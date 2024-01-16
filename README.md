@@ -4,10 +4,15 @@ This tool will create a new ESM or append to an existing ESM if it already exist
 
 # Records made
 CO (Constructable object) - The workshop listing such as price, description and menu positions
+
 GBFM (Generic Base Form) - The parts stats and PKIN links
+
 PKIN - The packin that points to the CELL
+
 CELL - The cell that contains the layout of the parts of the ship
+
 MSTT (Moveable Static) - The mesh and material information
+
 
 # Parameters:
 
