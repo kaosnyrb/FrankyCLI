@@ -12,15 +12,23 @@ Random random = new Random();
 
 for (int i = 0; i < args.Length; i++)
 {
-    Console.WriteLine(args[0]);
+    Console.WriteLine(args[i]);
 }
 
+if (args.Length < 1)
+{
+    Console.WriteLine("Requires parameters:");
+    Console.WriteLine("modname prefix itemname partname modelfilepath");
 
-string prefix = "test";
-string item = "wing" + random.Next(1000);
-string partname = "Wing";
-string modelpath = "avontech\\ats_cargo_02.nif";
-string modname = "FrankyTest";
+    return 1;
+}
+
+string modname = args[0];
+string prefix = args[1];
+string item = args[2];
+string partname = args[3];
+string modelpath = args[4];
+
 string datapath = "";
 using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
 {
@@ -39,6 +47,8 @@ using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGet
         {
             if (env.LoadOrder[i].FileName == modname + ".esm")
             {
+                ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
+                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
             }
         }
     }
@@ -318,3 +328,4 @@ using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGet
 
 myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
 Console.WriteLine("Finished");
+return 0;

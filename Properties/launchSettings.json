@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FrankyCLI": {
+      "commandName": "Project",
+      "commandLineArgs": "FrankyTest ft cargo Cargo avontech\\ats_cargo_04.nif"
+    }
+  }
+}

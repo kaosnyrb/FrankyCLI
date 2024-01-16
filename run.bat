@@ -1,0 +1,1 @@
+C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe FrankyTest ft cargo Cargo2 avontech\ats_cargo_04.nif
