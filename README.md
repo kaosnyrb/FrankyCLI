@@ -16,7 +16,7 @@ MSTT (Moveable Static) - The mesh and material information
 
 # Parameters:
 
-FrankyCLI.exe modname prefix itemname partname modelfilepath
+FrankyCLI.exe modname mode prefix itemname modelfilepath
 
 Mod name is the ESM name without the filetype
 
@@ -24,13 +24,13 @@ Editor id is such:
 
 prefix + "_{type}_" + itemname
 
-Partname is the visible UI names
-
 modelfilepath is the nif location: avontech\ats_cargo_04.nif
+
+Mode is gen mod, currently only struct is supported
 
 # Example
 
-FrankyCLI.exe FrankyTest ft cargo Cargo avontech\ats_cargo_04.nif
+FrankyCLI.exe FrankyTest struct ft cargo avontech\ats_cargo_04.nif
 
 # Materials 
 
