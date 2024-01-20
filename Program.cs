@@ -37,6 +37,9 @@ switch(mode)
     case "cellfix":
         res = gen_cellfixer.Generate(args);
         break;
+    case "placer":
+        res = gen_placer.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;
