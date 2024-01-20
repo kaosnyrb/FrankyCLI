@@ -34,5 +34,11 @@ switch(mode)
     case "struct":
         res = gen_shipstruct.Generate(args);
         break;
+    case "cellfix":
+        res = gen_cellfixer.Generate(args);
+        break;
+    default:
+        Console.WriteLine("No mode provided, valid types are: (struct)");
+        break;
 }
 return res;

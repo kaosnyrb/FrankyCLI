@@ -157,18 +157,45 @@ namespace FrankyCLI
                 var cellblockNumber = int.Parse(stringkey.Substring(stringkey.Length - 1));
                 var subBlockNumber = int.Parse(stringkey.Substring(stringkey.Length - 2, 1));
 
-                var cellblock = new CellBlock
+                //Try and use existing cellblocks and subblocks first.
+                CellBlock cellblock = null;
+                bool newCellBlock = false;
+                for( int i = 0; i < myMod.Cells.Count; i++ )
                 {
-                    BlockNumber = cellblockNumber,
-                    GroupType = GroupTypeEnum.InteriorCellBlock,
-                    SubBlocks = new ExtendedList<CellSubBlock>()
-                };
-                cellblock.SubBlocks.Add(new CellSubBlock()
+                    if (myMod.Cells[i].BlockNumber == cellblockNumber )
+                    {
+                        cellblock = myMod.Cells[i];
+                    }
+                }
+                if (cellblock == null )
                 {
-                    BlockNumber = subBlockNumber,
-                    GroupType = GroupTypeEnum.InteriorCellSubBlock,
-                    Cells = new ExtendedList<Cell>()
-                });
+                    cellblock = new CellBlock
+                    {
+                        BlockNumber = cellblockNumber,
+                        GroupType = GroupTypeEnum.InteriorCellBlock,
+                        SubBlocks = new ExtendedList<CellSubBlock>()
+                    };
+                    newCellBlock = true;
+                }
+
+                bool addSubblock = true;
+                for(int i = 0; i < cellblock.SubBlocks.Count; i++ )
+                {
+                    if (cellblock.SubBlocks[i].BlockNumber == subBlockNumber)
+                    {
+                        addSubblock = false;
+                    }
+                }
+                if (addSubblock)
+                {
+                    cellblock.SubBlocks.Add(new CellSubBlock()
+                    {
+                        BlockNumber = subBlockNumber,
+                        GroupType = GroupTypeEnum.InteriorCellSubBlock,
+                        Cells = new ExtendedList<Cell>()
+                    });
+                }
+
 
                 // Cell contents -------------------------------
                 IFormLink<IPlaceableObjectGetter> OutpostGroupPackinDummy = new FormKey(env.LoadOrder[0].ModKey, 0x00015804).ToLink<IPlaceableObjectGetter>();
@@ -214,9 +241,20 @@ namespace FrankyCLI
                     Position = new P3Float(0, 0, 0),
                     Rotation = new P3Float(0, 0, 0)
                 });
-
-                cellblock.SubBlocks[0].Cells.Add(newCell);
-                myMod.Cells.Add(cellblock);
+                
+                bool addedCell = false;
+                for (int i = 0; i < cellblock.SubBlocks.Count && !addedCell; i++)
+                {
+                    if (cellblock.SubBlocks[i].BlockNumber == subBlockNumber)
+                    {
+                        cellblock.SubBlocks[i].Cells.Add(newCell);
+                        addedCell = true;
+                    }
+                }
+                if(newCellBlock)
+                {
+                    myMod.Cells.Add(cellblock);
+                }
 
 
                 // Packin --------------------------------------

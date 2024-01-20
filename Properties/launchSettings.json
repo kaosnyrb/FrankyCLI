@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "FrankyTest struct ft cargo avontech\\ats_cargo_04.nif"
+      "commandLineArgs": "AvontechShipyards cellfix atsf hood02 avontech\\ats_ring_01.nif"
     }
   }
 }
