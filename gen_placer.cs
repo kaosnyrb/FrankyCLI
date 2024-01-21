@@ -69,38 +69,60 @@ namespace FrankyCLI
 
 
                 // Cell contents -------------------------------
-                IFormLink<INpcGetter> pirate = new FormKey(env.LoadOrder[0].ModKey, 0x00010B3A).ToLink<INpcGetter>();
+                //LvlCrimsonFleet_Assault [NPC_:00054327]
+                IFormLink<INpcGetter> pirate = new FormKey(env.LoadOrder[0].ModKey, 0x00054327).ToLink<INpcGetter>();
+                IFormLinkNullable<ILayerGetter> Encounters = new FormKey(env.LoadOrder[0].ModKey, 0x002B3CB9).ToNullableLink<ILayerGetter>();
+
                 Console.WriteLine("Placing Pirates");
                 int totalcount = 0;
 
 
                 foreach (var worldspace in env.LoadOrder[0].Mod.Worldspaces)
                 {
+                    int worldspacecount = 0;
                     try
                     {
                         var newworldspace = worldspace.DeepCopy();
-                        myMod.Worldspaces.Add(newworldspace);
-                        for (int targetsubcell = 0; targetsubcell < myMod.Worldspaces[worldspace.FormKey].SubCells.Count(); targetsubcell++)
+                        for (int targetsubcell = 0; targetsubcell < newworldspace.SubCells.Count(); targetsubcell++)
                         {
-                            var subcell = myMod.Worldspaces[worldspace.FormKey].SubCells[targetsubcell];                            
+                            var subcell = newworldspace.SubCells[targetsubcell];                            
                             for (int subblocks = 0; subblocks < subcell.Items.Count(); subblocks++)
                             {
                                 int placedinblock = 0;
                                 for (int mysbcell = 0; mysbcell < subcell.Items[subblocks].Items.Count(); mysbcell++)
                                 {
-                                    var cell = myMod.Worldspaces[worldspace.FormKey].SubCells[targetsubcell].Items[subblocks].Items[mysbcell];
+                                    var cell = newworldspace.SubCells[targetsubcell].Items[subblocks].Items[mysbcell];
                                     Console.WriteLine("Cell:" + worldspace.FormKey + " " + targetsubcell + " " + subblocks + " " + mysbcell);
                                     List<P3Float> positions = new List<P3Float>();
                                     foreach (var placed in cell.Temporary)
                                     {
+                                        bool positionadded = false;
                                         try
                                         {
                                             var placedcopy = placed.DeepCopy();
                                             var baseobj = ((PlacedObject)placedcopy).Base;
                                             var resolvedbase = immutableLoadOrderLinkCache.Resolve(baseobj.FormKey);
-                                            if (editorIds.Contains(resolvedbase.EditorID))
-                                            {
+                                            //if (editorIds.Contains(resolvedbase.EditorID))
+                                            //{
                                                 positions.Add(((PlacedObject)placedcopy).Position);
+                                            positionadded = true;
+                                            //}
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                        try
+                                        {
+                                            if (!positionadded)
+                                            {
+                                                var placedcopy = placed.DeepCopy();
+                                                var baseobj = ((PlacedNpc)placedcopy).Base;
+                                                var resolvedbase = immutableLoadOrderLinkCache.Resolve(baseobj.FormKey);
+                                                //if (editorIds.Contains(resolvedbase.EditorID))
+                                                //{
+                                                positions.Add(((PlacedNpc)placedcopy).Position);
+                                                positionadded = true;
                                             }
                                         }
                                         catch (Exception ex)
@@ -113,25 +135,41 @@ namespace FrankyCLI
                                     cell.NavigationMeshes.Clear();
                                     if (positions.Count == 0)
                                     {
-                                        myMod.Worldspaces[worldspace.FormKey].SubCells[targetsubcell].Items[subblocks].Items.Remove(cell);
+                                        newworldspace.SubCells[targetsubcell].Items[subblocks].Items.Remove(cell);
                                     }
                                     foreach (var pos in positions)
                                     {
+                                        var targetpos = pos;
+                                        targetpos.Z += 1;
                                         cell.Temporary.Add(new PlacedNpc(myMod)
                                         {
                                             EditorID = "DU_CT_enc",
                                             Base = pirate,
                                             LevelModifier = Level.Easy,
-                                            Position = pos,
-                                            Rotation = new P3Float(0, 0, 0)
+                                            Position = targetpos,
+                                            Rotation = new P3Float(0, 0, 0),
+                                            Layer = Encounters
                                         });
                                         totalcount++;
+                                        worldspacecount++;
                                         placedinblock++;
                                     }
                                 }
-                                subcell.Items.Remove(subcell.Items[subblocks]);
-                                subblocks--;
+                                if (placedinblock == 0)
+                                {
+                                    subcell.Items.Remove(subcell.Items[subblocks]);
+                                    subblocks--;
+                                }
                             }
+                            if (subcell.Items.Count == 0)
+                            {
+                                newworldspace.SubCells.Remove(subcell);
+                                targetsubcell--;
+                            }
+                        }
+                        if (worldspacecount > 0)
+                        {
+                            myMod.Worldspaces.Add(newworldspace);
                         }
                     }
                     catch (Exception ex)
