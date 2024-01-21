@@ -50,135 +50,39 @@ namespace FrankyCLI
                     }
                 }
 
-                List<string> editorIds = new List<string>()
-                {
-                    "Loot_Storage_MedKit_Common",
-                    "Loot_Storage_AmmoCase_Medium_Throwables_Common",
-                    "Loot_Storage_Miscbox02_Common",
-                    "Loot_Storage_Miscbox02_Rare",
-                    "Loot_Storage_CreaturePile01_Common",
-                    "Loot_Storage_BossChest_Creature_Rare",
-                    "Loot_Storage_BossChest_Industrial_Rare",
-                    "Loot_Storage_BossChest_Science_Rare",
-                    "Loot_Display_HelmetCase_Common",
-                    "REOverlayContainerNatureBarren",
-                    "Locker01",
-                    "ClutterPI_ElectricalGenerator02",
-                    "DesktopClutter_A01"
-                };
-
-
                 // Cell contents -------------------------------
                 //LvlCrimsonFleet_Assault [NPC_:00054327]
-                IFormLink<INpcGetter> pirate = new FormKey(env.LoadOrder[0].ModKey, 0x00054327).ToLink<INpcGetter>();
-                IFormLinkNullable<ILayerGetter> Encounters = new FormKey(env.LoadOrder[0].ModKey, 0x002B3CB9).ToNullableLink<ILayerGetter>();
-
+                var spawner = immutableLoadOrderLinkCache.Resolve("du_ct_spawnmarker");
                 Console.WriteLine("Placing Pirates");
-                int totalcount = 0;
-
-
+                //Parallel
                 foreach (var worldspace in env.LoadOrder[0].Mod.Worldspaces)
                 {
-                    int worldspacecount = 0;
-                    try
+                    var newworldspace = worldspace.DeepCopy();
+                    Parallel.ForEach(newworldspace.SubCells, wsblock =>
                     {
-                        var newworldspace = worldspace.DeepCopy();
-                        for (int targetsubcell = 0; targetsubcell < newworldspace.SubCells.Count(); targetsubcell++)
+                        Parallel.ForEach(wsblock.Items, wssblock =>
                         {
-                            var subcell = newworldspace.SubCells[targetsubcell];                            
-                            for (int subblocks = 0; subblocks < subcell.Items.Count(); subblocks++)
+                            Parallel.ForEach(wssblock.Items, cell =>
                             {
-                                int placedinblock = 0;
-                                for (int mysbcell = 0; mysbcell < subcell.Items[subblocks].Items.Count(); mysbcell++)
+//                                cell.Clear();
+                                Console.WriteLine("Cell:" + worldspace.FormKey + " " + cell.EditorID);
+                                cell.Temporary.Clear();
+                                cell.Persistent.Clear();
+                                cell.NavigationMeshes.Clear();
+//                                cell.Components.Clear();
+//                                cell.Grid.Clear();
+                                cell.Temporary.Add(new PlacedObject(myMod)
                                 {
-                                    var cell = newworldspace.SubCells[targetsubcell].Items[subblocks].Items[mysbcell];
-                                    Console.WriteLine("Cell:" + worldspace.FormKey + " " + targetsubcell + " " + subblocks + " " + mysbcell);
-                                    List<P3Float> positions = new List<P3Float>();
-                                    foreach (var placed in cell.Temporary)
-                                    {
-                                        bool positionadded = false;
-                                        try
-                                        {
-                                            var placedcopy = placed.DeepCopy();
-                                            var baseobj = ((PlacedObject)placedcopy).Base;
-                                            var resolvedbase = immutableLoadOrderLinkCache.Resolve(baseobj.FormKey);
-                                            //if (editorIds.Contains(resolvedbase.EditorID))
-                                            //{
-                                                positions.Add(((PlacedObject)placedcopy).Position);
-                                            positionadded = true;
-                                            //}
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                        try
-                                        {
-                                            if (!positionadded)
-                                            {
-                                                var placedcopy = placed.DeepCopy();
-                                                var baseobj = ((PlacedNpc)placedcopy).Base;
-                                                var resolvedbase = immutableLoadOrderLinkCache.Resolve(baseobj.FormKey);
-                                                //if (editorIds.Contains(resolvedbase.EditorID))
-                                                //{
-                                                positions.Add(((PlacedNpc)placedcopy).Position);
-                                                positionadded = true;
-                                            }
-                                        }
-                                        catch (Exception ex)
-                                        {
-
-                                        }
-                                    }
-                                    cell.Persistent.Clear();
-                                    cell.Temporary.Clear();
-                                    cell.NavigationMeshes.Clear();
-                                    if (positions.Count == 0)
-                                    {
-                                        newworldspace.SubCells[targetsubcell].Items[subblocks].Items.Remove(cell);
-                                    }
-                                    foreach (var pos in positions)
-                                    {
-                                        var targetpos = pos;
-                                        targetpos.Z += 1;
-                                        cell.Temporary.Add(new PlacedNpc(myMod)
-                                        {
-                                            EditorID = "DU_CT_enc",
-                                            Base = pirate,
-                                            LevelModifier = Level.Easy,
-                                            Position = targetpos,
-                                            Rotation = new P3Float(0, 0, 0),
-                                            Layer = Encounters
-                                        });
-                                        totalcount++;
-                                        worldspacecount++;
-                                        placedinblock++;
-                                    }
-                                }
-                                if (placedinblock == 0)
-                                {
-                                    subcell.Items.Remove(subcell.Items[subblocks]);
-                                    subblocks--;
-                                }
-                            }
-                            if (subcell.Items.Count == 0)
-                            {
-                                newworldspace.SubCells.Remove(subcell);
-                                targetsubcell--;
-                            }
-                        }
-                        if (worldspacecount > 0)
-                        {
-                            myMod.Worldspaces.Add(newworldspace);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    Console.WriteLine("Pirates Placed: " + totalcount);
+                                    EditorID = "du_ct_placedmarker",
+                                    Base = spawner.ToLink<IPlaceableObjectGetter>(),
+                                    Position = new P3Float(0, 0, 0),
+                                    Rotation = new P3Float(0, 0, 0),
+                                });
+                            });
+                        });
+                    });
+                    myMod.Worldspaces.Add(newworldspace);
                 }
-
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
