@@ -23,7 +23,7 @@ namespace FrankyCLI
     public class BonusStats
     {
         public string Type;
-
+        public bool Percentage;
         public Weapon.Property property;
         public ObjectModProperty.FloatFunctionType floatFunctionType;
         public UInt32 Keyword;
@@ -42,22 +42,14 @@ namespace FrankyCLI
                 var originalco = (ConstructibleObject)BaseConstructable.DeepCopy();
 
                 string amountstring = "+" + amount.ToString();
-                if (amount < 3)
+                if (stats.Percentage)
                 {
                     amountstring = "+" + (amount * 100).ToString() + "%";
                 }
-                /*
-                string StatName = "";
-                foreach (var item in stats)
-                {
-                    StatName += item.StatName + "|";
-                }
-                StatName = StatName.Substring(StatName)
-                */
+                
                 string editorid = "atwu_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
                 string ingameName = upgrade.WeaponName + " " + originalmod.Name + " (" + amountstring + " " + stats.StatName + ")";
                 string omodName = originalmod.Name + " (" + amountstring + " " + stats.StatName + ")";
-
 
                 //Add Book
                 var book = new Book(myMod)
@@ -186,7 +178,7 @@ namespace FrankyCLI
                         }
                     }
                 }
-                CreateUpgrade(myMod, UpgradeLib["mod_Beowulf_Barrel_Short"], StatLib["AmmoCapacityMultAndAdd"], 0.5f);
+                CreateUpgrade(myMod, UpgradeLib["mod_Beowulf_Barrel_Short"], StatLib["AmmoCapacityMultAndAdd"], 10.0f);
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
@@ -212,6 +204,7 @@ namespace FrankyCLI
             StatLib.Add("EMFlat", new BonusStats()
             {
                 Type = "KeywordFloat",
+                Percentage = false,
                 Keyword = 0x00023190,
                 StatName = "EM Damage",
                 property = Weapon.Property.DamageTypeValue,
@@ -220,6 +213,7 @@ namespace FrankyCLI
             StatLib.Add("EnergyFlat", new BonusStats()
             {
                 Type = "KeywordFloat",
+                Percentage = false,
                 Keyword = 0x00060A81,
                 StatName = "Energy Damage",
                 property = Weapon.Property.DamageTypeValue,
@@ -228,6 +222,7 @@ namespace FrankyCLI
             StatLib.Add("ToxicFlat", new BonusStats()
             {
                 Type = "KeywordFloat",
+                Percentage = false,
                 Keyword = 0x00000B79,
                 StatName = "Toxic Damage",
                 property = Weapon.Property.DamageTypeValue,
@@ -236,6 +231,7 @@ namespace FrankyCLI
             StatLib.Add("PhysicalMultAndAdd", new BonusStats()
             {
                 Type = "Float",
+                Percentage = true,
                 StatName = "Physical Damage",
                 property = Weapon.Property.DamagePhysical,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd
@@ -243,6 +239,7 @@ namespace FrankyCLI
             StatLib.Add("AmmoCapacityAdd", new BonusStats()
             {
                 Type = "Int",
+                Percentage = false,
                 StatName = "Ammo Capacity",
                 property = Weapon.Property.AmmoCapacity,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add
@@ -250,6 +247,7 @@ namespace FrankyCLI
             StatLib.Add("AmmoCapacityMultAndAdd", new BonusStats()
             {
                 Type = "Float",
+                Percentage = true,
                 StatName = "Ammo Capacity",
                 property = Weapon.Property.AmmoCapacity,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd
