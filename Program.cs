@@ -40,6 +40,12 @@ switch(mode)
     case "placer":
         res = gen_placer.Generate(args);
         break;
+    case "pluginmerger":
+        res = gen_pluginmerger.Generate(args);
+        break;
+    case "upgradegenerator":
+        res = gen_upgradegenerator.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;

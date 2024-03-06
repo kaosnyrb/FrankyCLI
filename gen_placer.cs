@@ -52,9 +52,53 @@ namespace FrankyCLI
 
                 // Cell contents -------------------------------
                 //LvlCrimsonFleet_Assault [NPC_:00054327]
-                var spawner = immutableLoadOrderLinkCache.Resolve("du_ct_spawnmarker");
+                var spawner = immutableLoadOrderLinkCache.Resolve("dv_nt_spawnmarker");
+                //var spacespawner = immutableLoadOrderLinkCache.Resolve("du_ct_spacespawnmarker");
+
                 Console.WriteLine("Placing Pirates");
+                foreach (var cell in env.LoadOrder[0].Mod.EnumerateMajorRecordContexts<ICell, ICellGetter>(env.LinkCache))
+                {
+                    //cell.TryGetParent<IWorldspaceGetter>(out var _) || 
+                    if (cell.Record.EditorID != null)
+                    {
+                        if (cell.Record.EditorID.Contains("PackInENVHazardPK"))
+                        {
+                            var cellOverride = cell.GetOrAddAsOverride(myMod);
+                            cellOverride.Temporary.Clear();
+                            cellOverride.Persistent.Clear();
+                            cellOverride.NavigationMeshes.Clear();
+                            cellOverride.Temporary.Add(new PlacedObject(myMod)
+                            {
+                                EditorID = "dv_nt_marker",
+                                Base = spawner.ToLink<IPlaceableObjectGetter>(),
+                                Position = new P3Float(0, 0, 0),
+                                Rotation = new P3Float(0, 0, 0),
+                            });
+                        }
+                    }
+
+                    /*
+                    if (cell.Record.EditorID != null)
+                    {
+                        if (cell.Record.EditorID.Contains("scGen"))
+                        {
+                            var cellOverride = cell.GetOrAddAsOverride(myMod);
+                            cellOverride.Temporary.Clear();
+                            cellOverride.Persistent.Clear();
+                            cellOverride.NavigationMeshes.Clear();
+                            cellOverride.Temporary.Add(new PlacedObject(myMod)
+                            {
+                                EditorID = "du_ct_space_placedmarker",
+                                Base = spacespawner.ToLink<IPlaceableObjectGetter>(),
+                                Position = new P3Float(0, 0, 0),
+                                Rotation = new P3Float(0, 0, 0),
+                            });
+                        }
+                    }*/
+                }
+
                 //Parallel
+                /*
                 foreach (var worldspace in env.LoadOrder[0].Mod.Worldspaces)
                 {
                     var newworldspace = worldspace.DeepCopy();
@@ -82,7 +126,7 @@ namespace FrankyCLI
                         });
                     });
                     myMod.Worldspaces.Add(newworldspace);
-                }
+                }*/
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");

@@ -1,1 +1,1 @@
-C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe AvontechShipyards struct atsf halfsize02 avontech\ats_halfsize_02.nif
+C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe AvontechShipyards struct cube cube avontech\cube.nif

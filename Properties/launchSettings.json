@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "DarkUniverse_CrimsonTide placer du_ct priate avontech\\ats_ring_01.nif"
+      "commandLineArgs": "AvontechWarptechUpgrades upgradegenerator 0 0 0 0"
     }
   }
 }
