@@ -75,17 +75,22 @@ namespace FrankyCLI
                 IFormLinkNullable<IObjectModification> _Template_mod_Weapon_Barrel_Short = new FormKey(env.LoadOrder[0].ModKey, 0x0014AFDA).ToNullableLink<IObjectModification>();
                 IFormLinkNullable<IKeywordGetter> ma_Beowulf = new FormKey(env.LoadOrder[0].ModKey, 0x001F70E6).ToNullableLink<IKeywordGetter>();
                 IFormLinkNullable<IKeywordGetter> if_Barrel_Long = new FormKey(env.LoadOrder[0].ModKey, 0x0003E063).ToNullableLink<IKeywordGetter>();
-                //if_Barrel_Long [KYWD:0003E063]
+
+                IFormLinkNullable<IKeywordGetter> ap_gun_Barrel = new FormKey(env.LoadOrder[0].ModKey, 0x0002249D).ToNullableLink<IKeywordGetter>();
+                IFormLinkNullable<IKeywordGetter> ap_gun_BarrelDisplay = new FormKey(env.LoadOrder[0].ModKey, 0x00035799).ToNullableLink<IKeywordGetter>();
+                IFormLinkNullable<IKeywordGetter> ap_gun_Muzzle = new FormKey(env.LoadOrder[0].ModKey, 0x0002249C).ToNullableLink<IKeywordGetter>();
+                IFormLinkNullable<IKeywordGetter> ap_gun_ProjectileNode = new FormKey(env.LoadOrder[0].ModKey, 0x0004B6E1).ToNullableLink<IKeywordGetter>();
+
                 var omod = new WeaponModification(myMod)
                 {
                     EditorID = "omod_" + editorid,
                     Name = editorid,
                     Model = new Model() { File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("Weapons\\Beowulf\\Beowulf_Barrel_Short.nif") },
+                    TargetOmodKeywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { ma_Beowulf },
+                    FilterKeywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { if_Barrel_Long },
+                    AttachPoint = ap_gun_Barrel,
+                    AttachParentSlots = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { ap_gun_BarrelDisplay, ap_gun_Muzzle, ap_gun_ProjectileNode },
                 };
-                omod.TargetOmodKeywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { ma_Beowulf };
-
-                omod.FilterKeywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { if_Barrel_Long };
-
 
                 omod.Includes.Add(new ObjectModInclude()
                 {
