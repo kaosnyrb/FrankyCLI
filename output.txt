@@ -1,0 +1,141 @@
+FrankyCLI. Build new ship part.
+AvontechWeaponUpgrades
+upgradegenerator
+1
+0
+0
+0
+Ignoring:mod_Novablast_Muzzle_None
+Ignoring:mod_Novablast_Laser_None
+Ignoring:mod_Novablast_Internal_None
+Ignoring:mod_Novablast_Modgroup_01
+Ignoring:mod_Novablast_Modgroup_02
+Creating mod_Novablast_Optics_ShortScope EMMultAndAdd 0.1
+Book ID:001582:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMMultAndAdd 0.2
+Book ID:001585:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMMultAndAdd 0.3
+Book ID:001588:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMMultAndAdd 0.4
+Book ID:00158B:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMMultAndAdd 0.5
+Book ID:00158E:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMFlat 10
+Book ID:001591:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMFlat 15
+Book ID:001594:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMFlat 20
+Book ID:001597:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMFlat 25
+Book ID:00159A:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EMFlat 30
+Book ID:00159D:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EnergyFlat 10
+Book ID:0015A0:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EnergyFlat 15
+Book ID:0015A3:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EnergyFlat 20
+Book ID:0015A6:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EnergyFlat 25
+Book ID:0015A9:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope EnergyFlat 30
+Book ID:0015AC:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ToxicFlat 10
+Book ID:0015AF:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ToxicFlat 15
+Book ID:0015B2:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ToxicFlat 20
+Book ID:0015B5:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ToxicFlat 25
+Book ID:0015B8:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ToxicFlat 30
+Book ID:0015BB:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope PhysicalAdd 10
+Book ID:0015BE:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope PhysicalAdd 15
+Book ID:0015C1:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope PhysicalAdd 20
+Book ID:0015C4:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope PhysicalAdd 25
+Book ID:0015C7:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope PhysicalAdd 30
+Book ID:0015CA:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityAdd 6
+Book ID:0015CD:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityAdd 12
+Book ID:0015D0:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityAdd 18
+Book ID:0015D3:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityAdd 24
+Book ID:0015D6:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityAdd 30
+Book ID:0015D9:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ProjectileAdd 1
+Book ID:0015DC:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ProjectileAdd 2
+Book ID:0015DF:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ProjectileAdd 3
+Book ID:0015E2:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityMultAndAdd 0.1
+Book ID:0015E5:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityMultAndAdd 0.2
+Book ID:0015E8:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityMultAndAdd 0.3
+Book ID:0015EB:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityMultAndAdd 0.4
+Book ID:0015EE:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope AmmoCapacityMultAndAdd 0.5
+Book ID:0015F1:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope StabilityMultAndAdd -0.50
+Book ID:0015F4:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope StabilityMultAndAdd -0.55
+Book ID:0015F7:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope StabilityMultAndAdd -0.60
+Book ID:0015FA:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope StabilityMultAndAdd -0.65
+Book ID:0015FD:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope StabilityMultAndAdd -0.70
+Book ID:001600:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope CritDamageMultAndAdd 0.50
+Book ID:001603:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope CritDamageMultAndAdd 0.60
+Book ID:001606:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope CritDamageMultAndAdd 0.70
+Book ID:001609:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope CritDamageMultAndAdd 0.80
+Book ID:00160C:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope CritDamageMultAndAdd 0.90
+Book ID:00160F:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BashDamageMultAndAdd 1.00
+Book ID:001612:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BashDamageMultAndAdd 1.50
+Book ID:001615:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BashDamageMultAndAdd 2.00
+Book ID:001618:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BashDamageMultAndAdd 2.50
+Book ID:00161B:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BashDamageMultAndAdd 3.00
+Book ID:00161E:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope SilentSet 2
+Book ID:001621:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope 02MultAndAdd -0.35
+Book ID:001624:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope 02MultAndAdd -0.40
+Book ID:001627:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope 02MultAndAdd -0.45
+Book ID:00162A:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope 02MultAndAdd -0.50
+Book ID:00162D:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope 02MultAndAdd -0.55
+Book ID:001630:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BonusXPAdd 0.10
+Book ID:001633:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BonusXPAdd 0.15
+Book ID:001636:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BonusXPAdd 0.20
+Book ID:001639:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BonusXPAdd 0.25
+Book ID:00163C:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope BonusXPAdd 0.30
+Book ID:00163F:AvontechWeaponUpgrades.esm
+Creating mod_Novablast_Optics_ShortScope ReloadSpeedAdd 0.20
