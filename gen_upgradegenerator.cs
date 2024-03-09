@@ -155,7 +155,7 @@ namespace FrankyCLI
                 };
 
                 //Remove the DontShowInUI [KYWD:00374EFA]
-                for(int i = 0; i <omod.Properties.Count; i++)
+                for(int i = 0; i < omod.Properties.Count; i++)
                 {
                     try
                     {
@@ -218,6 +218,7 @@ namespace FrankyCLI
                     });
                 }
                 myMod.ObjectModifications.Add(omod);
+                AddOModToUpgradeInclude(LevelledListContains, omod);
                 //Add Construct
                 IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
                 var co = new ConstructibleObject(myMod)
@@ -260,6 +261,25 @@ namespace FrankyCLI
                 }
             }
             return true;
+        }
+
+        public static Dictionary<string, WeaponModification> upgrademodlist = new Dictionary<string, WeaponModification>();
+        public static List<string> rtfpsettings = new List<string>();
+        public static void AddOModToUpgradeInclude(string upgradelist, WeaponModification weaponModification)
+        {            
+            if (upgrademodlist.ContainsKey(upgradelist))
+            {
+                //Starfield.esm~0028E02A|incl_add(AvontechWeaponUpgrades.esm~0010CB:2:1:1)
+                rtfpsettings.Add("Starfield.esm~0028E02A|incl_add(AvontechWeaponUpgrades.esm~" + weaponModification.FormKey.ID.ToString("X") + ":2:1:1)");
+                /*
+                upgrademodlist[upgradelist].Includes.Add(new ObjectModInclude()
+                {
+                    DoNotUseAll = true,
+                    Optional = true,
+                    MinimumLevel = 0,
+                    Mod = weaponModification.ToLink<IAObjectModificationGetter>()
+                });*/
+            }
         }
 
         public static int Generate(string[] args)
@@ -427,11 +447,22 @@ namespace FrankyCLI
                             Entries = new ExtendedList<LeveledItemEntry>()
                         });
                     }
+                    //Add the levelled list for the upgrade/weapon pairing - used in crafting
                     myMod.LeveledItems.Add(new LeveledItem(myMod)
                     {
                         EditorID = levelledlist,
                         Entries = new ExtendedList<LeveledItemEntry>()
                     });
+                    //Add the include omod for the upgrade/weapon pairing - used in dropped loot/vendors                    
+                    var upgradeinclude = new WeaponModification(myMod)
+                    {
+                        EditorID = levelledlist,
+                        Includes = new ExtendedList<ObjectModInclude>()
+                    };
+                    //Need to find the modgroup.
+                    upgrademodlist.Add(levelledlist, upgradeinclude);
+//                    myMod.ObjectModifications.Add(upgradeinclude);
+                   
                     foreach (var stat in StatLib)
                     {
                         for (int i = 0; i < StatLib[stat.Key].StepCount; i++)
@@ -496,6 +527,11 @@ namespace FrankyCLI
             foreach(var miss in MissingCOs)
             {
                 Console.WriteLine(miss);
+            }
+
+            foreach (var setting in rtfpsettings)
+            {
+                Console.WriteLine(setting);
             }
             
             return 0;
