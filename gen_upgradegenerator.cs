@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DynamicData;
 using Noggog;
 using Mutagen.Bethesda.Plugins.Records;
+using Noggog.StructuredStrings;
 
 namespace FrankyCLI
 {
@@ -120,7 +121,7 @@ namespace FrankyCLI
                 if (stats.Type == "Enum") { amountstring = ""; }                
                 string editorid = "atwu_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
                 string ingameName = upgrade.WeaponName + " " + originalmod.Name + " (" + amountstring + " " + stats.StatName + ")";
-                string omodName = originalmod.Name + " (" + amountstring + " " + stats.StatName + ")";
+                string omodName = amountstring + " " + stats.StatName + "\n " + originalmod.Name;
 
                 //Add Book
                 var book = new Book(myMod)
@@ -218,7 +219,7 @@ namespace FrankyCLI
                     });
                 }
                 myMod.ObjectModifications.Add(omod);
-                AddOModToUpgradeInclude(LevelledListContains, omod);
+                AddOModToUpgradeInclude(LevelledListContains, omod,upgrade.WeaponName);
                 //Add Construct
                 IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
                 var co = new ConstructibleObject(myMod)
@@ -263,24 +264,6 @@ namespace FrankyCLI
             return true;
         }
 
-        public static Dictionary<string, WeaponModification> upgrademodlist = new Dictionary<string, WeaponModification>();
-        public static List<string> rtfpsettings = new List<string>();
-        public static void AddOModToUpgradeInclude(string upgradelist, WeaponModification weaponModification)
-        {            
-            if (upgrademodlist.ContainsKey(upgradelist))
-            {
-                //Starfield.esm~0028E02A|incl_add(AvontechWeaponUpgrades.esm~0010CB:2:1:1)
-                rtfpsettings.Add("Starfield.esm~0028E02A|incl_add(AvontechWeaponUpgrades.esm~" + weaponModification.FormKey.ID.ToString("X") + ":2:1:1)");
-                /*
-                upgrademodlist[upgradelist].Includes.Add(new ObjectModInclude()
-                {
-                    DoNotUseAll = true,
-                    Optional = true,
-                    MinimumLevel = 0,
-                    Mod = weaponModification.ToLink<IAObjectModificationGetter>()
-                });*/
-            }
-        }
 
         public static int Generate(string[] args)
         {
@@ -295,7 +278,6 @@ namespace FrankyCLI
             string datapath = "";
             
             DamageMode = int.Parse(prefix);
-            //BuildUpgradeLib();
             BuildStatLib();
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
@@ -329,7 +311,7 @@ namespace FrankyCLI
                 }
                 if (DamageMode == 1)//EM
                 {
-                    Weapons = new List<string>() { "Novablast", };
+                    Weapons = new List<string>() { "Novablast", };//Novablast
                 }
 
                 if(DamageMode == 2)//Phys
@@ -459,10 +441,7 @@ namespace FrankyCLI
                         EditorID = levelledlist,
                         Includes = new ExtendedList<ObjectModInclude>()
                     };
-                    //Need to find the modgroup.
-                    upgrademodlist.Add(levelledlist, upgradeinclude);
-//                    myMod.ObjectModifications.Add(upgradeinclude);
-                   
+                  
                     foreach (var stat in StatLib)
                     {
                         for (int i = 0; i < StatLib[stat.Key].StepCount; i++)
@@ -520,7 +499,55 @@ namespace FrankyCLI
                         }
                     }
                 }
-                //CreateUpgrade(myMod, UpgradeLib["mod_Solstice_Grip_Tactical"], StatLib["PhysicalMultAndAdd"], 2, "Beowulf");
+
+                //REAL TIME FORM PATCHER output
+                Dictionary<string, List<string>> weaponlists = new Dictionary<string, List<string>>();
+                /*
+                weaponlists.Add("Novablast", new List<string>()
+                {
+                    "Starfield.esm~0028E02A|",
+                    "Starfield.esm~0028F433|"
+                });*/
+
+                foreach (var objmod in env.LoadOrder[0].Mod.ObjectModifications)
+                {
+                    foreach(var weapon in Weapons)
+                    {
+                        if (objmod.EditorID.ToLower().Contains(weapon.ToLower()) && objmod.EditorID.ToLower().Contains("modgroup"))
+                        {
+                            if (weaponlists.ContainsKey(weapon))
+                            {
+                                weaponlists[weapon].Add("Starfield.esm~" + objmod.FormKey.ID.ToString("X") + "|");
+                            }
+                            else
+                            {
+                                weaponlists.Add(weapon, new List<string>()
+                                {
+                                    "Starfield.esm~" + objmod.FormKey.ID.ToString("X") + "|"
+                                });
+                            }
+                        }
+                    }
+                }
+                using (StreamWriter outputFile = new StreamWriter(random.Next() + "_rtfp.txt"))
+                {
+                    foreach (var weaponkey in rtfpsettings.Keys)
+                    {
+                        if (weaponlists.ContainsKey(weaponkey))
+                        {
+                            foreach (var includelist in weaponlists[weaponkey])
+                            {
+                                outputFile.Write(includelist);
+                                foreach (var res in rtfpsettings[weaponkey])
+                                {
+                                    outputFile.Write(res);
+                                }
+                                outputFile.WriteLine(" ");
+                            }
+                        }
+                    }
+                }
+
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
@@ -529,12 +556,23 @@ namespace FrankyCLI
                 Console.WriteLine(miss);
             }
 
-            foreach (var setting in rtfpsettings)
-            {
-                Console.WriteLine(setting);
-            }
+            
             
             return 0;
+        }
+
+        public static Dictionary<string, List<string>> rtfpsettings = new Dictionary<string, List<string>>();
+        public static void AddOModToUpgradeInclude(string upgradelist, WeaponModification weaponModification, string Weapon)
+        {
+            if (rtfpsettings.ContainsKey(Weapon))
+            {
+                rtfpsettings[Weapon].Add("incl_add(AvontechWeaponUpgrades.esm~" + weaponModification.FormKey.ID.ToString("X") + ":2:1:1)|");
+            }
+            else
+            {
+                rtfpsettings.Add(Weapon, new List<string>());
+                rtfpsettings[Weapon].Add("incl_add(AvontechWeaponUpgrades.esm~" + weaponModification.FormKey.ID.ToString("X") + ":2:1:1)|");
+            }
         }
 
         public static int DamageMode = 0;//0 Energy , 1 EM, 2 Phys
@@ -555,8 +593,8 @@ namespace FrankyCLI
                     property = Weapon.Property.DamageTypeValue,
                     floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
                     Default = 0.1M,
-                    Step = 0.1M,
-                    StepCount = 5
+                    Step = 0.05M,
+                    StepCount = 10
                 });
             }
 
@@ -571,8 +609,8 @@ namespace FrankyCLI
                     property = Weapon.Property.DamageTypeValue,
                     floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
                     Default = 0.1M,
-                    Step = 0.1M,
-                    StepCount = 5
+                    Step = 0.05M,
+                    StepCount = 10
                 });
             }
 
@@ -586,8 +624,8 @@ namespace FrankyCLI
                     property = Weapon.Property.DamagePhysical,
                     floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
                     Default = 0.1M,
-                    Step = 0.1M,
-                    StepCount = 5
+                    Step = 0.05M,
+                    StepCount = 10
                 });
             }
 
@@ -601,20 +639,35 @@ namespace FrankyCLI
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
                 Default = 10,
                 Step = 5,
-                StepCount = 5
+                StepCount = 10
             });
-            StatLib.Add("EnergyFlat", new BonusStats()
+
+            if (DamageMode != 1)
             {
-                Type = "KeywordFloat",
-                Percentage = false,
-                Keyword = 0x00060A81,
-                StatName = "Energy Damage",
-                property = Weapon.Property.DamageTypeValue,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 10,
-                Step = 5,
-                StepCount = 5
-            });           
+                StatLib.Add("EnergyFlat", new BonusStats()
+                {
+                    Type = "KeywordFloat",
+                    Percentage = false,
+                    Keyword = 0x00060A81,
+                    StatName = "Energy Damage",
+                    property = Weapon.Property.DamageTypeValue,
+                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
+                    Default = 10,
+                    Step = 5,
+                    StepCount = 10
+                });
+                StatLib.Add("PhysicalAdd", new BonusStats()
+                {
+                    Type = "Float",
+                    Percentage = false,
+                    StatName = "Physical Damage",
+                    property = Weapon.Property.DamagePhysical,
+                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
+                    Default = 10,
+                    Step = 5,
+                    StepCount = 10
+                });
+            }
             StatLib.Add("ToxicFlat", new BonusStats()
             {
                 Type = "KeywordFloat",
@@ -625,21 +678,8 @@ namespace FrankyCLI
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
                 Default = 10,
                 Step = 5,
-                StepCount = 5
+                StepCount = 10
             });
-
-            StatLib.Add("PhysicalAdd", new BonusStats()
-            {
-                Type = "Float",
-                Percentage = false,
-                StatName = "Physical Damage",
-                property = Weapon.Property.DamagePhysical,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 10,
-                Step = 5,
-                StepCount = 5
-            });
-
             StatLib.Add("AmmoCapacityAdd", new BonusStats()
             {
                 Type = "Int",
@@ -648,8 +688,8 @@ namespace FrankyCLI
                 property = Weapon.Property.AmmoCapacity,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
                 Default = 6,
-                Step = 6,
-                StepCount = 5
+                Step = 2,
+                StepCount = 10
             });
             StatLib.Add("ProjectileAdd", new BonusStats()
             {
@@ -783,9 +823,9 @@ namespace FrankyCLI
                 property = Weapon.Property.ActorValue,
                 Keyword = 0x000002DC,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 50,
-                Step = 25,
-                StepCount = 5
+                Default = 15,
+                Step = 15,
+                StepCount = 10
             });
             StatLib.Add("JumpAdd", new BonusStats()
             {
@@ -819,9 +859,9 @@ namespace FrankyCLI
                 StatName = "Stealth Light Detection",
                 property = Weapon.Property.ActorValue,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = -0.3M,
+                Default = -0.2M,
                 Step = -0.1M,
-                StepCount = 5
+                StepCount = 3
             });
             StatLib.Add("StealthMovementDetectionAdd", new BonusStats()
             {
@@ -831,9 +871,9 @@ namespace FrankyCLI
                 StatName = "Stealth Movement Detection",
                 property = Weapon.Property.ActorValue,
                 floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = -0.3M,
+                Default = -0.2M,
                 Step = -0.1M,
-                StepCount = 5
+                StepCount = 3
             });
         }
     }
