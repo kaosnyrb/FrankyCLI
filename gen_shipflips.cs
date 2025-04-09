@@ -332,8 +332,8 @@ namespace FrankyCLI
                 //For stbd:
                 //Fore becomes Top
                 //Aft becomes bottom
-                //Port rotate +90 X
-                //Star rotate +90 X
+                //Port rotate -90 X
+                //Star rotate -90 X
                 //top becomes aft and 180
                 //aft becomes fore and 180
                 ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
@@ -364,7 +364,7 @@ namespace FrankyCLI
                     if (node.Node.FormKey.ID == starboard)
                     {
                         var rotation = node.Rotation;
-                        rotation.X += 90;
+                        rotation.Z += 0;
                         SnapNodeEntry newnode = new SnapNodeEntry()
                         {
                             Node = StarboardKey,
@@ -377,7 +377,7 @@ namespace FrankyCLI
                     if (node.Node.FormKey.ID == port)
                     {
                         var rotation = node.Rotation;
-                        rotation.X += 90;
+                        rotation.Z += 0;
                         SnapNodeEntry newnode = new SnapNodeEntry()
                         {
                             Node = PortKey,
@@ -390,7 +390,7 @@ namespace FrankyCLI
                     if (node.Node.FormKey.ID == top)
                     {
                         var rotation = node.Rotation;
-                        rotation.Z += 180;
+                        rotation.X += 180;
                         SnapNodeEntry newnode = new SnapNodeEntry()
                         {
                             Node = AftKey,
@@ -455,7 +455,7 @@ namespace FrankyCLI
                     if (node.Node.FormKey.ID == starboard)
                     {
                         var rotation = node.Rotation;
-                        rotation.X -= 90;
+                        rotation.Z += 0;
                         SnapNodeEntry newnode = new SnapNodeEntry()
                         {
                             Node = StarboardKey,
@@ -468,7 +468,7 @@ namespace FrankyCLI
                     if (node.Node.FormKey.ID == port)
                     {
                         var rotation = node.Rotation;
-                        rotation.X += 90;
+                        rotation.Z += 0;
                         SnapNodeEntry newnode = new SnapNodeEntry()
                         {
                             Node = PortKey,
