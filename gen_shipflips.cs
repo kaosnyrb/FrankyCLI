@@ -619,6 +619,17 @@ namespace FrankyCLI
                             oldsnap = st;
                         }
                     }
+                    if (oldsnap == null)
+                    {
+                        //vanilla?                        
+                        foreach (var st in env.LoadOrder[0].Mod.SnapTemplates)
+                        {
+                            if (st.FormKey == target.SnapTemplate.FormKey)
+                            {
+                                oldsnap = st.DeepCopy();
+                            }
+                        }
+                    }
                     
                     SnapTemplate snapTemplate = new SnapTemplate(myMod)
                     {
