@@ -42,25 +42,12 @@ namespace FrankyCLI
 
         public static ExtendedList<SnapNodeEntry> CalculateNodes(directions direction, ExtendedList<SnapNodeEntry> nodes, IGameEnvironment env)
         {
-            //SnapNode_SHIP_Fore01[STND: 0004AB6F]
-            //SnapNode_SHIP_Aft01 [STND:0004AB70 ]   
-
-            //SnapNode_SHIP_Top01 [STND:0004AB77]       
-            //SnapNode_SHIP_Bottom01 [STND:0004AB78]
-
-            //SnapNode_SHIP_Starboard01 [STND:0004AB74]
-            //SnapNode_SHIP_Port01 [STND:0004AB73]
-
-            //            IFormLinkNullable<IForm> SnapNode_SHIP_Fore01 = new FormKey(env.LoadOrder[0].ModKey, 0x00059B01).ToNullableLink<ISnapTemplateGetter>();
             int fore = 306031;
             int aft = 306032;
-
             int top = 306039;
-            int bottom = 306040;
-            
+            int bottom = 306040;            
             int starboard = 306036;
             int port = 306035;
-
 
             IFormLinkNullable<ISnapTemplateNodeGetter> ForeKey = new FormKey(env.LoadOrder[0].ModKey, 0x0004AB6F).ToNullableLink<ISnapTemplateNodeGetter>();
             IFormLinkNullable<ISnapTemplateNodeGetter> AftKey = new FormKey(env.LoadOrder[0].ModKey, 0x0004AB70).ToNullableLink<ISnapTemplateNodeGetter>();
@@ -83,6 +70,7 @@ namespace FrankyCLI
                 //For aft we swap
                 //Fore and Aft
                 //Port and Starboard
+                //Top and bottom rotate 180
                 ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
                 foreach (var node in nodes)
                 {
@@ -130,13 +118,394 @@ namespace FrankyCLI
                     }
                     if (node.Node.FormKey.ID == top)
                     {
-                        results.Add(node);
+                        var rotation = node.Rotation;
+                        rotation.Z += 180;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = TopKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
                     }
                     if (node.Node.FormKey.ID == bottom)
                     {
-                        results.Add(node);
+                        var rotation = node.Rotation;
+                        rotation.Z += 180;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = BottomKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
                     }
                 }
+                return results;
+            }
+
+
+            if (direction == directions.ShipModPositionPort)
+            {
+                //For port:
+                //Aft becomes port
+                //Fore becomes Star
+                //Port becomes for 90
+                //Star becomes aft 90
+                //top and bottom rotate -90
+                ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
+                foreach (var node in nodes)
+                {
+                    if (node.Node.FormKey.ID == fore)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = StarboardKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == aft)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = PortKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == starboard)
+                    {
+                        //rotate
+                        var rotation = node.Rotation;
+                        rotation.X -= 0;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = AftKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == port)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X -= 0;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = ForeKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == top)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z -= 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = TopKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == bottom)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z -= 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = BottomKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                }
+
+                return results;
+            }
+
+            if (direction == directions.ShipModPositionStbd)
+            {
+                //For stbd:
+                //Fore  becomes port
+                //Aft becomes Star
+                //Port becomes for
+                //Star becomes aft
+                //top and bottom rotate +90
+                ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
+                foreach (var node in nodes)
+                {
+                    if (node.Node.FormKey.ID == fore)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = PortKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == aft)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = StarboardKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == starboard)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X -= 0;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = ForeKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == port)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X -= 0;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = AftKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == top)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z += 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = TopKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == bottom)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z += 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = BottomKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                }
+
+                return results;
+            }
+            if (direction == directions.ShipModPositionTop)
+            {
+                //For stbd:
+                //Fore becomes Top
+                //Aft becomes bottom
+                //Port rotate +90 X
+                //Star rotate +90 X
+                //top becomes aft and 180
+                //aft becomes fore and 180
+                ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
+                foreach (var node in nodes)
+                {
+                    if (node.Node.FormKey.ID == fore)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = TopKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == aft)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = BottomKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == starboard)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X += 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = StarboardKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == port)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X += 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = PortKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == top)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z += 180;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = AftKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == bottom)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z += 180;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = ForeKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                }
+
+                return results;
+            }
+
+            if (direction == directions.ShipModPositionBottom)
+            {
+                //For stbd:
+                //Fore becomes Bot
+                //Aft becomes top
+                //Port rotate -90 X
+                //Star rotate -90 X
+                //top becomes fore and -180
+                //bot becomes aft and -180
+                ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
+                foreach (var node in nodes)
+                {
+                    if (node.Node.FormKey.ID == fore)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = BottomKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == aft)
+                    {
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = TopKey,
+                            NodeID = node.NodeID,
+                            Rotation = node.Rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == starboard)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X -= 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = StarboardKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == port)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.X += 90;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = PortKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == top)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z += 180;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = ForeKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                    if (node.Node.FormKey.ID == bottom)
+                    {
+                        var rotation = node.Rotation;
+                        rotation.Z += 180;
+                        SnapNodeEntry newnode = new SnapNodeEntry()
+                        {
+                            Node = AftKey,
+                            NodeID = node.NodeID,
+                            Rotation = rotation,
+                            Offset = node.Offset,
+                        };
+                        results.Add(newnode);
+                    }
+                }
+
                 return results;
             }
 
@@ -216,8 +585,15 @@ namespace FrankyCLI
                     EditorID = prefix + "_" + target.EditorID + "_" + "franky",
                 };
 
+                List<directions> flips = new List<directions>() { 
+                    directions.ShipModPositionFore, 
+                    directions.ShipModPositionAft,
+                    directions.ShipModPositionPort,
+                    directions.ShipModPositionStbd,
+                    directions.ShipModPositionTop,
+                    directions.ShipModPositionBottom,
 
-                List<directions> flips = new List<directions>() { directions.ShipModPositionFore, directions.ShipModPositionAft };
+                };
                 foreach (var direction in flips)
                 {
                     //1: find and clone the moveable static 
@@ -247,6 +623,8 @@ namespace FrankyCLI
                     SnapTemplate snapTemplate = new SnapTemplate(myMod)
                     {
                         EditorID = prefix + "_sn_" + target.EditorID + direction.ToString(),
+                        NextNodeID = oldsnap.NextNodeID,
+                        STPT = oldsnap.STPT,
                     };
 
 
@@ -255,6 +633,7 @@ namespace FrankyCLI
                     foreach (var node in nodes)
                     {
                         snapTemplate.Nodes.Add(node);
+
                     }
 
                     myMod.SnapTemplates.Add(snapTemplate);
@@ -388,14 +767,7 @@ namespace FrankyCLI
                         }
                     };
 
-                    int rotation = 0;
-                    if (direction == directions.ShipModPositionFore) rotation = 0;
-                    if (direction == directions.ShipModPositionAft) rotation = 180;
-                    if (direction == directions.ShipModPositionPort) rotation = 90;
-                    if (direction == directions.ShipModPositionStbd) rotation = 270;
-
-
-                    newCell.Temporary.Add(new PlacedObject(myMod)
+                    var newobj = new PlacedObject(myMod)
                     {
                         Base = moveableStatic.ToLink<IPlaceableObjectGetter>(),
                         //Not sure we need ragdoll data, but just copying what I know works
@@ -410,8 +782,19 @@ namespace FrankyCLI
                         },
                         Components = cell_contents_components,
                         Position = new P3Float(0, 0, 0),
-                        Rotation = new P3Float(0, 0, EulerToRadCardinals(rotation))
-                    });
+                        Rotation = new P3Float(0, 0, 0)
+                    };
+
+                    // Rotate the Moveable static in the flip wanted.
+                    if (direction == directions.ShipModPositionFore) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(0));
+                    if (direction == directions.ShipModPositionAft) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(180));
+                    if (direction == directions.ShipModPositionPort) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(90));
+                    if (direction == directions.ShipModPositionStbd) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(270));
+                    if (direction == directions.ShipModPositionTop) newobj.Rotation = new P3Float(-EulerToRadCardinals(90), 0, 0);
+                    if (direction == directions.ShipModPositionBottom) newobj.Rotation = new P3Float(EulerToRadCardinals(90), 0, 0);
+                    
+
+                    newCell.Temporary.Add(newobj);
 
                     bool addedCell = false;
                     for (int i = 0; i < cellblock.SubBlocks.Count && !addedCell; i++)
