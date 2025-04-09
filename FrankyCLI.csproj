@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mutagen.Bethesda.FormKeys.Starfield" Version="3.2.0" />
-    <PackageReference Include="Mutagen.Bethesda.Starfield" Version="0.43.2-nightly-20240116-095985" />
+    <PackageReference Include="Mutagen.Bethesda.Starfield" Version="0.44.0" />
   </ItemGroup>
 
 </Project>

@@ -39,7 +39,7 @@ namespace FrankyCLI
                 {
                     for (int i = 0; i < env.LoadOrder.Count; i++)
                     {
-                        if (env.LoadOrder[i].FileName == modname + ".esm")
+                        if (env.LoadOrder[i].FileName == modname + ".esp")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
                             myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
@@ -373,7 +373,12 @@ namespace FrankyCLI
                 // Finish up ---------------------------------------------
             }
 
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            foreach (var rec in myMod.EnumerateMajorRecords())
+            {
+                rec.IsCompressed = false;
+            }
+
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esp");
             Console.WriteLine("Finished");
             return 0;
         }

@@ -34,6 +34,9 @@ switch(mode)
     case "struct":
         res = gen_shipstruct.Generate(args);
         break;
+    case "flip":
+        res = gen_shipflips.Generate(args);
+        break;
     case "cellfix":
         res = gen_cellfixer.Generate(args);
         break;
@@ -45,6 +48,12 @@ switch(mode)
         break;
     case "upgradegenerator":
         res = gen_upgradegenerator.Generate(args);
+        break;
+    case "spaceencounterquest":
+        res = gen_spaceencounterquest.Generate(args);
+        break;
+    case "branchcreator":
+        res = gen_branchcreator.Generate(args);
         break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");

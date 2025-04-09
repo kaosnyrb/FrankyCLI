@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "AvontechWeaponUpgrades upgradegenerator 1 0 0 0"
+      "commandLineArgs": "AvontechTraveller flip f att_ms_struct_coldheart 0"
     }
   }
 }

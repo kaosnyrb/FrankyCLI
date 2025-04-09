@@ -1,1 +1,1 @@
-C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe AvontechShipyards struct cube cube avontech\cube.nif
+C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe AvontechShipyards struct ats hood_01 avontech\ats_hood_01.nif
