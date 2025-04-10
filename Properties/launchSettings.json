@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "avontechshipyards flip f ats_ms_tail01 0"
+      "commandLineArgs": "avontechshipyards flip f ats_ms_core02 AvontechTest 0.75"
     }
   }
 }

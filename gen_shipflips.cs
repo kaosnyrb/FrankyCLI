@@ -24,6 +24,7 @@ namespace FrankyCLI
     }
     class gen_shipflips
     {
+
         public static float EulerToRadCardinals(int euler)
         {
             switch (euler)
@@ -42,6 +43,7 @@ namespace FrankyCLI
 
         public static ExtendedList<SnapNodeEntry> CalculateNodes(directions direction, ExtendedList<SnapNodeEntry> nodes, IGameEnvironment env)
         {
+
             int fore = 306031;
             int aft = 306032;
             int top = 306039;
@@ -61,8 +63,20 @@ namespace FrankyCLI
 
             if (direction == directions.ShipModPositionFore)
             {
-                //Err this is what you passed in.
-                return nodes;
+                //scaling
+                ExtendedList<SnapNodeEntry> results = new ExtendedList<SnapNodeEntry>();
+                foreach (var node in nodes)
+                {
+                    SnapNodeEntry newnode = new SnapNodeEntry()
+                    {
+                        Node = node.Node,
+                        NodeID = node.NodeID,
+                        Rotation = node.Rotation,
+                        Offset = node.Offset,
+                    };
+                    results.Add(newnode);
+                }
+                return results;
             }
 
             if (direction == directions.ShipModPositionAft)
@@ -80,7 +94,7 @@ namespace FrankyCLI
                             Node = AftKey,
                             NodeID = node.NodeID, 
                             Rotation = node.Rotation,
-                            Offset = node.Offset,                            
+                            Offset = node.Offset,
                         };
                         results.Add(newnode);
                     }
@@ -90,7 +104,7 @@ namespace FrankyCLI
                             Node = ForeKey,
                             NodeID = node.NodeID, 
                             Rotation = node.Rotation,
-                            Offset = node.Offset,                            
+                            Offset = node.Offset,
                         };
                         results.Add(newnode);
                     }
@@ -520,7 +534,7 @@ namespace FrankyCLI
             string mode = args[1];
             string prefix = args[2];
             string item = args[3];
-            string modelpath = args[4];
+            string UIName = args[4];
 
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
@@ -778,6 +792,8 @@ namespace FrankyCLI
                         }
                     };
 
+                    
+
                     var newobj = new PlacedObject(myMod)
                     {
                         Base = moveableStatic.ToLink<IPlaceableObjectGetter>(),
@@ -888,11 +904,11 @@ namespace FrankyCLI
                                     ActorValue = SpaceshipPartMass,
                                     Value = 5,
                                 },
-                                new ObjectProperty()
-                                {
-                                    ActorValue = ShipModuleVariant,
-                                    Value = 1,
-                                }
+                                //new ObjectProperty()
+                                //{
+                                //    ActorValue = ShipModuleVariant,
+                                //    Value = 1,
+                                //}
                             }
                         },
                         new FormLinkDataComponent()
@@ -910,7 +926,7 @@ namespace FrankyCLI
                         ,
                         new FullNameComponent()
                         {
-                            Name = item
+                            Name = UIName
                         }
                     };
                     var gbfm = new GenericBaseForm(myMod)
