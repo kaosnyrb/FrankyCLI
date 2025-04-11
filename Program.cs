@@ -37,6 +37,9 @@ switch(mode)
     case "flip":
         res = gen_shipflips.Generate(args);
         break;
+    case "yrotate":
+        res = gen_shipyrotates.Generate(args);
+        break;       
     case "cellfix":
         res = gen_cellfixer.Generate(args);
         break;
