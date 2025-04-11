@@ -39,7 +39,10 @@ switch(mode)
         break;
     case "yrotate":
         res = gen_shipyrotates.Generate(args);
-        break;       
+        break;
+    case "yrotate45":
+        res = shipyfortyfiverotates.Generate(args);
+        break;        
     case "cellfix":
         res = gen_cellfixer.Generate(args);
         break;

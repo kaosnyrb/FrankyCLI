@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "avontechshipyards yrotate f ats_ms_core01 AvontechTest"
+      "commandLineArgs": "avontechshipyards yrotate45 f ats_ms_core03 AvontechTest"
     }
   }
 }
