@@ -122,9 +122,19 @@ namespace FrankyCLI
                     amountstring += amount.ToString();
                 }
                 if (stats.Type == "Enum") { amountstring = ""; }                
-                string editorid = "atwu_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
+                string editorid = "atbb_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
                 string ingameName = upgrade.WeaponName + " " + originalmod.Name + " (" + amountstring + " " + stats.StatName + ")";
                 string omodName = amountstring + " " + stats.StatName + "\n " + originalmod.Name;
+
+                //Global
+                string GlobalEditorid = "atbb_g_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
+                var global = new Global(myMod)
+                {
+                    EditorID = GlobalEditorid,
+                    Data = 0                    
+                };
+                myMod.Globals.Add(global);
+
 
                 //Add Book
                 var book = new Book(myMod)
@@ -139,7 +149,26 @@ namespace FrankyCLI
                     },
                     Description = "Blueprint for a Avontech " + upgrade.WeaponName + " mod.\n\n" + originalmod.Name + " with (" + amountstring + " " + stats.StatName + ").\n\nApply at Weapon Workbench.",
                     Value = 1000,
-                    Weight = 0
+                    Weight = 0,
+                    VirtualMachineAdapter = new VirtualMachineAdapter()
+                    {
+                        Scripts = new ExtendedList<ScriptEntry>()
+                        {
+                            new ScriptEntry()
+                            {
+                                Name = "atbb_recipepickup",
+                                Properties = new ExtendedList<ScriptProperty>()
+                                {
+                                    new ScriptObjectProperty()
+                                    {
+                                        Name = "recipeglobal",
+                                        Object = global.ToLink<IStarfieldMajorRecordGetter>(),
+                                    }
+                                }
+                                
+                            }
+                        }
+                    },
                 };
                 Console.WriteLine("Book ID:" + book.FormKey.ToString() );
                 myMod.Books.Add(book);
@@ -236,11 +265,10 @@ namespace FrankyCLI
                     Categories = originalco.Categories                    
                 };
                 co.ConstructableComponents = originalco.ConstructableComponents;
-                var con = new GetItemCountConditionData()
-                {
-                    RunOnType = Condition.RunOnType.Subject,
-                };
-                con.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(con, book.FormKey);
+
+                var link = global.ToLink<IGlobalGetter>();
+                var con = new GetGlobalValueConditionData();
+                con.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(con, link.FormKey);
                 co.Conditions.Add(new ConditionFloat()
                 {
                     Data = con,
@@ -248,6 +276,8 @@ namespace FrankyCLI
                     ComparisonValue = 0
                 });
                 myMod.ConstructibleObjects.Add(co);
+
+                
 
                 //Add Book to LevelledList
                 foreach( var lvl in myMod.LeveledItems)
@@ -258,7 +288,7 @@ namespace FrankyCLI
                         {
                             Count = 1,
                             ChanceNone = Percent.Zero,
-                            Level = 1,
+                            Level = (short)level,
                             Reference = book.ToLink<IItemGetter>()
                         });
                     }
@@ -416,13 +446,13 @@ namespace FrankyCLI
                 }
                 foreach(var upgrade in UpgradeLib)
                 {                    
-                    string levelledlist = "atwu_" + upgrade.Key.ToString();
+                    string levelledlist = "atbb_" + upgrade.Key.ToString();
 
                     //Find the Weapon LevelledList
                     bool foundweaponlist = false;
                     foreach (var lvl in myMod.LeveledItems)
                     {
-                        if (lvl.EditorID == "atwu_" + upgrade.Value.WeaponName)
+                        if (lvl.EditorID == "atbb_" + upgrade.Value.WeaponName)
                         {
                             foundweaponlist = true;
                             break;
@@ -432,7 +462,7 @@ namespace FrankyCLI
                     {
                         myMod.LeveledItems.Add(new LeveledItem(myMod)
                         {
-                            EditorID = "atwu_" + upgrade.Value.WeaponName,
+                            EditorID = "atbb_" + upgrade.Value.WeaponName,
                             Entries = new ExtendedList<LeveledItemEntry>()
                         });
                     }
@@ -448,13 +478,22 @@ namespace FrankyCLI
                         EditorID = levelledlist,
                         Includes = new ExtendedList<ObjectModInclude>()
                     };
-                  
+
+                    if (DamageMode == -1)
+                    {
+                        var test = StatLib.First();
+                        StatLib = new Dictionary<string, BonusStats>();
+                        StatLib.Add(test.Key, test.Value);
+                    }
                     foreach (var stat in StatLib)
                     {
                         for (int i = 0; i < StatLib[stat.Key].StepCount; i++)
                         {
                             decimal amount = StatLib[stat.Key].Default + (i * StatLib[stat.Key].Step);
                             Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key + " " + amount);
+
+                            //Filter on attach point
+
                             CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], amount, levelledlist, StatLib[stat.Key].startLevel + (i* StatLib[stat.Key].LevelPerStep));
                         }
                     }
@@ -462,7 +501,7 @@ namespace FrankyCLI
                     //Add new Upgrade to weapon list
                     foreach (var lvl in myMod.LeveledItems)
                     {
-                        if (lvl.EditorID == "atwu_" + upgrade.Value.WeaponName)
+                        if (lvl.EditorID == "atbb_" + upgrade.Value.WeaponName)
                         {
                             foreach (var newlist in myMod.LeveledItems)
                             {
@@ -487,13 +526,13 @@ namespace FrankyCLI
                 //Add the weapon lists to a global list
                 foreach (var lvl in myMod.LeveledItems)
                 {
-                    if (lvl.EditorID == "atwu_mainlist")
+                    if (lvl.EditorID == "atbb_mainlist")
                     {
                         foreach (var weap in Weapons)
                         {
                             foreach (var weaplvl in myMod.LeveledItems)
                             {
-                                if(weaplvl.EditorID == "atwu_" + weap)
+                                if(weaplvl.EditorID == "atbb_" + weap)
                                 {
                                     lvl.Entries.Add(new LeveledItemEntry()
                                     {
@@ -515,7 +554,7 @@ namespace FrankyCLI
                     "Starfield.esm~0028E02A|",
                     "Starfield.esm~0028F433|"
                 });*/
-
+                /* Creations don't use rtfp
                 foreach (var objmod in env.LoadOrder[0].Mod.ObjectModifications)
                 {
                     foreach(var weapon in Weapons)
@@ -553,7 +592,7 @@ namespace FrankyCLI
                             }
                         }
                     }
-                }
+                }*/
 
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");

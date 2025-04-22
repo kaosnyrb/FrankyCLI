@@ -8,3 +8,6 @@ C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe avontechshipyards yrotate45 f at
 
 C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe avontechshipyards yrotate45 f atsf_ms_hood03 "Avontech 45Hood"
 C:\git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe avontechshipyards yrotate45 f atsf_ms_hood04 "Avontech 45Hood"
+
+
+

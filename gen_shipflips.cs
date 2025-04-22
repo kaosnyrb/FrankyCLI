@@ -536,6 +536,11 @@ namespace FrankyCLI
             string item = args[3];
             string UIName = args[4];
 
+            int MSrotationX = 0;
+            if (args.Length > 5) {
+                MSrotationX = int.Parse(args[5]);
+            }
+
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
@@ -813,12 +818,14 @@ namespace FrankyCLI
                     };
 
                     // Rotate the Moveable static in the flip wanted.
-                    if (direction == directions.ShipModPositionFore) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(0));
-                    if (direction == directions.ShipModPositionAft) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(180));
-                    if (direction == directions.ShipModPositionPort) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(90));
-                    if (direction == directions.ShipModPositionStbd) newobj.Rotation = new P3Float(0, 0, EulerToRadCardinals(270));
-                    if (direction == directions.ShipModPositionTop) newobj.Rotation = new P3Float(-EulerToRadCardinals(90), 0, 0);
-                    if (direction == directions.ShipModPositionBottom) newobj.Rotation = new P3Float(EulerToRadCardinals(90), 0, 0);
+
+                    float rotationX = EulerToRadCardinals(MSrotationX);
+                    if (direction == directions.ShipModPositionFore) newobj.Rotation = new P3Float(rotationX, 0, EulerToRadCardinals(0));
+                    if (direction == directions.ShipModPositionAft) newobj.Rotation = new P3Float(rotationX, 0, EulerToRadCardinals(180));
+                    if (direction == directions.ShipModPositionPort) newobj.Rotation = new P3Float(rotationX, 0, EulerToRadCardinals(90));
+                    if (direction == directions.ShipModPositionStbd) newobj.Rotation = new P3Float(rotationX, 0, EulerToRadCardinals(270));
+                    if (direction == directions.ShipModPositionTop) newobj.Rotation = new P3Float(rotationX - EulerToRadCardinals(90), 0, 0);
+                    if (direction == directions.ShipModPositionBottom) newobj.Rotation = new P3Float(rotationX + EulerToRadCardinals(90), 0, 0);
                     
 
                     newCell.Temporary.Add(newobj);
