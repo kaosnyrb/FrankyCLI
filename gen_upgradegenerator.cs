@@ -19,6 +19,7 @@ namespace FrankyCLI
         public string WeaponName;
         public string BaseWeaponModID;
         public string BaseConstructableEditorId;
+        public string AttachPoint;
     }
 
     public class BonusStats
@@ -37,6 +38,8 @@ namespace FrankyCLI
 
         public int startLevel = 2;
         public int LevelPerStep = 10;
+
+        public List<string> AllowedAttachPoints;
     }
 
     public class gen_upgradegenerator
@@ -62,14 +65,16 @@ namespace FrankyCLI
                     }
                     else
                     {
-                        foreach (var obj in env.LoadOrder[0].Mod.ObjectModifications)
+                        string targetID = upgrade.BaseWeaponModID;
+
+                        var match = env.LoadOrder[0].Mod.ObjectModifications
+                            .FirstOrDefault(obj => string.Equals(obj.EditorID, targetID, StringComparison.OrdinalIgnoreCase));
+
+                        if (match != null)
                         {
-                            if (obj.EditorID.ToLower() == upgrade.BaseWeaponModID.ToLower())
-                            {
-                                modcache.Add(upgrade.BaseWeaponModID.ToLower(), (WeaponModification)obj.DeepCopy());
-                                originalmod = (WeaponModification)obj.DeepCopy();
-                                break;
-                            }
+                            var copy = (WeaponModification)match.DeepCopy();
+                            modcache[targetID.ToLower()] = copy;
+                            originalmod = copy;
                         }
                     }
                     if (cocache.ContainsKey(upgrade.BaseConstructableEditorId.ToLower()))
@@ -430,12 +435,14 @@ namespace FrankyCLI
                                 {
                                     coid = comap[coid];
                                 }
-                                UpgradeLib.Add(objmod.EditorID, new BaseUpgrade()
+                                var upgrade = new BaseUpgrade()
                                 {
                                     BaseWeaponModID = objmod.EditorID,
                                     BaseConstructableEditorId = coid,
-                                    WeaponName = weapon
-                                });
+                                    WeaponName = weapon,
+                                    AttachPoint = getAttachPoint(objmod.AttachPoint.FormKey.ToString())
+                                };
+                                UpgradeLib.Add(objmod.EditorID, upgrade);
                             }
                             else 
                             {
@@ -478,24 +485,31 @@ namespace FrankyCLI
                         EditorID = levelledlist,
                         Includes = new ExtendedList<ObjectModInclude>()
                     };
-
+                    /*
                     if (DamageMode == -1)
                     {
                         var test = StatLib.First();
                         StatLib = new Dictionary<string, BonusStats>();
                         StatLib.Add(test.Key, test.Value);
-                    }
+                    }*/
                     foreach (var stat in StatLib)
                     {
-                        for (int i = 0; i < StatLib[stat.Key].StepCount; i++)
+                        if (stat.Value.AllowedAttachPoints != null)
                         {
-                            decimal amount = StatLib[stat.Key].Default + (i * StatLib[stat.Key].Step);
-                            Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key + " " + amount);
+                            if (stat.Value.AllowedAttachPoints.Contains(UpgradeLib[upgrade.Key].AttachPoint))
+                            {
+                                for (int i = 0; i < StatLib[stat.Key].StepCount; i++)
+                                {
+                                    decimal amount = StatLib[stat.Key].Default + (i * StatLib[stat.Key].Step);
+                                    Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key + " " + amount);
 
-                            //Filter on attach point
+                                    //Filter on attach point
 
-                            CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], amount, levelledlist, StatLib[stat.Key].startLevel + (i* StatLib[stat.Key].LevelPerStep));
+                                    CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], amount, levelledlist, StatLib[stat.Key].startLevel + (i * StatLib[stat.Key].LevelPerStep));
+                                }
+                            }
                         }
+
                     }
 
                     //Add new Upgrade to weapon list
@@ -545,55 +559,6 @@ namespace FrankyCLI
                         }
                     }
                 }
-
-                //REAL TIME FORM PATCHER output
-                Dictionary<string, List<string>> weaponlists = new Dictionary<string, List<string>>();
-                /*
-                weaponlists.Add("Novablast", new List<string>()
-                {
-                    "Starfield.esm~0028E02A|",
-                    "Starfield.esm~0028F433|"
-                });*/
-                /* Creations don't use rtfp
-                foreach (var objmod in env.LoadOrder[0].Mod.ObjectModifications)
-                {
-                    foreach(var weapon in Weapons)
-                    {
-                        if (objmod.EditorID.ToLower().Contains(weapon.ToLower()) && objmod.EditorID.ToLower().Contains("modgroup"))
-                        {
-                            if (weaponlists.ContainsKey(weapon))
-                            {
-                                weaponlists[weapon].Add("Starfield.esm~" + objmod.FormKey.ID.ToString("X") + "|");
-                            }
-                            else
-                            {
-                                weaponlists.Add(weapon, new List<string>()
-                                {
-                                    "Starfield.esm~" + objmod.FormKey.ID.ToString("X") + "|"
-                                });
-                            }
-                        }
-                    }
-                }
-                using (StreamWriter outputFile = new StreamWriter(random.Next() + "_rtfp.txt"))
-                {
-                    foreach (var weaponkey in rtfpsettings.Keys)
-                    {
-                        if (weaponlists.ContainsKey(weaponkey))
-                        {
-                            foreach (var includelist in weaponlists[weaponkey])
-                            {
-                                outputFile.Write(includelist);
-                                foreach (var res in rtfpsettings[weaponkey])
-                                {
-                                    outputFile.Write(res);
-                                }
-                                outputFile.WriteLine(" ");
-                            }
-                        }
-                    }
-                }*/
-
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
@@ -625,6 +590,16 @@ namespace FrankyCLI
 
         public static Dictionary<string,BaseUpgrade> UpgradeLib = new Dictionary<string, BaseUpgrade>();
         public static Dictionary<string, BonusStats> StatLib = new Dictionary<string, BonusStats>();
+
+        public static string getAttachPoint(string form)
+        {
+            switch (form)
+            {
+                case "02249C:Starfield.esm":
+                    return "Muzzle";
+            }
+            return "";
+        }
 
         public static void BuildStatLib()
         {
@@ -795,6 +770,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 50,
                 LevelPerStep = 10,
+                AllowedAttachPoints = new List<string>() { "Muzzle" }
             });
             StatLib.Add("AmmoCapacityMultAndAdd", new BonusStats()
             {
