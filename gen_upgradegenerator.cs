@@ -11,6 +11,7 @@ using DynamicData;
 using Noggog;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog.StructuredStrings;
+using System.Globalization;
 
 namespace FrankyCLI
 {
@@ -20,6 +21,16 @@ namespace FrankyCLI
         public string BaseWeaponModID;
         public string BaseConstructableEditorId;
         public string AttachPoint;
+
+        public FormKey formKey;
+        public FormKey coFormKey;
+    }
+
+
+    public class StatSet
+    {
+        public string Name;
+        public List<BonusStats> stats;
     }
 
     public class BonusStats
@@ -65,6 +76,7 @@ namespace FrankyCLI
                     }
                     else
                     {
+                        //Search for the mod
                         string targetID = upgrade.BaseWeaponModID;
 
                         var match = env.LoadOrder[0].Mod.ObjectModifications
@@ -440,7 +452,8 @@ namespace FrankyCLI
                                     BaseWeaponModID = objmod.EditorID,
                                     BaseConstructableEditorId = coid,
                                     WeaponName = weapon,
-                                    AttachPoint = getAttachPoint(objmod.AttachPoint.FormKey.ToString())
+                                    AttachPoint = getAttachPoint(objmod.AttachPoint.FormKey.ToString()),
+                                    formKey = objmod.FormKey
                                 };
                                 UpgradeLib.Add(objmod.EditorID, upgrade);
                             }
@@ -470,14 +483,16 @@ namespace FrankyCLI
                         myMod.LeveledItems.Add(new LeveledItem(myMod)
                         {
                             EditorID = "atbb_" + upgrade.Value.WeaponName,
-                            Entries = new ExtendedList<LeveledItemEntry>()
+                            Entries = new ExtendedList<LeveledItemEntry>(),
+                            Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
                         });
                     }
                     //Add the levelled list for the upgrade/weapon pairing - used in crafting
                     myMod.LeveledItems.Add(new LeveledItem(myMod)
                     {
                         EditorID = levelledlist,
-                        Entries = new ExtendedList<LeveledItemEntry>()
+                        Entries = new ExtendedList<LeveledItemEntry>(),
+                        Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
                     });
                     //Add the include omod for the upgrade/weapon pairing - used in dropped loot/vendors                    
                     var upgradeinclude = new WeaponModification(myMod)
@@ -502,9 +517,6 @@ namespace FrankyCLI
                                 {
                                     decimal amount = StatLib[stat.Key].Default + (i * StatLib[stat.Key].Step);
                                     Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key + " " + amount);
-
-                                    //Filter on attach point
-
                                     CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], amount, levelledlist, StatLib[stat.Key].startLevel + (i * StatLib[stat.Key].LevelPerStep));
                                 }
                             }
@@ -593,11 +605,37 @@ namespace FrankyCLI
 
         public static string getAttachPoint(string form)
         {
+            //We merge some groups here
             switch (form)
             {
                 case "02249C:Starfield.esm":
-                    return "Muzzle";
+                    return "Barrel";
+                case "02249D:Starfield.esm":
+                    return "Barrel";
+                case "02EE28:Starfield.esm":
+                    return "Laser";
+                case "14D08A:Starfield.esm":
+                    return "Laser";
+                case "0191EE:Starfield.esm":
+                    return "Laser";
+                case "149CA8:Starfield.esm":
+                    return "Receiver";
+                case "01BC46:Starfield.esm":
+                    return "Receiver";
+                case "024004:Starfield.esm":
+                    return "Receiver";
+                case "02249F:Starfield.esm":
+                    return "Grip";
+                case "0849A6:Starfield.esm":
+                    return "Grip";
+                case "147AFE:Starfield.esm":
+                    return "Grip";
+                case "05D4D7:Starfield.esm":
+                    return "Magazine";
+                case "022499:Starfield.esm":
+                    return "Optic";
             }
+            Console.WriteLine("Missing Attach Form:" + form);
             return "";
         }
 
@@ -618,6 +656,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 10,
                     LevelPerStep = 10,
+                    AllowedAttachPoints = new List<string>() { "Receiver" }
                 });
             }
 
@@ -636,6 +675,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 10,
                     LevelPerStep = 10,
+                    AllowedAttachPoints = new List<string>() { "Receiver" }
                 });
             }
 
@@ -653,6 +693,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 10,
                     LevelPerStep = 10,
+                    AllowedAttachPoints = new List<string>() { "Receiver" }
                 });
             }
 
@@ -669,6 +710,7 @@ namespace FrankyCLI
                 StepCount = 10,
                 startLevel = 25,
                 LevelPerStep = 8,
+                AllowedAttachPoints = new List<string>() { "Barrel" }
             });
 
             if (DamageMode != 1)
@@ -686,7 +728,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 25,
                     LevelPerStep = 8,
-
+                    AllowedAttachPoints = new List<string>() { "Barrel" }
                 });
                 StatLib.Add("PhysicalAdd", new BonusStats()
                 {
@@ -700,6 +742,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 25,
                     LevelPerStep = 8,
+                    AllowedAttachPoints = new List<string>() { "Barrel" }
                 });
                 StatLib.Add("CryoAdd", new BonusStats()
                 {
@@ -714,6 +757,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 25,
                     LevelPerStep = 8,
+                    AllowedAttachPoints = new List<string>() { "Barrel" }
                 });
                 StatLib.Add("ShockAdd", new BonusStats()
                 {
@@ -728,6 +772,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 25,
                     LevelPerStep = 8,
+                    AllowedAttachPoints = new List<string>() { "Barrel" }
                 });
                 StatLib.Add("ToxicFlat", new BonusStats()
                 {
@@ -742,6 +787,7 @@ namespace FrankyCLI
                     StepCount = 10,
                     startLevel = 25,
                     LevelPerStep = 8,
+                    AllowedAttachPoints = new List<string>() { "Barrel" }
                 });
             }
 
@@ -757,6 +803,7 @@ namespace FrankyCLI
                 StepCount = 10,
                 startLevel = 5,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Magazine" }
             });
             StatLib.Add("ProjectileAdd", new BonusStats()
             {
@@ -770,7 +817,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 50,
                 LevelPerStep = 10,
-                AllowedAttachPoints = new List<string>() { "Muzzle" }
+                AllowedAttachPoints = new List<string>() { "Receiver" }
             });
             StatLib.Add("AmmoCapacityMultAndAdd", new BonusStats()
             {
@@ -784,6 +831,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 5,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Magazine" }
             });
             StatLib.Add("StabilityMultAndAdd", new BonusStats()
             {
@@ -797,6 +845,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Grip" }
             });
             StatLib.Add("CritDamageMultAndAdd", new BonusStats()
             {
@@ -810,6 +859,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Optic" }
             });
             StatLib.Add("BashDamageMultAndAdd", new BonusStats()
             {
@@ -823,6 +873,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Grip" }
             });
             StatLib.Add("SilentSet", new BonusStats()
             {
@@ -834,6 +885,7 @@ namespace FrankyCLI
                 Step = 0,
                 startLevel = 20,
                 LevelPerStep = 1,
+                AllowedAttachPoints = new List<string>() { "Receiver" }
             });
             StatLib.Add("02MultAndAdd", new BonusStats()
             {
@@ -848,6 +900,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 5,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Grip" }
             });
             StatLib.Add("BonusXPAdd", new BonusStats()
             {
@@ -862,6 +915,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 5,
                 LevelPerStep = 15,
+                AllowedAttachPoints = new List<string>() { "Grip" }
             });
             StatLib.Add("ReloadSpeedAdd", new BonusStats()
             {
@@ -876,6 +930,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 5,
                 LevelPerStep = 15,
+                AllowedAttachPoints = new List<string>() { "Magazine" }
             });
             StatLib.Add("DamageReductionAdd", new BonusStats()
             {
@@ -890,6 +945,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 5,
                 LevelPerStep = 15,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("HealRateAdd", new BonusStats()
             {
@@ -904,6 +960,7 @@ namespace FrankyCLI
                 StepCount = 2,
                 startLevel = 30,
                 LevelPerStep = 10,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("CarryWeightAdd", new BonusStats()
             {
@@ -918,6 +975,7 @@ namespace FrankyCLI
                 StepCount = 10,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("JumpAdd", new BonusStats()
             {
@@ -932,6 +990,7 @@ namespace FrankyCLI
                 StepCount = 2,
                 startLevel = 2,
                 LevelPerStep = 15,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("MovementAdd", new BonusStats()
             {
@@ -946,6 +1005,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("StealthLightDetectionAdd", new BonusStats()
             {
@@ -960,6 +1020,7 @@ namespace FrankyCLI
                 StepCount = 3,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("StealthMovementDetectionAdd", new BonusStats()
             {
@@ -974,6 +1035,7 @@ namespace FrankyCLI
                 StepCount = 3,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Laser" }
             });
             StatLib.Add("IncreaseHealthAdd", new BonusStats()
             {
@@ -988,6 +1050,7 @@ namespace FrankyCLI
                 StepCount = 5,
                 startLevel = 2,
                 LevelPerStep = 5,
+                AllowedAttachPoints = new List<string>() { "Grip" }
             });            
         }
     }
