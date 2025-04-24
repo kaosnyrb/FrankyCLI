@@ -15,53 +15,19 @@ using System.Globalization;
 
 namespace FrankyCLI
 {
-    public class BaseUpgrade
-    {
-        public string WeaponName;
-        public string BaseWeaponModID;
-        public string BaseConstructableEditorId;
-        public string AttachPoint;
-
-        public FormKey formKey;
-        public FormKey coFormKey;
-    }
-
-
-    public class StatSet
-    {
-        public string Name;
-        public List<BonusStats> stats;
-    }
-
-    public class BonusStats
-    {
-        public string Type;
-        public bool Percentage;
-        public Weapon.Property property;
-        public ObjectModProperty.FloatFunctionType floatFunctionType;
-        public UInt32 Keyword;
-        public string StatName;
-
-        public decimal Default;
-        public decimal Step;
-
-        public int StepCount = 1;
-
-        public int startLevel = 2;
-        public int LevelPerStep = 10;
-
-        public List<string> AllowedAttachPoints;
-    }
-
     public class gen_upgradegenerator
     {
+        public static int DamageMode = 0;//0 Energy , 1 EM, 2 Phys
 
         public static List<string> MissingCOs = new List<string>();
 
         public static Dictionary<string, WeaponModification> modcache = new Dictionary<string, WeaponModification>();
         public static Dictionary<string, ConstructibleObject> cocache = new Dictionary<string, ConstructibleObject>();
 
-        public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, BonusStats stats, decimal amount, string LevelledListContains, int level)
+        public static Dictionary<string, BaseUpgrade> UpgradeLib = new Dictionary<string, BaseUpgrade>();
+        public static Dictionary<string, StatSet> StatLib = new Dictionary<string, StatSet>();
+
+        public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step)
         {
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
@@ -86,7 +52,7 @@ namespace FrankyCLI
                         {
                             var copy = (WeaponModification)match.DeepCopy();
                             modcache[targetID.ToLower()] = copy;
-                            originalmod = copy;
+                            originalmod = modcache[targetID.ToLower()].DeepCopy();
                         }
                     }
                     if (cocache.ContainsKey(upgrade.BaseConstructableEditorId.ToLower()))
@@ -126,25 +92,12 @@ namespace FrankyCLI
                 }
 
                 //Figure out the text
-                string amountstring = "";
-                if (amount > 0) { amountstring += "+"; }
-
-                if (stats.Percentage)
-                {
-                    var str = (amount * 100).ToString();                    
-                    amountstring += str + "%";
-                }
-                else
-                {                    
-                    amountstring += amount.ToString();
-                }
-                if (stats.Type == "Enum") { amountstring = ""; }                
-                string editorid = "atbb_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
-                string ingameName = upgrade.WeaponName + " " + originalmod.Name + " (" + amountstring + " " + stats.StatName + ")";
-                string omodName = amountstring + " " + stats.StatName + "\n " + originalmod.Name;
-
+                
+                string amountstring = level.ToString();
+                string editorid = "atbb_" + amountstring + "_" + stats.Name + "_" + originalmod.EditorID;                
+                
                 //Global
-                string GlobalEditorid = "atbb_g_" + amountstring + "_" + stats.StatName + "_" + originalmod.EditorID;
+                string GlobalEditorid = "atbb_g_" + amountstring + "_" + stats.Name + "_" + originalmod.EditorID;
                 var global = new Global(myMod)
                 {
                     EditorID = GlobalEditorid,
@@ -153,6 +106,115 @@ namespace FrankyCLI
                 myMod.Globals.Add(global);
 
 
+
+                //Add OMOD
+                var omod = new WeaponModification(myMod)
+                {
+                    EditorID = editorid,
+                    Name = originalmod.Name,
+                    Description = stats.Description,
+                    Model = originalmod.Model,
+                    TargetOmodKeywords = originalmod.TargetOmodKeywords,
+                    FilterKeywords = originalmod.FilterKeywords,
+                    AttachPoint = originalmod.AttachPoint,
+                    AttachParentSlots = originalmod.AttachParentSlots,
+                    Includes = originalmod.Includes,
+                    Properties = originalmod.Properties,
+                };
+                //We need to build the UI based on the weapon stats.
+                string ingameName = upgrade.WeaponName + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(level,stats.Theme) + " " + stats.Name + " "+ originalmod.Name;
+
+
+                //Remove the DontShowInUI [KYWD:00374EFA]
+                for (int i = 0; i < omod.Properties.Count; i++)
+                {
+                    try
+                    {
+                        if (((ObjectModFormLinkIntProperty<Weapon.Property>)omod.Properties[i]).Record.FormKey.ID == 0x00374EFA)
+                        {
+                            omod.Properties.RemoveAt(i);
+                            break;
+                        }
+                    }
+                    catch { }
+                }
+                //The name of the OMOD contains all it's stats.
+                string omodName = gen_upgradegenerator_utils.getDiscriptiveLevel(level, stats.Theme) + " " + stats.Name + " " + originalmod.Name;
+                string Description = stats.Description;
+                foreach (var stat in stats.stats)
+                {
+                    decimal amount = stat.Default + (step * stat.Step);
+                    string amountstr = amount.ToString();
+                    if (stat.Percentage) { 
+                        if (stat.Type == "Float" || stat.Type == "KeywordFloat")
+                        {
+                            amountstr = (amount * 100).ToString("F0");
+                        }
+                        amountstr += "%";
+                    }
+                    //if (amount < 0) { amountstr = "-" + amountstr; }
+                    if (amount > 0) { amountstr = "+" + amountstr; }
+                    if (stat.Type == "Int")
+                    {
+                        omod.Properties.Add(new ObjectModIntProperty<Weapon.Property>
+                        {
+                            Property = stat.property,
+                            Value = (uint)amount,
+                            FunctionType = stat.floatFunctionType,
+                        });
+                        Description += " / " + amountstr + " " + stat.StatName;
+                        //omodName += "\n " + amountstr + " " + stat.StatName;
+                    }
+                    if (stat.Type == "Float")
+                    {
+                        omod.Properties.Add(new ObjectModFloatProperty<Weapon.Property>
+                        {
+                            Property = stat.property,
+                            Value = (float)amount,
+                            FunctionType = stat.floatFunctionType,
+                        });
+                        Description += " / " + amountstr + " " + stat.StatName;
+                        //omodName += "\n " + amountstr + " " + stat.StatName;                        
+                    }
+                    if (stat.Type == "Enum")
+                    {
+                        omod.Properties.Add(new ObjectModEnumProperty<Weapon.Property>
+                        {
+                            Property = stat.property,
+                            EnumIntValue = (uint)amount,
+                            FunctionType = ObjectModProperty.EnumFunctionType.Set,
+                        });
+                        //omodName += "\n " + stat.StatName;
+                    }
+                    if (stat.Type == "KeywordFloat")
+                    {
+                        IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(env.LoadOrder[0].ModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
+                        omod.Properties.Add(new ObjectModFormLinkFloatProperty<Weapon.Property>
+                        {
+                            Property = stat.property,
+                            Record = statkeyword,
+                            Value = (float)amount,
+                            FunctionType = stat.floatFunctionType,
+                        });
+                        Description += " / " + amountstr + " " + stat.StatName;
+                        //omodName += "\n " + amountstr + " " + stat.StatName;
+                    }
+                    if (stat.Type == "AddFormInt")
+                    {
+                        IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(env.LoadOrder[0].ModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
+                        omod.Properties.Add(new ObjectModFormLinkIntProperty<Weapon.Property>
+                        {
+                            Property = stat.property,
+                            Record = statkeyword,
+                            Value = (uint)amount,
+                            FunctionType = ObjectModProperty.FormLinkFunctionType.Add,
+                        });
+                        Description += " / " + amountstr + " " + stat.StatName;
+                        //omodName += "\n " + amountstr + " " + stat.StatName;
+                    }
+                }
+                omod.Name = omodName;
+                myMod.ObjectModifications.Add(omod);
                 //Add Book
                 var book = new Book(myMod)
                 {
@@ -164,8 +226,8 @@ namespace FrankyCLI
                     {
                         File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("avontech\\warpblueprint.nif"),
                     },
-                    Description = "Blueprint for a Avontech " + upgrade.WeaponName + " mod.\n\n" + originalmod.Name + " with (" + amountstring + " " + stats.StatName + ").\n\nApply at Weapon Workbench.",
-                    Value = 1000,
+                    Description = "Blueprint for a Avontech Blacksite " + upgrade.WeaponName + " weapon mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
+                    Value = 500,
                     Weight = 0,
                     VirtualMachineAdapter = new VirtualMachineAdapter()
                     {
@@ -182,99 +244,19 @@ namespace FrankyCLI
                                         Object = global.ToLink<IStarfieldMajorRecordGetter>(),
                                     }
                                 }
-                                
+
                             }
                         }
                     },
                 };
-                Console.WriteLine("Book ID:" + book.FormKey.ToString() );
+                Console.WriteLine("Book ID:" + book.FormKey.ToString());
                 myMod.Books.Add(book);
-                //Add OMOD
-                var omod = new WeaponModification(myMod)
-                {
-                    EditorID = editorid,
-                    Name = omodName,
-                    Description = originalmod.Description + amountstring + " " + stats.StatName,
-                    Model = originalmod.Model,
-                    TargetOmodKeywords = originalmod.TargetOmodKeywords,
-                    FilterKeywords = originalmod.FilterKeywords,
-                    AttachPoint = originalmod.AttachPoint,
-                    AttachParentSlots = originalmod.AttachParentSlots,
-                    Includes = originalmod.Includes,
-                    Properties = originalmod.Properties,
-                };
-
-                //Remove the DontShowInUI [KYWD:00374EFA]
-                for(int i = 0; i < omod.Properties.Count; i++)
-                {
-                    try
-                    {
-                        if (((ObjectModFormLinkIntProperty<Weapon.Property>)omod.Properties[i]).Record.FormKey.ID == 0x00374EFA)
-                        {
-                            omod.Properties.RemoveAt(i);
-                            break;
-                        }
-                    }
-                    catch { }
-                }
-
-                if (stats.Type == "Int")
-                {
-                    omod.Properties.Add(new ObjectModIntProperty<Weapon.Property>
-                    {
-                        Property = stats.property,
-                        Value = (uint)amount,
-                        FunctionType = stats.floatFunctionType,
-                    });
-                }
-                if (stats.Type == "Float")
-                {
-                    omod.Properties.Add(new ObjectModFloatProperty<Weapon.Property>
-                    {
-                        Property = stats.property,
-                        Value = (float)amount,
-                        FunctionType = stats.floatFunctionType,
-                    });
-                }
-                if (stats.Type == "Enum")
-                {
-                    omod.Properties.Add(new ObjectModEnumProperty<Weapon.Property>
-                    {
-                        Property = stats.property,
-                        EnumIntValue = (uint)amount,
-                        FunctionType = ObjectModProperty.EnumFunctionType.Set,
-                    });
-                }
-                if (stats.Type == "KeywordFloat")
-                {
-                    IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(env.LoadOrder[0].ModKey, stats.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
-                    omod.Properties.Add(new ObjectModFormLinkFloatProperty<Weapon.Property>
-                    {
-                        Property = stats.property,
-                        Record = statkeyword,
-                        Value = (float)amount,                        
-                        FunctionType = stats.floatFunctionType,                        
-                    });
-                }
-                if (stats.Type == "AddFormInt")
-                {
-                    IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(env.LoadOrder[0].ModKey, stats.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
-                    omod.Properties.Add(new ObjectModFormLinkIntProperty<Weapon.Property>
-                    {
-                        Property = stats.property,
-                        Record = statkeyword,
-                        Value = (uint)amount,
-                        FunctionType = ObjectModProperty.FormLinkFunctionType.Add,
-                    });
-                }
-                myMod.ObjectModifications.Add(omod);
-                AddOModToUpgradeInclude(LevelledListContains, omod,upgrade.WeaponName,level);
                 //Add Construct
                 IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
                 var co = new ConstructibleObject(myMod)
                 {
                     EditorID = editorid,
-                    Description = ingameName,
+                    Description = Description,
                     CreatedObject = targetmod,
                     WorkbenchKeyword = originalco.WorkbenchKeyword,
                     AmountProduced = originalco.AmountProduced,
@@ -314,7 +296,6 @@ namespace FrankyCLI
             return true;
         }
 
-
         public static int Generate(string[] args)
         {
             Random random = new Random();
@@ -324,11 +305,10 @@ namespace FrankyCLI
             string prefix = args[2];
             string item = args[3];
             string form = args[4];
-
             string datapath = "";
             
             DamageMode = int.Parse(prefix);
-            BuildStatLib();
+            StatLib = gen_upgradegenerator_utils.BuildStatLib(DamageMode);
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
@@ -352,7 +332,6 @@ namespace FrankyCLI
                         }
                     }
                 }
-
                 List<string> Weapons = new List<string>();
                 if (DamageMode == -1)//Test
                 {
@@ -379,60 +358,7 @@ namespace FrankyCLI
                 }
 
                 //Some contstructable objects don't follow the name format so we manually map them
-                Dictionary<string, string> comap = new Dictionary<string, string>
-                {
-                    { "co_gun_mod_AA99_Grip_StandardStock", "co_gun_mod_AA99_Grip_Standard" },
-                    { "co_gun_mod_AA99_Mag_S", "co_gun_mod_AA99_Mag_Standard" },
-                    { "co_gun_mod_AA99_Grip_StabilizingStock", "co_gun_mod_AA99_Grip_Stabilizing" },
-                    { "co_gun_mod_AA99_Mag_L", "co_gun_mod_AA99_Mag_Large" },
-                    { "co_gun_mod_Coachman_Grip_StandardStock", "co_gun_mod_Coachman_Grip_Standard" },
-                    { "co_gun_mod_Eon_Mag_L", "co_gun_mod_Eon_Mag_Large" },
-                    { "co_gun_mod_Equinox_Mag_L", "co_gun_mod_Equinox_Mag_Large" },
-                    { "co_gun_mod_Grendel_Mag_Standard", "co_gun_mod_Grendel_Mag_Medium_Standard" },
-                    { "co_gun_mod_Grendel_Receiver_BurstFire", "co_gun_mod_Grendel_Receiver_Burst" },
-                    { "co_gun_mod_Grendel_Laser_Empty", "co_gun_mod_Grendel_Laser_None" },
-                    { "co_gun_mod_HardTarget_Mag_L", "co_gun_mod_HardTarget_Mag_Large" },
-                    { "co_gun_mod_InflictorPistol_Mag_L", "co_gun_mod_HardTarget_Mag_Large" },
-                    { "co_gun_mod_Kodama_Mag_Standard_Flechette", "co_gun_mod_Kodama_Mag_Standard" },
-                    { "co_gun_mod_Kodama_Mag_Drum_Flechette", "co_gun_mod_Kodama_Mag_Drum" },
-                    { "co_gun_mod_Kodama_Mag_Tactical_Flechette", "co_gun_mod_Kodama_Mag_Tactical" },
-                    { "co_gun_mod_Kodama_Mag_L_Flechette", "co_gun_mod_Kodama_Mag_Large" },
-                    { "co_gun_mod_Kraken_Mag_L", "co_gun_mod_Kraken_Mag_Large" },
-                    { "co_gun_mod_M1919_Mag_L", "co_gun_mod_M1919_Mag_Large" },
-                    { "co_gun_mod_Maelstrom_Mag_L", "co_gun_mod_Maelstrom_Mag_Large" },
-                    { "co_gun_mod_MagSniper_Mag_L", "co_gun_mod_MagSniper_Mag_Large" },
-                    { "co_gun_mod_Microgun_Mag_S", "co_gun_mod_Microgun_Mag_Small" },
-                    { "co_gun_mod_Novalight_Mag_L", "co_gun_mod_Novalight_Mag_Large" },
-                    { "co_gun_mod_Orion_Optics_ShortScope", "co_gun_mod_Orion_Optics_ShortScope_Standard" },
-                    { "co_gun_mod_Orion_Mag_L", "co_gun_mod_Orion_Mag_Large" },
-                    { "co_gun_mod_Pacifier_Mag_L", "co_gun_mod_Pacifier_Mag_Large" },
-                    { "co_gun_mod_Regulator_Internal_MuzzleHighVelocity", "co_gun_mod_Regulator_Internal_HighVelocity" },
-                    { "co_gun_mod_RussianAssaultRifle_Optics_ReflexSight", "co_gun_mod_OldEarthAssaultRifle_Optics_ReflexSight" },
-                    { "co_gun_mod_RussianAssaultRifle_Optics_IronSights", "co_gun_mod_OldEarthAssaultRifle_Optics_IronSights" },
-                    { "co_gun_mod_RussianAssaultRifle_Mag_Tactical", "co_gun_mod_OldEarthAssaultRifle_Mag_Tactical" },
-                    { "co_gun_mod_RussianAssaultRifle_Mag_Small", "co_gun_mod_OldEarthAssaultRifle_Mag_Small" },
-                    { "co_gun_mod_RussianAssaultRifle_Mag_Drum", "co_gun_mod_OldEarthAssaultRifle_Mag_Drum" },
-                    { "co_gun_mod_RussianAssaultRifle_Mag_ArmorPiercing", "co_gun_mod_OldEarthAssaultRifle_Mag_ArmorPiercing" },
-                    { "co_gun_mod_RussianAssaultRifle_Grip_Tactical", "co_gun_mod_OldEarthAssaultRifle_Grip_Tactical" },
-                    { "co_gun_mod_RussianAssaultRifle_Grip_Ergonomic", "co_gun_mod_OldEarthAssaultRifle_Grip_Ergonomic" },
-                    { "co_gun_mod_RussianAssaultRifle_Muzzle_Suppressor", "co_gun_mod_OldEarthAssaultRifle_Muzzle_Suppressor" },
-                    { "co_gun_mod_RussianAssaultRifle_Muzzle_MuzzleBrake", "co_gun_mod_OldEarthAssaultRifle_Muzzle_MuzzleBrake" },
-                    { "co_gun_mod_RussianAssaultRifle_Barrel_Short", "co_gun_mod_OldEarthAssaultRifle_Barrel_Short" },
-                    {"co_gun_mod_RussianHuntingRifle_Internal_HairTrigger" ,"co_gun_mod_OldEarthHuntingRifle_Internal_HairTrigger"},
-                    {"co_gun_mod_RussianHuntingRifle_Internal_HighPowered" ,"co_gun_mod_OldEarthHuntingRifle_Internal_HighPowered"},
-                    {"co_gun_mod_RussianHuntingRifle_Internal_HighVelocity" ,"co_gun_mod_OldEarthHuntingRifle_Internal_HighVelocity"},
-                    {"co_gun_mod_RussianHuntingRifle_Laser_LaserSight" ,"co_gun_mod_OldEarthHuntingRifle_Laser_LaserSight"},
-                    {"co_gun_mod_RussianHuntingRifle_Mag_ArmorPiercing" ,"co_gun_mod_OldEarthHuntingRifle_Mag_ArmorPiercing"},
-                    {"co_gun_mod_RussianHuntingRifle_Mag_Small" ,"co_gun_mod_OldEarthHuntingRifle_Mag_Small"},
-                    {"co_gun_mod_RussianHuntingRifle_Mag_Standard" ,"co_gun_mod_OldEarthHuntingRifle_Mag_Standard"},
-                    { "co_gun_mod_Shotty_Mag_L", "co_gun_mod_Shotty_Mag_Large" },
-                    { "co_gun_mod_Sidestar_Mag_L", "co_gun_mod_Sidestar_Mag_Large" },
-                    { "co_gun_mod_Tombstone_Mag_L", "co_gun_mod_Tombstone_Mag_Large" },
-                    { "co_gun_mod_UrbanEagle_Mag_L", "co_gun_mod_UrbanEagle_Mag_Large" },
-                    { "co_gun_mod_XM2311_Mag_L", "co_gun_mod_XM2311_Mag_Large" },
-
-                };
-
+                var comap = gen_upgradegenerator_utils.GetCOMap();
                 foreach (var weapon in Weapons) {
                     foreach (var objmod in env.LoadOrder[0].Mod.ObjectModifications)
                     {
@@ -452,7 +378,7 @@ namespace FrankyCLI
                                     BaseWeaponModID = objmod.EditorID,
                                     BaseConstructableEditorId = coid,
                                     WeaponName = weapon,
-                                    AttachPoint = getAttachPoint(objmod.AttachPoint.FormKey.ToString()),
+                                    AttachPoint = gen_upgradegenerator_utils.getAttachPoint(objmod.AttachPoint.FormKey.ToString()),
                                     formKey = objmod.FormKey
                                 };
                                 UpgradeLib.Add(objmod.EditorID, upgrade);
@@ -513,17 +439,15 @@ namespace FrankyCLI
                         {
                             if (stat.Value.AllowedAttachPoints.Contains(UpgradeLib[upgrade.Key].AttachPoint))
                             {
-                                for (int i = 0; i < StatLib[stat.Key].StepCount; i++)
+                                for (int i = 0; i < StatLib[stat.Key].LevelStyle.StepCount; i++)
                                 {
-                                    decimal amount = StatLib[stat.Key].Default + (i * StatLib[stat.Key].Step);
-                                    Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key + " " + amount);
-                                    CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], amount, levelledlist, StatLib[stat.Key].startLevel + (i * StatLib[stat.Key].LevelPerStep));
+                                    Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
+                                    CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist, StatLib[stat.Key].LevelStyle.startLevel + (i * StatLib[stat.Key].LevelStyle.LevelPerStep),i);
                                 }
                             }
                         }
 
                     }
-
                     //Add new Upgrade to weapon list
                     foreach (var lvl in myMod.LeveledItems)
                     {
@@ -577,481 +501,8 @@ namespace FrankyCLI
             foreach(var miss in MissingCOs)
             {
                 Console.WriteLine(miss);
-            }
-
-            
-            
+            }            
             return 0;
-        }
-
-        public static Dictionary<string, List<string>> rtfpsettings = new Dictionary<string, List<string>>();
-        public static void AddOModToUpgradeInclude(string upgradelist, WeaponModification weaponModification, string Weapon, int level)
-        {
-            if (rtfpsettings.ContainsKey(Weapon))
-            {
-                rtfpsettings[Weapon].Add("incl_add(AvontechWeaponUpgrades.esm~" + weaponModification.FormKey.ID.ToString("X") + ":"+ level + ":1:1)|");
-            }
-            else
-            {
-                rtfpsettings.Add(Weapon, new List<string>());
-                rtfpsettings[Weapon].Add("incl_add(AvontechWeaponUpgrades.esm~" + weaponModification.FormKey.ID.ToString("X") + ":"+ level + ":1:1)|");
-            }
-        }
-
-        public static int DamageMode = 0;//0 Energy , 1 EM, 2 Phys
-
-        public static Dictionary<string,BaseUpgrade> UpgradeLib = new Dictionary<string, BaseUpgrade>();
-        public static Dictionary<string, BonusStats> StatLib = new Dictionary<string, BonusStats>();
-
-        public static string getAttachPoint(string form)
-        {
-            //We merge some groups here
-            switch (form)
-            {
-                case "02249C:Starfield.esm":
-                    return "Barrel";
-                case "02249D:Starfield.esm":
-                    return "Barrel";
-                case "02EE28:Starfield.esm":
-                    return "Laser";
-                case "14D08A:Starfield.esm":
-                    return "Laser";
-                case "0191EE:Starfield.esm":
-                    return "Laser";
-                case "149CA8:Starfield.esm":
-                    return "Receiver";
-                case "01BC46:Starfield.esm":
-                    return "Receiver";
-                case "024004:Starfield.esm":
-                    return "Receiver";
-                case "02249F:Starfield.esm":
-                    return "Grip";
-                case "0849A6:Starfield.esm":
-                    return "Grip";
-                case "147AFE:Starfield.esm":
-                    return "Grip";
-                case "05D4D7:Starfield.esm":
-                    return "Magazine";
-                case "022499:Starfield.esm":
-                    return "Optic";
-            }
-            Console.WriteLine("Missing Attach Form:" + form);
-            return "";
-        }
-
-        public static void BuildStatLib()
-        {
-            if (DamageMode == 0)
-            {
-                StatLib.Add("EnergyMultAndAdd", new BonusStats()
-                {
-                    Type = "KeywordFloat",
-                    Percentage = true,
-                    Keyword = 0x00060A81,
-                    StatName = "Energy Damage",
-                    property = Weapon.Property.DamageTypeValue,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                    Default = 0.1M,
-                    Step = 0.05M,
-                    StepCount = 10,
-                    startLevel = 10,
-                    LevelPerStep = 10,
-                    AllowedAttachPoints = new List<string>() { "Receiver" }
-                });
-            }
-
-            if (DamageMode == 1)
-            {
-                StatLib.Add("EMMultAndAdd", new BonusStats()
-                {
-                    Type = "KeywordFloat",
-                    Percentage = true,
-                    Keyword = 0x00023190,
-                    StatName = "EM Damage",
-                    property = Weapon.Property.DamageTypeValue,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                    Default = 0.1M,
-                    Step = 0.05M,
-                    StepCount = 10,
-                    startLevel = 10,
-                    LevelPerStep = 10,
-                    AllowedAttachPoints = new List<string>() { "Receiver" }
-                });
-            }
-
-            if (DamageMode == 2 || DamageMode == -1)
-            {
-                StatLib.Add("PhysicalMultAndAdd", new BonusStats()
-                {
-                    Type = "Float",
-                    Percentage = true,
-                    StatName = "Physical Damage",
-                    property = Weapon.Property.DamagePhysical,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                    Default = 0.1M,
-                    Step = 0.05M,
-                    StepCount = 10,
-                    startLevel = 10,
-                    LevelPerStep = 10,
-                    AllowedAttachPoints = new List<string>() { "Receiver" }
-                });
-            }
-
-            StatLib.Add("EMFlat", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = false,
-                Keyword = 0x00023190,
-                StatName = "EM Damage",
-                property = Weapon.Property.DamageTypeValue,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 10,
-                Step = 5,
-                StepCount = 10,
-                startLevel = 25,
-                LevelPerStep = 8,
-                AllowedAttachPoints = new List<string>() { "Barrel" }
-            });
-
-            if (DamageMode != 1)
-            {
-                StatLib.Add("EnergyFlat", new BonusStats()
-                {
-                    Type = "KeywordFloat",
-                    Percentage = false,
-                    Keyword = 0x00060A81,
-                    StatName = "Energy Damage",
-                    property = Weapon.Property.DamageTypeValue,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                    Default = 10,
-                    Step = 5,
-                    StepCount = 10,
-                    startLevel = 25,
-                    LevelPerStep = 8,
-                    AllowedAttachPoints = new List<string>() { "Barrel" }
-                });
-                StatLib.Add("PhysicalAdd", new BonusStats()
-                {
-                    Type = "Float",
-                    Percentage = false,
-                    StatName = "Physical Damage",
-                    property = Weapon.Property.DamagePhysical,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                    Default = 10,
-                    Step = 5,
-                    StepCount = 10,
-                    startLevel = 25,
-                    LevelPerStep = 8,
-                    AllowedAttachPoints = new List<string>() { "Barrel" }
-                });
-                StatLib.Add("CryoAdd", new BonusStats()
-                {
-                    Type = "KeywordFloat",
-                    Percentage = false,
-                    Keyword = 0x001E08BC,
-                    StatName = "Cryo Damage",
-                    property = Weapon.Property.DamageTypeValue,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                    Default = 10,
-                    Step = 5,
-                    StepCount = 10,
-                    startLevel = 25,
-                    LevelPerStep = 8,
-                    AllowedAttachPoints = new List<string>() { "Barrel" }
-                });
-                StatLib.Add("ShockAdd", new BonusStats()
-                {
-                    Type = "KeywordFloat",
-                    Percentage = false,
-                    Keyword = 0x001E08BB,
-                    StatName = "Shock Damage",
-                    property = Weapon.Property.DamageTypeValue,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                    Default = 10,
-                    Step = 5,
-                    StepCount = 10,
-                    startLevel = 25,
-                    LevelPerStep = 8,
-                    AllowedAttachPoints = new List<string>() { "Barrel" }
-                });
-                StatLib.Add("ToxicFlat", new BonusStats()
-                {
-                    Type = "KeywordFloat",
-                    Percentage = false,
-                    Keyword = 0x00000B79,
-                    StatName = "Toxic Damage",
-                    property = Weapon.Property.DamageTypeValue,
-                    floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                    Default = 10,
-                    Step = 5,
-                    StepCount = 10,
-                    startLevel = 25,
-                    LevelPerStep = 8,
-                    AllowedAttachPoints = new List<string>() { "Barrel" }
-                });
-            }
-
-            StatLib.Add("AmmoCapacityAdd", new BonusStats()
-            {
-                Type = "Int",
-                Percentage = false,
-                StatName = "Ammo Capacity",
-                property = Weapon.Property.AmmoCapacity,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 6,
-                Step = 2,
-                StepCount = 10,
-                startLevel = 5,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Magazine" }
-            });
-            StatLib.Add("ProjectileAdd", new BonusStats()
-            {
-                Type = "Int",
-                Percentage = false,
-                StatName = "Projectiles",
-                property = Weapon.Property.ProjectileCount,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 1,
-                Step = 1,
-                StepCount = 5,
-                startLevel = 50,
-                LevelPerStep = 10,
-                AllowedAttachPoints = new List<string>() { "Receiver" }
-            });
-            StatLib.Add("AmmoCapacityMultAndAdd", new BonusStats()
-            {
-                Type = "Float",
-                Percentage = true,
-                StatName = "Ammo Capacity",
-                property = Weapon.Property.AmmoCapacity,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                Default = 0.1M,
-                Step = 0.1M,
-                StepCount = 5,
-                startLevel = 5,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Magazine" }
-            });
-            StatLib.Add("StabilityMultAndAdd", new BonusStats()
-            {
-                Type = "Float",
-                Percentage = true,
-                StatName = "Spread",
-                property = Weapon.Property.AimModelConeMaxDegrees,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                Default = -0.5M,
-                Step = -0.05M,
-                StepCount = 5,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Grip" }
-            });
-            StatLib.Add("CritDamageMultAndAdd", new BonusStats()
-            {
-                Type = "Float",
-                Percentage = true,
-                StatName = "Crit Damage",
-                property = Weapon.Property.CriticalDamageMultiplier,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                Default = 0.5M,
-                Step = 0.10M,
-                StepCount = 5,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Optic" }
-            });
-            StatLib.Add("BashDamageMultAndAdd", new BonusStats()
-            {
-                Type = "Float",
-                Percentage = true,
-                StatName = "Bash Damage",
-                property = Weapon.Property.BashDamage,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.MultAndAdd,
-                Default = 1.0M,
-                Step = 0.50M,
-                StepCount = 5,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Grip" }
-            });
-            StatLib.Add("SilentSet", new BonusStats()
-            {
-                Type = "Enum",
-                Percentage = false,
-                StatName = "Silencer",
-                property = Weapon.Property.SoundLevel,
-                Default = 2,
-                Step = 0,
-                startLevel = 20,
-                LevelPerStep = 1,
-                AllowedAttachPoints = new List<string>() { "Receiver" }
-            });
-            StatLib.Add("02MultAndAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                StatName = "02 Costs",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x0022F93D,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = -0.35M,
-                Step = -0.05M,
-                StepCount = 5,
-                startLevel = 5,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Grip" }
-            });
-            StatLib.Add("BonusXPAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                StatName = "Bonus XP",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x002D873C,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 0.10M,
-                Step = 0.05M,
-                StepCount = 5,
-                startLevel = 5,
-                LevelPerStep = 15,
-                AllowedAttachPoints = new List<string>() { "Grip" }
-            });
-            StatLib.Add("ReloadSpeedAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                StatName = "Reload Speed",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x002D87C4,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 0.20M,
-                Step = 0.05M,
-                StepCount = 5,
-                startLevel = 5,
-                LevelPerStep = 15,
-                AllowedAttachPoints = new List<string>() { "Magazine" }
-            });
-            StatLib.Add("DamageReductionAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                StatName = "Damage Taken",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x0030397A,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = -0.10M,
-                Step = -0.05M,
-                StepCount = 5,
-                startLevel = 5,
-                LevelPerStep = 15,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("HealRateAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = false,
-                StatName = "Health Regen",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x000002D7,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 0.10M,
-                Step = 0.05M,
-                StepCount = 2,
-                startLevel = 30,
-                LevelPerStep = 10,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("CarryWeightAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = false,
-                StatName = "Carry Weight",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x000002DC,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 15,
-                Step = 5,
-                StepCount = 10,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("JumpAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                StatName = "Jump Strength",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x00040CDC,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 2M,
-                Step = 1M,
-                StepCount = 2,
-                startLevel = 2,
-                LevelPerStep = 15,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("MovementAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                StatName = "Movement Speed",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x000002DA,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 0.10M,
-                Step = 0.05M,
-                StepCount = 5,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("StealthLightDetectionAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                Keyword = 0x002EC4F5,
-                StatName = "Stealth Visibility",
-                property = Weapon.Property.ActorValue,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = -0.2M,
-                Step = -0.1M,
-                StepCount = 3,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("StealthMovementDetectionAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = true,
-                Keyword = 0x002EC4ED,
-                StatName = "Stealth Tracking",
-                property = Weapon.Property.ActorValue,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = -0.2M,
-                Step = -0.1M,
-                StepCount = 3,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Laser" }
-            });
-            StatLib.Add("IncreaseHealthAdd", new BonusStats()
-            {
-                Type = "KeywordFloat",
-                Percentage = false,
-                StatName = "Health",
-                property = Weapon.Property.ActorValue,
-                Keyword = 0x000002D4,
-                floatFunctionType = ObjectModProperty.FloatFunctionType.Add,
-                Default = 50M,
-                Step = 50M,
-                StepCount = 5,
-                startLevel = 2,
-                LevelPerStep = 5,
-                AllowedAttachPoints = new List<string>() { "Grip" }
-            });            
         }
     }
 }
