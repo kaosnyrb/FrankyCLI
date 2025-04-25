@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI
 {
+    public class UpdateSetRequest
+    {
+        public int DamageMode;
+        public string StatLibFile;
+        public List<string> Weapons;
+    }
+
     public class BaseUpgrade
     {
         public string WeaponName;
@@ -374,13 +381,13 @@ namespace FrankyCLI
 
         }
 
-        public static Dictionary<string, StatSet> BuildStatLib()
+        public static Dictionary<string, StatSet> BuildStatLib(string statlibfile)
         {
             BuildStatBank();
             BuildLevelStyles();
             
             var StatLib = new Dictionary<string, StatSet>();
-            StatLib = YamlImporter.getObjectFrom<Dictionary<string, StatSet>>("StatLib.yml");
+            StatLib = YamlImporter.getObjectFrom<Dictionary<string, StatSet>>(statlibfile);
             return StatLib;
         }
         public static string getDiscriptiveLevel(int level, string Theme)

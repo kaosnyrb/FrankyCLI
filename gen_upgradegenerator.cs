@@ -314,8 +314,6 @@ namespace FrankyCLI
             string form = args[4];
             string datapath = "";
             
-            DamageMode = int.Parse(prefix);
-            StatLib = gen_upgradegenerator_utils.BuildStatLib();
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
@@ -339,31 +337,11 @@ namespace FrankyCLI
                         }
                     }
                 }
-                List<string> Weapons = new List<string>();
-                if (DamageMode == -1)//Test
-                {
-                    Weapons = new List<string>() { "Beowulf" };
-                }
 
-                if (DamageMode == 0)//Energy
-                {
-                    Weapons = new List<string>() { "ArcWelder", "BigBang", "Equinox", "InflictorPistol", "InflictorRifle", "Novalight", "Orion", "Solstice" };
-                }
-                if (DamageMode == 1)//EM
-                {
-                    Weapons = new List<string>() { "Novablast", };//Novablast
-                }
-
-                if(DamageMode == 2)//Phys
-                {
-                    Weapons = new List<string>() { "AA99", "AutoRivet", "Beowulf",
-                    "Breach", "Bridger","Coachman", "DrumBeat","Eon","Grendel","HardTarget",
-                    "Kodama","Kraken","Lawgiver","M1919","Maelstrom","MagPulse","MagShear","MagShot",
-                    "MagSniper","Magstorm","Microgun","Pacifier","PumpShotgun","Rattler","Razorback","Regulator",
-                    "Rocketlauncher","RussianAssaultRifle","RussianHuntingRifle","Shotty","Sidestar","Tombstone","UrbanEagle",
-                    "XM2311"};
-                }
-
+                var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
+                DamageMode = request.DamageMode;
+                StatLib = gen_upgradegenerator_utils.BuildStatLib(request.StatLibFile);
+                List<string> Weapons = request.Weapons;
                 //Some contstructable objects don't follow the name format so we manually map them
                 var comap = gen_upgradegenerator_utils.GetCOMap();
                 foreach (var weapon in Weapons) {
@@ -413,12 +391,64 @@ namespace FrankyCLI
                     }
                     if (!foundweaponlist)
                     {
-                        myMod.LeveledItems.Add(new LeveledItem(myMod)
+                        LeveledItem lvlwi = new LeveledItem(myMod)
                         {
                             EditorID = "atbb_" + upgrade.Value.WeaponName,
                             Entries = new ExtendedList<LeveledItemEntry>(),
                             Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
-                        });
+                        };
+                        myMod.LeveledItems.Add(lvlwi);
+                        //Create a Book that gets built then spawns from the Levelled list
+                        var book = new Book(myMod)
+                        {
+                            EditorID = "atbb_lvlbook" + upgrade.Value.WeaponName,
+                            ObjectBounds = new ObjectBounds(),
+                            Transforms = new Transforms(),
+                            Name = upgrade.Value.WeaponName + " Blacksite Blueprint",
+                            Model = new Model()
+                            {
+                                File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("avontech\\warpblueprint.nif"),
+                            },
+                            Description = "Blueprint for a Avontech Blacksite " + upgrade.Value.WeaponName + " weapon mod.",
+                            Value = 500,
+                            Weight = 0,
+                            VirtualMachineAdapter = new VirtualMachineAdapter()
+                            {
+                                Scripts = new ExtendedList<ScriptEntry>()
+                                {
+                                    new ScriptEntry()
+                                    {
+                                        Name = "atbb_additem",
+                                        Properties = new ExtendedList<ScriptProperty>()
+                                        {
+                                            new ScriptObjectProperty()
+                                            {
+                                                Name = "LevelledItem",
+                                                Object = lvlwi.ToLink<IStarfieldMajorRecordGetter>(),
+                                            }
+                                        }
+
+                                    }
+                                }
+                            },
+                        };
+                        myMod.Books.Add(book);
+                        //Create a CO for the Book
+                        IFormLinkNullable<IKeywordGetter> WorkbenchIndustrialKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x000AA209).ToNullableLink<IKeywordGetter>();//WorkbenchIndustrialKeyword [KYWD:000AA209]
+                        IFormLinkNullable<IItemGetter> Iron = new FormKey(env.LoadOrder[0].ModKey, 0x000057C7).ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
+                        var co = new ConstructibleObject(myMod)
+                        {
+                            EditorID = "atbb_lvlbookco_" + upgrade.Value.WeaponName,
+                            Description = "Create a Avontech Blacksite Blueprint for the " + upgrade.Value.WeaponName,
+                            CreatedObject = book.ToNullableLink<IConstructibleObjectTargetGetter>(),
+                            WorkbenchKeyword = WorkbenchIndustrialKeyword,
+                            AmountProduced = 1,
+                            LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions
+                        };
+                        co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { 
+                            new ConstructibleObjectComponent() { Component = Iron, Count = 1 } 
+                        };
+                        myMod.ConstructibleObjects.Add(co);
                     }
                     //Add the levelled list for the upgrade/weapon pairing - used in crafting
                     myMod.LeveledItems.Add(new LeveledItem(myMod)
