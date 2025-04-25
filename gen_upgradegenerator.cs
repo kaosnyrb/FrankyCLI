@@ -17,6 +17,12 @@ namespace FrankyCLI
 {
     public class gen_upgradegenerator
     {
+
+        //DamageMode Groups
+        //0 Energy
+        //1 EM
+        //2 Phys
+
         public static int DamageMode = 0;//0 Energy , 1 EM, 2 Phys
 
         public static List<string> MissingCOs = new List<string>();
@@ -141,8 +147,9 @@ namespace FrankyCLI
                 //The name of the OMOD contains all it's stats.
                 string omodName = gen_upgradegenerator_utils.getDiscriptiveLevel(level, stats.Theme) + " " + stats.Name + " " + originalmod.Name;
                 string Description = stats.Description;
-                foreach (var stat in stats.stats)
+                foreach (var statname in stats.stats)
                 {
+                    var stat = gen_upgradegenerator_utils.StatBank[statname];
                     decimal amount = stat.Default + (step * stat.Step);
                     string amountstr = amount.ToString();
                     if (stat.Percentage) { 
@@ -308,7 +315,7 @@ namespace FrankyCLI
             string datapath = "";
             
             DamageMode = int.Parse(prefix);
-            StatLib = gen_upgradegenerator_utils.BuildStatLib(DamageMode);
+            StatLib = gen_upgradegenerator_utils.BuildStatLib();
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
@@ -435,18 +442,21 @@ namespace FrankyCLI
                     }*/
                     foreach (var stat in StatLib)
                     {
-                        if (stat.Value.AllowedAttachPoints != null)
+                        if (stat.Value.DamageMode == -1 || stat.Value.DamageMode == DamageMode || DamageMode == -1)
                         {
-                            if (stat.Value.AllowedAttachPoints.Contains(UpgradeLib[upgrade.Key].AttachPoint))
+                            if (stat.Value.AllowedAttachPoints != null)
                             {
-                                for (int i = 0; i < StatLib[stat.Key].LevelStyle.StepCount; i++)
+                                if (stat.Value.AllowedAttachPoints.Contains(UpgradeLib[upgrade.Key].AttachPoint))
                                 {
-                                    Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
-                                    CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist, StatLib[stat.Key].LevelStyle.startLevel + (i * StatLib[stat.Key].LevelStyle.LevelPerStep),i);
+                                    var levelStyle = gen_upgradegenerator_utils.levelStyles[StatLib[stat.Key].LevelStyle];
+                                    for (int i = 0; i < levelStyle.StepCount; i++)
+                                    {
+                                        Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
+                                        CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist, levelStyle.startLevel + (i * levelStyle.LevelPerStep), i);
+                                    }
                                 }
                             }
                         }
-
                     }
                     //Add new Upgrade to weapon list
                     foreach (var lvl in myMod.LeveledItems)

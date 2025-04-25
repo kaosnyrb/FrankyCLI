@@ -31,11 +31,12 @@ namespace FrankyCLI
         public string Name;
         public string Description;
 
-        public LevelStyle LevelStyle;
+        public string LevelStyle;
+        public int DamageMode = -1;//-1 all
 
         public string Theme = "Miltec";
 
-        public List<BonusStats> stats;
+        public List<string> stats;
         public List<string> AllowedAttachPoints;
     }
 
@@ -94,7 +95,7 @@ namespace FrankyCLI
         public static void BuildStatBank()
         {
             //Keep the scaling in one place.
-            StatBank.Add("+Physical%", new BonusStats()
+            StatBank.Add("percent_phys", new BonusStats()
             {
                 Type = "Float",
                 Percentage = true,
@@ -104,7 +105,7 @@ namespace FrankyCLI
                 Default = 0.1M,
                 Step = 0.05M,
             });
-            StatBank.Add("+Physical", new BonusStats()
+            StatBank.Add("flat_phys", new BonusStats()
             {
                 Type = "Float",
                 Percentage = false,
@@ -114,7 +115,7 @@ namespace FrankyCLI
                 Default = 4,
                 Step = 4,
             });
-            StatBank.Add("Projectiles+", new BonusStats()
+            StatBank.Add("flat_projectiles", new BonusStats()
             {
                 Type = "Int",
                 Percentage = false,
@@ -124,7 +125,7 @@ namespace FrankyCLI
                 Default = 1,
                 Step = 1,
             });
-            StatBank.Add("AmmoCapacity+", new BonusStats()
+            StatBank.Add("flat_ammo", new BonusStats()
             {
                 Type = "Int",
                 Percentage = false,
@@ -134,7 +135,7 @@ namespace FrankyCLI
                 Default = 2,
                 Step = 2,
             });
-            StatBank.Add("+AmmoCapacity%", new BonusStats()
+            StatBank.Add("percent_ammo", new BonusStats()
             {
                 Type = "Float",
                 Percentage = true,
@@ -144,7 +145,7 @@ namespace FrankyCLI
                 Default = 0.1M,
                 Step = 0.1M,
             });
-            StatBank.Add("Spread-", new BonusStats()
+            StatBank.Add("percent_spread_neg", new BonusStats()
             {
                 Type = "Float",
                 Percentage = true,
@@ -154,7 +155,7 @@ namespace FrankyCLI
                 Default = -0.5M,
                 Step = -0.05M,
             });
-            StatBank.Add("CritDamage+", new BonusStats()
+            StatBank.Add("flat_critdamage", new BonusStats()
             {
                 Type = "Float",
                 Percentage = true,
@@ -164,7 +165,7 @@ namespace FrankyCLI
                 Default = 0.5M,
                 Step = 0.10M,
             });
-            StatBank.Add("BashDamage+", new BonusStats()
+            StatBank.Add("flat_bashdamage", new BonusStats()
             {
                 Type = "Float",
                 Percentage = true,
@@ -174,7 +175,7 @@ namespace FrankyCLI
                 Default = 1.0M,
                 Step = 0.50M,
             });
-            StatBank.Add("DamageTaken-", new BonusStats()
+            StatBank.Add("percent_damagetaken", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -185,7 +186,7 @@ namespace FrankyCLI
                 Default = -0.10M,
                 Step = -0.05M,
             });
-            StatBank.Add("+Energy%", new BonusStats()
+            StatBank.Add("percent_energy", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -196,7 +197,7 @@ namespace FrankyCLI
                 Default = 0.1M,
                 Step = 0.05M,
             });
-            StatBank.Add("+EM%", new BonusStats()
+            StatBank.Add("percent_em", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -207,7 +208,7 @@ namespace FrankyCLI
                 Default = 0.1M,
                 Step = 0.05M,
             });
-            StatBank.Add("+EM", new BonusStats()
+            StatBank.Add("flat_em", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = false,
@@ -218,7 +219,7 @@ namespace FrankyCLI
                 Default = 10,
                 Step = 5,
             });
-            StatBank.Add("+EnergyDamage", new BonusStats()
+            StatBank.Add("flat_energy", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = false,
@@ -229,7 +230,7 @@ namespace FrankyCLI
                 Default = 10,
                 Step = 5,
             });
-            StatBank.Add("+Silent", new BonusStats()
+            StatBank.Add("silent", new BonusStats()
             {
                 Type = "Enum",
                 Percentage = false,
@@ -238,7 +239,7 @@ namespace FrankyCLI
                 Default = 2,
                 Step = 0,
             });
-            StatBank.Add("pen_+O2%", new BonusStats()
+            StatBank.Add("percent_o2_negative", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -249,7 +250,7 @@ namespace FrankyCLI
                 Default = 0.35M,
                 Step = 0.05M,
             });
-            StatBank.Add("-O2%", new BonusStats()
+            StatBank.Add("percent_o2", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -260,7 +261,7 @@ namespace FrankyCLI
                 Default = -0.35M,
                 Step = -0.05M,
             });
-            StatBank.Add("+XP%", new BonusStats()
+            StatBank.Add("percent_xp", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -271,7 +272,7 @@ namespace FrankyCLI
                 Default = 0.05M,
                 Step = 0.05M,
             });
-            StatBank.Add("pen_+Reload%", new BonusStats()
+            StatBank.Add("percent_reload_negative", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -282,7 +283,7 @@ namespace FrankyCLI
                 Default = 0.20M,
                 Step = 0.05M,
             });
-            StatBank.Add("-Reload%", new BonusStats()
+            StatBank.Add("percent_reload", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -293,7 +294,7 @@ namespace FrankyCLI
                 Default = -0.20M,
                 Step = -0.05M,
             });
-            StatBank.Add("+Regen", new BonusStats()
+            StatBank.Add("flat_regen", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = false,
@@ -304,7 +305,7 @@ namespace FrankyCLI
                 Default = 0.10M,
                 Step = 0.05M,
             });
-            StatBank.Add("+CarryWeight", new BonusStats()
+            StatBank.Add("flat_carry", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = false,
@@ -315,7 +316,7 @@ namespace FrankyCLI
                 Default = 15,
                 Step = 5,
             });
-            StatBank.Add("+Jump", new BonusStats()
+            StatBank.Add("flat_jump", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -326,7 +327,7 @@ namespace FrankyCLI
                 Default = 1M,
                 Step = 0.25M,
             });
-            StatBank.Add("+Movement", new BonusStats()
+            StatBank.Add("flat_movement", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -337,7 +338,7 @@ namespace FrankyCLI
                 Default = 0.10M,
                 Step = 0.05M,
             });
-            StatBank.Add("+StealthLight", new BonusStats()
+            StatBank.Add("flat_stealth_vis", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -348,7 +349,7 @@ namespace FrankyCLI
                 Default = -0.2M,
                 Step = -0.1M,
             });
-            StatBank.Add("+StealthMovement", new BonusStats()
+            StatBank.Add("flat_stealth_move", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = true,
@@ -359,7 +360,7 @@ namespace FrankyCLI
                 Default = -0.2M,
                 Step = -0.1M,
             });
-            StatBank.Add("+Health", new BonusStats()
+            StatBank.Add("flat_hp", new BonusStats()
             {
                 Type = "KeywordFloat",
                 Percentage = false,
@@ -373,358 +374,13 @@ namespace FrankyCLI
 
         }
 
-        public static Dictionary<string, StatSet> BuildStatLib(int DamageMode)
+        public static Dictionary<string, StatSet> BuildStatLib()
         {
             BuildStatBank();
             BuildLevelStyles();
+            
             var StatLib = new Dictionary<string, StatSet>();
-            //Energy
-            if (DamageMode == 0)
-            {
-                StatLib.Add("Blazetube", new StatSet()
-                {
-                    Name = "Blazetube",
-                    Theme = "Sci",
-                    Description = "Boosts Energy output and increases base Energy damage",
-                    LevelStyle = levelStyles["25s"],
-                    AllowedAttachPoints = new List<string>() { "Barrel" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["+Energy%"],
-                        StatBank["+EnergyDamage"],
-                    }
-                });
-                StatLib.Add("Sunpierce", new StatSet()
-                {
-                    Name = "Sunpierce",
-                    Theme = "Sci",
-                    Description = "Energy-powered crits that hit like a solar flare",
-                    LevelStyle = levelStyles["Mid"],
-                    AllowedAttachPoints = new List<string>() { "Barrel" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["+Energy%"],
-                        StatBank["CritDamage+"],
-                    }
-                });
-
-            }
-            //EM
-            if (DamageMode == 1)
-            {
-                StatLib.Add("Nullspire", new StatSet()
-                {
-                    Name = "Nullspire",
-                    Theme = "Sci",
-                    Description = "Maximizes Electromagnetic damage output",
-                    LevelStyle = levelStyles["25s"],
-                    AllowedAttachPoints = new List<string>() { "Laser" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["+EM%"],
-                        StatBank["+EM"],
-                    }
-                });
-                StatLib.Add("Moonshock", new StatSet()
-                {
-                    Name = "Moonshock",
-                    Theme = "Sci",
-                    Description = "Emits stunning EM charges and grants extra XP",
-                    LevelStyle = levelStyles["25s"],
-                    AllowedAttachPoints = new List<string>() { "Laser" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["+EM"],
-                        StatBank["+XP%"],
-                    }
-                });
-            }
-            //Phys
-            if (DamageMode == 2 || DamageMode == -1)
-            {
-                StatLib.Add("Slamshot", new StatSet()
-                {
-                    Name = "Slamshot",
-                    Theme = "Miltec",
-                    Description = "Adds base Physical damage and a Percentage increase",
-                    LevelStyle = levelStyles["25s"],
-                    AllowedAttachPoints = new List<string>() { "Receiver" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["+Physical%"],
-                        StatBank["+Physical"],
-                    }
-                });
-                StatLib.Add("Frostline", new StatSet()
-                {
-                    Name = "Frostline",
-                    Theme = "Sci",
-                    Description = "Adds Physical damage and decreases reload time",
-                    LevelStyle = levelStyles["Early"],
-                    AllowedAttachPoints = new List<string>() { "Receiver" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["+Physical"],
-                        StatBank["-Reload%"],
-                    }
-                });
-                StatLib.Add("Twilightbolt", new StatSet()
-                {
-                    Name = "Twilightbolt",
-                    Theme = "Exp",
-                    Description = "Critical strikes hit harder with added physical base",
-                    LevelStyle = levelStyles["50s"],
-                    AllowedAttachPoints = new List<string>() { "Barrel" },
-                    stats = new List<BonusStats>()
-                    {
-                        StatBank["CritDamage+"],
-                        StatBank["+Physical"],
-                    }
-                });
-            }
-            StatLib.Add("Flechette", new StatSet()
-            {
-                Name = "Flechette",
-                Theme = "Miltec",
-                Description = "Adds Physical damage Percentage and extra projectiles",
-                LevelStyle = levelStyles["Basic"],
-                AllowedAttachPoints = new List<string>() { "Receiver" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Physical%"],
-                        StatBank["Projectiles+"],
-                    }
-            });
-            StatLib.Add("Stockpile", new StatSet()
-            {
-                Name = "Stockpile",
-                Theme = "Miltec",
-                Description = "Adds extra capacity to the magazine",
-                LevelStyle = levelStyles["Early"],
-                AllowedAttachPoints = new List<string>() { "Magazine" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["AmmoCapacity+"]
-                    }
-            });
-            StatLib.Add("Holdfast", new StatSet()
-            {
-                Name = "Holdfast",
-                Theme = "Exp",
-                Description = "Increases Stability",
-                LevelStyle = levelStyles["Basic"],
-                AllowedAttachPoints = new List<string>() { "Grip" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["Spread-"]
-                    }
-            });
-            StatLib.Add("Skybind", new StatSet()
-            {
-                Name = "Skybind",
-                Theme = "Exp",
-                Description = "Enhances vertical and horizontal mobility",
-                LevelStyle = levelStyles["Early"],
-                AllowedAttachPoints = new List<string>() { "Grip" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Jump"],
-                        StatBank["+Movement"],
-                    }
-            });
-            StatLib.Add("Deadshot", new StatSet()
-            {
-                Name = "Deadshot",
-                Theme = "Corp",
-                Description = "Increases Critical Damage",
-                LevelStyle = levelStyles["50s"],
-                AllowedAttachPoints = new List<string>() { "Optic" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["CritDamage+"]
-                    }
-            });
-            StatLib.Add("Bastion", new StatSet()
-            {
-                Name = "Bastion",
-                Theme = "Sci",
-                Description = "Reduces damage taken",
-                LevelStyle = levelStyles["50s"],
-                AllowedAttachPoints = new List<string>() { "Laser" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["DamageTaken-"],
-                    }
-            });
-            StatLib.Add("Cryolens", new StatSet()
-            {
-                Name = "Cryolens",
-                Theme = "Sci",
-                Description = "Enhances EM output while reducing visabilty for stealth",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Optic" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+EM"],
-                        StatBank["+StealthLight"],
-                    }
-            });
-            StatLib.Add("Stormrack", new StatSet()
-            {
-                Name = "Stormrack",
-                Theme = "Sci",
-                Description = "Greatly expands both base and scalable ammo capacity",
-                LevelStyle = levelStyles["Basic"],
-                AllowedAttachPoints = new List<string>() { "Magazine" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["AmmoCapacity+"],
-                        StatBank["+AmmoCapacity%"],
-                    }
-            });
-            StatLib.Add("Stormvein", new StatSet()
-            {
-                Name = "Stormvein",
-                Theme = "Sci",
-                Description = "Increases mag size and reloads faster",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Magazine" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+AmmoCapacity%"],
-                        StatBank["-Reload%"],
-                    }
-            });
-            StatLib.Add("Lightcloak", new StatSet()
-            {
-                Name = "Lightcloak",
-                Theme = "Corp",
-                Description = "Cloaks in shadows and earns bonus experience",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Grip" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+StealthLight"],
-                        StatBank["+XP%"],
-                    }
-            });
-            StatLib.Add("Neurogrip", new StatSet()
-            {
-                Name = "Neurogrip",
-                Theme = "Corp",
-                Description = "Increases health and recovery over time",
-                LevelStyle = levelStyles["Early"],
-                AllowedAttachPoints = new List<string>() { "Grip" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Health"],
-                        StatBank["+Regen"],
-                    }
-            });
-            StatLib.Add("Thunderdrop", new StatSet()
-            {
-                Name = "Thunderdrop",
-                Theme = "Corp",
-                Description = "Adds extra rounds and allows multi-projectile shots",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Magazine" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["AmmoCapacity+"],
-                        StatBank["Projectiles+"],
-                    }
-            });
-            StatLib.Add("Starflare", new StatSet()
-            {
-                Name = "Starflare",
-                Theme = "Corp",
-                Description = "Radiates high-output energy and damage",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Laser" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+EnergyDamage"],
-                        StatBank["+Energy%"],
-                    }
-            });
-            StatLib.Add("Thornbolt", new StatSet()
-            {
-                Name = "Thornbolt",
-                Theme = "Exp",
-                Description = "Piercing shots that tear through enemies",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Barrel" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Physical"],
-                        StatBank["BashDamage+"],
-                    }
-            });
-            StatLib.Add("Driftstock", new StatSet()
-            {
-                Name = "Driftstock",
-                Theme = "Exp",
-                Description = "Nimble footwork with heavy hauls",
-                LevelStyle = levelStyles["Mid"],
-                AllowedAttachPoints = new List<string>() { "Grip" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Movement"],
-                        StatBank["+CarryWeight"],
-                    }
-            });
-            StatLib.Add("Starfang", new StatSet()
-            {
-                Name = "Starfang",
-                Theme = "Sci",
-                Description = "Balanced physical and Energy hybrid output",
-                LevelStyle = levelStyles["50s"],
-                AllowedAttachPoints = new List<string>() { "Receiver" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Physical"],
-                        StatBank["+EnergyDamage"],
-                    }
-            });
-            StatLib.Add("Mistveil", new StatSet()
-            {
-                Name = "Mistveil",
-                Theme = "Corp",
-                Description = "Improved O2 usage with cloaked movement",
-                LevelStyle = levelStyles["50s"],
-                AllowedAttachPoints = new List<string>() { "Optic" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["-O2%"],
-                        StatBank["+StealthMovement"],
-                    }
-            });
-            StatLib.Add("Howlround", new StatSet()
-            {
-                Name = "Howlround",
-                Theme = "Miltec",
-                Description = "More bullets, more stamina",
-                LevelStyle = levelStyles["25s"],
-                AllowedAttachPoints = new List<string>() { "Magazine" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["-O2%"],
-                        StatBank["+AmmoCapacity%"],
-                    }
-            });
-            StatLib.Add("Coretap", new StatSet()
-            {
-                Name = "Coretap",
-                Theme = "Miltec",
-                Description = "Slowly regenerates health and increases carrying capacity",
-                LevelStyle = levelStyles["Basic"],
-                AllowedAttachPoints = new List<string>() { "Grip" },
-                stats = new List<BonusStats>()
-                    {
-                        StatBank["+Regen"],
-                        StatBank["+CarryWeight"],
-                    }
-            });
+            StatLib = YamlImporter.getObjectFrom<Dictionary<string, StatSet>>("StatLib.yml");
             return StatLib;
         }
         public static string getDiscriptiveLevel(int level, string Theme)
