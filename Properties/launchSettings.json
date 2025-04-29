@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "AvontechBlacksiteBlueprints upgradegenerator test.yaml 0 0"
+      "commandLineArgs": "AvontechBlacksiteBlueprints upgradegenerator Data/Weapons/test.yaml 0 0"
     }
   }
 }

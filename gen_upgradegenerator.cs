@@ -83,6 +83,8 @@ namespace FrankyCLI
                     }
                     if (originalco == null)
                     {
+                        //We can't find the original construtable object. Here would be the point to make a new one.
+
                         Console.WriteLine("Missing CO: " + upgrade.BaseConstructableEditorId);
                         if (!MissingCOs.Contains(upgrade.BaseConstructableEditorId))
                         {
@@ -128,8 +130,7 @@ namespace FrankyCLI
                     Properties = originalmod.Properties,
                 };
                 //We need to build the UI based on the weapon stats.
-                string ingameName = upgrade.WeaponName + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(level,stats.Theme) + " " + stats.Name + " "+ originalmod.Name;
-
+                string ingameName = upgrade.WeaponName + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + stats.Name + " "+ originalmod.Name;
 
                 //Remove the DontShowInUI [KYWD:00374EFA]
                 for (int i = 0; i < omod.Properties.Count; i++)
@@ -145,7 +146,7 @@ namespace FrankyCLI
                     catch { }
                 }
                 //The name of the OMOD contains all it's stats.
-                string omodName = gen_upgradegenerator_utils.getDiscriptiveLevel(level, stats.Theme) + " " + stats.Name + " " + originalmod.Name;
+                string omodName = gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + stats.Name + " " + originalmod.Name;
                 string Description = stats.Description;
                 foreach (var statname in stats.stats)
                 {
@@ -259,18 +260,28 @@ namespace FrankyCLI
                 Console.WriteLine("Book ID:" + book.FormKey.ToString());
                 myMod.Books.Add(book);
                 //Add Construct
+                IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
                 IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
+
+                IFormLinkNullable<IItemGetter> ResInorgCommonIron = omod.FormKey.ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
+
                 var co = new ConstructibleObject(myMod)
                 {
                     EditorID = editorid,
                     Description = Description,
                     CreatedObject = targetmod,
-                    WorkbenchKeyword = originalco.WorkbenchKeyword,
-                    AmountProduced = originalco.AmountProduced,
-                    LearnMethod = originalco.LearnMethod,
-                    Categories = originalco.Categories                    
+                    WorkbenchKeyword = WorkbenchWeaponKeyword,
+                    AmountProduced = 1,
+                    LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
+                    Conditions = new ExtendedList<Condition>()
+                    //Categories = originalco.Categories
                 };
                 co.ConstructableComponents = originalco.ConstructableComponents;
+                co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
+                {
+                    Count = 1,
+                    Component = ResInorgCommonIron
+                } };
 
                 var link = global.ToLink<IGlobalGetter>();
                 var con = new GetGlobalValueConditionData();
@@ -282,8 +293,6 @@ namespace FrankyCLI
                     ComparisonValue = 0
                 });
                 myMod.ConstructibleObjects.Add(co);
-
-                
 
                 //Add Book to LevelledList
                 foreach( var lvl in myMod.LeveledItems)
@@ -340,14 +349,34 @@ namespace FrankyCLI
 
                 var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
                 DamageMode = request.DamageMode;
-                StatLib = gen_upgradegenerator_utils.BuildStatLib(request.StatLibFile);
+
+
+                gen_upgradegenerator_utils.BuildStatBank(request.ScalingStats);
+                gen_upgradegenerator_utils.BuildLevelStyles();
+
+                StatLib = new Dictionary<string, StatSet>();
+                foreach(var lib in request.StatLibFile)
+                {
+                    var files = Directory.GetFiles(lib);
+                    foreach (var f in files)
+                    {
+                        var statlib = gen_upgradegenerator_utils.BuildStatLib(f);
+                        foreach (var stat in statlib)
+                        {
+                            StatLib.Add(stat.Key, stat.Value);
+                        }
+                    }
+                }
+                gen_upgradegenerator_utils.LoadThemeFile(request.ThemeFile);
+
+
                 List<string> Weapons = request.Weapons;
                 //Some contstructable objects don't follow the name format so we manually map them
                 var comap = gen_upgradegenerator_utils.GetCOMap();
                 foreach (var weapon in Weapons) {
                     foreach (var objmod in env.LoadOrder[0].Mod.ObjectModifications)
                     {
-                        if (objmod.EditorID.Contains(weapon))
+                        if (objmod.EditorID.ToLower().Contains(weapon.ToLower()))
                         {
                             if (!objmod.EditorID.Contains("Quality") &&
                                 !objmod.EditorID.Contains("None") &&
