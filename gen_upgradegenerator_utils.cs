@@ -1,10 +1,17 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Mutagen.Bethesda;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DynamicData;
+using Noggog;
+using Mutagen.Bethesda.Plugins.Records;
+using Noggog.StructuredStrings;
+using System.Globalization;
 
 namespace FrankyCLI
 {
@@ -189,6 +196,17 @@ namespace FrankyCLI
         {            
             var map = YamlImporter.getObjectFrom<Dictionary<string,string>>("Data/comap.yaml");
             return map;
+        }
+
+        public static ExtendedList<ConstructibleObjectComponent> GetUpgradeCost(ModKey Starfield,int level)
+        {
+            IFormLinkNullable<IItemGetter> ResInorgCommonIron = new FormKey(Starfield, 0x000057C7).ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
+            var cost = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
+            {
+                Count = 1,
+                Component = ResInorgCommonIron
+            } };
+            return cost;
         }
     }
 }
