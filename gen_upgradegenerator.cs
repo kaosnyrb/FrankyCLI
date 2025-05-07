@@ -37,6 +37,7 @@ namespace FrankyCLI
         public static ModKey StarfieldModKey;
         public static ModKey BlackSiteModKey;
 
+        public static string csvoutput;
         public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step)
         {
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
@@ -85,11 +86,9 @@ namespace FrankyCLI
                 var global = new Global(myMod)
                 {
                     EditorID = GlobalEditorid,
-                    Data = 0                    
+                    Data = 1
                 };
                 myMod.Globals.Add(global);
-
-
 
                 //Add OMOD
                 var omod = new WeaponModification(myMod)
@@ -130,7 +129,7 @@ namespace FrankyCLI
                     decimal amount = stat.Default + (step * stat.Step);
                     string amountstr = amount.ToString();
                     if (stat.Percentage) { 
-                        if (stat.Type == "Float" || stat.Type == "KeywordFloat")
+                        if (stat.Type == "Float" || stat.Type == "BothFloat" || stat.Type == "KeywordFloat")
                         {
                             amountstr = (amount * 100).ToString("F0");
                         }
@@ -156,6 +155,17 @@ namespace FrankyCLI
                             FunctionType = stat.floatFunctionType,
                         });
                         Description += " / " + amountstr + " " + stat.StatName;                   
+                    }
+                    if (stat.Type == "BothFloat")
+                    {
+                        omod.Properties.Add(new ObjectModFloatProperty<Weapon.Property>
+                        {
+                            Property = stat.property,
+                            Value = (float)amount,
+                            Value2 = (float)amount,
+                            FunctionType = stat.floatFunctionType,
+                        });
+                        Description += " / " + amountstr + " " + stat.StatName;
                     }
                     if (stat.Type == "Enum")
                     {
@@ -246,7 +256,7 @@ namespace FrankyCLI
                     LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
                     Conditions = new ExtendedList<Condition>()
                 };                
-                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(env.LoadOrder[0].ModKey,step);
+                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(env.LoadOrder[0].ModKey,level);
 
                 var link = global.ToLink<IGlobalGetter>();
                 var con = new GetGlobalValueConditionData();
@@ -273,8 +283,64 @@ namespace FrankyCLI
                         });
                     }
                 }
+                //Add to modgroups
+                IFormLinkNullable<IAObjectModificationGetter> includemod = omod.FormKey.ToNullableLink<IAObjectModificationGetter>();
+                //Does the modgroup already exist?
+                byte safelevel = 0;
+                if (level < 255) { safelevel = (byte)level; }
+                else safelevel = 255;
+
+                bool added = false;
+                foreach (var modgroup in myMod.ObjectModifications)
+                {
+                    foreach (var includedobjmod in modgroup.Includes)
+                    {
+                        if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                        {
+                            if (!added)
+                            {
+                                modgroup.Includes.Add(new ObjectModInclude()
+                                {
+                                    DoNotUseAll = true,
+                                    MinimumLevel = safelevel,
+                                    Mod = includemod,
+                                    Optional = true
+                                });
+                                added = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                //Can't find it so add it to our mod.
+                if (!added)
+                {
+                    foreach (var objmod in SourceESM.ObjectModifications)
+                    {
+                        foreach (var includedobjmod in objmod.Includes)
+                        {
+                            if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                            {
+                                //This mod is in this this modgroup
+                                var group = objmod.DeepCopy();
+                                group.Includes.Add(new ObjectModInclude()
+                                {
+                                    DoNotUseAll = true,
+                                    MinimumLevel = safelevel,
+                                    Mod = includemod,
+                                    Optional = true
+                                });
+                                myMod.ObjectModifications.Add(group);
+                                added = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
                 //Write to CSV
-                File.AppendAllText("output.csv", upgrade.WeaponName + "," + upgrade.BaseWeaponModID + "," + level + "," + omodName + "," + justnumberdesc + "\n");
+                csvoutput += upgrade.WeaponName + "," + upgrade.BaseWeaponModID + "," + level + "," + omodName + "," + justnumberdesc + "\n";
             }
             return true;
         }
@@ -314,6 +380,7 @@ namespace FrankyCLI
                     }
                 }
 
+
                 var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
                 DamageMode = request.DamageMode;
 
@@ -339,6 +406,10 @@ namespace FrankyCLI
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 BlackSiteModKey = new ModKey("AvontechBlacksiteBlueprints", ModType.Master);
 
+                //DEBUG SECTION
+                //var match = SourceESM.ObjectModifications[new FormKey(StarfieldModKey, 0x0000C521)];
+
+
                 List<string> Weapons = request.Weapons;
                 //Some contstructable objects don't follow the name format so we manually map them
                 var comap = gen_upgradegenerator_utils.GetCOMap();
@@ -356,6 +427,7 @@ namespace FrankyCLI
                                 !coid.Contains("None") &&
                                 !coid.Contains("Modgroup") &&
                                 !coid.Contains("OLD") &&
+                                !coid.Contains("AVM") &&
                                 !coid.Contains("CUT"))
                             {
                                 bool foundblueprint = false;
@@ -369,7 +441,7 @@ namespace FrankyCLI
                                 if (!foundblueprint)
                                 {
                                     IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(StarfieldModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
-                                    IFormLinkNullable<IItemGetter> ResInorgCommonIron = new FormKey(StarfieldModKey, 0x000057C7).ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
+                                    IFormLinkNullable<IItemGetter> commonresource = new FormKey(StarfieldModKey, gen_upgradegenerator_utils.GetBasicResource()).ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
 
                                     var co = new ConstructibleObject(myMod)
                                     {
@@ -383,8 +455,8 @@ namespace FrankyCLI
                                     };
                                     co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
                                         {
-                                            Count = 1,
-                                            Component = ResInorgCommonIron
+                                            Count = (uint)random.Next(4),
+                                            Component = commonresource
                                         } };
                                     myMod.ConstructibleObjects.Add(co);
                                 }
@@ -399,7 +471,10 @@ namespace FrankyCLI
                                         AttachPoint = attach,
                                         formKey = objmod.FormKey
                                     };
-                                    UpgradeLib.Add(objmod.EditorID, upgrade);
+                                    if (!UpgradeLib.ContainsKey(objmod.EditorID))
+                                    {
+                                        UpgradeLib.Add(objmod.EditorID, upgrade);
+                                    }
                                 }
                             }
                             else 
@@ -438,10 +513,10 @@ namespace FrankyCLI
                             EditorID = "atbb_lvlbook" + upgrade.Value.WeaponName,
                             ObjectBounds = new ObjectBounds(),
                             Transforms = new Transforms(),
-                            Name = upgrade.Value.WeaponName + " Blacksite Blueprint",
+                            Name = upgrade.Value.WeaponName + "",
                             Model = new Model()
                             {
-                                File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("Items\\DataSlate\\DataSlate01.nif"),
+                                File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(gen_upgradegenerator_utils.GetWeaponModel(upgrade.Value.WeaponName)),
                             },
                             Description = "Blueprint for a Avontech Blacksite " + upgrade.Value.WeaponName + " weapon mod.",
                             Value = 500,
@@ -468,19 +543,19 @@ namespace FrankyCLI
                         };
                         myMod.Books.Add(book);
                         //Create a CO for the Book
-                        IFormLinkNullable<IKeywordGetter> WorkbenchIndustrialKeyword = new FormKey(StarfieldModKey, 0x000AA209).ToNullableLink<IKeywordGetter>();//WorkbenchIndustrialKeyword [KYWD:000AA209]
-                        IFormLinkNullable<IItemGetter> Iron = new FormKey(StarfieldModKey, 0x000057C7).ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
-
+                        IFormLinkNullable<IKeywordGetter> WorkbenchBlacksiteFilterKeyword = new FormKey(BlackSiteModKey, 0x0000080C).ToNullableLink<IKeywordGetter>(); //WorkbenchBlacksiteFilterKeyword [KYWD:0000080C]
+                        IFormLinkNullable<IKeywordGetter> WorkbenchBlacksiteKeyword = new FormKey(BlackSiteModKey, 0x0000080A).ToNullableLink<IKeywordGetter>(); //WorkbenchBlacksiteKeyword[KYWD: 0000080A]
                         IFormLinkNullable<IItemGetter> atbb_upgradeitem = new FormKey(BlackSiteModKey, 0x00000809).ToNullableLink<IItemGetter>();//atbb_upgradeitem "Blacksite Blueprint" [MISC:01000809]
 
                         var co = new ConstructibleObject(myMod)
                         {
                             EditorID = "atbb_lvlbookco_" + upgrade.Value.WeaponName,
-                            Description = "Create a Avontech Blacksite Blueprint for the " + upgrade.Value.WeaponName,
+                            Description = "Create a Levelled Avontech Blacksite Blueprint Weapon Upgrade for the " + upgrade.Value.WeaponName,
                             CreatedObject = book.ToNullableLink<IConstructibleObjectTargetGetter>(),
-                            WorkbenchKeyword = WorkbenchIndustrialKeyword,
+                            WorkbenchKeyword = WorkbenchBlacksiteKeyword,
                             AmountProduced = 1,
-                            LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions
+                            LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,                            
+                            Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { WorkbenchBlacksiteFilterKeyword }
                         };
                         co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { 
                             new ConstructibleObjectComponent() { Component = atbb_upgradeitem, Count = 1 } 
@@ -513,6 +588,8 @@ namespace FrankyCLI
                             }
                         }
                     }
+                    File.AppendAllText("output.csv", csvoutput);
+                    csvoutput = "";
                     //Add new Upgrade to weapon list
                     foreach (var lvl in myMod.LeveledItems)
                     {

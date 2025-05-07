@@ -87,29 +87,30 @@ namespace FrankyCLI
 
         public static void BuildLevelStyles()
         {
+            int Standardstepcount = 1;
             //Standard
             levelStyles.Add("Standard_Common", new LevelStyle
             {
                 startLevel = 0,
-                StepCount = 10,
+                StepCount = Standardstepcount,
                 LevelPerStep = 10,
             });
             levelStyles.Add("Standard_Rare", new LevelStyle
             {
                 startLevel = 80,
-                StepCount = 10,
+                StepCount = Standardstepcount,
                 LevelPerStep = 10,
             });
             levelStyles.Add("Standard_Epic", new LevelStyle
             {
                 startLevel = 150,
-                StepCount = 10,
+                StepCount = Standardstepcount,
                 LevelPerStep = 10,
             });
             levelStyles.Add("Standard_Legendary", new LevelStyle
             {
                 startLevel = 220,
-                StepCount = 10,
+                StepCount = Standardstepcount,
                 LevelPerStep = 10,
             });
 
@@ -198,14 +199,73 @@ namespace FrankyCLI
             return map;
         }
 
+        public static Dictionary<string, string> WeaponModelCache = new Dictionary<string, string>();
+        public static string GetWeaponModel(string weapon)
+        {
+            if (WeaponModelCache.Count == 0)
+            {
+                WeaponModelCache = YamlImporter.getObjectFrom<Dictionary<string, string>>("Data/weaponmodel.yaml");
+            }
+            return WeaponModelCache[weapon.ToLower()];
+        }
+
+        public static List<uint> BasicResourceCache = new List<uint>();
+        public static uint GetBasicResource()
+        {
+            if (BasicResourceCache.Count == 0)
+            {
+                BasicResourceCache = YamlImporter.getObjectFrom<List<uint>>("Data/basicresources.yaml");
+            }
+            Random random = new Random();
+            return BasicResourceCache[random.Next(BasicResourceCache.Count)];
+        }
+
         public static ExtendedList<ConstructibleObjectComponent> GetUpgradeCost(ModKey Starfield,int level)
         {
-            IFormLinkNullable<IItemGetter> ResInorgCommonIron = new FormKey(Starfield, 0x000057C7).ToNullableLink<IItemGetter>();//ResInorgCommonIron "Iron" [IRES:000057C7]
+            Random random = new Random();
+
+            uint resourcea = GetBasicResource();
+            uint resourceb = GetBasicResource();
+
+            IFormLinkNullable<IItemGetter> commonresource = new FormKey(Starfield, resourcea).ToNullableLink<IItemGetter>();
+
             var cost = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
             {
-                Count = 1,
-                Component = ResInorgCommonIron
+                Count = (uint)(1 + random.Next(5)),
+                Component = commonresource
             } };
+
+            if ( level > 50)
+            {
+                //Don't want duplicate resources
+                while (resourceb == resourcea)
+                {
+                    resourceb = GetBasicResource();
+                }
+                IFormLinkNullable<IItemGetter> commonresourceb = new FormKey(Starfield, resourceb).ToNullableLink<IItemGetter>();
+
+                cost.Add(new ConstructibleObjectComponent()
+                {
+                    Count = (uint)(1 + random.Next(8)),
+                    Component = commonresourceb
+                });
+            }
+            if (level > 100)
+            {
+                uint resourcec = GetBasicResource();
+                //Don't want duplicate resources
+                while (resourcec == resourcea || resourcec == resourceb)
+                {
+                    resourcec = GetBasicResource();
+                }
+                IFormLinkNullable<IItemGetter> commonresourcec = new FormKey(Starfield, resourcec).ToNullableLink<IItemGetter>();
+
+                cost.Add(new ConstructibleObjectComponent()
+                {
+                    Count = (uint)(1 + random.Next(10)),
+                    Component = commonresourcec
+                });
+            }
             return cost;
         }
     }
