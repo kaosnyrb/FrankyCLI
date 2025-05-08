@@ -77,6 +77,8 @@ namespace FrankyCLI
 
         public decimal Default;
         public decimal Step;
+
+        public List<string> OtherStats;
     }
 
     public static class gen_upgradegenerator_utils
@@ -84,6 +86,140 @@ namespace FrankyCLI
         public static Dictionary<string, BonusStats> StatBank = new Dictionary<string, BonusStats>();
         public static Dictionary<string,LevelStyle> levelStyles = new Dictionary<string, LevelStyle>();
         public static ThemeFile LoadedThemeFile = new ThemeFile();
+
+        public static void AddStat(string statname,ref WeaponModification omod,ref string Description, int step, bool silent)
+        {
+            var stat = StatBank[statname];
+            decimal amount = stat.Default + (step * stat.Step);
+            string amountstr = amount.ToString();
+            if (stat.Percentage)
+            {
+                if (stat.Type == "Float" || stat.Type == "BothFloat" || stat.Type == "KeywordFloat")
+                {
+                    amountstr = (amount * 100).ToString("F0");
+                }
+                amountstr += "%";
+            }
+            if (amount > 0) { amountstr = "+" + amountstr; }
+            // Number of things like Projectiles or Ammo
+            if (stat.Type == "Int")
+            {
+                omod.Properties.Add(new ObjectModIntProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Value = (uint)amount,
+                    FunctionType = stat.floatFunctionType,
+                });
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+            //Percentages/Flat
+            if (stat.Type == "Float")
+            {
+                omod.Properties.Add(new ObjectModFloatProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Value = (float)amount,
+                    FunctionType = stat.floatFunctionType,
+                });
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+            // Where value 1 and 2 need set (Like Range)
+            if (stat.Type == "BothFloat")
+            {
+                omod.Properties.Add(new ObjectModFloatProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Value = (float)amount,
+                    Value2 = (float)amount,
+                    FunctionType = stat.floatFunctionType,
+                });
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+            // Flags like Silent
+            if (stat.Type == "Enum")
+            {
+                omod.Properties.Add(new ObjectModEnumProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    EnumIntValue = (uint)amount,
+                    FunctionType = ObjectModProperty.EnumFunctionType.Set,
+                });
+            }
+            // Stats like damage reduction
+            if (stat.Type == "KeywordFloat")
+            {
+                IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(gen_upgradegenerator.StarfieldModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
+                omod.Properties.Add(new ObjectModFormLinkFloatProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Record = statkeyword,
+                    Value = (float)amount,
+                    FunctionType = stat.floatFunctionType,
+                });
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+            // Not used atm
+            if (stat.Type == "AddFormInt")
+            {
+                IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(gen_upgradegenerator.StarfieldModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
+                omod.Properties.Add(new ObjectModFormLinkIntProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Record = statkeyword,
+                    Value = (uint)amount,
+                    FunctionType = ObjectModProperty.FormLinkFunctionType.Add,
+                });
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+            // Attach another OMOD to this entry, can add templates
+            if (stat.Type == "Include")
+            {
+                IFormLinkNullable<IAObjectModificationGetter> statkeyword = new FormKey(gen_upgradegenerator.StarfieldModKey, stat.Keyword).ToNullableLink<IAObjectModificationGetter>();
+                omod.Includes.Add(new ObjectModInclude() { Mod = statkeyword, DoNotUseAll = false, MinimumLevel = 0, Optional = false });
+                Description += " / " + stat.StatName;
+            }
+            // More than one stat that need grouping together.
+            if (stat.Type == "Group")
+            {
+                foreach (var otherstat in stat.OtherStats)
+                {
+                    //Recursion, we add the stats then label them as one.
+                    //This is for things like range which has min and max that both need to be set.
+                    AddStat(otherstat, ref omod, ref Description, step, true);
+                }
+                var firststat = StatBank[stat.OtherStats[0]];
+                amount = firststat.Default + (step * firststat.Step);
+                amountstr = amount.ToString();
+                if (firststat.Percentage)
+                {
+                    if (firststat.Type == "Float" || firststat.Type == "BothFloat" || firststat.Type == "KeywordFloat")
+                    {
+                        amountstr = (amount * 100).ToString("F0");
+                    }
+                    amountstr += "%";
+                }
+                if (amount > 0) { amountstr = "+" + amountstr; }
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+        }
 
         public static void BuildLevelStyles()
         {
