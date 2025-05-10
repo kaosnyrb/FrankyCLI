@@ -74,7 +74,7 @@ namespace FrankyCLI
         public ObjectModProperty.FloatFunctionType floatFunctionType;
         public UInt32 Keyword;
         public string StatName;
-
+        public string ShortName;
         public decimal Default;
         public decimal Step;
 
@@ -170,7 +170,7 @@ namespace FrankyCLI
                     Description += " / " + amountstr + " " + stat.StatName;
                 }
             }
-            // Not used atm
+            // Enchants
             if (stat.Type == "AddFormInt")
             {
                 IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(gen_upgradegenerator.StarfieldModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
@@ -183,7 +183,7 @@ namespace FrankyCLI
                 });
                 if (!silent)
                 {
-                    Description += " / " + amountstr + " " + stat.StatName;
+                    Description += " / " + stat.StatName;
                 }
             }
             // Attach another OMOD to this entry, can add templates
@@ -354,6 +354,21 @@ namespace FrankyCLI
             }
             Random random = new Random();
             return BasicResourceCache[random.Next(BasicResourceCache.Count)];
+        }
+
+        public static Dictionary<string, string> WordReplaceCache = new Dictionary<string, string>();
+        public static string ReplaceWords(string input)
+        {
+            if (WordReplaceCache.Count == 0)
+            {
+                WordReplaceCache = YamlImporter.getObjectFrom<Dictionary<string, string>>("Data/replacemap.yaml");
+            }
+            string result = input;
+            foreach(var entry in WordReplaceCache)
+            {
+                result = result.Replace(entry.Key, entry.Value);
+            }
+            return result;
         }
 
         public static ExtendedList<ConstructibleObjectComponent> GetUpgradeCost(ModKey Starfield,int level)

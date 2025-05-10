@@ -105,8 +105,9 @@ namespace FrankyCLI
                     Properties = originalmod.Properties,
                 };
                 //We need to build the UI based on the weapon stats.
-                string ingameName = upgrade.WeaponName + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + stats.Name + " "+ originalmod.Name;
-
+                string ingameName = upgrade.WeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
+                ingameName = gen_upgradegenerator_utils.ReplaceWords(ingameName);
+                ingameName = ingameName.Trim();
                 //Remove the DontShowInUI [KYWD:00374EFA]
                 for (int i = 0; i < omod.Properties.Count; i++)
                 {
@@ -121,7 +122,9 @@ namespace FrankyCLI
                     catch { }
                 }
                 //The name of the OMOD contains all it's stats.
-                string omodName = gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + stats.Name + " " + originalmod.Name;
+                string omodName = stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + originalmod.Name;
+                omodName = gen_upgradegenerator_utils.ReplaceWords(omodName);
+                omodName = omodName.Trim();
                 string Description = "";//
                 foreach (var statname in stats.stats)
                 {
@@ -306,6 +309,12 @@ namespace FrankyCLI
                     }
                 }
 
+                SourceESM = env.LoadOrder[0].Mod;
+                StarfieldModKey = new ModKey("Starfield", ModType.Master);
+                BlackSiteModKey = new ModKey("AvontechBlacksiteBlueprints", ModType.Master);
+
+                //DEBUG SECTION
+                //var match = SourceESM.ObjectModifications[new FormKey(StarfieldModKey, 0x0014AFDB)];
 
                 var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
                 DamageMode = request.DamageMode;
@@ -328,12 +337,7 @@ namespace FrankyCLI
                     }
                 }
                 gen_upgradegenerator_utils.LoadThemeFile(request.ThemeFile);
-                SourceESM = env.LoadOrder[0].Mod;
-                StarfieldModKey = new ModKey("Starfield", ModType.Master);
-                BlackSiteModKey = new ModKey("AvontechBlacksiteBlueprints", ModType.Master);
 
-                //DEBUG SECTION
-                //var match = SourceESM.ObjectModifications[new FormKey(StarfieldModKey, 0x0000C521)];
 
 
                 List<string> Weapons = request.Weapons;
@@ -350,7 +354,7 @@ namespace FrankyCLI
                         if (objmod.EditorID.ToLower().Contains(weapon.ToLower()))
                         {
                             if (!coid.Contains("Quality") &&
-                                !coid.Contains("None") &&
+                                //!coid.Contains("None") &&
                                 !coid.Contains("Modgroup") &&
                                 !coid.Contains("OLD") &&
                                 !coid.Contains("AVM") &&
