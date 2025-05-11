@@ -87,7 +87,7 @@ namespace FrankyCLI
         public static Dictionary<string,LevelStyle> levelStyles = new Dictionary<string, LevelStyle>();
         public static ThemeFile LoadedThemeFile = new ThemeFile();
 
-        public static void AddStat(string statname,ref WeaponModification omod,ref string Description, int step, bool silent)
+        public static void AddStat(string statname,ref WeaponModification omod,ref string Description, ref string stattag, int step, bool silent)
         {
             var stat = StatBank[statname];
             decimal amount = stat.Default + (step * stat.Step);
@@ -173,6 +173,7 @@ namespace FrankyCLI
             // Enchants
             if (stat.Type == "AddFormInt")
             {
+                amountstr = "";
                 IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(gen_upgradegenerator.StarfieldModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
                 omod.Properties.Add(new ObjectModFormLinkIntProperty<Weapon.Property>
                 {
@@ -200,7 +201,7 @@ namespace FrankyCLI
                 {
                     //Recursion, we add the stats then label them as one.
                     //This is for things like range which has min and max that both need to be set.
-                    AddStat(otherstat, ref omod, ref Description, step, true);
+                    AddStat(otherstat, ref omod, ref Description, ref stattag, step, true);
                 }
                 var firststat = StatBank[stat.OtherStats[0]];
                 amount = firststat.Default + (step * firststat.Step);
@@ -217,6 +218,17 @@ namespace FrankyCLI
                 if (!silent)
                 {
                     Description += " / " + amountstr + " " + stat.StatName;
+                }
+            }
+            if (!silent)
+            {
+                if (stattag.Length > 0)
+                {
+                    stattag += "/" + amountstr + stat.ShortName;
+                }
+                else
+                {
+                    stattag += amountstr + stat.ShortName;
                 }
             }
         }
@@ -254,7 +266,12 @@ namespace FrankyCLI
 
         public static void BuildStatBank(string statsfile)
         {
-            StatBank = YamlImporter.getObjectFrom<Dictionary<string, BonusStats>>(statsfile);
+            var bank = YamlImporter.getObjectFrom<Dictionary<string, BonusStats>>(statsfile);
+            foreach(var en in bank)
+            {
+                StatBank.Add(en.Key,en.Value);
+            }
+//            StatBank = YamlImporter.getObjectFrom<Dictionary<string, BonusStats>>(statsfile);
         }
 
         public static Dictionary<string, StatSet> BuildStatLib(string statlibfile)

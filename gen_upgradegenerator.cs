@@ -12,6 +12,7 @@ using Noggog;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog.StructuredStrings;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace FrankyCLI
 {
@@ -76,13 +77,12 @@ namespace FrankyCLI
                     return false;
                 }
 
-                //Figure out the text
-                
+                //Figure out the text                
                 string amountstring = level.ToString();
-                string editorid = "atbb_" + amountstring + "_" + stats.Name + "_" + originalmod.EditorID;                
+                string editorid = "atbb_" + originalmod.EditorID + "_" + stats.Name + "_" +  amountstring;                
                 
                 //Global
-                string GlobalEditorid = "atbb_g_" + amountstring + "_" + stats.Name + "_" + originalmod.EditorID;
+                string GlobalEditorid = "atbb_g_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
                 var global = new Global(myMod)
                 {
                     EditorID = GlobalEditorid,
@@ -125,14 +125,15 @@ namespace FrankyCLI
                 string omodName = stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + originalmod.Name;
                 omodName = gen_upgradegenerator_utils.ReplaceWords(omodName);
                 omodName = omodName.Trim();
-                string Description = "";//
+                string Description = "";
+                string StatTag = "";
                 foreach (var statname in stats.stats)
                 {
-                    gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,step,false);                    
+                    gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,ref StatTag,step, false);                    
                 }
                 string justnumberdesc = Description;
                 Description = stats.Description + Description;
-                omod.Name = omodName;
+                omod.Name = omodName;// + " " + StatTag;
                 myMod.ObjectModifications.Add(omod);
                 //Add Book
                 var book = new Book(myMod)
@@ -284,7 +285,10 @@ namespace FrankyCLI
             string item = args[3];
             string form = args[4];
             string datapath = "";
-            
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
@@ -319,8 +323,12 @@ namespace FrankyCLI
                 var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
                 DamageMode = request.DamageMode;
 
+                
+                foreach(var file in Directory.EnumerateFiles(request.ScalingStats))
+                {
+                    gen_upgradegenerator_utils.BuildStatBank(file);
+                }
 
-                gen_upgradegenerator_utils.BuildStatBank(request.ScalingStats);
                 gen_upgradegenerator_utils.BuildLevelStyles();
 
                 StatLib = new Dictionary<string, StatSet>();
@@ -570,6 +578,8 @@ namespace FrankyCLI
             }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.Elapsed.ToString());
             foreach(var miss in MissingCOs)
             {
                 Console.WriteLine(miss);
