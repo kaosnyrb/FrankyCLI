@@ -197,11 +197,19 @@ namespace FrankyCLI
                         Rank = stats.RequiredPerkLevel
                     });                    
                 }
+                //Research Requirements
+                Condition Research = null;
+                Research = gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
+                //Not all upgrades need research.
+                if (Research != null)
+                {
+                    co.Conditions.Add(Research);
+                }
 
-                gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
-
+                // Build Cost
                 co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(env.LoadOrder[0].ModKey,level);
                 
+                // Global Unlock
                 var link = global.ToLink<IGlobalGetter>();
                 var con = new GetGlobalValueConditionData();
                 con.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(con, link.FormKey);
@@ -211,11 +219,7 @@ namespace FrankyCLI
                     CompareOperator = CompareOperator.GreaterThan,
                     ComparisonValue = 0
                 });
-                // Weapon Research Conditions
-
-
-
-
+                // Complete the Weapon CO
                 myMod.ConstructibleObjects.Add(co);
 
                 //Add Book to LevelledList
@@ -223,13 +227,21 @@ namespace FrankyCLI
                 {
                     if (lvl.EditorID.Contains(LevelledListContains))
                     {
-                        lvl.Entries.Add(new LeveledItemEntry()
+                        var bookentry = new LeveledItemEntry()
                         {
                             Count = 1,
                             ChanceNone = Percent.Zero,
                             Level = (short)level,
-                            Reference = book.ToLink<IItemGetter>()
+                            Reference = book.ToLink<IItemGetter>(),
+                            Conditions = new ExtendedList<Condition>(),
+                        };
+                        bookentry.Conditions.Add(new ConditionFloat()
+                        {
+                            Data = con,
+                            CompareOperator = CompareOperator.EqualTo,
+                            ComparisonValue = 0
                         });
+                        lvl.Entries.Add(bookentry);     
                     }
                 }
                 //Add to modgroups
@@ -338,6 +350,8 @@ namespace FrankyCLI
 
                 //DEBUG SECTION
                 //var match = SourceESM.ObjectModifications[new FormKey(StarfieldModKey, 0x0014AFDB)];
+                //var match = SourceESM.ConstructibleObjects[new FormKey(StarfieldModKey, 0x000447C6)];
+                //gen_upgradegenerator_utils.ResearchCopy = (IsResearchCompleteConditionData)match.Conditions[0].Data.DeepCopy();
 
                 var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
                 DamageMode = request.DamageMode;
@@ -444,8 +458,7 @@ namespace FrankyCLI
                 int count = 0;
                 int total = UpgradeLib.Keys.Count * StatLib.Keys.Count;
                 foreach (var upgrade in UpgradeLib)
-                {
-                    
+                {                    
                     string levelledlist = "atbb_" + upgrade.Key.ToString();
 
                     //Find the Weapon LevelledList
@@ -533,7 +546,7 @@ namespace FrankyCLI
                     
                     foreach (var stat in StatLib)
                     {
-                        Console.WriteLine(count + "/" + total + " : " + stat.Value.Name);
+                        Console.WriteLine(count + "/" + total + " : " + upgrade.Key + stat.Value.Name + " " + UpgradeLib[upgrade.Key].AttachPoint);
                         count++;
                         if (stat.Value.DamageMode == -1 || stat.Value.DamageMode == DamageMode || DamageMode == -1)
                         {

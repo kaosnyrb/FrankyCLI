@@ -411,54 +411,150 @@ namespace FrankyCLI
 
         public static Condition GetPartResearchReq(ModKey Starfield, int level, string part)
         {
-            uint research = 0x00389F1B;
-            IFormLinkOrIndex<IResearchProjectGetter> ResearchRequired =(IFormLinkOrIndex <IResearchProjectGetter>)new FormKey(Starfield, research).ToNullableLinkGetter<IResearchProjectGetter>();
 
-            var con = new IsResearchCompleteConditionData()
+            //Current plan, can't make research things, boo
+            //So we just clone existing IsResearchCompleteConditionData and put it on the new blueprint
+
+            FormKey WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000447C6);
+
+            if (level < 50)
             {
-                FirstParameter = ResearchRequired
-            };
+                return null;
+            }
+            if (level >= 50 && level < 100)
+            {
+                switch (part) {
+                    case "Magazine":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x0002E1EA);//co_gun_mod_Grendel_Mag_Whitehot [COBJ:0002E1EA]
+                        break;
+                    case "Muzzle":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000432AE);//co_gun_mod_PumpShotgun_Muzzle_MuzzleBrake [COBJ:000432AE]
+                        break;
+                    case "Barrel":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D1C);//co_gun_mod_InflictorPistol_Barrel_Long [COBJ:00042D1C]
+                        break;
+                    case "Laser":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D27);//co_gun_mod_InflictorRifle_Optics_ShortScope [COBJ:00042D27]
+                        break;
+                    case "Foregrip":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000432CD);//co_gun_mod_M1919_Grip_Tactical [COBJ:000432CD]
+                        break;
+                    case "Receiver":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D0F);//co_gun_mod_InflictorPistol_Receiver_BurstFire [COBJ:00042D0F]
+                        break;
+                    case "Grip":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000432CD);//co_gun_mod_M1919_Grip_Tactical [COBJ:000432CD]
+                        break;
+                    case "Stock":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000432CD);//co_gun_mod_M1919_Grip_Tactical [COBJ:000432CD]
+                        break;
+                    case "Internal":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D95);//co_gun_mod_AutoRivet_Internal_HairTrigger [COBJ:00042D95]
+                        break;
+                    case "Optic":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D27);//co_gun_mod_InflictorRifle_Optics_ShortScope [COBJ:00042D27]
+                        break;
+                    case "Handle":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x002FB33B);//co_melee_mod_Gutter_Handle_Ergonomic [COBJ:002FB33B]
+                        break;
+                    case "Blade":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x002FB33A);//co_melee_mod_Gutter_Blade_StainlessSteel [COBJ:002FB33A]
+                        break;
+                }
+            }
+            if (level >= 100 && level < 200)
+            {
+                switch (part)
+                {
+                    case "Magazine":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000432B4);//co_gun_mod_PumpShotgun_Mag_Flechette [COBJ:000432B4]
+                        break;
+                    case "Muzzle":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D14);//co_gun_mod_InflictorPistol_Muzzle_FocusNozzle [COBJ:00042D14]
+                        break;
+                    case "Barrel":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D33);//co_gun_mod_InflictorRifle_Barrel_Stabilizing [COBJ:00042D33]
+                        break;
+                    case "Laser":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000454AB);//co_gun_mod_HardTarget_Optics_MediumScope [COBJ:000454AB]
+                        break;
+                    case "Foregrip":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044595);//co_gun_mod_RocketLauncher_Grip_Foregrip [COBJ:00044595]
+                        break;
+                    case "Receiver":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044C26);//co_gun_mod_Razorback_Receiver_BinaryTrigger [COBJ:00044C26]
+                        break;
+                    case "Grip":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044595);//co_gun_mod_RocketLauncher_Grip_Foregrip [COBJ:00044595]
+                        break;
+                    case "Stock":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044595);//co_gun_mod_RocketLauncher_Grip_Foregrip [COBJ:00044595]
+                        break;
+                    case "Internal":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D1B);//co_gun_mod_InflictorPistol_Internal_Amplifier [COBJ:00042D1B]
+                        break;
+                    case "Optic":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x000454AB);//co_gun_mod_HardTarget_Optics_MediumScope [COBJ:000454AB]
+                        break;
+                    case "Handle":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x002FB345);//co_melee_mod_Gutter_Handle_ForceExtruded [COBJ:002FB345]
+                        break;
+                    case "Blade":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x002FB340);//co_melee_mod_Gutter_Blade_Irradiated [COBJ:002FB340]
+                        break;
+                }
+            }
+            if (level >= 200)
+            {
+                switch (part)
+                {
+                    case "Magazine":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D17);//co_gun_mod_InflictorPistol_Mag_Annihilator [COBJ:00042D17]
+                        break;
+                    case "Muzzle":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044576);//co_gun_mod_BigBang_Muzzle_Double [COBJ:00044576]
+                        break;
+                    case "Barrel":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D33);//co_gun_mod_InflictorRifle_Barrel_Stabilizing [COBJ:00042D33]
+                        break;
+                    case "Laser":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D18);//co_gun_mod_InflictorPistol_Laser_ReconSight [COBJ:00042D18]
+                        break;
+                    case "Foregrip":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044599);//co_gun_mod_RocketLauncher_Grip_StabilizingStock [COBJ:00044599]
+                        break;
+                    case "Receiver":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044C26);//co_gun_mod_Razorback_Receiver_BinaryTrigger [COBJ:00044C26]
+                        break;
+                    case "Grip":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044599);//co_gun_mod_RocketLauncher_Grip_StabilizingStock [COBJ:00044599]
+                        break;
+                    case "Stock":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00044599);//co_gun_mod_RocketLauncher_Grip_StabilizingStock [COBJ:00044599]
+                        break;
+                    case "Internal":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x0000C522);//co_gun_mod_Microgun_Internal_BulletHose [COBJ:0000C522]
+                        break;
+                    case "Optic":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x00042D18);//co_gun_mod_InflictorPistol_Laser_ReconSight [COBJ:00042D18]
+                        break;
+                    case "Handle":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x002FB345);//co_melee_mod_Gutter_Handle_ForceExtruded [COBJ:002FB345]
+                        break;
+                    case "Blade":
+                        WeaponWithResearch = new FormKey(gen_upgradegenerator.StarfieldModKey, 0x002FB340);//co_melee_mod_Gutter_Blade_Irradiated [COBJ:002FB340]
+                        break;
+                }
+            }
+
+            var match = gen_upgradegenerator.SourceESM.ConstructibleObjects[WeaponWithResearch];
+            var ResearchCopy = (IsResearchCompleteConditionData)match.Conditions[0].Data.DeepCopy();
             return new ConditionFloat()
             {
-                Data = con,
+                Data = ResearchCopy,
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 1
             };
-            /*
-            var Skill_WeaponEngineeringuint = gen_upgradegenerator_utils.GetPerk("Skill_WeaponEngineering");
-            IFormLinkNullable<IPerkGetter> Skill_WeaponEngineering = new FormKey(Starfield, Skill_WeaponEngineeringuint).ToNullableLink<IPerkGetter>();
-            if (level >= 50 && level < 100)
-            {
-                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
-                {
-                    Perk = Skill_WeaponEngineering,
-                    Rank = 1
-                });
-            }
-            if (level >= 100 && level < 175)
-            {
-                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
-                {
-                    Perk = Skill_WeaponEngineering,
-                    Rank = 2
-                });
-            }
-            if (level >= 175 && level < 250)
-            {
-                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
-                {
-                    Perk = Skill_WeaponEngineering,
-                    Rank = 3
-                });
-            }
-            if (level >= 250)
-            {
-                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
-                {
-                    Perk = Skill_WeaponEngineering,
-                    Rank = 4
-                });
-            }*/
         }
 
         public static ExtendedList<ConstructibleObjectComponent> GetUpgradeCost(ModKey Starfield,int level)
