@@ -86,7 +86,7 @@ namespace FrankyCLI
                 var global = new Global(myMod)
                 {
                     EditorID = GlobalEditorid,
-                    Data = 1
+                    Data = 0
                 };
                 myMod.Globals.Add(global);
 
@@ -169,7 +169,7 @@ namespace FrankyCLI
                         }
                     },
                 };
-                Console.WriteLine("Book ID:" + book.FormKey.ToString());
+                //Console.WriteLine("Book ID:" + book.FormKey.ToString());
                 myMod.Books.Add(book);
 
                 //Add Construct
@@ -184,10 +184,24 @@ namespace FrankyCLI
                     WorkbenchKeyword = WorkbenchWeaponKeyword,
                     AmountProduced = 1,
                     LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
-                    Conditions = new ExtendedList<Condition>()
-                };                
-                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(env.LoadOrder[0].ModKey,level);
+                    Conditions = new ExtendedList<Condition>(),
+                    RequiredPerks = new ExtendedList<ConstructibleRequiredPerk>()
+                };
+                if (stats.RequiredPerk.Length > 0)
+                {
+                    var perkuint = gen_upgradegenerator_utils.GetPerk(stats.RequiredPerk);
+                    IFormLinkNullable<IPerkGetter> PerkForm = new FormKey(env.LoadOrder[0].ModKey, perkuint).ToNullableLink<IPerkGetter>();
 
+                    co.RequiredPerks.Add(new ConstructibleRequiredPerk(){
+                        Perk = PerkForm,
+                        Rank = stats.RequiredPerkLevel
+                    });                    
+                }
+
+                gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
+
+                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(env.LoadOrder[0].ModKey,level);
+                
                 var link = global.ToLink<IGlobalGetter>();
                 var con = new GetGlobalValueConditionData();
                 con.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(con, link.FormKey);
@@ -197,6 +211,11 @@ namespace FrankyCLI
                     CompareOperator = CompareOperator.GreaterThan,
                     ComparisonValue = 0
                 });
+                // Weapon Research Conditions
+
+
+
+
                 myMod.ConstructibleObjects.Add(co);
 
                 //Add Book to LevelledList
@@ -422,8 +441,11 @@ namespace FrankyCLI
                         }
                     }
                 }
-                foreach(var upgrade in UpgradeLib)
-                {                    
+                int count = 0;
+                int total = UpgradeLib.Keys.Count * StatLib.Keys.Count;
+                foreach (var upgrade in UpgradeLib)
+                {
+                    
                     string levelledlist = "atbb_" + upgrade.Key.ToString();
 
                     //Find the Weapon LevelledList
@@ -508,8 +530,11 @@ namespace FrankyCLI
                         Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
                     });
 
+                    
                     foreach (var stat in StatLib)
                     {
+                        Console.WriteLine(count + "/" + total + " : " + stat.Value.Name);
+                        count++;
                         if (stat.Value.DamageMode == -1 || stat.Value.DamageMode == DamageMode || DamageMode == -1)
                         {
                             if (stat.Value.AllowedAttachPoints != null)
@@ -519,7 +544,7 @@ namespace FrankyCLI
                                     var levelStyle = gen_upgradegenerator_utils.levelStyles[StatLib[stat.Key].LevelStyle];
                                     for (int i = 0; i < levelStyle.StepCount; i++)
                                     {
-                                        Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
+                                        //Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
                                         CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist, levelStyle.startLevel + (i * levelStyle.LevelPerStep), i);
                                     }
                                 }

@@ -12,6 +12,7 @@ using Noggog;
 using Mutagen.Bethesda.Plugins.Records;
 using Noggog.StructuredStrings;
 using System.Globalization;
+using System.Reflection.Emit;
 
 namespace FrankyCLI
 {
@@ -61,6 +62,9 @@ namespace FrankyCLI
         public int DamageMode = -1;//-1 all
 
         public string Theme = "Miltec";
+
+        public string RequiredPerk = "";
+        public uint RequiredPerkLevel = 0;
 
         public List<string> stats;
         public List<string> AllowedAttachPoints;
@@ -233,6 +237,7 @@ namespace FrankyCLI
             }
         }
 
+        static Random random = new Random();
         public static void BuildLevelStyles()
         {
             int Standardstepcount = 1;
@@ -261,7 +266,12 @@ namespace FrankyCLI
                 StepCount = Standardstepcount,
                 LevelPerStep = 10,
             });
-
+            levelStyles.Add("Unique_Legendary", new LevelStyle
+            {
+                startLevel = 50 + random.Next(150),
+                StepCount = 1,
+                LevelPerStep = 1,
+            });
         }
 
         public static void BuildStatBank(string statsfile)
@@ -311,13 +321,13 @@ namespace FrankyCLI
             switch (form)
             {
                 case "02249C:Starfield.esm":
-                    return "Barrel";
+                    return "Muzzle";
                 case "02249D:Starfield.esm":
                     return "Barrel";
                 case "02EE28:Starfield.esm":
                     return "Laser";
                 case "14D08A:Starfield.esm":
-                    return "Laser";
+                    return "Foregrip";
                 case "0191EE:Starfield.esm":
                     return "Laser";
                 case "149CA8:Starfield.esm":
@@ -329,9 +339,9 @@ namespace FrankyCLI
                 case "02249F:Starfield.esm":
                     return "Grip";
                 case "0849A6:Starfield.esm":
-                    return "Grip";
+                    return "Stock";
                 case "147AFE:Starfield.esm":
-                    return "Grip";
+                    return "Internal";
                 case "05D4D7:Starfield.esm":
                     return "Magazine";
                 case "022499:Starfield.esm":
@@ -373,6 +383,17 @@ namespace FrankyCLI
             return BasicResourceCache[random.Next(BasicResourceCache.Count)];
         }
 
+        public static Dictionary<string, uint> PerkList = new Dictionary<string,uint>();
+        public static uint GetPerk(string perkname)
+        {
+            if (PerkList.Count == 0)
+            {
+                PerkList = YamlImporter.getObjectFrom<Dictionary<string, uint>>("Data/perks.yaml");
+            }
+
+            return PerkList[perkname];
+        }
+
         public static Dictionary<string, string> WordReplaceCache = new Dictionary<string, string>();
         public static string ReplaceWords(string input)
         {
@@ -386,6 +407,58 @@ namespace FrankyCLI
                 result = result.Replace(entry.Key, entry.Value);
             }
             return result;
+        }
+
+        public static Condition GetPartResearchReq(ModKey Starfield, int level, string part)
+        {
+            uint research = 0x00389F1B;
+            IFormLinkOrIndex<IResearchProjectGetter> ResearchRequired =(IFormLinkOrIndex <IResearchProjectGetter>)new FormKey(Starfield, research).ToNullableLinkGetter<IResearchProjectGetter>();
+
+            var con = new IsResearchCompleteConditionData()
+            {
+                FirstParameter = ResearchRequired
+            };
+            return new ConditionFloat()
+            {
+                Data = con,
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1
+            };
+            /*
+            var Skill_WeaponEngineeringuint = gen_upgradegenerator_utils.GetPerk("Skill_WeaponEngineering");
+            IFormLinkNullable<IPerkGetter> Skill_WeaponEngineering = new FormKey(Starfield, Skill_WeaponEngineeringuint).ToNullableLink<IPerkGetter>();
+            if (level >= 50 && level < 100)
+            {
+                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
+                {
+                    Perk = Skill_WeaponEngineering,
+                    Rank = 1
+                });
+            }
+            if (level >= 100 && level < 175)
+            {
+                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
+                {
+                    Perk = Skill_WeaponEngineering,
+                    Rank = 2
+                });
+            }
+            if (level >= 175 && level < 250)
+            {
+                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
+                {
+                    Perk = Skill_WeaponEngineering,
+                    Rank = 3
+                });
+            }
+            if (level >= 250)
+            {
+                co.RequiredPerks.Add(new ConstructibleRequiredPerk()
+                {
+                    Perk = Skill_WeaponEngineering,
+                    Rank = 4
+                });
+            }*/
         }
 
         public static ExtendedList<ConstructibleObjectComponent> GetUpgradeCost(ModKey Starfield,int level)
