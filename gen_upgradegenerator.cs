@@ -35,8 +35,12 @@ namespace FrankyCLI
         public static Dictionary<string, StatSet> StatLib = new Dictionary<string, StatSet>();
 
         public static IStarfieldModGetter SourceESM;
+        public static IStarfieldModGetter StarfieldESM;
         public static ModKey StarfieldModKey;
         public static ModKey BlackSiteModKey;
+
+        public static Dictionary<string, string> ModCOMAPPER = new Dictionary<string, string>();//Used to build the CO map
+
 
         public static string csvoutput;
         public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step)
@@ -75,6 +79,13 @@ namespace FrankyCLI
                 {
                     Console.WriteLine("Failed to file: " + upgrade.BaseConstructableEditorId);
                     return false;
+                }
+
+                //If we're a Unique_Legendary then calc the level.
+                if (level == -1)
+                {
+                    Random random = new Random();
+                    level = 50 + random.Next(150);
                 }
 
                 //Figure out the text                
@@ -173,7 +184,7 @@ namespace FrankyCLI
                 myMod.Books.Add(book);
 
                 //Add Construct
-                IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
+                IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(StarfieldModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
                 IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
 
                 var co = new ConstructibleObject(myMod)
@@ -190,7 +201,7 @@ namespace FrankyCLI
                 if (stats.RequiredPerk.Length > 0)
                 {
                     var perkuint = gen_upgradegenerator_utils.GetPerk(stats.RequiredPerk);
-                    IFormLinkNullable<IPerkGetter> PerkForm = new FormKey(env.LoadOrder[0].ModKey, perkuint).ToNullableLink<IPerkGetter>();
+                    IFormLinkNullable<IPerkGetter> PerkForm = new FormKey(StarfieldModKey, perkuint).ToNullableLink<IPerkGetter>();
 
                     co.RequiredPerks.Add(new ConstructibleRequiredPerk(){
                         Perk = PerkForm,
@@ -207,7 +218,7 @@ namespace FrankyCLI
                 }
 
                 // Build Cost
-                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(env.LoadOrder[0].ModKey,level);
+                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(StarfieldModKey, level);
                 
                 // Global Unlock
                 var link = global.ToLink<IGlobalGetter>();
@@ -344,8 +355,21 @@ namespace FrankyCLI
                     }
                 }
 
-                SourceESM = env.LoadOrder[0].Mod;
+                var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
+                DamageMode = request.DamageMode;
+
+
+                //Find the SourceESM
+                for (int i = 0; i < env.LoadOrder.Count; i++)
+                {
+                    if (env.LoadOrder[i].FileName == request.WeaponESM)
+                    {
+                        SourceESM = env.LoadOrder[i].Mod;
+                    }
+                }
+                //SourceESM = env.LoadOrder[0].Mod;
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
+                StarfieldESM = env.LoadOrder[0].Mod;
                 BlackSiteModKey = new ModKey("AvontechBlacksiteBlueprints", ModType.Master);
 
                 //DEBUG SECTION
@@ -353,8 +377,6 @@ namespace FrankyCLI
                 //var match = SourceESM.ConstructibleObjects[new FormKey(StarfieldModKey, 0x000447C6)];
                 //gen_upgradegenerator_utils.ResearchCopy = (IsResearchCompleteConditionData)match.Conditions[0].Data.DeepCopy();
 
-                var request = YamlImporter.getObjectFrom<UpdateSetRequest>(prefix);
-                DamageMode = request.DamageMode;
 
                 
                 foreach(var file in Directory.EnumerateFiles(request.ScalingStats))
@@ -380,26 +402,23 @@ namespace FrankyCLI
                 gen_upgradegenerator_utils.LoadThemeFile(request.ThemeFile);
 
 
-
+                
                 List<string> Weapons = request.Weapons;
                 //Some contstructable objects don't follow the name format so we manually map them
                 var comap = gen_upgradegenerator_utils.GetCOMap();
                 foreach (var weapon in Weapons) {
                     foreach (var objmod in SourceESM.ObjectModifications)
-                    {
+                    {                        
                         string coid = "co_gun_" + objmod.EditorID;
+                        ModCOMAPPER.Add(coid, objmod.EditorID);
+
                         if (comap.ContainsKey(coid))
                         {
                             coid = comap[coid];
                         }
                         if (objmod.EditorID.ToLower().Contains(weapon.ToLower()))
                         {
-                            if (!coid.Contains("Quality") &&
-                                //!coid.Contains("None") &&
-                                !coid.Contains("Modgroup") &&
-                                !coid.Contains("OLD") &&
-                                !coid.Contains("AVM") &&
-                                !coid.Contains("CUT"))
+                            if (!gen_upgradegenerator_utils.IsBanned(coid))
                             {
                                 bool foundblueprint = false;
                                 foreach (var allco in SourceESM.ConstructibleObjects)
@@ -481,11 +500,13 @@ namespace FrankyCLI
                         };
                         myMod.LeveledItems.Add(lvlwi);
                         //Create a Book that gets built then spawns from the Levelled list
+                        IFormLinkNullable<ITransformGetter> Inv_Guns_Workbench3D_01 = new FormKey(StarfieldModKey, 0x000796D5).ToNullableLink<ITransformGetter>();//Inv_Guns_Workbench3D_01 [TRNS:000796D5]
+
                         var book = new Book(myMod)
                         {
                             EditorID = "atbb_lvlbook" + upgrade.Value.WeaponName,
                             ObjectBounds = new ObjectBounds(),
-                            Transforms = new Transforms(),
+                            Transforms = new Transforms() { Workbench = Inv_Guns_Workbench3D_01 },
                             Name = upgrade.Value.WeaponName + "",
                             Model = new Model()
                             {
@@ -528,7 +549,7 @@ namespace FrankyCLI
                             WorkbenchKeyword = WorkbenchBlacksiteKeyword,
                             AmountProduced = 1,
                             LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,                            
-                            Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { WorkbenchBlacksiteFilterKeyword }
+                            Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { WorkbenchBlacksiteFilterKeyword },                            
                         };
                         co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { 
                             new ConstructibleObjectComponent() { Component = atbb_upgradeitem, Count = 1 } 
@@ -614,9 +635,18 @@ namespace FrankyCLI
                     }
                 }
             }
+
+            //System.NotImplementedException: Writing with compression enabled is not currently supported.  https://github.com/Mutagen-Modding/Mutagen/issues/235
+            foreach (var rec in myMod.EnumerateMajorRecords())
+            {
+                rec.IsCompressed = false;
+            }
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
             stopwatch.Stop();
+
+            //YamlExporter.WriteObjToYaml("COMAPPERTEMP.yaml", ModCOMAPPER);
+            
             Console.WriteLine(stopwatch.Elapsed.ToString());
             foreach(var miss in MissingCOs)
             {

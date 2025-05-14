@@ -18,11 +18,12 @@ namespace FrankyCLI
 {
     public class UpdateSetRequest
     {
-        public int DamageMode;
-        public List<string> StatLibFile;
-        public string ScalingStats;
-        public string ThemeFile;
-        public List<string> Weapons;
+        public int DamageMode;          //0 Energy, 1 EM, 2 Phys (Used to filter percentage damage etc)
+        public List<string> StatLibFile;//Upgrades to use
+        public string ScalingStats;     //The folder containing the raw stats
+        public string ThemeFile;        //The upgrade theme, switched to roman numerals so this is a little redundnat atm
+        public List<string> Weapons;    //The weapon ids that we are processing
+        public string WeaponESM = "Starfield.esm";//The ESM the weapons are in.
     }
 
     public class ThemeFile
@@ -268,9 +269,9 @@ namespace FrankyCLI
             });
             levelStyles.Add("Unique_Legendary", new LevelStyle
             {
-                startLevel = 50 + random.Next(150),
+                startLevel = -1,
                 StepCount = 1,
-                LevelPerStep = 1,
+                LevelPerStep = 0,
             });
         }
 
@@ -341,7 +342,7 @@ namespace FrankyCLI
                 case "0849A6:Starfield.esm":
                     return "Stock";
                 case "147AFE:Starfield.esm":
-                    return "Internal";
+                    return "Receiver";//"Internal";
                 case "05D4D7:Starfield.esm":
                     return "Magazine";
                 case "022499:Starfield.esm":
@@ -368,6 +369,10 @@ namespace FrankyCLI
             if (WeaponModelCache.Count == 0)
             {
                 WeaponModelCache = YamlImporter.getObjectFrom<Dictionary<string, string>>("Data/weaponmodel.yaml");
+            }
+            if (!WeaponModelCache.ContainsKey(weapon.ToLower()))
+            {
+                return "weapons\\breach\\breach.nif";//Incase we haven't set this up yet.
             }
             return WeaponModelCache[weapon.ToLower()];
         }
@@ -407,6 +412,22 @@ namespace FrankyCLI
                 result = result.Replace(entry.Key, entry.Value);
             }
             return result;
+        }
+
+
+        public static List<string> BannedObjectMods = new List<string>();
+        public static bool IsBanned(string input)
+        {
+            if (BannedObjectMods.Count == 0)
+            {
+                BannedObjectMods = YamlImporter.getObjectFrom<List<string>> ("Data/bannedomods.yaml");
+            }
+            bool banned = false;
+            foreach(var entry in BannedObjectMods)
+            {
+                if (input.Contains(entry)) {banned = true;}
+            }
+            return banned;
         }
 
         public static Condition GetPartResearchReq(ModKey Starfield, int level, string part)
@@ -547,7 +568,7 @@ namespace FrankyCLI
                 }
             }
 
-            var match = gen_upgradegenerator.SourceESM.ConstructibleObjects[WeaponWithResearch];
+            var match = gen_upgradegenerator.StarfieldESM.ConstructibleObjects[WeaponWithResearch];
             var ResearchCopy = (IsResearchCompleteConditionData)match.Conditions[0].Data.DeepCopy();
             return new ConditionFloat()
             {
