@@ -90,7 +90,7 @@ namespace FrankyCLI
 
                 //Figure out the text                
                 string amountstring = level.ToString();
-                string editorid = "atbb_" + originalmod.EditorID + "_" + stats.Name + "_" +  amountstring;                
+                string omodeditorid = "atbb_omod_" + originalmod.EditorID + "_" + stats.Name + "_" +  amountstring;                
                 
                 //Global
                 string GlobalEditorid = "atbb_g_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
@@ -104,7 +104,7 @@ namespace FrankyCLI
                 //Add OMOD
                 var omod = new WeaponModification(myMod)
                 {
-                    EditorID = editorid,
+                    EditorID = omodeditorid,
                     Name = originalmod.Name,
                     Description = stats.Description,
                     Model = originalmod.Model,
@@ -147,9 +147,11 @@ namespace FrankyCLI
                 omod.Name = omodName;// + " " + StatTag;
                 myMod.ObjectModifications.Add(omod);
                 //Add Book
+                string editorBookid = "atbb_book_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
+
                 var book = new Book(myMod)
                 {
-                    EditorID = editorid,
+                    EditorID = editorBookid,
                     ObjectBounds = new ObjectBounds(),
                     Transforms = new Transforms(),
                     Name = ingameName,
@@ -186,10 +188,11 @@ namespace FrankyCLI
                 //Add Construct
                 IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(StarfieldModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
                 IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
+                string coeditorid = "atbb_co_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
 
                 var co = new ConstructibleObject(myMod)
                 {
-                    EditorID = editorid,
+                    EditorID = coeditorid,
                     Description = Description,
                     CreatedObject = targetmod,
                     WorkbenchKeyword = WorkbenchWeaponKeyword,
@@ -410,7 +413,10 @@ namespace FrankyCLI
                     foreach (var objmod in SourceESM.ObjectModifications)
                     {                        
                         string coid = "co_gun_" + objmod.EditorID;
-                        ModCOMAPPER.Add(coid, objmod.EditorID);
+                        if (!ModCOMAPPER.ContainsKey(coid))
+                        {
+                            ModCOMAPPER.Add(coid, objmod.EditorID);
+                        }
 
                         if (comap.ContainsKey(coid))
                         {
