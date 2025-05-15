@@ -39,6 +39,8 @@ namespace FrankyCLI
     public class BaseUpgrade
     {
         public string WeaponName;
+        public string FixedWeaponName;
+
         public string BaseWeaponModID;
         public string BaseConstructableEditorId;
         public string AttachPoint;
@@ -92,6 +94,7 @@ namespace FrankyCLI
         public static Dictionary<string,LevelStyle> levelStyles = new Dictionary<string, LevelStyle>();
         public static ThemeFile LoadedThemeFile = new ThemeFile();
 
+        //Attach a new stat to an OMOD.
         public static void AddStat(string statname,ref WeaponModification omod,ref string Description, ref string stattag, int step, bool silent)
         {
             var stat = StatBank[statname];
@@ -238,10 +241,12 @@ namespace FrankyCLI
             }
         }
 
+        
         static Random random = new Random();
+        //Controls the Levels/Steps between the different versions of a upgrade
         public static void BuildLevelStyles()
         {
-            int Standardstepcount = 1;
+            int Standardstepcount = 10;
             //Standard
             levelStyles.Add("Standard_Common", new LevelStyle
             {
@@ -410,6 +415,24 @@ namespace FrankyCLI
             foreach(var entry in WordReplaceCache)
             {
                 result = result.Replace(entry.Key, entry.Value);
+            }
+            return result;
+        }
+
+        public static Dictionary<string, string> WeaponNameCache = new Dictionary<string, string>();
+        public static string RenameWeapons(string input)
+        {
+            if (WeaponNameCache.Count == 0)
+            {
+                WeaponNameCache = YamlImporter.getObjectFrom<Dictionary<string, string>>("Data/WeaponNameMap.yaml");
+            }
+            string result = input;
+            foreach (var entry in WeaponNameCache)
+            {
+                if (result == entry.Key)
+                {
+                    result = entry.Value;
+                }
             }
             return result;
         }

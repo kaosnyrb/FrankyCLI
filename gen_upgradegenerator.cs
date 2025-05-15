@@ -116,7 +116,7 @@ namespace FrankyCLI
                     Properties = originalmod.Properties,
                 };
                 //We need to build the UI based on the weapon stats.
-                string ingameName = upgrade.WeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
+                string ingameName = upgrade.FixedWeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
                 ingameName = gen_upgradegenerator_utils.ReplaceWords(ingameName);
                 ingameName = ingameName.Trim();
                 //Remove the DontShowInUI [KYWD:00374EFA]
@@ -159,7 +159,7 @@ namespace FrankyCLI
                     {
                         File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("Items\\DataSlate\\DataSlate01.nif"),
                     },
-                    Description = "Blueprint for a Avontech Blacksite " + upgrade.WeaponName + " weapon mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
+                    Description = "Blueprint for a Avontech Blacksite " + upgrade.FixedWeaponName + " weapon mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
                     Value = 500,
                     Weight = 0,
                     VirtualMachineAdapter = new VirtualMachineAdapter()
@@ -463,7 +463,9 @@ namespace FrankyCLI
                                     {
                                         BaseWeaponModID = objmod.EditorID,
                                         BaseConstructableEditorId = coid,
+                                        FixedWeaponName = gen_upgradegenerator_utils.RenameWeapons(weapon),
                                         WeaponName = weapon,
+
                                         AttachPoint = attach,
                                         formKey = objmod.FormKey
                                     };
@@ -513,12 +515,12 @@ namespace FrankyCLI
                             EditorID = "atbb_lvlbook" + upgrade.Value.WeaponName,
                             ObjectBounds = new ObjectBounds(),
                             Transforms = new Transforms() { Workbench = Inv_Guns_Workbench3D_01 },
-                            Name = upgrade.Value.WeaponName + "",
+                            Name = upgrade.Value.FixedWeaponName + "",
                             Model = new Model()
                             {
                                 File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(gen_upgradegenerator_utils.GetWeaponModel(upgrade.Value.WeaponName)),
                             },
-                            Description = "Blueprint for a Avontech Blacksite " + upgrade.Value.WeaponName + " weapon mod.",
+                            Description = "Blueprint for a Avontech Blacksite " + upgrade.Value.FixedWeaponName + " weapon mod.",
                             Value = 500,
                             Weight = 0,
                             VirtualMachineAdapter = new VirtualMachineAdapter()
@@ -550,7 +552,7 @@ namespace FrankyCLI
                         var co = new ConstructibleObject(myMod)
                         {
                             EditorID = "atbb_lvlbookco_" + upgrade.Value.WeaponName,
-                            Description = "Create a Levelled Avontech Blacksite Blueprint Weapon Upgrade for the " + upgrade.Value.WeaponName,
+                            Description = "Create a Levelled Avontech Blacksite Blueprint Weapon Upgrade for the " + upgrade.Value.FixedWeaponName,
                             CreatedObject = book.ToNullableLink<IConstructibleObjectTargetGetter>(),
                             WorkbenchKeyword = WorkbenchBlacksiteKeyword,
                             AmountProduced = 1,
