@@ -26,23 +26,29 @@ namespace FrankyCLI
 
         public static int DamageMode = 0;//0 Energy , 1 EM, 2 Phys
 
-        public static List<string> MissingCOs = new List<string>();
-
+        // The Original Mod we're adding to, saves looking it up each time.
         public static Dictionary<string, WeaponModification> modcache = new Dictionary<string, WeaponModification>();
-        public static Dictionary<string, ConstructibleObject> cocache = new Dictionary<string, ConstructibleObject>();
-
+        
+        //The weapon upgrades we'll be adding to
         public static Dictionary<string, BaseUpgrade> UpgradeLib = new Dictionary<string, BaseUpgrade>();
+        //The stat upgrades we'll be adding
         public static Dictionary<string, StatSet> StatLib = new Dictionary<string, StatSet>();
 
+        //Where the weapon is
         public static IStarfieldModGetter SourceESM;
+        //The base starfield ESM (for workbench, resources etc)
         public static IStarfieldModGetter StarfieldESM;
+        
         public static ModKey StarfieldModKey;
         public static ModKey BlackSiteModKey;
 
+        //Maps Construcable object names to another, might be reduntant...?
         public static Dictionary<string, string> ModCOMAPPER = new Dictionary<string, string>();//Used to build the CO map
 
-
+        //The full list of things we create
         public static string csvoutput;
+
+        //This function creates a single upgrade
         public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step)
         {
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
@@ -51,6 +57,7 @@ namespace FrankyCLI
                 WeaponModification originalmod = null;             
                 try
                 {
+                    //Try and use the cache first as it's quicker.
                     if (modcache.ContainsKey(upgrade.BaseWeaponModID.ToLower()))
                     {
                         originalmod = modcache[upgrade.BaseWeaponModID.ToLower()].DeepCopy();
@@ -70,6 +77,7 @@ namespace FrankyCLI
                             originalmod = modcache[targetID.ToLower()].DeepCopy();
                         }
                     }
+                    //Not sure we can ever get to this point, we've already found the mod before we called this function.
                     if (originalmod == null) {
                         Console.WriteLine("Missing OM: " + upgrade.BaseWeaponModID);
                         return false;
@@ -82,6 +90,7 @@ namespace FrankyCLI
                 }
 
                 //If we're a Unique_Legendary then calc the level.
+                //While this means upgrades could be low level for there power you still need to find them. Adds spice
                 if (level == -1)
                 {
                     Random random = new Random();
@@ -92,7 +101,7 @@ namespace FrankyCLI
                 string amountstring = level.ToString();
                 string omodeditorid = "atbb_omod_" + originalmod.EditorID + "_" + stats.Name + "_" +  amountstring;                
                 
-                //Global
+                //Global flag used to mark if you know the recipe
                 string GlobalEditorid = "atbb_g_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
                 var global = new Global(myMod)
                 {
@@ -101,7 +110,7 @@ namespace FrankyCLI
                 };
                 myMod.Globals.Add(global);
 
-                //Add OMOD
+                //Add OMOD - Actual weapon upgrade
                 var omod = new WeaponModification(myMod)
                 {
                     EditorID = omodeditorid,
@@ -116,10 +125,12 @@ namespace FrankyCLI
                     Properties = originalmod.Properties,
                 };
                 //We need to build the UI based on the weapon stats.
+                //Played around with this a few times, currently we just use a MK-IV roman style name.
                 string ingameName = upgrade.FixedWeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
+                //Remove extra bloat like "Standard Barrel"
                 ingameName = gen_upgradegenerator_utils.ReplaceWords(ingameName);
                 ingameName = ingameName.Trim();
-                //Remove the DontShowInUI [KYWD:00374EFA]
+                //Remove the DontShowInUI [KYWD:00374EFA]. We want all upgrades with stats visable.
                 for (int i = 0; i < omod.Properties.Count; i++)
                 {
                     try
@@ -138,6 +149,7 @@ namespace FrankyCLI
                 omodName = omodName.Trim();
                 string Description = "";
                 string StatTag = "";
+                // Add the stats to the Weapon Upgrade
                 foreach (var statname in stats.stats)
                 {
                     gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,ref StatTag,step, false);                    
@@ -404,8 +416,16 @@ namespace FrankyCLI
                 }
                 gen_upgradegenerator_utils.LoadThemeFile(request.ThemeFile);
 
+                List<string> upgrades = new List<string>();
+                foreach (var stat in StatLib)
+                {
+                    upgrades.Add(stat.Value.Name + " : " + stat.Value.Description);
+                }
+                upgrades.Sort();
+                YamlExporter.WriteObjToYaml("Statlib.yaml", upgrades);
 
-                
+
+
                 List<string> Weapons = request.Weapons;
                 //Some contstructable objects don't follow the name format so we manually map them
                 var comap = gen_upgradegenerator_utils.GetCOMap();
@@ -564,6 +584,40 @@ namespace FrankyCLI
                         };
                         myMod.ConstructibleObjects.Add(co);
                     }
+
+
+                    //Upgrade Splitter
+                    // Leveled lists can only support 256 entries, split the upgrades amoung X entries to increase our count.
+                    int splitcount = 5;//Number of bucket per part
+
+                    //Top Level
+                    //We still have a top level node that will be what the workbench creates, it's just a list of lists now.
+                    var parent = new LeveledItem(myMod)
+                    {
+                        EditorID = levelledlist,
+                        Entries = new ExtendedList<LeveledItemEntry>(),
+                        Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
+                    };
+                    //Node
+                    for (int i = 0; i < splitcount; i++)
+                    {
+                        var child = new LeveledItem(myMod)
+                        {
+                            EditorID = levelledlist + "_split_" + i,
+                            Entries = new ExtendedList<LeveledItemEntry>(),
+                            Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
+                        };
+                        myMod.LeveledItems.Add(child);
+                        parent.Entries.Add(new LeveledItemEntry()
+                        {
+                            Reference = child.ToLink<IItemGetter>(),
+                            Level = 1,
+                            Count = 1
+                        });
+                    }
+                    myMod.LeveledItems.Add(parent);
+
+                    /*
                     //Add the levelled list for the upgrade/weapon pairing - used in crafting
                     myMod.LeveledItems.Add(new LeveledItem(myMod)
                     {
@@ -571,10 +625,12 @@ namespace FrankyCLI
                         Entries = new ExtendedList<LeveledItemEntry>(),
                         Flags = LeveledItem.Flag.CalculateFromAllLevelsLessThanOrEqualPlayer
                     });
+                    */
 
-                    
+                    Random rand = new Random();
                     foreach (var stat in StatLib)
                     {
+                        int StatBucket = rand.Next(splitcount);
                         Console.WriteLine(count + "/" + total + " : " + upgrade.Key + stat.Value.Name + " " + UpgradeLib[upgrade.Key].AttachPoint);
                         count++;
                         if (stat.Value.DamageMode == -1 || stat.Value.DamageMode == DamageMode || DamageMode == -1)
@@ -587,7 +643,7 @@ namespace FrankyCLI
                                     for (int i = 0; i < levelStyle.StepCount; i++)
                                     {
                                         //Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
-                                        CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist, levelStyle.startLevel + (i * levelStyle.LevelPerStep), i);
+                                        CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist + "_split_" + StatBucket, levelStyle.startLevel + (i * levelStyle.LevelPerStep), i);
                                     }
                                 }
                             }
@@ -654,12 +710,7 @@ namespace FrankyCLI
             stopwatch.Stop();
 
             //YamlExporter.WriteObjToYaml("COMAPPERTEMP.yaml", ModCOMAPPER);
-            
             Console.WriteLine(stopwatch.Elapsed.ToString());
-            foreach(var miss in MissingCOs)
-            {
-                Console.WriteLine(miss);
-            }            
             return 0;
         }
     }
