@@ -49,286 +49,285 @@ namespace FrankyCLI
         public static string csvoutput;
 
         //This function creates a single upgrade
-        public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step)
+        public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
         {
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+
+            //Find the weapon mod and recipe to copy
+            WeaponModification originalmod = null;             
+            try
             {
-                //Find the weapon mod and recipe to copy
-                WeaponModification originalmod = null;             
-                try
+                //Try and use the cache first as it's quicker.
+                if (modcache.ContainsKey(upgrade.BaseWeaponModID.ToLower()))
                 {
-                    //Try and use the cache first as it's quicker.
-                    if (modcache.ContainsKey(upgrade.BaseWeaponModID.ToLower()))
-                    {
-                        originalmod = modcache[upgrade.BaseWeaponModID.ToLower()].DeepCopy();
-                    }
-                    else
-                    {
-                        //Search for the mod
-                        string targetID = upgrade.BaseWeaponModID;
+                    originalmod = modcache[upgrade.BaseWeaponModID.ToLower()].DeepCopy();
+                }
+                else
+                {
+                    //Search for the mod
+                    string targetID = upgrade.BaseWeaponModID;
 
-                        var match = SourceESM.ObjectModifications
-                            .FirstOrDefault(obj => string.Equals(obj.EditorID, targetID, StringComparison.OrdinalIgnoreCase));
+                    var match = SourceESM.ObjectModifications
+                        .FirstOrDefault(obj => string.Equals(obj.EditorID, targetID, StringComparison.OrdinalIgnoreCase));
 
-                        if (match != null)
-                        {
-                            var copy = (WeaponModification)match.DeepCopy();
-                            modcache[targetID.ToLower()] = copy;
-                            originalmod = modcache[targetID.ToLower()].DeepCopy();
-                        }
-                    }
-                    //Not sure we can ever get to this point, we've already found the mod before we called this function.
-                    if (originalmod == null) {
-                        Console.WriteLine("Missing OM: " + upgrade.BaseWeaponModID);
-                        return false;
+                    if (match != null)
+                    {
+                        var copy = (WeaponModification)match.DeepCopy();
+                        modcache[targetID.ToLower()] = copy;
+                        originalmod = modcache[targetID.ToLower()].DeepCopy();
                     }
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Failed to file: " + upgrade.BaseConstructableEditorId);
+                //Not sure we can ever get to this point, we've already found the mod before we called this function.
+                if (originalmod == null) {
+                    Console.WriteLine("Missing OM: " + upgrade.BaseWeaponModID);
                     return false;
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Failed to file: " + upgrade.BaseConstructableEditorId);
+                return false;
+            }
 
-                //If we're a Unique_Legendary then calc the level.
-                //While this means upgrades could be low level for there power you still need to find them. Adds spice
-                if (level == -1)
-                {
-                    Random random = new Random();
-                    level = 50 + random.Next(150);
-                }
+            //If we're a Unique_Legendary then calc the level.
+            //While this means upgrades could be low level for there power you still need to find them. Adds spice
+            if (level == -1)
+            {
+                Random random = new Random();
+                level = 50 + random.Next(150);
+            }
 
-                //Figure out the text                
-                string amountstring = level.ToString();
-                string omodeditorid = "atbb_omod_" + originalmod.EditorID + "_" + stats.Name + "_" +  amountstring;                
+            //Figure out the text                
+            string amountstring = level.ToString();
+            string omodeditorid = "atbb_omod_" + originalmod.EditorID + "_" + stats.Name + "_" +  amountstring;                
                 
-                //Global flag used to mark if you know the recipe
-                string GlobalEditorid = "atbb_g_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
-                var global = new Global(myMod)
-                {
-                    EditorID = GlobalEditorid,
-                    Data = 0
-                };
-                myMod.Globals.Add(global);
+            //Global flag used to mark if you know the recipe
+            string GlobalEditorid = "atbb_g_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
+            var global = new Global(myMod)
+            {
+                EditorID = GlobalEditorid,
+                Data = 0
+            };
+            myMod.Globals.Add(global);
 
-                //Add OMOD - Actual weapon upgrade
-                var omod = new WeaponModification(myMod)
+            //Add OMOD - Actual weapon upgrade
+            var omod = new WeaponModification(myMod)
+            {
+                EditorID = omodeditorid,
+                Name = originalmod.Name,
+                Description = stats.Description,
+                Model = originalmod.Model,
+                TargetOmodKeywords = originalmod.TargetOmodKeywords,
+                FilterKeywords = originalmod.FilterKeywords,
+                AttachPoint = originalmod.AttachPoint,
+                AttachParentSlots = originalmod.AttachParentSlots,
+                Includes = originalmod.Includes,
+                Properties = originalmod.Properties,
+            };
+            //We need to build the UI based on the weapon stats.
+            //Played around with this a few times, currently we just use a MK-IV roman style name.
+            string ingameName = upgrade.FixedWeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
+            //Remove extra bloat like "Standard Barrel"
+            ingameName = gen_upgradegenerator_utils.ReplaceWords(ingameName);
+            ingameName = ingameName.Trim();
+            //Remove the DontShowInUI [KYWD:00374EFA]. We want all upgrades with stats visable.
+            for (int i = 0; i < omod.Properties.Count; i++)
+            {
+                try
                 {
-                    EditorID = omodeditorid,
-                    Name = originalmod.Name,
-                    Description = stats.Description,
-                    Model = originalmod.Model,
-                    TargetOmodKeywords = originalmod.TargetOmodKeywords,
-                    FilterKeywords = originalmod.FilterKeywords,
-                    AttachPoint = originalmod.AttachPoint,
-                    AttachParentSlots = originalmod.AttachParentSlots,
-                    Includes = originalmod.Includes,
-                    Properties = originalmod.Properties,
-                };
-                //We need to build the UI based on the weapon stats.
-                //Played around with this a few times, currently we just use a MK-IV roman style name.
-                string ingameName = upgrade.FixedWeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
-                //Remove extra bloat like "Standard Barrel"
-                ingameName = gen_upgradegenerator_utils.ReplaceWords(ingameName);
-                ingameName = ingameName.Trim();
-                //Remove the DontShowInUI [KYWD:00374EFA]. We want all upgrades with stats visable.
-                for (int i = 0; i < omod.Properties.Count; i++)
-                {
-                    try
+                    if (((ObjectModFormLinkIntProperty<Weapon.Property>)omod.Properties[i]).Record.FormKey.ID == 0x00374EFA)
                     {
-                        if (((ObjectModFormLinkIntProperty<Weapon.Property>)omod.Properties[i]).Record.FormKey.ID == 0x00374EFA)
+                        omod.Properties.RemoveAt(i);
+                        break;
+                    }
+                }
+                catch { }
+            }
+            //The name of the OMOD contains all it's stats.
+            string omodName = stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + originalmod.Name;
+            omodName = gen_upgradegenerator_utils.ReplaceWords(omodName);
+            omodName = omodName.Trim();
+            string Description = "";
+            string StatTag = "";
+            // Add the stats to the Weapon Upgrade
+            foreach (var statname in stats.stats)
+            {
+                gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,ref StatTag,step, false);                    
+            }
+            string justnumberdesc = Description;
+            Description = stats.Description + Description;
+            omod.Name = omodName;// + " " + StatTag;
+            myMod.ObjectModifications.Add(omod);
+            //Add Book
+            string editorBookid = "atbb_book_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
+            IFormLinkNullable<ITransformGetter> Inv_DefaultTransform_UP_X90_Y160_Z270_DataSlates = new FormKey(StarfieldModKey, 0x000162A7).ToNullableLink<ITransformGetter>();//Inv_DefaultTransform_UP_X90_Y160_Z270_DataSlates [TRNS:000162A7]
+
+            var book = new Book(myMod)
+            {
+                EditorID = editorBookid,
+                ObjectBounds = new ObjectBounds(),
+                Transforms = new Transforms() { Inventory = Inv_DefaultTransform_UP_X90_Y160_Z270_DataSlates },
+                Name = ingameName,
+                Model = new Model()
+                {
+                    File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("avontechblacksite\\dataslate.nif"),
+                },
+                Description = "Blueprint for a Avontech Blacksite " + upgrade.FixedWeaponName + " weapon mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
+                Value = 500,
+                Weight = 0,
+                VirtualMachineAdapter = new VirtualMachineAdapter()
+                {
+                    Scripts = new ExtendedList<ScriptEntry>()
+                    {
+                        new ScriptEntry()
                         {
-                            omod.Properties.RemoveAt(i);
+                            Name = "atbb_recipepickup",
+                            Properties = new ExtendedList<ScriptProperty>()
+                            {
+                                new ScriptObjectProperty()
+                                {
+                                    Name = "recipeglobal",
+                                    Object = global.ToLink<IStarfieldMajorRecordGetter>(),
+                                }
+                            }
+
+                        }
+                    }
+                },
+            };
+            //Console.WriteLine("Book ID:" + book.FormKey.ToString());
+            myMod.Books.Add(book);
+
+            //Add Construct
+            IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(StarfieldModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
+            IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
+            string coeditorid = "atbb_co_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
+
+            var co = new ConstructibleObject(myMod)
+            {
+                EditorID = coeditorid,
+                Description = Description,
+                CreatedObject = targetmod,
+                WorkbenchKeyword = WorkbenchWeaponKeyword,
+                AmountProduced = 1,
+                LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
+                Conditions = new ExtendedList<Condition>(),
+                RequiredPerks = new ExtendedList<ConstructibleRequiredPerk>()
+            };
+            if (stats.RequiredPerk.Length > 0)
+            {
+                var perkuint = gen_upgradegenerator_utils.GetPerk(stats.RequiredPerk);
+                IFormLinkNullable<IPerkGetter> PerkForm = new FormKey(StarfieldModKey, perkuint).ToNullableLink<IPerkGetter>();
+
+                co.RequiredPerks.Add(new ConstructibleRequiredPerk(){
+                    Perk = PerkForm,
+                    Rank = stats.RequiredPerkLevel
+                });                    
+            }
+            //Research Requirements
+            Condition Research = null;
+            Research = gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
+            //Not all upgrades need research.
+            if (Research != null)
+            {
+                co.Conditions.Add(Research);
+            }
+
+            // Build Cost
+            co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(StarfieldModKey, level);
+                
+            // Global Unlock
+            var link = global.ToLink<IGlobalGetter>();
+            var con = new GetGlobalValueConditionData();
+            con.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(con, link.FormKey);
+            co.Conditions.Add(new ConditionFloat()
+            {
+                Data = con,
+                CompareOperator = CompareOperator.GreaterThan,
+                ComparisonValue = 0
+            });
+            // Complete the Weapon CO
+            myMod.ConstructibleObjects.Add(co);
+
+            //Add Book to LevelledList
+            foreach( var lvl in myMod.LeveledItems)
+            {
+                if (lvl.EditorID.Contains(LevelledListContains))
+                {
+                    var bookentry = new LeveledItemEntry()
+                    {
+                        Count = 1,
+                        ChanceNone = Percent.Zero,
+                        Level = (short)level,
+                        Reference = book.ToLink<IItemGetter>(),
+                        Conditions = new ExtendedList<Condition>(),
+                    };
+                    bookentry.Conditions.Add(new ConditionFloat()
+                    {
+                        Data = con,
+                        CompareOperator = CompareOperator.EqualTo,
+                        ComparisonValue = 0
+                    });
+                    lvl.Entries.Add(bookentry);     
+                }
+            }
+            //Add to modgroups
+            IFormLinkNullable<IAObjectModificationGetter> includemod = omod.FormKey.ToNullableLink<IAObjectModificationGetter>();
+            //Does the modgroup already exist?
+            byte safelevel = 0;
+            if (level < 255) { safelevel = (byte)level; }
+            else safelevel = 255;
+
+            bool added = false;
+            foreach (var modgroup in myMod.ObjectModifications)
+            {
+                foreach (var includedobjmod in modgroup.Includes)
+                {
+                    if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                    {
+                        if (!added)
+                        {
+                            modgroup.Includes.Add(new ObjectModInclude()
+                            {
+                                DoNotUseAll = true,
+                                MinimumLevel = safelevel,
+                                Mod = includemod,
+                                Optional = true
+                            });
+                            added = true;
                             break;
                         }
                     }
-                    catch { }
                 }
-                //The name of the OMOD contains all it's stats.
-                string omodName = stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + originalmod.Name;
-                omodName = gen_upgradegenerator_utils.ReplaceWords(omodName);
-                omodName = omodName.Trim();
-                string Description = "";
-                string StatTag = "";
-                // Add the stats to the Weapon Upgrade
-                foreach (var statname in stats.stats)
+            }
+            //Can't find it so add it to our mod.
+            if (!added)
+            {
+                foreach (var objmod in SourceESM.ObjectModifications)
                 {
-                    gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,ref StatTag,step, false);                    
-                }
-                string justnumberdesc = Description;
-                Description = stats.Description + Description;
-                omod.Name = omodName;// + " " + StatTag;
-                myMod.ObjectModifications.Add(omod);
-                //Add Book
-                string editorBookid = "atbb_book_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
-
-                var book = new Book(myMod)
-                {
-                    EditorID = editorBookid,
-                    ObjectBounds = new ObjectBounds(),
-                    Transforms = new Transforms(),
-                    Name = ingameName,
-                    Model = new Model()
-                    {
-                        File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("Items\\DataSlate\\DataSlate01.nif"),
-                    },
-                    Description = "Blueprint for a Avontech Blacksite " + upgrade.FixedWeaponName + " weapon mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
-                    Value = 500,
-                    Weight = 0,
-                    VirtualMachineAdapter = new VirtualMachineAdapter()
-                    {
-                        Scripts = new ExtendedList<ScriptEntry>()
-                        {
-                            new ScriptEntry()
-                            {
-                                Name = "atbb_recipepickup",
-                                Properties = new ExtendedList<ScriptProperty>()
-                                {
-                                    new ScriptObjectProperty()
-                                    {
-                                        Name = "recipeglobal",
-                                        Object = global.ToLink<IStarfieldMajorRecordGetter>(),
-                                    }
-                                }
-
-                            }
-                        }
-                    },
-                };
-                //Console.WriteLine("Book ID:" + book.FormKey.ToString());
-                myMod.Books.Add(book);
-
-                //Add Construct
-                IFormLinkNullable<IKeywordGetter> WorkbenchWeaponKeyword = new FormKey(StarfieldModKey, 0x002CE1C0).ToNullableLink<IKeywordGetter>();//WorkbenchWeaponKeyword "Weapons" [KYWD:002CE1C0]
-                IFormLinkNullable<IConstructibleObjectTargetGetter> targetmod = omod.FormKey.ToNullableLink<IConstructibleObjectTargetGetter>();
-                string coeditorid = "atbb_co_" + originalmod.EditorID + "_" + stats.Name + "_" + amountstring;
-
-                var co = new ConstructibleObject(myMod)
-                {
-                    EditorID = coeditorid,
-                    Description = Description,
-                    CreatedObject = targetmod,
-                    WorkbenchKeyword = WorkbenchWeaponKeyword,
-                    AmountProduced = 1,
-                    LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
-                    Conditions = new ExtendedList<Condition>(),
-                    RequiredPerks = new ExtendedList<ConstructibleRequiredPerk>()
-                };
-                if (stats.RequiredPerk.Length > 0)
-                {
-                    var perkuint = gen_upgradegenerator_utils.GetPerk(stats.RequiredPerk);
-                    IFormLinkNullable<IPerkGetter> PerkForm = new FormKey(StarfieldModKey, perkuint).ToNullableLink<IPerkGetter>();
-
-                    co.RequiredPerks.Add(new ConstructibleRequiredPerk(){
-                        Perk = PerkForm,
-                        Rank = stats.RequiredPerkLevel
-                    });                    
-                }
-                //Research Requirements
-                Condition Research = null;
-                Research = gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
-                //Not all upgrades need research.
-                if (Research != null)
-                {
-                    co.Conditions.Add(Research);
-                }
-
-                // Build Cost
-                co.ConstructableComponents = gen_upgradegenerator_utils.GetUpgradeCost(StarfieldModKey, level);
-                
-                // Global Unlock
-                var link = global.ToLink<IGlobalGetter>();
-                var con = new GetGlobalValueConditionData();
-                con.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(con, link.FormKey);
-                co.Conditions.Add(new ConditionFloat()
-                {
-                    Data = con,
-                    CompareOperator = CompareOperator.GreaterThan,
-                    ComparisonValue = 0
-                });
-                // Complete the Weapon CO
-                myMod.ConstructibleObjects.Add(co);
-
-                //Add Book to LevelledList
-                foreach( var lvl in myMod.LeveledItems)
-                {
-                    if (lvl.EditorID.Contains(LevelledListContains))
-                    {
-                        var bookentry = new LeveledItemEntry()
-                        {
-                            Count = 1,
-                            ChanceNone = Percent.Zero,
-                            Level = (short)level,
-                            Reference = book.ToLink<IItemGetter>(),
-                            Conditions = new ExtendedList<Condition>(),
-                        };
-                        bookentry.Conditions.Add(new ConditionFloat()
-                        {
-                            Data = con,
-                            CompareOperator = CompareOperator.EqualTo,
-                            ComparisonValue = 0
-                        });
-                        lvl.Entries.Add(bookentry);     
-                    }
-                }
-                //Add to modgroups
-                IFormLinkNullable<IAObjectModificationGetter> includemod = omod.FormKey.ToNullableLink<IAObjectModificationGetter>();
-                //Does the modgroup already exist?
-                byte safelevel = 0;
-                if (level < 255) { safelevel = (byte)level; }
-                else safelevel = 255;
-
-                bool added = false;
-                foreach (var modgroup in myMod.ObjectModifications)
-                {
-                    foreach (var includedobjmod in modgroup.Includes)
+                    foreach (var includedobjmod in objmod.Includes)
                     {
                         if (includedobjmod.Mod.FormKey == originalmod.FormKey)
                         {
-                            if (!added)
+                            //This mod is in this this modgroup
+                            var group = objmod.DeepCopy();
+                            group.Includes.Add(new ObjectModInclude()
                             {
-                                modgroup.Includes.Add(new ObjectModInclude()
-                                {
-                                    DoNotUseAll = true,
-                                    MinimumLevel = safelevel,
-                                    Mod = includemod,
-                                    Optional = true
-                                });
-                                added = true;
-                                break;
-                            }
+                                DoNotUseAll = true,
+                                MinimumLevel = safelevel,
+                                Mod = includemod,
+                                Optional = true
+                            });
+                            myMod.ObjectModifications.Add(group);
+                            added = true;
+                            break;
                         }
                     }
                 }
-                //Can't find it so add it to our mod.
-                if (!added)
-                {
-                    foreach (var objmod in SourceESM.ObjectModifications)
-                    {
-                        foreach (var includedobjmod in objmod.Includes)
-                        {
-                            if (includedobjmod.Mod.FormKey == originalmod.FormKey)
-                            {
-                                //This mod is in this this modgroup
-                                var group = objmod.DeepCopy();
-                                group.Includes.Add(new ObjectModInclude()
-                                {
-                                    DoNotUseAll = true,
-                                    MinimumLevel = safelevel,
-                                    Mod = includemod,
-                                    Optional = true
-                                });
-                                myMod.ObjectModifications.Add(group);
-                                added = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-
-                //Write to CSV
-                csvoutput += upgrade.WeaponName + "," + upgrade.BaseWeaponModID + "," + level + "," + omodName + "," + justnumberdesc + "\n";
             }
+
+
+            //Write to CSV
+            csvoutput += upgrade.WeaponName + "," + upgrade.BaseWeaponModID + "," + level + "," + omodName + "," + justnumberdesc + "\n";
             return true;
         }
 
@@ -643,7 +642,7 @@ namespace FrankyCLI
                                     for (int i = 0; i < levelStyle.StepCount; i++)
                                     {
                                         //Console.WriteLine("Creating " + upgrade.Key + " " + stat.Key);
-                                        CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist + "_split_" + StatBucket, levelStyle.startLevel + (i * levelStyle.LevelPerStep), i);
+                                        CreateUpgrade(myMod, UpgradeLib[upgrade.Key], StatLib[stat.Key], levelledlist + "_split_" + StatBucket, levelStyle.startLevel + (i * levelStyle.LevelPerStep), i, env);
                                     }
                                 }
                             }

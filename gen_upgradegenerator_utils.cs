@@ -246,7 +246,7 @@ namespace FrankyCLI
         //Controls the Levels/Steps between the different versions of a upgrade
         public static void BuildLevelStyles()
         {
-            int Standardstepcount = 10;
+            int Standardstepcount = 1;
             //Standard
             levelStyles.Add("Standard_Common", new LevelStyle
             {
