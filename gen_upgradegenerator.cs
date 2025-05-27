@@ -45,6 +45,9 @@ namespace FrankyCLI
         //Maps Construcable object names to another, might be reduntant...?
         public static Dictionary<string, string> ModCOMAPPER = new Dictionary<string, string>();//Used to build the CO map
 
+        //Maps Levelled Items to the Editor Id, used when adding to the crafting book.
+        public static Dictionary<string, LeveledItem> LevelledBooks = new Dictionary<string, LeveledItem>();
+
         //The full list of things we create
         public static string csvoutput;
 
@@ -148,10 +151,12 @@ namespace FrankyCLI
             omodName = omodName.Trim();
             string Description = "";
             string StatTag = "";
+
+            bool IsLootable = true;
             // Add the stats to the Weapon Upgrade
             foreach (var statname in stats.stats)
             {
-                gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,ref StatTag,step, false);                    
+                gen_upgradegenerator_utils.AddStat(statname, ref omod, ref Description,ref StatTag,step, false, ref IsLootable);                    
             }
             string justnumberdesc = Description;
             Description = stats.Description + Description;
@@ -248,84 +253,95 @@ namespace FrankyCLI
             // Complete the Weapon CO
             myMod.ConstructibleObjects.Add(co);
 
-            //Add Book to LevelledList
-            foreach( var lvl in myMod.LeveledItems)
+            
+            if (!LevelledBooks.ContainsKey(LevelledListContains))
             {
-                if (lvl.EditorID.Contains(LevelledListContains))
+                foreach (var lvl in myMod.LeveledItems)
                 {
-                    var bookentry = new LeveledItemEntry()
+                    if (lvl.EditorID.Contains(LevelledListContains))
                     {
-                        Count = 1,
-                        ChanceNone = Percent.Zero,
-                        Level = (short)level,
-                        Reference = book.ToLink<IItemGetter>(),
-                        Conditions = new ExtendedList<Condition>(),
-                    };
-                    bookentry.Conditions.Add(new ConditionFloat()
-                    {
-                        Data = con,
-                        CompareOperator = CompareOperator.EqualTo,
-                        ComparisonValue = 0
-                    });
-                    lvl.Entries.Add(bookentry);     
-                }
-            }
-            //Add to modgroups
-            IFormLinkNullable<IAObjectModificationGetter> includemod = omod.FormKey.ToNullableLink<IAObjectModificationGetter>();
-            //Does the modgroup already exist?
-            byte safelevel = 0;
-            if (level < 255) { safelevel = (byte)level; }
-            else safelevel = 255;
-
-            bool added = false;
-            foreach (var modgroup in myMod.ObjectModifications)
-            {
-                foreach (var includedobjmod in modgroup.Includes)
-                {
-                    if (includedobjmod.Mod.FormKey == originalmod.FormKey)
-                    {
-                        if (!added)
-                        {
-                            modgroup.Includes.Add(new ObjectModInclude()
-                            {
-                                DoNotUseAll = true,
-                                MinimumLevel = safelevel,
-                                Mod = includemod,
-                                Optional = true
-                            });
-                            added = true;
-                            break;
-                        }
+                        LevelledBooks.Add(LevelledListContains, lvl);
+                        break;
                     }
                 }
             }
-            //Can't find it so add it to our mod.
-            if (!added)
+
+            //Add Book to LevelledList
+            var bookentry = new LeveledItemEntry()
             {
-                foreach (var objmod in SourceESM.ObjectModifications)
+                Count = 1,
+                ChanceNone = Percent.Zero,
+                Level = (short)level,
+                Reference = book.ToLink<IItemGetter>(),
+                Conditions = new ExtendedList<Condition>(),
+            };
+            bookentry.Conditions.Add(new ConditionFloat()
+            {
+                Data = con,
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 0
+            });
+            LevelledBooks[LevelledListContains].Entries.Add(bookentry);     
+
+            // Only allow the stats that are visable on the item card to be looted.
+            if (IsLootable)
+            {
+                //Add to modgroups
+                IFormLinkNullable<IAObjectModificationGetter> includemod = omod.FormKey.ToNullableLink<IAObjectModificationGetter>();
+                //Does the modgroup already exist?
+                byte safelevel = 0;
+                if (level < 255) { safelevel = (byte)level; }
+                else safelevel = 255;
+
+                bool added = false;
+                for (int i = 0; i < myMod.ObjectModifications.Count && !added; i++)
                 {
-                    foreach (var includedobjmod in objmod.Includes)
+                    foreach (var includedobjmod in myMod.ObjectModifications.ElementAt(i).Includes)
                     {
                         if (includedobjmod.Mod.FormKey == originalmod.FormKey)
                         {
-                            //This mod is in this this modgroup
-                            var group = objmod.DeepCopy();
-                            group.Includes.Add(new ObjectModInclude()
+                            if (!added)
                             {
-                                DoNotUseAll = true,
-                                MinimumLevel = safelevel,
-                                Mod = includemod,
-                                Optional = true
-                            });
-                            myMod.ObjectModifications.Add(group);
-                            added = true;
-                            break;
+                                myMod.ObjectModifications.ElementAt(i).Includes.Add(new ObjectModInclude()
+                                {
+                                    DoNotUseAll = true,
+                                    MinimumLevel = safelevel,
+                                    Mod = includemod,
+                                    Optional = true
+                                });
+                                added = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                //Can't find it so add it to our mod.
+                //Could we switch this out for finding the modgroups first?
+                if (!added)
+                {
+                    foreach (var objmod in SourceESM.ObjectModifications)
+                    {
+                        foreach (var includedobjmod in objmod.Includes)
+                        {
+                            if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                            {
+                                //This mod is in this this modgroup
+                                var group = objmod.DeepCopy();
+                                group.Includes.Add(new ObjectModInclude()
+                                {
+                                    DoNotUseAll = true,
+                                    MinimumLevel = safelevel,
+                                    Mod = includemod,
+                                    Optional = true
+                                });
+                                myMod.ObjectModifications.Add(group);
+                                added = true;
+                                break;
+                            }
                         }
                     }
                 }
             }
-
-
             //Write to CSV
             csvoutput += upgrade.WeaponName + "," + upgrade.BaseWeaponModID + "," + level + "," + omodName + "," + justnumberdesc + "\n";
             return true;

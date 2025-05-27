@@ -85,6 +85,8 @@ namespace FrankyCLI
         public decimal Default;
         public decimal Step;
 
+        public bool Lootable = true;
+
         public List<string> OtherStats;
     }
 
@@ -95,7 +97,7 @@ namespace FrankyCLI
         public static ThemeFile LoadedThemeFile = new ThemeFile();
 
         //Attach a new stat to an OMOD.
-        public static void AddStat(string statname,ref WeaponModification omod,ref string Description, ref string stattag, int step, bool silent)
+        public static void AddStat(string statname,ref WeaponModification omod,ref string Description, ref string stattag, int step, bool silent, ref bool lootable)
         {
             var stat = StatBank[statname];
             decimal amount = stat.Default + (step * stat.Step);
@@ -209,7 +211,7 @@ namespace FrankyCLI
                 {
                     //Recursion, we add the stats then label them as one.
                     //This is for things like range which has min and max that both need to be set.
-                    AddStat(otherstat, ref omod, ref Description, ref stattag, step, true);
+                    AddStat(otherstat, ref omod, ref Description, ref stattag, step, true,ref lootable);
                 }
                 var firststat = StatBank[stat.OtherStats[0]];
                 amount = firststat.Default + (step * firststat.Step);
@@ -239,6 +241,11 @@ namespace FrankyCLI
                     stattag += amountstr + stat.ShortName;
                 }
             }
+            //If any of the stats are unlootable then the whole omod is.
+            //This is so that we don't have stats like +HP on looted gear as there's no way to show that on the item card.
+            if (lootable && stat.Lootable == false) {
+                lootable = false;
+            }
         }
 
         
@@ -246,7 +253,7 @@ namespace FrankyCLI
         //Controls the Levels/Steps between the different versions of a upgrade
         public static void BuildLevelStyles()
         {
-            int Standardstepcount = 1;
+            int Standardstepcount = 10;
             //Standard
             levelStyles.Add("Standard_Common", new LevelStyle
             {
