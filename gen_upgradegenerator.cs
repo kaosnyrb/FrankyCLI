@@ -293,16 +293,18 @@ namespace FrankyCLI
                 if (level < 255) { safelevel = (byte)level; }
                 else safelevel = 255;
 
+
+                //Find the modgroups for this gun...
                 bool added = false;
-                for (int i = 0; i < myMod.ObjectModifications.Count && !added; i++)
+                foreach (var obj in myMod.ObjectModifications)
                 {
-                    foreach (var includedobjmod in myMod.ObjectModifications.ElementAt(i).Includes)
+                    foreach (var includedobjmod in obj.Includes)
                     {
                         if (includedobjmod.Mod.FormKey == originalmod.FormKey)
                         {
                             if (!added)
                             {
-                                myMod.ObjectModifications.ElementAt(i).Includes.Add(new ObjectModInclude()
+                                obj.Includes.Add(new ObjectModInclude()
                                 {
                                     DoNotUseAll = true,
                                     MinimumLevel = safelevel,
