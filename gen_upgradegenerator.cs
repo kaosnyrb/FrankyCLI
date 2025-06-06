@@ -591,6 +591,7 @@ namespace FrankyCLI
                             EditorID = "atbb_lvlbookco_" + upgrade.Value.WeaponName,
                             Description = "Create a Levelled Avontech Blacksite Blueprint Weapon Upgrade for the " + upgrade.Value.FixedWeaponName,
                             CreatedObject = book.ToNullableLink<IConstructibleObjectTargetGetter>(),
+                            MenuSortOrder = 2,
                             WorkbenchKeyword = WorkbenchBlacksiteKeyword,
                             AmountProduced = 1,
                             LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,                            
@@ -722,6 +723,9 @@ namespace FrankyCLI
             {
                 rec.IsCompressed = false;
             }
+
+            //Note that FrankyCLI doesn't like gaps in the formIDs. Not sure why. Bascially make loads on enchances, run this then delete them
+            //NEXT FORM ID is used! Just set that later than anything in the esm.
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
             Console.WriteLine("Finished");
             stopwatch.Stop();
