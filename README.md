@@ -48,3 +48,26 @@ Ship_ShipsYellowPaintedMetal01_T [LMSW:000B6B1F]
 Materials\Ships\ShipCommon\ShipsYellowPaintedMetal01.mat
 
 You can edit these to another ship materials by looking at the LMSW's, but they contain REFL data so need the CK to make new ones.
+
+
+Build ship parts
+
+{
+  "profiles": {
+    "FrankyCLI": {
+      "commandName": "Project",
+      "commandLineArgs": "AvontechBlacksiteBlueprints struct atbb panel avontechblacksite\\atbb_panel.nif"
+    }
+  }
+}
+
+Rotations
+{
+  "profiles": {
+    "FrankyCLI": {
+      "commandName": "Project",
+      "commandLineArgs": "AvontechBlacksiteBlueprints flip f atbb_ms_panel Panel"
+    }
+  }
+}
+

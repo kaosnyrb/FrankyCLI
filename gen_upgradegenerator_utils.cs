@@ -82,6 +82,8 @@ namespace FrankyCLI
         public UInt32 Keyword;
         public string StatName;
         public string ShortName;
+        public string EnchantModName;
+
         public decimal Default;
         public decimal Step;
 
@@ -195,6 +197,22 @@ namespace FrankyCLI
                 if (!silent)
                 {
                     Description += " / " + stat.StatName;
+                }
+            }
+            // Enchants
+            if (stat.Type == "ModEnchant")
+            {
+                IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(gen_upgradegenerator.BlackSiteModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
+                omod.Properties.Add(new ObjectModFormLinkIntProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Record = statkeyword,
+                    Value = (uint)amount,
+                    FunctionType = ObjectModProperty.FormLinkFunctionType.Add,
+                });
+                if (!silent)
+                {
+                    Description += " / " + amountstr + " " + stat.StatName;
                 }
             }
             // Attach another OMOD to this entry, can add templates
