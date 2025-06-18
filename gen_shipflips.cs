@@ -623,7 +623,7 @@ namespace FrankyCLI
                     {
                         EditorID = item + direction.ToString(),
                         ObjectBounds = target.ObjectBounds,
-                        ODTY = target.ODTY,
+                        DirtinessScale = new Percent(0),
                         Model = target.Model,
                         DATA = target.DATA,
                         Keywords = target.Keywords
@@ -694,7 +694,8 @@ namespace FrankyCLI
                             FogMax = 1,
                             NearHeightRange = 10000,
                             Unknown1 = 1951,
-                            Unknown2 = 3,
+                            InteriorType = Cell.InteriorType.PackIn
+                            //Unknown2 = 3,
                         },
                         WaterHeight = 0,
                         XILS = 1.0f,
@@ -857,7 +858,8 @@ namespace FrankyCLI
                             First = new P3Float(-4, -4, -1.767578f),
                             Second = new P3Float(4, 4, 1.767578f)
                         },
-                        ODTY = 0,
+                        DirtinessScale = new Percent(0),
+                        
                         Transforms = new Transforms
                         {
                             Ship = link
@@ -940,10 +942,10 @@ namespace FrankyCLI
                     {
                         EditorID = prefix + "_gbfm_" + item + direction.ToString(),
                         ObjectBounds = new ObjectBounds() { First = new P3Float(0, 0, 0), Second = new P3Float(0, 0, 0) },
-                        ODTY = 0,
+                        DirtinessScale = new Percent(0),
                         Template = FormSpaceshipModule,
                         Components = gbfm_components,
-                        STRVs = new ExtendedList<string>()
+                        ObjectTemplateInstanceData = new ExtendedList<string>()
                         {
                             "BGSMod_Template_Component"
                         }
@@ -968,15 +970,16 @@ namespace FrankyCLI
                     CreatedObject = FlipsList.ToNullableLink<IConstructibleObjectTargetGetter>(),
                     AmountProduced = 1,
                     MenuSortOrder = 1,
-                    TNAM = tnamearry,
+                    Tier = tnamearry,
                     LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
                     Value = 1000,
                     WorkbenchKeyword = WorkbenchShipBuildingKeyword,
-                    Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
+                    RecipeFilters = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
                         {
                             Category_ShipMod_Structure
                         },
-                    RECF = 0,
+                    Flags = 0,
+                    //RECF = 0,
                 };
 
                 myMod.ConstructibleObjects.Add(co);
