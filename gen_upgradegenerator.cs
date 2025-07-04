@@ -14,6 +14,7 @@ using Noggog.StructuredStrings;
 using System.Globalization;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using DynamicData.Kernel;
 
 namespace FrankyCLI
 {
@@ -299,29 +300,97 @@ namespace FrankyCLI
                 if (level < 255) { safelevel = (byte)level; }
                 else safelevel = 255;
 
+                Random random = new Random();
 
+                //Modgroup Test
+                var weaponname = gen_upgradegenerator_utils.RenameWeapons(upgrade.WeaponName);
+                if (gen_upgradegenerator_utils.modgroups.ContainsKey(weaponname))
+                {
+                    foreach (var modkey in gen_upgradegenerator_utils.modgroups[weaponname])
+                    {
+                        if (myMod.ObjectModifications.ContainsKey(modkey))
+                        {
+                            // There's a limit here so if we start getting near then only add a handful.
+                            if (myMod.ObjectModifications[modkey].Includes.Count < 9300) //Hard limit
+                            {
+                                bool add = true;
+                                // high level mods in group 01
+                                if (safelevel > 75 && myMod.ObjectModifications[modkey].EditorID.ToLower().Contains("01"))
+                                {
+                                    add = false;
+                                }
+                                if (safelevel > 120 && myMod.ObjectModifications[modkey].EditorID.ToLower().Contains("02"))
+                                {
+                                    add = false;
+                                }
+                                // Take 80% of the upgrades for modgroup 03
+                                if (random.Next(100) > 90 && myMod.ObjectModifications[modkey].EditorID.ToLower().Contains("03"))
+                                {
+                                    add = false;
+                                }
+
+                                if (myMod.ObjectModifications[modkey].Includes.Count > 9000)
+                                {
+                                    if (random.Next(100) > 50)
+                                    {
+                                        add = false;
+                                    }
+                                }
+                                if (add)
+                                {
+                                    myMod.ObjectModifications[modkey].Includes.Add(new ObjectModInclude()
+                                    {
+                                        DoNotUseAll = true,
+                                        MinimumLevel = safelevel,
+                                        Mod = includemod,
+                                        Optional = true
+                                    });
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            var group = SourceESM.ObjectModifications[modkey].DeepCopy();
+                            group.Includes.Add(new ObjectModInclude()
+                            {
+                                DoNotUseAll = true,
+                                MinimumLevel = safelevel,
+                                Mod = includemod,
+                                Optional = true
+                            });
+                            myMod.ObjectModifications.Add(group);
+                        }
+                    }
+                }
+                
+                /*
                 //Find the modgroups for this gun...
                 bool added = false;
                 foreach (var obj in myMod.ObjectModifications)
                 {
-                    foreach (var includedobjmod in obj.Includes)
+                    if (obj.Name.ToString().ToLower().Contains("group"))
                     {
-                        if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                        foreach (var includedobjmod in obj.Includes)
                         {
-                            if (!added)
+                            if (includedobjmod.Mod.FormKey == originalmod.FormKey)
                             {
-                                obj.Includes.Add(new ObjectModInclude()
+                                if (!added)
                                 {
-                                    DoNotUseAll = true,
-                                    MinimumLevel = safelevel,
-                                    Mod = includemod,
-                                    Optional = true
-                                });
-                                added = true;
-                                break;
+                                    obj.Includes.Add(new ObjectModInclude()
+                                    {
+                                        DoNotUseAll = true,
+                                        MinimumLevel = safelevel,
+                                        Mod = includemod,
+                                        Optional = true
+                                    });
+                                    added = true;
+                                    break;
+                                }
                             }
                         }
                     }
+
                 }
                 //Can't find it so add it to our mod.
                 //Could we switch this out for finding the modgroups first?
@@ -329,26 +398,33 @@ namespace FrankyCLI
                 {
                     foreach (var objmod in SourceESM.ObjectModifications)
                     {
-                        foreach (var includedobjmod in objmod.Includes)
+                        if(objmod.Name != null)
                         {
-                            if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                            if (objmod.Name.ToString().ToLower().Contains("group"))
                             {
-                                //This mod is in this this modgroup
-                                var group = objmod.DeepCopy();
-                                group.Includes.Add(new ObjectModInclude()
+                                foreach (var includedobjmod in objmod.Includes)
                                 {
-                                    DoNotUseAll = true,
-                                    MinimumLevel = safelevel,
-                                    Mod = includemod,
-                                    Optional = true
-                                });
-                                myMod.ObjectModifications.Add(group);
-                                added = true;
-                                break;
+                                    if (includedobjmod.Mod.FormKey == originalmod.FormKey)
+                                    {
+                                        //This mod is in this this modgroup
+                                        var group = objmod.DeepCopy();
+                                        group.Includes.Add(new ObjectModInclude()
+                                        {
+                                            DoNotUseAll = true,
+                                            MinimumLevel = safelevel,
+                                            Mod = includemod,
+                                            Optional = true
+                                        });
+                                        myMod.ObjectModifications.Add(group);
+                                        added = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                }    
+                */
             }
             //Write to CSV
             csvoutput += upgrade.WeaponName + "," + upgrade.BaseWeaponModID + "," + level + "," + omodName + "," + justnumberdesc + "\n";
@@ -543,6 +619,24 @@ namespace FrankyCLI
                             }
                             else 
                             {
+                                //Log the modgroups
+
+                                var FixedName = gen_upgradegenerator_utils.RenameWeapons(weapon);
+                                if (objmod.EditorID != null)
+                                {
+                                    if (objmod.EditorID.ToString().ToLower().Contains("modgroup"))
+                                    {
+                                        if (gen_upgradegenerator_utils.modgroups.ContainsKey(FixedName))
+                                        {
+                                            gen_upgradegenerator_utils.modgroups[FixedName].Add(objmod.FormKey);
+                                        }
+                                        else
+                                        {
+                                            gen_upgradegenerator_utils.modgroups.Add(FixedName, new List<FormKey>() { objmod.FormKey });
+                                        }
+                                    }
+                                }
+                                //
                                 Console.WriteLine("Ignoring:" + objmod.EditorID);
                             }
                         }

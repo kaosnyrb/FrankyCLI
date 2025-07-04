@@ -101,6 +101,7 @@ namespace FrankyCLI
         public static Dictionary<string,LevelStyle> levelStyles = new Dictionary<string, LevelStyle>();
         public static ThemeFile LoadedThemeFile = new ThemeFile();
 
+        public static Dictionary<string, List<FormKey>> modgroups = new Dictionary<string, List<FormKey>>();
         //Attach a new stat to an OMOD.
         public static void AddStat(string statname,ref WeaponModification omod,ref string Description, ref string stattag, int step, bool silent, ref bool lootable)
         {
