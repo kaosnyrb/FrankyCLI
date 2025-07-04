@@ -44,6 +44,9 @@ namespace FrankyCLI
         public string BaseWeaponModID;
         public string BaseConstructableEditorId;
         public string AttachPoint;
+        public string OriginalAttachPoint;
+
+        public Condition ResearchReq;
 
         public FormKey formKey;
         public FormKey coFormKey;
@@ -297,11 +300,54 @@ namespace FrankyCLI
                 StepCount = Standardstepcount,
                 LevelPerStep = 10,
             });
+            //Legendary
             levelStyles.Add("Unique_Legendary", new LevelStyle
             {
                 startLevel = -1,
                 StepCount = 1,
                 LevelPerStep = 0,
+            });
+            //Starter
+            //1 - 50 over 10 upgrades. The basic set
+            int StarterStep = 5;
+            levelStyles.Add("Starter_Common", new LevelStyle
+            {
+                startLevel = 0,
+                StepCount = StarterStep,
+                LevelPerStep = 5,
+            });
+            levelStyles.Add("Starter_Rare", new LevelStyle
+            {
+                startLevel = 30,
+                StepCount = StarterStep,
+                LevelPerStep = 5,
+            });
+            //3 Enchant set
+            //More enhant focused where having 10 is a bit wierd as the spells don't scale.
+            int EnchantStep = 3;
+            levelStyles.Add("Enchant_Common", new LevelStyle
+            {
+                startLevel = 20,
+                StepCount = StarterStep,
+                LevelPerStep = 10,
+            });
+            levelStyles.Add("Enchant_Rare", new LevelStyle
+            {
+                startLevel = 60,
+                StepCount = StarterStep,
+                LevelPerStep = 10,
+            });
+            levelStyles.Add("Enchant_Epic", new LevelStyle
+            {
+                startLevel = 100,
+                StepCount = StarterStep,
+                LevelPerStep = 10,
+            });
+            levelStyles.Add("Enchant_Legendary", new LevelStyle
+            {
+                startLevel = 130,
+                StepCount = StarterStep,
+                LevelPerStep = 10,
             });
         }
 
@@ -375,6 +421,48 @@ namespace FrankyCLI
                     return "Receiver";//"Internal";
                 case "05D4D7:Starfield.esm":
                     return "Magazine";
+                case "022499:Starfield.esm":
+                    return "Optic";
+                case "2FB3C2:Starfield.esm":
+                    return "Handle";
+                case "2FB3C0:Starfield.esm":
+                    return "Blade";
+
+            }
+            Console.WriteLine("Missing Attach Form:" + form);
+            return "";
+        }
+
+        // So we can label the upgrades correctly
+        public static string getOriginalAttachPoint(string form)
+        {
+            //We merge some groups here
+            switch (form)
+            {
+                case "02249C:Starfield.esm":
+                    return "Muzzle";
+                case "02249D:Starfield.esm":
+                    return "Barrel";
+                case "02EE28:Starfield.esm":
+                    return "Laser";
+                case "14D08A:Starfield.esm":
+                    return "Laser";
+                case "0191EE:Starfield.esm":
+                    return "Laser";
+                case "149CA8:Starfield.esm":
+                    return "Casing";
+                case "01BC46:Starfield.esm":
+                    return "Cover";
+                case "024004:Starfield.esm":
+                    return "Receiver";
+                case "02249F:Starfield.esm":
+                    return "Grip and Stock";
+                case "0849A6:Starfield.esm":
+                    return "Grip and Stock";
+                case "147AFE:Starfield.esm":
+                    return "Internal";
+                case "05D4D7:Starfield.esm":
+                    return "Magazine and Battery";
                 case "022499:Starfield.esm":
                     return "Optic";
                 case "2FB3C2:Starfield.esm":

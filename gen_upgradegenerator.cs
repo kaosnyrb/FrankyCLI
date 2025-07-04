@@ -13,6 +13,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Noggog.StructuredStrings;
 using System.Globalization;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace FrankyCLI
 {
@@ -128,14 +129,15 @@ namespace FrankyCLI
             };
             //We need to build the UI based on the weapon stats.
             //Played around with this a few times, currently we just use a MK-IV roman style name.
-            string ingameName = upgrade.FixedWeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " "+ originalmod.Name;
+            string ingameName = upgrade.FixedWeaponName + " " + stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + originalmod.Name;
             //Remove extra bloat like "Standard Barrel"
             ingameName = gen_upgradegenerator_utils.ReplaceWords(ingameName);
             ingameName = ingameName.Trim();
             //Remove the DontShowInUI [KYWD:00374EFA]. We want all upgrades with stats visable.
             for (int i = 0; i < omod.Properties.Count; i++)
             {
-                try
+                var type = omod.Properties[i].GetType();
+                if (type.Name == "ObjectModFormLinkIntProperty`1")
                 {
                     if (((ObjectModFormLinkIntProperty<Weapon.Property>)omod.Properties[i]).Record.FormKey.ID == 0x00374EFA)
                     {
@@ -143,7 +145,6 @@ namespace FrankyCLI
                         break;
                     }
                 }
-                catch { }
             }
             //The name of the OMOD contains all it's stats.
             string omodName = stats.Name + " " + gen_upgradegenerator_utils.getDiscriptiveLevel(step, stats.Theme) + " " + originalmod.Name;
@@ -176,7 +177,7 @@ namespace FrankyCLI
                 {
                     File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>("avontechblacksite\\dataslate.nif"),
                 },
-                Description = "Blueprint for a Avontech Blacksite " + upgrade.FixedWeaponName + " weapon mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
+                Description = "Blueprint for a Avontech Blacksite " + upgrade.FixedWeaponName + " " + upgrade.OriginalAttachPoint + " mod.\n\n"+ Description + "\n\n" + omodName + "\n\nThis upgrade is now unlocked at the Weapon Workbench.",
                 Value = 500,
                 Weight = 0,
                 VirtualMachineAdapter = new VirtualMachineAdapter()
@@ -229,12 +230,17 @@ namespace FrankyCLI
                 });                    
             }
             //Research Requirements
-            Condition Research = null;
-            Research = gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
+            //Condition Research = null;
+            //Research = gen_upgradegenerator_utils.GetPartResearchReq(StarfieldModKey, level, upgrade.AttachPoint);
             //Not all upgrades need research.
+            /*
             if (Research != null)
             {
                 co.Conditions.Add(Research);
+            }*/
+            if (upgrade.ResearchReq != null)
+            {
+                co.Conditions.Add(upgrade.ResearchReq);
             }
 
             // Build Cost
@@ -409,9 +415,21 @@ namespace FrankyCLI
                 //var match = SourceESM.ConstructibleObjects[new FormKey(StarfieldModKey, 0x000447C6)];
                 //gen_upgradegenerator_utils.ResearchCopy = (IsResearchCompleteConditionData)match.Conditions[0].Data.DeepCopy();
 
+                //Form lister - prints the forms out in order.
+                /*
+                List<string> formids = new List<string>();
+                foreach (var rec in myMod.EnumerateMajorRecords())
+                {
+                    formids.Add(rec.FormKey.ToString());
+                    
+                }
+                formids.Sort();
+                foreach(var stringform in formids) {
+                    Console.WriteLine(stringform);
+                }
+                */ 
 
-                
-                foreach(var file in Directory.EnumerateFiles(request.ScalingStats))
+                foreach (var file in Directory.EnumerateFiles(request.ScalingStats))
                 {
                     gen_upgradegenerator_utils.BuildStatBank(file);
                 }
@@ -464,11 +482,17 @@ namespace FrankyCLI
                             if (!gen_upgradegenerator_utils.IsBanned(coid))
                             {
                                 bool foundblueprint = false;
+                                IConditionGetter researchCheck = null;
                                 foreach (var allco in SourceESM.ConstructibleObjects)
                                 {
                                     if (allco.EditorID.ToLower() == coid.ToLower())
                                     {
-                                        foundblueprint = true;
+                                        if (allco.Conditions.Count >0)
+                                        {
+                                            var researchCompleteConditionData = allco.Conditions[0];
+                                            researchCheck = researchCompleteConditionData;
+                                            foundblueprint = true;
+                                        }
                                     }
                                 }
                                 if (!foundblueprint)
@@ -494,6 +518,7 @@ namespace FrankyCLI
                                     myMod.ConstructibleObjects.Add(co);
                                 }
                                 var attach = gen_upgradegenerator_utils.getAttachPoint(objmod.AttachPoint.FormKey.ToString());
+                                var orginalAttach = gen_upgradegenerator_utils.getOriginalAttachPoint(objmod.AttachPoint.FormKey.ToString());
                                 if (attach.Length > 0)
                                 {
                                     var upgrade = new BaseUpgrade()
@@ -502,10 +527,14 @@ namespace FrankyCLI
                                         BaseConstructableEditorId = coid,
                                         FixedWeaponName = gen_upgradegenerator_utils.RenameWeapons(weapon),
                                         WeaponName = weapon,
-
+                                        OriginalAttachPoint = orginalAttach,
                                         AttachPoint = attach,
-                                        formKey = objmod.FormKey
+                                        formKey = objmod.FormKey                                        
                                     };
+                                    if (researchCheck != null)
+                                    {
+                                        upgrade.ResearchReq = researchCheck.DeepCopy();
+                                    }
                                     if (!UpgradeLib.ContainsKey(objmod.EditorID))
                                     {
                                         UpgradeLib.Add(objmod.EditorID, upgrade);
@@ -552,7 +581,7 @@ namespace FrankyCLI
                             EditorID = "atbb_lvlbook" + upgrade.Value.WeaponName,
                             ObjectBounds = new ObjectBounds(),
                             Transforms = new Transforms() { Workbench = Inv_Guns_Workbench3D_01 },
-                            Name = upgrade.Value.FixedWeaponName + "",
+                            Name = upgrade.Value.FixedWeaponName + " Upgrade",
                             Model = new Model()
                             {
                                 File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(gen_upgradegenerator_utils.GetWeaponModel(upgrade.Value.WeaponName)),
