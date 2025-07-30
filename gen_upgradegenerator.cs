@@ -485,7 +485,10 @@ namespace FrankyCLI
                 if (SourceESM == null)
                 {
                     ModPath modPath = Path.Combine(env.DataFolderPath, request.WeaponESM);
-                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, new GroupMask() {
+                        Weapons = true,
+                        ObjectModifications = true 
+                    });
                 }
 
                 //SourceESM = env.LoadOrder[0].Mod;

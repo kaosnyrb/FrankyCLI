@@ -407,41 +407,42 @@ namespace FrankyCLI
         public static string getAttachPoint(string form)
         {
             //We merge some groups here
-            switch (form)
+            string id = form.ToLower();
+            switch (id)
             {
-                case "02249C:Starfield.esm":
+                case "02249c:starfield.esm":
                     return "Muzzle";
-                case "02249D:Starfield.esm":
+                case "02249d:starfield.esm":
                     return "Barrel";
-                case "02EE28:Starfield.esm":
+                case "02ee28:starfield.esm":
                     return "Laser";
-                case "14D08A:Starfield.esm":
+                case "14d08a:starfield.esm":
                     return "Foregrip";
-                case "0191EE:Starfield.esm":
+                case "0191ee:starfield.esm":
                     return "Laser";
-                case "149CA8:Starfield.esm":
+                case "149ca8:starfield.esm":
                     return "Receiver";
-                case "01BC46:Starfield.esm":
+                case "01bc46:starfield.esm":
                     return "Receiver";
-                case "024004:Starfield.esm":
+                case "024004:starfield.esm":
                     return "Receiver";
-                case "02249F:Starfield.esm":
+                case "02249f:starfield.esm":
                     return "Grip";
-                case "0849A6:Starfield.esm":
+                case "0849a6:starfield.esm":
                     return "Stock";
-                case "147AFE:Starfield.esm":
+                case "147afe:starfield.esm":
                     return "Receiver";//"Internal";
-                case "05D4D7:Starfield.esm":
+                case "05d4d7:starfield.esm":
                     return "Magazine";
-                case "022499:Starfield.esm":
+                case "022499:starfield.esm":
                     return "Optic";
-                case "2FB3C2:Starfield.esm":
+                case "2fb3c2:starfield.esm":
                     return "Handle";
-                case "2FB3C0:Starfield.esm":
+                case "2fb3c0:starfield.esm":
                     return "Blade";
 
             }
-            Console.WriteLine("Missing Attach Form:" + form);
+            Console.WriteLine("Missing Attach Form:" + id);
             return "";
         }
 
@@ -449,41 +450,42 @@ namespace FrankyCLI
         public static string getOriginalAttachPoint(string form)
         {
             //We merge some groups here
-            switch (form)
+            string id = form.ToLower();
+            switch (id)
             {
-                case "02249C:Starfield.esm":
+                case "02249c:starfield.esm":
                     return "Muzzle";
-                case "02249D:Starfield.esm":
+                case "02249d:starfield.esm":
                     return "Barrel";
-                case "02EE28:Starfield.esm":
+                case "02ee28:starfield.esm":
                     return "Laser";
-                case "14D08A:Starfield.esm":
+                case "14d08a:starfield.esm":
                     return "Laser";
-                case "0191EE:Starfield.esm":
+                case "0191ee:starfield.esm":
                     return "Laser";
-                case "149CA8:Starfield.esm":
+                case "149ca8:starfield.esm":
                     return "Casing";
-                case "01BC46:Starfield.esm":
+                case "01bc46:starfield.esm":
                     return "Cover";
-                case "024004:Starfield.esm":
+                case "024004:starfield.esm":
                     return "Receiver";
-                case "02249F:Starfield.esm":
+                case "02249f:starfield.esm":
                     return "Grip and Stock";
-                case "0849A6:Starfield.esm":
+                case "0849a6:starfield.esm":
                     return "Grip and Stock";
-                case "147AFE:Starfield.esm":
+                case "147afe:starfield.esm":
                     return "Internal";
-                case "05D4D7:Starfield.esm":
+                case "05d4d7:starfield.esm": 
                     return "Magazine and Battery";
-                case "022499:Starfield.esm":
+                case "022499:starfield.esm":
                     return "Optic";
-                case "2FB3C2:Starfield.esm":
+                case "2fb3c2:starfield.esm":
                     return "Handle";
-                case "2FB3C0:Starfield.esm":
+                case "2fb3c0:starfield.esm":
                     return "Blade";
 
             }
-            Console.WriteLine("Missing Attach Form:" + form);
+            Console.WriteLine("Missing Oringal Attach Form:" + id);
             return "";
         }
 
