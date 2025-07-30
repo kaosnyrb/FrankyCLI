@@ -170,6 +170,17 @@ namespace FrankyCLI
                     FunctionType = ObjectModProperty.EnumFunctionType.Set,
                 });
             }
+            // Setting Projectiles
+            if (stat.Type == "ProjectileOverride")
+            {
+                IFormLinkNullable<IStarfieldMajorRecordGetter> statkeyword = new FormKey(gen_upgradegenerator.BlackSiteModKey, stat.Keyword).ToNullableLink<IStarfieldMajorRecordGetter>();
+                omod.Properties.Add(new ObjectModFormLinkIntProperty<Weapon.Property>
+                {
+                    Property = stat.property,
+                    Record = statkeyword,
+                    FunctionType = ObjectModProperty.FormLinkFunctionType.Set,
+                });
+            }
             // Stats like damage reduction
             if (stat.Type == "KeywordFloat")
             {
@@ -275,31 +286,31 @@ namespace FrankyCLI
         //Controls the Levels/Steps between the different versions of a upgrade
         public static void BuildLevelStyles()
         {
-            int Standardstepcount = 10;
+            int Standardstepcount = 7;
             //Standard
             levelStyles.Add("Standard_Common", new LevelStyle
             {
                 startLevel = 0,
                 StepCount = Standardstepcount,
-                LevelPerStep = 10,
+                LevelPerStep = 20,
             });
             levelStyles.Add("Standard_Rare", new LevelStyle
             {
                 startLevel = 80,
                 StepCount = Standardstepcount,
-                LevelPerStep = 10,
+                LevelPerStep = 20,
             });
             levelStyles.Add("Standard_Epic", new LevelStyle
             {
                 startLevel = 150,
                 StepCount = Standardstepcount,
-                LevelPerStep = 10,
+                LevelPerStep = 20,
             });
             levelStyles.Add("Standard_Legendary", new LevelStyle
             {
                 startLevel = 220,
                 StepCount = Standardstepcount,
-                LevelPerStep = 10,
+                LevelPerStep = 20,
             });
             //Legendary
             levelStyles.Add("Unique_Legendary", new LevelStyle

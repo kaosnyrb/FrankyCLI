@@ -61,6 +61,9 @@ switch(mode)
     case "branchcreator":
         res = gen_branchcreator.Generate(args);
         break;
+    case "shipicons":
+        res = gen_msicon.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;

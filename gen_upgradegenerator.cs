@@ -481,13 +481,20 @@ namespace FrankyCLI
                         SourceESM = env.LoadOrder[i].Mod;
                     }
                 }
+                // Huh, couldn't find it. Shatter space does this
+                if (SourceESM == null)
+                {
+                    ModPath modPath = Path.Combine(env.DataFolderPath, request.WeaponESM);
+                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                }
+
                 //SourceESM = env.LoadOrder[0].Mod;
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 StarfieldESM = env.LoadOrder[0].Mod;
                 BlackSiteModKey = new ModKey("AvontechBlacksiteBlueprints", ModType.Master);
 
                 //DEBUG SECTION
-                //var match = SourceESM.ObjectModifications[new FormKey(StarfieldModKey, 0x0014AFDB)];
+                //var match = SourceESM.ObjectModifications[new FormKey(StarfieldModKey, 0x001341EB)];
                 //var match = SourceESM.ConstructibleObjects[new FormKey(StarfieldModKey, 0x000447C6)];
                 //gen_upgradegenerator_utils.ResearchCopy = (IsResearchCompleteConditionData)match.Conditions[0].Data.DeepCopy();
 
@@ -503,7 +510,7 @@ namespace FrankyCLI
                 foreach(var stringform in formids) {
                     Console.WriteLine(stringform);
                 }
-                */ 
+                */
 
                 foreach (var file in Directory.EnumerateFiles(request.ScalingStats))
                 {
