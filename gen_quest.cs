@@ -54,13 +54,16 @@ namespace FrankyCLI
                     }
                 }
 
-                Guid runinfo = Guid.NewGuid();
+                string runinfo = "Each time this prompt runs make the results unique.";
                 string gender = "female";
 
-                string nameprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\nReply only with the following information:\r\n\r\nA "  + gender + " first name, nickname and surname an fitting into the Starfield Universe. Keep the names to the western culture.\r\n\r\nThe nickname should reflect a rogue Spacer name that a convict would have.\r\n\r\nOnly include the three names in the response";
+                string jobprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\nReply only with the following information:\r\n\r\n a Job that a criminal would have.";
+                var job = GetJob(); //RunPrompt(jobprompt);//Really loved safe crackers  and art forgers
+
+                string nameprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\nReply only with the following information:\r\n\r\nA "  + gender + " first name, nickname and surname. \r\n\r\nThe nickname should reflect a " + job + ".\r\n\r\nOnly include the three names in the response. Generate 100 examples then choose one randomly. Only return the choosen entry";
                 var name = RunPrompt(nameprompt);
 
-                string backgroundprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\nReply only with the following information:\r\n\r\nTwo paragraph background information in the form of a offical escaped convict report about a "  + gender + " convict fitting into the Starfield Universe. \r\n\r\nAvoid using place names and don't break the fourth wall \r\n\r\nOnly include the background in the response.\r\n\r\nInclude the characters name in the background which is: \r\n\r\n";
+                string backgroundprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\nReply only with the following information:\r\n\r\nTwo paragraph background information in the form of a offical report about a "  + gender + " " + job + " fitting into the Starfield Universe. \r\n\r\nAvoid using place names and don't break the fourth wall \r\n\r\nOnly include the background in the response.\r\n\r\nInclude the characters name in the background which is: \r\n\r\n";
                 backgroundprompt += name;
                 string background = RunPrompt(backgroundprompt);
 
@@ -71,13 +74,32 @@ namespace FrankyCLI
 
                 var questname = RunPrompt(questprompt);
 
+
                 var questID = Guid.NewGuid().ToString().Substring(0, 8);
+
+                Console.WriteLine(questname);
+                Console.WriteLine(name);
+                Console.WriteLine(background);
+
 
                 // NPC Target
                 var NPC = myMod.Npcs[new FormKey(myMod.ModKey, 0x000818)].DeepCopy();
                 Npc npc = CloneNPC(myMod, NPC);
                 npc.Name = name;
                 npc.EditorID = "npc_" +questID;
+
+                Random wrand = new Random();
+                npc.Weight = new NpcWeight()
+                {
+                    Fat = (float)wrand.NextDouble(),
+                    Muscular = (float)wrand.NextDouble(),
+                    Thin = (float)wrand.NextDouble()
+                };
+
+                npc.SpaceOutfit = GetRandomOutfit();
+                npc.EyeColor = GetEyeColour();
+                npc.HairColor = GetHairColour();
+
                 myMod.Npcs.Add(npc);
 
                 // Quest
@@ -236,16 +258,194 @@ namespace FrankyCLI
             };
         }
 
+        public static IFormLinkNullable<IOutfitGetter> GetRandomOutfit()
+        {
+            Random random = new Random();
+
+            List<uint> outfitlist = new List<uint>()
+            {
+                0x003D094D,
+                0x0015E248,
+                0x000A5637,
+                0x00018DCF,
+                0x0027027D,
+                0x003AC14B,
+                0x000390A2
+            };
+
+            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
+
+
+             return outfit;
+        }
+
+        public static string GetJob()
+        {
+            Random random = new Random();
+
+            List<string> joblist = new List<string>()
+            {
+                "Forger",
+                "Safe-cracker",
+                "Pickpocket",
+                "Lockpicker",
+                "Fence",
+                "Blackmailer",
+                "Hacker",
+                "Identity thief",
+                "Counterfeiter",
+                "Drug dealer",
+                "Smuggler",
+                "Bootlegger",
+                "Digital pirate",
+                "Shipjacker",
+                "Armed robber",
+                "Burglar",
+                "Con artist",
+                "Fraudster",
+                "Embezzler",
+                "Money launderer",
+                "Human trafficker",
+                "Kidnapper",
+                "Extortionist",
+                "Hitman",
+                "Enforcer",
+                "Gang leader",
+                "Racketeer",
+                "Loan shark",
+                "Illegal bookmaker",
+                "Arms dealer",
+                "Poacher",
+                "Art thief",
+                "Jewel thief",
+                "Shoplifter",
+                "Document forger",
+                "Wildlife trafficker",
+                "Cybercriminal",
+                "Card counter",
+                "Casino cheat",
+                "Scammer",
+                "Phisher",
+                "Ransomware operator",
+                "Malware developer",
+                "Darknet vendor",
+                "Card skimmer",
+                "ATM skimmer",
+                "Drug courier",
+                "Cartel operative",
+                "Night burglar",
+                "Vehicle theft specialist",
+                "Chop shop operator",
+                "Cargo hijacker",
+                "Maritime pirate",
+                "Diploma forger",
+                "Identity fabricator",
+                "Illegal waste dumper",
+                "Arsonist",
+                "Insider trader",
+                "Corporate saboteur",
+                "Industrial spy",
+                "Organ broker",
+                "Organ trafficker",
+                "Counterfeit clothing seller",
+                "Bribe broker",
+                "Political fixer",
+                "Corrupt official",
+                "Dirty cop",
+                "Police impersonator",
+                "Impersonator",
+                "Heist planner",
+                "Smash-and-grab specialist",
+                "Highway robber",
+                "Train robber",
+                "Safe-transport robber",
+                "Fence network coordinator",
+                "Hit-squad member",
+                "Illegal mining operator",
+                "Credit card fraudster",
+                "Employment document scammer",
+                "Romance scammer",
+                "Charity scammer",
+                "Investment fraudster",
+                "Pyramid scheme operator",
+                "Black market pharmacist",
+                "Prescription fraudster",
+                "Crypto scammer",
+                "ICO scammer",
+                "Bitcoin mixer operator",
+                "Money mule",
+                "Stolen data broker",
+                "Doxxer",
+                "Spoofing specialist",
+                "Ticket scalper",
+                "Street-level drug pusher",
+                "Meth cook",
+                "Counterfeit electronics seller",
+                "Burglary crew member",
+                "Air smuggler (pilot)",
+                "Illegal gambling operator",
+                "Black market dealer"
+            };
+
+            return joblist[random.Next(joblist.Count)];
+        }
+
+        public static string GetEyeColour()
+        {
+            Random random = new Random();
+
+            List<string> eyelist = new List<string>()
+            {
+                "Blue",
+                "Brown",
+                "Red",
+                "Iron",
+                "Grey",
+                "Hazel",
+                "Green",
+                "Sulfur",
+                "BrownDark"
+            };
+
+            return eyelist[random.Next(eyelist.Count)];
+        }
+
+        public static string GetHairColour()
+        {
+            Random random = new Random();
+
+            List<string> hairlist = new List<string>()
+            {
+                "Jet",
+                "DirtyBlonde",
+                "BlackBrown",
+                "Black",
+                "Amber",
+                "Copper",
+                "Platinum",
+                "SaltAndBrown",
+                "BrownDark",
+                "Violet",
+                "White",
+                "Ruby",
+                "SaltAndPepper",
+                "Blonde"
+            };
+
+            return hairlist[random.Next(hairlist.Count)];
+        }
+
         // Make sure to set your API key in an environment variable: OPENAI_API_KEY
         public static string RunPrompt(string prompt)
         {
             var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             var client = new OpenAIClient(apiKey);
 
-            var chat = client.GetChatClient("gpt-4.1-mini");
+            var chat = client.GetChatClient("gpt-5");
             var res = chat.CompleteChat(new UserChatMessage(prompt));
              return res.Value.Content[0].Text;
         }
+
 
     }
 
