@@ -64,6 +64,9 @@ switch(mode)
     case "shipicons":
         res = gen_msicon.Generate(args);
         break;
+    case "gen_quest":
+        res = gen_quest.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;

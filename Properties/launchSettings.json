@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "atbb_shatteredspace upgradegenerator \"Data/Weapons/DLC_ShatteredSpace_EnergyPistol.yaml\" 0 0"
+      "commandLineArgs": "du_outlaws_template gen_quest 0 0 0 0"
     }
   }
 }
