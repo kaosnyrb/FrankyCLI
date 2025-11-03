@@ -86,9 +86,16 @@ namespace FrankyCLI
                 var NPC = myMod.Npcs[new FormKey(myMod.ModKey, 0x000818)].DeepCopy();
                 Npc npc = CloneNPC(myMod, NPC);
                 npc.Name = name;
-                npc.EditorID = "npc_" +questID;
+                npc.EditorID = "npc_" + questID;
 
                 Random wrand = new Random();
+                foreach (var facemorph in  npc.FaceMorphs) 
+                { 
+                    foreach(var inner in facemorph.MorphGroups)
+                    {
+                        inner.BlendIntensity = (float)wrand.NextDouble();
+                    }
+                }
                 npc.Weight = new NpcWeight()
                 {
                     Fat = (float)wrand.NextDouble(),
@@ -99,8 +106,12 @@ namespace FrankyCLI
                 npc.SpaceOutfit = GetRandomOutfit();
                 npc.EyeColor = GetEyeColour();
                 npc.HairColor = GetHairColour();
+                npc.SkinToneIndex = (byte)wrand.Next(8);
+                npc.HeadParts.Add(GetHaircut());
 
-                myMod.Npcs.Add(npc);
+
+
+                 myMod.Npcs.Add(npc);
 
                 // Quest
                 var Quest = myMod.Quests[new FormKey(myMod.ModKey, 0x000803)].DeepCopy();
@@ -264,13 +275,13 @@ namespace FrankyCLI
 
             List<uint> outfitlist = new List<uint>()
             {
-                0x003D094D,
-                0x0015E248,
-                0x000A5637,
-                0x00018DCF,
-                0x0027027D,
-                0x003AC14B,
-                0x000390A2
+                0x000FD016,
+                0x00052B02,
+                0x00279225,
+                0x0013E5D0,
+                0x00085FBE,
+                0x0005B0A7,
+                0x0000697C
             };
 
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
@@ -435,6 +446,34 @@ namespace FrankyCLI
             return hairlist[random.Next(hairlist.Count)];
         }
 
+        public static IFormLinkNullable<IHeadPartGetter> GetHaircut()
+        {
+            Random random = new Random();
+
+            List<uint> hairlist = new List<uint>()
+            {
+                0x00127395,
+                0x0015578B,
+                0x00159AF2,
+                0x00172588,
+                0x0012FDE2,
+                0x0012FDE3,
+                0x00132C5A,
+                0x00128008,
+                0x0015B029,
+                0x00133E4E,
+                0x0014AFDD,
+                0x00134EB1,
+                0x0005B53C,
+                0x000D9D3A
+
+            };
+
+            IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+
+
+            return outfit;
+        }
         // Make sure to set your API key in an environment variable: OPENAI_API_KEY
         public static string RunPrompt(string prompt)
         {
@@ -442,6 +481,7 @@ namespace FrankyCLI
             var client = new OpenAIClient(apiKey);
 
             var chat = client.GetChatClient("gpt-5");
+            //var chat = client.GetChatClient("gpt-5-mini");
             var res = chat.CompleteChat(new UserChatMessage(prompt));
              return res.Value.Content[0].Text;
         }
