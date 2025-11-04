@@ -13,6 +13,9 @@ namespace FrankyCLI.questgen_tools
         // Make sure to set your API key in an environment variable: OPENAI_API_KEY
         public static string RunPrompt(string prompt)
         {
+            //Dumb switch for fast testing
+            return "Test";
+
             var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             var client = new OpenAIClient(apiKey);
 

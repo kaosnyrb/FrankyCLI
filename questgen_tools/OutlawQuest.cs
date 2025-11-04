@@ -28,7 +28,17 @@ namespace FrankyCLI.questgen_tools
 
         public bool GenerateQuest()
         {
-            OutlawNpc outlawNpc = new OutlawNpc(StarfieldModKey, myMod, false,false);
+            MissionLib lib = new MissionLib();
+            var Missiontemplate = lib.GetMissionTemplate();
+            
+            Random random = new Random();
+            bool isfemale = false;
+            if (random.Next(100) > 50)
+            {
+                isfemale = true;
+            }
+            
+            OutlawNpc outlawNpc = new OutlawNpc(StarfieldModKey, myMod, isfemale, Missiontemplate.needSpacesuit);
 
             var questprompt = "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
@@ -37,7 +47,7 @@ namespace FrankyCLI.questgen_tools
             questprompt += outlawNpc.name + "\r\n";
             questprompt += outlawNpc.background + "\r\n";
 
-            var questname = AITools.RunPrompt(questprompt);
+            var questname = AITools.RunPrompt(questprompt); 
 
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
@@ -50,7 +60,7 @@ namespace FrankyCLI.questgen_tools
             var npc = outlawNpc.GenerateNPC(questID);
             myMod.Npcs.Add(npc);
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, 0x000803)].DeepCopy();
+            var Quest = myMod.Quests[new FormKey(myMod.ModKey, Missiontemplate.formid)].DeepCopy();
             Quest newQuest = new Quest(myMod)
             {
                 Name = questname,
@@ -112,5 +122,41 @@ namespace FrankyCLI.questgen_tools
 
             return true;
         }
+
+    }
+
+    public class MissionLib
+    {
+        public List<MissionTemplate> Templates;
+        public MissionLib()
+        {
+            Templates = new List<MissionTemplate>
+            {
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a breathable atmosphere",
+                    Location = "A remote colony", 
+                    formid = 0x000803,
+                    needSpacesuit = false
+                }
+            };
+        }
+
+        public MissionTemplate GetMissionTemplate()
+        {
+            Random  random = new Random();
+            return Templates[random.Next(Templates.Count)];
+        }
+    }
+
+    public class MissionTemplate
+    {
+        public string Name;
+        public string Description;
+        public string Location;
+        public uint formid;
+        public bool needSpacesuit;
+
     }
 }

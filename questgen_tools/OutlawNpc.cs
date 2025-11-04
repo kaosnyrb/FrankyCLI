@@ -222,13 +222,13 @@ namespace FrankyCLI.questgen_tools
             {
                 List<uint> outfitlist = new List<uint>()
                 {
-                    0x000FD016,
-                    0x00052B02,
-                    0x00279225,
-                    0x0013E5D0,
-                    0x00085FBE,
-                    0x0005B0A7,
-                    0x0000697C
+                    0x0015E248,//Outfit_Spacesuit_BountyHunter_01 [OTFT:0015E248]
+                    0x000A5637,//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
+                    0x00018DCF,//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
+                    0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
+                    0x0026B103,//Outfit_Spacesuit_Miner [OTFT:0026B103]
+                    0x00026BF4,//Outfit_Spacesuit_Miner_Deimos [OTFT:00026BF4]
+                    0x0006AC02,//Outfit_Spacesuit_Miner_Orange [OTFT:0006AC02]
                 };
 
                 IFormLinkNullable<IOutfitGetter> outfit = new FormKey(StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
@@ -238,13 +238,16 @@ namespace FrankyCLI.questgen_tools
             {
                 List<uint> outfitlist = new List<uint>()
                 {
-                    0x000FD016,
-                    0x00052B02,
-                    0x00279225,
-                    0x0013E5D0,
-                    0x00085FBE,
-                    0x0005B0A7,
-                    0x0000697C
+                    0x00253B90,//Outfit_Clothes_Civilian_RubberPants_01 [OTFT:00253B90]
+                    0x0006A8B2,//Outfit_Clothes_Civilian_RubberPocketPants_01 [OTFT:0006A8B2]
+                    0x00133D76,//Outfit_Clothes_Colonist_Adventurous_01_NoHat [OTFT:00133D76]
+                    0x00133D75,//Outfit_Clothes_Colonist_Adventurous_01_with_Hat [OTFT:00133D75]
+                    0x00133D74,//Outfit_Clothes_Colonist_Adventurous_Poncho_01_NoHat [OTFT:00133D74]
+                    0x00133D73,//Outfit_Clothes_Colonist_Adventurous_Poncho_01_with_Hat [OTFT:00133D73]
+                    0x00133D72,//Outfit_Clothes_Colonist_Adventurous_Poncho_Mask_01_NoHat [OTFT:00133D72]
+                    0x00133D68,//Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat [OTFT:00133D68]
+                    0x001341DF//Outfit_Clothes_Akila_Security_NoHeadwear [OTFT:001341DF]
+
                 };
                 IFormLinkNullable<IOutfitGetter> outfit = new FormKey(StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
                 return outfit;
@@ -298,30 +301,54 @@ namespace FrankyCLI.questgen_tools
         public IFormLinkNullable<IHeadPartGetter> GetHaircut()
         {
             Random random = new Random();
-
-            List<uint> hairlist = new List<uint>()
+            if (female)
             {
-                0x00127395,
-                0x0015578B,
-                0x00159AF2,
-                0x00172588,
-                0x0012FDE2,
-                0x0012FDE3,
-                0x00132C5A,
-                0x00128008,
-                0x0015B029,
-                0x00133E4E,
-                0x0014AFDD,
-                0x00134EB1,
-                0x0005B53C,
-                0x000D9D3A
+                List<uint> hairlist = new List<uint>()
+                {
+                    0x00127395,//Human_Female_Hair_Bob "Human_Female_Hair_Bob" [HDPT:00127395]
+                    0x0015578B,//Human_Female_Hair_Business "Human_Female_Hair_Business" [HDPT:0015578B]
+                    0x00159AF2,//Human_Female_Hair_Buzz_Mohawk "Human_Female_Hair_Buzz_Mohawk" [HDPT:00159AF2]
+                    0x00172588,//Human_Female_Hair_CyberFade "Human_Female_Hair_CyberFade" [HDPT:00172588]
+                    0x0012FDE2,//Human_Female_Hair_Dreadlocks_HairMesh "Human_Female_Hair_Dreadlocks_HairMesh" [HDPT:0012FDE2]
+                    0x0012FDE3,//Human_Female_Hair_Dreadlocks_HairTie "Human_Female_Hair_Dreadlocks_HairTie" [HDPT:0012FDE3]
+                    0x00132C5A,//Human_Female_Hair_Even_Buzz_Back "Human_Female_Hair_Even_Buzz_Back" [HDPT:00132C5A]
+                    0x00128008,//Human_Female_Hair_Hairspray_Bob "Human_Female_Hair_Hairspray_Bob" [HDPT:00128008]
+                    0x0015B029,//Human_Female_Hair_High_and_Tight "Human_Female_Hair_High_and_Tight" [HDPT:0015B029]
+                    0x00133E4E,//Human_Female_Hair_Hollywood_curls "Human_Female_Hair_Hollywood_curls" [HDPT:00133E4E]
+                    0x0014AFDD,//Human_Female_Hair_Messy_Bob "Human_Female_Hair_Messy_Bob" [HDPT:0014AFDD]
+                    0x00134EB1,//Human_Female_Hair_Messy_Business "Human_Female_Hair_Messy_Business" [HDPT:00134EB1]
+                    0x0005B53C,//Human_Female_Hair_Messy_Updo "Human_Female_Hair_Messy_Updo" [HDPT:0005B53C]
+                    0x000D9D3A//Human_Female_Hair_Mullet "Human_Female_Hair_Mullet" [HDPT:000D9D3A]
 
-            };
+                };
+                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                return outfit;
+            }
+            else
+            {
+                List<uint> hairlist = new List<uint>()
+                {
+                    0x00127396,//Human_Male_Hair_Bob "Human_Male_Hair_Bob" [HDPT:00127396]
+                    0x0015578A,//Human_Male_Hair_Business "Human_Male_Hair_Business" [HDPT:0015578A]
+                    0x00159AF3,//Human_Male_Hair_Buzz_Mohawk "Human_Male_Hair_Buzz_Mohawk" [HDPT:00159AF3]
+                    0x00266092,//Human_Male_Hair_Choppy_Bob "Human_Male_Hair_Choppy_Bob" [HDPT:00266092]
+                    0x0013F87D,//Human_Male_Hair_Coily_Mohawk "Human_Male_Hair_Coily_Mohawk" [HDPT:0013F87D]
+                    0x001177D1,//Human_Male_Hair_Cornrows_Beads "Human_Male_Hair_Cornrows_Beads" [HDPT:001177D1]
+                    0x0013EB51,//Human_Male_Hair_Cropped "Human_Male_Hair_Cropped" [HDPT:0013EB51]
+                    0x00169ED3,//Human_Male_Hair_CyberFade "Human_Male_Hair_CyberFade" [HDPT:00169ED3]
+                    0x00132C59,//Human_Male_Hair_Even_Buzz_Front "Human_Male_Hair_Even_Buzz_Front" [HDPT:00132C59]
+                    0x0014781F,//Human_Male_Hair_Flat_Top "Human_Male_Hair_Flat_Top" [HDPT:0014781F]
+                    0x00134EB0,//Human_Male_Hair_Messy_Business "Human_Male_Hair_Messy_Business" [HDPT:00134EB0]
+                    0x00264EFA,//Human_Male_Hair_None "Human_Male_Hair_None" [HDPT:00264EFA]
+                    0x000D9D39,//Human_Male_Hair_Mullet "Human_Male_Hair_Mullet" [HDPT:000D9D39]
+                    0x00141E96,//Human_Male_Hair_Shaggy "Human_Male_Hair_Shaggy" [HDPT:00141E96]
+                    0x0015335C,//Human_Male_Hair_Spiked "Human_Male_Hair_Spiked" [HDPT:0015335C]
+                    0x0012F26F//Human_Male_Hair_Viking_Braids "Human_Male_Hair_Viking_Braids" [HDPT:0012F26F]
 
-            IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
-
-
-            return outfit;
+                };
+                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                return outfit;
+            }
         }
 
         public string GetJob()
