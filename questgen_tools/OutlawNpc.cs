@@ -58,7 +58,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateName()
         {
-            string runinfo = "Each time this prompt runs make the results unique.";
+            string runinfo = AITools.GetBackgroundPrompt() + "Each time this prompt runs make the results unique.";
 
             string nameprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
                 "Reply only with the following information:\r\n\r\n" +
@@ -72,11 +72,13 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateBackground()
         {
-            string backgroundprompt = "Each time this prompt runs make the results unique." +
+            string backgroundprompt = AITools.GetBackgroundPrompt() + "Each time this prompt runs make the results unique." +
                 "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+                "Include newline characters in your response.\r\n" +
                 "Reply only with the following information:\r\n\r\n" +
-                "One paragraph background information in the form of a report about fitting into the Starfield Universe. \r\n\r\n" +
-                "Include a Psych Profile. \r\n\r\n" +
+                "One paragraph with about 100 words background information in the form of a report about fitting into the Starfield Universe. \r\n\r\n" +
+                "Write in the style of high-tech-noir\r\n\r\n" +
+                "Include a short Psych Profile. \r\n\r\n" +
                 "Avoid using overly complex language and terminology. \r\n\r\n" +
                 "Avoid using place names and don't break the fourth wall. \r\n\r\n" +
                 "Only include the background in the response.\r\n\r\n" +
@@ -89,6 +91,7 @@ namespace FrankyCLI.questgen_tools
 
             string background = AITools.RunPrompt(backgroundprompt);
 
+            
             return background;
         }
 

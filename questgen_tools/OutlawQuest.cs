@@ -30,6 +30,8 @@ namespace FrankyCLI.questgen_tools
         {
             MissionLib lib = new MissionLib();
             var Missiontemplate = lib.GetMissionTemplate();
+
+            Missiontemplate = lib.Templates[3];
             
             Random random = new Random();
             bool isfemale = false;
@@ -40,7 +42,7 @@ namespace FrankyCLI.questgen_tools
             
             OutlawNpc outlawNpc = new OutlawNpc(StarfieldModKey, myMod, isfemale, Missiontemplate.needSpacesuit);
 
-            var questprompt = "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+            var questprompt = AITools.GetBackgroundPrompt() + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
 
@@ -60,6 +62,21 @@ namespace FrankyCLI.questgen_tools
             var npc = outlawNpc.GenerateNPC(questID);
             myMod.Npcs.Add(npc);
 
+            //Log Entry
+            var logprompt = AITools.GetBackgroundPrompt() + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+                "Include newline characters in your response.\r\n" +
+            "Generate a short explaination on why this character is at this location.\r\n\r\n" +
+            "Write in the style of high-tech-noir \r\n\r\n" +
+            "Use the following information to build the explaination:\r\n\r\n";
+
+            logprompt += "Location:" + Missiontemplate.Location + "\r\n";
+            logprompt += "Character background: " + outlawNpc.background + "\r\n";
+
+            var logmessage = AITools.RunPrompt(logprompt);
+
+            Console.WriteLine(logmessage);
+
+            //Quest
             var Quest = myMod.Quests[new FormKey(myMod.ModKey, Missiontemplate.formid)].DeepCopy();
             Quest newQuest = new Quest(myMod)
             {
@@ -80,7 +97,7 @@ namespace FrankyCLI.questgen_tools
                 VirtualMachineAdapter = Quest.VirtualMachineAdapter
             };
 
-            newQuest.Stages[0].LogEntries[0].Entry = "I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
+            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
 
             //set quest alias to self in scripts
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
@@ -97,7 +114,7 @@ namespace FrankyCLI.questgen_tools
             {
                 CNAM = Book.CNAM,
                 Components = Book.Components,
-                Description = outlawNpc.background,
+                Description = outlawNpc.background + "\r\n" + logmessage,
                 DNAMUnknown = Book.DNAMUnknown,
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + questID,
@@ -136,9 +153,33 @@ namespace FrankyCLI.questgen_tools
                 {
                     Name = "Planet side Bounty",
                     Description = "Kill the target on a planet with a breathable atmosphere",
-                    Location = "A remote colony", 
+                    Location = "A small remote civilan installation", 
                     formid = 0x000803,
                     needSpacesuit = false
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a poor atmosphere",
+                    Location = "A small remote civilan installation",
+                    formid = 0x000830,
+                    needSpacesuit = true
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a breathable atmosphere Dungeon Industrial",
+                    Location = "A Occupied Industrial Complex",
+                    formid = 0x000831,
+                    needSpacesuit = false
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a Dungeon Industrial",
+                    Location = "A Occupied Industrial Complex",
+                    formid = 0x000834,
+                    needSpacesuit = true
                 }
             };
         }
