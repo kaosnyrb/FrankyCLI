@@ -43,7 +43,7 @@ namespace FrankyCLI.questgen_tools
                 new MissionTemplate()
                 {
                     Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a breathable atmosphere Dungeon Industrial",
+                    Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
                     Location = "A Occupied Industrial Complex",
                     formid = 0x000831,
                     needSpacesuit = false,
@@ -55,6 +55,24 @@ namespace FrankyCLI.questgen_tools
                     Description = "Kill the target on a planet with a Dungeon Industrial",
                     Location = "A Occupied Industrial Complex",
                     formid = 0x000834,
+                    needSpacesuit = true,
+                    outlawQuest = new OutlawQuest_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a Dungeon Military",
+                    Location = "A Old Military Base",
+                    formid = 0x000840,
+                    needSpacesuit = true,
+                    outlawQuest = new OutlawQuest_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a Dungeon Mining",
+                    Location = "A Mining Operation",
+                    formid = 0x000841,
                     needSpacesuit = true,
                     outlawQuest = new OutlawQuest_BountyPlanet()
                 }
