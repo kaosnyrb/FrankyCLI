@@ -33,6 +33,7 @@ namespace FrankyCLI.questgen_tools
 
         public bool female;
 
+        public Npc GeneratedNPC; 
         public OutlawNpc(ModKey Starfield, StarfieldMod myModparam, bool isfemale, bool hasspacesuit) {
             StarfieldModKey = Starfield;
             myMod = myModparam;
@@ -64,6 +65,7 @@ namespace FrankyCLI.questgen_tools
                 "Reply only with the following information:\r\n\r\n" +
                 "A " + gender + " first name, nickname and surname. \r\n\r\n" +
                 "The nickname should reflect a " + job + ".\r\n\r\n" +
+                "The name should reflect the Nationality: " + GetNationality() + ".\r\n\r\n" +
                 "Only include the three names in the response. Generate 100 examples then choose one randomly. Only return the choosen entry";
             var name = AITools.RunPrompt(nameprompt);
 
@@ -95,12 +97,12 @@ namespace FrankyCLI.questgen_tools
             return background;
         }
 
-        public Npc GenerateNPC(string questID)
+        public Npc GenerateNPC()
         {
             var NPC = myMod.Npcs[new FormKey(myMod.ModKey, GetTemplateNPC())].DeepCopy();
             Npc npc = CloneNPC(myMod, NPC);
             npc.Name = name;
-            npc.EditorID = "npc_" + questID;
+            npc.EditorID = "npc_" + (name.ToLower()).Replace(" ","");
 
             Random wrand = new Random();
             foreach (var facemorph in npc.FaceMorphs)
@@ -122,7 +124,8 @@ namespace FrankyCLI.questgen_tools
             npc.HairColor = Haircolor;
             npc.SkinToneIndex = (byte)wrand.Next(8);
             npc.HeadParts.Add(GetHaircut());
-
+            myMod.Npcs.Add(npc);
+            GeneratedNPC = npc;
             return npc;
         }
 
@@ -464,5 +467,117 @@ namespace FrankyCLI.questgen_tools
 
             return joblist[random.Next(joblist.Count)];
         }
+
+        public static string GetNationality()
+        {
+            Random random = new Random();
+
+            List<string> nationalityList = new List<string>()
+            {
+                "American",
+                "British",
+                "Canadian",
+                "Mexican",
+                "Brazilian",
+                "Argentinian",
+                "Chilean",
+                "Colombian",
+                "Peruvian",
+                "Venezuelan",
+                "Uruguayan",
+                "Paraguayan",
+                "Bolivian",
+                "Ecuadorian",
+                "Costa Rican",
+                "Panamanian",
+                "Cuban",
+                "Dominican",
+                "Haitian",
+                "Puerto Rican",
+                "Jamaican",
+                "Bahamian",
+                "Barbadian",
+                "Trinidadian",
+                "Guyanese",
+                "Belizean",
+                "Honduran",
+                "Salvadoran",
+                "Nicaraguan",
+                "Guatemalan",
+                "Irish",
+                "Scottish",
+                "Welsh",
+                "English",
+                "French",
+                "German",
+                "Dutch",
+                "Belgian",
+                "Luxembourgish",
+                "Swiss",
+                "Austrian",
+                "Italian",
+                "Spanish",
+                "Portuguese",
+                "Greek",
+                "Turkish",
+                "Polish",
+                "Czech",
+                "Slovak",
+                "Hungarian",
+                "Romanian",
+                "Bulgarian",
+                "Serbian",
+                "Croatian",
+                "Bosnian",
+                "Slovenian",
+                "Macedonian",
+                "Albanian",
+                "Lithuanian",
+                "Latvian",
+                "Estonian",
+                "Finnish",
+                "Swedish",
+                "Norwegian",
+                "Danish",
+                "Icelandic",
+                "Russian",
+                "Ukrainian",
+                "Belarusian",
+                "Kazakh",
+                "Uzbek",
+                "Turkmen",
+                "Kyrgyz",
+                "Tajik",
+                "Georgian",
+                "Armenian",
+                "Azerbaijani",
+                "Israeli",
+                "Lebanese",
+                "Syrian",
+                "Jordanian",
+                "Iraqi",
+                "Iranian",
+                "Saudi",
+                "Emirati",
+                "Qatari",
+                "Bahraini",
+                "Omani",
+                "Yemeni",
+                "Egyptian",
+                "Moroccan",
+                "Algerian",
+                "Tunisian",
+                "Libyan",
+                "Sudanese",
+                "Kenyan",
+                "Tanzanian",
+                "Ugandan",
+                "Rwandan",
+                "Burundian"
+            };
+
+            return nationalityList[random.Next(nationalityList.Count)];
+        }
+
     }
 }
