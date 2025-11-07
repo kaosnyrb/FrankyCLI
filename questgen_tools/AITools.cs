@@ -23,6 +23,7 @@ namespace FrankyCLI.questgen_tools
             //var chat = client.GetChatClient("gpt-5-mini");
             var res = chat.CompleteChat(new UserChatMessage(prompt));
             string textres = res.Value.Content[0].Text;
+            textres = textres.Replace(" — ", " ");//No EM-dashes please. (With spaces)
             textres = textres.Replace("—", "");//No EM-dashes please.
             textres = textres.Replace("“", "\"");//wierd qoutes
             textres = textres.Replace("”", "\"");//wierd qoutes
@@ -38,6 +39,8 @@ namespace FrankyCLI.questgen_tools
             result += "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n";
             result += "Write in space pulp fiction style.\r\n\r\n";
             result += "Include newline characters in your response.\r\n";
+            result += "Don't use the folowing characters: — \r\n";
+
             result += "The following is background information about the universe the story is set in, don't quote any back directly.\r\n\r\n";
 
             Random random = new Random();

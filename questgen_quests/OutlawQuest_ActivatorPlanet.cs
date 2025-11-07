@@ -20,6 +20,8 @@ namespace FrankyCLI
     {
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest)
         {
+            Console.WriteLine("Generating Activator Planet Quest...");
+
 
             var datasourceprompt = AITools.GetBackgroundPrompt() + 
                 "A three word or less digital file that contains a clue to the characters location. Examples are a Log Entry or Shipping Manifest\r\nOnly include the data source name in the response.\r\n\r\n" +
@@ -29,7 +31,7 @@ namespace FrankyCLI
             datasourceprompt += "Name: " + outlawNpc.name + "\r\n";
             datasourceprompt += "Background: " + outlawNpc.background + "\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
-
+            Console.WriteLine("datasource: " + datasource);
 
             var questprompt = AITools.GetBackgroundPrompt() +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
@@ -42,28 +44,33 @@ namespace FrankyCLI
             questprompt += "Vital clue to their location: " + datasource + "\r\n";
 
             var questname = AITools.RunPrompt(questprompt);
+            Console.WriteLine("questname: " + questname);
 
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Generate a gang
+
+            string gangtheme = OutlawGang.GetGangTheme();
+            Console.WriteLine("gangtheme: " + gangtheme);
+
             var gangpromt = AITools.GetBackgroundPrompt() +
-               "Include newline characters in your response.\r\n" +
                "Generate the name of a member of the characters gang.\r\n\r\n" +
                "Keep it to two words and only return those two words\r\n\r\n" +
+               "The gangs theme is " + gangtheme + " \r\n\r\n" +
                "Use the following information:\r\n\r\n";
-            gangpromt += "Location:" + missionTemplate.Location + "\r\n";
             gangpromt += "Character background: " + outlawNpc.background + "\r\n";
-            gangpromt += "Vital clue to there location: " + datasource + "\r\n";
 
             var gangname = AITools.RunPrompt(gangpromt);
+            Console.WriteLine("gangname: " + gangname);
+
             OutlawGang outlawGang = new OutlawGang(myMod, gangname);
             var gang = outlawGang.GenerateGang();
 
             //Log Entry
             var logprompt = AITools.GetBackgroundPrompt() +
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
-            "Keep it to one paragraph with newlines\r\n\r\n" +
+            "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Character background: " + outlawNpc.background + "\r\n";
@@ -111,13 +118,15 @@ namespace FrankyCLI
             var pickuppromt = AITools.GetBackgroundPrompt() +
             "Include newline characters in your response.\r\n" +
             "Generate a short flavour text story which explains to the player that they have found the location of the target via this clue.\r\n\r\n" +
-            "Keep it to one paragraph with newlines\r\n\r\n" +
+            "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
             pickuppromt += "Character background: " + outlawNpc.background + "\r\n";
             pickuppromt += "Vital clue to there location: " + datasource + "\r\n";
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);
+            Console.WriteLine("pickupmessage: " + pickupmessage);
+
             var messageClone = myMod.Messages[new FormKey(myMod.ModKey, 0x000844)].DeepCopy();
             Message message = new Message(myMod)
             {
@@ -172,7 +181,7 @@ namespace FrankyCLI
             {
                 CNAM = Book.CNAM,
                 Components = Book.Components,
-                Description = outlawNpc.background + "\r\n" + logmessage,
+                Description = outlawNpc.background + "\r\n\r\n" + logmessage,
                 DNAMUnknown = Book.DNAMUnknown,
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + questID,

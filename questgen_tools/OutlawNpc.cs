@@ -76,14 +76,14 @@ namespace FrankyCLI.questgen_tools
                 "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
                 "Include newline characters in your response.\r\n" +
                 "Reply only with the following information:\r\n\r\n" +
-                "One paragraph on the history of the character, there strengths and weaknesses and past crimes\r\n\r\n" +
+                "Three paragraph on the history of the character, there strengths and weaknesses and past crimes. Keep each under 50 words.\r\n\r\n" +
                 "Avoid using overly complex language and terminology. \r\n\r\n" +
                 "Avoid using place names and don't break the fourth wall. \r\n\r\n" +
                 "Only include the background in the response.\r\n\r\n" +
                 "Include the characters information in the background which is: \r\n\r\n";
             backgroundprompt += "Name: " + name + "\r\n\r\n";
             backgroundprompt += "Gender: " + gender + "\r\n\r\n";
-            backgroundprompt += "Hair Color: " + Haircolor + "\r\n\r\n";
+            backgroundprompt += "Hair Color: " + NPCTools.SanitiseHairColor(Haircolor) + "\r\n\r\n";
             backgroundprompt += "Eye Color: " + Eyecolor + "\r\n\r\n";
             backgroundprompt += "Job: " + job + "\r\n\r\n";
 
@@ -120,6 +120,10 @@ namespace FrankyCLI.questgen_tools
             npc.HairColor = Haircolor;
             npc.SkinToneIndex = (byte)wrand.Next(8);
             npc.HeadParts.Add(GetHaircut());
+            var lev = new PcLevelMult();
+            lev.LevelMult = 0.25f + (float)wrand.NextDouble();
+            npc.Level = lev;
+
             myMod.Npcs.Add(npc);
             GeneratedNPC = npc;
             return npc;

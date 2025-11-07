@@ -20,6 +20,8 @@ namespace FrankyCLI
     {
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest)
         {
+            Console.WriteLine("Generating Bounty Planet Quest...");
+
             var questprompt = AITools.GetBackgroundPrompt() +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
@@ -28,6 +30,7 @@ namespace FrankyCLI
             questprompt += outlawNpc.background + "\r\n";
 
             var questname = AITools.RunPrompt(questprompt);
+            Console.WriteLine("questname: " + questname);
 
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
@@ -35,16 +38,16 @@ namespace FrankyCLI
             //Log Entry
             var logprompt = AITools.GetBackgroundPrompt() +
                 "Include newline characters in your response.\r\n" +
-            "Generate a short flavour text story explaination on why this character is at this location.\r\n\r\n" +            
-            "Use the following information to build the explaination:\r\n\r\n";
+                "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
+                "Generate a short flavour text story explaination on why this character is at this location.\r\n\r\n" +            
+                "Use the following information to build the explaination:\r\n\r\n";
 
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Character background: " + outlawNpc.background + "\r\n";
 
             var logmessage = AITools.RunPrompt(logprompt);
 
-            Console.WriteLine(logmessage);
-
+            Console.WriteLine("logmessage: " + logmessage);
 
             var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
             Quest newQuest = new Quest(myMod)
@@ -75,36 +78,6 @@ namespace FrankyCLI
             //Set the NPC to be the quest target
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
-            // Book
-            /*
-            var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
-            Book bountybook = new Book(myMod)
-            {
-                CNAM = Book.CNAM,
-                Components = Book.Components,
-                Description = outlawNpc.background + "\r\n" + logmessage,
-                DNAMUnknown = Book.DNAMUnknown,
-                DropdownSound = Book.DropdownSound,
-                EditorID = "book_" + questID,
-                Keywords = Book.Keywords,
-                ENAM = Book.ENAM,
-                FeaturedItemMessage = Book.FeaturedItemMessage,
-                Flags = Book.Flags,
-                FNAM = Book.FNAM,
-                InventoryArt = Book.InventoryArt,
-                Model = Book.Model,
-                Name = "Bounty: " + outlawNpc.name,
-                ODTY = Book.ODTY,
-                Value = Book.Value,
-                Weight = Book.Weight,
-                VirtualMachineAdapter = Book.VirtualMachineAdapter
-            };
-            //set  the  book to start the new quest
-            ((ScriptObjectProperty)bountybook.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
-            bountybook.ENAM = "Data Slate #" + questID;
-            myMod.Books.Add(bountybook);
-            */
             return newQuest;
         }
 

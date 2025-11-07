@@ -125,10 +125,27 @@ namespace FrankyCLI.questgen_tools
                 "Hazel",
                 "Green",
                 "Sulfur",
-                "BrownDark"
             };
 
             return eyelist[random.Next(eyelist.Count)];
+        }
+
+        public static string SanitiseHairColor(string haircolor)
+        {
+            switch (haircolor) {
+                case "DirtyBlonde":
+                    return "Blonde";
+                case "BlackBrown":
+                    return "Brown";
+                case "SaltAndBrown":
+                    return "Brown";
+                case "BrownDark":
+                    return "Brown";
+                case "SaltAndPepper":
+                    return "Greying";
+                default:
+                    return haircolor;
+            }
         }
 
         public static string GetHairColour()

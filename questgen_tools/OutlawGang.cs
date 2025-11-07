@@ -9,6 +9,7 @@ using OpenAI;
 using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
@@ -31,6 +32,42 @@ namespace FrankyCLI.questgen_tools
         {
             myMod = myModparam;
             gangName = gangNameparam;
+        }
+
+        public static string GetGangTheme()
+        {
+            Random random = new Random();
+
+            List<string> ganglist = new List<string>()
+            {
+                "Urban cyberpunk street gang",
+                "Rogue space pirate faction",
+                "Paramilitary mercenary company",
+                "Bio-augmented criminal syndicate",
+                "Black-market tech smugglers",
+                "Nomadic wasteland raider clan",
+                "Elite assassin brotherhood",
+                "Underground robotics cult",
+                "Rebel freedom-fighter cell",
+                "Corporate espionage division",
+                "Post-apocalyptic scavenger tribe",
+                "Void-dwelling marauder fleet",
+                "Mutant undercity crime family",
+                "High-society criminal cartel",
+                "Fanatical doomsday cult",
+                "AI-controlled pirate collective",
+                "Stealth-oriented infiltration unit",
+                "Chemical-enhanced gladiator gang",
+                "Ancient relic-hunters guild",
+                "Quantum anomaly worshippers",
+                "Smuggler-trader nomad caravans",
+                "Deep-space salvage pirates",
+                "Telepathic crime circle",
+                "Ex-military deserter faction",
+                "Genetically-engineered outcast tribe"
+            };
+
+            return ganglist[random.Next(ganglist.Count)];
         }
 
         public Mutagen.Bethesda.Starfield.FormList GenerateGang()
