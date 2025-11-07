@@ -24,18 +24,24 @@ namespace FrankyCLI.questgen_tools
             var res = chat.CompleteChat(new UserChatMessage(prompt));
             string textres = res.Value.Content[0].Text;
             textres = textres.Replace("—", " ");//No EM-dashes please.
-
+            textres = textres.Replace("“", "\"");//wierd qoutes
+            textres = textres.Replace("”", "\"");//wierd qoutes
             return textres;
         }
 
         public static string GetBackgroundPrompt()
         {
             string result = "";
+            result += "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n";
+            result += "Write in space pulp fiction style.\r\n\r\n";
+            result += "Include newline characters in your response.\r\n";
+            result += "The following is background information about the universe the story is set in, don't quote any back directly.\r\n\r\n";
+
             Random random = new Random();
             //If I feed all this the it tries to mention everything :D
             if (random.Next(100)>50)
             {
-                result += "By the year 2330, humanity has expanded into a region of space known as the Settled Systems – a pocket of colonized star systems extending about 50 light-years from Earth\r\n. The technology level is advanced yet grounded: interstellar travel relies on Grav Drives that enable faster-than-light jumps (capped at roughly 30 light-years per jump)\r\n, but there are no instantaneous FTL communications, and any sufficiently advanced “unshackled” AI is outlawed (along with military-grade mechs)\r\n ";
+                result += "By the year 2330, humanity has expanded into a region of space known as the Settled Systems \r\n. The technology level is advanced yet grounded: interstellar travel relies on Grav Drives that enable faster-than-light jumps \r\n";
             }
             if (random.Next(100) > 50)
             {
@@ -62,6 +68,7 @@ namespace FrankyCLI.questgen_tools
             {
                 result += "Across the Settled Systems, themes of colonization and frontier survival, political rivalry and uneasy alliances, flourishing commerce and black-market dealings, rampant piracy, and the enduring human drive to explore the unknown all intermingle. It is a future where humanity’s colonies stand scattered among the stars – full of opportunity and danger in equal measure – as factions compete and adventurers chart new horizons in the vast expanse of Starfield.\r\n ";
             }
+            result += "This marks the end of the background information section. Following this is more detail on the prompt to carry out.\r\n\r\n";
 
             return result;
         }

@@ -78,9 +78,7 @@ namespace FrankyCLI.questgen_tools
                 "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
                 "Include newline characters in your response.\r\n" +
                 "Reply only with the following information:\r\n\r\n" +
-                "One paragraph with about 100 words background information in the form of a report about fitting into the Starfield Universe. \r\n\r\n" +
-                "Write in the style of high-tech-noir\r\n\r\n" +
-                "Include a short Psych Profile. \r\n\r\n" +
+                "One paragraph on the history of the character, there strengths and weaknesses and past crimes\r\n\r\n" +
                 "Avoid using overly complex language and terminology. \r\n\r\n" +
                 "Avoid using place names and don't break the fourth wall. \r\n\r\n" +
                 "Only include the background in the response.\r\n\r\n" +

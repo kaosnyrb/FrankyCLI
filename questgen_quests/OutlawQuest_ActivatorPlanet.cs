@@ -20,13 +20,26 @@ namespace FrankyCLI
     {
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest)
         {
-            var questprompt = AITools.GetBackgroundPrompt() + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+
+            var datasourceprompt = AITools.GetBackgroundPrompt() + 
+                "A three word or less digital file that contains a clue to the characters location. Examples are a Log Entry or Shipping Manifest\r\nOnly include the data source name in the response.\r\n\r\n" +
+                "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
+                "Keep it to one paragraph with newlines\r\n\r\n" +
+                "Use the following information to build the quest name:\r\n\r\n";
+            datasourceprompt += "Name: " + outlawNpc.name + "\r\n";
+            datasourceprompt += "Background: " + outlawNpc.background + "\r\n";
+            var datasource = AITools.RunPrompt(datasourceprompt);
+
+
+            var questprompt = AITools.GetBackgroundPrompt() +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "This quest is about finding the location of this character\r\n\r\n"+
+                "Keep it to one paragraph with newlines\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
 
-            questprompt += outlawNpc.name + "\r\n";
-            questprompt += outlawNpc.background + "\r\n";
+            questprompt += "Name:" + outlawNpc.name + "\r\n";
+            questprompt += "Background: " + outlawNpc.background + "\r\n";
+            questprompt += "Vital clue to their location: " + datasource + "\r\n";
 
             var questname = AITools.RunPrompt(questprompt);
 
@@ -34,14 +47,13 @@ namespace FrankyCLI
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logprompt = AITools.GetBackgroundPrompt() + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
-                "Include newline characters in your response.\r\n" +
-            "Generate a short explaination on why a lead on how to find this character is at this location.\r\n\r\n" +
-            "Write in the style of high-tech-noir \r\n\r\n" +
+            var logprompt = AITools.GetBackgroundPrompt() +
+            "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
+            "Keep it to one paragraph with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
-
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Character background: " + outlawNpc.background + "\r\n";
+            logprompt += "Vital clue to there location: " + datasource + "\r\n";
 
             var logmessage = AITools.RunPrompt(logprompt);
 
@@ -74,7 +86,32 @@ namespace FrankyCLI
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
+            //Create the activation message
+            var pickuppromt = AITools.GetBackgroundPrompt() +
+            "Include newline characters in your response.\r\n" +
+            "Generate a short flavour text story which explains to the player that they have found the location of the target via this clue.\r\n\r\n" +
+            "Keep it to one paragraph with newlines\r\n\r\n" +
+            "Use the following information to build the explaination:\r\n\r\n";
+            pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
+            pickuppromt += "Character background: " + outlawNpc.background + "\r\n";
+            pickuppromt += "Vital clue to there location: " + datasource + "\r\n";
+
+            var pickupmessage = AITools.RunPrompt(pickuppromt);
+            var messageClone = myMod.Messages[new FormKey(myMod.ModKey, 0x000844)].DeepCopy();
+            Message message = new Message(myMod)
+            {
+                Name = messageClone.Name,
+                BNAM = messageClone.BNAM,
+                EditorID = "message_" + questID,
+                Description = pickupmessage,
+                Flags = messageClone.Flags
+            };
+            
+            myMod.Messages.Add(message);
+
+
             //Create the Activator
+
             var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000836)].DeepCopy();
             Mutagen.Bethesda.Starfield.Activator newActivator = new Mutagen.Bethesda.Starfield.Activator(myMod)
             {
@@ -89,7 +126,7 @@ namespace FrankyCLI
                 EditorID = "activator_" + questID,
                 Destructible = ActivatorClone.Destructible,
                 Keywords = ActivatorClone.Keywords,
-                Name = ActivatorClone.Name,
+                Name = datasource,
                 ObjectBounds = ActivatorClone.ObjectBounds,
                 ODTY = ActivatorClone.ODTY,
                 Model = ActivatorClone.Model,
@@ -99,6 +136,7 @@ namespace FrankyCLI
             //Set the Current quest and next quest so when you use the activator it progresses the mission
             ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = nextQuest.ToLink<IStarfieldMajorRecordGetter>();
+            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[2]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
 
             myMod.Activators.Add(newActivator);
 
@@ -135,6 +173,17 @@ namespace FrankyCLI
 
             bountybook.ENAM = "Data Slate #" + questID;
             myMod.Books.Add(bountybook);
+
+            //Find the levelled list
+            //duout_LL_QuestBooks [LVLI:02000843]
+
+            myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries.Add(new LeveledItemEntry()
+            {
+                Count = 1,
+                Reference = bountybook.ToLink<IItemGetter>(),
+                ChanceNone = new Percent(0),
+                Level = 1                
+            });
 
             return Quest;
         }

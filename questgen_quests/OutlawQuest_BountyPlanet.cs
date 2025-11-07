@@ -20,7 +20,7 @@ namespace FrankyCLI
     {
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest)
         {
-            var questprompt = AITools.GetBackgroundPrompt() + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+            var questprompt = AITools.GetBackgroundPrompt() +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
 
@@ -33,10 +33,9 @@ namespace FrankyCLI
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logprompt = AITools.GetBackgroundPrompt() + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+            var logprompt = AITools.GetBackgroundPrompt() +
                 "Include newline characters in your response.\r\n" +
-            "Generate a short explaination on why this character is at this location.\r\n\r\n" +
-            "Write in the style of high-tech-noir \r\n\r\n" +
+            "Generate a short flavour text story explaination on why this character is at this location.\r\n\r\n" +            
             "Use the following information to build the explaination:\r\n\r\n";
 
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
@@ -77,6 +76,7 @@ namespace FrankyCLI
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
             // Book
+            /*
             var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
             Book bountybook = new Book(myMod)
             {
@@ -104,7 +104,7 @@ namespace FrankyCLI
 
             bountybook.ENAM = "Data Slate #" + questID;
             myMod.Books.Add(bountybook);
-
+            */
             return newQuest;
         }
 
