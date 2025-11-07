@@ -23,9 +23,12 @@ namespace FrankyCLI.questgen_tools
             //var chat = client.GetChatClient("gpt-5-mini");
             var res = chat.CompleteChat(new UserChatMessage(prompt));
             string textres = res.Value.Content[0].Text;
-            textres = textres.Replace("—", " ");//No EM-dashes please.
+            textres = textres.Replace("—", "");//No EM-dashes please.
             textres = textres.Replace("“", "\"");//wierd qoutes
             textres = textres.Replace("”", "\"");//wierd qoutes
+            textres = textres.Replace("’", "'");//wierd qoutes
+
+            
             return textres;
         }
 

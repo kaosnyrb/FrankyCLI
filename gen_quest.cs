@@ -55,7 +55,7 @@ namespace FrankyCLI
                 }
 
                 // Quest
-                OutlawQuestChain outlawQuest = new OutlawQuestChain(StarfieldModKey, myMod);
+                OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
                 outlawQuest.GenerateQuest();
             }
 

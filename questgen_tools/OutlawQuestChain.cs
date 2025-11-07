@@ -18,11 +18,9 @@ namespace FrankyCLI.questgen_tools
 {
     public class OutlawQuestChain
     {
-        public ModKey StarfieldModKey;
         public StarfieldMod myMod;
 
-        public OutlawQuestChain(ModKey Starfield, StarfieldMod myModparam) {
-            StarfieldModKey = Starfield;
+        public OutlawQuestChain(StarfieldMod myModparam) {
             myMod = myModparam;
         }
 
@@ -39,7 +37,7 @@ namespace FrankyCLI.questgen_tools
                 isfemale = true;
             }
             
-            OutlawNpc outlawNpc = new OutlawNpc(StarfieldModKey, myMod, isfemale, Missiontemplate.needSpacesuit);
+            OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, Missiontemplate.needSpacesuit);
             // NPC Target                
             outlawNpc.GenerateNPC();
             

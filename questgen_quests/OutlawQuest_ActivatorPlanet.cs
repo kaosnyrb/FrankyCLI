@@ -46,6 +46,20 @@ namespace FrankyCLI
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
+            //Generate a gang
+            var gangpromt = AITools.GetBackgroundPrompt() +
+               "Include newline characters in your response.\r\n" +
+               "Generate the name of a member of the characters gang.\r\n\r\n" +
+               "Keep it to two words and only return those two words\r\n\r\n" +
+               "Use the following information:\r\n\r\n";
+            gangpromt += "Location:" + missionTemplate.Location + "\r\n";
+            gangpromt += "Character background: " + outlawNpc.background + "\r\n";
+            gangpromt += "Vital clue to there location: " + datasource + "\r\n";
+
+            var gangname = AITools.RunPrompt(gangpromt);
+            OutlawGang outlawGang = new OutlawGang(myMod, gangname);
+            var gang = outlawGang.GenerateGang();
+
             //Log Entry
             var logprompt = AITools.GetBackgroundPrompt() +
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
@@ -54,6 +68,7 @@ namespace FrankyCLI
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Character background: " + outlawNpc.background + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
+            logprompt += "the title of the Gang members who are helping the target: " + gangname + "\r\n";
 
             var logmessage = AITools.RunPrompt(logprompt);
 
@@ -85,6 +100,12 @@ namespace FrankyCLI
             //set quest alias to self in scripts
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+
+
+            //Set the enemy gang to the new gang
+            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
+
+
 
             //Create the activation message
             var pickuppromt = AITools.GetBackgroundPrompt() +
