@@ -19,6 +19,7 @@ namespace FrankyCLI
     public class gen_quest
     {
         public static ModKey StarfieldModKey;
+        public static IStarfieldModGetter _StarfieldMod;
         public static int Generate(string[] args)
         {
             Random random = new Random();
@@ -35,6 +36,7 @@ namespace FrankyCLI
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
                 datapath = env.DataFolderPath;
+                _StarfieldMod = env.LoadOrder[0].Mod;
                 //Find the modkey 
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);
@@ -57,6 +59,8 @@ namespace FrankyCLI
                 // Quest
                 OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
                 outlawQuest.GenerateQuest();
+
+                //LegendaryGen.GenerateLegendaryArmour(myMod,"Bryn");
             }
 
             foreach (var rec in myMod.EnumerateMajorRecords())

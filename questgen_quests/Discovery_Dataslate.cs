@@ -30,6 +30,7 @@ namespace FrankyCLI.questgen_quests
 
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
+            Console.WriteLine("Discovery Quest - Dataslate.");
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             // Book

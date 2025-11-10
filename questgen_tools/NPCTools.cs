@@ -173,6 +173,27 @@ namespace FrankyCLI.questgen_tools
             return hairlist[random.Next(hairlist.Count)];
         }
 
+        public static IFormLinkNullable<ILeveledItemGetter> GetRandomGear()
+        {
+            Random random = new Random();
+            List<uint> gearlist = new List<uint>()
+                {
+                    0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
+                    0x003D0947,//LLI_Spacer_Charger [LVLI:003D0947]
+                    0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
+                    0x003D094A,//LLI_Spacer_Recruit [LVLI:003D094A]
+                    0x003D094B,//LLI_Spacer_Sniper [LVLI:003D094B]
+                    0x003D60AF,//LLI_Ecliptic_AssaultDefaultRole [LVLI:003D60AF]
+                    0x003D60B1,//LLI_Ecliptic_Heavy [LVLI:003D60B1]
+                    0x003D60B2,//LLI_Ecliptic_Officer [LVLI:003D60B2]
+                    0x003D60B4,//LLI_Ecliptic_Sniper [LVLI:003D60B4]
+                    0x003D60B5,//LLI_Ecliptic_Support [LVLI:003D60B5]
+
+                };
+            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
+            return gear;
+        }
+
         public static IFormLinkNullable<IOutfitGetter> GetRandomOutfit(bool spacesuit)
         {
             Random random = new Random();

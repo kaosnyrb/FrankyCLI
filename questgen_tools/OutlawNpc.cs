@@ -123,6 +123,14 @@ namespace FrankyCLI.questgen_tools
             lev.LevelMult = 0.25f + (float)wrand.NextDouble();
             npc.Level = lev;
 
+            var legendary = LegendaryGen.GenerateLegendaryArmour(myMod, name);
+
+            npc.Items = new ExtendedList<ContainerEntry>
+            {
+                new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } },
+                 new ContainerEntry() { Item = new ContainerItem() { Item = legendary, Count = 1 } }
+           };
+             
             myMod.Npcs.Add(npc);
             GeneratedNPC = npc;
             return npc;

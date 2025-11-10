@@ -103,7 +103,11 @@ namespace FrankyCLI.questgen_tools
                 lev.LevelMult = (float)random.NextDouble();
                 npc.Level = lev;
                 npc.SpaceOutfit = outfit;
-                npc.Items.RemoveAt(1);
+
+                npc.Items = new ExtendedList<ContainerEntry>
+                {
+                    new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } }
+                };
                 myMod.Npcs.Add(npc);
                 //Add it to the list
                 list.Add(npc);
