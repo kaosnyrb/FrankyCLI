@@ -108,7 +108,7 @@ namespace FrankyCLI.questgen_tools
             var if_tmp_Armor_Quality_02_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BF)];//if_tmp_Armor_Quality_02_Restricted [KYWD:0011E2BF]
 
             //Hmm do I want levelled stuff? probs
-            myModparam.LeveledItems.Add(new LeveledItem(myModparam)
+            var leglevel = new LeveledItem(myModparam)
             {
                 EditorID = "lvlleg_" + legID,
                 ChanceNone = 0,
@@ -131,9 +131,10 @@ namespace FrankyCLI.questgen_tools
                         Level = 1
                     }
                 }
-            });
+            };
+            myModparam.LeveledItems.Add(leglevel);
 
-            return null;
+            return leglevel.ToNullableLink<ILeveledItemGetter>();
         }
 
         public static uint GetRandomHelmet()
