@@ -51,15 +51,15 @@ namespace FrankyCLI.questgen_tools
             Eyecolor = NPCTools.GetEyeColour();
 
             job = GetJob();
+
+            Console.WriteLine("Building Outlaw NPC...");
             name = GenerateName();
             background = GenerateBackground();
         }
 
         public string GenerateName()
         {
-            string runinfo = AITools.GetBackgroundPrompt() + "Each time this prompt runs make the results unique.";
-
-            string nameprompt = runinfo + "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
+            string nameprompt = AITools.GetBackgroundPrompt() +
                 "Reply only with the following information:\r\n\r\n" +
                 "A " + gender + " first name, nickname and surname. \r\n\r\n" +
                 "The nickname should reflect a " + job + ".\r\n\r\n" +
@@ -72,9 +72,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateBackground()
         {
-            string backgroundprompt = AITools.GetBackgroundPrompt() + "Each time this prompt runs make the results unique." +
-                "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n" +
-                "Include newline characters in your response.\r\n" +
+            string backgroundprompt = AITools.GetBackgroundPrompt() +
                 "Reply only with the following information:\r\n\r\n" +
                 "Three paragraph on the history of the character, there strengths and weaknesses and past crimes. Keep each under 50 words.\r\n\r\n" +
                 "Avoid using overly complex language and terminology. \r\n\r\n" +
@@ -83,6 +81,7 @@ namespace FrankyCLI.questgen_tools
                 "Include the characters information in the background which is: \r\n\r\n";
             backgroundprompt += "Name: " + name + "\r\n\r\n";
             backgroundprompt += "Gender: " + gender + "\r\n\r\n";
+            backgroundprompt += "Upbringing: " + GetUpbringing() + "\r\n\r\n";
             backgroundprompt += "Hair Color: " + NPCTools.SanitiseHairColor(Haircolor) + "\r\n\r\n";
             backgroundprompt += "Eye Color: " + Eyecolor + "\r\n\r\n";
             backgroundprompt += "Job: " + job + "\r\n\r\n";
@@ -182,6 +181,47 @@ namespace FrankyCLI.questgen_tools
             }
         }
 
+        public string GetUpbringing()
+        {
+            Random random = new Random();
+
+            List<string> upbringinglist = new List<string>()
+            {
+                "Grew up in the city of New Atlantis, their parents worked in MAST admin.",
+                "Grew up in the city of New Atlantis, their parents worked in the UC Navy.",
+                "Grew up in the city of New Atlantis, they were in the UC Vanguard before they betrayed there oath.",
+                "Grew up in the city of New Atlantis, their parents worked cleaning the New Atlantis Transit system.",
+                "Grew up in the city of New Atlantis, their parents worked in the UC Ageis.",
+                "Grew up in the city of New Atlantis, their parents worked maintence in The Well, the dark underbelly of the city.",
+                "Grew up in the city of New Atlantis, their parents worked at the Spaceport doing repairs on ships.",
+                "Grew up in the city of New Atlantis, worked as a Chunks employee before having a breakdown.",
+                "Grew up in the city of Cydonia on Mars, their parents worked as miners.",
+                "Grew up in the city of Cydonia on Mars, their parents worked running supplies to the Trade Authority.",
+                "Grew up in the city of Cydonia on Mars, their parents worked running supplies to the Deimos Staryards.",
+                "Grew up in the city of Gagarin Landing, their parents worked in the Mech Planet during the Colony War.",
+                "Grew up in the city of Gagarin Landing, their parents worked maintence.",
+                "Grew up in the city of Gagarin Landing, their parents worked in shipping.",
+                "Grew up in the city of Neon, catching Chasmbass for Xenofresh Fisheries.",
+                "Grew up in the city of Neon, as a dancer in the Astral Lounge.",
+                "Grew up in the city of Neon, as a streetrat on the Ebbside.",
+                "Grew up in the city of Neon, their parents worked as low level Ryujin employees.",
+                "Grew up in the city of Neon, their parents worked as low level Generdyne Industries employees.",
+                "Grew up in the city of Neon, their parents worked as low level Xenofresh Fisheries employees.",
+                "Grew up in the city of Neon, their parents worked as low level Taiyō Astroneering employees.",
+                "Grew up in the city of Neon, their parents worked as low level DRONE employees.",
+                "Grew up in the city of Neon, their parents worked as low level Arboron employees.",
+                "Grew up in the city of Neon, worked as a Chunks employee before having a breakdown.",
+                "Grew up in the city of Akila, as an orphan on The Stretch.",
+                "Grew up in the city of Akila, their parents worked as Farmhands.",
+                "Grew up in the city of Akila, their parents worked as Ship technicians.",
+                "Grew up in the city of Akila, their parents worked to support the Freestar Rangers.",
+                "Grew up away for civilisation as a LIST Colonist, trying to build a life on the frontier",
+            };
+
+            return upbringinglist[random.Next(upbringinglist.Count)];
+
+        }
+
         public string GetJob()
         {
             Random random = new Random();
@@ -240,7 +280,7 @@ namespace FrankyCLI.questgen_tools
                 "Vehicle theft specialist",
                 "Chop shop operator",
                 "Cargo hijacker",
-                "Maritime pirate",
+                "Space pirate",
                 "Diploma forger",
                 "Identity fabricator",
                 "Illegal waste dumper",
