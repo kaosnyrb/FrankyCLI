@@ -16,9 +16,25 @@ using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI
 {
-    public class OutlawQuest_ActivatorPlanet : IOutlawQuest
+    public class Investigation_ActivatorPlanet : IOutlawQuest
     {
-        public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest)
+        private Quest questform;
+
+        public string logMessage { get; set; }
+
+        public string LogMessage
+        {
+            get => logMessage;
+            set => logMessage = value;
+        }
+        Quest IOutlawQuest.questform
+        {
+            get => questform;
+            set => questform = value;
+        }
+
+
+        public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Activator Planet Quest...");
 
@@ -165,7 +181,7 @@ namespace FrankyCLI
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
             ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = nextQuest.ToLink<IStarfieldMajorRecordGetter>();
+            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
             ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[2]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
 
             myMod.Activators.Add(newActivator);
@@ -173,47 +189,13 @@ namespace FrankyCLI
             //Set the Activator to be the quest target
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
+            
 
+            
 
-            // Book
-            var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
-            Book bountybook = new Book(myMod)
-            {
-                CNAM = Book.CNAM,
-                Components = Book.Components,
-                Description = outlawNpc.background + "\r\n\r\n" + logmessage,
-                DNAMUnknown = Book.DNAMUnknown,
-                DropdownSound = Book.DropdownSound,
-                EditorID = "book_" + questID,
-                Keywords = Book.Keywords,
-                ENAM = Book.ENAM,
-                FeaturedItemMessage = Book.FeaturedItemMessage,
-                Flags = Book.Flags,
-                FNAM = Book.FNAM,
-                InventoryArt = Book.InventoryArt,
-                Model = Book.Model,
-                Name = "Bounty: " + outlawNpc.name,
-                ODTY = Book.ODTY,
-                Value = Book.Value,
-                Weight = Book.Weight,
-                VirtualMachineAdapter = Book.VirtualMachineAdapter
-            };
-            //set  the  book to start the new quest
-            ((ScriptObjectProperty)bountybook.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
-            bountybook.ENAM = "Data Slate #" + questID;
-            myMod.Books.Add(bountybook);
-
-            //Find the levelled list
-            //duout_LL_QuestBooks [LVLI:02000843]
-
-            myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries.Add(new LeveledItemEntry()
-            {
-                Count = 1,
-                Reference = bountybook.ToLink<IItemGetter>(),
-                ChanceNone = new Percent(0),
-                Level = 1                
-            });
+            //Set the interfaces
+            questform = newQuest;
+            logMessage = logmessage;
 
             return Quest;
         }

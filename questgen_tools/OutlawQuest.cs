@@ -6,75 +6,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FrankyCLI.questgen_quests;
 
 namespace FrankyCLI.questgen_tools
 {
     public interface IOutlawQuest
     {
-        public Quest Setup(StarfieldMod myMod,OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest);
+        public Quest Setup(StarfieldMod myMod,OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest);
+        public string LogMessage { get; set; }
+        public Quest questform { get; set; }
     }
 
     public class MissionLib
     {
+        public List<MissionTemplate> DiscoveryTemplates;
         public List<MissionTemplate> InvestigationTemplates;
-        public List<MissionTemplate> FinalEncounterTemplates;
+        public List<MissionTemplate> ShowdownTemplates;
         public MissionLib()
         {
-            FinalEncounterTemplates = new List<MissionTemplate>
+            DiscoveryTemplates = new List<MissionTemplate>()
             {
                 new MissionTemplate()
                 {
-                    Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a breathable atmosphere",
-                    Location = "A small remote civilan installation",
-                    formid = 0x000803,
-                    needSpacesuit = false,
-                    outlawQuest = new OutlawQuest_BountyPlanet()
-                },
-                new MissionTemplate()
-                {
-                    Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a poor atmosphere",
-                    Location = "A small remote civilan installation",
-                    formid = 0x000830,
+                    Name = "Dataslate in levelled item",
+                    Description = "This creates a dataslate which starts the mission",
+                    Location = "A remote location",
+                    formid = 0,
                     needSpacesuit = true,
-                    outlawQuest = new OutlawQuest_BountyPlanet()
-                },
-                new MissionTemplate()
-                {
-                    Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
-                    Location = "A Occupied Industrial Complex",
-                    formid = 0x000831,
-                    needSpacesuit = false,
-                    outlawQuest = new OutlawQuest_BountyPlanet()
-                },
-                new MissionTemplate()
-                {
-                    Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a Dungeon Industrial",
-                    Location = "A Occupied Industrial Complex",
-                    formid = 0x000834,
-                    needSpacesuit = true,
-                    outlawQuest = new OutlawQuest_BountyPlanet()
-                },
-                new MissionTemplate()
-                {
-                    Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a Dungeon Military",
-                    Location = "A Old Military Base",
-                    formid = 0x000840,
-                    needSpacesuit = true,
-                    outlawQuest = new OutlawQuest_BountyPlanet()
-                },
-                new MissionTemplate()
-                {
-                    Name = "Planet side Bounty",
-                    Description = "Kill the target on a planet with a Dungeon Mining",
-                    Location = "A Mining Operation",
-                    formid = 0x000841,
-                    needSpacesuit = true,
-                    outlawQuest = new OutlawQuest_BountyPlanet()
+                    outlawQuest = new Discovery_Dataslate()
                 }
             };
 
@@ -87,21 +46,90 @@ namespace FrankyCLI.questgen_tools
                     Location = "A remote location",
                     formid = 0x000835,
                     needSpacesuit = true,
-                    outlawQuest = new OutlawQuest_ActivatorPlanet()
+                    outlawQuest = new Investigation_ActivatorPlanet()
                 }
             };
+
+            ShowdownTemplates = new List<MissionTemplate>
+            {
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a breathable atmosphere",
+                    Location = "A small remote civilan installation",
+                    formid = 0x000803,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a poor atmosphere",
+                    Location = "A small remote civilan installation",
+                    formid = 0x000830,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
+                    Location = "A Occupied Industrial Complex",
+                    formid = 0x000831,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a Dungeon Industrial",
+                    Location = "A Occupied Industrial Complex",
+                    formid = 0x000834,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a Dungeon Military",
+                    Location = "A Old Military Base",
+                    formid = 0x000840,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty",
+                    Description = "Kill the target on a planet with a Dungeon Mining",
+                    Location = "A Mining Operation",
+                    formid = 0x000841,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyPlanet()
+                }
+            };
+
+
         }
+
+
+        public MissionTemplate GetShowdownMissionTemplate()
+        {
+            Random random = new Random();
+            return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
+        }
+
         public MissionTemplate GetInvestigationMissionTemplate()
         {
             Random random = new Random();
             return InvestigationTemplates[random.Next(InvestigationTemplates.Count)];
         }
 
-        public MissionTemplate GetFinalMissionTemplate()
+        public MissionTemplate GetDiscoveryMissionTemplate()
         {
             Random random = new Random();
-            return FinalEncounterTemplates[random.Next(FinalEncounterTemplates.Count)];
+            return DiscoveryTemplates[random.Next(DiscoveryTemplates.Count)];
         }
+
     }
 
     public class MissionTemplate

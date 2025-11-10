@@ -16,9 +16,25 @@ using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI
 {
-    public class OutlawQuest_BountyPlanet : IOutlawQuest
+    public class Showdown_BountyPlanet : IOutlawQuest
     {
-        public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, Quest nextQuest)
+        private Quest questform;
+
+        public string logMessage { get; set; }
+
+        public string LogMessage
+        {
+            get => logMessage;
+            set => logMessage = value;
+        }
+        Quest IOutlawQuest.questform
+        {
+            get => questform;
+            set => questform = value;
+        }
+
+
+        public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Bounty Planet Quest...");
 
@@ -78,8 +94,12 @@ namespace FrankyCLI
             //Set the NPC to be the quest target
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
+
+            //Set the interfaces
+            questform = newQuest;
+            logMessage = logmessage;
+
             return newQuest;
         }
-
     }
 }

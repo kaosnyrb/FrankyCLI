@@ -27,7 +27,7 @@ namespace FrankyCLI.questgen_tools
         public bool GenerateQuest()
         {
             MissionLib lib = new MissionLib();
-            var Missiontemplate = lib.GetFinalMissionTemplate();
+            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate();
             //Missiontemplate = lib.FinalEncounterTemplates[3];
             
             Random random = new Random();
@@ -35,9 +35,9 @@ namespace FrankyCLI.questgen_tools
             if (random.Next(100) > 50)
             {
                 isfemale = true;
-            }
-            
-            OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, Missiontemplate.needSpacesuit);
+            }            
+            OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, ShowdownMissionTemplate.needSpacesuit);
+
             // NPC Target                
             outlawNpc.GenerateNPC();
             
@@ -45,11 +45,15 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine(outlawNpc.background);
 
             //Quest Step
-            var Quest = Missiontemplate.outlawQuest.Setup(myMod, outlawNpc, Missiontemplate,null);
+            var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
 
             //Now build an investigation step before
-            var invest = lib.GetInvestigationMissionTemplate();
-            var InvestQuest = invest.outlawQuest.Setup(myMod, outlawNpc, invest, Quest);
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate();
+            var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
+
+            // Finally build the discovery step
+            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
+            var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 
             return true;
         }
