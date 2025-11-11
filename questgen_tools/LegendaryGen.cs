@@ -35,6 +35,8 @@ namespace FrankyCLI.questgen_tools
                 armourid = GetRandomSpacesuit();
                 Type = "Spacesuit";
             }
+
+
             string Armournameprompt = AITools.GetBackgroundPrompt() +
                 "Reply only with the following information:\r\n\r\n" +
                 "A legendary " + Type +" belonging to "+ OutlawName  + " . \r\n\r\n" +
@@ -104,8 +106,11 @@ namespace FrankyCLI.questgen_tools
             };
             myModparam.LegendaryItems.Add(newleg);
             //New levelled list with legendary
-            //if_tmp_Armor_Quality_02_Restricted [KYWD:0011E2BF]
-            var if_tmp_Armor_Quality_02_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BF)];//if_tmp_Armor_Quality_02_Restricted [KYWD:0011E2BF]
+            //var if_tmp_Armor_Quality_02_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BF)];//if_tmp_Armor_Quality_02_Restricted [KYWD:0011E2BF]
+            //var if_tmp_Armor_Quality_03_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BE)];//if_tmp_Armor_Quality_03_Restricted [KYWD:0011E2BE]
+            //var if_tmp_Armor_Quality_04_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BD)];//if_tmp_Armor_Quality_04_Restricted [KYWD:0011E2BD]
+
+            
 
             //Hmm do I want levelled stuff? probs
             var leglevel = new LeveledItem(myModparam)
@@ -114,13 +119,13 @@ namespace FrankyCLI.questgen_tools
                 ChanceNone = 0,
                 LVLL = new byte[] { 3 },
                 MaxCount = 0,
-                FilterKeywordChances = new ExtendedList<FilterKeywordChance>()
-                {
-                    new FilterKeywordChance(){
-                        Keyword = if_tmp_Armor_Quality_02_Restricted.ToLink<IKeywordGetter>(),
-                        Chance = Percent.One,
-                    },
-                },
+                //FilterKeywordChances = new ExtendedList<FilterKeywordChance>()
+                //{
+                //    new FilterKeywordChance(){
+                //        Keyword = if_tmp_Armor_Quality_04_Restricted.ToLink<IKeywordGetter>(),
+                //        Chance = new Percent(1.0),
+                //    },
+                //},
                 Entries = new ExtendedList<LeveledItemEntry>()
                 {
                     new LeveledItemEntry()
@@ -188,9 +193,39 @@ namespace FrankyCLI.questgen_tools
             Random random = new Random();
             List<uint> gearlist = new List<uint>()
             {
-                0x00257807,//Spacesuit_UCMarine_Backpack "UC Marine" [ARMO:00257807]
+                0x00169F59, // Spacesuit_Assault_Backpack_01 "Shocktroop" [ARMO:00169F59]
+                0x0003B423, // Spacesuit_Assault_Backpack_01_Cydonia "Cydonia" [ARMO:0003B423]
+                0x001C0F35, // SpaceSuit_BountyHunter_01_Backpack_A "Bounty Hunter Stalk" [ARMO:001C0F35]
+                0x001C0F34, // SpaceSuit_BountyHunter_01_Backpack_B "Bounty Hunter Seek" [ARMO:001C0F34]
+                0x001C0F33, // SpaceSuit_BountyHunter_01_Backpack_C "Bounty Hunter Track" [ARMO:001C0F33]
+                0x00166402, // Spacesuit_BountyHunter_02_BackPack "Trackers Alliance" [ARMO:00166402]
+                0x001E2B19, // Spacesuit_Constellation_Backpack_01 "Constellation" [ARMO:001E2B19]
+                0x00066824, // Spacesuit_CrimsonFleet_Backpack_1 "Pirate Raiding" [ARMO:00066824]
+                0x00066825, // Spacesuit_CrimsonFleet_Backpack_2 "Pirate Survival" [ARMO:00066825]
+                0x0016D15B, // SpaceSuit_Diver_Backpack_01 "Deepseeker" [ARMO:0016D15B]
+                0x00166407, // Spacesuit_Ecliptic_Backpack "Ecliptic" [ARMO:00166407]
+                0x00169F51, // Spacesuit_Explorer_Backpack_01 "Explorer" [ARMO:00169F51]
+                0x002392B3, // Spacesuit_Groundcrew_Backpack_NoBoostpack "Ground Crew" [ARMO:002392B3]
+                0x0001754E, // Spacesuit_Mark1_Backpack "Mark I" [ARMO:0001754E]
+                0x0016E0B6, // SpaceSuit_Mercenary_Backpack_01 "Mercenary" [ARMO:0016E0B6]
+                0x001D0F95, // Spacesuit_Mercury_Backpack_NoBoostpack "Mercury" [ARMO:001D0F95]
+                0x002EDF1F, // Spacesuit_Miner_Backpack "Deep Mining" [ARMO:002EDF1F]
+                0x00026BEF, // Spacesuit_Miner_Backpack_Deimos "Deimos" [ARMO:00026BEF]
+                0x000FD333, // Spacesuit_Miner_Backpack_Orange "Deepcore" [ARMO:000FD333]
+                0x00067C95, // Spacesuit_Navigator_Backpack "Navigator" [ARMO:00067C95]
+                0x001E2AF7, // Spacesuit_Ranger_Backpack_01 "Ranger" [ARMO:001E2AF7]
+                0x00169F55, // Spacesuit_Recon_Backpack_01 "Deep Recon" [ARMO:00169F55]
+                0x0016E0BB, // SpaceSuit_SpaceTrucker_Backpack "Space Trucker" [ARMO:0016E0BB]
+                0x00257807, // Spacesuit_UCMarine_Backpack "UC Marine" [ARMO:00257807]
+                0x00398105, // Spacesuit_UCMarine_Backpack_SysDef "SysDef" [ARMO:00398105]
+                0x000EF9AC, // SpaceSuit_UCMarine_Backpack_UCSEC "UC Security" [ARMO:000EF9AC]
+                0x0016640E, // Spacesuit_UCPilot_Backpack_01 "UC Ace Pilot" [ARMO:0016640E]
+                0x002AAF43, // Spacesuit_UCPilot_Backpack_SysDef "SysDef Pilot" [ARMO:002AAF43]
+                0x003E3D4F, // Spacesuit_UCPilot_Backpack_Vanguard "UC Vanguard Pilot" [ARMO:003E3D4F]
+                0x0021A86C, // Spacesuit_UC_ShockArmor_Backpack "UC Shock Armor" [ARMO:0021A86C]
+                0x0020612F, // Spacesuit_UC_XenoSpecialist_Backpack "UC AntiXeno" [ARMO:0020612F]
+                0x0016D3D0, // SpaceSuit_Varuun_Backpack_01 "Va'ruun" [ARMO:0016D3D0]
             };
-
 
             return gearlist[random.Next(gearlist.Count)];
         }
@@ -200,10 +235,48 @@ namespace FrankyCLI.questgen_tools
             Random random = new Random();
             List<uint> gearlist = new List<uint>()
             {
-                0x0025780A,//SSpacesuit_UCMarine_Body_Armored "UC Wardog Spacesuit" [ARMO:0025780A]
+                0x002265AD, // Spacesuit_Assault_01 "Shocktroop Spacesuit" [ARMO:002265AD]
+                0x0003B422, // Spacesuit_Assault_01Cydonia "Cydonia Spacesuit" [ARMO:0003B422]
+                0x00228570, // Spacesuit_BountyHunter_01 "Bounty Hunter Spacesuit" [ARMO:00228570]
+                0x00166404, // Spacesuit_BountyHunter_02 "Trackers Alliance Spacesuit" [ARMO:00166404]
+                0x001E2B18, // Spacesuit_Constellation_01 "Constellation Spacesuit" [ARMO:001E2B18]
+                0x00066821, // Spacesuit_CrimsonFleet_Assault "Pirate Assault Spacesuit" [ARMO:00066821]
+                0x00066826, // Spacesuit_CrimsonFleet_Charger "Pirate Charger Spacesuit" [ARMO:00066826]
+                0x00066828, // Spacesuit_CrimsonFleet_Officer "Pirate Corsair Spacesuit" [ARMO:00066828]
+                0x0006682A, // Spacesuit_CrimsonFleet_Sniper "Pirate Sniper Spacesuit" [ARMO:0006682A]
+                0x0016D2C4, // SpaceSuit_Diver_01 "Deepseeker Spacesuit" [ARMO:0016D2C4]
+                0x0022856F, // Spacesuit_Ecliptic "Ecliptic Spacesuit" [ARMO:0022856F]
+                0x002265AF, // Spacesuit_Explorer_01 "Explorer Spacesuit" [ARMO:002265AF]
+                0x002392B5, // Spacesuit_GroundCrew "Ground Crew Spacesuit" [ARMO:002392B5]
+                0x0001754D, // Spacesuit_Mark1_Body "Mark I Spacesuit" [ARMO:0001754D]
+                0x00226296, // Spacesuit_Mercenary_01 "Mercenary Spacesuit" [ARMO:00226296]
+                0x001D0F96, // Spacesuit_Mercury_Body "Mercury Spacesuit" [ARMO:001D0F96]
+                0x0005278E, // Spacesuit_Miner "Deep Mining Spacesuit" [ARMO:0005278E]
+                0x00026BF1, // Spacesuit_Miner_Deimos "Deimos Spacesuit" [ARMO:00026BF1]
+                0x0006AC00, // Spacesuit_Miner_Orange "Deepcore Spacesuit" [ARMO:0006AC00]
+                0x00067C94, // Spacesuit_Navigator_Body "Navigator Spacesuit" [ARMO:00067C94]
+                0x00227CA0, // Spacesuit_Ranger_01 "Ranger Spacesuit" [ARMO:00227CA0]
+                0x002265AE, // Spacesuit_Recon_01 "Deep Recon Spacesuit" [ARMO:002265AE]
+                0x0021C780, // Spacesuit_SpaceTrucker "Space Trucker Spacesuit" [ARMO:0021C780]
+                0x00004E78, // Spacesuit_SpaceTrucker_Generic "Star Roamer Spacesuit" [ARMO:00004E78]
+                0x00257805, // Spacesuit_UCMarine_Body "UC Marine Spacesuit" [ARMO:00257805]
+                0x0025780A, // Spacesuit_UCMarine_Body_Armored "UC Wardog Spacesuit" [ARMO:0025780A]
+                0x00398104, // Spacesuit_UCMarine_Body_Armored_SysDef "SysDef Assault Spacesuit" [ARMO:00398104]
+                0x000EF9AE, // Spacesuit_UCMarine_Body_Armored_UCSEC "UC Sec Starlaw Spacesuit" [ARMO:000EF9AE]
+                0x00257809, // Spacesuit_UCMarine_Body_LightArmored "UC Startroop Spacesuit" [ARMO:00257809]
+                0x00398108, // Spacesuit_UCMarine_Body_LightArmored_SysDef "SysDef Recon Spacesuit" [ARMO:00398108]
+                0x000EF9AF, // Spacesuit_UCMarine_Body_LightArmored_UCSEC "UC Sec Recon Spacesuit" [ARMO:000EF9AF]
+                0x00257808, // Spacesuit_UCMarine_Body_Padded "UC Combat Spacesuit" [ARMO:00257808]
+                0x0039810A, // Spacesuit_UCMarine_Body_Padded_SysDef "SysDef Combat Spacesuit" [ARMO:0039810A]
+                0x000EF9B0, // Spacesuit_UCMarine_Body_Padded_UCSEC "UC Sec Combat Spacesuit" [ARMO:000EF9B0]
+                0x00398103, // Spacesuit_UCMarine_Body_SysDef "SysDef Spacesuit" [ARMO:00398103]
+                0x000EF9AD, // Spacesuit_UCMarine_Body_UCSEC "UC Security Spacesuit" [ARMO:000EF9AD]
+                0x00166410, // Spacesuit_UCPilot_01 "UC Ace Spacesuit" [ARMO:00166410]
+                0x002AAF44, // Spacesuit_UCPilot_SysDef "SysDef Ace Spacesuit" [ARMO:002AAF44]
+                0x0021A86A, // Spacesuit_UC_ShockArmor "UC Urbanwar Spacesuit" [ARMO:0021A86A]
+                0x00206130, // Spacesuit_UC_XenoSpecialist "UC AntiXeno Spacesuit" [ARMO:00206130]
+                0x00227CA3, // Spacesuit_Varuun_01 "Va'ruun Spacesuit" [ARMO:00227CA3]
             };
-
-
             return gearlist[random.Next(gearlist.Count)];
         }
     }

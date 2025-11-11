@@ -38,7 +38,7 @@ namespace FrankyCLI.questgen_tools
             string result = "";
             result += "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n";
             result += "Write in space pulp fiction style.\r\n\r\n";
-            result += "Include newline characters in your response.\r\n";
+            result += "Include newline characters in your response if there are mulitple sentences.\r\n";
             result += "Don't use the folowing characters: — \r\n";
 
             result += "The following is background information about the universe the story is set in, don't quote any back directly.\r\n\r\n";
