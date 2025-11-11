@@ -201,13 +201,18 @@ namespace FrankyCLI.questgen_tools
             {
                 List<uint> outfitlist = new List<uint>()
                 {
-                    0x0015E248,//Outfit_Spacesuit_BountyHunter_01 [OTFT:0015E248]
+                    0x0015E248,//Outfit_Spacesuit_BountyHunter [OTFT:0026B102]
                     0x000A5637,//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
                     0x00018DCF,//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
                     0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
                     0x0026B103,//Outfit_Spacesuit_Miner [OTFT:0026B103]
                     0x00026BF4,//Outfit_Spacesuit_Miner_Deimos [OTFT:00026BF4]
                     0x0006AC02,//Outfit_Spacesuit_Miner_Orange [OTFT:0006AC02]
+                    0x0006AC02,//Outfit_Spacesuit_Settler [OTFT:00067C92]
+                    0x0006AC02,//Outfit_Spacesuit_ShockArmor [OTFT:00203FB7]
+                    0x0006AC02,//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
+                    0x0006AC02,//Outfit_Spacesuit_TheFirst [OTFT:0012B42F]
+                    0x0006AC02,//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
                 };
 
                 IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
@@ -217,17 +222,26 @@ namespace FrankyCLI.questgen_tools
             {
                 List<uint> outfitlist = new List<uint>()
                 {
-                    0x00253B90,//Outfit_Clothes_Civilian_RubberPants_01 [OTFT:00253B90]
-                    0x0006A8B2,//Outfit_Clothes_Civilian_RubberPocketPants_01 [OTFT:0006A8B2]
-                    0x00133D76,//Outfit_Clothes_Colonist_Adventurous_01_NoHat [OTFT:00133D76]
-                    0x00133D75,//Outfit_Clothes_Colonist_Adventurous_01_with_Hat [OTFT:00133D75]
-                    0x00133D74,//Outfit_Clothes_Colonist_Adventurous_Poncho_01_NoHat [OTFT:00133D74]
-                    0x00133D73,//Outfit_Clothes_Colonist_Adventurous_Poncho_01_with_Hat [OTFT:00133D73]
-                    0x00133D72,//Outfit_Clothes_Colonist_Adventurous_Poncho_Mask_01_NoHat [OTFT:00133D72]
-                    0x00133D68,//Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat [OTFT:00133D68]
-                    0x001341DF//Outfit_Clothes_Akila_Security_NoHeadwear [OTFT:001341DF]
+                    0x002B211A, // Outfit_Citizen [OTFT:002B211A]
+                    0x00270258, // Outfit_BountyHunter [OTFT:00270258]
+                    0x002E2BBC, // Outfit_Citizen_UC [OTFT:002E2BBC]
+                    0x000E6944, // Outfit_Clothes_Akila_Security [OTFT:000E6944]
+                    0x001341D9, // Outfit_Clothes_Argos_Jumpsuit [OTFT:001341D9]
+                    0x002EB236, // Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
+                    0x0015CF45, // Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
+                    0x0026B0FC, // Outfit_Colonist [OTFT:0026B0FC]
+                    0x00253B9B, // Outfit_Clothes_ScienceLabTec [OTFT:00253B9B]
+                    0x00034115, // Outfit_Clothes_ScienceLabTec_02 [OTFT:00034115]
+                    0x00392EE8, // Outfit_Clothes_Service_Uniform_RedMile [OTFT:00392EE8]
+                    0x00253B8A, // Outfit_Clothes_BusinessSuit [OTFT:00253B8A]
+                    0x00133D75, // Outfit_Clothes_Colonist_Adventurous_01_with_Hat [OTFT:00133D75]
+                    0x00133D56, // Outfit_Clothes_Farmer_01_NoHat [OTFT:00133D56]
+                    0x0026FB5C, // Outfit_TheFirst [OTFT:0026FB5C]
+                    0x00042D85, // Outfit_Worker [OTFT:00042D85]
+
 
                 };
+
                 IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
                 return outfit;
             }
