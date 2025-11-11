@@ -126,7 +126,7 @@ namespace FrankyCLI
 
 
             //Set the enemy gang to the new gang
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
+            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[3]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
 
 
 
@@ -181,8 +181,8 @@ namespace FrankyCLI
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
             ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[2]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
+            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[2]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
+            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
 
             myMod.Activators.Add(newActivator);
 
