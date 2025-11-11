@@ -47,6 +47,8 @@ namespace FrankyCLI.questgen_tools
             var armour = gen_quest._StarfieldMod.Armors[new FormKey(gen_quest.StarfieldModKey, armourid)].DeepCopy();
             var legID = Guid.NewGuid().ToString().Substring(0, 8);
 
+
+            
             //New Armour
             var newarmour = new Armor(myModparam, "baseleg_" + legID)
             {
@@ -74,6 +76,56 @@ namespace FrankyCLI.questgen_tools
                 Weight = armour.Weight,
                 Race = armour.Race,
             };
+
+
+            //Stat randomiser - Suits have more points to spend
+            uint statpoints = 0;
+            ushort nextstat = 0;
+
+            if (Type == "Spacesuit Helmet")
+            {
+                statpoints = (uint)(70 + rand.Next(50));
+
+                nextstat = (ushort)rand.Next((int)statpoints);
+                statpoints -= nextstat;
+                newarmour.ArmorRating = (ushort)(10 + nextstat);
+
+                nextstat = (ushort)rand.Next((int)statpoints);
+                statpoints -= nextstat;
+                newarmour.Resistances[0].Value = (uint)(10 + nextstat);
+
+                newarmour.Resistances[1].Value = 10 + statpoints;
+            }            
+
+            if (Type == "Spacesuit Pack")
+            {
+                statpoints = (uint)(70 + rand.Next(75));
+
+                nextstat = (ushort)rand.Next((int)statpoints);
+                statpoints -= nextstat;
+                newarmour.ArmorRating = (ushort)(10 + nextstat);
+
+                nextstat = (ushort)rand.Next((int)statpoints);
+                statpoints -= nextstat;
+                newarmour.Resistances[0].Value = (uint)(10 + nextstat);
+
+                newarmour.Resistances[1].Value = 10 + statpoints;
+            }
+
+            if (Type == "Spacesuit")
+            {
+                statpoints = (uint)(70 + rand.Next(150));
+
+                nextstat = (ushort)rand.Next((int)statpoints);
+                statpoints -= nextstat;
+                newarmour.ArmorRating = (ushort)(10 + nextstat);
+
+                nextstat = (ushort)rand.Next((int)statpoints);
+                statpoints -= nextstat;
+                newarmour.Resistances[0].Value = (uint)(10 + nextstat);
+
+                newarmour.Resistances[1].Value = 10 + statpoints;
+            }
             myModparam.Armors.Add(newarmour);
             //Base armour levelled list
 
