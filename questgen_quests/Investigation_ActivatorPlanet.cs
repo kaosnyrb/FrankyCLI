@@ -126,7 +126,15 @@ namespace FrankyCLI
 
 
             //Set the enemy gang to the new gang
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[3]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
+            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
+            for (int i = 0; i < properties.Count;i++)
+            {
+                if ( properties[i].Name == "GangMembers")
+                {
+                    ((ScriptObjectProperty)properties[i]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
+                }
+
+            }
 
 
 
@@ -180,9 +188,23 @@ namespace FrankyCLI
             };
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
-            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[2]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-            ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[1]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
+
+            var activatorproperties = newActivator.VirtualMachineAdapter.Scripts[0].Properties;
+            for (int i = 0; i < activatorproperties.Count; i++)
+            {
+                if (activatorproperties[i].Name == "messagetext")
+                {
+                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
+                }
+                if (activatorproperties[i].Name == "currentquest")
+                {
+                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                }
+                if (activatorproperties[i].Name == "nextquest")
+                {
+                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
+                }
+            }
 
             myMod.Activators.Add(newActivator);
 
