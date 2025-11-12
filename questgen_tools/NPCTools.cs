@@ -22,13 +22,37 @@ namespace FrankyCLI.questgen_tools
     {
         public static uint GetTemplateNPC(bool female)
         {
+            Random random = new Random();
+
             if (female)
             {
-                return 0x000818;
+                List<uint> npclist = new List<uint>()
+                {
+                    0x000818,
+                    0x000856,
+                    0x000857,
+                    0x000858,
+                    0x00085C,
+                    0x00085D,
+                    0x00085E,
+                    0x00085F,
+                    0x000860,
+                    0x000861,
+                };
+                return npclist[random.Next(npclist.Count)];
             }
             else
             {
-                return 0x000826;
+                List<uint> npclist = new List<uint>()
+                {
+                    0x000826,
+                    0x000862,
+                    0x000863,
+                    0x000865,
+                    0x000866,
+                    0x000867,
+                    0x000868,                };
+                return npclist[random.Next(npclist.Count)];
             }
         }
         public static Npc CloneNPC(StarfieldMod myMod, Npc NPC)

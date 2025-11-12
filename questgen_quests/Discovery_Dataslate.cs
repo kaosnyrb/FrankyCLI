@@ -66,14 +66,20 @@ namespace FrankyCLI.questgen_quests
             //Find the levelled list
             //duout_LL_QuestBooks [LVLI:02000843]
 
+            //We have a condictional so that the dataslate only drops until you complete the next quest.
+            //This means you more likely to find missions you haven't done.
+            var condition = myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries[0].Conditions[0].DeepCopy();
+            ((GetQuestCompletedConditionData)condition.Data).FirstParameter = new FormLinkOrIndex<IQuestGetter>(condition.Data, nextQuest.questform.FormKey);
+
             myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries.Add(new LeveledItemEntry()
             {
                 Count = 1,
                 Reference = bountybook.ToLink<IItemGetter>(),
                 ChanceNone = new Percent(0),
-                Level = 1
+                Level = 1,
+                Conditions = new ExtendedList<Condition>() { condition }
             });
-
+            
             return null;
         }
     }
