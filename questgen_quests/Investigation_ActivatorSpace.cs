@@ -1,22 +1,16 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_tools;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
-using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 
-namespace FrankyCLI
+namespace FrankyCLI.questgen_quests
 {
-    public class Investigation_ActivatorPlanet : IOutlawQuest
+    public class Investigation_ActivatorSpace : IOutlawQuest
     {
         private Quest questform;
 
@@ -36,11 +30,11 @@ namespace FrankyCLI
 
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
-            Console.WriteLine("Generating Activator Planet Quest...");
+            Console.WriteLine("Generating Activator Space Quest...");
 
 
-            var datasourceprompt = AITools.GetBackgroundPrompt() + 
-                "A three word or less digital file that contains a clue to the characters location. Examples are a Log Entry or Shipping Manifest\r\nOnly include the data source name in the response.\r\n\r\n" +
+            var datasourceprompt = AITools.GetBackgroundPrompt() +
+                "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
@@ -51,7 +45,7 @@ namespace FrankyCLI
 
             var questprompt = AITools.GetBackgroundPrompt() +
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
-                "This quest is about finding the location of this character\r\n\r\n"+
+                "This quest is about finding the location of this character\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
 
@@ -64,25 +58,7 @@ namespace FrankyCLI
 
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-
-            //Generate a gang
-
-            string gangtheme = OutlawGang.GetGangTheme();
-            Console.WriteLine("gangtheme: " + gangtheme);
-
-            var gangpromt = AITools.GetBackgroundPrompt() +
-               "Generate the name of a member of the characters gang.\r\n\r\n" +
-               "Keep it to two words and only return those two words\r\n\r\n" +
-               "The gangs theme is " + gangtheme + " \r\n\r\n" +
-               "Use the following information:\r\n\r\n";
-            gangpromt += "Character background: " + outlawNpc.background + "\r\n";
-
-            var gangname = AITools.RunPrompt(gangpromt);
-            Console.WriteLine("gangname: " + gangname);
-
-            OutlawGang outlawGang = new OutlawGang(myMod, gangname);
-            var gang = outlawGang.GenerateGang();
-
+            
             //Log Entry
             var logprompt = AITools.GetBackgroundPrompt() +
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
@@ -91,8 +67,6 @@ namespace FrankyCLI
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Character background: " + outlawNpc.background + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
-            logprompt += "the title of the Gang members who are helping the target: " + gangname + "\r\n";
-
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);
@@ -125,19 +99,6 @@ namespace FrankyCLI
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
 
-            //Set the enemy gang to the new gang
-            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < properties.Count;i++)
-            {
-                if ( properties[i].Name == "GangMembers")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
-                }
-
-            }
-
-
-
             //Create the activation message
             var pickuppromt = AITools.GetBackgroundPrompt() +
             "Include newline characters in your response.\r\n" +
@@ -160,13 +121,13 @@ namespace FrankyCLI
                 Description = pickupmessage,
                 Flags = messageClone.Flags
             };
-            
+
             myMod.Messages.Add(message);
 
 
             //Create the Activator
 
-            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000836)].DeepCopy();
+            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000901)].DeepCopy();
             Mutagen.Bethesda.Starfield.Activator newActivator = new Mutagen.Bethesda.Starfield.Activator(myMod)
             {
                 ActivateSound = ActivatorClone.ActivateSound,
@@ -188,7 +149,6 @@ namespace FrankyCLI
             };
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
-
             var activatorproperties = newActivator.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < activatorproperties.Count; i++)
             {
@@ -209,9 +169,9 @@ namespace FrankyCLI
             myMod.Activators.Add(newActivator);
 
             //Set the Activator to be the quest target
-            ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
+            ((IQuestReferenceAlias)Quest.Aliases[4]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
-            
+
             //Set the interfaces
             questform = newQuest;
             logMessage = logmessage;

@@ -14,7 +14,7 @@ namespace FrankyCLI.questgen_tools
         public static string RunPrompt(string prompt)
         {
             //Dumb switch for fast testing
-            //return "Test";
+            return "Test";
 
             var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             var client = new OpenAIClient(apiKey);

@@ -41,13 +41,41 @@ namespace FrankyCLI.questgen_tools
             {
                 new MissionTemplate()
                 {
-                    Name = "Planet side Activator",
-                    Description = "Find info about the target on a planet with a Dungeon Industrial",
+                    Name = "Planet side Activator Small Marker",
+                    Description = "Find info about the target on a planet POI",
                     Location = "A remote location",
                     formid = 0x000835,
                     needSpacesuit = true,
                     outlawQuest = new Investigation_ActivatorPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Activator Captive",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "A remote location",
+                    formid = 0x000907,
+                    needSpacesuit = true,
+                    outlawQuest = new Investigation_ActivatorPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Activator Large Marker",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "A remote location",
+                    formid = 0x000908,
+                    needSpacesuit = true,
+                    outlawQuest = new Investigation_ActivatorPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Activator",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "An old space beacon",
+                    formid = 0x000900,
+                    needSpacesuit = true,
+                    outlawQuest = new Investigation_ActivatorSpace()
                 }
+
             };
 
             ShowdownTemplates = new List<MissionTemplate>
@@ -121,7 +149,10 @@ namespace FrankyCLI.questgen_tools
         public MissionTemplate GetInvestigationMissionTemplate()
         {
             Random random = new Random();
-            return InvestigationTemplates[random.Next(InvestigationTemplates.Count)];
+            int selected = random.Next(InvestigationTemplates.Count);
+            var template = InvestigationTemplates[selected];
+            InvestigationTemplates.RemoveAt(selected);
+            return template;
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate()
