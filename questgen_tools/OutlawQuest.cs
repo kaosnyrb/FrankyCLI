@@ -68,14 +68,32 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Space Activator",
+                    Name = "Planet side Activator Important Marker Breathable",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "A remote location",
+                    formid = 0x000909,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Activator - unguarded",
                     Description = "Find info about the target from a beacon in orbit around a planet",
                     Location = "An old space beacon",
                     formid = 0x000900,
                     needSpacesuit = true,
                     outlawQuest = new Investigation_ActivatorSpace()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Activator  - Guarded by custom",
+                    Description = "Find info about the target from a beacon in orbit around a planet guarded by a ship",
+                    Location = "An old space beacon",
+                    formid = 0x00090D,
+                    needSpacesuit = true,
+                    outlawQuest = new Investigation_ActivatorSpace_Guard()
                 }
-
+               
             };
 
             ShowdownTemplates = new List<MissionTemplate>
@@ -93,14 +111,14 @@ namespace FrankyCLI.questgen_tools
                 {
                     Name = "Planet side Bounty",
                     Description = "Kill the target on a planet with a poor atmosphere",
-                    Location = "A small remote civilan installation",
+                    Location = "A small remote civilan installation on a planet with a poor atmosphere",
                     formid = 0x000830,
                     needSpacesuit = true,
                     outlawQuest = new Showdown_BountyPlanet()
                 },
                 new MissionTemplate()
                 {
-                    Name = "Planet side Bounty",
+                    Name = "Planet side Bounty - Breathable Dungeon",
                     Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
                     Location = "A Occupied Industrial Complex",
                     formid = 0x000831,
@@ -109,7 +127,7 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Planet side Bounty",
+                    Name = "Planet side Bounty - Industrial Dungeon",
                     Description = "Kill the target on a planet with a Dungeon Industrial",
                     Location = "A Occupied Industrial Complex",
                     formid = 0x000834,
@@ -118,7 +136,7 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Planet side Bounty",
+                    Name = "Planet side Bounty - Military Dungeon",
                     Description = "Kill the target on a planet with a Dungeon Military",
                     Location = "A Old Military Base",
                     formid = 0x000840,
@@ -127,7 +145,7 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Planet side Bounty",
+                    Name = "Planet side Bounty - Mining Dungeon",
                     Description = "Kill the target on a planet with a Dungeon Mining",
                     Location = "A Mining Operation",
                     formid = 0x000841,

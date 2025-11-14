@@ -20,10 +20,12 @@ namespace FrankyCLI
     {
         public static ModKey StarfieldModKey;
         public static IStarfieldModGetter _StarfieldMod;
+        public static StarfieldMod myMod;
+
         public static int Generate(string[] args)
         {
             Random random = new Random();
-            StarfieldMod myMod;
+            //StarfieldMod myMod;
             string modname = args[0];
             string mode = args[1];
             string prefix = args[2];
