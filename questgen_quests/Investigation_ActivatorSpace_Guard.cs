@@ -37,10 +37,11 @@ namespace FrankyCLI.questgen_quests
                 "A three word or less spaceship name.\r\nOnly include the spaceship source name in the response.\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
             shipnameprompt += "Faction: " + "Ecliptic Mercenary Corp" + "\r\n";
+            shipnameprompt += "Ship Type: " + "An old cargo hauler that has seen better days." + "\r\n";
 
             var shipname = AITools.RunPrompt(shipnameprompt);
             Console.WriteLine("shipname: " + shipname);
-            var ship = ShipTools.GenShip(shipname, 0x002E74E2, 0x000AE4F3);
+            var ship = ShipTools.GenShip(shipname, ShipTools.GetCargoShip(), 0x000AE4F3);
 
             //Create the datasource
             var datasourceprompt = AITools.GetBackgroundPrompt() +
