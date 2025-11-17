@@ -57,7 +57,7 @@ namespace FrankyCLI
                         }
                     }
                 }
-
+                AITools.TestPrompt();
                 // Quest
                 OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
                 outlawQuest.GenerateQuest();

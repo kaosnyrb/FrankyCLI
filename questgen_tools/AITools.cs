@@ -10,6 +10,16 @@ namespace FrankyCLI.questgen_tools
 {
     public class AITools
     {
+        public static string TestPrompt()
+        {
+            string prompt = File.ReadAllText("aipromt.txt");
+
+            string results = RunPrompt(prompt);
+            Console.WriteLine(results);
+
+            return results;
+        }
+
         // Make sure to set your API key in an environment variable: OPENAI_API_KEY
         public static string RunPrompt(string prompt)
         {

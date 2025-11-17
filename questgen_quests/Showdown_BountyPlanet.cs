@@ -55,7 +55,8 @@ namespace FrankyCLI
             var logprompt = AITools.GetBackgroundPrompt() +
                 "Include newline characters in your response.\r\n" +
                 "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
-                "Generate a short flavour text story explaination on why this character is at this location.\r\n\r\n" +            
+                "Generate a short quest objective for the game Starfield on why this character is at this location.\r\n\r\n" +
+                "It should explain why the character is at the location and that the player should kill them.\r\n\r\n" +            
                 "Use the following information to build the explaination:\r\n\r\n";
 
             logprompt += "Location:" + missionTemplate.Location + "\r\n";

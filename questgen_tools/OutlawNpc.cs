@@ -73,12 +73,7 @@ namespace FrankyCLI.questgen_tools
         public string GenerateBackground()
         {
             string backgroundprompt = AITools.GetBackgroundPrompt() +
-                "Reply only with the following information:\r\n\r\n" +
-                "Three paragraph on the history of the character, there strengths and weaknesses and past crimes. Keep each under 50 words.\r\n\r\n" +
-                "Avoid using overly complex language and terminology. \r\n\r\n" +
-                "Avoid using place names and don't break the fourth wall. \r\n\r\n" +
-                "Only include the background in the response.\r\n\r\n" +
-                "Include the characters information in the background which is: \r\n\r\n";
+                "Two paragraphs on the history of the character.\r\n\r\nThese should explain the characters upbringing and how they turned to a life of crime.\r\n\r\nThese should be written in the tone of a report a bounty hunter group have compiled\r\n\r\nAvoid using overly complex language and terminology. \r\n\r\nAvoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\nOnly include the background in the response.\r\n\r\nAvoid starting each sentence with a pronoun\r\n\r\nInclude the characters information in the background which is: \r\n";
             backgroundprompt += "Name: " + name + "\r\n\r\n";
             backgroundprompt += "Gender: " + gender + "\r\n\r\n";
             backgroundprompt += "Upbringing: " + GetUpbringing() + "\r\n\r\n";
