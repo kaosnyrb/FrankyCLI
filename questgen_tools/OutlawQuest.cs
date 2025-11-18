@@ -92,8 +92,17 @@ namespace FrankyCLI.questgen_tools
                     formid = 0x00090D,
                     needSpacesuit = true,
                     outlawQuest = new Investigation_ActivatorSpace_Guard()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Activator - Crimson Fleet Trap",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "An space beacon in an asteroid field",
+                    formid = 0x00090F,
+                    needSpacesuit = true,
+                    outlawQuest = new Investigation_ActivatorSpace_trapped_crimson()
                 }
-               
+
             };
 
             ShowdownTemplates = new List<MissionTemplate>
