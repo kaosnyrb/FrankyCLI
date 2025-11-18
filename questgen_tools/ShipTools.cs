@@ -146,5 +146,40 @@ namespace FrankyCLI.questgen_tools
 
             return shiplist[random.Next(shiplist.Count)];
         }
+
+        public static string GetShipName()
+        {
+            Random random = new Random();
+            List<string> spaceshipPrefixes = new List<string>
+            {
+                "Star", "Nova", "Nebula", "Galaxy", "Cosmic", "Solar", "Lunar", "Quantum", "Eclipse", "Stellar",
+                "Astro", "Meteor", "Comet", "Ion", "Photon", "Plasma", "Warp", "Hyper", "Proto", "Omega",
+                "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Sigma", "Lambda", "Zenith", "Apex",
+                "Radiant", "Infinite", "Eternal", "Celestial", "Astral", "Void", "NovaCore", "DarkStar", "Bright",
+                "Vortex", "Chrono", "Mythic", "Eon", "Holo", "Spectra", "Titan", "Orion", "Pulsar", "Aurora",
+                "Fusion", "Nebulon", "Aether", "Prime", "Vector", "Vanguard", "Vesper", "Tempest", "Ignis",
+                "Drift", "Pyre", "Crystal", "Echo", "Pulse", "Circuit", "Arc", "Cyber", "Nano", "Mega",
+                "Ultra", "Micro", "Macro", "Astris", "Nimbus", "Thunder", "Storm", "Phoenix", "Dragon",
+                "Seraph", "Vertex", "Singularity", "Halo", "Ionis", "Specter", "Shadow", "Frost", "Ember",
+                "Radiance", "Spectrum", "Horizon", "Cosmos", "Starlance", "Astrion", "Solaris", "Equinox",
+                "Monolith", "Zen", "Genesis", "Frontier", "Pioneer", "EclipseCore", "Velocity", "Nebulite"
+            };
+            List<string> spaceshipSuffixes = new List<string>
+            {
+                "Voyager", "Runner", "Spear", "Falcon", "Hawk", "Drifter", "Carrier", "Cruiser", "Ranger",
+                "Explorer", "Warrior", "Sentinel", "Guardian", "Hunter", "Pioneer", "Prospector", "Trader",
+                "Nomad", "Lancer", "Strider", "Wanderer", "Harbinger", "Ascendant", "Venture", "Breaker",
+                "Wing", "Claw", "Ray", "Beacon", "Frontier", "Comet", "Trailblazer", "Traverse", "Seeker",
+                "Shadow", "Command", "Legacy", "Titan", "Voyage", "Impact", "Conquest", "Discovery",
+                "Odyssey", "Pilgrim", "Specter", "Echo", "Vanguard", "Pulse", "Chaser", "Dragon", "Phoenix",
+                "Starship", "Cruise", "Engine", "Rider", "Vector", "Pathfinder", "Tempest", "Striker", "Stalker",
+                "Wingblade", "Forge", "Harrier", "Reclaimer", "Interceptor", "Marauder", "Navigator",
+                "Battleship", "Destroyer", "Frigate", "Skylance", "Storm", "Cycler", "Ascension", "Authority",
+                "Circuit", "Frequency", "Equinox", "Nebulon", "Starlance", "Echohawk", "Skyrider", "Warpwing",
+                "Revenant", "Eternity", "Obsidian", "Constellation", "Continuum", "Prospect", "Arc",
+                "Dominion", "ReclaimerX", "Pathway", "Surge", "Vortex", "Helix", "Prime", "Horizon", "VectorX"
+            };
+            return spaceshipPrefixes[random.Next(spaceshipPrefixes.Count)] + " " + spaceshipSuffixes[random.Next(spaceshipSuffixes.Count)];
+        }
     }
 }

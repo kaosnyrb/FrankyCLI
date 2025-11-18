@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_quests
 {
-    public class Investigation_ActivatorSpace_Guard : IOutlawQuest
+    public class Investigation_ActivatorSpace_trapped_ecliptic : IOutlawQuest
     {
         private Quest questform;
 
@@ -30,21 +30,9 @@ namespace FrankyCLI.questgen_quests
 
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
-            Console.WriteLine("Generating Activator Guarded Space Quest...");
+            Console.WriteLine("Generating Activator Spacer Trapped Space Quest...");
 
-            //Create the ship
-            //var shipnameprompt = 
-            //    "A three word or less spaceship name.\r\nOnly include the spaceship source name in the response.\r\n\r\n" +
-            //    "Try and make the ship name iconic like the falcon or firefly.\r\n\r\n" +
-            //    "Use the following information to build the Ship name:\r\n\r\n";
-            //shipnameprompt += "Faction: " + "Ecliptic Mercenary Corp" + "\r\n";
-            //shipnameprompt += "Ship Type: " + "An old cargo hauler that has seen better days." + "\r\n";
 
-            var shipname = ShipTools.GetShipName();
-            Console.WriteLine("shipname: " + shipname);
-            var ship = ShipTools.GenShip(shipname, ShipTools.GetCargoShip(), 0x000AE4F3);
-
-            //Create the datasource
             var datasourceprompt =
                 "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
@@ -55,7 +43,7 @@ namespace FrankyCLI.questgen_quests
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
 
-            var questprompt = 
+            var questprompt =
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "This quest is about finding the location of this character\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
@@ -64,7 +52,6 @@ namespace FrankyCLI.questgen_quests
             questprompt += "Name:" + outlawNpc.name + "\r\n";
             questprompt += "Background: " + outlawNpc.background + "\r\n";
             questprompt += "Vital clue to their location: " + datasource + "\r\n";
-            questprompt += "Spaceship guarding the information: " + shipname + "\r\n";
 
             var questname = AITools.RunPrompt(questprompt);
             Console.WriteLine("questname: " + questname);
@@ -73,15 +60,13 @@ namespace FrankyCLI.questgen_quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
             
             //Log Entry
-            var logprompt = 
+            var logprompt =
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
-            "Explain why the ship in this stage is gaurding it and there connection with the bounty.\r\n\r\n" +
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Character background: " + outlawNpc.background + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
-            questprompt += "Spaceship guarding the information: " + shipname + "\r\n";
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);
@@ -113,15 +98,14 @@ namespace FrankyCLI.questgen_quests
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
-            //Set the guard ship
-            ((IQuestReferenceAlias)Quest.Aliases[6]).CreateReferenceToObject.Object = ship.ToLink<IStarfieldMajorRecordGetter>();
-
 
             //Create the activation message
-            var pickuppromt = 
+            var pickuppromt =
             "Include newline characters in your response.\r\n" +
             "Generate a short flavour text story which explains to the player that they have found the location of the target via this clue.\r\n\r\n" +
             "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
+            "The Ecliptic Mercenaries have been paid to guard this becaon and attack!\r\n\r\n" +
+
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
             pickuppromt += "Character background: " + outlawNpc.background + "\r\n";
@@ -145,7 +129,7 @@ namespace FrankyCLI.questgen_quests
 
             //Create the Activator
 
-            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000901)].DeepCopy();
+            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000914)].DeepCopy();
             Mutagen.Bethesda.Starfield.Activator newActivator = new Mutagen.Bethesda.Starfield.Activator(myMod)
             {
                 ActivateSound = ActivatorClone.ActivateSound,

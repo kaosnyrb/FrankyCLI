@@ -110,6 +110,15 @@ namespace FrankyCLI.questgen_tools
                     formid = 0x000912,
                     needSpacesuit = true,
                     outlawQuest = new Investigation_ActivatorSpace_trapped_spacer()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Activator - Ecliptic Trap",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "An space beacon in an asteroid field",
+                    formid = 0x000915,
+                    needSpacesuit = true,
+                    outlawQuest = new Investigation_ActivatorSpace_trapped_ecliptic()
                 }
             };
 

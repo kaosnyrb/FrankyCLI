@@ -60,7 +60,7 @@ namespace FrankyCLI.questgen_tools
             //Second invesitiation test  - works fine
             AITools.RunPrompt("<InitalInvestigation>");
             var invest2 = lib.GetInvestigationMissionTemplate();
-            invest2 = lib.InvestigationTemplates[5];
+            //invest2 = lib.InvestigationTemplates[6];
             Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);
             Console.WriteLine("Investigation: " + invest2.Name);
 
