@@ -28,7 +28,7 @@ namespace FrankyCLI.questgen_tools
         {
             MissionLib lib = new MissionLib();
             var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate();
-            //Missiontemplate = lib.FinalEncounterTemplates[3];
+            ShowdownMissionTemplate = lib.ShowdownTemplates[6];
             
             Random random = new Random();
             bool isfemale = false;
@@ -54,15 +54,15 @@ namespace FrankyCLI.questgen_tools
 
             AITools.RunPrompt("<DeepInvestigation>");
             var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate();
-            var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
+            var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
 
             //Second invesitiation test  - works fine
             AITools.RunPrompt("<InitalInvestigation>");
             var invest2 = lib.GetInvestigationMissionTemplate();
+            Console.WriteLine("Investigation: " + invest2.Name);
             //invest2 = lib.InvestigationTemplates[6];
             Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);
-            Console.WriteLine("Investigation: " + invest2.Name);
 
             // Finally build the discovery step
             AITools.RunPrompt("<Discovery>");

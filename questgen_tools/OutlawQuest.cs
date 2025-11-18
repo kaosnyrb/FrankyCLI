@@ -146,7 +146,7 @@ namespace FrankyCLI.questgen_tools
                 {
                     Name = "Planet side Bounty - Breathable Dungeon",
                     Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
-                    Location = "A Occupied Industrial Complex",
+                    Location = "A Occupied Complex",
                     formid = 0x000831,
                     needSpacesuit = false,
                     outlawQuest = new Showdown_BountyPlanet()
@@ -176,6 +176,15 @@ namespace FrankyCLI.questgen_tools
                     Location = "A Mining Operation",
                     formid = 0x000841,
                     needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Planet side Bounty - Breathable Dungeon boss marker",
+                    Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
+                    Location = "A Occupied Base where they are meeting with a boss",
+                    formid = 0x000916,
+                    needSpacesuit = false,
                     outlawQuest = new Showdown_BountyPlanet()
                 }
             };
