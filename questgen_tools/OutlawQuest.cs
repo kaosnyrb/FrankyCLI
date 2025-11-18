@@ -189,13 +189,85 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "City Bounty - Cydonia Outside",
+                    Name = "City Bounty - Cydonia Outside 01",
                     Description = "Kill the target at the mining city of Cydonia",
                     Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
                     formid = 0x000917,
                     needSpacesuit = true,
                     outlawQuest = new Showdown_BountyCity()
-                }
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Cydonia Outside 02",
+                    Description = "Kill the target at the mining city of Cydonia",
+                    Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
+                    formid = 0x000926,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Cydonia Outside 03",
+                    Description = "Kill the target at the mining city of Cydonia",
+                    Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
+                    formid = 0x001131,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Well 01",
+                    Description = "Kill the target in The Well under New Atlantis",
+                    Location = "The Well is an underground district of New Atlantis. It appears dim and unclean, compared to its above-ground counterparts.",
+                    formid = 0x00118E,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - New Atlantis 01",
+                    Description = "Kill the target at New Atlantis",
+                    Location = "New Atlantis",
+                    formid = 0x001196,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Neon 01",
+                    Description = "Kill the target at Neon",
+                    Location = "Neon",
+                    formid = 0x0011F9,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Neon 02",
+                    Description = "Kill the target at Neon",
+                    Location = "Neon",
+                    formid = 0x001200,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Neon 03",
+                    Description = "Kill the target at Neon",
+                    Location = "Neon",
+                    formid = 0x001201,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Neon 04",
+                    Description = "Kill the target at Neon",
+                    Location = "Neon",
+                    formid = 0x0012BE,
+                    needSpacesuit = false,
+                    outlawQuest = new Showdown_BountyCity()
+                },
             };
 
 

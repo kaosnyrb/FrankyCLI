@@ -120,7 +120,7 @@ namespace FrankyCLI.questgen_quests
             //Create the activation message
             var pickuppromt = 
             "Include newline characters in your response.\r\n" +
-            "Generate a short flavour text story which explains to the player that they have found the location of the target via this clue.\r\n\r\n" +
+            "Generate a short flavour text story which explains to the player that they have found the location of the next stage via this clue.\r\n\r\n" +
             "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
