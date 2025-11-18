@@ -35,8 +35,9 @@ namespace FrankyCLI.questgen_quests
             //Create the ship
             var shipnameprompt = 
                 "A three word or less spaceship name.\r\nOnly include the spaceship source name in the response.\r\n\r\n" +
-                "Use the following information to build the quest name:\r\n\r\n";
-            shipnameprompt += "Faction: " + "Ecliptic Mercenary Corp" + "\r\n";
+                "Try and make the ship name iconic like the falcon or firefly.\r\n\r\n" +
+                "Use the following information to build the Ship name:\r\n\r\n";
+            //shipnameprompt += "Faction: " + "Ecliptic Mercenary Corp" + "\r\n";
             shipnameprompt += "Ship Type: " + "An old cargo hauler that has seen better days." + "\r\n";
 
             var shipname = AITools.RunPrompt(shipnameprompt);
@@ -74,6 +75,7 @@ namespace FrankyCLI.questgen_quests
             //Log Entry
             var logprompt = 
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
+            "Explain why the ship in this stage is gaurding it and there connection with the bounty.\r\n\r\n" +
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";

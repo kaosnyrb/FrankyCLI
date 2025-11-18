@@ -32,6 +32,8 @@ namespace FrankyCLI.questgen_tools
         {
             myMod = myModparam;
             gangName = gangNameparam;
+
+            AITools.RunPrompt("<Lore> There is a gang of people called " + gangName + " who are assiting the target");
         }
 
         public static string GetGangTheme()

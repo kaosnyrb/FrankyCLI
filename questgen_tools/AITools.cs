@@ -71,6 +71,13 @@ namespace FrankyCLI.questgen_tools
             result += "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n";
             //            result += "Write in space pulp fiction style.\r\n\r\n";
             result += "You will be generating the story from the final encounter backwards, try and link things together in way that makes sense.\r\n\r\n";
+            
+            result += "The final order is as follows: Discovery of a lead on the target bounty, Inital investigation where you find the location of a descive  clue, Investigation where you find the location of the target and then the final showdown with the bounty.\r\n\r\n";
+
+            result += "You will recieve a tag like <InitalInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
+            result += "Use the information generated in the last step to inform the current step.\r\n\r\n";
+
+            result += "You will recheive new <Lore> entries as things are created, use these to flesh out the story.\r\n\r\n";
 
             result += "Include newline characters in your response if there are mulitple sentences.\r\n";
             result += "Don't use the folowing characters: — \r\n";

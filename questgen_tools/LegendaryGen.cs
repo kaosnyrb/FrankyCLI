@@ -37,18 +37,19 @@ namespace FrankyCLI.questgen_tools
             }
 
 
-            string Armournameprompt =
-                "Reply only with the following information:\r\n\r\n" +
-                "A legendary " + Type +" belonging to "+ OutlawName  + " . \r\n\r\n" +
-                "Limit it to three words and only response with those three words";
-            string ArmourName = AITools.RunPrompt(Armournameprompt);
-            Console.WriteLine(ArmourName); 
 
             var armour = gen_quest._StarfieldMod.Armors[new FormKey(gen_quest.StarfieldModKey, armourid)].DeepCopy();
             var legID = Guid.NewGuid().ToString().Substring(0, 8);
 
+            string Armournameprompt =
+                "Reply only with the following information:\r\n\r\n" +
+                "A legendary " + Type + " belonging to " + OutlawName + " . \r\n\r\n" +
+                "The orginal item this is based on is called the " + armour.Name + ".\r\n\r\n" +
+                "Limit it to two to four words and only response with those words";
+            string ArmourName = AITools.RunPrompt(Armournameprompt);
+            Console.WriteLine(ArmourName);
 
-            
+
             //New Armour
             var newarmour = new Armor(myModparam, "baseleg_" + legID)
             {

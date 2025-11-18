@@ -45,21 +45,27 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine(outlawNpc.background);
 
             //Quest Step
+
+            AITools.RunPrompt("<Showdown>");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
 
             //Now build an investigation step before
+
+            AITools.RunPrompt("<DeepInvestigation>");
             var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate();
             var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
 
             //Second invesitiation test  - works fine
+            AITools.RunPrompt("<InitalInvestigation>");
             var invest2 = lib.GetInvestigationMissionTemplate();
             invest2 = lib.InvestigationTemplates[3];
             Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);
             Console.WriteLine("Investigation: " + invest2.Name);
 
             // Finally build the discovery step
+            AITools.RunPrompt("<Discovery>");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, invest2.outlawQuest);
 
