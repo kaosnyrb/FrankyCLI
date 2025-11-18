@@ -37,7 +37,7 @@ namespace FrankyCLI.questgen_tools
             }
 
 
-            string Armournameprompt = AITools.GetBackgroundPrompt() +
+            string Armournameprompt =
                 "Reply only with the following information:\r\n\r\n" +
                 "A legendary " + Type +" belonging to "+ OutlawName  + " . \r\n\r\n" +
                 "Limit it to three words and only response with those three words";

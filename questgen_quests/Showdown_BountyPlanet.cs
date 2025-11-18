@@ -38,7 +38,7 @@ namespace FrankyCLI
         {
             Console.WriteLine("Generating Bounty Planet Quest...");
 
-            var questprompt = AITools.GetBackgroundPrompt() +
+            var questprompt =
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
 
@@ -52,7 +52,7 @@ namespace FrankyCLI
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logprompt = AITools.GetBackgroundPrompt() +
+            var logprompt = 
                 "Include newline characters in your response.\r\n" +
                 "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
                 "Generate a short quest objective for the game Starfield on why this character is at this location.\r\n\r\n" +

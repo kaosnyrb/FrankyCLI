@@ -33,7 +33,7 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("Generating Activator Space Quest...");
 
 
-            var datasourceprompt = AITools.GetBackgroundPrompt() +
+            var datasourceprompt =
                 "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
@@ -43,7 +43,7 @@ namespace FrankyCLI.questgen_quests
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
 
-            var questprompt = AITools.GetBackgroundPrompt() +
+            var questprompt =
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "This quest is about finding the location of this character\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
@@ -60,7 +60,7 @@ namespace FrankyCLI.questgen_quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
             
             //Log Entry
-            var logprompt = AITools.GetBackgroundPrompt() +
+            var logprompt =
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
@@ -100,7 +100,7 @@ namespace FrankyCLI.questgen_quests
 
 
             //Create the activation message
-            var pickuppromt = AITools.GetBackgroundPrompt() +
+            var pickuppromt =
             "Include newline characters in your response.\r\n" +
             "Generate a short flavour text story which explains to the player that they have found the location of the target via this clue.\r\n\r\n" +
             "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
