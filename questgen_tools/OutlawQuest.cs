@@ -186,6 +186,15 @@ namespace FrankyCLI.questgen_tools
                     formid = 0x000916,
                     needSpacesuit = false,
                     outlawQuest = new Showdown_BountyPlanet()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Cydonia Outside",
+                    Description = "Kill the target at the mining city of Cydonia",
+                    Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
+                    formid = 0x000917,
+                    needSpacesuit = true,
+                    outlawQuest = new Showdown_BountyCity()
                 }
             };
 
@@ -193,10 +202,17 @@ namespace FrankyCLI.questgen_tools
         }
 
 
-        public MissionTemplate GetShowdownMissionTemplate()
+        public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
-            Random random = new Random();
-            return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
+            if (mission != "")
+            {
+                return ShowdownTemplates.Where(x => x.Name == mission).Single();
+            }
+            else
+            {
+                Random random = new Random();
+                return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
+            }
         }
 
         public MissionTemplate GetInvestigationMissionTemplate()

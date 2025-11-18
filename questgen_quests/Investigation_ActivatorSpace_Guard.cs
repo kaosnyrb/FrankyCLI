@@ -111,7 +111,7 @@ namespace FrankyCLI.questgen_quests
 
             //set quest alias to self in scripts
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+            //newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
             //Set the guard ship
             ((IQuestReferenceAlias)Quest.Aliases[6]).CreateReferenceToObject.Object = ship.ToLink<IStarfieldMajorRecordGetter>();

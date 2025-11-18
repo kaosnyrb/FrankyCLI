@@ -27,8 +27,7 @@ namespace FrankyCLI.questgen_tools
         public bool GenerateQuest()
         {
             MissionLib lib = new MissionLib();
-            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate();
-            ShowdownMissionTemplate = lib.ShowdownTemplates[6];
+            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("City Bounty - Cydonia Outside");
             
             Random random = new Random();
             bool isfemale = false;
