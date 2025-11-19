@@ -123,7 +123,7 @@ namespace FrankyCLI.questgen_tools
                 new MissionTemplate()
                 {
                     Name = "City Activator - Cydonia 01",
-                    Description = "Find info about the target on a planet POI",
+                    Description = "Find info about the target in a city",
                     Location = "Cydonia",
                     formid = 0x0012C0,
                     needSpacesuit = false,
@@ -132,7 +132,7 @@ namespace FrankyCLI.questgen_tools
                 new MissionTemplate()
                 {
                     Name = "City Activator - Cydonia 02",
-                    Description = "Find info about the target on a planet POI",
+                    Description = "Find info about the target in a city",
                     Location = "Cydonia",
                     formid = 0x0012F7,
                     needSpacesuit = false,
@@ -141,7 +141,7 @@ namespace FrankyCLI.questgen_tools
                 new MissionTemplate()
                 {
                     Name = "City Activator - Cydonia 03",
-                    Description = "Find info about the target on a planet POI",
+                    Description = "Find info about the target in a city",
                     Location = "Cydonia",
                     formid = 0x0012F9,
                     needSpacesuit = false,
@@ -150,9 +150,36 @@ namespace FrankyCLI.questgen_tools
                 new MissionTemplate()
                 {
                     Name = "City Activator - Cydonia 04",
-                    Description = "Find info about the target on a planet POI",
+                    Description = "Find info about the target in a city",
                     Location = "Cydonia",
                     formid = 0x001372,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Neon 01",
+                    Description = "Find info about the target in a city",
+                    Location = "Neon",
+                    formid = 0x001379,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Neon 02",
+                    Description = "Find info about the target in a city",
+                    Location = "Neon",
+                    formid = 0x00137B,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Neon 03",
+                    Description = "Find info about the target in a city",
+                    Location = "Neon",
+                    formid = 0x001384,
                     needSpacesuit = false,
                     outlawQuest = new Investigation_ActivatorCity()
                 }

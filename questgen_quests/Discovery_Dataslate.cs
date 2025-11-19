@@ -54,7 +54,8 @@ namespace FrankyCLI.questgen_quests
                 ODTY = Book.ODTY,
                 Value = Book.Value,
                 Weight = Book.Weight,
-                VirtualMachineAdapter = Book.VirtualMachineAdapter
+                VirtualMachineAdapter = Book.VirtualMachineAdapter,
+                Transforms = Book.Transforms,
             };
             
             //set  the  book to start the new quest
