@@ -119,6 +119,42 @@ namespace FrankyCLI.questgen_tools
                     formid = 0x000915,
                     needSpacesuit = true,
                     outlawQuest = new Investigation_ActivatorSpace_trapped_ecliptic()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Cydonia 01",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "Cydonia",
+                    formid = 0x0012C0,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Cydonia 02",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "Cydonia",
+                    formid = 0x0012F7,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Cydonia 03",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "Cydonia",
+                    formid = 0x0012F9,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Cydonia 04",
+                    Description = "Find info about the target on a planet POI",
+                    Location = "Cydonia",
+                    formid = 0x001372,
+                    needSpacesuit = false,
+                    outlawQuest = new Investigation_ActivatorCity()
                 }
             };
 
@@ -287,13 +323,21 @@ namespace FrankyCLI.questgen_tools
             }
         }
 
-        public MissionTemplate GetInvestigationMissionTemplate()
+        public MissionTemplate GetInvestigationMissionTemplate(string mission)
         {
-            Random random = new Random();
-            int selected = random.Next(InvestigationTemplates.Count);
-            var template = InvestigationTemplates[selected];
-            InvestigationTemplates.RemoveAt(selected);
-            return template;
+            if (mission != "")
+            {
+                //Don't really care about deleting as this is for testing
+                return InvestigationTemplates.Where(x => x.Name == mission).Single();
+            }
+            else
+            {
+                Random random = new Random();
+                int selected = random.Next(InvestigationTemplates.Count);
+                var template = InvestigationTemplates[selected];
+                InvestigationTemplates.RemoveAt(selected);
+                return template;
+            }
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate()

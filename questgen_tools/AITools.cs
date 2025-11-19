@@ -76,6 +76,7 @@ namespace FrankyCLI.questgen_tools
 
             result += "You will recieve a tag like <InitalInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
             result += "Use the information generated in the last step to inform the current step.\r\n\r\n";
+            result += "Avoid mentioning the bounty targets final location until the end of the <DeepInvestigation> step.\r\n\r\n";
 
             result += "You will recheive new <Lore> entries as things are created, use these to flesh out the story.\r\n\r\n";
 
