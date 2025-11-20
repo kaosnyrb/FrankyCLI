@@ -122,65 +122,22 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "City Activator - Cydonia 01",
+                    Name = "City Activator - Cydonia",
                     Description = "Find info about the target in a city",
-                    Location = "Cydonia",
+                    Location = "Neon",
                     formid = 0x0012C0,
                     needSpacesuit = false,
+                    parameter1 = "cydonia",
                     outlawQuest = new Investigation_ActivatorCity()
                 },
                 new MissionTemplate()
                 {
-                    Name = "City Activator - Cydonia 02",
-                    Description = "Find info about the target in a city",
-                    Location = "Cydonia",
-                    formid = 0x0012F7,
-                    needSpacesuit = false,
-                    outlawQuest = new Investigation_ActivatorCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Activator - Cydonia 03",
-                    Description = "Find info about the target in a city",
-                    Location = "Cydonia",
-                    formid = 0x0012F9,
-                    needSpacesuit = false,
-                    outlawQuest = new Investigation_ActivatorCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Activator - Cydonia 04",
-                    Description = "Find info about the target in a city",
-                    Location = "Cydonia",
-                    formid = 0x001372,
-                    needSpacesuit = false,
-                    outlawQuest = new Investigation_ActivatorCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Activator - Neon 01",
+                    Name = "City Activator - Neon",
                     Description = "Find info about the target in a city",
                     Location = "Neon",
                     formid = 0x001379,
                     needSpacesuit = false,
-                    outlawQuest = new Investigation_ActivatorCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Activator - Neon 02",
-                    Description = "Find info about the target in a city",
-                    Location = "Neon",
-                    formid = 0x00137B,
-                    needSpacesuit = false,
-                    outlawQuest = new Investigation_ActivatorCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Activator - Neon 03",
-                    Description = "Find info about the target in a city",
-                    Location = "Neon",
-                    formid = 0x001384,
-                    needSpacesuit = false,
+                    parameter1 = "neon",
                     outlawQuest = new Investigation_ActivatorCity()
                 }
             };
@@ -252,83 +209,22 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "City Bounty - Cydonia Outside 01",
+                    Name = "City Bounty - Cydonia",
                     Description = "Kill the target at the mining city of Cydonia",
                     Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
                     formid = 0x000917,
                     needSpacesuit = true,
+                    parameter1 = "cydonia",
                     outlawQuest = new Showdown_BountyCity()
                 },
                 new MissionTemplate()
                 {
-                    Name = "City Bounty - Cydonia Outside 02",
-                    Description = "Kill the target at the mining city of Cydonia",
-                    Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
-                    formid = 0x000926,
-                    needSpacesuit = true,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - Cydonia Outside 03",
-                    Description = "Kill the target at the mining city of Cydonia",
-                    Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
-                    formid = 0x001131,
-                    needSpacesuit = true,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - Well 01",
-                    Description = "Kill the target in The Well under New Atlantis",
-                    Location = "The Well is an underground district of New Atlantis. It appears dim and unclean, compared to its above-ground counterparts.",
-                    formid = 0x00118E,
-                    needSpacesuit = false,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - New Atlantis 01",
-                    Description = "Kill the target at New Atlantis",
-                    Location = "New Atlantis",
-                    formid = 0x001196,
-                    needSpacesuit = false,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - Neon 01",
-                    Description = "Kill the target at Neon",
-                    Location = "Neon",
-                    formid = 0x0011F9,
-                    needSpacesuit = false,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - Neon 02",
-                    Description = "Kill the target at Neon",
-                    Location = "Neon",
-                    formid = 0x001200,
-                    needSpacesuit = false,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - Neon 03",
-                    Description = "Kill the target at Neon",
-                    Location = "Neon",
-                    formid = 0x001201,
-                    needSpacesuit = false,
-                    outlawQuest = new Showdown_BountyCity()
-                },
-                new MissionTemplate()
-                {
-                    Name = "City Bounty - Neon 04",
+                    Name = "City Bounty - Neon",
                     Description = "Kill the target at Neon",
                     Location = "Neon",
                     formid = 0x0012BE,
                     needSpacesuit = false,
+                    parameter1 = "neon",
                     outlawQuest = new Showdown_BountyCity()
                 },
             };
@@ -380,6 +276,7 @@ namespace FrankyCLI.questgen_tools
         public string Name;
         public string Description;
         public string Location;
+        public string parameter1;
         public uint formid;
         public bool needSpacesuit;
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation

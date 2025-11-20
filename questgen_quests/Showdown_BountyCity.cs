@@ -1,18 +1,20 @@
-﻿using Mutagen.Bethesda.Environments;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
+﻿using DynamicData;
+using FrankyCLI.questgen_tools;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI
 {
@@ -95,6 +97,24 @@ namespace FrankyCLI
             //Set the NPC to be the quest target
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
+
+            //Find a target marker to use
+            List<IMajorRecord> rec = new List<IMajorRecord>();
+            foreach (var record in myMod.EnumerateMajorRecords())
+            {
+                if (record.EditorID != null)
+                {
+                    if (record.EditorID.Contains("doout_city_showdown_marker_" + missionTemplate.parameter1))
+                    {
+                        rec.Add(record);
+                    }
+                }
+            }
+
+            Random rand = new Random();
+            ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = rec[rand.Next(rec.Count)].FormKey;
+
+
 
             //Set the interfaces
             questform = newQuest;
