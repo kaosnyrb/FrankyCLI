@@ -126,6 +126,7 @@ namespace FrankyCLI.questgen_tools
                     Description = "Find info about the target in a city",
                     Location = "Neon",
                     formid = 0x0012C0,
+                    parameterformid = 0x00015FF7,
                     needSpacesuit = false,
                     parameter1 = "cydonia",
                     outlawQuest = new Investigation_ActivatorCity()
@@ -136,8 +137,31 @@ namespace FrankyCLI.questgen_tools
                     Description = "Find info about the target in a city",
                     Location = "Neon",
                     formid = 0x001379,
+                    parameterformid = 0x00015FFE,
                     needSpacesuit = false,
                     parameter1 = "neon",
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Akila City",
+                    Description = "Find info about the target in a city",
+                    Location = "Akila City",
+                    formid = 0x001379,
+                    parameterformid = 0x00010DFB,
+                    needSpacesuit = false,
+                    parameter1 = "akila",
+                    outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Waggoner Farm",
+                    Description = "Find info about the target in a farm",
+                    Location = "Waggoner Farm",
+                    formid = 0x001379,
+                    parameterformid = 0x002CC1EF,
+                    needSpacesuit = false,
+                    parameter1 = "waggonerfarm",
                     outlawQuest = new Investigation_ActivatorCity()
                 }
             };
@@ -215,6 +239,7 @@ namespace FrankyCLI.questgen_tools
                     formid = 0x000917,
                     needSpacesuit = true,
                     parameter1 = "cydonia",
+                    parameterformid = 0x00015FF7,
                     outlawQuest = new Showdown_BountyCity()
                 },
                 new MissionTemplate()
@@ -225,6 +250,29 @@ namespace FrankyCLI.questgen_tools
                     formid = 0x0012BE,
                     needSpacesuit = false,
                     parameter1 = "neon",
+                    parameterformid = 0x00015FFE,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Akila",
+                    Description = "Kill the target at Akila",
+                    Location = "Akila City",
+                    formid = 0x0012BE,
+                    needSpacesuit = false,
+                    parameter1 = "akila",
+                    parameterformid = 0x00010DFB,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Waggoner Farm",
+                    Description = "Kill the target at Waggoner Farm",
+                    Location = "Waggoner Farm",
+                    formid = 0x0012BE,
+                    needSpacesuit = false,
+                    parameter1 = "waggonerfarm",
+                    parameterformid = 0x002CC1EF,
                     outlawQuest = new Showdown_BountyCity()
                 },
             };
@@ -277,6 +325,7 @@ namespace FrankyCLI.questgen_tools
         public string Description;
         public string Location;
         public string parameter1;
+        public uint parameterformid;
         public uint formid;
         public bool needSpacesuit;
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation

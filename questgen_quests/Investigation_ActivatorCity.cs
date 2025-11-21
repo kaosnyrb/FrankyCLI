@@ -120,7 +120,13 @@ namespace FrankyCLI
             }
 
             Random rand = new Random();
-            ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = rec[rand.Next(rec.Count)].FormKey;
+            var markerused = rec[rand.Next(rec.Count)];
+            ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = markerused.FormKey;
+
+            //Set Location            
+            var locaform = gen_quest._StarfieldMod.Locations[new FormKey(gen_quest.StarfieldModKey, missionTemplate.parameterformid)];
+            ((IQuestLocationAlias)Quest.Aliases[0]).SpecificLocation = locaform.ToNullableLink<ILocationGetter>();
+
 
             //Create the activation message
             var pickuppromt = 
@@ -170,6 +176,12 @@ namespace FrankyCLI
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };
+
+            //Set the models based on if there's  tags  in the  name
+            if (markerused.EditorID.Contains("_wall"))
+            {
+                newActivator.Model.File = ActivatorTools.GetWallModel();
+            }
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
 

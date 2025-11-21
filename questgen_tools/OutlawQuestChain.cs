@@ -33,7 +33,7 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("DiscoveryTemplates: " + lib.DiscoveryTemplates.Count);
 
 
-            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("City Bounty - Cydonia");
+            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("City Bounty - Akila");
             
             Random random = new Random();
             bool isfemale = false;
@@ -58,13 +58,13 @@ namespace FrankyCLI.questgen_tools
             //Now build an investigation step before
 
             AITools.RunPrompt("<DeepInvestigation>");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("City Activator - Neon");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("City Activator - Akila City");
             Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
             var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
 
             //Second invesitiation test  - works fine
             AITools.RunPrompt("<InitalInvestigation>");
-            var invest2 = lib.GetInvestigationMissionTemplate("City Activator - Cydonia");
+            var invest2 = lib.GetInvestigationMissionTemplate("City Activator - Akila City");
             Console.WriteLine("Investigation: " + invest2.Name);
             //invest2 = lib.InvestigationTemplates[6];
             Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);
