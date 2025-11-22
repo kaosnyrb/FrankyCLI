@@ -64,7 +64,6 @@ namespace FrankyCLI
 
                 //LegendaryGen.GenerateLegendaryArmour(myMod,"Bryn");
             }
-
             foreach (var rec in myMod.EnumerateMajorRecords())
             {
                 rec.IsCompressed = false;

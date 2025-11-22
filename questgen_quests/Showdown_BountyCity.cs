@@ -118,6 +118,15 @@ namespace FrankyCLI
             var locaform = gen_quest._StarfieldMod.Locations[new FormKey(gen_quest.StarfieldModKey, missionTemplate.parameterformid)];
             ((IQuestLocationAlias)Quest.Aliases[0]).SpecificLocation = locaform.ToNullableLink<ILocationGetter>();
 
+            //Set death items
+            var questprops = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
+            for (int i = 0; i < questprops.Count; i++)
+            {
+                if (questprops[i].Name == "DeathItems")
+                {
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>();
+                }
+            }
 
             //Set the interfaces
             questform = newQuest;

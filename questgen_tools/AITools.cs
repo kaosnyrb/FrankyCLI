@@ -41,7 +41,7 @@ namespace FrankyCLI.questgen_tools
         public static string RunPrompt(string prompt)
         {
             //Dumb switch for fast testing
-            //return Guid.NewGuid().ToString().Substring(0, 8);
+            return Guid.NewGuid().ToString().Substring(0, 8);
 
             // 1. Add user message to history
             _history.Add(new UserChatMessage(prompt));
@@ -96,7 +96,8 @@ namespace FrankyCLI.questgen_tools
 
             result += "Meanwhile, the secretive House Va’ruun lurks on the fringes: a fanatical theocracy of zealots worshipping the Great Serpent, known for violently imposing its faith on non-believers\r\n ";
 
-            result += "Waggoner Farm is a farm on Montara Luna, Cheyenne System. It is inhabited by Mikaela Waggoner and her father, Waylon Waggoner.\r\n\r\nThey mainly grow grains and root vegetables, rotating between varieties to benefit the soil. They also have livestock and other animals, primarily to keep them fed, although they do sell any excess meat and eggs."
+            result += "Waggoner Farm is a farm on Montara Luna, Cheyenne System. It is inhabited by Mikaela Waggoner and her father, Waylon Waggoner.\r\n\r\nThey mainly grow grains and root vegetables, rotating between varieties to benefit the soil. They also have livestock and other animals, primarily to keep them fed, although they do sell any excess meat and eggs.";
+            result += "New Homestead is a settlement on Titan, a moon of Saturn in the Sol system, and is considered one of the oldest colonies. Initially founded by NASA as the \"Titan Astrobase\" for xenobiology research, it was later transferred to the public as a historical site and is now a tourist destination and settlement. You can find it by navigating to the Sol system, locating Saturn, and then finding the moon Titan, where you will see the New Homestead landing marker. ";
 
             result += "Key locations reflect the diverse character of this spacefaring era: New Atlantis is a gleaming ultramodern metropolis and bastion of the UC’s governance and trade; Akila City is a walled frontier settlement where Freestar citizens fiercely uphold their independence; Neon is a seedy neon-lit pleasure city built on a giant ocean platform, infamous for its legalized trade in the psychotropic drug Aurora and rife with corporate intrigue and smuggling.\r\n ";
 

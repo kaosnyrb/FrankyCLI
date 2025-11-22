@@ -134,6 +134,7 @@ namespace FrankyCLI.questgen_tools
             {
                 EditorID = "lvlstandard_" + legID,
                 ChanceNone = 0,
+                MaxCount = 1,
                 Entries = new ExtendedList<LeveledItemEntry>()
                 {
                     new LeveledItemEntry()
@@ -171,7 +172,7 @@ namespace FrankyCLI.questgen_tools
                 EditorID = "lvlleg_" + legID,
                 ChanceNone = 0,
                 LVLL = new byte[] { 3 },
-                MaxCount = 0,
+                MaxCount = 1,
                 //FilterKeywordChances = new ExtendedList<FilterKeywordChance>()
                 //{
                 //    new FilterKeywordChance(){

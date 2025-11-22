@@ -163,6 +163,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = false,
                     parameter1 = "waggonerfarm",
                     outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - New Homestead",
+                    Description = "Find info about the target in a farm",
+                    Location = "New Homestead",
+                    formid = 0x001379,
+                    parameterformid = 0x0021702B,
+                    needSpacesuit = false,
+                    parameter1 = "newhomestead",
+                    outlawQuest = new Investigation_ActivatorCity()
                 }
             };
 
@@ -273,6 +284,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = false,
                     parameter1 = "waggonerfarm",
                     parameterformid = 0x002CC1EF,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - New Homestead",
+                    Description = "Kill the target at New Homestead",
+                    Location = "New Homestead",
+                    formid = 0x0012BE,
+                    needSpacesuit = true,
+                    parameter1 = "newhomestead",
+                    parameterformid = 0x0021702B,
                     outlawQuest = new Showdown_BountyCity()
                 },
             };

@@ -32,7 +32,11 @@ namespace FrankyCLI.questgen_tools
 
         public bool female;
 
-        public Npc GeneratedNPC; 
+        public Npc GeneratedNPC;
+
+
+        public FormKey deathItems;
+
         public OutlawNpc(StarfieldMod myModparam, bool isfemale, bool hasspacesuit) {
             myMod = myModparam;
             
@@ -62,7 +66,7 @@ namespace FrankyCLI.questgen_tools
             string nameprompt =
                 "Reply only with the following information:\r\n\r\n" +
                 "A " + gender + " first name, nickname and surname. \r\n\r\n" +
-                "The nickname should reflect a " + job + ".\r\n\r\n" +
+                "The nickname should reflect a " + job + "  and be in English.\r\n\r\n" +
                 "The name should reflect the Nationality: " + GetNationality() + ".\r\n\r\n" +
                 "Only include the three names in the response. Generate 10 examples then choose one randomly. Only return the choosen entry";
             var name = AITools.RunPrompt(nameprompt);
@@ -123,11 +127,26 @@ namespace FrankyCLI.questgen_tools
             npc.Items = new ExtendedList<ContainerEntry>
             {
                 new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } },
-                 new ContainerEntry() { Item = new ContainerItem() { Item = legendary, Count = 1 } }
-           };
-             
+                 //new ContainerEntry() { Item = new ContainerItem() { Item = legendary, Count = 1 } }//Instead of adding the legendary here create a deathitems list
+             };
+
+            var frmlst = new FormList(myMod)
+            {
+                EditorID = npc.EditorID + "_deathitems",
+                Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),                
+            };
+
+            frmlst.Items.Add(legendary);
+            deathItems = frmlst.FormKey;
+
+            myMod.FormLists.Add(frmlst);
+
             myMod.Npcs.Add(npc);
             GeneratedNPC = npc;
+
+
+
+
             return npc;
         }
 
