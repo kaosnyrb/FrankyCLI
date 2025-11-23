@@ -49,103 +49,91 @@ namespace FrankyCLI.questgen_tools
             string ArmourName = AITools.RunPrompt(Armournameprompt);
             Console.WriteLine(ArmourName);
 
-
-            //New Armour
-            var newarmour = new Armor(myModparam, "baseleg_" + legID)
-            {
-                ObjectBounds = armour.ObjectBounds,
-                Transforms = armour.Transforms,
-                Name = ArmourName,
-                WorldModel = armour.WorldModel,
-                PickupSound = armour.PickupSound,
-                FirstPersonFlags=armour.FirstPersonFlags,
-                ArmorRating = armour.ArmorRating,
-                Armatures = armour.Armatures,
-                Components = armour.Components,
-                Description = armour.Description,
-                Health = armour.Health,
-                ObjectTemplates = armour.ObjectTemplates,
-                AttachParentSlots = armour.AttachParentSlots,
-                Footstep = armour.Footstep,
-                DropdownSound = armour.DropdownSound,
-                //InstanceNaming = armour.InstanceNaming,
-                Keywords = armour.Keywords,
-                Resistances = armour.Resistances,
-                ObjectEffect =  armour.ObjectEffect,
-                Voice = armour.Voice,
-                Value = armour.Value * 2,
-                Weight = armour.Weight,
-                Race = armour.Race,
-            };
-
-
-            //Stat randomiser - Suits have more points to spend
-            uint statpoints = 0;
-            ushort nextstat = 0;
-
-            if (Type == "Spacesuit Helmet")
-            {
-                statpoints = (uint)(70 + rand.Next(50));
-
-                nextstat = (ushort)rand.Next((int)statpoints);
-                statpoints -= nextstat;
-                newarmour.ArmorRating = (ushort)(10 + nextstat);
-
-                nextstat = (ushort)rand.Next((int)statpoints);
-                statpoints -= nextstat;
-                newarmour.Resistances[0].Value = (uint)(10 + nextstat);
-
-                newarmour.Resistances[1].Value = 10 + statpoints;
-            }            
-
-            if (Type == "Spacesuit Pack")
-            {
-                statpoints = (uint)(70 + rand.Next(75));
-
-                nextstat = (ushort)rand.Next((int)statpoints);
-                statpoints -= nextstat;
-                newarmour.ArmorRating = (ushort)(10 + nextstat);
-
-                nextstat = (ushort)rand.Next((int)statpoints);
-                statpoints -= nextstat;
-                newarmour.Resistances[0].Value = (uint)(10 + nextstat);
-
-                newarmour.Resistances[1].Value = 10 + statpoints;
-            }
-
-            if (Type == "Spacesuit")
-            {
-                statpoints = (uint)(70 + rand.Next(150));
-
-                nextstat = (ushort)rand.Next((int)statpoints);
-                statpoints -= nextstat;
-                newarmour.ArmorRating = (ushort)(10 + nextstat);
-
-                nextstat = (ushort)rand.Next((int)statpoints);
-                statpoints -= nextstat;
-                newarmour.Resistances[0].Value = (uint)(10 + nextstat);
-
-                newarmour.Resistances[1].Value = 10 + statpoints;
-            }
-            myModparam.Armors.Add(newarmour);
-            //Base armour levelled list
-
+            //We generate 5 versions of the base, to give high level items
             var baseleveled = new LeveledItem(myModparam)
             {
                 EditorID = "lvlstandard_" + legID,
                 ChanceNone = 0,
                 MaxCount = 1,
                 Entries = new ExtendedList<LeveledItemEntry>()
-                {
-                    new LeveledItemEntry()
-                    {
-                        Count = 1,
-                        Reference = newarmour.ToLink<IItemGetter>(),
-                        ChanceNone = new Percent(0),
-                        Level = 1
-                    }
-                }
             };
+
+            double armourscaler = rand.NextDouble();
+            double energyscaler = rand.NextDouble();
+            double EMscaler = rand.NextDouble();
+
+            int pointsperlevel = 10;
+
+            for (int i = 1; i < 5; i++)
+            {
+                //New Armour
+                var newarmour = new Armor(myModparam, "baseleg_" + legID)
+                {
+                    ObjectBounds = armour.ObjectBounds,
+                    Transforms = armour.Transforms,
+                    Name = ArmourName,
+                    WorldModel = armour.WorldModel,
+                    PickupSound = armour.PickupSound,
+                    FirstPersonFlags = armour.FirstPersonFlags,
+                    ArmorRating = armour.ArmorRating,
+                    Armatures = armour.Armatures,
+                    Components = armour.Components,
+                    Description = armour.Description,
+                    Health = armour.Health,
+                    ObjectTemplates = armour.ObjectTemplates,
+                    AttachParentSlots = armour.AttachParentSlots,
+                    Footstep = armour.Footstep,
+                    DropdownSound = armour.DropdownSound,
+                    //InstanceNaming = armour.InstanceNaming,
+                    Keywords = armour.Keywords,
+                    Resistances = armour.Resistances,
+                    ObjectEffect = armour.ObjectEffect,
+                    Voice = armour.Voice,
+                    Value = armour.Value * 2,
+                    Weight = armour.Weight,
+                    Race = armour.Race,
+                };
+
+
+                //Stat randomiser - Suits have more points to spend
+                uint statpoints = 0;
+                ushort nextstat = 0;
+
+                newarmour.ArmorRating += (ushort)((pointsperlevel * i)*armourscaler);
+
+                newarmour.Resistances = new ExtendedList<DamageTypeValue>();
+
+                newarmour.Resistances.Add(new DamageTypeValue()
+                {
+                    DamageType = gen_quest._StarfieldMod.DamageTypes[new FormKey(gen_quest.StarfieldModKey, 0x00023190)].ToLink(),
+                    Value = armour.Resistances[0].Value + (ushort)((pointsperlevel * i) * EMscaler)
+                });
+
+                newarmour.Resistances.Add(new DamageTypeValue()
+                {
+                    DamageType = gen_quest._StarfieldMod.DamageTypes[new FormKey(gen_quest.StarfieldModKey, 0x00060A81)].ToLink(),
+                    Value = armour.Resistances[1].Value + (ushort)((pointsperlevel * i) * energyscaler)
+                });
+
+                myModparam.Armors.Add(newarmour);
+
+                short level = 1;
+                if (i > 1)
+                {
+                    level = (short)(20 * i);
+                }
+
+                baseleveled.Entries.Add(new LeveledItemEntry()
+                {
+                    Count = 1,
+                    Reference = newarmour.ToLink<IItemGetter>(),
+                    ChanceNone = new Percent(0),
+                    Level = level
+                });
+            }
+
+            
+            //Base armour levelled list
             myModparam.LeveledItems.Add(baseleveled);
             //New Legendary using list
             //Fetch standard
@@ -159,27 +147,12 @@ namespace FrankyCLI.questgen_tools
                 IncludeFilters = DefaultLegendaryArmor.IncludeFilters,
             };
             myModparam.LegendaryItems.Add(newleg);
-            //New levelled list with legendary
-            //var if_tmp_Armor_Quality_02_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BF)];//if_tmp_Armor_Quality_02_Restricted [KYWD:0011E2BF]
-            //var if_tmp_Armor_Quality_03_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BE)];//if_tmp_Armor_Quality_03_Restricted [KYWD:0011E2BE]
-            //var if_tmp_Armor_Quality_04_Restricted = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0011E2BD)];//if_tmp_Armor_Quality_04_Restricted [KYWD:0011E2BD]
-
-            
-
-            //Hmm do I want levelled stuff? probs
             var leglevel = new LeveledItem(myModparam)
             {
                 EditorID = "lvlleg_" + legID,
                 ChanceNone = 0,
                 LVLL = new byte[] { 3 },
                 MaxCount = 1,
-                //FilterKeywordChances = new ExtendedList<FilterKeywordChance>()
-                //{
-                //    new FilterKeywordChance(){
-                //        Keyword = if_tmp_Armor_Quality_04_Restricted.ToLink<IKeywordGetter>(),
-                //        Chance = new Percent(1.0),
-                //    },
-                //},
                 Entries = new ExtendedList<LeveledItemEntry>()
                 {
                     new LeveledItemEntry()

@@ -97,9 +97,9 @@ namespace FrankyCLI.questgen_tools
                 "Two paragraphs which are the dairy entries of the bounty target, " +
                 "discussing plans and why they've fled to this location. " +
                 "Write in the first person in a style that suits the background of the character." +
-                "Use all the steps and generated data so far to build the narrative." +
-                "\r\n\r\nAvoid using overly complex language and terminology. " +
-                "\r\n\r\nAvoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\n" +
+                "Use all the steps and generated data so far to build the narrative, you don't have to include everything." +
+                "Avoid using overly complex language and terminology. " +
+                "Avoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\n" +
                 "Only include the background in the response.\r\n\r\n";
             string background = AITools.RunPrompt(backgroundprompt);
             return background;
