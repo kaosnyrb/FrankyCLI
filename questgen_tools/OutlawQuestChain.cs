@@ -74,6 +74,9 @@ namespace FrankyCLI.questgen_tools
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, invest2.outlawQuest);
 
+            //We have now generated all the stages. Do any final linking steps
+            outlawNpc.GenerateLog();
+
             return true;
         }
 

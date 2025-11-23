@@ -91,6 +91,20 @@ namespace FrankyCLI.questgen_tools
             return background;
         }
 
+        public string GenerateLogfile()
+        {
+            string backgroundprompt =
+                "Two paragraphs which are the dairy entries of the bounty target, " +
+                "discussing plans and why they've fled to this location. " +
+                "Write in the first person in a style that suits the background of the character." +
+                "Use all the steps and generated data so far to build the narrative." +
+                "\r\n\r\nAvoid using overly complex language and terminology. " +
+                "\r\n\r\nAvoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\n" +
+                "Only include the background in the response.\r\n\r\n";
+            string background = AITools.RunPrompt(backgroundprompt);
+            return background;
+        }
+
         public Npc GenerateNPC()
         {
             var NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateNPC(female))].DeepCopy();
@@ -144,10 +158,43 @@ namespace FrankyCLI.questgen_tools
             myMod.Npcs.Add(npc);
             GeneratedNPC = npc;
 
-
-
-
             return npc;
+        }
+
+        //We do this last as we've built all the infomation to use in it.
+        public void GenerateLog()
+        {
+            var log = GenerateLogfile();
+            Console.WriteLine(log);
+            //Generate Log file for bounty
+            var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
+            Book logbook = new Book(myMod)
+            {
+                CNAM = Book.CNAM,
+                Components = Book.Components,
+                Description = log,
+                DNAMUnknown = Book.DNAMUnknown,
+                DropdownSound = Book.DropdownSound,
+                EditorID = "book_" + (name.ToLower()).Replace(" ", ""),
+                Keywords = Book.Keywords,
+                ENAM = Book.ENAM,
+                FeaturedItemMessage = Book.FeaturedItemMessage,
+                Flags = Book.Flags,
+                FNAM = Book.FNAM,
+                InventoryArt = Book.InventoryArt,
+                Model = Book.Model,
+                Name = name + " Logs",
+                ODTY = Book.ODTY,
+                Value = Book.Value,
+                Weight = Book.Weight,
+                Transforms = Book.Transforms,
+            };
+
+            myMod.Books.Add(logbook);
+
+            //Add logbook to death items
+
+            myMod.FormLists[deathItems].Items.Add(logbook);
         }
 
         public IFormLinkNullable<IHeadPartGetter> GetHaircut()

@@ -37,11 +37,48 @@ namespace FrankyCLI.questgen_tools
             return results;
         }
 
+        public static bool ExportConversation()
+        {
+            var loc = Guid.NewGuid().ToString().Substring(0, 8) + ".txt";
+
+            string conversation = "";
+
+            foreach (var item in _history)
+            {
+                if (item is UserChatMessage)
+                {
+                    conversation += ((UserChatMessage)item).Content[0].Text.ToString();
+                }
+                if (item is SystemChatMessage)
+                {
+                    conversation += ((SystemChatMessage)item).Content[0].Text.ToString();
+                }
+                if (item is AssistantChatMessage)
+                {
+                    conversation += ((AssistantChatMessage)item).Content[0].Text.ToString();
+                }
+                conversation += Environment.NewLine;
+            }
+
+            try
+            {
+                // Create or overwrite the file with the specified content.
+                File.WriteAllText(loc, conversation);
+
+                Console.WriteLine("String successfully written to " + loc);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error writing to " + ex.Message);
+            }
+            return true;
+        }
+
         // Make sure to set your API key in an environment variable: OPENAI_API_KEY
         public static string RunPrompt(string prompt)
         {
             //Dumb switch for fast testing
-            return Guid.NewGuid().ToString().Substring(0, 8);
+            //return Guid.NewGuid().ToString().Substring(0, 8);
 
             // 1. Add user message to history
             _history.Add(new UserChatMessage(prompt));

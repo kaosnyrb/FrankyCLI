@@ -70,6 +70,7 @@ namespace FrankyCLI
             }
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            AITools.ExportConversation();
             Console.WriteLine("Finished");
             return 0;
         }
