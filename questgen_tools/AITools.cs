@@ -78,7 +78,7 @@ namespace FrankyCLI.questgen_tools
         public static string RunPrompt(string prompt)
         {
             //Dumb switch for fast testing
-            return Guid.NewGuid().ToString().Substring(0, 8);
+            //return Guid.NewGuid().ToString().Substring(0, 8);
 
             // 1. Add user message to history
             _history.Add(new UserChatMessage(prompt));

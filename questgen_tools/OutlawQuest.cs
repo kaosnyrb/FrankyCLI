@@ -185,6 +185,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = false,
                     parameter1 = "gagarinlanding",
                     outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - New Atlantis",
+                    Description = "Find info about the target in a city",
+                    Location = "New Atlantis",
+                    formid = 0x001379,
+                    parameterformid = 0x0001295A,
+                    needSpacesuit = false,
+                    parameter1 = "newatlantis",
+                    outlawQuest = new Investigation_ActivatorCity()
                 }
             };
 
@@ -317,6 +328,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = true,
                     parameter1 = "gagarinlanding",
                     parameterformid = 0x00265018,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - New Atlantis",
+                    Description = "Kill the target at New Atlantis",
+                    Location = "New Atlantis",
+                    formid = 0x0012BE,
+                    needSpacesuit = true,
+                    parameter1 = "newatlantis",
+                    parameterformid = 0x0001295A,
                     outlawQuest = new Showdown_BountyCity()
                 },
             };
