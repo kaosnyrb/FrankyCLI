@@ -37,6 +37,9 @@ namespace FrankyCLI.questgen_tools
 
         public FormKey deathItems;
 
+        public FormKey Logfile;
+
+
         public OutlawNpc(StarfieldMod myModparam, bool isfemale, bool hasspacesuit) {
             myMod = myModparam;
             
@@ -200,6 +203,7 @@ namespace FrankyCLI.questgen_tools
             myMod.Books.Add(logbook);
 
             //Add logbook to death items
+            Logfile = logbook.FormKey;
 
             myMod.FormLists[deathItems].Items.Add(logbook);
         }

@@ -79,6 +79,7 @@ namespace FrankyCLI
                 ScriptComment = Quest.ScriptComment,
                 Stages = Quest.Stages,
                 Summary = Quest.Summary,
+                DialogTopics = new ExtendedList<DialogTopic>(),
                 VirtualMachineAdapter = Quest.VirtualMachineAdapter
             };
 

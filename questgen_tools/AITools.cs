@@ -78,7 +78,7 @@ namespace FrankyCLI.questgen_tools
         public static string RunPrompt(string prompt)
         {
             //Dumb switch for fast testing
-            //return Guid.NewGuid().ToString().Substring(0, 8);
+            return Guid.NewGuid().ToString().Substring(0, 8);
 
             // 1. Add user message to history
             _history.Add(new UserChatMessage(prompt));
@@ -105,17 +105,17 @@ namespace FrankyCLI.questgen_tools
         public static string GetBackgroundPrompt()
         {
             string result = "";
-            result += "Stop being an AI model. You are part of a pipeline for generating stories.\r\n\r\n";
+            result += "You are a Starfield quest writer crafting an in-game mission narrative.\r\n\r\n";
 
             result += "You will be generating the story from the final encounter backwards, try and link things together in way that makes sense.\r\n\r\n";
             
             result += "The final order is as follows: Discovery of a lead on the target bounty, Inital investigation where you find the location of a descive  clue, Investigation where you find the location of the target and then the final showdown with the bounty.\r\n\r\n";
 
-            result += "You will recieve a tag like <InitalInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
+            result += "You will recieve a tag like <InitialInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
             result += "Use the information generated in the last step to inform the current step.\r\n\r\n";
             result += "Avoid mentioning the bounty targets final location until the end of the <DeepInvestigation> step.\r\n\r\n";
 
-            result += "You will recheive new <Lore> entries as things are created, use these to flesh out the story.\r\n\r\n";
+            result += "You will recheive new <Lore> entries as things are created, use these to flesh out the story. Incorporate at least one relevant lore detail (faction, tech, or city) to ground the scene.\r\n\r\n";
 
             result += "Include newline characters in your response if there are mulitple sentences.\r\n";
             result += "Don't use the folowing characters: — \r\n";

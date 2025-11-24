@@ -77,6 +77,7 @@ namespace FrankyCLI
                 ScriptComment = Quest.ScriptComment,
                 Stages = Quest.Stages,
                 Summary = Quest.Summary,
+                DialogTopics = new ExtendedList<DialogTopic>(),
                 VirtualMachineAdapter = Quest.VirtualMachineAdapter
             };
 
@@ -85,7 +86,6 @@ namespace FrankyCLI
             //set quest alias to self in scripts
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
 
             var questprops = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < questprops.Count; i++)
@@ -100,6 +100,10 @@ namespace FrankyCLI
             //Set the NPC to be the quest target
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
             myMod.Quests.Add(newQuest);
+
+            //Generate Voice for the log
+            //SpeechTools.AddVoice(outlawNpc.Logfile.ID, newQuest.FormKey.ID, "THIS IS A TEST");
+
 
             //Set the interfaces
             questform = newQuest;
