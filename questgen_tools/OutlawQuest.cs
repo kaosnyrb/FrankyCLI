@@ -14,6 +14,7 @@ namespace FrankyCLI.questgen_tools
     {
         public Quest Setup(StarfieldMod myMod,OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest);
         public string LogMessage { get; set; }
+        public string QuestLocation { get; set; }
         public Quest questform { get; set; }
     }
 

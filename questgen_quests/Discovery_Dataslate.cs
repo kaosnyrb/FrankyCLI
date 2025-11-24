@@ -27,10 +27,14 @@ namespace FrankyCLI.questgen_quests
             get => questform;
             set => questform = value;
         }
+        string questloc { get; set; }
+        string IOutlawQuest.QuestLocation { get => questloc; set => questloc = value; }
 
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Discovery Quest - Dataslate.");
+            questloc = missionTemplate.Location;
+
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             // Book

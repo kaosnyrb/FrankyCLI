@@ -35,11 +35,14 @@ namespace FrankyCLI
             set => questform = value;
         }
 
+        string questloc { get; set; }
+        string IOutlawQuest.QuestLocation { get => questloc; set => questloc = value; }
+
 
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Activator City Quest...");
-
+            questloc = missionTemplate.Location;
 
             var datasourceprompt =
                 "A three word or less digital file that contains a clue to the characters location. Examples are a Log Entry or Shipping Manifest\r\nOnly include the data source name in the response.\r\n\r\n" +
@@ -125,9 +128,12 @@ namespace FrankyCLI
             var pickuppromt = 
             "Include newline characters in your response.\r\n" +
             "Generate a short flavour text story which explains to the player that they have found the location of the next stage via this clue.\r\n\r\n" +
+            "The location must match the one that is provided below.\r\n\r\n" +
             "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
-            pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
+
+
+            pickuppromt += "Location:" + nextQuest.QuestLocation + "\r\n";
             pickuppromt += "Vital clue to there location: " + datasource + "\r\n";
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);

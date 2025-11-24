@@ -62,6 +62,8 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
             var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
 
+            AITools.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
+
             //Second invesitiation test  - works fine
             AITools.RunPrompt("<InitialInvestigation>");
             var invest2 = lib.GetInvestigationMissionTemplate("");

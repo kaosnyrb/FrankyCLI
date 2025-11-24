@@ -35,10 +35,12 @@ namespace FrankyCLI
             set => questform = value;
         }
 
-
+        string questloc { get; set; }
+        string IOutlawQuest.QuestLocation { get => questloc; set => questloc = value; }
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Bounty Planet Quest...");
+            questloc = missionTemplate.Location;
 
             var questprompt =
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n";
