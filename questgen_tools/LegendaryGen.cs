@@ -62,7 +62,7 @@ namespace FrankyCLI.questgen_tools
             double energyscaler = rand.NextDouble();
             double EMscaler = rand.NextDouble();
 
-            int pointsperlevel = 10;
+            int pointsperlevel = 50;
 
             for (int i = 1; i < 5; i++)
             {

@@ -174,6 +174,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = false,
                     parameter1 = "newhomestead",
                     outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Gagarin Landing",
+                    Description = "Find info about the target in a farm",
+                    Location = "Gagarin Landing",
+                    formid = 0x001379,
+                    parameterformid = 0x00265018,
+                    needSpacesuit = false,
+                    parameter1 = "gagarinlanding",
+                    outlawQuest = new Investigation_ActivatorCity()
                 }
             };
 
@@ -297,11 +308,33 @@ namespace FrankyCLI.questgen_tools
                     parameterformid = 0x0021702B,
                     outlawQuest = new Showdown_BountyCity()
                 },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - Gagarin Landing",
+                    Description = "Kill the target at Gagarin Landing",
+                    Location = "Gagarin Landing",
+                    formid = 0x0012BE,
+                    needSpacesuit = true,
+                    parameter1 = "gagarinlanding",
+                    parameterformid = 0x00265018,
+                    outlawQuest = new Showdown_BountyCity()
+                },
             };
 
 
         }
-
+        /*
+                new MissionTemplate()
+                {
+                    Name = "City Activator - Gagarin Landing",
+                    Description = "Find info about the target in a farm",
+                    Location = "Gagarin Landing",
+                    formid = 0x001379,
+                    parameterformid = 0x00265018,
+                    needSpacesuit = false,
+                    parameter1 = "gagarinlanding",
+                    outlawQuest = new Investigation_ActivatorCity()
+                }         */
 
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {

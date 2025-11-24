@@ -13,6 +13,7 @@ using OpenAI.Chat;
 using OpenAI;
 using System.Security.Policy;
 using FrankyCLI.questgen_tools;
+using Mutagen.Bethesda.Plugins.Records;
 
 namespace FrankyCLI
 {
@@ -57,8 +58,21 @@ namespace FrankyCLI
                         }
                     }
                 }
+                /*
+                uint formid = 0;
+                IMajorRecord formrec = null;
+                foreach (var rec in myMod.EnumerateMajorRecords())
+                {
+                    if (rec.FormKey.ID > formid && rec.FormKey.ID < 0x011800)
+                    {
+                        formid = rec.FormKey.ID;
+                        formrec = rec;
+                    }
+                }*/
+
                 //AITools.TestPrompt();
                 // Quest
+
                 OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
                 outlawQuest.GenerateQuest();
 
