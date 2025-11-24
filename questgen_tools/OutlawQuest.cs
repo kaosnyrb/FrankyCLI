@@ -207,6 +207,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = false,
                     parameter1 = "thewell",
                     outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - HopeTown",
+                    Description = "Find info about the target in a city",
+                    Location = "HopeTown",
+                    formid = 0x001379,
+                    parameterformid = 0x00016027,
+                    needSpacesuit = false,
+                    parameter1 = "hopetown",
+                    outlawQuest = new Investigation_ActivatorCity()
                 }
             };
 
@@ -361,6 +372,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = true,
                     parameter1 = "thewell",
                     parameterformid = 0x0019A5C2,
+                    outlawQuest = new Showdown_BountyCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - HopeTown",
+                    Description = "Kill the target at HopeTown",
+                    Location = "HopeTown",
+                    formid = 0x0012BE,
+                    needSpacesuit = true,
+                    parameter1 = "hopetown",
+                    parameterformid = 0x00016027,
                     outlawQuest = new Showdown_BountyCity()
                 },
             };
