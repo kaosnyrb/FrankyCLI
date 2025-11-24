@@ -36,10 +36,7 @@ namespace FrankyCLI.questgen_quests
             var datasourceprompt =
                 "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
-                "Keep it to one paragraph with newlines\r\n\r\n" +
-                "Use the following information to build the quest name:\r\n\r\n";
-            datasourceprompt += "Name: " + outlawNpc.name + "\r\n";
-            datasourceprompt += "Background: " + outlawNpc.background + "\r\n";
+                "Keep it to one paragraph with newlines\r\n\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
 
@@ -49,8 +46,6 @@ namespace FrankyCLI.questgen_quests
                 "Keep it to one paragraph with newlines\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
 
-            questprompt += "Name:" + outlawNpc.name + "\r\n";
-            questprompt += "Background: " + outlawNpc.background + "\r\n";
             questprompt += "Vital clue to their location: " + datasource + "\r\n";
 
             var questname = AITools.RunPrompt(questprompt);
@@ -65,7 +60,6 @@ namespace FrankyCLI.questgen_quests
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
-            logprompt += "Character background: " + outlawNpc.background + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
             var logmessage = AITools.RunPrompt(logprompt);
 
@@ -108,7 +102,6 @@ namespace FrankyCLI.questgen_quests
 
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
-            pickuppromt += "Character background: " + outlawNpc.background + "\r\n";
             pickuppromt += "Vital clue to there location: " + datasource + "\r\n";
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);

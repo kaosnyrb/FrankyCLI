@@ -32,14 +32,6 @@ namespace FrankyCLI.questgen_quests
         {
             Console.WriteLine("Generating Activator Guarded Space Quest...");
 
-            //Create the ship
-            //var shipnameprompt = 
-            //    "A three word or less spaceship name.\r\nOnly include the spaceship source name in the response.\r\n\r\n" +
-            //    "Try and make the ship name iconic like the falcon or firefly.\r\n\r\n" +
-            //    "Use the following information to build the Ship name:\r\n\r\n";
-            //shipnameprompt += "Faction: " + "Ecliptic Mercenary Corp" + "\r\n";
-            //shipnameprompt += "Ship Type: " + "An old cargo hauler that has seen better days." + "\r\n";
-
             var shipname = ShipTools.GetShipName();
             Console.WriteLine("shipname: " + shipname);
             var ship = ShipTools.GenShip(shipname, ShipTools.GetCargoShip(), 0x000AE4F3);
@@ -47,11 +39,7 @@ namespace FrankyCLI.questgen_quests
             //Create the datasource
             var datasourceprompt =
                 "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
-                "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
-                "Keep it to one paragraph with newlines\r\n\r\n" +
-                "Use the following information to build the quest name:\r\n\r\n";
-            datasourceprompt += "Name: " + outlawNpc.name + "\r\n";
-            datasourceprompt += "Background: " + outlawNpc.background + "\r\n";
+                "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
 
@@ -60,9 +48,6 @@ namespace FrankyCLI.questgen_quests
                 "This quest is about finding the location of this character\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
-
-            questprompt += "Name:" + outlawNpc.name + "\r\n";
-            questprompt += "Background: " + outlawNpc.background + "\r\n";
             questprompt += "Vital clue to their location: " + datasource + "\r\n";
             questprompt += "Spaceship guarding the information: " + shipname + "\r\n";
 
@@ -79,7 +64,6 @@ namespace FrankyCLI.questgen_quests
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
-            logprompt += "Character background: " + outlawNpc.background + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
             questprompt += "Spaceship guarding the information: " + shipname + "\r\n";
             var logmessage = AITools.RunPrompt(logprompt);
@@ -124,7 +108,6 @@ namespace FrankyCLI.questgen_quests
             "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + missionTemplate.Location + "\r\n";
-            pickuppromt += "Character background: " + outlawNpc.background + "\r\n";
             pickuppromt += "Vital clue to there location: " + datasource + "\r\n";
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);

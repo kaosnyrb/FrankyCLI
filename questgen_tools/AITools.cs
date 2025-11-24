@@ -47,15 +47,15 @@ namespace FrankyCLI.questgen_tools
             {
                 if (item is UserChatMessage)
                 {
-                    conversation += ((UserChatMessage)item).Content[0].Text.ToString();
+                    conversation += "USER:" +  ((UserChatMessage)item).Content[0].Text.ToString();
                 }
                 if (item is SystemChatMessage)
                 {
-                    conversation += ((SystemChatMessage)item).Content[0].Text.ToString();
+                    conversation += "USER:" + ((SystemChatMessage)item).Content[0].Text.ToString();
                 }
                 if (item is AssistantChatMessage)
                 {
-                    conversation += ((AssistantChatMessage)item).Content[0].Text.ToString();
+                    conversation += "AI:" + ((AssistantChatMessage)item).Content[0].Text.ToString();
                 }
                 conversation += Environment.NewLine;
             }

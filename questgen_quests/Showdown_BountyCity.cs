@@ -41,12 +41,7 @@ namespace FrankyCLI
             Console.WriteLine("Generating Bounty Planet Quest...");
 
             var questprompt =
-                "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
-                "Use the following information to build the quest name:\r\n\r\n";
-
-            questprompt += outlawNpc.name + "\r\n";
-            questprompt += outlawNpc.background + "\r\n";
-
+                "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n";
             var questname = AITools.RunPrompt(questprompt);
             Console.WriteLine("questname: " + questname);
 
@@ -62,7 +57,6 @@ namespace FrankyCLI
                 "Use the following information to build the explaination:\r\n\r\n";
 
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
-            logprompt += "Character background: " + outlawNpc.background + "\r\n";
 
             var logmessage = AITools.RunPrompt(logprompt);
 
