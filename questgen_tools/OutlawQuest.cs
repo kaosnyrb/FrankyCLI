@@ -196,6 +196,17 @@ namespace FrankyCLI.questgen_tools
                     needSpacesuit = false,
                     parameter1 = "newatlantis",
                     outlawQuest = new Investigation_ActivatorCity()
+                },
+                new MissionTemplate()
+                {
+                    Name = "City Activator - The Well",
+                    Description = "Find info about the target in a city",
+                    Location = "The Well",
+                    formid = 0x001379,
+                    parameterformid = 0x0019A5C2,
+                    needSpacesuit = false,
+                    parameter1 = "thewell",
+                    outlawQuest = new Investigation_ActivatorCity()
                 }
             };
 
@@ -341,22 +352,21 @@ namespace FrankyCLI.questgen_tools
                     parameterformid = 0x0001295A,
                     outlawQuest = new Showdown_BountyCity()
                 },
+                new MissionTemplate()
+                {
+                    Name = "City Bounty - The Well",
+                    Description = "Kill the target at The Well",
+                    Location = "The Well",
+                    formid = 0x0012BE,
+                    needSpacesuit = true,
+                    parameter1 = "thewell",
+                    parameterformid = 0x0019A5C2,
+                    outlawQuest = new Showdown_BountyCity()
+                },
             };
 
 
         }
-        /*
-                new MissionTemplate()
-                {
-                    Name = "City Activator - Gagarin Landing",
-                    Description = "Find info about the target in a farm",
-                    Location = "Gagarin Landing",
-                    formid = 0x001379,
-                    parameterformid = 0x00265018,
-                    needSpacesuit = false,
-                    parameter1 = "gagarinlanding",
-                    outlawQuest = new Investigation_ActivatorCity()
-                }         */
 
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
