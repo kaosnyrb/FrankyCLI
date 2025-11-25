@@ -102,6 +102,35 @@ namespace FrankyCLI.questgen_tools
             return textres;
         }
 
+        public static string GetQuestTheme()
+        {
+            Random random = new Random();
+            List<string> questThemes = new List<string>()
+            {
+                "Corporate espionage thriller",
+                "Frontier survival adventure",
+                "Political conspiracy drama",
+                "Underworld crime investigation",
+                "Space-pirate hunting action",
+                "High-tech infiltration stealth mission",
+                "Frontier law enforcement procedural",
+                "Scientific mystery exploration",
+                "Interstellar noir detective case",
+                "Post-war tension diplomacy scenario",
+                "Cyberpunk corporate intrigue",
+                "Cult infiltration psychological drama",
+                "Resource-rush frontier scramble",
+                "Black-market smuggling caper",
+                "Megacorp sabotage operation",
+                "Deep-space horror encounter",
+                "Military rogue-unit pursuit",
+                "Neon nightlife criminal underbelly story"
+            };
+            var theme = questThemes[random.Next(questThemes.Count)];
+            Console.WriteLine(theme);
+            return theme;
+        }
+
         public static string GetBackgroundPrompt()
         {
             string result = "";
@@ -110,6 +139,8 @@ namespace FrankyCLI.questgen_tools
             result += "You will be generating the story from the final encounter backwards, try and link things together in way that makes sense.\r\n\r\n";
             
             result += "The final order is as follows: Discovery of a lead on the target bounty, Inital investigation where you find the location of a descive  clue, Investigation where you find the location of the target and then the final showdown with the bounty.\r\n\r\n";
+
+            result += "The theme for this mission is " + GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
 
             result += "You will recieve a tag like <InitialInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
             result += "Use the information generated in the last step to inform the current step.\r\n\r\n";

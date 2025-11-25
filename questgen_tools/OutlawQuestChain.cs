@@ -34,7 +34,8 @@ namespace FrankyCLI.questgen_tools
 
 
             var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
-            
+
+                       
             Random random = new Random();
             bool isfemale = false;
             if (random.Next(100) > 50)
@@ -66,7 +67,7 @@ namespace FrankyCLI.questgen_tools
 
             //Second invesitiation test  - works fine
             AITools.RunPrompt("<InitialInvestigation>");
-            var invest2 = lib.GetInvestigationMissionTemplate("Space Derelict - Galbank Ship B");
+            var invest2 = lib.GetInvestigationMissionTemplate("");
             Console.WriteLine("Investigation: " + invest2.Name);
             //invest2 = lib.InvestigationTemplates[6];
             Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);
