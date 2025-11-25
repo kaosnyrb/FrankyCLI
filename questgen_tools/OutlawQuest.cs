@@ -123,6 +123,39 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
+                    Name = "Space Informant - Crimson Fleet",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A cargo ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Crimson Fleet",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Spacer",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A cargo ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Spacer",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Ecliptic",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A cargo ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Ecliptic",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
                     Name = "City Activator - Cydonia",
                     Description = "Find info about the target in a city",
                     Location = "Neon",

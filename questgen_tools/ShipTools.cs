@@ -106,6 +106,7 @@ namespace FrankyCLI.questgen_tools
             return newship;
         }
 
+
         public static uint GetCargoShip()
         {
             Random random = new Random();
@@ -152,7 +153,7 @@ namespace FrankyCLI.questgen_tools
             Random random = new Random();
             List<string> spaceshipPrefixes = new List<string>
             {
-                "Star", "Nova", "Nebula", "Galaxy", "Cosmic", "Solar", "Lunar", "Quantum", "Eclipse", "Stellar",
+                "Star", "Nova", "Nebula", "Galaxy", "Cosmic", "Solar", "Lunar", "Quantum", "Stellar",
                 "Astro", "Meteor", "Comet", "Ion", "Photon", "Plasma", "Warp", "Hyper", "Proto", "Omega",
                 "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Sigma", "Lambda", "Zenith", "Apex",
                 "Radiant", "Infinite", "Eternal", "Celestial", "Astral", "Void", "NovaCore", "DarkStar", "Bright",
@@ -180,6 +181,49 @@ namespace FrankyCLI.questgen_tools
                 "Dominion", "ReclaimerX", "Pathway", "Surge", "Vortex", "Helix", "Prime", "Horizon", "VectorX"
             };
             return spaceshipPrefixes[random.Next(spaceshipPrefixes.Count)] + " " + spaceshipSuffixes[random.Next(spaceshipSuffixes.Count)];
+        }
+
+        public static uint GetFactionID(string faction)
+        {
+            switch (faction)
+            {
+                case "Crimson Fleet":
+                    return 0x000B1375;
+                case "Spacer":
+                    return 0x000B13A8;
+                case "Ecliptic":
+                    return 0x000AE4F3;
+            }
+            return 0;
+        }
+
+        public static IFormLink<IStarfieldMajorRecordGetter> GetGangList(uint ShipFaction)
+        {
+            string ganglistEditorID = "";
+            switch(ShipFaction)
+            {
+                case 0x000AE4F3: //LShip_Ecliptic_Template [LVLB:000AE4F3]
+                    ganglistEditorID = "duout_GangMembersList_Space_Ecliptic";
+                    break;
+                case 0x000B1375: //LShip_CrimsonFleet_Template [LVLB:000B1375]
+                    ganglistEditorID = "duout_GangMembersList_Space_Crimsonfleet";
+                    break;
+                case 0x000B13A8: //LShip_Spacer_Template [LVLB:000B13A8]
+                    ganglistEditorID = "duout_GangMembersList_Space_Spacer";
+                    break;
+            }
+
+            foreach (var record in gen_quest.myMod.EnumerateMajorRecords())
+            {
+                if (record.EditorID != null)
+                {
+                    if (record.EditorID.Contains(ganglistEditorID))
+                    {
+                        return record.ToLink<IStarfieldMajorRecordGetter>();
+                    }
+                }
+            }
+            return null;
         }
     }
 }
