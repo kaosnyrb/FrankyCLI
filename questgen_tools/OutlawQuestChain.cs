@@ -35,7 +35,9 @@ namespace FrankyCLI.questgen_tools
 
             var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
 
-                       
+            //What if we tell the AI  all the  steps first?
+
+
             Random random = new Random();
             bool isfemale = false;
             if (random.Next(100) > 50)
@@ -50,32 +52,38 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine(outlawNpc.name);
             Console.WriteLine(outlawNpc.background);
 
-            //Quest Step
+            //Quest Steps
+
+            AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
+            var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
+
+            AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
+            AITools.RunPrompt("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);
+            AITools.RunPrompt("<InitialInvestigation Summary>" + InvestigationMissionTemplate.Description + " Location: " + InvestigationMissionTemplate.Location);
+            AITools.RunPrompt("<Discovery Summary>" + DiscoveryMissionTemplate.Description + " Location: " + DiscoveryMissionTemplate.Location);
+
+            AITools.RunPrompt("</Summary>That was the summary, we are now generating the stages.");
 
             AITools.RunPrompt("<Showdown>");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
-
             //Now build an investigation step before
 
             AITools.RunPrompt("<DeepInvestigation>");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
-            Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
-            var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
-
+            Console.WriteLine("Investigation: " + DeepInvestigationMissionTemplate.Name);
+            var InvestigationMission = DeepInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DeepInvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             AITools.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
 
-            //Second invesitiation test  - works fine
+            //InitialInvestigation
             AITools.RunPrompt("<InitialInvestigation>");
-            var invest2 = lib.GetInvestigationMissionTemplate("");
-            Console.WriteLine("Investigation: " + invest2.Name);
-            //invest2 = lib.InvestigationTemplates[6];
-            Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);
+            Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
+            Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
 
             // Finally build the discovery step
             AITools.RunPrompt("<Discovery>");
-            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
-            var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, invest2.outlawQuest);
+            var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 
             //We have now generated all the stages. Do any final linking steps
             outlawNpc.GenerateLog();

@@ -30,7 +30,7 @@ namespace FrankyCLI.questgen_tools
                 new MissionTemplate()
                 {
                     Name = "Dataslate in levelled item",
-                    Description = "This creates a dataslate which starts the mission",
+                    Description = "The player finds a dataslate containing a lead to the target.",
                     Location = "A remote location",
                     formid = 0,
                     needSpacesuit = true,

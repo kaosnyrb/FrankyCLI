@@ -15,7 +15,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - Cydonia",
-                Description = "Find info about the target in a city",
+                Description = "Find info about the target in Cydonia",
                 Location = "Neon",
                 formid = 0x0012C0,
                 parameterformid = 0x00015FF7,
@@ -26,7 +26,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - Neon",
-                Description = "Find info about the target in a city",
+                Description = "Find info about the target in Neon",
                 Location = "Neon",
                 formid = 0x001379,
                 parameterformid = 0x00015FFE,
@@ -37,7 +37,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - Akila City",
-                Description = "Find info about the target in a city",
+                Description = "Find info about the target in Akila City",
                 Location = "Akila City",
                 formid = 0x001379,
                 parameterformid = 0x00010DFB,
@@ -48,7 +48,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - Waggoner Farm",
-                Description = "Find info about the target in a farm",
+                Description = "Find info about the target in Waggoner Farm",
                 Location = "Waggoner Farm",
                 formid = 0x001379,
                 parameterformid = 0x002CC1EF,
@@ -59,7 +59,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - New Homestead",
-                Description = "Find info about the target in a farm",
+                Description = "Find info about the target in New Homestead",
                 Location = "New Homestead",
                 formid = 0x001379,
                 parameterformid = 0x0021702B,
@@ -70,7 +70,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - Gagarin Landing",
-                Description = "Find info about the target in a farm",
+                Description = "Find info about the target in Gagarin Landing",
                 Location = "Gagarin Landing",
                 formid = 0x001379,
                 parameterformid = 0x00265018,
@@ -81,7 +81,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - New Atlantis",
-                Description = "Find info about the target in a city",
+                Description = "Find info about the target in New Atlantis",
                 Location = "New Atlantis",
                 formid = 0x001379,
                 parameterformid = 0x0001295A,
@@ -92,7 +92,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - The Well",
-                Description = "Find info about the target in a city",
+                Description = "Find info about the target in The Well",
                 Location = "The Well",
                 formid = 0x001379,
                 parameterformid = 0x0019A5C2,
@@ -103,7 +103,7 @@ namespace FrankyCLI.questgen_quests
             investiation.Add(new MissionTemplate()
             {
                 Name = "City Activator - HopeTown",
-                Description = "Find info about the target in a city",
+                Description = "Find info about the target in HopeTown",
                 Location = "HopeTown",
                 formid = 0x001379,
                 parameterformid = 0x00016027,
