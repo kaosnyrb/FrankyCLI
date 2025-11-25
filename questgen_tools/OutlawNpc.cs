@@ -66,12 +66,36 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateName()
         {
+            string namestogenerate = "first name, nickname and surname.";
+
+            Random rand = new Random();
+            int nametype = rand.Next(130);
+            if(nametype <= 33)
+            {
+                namestogenerate = "first name, nickname and surname.";
+            }
+            if (nametype > 33 && nametype <= 66)
+            {
+                namestogenerate = "nickname and surname.";
+            }
+            if(nametype >66 && nametype <= 100)
+            {
+                namestogenerate = "first name and nickname";
+            }
+            if (nametype > 100 && nametype <= 120)
+            {
+                namestogenerate = "first name and surname.";
+            }
+            if (nametype >120)
+            {
+                namestogenerate = "cool pseudonym";
+            }
             string nameprompt =
                 "Reply only with the following information:\r\n\r\n" +
-                "A " + gender + " first name, nickname and surname. \r\n\r\n" +
+                "A " + gender + " " + namestogenerate + " \r\n\r\n" +
                 "The nickname should reflect a " + job + "  and be in English.\r\n\r\n" +
                 "The name should reflect the Nationality: " + GetNationality() + ".\r\n\r\n" +
-                "Only include the three names in the response. Generate 10 examples then choose one randomly. Only return the choosen entry";
+                "Only include the names in the response. Generate 10 examples then choose one randomly. Only return the choosen entry";
             var name = AITools.RunPrompt(nameprompt);
 
             return name;

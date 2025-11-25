@@ -222,6 +222,201 @@ namespace FrankyCLI.questgen_tools
                     outlawQuest = new Investigation_Informant_Space()
                 },
 
+                // Derelicts --------------------------------------------
+                //UC Navy
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC Navy Cargo",
+                    Location = "A UC Navy Cargo Ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC Navy",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC Navy Ship A",
+                    Location = "A UC Navy Light Scout Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC Navy",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC Navy Ship B",
+                    Location = "A UC Navy Large Combat Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC Navy",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+
+                //UC Vanguard
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC Vanguard Ship A",
+                    Location = "A UC Vanguard Light Scout Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC Vanguard",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC Vanguard Ship B",
+                    Location = "A UC Vanguard Large Combat Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC Vanguard",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+
+               //UC SysDef
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC SysDef Ship A",
+                    Location = "A UC SysDef Light Tactical Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC SysDef",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - UC SysDef Ship B",
+                    Location = "A UC SysDef Large Combat Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "UC SysDef",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+
+               //Freestar Security
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Freestar Security Cargo",
+                    Location = "A Freestar Security Cargo Ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Freestar Security",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Freestar Security Ship A",
+                    Location = "A Freestar Security Light Patrol Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Freestar Security",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Freestar Security Ship B",
+                    Location = "A Freestar Security Large Combat Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Freestar Security",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+
+               // Trade Authority
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Trade Authority Cargo",
+                    Location = "A Trade Authority Cargo Ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Trade Authority",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Trade Authority Ship A",
+                    Location = "A Trade Authority Fast Courier Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Trade Authority",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Trade Authority Ship B",
+                    Location = "A Trade Authority Large Support Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Trade Authority",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                // Galbank
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Galbank Cargo",
+                    Location = "A Galbank Vault Ship",
+                    parameterformid = ShipTools.GetCargoShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Galbank",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Galbank Ship A",
+                    Location = "A Galbank Contract Transport Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Galbank",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Galbank Ship B",
+                    Location = "A Galbank Large Investment Protection Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Galbank",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+
+                //Trackers Alliance
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Trackers Alliance Ship A",
+                    Location = "A Trackers Alliance Bounty Tracker Ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Trackers Alliance",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Derelict - Trackers Alliance Ship B",
+                    Location = "A Trackers Alliance Bounty Hunter Ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x00080D,
+                    needSpacesuit = true,
+                    parameter1 = "Trackers Alliance",
+                    outlawQuest = new Investigation_Derelict_Space()
+                },
+
+                // City Activators -------------------------------------
                 new MissionTemplate()
                 {
                     Name = "City Activator - Cydonia",

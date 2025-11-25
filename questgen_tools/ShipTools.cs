@@ -61,7 +61,8 @@ namespace FrankyCLI.questgen_tools
                 //Console.WriteLine(component.GetType().ToString());
                 if(typestring == "Mutagen.Bethesda.Starfield.ExternalDataSourceComponent")
                 {
-                    var ShipTemplate = gen_quest._StarfieldMod.LeveledBaseForms[new FormKey(gen_quest.StarfieldModKey, ShipFaction)]; //LShip_Ecliptic_Template [LVLB:000AE4F3]
+                    var formkey = new FormKey(gen_quest.StarfieldModKey, ShipFaction);
+                    var ShipTemplate = gen_quest._StarfieldMod.LeveledBaseForms[formkey];
 
                     ExternalDataSourceComponent externalDataSourceComponent = (ExternalDataSourceComponent)component;
                     foreach (var source in externalDataSourceComponent.Sources)
@@ -260,10 +261,26 @@ namespace FrankyCLI.questgen_tools
                     return 0x000B13A8;
                 case "Ecliptic":
                     return 0x000AE4F3;
+                case "UC Navy":
+                    return 0x000D320E;
+                case "UC Vanguard":
+                    return 0x000D1859;
+                case "Freestar Security":
+                    return 0x000CA78D;
+                case "UC SysDef":
+                    return 0x000DBC51;
+                case "Trade Authority":
+                    return 0x000AE4D0;
+                case "Galbank":
+                    return 0x0034BB12;
+                case "Trackers Alliance":
+                    return 0x000AE4D3;
+
             }
             return 0;
         }
 
+        //LShip_UCNavy_Cargo [LVLB:000D320F]
         public static IFormLink<IStarfieldMajorRecordGetter> GetGangList(uint ShipFaction)
         {
             string ganglistEditorID = "";
@@ -276,6 +293,9 @@ namespace FrankyCLI.questgen_tools
                     ganglistEditorID = "duout_GangMembersList_Space_Crimsonfleet";
                     break;
                 case 0x000B13A8: //LShip_Spacer_Template [LVLB:000B13A8]
+                    ganglistEditorID = "duout_GangMembersList_Space_Spacer";
+                    break;
+                default:
                     ganglistEditorID = "duout_GangMembersList_Space_Spacer";
                     break;
             }
