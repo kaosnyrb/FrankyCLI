@@ -58,7 +58,7 @@ namespace FrankyCLI.questgen_tools
             //Now build an investigation step before
 
             AITools.RunPrompt("<DeepInvestigation>");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Space Informant - Spacer  - Class B");
             Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
             var InvestigationMission = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
 
@@ -66,7 +66,7 @@ namespace FrankyCLI.questgen_tools
 
             //Second invesitiation test  - works fine
             AITools.RunPrompt("<InitialInvestigation>");
-            var invest2 = lib.GetInvestigationMissionTemplate("Space Informant - Ecliptic");
+            var invest2 = lib.GetInvestigationMissionTemplate("Space Informant - Crimson Fleet - Class B");
             Console.WriteLine("Investigation: " + invest2.Name);
             //invest2 = lib.InvestigationTemplates[6];
             Quest investmission2 = invest2.outlawQuest.Setup(myMod, outlawNpc, invest2, InvestigationMissionTemplate.outlawQuest);

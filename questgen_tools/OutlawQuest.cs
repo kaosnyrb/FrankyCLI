@@ -123,7 +123,7 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Space Informant - Crimson Fleet",
+                    Name = "Space Informant - Crimson Fleet - cargo",
                     Description = "Find info about the target from a beacon in orbit around a planet",
                     Location = "A cargo ship",
                     parameterformid = ShipTools.GetCargoShip(),
@@ -134,7 +134,7 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Space Informant - Spacer",
+                    Name = "Space Informant - Spacer  - cargo",
                     Description = "Find info about the target from a beacon in orbit around a planet",
                     Location = "A cargo ship",
                     parameterformid = ShipTools.GetCargoShip(),
@@ -145,7 +145,7 @@ namespace FrankyCLI.questgen_tools
                 },
                 new MissionTemplate()
                 {
-                    Name = "Space Informant - Ecliptic",
+                    Name = "Space Informant - Ecliptic - cargo",
                     Description = "Find info about the target from a beacon in orbit around a planet",
                     Location = "A cargo ship",
                     parameterformid = ShipTools.GetCargoShip(),
@@ -154,6 +154,74 @@ namespace FrankyCLI.questgen_tools
                     parameter1 = "Ecliptic",
                     outlawQuest = new Investigation_Informant_Space()
                 },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Crimson Fleet - Class A",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A small ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Crimson Fleet",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Spacer  - Class A",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A small ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Spacer",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Ecliptic - Class A",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A small ship",
+                    parameterformid = ShipTools.GetAClassShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Ecliptic",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Crimson Fleet - Class B",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A strong medium sized ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Crimson Fleet",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Spacer  - Class B",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A strong medium sized ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Spacer",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+                new MissionTemplate()
+                {
+                    Name = "Space Informant - Ecliptic - Class B",
+                    Description = "Find info about the target from a beacon in orbit around a planet",
+                    Location = "A strong medium sized ship",
+                    parameterformid = ShipTools.GetBClassShip(),
+                    formid = 0x000808,
+                    needSpacesuit = true,
+                    parameter1 = "Ecliptic",
+                    outlawQuest = new Investigation_Informant_Space()
+                },
+
                 new MissionTemplate()
                 {
                     Name = "City Activator - Cydonia",

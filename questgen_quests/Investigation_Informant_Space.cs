@@ -39,7 +39,7 @@ namespace FrankyCLI.questgen_quests
 
             var shipname = ShipTools.GetShipName();
             Console.WriteLine("shipname: " + shipname);
-            var ship = ShipTools.GenShip(shipname, ShipTools.GetCargoShip(), factionID);
+            var ship = ShipTools.GenShip(shipname, missionTemplate.parameterformid, factionID);
 
             //Create the datasource
             var datasourceprompt =

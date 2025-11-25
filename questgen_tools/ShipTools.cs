@@ -148,6 +148,73 @@ namespace FrankyCLI.questgen_tools
             return shiplist[random.Next(shiplist.Count)];
         }
 
+        public static uint GetAClassShip()
+        {
+            //Note  the faction ones seem to work but the manufactor ones don't
+            Random random = new Random();
+            List<uint> shiplist = new List<uint>()
+            {
+                0x0031DF00, // EncShip_CrimsonFleet_A_Ghost01 [GBFM:0031DF00]
+                0x0031DF60, // EncShip_CrimsonFleet_A_Haunt01 [GBFM:0031DF60]
+                0x00322BE1, // EncShip_CrimsonFleet_A_Phantom01 [GBFM:00322BE1]
+                0x003889AD, // EncShip_UCSecurity_A_Dagger01 [GBFM:003889AD]
+                0x003889E7, // EncShip_UCSysDef_A_Gladius01 [GBFM:003889E7]
+                0x00187C77, // EncShip_UCNavy_A_Longsword01 [GBFM:00187C77]
+                0x00322BF7, // EncShip_Ecliptic_A_Falcata01 [GBFM:00322BF7]
+                0x00322BF1, // EncShip_Ecliptic_A_Stiletto01 [GBFM:00322BF1]
+                0x002E74A4, // EncShip_FreestarCitizen_A_Kfir01 [GBFM:002E74A4]
+                0x002E749E, // EncShip_FreestarCitizen_A_Discovery [GBFM:002E749E]
+                0x002E762D, // EncShip_FreestarCitizen_A_Mustang01 [GBFM:002E762D]
+                0x0004237F, // EncShip_FreestarCitizen_A_Narcissus01 [GBFM:0004237F]
+                0x0018D3D5, // EncShip_FreestarCitizen_A_Responder01 [GBFM:0018D3D5]
+                0x000423AB, // EncShip_TheFirst_A_Thresher01 [GBFM:000423AB]
+                0x000D0AA9, // EncShip_TheFirst_A_Wendigo01 [GBFM:000D0AA9]
+                0x00042376, // EncShip_UCCitizen_A_Rambler01 [GBFM:00042376]
+                0x0004238B, // EncShip_FreestarSecurity_A_Railstar01 [GBFM:0004238B]
+                0x00322C13, // EncShip_Spacer_A_Raccoon01 [GBFM:00322C13]
+                0x00322C15, // EncShip_Spacer_A_Raven01 [GBFM:00322C15]
+                0x00322C17, // EncShip_Spacer_A_Scarab01 [GBFM:00322C17]
+            };
+
+
+            return shiplist[random.Next(shiplist.Count)];
+        }
+
+        public static uint GetBClassShip()
+        {
+            //Note  the faction ones seem to work but the manufactor ones don't
+            Random random = new Random();
+            List<uint> shiplist = new List<uint>()
+            {
+                0x00322BE9, // EncShip_CrimsonFleet_B_Banshee01 [GBFM:00322BE9]
+                0x00322BEB, // EncShip_CrimsonFleet_B_Reaper01 [GBFM:00322BEB]
+                0x00322BED, // EncShip_CrimsonFleet_B_Specter01 [GBFM:00322BED]
+                0x00322BFF, // EncShip_Ecliptic_B_Cutlass01 [GBFM:00322BFF]
+                0x00322C03, // EncShip_Ecliptic_B_Rapier01 [GBFM:00322C03]
+                0x00322C07, // EncShip_Ecliptic_B_Scimitar01 [GBFM:00322C07]
+                0x002E7530, // EncShip_FreestarCitizen_B_Dolphin01 [GBFM:002E7530]
+                0x002E7611, // EncShip_FreestarCitizen_B_Ranger01 [GBFM:002E7611]
+                0x0002C201, // EncShip_FreestarCitizen_B_Slipstream01 [GBFM:0002C201]
+                0x0018D3DD, // EncShip_FreestarCitizen_B_Venture01 [GBFM:0018D3DD]
+                0x00388977, // EncShip_FreestarSecurity_B_Falcon01 [GBFM:00388977]
+                0x00388985, // EncShip_FreestarSecurity_B_Ranger01 [GBFM:00388985]
+                0x0030ED45, // EncShip_Galbank_B_AsphaltCB01 [GBFM:0030ED45]
+                0x00323454, // EncShip_HouseVaruun_B_Eulogy01 [GBFM:00323454]
+                0x00322C19, // EncShip_Spacer_B_Coyote01 [GBFM:00322C19]
+                0x00322C1B, // EncShip_Spacer_B_Jackal01 [GBFM:00322C1B]
+                0x00322C1D, // EncShip_Spacer_B_Vulture01 [GBFM:00322C1D]
+                0x0002C88F, // EncShip_TheFirst_B_Zumwalt01 [GBFM:0002C88F]
+                0x0002C75D, // EncShip_TheFirst_B_Combat_Pterosaur01 [GBFM:0002C75D]
+                0x00331347, // EncShip_TrackersAlliance_B_Naginata01 [GBFM:00331347]
+                0x001E5E76, // EncShip_UCNavy_B_Bireme01 [GBFM:001E5E76]
+                0x001E5E79, // EncShip_UCNavy_B_Celestial01 [GBFM:001E5E79]
+                0x001E5E7B, // EncShip_UCNavy_B_Hoplite01 [GBFM:001E5E7B]
+                0x001E5E7D, // EncShip_UCNavy_B_Nebula01 [GBFM:001E5E7D]
+                0x001E5E7F, // EncShip_UCNavy_B_Phalanx01 [GBFM:001E5E7F]
+            };
+            return shiplist[random.Next(shiplist.Count)];
+        }
+
         public static string GetShipName()
         {
             Random random = new Random();
