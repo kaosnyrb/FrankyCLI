@@ -62,6 +62,7 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("Building Outlaw NPC...");
             name = GenerateName();
             background = GenerateBackground();
+
         }
 
         public string GenerateName()
