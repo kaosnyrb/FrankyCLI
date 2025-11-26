@@ -39,10 +39,16 @@ namespace FrankyCLI
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Activator Planet Quest...");
+
+            var questActivator = ActivatorTools.GetRandomGroundType();
+
+
             questloc = missionTemplate.Location;
 
             var datasourceprompt =
-                "A three word or less digital file that contains a clue to the characters location. Examples are a Log Entry or Shipping Manifest\r\nOnly include the data source name in the response.\r\n\r\n" +
+                "A three word or less digital file that contains a clue to the characters location.\r\n" +
+                "The base type of the activator is." + questActivator.Name + "\r\n\r\n" +
+                "Only include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
@@ -177,6 +183,7 @@ namespace FrankyCLI
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };
+            newActivator.Model.File = questActivator.Model;
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
 

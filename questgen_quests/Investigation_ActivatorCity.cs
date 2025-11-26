@@ -44,8 +44,12 @@ namespace FrankyCLI
             Console.WriteLine("Generating Activator City Quest...");
             questloc = missionTemplate.Location;
 
+            var questActivator = ActivatorTools.GetRandomGroundType();
+
             var datasourceprompt =
-                "A three word or less digital file that contains a clue to the characters location. Examples are a Log Entry or Shipping Manifest\r\nOnly include the data source name in the response.\r\n\r\n" +
+                "A three word or less digital file that contains a clue to the characters location.\r\n" +
+                "The base type of the activator is." + questActivator.Name + "\r\n\r\n" +
+                "Only include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
@@ -174,12 +178,7 @@ namespace FrankyCLI
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };
-
-            //Set the models based on if there's  tags  in the  name
-            if (markerused.EditorID.Contains("_wall"))
-            {
-                newActivator.Model.File = ActivatorTools.GetWallModel();
-            }
+            newActivator.Model.File = questActivator.Model;
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
 
