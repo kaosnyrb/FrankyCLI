@@ -238,46 +238,10 @@ namespace FrankyCLI.questgen_tools
                     Name = "Box of Scanned Reports",
                     Model = "setdressing\\crates\\cardboardboxes\\cardboardbox01.nif"
                 },
-                new ActivatorType(){
-                    Name = "Encrypted Hackbook",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Stolen Access Terminal",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Cracked Security Laptop",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Portable Intrusion Rig",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Spoofed Credential Machine",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Hidden Cyberdeck",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Signal Scrambler Console",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Contraband Data Laptop",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Unauthorized Network Device",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                },
-                new ActivatorType(){
-                    Name = "Remote Access Terminal",
-                    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                }
+                //new ActivatorType(){
+                //    Name = "Encrypted Hackbook",
+                //    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
+                //},
                 //
             };
             //

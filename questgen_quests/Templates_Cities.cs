@@ -29,17 +29,6 @@ namespace FrankyCLI.questgen_quests
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "City Activator - Neon",
-                Description = "Find info about the target in Neon",
-                Location = "Neon",
-                formid = 0x001379,
-                parameterformid = 0x00015FFE,
-                needSpacesuit = false,
-                parameter1 = "neon",
-                outlawQuest = new Investigation_ActivatorCity()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
                 Name = "City Activator - Akila City",
                 Description = "Find info about the target in Akila City",
                 Location = "Akila City",
@@ -125,17 +114,6 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "cydonia",
                 parameterformid = 0x00015FF7,
-                outlawQuest = new Showdown_BountyCity()
-            });
-            ShowdownTemplates.Add(new MissionTemplate()
-            {
-                Name = "City Bounty - Neon",
-                Description = "Kill the target at Neon",
-                Location = "Neon",
-                formid = 0x0012BE,
-                needSpacesuit = false,
-                parameter1 = "neon",
-                parameterformid = 0x00015FFE,
                 outlawQuest = new Showdown_BountyCity()
             });
             ShowdownTemplates.Add(new MissionTemplate()

@@ -46,6 +46,7 @@ namespace FrankyCLI.questgen_tools
             TemplateLibs.Add(new Templates_PlanetPCM());
             TemplateLibs.Add(new Templates_SpaceActivator());
             TemplateLibs.Add(new Templates_Derelicts());
+            TemplateLibs.Add(new Templates_Cities_Neon());
 
             MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
             MergedLib.InvestigationTemplates = new List<MissionTemplate>();
