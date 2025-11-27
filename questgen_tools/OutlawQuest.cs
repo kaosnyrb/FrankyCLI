@@ -72,73 +72,16 @@ namespace FrankyCLI.questgen_tools
         {
 
             return MergedLib.GetShowdownMissionTemplate("");
-            /*
-            Random random = new Random();
-            //Choose a deck
-            bool drawn = false;
-            while (!drawn)
-            {
-                //Choose a deck and draw a card
-                int decknumber = random.Next(TemplateLibs.Count);
-                var mission = TemplateLibs[decknumber].GetShowdownMissionTemplate("");
-                // Note that not all decks have all mission types.
-                if (mission != null)
-                {
-                    drawn = true;
-                    //Now remove the deck from the set
-                    TemplateLibs.RemoveAt(decknumber);
-                    return mission;
-                }
-            }
-            return null;*/
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string missionName)
         {
             return MergedLib.GetInvestigationMissionTemplate("");
-
-            Random random = new Random();
-            //Choose a deck
-            bool drawn = false;
-            while (!drawn)
-            {
-                //Choose a deck and draw a card
-                int decknumber = random.Next(TemplateLibs.Count);
-                var mission = TemplateLibs[decknumber].GetInvestigationMissionTemplate("");
-                // Note that not all decks have all mission types.
-                if (mission != null)
-                {
-                    drawn = true;
-                    //Now remove the deck from the set
-                    TemplateLibs.RemoveAt(decknumber);
-                    return mission;
-                }
-            }
-            return null;
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate()
         {
             return MergedLib.GetDiscoveryMissionTemplate();
-
-            Random random = new Random();
-            //Choose a deck
-            bool drawn = false;
-            while(!drawn)
-            {
-                //Choose a deck and draw a card
-                int decknumber = random.Next(TemplateLibs.Count);
-                var mission = TemplateLibs[decknumber].GetDiscoveryMissionTemplate();
-                // Note that not all decks have all mission types.
-                if (mission != null)
-                {
-                    drawn = true;
-                    //Now remove the deck from the set
-                    TemplateLibs.RemoveAt(decknumber);
-                    return mission;
-                }
-            }
-            return null;
        }
 
     }
