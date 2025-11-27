@@ -43,7 +43,6 @@ namespace FrankyCLI.questgen_tools
             // 
             //
             var ship = gen_quest._StarfieldMod.GenericBaseForms[new FormKey(gen_quest.StarfieldModKey, ShipFormID)].DeepCopy();
-
             var newship = new GenericBaseForm(gen_quest.myMod)
             {
                 EditorID = "encship_" + Guid.NewGuid().ToString().Substring(0, 8),
@@ -250,6 +249,26 @@ namespace FrankyCLI.questgen_tools
             };
             return spaceshipPrefixes[random.Next(spaceshipPrefixes.Count)] + " " + spaceshipSuffixes[random.Next(spaceshipSuffixes.Count)];
         }
+
+        public static string GetShipCode()
+        {
+            Random random = new Random();
+
+            // Military-style prefix letters
+            List<string> shipPrefixes = new List<string>
+            {
+                "FT", "XR", "NV", "TS", "RG", "VT", "HM", "SK",
+                "DF", "CW", "KN", "RS", "OM", "LX", "GX", "BL",
+                "ZT", "PX", "FX", "CM", "AP", "GT", "HS", "JN",
+                "QR", "ST", "VG", "WK", "YP", "ZC", "MK", "DH"
+            };
+
+            // Generate a 2–4 digit number
+            int number = random.Next(10, 9999);
+
+            return $"{shipPrefixes[random.Next(shipPrefixes.Count)]}-{number}";
+        }
+
 
         public static uint GetFactionID(string faction)
         {
