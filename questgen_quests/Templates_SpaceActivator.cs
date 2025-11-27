@@ -26,13 +26,35 @@ namespace FrankyCLI.questgen_quests
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by custom",
-                Description = "Find info about the target from a beacon in orbit around a planet guarded by a ship",
+                Name = "Space Activator  - Guarded by Crimson Fleet",
+                Description = "Find info about the target from a beacon in orbit around a planet guarded by a Crimson Fleet ship",
                 Location = "An old space beacon",
                 formid = 0x00090D,
+                parameter1 = "Crimson Fleet",
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Guard()
             });
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "Space Activator  - Guarded by Spacer",
+                Description = "Find info about the target from a beacon in orbit around a planet guarded by a Spacer ship",
+                Location = "An old space beacon",
+                formid = 0x00090D,
+                parameter1 = "Spacer",
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "Space Activator  - Guarded by Ecliptic",
+                Description = "Find info about the target from a beacon in orbit around a planet guarded by a Ecliptic ship",
+                Location = "An old space beacon",
+                formid = 0x00090D,
+                parameter1 = "Ecliptic",
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Crimson Fleet Trap",

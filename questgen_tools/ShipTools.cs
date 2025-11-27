@@ -215,6 +215,119 @@ namespace FrankyCLI.questgen_tools
             return shiplist[random.Next(shiplist.Count)];
         }
 
+        public static string GetFactionShipName(string id)
+        {
+            string shipname = ShipTools.GetShipName();
+
+            switch (id)
+            {
+                case "UC Navy":
+                    shipname = GetUCShipCode();
+                    break;
+                case "UC Vanguard":
+                    shipname = GetUCShipCode();
+                    break;
+                case "UC SysDef":
+                    shipname = GetUCShipCode();
+                    break;
+                case "Freestar Security":
+                    shipname = GetFreestarCodeName();
+                    break;
+                case "Trackers Alliance":
+                    shipname = GetFreestarCodeName();
+                    break;
+                case "Galbank":
+                    shipname = GetGalBankCodeName();
+                    break;
+                case "Crimson Fleet":
+                    shipname = GetCrimsonFleetCodeName();
+                    break;
+                case "Spacer":
+                    shipname = GetSpacerCodeName();
+                    break;
+                case "Ecliptic":
+                    shipname = GetMercenaryCodeName();
+                    break;
+                case "Trade Authority":
+                    shipname = GetTradeAuthoritySailingCodeName();
+                    break;
+
+            }
+            return shipname;
+        }
+
+        public static string GetTradeAuthoritySailingCodeName()
+        {
+            Random random = new Random();
+
+            // Old-world merchant & sailing-inspired ship names (single word, classy)
+            List<string> singleWordNames = new List<string>
+            {
+                "Windward", "Starborne", "Wayfarer", "Goldenwake", "Mariner",
+                "Seafarer", "Voyager", "Windcrier", "Sunchaser", "Tidebreaker",
+                "Silverwake", "Harbormark", "Tradewind", "Northstar", "Indenture",
+                "Merchantine", "Seafoam", "Gildedwave", "Longshore", "Brinefall",
+                "Tidewalker", "Starclipper", "Windcrest", "Oceancrest", "Brightwake",
+                "Saltbrand", "Seamender", "Starwharf", "Galeheart", "Windcrest",
+                "Deepwater", "Wavecrest", "Hullmark", "Widebeam", "Ironkeel",
+                "Sovereign", "Goldenspar", "Starbrig", "Freewater", "Skyclipper"
+            };
+
+            // Trade Authority codes
+            List<string> codePrefixes = new List<string>
+            {
+                "TA", // Trade Authority
+                "TB", // Trade Bureau
+                "TR", // Trade Registry
+                "LT", // Logistics Transport
+                "CT", // Cargo Transit
+                "AX"  // Authority Exchange
+            };
+
+            int number = random.Next(10, 9999);
+
+            return $"{singleWordNames[random.Next(singleWordNames.Count)]} {codePrefixes[random.Next(codePrefixes.Count)]}-{number}";
+        }
+
+
+        public static string GetMercenaryCodeName()
+        {
+            Random random = new Random();
+
+            // Tactical, military-style code prefixes
+            List<string> codePrefixes = new List<string>
+            {
+                "MX", // Mercenary X Division
+                "VR", // Vanguard Recon
+                "KT", // Kill Team
+                "HX", // Helix Unit
+                "OD", // Onyx Division
+                "ST", // Strike Team
+                "BL", // Blacklight
+                "AR", // Aegis Regiment
+                "GS", // Ghost Squad
+                "RF"  // Red Force
+            };
+
+            // Professional, sleek, aggressive single-word names
+            List<string> singleWordNames = new List<string>
+            {
+                "Blacktalon", "Ironstrike", "Ghostline", "Nightblade", "Steelshade",
+                "Warhawk", "Shadowfall", "Hardpoint", "Crossfire", "Deadlock",
+                "Viperline", "Stormpoint", "Grimshot", "Helixborn", "Redstrike",
+                "Starblade", "Lanceredge", "Darkwolf", "Nullfire", "Specterborn",
+                "Warshade", "Ghostforge", "Talonfire", "Blackstorm", "Razorwind",
+                "Ironshard", "Strikefall", "Nightcore", "Steelbrand", "Shadowwing",
+                "Bloodsteel", "Edgefire", "Razerclaw", "Crossline", "Stormlance",
+                "Silentedge", "Frostblade", "Shockwave", "Voidbrand", "Gunspire"
+            };
+
+            int number = random.Next(10, 9999);
+
+            return $"{codePrefixes[random.Next(codePrefixes.Count)]}-{number} {singleWordNames[random.Next(singleWordNames.Count)]}";
+        }
+
+
         public static string GetShipName()
         {
             Random random = new Random();
@@ -250,7 +363,71 @@ namespace FrankyCLI.questgen_tools
             return spaceshipPrefixes[random.Next(spaceshipPrefixes.Count)] + " " + spaceshipSuffixes[random.Next(spaceshipSuffixes.Count)];
         }
 
-        public static string GetShipCode()
+        public static string GetSpacerCodeName()
+        {
+            Random random = new Random();
+
+            // Scavenger / bandit-style prefixes
+            List<string> codePrefixes = new List<string>
+            {
+                "SP", // Spacers
+                "SB", // Scrap Bandits
+                "JT", // Junk Trawlers
+                "GX", // Grease X
+                "RD", // Rust Devils
+                "BR", // Bolt Runners
+                "SL", // Scrap Lords
+                "WK"  // Wreckers
+            };
+
+            // Single-word gritty, junker, scavenger ship names
+            List<string> singleWordNames = new List<string>
+            {
+                "Scrapfang", "Rustburner", "Junkrider", "Boltshank", "Grimejaw",
+                "Wreckborn", "Filthrunner", "Trashfire", "Scrapmaw", "Rusthound",
+                "Grindcore", "Crackspine", "Bashstar", "Pitfall", "Irontrash",
+                "Grungeblade", "Dustshank", "Junklash", "Metalgrit", "Shatterjaw",
+                "Ragskull", "Sootclaw", "Gutterwind", "Wastemaul", "Rivetstrike",
+                "Rustclaw", "Scraprider", "Dirtywing", "Gravelshot", "Ironjunk",
+                "Mashrider", "Gunkfang", "Trashfang", "Ruststalker", "Grindfang",
+                "Scrapviper", "Wretchborn", "Boltbreaker", "Dirtmaw", "Smogshard"
+            };
+
+            int number = random.Next(10, 9999);
+
+            return $"{codePrefixes[random.Next(codePrefixes.Count)]}-{number} {singleWordNames[random.Next(singleWordNames.Count)]}";
+        }
+
+        public static string GetFreestarCodeName()
+        {
+            Random random = new Random();
+
+            // Military-style prefixes for Freestar
+            List<string> codePrefixes = new List<string>
+            {
+                "FS", "FR", "FC", "WC", "LF", "RG", "MD", "PR"
+            };
+
+            // Single-word, space-cowboy, frontier-style ship names
+            List<string> singleWordNames = new List<string>
+            {
+                "Dustrunner", "Ironwind", "Sundrifter", "Lonerider", "Redhawk",
+                "Coyoteheart", "Brimstone", "Mustang", "Trailborn", "Dustfall",
+                "Wildshot", "Longhorn", "Starforge", "Rusthoof", "Badlander",
+                "Highnoon", "Gritstone", "Sunchaser", "Buckshot", "Outrider",
+                "Skybronco", "Dustforge", "Sunstalker", "Firetrail", "Sablestride",
+                "Wildbrand", "Redsun", "Irontrail", "Loneforge", "Mesaheart",
+                "Starstallion", "Ashrider", "Windbrand", "Prairiefire", "Dustlance",
+                "Goldspur", "Starrodeo", "Thornsteel", "Dawnbreak", "Ironspur"
+            };
+
+            // Number: 10–9999
+            int number = random.Next(10, 9999);
+
+            return $"{codePrefixes[random.Next(codePrefixes.Count)]}-{number} {singleWordNames[random.Next(singleWordNames.Count)]}";
+        }
+
+        public static string GetUCShipCode()
         {
             Random random = new Random();
 
@@ -268,6 +445,72 @@ namespace FrankyCLI.questgen_tools
 
             return $"{shipPrefixes[random.Next(shipPrefixes.Count)]}-{number}";
         }
+
+        public static string GetCrimsonFleetCodeName()
+        {
+            Random random = new Random();
+
+            // Aggressive, outlaw-style prefixes suitable for Crimson Fleet
+            List<string> codePrefixes = new List<string>
+            {
+                "CF",  // Crimson Fleet
+                "CR",  // Crimson Raiders
+                "RS",  // Red Sabers
+                "BL",  // Bloodline
+                "FM",  // Fleet Marauders
+                "DS",  // Deadstar
+                "VK",  // Void Killers
+                "BR"   // Blood Reavers
+            };
+
+            // Single-word pirate names
+            List<string> singleWordNames = new List<string>
+            {
+                "Bloodreaver", "Skullrender", "Voidfang", "Ironmaw", "Redhowl",
+                "Starcutlass", "Darkstrike", "Bloodwake", "Nightraider", "Riftclaw",
+                "Scarrunner", "Dreadskull", "Havocborn", "Hellwake", "Gunmaw",
+                "Crimsonfang", "Ragewing", "Emberblade", "Killstar", "Voidbreaker",
+                "Boneclaw", "Cutlassfire", "Maraudstar", "Darklance", "Stormreaver",
+                "Riftblade", "Flameskull", "Viperwind", "Bloodshot", "Gravespine",
+                "Deadfall", "Ravageborn", "Ironreaper", "Warhound", "Bloodtrail",
+                "Shadowreaver", "Riftbane", "Starwrecker", "Ironskull"
+            };
+
+            int number = random.Next(10, 9999);
+
+            return $"{codePrefixes[random.Next(codePrefixes.Count)]}-{number} {singleWordNames[random.Next(singleWordNames.Count)]}";
+        }
+
+
+        public static string GetGalBankCodeName()
+        {
+            Random random = new Random();
+
+            // Corporate / banking military-style prefixes
+            List<string> codePrefixes = new List<string>
+            {
+                "GB", "GC", "GF", "GL", "GA", "BX", "CB", "CR"  // GalBank, Credit Bureau, Credit Reserve, etc.
+            };
+
+            // Single-word corporate banking-style names
+            List<string> singleWordNames = new List<string>
+            {
+                "Vaultguard", "Credshield", "Fundrunner", "Mintline", "Bondrider",
+                "Securehaul", "Depositrail", "Ledgerstar", "Goldshift", "Coinlance",
+                "Trustwave", "Cashflow", "Quantisec", "Finline", "Creditmark",
+                "Bankrider", "Depositron", "Primesec", "Safewing", "Yieldcore",
+                "Stockwind", "Vaultborne", "Fundshift", "Mintward", "Goldvector",
+                "Assetguard", "Capitalwing", "Shareline", "Trustforge", "Bondshift",
+                "Vaultline", "Profitstar", "Cashrunner", "Lockwind", "Currency",
+                "Mintforge", "Dividend", "Creditforge", "Trustsphere", "Coinshift"
+            };
+
+            // Number 10–9999
+            int number = random.Next(10, 9999);
+
+            return $"{codePrefixes[random.Next(codePrefixes.Count)]}-{number} {singleWordNames[random.Next(singleWordNames.Count)]}";
+        }
+
 
 
         public static uint GetFactionID(string faction)

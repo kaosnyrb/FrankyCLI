@@ -37,7 +37,8 @@ namespace FrankyCLI.questgen_quests
 
             var factionID = ShipTools.GetFactionID(missionTemplate.parameter1);
 
-            var shipname = ShipTools.GetShipName();
+
+            string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
             Console.WriteLine("shipname: " + shipname);
             var ship = ShipTools.GenShip(shipname, missionTemplate.parameterformid, factionID);
 

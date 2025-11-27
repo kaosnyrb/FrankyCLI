@@ -34,7 +34,8 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("Generating Activator Guarded Space Quest...");
             questloc = missionTemplate.Location;
 
-            var shipname = ShipTools.GetShipName();
+            string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
+
             Console.WriteLine("shipname: " + shipname);
             var ship = ShipTools.GenShip(shipname, ShipTools.GetCargoShip(), 0x000AE4F3);
 
