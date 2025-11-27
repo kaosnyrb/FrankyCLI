@@ -15,6 +15,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
 
+            /*
             DiscoveryTemplates.Add(
                 new MissionTemplate()
                 {
@@ -24,7 +25,19 @@ namespace FrankyCLI.questgen_quests
                     formid = 0,
                     needSpacesuit = true,
                     outlawQuest = new Discovery_Dataslate()
+                });*/
+
+            DiscoveryTemplates.Add(
+                new MissionTemplate()
+                {
+                    Name = "Wanted Poster Activator",
+                    Description = "The player finds a wanted poster hanging in a bar.",
+                    Location = "A bar",
+                    formid = 0,
+                    needSpacesuit = true,
+                    outlawQuest = new Discovery_WantedPoster()
                 });
+
         }
     }
 }
