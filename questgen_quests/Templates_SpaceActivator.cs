@@ -36,7 +36,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Crimson Fleet Trap",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "Find info about the target from a beacon in orbit around a planet. Crimson Fleet attack when the player uses the beacon",
                 Location = "An space beacon in an asteroid field",
                 formid = 0x00090F,
                 needSpacesuit = true,
@@ -45,7 +45,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Spacer Trap",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "Find info about the target from a beacon in orbit around a planet. Spacer attack when the player uses the beacon",
                 Location = "An space beacon in an asteroid field",
                 formid = 0x000912,
                 needSpacesuit = true,
@@ -54,7 +54,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Ecliptic Trap",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "Find info about the target from a beacon in orbit around a planet. Ecliptic attack when the player uses the beacon",
                 Location = "An space beacon in an asteroid field",
                 formid = 0x000915,
                 needSpacesuit = true,
@@ -63,7 +63,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Crimson Fleet - cargo",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Crimson Fleet ship has the data in there hold",
                 Location = "A cargo ship",
                 parameterformid = ShipTools.GetCargoShip(),
                 formid = 0x000808,
@@ -74,7 +74,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Spacer  - cargo",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Spacer ship has the data in there hold",
                 Location = "A cargo ship",
                 parameterformid = ShipTools.GetCargoShip(),
                 formid = 0x000808,
@@ -85,7 +85,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Ecliptic - cargo",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Ecliptic ship has the data in there hold",
                 Location = "A cargo ship",
                 parameterformid = ShipTools.GetCargoShip(),
                 formid = 0x000808,
@@ -96,7 +96,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Crimson Fleet - Class A",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Crimson Fleet ship has the data in there hold",
                 Location = "A small ship",
                 parameterformid = ShipTools.GetAClassShip(),
                 formid = 0x000808,
@@ -107,7 +107,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Spacer  - Class A",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Spacer ship has the data in there hold",
                 Location = "A small ship",
                 parameterformid = ShipTools.GetAClassShip(),
                 formid = 0x000808,
@@ -118,7 +118,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Ecliptic - Class A",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Ecliptic ship has the data in there hold",
                 Location = "A small ship",
                 parameterformid = ShipTools.GetAClassShip(),
                 formid = 0x000808,
@@ -129,7 +129,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Crimson Fleet - Class B",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Crimson Fleet ship has the data in there hold",
                 Location = "A strong medium sized ship",
                 parameterformid = ShipTools.GetBClassShip(),
                 formid = 0x000808,
@@ -140,7 +140,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Spacer  - Class B",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Spacer ship has the data in there hold",
                 Location = "A strong medium sized ship",
                 parameterformid = ShipTools.GetBClassShip(),
                 formid = 0x000808,
@@ -151,7 +151,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Ecliptic - Class B",
-                Description = "Find info about the target from a beacon in orbit around a planet",
+                Description = "A Ecliptic ship has the data in there hold",
                 Location = "A strong medium sized ship",
                 parameterformid = ShipTools.GetBClassShip(),
                 formid = 0x000808,

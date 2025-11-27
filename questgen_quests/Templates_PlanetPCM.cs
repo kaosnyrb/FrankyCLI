@@ -48,7 +48,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Important Marker Breathable",
-                Description = "Find info about the target on a planet POI",
+                Description = "Find info about the target on a planet POI with a breathable atmosphere",
                 Location = "A remote location",
                 formid = 0x000909,
                 needSpacesuit = false,

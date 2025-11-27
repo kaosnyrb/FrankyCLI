@@ -36,17 +36,43 @@ namespace FrankyCLI.questgen_tools
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
+        TemplateLib MergedLib = new TemplateLib();
+
         public MissionLib()
         {
+
             TemplateLibs.Add(new Templates_Dataslate());
-            //TemplateLibs.Add(new Templates_Cities());
+            TemplateLibs.Add(new Templates_Cities());
             TemplateLibs.Add(new Templates_PlanetPCM());
             TemplateLibs.Add(new Templates_SpaceActivator());
             TemplateLibs.Add(new Templates_Derelicts());
+
+            MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
+            MergedLib.InvestigationTemplates = new List<MissionTemplate>();
+            MergedLib.ShowdownTemplates = new List<MissionTemplate>();
+
+            foreach (TemplateLib templateLib in TemplateLibs)
+            {
+                foreach (var dis in templateLib.DiscoveryTemplates)
+                {
+                    MergedLib.DiscoveryTemplates.Add(dis);
+                }
+                foreach (var dis in templateLib.InvestigationTemplates)
+                {
+                    MergedLib.InvestigationTemplates.Add(dis);
+                }
+                foreach(var dis in templateLib.ShowdownTemplates)
+                {
+                    MergedLib.ShowdownTemplates.Add(dis);
+                }
+            }
         }
 
         public MissionTemplate GetShowdownMissionTemplate(string missionName)
         {
+
+            return MergedLib.GetShowdownMissionTemplate("");
+            /*
             Random random = new Random();
             //Choose a deck
             bool drawn = false;
@@ -64,11 +90,13 @@ namespace FrankyCLI.questgen_tools
                     return mission;
                 }
             }
-            return null;
+            return null;*/
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string missionName)
         {
+            return MergedLib.GetInvestigationMissionTemplate("");
+
             Random random = new Random();
             //Choose a deck
             bool drawn = false;
@@ -91,6 +119,8 @@ namespace FrankyCLI.questgen_tools
 
         public MissionTemplate GetDiscoveryMissionTemplate()
         {
+            return MergedLib.GetDiscoveryMissionTemplate();
+
             Random random = new Random();
             //Choose a deck
             bool drawn = false;

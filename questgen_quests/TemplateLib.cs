@@ -13,33 +13,83 @@ namespace FrankyCLI.questgen_quests
         public List<MissionTemplate> InvestigationTemplates;
         public List<MissionTemplate> ShowdownTemplates;
 
+        public bool AIMODE = true;
+
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
-            if (ShowdownTemplates.Count == 0) return null;
-            if (mission != "")
+            Random random = new Random();
+
+
+            if (AIMODE)
             {
-                return ShowdownTemplates.Where(x => x.Name == mission).Single();
+                //AI Test
+                string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
+                ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
+
+                for (int i = 0; i < ShowdownTemplates.Count; i++)
+                {
+                    ItemPrompts += i + " : " + ShowdownTemplates[i].Location + " " + ShowdownTemplates[i].Description + "\r\n";
+                }
+                var result = AITools.RunPrompt(ItemPrompts);
+                int index = 0;
+                try
+                {
+                    int.TryParse(result, out index);
+                    return ShowdownTemplates[index];
+                }
+                catch
+                {
+                    int selected = random.Next(ShowdownTemplates.Count);
+                    var template = ShowdownTemplates[selected];
+                    ShowdownTemplates.RemoveAt(selected);
+                    return template;
+                }
             }
             else
             {
-                Random random = new Random();
-                return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
+                if (ShowdownTemplates.Count == 0) return null;
+                if (mission != "")
+                {
+                    return ShowdownTemplates.Where(x => x.Name == mission).Single();
+                }
+                else
+                {
+                    return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
+                }
             }
+
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string mission)
         {
             if (InvestigationTemplates.Count == 0) return null;
 
-            //AI Test
-            string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
-            ItemPrompts += "Return just the number of the item that makes the most sense story wise.";
-
-            for(int i = 0; i < InvestigationTemplates.Count; i++)
+            if(AIMODE)
             {
-//                ItemPrompts+= i + " : " + InvestigationTemplates
-            }
+                //AI Test
+                string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
+                ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
 
+                for (int i = 0; i < InvestigationTemplates.Count; i++)
+                {
+                    ItemPrompts += i + " : " + InvestigationTemplates[i].Location + " " + InvestigationTemplates[i].Description + "\r\n";
+                }
+                var result = AITools.RunPrompt(ItemPrompts);
+                int index = 0;
+                try
+                {
+                    int.TryParse(result, out index);
+                    return InvestigationTemplates[index];
+                }
+                catch
+                {
+                    Random random = new Random();
+                    int selected = random.Next(InvestigationTemplates.Count);
+                    var template = InvestigationTemplates[selected];
+                    InvestigationTemplates.RemoveAt(selected);
+                    return template;
+                }
+            }
 
             if (mission != "")
             {
@@ -59,12 +109,41 @@ namespace FrankyCLI.questgen_quests
         public MissionTemplate GetDiscoveryMissionTemplate()
         {
             if (DiscoveryTemplates.Count == 0) return null;
-
             Random random = new Random();
-            int selected = random.Next(DiscoveryTemplates.Count);
-            var template = DiscoveryTemplates[selected];
-            DiscoveryTemplates.RemoveAt(selected);
-            return template;
+
+            if (AIMODE)
+            {
+                //AI Test
+                string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
+                ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
+
+                for (int i = 0; i < DiscoveryTemplates.Count; i++)
+                {
+                    ItemPrompts += i + " : " + DiscoveryTemplates[i].Location + " " + DiscoveryTemplates[i].Description + "\r\n";
+                }
+                var result = AITools.RunPrompt(ItemPrompts);
+                int index = 0;
+                try
+                {
+                    int.TryParse(result, out index);
+                    return DiscoveryTemplates[index];
+                }
+                catch
+                {
+                    int selected = random.Next(DiscoveryTemplates.Count);
+                    var template = DiscoveryTemplates[selected];
+                    DiscoveryTemplates.RemoveAt(selected);
+                    return template;
+                }
+            }
+            else
+            {
+                int selected = random.Next(DiscoveryTemplates.Count);
+                var template = DiscoveryTemplates[selected];
+                DiscoveryTemplates.RemoveAt(selected);
+                return template;
+
+            }
         }
     }
 }
