@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_quests
 {
-    internal class Templates_SpaceActivator
+    internal class Templates_SpaceActivator : TemplateLib
     {
-        public static void AddTemplates(List<MissionTemplate> discovery, List<MissionTemplate> investiation, List<MissionTemplate> showdown)
+        public Templates_SpaceActivator()
         {
+            DiscoveryTemplates = new List<MissionTemplate>();
+            InvestigationTemplates = new List<MissionTemplate>();
+            ShowdownTemplates = new List<MissionTemplate>();
             //-------------------------------  INVESTIGATION ------------------------------------------
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - unguarded",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -21,7 +24,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator  - Guarded by custom",
                 Description = "Find info about the target from a beacon in orbit around a planet guarded by a ship",
@@ -30,7 +33,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Guard()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Crimson Fleet Trap",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -39,7 +42,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_trapped_crimson()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Spacer Trap",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -48,7 +51,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_trapped_spacer()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Ecliptic Trap",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -57,7 +60,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_trapped_ecliptic()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Crimson Fleet - cargo",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -68,7 +71,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Spacer  - cargo",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -79,7 +82,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Spacer",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Ecliptic - cargo",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -90,7 +93,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Crimson Fleet - Class A",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -101,7 +104,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Spacer  - Class A",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -112,7 +115,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Spacer",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Ecliptic - Class A",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -123,7 +126,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Crimson Fleet - Class B",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -134,7 +137,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Spacer  - Class B",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -145,7 +148,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Spacer",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Informant - Ecliptic - Class B",
                 Description = "Find info about the target from a beacon in orbit around a planet",
@@ -156,7 +159,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 outlawQuest = new Investigation_Informant_Space()
             });
-            
+
             //-------------------------------  SHOWDOWN ------------------------------------------
 
         }

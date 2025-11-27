@@ -1,12 +1,14 @@
-﻿using Mutagen.Bethesda.Plugins;
+﻿using DynamicData;
+using FrankyCLI.questgen_quests;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FrankyCLI.questgen_quests;
 
 namespace FrankyCLI.questgen_tools
 {
@@ -17,81 +19,6 @@ namespace FrankyCLI.questgen_tools
         public string QuestLocation { get; set; }
         public Quest questform { get; set; }
     }
-
-    public class MissionLib
-    {
-        public List<MissionTemplate> DiscoveryTemplates;
-        public List<MissionTemplate> InvestigationTemplates;
-        public List<MissionTemplate> ShowdownTemplates;
-        public MissionLib()
-        {
-            DiscoveryTemplates = new List<MissionTemplate>()
-            {
-                new MissionTemplate()
-                {
-                    Name = "Dataslate in levelled item",
-                    Description = "The player finds a dataslate containing a lead to the target.",
-                    Location = "A remote location",
-                    formid = 0,
-                    needSpacesuit = true,
-                    outlawQuest = new Discovery_Dataslate()
-                }
-            };
-
-            InvestigationTemplates = new List<MissionTemplate>()
-            {
-
-            };
-
-            ShowdownTemplates = new List<MissionTemplate>
-            {
-            };
-
-            //We load our template libs here
-            Templates_PlanetPCM.AddTemplates(DiscoveryTemplates, InvestigationTemplates, ShowdownTemplates);
-            Templates_Cities.AddTemplates(DiscoveryTemplates, InvestigationTemplates, ShowdownTemplates);
-            Templates_SpaceActivator.AddTemplates(DiscoveryTemplates, InvestigationTemplates, ShowdownTemplates);
-            Templates_Derelicts.AddTemplates(DiscoveryTemplates, InvestigationTemplates, ShowdownTemplates);
-        }
-
-        public MissionTemplate GetShowdownMissionTemplate(string mission)
-        {
-            if (mission != "")
-            {
-                return ShowdownTemplates.Where(x => x.Name == mission).Single();
-            }
-            else
-            {
-                Random random = new Random();
-                return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
-            }
-        }
-
-        public MissionTemplate GetInvestigationMissionTemplate(string mission)
-        {
-            if (mission != "")
-            {
-                //Don't really care about deleting as this is for testing
-                return InvestigationTemplates.Where(x => x.Name == mission).Single();
-            }
-            else
-            {
-                Random random = new Random();
-                int selected = random.Next(InvestigationTemplates.Count);
-                var template = InvestigationTemplates[selected];
-                InvestigationTemplates.RemoveAt(selected);
-                return template;
-            }
-        }
-
-        public MissionTemplate GetDiscoveryMissionTemplate()
-        {
-            Random random = new Random();
-            return DiscoveryTemplates[random.Next(DiscoveryTemplates.Count)];
-        }
-
-    }
-
     public class MissionTemplate
     {
         public string Name;
@@ -103,4 +30,88 @@ namespace FrankyCLI.questgen_tools
         public bool needSpacesuit;
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
     }
+
+
+    public class MissionLib
+    {
+        List<TemplateLib> TemplateLibs = new List<TemplateLib>();
+
+        public MissionLib()
+        {
+            TemplateLibs.Add(new Templates_Dataslate());
+            //TemplateLibs.Add(new Templates_Cities());
+            TemplateLibs.Add(new Templates_PlanetPCM());
+            TemplateLibs.Add(new Templates_SpaceActivator());
+            TemplateLibs.Add(new Templates_Derelicts());
+        }
+
+        public MissionTemplate GetShowdownMissionTemplate(string missionName)
+        {
+            Random random = new Random();
+            //Choose a deck
+            bool drawn = false;
+            while (!drawn)
+            {
+                //Choose a deck and draw a card
+                int decknumber = random.Next(TemplateLibs.Count);
+                var mission = TemplateLibs[decknumber].GetShowdownMissionTemplate("");
+                // Note that not all decks have all mission types.
+                if (mission != null)
+                {
+                    drawn = true;
+                    //Now remove the deck from the set
+                    TemplateLibs.RemoveAt(decknumber);
+                    return mission;
+                }
+            }
+            return null;
+        }
+
+        public MissionTemplate GetInvestigationMissionTemplate(string missionName)
+        {
+            Random random = new Random();
+            //Choose a deck
+            bool drawn = false;
+            while (!drawn)
+            {
+                //Choose a deck and draw a card
+                int decknumber = random.Next(TemplateLibs.Count);
+                var mission = TemplateLibs[decknumber].GetInvestigationMissionTemplate("");
+                // Note that not all decks have all mission types.
+                if (mission != null)
+                {
+                    drawn = true;
+                    //Now remove the deck from the set
+                    TemplateLibs.RemoveAt(decknumber);
+                    return mission;
+                }
+            }
+            return null;
+        }
+
+        public MissionTemplate GetDiscoveryMissionTemplate()
+        {
+            Random random = new Random();
+            //Choose a deck
+            bool drawn = false;
+            while(!drawn)
+            {
+                //Choose a deck and draw a card
+                int decknumber = random.Next(TemplateLibs.Count);
+                var mission = TemplateLibs[decknumber].GetDiscoveryMissionTemplate();
+                // Note that not all decks have all mission types.
+                if (mission != null)
+                {
+                    drawn = true;
+                    //Now remove the deck from the set
+                    TemplateLibs.RemoveAt(decknumber);
+                    return mission;
+                }
+            }
+            return null;
+       }
+
+    }
+
+
 }

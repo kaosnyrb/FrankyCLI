@@ -28,6 +28,8 @@ namespace FrankyCLI.questgen_tools
         public string Haircolor;
         public string Eyecolor;
 
+        public string BountyFaction;
+
         public bool spacesuit;
 
         public bool female;
@@ -104,22 +106,59 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateBackground()
         {
-            string backgroundprompt =
-                "Two paragraphs on the history of the character. Keep it under 100 words.\r\n\r\n" +
-                "These should explain the characters upbringing and how they turned to a life of crime.\r\n\r\n" +
-                "These should be written in the tone of a report a bounty hunter group have compiled\r\n\r\n" +
-                "Avoid using overly complex language and terminology. \r\n\r\n" +
-                "Avoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\n" +
-                "Only include the background in the response.\r\n\r\n" +
-                "Avoid starting each sentence with a pronoun\r\n\r\n" +
-                "Include most of the characters information in the background which is: \r\n";
-            backgroundprompt += "Name: " + name + "\r\n\r\n";
-            backgroundprompt += "Gender: " + gender + "\r\n\r\n";
-            backgroundprompt += "Upbringing: " + GetUpbringing() + "\r\n\r\n";
-            backgroundprompt += "Hair Color: " + NPCTools.SanitiseHairColor(Haircolor) + "\r\n\r\n";
-            backgroundprompt += "Eye Color: " + Eyecolor + "\r\n\r\n";
-            backgroundprompt += "Job: " + job + "\r\n\r\n";
+            BountyFaction = FactionTools.GetFaction();
+            Random random = new Random();
 
+            string backgroundprompt = "Create a brief background file on the target using one of several possible report formats.\r\n";
+
+            backgroundprompt += "Choose one of the following formats at random for each generation:\r\n";
+            backgroundprompt += "Two short paragraphs\r\n";
+            backgroundprompt += "A three-section mini-dossier (Background, Activities, Notes)\r\n";
+            backgroundprompt += "A short bullet-point intelligence summary\r\n";
+            backgroundprompt += "A compact internal memo (3 to 5 sentences)\r\n";
+            backgroundprompt += "A field agent observation report\r\n";
+            backgroundprompt += "A brief narrative overview written like an incident recap\r\n";
+            backgroundprompt += "A senior analyst incident summary\r\n";
+            backgroundprompt += "An internal security briefing note\r\n";
+            backgroundprompt += "A condensed behavioral risk profile\r\n";
+            backgroundprompt += "A frontline investigator situation recap\r\n";
+            backgroundprompt += "A regional operations intelligence note\r\n";
+            backgroundprompt += "A covert surveillance extract\r\n";
+            backgroundprompt += "A rapid assessment threat outline\r\n";
+            backgroundprompt += "A personnel history compression file\r\n";
+            backgroundprompt += "A classified misconduct review\r\n";
+            backgroundprompt += "A compressed target bio entry\r\n";
+
+            backgroundprompt += "Ensure the total output stays under 100 words, regardless of format.\r\n";
+
+
+
+            backgroundprompt += "The entry must be written in the tone of an internal " + BountyFaction + " report.\r\n";
+            backgroundprompt += "Avoid complex terminology. \r\n";
+            backgroundprompt += "Use only locations and details present in the provided background information.\r\n";
+            backgroundprompt += "Do not break the fourth wall.";
+            backgroundprompt += "Avoid fictional place names.";
+            backgroundprompt += "Avoid starting every sentence with a pronoun.";
+
+            backgroundprompt += "Include the character’s background details naturally:";
+
+            backgroundprompt += "Name: " + name + "\r\n";
+            backgroundprompt += "Upbringing: " + GetUpbringing() + "\r\n";
+            backgroundprompt += "Job: " + job + "\r\n";
+
+
+            //These are optional details to spice things up.
+            if (random.Next(100) > 50) backgroundprompt += "Trait: " + GetTrait() + "\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Habits: " + GetHabit() + "\r\n\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Gender: " + gender + "\r\n\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Hair Color: " + NPCTools.SanitiseHairColor(Haircolor) + "\r\n\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Eye Color: " + Eyecolor + "\r\n\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Flaws: " + Getflaws() + "\r\n\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Fears: " + GetFears() + "\r\n\r\n";
+            if (random.Next(100) > 50) backgroundprompt += "Goals: " + GetGoals() + "\r\n\r\n";
+
+
+            
             string background = AITools.RunPrompt(backgroundprompt);
 
             
@@ -405,6 +444,554 @@ namespace FrankyCLI.questgen_tools
 
             return upbringinglist[random.Next(upbringinglist.Count)];
 
+        }
+
+        public string Getflaws()
+        {
+            Random random = new Random();
+            List<string> personalityFlaws = new List<string>()
+            {
+                "Impulsive",
+                "Overly stubborn",
+                "Easily angered",
+                "Overconfident",
+                "Pessimistic",
+                "Jealous",
+                "Distrustful",
+                "Overly competitive",
+                "Hot-headed",
+                "Indecisive",
+                "Reckless",
+                "Apathetic",
+                "Secretive",
+                "Vain",
+                "Paranoid",
+                "Selfish",
+                "Lazy",
+                "Overly critical",
+                "Judgmental",
+                "Obsessive",
+                "Fearful",
+                "Easily discouraged",
+                "Passive-aggressive",
+                "Manipulative",
+                "Insensitive",
+                "Forgetful",
+                "Gullible",
+                "Naive",
+                "Sarcastic",
+                "Hypocritical",
+                "Easily frustrated",
+                "Insecure",
+                "Procrastinator",
+                "Distractible",
+                "Short-tempered",
+                "Blunt to a fault",
+                "Clingy",
+                "Overly serious",
+                "Pushy",
+                "Self-doubting",
+                "Moody",
+                "Overly sentimental",
+                "Talks too much",
+                "Interrupts often",
+                "Argumentative",
+                "Needs constant validation",
+                "Fear of failure",
+                "Fear of rejection",
+                "Cowardly",
+                "Arrogant",
+                "Resentful",
+                "Holds grudges",
+                "Perfectionist to a fault",
+                "Unreliable",
+                "Self-destructive",
+                "Obsessed with approval",
+                "Overly dramatic",
+                "Tends to exaggerate",
+                "Lacks empathy",
+                "Has trouble apologizing",
+                "Blames others frequently",
+                "Easily bored",
+                "Avoids responsibility",
+                "Distrusts authority",
+                "Overly dependent",
+                "Highly defensive",
+                "Insensitive with humor",
+                "Prone to overthinking",
+                "Prone to panic",
+                "Forgetful of commitments",
+                "Spends impulsively",
+                "Seeks conflict",
+                "Avoids conflict",
+                "Always assumes the worst",
+                "Cannot take criticism",
+                "Gives up too easily",
+                "Workaholic",
+                "Too trusting",
+                "Controlling",
+                "Impatient",
+                "Self-centered",
+                "Awkward in conversations",
+                "Has trouble listening",
+                "Dismissive of others’ ideas",
+                "Easily overwhelmed",
+                "Talks down to others",
+                "Irresponsible with time",
+                "Emotionally distant",
+                "Fearful of change",
+                "Gets jealous of success",
+                "Hides true feelings",
+                "Acts without thinking",
+                "Holds unrealistic expectations",
+                "Too focused on rules",
+                "Overanalyzes everything",
+                "Struggles to make connections",
+                "Constant worrier",
+                "Avoids difficult situations"
+            };
+
+            return personalityFlaws[random.Next(personalityFlaws.Count)];
+
+        }
+
+        public string GetTrait()
+        {
+            Random random = new Random();
+
+            List<string> traitlist = new List<string>()
+            {
+                 "Short temper",
+                "Good hearing",
+                "Can't dance",
+                "Night owl",
+                "Early riser",
+                "Tech savvy",
+                "Claustrophobic",
+                "Fearless",
+                "Overconfident",
+                "Calm under pressure",
+                "Fast learner",
+                "Suspicious of strangers",
+                "Loyal to a fault",
+                "Perfectionist",
+                "Messy eater",
+                "Strong moral code",
+                "Secretive",
+                "Forgetful",
+                "Great storyteller",
+                "Prone to daydreaming",
+                "Stubborn",
+                "Easily distracted",
+                "Addicted to coffee",
+                "Talks to themselves",
+                "Hates authority",
+                "Natural leader",
+                "Gets lost easily",
+                "Obsessed with gadgets",
+                "Enjoys solving puzzles",
+                "Afraid of heights",
+                "Makes terrible jokes",
+                "Competitive",
+                "Mild insomnia",
+                "Hates confrontation",
+                "Risk taker",
+                "Always hungry",
+                "Doesn’t trust AI",
+                "Keeps souvenirs",
+                "Writes in a journal",
+                "Collects rare minerals",
+                "Overthinks everything",
+                "Gets motion sickness",
+                "Prefers solitude",
+                "Friendly with everyone",
+                "Talkative",
+                "Soft-spoken",
+                "Hates small talk",
+                "Fidgety",
+                "Walks quickly",
+                "Heavy sleeper",
+                "Light sleeper",
+                "Easily annoyed",
+                "Worries constantly",
+                "Laughs loudly",
+                "Whistles often",
+                "Has a lucky charm",
+                "Skeptical of science",
+                "Trusts intuition",
+                "Excellent memory",
+                "Clumsy",
+                "Organized",
+                "Obsessive planner",
+                "Sings while working",
+                "Prone to headaches",
+                "Enjoys danger",
+                "Pessimistic",
+                "Optimistic",
+                "Realist",
+                "Can’t lie well",
+                "Master liar",
+                "Overly polite",
+                "Gets homesick",
+                "Loves spicy food",
+                "Vegetarian",
+                "Always cold",
+                "Always hot",
+                "Sensitive to noise",
+                "Easily bored",
+                "Flirtatious",
+                "Confident speaker",
+                "Fearful of conflict",
+                "Protective of friends",
+                "Tries to impress others",
+                "Stoic",
+                "Has a dark sense of humor",
+                "Prone to nostalgia",
+                "Talks in their sleep",
+                "Snores loudly",
+                "Loves animals",
+                "Dislikes kids",
+                "Trusts everyone too quickly",
+                "Hates flying",
+                "Tends to exaggerate",
+                "Loves surprises",
+                "Hates surprises",
+                "Often late",
+                "Always punctual",
+                "Easily embarrassed",
+                "Strong sense of justice",
+                "Collects secrets",
+            };
+
+            return traitlist[random.Next(traitlist.Count)];
+
+        }
+
+        public string GetHabit()
+        {
+            List<string> habitsAndBehaviors = new List<string>()
+            {
+                "Always cleans their gear",
+                "Talks with their hands",
+                "Constantly taps their foot",
+                "Twirls objects when thinking",
+                "Writes everything down",
+                "Double-checks all locks",
+                "Mutters under their breath",
+                "Paces when nervous",
+                "Organizes items by size",
+                "Keeps pockets full of snacks",
+                "Checks the time frequently",
+                "Randomly hums tunes",
+                "Talks to machines",
+                "Adjusts their clothing often",
+                "Over-explains things",
+                "Interrupts often",
+                "Finishes other people's sentences",
+                "Avoids eye contact",
+                "Stares too long at people",
+                "Cracks knuckles regularly",
+                "Keeps a strict daily routine",
+                "Laughs at inappropriate times",
+                "Speaks very slowly",
+                "Speaks very quickly",
+                "Collects odd trinkets",
+                "Always early to meetings",
+                "Always late to meetings",
+                "Fidgets with tools",
+                "Sleeps with lights on",
+                "Eats extremely fast",
+                "Eats extremely slow",
+                "Never sits still",
+                "Overuses sarcastic comments",
+                "Asks too many questions",
+                "Repeats themselves",
+                "Talks to themselves",
+                "Sighs loudly",
+                "Quotes ancient proverbs",
+                "Tends to wander off",
+                "Stands too close to others",
+                "Keeps detailed logs",
+                "Wakes up before dawn",
+                "Sleeps in whenever possible",
+                "Hates making decisions",
+                "Rarely speaks unless necessary",
+                "Chews on their lip",
+                "Taps objects absentmindedly",
+                "Always cleans up after others",
+                "Leaves a mess wherever they go",
+                "Listens to music constantly",
+                "Refuses to throw anything away",
+                "Overpacks for every mission",
+                "Hardly brings anything",
+                "Worries about equipment constantly",
+                "Likes to rearrange furniture",
+                "Talks about past adventures often",
+                "Repeats jokes",
+                "Reads manuals for fun",
+                "Fixes things that aren’t broken",
+                "Obsessively checks vitals",
+                "Polishes weapons daily",
+                "Has a strict bedtime",
+                "Never sleeps enough",
+                "Eats the same meal every day",
+                "Tries a new food every chance",
+                "Always volunteers first",
+                "Avoids volunteering",
+                "Writes poetry secretly",
+                "Keeps souvenirs from missions",
+                "Refuses to sit with their back to a door",
+                "Always chooses the window seat",
+                "Checks behind themselves frequently",
+                "Whistles while working",
+                "Collects shiny objects",
+                "Talks overly politely",
+                "Nods constantly while listening",
+                "Tilts head when confused",
+                "Giggles nervously",
+                "Always wants to negotiate",
+                "Avoids confrontation at all costs",
+                "Overreacts to small noises",
+                "Keeps plants and tends them carefully",
+                "Gambles whenever possible",
+                "Carries a good-luck charm",
+                "Has a ritual before missions",
+                "Refuses to walk under ladders",
+                "Keeps secrets easily",
+                "Shares too much personal info",
+                "Hums the same tune repeatedly",
+                "Reads every label and warning",
+                "Walks very quietly",
+                "Walks extremely loudly",
+                "Always optimistic about outcomes",
+                "Always expects the worst",
+                "Gives long speeches",
+                "Stretches constantly",
+                "Uses humor to defuse tension",
+                "Talks big but rarely follows through",
+                "Keeps everything meticulously organized"
+            };
+
+            Random random = new Random();
+
+            return habitsAndBehaviors[random.Next(habitsAndBehaviors.Count)];
+        }
+
+        public string GetFears()
+        {
+            Random random = new Random();
+            List<string> fearsAndPhobias = new List<string>()
+            {
+                "Fear of heights",
+                "Fear of deep water",
+                "Fear of drowning",
+                "Fear of small spaces",
+                "Fear of the dark",
+                "Fear of spiders",
+                "Fear of insects",
+                "Fear of snakes",
+                "Fear of flying",
+                "Fear of enclosed spaces",
+                "Fear of open spaces",
+                "Fear of loud noises",
+                "Fear of ghosts",
+                "Fear of aliens",
+                "Fear of being watched",
+                "Fear of failure",
+                "Fear of being alone",
+                "Fear of large crowds",
+                "Fear of betrayal",
+                "Fear of pain",
+                "Fear of fire",
+                "Fear of robots",
+                "Fear of AI",
+                "Fear of spacewalks",
+                "Fear of zero gravity",
+                "Fear of losing control",
+                "Fear of death",
+                "Fear of injury",
+                "Fear of germs",
+                "Fear of medical procedures",
+                "Fear of needles",
+                "Fear of blood",
+                "Fear of suffocation",
+                "Fear of being forgotten",
+                "Fear of authority",
+                "Fear of confrontation",
+                "Fear of commitment",
+                "Fear of abandonment",
+                "Fear of intimacy",
+                "Fear of failure in combat",
+                "Fear of navigation errors",
+                "Fear of system malfunctions",
+                "Fear of explosions",
+                "Fear of toxic environments",
+                "Fear of extreme temperatures",
+                "Fear of poison",
+                "Fear of losing oxygen",
+                "Fear of void exposure",
+                "Fear of meteor storms",
+                "Fear of confined crew quarters",
+                "Fear of strange planets",
+                "Fear of unknown species",
+                "Fear of darkness in space",
+                "Fear of malfunctioning equipment",
+                "Fear of hostile factions",
+                "Fear of mind control",
+                "Fear of hallucinations",
+                "Fear of isolation",
+                "Fear of panic attacks",
+                "Fear of being judged",
+                "Fear of speaking publicly",
+                "Fear of being misunderstood",
+                "Fear of getting lost",
+                "Fear of losing memory",
+                "Fear of time loops",
+                "Fear of mutiny",
+                "Fear of sabotage",
+                "Fear of contaminated food",
+                "Fear of mold or fungi",
+                "Fear of magnetic storms",
+                "Fear of deep-space anomalies",
+                "Fear of loud alarms",
+                "Fear of emergency situations",
+                "Fear of unpredictable behavior",
+                "Fear of betrayal by allies",
+                "Fear of being trapped under rubble",
+                "Fear of heights inside large structures",
+                "Fear of teleportation",
+                "Fear of clonings gone wrong",
+                "Fear of seeing dead bodies",
+                "Fear of being hunted",
+                "Fear of losing teammates",
+                "Fear of failing missions",
+                "Fear of rapid decompression",
+                "Fear of waking up restrained",
+                "Fear of disease outbreaks",
+                "Fear of radiation",
+                "Fear of unstable terrain",
+                "Fear of darkness in caves",
+                "Fear of giant creatures",
+                "Fear of unknown artifacts",
+                "Fear of cosmic storms",
+                "Fear of malfunctioning AI companions",
+                "Fear of contaminated planets",
+                "Fear of sudden explosions",
+                "Fear of being buried alive",
+                "Fear of uncharted space",
+                "Fear of silent environments"
+            };
+
+            return fearsAndPhobias[random.Next(fearsAndPhobias.Count)];
+        }
+
+        public string GetGoals()
+        {
+            Random random = new Random();
+
+            List<string> motivationsAndGoals = new List<string>()
+            {
+                "Seeking wealth",
+                "Seeking fame",
+                "Seeking revenge",
+                "Searching for lost family",
+                "Searching for a missing friend",
+                "Trying to clear their name",
+                "Hoping to escape their past",
+                "Seeking knowledge",
+                "Proving themselves worthy",
+                "Seeking justice",
+                "Protecting someone important",
+                "Protecting their homeworld",
+                "Trying to rebuild their life",
+                "Looking for a new beginning",
+                "Trying to atone for past mistakes",
+                "Desiring power",
+                "Desiring recognition",
+                "Ambition to lead a faction",
+                "Trying to uncover a conspiracy",
+                "Trying to stop a war",
+                "Trying to prevent disaster",
+                "Collecting rare artifacts",
+                "Mapping unexplored regions",
+                "Advancing scientific understanding",
+                "Becoming the best in their field",
+                "Earning the respect of peers",
+                "Trying to save a dying planet",
+                "Finding a cure for a disease",
+                "Trying to become wealthy enough to retire",
+                "Trying to protect the frontier",
+                "Finding purpose in life",
+                "Finding inner peace",
+                "Escaping a bounty on their head",
+                "Avoiding dangerous enemies",
+                "Fulfilling a promise",
+                "Honoring a fallen comrade",
+                "Fighting for a cause they believe in",
+                "Uncovering ancient secrets",
+                "Learning forbidden knowledge",
+                "Finding spiritual enlightenment",
+                "Securing enough resources for their colony",
+                "Creating a new invention",
+                "Proving a scientific theory",
+                "Becoming a legendary explorer",
+                "Reuniting with their estranged family",
+                "Protecting the weak",
+                "Saving their mentor",
+                "Finding redemption",
+                "Fleeing a prophecy",
+                "Trying to fulfill a prophecy",
+                "Restoring their family’s honor",
+                "Breaking free from a controlling faction",
+                "Building a successful business",
+                "Creating a safe haven for others",
+                "Understanding the universe",
+                "Learning the truth about their origins",
+                "Becoming a master pilot",
+                "Obtaining a rare or forbidden item",
+                "Ending corruption in a faction",
+                "Saving someone kidnapped",
+                "Preventing the spread of a dangerous technology",
+                "Building a powerful alliance",
+                "Getting revenge on a rival faction",
+                "Becoming a top strategist",
+                "Completing a lifelong dream",
+                "Escaping a collapsing star system",
+                "Seeking artistic inspiration",
+                "Trying to rescue survivors of a disaster",
+                "Aiming to be self-sufficient",
+                "Stopping an interstellar crime ring",
+                "Recovering stolen property",
+                "Trying to win a major competition",
+                "Achieving political influence",
+                "Protecting their crew",
+                "Becoming a mentor to others",
+                "Learning a rare skill",
+                "Recovering from trauma",
+                "Finding a safe new homeworld",
+                "Studying alien cultures",
+                "Teaching others what they know",
+                "Gathering intelligence for a faction",
+                "Stopping environmental destruction",
+                "Uncovering corruption in leadership",
+                "Seeking adventure",
+                "Chasing a legendary creature",
+                "Establishing a new colony",
+                "Reclaiming lost territory",
+                "Ending a feud",
+                "Building the perfect starship",
+                "Solving an ancient mystery",
+                "Breaking a powerful curse",
+                "Becoming a symbol of hope",
+                "Achieving ultimate freedom",
+                "Finding true love",
+                "Completing a mysterious mission",
+                "Finishing their life’s work",
+                "Leaving a lasting legacy"
+            };
+
+
+            return motivationsAndGoals[random.Next(motivationsAndGoals.Count)];
         }
 
         public string GetJob()

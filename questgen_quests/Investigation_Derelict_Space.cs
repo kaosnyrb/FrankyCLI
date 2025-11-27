@@ -130,8 +130,8 @@ namespace FrankyCLI.questgen_quests
 
             //Log Entry
             var booklogprompt =
-            "Generate a short log which is a first person account from the target.\r\n\r\n" +
-            "This log explains why the target is at the next location and how the crew of this ship met it's end.\r\n\r\n" +
+            "Generate a short data file which is a log stream from the target.\r\n\r\n" +
+            "This log explains why the target is at the next location\r\n\r\n" +
             "Keep it to two paragraphs under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             booklogprompt += "Location:" + nextQuest.QuestLocation + "\r\n";

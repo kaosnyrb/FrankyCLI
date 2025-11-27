@@ -10,12 +10,15 @@ using System.Xml.Linq;
 
 namespace FrankyCLI.questgen_quests
 {
-    internal class Templates_PlanetPCM
+    public class Templates_PlanetPCM : TemplateLib
     {
-        public static void AddTemplates(List<MissionTemplate> discovery, List<MissionTemplate> investiation, List<MissionTemplate>  showdown)
+        public Templates_PlanetPCM()
         {
+            DiscoveryTemplates = new List<MissionTemplate>();
+            InvestigationTemplates = new List<MissionTemplate>();
+            ShowdownTemplates = new List<MissionTemplate>();
             //-------------------------------  INVESTIGATION ------------------------------------------
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Small Marker",
                 Description = "Find info about the target on a planet POI",
@@ -24,7 +27,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Captive",
                 Description = "Find info about the target on a planet POI",
@@ -33,7 +36,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Large Marker",
                 Description = "Find info about the target on a planet POI",
@@ -42,7 +45,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Important Marker Breathable",
                 Description = "Find info about the target on a planet POI",
@@ -53,7 +56,7 @@ namespace FrankyCLI.questgen_quests
             });
 
             //-------------------------------  SHOWDOWN ------------------------------------------
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty",
                 Description = "Kill the target on a planet with a breathable atmosphere",
@@ -62,7 +65,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty",
                 Description = "Kill the target on a planet with a poor atmosphere",
@@ -71,7 +74,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Breathable Dungeon",
                 Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
@@ -80,7 +83,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Industrial Dungeon",
                 Description = "Kill the target on a planet with a Dungeon Industrial",
@@ -89,7 +92,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Military Dungeon",
                 Description = "Kill the target on a planet with a Dungeon Military",
@@ -98,16 +101,16 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
-            { 
-                    Name = "Planet side Bounty - Mining Dungeon",
-                    Description = "Kill the target on a planet with a Dungeon Mining",
-                    Location = "A Mining Operation",
-                    formid = 0x000841,
-                    needSpacesuit = true,
-                    outlawQuest = new Showdown_BountyPlanet()
+            ShowdownTemplates.Add(new MissionTemplate()
+            {
+                Name = "Planet side Bounty - Mining Dungeon",
+                Description = "Kill the target on a planet with a Dungeon Mining",
+                Location = "A Mining Operation",
+                formid = 0x000841,
+                needSpacesuit = true,
+                outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Breathable Dungeon boss marker",
                 Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
@@ -116,7 +119,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            showdown.Add(new MissionTemplate()
+            ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Industrial Dungeon",
                 Description = "Kill the target on a planet with a Dungeon Industrial",
@@ -125,7 +128,7 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-
         }
+
     }
 }

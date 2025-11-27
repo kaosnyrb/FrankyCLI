@@ -28,9 +28,9 @@ namespace FrankyCLI.questgen_tools
         {
 
             MissionLib lib = new MissionLib();
-            Console.WriteLine("ShowdownTemplates: " + lib.ShowdownTemplates.Count);
-            Console.WriteLine("InvestigationTemplates: " + lib.InvestigationTemplates.Count);
-            Console.WriteLine("DiscoveryTemplates: " + lib.DiscoveryTemplates.Count);
+            //Console.WriteLine("ShowdownTemplates: " + lib.ShowdownTemplates.Count);
+            //Console.WriteLine("InvestigationTemplates: " + lib.InvestigationTemplates.Count);
+            //Console.WriteLine("DiscoveryTemplates: " + lib.DiscoveryTemplates.Count);
 
 
             var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");

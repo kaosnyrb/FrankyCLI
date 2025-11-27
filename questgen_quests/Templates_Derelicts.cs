@@ -7,13 +7,16 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_quests
 {
-    internal class Templates_Derelicts
+    public class Templates_Derelicts : TemplateLib
     {
-        public static void AddTemplates(List<MissionTemplate> discovery, List<MissionTemplate> investiation, List<MissionTemplate> showdown)
+        public Templates_Derelicts()
         {
+            DiscoveryTemplates = new List<MissionTemplate>();
+            InvestigationTemplates = new List<MissionTemplate>();
+            ShowdownTemplates = new List<MissionTemplate>();
             //-------------------------------  INVESTIGATION ------------------------------------------
             //UC Navy
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC Navy Cargo",
                 Location = "A UC Navy Cargo Ship",
@@ -24,7 +27,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "UC Navy",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC Navy Ship A",
                 Location = "A UC Navy Light Scout Ship",
@@ -35,7 +38,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "UC Navy",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC Navy Ship B",
                 Location = "A UC Navy Large Combat Ship",
@@ -48,7 +51,7 @@ namespace FrankyCLI.questgen_quests
             });
 
             //UC Vanguard
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC Vanguard Ship A",
                 Location = "A UC Vanguard Light Scout Ship",
@@ -59,7 +62,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "UC Vanguard",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC Vanguard Ship B",
                 Location = "A UC Vanguard Large Combat Ship",
@@ -72,7 +75,7 @@ namespace FrankyCLI.questgen_quests
             });
 
             //UC SysDef
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC SysDef Ship A",
                 Location = "A UC SysDef Light Tactical Ship",
@@ -83,7 +86,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "UC SysDef",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - UC SysDef Ship B",
                 Location = "A UC SysDef Large Combat Ship",
@@ -96,7 +99,7 @@ namespace FrankyCLI.questgen_quests
             });
             //Freestar Security
 
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Freestar Security Cargo",
                 Location = "A Freestar Security Cargo Ship",
@@ -107,7 +110,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Freestar Security",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Freestar Security Ship A",
                 Location = "A Freestar Security Light Patrol Ship",
@@ -118,7 +121,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Freestar Security",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Freestar Security Ship B",
                 Location = "A Freestar Security Large Combat Ship",
@@ -131,7 +134,7 @@ namespace FrankyCLI.questgen_quests
             });
 
             // Trade Authority
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Trade Authority Cargo",
                 Location = "A Trade Authority Cargo Ship",
@@ -142,7 +145,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Trade Authority",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Trade Authority Ship A",
                 Location = "A Trade Authority Fast Courier Ship",
@@ -153,7 +156,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Trade Authority",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Trade Authority Ship B",
                 Location = "A Trade Authority Large Support Ship",
@@ -166,7 +169,7 @@ namespace FrankyCLI.questgen_quests
             });
 
             // Galbank
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Galbank Cargo",
                 Location = "A Galbank Vault Ship",
@@ -177,7 +180,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Galbank",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Galbank Ship A",
                 Location = "A Galbank Contract Transport Ship",
@@ -188,7 +191,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Galbank",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Galbank Ship B",
                 Location = "A Galbank Large Investment Protection Ship",
@@ -201,7 +204,7 @@ namespace FrankyCLI.questgen_quests
             });
 
             //Trackers Alliance
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Trackers Alliance Ship A",
                 Location = "A Trackers Alliance Bounty Tracker Ship",
@@ -212,7 +215,7 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Trackers Alliance",
                 outlawQuest = new Investigation_Derelict_Space()
             });
-            investiation.Add(new MissionTemplate()
+            InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Derelict - Trackers Alliance Ship B",
                 Location = "A Trackers Alliance Bounty Hunter Ship",
