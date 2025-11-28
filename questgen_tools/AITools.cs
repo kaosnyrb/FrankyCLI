@@ -13,6 +13,9 @@ namespace FrankyCLI.questgen_tools
         private static readonly ChatClient _chatClient;
         private static readonly List<ChatMessage> _history = new();
 
+        // We can turn off the chatgpt calls for fast generation.
+        public static bool AIMODE = true;
+
         static AITools()
         {
             var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
@@ -78,7 +81,10 @@ namespace FrankyCLI.questgen_tools
         public static string RunPrompt(string prompt)
         {
             //Dumb switch for fast testing
-            //return Guid.NewGuid().ToString().Substring(0, 8);
+            if (!AIMODE)
+            {
+                return Guid.NewGuid().ToString().Substring(0, 8);
+            }
 
             // 1. Add user message to history
             _history.Add(new UserChatMessage(prompt));

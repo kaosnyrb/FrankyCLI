@@ -8,6 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
 
 namespace FrankyCLI.questgen_quests
 {
@@ -111,6 +115,24 @@ namespace FrankyCLI.questgen_quests
 
             myMod.Activators.Add(newActivator);
 
+            //Find a target marker to use
+            List<IMajorRecord> rec = new List<IMajorRecord>();
+            foreach (var record in myMod.EnumerateMajorRecords())
+            {
+                if (record.EditorID != null)
+                {
+                    if (record.EditorID.Contains("doout_wantedposter_" + missionTemplate.parameter1))
+                    {
+                        rec.Add(record);
+                    }
+                }
+            }
+            //We could ask the AI here which location would be best.
+            Random rand = new Random();
+            var markerused = rec[rand.Next(rec.Count)];
+
+            markerused.EditorID = "placedposter_" + questID;
+            ((PlacedObject)markerused).Base = newActivator.ToLink<IPlaceableObjectGetter>();
             return null;
         }
     }

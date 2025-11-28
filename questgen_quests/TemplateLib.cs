@@ -13,14 +13,12 @@ namespace FrankyCLI.questgen_quests
         public List<MissionTemplate> InvestigationTemplates;
         public List<MissionTemplate> ShowdownTemplates;
 
-        public bool AIMODE = true;
-
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
             Random random = new Random();
 
 
-            if (AIMODE)
+            if (AITools.AIMODE)
             {
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
@@ -64,7 +62,7 @@ namespace FrankyCLI.questgen_quests
         {
             if (InvestigationTemplates.Count == 0) return null;
 
-            if(AIMODE)
+            if(AITools.AIMODE)
             {
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
@@ -111,7 +109,7 @@ namespace FrankyCLI.questgen_quests
             if (DiscoveryTemplates.Count == 0) return null;
             Random random = new Random();
 
-            if (AIMODE)
+            if (AITools.AIMODE)
             {
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
