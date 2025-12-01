@@ -86,17 +86,23 @@ namespace FrankyCLI
             newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
 
             //set quest alias to self in scripts
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
+            // Set the scripts
             var questprops = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < questprops.Count; i++)
             {
                 if (questprops[i].Name == "DeathItems")
-                {                    
+                {
                     ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>();
                 }
+                if (questprops[i].Name == "BountyTarget")
+                {
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                }
             }
+
+            //
 
 
             //Set the NPC to be the quest target
