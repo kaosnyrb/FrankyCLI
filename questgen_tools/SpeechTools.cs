@@ -35,6 +35,8 @@ namespace FrankyCLI.questgen_tools
 
             //Fetch the Mod Quest
             var currentquest = gen_quest.myMod.Quests[new FormKey(gen_quest.myMod.ModKey, QuestID)];
+
+
             //Fetch the Sample Sound Quest
             var quest = gen_quest._StarfieldMod.Quests[new FormKey(gen_quest.StarfieldModKey, 0x21A1CA)];
 
@@ -42,7 +44,6 @@ namespace FrankyCLI.questgen_tools
 
             var clonescene = quest.Scenes[0].DeepCopy();
 
-            DialogResponse dialogResponse = new DialogResponse(){};
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             var topic = new DialogTopic(gen_quest.myMod)
@@ -51,18 +52,18 @@ namespace FrankyCLI.questgen_tools
                 Priority = clonetopic.Priority,
                 SubtypeName = clonetopic.SubtypeName,
                 Subtype = clonetopic.Subtype,
-                TopicInfoList = clonetopic.TopicInfoList,
+                TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>()
+                {
+
+                },
                 
             };
             topic.TopicInfoList.Clear();
 
 
-            var resposne = new DialogResponse()
-            {
-                Text = text
-            };
+            DialogResponse dialogResponse = new DialogResponse() { };
 
-            //topic.TopicInfoList.Add(resposne);
+            topic.TopicInfoList.Add((IFormLinkGetter<IDialogResponsesGetter>)dialogResponse);
 
             //currentquest.DialogTopics.Add(topic);
              

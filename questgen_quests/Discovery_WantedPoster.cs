@@ -128,8 +128,28 @@ namespace FrankyCLI.questgen_quests
                 }
             }
             //We could ask the AI here which location would be best.
-            Random rand = new Random();
-            var markerused = rec[rand.Next(rec.Count)];
+
+            string question = "Choose one of these as the location of the wanted poster for this target. Return just the number of the item that makes the most sense story wise.\r\n";
+            for(int i =0;i<rec.Count;i++)
+            {
+                question += i + " : " + rec[i].EditorID + " \r\n";
+            }
+            var result = AITools.RunPrompt(question);
+            int index = 0;
+            IMajorRecord markerused;
+            try
+            {
+                int.TryParse(result, out index);
+                markerused = rec[index];
+            }
+            catch
+            {
+                Random rand = new Random();
+                markerused = rec[rand.Next(rec.Count)];
+
+            }
+
+            Console.WriteLine("Using Marker: " + markerused.EditorID);
 
             markerused.EditorID = "placedposter_" + questID;
             ((PlacedObject)markerused).Base = newActivator.ToLink<IPlaceableObjectGetter>();

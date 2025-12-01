@@ -18,28 +18,6 @@ namespace FrankyCLI.questgen_quests
             //-------------------------------  INVESTIGATION ------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "City Activator - Cydonia",
-                Description = "Find info about the target in Cydonia",
-                Location = "Neon",
-                formid = 0x0012C0,
-                parameterformid = 0x00015FF7,
-                needSpacesuit = false,
-                parameter1 = "cydonia",
-                outlawQuest = new Investigation_ActivatorCity()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "City Activator - Akila City",
-                Description = "Find info about the target in Akila City",
-                Location = "Akila City",
-                formid = 0x001379,
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akila",
-                outlawQuest = new Investigation_ActivatorCity()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
                 Name = "City Activator - Waggoner Farm",
                 Description = "Find info about the target in Waggoner Farm",
                 Location = "Waggoner Farm",
@@ -105,28 +83,6 @@ namespace FrankyCLI.questgen_quests
                 outlawQuest = new Investigation_ActivatorCity()
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
-            ShowdownTemplates.Add(new MissionTemplate()
-            {
-                Name = "City Bounty - Cydonia",
-                Description = "Kill the target at the mining city of Cydonia",
-                Location = "Cydonia is a colony on Mars in the Sol system. It is the most important mining settlement in United Colonies territory.",
-                formid = 0x000917,
-                needSpacesuit = true,
-                parameter1 = "cydonia",
-                parameterformid = 0x00015FF7,
-                outlawQuest = new Showdown_BountyCity()
-            });
-            ShowdownTemplates.Add(new MissionTemplate()
-            {
-                Name = "City Bounty - Akila",
-                Description = "Kill the target at Akila",
-                Location = "Akila City",
-                formid = 0x0012BE,
-                needSpacesuit = false,
-                parameter1 = "akila",
-                parameterformid = 0x00010DFB,
-                outlawQuest = new Showdown_BountyCity()
-            });
             ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "City Bounty - Waggoner Farm",

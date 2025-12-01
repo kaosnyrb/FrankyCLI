@@ -42,11 +42,13 @@ namespace FrankyCLI.questgen_tools
         {
 
             TemplateLibs.Add(new Templates_Dataslate());
-            TemplateLibs.Add(new Templates_Cities());
-            TemplateLibs.Add(new Templates_PlanetPCM());
-            TemplateLibs.Add(new Templates_SpaceActivator());
-            TemplateLibs.Add(new Templates_Derelicts());
-            TemplateLibs.Add(new Templates_Cities_Neon());
+//            TemplateLibs.Add(new Templates_Cities());
+//            TemplateLibs.Add(new Templates_PlanetPCM());
+            //TemplateLibs.Add(new Templates_SpaceActivator());
+//            TemplateLibs.Add(new Templates_Derelicts());
+//            TemplateLibs.Add(new Templates_Cities_Neon());
+//            TemplateLibs.Add(new Templates_Cities_Cydonia());
+            TemplateLibs.Add(new Templates_Cities_Akila());
 
             MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
             MergedLib.InvestigationTemplates = new List<MissionTemplate>();
