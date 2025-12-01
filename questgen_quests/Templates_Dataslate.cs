@@ -15,7 +15,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
 
-            /*
+            
             DiscoveryTemplates.Add(
                 new MissionTemplate()
                 {
@@ -25,8 +25,8 @@ namespace FrankyCLI.questgen_quests
                     formid = 0,
                     needSpacesuit = true,
                     outlawQuest = new Discovery_Dataslate()
-                });*/
-
+                });
+            /*
             DiscoveryTemplates.Add(
                 new MissionTemplate()
                 {
@@ -37,7 +37,7 @@ namespace FrankyCLI.questgen_quests
                     needSpacesuit = true,
                     outlawQuest = new Discovery_WantedPoster()
                 });
-
+            */
         }
     }
 }

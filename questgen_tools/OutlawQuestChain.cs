@@ -33,7 +33,7 @@ namespace FrankyCLI.questgen_tools
             //Console.WriteLine("DiscoveryTemplates: " + lib.DiscoveryTemplates.Count);
 
 
-            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
+            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("Planet side Bounty - Deserted UC Listening Post");
 
             //What if we tell the AI  all the  steps first?
 

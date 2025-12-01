@@ -42,12 +42,12 @@ namespace FrankyCLI.questgen_tools
         {
 
             TemplateLibs.Add(new Templates_Dataslate());
-//            TemplateLibs.Add(new Templates_Cities());
-//            TemplateLibs.Add(new Templates_PlanetPCM());
-            //TemplateLibs.Add(new Templates_SpaceActivator());
-//            TemplateLibs.Add(new Templates_Derelicts());
-//            TemplateLibs.Add(new Templates_Cities_Neon());
-//            TemplateLibs.Add(new Templates_Cities_Cydonia());
+            TemplateLibs.Add(new Templates_Cities());
+            TemplateLibs.Add(new Templates_PlanetPCM());
+            TemplateLibs.Add(new Templates_SpaceActivator());
+            TemplateLibs.Add(new Templates_Derelicts());
+            TemplateLibs.Add(new Templates_Cities_Neon());
+            TemplateLibs.Add(new Templates_Cities_Cydonia());
             TemplateLibs.Add(new Templates_Cities_Akila());
 
             MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
@@ -73,13 +73,12 @@ namespace FrankyCLI.questgen_tools
 
         public MissionTemplate GetShowdownMissionTemplate(string missionName)
         {
-
-            return MergedLib.GetShowdownMissionTemplate("");
+            return MergedLib.GetShowdownMissionTemplate(missionName);
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string missionName)
         {
-            return MergedLib.GetInvestigationMissionTemplate("");
+            return MergedLib.GetInvestigationMissionTemplate(missionName);
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate()

@@ -21,7 +21,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Small Marker",
-                Description = "Find info about the target on a planet POI",
+                Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = 0x000835,
                 needSpacesuit = true,
@@ -30,7 +30,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Captive",
-                Description = "Find info about the target on a planet POI",
+                Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = 0x000907,
                 needSpacesuit = true,
@@ -39,7 +39,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Large Marker",
-                Description = "Find info about the target on a planet POI",
+                Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = 0x000908,
                 needSpacesuit = true,
@@ -48,7 +48,7 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Activator Important Marker Breathable",
-                Description = "Find info about the target on a planet POI with a breathable atmosphere",
+                Description = "Find info about the target on a nearby planet at a small facility with a breathable atmosphere",
                 Location = "A remote location",
                 formid = 0x000909,
                 needSpacesuit = false,
@@ -77,7 +77,7 @@ namespace FrankyCLI.questgen_quests
             ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Breathable Dungeon",
-                Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
+                Description = "Kill the target on a planet with a breathable atmosphere at a protected Dungeon",
                 Location = "A Occupied Complex",
                 formid = 0x000831,
                 needSpacesuit = false,
@@ -86,7 +86,7 @@ namespace FrankyCLI.questgen_quests
             ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Industrial Dungeon",
-                Description = "Kill the target on a planet with a Dungeon Industrial",
+                Description = "Kill the target on a planet with a breathable atmosphere at a protected Industrial themed Dungeon",
                 Location = "A Occupied Industrial Complex",
                 formid = 0x000834,
                 needSpacesuit = true,
@@ -95,7 +95,7 @@ namespace FrankyCLI.questgen_quests
             ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Military Dungeon",
-                Description = "Kill the target on a planet with a Dungeon Military",
+                Description = "Kill the target on a planet with a breathable atmosphere at a protected Military themed Dungeon",
                 Location = "A Old Military Base",
                 formid = 0x000840,
                 needSpacesuit = true,
@@ -104,7 +104,7 @@ namespace FrankyCLI.questgen_quests
             ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Mining Dungeon",
-                Description = "Kill the target on a planet with a Dungeon Mining",
+                Description = "Kill the target on a planet with a breathable atmosphere at a protected Mining themed Dungeon",
                 Location = "A Mining Operation",
                 formid = 0x000841,
                 needSpacesuit = true,
@@ -113,7 +113,7 @@ namespace FrankyCLI.questgen_quests
             ShowdownTemplates.Add(new MissionTemplate()
             {
                 Name = "Planet side Bounty - Breathable Dungeon boss marker",
-                Description = "Kill the target on a planet with a breathable atmosphere Dungeon",
+                Description = "Kill the target on a planet with a breathable atmosphere at a protected Dungeon",
                 Location = "A Occupied Base where they are meeting with a boss",
                 formid = 0x000916,
                 needSpacesuit = false,
@@ -121,13 +121,14 @@ namespace FrankyCLI.questgen_quests
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
-                Name = "Planet side Bounty - Industrial Dungeon",
-                Description = "Kill the target on a planet with a Dungeon Industrial",
-                Location = "A Occupied Industrial Complex",
-                formid = 0x000834,
+                Name = "Planet side Bounty - Deserted UC Listening Post",
+                Description = "Kill the target who is hiding out at a Deserted UC Listening Post",
+                Location = "Deserted UC Listening Post",
+                formid = 0x000811,
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet()
             });
+
         }
 
     }

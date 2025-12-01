@@ -17,6 +17,10 @@ namespace FrankyCLI.questgen_quests
         {
             Random random = new Random();
 
+            if (mission.Length > 0) {
+                return ShowdownTemplates.Where(x => x.Name == mission).Single();
+            }
+
 
             if (AITools.AIMODE)
             {
