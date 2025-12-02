@@ -102,14 +102,19 @@ namespace FrankyCLI.questgen_quests
             newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
 
             newQuest.Objectives[0].DisplayText = "Recover the " + datasource + " from the " + shipname;
-            //set quest alias to self in scripts
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+            
+            
+            //Set the mapmarker alias
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
-            //Set the gang members
+            //Set the script values
             var questproperties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < questproperties.Count; i++)
             {
+                if (questproperties[i].Name == "BountyTarget")
+                {
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                }
                 if (questproperties[i].Name == "GangMembers")
                 {
                     ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = ShipTools.GetGangList(factionID);

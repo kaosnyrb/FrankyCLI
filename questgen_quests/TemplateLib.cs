@@ -65,8 +65,13 @@ namespace FrankyCLI.questgen_quests
         public MissionTemplate GetInvestigationMissionTemplate(string mission)
         {
             if (InvestigationTemplates.Count == 0) return null;
+            
+            if (mission.Length > 0)
+            {
+                return InvestigationTemplates.Where(x => x.Name == mission).Single();
+            }
 
-            if(AITools.AIMODE)
+            if (AITools.AIMODE)
             {
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";

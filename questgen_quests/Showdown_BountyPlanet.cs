@@ -102,7 +102,11 @@ namespace FrankyCLI
                 }
             }
 
-            //
+            // We set the PCM keyword to be the param. We've build a tree with a 1 to 1 mapping of keywords and POIs
+            if (missionTemplate.parameterformid != 0)
+            {                
+                ((Mutagen.Bethesda.Starfield.QuestLocationAlias)newQuest.Aliases[0]).ALPS.PcmTypeKeyword = myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>();
+            }
 
 
             //Set the NPC to be the quest target

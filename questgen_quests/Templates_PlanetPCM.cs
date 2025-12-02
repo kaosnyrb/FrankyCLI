@@ -119,15 +119,6 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet()
             });
-            ShowdownTemplates.Add(new MissionTemplate()
-            {
-                Name = "Planet side Bounty - Deserted UC Listening Post",
-                Description = "Kill the target who is hiding out at a Deserted UC Listening Post",
-                Location = "Deserted UC Listening Post",
-                formid = 0x000811,
-                needSpacesuit = true,
-                outlawQuest = new Showdown_BountyPlanet()
-            });
 
         }
 
