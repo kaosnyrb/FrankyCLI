@@ -104,13 +104,16 @@ namespace FrankyCLI.questgen_quests
 
             newQuest.Objectives[0].DisplayText = "Recover the " + datasource + " from the " + shipname + " cargo hold";
             //set quest alias to self in scripts
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
             //Set the gang members
             var questproperties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < questproperties.Count; i++)
             {
+                if (questproperties[i].Name == "BountyTarget")
+                {
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                }
                 if (questproperties[i].Name == "GangMembers")
                 {
                     ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = ShipTools.GetGangList(factionID);

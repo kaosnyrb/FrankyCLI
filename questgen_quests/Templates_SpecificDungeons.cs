@@ -13,9 +13,6 @@ namespace FrankyCLI.questgen_quests
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
-            //-------------------------------  INVESTIGATION ------------------------------------------
-
-            //-------------------------------  SHOWDOWN ------------------------------------------
 
             //Based on the keywords create a showdown for each.
             foreach (var PCM in gen_quest.myMod.Keywords)
@@ -23,6 +20,20 @@ namespace FrankyCLI.questgen_quests
                 if(PCM.EditorID.Contains("duout_PCM_Request_"))
                 {
                     string PCMName = PCM.Name;
+
+                    //-------------------------------  INVESTIGATION ------------------------------------------
+                    InvestigationTemplates.Add(new MissionTemplate()
+                    {
+                        Name = "Planet side Activator - " + PCMName,
+                        Description = "Find a cruical lead to the target at a " + PCMName,
+                        Location = PCMName,
+                        formid = 0x0008B9,
+                        parameterformid = PCM.FormKey.ID,
+                        needSpacesuit = true,
+                        outlawQuest = new Investigation_ActivatorSetDungeon()
+                    });
+
+                    //-------------------------------  SHOWDOWN ------------------------------------------
                     ShowdownTemplates.Add(new MissionTemplate()
                     {
                         Name = "Planet side Bounty - " + PCMName,

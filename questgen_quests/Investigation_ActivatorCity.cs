@@ -103,8 +103,17 @@ namespace FrankyCLI
             newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
 
             //set quest alias to self in scripts
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+
+            //Set the enemy gang to the new gang
+            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
+            for (int i = 0; i < properties.Count; i++)
+            {
+                if (properties[i].Name == "BountyTarget")
+                {
+                    ((ScriptObjectProperty)properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                }
+            }
 
             //Find a target marker to use
             List<IMajorRecord> rec = new List<IMajorRecord>();
