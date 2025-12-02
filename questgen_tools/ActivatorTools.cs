@@ -24,6 +24,7 @@ namespace FrankyCLI.questgen_tools
 
         public static ActivatorType GetRandomGroundType()
         {
+            //We duplicate the models here but the different names give flavour
             List<ActivatorType> activatorTypes = new List<ActivatorType>()
             {
                 new ActivatorType(){
@@ -238,6 +239,348 @@ namespace FrankyCLI.questgen_tools
                     Name = "Box of Scanned Reports",
                     Model = "setdressing\\crates\\cardboardboxes\\cardboardbox01.nif"
                 },
+                new ActivatorType(){
+                    Name = "Fertilizer Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Agricultural Supply Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Nutrient Storage Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Soil Additive Container",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Irrigation Mix Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Processed Compost Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Agrichemical Storage Unit",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Farm Stock Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Soil Treatment Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Crop Booster Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Stored Nutrient Cylinder",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Industrial Waste Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Hazardous Disposal Barrel",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Chemical Runoff Container",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Toxic Storage Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Corrosive Material Barrel",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Discarded Solvent Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Contaminant Containment Barrel",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Research Waste Cylinder",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Industrial Sludge Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Biohazard Disposal Unit",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illicit Artifact Cache",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Smuggled Relic Crate",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Forbidden Cultural Items",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unregistered Historical Goods",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Confiscated Museum Pieces",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Underground Auction Stock",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Stolen Heritage Artifacts",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illegally Excavated Relics",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Shadow Market Curios",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unlicensed Antiquity Bundle",
+                    Model = "setdressing\\contraband\\cb_blackmarketantiquities.nif"
+                },
+                new ActivatorType(){
+                    Name = "Mech Components",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illegal Servo Assemblies",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unregistered Actuator Parts",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Restricted Mech Chassis Segments",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Smuggled Hydraulic Bundles",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Confiscated Armor Plating",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unauthorized Power Couplings",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Stolen Robotics Parts",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Combat Frame Components",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Dismantled Mech Systems",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illicit Servo Motor Crate",
+                    Model = "setdressing\\contraband\\cb_mechcomponents.nif"
+                },
+                new ActivatorType(){
+                    Name = "Sentient AI Adapters",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Restricted Neural Drivers",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unlicensed Cognitive Modules",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illegal AI Uplink Ports",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Blacklisted Synapse Bridges",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Smuggled Thought Processors",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Prohibited AI Integration Kits",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Cognitive Relay Interfaces",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unregulated Sentience Nodes",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illegal Autonomy Firmware Packs",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "AI Consciousness Bridges",
+                    Model = "setdressing\\contraband\\cb_sentientaiadapters.nif"
+                },
+                new ActivatorType(){
+                    Name = "Stolen Artwork",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Confidential File Bundle",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Classified Data Folders",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Leaked Corporate Papers",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Sensitive Contract Records",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illicit Government Briefings",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unauthorized Personnel Files",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Compromising Intelligence Reports",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Black Market Blueprint Sheets",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Intercepted Communication Logs",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Restricted Archive Copies",
+                    Model = "setdressing\\contraband\\cb_stolenartwork.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illicit Biologic Samples",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unregulated Tissue Packs",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Black Market Biomatter",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Smuggled Medical Specimens",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unauthorized Donor Material",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Contraband Genetic Stock",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Bio-Specimen Transport Box",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illegal Transplant Supplies",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Prohibited Medical Cargo",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unregistered Biological Containers",
+                    Model = "setdressing\\contraband\\cb_unethicallyharvestedorgans.nif"
+                },
+                new ActivatorType(){
+                    Name = "Warfare Tech",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Experimental Combat Modules",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unauthorized Weapon Prototypes",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illicit Tactical Enhancers",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Smuggled Military Firmware",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Restricted Defense Hardware",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Blacklisted Combat Implants",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unregulated Weapon Systems",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Prototype Battlefield Devices",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Confiscated War Lab Materials",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Advanced Targeting Components",
+                    Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
+                }
+
+
                 //new ActivatorType(){
                 //    Name = "Encrypted Hackbook",
                 //    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
