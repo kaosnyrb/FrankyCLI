@@ -36,7 +36,7 @@ namespace FrankyCLI.questgen_tools
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
-        TemplateLib MergedLib = new TemplateLib();
+        public TemplateLib MergedLib = new TemplateLib();
 
         public MissionLib()
         {

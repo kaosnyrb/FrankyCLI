@@ -28,9 +28,9 @@ namespace FrankyCLI.questgen_tools
         {
 
             MissionLib lib = new MissionLib();
-            //Console.WriteLine("ShowdownTemplates: " + lib.ShowdownTemplates.Count);
-            //Console.WriteLine("InvestigationTemplates: " + lib.InvestigationTemplates.Count);
-            //Console.WriteLine("DiscoveryTemplates: " + lib.DiscoveryTemplates.Count);
+            Console.WriteLine("ShowdownTemplates: " + lib.MergedLib.ShowdownTemplates.Count);
+            Console.WriteLine("InvestigationTemplates: " + lib.MergedLib.InvestigationTemplates.Count);
+            Console.WriteLine("DiscoveryTemplates: " + lib.MergedLib.DiscoveryTemplates.Count);
 
 
             var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
@@ -56,7 +56,7 @@ namespace FrankyCLI.questgen_tools
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Planet side Activator - Planetside Fuel Depot");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
