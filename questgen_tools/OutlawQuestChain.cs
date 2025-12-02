@@ -35,9 +35,6 @@ namespace FrankyCLI.questgen_tools
 
             var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
 
-            //What if we tell the AI  all the  steps first?
-
-
             Random random = new Random();
             bool isfemale = false;
             if (random.Next(100) > 50)

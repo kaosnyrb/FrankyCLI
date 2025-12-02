@@ -34,8 +34,8 @@ namespace FrankyCLI.questgen_quests
                     });
                     InvestigationTemplates.Add(new MissionTemplate()
                     {
-                        Name = "Planet side Destory - " + PCMName,
-                        Description = "Destory an important object at a " + PCMName,
+                        Name = "Planet side Destroy - " + PCMName,
+                        Description = "Destroy an important object at a " + PCMName,
                         Location = PCMName,
                         formid = 0x0008B9,
                         parameterformid = PCM.FormKey.ID,
