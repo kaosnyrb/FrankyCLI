@@ -47,6 +47,7 @@ namespace FrankyCLI.questgen_tools
             TemplateLibs.Add(new Templates_SpecificDungeons());
 
             TemplateLibs.Add(new Templates_SpaceActivator());
+            TemplateLibs.Add(new Templates_SpaceInformant());
             TemplateLibs.Add(new Templates_Derelicts());
 
             TemplateLibs.Add(new Templates_Cities());

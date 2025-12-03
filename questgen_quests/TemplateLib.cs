@@ -76,7 +76,7 @@ namespace FrankyCLI.questgen_quests
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
                 ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
-                ItemPrompts += "Avoid using two of the same city locations in a row." + "\r\n";
+                ItemPrompts += "Do not choose a City stage if you already have." + "\r\n";
 
                 for (int i = 0; i < InvestigationTemplates.Count; i++)
                 {

@@ -21,6 +21,44 @@ namespace FrankyCLI.questgen_tools
             return wallmodel[random.Next(wallmodel.Count)];
         }
 
+        public static ActivatorType GetRandomSpaceType()
+        {
+            //We duplicate the models here but the different names give flavour
+            List<ActivatorType> activatorTypes = new List<ActivatorType>()
+            {
+                new ActivatorType(){
+                    Name = "Satellite Beacon",
+                    Model = "duout\\space_base.nif"
+                },
+                new ActivatorType(){
+                    Name = "Lost Cargo Crate",
+                    Model = "duout\\space_cargo.nif"
+                },
+                new ActivatorType(){
+                    Name = "Spaceship Engine Debris",
+                    Model = "duout\\space_eng.nif"
+                },
+               new ActivatorType(){
+                    Name = "Ejected Mech Wreckage",
+                    Model = "duout\\space_mech.nif"
+                },
+                new ActivatorType(){
+                    Name = "Remote Monitoring Beacon",
+                    Model = "duout\\space_monitoring.nif"
+                },
+                new ActivatorType(){
+                    Name = "Space Debris",
+                    Model = "duout\\space_pipes.nif"
+                },
+                new ActivatorType(){
+                    Name = "Weapon Test Site",
+                    Model = "duout\\space_weapontest.nif"
+                },
+            };
+            Random random = new Random();
+            return activatorTypes[random.Next(activatorTypes.Count)];
+
+        }
 
         public static ActivatorType GetRandomGroundType()
         {

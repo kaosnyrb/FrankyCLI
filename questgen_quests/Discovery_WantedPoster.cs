@@ -15,6 +15,10 @@ using Noggog;
 
 namespace FrankyCLI.questgen_quests
 {
+
+    // Originally each bounty could possibly have it's own wanted poster and they'd be placed in the world.
+    // I felt this was a bit limiting as for 20 quests there'd be 20 posters which is a lot to place
+    // So this was switched out so a single poster gave from the levelled book list.
     internal class Discovery_WantedPoster : IOutlawQuest
     {
         private Quest questform;

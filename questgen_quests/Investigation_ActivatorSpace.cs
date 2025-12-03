@@ -34,8 +34,12 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("Generating Activator Space Quest...");
             questloc = missionTemplate.Location;
 
+            var questActivator = ActivatorTools.GetRandomSpaceType();
+
             var datasourceprompt =
-                "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
+                "A three word or less name that contains a clue to the characters location.\r\n" +
+                 "The base type of the activator is." + questActivator.Name + "\r\n\r\n" +
+                "Only include the data source name in the response.\r\n\r\n" +
                 "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
@@ -146,6 +150,9 @@ namespace FrankyCLI.questgen_quests
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };
+
+            newActivator.Model.File = questActivator.Model;
+
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
             var activatorproperties = newActivator.VirtualMachineAdapter.Scripts[0].Properties;

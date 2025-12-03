@@ -18,170 +18,149 @@ namespace FrankyCLI.questgen_quests
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - unguarded",
-                Description = "Find info about the target from a beacon in orbit around a planet",
-                Location = "An old space beacon",
+                Description = "Find info about the target from a clue in orbit around a planet",
+                Location = "A clue hidden in orbit around a planet",
                 formid = 0x000900,
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace()
             });
+            //Crimson Fleet
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Crimson Fleet",
-                Description = "Find info about the target from a beacon in orbit around a planet guarded by a Crimson Fleet ship",
-                Location = "An old space beacon",
+                Name = "Space Activator  - Guarded by Crimson Fleet A Class",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Crimson Fleet ship",
+                Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
                 parameter1 = "Crimson Fleet",
+                parameterformid = ShipTools.GetAClassShip(),
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "Space Activator  - Guarded by Crimson Fleet B Class",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Crimson Fleet ship",
+                Location = "A clue hidden in orbit around a planet",
+                formid = 0x00090D,
+                parameter1 = "Crimson Fleet",
+                parameterformid = ShipTools.GetBClassShip(),
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "Space Activator  - Guarded by Crimson Fleet Cargo",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Crimson Fleet ship",
+                Location = "A clue hidden in orbit around a planet",
+                formid = 0x00090D,
+                parameter1 = "Crimson Fleet",
+                parameterformid = ShipTools.GetCargoShip(),
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+            //Spacer
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "Space Activator  - Guarded by Spacer",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Spacer ship",
+                Location = "A clue hidden in orbit around a planet",
+                formid = 0x00090D,
+                parameter1 = "Spacer",
+                parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Guard()
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator  - Guarded by Spacer",
-                Description = "Find info about the target from a beacon in orbit around a planet guarded by a Spacer ship",
-                Location = "An old space beacon",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Spacer ship",
+                Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
                 parameter1 = "Spacer",
+                parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Guard()
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
+                Name = "Space Activator  - Guarded by Spacer",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Spacer ship",
+                Location = "A clue hidden in orbit around a planet",
+                formid = 0x00090D,
+                parameter1 = "Spacer",
+                parameterformid = ShipTools.GetCargoShip(),
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+
+            //Ecliptic
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
                 Name = "Space Activator  - Guarded by Ecliptic",
-                Description = "Find info about the target from a beacon in orbit around a planet guarded by a Ecliptic ship",
-                Location = "An old space beacon",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Ecliptic ship",
+                Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
                 parameter1 = "Ecliptic",
+                parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Guard()
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
             {
+                Name = "Space Activator  - Guarded by Ecliptic",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Ecliptic ship",
+                Location = "A clue hidden in orbit around a planet",
+                formid = 0x00090D,
+                parameter1 = "Ecliptic",
+                parameterformid = ShipTools.GetBClassShip(),
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "Space Activator  - Guarded by Ecliptic",
+                Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Ecliptic ship",
+                Location = "A clue hidden in orbit around a planet",
+                formid = 0x00090D,
+                parameter1 = "Ecliptic",
+                parameterformid = ShipTools.GetCargoShip(),
+                needSpacesuit = true,
+                outlawQuest = new Investigation_ActivatorSpace_Guard()
+            });
+
+            // Traps
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
                 Name = "Space Activator - Crimson Fleet Trap",
-                Description = "Find info about the target from a beacon in orbit around a planet. Crimson Fleet attack when the player uses the beacon",
-                Location = "An space beacon in an asteroid field",
+                Description = "Find info about the target from a clue in orbit around a planet. Crimson Fleet attack when the player uses the beacon",
+                Location = "An clue hidden in an asteroid field",
                 formid = 0x00090F,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_trapped_crimson()
+                parameter1 = "Crimson Fleet",
+                outlawQuest = new Investigation_ActivatorSpace_Trapped()
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Spacer Trap",
-                Description = "Find info about the target from a beacon in orbit around a planet. Spacer attack when the player uses the beacon",
-                Location = "An space beacon in an asteroid field",
-                formid = 0x000912,
+                Description = "Find info about the target from a clue in orbit around a planet. Spacer attack when the player uses the beacon",
+                Location = "An clue hidden in an asteroid field",
+                formid = 0x00090F,
+                parameter1 = "Spacer",
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_trapped_spacer()
+                outlawQuest = new Investigation_ActivatorSpace_Trapped()
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Space Activator - Ecliptic Trap",
-                Description = "Find info about the target from a beacon in orbit around a planet. Ecliptic attack when the player uses the beacon",
-                Location = "An space beacon in an asteroid field",
-                formid = 0x000915,
-                needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_trapped_ecliptic()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Crimson Fleet - cargo",
-                Description = "A Crimson Fleet ship has the data in there hold",
-                Location = "A cargo ship",
-                parameterformid = ShipTools.GetCargoShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Spacer  - cargo",
-                Description = "A Spacer ship has the data in there hold",
-                Location = "A cargo ship",
-                parameterformid = ShipTools.GetCargoShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Spacer",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Ecliptic - cargo",
-                Description = "A Ecliptic ship has the data in there hold",
-                Location = "A cargo ship",
-                parameterformid = ShipTools.GetCargoShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
+                Description = "Find info about the target from a clue in orbit around a planet. Ecliptic attack when the player uses the beacon",
+                Location = "An clue hidden in an asteroid field",
                 parameter1 = "Ecliptic",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Crimson Fleet - Class A",
-                Description = "A Crimson Fleet ship has the data in there hold",
-                Location = "A small ship",
-                parameterformid = ShipTools.GetAClassShip(),
-                formid = 0x000808,
+                formid = 0x00090F,
                 needSpacesuit = true,
-                parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_ActivatorSpace_Trapped()
             });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Spacer  - Class A",
-                Description = "A Spacer ship has the data in there hold",
-                Location = "A small ship",
-                parameterformid = ShipTools.GetAClassShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Spacer",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Ecliptic - Class A",
-                Description = "A Ecliptic ship has the data in there hold",
-                Location = "A small ship",
-                parameterformid = ShipTools.GetAClassShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Ecliptic",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Crimson Fleet - Class B",
-                Description = "A Crimson Fleet ship has the data in there hold",
-                Location = "A strong medium sized ship",
-                parameterformid = ShipTools.GetBClassShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Spacer  - Class B",
-                Description = "A Spacer ship has the data in there hold",
-                Location = "A strong medium sized ship",
-                parameterformid = ShipTools.GetBClassShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Spacer",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-            InvestigationTemplates.Add(new MissionTemplate()
-            {
-                Name = "Space Informant - Ecliptic - Class B",
-                Description = "A Ecliptic ship has the data in there hold",
-                Location = "A strong medium sized ship",
-                parameterformid = ShipTools.GetBClassShip(),
-                formid = 0x000808,
-                needSpacesuit = true,
-                parameter1 = "Ecliptic",
-                outlawQuest = new Investigation_Informant_Space()
-            });
-
             //-------------------------------  SHOWDOWN ------------------------------------------
 
         }

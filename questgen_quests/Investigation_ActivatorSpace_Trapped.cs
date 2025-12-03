@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_quests
 {
-    public class Investigation_ActivatorSpace_trapped_ecliptic : IOutlawQuest
+    public class Investigation_ActivatorSpace_Trapped : IOutlawQuest
     {
         private Quest questform;
 
@@ -31,21 +31,26 @@ namespace FrankyCLI.questgen_quests
         string IOutlawQuest.QuestLocation { get => questloc; set => questloc = value; }
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
-            Console.WriteLine("Generating Activator Spacer Trapped Space Quest...");
+            Console.WriteLine("Generating Activator " + missionTemplate.parameter1 + " Trapped Space Quest...");
             questloc = missionTemplate.Location;
 
+            var questActivator = ActivatorTools.GetRandomSpaceType();
+
             var datasourceprompt =
-                "A three word or less space beacon name that contains a clue to the characters location. Examples are a Damaged comms sattelle or Scanning Beacon\r\nOnly include the data source name in the response.\r\n\r\n" +
-                "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n" +
-                "Keep it to one paragraph with newlines\r\n\r\n";
+                "A three word or less name that contains a clue to the characters location.\r\n" +
+                 "The base type of the activator is." + questActivator.Name + "\r\n\r\n" +
+                "Only include the data source name in the response.\r\n\r\n" +
+                "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n";
             var datasource = AITools.RunPrompt(datasourceprompt);
             Console.WriteLine("datasource: " + datasource);
+
 
             var questprompt =
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "This quest is about finding the location of this character\r\n\r\n" +
                 "Keep it to one paragraph with newlines\r\n\r\n" +
                 "Use the following information to build the quest name:\r\n\r\n";
+
             questprompt += "Vital clue to their location: " + datasource + "\r\n";
 
             var questname = AITools.RunPrompt(questprompt);
@@ -90,6 +95,7 @@ namespace FrankyCLI.questgen_quests
 
             //set quest alias to self in scripts
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+            //Set the enemy gang to the new gang
             var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < properties.Count; i++)
             {
@@ -97,15 +103,16 @@ namespace FrankyCLI.questgen_quests
                 {
                     ((ScriptObjectProperty)properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
                 }
+
             }
 
-            //Create the activation message
-            var pickuppromt =
+                //Create the activation message
+                var pickuppromt =
             "Include newline characters in your response.\r\n" +
             "Generate a short flavour text story which explains to the player that they have found the location of the next stage via this clue.\r\n\r\n" +
-            "The location must match the one that is provided below.\r\n\r\n" +
             "Keep it to one paragraph with newlines and under 50 words.\r\n\r\n" +
-            "The Ecliptic Mercenaries have been paid to guard this becaon and attack!\r\n\r\n" +
+            "The location must match the one that is provided below.\r\n\r\n" +
+            "Activating this has caused the " + missionTemplate.parameter1 + "to grav jump in and attack!\r\n\r\n" +
 
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + nextQuest.QuestLocation + "\r\n";
@@ -129,7 +136,7 @@ namespace FrankyCLI.questgen_quests
 
             //Create the Activator
 
-            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000914)].DeepCopy();
+            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x00090E)].DeepCopy();
             Mutagen.Bethesda.Starfield.Activator newActivator = new Mutagen.Bethesda.Starfield.Activator(myMod)
             {
                 ActivateSound = ActivatorClone.ActivateSound,
@@ -149,6 +156,7 @@ namespace FrankyCLI.questgen_quests
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };
+            newActivator.Model.File = questActivator.Model;
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
             var activatorproperties = newActivator.VirtualMachineAdapter.Scripts[0].Properties;
@@ -165,6 +173,10 @@ namespace FrankyCLI.questgen_quests
                 if (activatorproperties[i].Name == "nextquest")
                 {
                     ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
+                }
+                if (activatorproperties[i].Name == "GangMembers")
+                {
+                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameter1));
                 }
             }
 
