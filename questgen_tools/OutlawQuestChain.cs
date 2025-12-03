@@ -52,8 +52,8 @@ namespace FrankyCLI.questgen_tools
             //Quest Steps
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
-            var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Space Derelict - UC Vanguard Ship B");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Space Activator  - Guarded by Spacer Small");
+            var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Space Derelict - UC Navy Cargo");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);

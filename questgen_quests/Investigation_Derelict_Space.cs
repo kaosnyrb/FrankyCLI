@@ -129,6 +129,15 @@ namespace FrankyCLI.questgen_quests
                 {
                     ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
                 }
+                if (questproperties[i].Name == "ItemSpawnMarkers")
+                {
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                }
+                if (questproperties[i].Name == "Corpses")
+                {
+                    //This is a form list of the npcs to spawn on the ship at random markers
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = CrewTools.GetCrewFormList(missionTemplate.parameter1, shipname);
+                }
             }
 
             //Set the target ship
