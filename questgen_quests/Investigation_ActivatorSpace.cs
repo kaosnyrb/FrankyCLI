@@ -92,6 +92,9 @@ namespace FrankyCLI.questgen_quests
             //set quest alias to self in scripts
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
 
+            //We set the spawn marker to one of random ones so the target is in different places
+            ((QuestReferenceAlias)newQuest.Aliases[2]).Conditions[0] = SpaceCellTools.GetSpaceMarkerCondition();
+
             //Set the enemy gang to the new gang
             var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
             for (int i = 0; i < properties.Count; i++)
