@@ -61,7 +61,7 @@ namespace FrankyCLI.questgen_quests
             //Spacer
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Spacer",
+                Name = "Space Activator  - Guarded by Spacer Small",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
@@ -72,7 +72,7 @@ namespace FrankyCLI.questgen_quests
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Spacer",
+                Name = "Space Activator  - Guarded by Spacer Large",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
@@ -83,7 +83,7 @@ namespace FrankyCLI.questgen_quests
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Spacer",
+                Name = "Space Activator  - Guarded by Spacer Cargo",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
@@ -96,7 +96,7 @@ namespace FrankyCLI.questgen_quests
             //Ecliptic
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Ecliptic",
+                Name = "Space Activator  - Guarded by Ecliptic Small",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
@@ -108,7 +108,7 @@ namespace FrankyCLI.questgen_quests
 
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Ecliptic",
+                Name = "Space Activator  - Guarded by Ecliptic Large",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
@@ -120,7 +120,7 @@ namespace FrankyCLI.questgen_quests
 
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Activator  - Guarded by Ecliptic",
+                Name = "Space Activator  - Guarded by Ecliptic Cargo",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x00090D,
