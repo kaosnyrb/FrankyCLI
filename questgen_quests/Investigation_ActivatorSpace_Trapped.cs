@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
@@ -92,6 +93,9 @@ namespace FrankyCLI.questgen_quests
             };
 
             newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
+
+            //We set the spawn marker to one of random ones so the target is in different places
+            ((QuestReferenceAlias)newQuest.Aliases[2]).Conditions[0] = SpaceCellTools.GetSpaceMarkerCondition();
 
             //set quest alias to self in scripts
             newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
