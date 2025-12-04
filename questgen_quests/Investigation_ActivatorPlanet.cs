@@ -69,7 +69,7 @@ namespace FrankyCLI
             string gangtheme = OutlawGang.GetGangTheme();
             Console.WriteLine("gangtheme: " + gangtheme);
 
-            var gangpromt = 
+            var gangpromt =
                "Generate the name of a member of the characters gang.\r\n\r\n" +
                "Keep it to two words and only return those two words\r\n\r\n" +
                "The gangs theme is " + gangtheme + " \r\n\r\n" +
@@ -85,6 +85,7 @@ namespace FrankyCLI
             var logprompt = 
             "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
+            "Mention the gang members you just generated\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";

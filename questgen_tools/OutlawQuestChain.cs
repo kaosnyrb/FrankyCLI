@@ -55,7 +55,7 @@ namespace FrankyCLI.questgen_tools
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Planet side Activator Small Marker");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);

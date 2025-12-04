@@ -238,6 +238,8 @@ namespace FrankyCLI.questgen_tools
 
             result += "Across the Settled Systems, themes of colonization and frontier survival, political rivalry and uneasy alliances, flourishing commerce and black-market dealings, rampant piracy, and the enduring human drive to explore the unknown all intermingle. It is a future where humanity’s colonies stand scattered among the stars – full of opportunity and danger in equal measure – as factions compete and adventurers chart new horizons in the vast expanse of Starfield.\r\n ";
 
+            result += "The game starts on May 7th 2330. Use this to figure out any dates needed. \r\n";
+
             result += "This marks the end of the background information section. Following this is more detail on the prompt to carry out.\r\n\r\n";
 
             return result;

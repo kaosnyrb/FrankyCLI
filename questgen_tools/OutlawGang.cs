@@ -111,7 +111,10 @@ namespace FrankyCLI.questgen_tools
             //Generate a new NPC
 
             var outfit = NPCTools.GetRandomOutfit(true);
-            for (int i = 0; i < 3; i++)
+
+            int gangmembers = 2 + random.Next(5);
+
+            for (int i = 0; i < gangmembers; i++)
             {
                 bool isfemale = false;
                 if (random.Next(100) > 50)
@@ -121,9 +124,14 @@ namespace FrankyCLI.questgen_tools
 
                 var NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
                 Npc npc = NPCTools.CloneNPC(myMod, NPC);
-                npc.Name = gangName;
-                npc.EditorID = "npc_" + (gangName.ToLower()).Replace(" ", "");
+                string Gender = "Male";
+                if (isfemale) Gender = "Female";
 
+                 npc.Name = AITools.RunPrompt("Generate a first name and last name for a "
+                    + Gender + " "
+                    + gangName + " gang member. Return only the name in the response. " +
+                    "Don't use any of the names that have appeared before.");
+                npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
                 Random wrand = new Random();
                 npc.Weight = new NpcWeight()
                 {
@@ -135,11 +143,57 @@ namespace FrankyCLI.questgen_tools
                 lev.LevelMult = (float)random.NextDouble();
                 npc.Level = lev;
                 npc.SpaceOutfit = outfit;
-
+                npc.EyeColor = NPCTools.GetEyeColour();
+                npc.HairColor = NPCTools.GetHairColour();
+                npc.SkinToneIndex = (byte)wrand.Next(8);
+                npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
                 npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } }
                 };
+
+                //Logfile for Crew Member
+                if (i == gangmembers - 1)
+                {
+                    //We do this last as we know all the crew now. Also only once as they are a bit samey.
+                    Console.WriteLine("Generating Crew Log file...");
+                    string BookPrompt = "Write a personal diary entry for " + npc.Name + ", a " + Gender + " member of the " + gangName + ".";
+                    BookPrompt += "Use a first - person voice that reflects their personality, emotional state, and current circumstances.";
+                    BookPrompt += "Use the previously generated crew names for this gang.";
+                    BookPrompt += "Make the entry feel immersive, introspective, character-driven and suitable as lore flavor for a quest.";
+
+                    BookPrompt = PromptFlavourTools.AddFlavourToShipBook(BookPrompt);
+
+
+                    string BookContents = AITools.RunPrompt(BookPrompt);
+                    var Book = gen_quest.myMod.Books[new FormKey(gen_quest.myMod.ModKey, 0x000905)].DeepCopy();
+                    Book bountybook = new Book(gen_quest.myMod)
+                    {
+                        CNAM = Book.CNAM,
+                        Components = Book.Components,
+                        Description = BookContents,
+                        DNAMUnknown = Book.DNAMUnknown,
+                        DropdownSound = Book.DropdownSound,
+                        EditorID = "book_" + (npc.Name.ToString().ToLower()).Replace(" ", ""),
+                        Keywords = Book.Keywords,
+                        ENAM = Book.ENAM,
+                        FeaturedItemMessage = Book.FeaturedItemMessage,
+                        Flags = Book.Flags,
+                        FNAM = Book.FNAM,
+                        InventoryArt = Book.InventoryArt,
+                        Model = Book.Model,
+                        Name = npc.Name.ToString() + " Logs",
+                        ODTY = Book.ODTY,
+                        Value = Book.Value,
+                        Weight = Book.Weight,
+                        VirtualMachineAdapter = Book.VirtualMachineAdapter,
+                        Transforms = Book.Transforms,
+                    };
+
+                    gen_quest.myMod.Books.Add(bountybook);
+                    npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest.myMod.Books[bountybook.FormKey].ToLink(), Count = 1 } });
+                }
+
                 myMod.Npcs.Add(npc);
                 //Add it to the list
                 list.Add(npc);
