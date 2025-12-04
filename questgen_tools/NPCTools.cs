@@ -51,7 +51,30 @@ namespace FrankyCLI.questgen_tools
                     0x000865,
                     0x000866,
                     0x000867,
-                    0x000868,                };
+                    0x000868,                
+                };
+                return npclist[random.Next(npclist.Count)];
+            }
+        }
+
+        public static uint GetTemplateDeadNPC(bool female)
+        {
+            Random random = new Random();
+
+            if (female)
+            {
+                List<uint> npclist = new List<uint>()
+                {
+                    0x000902,
+                };
+                return npclist[random.Next(npclist.Count)];
+            }
+            else
+            {
+                List<uint> npclist = new List<uint>()
+                {
+                    0x000904,             
+                };
                 return npclist[random.Next(npclist.Count)];
             }
         }
@@ -216,6 +239,60 @@ namespace FrankyCLI.questgen_tools
                 };
             IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
+        }
+
+        public static IFormLinkNullable<IOutfitGetter> GetRandomFactionOutfit(string Faction)
+        {
+            Random random = new Random();
+            List<uint> Outfits = new List<uint>();
+            switch (Faction)
+            {
+                case "UC Navy":
+                    Outfits.Add(0x0015CF45);//Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
+                    break;
+                case "UC Vanguard":
+                    Outfits.Add(0x002B211A);//Outfit_Citizen [OTFT:002B211A]
+                    Outfits.Add(0x0009653C);//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
+                    Outfits.Add(0x0009653C);//Outfit_Spacesuit_UCVanguard_NoHelmet[OTFT: 0000697C]
+                    break;
+                case "UC SysDef":
+                    Outfits.Add(0x0015CF45);//Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
+                    Outfits.Add(0x002BE711);//Outfit_Spacesuit_UC_Pilot_SysDef_with_Helmet [OTFT:002BE711]
+                    Outfits.Add(0x0030F3DF);//Outfit_Spacesuit_UC_Pilot_SysDef_NoHelmet [OTFT:0030F3DF]
+                    break;
+                case "Freestar Security":
+                    Outfits.Add(0x000E6944);//Outfit_Clothes_Akila_Security [OTFT:000E6944]
+                    break;
+                case "Trackers Alliance":
+                    Outfits.Add(0x00270258);//Outfit_BountyHunter [OTFT:00270258]
+                    Outfits.Add(0x0026B102);//Outfit_Spacesuit_BountyHunter [OTFT:0026B102]
+                    Outfits.Add(0x000A5637);//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
+                    break;
+                case "Galbank":
+                    Outfits.Add(0x00067C92);//Outfit_Spacesuit_Settler [OTFT:00067C92]
+                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                    break;
+                case "Crimson Fleet":
+                    Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
+                    Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
+                    break;
+                case "Spacer":
+                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                    Outfits.Add(0x0015E246);//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
+                    break;
+                case "Ecliptic":
+                    Outfits.Add(0x0027027D);//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
+                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                    break;
+                case "Trade Authority":
+                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                    break;
+
+            }
+
+            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
+            return outfit;
+
         }
 
         public static IFormLinkNullable<IOutfitGetter> GetRandomOutfit(bool spacesuit)

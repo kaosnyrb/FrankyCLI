@@ -89,7 +89,7 @@ namespace FrankyCLI
 
             //set quest alias to self in scripts
             ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+            
 
             //Set the NPC to be the quest target
             ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
@@ -122,6 +122,10 @@ namespace FrankyCLI
                 if (questprops[i].Name == "DeathItems")
                 {
                     ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>();
+                }
+                if (questprops[i].Name == "BountyTarget")
+                {
+                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
                 }
             }
 
