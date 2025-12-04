@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Core.Tokens;
 
 namespace FrankyCLI.questgen_tools
 {
@@ -53,6 +54,70 @@ namespace FrankyCLI.questgen_tools
                 new ActivatorType(){
                     Name = "Weapon Test Site",
                     Model = "duout\\space_weapontest.nif"
+                },
+                new ActivatorType(){
+                    Name = "Fuel Depot",
+                    Model = "duout\\space_fueldepot.nif"
+                },
+                new ActivatorType(){
+                    Name = "Hidden Storage Cache",
+                    Model = "duout\\space_crimsonvault.nif"
+                },
+                new ActivatorType(){
+                    Name = "Hydroponics Farm",
+                    Model = "duout\\space_domefarm.nif"
+                },
+                new ActivatorType(){
+                    Name = "Robotic Parts Factory",
+                    Model = "duout\\space_factory.nif"
+                },
+                new ActivatorType(){
+                    Name = "Chemical Plant",
+                    Model = "duout\\space_factory2.nif"
+                },
+                new ActivatorType(){
+                    Name = "Mechanical Systems Forge",
+                    Model = "duout\\space_factory3.nif"
+                },
+                new ActivatorType(){
+                    Name = "Orbital Processing Hub",
+                    Model = "duout\\space_factory4.nif"
+                },
+                new ActivatorType(){
+                    Name = "Interstellar Survey Node",
+                    Model = "duout\\space_factory5.nif"
+                },
+                new ActivatorType(){
+                    Name = "Far-Orbit Surveillance Array",
+                    Model = "duout\\space_fuel.nif"
+                },
+                new ActivatorType(){
+                    Name = "Deep Space Recon Sensor Grid",
+                    Model = "duout\\space_generic1.nif"
+                },
+                new ActivatorType(){
+                    Name = "Cosmic Radiation Sensor Hub",
+                    Model = "duout\\space_longrangescan.nif"
+                },
+                new ActivatorType(){
+                    Name = "Automated Ore Harvesting Platform",
+                    Model = "duout\\space_mine.nif"
+                },
+                new ActivatorType(){
+                    Name = "Microgravity Drilling Platform",
+                    Model = "duout\\space_mine02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Maintenance Service Hub",
+                    Model = "duout\\space_repair.nif"
+                },
+                new ActivatorType(){
+                    Name = "Trade Authority Commerce Post",
+                    Model = "duout\\space_tradeauth.nif"
+                },
+                new ActivatorType(){
+                    Name = "Off-Grid Storage Vault",
+                    Model = "duout\\space_vault.nif"
                 },
             };
             Random random = new Random();
