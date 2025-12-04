@@ -67,6 +67,12 @@ namespace FrankyCLI.questgen_tools
                 lev.LevelMult = (float)random.NextDouble();
                 npc.Level = lev;
                 npc.SpaceOutfit = outfit;
+
+                npc.EyeColor = NPCTools.GetEyeColour();
+                npc.HairColor = NPCTools.GetHairColour();
+                npc.SkinToneIndex = (byte)wrand.Next(8);
+                npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
+
                 npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } },
@@ -79,14 +85,15 @@ namespace FrankyCLI.questgen_tools
                 {
                     //We do this last as we know all the crew now. Also only once as they are a bit samey.
                     Console.WriteLine("Generating Crew Log file...");
-                    string BookContents = AITools.RunPrompt("Write a personal diary entry for " + npc.Name + ", a " + Gender + " crew member aboard the " + ShipName + "." +
-                    "Use a first - person voice that reflects their personality, emotional state, and current circumstances." +
-                    "Include vivid details about their daily life on the ship, their private thoughts, and how they feel about recent events." +
-                    "Incorporate flavorful gossip or rumors they’ve heard about other people encountered during their travels." +
-                    "Describe sensory details of life aboard the ship—smells, sounds, cramped quarters, rituals." +
-                    "Use the previously generated crew names for this ship." +
-                    "Make the entry feel immersive, introspective, and character-driven." +
-                    "Make the entry immersive, character-driven, and suitable as lore flavor for a quest.");
+                    string BookPrompt = "Write a personal diary entry for " + npc.Name + ", a " + Gender + " crew member aboard the " + ShipName + ".";
+                    BookPrompt += "Use a first - person voice that reflects their personality, emotional state, and current circumstances.";
+                    BookPrompt += "Use the previously generated crew names for this ship.";
+                    BookPrompt += "Make the entry feel immersive, introspective, character-driven and suitable as lore flavor for a quest.";
+
+                    BookPrompt = BookTools.AddFlavourToShipBook(BookPrompt);
+
+
+                    string BookContents = AITools.RunPrompt(BookPrompt);
                     var Book = gen_quest.myMod.Books[new FormKey(gen_quest.myMod.ModKey, 0x000905)].DeepCopy();
                     Book bountybook = new Book(gen_quest.myMod)
                     {
