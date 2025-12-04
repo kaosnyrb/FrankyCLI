@@ -63,7 +63,7 @@ namespace FrankyCLI.questgen_quests
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
             var logmessage = AITools.RunPrompt(logprompt);
-
+            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             Console.WriteLine(logmessage);
 
 

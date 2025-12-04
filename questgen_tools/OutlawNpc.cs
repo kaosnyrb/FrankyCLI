@@ -179,7 +179,7 @@ namespace FrankyCLI.questgen_tools
                 "Only include the background in the response.\r\n\r\n";
             Console.WriteLine("Generating Outlaw Log...");
 
-            backgroundprompt = BookTools.AddFlavourToTargetBook(backgroundprompt);
+            backgroundprompt = PromptFlavourTools.AddFlavourToTargetBook(backgroundprompt);
 
             string background = AITools.RunPrompt(backgroundprompt);
             return background;

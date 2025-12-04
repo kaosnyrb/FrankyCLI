@@ -73,7 +73,8 @@ namespace FrankyCLI.questgen_quests
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
-            questprompt += "Spaceship guarding the information: " + shipname + "\r\n";
+            logprompt += "Spaceship guarding the information: " + shipname + "\r\n";
+            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);

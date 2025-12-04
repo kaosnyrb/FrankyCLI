@@ -75,6 +75,7 @@ namespace FrankyCLI.questgen_quests
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
             logprompt += "Spaceship guarding the information: " + shipname + "\r\n";
             logprompt += "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n";
+            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);

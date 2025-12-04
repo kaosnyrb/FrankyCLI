@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class BookTools
+    public class PromptFlavourTools
     {
         public static string AddFlavourToShipBook(string BookPrompt)
         {
@@ -290,6 +290,151 @@ namespace FrankyCLI.questgen_tools
                 "Include a reflection on how their values shifted over time, slipping further from what they once believed was right.",
                 "Have them acknowledge they can no longer remember the last moment they felt truly innocent.",
                 "Include a moment where they question whether that innocence was ever real—or just a story they told themselves."
+            };
+            Random random = new Random();
+
+            int count = 1 + random.Next(5);
+
+            var selected = PromptOptions
+                .OrderBy(x => random.Next())
+                .Take(count);
+
+            foreach (var prompt in selected)
+            {
+                BookPrompt += prompt + " ";
+            }
+
+            return BookPrompt;
+        }
+
+
+        public static string AddFlavourToLogMessage(string BookPrompt)
+        {
+            //Flavours that add variation between generations
+            List<string> PromptOptions = new List<string>
+            {
+                "Retell the events in a gritty noir tone—cynical, shadowed, and heavy with unspoken suspicions.",
+                "Rewrite the summary using clipped, precise military language, as if logged in an after-action report.",
+                "Present the events as a sanitized corporate memo full of jargon, euphemisms, and liability management.",
+                "Retell the facts with the voice of a conspiracy theorist, layering implication and paranoia without altering the truth.",
+                "Frame the events like an academic analysis, detached and scholarly, as though pieced together years later.",
+                "Style the summary as if reconstructed from fragmented personal logs, lending a human, emotional undertone.",
+                "Present the account in the tone of spacer folklore—mythic, exaggerated, and retold around mess-hall tables.",
+                "Rewrite the summary like a breaking news broadcast—urgent, dramatic, and slightly sensational.",
+                "Frame the events in sterile forensic language, focusing on evidence trails and procedural breakdowns.",
+                "Add a layer of dark humor or grim irony, highlighting tragic timing without changing the facts.",
+                "Retell the events with the sweeping, dramatic tone of a tragic epic—grand, solemn, and poetic.",
+                "Frame the summary as a heavily redacted government document, with '[REDACTED]' segments for dramatic effect.",
+                "Rewrite the account from the perspective of an AI analysis—cold, clinical, and emotionless.",
+                "Present the events like an investigative news deep-dive, connecting implications and systemic failures.",
+                "Use a somber, reflective tone as if written by a historian chronicling a forgotten tragedy.",
+                "Retell the facts in the voice of frontier tall tales—bold, exaggerated, and rugged.",
+                "Frame the events like a legal deposition—stilted, defensive, overly formal, but accurate.",
+                "Rewrite the summary as if pieced together from emergency alerts or partial distress transmissions.",
+                "Use a tone focused strictly on financial and logistical impact, as though written by a corporate auditor.",
+                "Present the summary in a melancholic, elegiac voice, mourning the loss and contemplating its meaning.",
+                "Add a small sensory detail—sounds, smells, or environmental cues—that reinforces the existing events.",
+                "Include a brief mention of the crew’s last routine activity before the incident, keeping it consistent with the facts.",
+                "Add a minor detail about equipment, cargo, or tools that were present, supporting the established narrative.",
+                "Include a short note about the lighting, atmosphere, or condition of the corridors to enhance immersion.",
+                "Add a small clue recovered from the scene—scuffed floors, scattered items, or half-finished tasks.",
+                "Include a small observation about the target’s personal effects that survived the event.",
+                "Add a brief detail about the state of the navigation systems or consoles at the time of discovery.",
+                "Include hints of environmental decay—frosted panels, drifting debris, or faint residue from the chem leak.",
+                "Add a minor timestamp or sequence detail to emphasize the rushed or chaotic nature of events.",
+                "Include a detail about a forgotten datapad entry, half-saved file, or corrupted message supporting the known outcome.",
+                "Add a short mention of background chatter or logs that stop abruptly as the disaster unfolds.",
+                "Include a faint trace of the chemicals involved—color, vapor residue, or corrosion marks.",
+                "Add a detail about the power state—flickering lights, drained batteries, or backup systems failing.",
+                "Include a note on temperature changes caused by the incident—heat spikes, cold pockets, or uneven airflow.",
+                "Add a minor clue left by a crew member—an open locker, a dropped tool, or a half-worn uniform tag.",
+                "Include a description of how certain systems auto-reacted—sealed bulkheads, alarms, or emergency vents.",
+                "Add a subtle indication of the crew’s last movements—footprints, fingerprints, or partially completed tasks.",
+                "Include a small environmental oddity that matches the established chemical rupture—warped metal, pitted surfaces, or discoloration.",
+                "Add a fleeting detail about how the vessel or location appears when first boarded—dust motes, drifting papers, dim console glow.",
+                "Include a final subtle detail pointing to the consequences—oxidation marks, frozen displays, or stale, recycled air frozen in time.",
+                "Provide a concise account of a routine job that spiraled into something far more complicated than expected.",
+                "Summarize an incident involving corporate negligence or smuggling gone wrong, framed with calm, investigative detachment.",
+                "Describe a derelict vessel or abandoned outpost with a hint of mystery tied to missing logs or corrupted data streams.",
+                "Mention a faction connection—Freestar, UC, Crimson Fleet—without overstating their involvement.",
+                "Include a technical failure or anomaly that sets the stage, such as compromised life support or corrupted navigation layers.",
+                "Introduce a deceased or missing crew whose final moments are pieced together through scattered system logs.",
+                "Frame the objective around retrieving a key data slate, encrypted file, or malfunctioning module tied to the event.",
+                "Hint at rival interests or unknown third parties who may have benefited from the disaster.",
+                "Add a detail about environmental hazards—pressure leaks, toxic vapor, or unstable gravity fields.",
+                "Include a subtle tone of procedural investigation, as if uncovering the truth is just another day’s work.",
+                "Describe the remains of a botched operation with quiet, factual resignation rather than drama.",
+                "Reference a hidden route, contraband manifest, or unauthorized detour that explains how the situation unraveled.",
+                "Include a brief line acknowledging that the crew’s final decisions were rushed, desperate, or poorly calculated.",
+                "Frame the incident as one small part of a much larger pattern across the settled systems.",
+                "Note that automated systems attempted to compensate but ultimately failed, locking in the tragic outcome.",
+                "Add a detail suggesting the player will be combing through whatever the target left behind—logs, caches, or hardware.",
+                "Describe the scene as eerily quiet, with only dormant systems or faint alarms offering clues to what happened.",
+                "Include a hint that the recovered evidence may reshape the understanding of the mission’s true purpose.",
+                "Reference a chain of events triggered by greed, miscalculation, or sheer bad luck, delivered with understated tone.",
+                "Present the situation as an opportunity to uncover the truth, secure valuable intel, or tie off a loose end long forgotten.",
+                "Add a detail about the condition of the equipment involved—scuffed panels, scorched wiring, or residue from prior use.",
+                "Include a mention of a specific tool or device left behind, hinting at the crew’s last attempt to fix the problem.",
+                "Describe the cargo containers with a small visual cue—dented frames, cracked seals, or flickering status lights.",
+                "Add a detail about the manifest tags or shipping labels, showing signs of hasty alterations or forged entries.",
+                "Include a brief note about a data slate or terminal with half-finished commands still visible on-screen.",
+                "Mention minor wear on structural supports or bulkheads, suggesting the crew had been ignoring needed maintenance.",
+                "Add a subtle observation about the chem canisters—unusual coloring, warped metal, or faint particulate trails.",
+                "Include a detail about the navigation readout—ghost entries, corrupted overlays, or mismatched coordinates.",
+                "Describe a scattered personal item—an ID badge, a torn glove, or a dropped toolkit—as a silent clue.",
+                "Add a detail about environmental indicators—pressure gauges stuck mid-range or CO₂ alarms blinking idle warnings.",
+                "Include a small malfunction in an auxiliary system—unresponsive buttons, intermittent power cycling, or jammed shutters.",
+                "Mention the condition of emergency gear—discarded masks, half-open med packs, or offline hazard suits.",
+                "Add a clue from the internal lighting—burned-out strips, emergency red glow, or low-power pulsing.",
+                "Include faint markings on the floor—drag streaks, chemical stains, or footprints frozen mid-action.",
+                "Describe the status of security systems—passive turrets in sleep mode, disabled cameras, or overridden locks.",
+                "Add a detail about an overlooked storage crate—loose hinges, broken seal, or mislabeled contents.",
+                "Include a quick note about atmospheric sensors flickering between normal and contaminated readings.",
+                "Mention the state of comms equipment—signal boosters humming, cracked headsets, or fragmented audio logs.",
+                "Add a subtle detail about shipboard robotics—maintenance drones frozen mid-task or tools still extended.",
+                "Include a detail about dataport connectors—sparking edges, melted casing, or improvised bypass clips.",
+                "Include a faint detail about scuffed floor panels or drag marks hinting at the crew’s final movements.",
+                "Add a mention of scattered tools or debris arranged in a way that suggests a rushed attempt at repairs.",
+                "Describe a flickering light source casting uneven shadows that make the scene feel frozen in the moment of disaster.",
+                "Include a detail about a half-eaten meal or abandoned drink, emphasizing how abruptly events unfolded.",
+                "Add a note about handprints, smudges, or fingerprints on surfaces, showing where the crew tried to brace themselves.",
+                "Mention an open maintenance hatch or exposed wiring that implies a desperate improvisation.",
+                "Include signs of environmental decay—condensation streaks, rust blooms, or frozen vapor residue.",
+                "Describe a chair knocked over or a stool lying on its side, hinting at chaos moments before the end.",
+                "Add a detail about personal effects left behind—photos, trinkets, or logs—scattered across a workstation.",
+                "Include a mention of a cracked viewport or stressed panel, suggesting extreme pressure fluctuations.",
+                "Describe a datapad on the ground with a single message still visible, as if it was dropped mid-sentence.",
+                "Add a faint audio cue from the environment—static-laced alarms, distant hissing, or a looping warning tone.",
+                "Include a detail about dust or particulate drifting weightlessly, disturbed only by the player’s movement.",
+                "Describe a mismatched set of footprints, some confident and others staggered, telling a silent story.",
+                "Add a mention of a shattered container or broken console, its contents scattered like clues across the floor.",
+                "Include subtle clues of the crew’s personal lives—a jacket tossed over a chair, a mug labeled with a nickname.",
+                "Describe signs of emergency measures abandoned half-executed—sealed doors, unlatched vents, offline modules.",
+                "Add a note about scorch marks or chemical burns streaking along a wall, silently outlining the catastrophe.",
+                "Include a faint environmental smell or residue—ozone, coolant, burnt insulation—that lingers after the event.",
+                "Describe dust settling on powered-down systems, giving the whole area a feeling of forgotten stillness.",
+                "Include a note about a diagnostic panel looping the same error code, its display dim but still functioning.",
+                "Add a detail about a cargo crate with its mag-seal flickering, barely holding its contents in place.",
+                "Mention a handheld scanner left running on low battery, its readout frozen on elevated hazard levels.",
+                "Include a micro-detail about ventilation filters clogged with particulate from a ruptured chem batch.",
+                "Describe a multi-tool resting beside a panel, still warm from recent use, as if dropped mid-repair.",
+                "Add a detail about a coolant line beading with frost, hinting at sudden system depressurization.",
+                "Mention a crate marked with outdated corporate branding, suggesting it was never meant to be on the manifest.",
+                "Include a faint hum from an auxiliary reactor struggling to maintain minimal power distribution.",
+                "Describe an emergency respirator discarded nearby, its indicator light blinking an exhausted amber.",
+                "Add a micro-detail about a thermal gauge spiking erratically, a silent record of the system’s failure cascade.",
+                "Mention a dataport adapter jammed into an access terminal, showing signs of hurried bypass attempts.",
+                "Include a detail about spilled polymer beads rolling across the floor, escaping from a split packing container.",
+                "Describe a portable chem stabilizer unit lying on its side, its regulator valves warped from overpressure.",
+                "Add a small note about hazard-striping peeling off a bulk container, revealing older warning icons beneath.",
+                "Mention a refrigeration crate whose internal fans sputter intermittently, unable to maintain correct temperature.",
+                "Include a micro-detail about a fuse array with several slots blown out in a neat, catastrophic sequence.",
+                "Describe a handheld atmospheric reader dropped nearby, still chirping intermittent contamination alerts.",
+                "Add a detail about fiber-optic bundles hanging loose, their ends glowing faintly under residual charge.",
+                "Mention a transport dolly left halfway down a corridor, its inertial locks engaged as if abandoned mid-transfer.",
+                "Include a micro-detail about the lingering shimmer of aerosolized chemicals suspended in low gravity."
+
+
             };
             Random random = new Random();
 

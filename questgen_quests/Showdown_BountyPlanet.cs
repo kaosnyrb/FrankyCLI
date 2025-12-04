@@ -57,7 +57,7 @@ namespace FrankyCLI
                 "Use the following information to build the explaination:\r\n\r\n";
 
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
-
+            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine("logmessage: " + logmessage);

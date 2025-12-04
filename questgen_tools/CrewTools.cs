@@ -90,7 +90,7 @@ namespace FrankyCLI.questgen_tools
                     BookPrompt += "Use the previously generated crew names for this ship.";
                     BookPrompt += "Make the entry feel immersive, introspective, character-driven and suitable as lore flavor for a quest.";
 
-                    BookPrompt = BookTools.AddFlavourToShipBook(BookPrompt);
+                    BookPrompt = PromptFlavourTools.AddFlavourToShipBook(BookPrompt);
 
 
                     string BookContents = AITools.RunPrompt(BookPrompt);

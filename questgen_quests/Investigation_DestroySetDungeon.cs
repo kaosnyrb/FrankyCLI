@@ -89,7 +89,7 @@ namespace FrankyCLI
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
             logprompt += "the title of the Gang members who are helping the target: " + gangname + "\r\n";
-
+            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);

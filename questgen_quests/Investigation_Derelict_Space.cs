@@ -74,6 +74,8 @@ namespace FrankyCLI.questgen_quests
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
             logprompt += "Spaceship guarding the information: " + shipname + "\r\n";
             logprompt += "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n";
+
+            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);
@@ -152,6 +154,9 @@ namespace FrankyCLI.questgen_quests
             "Keep it to two paragraphs under 100 words with newlines\r\n\r\n" +
             "Use the following information to build the explaination:\r\n\r\n";
             booklogprompt += "Location:" + nextQuest.QuestLocation + "\r\n";
+
+            booklogprompt = PromptFlavourTools.AddFlavourToTargetBook(booklogprompt);
+
             var booklogmessage = AITools.RunPrompt(booklogprompt);
 
             var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
