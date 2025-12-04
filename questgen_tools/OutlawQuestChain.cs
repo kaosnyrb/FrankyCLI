@@ -50,10 +50,12 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine(outlawNpc.background);
 
             //Quest Steps
+            Console.WriteLine("---------------------------------------------------------------------------------");
+            Console.WriteLine("Feeding the stages into the AI...");
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Space Derelict - UC Navy Cargo");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
@@ -64,22 +66,27 @@ namespace FrankyCLI.questgen_tools
             AITools.RunPrompt("</Summary>That was the summary, we are now generating the stages.");
 
             AITools.RunPrompt("<Showdown>");
+            Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
             //Now build an investigation step before
 
             AITools.RunPrompt("<DeepInvestigation>");
+            Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Investigation: " + DeepInvestigationMissionTemplate.Name);
             var InvestigationMission = DeepInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DeepInvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             AITools.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
 
             //InitialInvestigation
             AITools.RunPrompt("<InitialInvestigation>");
+            Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
             Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
 
             // Finally build the discovery step
             AITools.RunPrompt("<Discovery>");
+            Console.WriteLine("---------------------------------------------------------------------------------");
+
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 
             //We have now generated all the stages. Do any final linking steps

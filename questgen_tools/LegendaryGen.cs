@@ -1,5 +1,6 @@
 ﻿using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -41,13 +42,14 @@ namespace FrankyCLI.questgen_tools
             var armour = gen_quest._StarfieldMod.Armors[new FormKey(gen_quest.StarfieldModKey, armourid)].DeepCopy();
             var legID = Guid.NewGuid().ToString().Substring(0, 8);
 
+            Console.WriteLine("Generating Legendary Name...");
             string Armournameprompt =
                 "Reply only with the following information:\r\n\r\n" +
                 "A legendary " + Type + " belonging to " + OutlawName + " . \r\n\r\n" +
                 "The orginal item this is based on is called the " + armour.Name + ".\r\n\r\n" +
                 "Limit it to two to four words and only response with those words";
             string ArmourName = AITools.RunPrompt(Armournameprompt);
-            Console.WriteLine(ArmourName);
+            //Console.WriteLine(ArmourName);
 
             //We generate 5 versions of the base, to give high level items
             var baseleveled = new LeveledItem(myModparam)
@@ -146,12 +148,83 @@ namespace FrankyCLI.questgen_tools
                 ApplicableItemList = baseleveled.ToNullableLink<ILeveledItemGetter>(),
                 IncludeFilters = DefaultLegendaryArmor.IncludeFilters,
             };
+            //We setup the legendary to have a fixed set of perks. Feels cooler. (This behaved wierd so shelving)
+            /*
+            var legendaryMods = new ExtendedList<LegendaryMod>();
+            var filters = new ExtendedList<LegendaryFilter>();
+            bool first = false;
+            bool second = false;
+            bool third = false;
+            for(int i = 0;!first || !second || !third; i++)
+            {
+                var target = newleg.LegendaryMods[rand.Next(newleg.LegendaryMods.Count)];
+                if (target.Slot == LegendaryItem.StarSlot.First && !first)
+                {
+                    legendaryMods.Add(target);
+                    var filter = new LegendaryFilter()
+                    {
+                        Slot = target.Slot,
+                        Keyword = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0023C7C0)].ToLink(),
+                    };
+                    //So the ReferencedModifier is really wierd, they're storing a int inside a formkey. So we look up the one we want from the original.
+                    foreach (var lfilt in newleg.IncludeFilters)
+                    {
+                        if (lfilt.ReferencedModifier.FormKey.ID == 0 && lfilt.Slot == target.Slot)
+                        {
+                            filter.ReferencedModifier = lfilt.ReferencedModifier;
+                        }
+                    }
+                    filters.Add(filter);
+                    first = true;
+                }
+                if (target.Slot == LegendaryItem.StarSlot.Second && !second)
+                {
+                    legendaryMods.Add(target);
+                    var filter = new LegendaryFilter()
+                    {
+                        Slot = target.Slot,
+                        Keyword = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0023C7C0)].ToLink(),
+                    };
+                    //So the ReferencedModifier is really wierd, they're storing a int inside a formkey. So we look up the one we want from the original.
+                    foreach (var lfilt in newleg.IncludeFilters)
+                    {
+                        if (lfilt.ReferencedModifier.FormKey.ID == 0 && lfilt.Slot == target.Slot)
+                        {
+                            filter.ReferencedModifier = lfilt.ReferencedModifier;
+                        }
+                    }
+                    filters.Add(filter);
+                    second = true;
+                }
+                if (target.Slot == LegendaryItem.StarSlot.Third && !third)
+                {
+                    legendaryMods.Add(target);
+                    var filter = new LegendaryFilter()
+                    {
+                        Slot = target.Slot,
+                        Keyword = gen_quest._StarfieldMod.Keywords[new FormKey(gen_quest.StarfieldModKey, 0x0023C7C0)].ToLink(),
+                    };
+                    //So the ReferencedModifier is really wierd, they're storing a int inside a formkey. So we look up the one we want from the original.
+                    foreach (var lfilt in newleg.IncludeFilters)
+                    {
+                        if (lfilt.ReferencedModifier.FormKey.ID == 0 && lfilt.Slot == target.Slot)
+                        {
+                            filter.ReferencedModifier = lfilt.ReferencedModifier;
+                        }
+                    }
+                    filters.Add(filter);
+                    third = true;
+                }
+            }
+            newleg.LegendaryMods = legendaryMods;
+            newleg.IncludeFilters = filters;
+            */
             myModparam.LegendaryItems.Add(newleg);
+
             var leglevel = new LeveledItem(myModparam)
             {
                 EditorID = "lvlleg_" + legID,
                 ChanceNone = 0,
-                LVLL = new byte[] { 3 },
                 MaxCount = 1,
                 Entries = new ExtendedList<LeveledItemEntry>()
                 {
@@ -164,6 +237,17 @@ namespace FrankyCLI.questgen_tools
                     }
                 }
             };
+
+            //Most are purple, 25% for gold
+            if (rand.Next(100) > 75)
+            {
+                leglevel.LVLL = new byte[] { 3 };
+            }
+            else
+            {
+                leglevel.LVLL = new byte[] { 2 };
+            }
+
             myModparam.LeveledItems.Add(leglevel);
 
             return leglevel.ToNullableLink<ILeveledItemGetter>();

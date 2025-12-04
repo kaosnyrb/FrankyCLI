@@ -93,12 +93,14 @@ namespace FrankyCLI.questgen_tools
             {
                 namestogenerate = "cool pseudonym";
             }
+            Console.WriteLine("Generating Outlaw Name...");
+
             string nameprompt =
                 "Reply only with the following information:\r\n\r\n" +
                 "A " + gender + " " + namestogenerate + " \r\n\r\n" +
                 "The nickname should reflect a " + job + "  and be in English.\r\n\r\n" +
                 "The name should reflect the Nationality: " + GetNationality() + ".\r\n\r\n" +
-                "Only include the names in the response. Generate 10 examples then choose one randomly. Only return the choosen entry";
+                "Only include the names in the response. Generate 10 examples then return number " + rand.Next(10) + ". Only return the choosen entry";
             var name = AITools.RunPrompt(nameprompt);
 
             return name;
@@ -158,7 +160,8 @@ namespace FrankyCLI.questgen_tools
             if (random.Next(100) > 50) backgroundprompt += "Goals: " + GetGoals() + "\r\n\r\n";
 
 
-            
+            Console.WriteLine("Generating Outlaw Background...");
+
             string background = AITools.RunPrompt(backgroundprompt);
 
             
@@ -175,6 +178,8 @@ namespace FrankyCLI.questgen_tools
                 "Avoid using overly complex language and terminology. " +
                 "Avoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\n" +
                 "Only include the background in the response.\r\n\r\n";
+            Console.WriteLine("Generating Outlaw Log...");
+
             string background = AITools.RunPrompt(backgroundprompt);
             return background;
         }

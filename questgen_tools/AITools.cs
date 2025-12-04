@@ -149,6 +149,7 @@ namespace FrankyCLI.questgen_tools
             result += "The theme for this mission is " + GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
 
             result += "You will recieve a tag like <InitialInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
+            result += "You don't have to respond to calls which have tags in them like <DeepInvestigation>. These are just so you know which stage we are starting.\r\n\r\n";
             result += "Use the information generated in the last step to inform the current step.\r\n\r\n";
             result += "Avoid mentioning the bounty targets final location until the end of the <DeepInvestigation> step.\r\n\r\n";
 

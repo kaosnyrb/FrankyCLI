@@ -26,6 +26,8 @@ namespace FrankyCLI.questgen_tools
             //Works out the same in the end.
 
             //0x000277A4 the Robot Survey has loads of markers
+
+            //se_PatrolStartMarkerLocRef01 [LCRT:001DEE29]
             var Markers = new List<MarkerLocation>
             {
                 new MarkerLocation()
@@ -33,24 +35,6 @@ namespace FrankyCLI.questgen_tools
                     EditorID = "se_DistantPatrolStartMarkerLocRef01",
                     QuestID = 0x00127FA8,
                     AliasID = 7,
-                },
-                new MarkerLocation()
-                {
-                    EditorID = "se_PatrolStartMarkerLocRef01",
-                    QuestID = 0x000277A4,
-                    AliasID = 16,
-                },
-                new MarkerLocation()
-                {
-                    EditorID = "se_PatrolStartMarkerLocRef02",
-                    QuestID = 0x00127FA8,
-                    AliasID = 9,
-                },
-                new MarkerLocation()
-                {
-                    EditorID = "se_PatrolStartMarkerLocRef03",
-                    QuestID = 0x00127FA8,
-                    AliasID = 10,
                 },
                 new MarkerLocation()
                 {
@@ -136,6 +120,26 @@ namespace FrankyCLI.questgen_tools
                     QuestID = 0x000277A4,
                     AliasID = 24,
                 },
+                /* /Had a mission that failed to start cus of these. Disable for now. Prob enough others not to care
+                new MarkerLocation()
+                {
+                    EditorID = "se_PatrolStartMarkerLocRef01",
+                    QuestID = 0x000277A4,
+                    AliasID = 16,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_PatrolStartMarkerLocRef02",
+                    QuestID = 0x00127FA8,
+                    AliasID = 9,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_PatrolStartMarkerLocRef03",
+                    QuestID = 0x00127FA8,
+                    AliasID = 10,
+                },*/
+
             };
 
             Random random = new Random();
