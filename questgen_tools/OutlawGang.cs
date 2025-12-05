@@ -126,7 +126,7 @@ namespace FrankyCLI.questgen_tools
                     Thin = (float)wrand.NextDouble()
                 };
                 var lev = new PcLevelMult();
-                lev.LevelMult = (float)random.NextDouble();
+                lev.LevelMult = 0.25f + (float)random.NextDouble();
                 npc.Level = lev;
                 npc.SpaceOutfit = outfit;
                 npc.EyeColor = NPCTools.GetEyeColour();

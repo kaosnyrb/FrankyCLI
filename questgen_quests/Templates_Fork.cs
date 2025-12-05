@@ -23,7 +23,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "",
                 formid = 0x0008BC,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_Branch(),
+                outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = MissionLib.planetlib,
                 Lib2 = MissionLib.spacelib
             });
@@ -35,7 +35,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "",
                 formid = 0x0008BC,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_Branch(),
+                outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = MissionLib.citieslib,
                 Lib2 = MissionLib.spacelib
             });
@@ -47,7 +47,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "",
                 formid = 0x0008BC,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_Branch(),
+                outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = MissionLib.citieslib,
                 Lib2 = MissionLib.planetlib
             });

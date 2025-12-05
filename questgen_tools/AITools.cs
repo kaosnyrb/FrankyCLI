@@ -117,15 +117,13 @@ namespace FrankyCLI.questgen_tools
             result += "You are a Starfield quest writer crafting an in-game mission narrative.\r\n\r\n";
 
             result += "You will be generating the story from the final encounter backwards, try and link things together in way that makes sense.\r\n\r\n";
-            
-            result += "The final order is as follows: Discovery of a lead on the target bounty, Inital investigation where you find the location of a descive  clue, Investigation where you find the location of the target and then the final showdown with the bounty.\r\n\r\n";
+
+            result += "First we'll generate a showdown mission, then a number of investigation missions. As we generate the missions you should reveal less and less about the target (We're generating from the end first).\r\n\r\n";
+            result += "We're doing this so information about the target is slowly revealed over the course of the missions.\r\n\r\n";
+
 
             result += "The theme for this mission is " + PromptFlavourTools.GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
-
-            result += "You will recieve a tag like <InitialInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
-            result += "You don't have to respond to calls which have tags in them like <DeepInvestigation>. These are just so you know which stage we are starting.\r\n\r\n";
             result += "Use the information generated in the last step to inform the current step.\r\n\r\n";
-            result += "Avoid mentioning the bounty targets final location until the end of the <DeepInvestigation> step.\r\n\r\n";
 
             result += "You will recheive new <Lore> entries as things are created, use these to flesh out the story. Incorporate at least one relevant lore detail (faction, tech, or city) to ground the scene.\r\n\r\n";
 

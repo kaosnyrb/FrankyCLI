@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_quests
 {
-    internal class Investigation_Branch : IOutlawQuest
+    internal class Meta_Fork_Exclusive : IOutlawQuest
     {
         private Quest questform;
 
@@ -64,6 +64,8 @@ namespace FrankyCLI.questgen_quests
             Quest2.outlawQuest.Setup(myMod, outlawNpc, Quest2, nextQuest);
 
             string choiceprompt = "Generate a paragraph that explains that the player has a choice on which lead to follow. " +
+                "The player will only do one of these missions." +
+                "Write this from the players point of view and don't break the fourth wall." +
                 "The choices are: \r\n" +
                 "1. " + Quest1.outlawQuest.LogMessage + " \r\n" +
                 "2. " + Quest2.outlawQuest.LogMessage + " \r\n";
