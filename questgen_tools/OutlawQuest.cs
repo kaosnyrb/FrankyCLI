@@ -41,7 +41,7 @@ namespace FrankyCLI.questgen_tools
         public MissionLib()
         {
 
-            TemplateLibs.Add(new Templates_Meta());
+            //TemplateLibs.Add(new Templates_Fork());
 
             TemplateLibs.Add(new Templates_Dataslate());
 

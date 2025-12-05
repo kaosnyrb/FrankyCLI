@@ -74,7 +74,7 @@ namespace FrankyCLI
                 // Quest
 
                 OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
-                outlawQuest.GenerateQuest();
+                outlawQuest.GenerateQuestLoop();
 
                 //LegendaryGen.GenerateLegendaryArmour(myMod,"Bryn");
             }

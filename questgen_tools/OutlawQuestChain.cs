@@ -1,18 +1,19 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_quests;
+using FrankyCLI.questgen_tools;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI.questgen_tools
 {
@@ -23,6 +24,7 @@ namespace FrankyCLI.questgen_tools
         public OutlawQuestChain(StarfieldMod myModparam) {
             myMod = myModparam;
         }
+
 
         public bool GenerateQuest()
         {
@@ -37,7 +39,7 @@ namespace FrankyCLI.questgen_tools
 
             Random random = new Random();
             bool isfemale = false;
-            bool fork = true;
+            bool fork = false;
             
             if (random.Next(100) > 50)
             {
@@ -65,7 +67,7 @@ namespace FrankyCLI.questgen_tools
             var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
             if (fork)
             {
-                ForkInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Branching Node");
+                ForkInvestigationMissionTemplate = new Templates_Fork().GetInvestigationMissionTemplate("Branching Node");
             }
             var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
@@ -121,6 +123,67 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("---------------------------------------------------------------------------------");
 
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
+
+            //We have now generated all the stages. Do any final linking steps
+            Console.WriteLine("Generating Final Bounty Log...");
+            outlawNpc.GenerateLog();
+
+            return true;
+        }
+
+        public bool GenerateQuestLoop()
+        {
+
+            MissionLib lib = new MissionLib();
+            Console.WriteLine("ShowdownTemplates: " + lib.MergedLib.ShowdownTemplates.Count);
+            Console.WriteLine("InvestigationTemplates: " + lib.MergedLib.InvestigationTemplates.Count);
+            Console.WriteLine("DiscoveryTemplates: " + lib.MergedLib.DiscoveryTemplates.Count);
+
+
+            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
+
+            Random random = new Random();
+            bool isfemale = false;
+
+            if (random.Next(100) > 50)
+            {
+                isfemale = true;
+            }
+            MissionTemplate ForkInvestigationMissionTemplate = new MissionTemplate();
+
+            OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, ShowdownMissionTemplate.needSpacesuit);
+
+            // NPC Target                
+            outlawNpc.GenerateNPC();
+            Console.WriteLine("---------------------------------------------------------------------------------");
+            Console.WriteLine("Outlaw Name: " + outlawNpc.name);
+
+            //Quest Steps
+            var quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate, null);
+            var lastoutlaw = ShowdownMissionTemplate.outlawQuest;
+            int count = 5;
+            for (int i = 0; i < 5; i++)
+            {
+                Console.WriteLine("---------------------------------------------------------------------------------");
+                var template = lib.GetInvestigationMissionTemplate("");
+                //Don't run on the first and last.
+                if (i != 0 && i != count - 1)
+                {
+                    if (i % 2 != 0 && random.Next(100) > 0)
+                    {
+                        //Run on Even as things get wierd if we get a choice at the start or in a row.
+                        template = new Templates_Fork().GetInvestigationMissionTemplate("Branching Node");
+                    }
+                }
+                Console.WriteLine("Investigation Template: " + template.Name);
+                Quest formmission = template.outlawQuest.Setup(myMod, outlawNpc, template, lastoutlaw);
+                lastoutlaw = template.outlawQuest;
+            }
+
+            // Finally build the discovery step
+            Console.WriteLine("---------------------------------------------------------------------------------");
+            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
+            var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, lastoutlaw);
 
             //We have now generated all the stages. Do any final linking steps
             Console.WriteLine("Generating Final Bounty Log...");

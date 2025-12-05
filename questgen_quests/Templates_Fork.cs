@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_quests
 {
-    internal class Templates_Meta : TemplateLib
+    internal class Templates_Fork : TemplateLib
     {
-        public Templates_Meta() {
+        public Templates_Fork() {
 
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
