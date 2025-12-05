@@ -37,13 +37,23 @@ namespace FrankyCLI.questgen_quests
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
+            //Merge the background and log message.
+
+            string prompt = "Merge the background info the bounty and the first investigation mission Log message into the contents of a dataslate that tells the player who they are chasing and how they'll find them. " +
+                "Keep it to 200 words.";
+            prompt = PromptFlavourTools.AddFlavourToLogMessage(prompt);
+
+            prompt += "Background: " + outlawNpc.background;
+            prompt += "LogMessage: " + nextQuest.LogMessage;
+            string bookcontents = AITools.RunPrompt(prompt);
+
             // Book
             var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
             Book bountybook = new Book(myMod)
             {
                 CNAM = Book.CNAM,
                 Components = Book.Components,
-                Description = outlawNpc.background + "\r\n\r\n" + nextQuest.LogMessage,
+                Description = bookcontents,//outlawNpc.background + "\r\n\r\n" + nextQuest.LogMessage,
                 DNAMUnknown = Book.DNAMUnknown,
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + questID,

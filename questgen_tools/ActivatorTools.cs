@@ -125,6 +125,185 @@ namespace FrankyCLI.questgen_tools
 
         }
 
+        public static ActivatorType GetRandomDestroyGroundType()
+        {
+            //We duplicate the models here but the different names give flavour
+            List<ActivatorType> activatorTypes = new List<ActivatorType>()
+            {
+                new ActivatorType(){
+                    Name = "Volatile Data Core",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Hazard-Class Server Node",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Compromised System Log",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unstable System Partition",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Critical Failure Processing Core",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Illegal Network Trace Beacon",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Corrupted Memory Lattice",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Emergency Overload Node",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Residual Hazard Signature",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unauthorized Firmware Splice",
+                    Model = "SetDressing\\Computer_Cabinets\\Computer_Cabinet_Base_Computer01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Danger-Class Cargo Crate",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Encrypted Hazard Crate",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Compromised Supply Case",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unstable Smuggler Cache",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "High-Risk Contraband Box",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unmarked Reactive Container",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Secured Hazard Materials Crate",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Evidence Containment Case",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Encrypted Threat Package",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Reinforced Danger Lockbox",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Sealed Hazard Transport Unit",
+                    Model = "SetDressing\\ConsolePanels\\ConsoleCrateA02.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unstable Fertilizer Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Volatile Agrochemical Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Reactive Nutrient Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Hazard-Class Soil Additive",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Contaminated Irrigation Mix",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Toxic Compost Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Agrichemical Hot Zone Unit",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Bioactive Stock Barrel",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unstable Soil Treatment Drum",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Reactive Crop Booster",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Stored Hazard Cylinder",
+                    Model = "setdressing\\Container\\fertilizerbarrel_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "High-Risk Waste Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Hazard Disposal Cylinder",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Chemical Contaminant Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Toxic Residue Container",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Corrosive Hazard Barrel",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Reactive Solvent Drum",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Containment Breach Barrel",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Unstable Research Waste",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Industrial Sludge Hazard",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+                new ActivatorType(){
+                    Name = "Biohazard Overflow Unit",
+                    Model = "setdressing\\Container\\wastebarreldrum_01.nif"
+                },
+
+            };
+            Random random = new Random();
+            return activatorTypes[random.Next(activatorTypes.Count)];
+        }
+
         public static ActivatorType GetRandomGroundType()
         {
             //We duplicate the models here but the different names give flavour
@@ -682,13 +861,6 @@ namespace FrankyCLI.questgen_tools
                     Name = "Advanced Targeting Components",
                     Model = "setdressing\\contraband\\cb_xenowarfaretech.nif"
                 }
-
-
-                //new ActivatorType(){
-                //    Name = "Encrypted Hackbook",
-                //    Model = "SetDressing\\Hackers_LapTop\\Hackers_Laptop_01.nif"
-                //},
-                //
             };
             //
 
@@ -696,8 +868,6 @@ namespace FrankyCLI.questgen_tools
             Random random = new Random();
             return activatorTypes[random.Next(activatorTypes.Count)];
         }
-
-
     }
 
     public struct ActivatorType

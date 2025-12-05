@@ -1,5 +1,6 @@
-﻿using OpenAI.Chat;
+﻿using GameFinder.Common;
 using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,34 +109,7 @@ namespace FrankyCLI.questgen_tools
             return textres;
         }
 
-        public static string GetQuestTheme()
-        {
-            Random random = new Random();
-            List<string> questThemes = new List<string>()
-            {
-                "Corporate espionage thriller",
-                "Frontier survival adventure",
-                "Political conspiracy drama",
-                "Underworld crime investigation",
-                "Space-pirate hunting action",
-                "High-tech infiltration stealth mission",
-                "Frontier law enforcement procedural",
-                "Scientific mystery exploration",
-                "Interstellar noir detective case",
-                "Post-war tension diplomacy scenario",
-                "Cyberpunk corporate intrigue",
-                "Cult infiltration psychological drama",
-                "Resource-rush frontier scramble",
-                "Black-market smuggling caper",
-                "Megacorp sabotage operation",
-                "Deep-space horror encounter",
-                "Military rogue-unit pursuit",
-                "Neon nightlife criminal underbelly story"
-            };
-            var theme = questThemes[random.Next(questThemes.Count)];
-            Console.WriteLine(theme);
-            return theme;
-        }
+
 
         public static string GetBackgroundPrompt()
         {
@@ -146,7 +120,7 @@ namespace FrankyCLI.questgen_tools
             
             result += "The final order is as follows: Discovery of a lead on the target bounty, Inital investigation where you find the location of a descive  clue, Investigation where you find the location of the target and then the final showdown with the bounty.\r\n\r\n";
 
-            result += "The theme for this mission is " + GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
+            result += "The theme for this mission is " + PromptFlavourTools.GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
 
             result += "You will recieve a tag like <InitialInvestigation> etc to tell you when we start generating each stage.\r\n\r\n";
             result += "You don't have to respond to calls which have tags in them like <DeepInvestigation>. These are just so you know which stage we are starting.\r\n\r\n";
@@ -235,6 +209,10 @@ namespace FrankyCLI.questgen_tools
             result += "While the Trade Authority claims to be entirely apolitical and involved only in legal trade and shipping, they have a checkered reputation and are openly suspected of profiteering, theft, and smuggling. However, while the group has been investigated and even brought to trial on occasion, any witnesses to their wrongdoing always end up recanting their testimony.\r\n\r\nTrade Authority offices and kiosks can be found at numerous spaceports and star stations. Notably, Trade Authority representatives will readily purchase contraband and stolen items.";
             result += "Trident Luxury Lines is a corporation that offers premium interstellar vacation packages, and maintains its own fleet of custom-built passenger liners for that purpose. Any Trident employee will readily admit that their ships are expensive and cannot compete with other staryards' products in terms of defenses and firepower, but they insist that a flight aboard a Trident ship is an unparalleled luxury experience and more than worth the price. Vacation packages on Trident liners are extremely popular, even with their exorbitant cost, and are usually booked by customers as quickly as openings become available.\r\n\r\nTrident ships and ship parts are unavailable for purchase by consumers, and according to Jia Chen, all vacation packages have been booked for the foreseeable future. Award-winning ship designer Gladys Coffin heads Trident's R&D department at Trident Staryard, the corporation's main manufacturing facility, and is responsible for creating renowned ship models such as the Astra.";
             result += "In the late 22nd century, Xenofresh Fisheries discovered the aquatic planet Volii Alpha in the Volii system and set up a fishing platform on the planet. Not long afterward, Xenofresh discovered that one of Volii Alpha's native species, the Chasmbass, produced secretions that caused an addictive hallucinogenic effect in humans, but had no apparent harmful side effects. Medical authorities approved this drug, which named Aurora, for human use, but the United Colonies promptly banned it within its territory. This resulted in an influx of tourists to the Xenofresh platform, and Xenofresh Fisheries realized that they could make more profit from Aurora than from catching and selling fish alone. In 2187, Xenofresh transformed the platform into the pleasure city of Neon, where the Aurora flowed freely. After Volii joined the Freestar Collective in 2189, Aurora's sale and consumption was officially restricted to the confines of Neon.\r\n\r\nAs of 2330, Xenofresh Fisheries continues to control Neon and the planet Volii Alpha under the leadership of its CEO, Benjamin Bayu, who has decreed that Aurora may only be distributed legally through Boone Morgan at the Astral Lounge club in Neon's Trade Tower. As Xenofresh owns both the Trade Tower and the Astral Lounge, this arrangement gives Xenofresh a monopoly over the legal Aurora trade. Outside Neon, Aurora smuggling is a persistent problem despite the best efforts of Neon Security and the Freestar Rangers to contain it. Xenofresh Fisheries also continues to carry out its original work by fishing the seas of Volii Alpha and producing food that is eaten across the Settled Systems.";
+
+            //Food 
+            result += "The following is a list of all the food and drink in the game. You can mention these in logs etc. Alien Liquor, Astral Lounge Special Sangria, Bayu Private Reserve, Beertini, Blend, Bog's Grog, Bourbon, Cabernet Chunkignon, CAN-uck! Pilsner, Chandra Cabernet Sauvignon, Chandra Chardonnay, Chandra Malbec, Chandra Merlot, Chandra Pinot Noir, Chandra Port, Chandra Riesling, Chandra Sauvignon Blanc, Chimera, Chunks Wine, Chunks Wine - Packaged, Codos Crater, Colonel's Choice, Dark Lager, Departure Time, Disastrous Shipwreck, Drink Pack: Beer, Drink Pack: Red Wine, Drink Pack: Vodka, Drink Pack: Whiskey, Drink Pack: White Wine, Erdebrau Dark Can, Erdebrau Lager Can, Erdebrau Light Can, Erdebrau Pils Can, Fully-Loaded Bloody Mary, High Gravity Reserve, Jake's Stout, Lumberjack Julep, New Arrival, Pale Ale, Red Ale, Red Harvest Amber Ale, Red Harvest Double Malt Whiskey, Red Harvest Milk Stout, Red Harvest Pale Ale, Red Harvest Single Malt Whiskey, Runaway Whiskey, Runner's Rush, Solomon's Reserve, Sparkling Wine, Supernova, The Top Shelf, Velocity Blue, Velocity Green, Velocity Orange, Velocity Red, Velocity Violet, Velocity Yellow, Very Heavy Water, Viewport Original, Alien Jerky, Alien Kebabs, Alien Pie, Alien Sandwich, Alien Scramble, Alien Stew, Alien Stir Fry, Barbacoa Wrap, Chapaguri, Chicken Marsala, Chicken Tikka, Creature Jam, Crispy Alien Nuggets, Dal Makhani, Doro Wat, Galaxy Lo Mein, Grandpa's Meatloaf, Grilled Cheese Sandwich, Ham and Cheese Sandwich, Latkes, Meatloaf, Nebula Wat, Pappardelle Bolognese, Reuben, Spaghetti Carbonara, Star Cluster Marsala, Stellar Kebabs, Xenowurst, Meal Kit, Meal Pack - Cereal, Meal Pack - Chicken, Meal Pack - Eggs, Meal Pack - Ramen, Meal Pack - Shrimp, Meal Pack - Sushi, Meal Pack - Tofu, Midnight Delight, Miso Soup, Miso Soup Minislurp, Miso Soup Multipack, Mochi, Mochi Minibite, Mochi Multipack, Ramen, Ramen Minibite, Ramen Multipack, Seaweed Minibite, Seaweed Snacks, Seaweed Snacks Multipack, Snack Pack - Apple Bites, Snack Pack - Choco Bites, Snack Pack - Gummi Bugs, Snack Pack - Protein Bar, Soba, Soba Minibite, Soba Multipack, Sushi Rolls, Sushi Rolls Minibite, Sushi Rolls Multipack, UC BattleMeal, UC BattleMeal Multipack, Udon, Udon Minibite, Udon Multipack, Alien Broth, Alien Energy Drink, Alien Tea, Alien Tonic, Boba Alien Tea, Boom Pop! Black Licorice, Boom Pop! Cherry, Boom Pop! Cola, Boom Pop! Dynamite, Boom Pop! Orange, Boom Pop! Reactor, Boom Pop! Rhubarb, Boom Pop! Root Beer, Bullet Coffee, Cafe et the Prime, CAN-uck! Double Double, CAN-uck! Maple Cola, Chai Latte, Chunks Cola, Chunks Cola - Packaged, Distilled Water, Drink Pack: Milk, Drink Pack: Orange Juice, Drink Pack: Water, Kefir, Milk, Orange Juice of Transcendence, Sparkling Water, Sunray Tonic, TerraBrew Cappuccino, TerraBrew Classic, TerraBrew Cortado, TerraBrew Espresso, TerraBrew Latte, TerraBrew Macchiato, Tranquilitea Breakfast, Tranquilitea Chamomile, Tranquilitea Classic, Tranquilitea Dynastic, Tranquilitea Earl Grey, Tranquilitea Easy Sleep, Tranquilitea Lemon, Tranquilitea Lotus, Tranquilitea Sunray, Yellow Giant Splash, Yuko's Coffee, Baguette, Butter, CAN-uck! Bacon, CAN-uck! Pancakes Plus, CAN-uck! Poutine, CAN-uck! Tourtiere, Cheddar Snack Crackers, Cheese, Chocolate Labs, Chunks Apple - Packaged, Chunks Beef - Packaged, Chunks Cake - Packaged, Chunks Cheesesteak - Packaged, Chunks Chick - Packaged, Chunks Choco - Packaged, Chunks Egg - Packaged, Chunks Pie - Packaged, Chunks Potato - Packaged, Container of Cereal, Fullfood Spiced Worms, Granola Mix, Instant Oatmeal, Marshmallow Treat Cereal, Oat Clusters, Opened Superfood Paste Kit, Pizza Square, Raisin Bran Cereal, Red Harvest Lentils, Red Harvest Naan, Red Harvest Rice, Red Harvest Rye, Red Harvest Spaghetti, Red Harvest Wheat, Red Harvest White, Ships O' the Line Cereal, Smoked Salmon Filet, Superfood Paste Kit, Superfood Paste Set, Synthameat Chicken, Synthameat Ham, Synthameat Hamburger, Synthameat Multi, Synthameat Steak, Synthameat Turkey, Synthameat Veal, Yogurt, Carrot, Celery, Grapes, Lemon, Lettuce, Lime, Onion, Orange, Peach, Pear, Plum, Potato, Tomato, Watermelon, Astral Sliders, Bart's Chili, Beer Brat Platter, Bitten Sandwich, CAN-uck! Edmontonian, CAN-uck! Haligonian, CAN-uck! Ham Boys, CAN-uck! Shepherd's Pie, Chunks Apple, Chunks Beef, Chunks Cake, Chunks Cheesesteak, Chunks Chicken, Chunks Choco, Chunks Egg, Chunks Pie, Chunks Potato, Crawler Bisque, Dawn's Roost Strip, Fried Pickles, Gazpacho, Jemison Wellington, Kiffles, Liver Pate, Lounge Special, Meal Tray, Melon Caviar, Midnight Special, Panache, Patty Melt, Pierogis, Pit Chops, Sandwich, Shepherd's Pie, Sweet Rolls, Ta'ameya Pita, The Deep, The Rack, The Strip, Toast, Trawl, Trilo Bites, Veggie Grinder, Xenofresh Paella, Xenofresh Ramen, Xenoyaki";
+
 
             result += "Across the Settled Systems, themes of colonization and frontier survival, political rivalry and uneasy alliances, flourishing commerce and black-market dealings, rampant piracy, and the enduring human drive to explore the unknown all intermingle. It is a future where humanity’s colonies stand scattered among the stars – full of opportunity and danger in equal measure – as factions compete and adventurers chart new horizons in the vast expanse of Starfield.\r\n ";
 

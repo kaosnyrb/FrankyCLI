@@ -45,9 +45,9 @@ namespace FrankyCLI.questgen_tools
 
             // NPC Target                
             outlawNpc.GenerateNPC();
-            
-            Console.WriteLine(outlawNpc.name);
-            Console.WriteLine(outlawNpc.background);
+            Console.WriteLine("---------------------------------------------------------------------------------");
+            Console.WriteLine("Outlaw Name: " + outlawNpc.name);
+            //Console.WriteLine(outlawNpc.background);
 
             //Quest Steps
             Console.WriteLine("---------------------------------------------------------------------------------");
@@ -55,7 +55,7 @@ namespace FrankyCLI.questgen_tools
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Planet side Activator Small Marker");
+            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
@@ -90,6 +90,7 @@ namespace FrankyCLI.questgen_tools
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 
             //We have now generated all the stages. Do any final linking steps
+            Console.WriteLine("Generating Final Bounty Log...");
             outlawNpc.GenerateLog();
 
             return true;

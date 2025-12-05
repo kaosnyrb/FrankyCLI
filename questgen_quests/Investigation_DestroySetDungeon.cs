@@ -40,7 +40,7 @@ namespace FrankyCLI
         {
             Console.WriteLine("Generating Destroy Planet Quest...");
 
-            var questActivator = ActivatorTools.GetRandomGroundType();
+            var questActivator = ActivatorTools.GetRandomDestroyGroundType();
 
 
             questloc = missionTemplate.Location;
@@ -65,17 +65,7 @@ namespace FrankyCLI
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Generate a gang
-
-            string gangtheme = OutlawGang.GetGangTheme();
-            Console.WriteLine("gangtheme: " + gangtheme);
-
-            var gangpromt = 
-               "Generate the name of a member of the characters gang.\r\n\r\n" +
-               "Keep it to two words and only return those two words\r\n\r\n" +
-               "The gangs theme is " + gangtheme + " \r\n\r\n" +
-               "Use the following information:\r\n\r\n";
-
-            var gangname = AITools.RunPrompt(gangpromt);
+            var gangname = OutlawGang.GetGangName();
             Console.WriteLine("gangname: " + gangname);
 
             OutlawGang outlawGang = new OutlawGang(myMod, gangname);

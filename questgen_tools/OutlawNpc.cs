@@ -111,29 +111,11 @@ namespace FrankyCLI.questgen_tools
             BountyFaction = FactionTools.GetFaction();
             Random random = new Random();
 
-            string backgroundprompt = "Create a brief background file on the target using one of several possible report formats.\r\n";
+            string backgroundprompt = "Create a brief background file on the target.\r\n";
 
-            backgroundprompt += "Choose one of the following formats at random for each generation:\r\n";
-            backgroundprompt += "Two short paragraphs\r\n";
-            backgroundprompt += "A three-section mini-dossier (Background, Activities, Notes)\r\n";
-            backgroundprompt += "A short bullet-point intelligence summary\r\n";
-            backgroundprompt += "A compact internal memo (3 to 5 sentences)\r\n";
-            backgroundprompt += "A field agent observation report\r\n";
-            backgroundprompt += "A brief narrative overview written like an incident recap\r\n";
-            backgroundprompt += "A senior analyst incident summary\r\n";
-            backgroundprompt += "An internal security briefing note\r\n";
-            backgroundprompt += "A condensed behavioral risk profile\r\n";
-            backgroundprompt += "A frontline investigator situation recap\r\n";
-            backgroundprompt += "A regional operations intelligence note\r\n";
-            backgroundprompt += "A covert surveillance extract\r\n";
-            backgroundprompt += "A rapid assessment threat outline\r\n";
-            backgroundprompt += "A personnel history compression file\r\n";
-            backgroundprompt += "A classified misconduct review\r\n";
-            backgroundprompt += "A compressed target bio entry\r\n";
+            backgroundprompt = PromptFlavourTools.AddReportTypes(backgroundprompt);
 
-            backgroundprompt += "Ensure the total output stays under 100 words, regardless of format.\r\n";
-
-
+            backgroundprompt += "Ensure the total output stays under 500 words, regardless of format.\r\n";
 
             backgroundprompt += "The entry must be written in the tone of an internal " + BountyFaction + " report.\r\n";
             backgroundprompt += "Avoid complex terminology. \r\n";
@@ -245,7 +227,7 @@ namespace FrankyCLI.questgen_tools
         public void GenerateLog()
         {
             var log = GenerateLogfile();
-            Console.WriteLine(log);
+            //Console.WriteLine(log);
             //Generate Log file for bounty
             var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
             Book logbook = new Book(myMod)

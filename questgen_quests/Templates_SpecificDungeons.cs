@@ -37,7 +37,7 @@ namespace FrankyCLI.questgen_quests
                         Name = "Planet side Destroy - " + PCMName,
                         Description = "Destroy an important object at a " + PCMName,
                         Location = PCMName,
-                        formid = 0x0008B9,
+                        formid = 0x000842,
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
                         outlawQuest = new Investigation_DestroySetDungeon()

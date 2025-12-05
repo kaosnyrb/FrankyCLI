@@ -36,70 +36,56 @@ namespace FrankyCLI.questgen_tools
             AITools.RunPrompt("<Lore> There is a gang of people called " + gangName + " who are assiting the target");
         }
 
-        public static string GetGangTheme()
+        public static string GetGangName()
         {
             Random random = new Random();
-
-            List<string> ganglist = new List<string>()
+            List<string> gangPrefixes = new List<string>
             {
-                "Urban cyberpunk street gang",
-                "Rogue space pirate faction",
-                "Paramilitary mercenary company",
-                "Bio-augmented criminal syndicate",
-                "Black-market tech smugglers",
-                "Nomadic wasteland raider clan",
-                "Elite assassin brotherhood",
-                "Underground robotics cult",
-                "Rebel freedom-fighter cell",
-                "Corporate espionage division",
-                "Post-apocalyptic scavenger tribe",
-                "Void-dwelling marauder fleet",
-                "Mutant undercity crime family",
-                "High-society criminal cartel",
-                "Fanatical doomsday cult",
-                "AI-controlled pirate collective",
-                "Stealth-oriented infiltration unit",
-                "Chemical-enhanced gladiator gang",
-                "Ancient relic-hunters guild",
-                "Quantum anomaly worshippers",
-                "Smuggler-trader nomad caravans",
-                "Deep-space salvage pirates",
-                "Telepathic crime circle",
-                "Ex-military deserter faction",
-                "Genetically-engineered outcast tribe",
-                "Orbital scrap-reaver union",
-                "Neo-frontier dustland bandits",
-                "Cold-void infiltration cult",
-                "Illicit xenobiology harvesters",
-                "Contraband sensor-jammer crew",
-                "Black-helm paramilitary enforcers",
-                "Gravity-well ambush legion",
-                "Underbelly organ-trading ring",
-                "Pirate grav-drive hijacker squad",
-                "Radiation-zone nomad hunters",
-                "Augmetic street-warrior horde",
-                "Lawless frontier marshal impostors",
-                "Cosmic rift superstition sect",
-                "Shadow-market auction guards",
-                "Deep-mine exiles turned raiders",
-                "Atmospheric processor saboteurs",
-                "Shipbreaker hull-clan scavengers",
-                "Dishonored UC veteran brotherhood",
-                "Freestar-wanted outlaw posse",
-                "Off-grid techno-survivalists",
-                "Microfusion-lab rogue technicians",
-                "Disavowed corporate strike team",
-                "Void-mask smuggler assassins",
-                "Grav-jump relay saboteur crew",
-                "Asteroid claim-jumping militias",
-                "Illicit drone-warfare swarmers",
-                "Genesplice cult of perfectionists",
-                "Underdeck chem-running battalion",
-                "Stargrave relic-hungry fanatics",
-                "Atmospheric skimmer piracy ring"
+                "Red", "Black", "Iron", "Steel", "Rust", "Grim", "Dead", "Broken", "Shadow",
+                "Blood", "Night", "Grave", "Ash", "Gutter", "Backstreet", "Lowtown", "Hollow",
+                "Cross", "Eastside", "Westside", "Southend", "Northblock", "Dust", "Mud",
+                "Scrap", "Brick", "Stone", "Razor", "Chain", "Wire", "Block", "Wasteland",
+                "Chrome", "Slag", "Smoke", "Sewer", "Under", "Bleak", "Ridge", "Ironbound",
+                "Drift", "Lockjaw", "Blacktop", "Cracked", "Scar", "Vandal", "Pitch",
+                "Copper", "Tin", "Lead", "Rot", "Slick", "Grime", "Blight", "Rivet",
+                "Forge", "Rusted", "Cold", "Frost", "Burnt", "Charred", "Smolder",
+                "Ember", "Thunder", "Storm", "Wild", "Feral", "Nomad", "Stray", "Lone",
+                "Bone", "Skull", "Hate", "Vice", "Sorrow", "Dread", "Void", "Wraith",
+                "Rumble", "Ruckus", "Scrapper", "Chainlink", "Barbed", "Hellbound", "Crimson",
+                "Pale", "Ivory", "Coal", "Shiv", "Needle", "Soot", "Gloom", "Tangle",
+                "Vermin", "Slickline", "Ironcore", "Blackwire", "Gravel", "Murk", "Roughcut",
+                // Military phonetic alphabet & tactical designators
+                "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Gamma", "Hotel",
+                "Kilo", "Lima", "Omega", "Sierra", "Tango", "Uniform", "Victor", "Zulu",
+                "Squad", "Unit", "Division", "Sector", "Zone", "Company", "Battalion",
+                "Tier-One", "Strike", "Recon", "Forward", "Tactical", "Rapid", "Command",
+                "Vector", "Grid", "Perimeter", "Outpost", "Protocol", "Cipher", "Directive",
+
+                // Paramilitary / PMC-flavored
+                "Blacksite", "Shadowcell", "Darkwatch", "Ironfront", "Redline", "Nightwatch",
+                "Warpath", "Overwatch", "Sentinel", "Bulwark", "Vanguard", "Helix", "Crucible",
+                "Legion", "Taskforce", "Cerberus", "Executioner", "Skirmish", "Breach",
+            };
+            List<string> gangSuffixes = new List<string>
+            {
+                "Reapers", "Rats", "Jackals", "Vipers", "Saints", "Devils", "Serpents", "Breakers", "Wolves",
+                "Talons", "Mongrels", "Phantoms", "Specters", "Ghouls", "Grinders", "Cutthroats", "Rogues",
+                "Drifters", "Raiders", "Bruisers", "Stalkers", "Outcasts", "Ironclaws", "Deadlights", "Bonecrushers",
+                "Shadows", "Hollows", "Nightfolk", "Eclipsers", "Backlot Boys", "Dustwalkers", "Ridge Runners",
+                "Streetburners", "Ashborn", "Pack", "Crimson Lot", "Black Fangs", "Gravepack", "Scrapwolves",
+                "Rubble Rats", "Steel Vipers", "Gutter Kings", "Wastelanders", "Faultliners", "Lowborn",
+                "Blackjacks", "Chain Runners", "Shivmasters", "Lockjaw Crew", "Thunder Dogs", "Pit Wolves",
+                "Slick Syndicate", "Rust Syndicate", "Dripline Crew", "Backbreaker Union", "Molten Skulls",
+                "Needle Boys", "Ironbloods", "Edgewalkers", "Night Wreckers", "Frosthands", "Grime Pact",
+                "Razorbacks", "Slagborn", "Grim Company", "Gravel Kings", "Mirefolk", "Dust Devils", "Hellpack",
+                "Red Lanterns", "Chrome Fangs", "Wreckrats", "Basement Lords", "Block Runners", "Gutterline",
+                "Ash Syndicate", "Crackstone Crew", "Chainlink Mob", "Rustmarks", "Night Chain", "Hollow Sons",
+                "Deadwater Crew", "Blight Riders", "Iron Syndicate", "Ravagers", "Hellchain", "Spinebreakers",
+                "Rotfangs", "Blackwater Pact", "Rage Unit", "Broken Crown", "Silk Knives", "Rubble Born",
+                "Wire Rats", "Torchline", "Gutter Serpents", "Blood Signal", "Shadow Union", "Vermin Pact"
             };
 
-            return ganglist[random.Next(ganglist.Count)];
+            return gangPrefixes[random.Next(gangPrefixes.Count)] + " " + gangSuffixes[random.Next(gangSuffixes.Count)];
         }
 
         public Mutagen.Bethesda.Starfield.FormList GenerateGang()
@@ -162,7 +148,7 @@ namespace FrankyCLI.questgen_tools
                     BookPrompt += "Use the previously generated crew names for this gang.";
                     BookPrompt += "Make the entry feel immersive, introspective, character-driven and suitable as lore flavor for a quest.";
 
-                    BookPrompt = PromptFlavourTools.AddFlavourToShipBook(BookPrompt);
+                    BookPrompt = PromptFlavourTools.AddFlavourToGangBook(BookPrompt);
 
 
                     string BookContents = AITools.RunPrompt(BookPrompt);

@@ -66,18 +66,7 @@ namespace FrankyCLI
 
             //Generate a gang
 
-            string gangtheme = OutlawGang.GetGangTheme();
-            Console.WriteLine("gangtheme: " + gangtheme);
-
-            var gangpromt = 
-               "Generate the name of a member of the characters gang.\r\n\r\n" +
-               "Keep it to two words and only return those two words\r\n\r\n" +
-               "The gangs theme is " + gangtheme + " \r\n\r\n" +
-               "Use the following information:\r\n\r\n";
-
-            var gangname = AITools.RunPrompt(gangpromt);
-            Console.WriteLine("gangname: " + gangname);
-
+            var gangname = OutlawGang.GetGangName();
             OutlawGang outlawGang = new OutlawGang(myMod, gangname);
             var gang = outlawGang.GenerateGang();
 
