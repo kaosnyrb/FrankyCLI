@@ -41,19 +41,28 @@ namespace FrankyCLI.questgen_tools
         public MissionLib()
         {
 
+            TemplateLibs.Add(new Templates_Meta());
+
             TemplateLibs.Add(new Templates_Dataslate());
 
-            TemplateLibs.Add(new Templates_PlanetPCM());
-            TemplateLibs.Add(new Templates_SpecificDungeons());
+            var planetlib = new TemplateLib();
+            planetlib.ImportTemplates(new Templates_PlanetPCM());
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
+            TemplateLibs.Add(planetlib);
 
-            TemplateLibs.Add(new Templates_SpaceActivator());
-            TemplateLibs.Add(new Templates_SpaceInformant());
-            TemplateLibs.Add(new Templates_Derelicts());
+            var spacelib = new TemplateLib();
+            spacelib.ImportTemplates(new Templates_SpaceActivator());
+            spacelib.ImportTemplates(new Templates_SpaceInformant());
+            spacelib.ImportTemplates(new Templates_Derelicts());
+            TemplateLibs.Add(spacelib);
 
-            TemplateLibs.Add(new Templates_Cities());
-            TemplateLibs.Add(new Templates_Cities_Neon());
-            TemplateLibs.Add(new Templates_Cities_Cydonia());
-            TemplateLibs.Add(new Templates_Cities_Akila());
+
+            var cities = new TemplateLib();
+            cities.ImportTemplates(new Templates_Cities());
+            cities.ImportTemplates(new Templates_Cities_Neon());
+            cities.ImportTemplates(new Templates_Cities_Cydonia());
+            cities.ImportTemplates(new Templates_Cities_Akila());
+            TemplateLibs.Add(cities);
 
             MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
             MergedLib.InvestigationTemplates = new List<MissionTemplate>();
@@ -83,6 +92,29 @@ namespace FrankyCLI.questgen_tools
 
         public MissionTemplate GetInvestigationMissionTemplate(string missionName)
         {
+
+            Random random = new Random();
+            bool foundMission = false;
+
+            if (missionName.Length > 0)
+            {
+                return MergedLib.GetInvestigationMissionTemplate(missionName);
+            }
+
+            while (!foundMission)
+            {
+                var chosenlib = TemplateLibs[random.Next(TemplateLibs.Count)];
+                if (chosenlib.InvestigationTemplates.Count >0)
+                {
+                    var chosen = chosenlib.GetInvestigationMissionTemplate(missionName);
+                    if (chosen != null)
+                    {
+                        return chosen;
+                    }
+                }
+
+            }
+
             return MergedLib.GetInvestigationMissionTemplate(missionName);
         }
 

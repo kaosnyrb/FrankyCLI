@@ -747,7 +747,7 @@ namespace FrankyCLI.questgen_tools
                 "Underground alliance sheltering settlers evading corp debt collectors"
             };
             var theme = questThemes[random.Next(questThemes.Count)];
-            Console.WriteLine(theme);
+            //Console.WriteLine(theme);
             return theme;
         }
 

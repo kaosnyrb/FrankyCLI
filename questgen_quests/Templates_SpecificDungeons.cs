@@ -25,7 +25,7 @@ namespace FrankyCLI.questgen_quests
                     InvestigationTemplates.Add(new MissionTemplate()
                     {
                         Name = "Planet side Activator - " + PCMName,
-                        Description = "Find a cruical lead to the target at a " + PCMName,
+                        Description = "Find a lead to the target at a " + PCMName,
                         Location = PCMName,
                         formid = 0x0008B9,
                         parameterformid = PCM.FormKey.ID,
@@ -35,7 +35,7 @@ namespace FrankyCLI.questgen_quests
                     InvestigationTemplates.Add(new MissionTemplate()
                     {
                         Name = "Planet side Destroy - " + PCMName,
-                        Description = "Destroy an important object at a " + PCMName,
+                        Description = "Destroy an object at a " + PCMName,
                         Location = PCMName,
                         formid = 0x000842,
                         parameterformid = PCM.FormKey.ID,

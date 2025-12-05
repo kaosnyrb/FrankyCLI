@@ -37,10 +37,18 @@ namespace FrankyCLI.questgen_tools
 
             Random random = new Random();
             bool isfemale = false;
+            bool fork = true;
+            
             if (random.Next(100) > 50)
             {
                 isfemale = true;
-            }            
+            }
+            if (random.Next(100) > 50)
+            {
+                fork = true;
+            }
+            MissionTemplate ForkInvestigationMissionTemplate = new MissionTemplate();
+
             OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, ShowdownMissionTemplate.needSpacesuit);
 
             // NPC Target                
@@ -55,11 +63,19 @@ namespace FrankyCLI.questgen_tools
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            if (fork)
+            {
+                ForkInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("Branching Node");
+            }
             var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
             var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
             AITools.RunPrompt("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);
+            if (fork)
+            {
+                AITools.RunPrompt("<ForkInvestigation Summary>" + ForkInvestigationMissionTemplate.Description + " Location: " + ForkInvestigationMissionTemplate.Location);
+            }
             AITools.RunPrompt("<InitialInvestigation Summary>" + InvestigationMissionTemplate.Description + " Location: " + InvestigationMissionTemplate.Location);
             AITools.RunPrompt("<Discovery Summary>" + DiscoveryMissionTemplate.Description + " Location: " + DiscoveryMissionTemplate.Location);
 
@@ -77,11 +93,28 @@ namespace FrankyCLI.questgen_tools
             var InvestigationMission = DeepInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DeepInvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             AITools.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
 
-            //InitialInvestigation
-            AITools.RunPrompt("<InitialInvestigation>");
-            Console.WriteLine("---------------------------------------------------------------------------------");
-            Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
-            Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
+            if (fork)
+            {
+                //ForkInvestigation
+                AITools.RunPrompt("<ForkInvestigation>");
+                Console.WriteLine("---------------------------------------------------------------------------------");
+                Console.WriteLine("ForkInvestigation: " + ForkInvestigationMissionTemplate.Name);
+                Quest formmission = ForkInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ForkInvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
+
+                //InitialInvestigation
+                AITools.RunPrompt("<InitialInvestigation>");
+                Console.WriteLine("---------------------------------------------------------------------------------");
+                Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
+                Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ForkInvestigationMissionTemplate.outlawQuest);
+            }
+            else
+            {
+                //InitialInvestigation
+                AITools.RunPrompt("<InitialInvestigation>");
+                Console.WriteLine("---------------------------------------------------------------------------------");
+                Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
+                Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
+            }
 
             // Finally build the discovery step
             AITools.RunPrompt("<Discovery>");

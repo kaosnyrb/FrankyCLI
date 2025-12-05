@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+﻿using DynamicData;
+using FrankyCLI.questgen_tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,17 @@ namespace FrankyCLI.questgen_quests
         public List<MissionTemplate> DiscoveryTemplates;
         public List<MissionTemplate> InvestigationTemplates;
         public List<MissionTemplate> ShowdownTemplates;
+
+        public void ImportTemplates(TemplateLib template)
+        {
+            if (DiscoveryTemplates == null) { DiscoveryTemplates = new List<MissionTemplate>(); }
+            if (InvestigationTemplates == null) { InvestigationTemplates = new List<MissionTemplate>(); }
+            if (ShowdownTemplates == null) { ShowdownTemplates = new List<MissionTemplate>(); }
+
+            DiscoveryTemplates.Add(template.DiscoveryTemplates);
+            InvestigationTemplates.Add(template.InvestigationTemplates);
+            ShowdownTemplates.Add(template.ShowdownTemplates);
+        }
 
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
@@ -76,12 +88,11 @@ namespace FrankyCLI.questgen_quests
                 return InvestigationTemplates.Where(x => x.Name == mission).Single();
             }
 
-            if (AITools.AIMODE)
+            if (AITools.AIMODE && false)
             {
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
                 ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
-                ItemPrompts += "Do not choose a City stage if you already have." + "\r\n";
 
                 int count = 5 + random.Next(10);
                 List<MissionTemplate> selected = InvestigationTemplates
@@ -128,7 +139,7 @@ namespace FrankyCLI.questgen_quests
             if (DiscoveryTemplates.Count == 0) return null;
             Random random = new Random();
 
-            if (AITools.AIMODE)
+            if (AITools.AIMODE && false)
             {
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
