@@ -54,14 +54,13 @@ namespace FrankyCLI.questgen_quests
                 VirtualMachineAdapter = Quest.VirtualMachineAdapter
             };
 
-            MissionLib missionLib = new MissionLib();
 
             //Quest 1
-            var Quest1 = missionLib.GetInvestigationMissionTemplate("");
+            var Quest1 = missionTemplate.Lib1.GetInvestigationMissionTemplate("");
             Quest1.outlawQuest.Setup(myMod, outlawNpc, Quest1, nextQuest);
 
             //Quest 2
-            var Quest2 = missionLib.GetInvestigationMissionTemplate("");
+            var Quest2 = missionTemplate.Lib2.GetInvestigationMissionTemplate("");
             Quest2.outlawQuest.Setup(myMod, outlawNpc, Quest2, nextQuest);
 
             string choiceprompt = "Generate a paragraph that explains that the player has a choice on which lead to follow. " +

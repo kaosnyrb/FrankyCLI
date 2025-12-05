@@ -172,12 +172,16 @@ namespace FrankyCLI.questgen_tools
                     if (i % 2 != 0 && random.Next(100) > 0)
                     {
                         //Run on Even as things get wierd if we get a choice at the start or in a row.
-                        template = new Templates_Fork().GetInvestigationMissionTemplate("Branching Node");
+                        template = new Templates_Fork().GetInvestigationMissionTemplate("");
                     }
                 }
                 Console.WriteLine("Investigation Template: " + template.Name);
                 Quest formmission = template.outlawQuest.Setup(myMod, outlawNpc, template, lastoutlaw);
                 lastoutlaw = template.outlawQuest;
+                if (i == 0)
+                {
+                    AITools.RunPrompt("Important note: From now on don't mention where the final showdown takes place.");
+                }
             }
 
             // Finally build the discovery step

@@ -58,25 +58,8 @@ namespace FrankyCLI
                         }
                     }
                 }
-                /*
-                uint formid = 0;
-                IMajorRecord formrec = null;
-                foreach (var rec in myMod.EnumerateMajorRecords())
-                {
-                    if (rec.FormKey.ID > formid && rec.FormKey.ID < 0x011800)
-                    {
-                        formid = rec.FormKey.ID;
-                        formrec = rec;
-                    }
-                }*/
-
-                //AITools.TestPrompt();
-                // Quest
-
                 OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
                 outlawQuest.GenerateQuestLoop();
-
-                //LegendaryGen.GenerateLegendaryArmour(myMod,"Bryn");
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

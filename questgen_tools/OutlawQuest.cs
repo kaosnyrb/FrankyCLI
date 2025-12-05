@@ -28,6 +28,8 @@ namespace FrankyCLI.questgen_tools
         public uint parameterformid;
         public uint formid;
         public bool needSpacesuit;
+        public TemplateLib Lib1;
+        public TemplateLib Lib2;
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
     }
 
@@ -38,6 +40,10 @@ namespace FrankyCLI.questgen_tools
 
         public TemplateLib MergedLib = new TemplateLib();
 
+        public static TemplateLib planetlib = new TemplateLib();
+        public static TemplateLib spacelib = new TemplateLib();
+        public static TemplateLib citieslib = new TemplateLib();
+
         public MissionLib()
         {
 
@@ -45,24 +51,21 @@ namespace FrankyCLI.questgen_tools
 
             TemplateLibs.Add(new Templates_Dataslate());
 
-            var planetlib = new TemplateLib();
             planetlib.ImportTemplates(new Templates_PlanetPCM());
             planetlib.ImportTemplates(new Templates_SpecificDungeons());           
             TemplateLibs.Add(planetlib);
 
-            var spacelib = new TemplateLib();
             spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
             spacelib.ImportTemplates(new Templates_Derelicts());
             TemplateLibs.Add(spacelib);
 
 
-            var cities = new TemplateLib();
-            cities.ImportTemplates(new Templates_Cities());
-            cities.ImportTemplates(new Templates_Cities_Neon());
-            cities.ImportTemplates(new Templates_Cities_Cydonia());
-            cities.ImportTemplates(new Templates_Cities_Akila());
-            TemplateLibs.Add(cities);
+            citieslib.ImportTemplates(new Templates_Cities());
+            citieslib.ImportTemplates(new Templates_Cities_Neon());
+            citieslib.ImportTemplates(new Templates_Cities_Cydonia());
+            citieslib.ImportTemplates(new Templates_Cities_Akila());
+            TemplateLibs.Add(citieslib);
 
             MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
             MergedLib.InvestigationTemplates = new List<MissionTemplate>();
