@@ -198,7 +198,7 @@ namespace FrankyCLI.questgen_tools
             lev.LevelMult = 0.25f + (float)wrand.NextDouble();
             npc.Level = lev;
 
-            var legendary = LegendaryGen.GenerateLegendaryArmour(myMod, name);
+            var legendary = new LegendaryArmour(name);
 
             npc.Items = new ExtendedList<ContainerEntry>
             {
@@ -212,7 +212,7 @@ namespace FrankyCLI.questgen_tools
                 Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),                
             };
 
-            frmlst.Items.Add(legendary);
+            frmlst.Items.Add(legendary.LeveledItemGetter);
             deathItems = frmlst.FormKey;
 
             myMod.FormLists.Add(frmlst);
