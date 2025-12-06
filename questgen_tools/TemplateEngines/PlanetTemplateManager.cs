@@ -1,36 +1,63 @@
 ﻿using DynamicData;
-using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_quests;
+using FrankyCLI.questgen_tools.Interfaces;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FrankyCLI.questgen_quests
+namespace FrankyCLI.questgen_tools
 {
-    public class TemplateLib
+    public class PlanetTemplateManager : ITemplateManager
     {
-        public List<MissionTemplate> DiscoveryTemplates;
-        public List<MissionTemplate> InvestigationTemplates;
-        public List<MissionTemplate> ShowdownTemplates;
+        List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
-        public void ImportTemplates(TemplateLib template)
+        public TemplateLib MergedLib = new TemplateLib();
+
+        public static TemplateLib planetlib = new TemplateLib();
+        public static TemplateLib spacelib = new TemplateLib();
+        public static TemplateLib citieslib = new TemplateLib();
+
+        public PlanetTemplateManager()
         {
-            if (DiscoveryTemplates == null) { DiscoveryTemplates = new List<MissionTemplate>(); }
-            if (InvestigationTemplates == null) { InvestigationTemplates = new List<MissionTemplate>(); }
-            if (ShowdownTemplates == null) { ShowdownTemplates = new List<MissionTemplate>(); }
 
-            DiscoveryTemplates.Add(template.DiscoveryTemplates);
-            InvestigationTemplates.Add(template.InvestigationTemplates);
-            ShowdownTemplates.Add(template.ShowdownTemplates);
+            planetlib.ImportTemplates(new Templates_PlanetPCM());
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
+            TemplateLibs.Add(planetlib);
+
+            MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
+            MergedLib.InvestigationTemplates = new List<MissionTemplate>();
+            MergedLib.ShowdownTemplates = new List<MissionTemplate>();
+
+            foreach (TemplateLib templateLib in TemplateLibs)
+            {
+                foreach (var dis in templateLib.DiscoveryTemplates)
+                {
+                    MergedLib.DiscoveryTemplates.Add(dis);
+                }
+                foreach (var dis in templateLib.InvestigationTemplates)
+                {
+                    MergedLib.InvestigationTemplates.Add(dis);
+                }
+                foreach(var dis in templateLib.ShowdownTemplates)
+                {
+                    MergedLib.ShowdownTemplates.Add(dis);
+                }
+            }
         }
 
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
             Random random = new Random();
 
-            if (mission.Length > 0) {
-                return ShowdownTemplates.Where(x => x.Name == mission).Single();
+            if (mission.Length > 0)
+            {
+                return MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
             }
 
             //Should showdowns use ai at all?
@@ -39,9 +66,9 @@ namespace FrankyCLI.questgen_quests
                 //AI Test
                 string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
                 ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
-                
+
                 int count = 5 + random.Next(10);
-                List<MissionTemplate> selected = ShowdownTemplates
+                List<MissionTemplate> selected = MergedLib.ShowdownTemplates
                     .OrderBy(x => random.Next())
                     .Take(count).ToList();
                 for (int i = 0; i < selected.Count; i++)
@@ -57,22 +84,22 @@ namespace FrankyCLI.questgen_quests
                 }
                 catch
                 {
-                    int randselected = random.Next(ShowdownTemplates.Count);
-                    var template = ShowdownTemplates[randselected];
-                    ShowdownTemplates.RemoveAt(randselected);
+                    int randselected = random.Next(MergedLib.ShowdownTemplates.Count);
+                    var template = MergedLib.ShowdownTemplates[randselected];
+                    MergedLib.ShowdownTemplates.RemoveAt(randselected);
                     return template;
                 }
             }
             else
             {
-                if (ShowdownTemplates.Count == 0) return null;
+                if (MergedLib.ShowdownTemplates.Count == 0) return null;
                 if (mission != "")
                 {
-                    return ShowdownTemplates.Where(x => x.Name == mission).Single();
+                    return MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
                 }
                 else
                 {
-                    return ShowdownTemplates[random.Next(ShowdownTemplates.Count)];
+                    return MergedLib.ShowdownTemplates[random.Next(MergedLib.ShowdownTemplates.Count)];
                 }
             }
 
@@ -80,12 +107,12 @@ namespace FrankyCLI.questgen_quests
 
         public MissionTemplate GetInvestigationMissionTemplate(string mission)
         {
-            if (InvestigationTemplates.Count == 0) return null;
+            if (MergedLib.InvestigationTemplates.Count == 0) return null;
             Random random = new Random();
 
             if (mission.Length > 0)
             {
-                return InvestigationTemplates.Where(x => x.Name == mission).Single();
+                return MergedLib.InvestigationTemplates.Where(x => x.Name == mission).Single();
             }
 
             if (AITools.AIMODE && false)
@@ -95,7 +122,7 @@ namespace FrankyCLI.questgen_quests
                 ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
 
                 int count = 5 + random.Next(10);
-                List<MissionTemplate> selected = InvestigationTemplates
+                List<MissionTemplate> selected = MergedLib.InvestigationTemplates
                     .OrderBy(x => random.Next())
                     .Take(count).ToList();
                 for (int i = 0; i < selected.Count; i++)
@@ -109,13 +136,13 @@ namespace FrankyCLI.questgen_quests
                 try
                 {
                     int.TryParse(result, out index);
-                    return InvestigationTemplates[index];
+                    return MergedLib.InvestigationTemplates[index];
                 }
                 catch
                 {
-                    int randselected = random.Next(InvestigationTemplates.Count);
-                    var template = InvestigationTemplates[randselected];
-                    InvestigationTemplates.RemoveAt(randselected);
+                    int randselected = random.Next(MergedLib.InvestigationTemplates.Count);
+                    var template = MergedLib.InvestigationTemplates[randselected];
+                    MergedLib.InvestigationTemplates.RemoveAt(randselected);
                     return template;
                 }
             }
@@ -123,20 +150,20 @@ namespace FrankyCLI.questgen_quests
             if (mission != "")
             {
                 //Don't really care about deleting as this is for testing
-                return InvestigationTemplates.Where(x => x.Name == mission).Single();
+                return MergedLib.InvestigationTemplates.Where(x => x.Name == mission).Single();
             }
             else
             {
-                int selected = random.Next(InvestigationTemplates.Count);
-                var template = InvestigationTemplates[selected];
-                InvestigationTemplates.RemoveAt(selected);
+                int selected = random.Next(MergedLib.InvestigationTemplates.Count);
+                var template = MergedLib.InvestigationTemplates[selected];
+                MergedLib.InvestigationTemplates.RemoveAt(selected);
                 return template;
             }
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate()
         {
-            if (DiscoveryTemplates.Count == 0) return null;
+            if (MergedLib.DiscoveryTemplates.Count == 0) return null;
             Random random = new Random();
 
             if (AITools.AIMODE && false)
@@ -146,7 +173,7 @@ namespace FrankyCLI.questgen_quests
                 ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
 
                 int count = 5 + random.Next(10);
-                List<MissionTemplate> selected = DiscoveryTemplates
+                List<MissionTemplate> selected = MergedLib.DiscoveryTemplates
                     .OrderBy(x => random.Next())
                     .Take(count).ToList();
                 for (int i = 0; i < selected.Count; i++)
@@ -159,24 +186,31 @@ namespace FrankyCLI.questgen_quests
                 try
                 {
                     int.TryParse(result, out index);
-                    return DiscoveryTemplates[index];
+                    return MergedLib.DiscoveryTemplates[index];
                 }
                 catch
                 {
-                    int randselected = random.Next(DiscoveryTemplates.Count);
-                    var template = DiscoveryTemplates[randselected];
-                    DiscoveryTemplates.RemoveAt(randselected);
+                    int randselected = random.Next(MergedLib.DiscoveryTemplates.Count);
+                    var template = MergedLib.DiscoveryTemplates[randselected];
+                    MergedLib.DiscoveryTemplates.RemoveAt(randselected);
                     return template;
                 }
             }
             else
             {
-                int selected = random.Next(DiscoveryTemplates.Count);
-                var template = DiscoveryTemplates[selected];
-                DiscoveryTemplates.RemoveAt(selected);
+                int selected = random.Next(MergedLib.DiscoveryTemplates.Count);
+                var template = MergedLib.DiscoveryTemplates[selected];
+                MergedLib.DiscoveryTemplates.RemoveAt(selected);
                 return template;
 
             }
         }
+        public void PrintManagerInfo()
+        {
+            Console.WriteLine("Planet Template Manager");
+        }
+
     }
+
+
 }

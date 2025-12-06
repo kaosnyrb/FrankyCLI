@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Interfaces;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -26,16 +27,11 @@ namespace FrankyCLI.questgen_tools
         }
 
 
-        public bool GenerateQuest()
+        public bool GenerateQuest(ITemplateManager templateManager)
         {
-
-            TemplateManager lib = new TemplateManager();
-            Console.WriteLine("ShowdownTemplates: " + lib.MergedLib.ShowdownTemplates.Count);
-            Console.WriteLine("InvestigationTemplates: " + lib.MergedLib.InvestigationTemplates.Count);
-            Console.WriteLine("DiscoveryTemplates: " + lib.MergedLib.DiscoveryTemplates.Count);
-
-
-            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
+            Console.WriteLine("StaticLayoutQuestChain");
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
+            templateManager.PrintManagerInfo();
 
             Random random = new Random();
             bool isfemale = false;
@@ -64,13 +60,14 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("Feeding the stages into the AI...");
 
             AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
-            var DeepInvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
+            var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
             if (fork)
             {
-                ForkInvestigationMissionTemplate = new Templates_Fork().GetInvestigationMissionTemplate("Branching Node");
+                var forktemplates = new Templates_Fork();
+                ForkInvestigationMissionTemplate = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
             }
-            var InvestigationMissionTemplate = lib.GetInvestigationMissionTemplate("");
-            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
             AITools.RunPrompt("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);

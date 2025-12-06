@@ -14,6 +14,7 @@ using OpenAI;
 using System.Security.Policy;
 using FrankyCLI.questgen_tools;
 using Mutagen.Bethesda.Plugins.Records;
+using FrankyCLI.questgen_tools.Interfaces;
 
 namespace FrankyCLI
 {
@@ -59,13 +60,21 @@ namespace FrankyCLI
                     }
                 }
                 //We have different styles of quest chains, so randomly choose one.
-                List<IQuestchain> questchains = new List<IQuestchain>();
-                questchains.Add(new LoopingLayoutQuestChain(myMod));
-                questchains.Add(new StaticLayoutQuestChain(myMod));
+                List<IQuestchain> questchains = new List<IQuestchain>
+                {
+                    new LoopingLayoutQuestChain(myMod),
+                    new StaticLayoutQuestChain(myMod)
+                };
 
-                
                 var outlawQuest = questchains[random.Next(questchains.Count)];
-                outlawQuest.GenerateQuest();
+
+                List<ITemplateManager> templates = new List<ITemplateManager>()
+                {
+                    new AICardTemplateManager(),
+                    new RandomTemplateManager()
+                };
+
+                outlawQuest.GenerateQuest(templates[random.Next(templates.Count)]);
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

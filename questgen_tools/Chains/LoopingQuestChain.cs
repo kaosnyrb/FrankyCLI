@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Interfaces;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -25,15 +26,13 @@ namespace FrankyCLI.questgen_tools
             myMod = myModparam;
         }
 
-        public bool GenerateQuest()
+        public bool GenerateQuest(ITemplateManager templateManager)
         {
-            TemplateManager lib = new TemplateManager();
-            Console.WriteLine("ShowdownTemplates: " + lib.MergedLib.ShowdownTemplates.Count);
-            Console.WriteLine("InvestigationTemplates: " + lib.MergedLib.InvestigationTemplates.Count);
-            Console.WriteLine("DiscoveryTemplates: " + lib.MergedLib.DiscoveryTemplates.Count);
+            Console.WriteLine("LoopingLayoutQuestChain");
 
+            templateManager.PrintManagerInfo();
 
-            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
 
             Random random = new Random();
             bool isfemale = false;
@@ -54,18 +53,19 @@ namespace FrankyCLI.questgen_tools
             //Quest Steps
             var quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate, null);
             var lastoutlaw = ShowdownMissionTemplate.outlawQuest;
-            int count = 5;
-            for (int i = 0; i < 5; i++)
+            int count = 2 + random.Next(4);
+            for (int i = 0; i < count; i++)
             {
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                var template = lib.GetInvestigationMissionTemplate("");
+                var template = templateManager.GetInvestigationMissionTemplate("");
                 //Don't run on the first and last.
                 if (i != 0 && i != count - 1)
                 {
                     if (i % 2 != 0 && random.Next(100) > 0)
                     {
                         //Run on Even as things get wierd if we get a choice at the start or in a row.
-                        template = new Templates_Fork().GetInvestigationMissionTemplate("");
+                        var forktemplates = new Templates_Fork();
+                        template = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
                     }
                 }
                 Console.WriteLine("Investigation Template: " + template.Name);
@@ -79,7 +79,7 @@ namespace FrankyCLI.questgen_tools
 
             // Finally build the discovery step
             Console.WriteLine("---------------------------------------------------------------------------------");
-            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, lastoutlaw);
 
             //We have now generated all the stages. Do any final linking steps

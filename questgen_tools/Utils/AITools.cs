@@ -15,7 +15,7 @@ namespace FrankyCLI.questgen_tools
         private static readonly List<ChatMessage> _history = new();
 
         // We can turn off the chatgpt calls for fast generation.
-        public static bool AIMODE = false;
+        public static bool AIMODE = true;
 
         static AITools()
         {
