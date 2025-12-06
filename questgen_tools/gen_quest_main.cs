@@ -17,7 +17,7 @@ using Mutagen.Bethesda.Plugins.Records;
 
 namespace FrankyCLI
 {
-    public class gen_quest
+    public class gen_quest_main
     {
         public static ModKey StarfieldModKey;
         public static IStarfieldModGetter _StarfieldMod;
@@ -58,8 +58,14 @@ namespace FrankyCLI
                         }
                     }
                 }
-                OutlawQuestChain outlawQuest = new OutlawQuestChain(myMod);
-                outlawQuest.GenerateQuestLoop();
+                //We have different styles of quest chains, so randomly choose one.
+                List<IQuestchain> questchains = new List<IQuestchain>();
+                questchains.Add(new LoopingLayoutQuestChain(myMod));
+                questchains.Add(new StaticLayoutQuestChain(myMod));
+
+                
+                var outlawQuest = questchains[random.Next(questchains.Count)];
+                outlawQuest.GenerateQuest();
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

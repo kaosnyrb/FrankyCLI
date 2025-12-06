@@ -258,7 +258,7 @@ namespace FrankyCLI.questgen_tools
                     0x000D9D3A//Human_Female_Hair_Mullet "Human_Female_Hair_Mullet" [HDPT:000D9D3A]
 
                 };
-                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(gen_quest.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
                 return outfit;
             }
             else
@@ -283,7 +283,7 @@ namespace FrankyCLI.questgen_tools
                     0x0012F26F//Human_Male_Hair_Viking_Braids "Human_Male_Hair_Viking_Braids" [HDPT:0012F26F]
 
                 };
-                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(gen_quest.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
                 return outfit;
             }
         }
@@ -305,7 +305,7 @@ namespace FrankyCLI.questgen_tools
                     0x003D60B5,//LLI_Ecliptic_Support [LVLI:003D60B5]
 
                 };
-            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
+            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
         }
 
@@ -358,7 +358,7 @@ namespace FrankyCLI.questgen_tools
 
             }
 
-            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
+            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
 
         }
@@ -384,7 +384,7 @@ namespace FrankyCLI.questgen_tools
                     0x0006AC02,//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
                 };
 
-                IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
+                IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
                 return outfit;
             }
             else
@@ -411,7 +411,7 @@ namespace FrankyCLI.questgen_tools
 
                 };
 
-                IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
+                IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
                 return outfit;
             }
         }

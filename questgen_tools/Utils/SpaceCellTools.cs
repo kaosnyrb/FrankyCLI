@@ -144,7 +144,7 @@ namespace FrankyCLI.questgen_tools
 
             Random random = new Random();
             var Choosen = Markers[random.Next(Markers.Count)];
-            var quest = gen_quest._StarfieldMod.Quests[new FormKey(gen_quest.StarfieldModKey, Choosen.QuestID)];
+            var quest = gen_quest_main._StarfieldMod.Quests[new FormKey(gen_quest_main.StarfieldModKey, Choosen.QuestID)];
             var alias = quest.Aliases[Choosen.AliasID];
             var blah = ((IQuestReferenceAliasGetter)alias).Conditions[0];
 

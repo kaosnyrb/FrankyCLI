@@ -152,8 +152,8 @@ namespace FrankyCLI.questgen_tools
 
 
                     string BookContents = AITools.RunPrompt(BookPrompt);
-                    var Book = gen_quest.myMod.Books[new FormKey(gen_quest.myMod.ModKey, 0x000905)].DeepCopy();
-                    Book bountybook = new Book(gen_quest.myMod)
+                    var Book = gen_quest_main.myMod.Books[new FormKey(gen_quest_main.myMod.ModKey, 0x000905)].DeepCopy();
+                    Book bountybook = new Book(gen_quest_main.myMod)
                     {
                         CNAM = Book.CNAM,
                         Components = Book.Components,
@@ -176,8 +176,8 @@ namespace FrankyCLI.questgen_tools
                         Transforms = Book.Transforms,
                     };
 
-                    gen_quest.myMod.Books.Add(bountybook);
-                    npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest.myMod.Books[bountybook.FormKey].ToLink(), Count = 1 } });
+                    gen_quest_main.myMod.Books.Add(bountybook);
+                    npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest_main.myMod.Books[bountybook.FormKey].ToLink(), Count = 1 } });
                 }
 
                 myMod.Npcs.Add(npc);

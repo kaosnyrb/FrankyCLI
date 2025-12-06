@@ -17,11 +17,11 @@ using static Loqui.EqualsMaskHelper;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class CrewTools
+    public class Crew
     {
         public static IFormLink<IStarfieldMajorRecordGetter> GetCrewFormList(string Faction,string ShipName)
         {
-            var frmlst = new FormList(gen_quest.myMod)
+            var frmlst = new FormList(gen_quest_main.myMod)
             {
                 EditorID = ShipName + "_crewlist",
                 Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
@@ -43,8 +43,8 @@ namespace FrankyCLI.questgen_tools
                     isfemale = true;
                 }
 
-                var NPC = gen_quest.myMod.Npcs[new FormKey(gen_quest.myMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(gen_quest.myMod, NPC);
+                var NPC = gen_quest_main.myMod.Npcs[new FormKey(gen_quest_main.myMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
+                Npc npc = NPCTools.CloneNPC(gen_quest_main.myMod, NPC);
 
                 //Name
                 Console.WriteLine("Generating Crew Name...");
@@ -94,8 +94,8 @@ namespace FrankyCLI.questgen_tools
 
 
                     string BookContents = AITools.RunPrompt(BookPrompt);
-                    var Book = gen_quest.myMod.Books[new FormKey(gen_quest.myMod.ModKey, 0x000905)].DeepCopy();
-                    Book bountybook = new Book(gen_quest.myMod)
+                    var Book = gen_quest_main.myMod.Books[new FormKey(gen_quest_main.myMod.ModKey, 0x000905)].DeepCopy();
+                    Book bountybook = new Book(gen_quest_main.myMod)
                     {
                         CNAM = Book.CNAM,
                         Components = Book.Components,
@@ -118,18 +118,18 @@ namespace FrankyCLI.questgen_tools
                         Transforms = Book.Transforms,
                     };
 
-                    gen_quest.myMod.Books.Add(bountybook);
-                    npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest.myMod.Books[bountybook.FormKey].ToLink(), Count = 1 } });
+                    gen_quest_main.myMod.Books.Add(bountybook);
+                    npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest_main.myMod.Books[bountybook.FormKey].ToLink(), Count = 1 } });
                 }
 
-                gen_quest.myMod.Npcs.Add(npc);
+                gen_quest_main.myMod.Npcs.Add(npc);
                 //Add it to the list
                 list.Add(npc);
                 frmlst.Items.Add(npc);
             }
 
-            gen_quest.myMod.FormLists.Add(frmlst);
-            return gen_quest.myMod.FormLists[frmlst.FormKey].ToLink<IStarfieldMajorRecordGetter>();
+            gen_quest_main.myMod.FormLists.Add(frmlst);
+            return gen_quest_main.myMod.FormLists[frmlst.FormKey].ToLink<IStarfieldMajorRecordGetter>();
         }
     }
 }

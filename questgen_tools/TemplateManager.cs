@@ -12,29 +12,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools
 {
-    public interface IOutlawQuest
-    {
-        public Quest Setup(StarfieldMod myMod,OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest);
-        public string LogMessage { get; set; }
-        public string QuestLocation { get; set; }
-        public Quest questform { get; set; }
-    }
-    public class MissionTemplate
-    {
-        public string Name;
-        public string Description;
-        public string Location;
-        public string parameter1;
-        public uint parameterformid;
-        public uint formid;
-        public bool needSpacesuit;
-        public TemplateLib Lib1;
-        public TemplateLib Lib2;
-        public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
-    }
-
-
-    public class MissionLib
+    public class TemplateManager
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
@@ -44,7 +22,7 @@ namespace FrankyCLI.questgen_tools
         public static TemplateLib spacelib = new TemplateLib();
         public static TemplateLib citieslib = new TemplateLib();
 
-        public MissionLib()
+        public TemplateManager()
         {
 
             //TemplateLibs.Add(new Templates_Fork());

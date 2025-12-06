@@ -17,11 +17,11 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class OutlawQuestChain
+    public class StaticLayoutQuestChain : IQuestchain
     {
         public StarfieldMod myMod;
 
-        public OutlawQuestChain(StarfieldMod myModparam) {
+        public StaticLayoutQuestChain(StarfieldMod myModparam) {
             myMod = myModparam;
         }
 
@@ -29,7 +29,7 @@ namespace FrankyCLI.questgen_tools
         public bool GenerateQuest()
         {
 
-            MissionLib lib = new MissionLib();
+            TemplateManager lib = new TemplateManager();
             Console.WriteLine("ShowdownTemplates: " + lib.MergedLib.ShowdownTemplates.Count);
             Console.WriteLine("InvestigationTemplates: " + lib.MergedLib.InvestigationTemplates.Count);
             Console.WriteLine("DiscoveryTemplates: " + lib.MergedLib.DiscoveryTemplates.Count);
@@ -130,71 +130,5 @@ namespace FrankyCLI.questgen_tools
 
             return true;
         }
-
-        public bool GenerateQuestLoop()
-        {
-
-            MissionLib lib = new MissionLib();
-            Console.WriteLine("ShowdownTemplates: " + lib.MergedLib.ShowdownTemplates.Count);
-            Console.WriteLine("InvestigationTemplates: " + lib.MergedLib.InvestigationTemplates.Count);
-            Console.WriteLine("DiscoveryTemplates: " + lib.MergedLib.DiscoveryTemplates.Count);
-
-
-            var ShowdownMissionTemplate = lib.GetShowdownMissionTemplate("");
-
-            Random random = new Random();
-            bool isfemale = false;
-
-            if (random.Next(100) > 50)
-            {
-                isfemale = true;
-            }
-            MissionTemplate ForkInvestigationMissionTemplate = new MissionTemplate();
-
-            OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, ShowdownMissionTemplate.needSpacesuit);
-
-            // NPC Target                
-            outlawNpc.GenerateNPC();
-            Console.WriteLine("---------------------------------------------------------------------------------");
-            Console.WriteLine("Outlaw Name: " + outlawNpc.name);
-
-            //Quest Steps
-            var quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate, null);
-            var lastoutlaw = ShowdownMissionTemplate.outlawQuest;
-            int count = 5;
-            for (int i = 0; i < 5; i++)
-            {
-                Console.WriteLine("---------------------------------------------------------------------------------");
-                var template = lib.GetInvestigationMissionTemplate("");
-                //Don't run on the first and last.
-                if (i != 0 && i != count - 1)
-                {
-                    if (i % 2 != 0 && random.Next(100) > 0)
-                    {
-                        //Run on Even as things get wierd if we get a choice at the start or in a row.
-                        template = new Templates_Fork().GetInvestigationMissionTemplate("");
-                    }
-                }
-                Console.WriteLine("Investigation Template: " + template.Name);
-                Quest formmission = template.outlawQuest.Setup(myMod, outlawNpc, template, lastoutlaw);
-                lastoutlaw = template.outlawQuest;
-                if (i == 0)
-                {
-                    AITools.RunPrompt("Important note: From now on don't mention where the final showdown takes place.");
-                }
-            }
-
-            // Finally build the discovery step
-            Console.WriteLine("---------------------------------------------------------------------------------");
-            var DiscoveryMissionTemplate = lib.GetDiscoveryMissionTemplate();
-            var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, lastoutlaw);
-
-            //We have now generated all the stages. Do any final linking steps
-            Console.WriteLine("Generating Final Bounty Log...");
-            outlawNpc.GenerateLog();
-
-            return true;
-        }
-
     }
 }

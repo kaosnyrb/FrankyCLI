@@ -133,7 +133,7 @@ namespace FrankyCLI
             ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = markerused.FormKey;
 
             //Set Location            
-            var locaform = gen_quest._StarfieldMod.Locations[new FormKey(gen_quest.StarfieldModKey, missionTemplate.parameterformid)];
+            var locaform = gen_quest_main._StarfieldMod.Locations[new FormKey(gen_quest_main.StarfieldModKey, missionTemplate.parameterformid)];
             ((IQuestLocationAlias)Quest.Aliases[0]).SpecificLocation = locaform.ToNullableLink<ILocationGetter>();
 
 

@@ -38,7 +38,8 @@ namespace FrankyCLI.questgen_quests
 
             Console.WriteLine("shipname: " + shipname);
 
-            var ship = ShipTools.GenShip(shipname, missionTemplate.parameterformid, ShipTools.GetFactionID(missionTemplate.parameter1));
+
+            var ship = new SpaceShip(shipname, missionTemplate.parameterformid, ShipTools.GetFactionID(missionTemplate.parameter1));
 
             var questActivator = ActivatorTools.GetRandomSpaceType();
 
@@ -123,7 +124,7 @@ namespace FrankyCLI.questgen_quests
             }
 
             //Set the guard ship
-            ((IQuestReferenceAlias)Quest.Aliases[6]).CreateReferenceToObject.Object = ship.ToLink<IStarfieldMajorRecordGetter>();
+            ((IQuestReferenceAlias)Quest.Aliases[6]).CreateReferenceToObject.Object = ship.Instance.ToLink<IStarfieldMajorRecordGetter>();
 
 
             //Create the activation message

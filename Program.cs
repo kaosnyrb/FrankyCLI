@@ -65,7 +65,7 @@ switch(mode)
         res = gen_msicon.Generate(args);
         break;
     case "gen_quest":
-        res = gen_quest.Generate(args);
+        res = gen_quest_main.Generate(args);
         break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");

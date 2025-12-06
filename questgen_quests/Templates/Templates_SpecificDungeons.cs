@@ -15,7 +15,7 @@ namespace FrankyCLI.questgen_quests
             ShowdownTemplates = new List<MissionTemplate>();
 
             //Based on the keywords create a showdown for each.
-            foreach (var PCM in gen_quest.myMod.Keywords)
+            foreach (var PCM in gen_quest_main.myMod.Keywords)
             {
                 if(PCM.EditorID.Contains("duout_PCM_Request_"))
                 {

@@ -39,7 +39,7 @@ namespace FrankyCLI.questgen_tools
 
 
 
-            var armour = gen_quest._StarfieldMod.Armors[new FormKey(gen_quest.StarfieldModKey, armourid)].DeepCopy();
+            var armour = gen_quest_main._StarfieldMod.Armors[new FormKey(gen_quest_main.StarfieldModKey, armourid)].DeepCopy();
             var legID = Guid.NewGuid().ToString().Substring(0, 8);
 
             Console.WriteLine("Generating Legendary Name...");
@@ -107,13 +107,13 @@ namespace FrankyCLI.questgen_tools
 
                 newarmour.Resistances.Add(new DamageTypeValue()
                 {
-                    DamageType = gen_quest._StarfieldMod.DamageTypes[new FormKey(gen_quest.StarfieldModKey, 0x00023190)].ToLink(),
+                    DamageType = gen_quest_main._StarfieldMod.DamageTypes[new FormKey(gen_quest_main.StarfieldModKey, 0x00023190)].ToLink(),
                     Value = armour.Resistances[0].Value + (ushort)((pointsperlevel * i) * EMscaler)
                 });
 
                 newarmour.Resistances.Add(new DamageTypeValue()
                 {
-                    DamageType = gen_quest._StarfieldMod.DamageTypes[new FormKey(gen_quest.StarfieldModKey, 0x00060A81)].ToLink(),
+                    DamageType = gen_quest_main._StarfieldMod.DamageTypes[new FormKey(gen_quest_main.StarfieldModKey, 0x00060A81)].ToLink(),
                     Value = armour.Resistances[1].Value + (ushort)((pointsperlevel * i) * energyscaler)
                 });
 
@@ -139,7 +139,7 @@ namespace FrankyCLI.questgen_tools
             myModparam.LeveledItems.Add(baseleveled);
             //New Legendary using list
             //Fetch standard
-            var DefaultLegendaryArmor = gen_quest._StarfieldMod.LegendaryItems[new FormKey(gen_quest.StarfieldModKey, 0x001336C3)].DeepCopy();//DefaultLegendaryArmor [LGDI:001336C3]
+            var DefaultLegendaryArmor = gen_quest_main._StarfieldMod.LegendaryItems[new FormKey(gen_quest_main.StarfieldModKey, 0x001336C3)].DeepCopy();//DefaultLegendaryArmor [LGDI:001336C3]
 
             var newleg = new LegendaryItem(myModparam)
             {

@@ -34,11 +34,11 @@ namespace FrankyCLI.questgen_tools
             IMajorRecord formrec = null;
 
             //Fetch the Mod Quest
-            var currentquest = gen_quest.myMod.Quests[new FormKey(gen_quest.myMod.ModKey, QuestID)];
+            var currentquest = gen_quest_main.myMod.Quests[new FormKey(gen_quest_main.myMod.ModKey, QuestID)];
 
 
             //Fetch the Sample Sound Quest
-            var quest = gen_quest._StarfieldMod.Quests[new FormKey(gen_quest.StarfieldModKey, 0x21A1CA)];
+            var quest = gen_quest_main._StarfieldMod.Quests[new FormKey(gen_quest_main.StarfieldModKey, 0x21A1CA)];
 
             var clonetopic = quest.DialogTopics[0].DeepCopy();
 
@@ -46,7 +46,7 @@ namespace FrankyCLI.questgen_tools
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var topic = new DialogTopic(gen_quest.myMod)
+            var topic = new DialogTopic(gen_quest_main.myMod)
             {
                 EditorID = "topic_" + questID,
                 Priority = clonetopic.Priority,
@@ -68,7 +68,7 @@ namespace FrankyCLI.questgen_tools
             //currentquest.DialogTopics.Add(topic);
              
 
-            var Scene = new Scene(gen_quest.myMod)
+            var Scene = new Scene(gen_quest_main.myMod)
             {
                 EditorID = "scene_" + questID,
                 Phases = clonescene.Phases,
@@ -84,7 +84,7 @@ namespace FrankyCLI.questgen_tools
 
             currentquest.Scenes.Add(Scene);
 
-            var book = gen_quest.myMod.Books[new FormKey(gen_quest.myMod.ModKey, BookID)];
+            var book = gen_quest_main.myMod.Books[new FormKey(gen_quest_main.myMod.ModKey, BookID)];
 
             book.Scene = Scene.ToNullableLink<ISceneGetter>();
         }
