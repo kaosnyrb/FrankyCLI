@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -32,8 +33,7 @@ namespace FrankyCLI.questgen_quests
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Activator Space Quest...");
-            questloc = missionTemplate.Location;
-
+            
             var questActivator = ActivatorTools.GetRandomSpaceType();
 
             var datasourceprompt =
@@ -67,43 +67,13 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine(logmessage);
 
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questname,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
+            var newQuest = new QuestInstance(missionTemplate.formid, questname);
 
-            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
-
-            //set quest alias to self in scripts
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
+            newQuest.SetLogMessage(0, 0, logmessage);
+            newQuest.SetScriptAlias(0, newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
             //We set the spawn marker to one of random ones so the target is in different places
-            ((QuestReferenceAlias)newQuest.Aliases[2]).Conditions[0] = SpaceCellTools.GetSpaceMarkerCondition();
-
-            //Set the enemy gang to the new gang
-            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < properties.Count; i++)
-            {
-                if (properties[i].Name == "BountyTarget")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
+            newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
 
             //Create the activation message
             var pickuppromt =
@@ -117,75 +87,24 @@ namespace FrankyCLI.questgen_quests
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);
             Console.WriteLine("pickupmessage: " + pickupmessage);
-
-            var messageClone = myMod.Messages[new FormKey(myMod.ModKey, 0x000844)].DeepCopy();
-            Message message = new Message(myMod)
-            {
-                Name = messageClone.Name,
-                BNAM = messageClone.BNAM,
-                EditorID = "message_" + questID,
-                Description = pickupmessage,
-                Flags = messageClone.Flags
-            };
-
-            myMod.Messages.Add(message);
-
+            var message = new MessageBox(0x000844, pickupmessage);
 
             //Create the Activator
-
-            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x000901)].DeepCopy();
-            Mutagen.Bethesda.Starfield.Activator newActivator = new Mutagen.Bethesda.Starfield.Activator(myMod)
-            {
-                ActivateSound = ActivatorClone.ActivateSound,
-                Properties = ActivatorClone.Properties,
-                VirtualMachineAdapter = ActivatorClone.VirtualMachineAdapter,
-                ActivateTextOverride = ActivatorClone.ActivateTextOverride,
-                ActivationAngle = ActivatorClone.ActivationAngle,
-                Components = ActivatorClone.Components,
-                Flags = ActivatorClone.Flags,
-                Conditions = ActivatorClone.Conditions,
-                EditorID = "activator_" + questID,
-                Destructible = ActivatorClone.Destructible,
-                Keywords = ActivatorClone.Keywords,
-                Name = datasource,
-                ObjectBounds = ActivatorClone.ObjectBounds,
-                ODTY = ActivatorClone.ODTY,
-                Model = ActivatorClone.Model,
-                XALG = ActivatorClone.XALG
-            };
-
-            newActivator.Model.File = questActivator.Model;
-
+            var newActivator = new OutlawActivator(0x000901, datasource, questActivator.Model);
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
-            var activatorproperties = newActivator.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < activatorproperties.Count; i++)
-            {
-                if (activatorproperties[i].Name == "messagetext")
-                {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (activatorproperties[i].Name == "currentquest")
-                {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (activatorproperties[i].Name == "nextquest")
-                {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
+            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.message.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_activator_completenstart", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
-            myMod.Activators.Add(newActivator);
-
-            //Set the Activator to be the quest target
-            ((IQuestReferenceAlias)Quest.Aliases[4]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
-            myMod.Quests.Add(newQuest);
+            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.newActivator.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the interfaces
-            questform = newQuest;
+            questform = newQuest.quest;
             logMessage = logmessage;
+            questloc = missionTemplate.Location;
 
-            return Quest;
+            return newQuest.quest;
         }
 
     }

@@ -97,6 +97,28 @@ namespace FrankyCLI.questgen_tools.Nouns
             return false;
         }
 
+        public bool SetQuestReferenceSpaceLocationAlias(String AliasName, Condition Value)
+        {
+            foreach (var alias in quest.Aliases)
+            {
+                try
+                {
+                    var CastedAlias = (IQuestReferenceAlias)alias;
+                    if (CastedAlias.Name == AliasName)
+                    {
+                        CastedAlias.Conditions[0] = Value;
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+            }
+            return false;
+        }
+
         public bool SetQuestReferenceAlias(String AliasName, FormKey formKey)
         {
             foreach(var alias in quest.Aliases)

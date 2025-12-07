@@ -42,8 +42,7 @@ namespace FrankyCLI
             Console.WriteLine("Generating Activator Planet Quest...");
 
             var questActivator = ActivatorTools.GetRandomGroundType();
-            questloc = missionTemplate.Location;
-
+            
             var datasourceprompt =
                 "A three word or less digital file that contains a clue to the characters location.\r\n" +
                 "The base type of the activator is." + questActivator.Name + "\r\n\r\n" +
@@ -108,6 +107,7 @@ namespace FrankyCLI
             //Set the interfaces
             questform = newQuest.quest;
             logMessage = logmessage;
+            questloc = missionTemplate.Location;
 
             return newQuest.quest;
         }
