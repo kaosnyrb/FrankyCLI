@@ -1,4 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -79,64 +81,17 @@ namespace FrankyCLI
 
             Console.WriteLine(logmessage);
 
+            var newQuest = new QuestInstance(missionTemplate.formid, questname);
+            newQuest.SetLogMessage(0,0,logmessage);
+            newQuest.SetScriptAlias(0, newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questname,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
+            var markerused = RandomUtils.GetRandomMarker("doout_city_activator_marker_" + missionTemplate.parameter1);
+            newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
 
-            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
-
-            //set quest alias to self in scripts
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
-            //Set the enemy gang to the new gang
-            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < properties.Count; i++)
-            {
-                if (properties[i].Name == "BountyTarget")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
-
-            //Find a target marker to use
-            List<IMajorRecord> rec = new List<IMajorRecord>();
-            foreach (var record in myMod.EnumerateMajorRecords())
-            {
-                if (record.EditorID != null)
-                {
-                    if (record.EditorID.Contains("doout_city_activator_marker_" + missionTemplate.parameter1))
-                    {
-                        rec.Add(record);
-                    }
-                }
-            }
-
-            Random rand = new Random();
-            var markerused = rec[rand.Next(rec.Count)];
-            ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = markerused.FormKey;
-
-            //Set Location            
             var locaform = gen_quest_main._StarfieldMod.Locations[new FormKey(gen_quest_main.StarfieldModKey, missionTemplate.parameterformid)];
-            ((IQuestLocationAlias)Quest.Aliases[0]).SpecificLocation = locaform.ToNullableLink<ILocationGetter>();
-
-
+            newQuest.SetQuestLocationAlias("DungeonLocation", locaform.ToNullableLink<ILocationGetter>());
+            
             //Create the activation message
             var pickuppromt = 
             "Include newline characters in your response.\r\n" +
@@ -200,7 +155,7 @@ namespace FrankyCLI
                 }
                 if (activatorproperties[i].Name == "currentquest")
                 {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.quest.ToLink<IStarfieldMajorRecordGetter>();
                 }
                 if (activatorproperties[i].Name == "nextquest")
                 {
@@ -211,14 +166,14 @@ namespace FrankyCLI
             myMod.Activators.Add(newActivator);
 
             //Set the Activator to be the quest target
-            ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
-            myMod.Quests.Add(newQuest);
-            
+            ((IQuestReferenceAlias)newQuest.quest.Aliases[3]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
+
+            newQuest.Finalise();            
             //Set the interfaces
-            questform = newQuest;
+            questform = newQuest.quest;
             logMessage = logmessage;
 
-            return Quest;
+            return newQuest.quest;
         }
 
     }

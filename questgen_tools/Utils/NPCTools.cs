@@ -1,18 +1,19 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
 
@@ -22,7 +23,7 @@ namespace FrankyCLI.questgen_tools
     {
         public static uint GetTemplateNPC(bool female)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             if (female)
             {
@@ -59,7 +60,7 @@ namespace FrankyCLI.questgen_tools
 
         public static uint GetTemplateDeadNPC(bool female)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             if (female)
             {
@@ -175,7 +176,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetEyeColour()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> eyelist = new List<string>()
             {
@@ -212,7 +213,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetHairColour()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> hairlist = new List<string>()
             {
@@ -237,7 +238,7 @@ namespace FrankyCLI.questgen_tools
 
         public static IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             if (female)
             {
                 List<uint> hairlist = new List<uint>()
@@ -290,7 +291,7 @@ namespace FrankyCLI.questgen_tools
 
         public static IFormLinkNullable<ILeveledItemGetter> GetRandomGear()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
                 {
                     0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
@@ -311,7 +312,7 @@ namespace FrankyCLI.questgen_tools
 
         public static IFormLinkNullable<IOutfitGetter> GetRandomFactionOutfit(string Faction)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> Outfits = new List<uint>();
             switch (Faction)
             {
@@ -365,7 +366,7 @@ namespace FrankyCLI.questgen_tools
 
         public static IFormLinkNullable<IOutfitGetter> GetRandomOutfit(bool spacesuit)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             if (spacesuit)
             {
                 List<uint> outfitlist = new List<uint>()

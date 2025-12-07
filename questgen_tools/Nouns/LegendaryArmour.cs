@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda;
+﻿using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
@@ -20,7 +21,7 @@ namespace FrankyCLI.questgen_tools
         {
             uint armourid = 0;
 
-            Random rand = new Random();
+            Random rand = RandomUtils.random;
             int type = rand.Next(100);
             string Type = "";
             if (type < 33)

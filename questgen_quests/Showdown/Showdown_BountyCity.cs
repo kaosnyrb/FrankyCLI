@@ -1,5 +1,6 @@
 ﻿using DynamicData;
 using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -108,7 +109,7 @@ namespace FrankyCLI
                 }
             }
 
-            Random rand = new Random();
+            Random rand = RandomUtils.random;
             ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = rec[rand.Next(rec.Count)].FormKey;
 
             //Set Location            

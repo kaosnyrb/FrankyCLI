@@ -9,6 +9,6 @@ namespace FrankyCLI.questgen_tools
 {
     public interface IQuestchain
     {
-        bool GenerateQuest(ITemplateManager templateManager);
+        bool GenerateQuest();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Starfield;
+﻿using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace FrankyCLI.questgen_tools
     {
         public static string GetFaction()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> factions = new List<string>()
             {

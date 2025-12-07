@@ -1,6 +1,8 @@
 ﻿using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Interfaces;
+using FrankyCLI.questgen_tools.Utils;
+using GameFinder.Common;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -27,46 +29,53 @@ namespace FrankyCLI.questgen_tools
         }
 
 
-        public bool GenerateQuest(ITemplateManager templateManager)
+        public bool GenerateQuest()
         {
+            // Story Setup --------------------------------
+            Random random = RandomUtils.random;
             Console.WriteLine("StaticLayoutQuestChain");
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
-            templateManager.PrintManagerInfo();
+            List<ITemplateManager> templates = new List<ITemplateManager>()
+                {
+                    new AICardTemplateManager(),
+                    new RandomTemplateManager()
+                };
+            var templateManager = templates[random.Next(templates.Count)];
 
-            Random random = new Random();
-            bool isfemale = false;
-            bool fork = false;
-            
-            if (random.Next(100) > 50)
-            {
-                isfemale = true;
-            }
+            //AI Seeding
+            string MissionSetupPrompt = "";
+            MissionSetupPrompt += "You will be generating the story from the final encounter backwards, try and link things together in way that makes sense.\r\n\r\n";
+            MissionSetupPrompt += "First we'll generate a showdown mission, then a number of investigation missions. As we generate the missions you should reveal less and less about the target (We're generating from the end first).\r\n\r\n";
+            MissionSetupPrompt += "We're doing this so information about the target is slowly revealed over the course of the missions.\r\n\r\n";
+            MissionSetupPrompt += "The theme for this mission is " + PromptFlavourTools.GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
+            MissionSetupPrompt += "Use the information generated in the last step to inform the current step.\r\n\r\n";
+            MissionSetupPrompt += "You will recheive new <Lore> entries as things are created, use these to flesh out the story. Incorporate at least one relevant lore detail (faction, tech, or city) to ground the scene.\r\n\r\n";
+            AITools.RunPrompt(MissionSetupPrompt);
+
+            // Template Choices --------------------------------
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
+            bool fork = false;            
             if (random.Next(100) > 50)
             {
                 fork = true;
             }
             MissionTemplate ForkInvestigationMissionTemplate = new MissionTemplate();
 
-            OutlawNpc outlawNpc = new OutlawNpc(myMod, isfemale, ShowdownMissionTemplate.needSpacesuit);
-
             // NPC Target                
-            outlawNpc.GenerateNPC();
+            OutlawNpc outlawNpc = new OutlawNpc(myMod, ShowdownMissionTemplate.needSpacesuit);
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Outlaw Name: " + outlawNpc.name);
-            //Console.WriteLine(outlawNpc.background);
-
+            
             //Quest Steps
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Feeding the stages into the AI...");
-
-            AITools.RunPrompt("<Summary> The next section contains all the  locations and types of missions  that will be happening. Use this to tie things together.");
+            AITools.RunPrompt("<Summary> The next section contains all the locations and types of missions that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
             if (fork)
             {
                 var forktemplates = new Templates_Fork();
                 ForkInvestigationMissionTemplate = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
             }
-            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("City Activator - Neon Core");
             var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
@@ -84,10 +93,8 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
-            //Now build an investigation step before
-
-            AITools.RunPrompt("<DeepInvestigation>");
             Console.WriteLine("---------------------------------------------------------------------------------");
+            AITools.RunPrompt("<DeepInvestigation>");
             Console.WriteLine("Investigation: " + DeepInvestigationMissionTemplate.Name);
             var InvestigationMission = DeepInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DeepInvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             AITools.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
@@ -95,29 +102,29 @@ namespace FrankyCLI.questgen_tools
             if (fork)
             {
                 //ForkInvestigation
-                AITools.RunPrompt("<ForkInvestigation>");
                 Console.WriteLine("---------------------------------------------------------------------------------");
+                AITools.RunPrompt("<ForkInvestigation>");
                 Console.WriteLine("ForkInvestigation: " + ForkInvestigationMissionTemplate.Name);
                 Quest formmission = ForkInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ForkInvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
 
                 //InitialInvestigation
-                AITools.RunPrompt("<InitialInvestigation>");
                 Console.WriteLine("---------------------------------------------------------------------------------");
+                AITools.RunPrompt("<InitialInvestigation>");
                 Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
                 Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ForkInvestigationMissionTemplate.outlawQuest);
             }
             else
             {
                 //InitialInvestigation
-                AITools.RunPrompt("<InitialInvestigation>");
                 Console.WriteLine("---------------------------------------------------------------------------------");
+                AITools.RunPrompt("<InitialInvestigation>");
                 Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
                 Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
             }
 
             // Finally build the discovery step
-            AITools.RunPrompt("<Discovery>");
             Console.WriteLine("---------------------------------------------------------------------------------");
+            AITools.RunPrompt("<Discovery>");
 
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 

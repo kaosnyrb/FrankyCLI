@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FrankyCLI.questgen_tools.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -107,7 +108,7 @@ namespace FrankyCLI.questgen_tools
                 "Have them notice a small habit or ritual that has quietly helped them cope—journaling, breathing, watching the stars—and how it soothes them.",
                 "Describe them getting briefly annoyed or amused by something trivial, such as a crewmate’s loud chewing or mismatched socks."
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             int count = 1 + random.Next(5);
 
@@ -270,7 +271,7 @@ namespace FrankyCLI.questgen_tools
                 "Have them recall a moment where a seemingly harmless decision put them on someone’s radar.",
                 "Include a moment where they admit that part of them always wanted to belong somewhere—no matter the cost."
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             int count = 1 + random.Next(5);
 
@@ -454,7 +455,7 @@ namespace FrankyCLI.questgen_tools
                 "Have them acknowledge they can no longer remember the last moment they felt truly innocent.",
                 "Include a moment where they question whether that innocence was ever real—or just a story they told themselves."
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             int count = 1 + random.Next(5);
 
@@ -516,7 +517,7 @@ namespace FrankyCLI.questgen_tools
                 "Suggest that the earliest version of the tale has already been lost to speculation.",
                 "Add a murmur of unease, as if the truth lies somewhere between fear and convenience."
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             int count = 1 + random.Next(1);
 
@@ -534,7 +535,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetQuestTheme()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<string> questThemes = new List<string>()
             {
                 "Corporate espionage thriller",
@@ -793,7 +794,7 @@ namespace FrankyCLI.questgen_tools
                 "A Xenowardens ecological interference note linking the target to regional disruption.",
                 "A decrypted UC SysDef intercept annotated with operational significance."
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             int count = 1 + random.Next(5);
 

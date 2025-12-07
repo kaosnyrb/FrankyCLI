@@ -1,20 +1,21 @@
-﻿using Mutagen.Bethesda.Environments;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Interfaces;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
-using Mutagen.Bethesda.Plugins.Records;
-using FrankyCLI.questgen_tools.Interfaces;
 
 namespace FrankyCLI
 {
@@ -26,7 +27,7 @@ namespace FrankyCLI
 
         public static int Generate(string[] args)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             //StarfieldMod myMod;
             string modname = args[0];
             string mode = args[1];
@@ -62,19 +63,13 @@ namespace FrankyCLI
                 //We have different styles of quest chains, so randomly choose one.
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {
-                    new LoopingLayoutQuestChain(myMod),
+                    //new LoopingLayoutQuestChain(myMod),
                     new StaticLayoutQuestChain(myMod)
                 };
 
                 var outlawQuest = questchains[random.Next(questchains.Count)];
 
-                List<ITemplateManager> templates = new List<ITemplateManager>()
-                {
-                    new AICardTemplateManager(),
-                    new RandomTemplateManager()
-                };
-
-                outlawQuest.GenerateQuest(templates[random.Next(templates.Count)]);
+                outlawQuest.GenerateQuest();
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

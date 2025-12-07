@@ -1,18 +1,19 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI.questgen_tools
 {
@@ -42,11 +43,15 @@ namespace FrankyCLI.questgen_tools
         public FormKey Logfile;
 
 
-        public OutlawNpc(StarfieldMod myModparam, bool isfemale, bool hasspacesuit) {
+        public OutlawNpc(StarfieldMod myModparam, bool hasspacesuit) {
+            
+            if (RandomUtils.random.Next(100) > 50)
+            {
+                female = true;
+            }
             myMod = myModparam;
             
-            female = isfemale;
-            if (isfemale)
+            if (female)
             {
                 gender = "female";
             }
@@ -64,14 +69,14 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("Building Outlaw NPC...");
             name = GenerateName();
             background = GenerateBackground();
-
+            GenerateNPC();
         }
 
         public string GenerateName()
         {
             string namestogenerate = "first name, nickname and surname.";
 
-            Random rand = new Random();
+            Random rand = RandomUtils.random;
             int nametype = rand.Next(130);
             if(nametype <= 33)
             {
@@ -109,7 +114,7 @@ namespace FrankyCLI.questgen_tools
         public string GenerateBackground()
         {
             BountyFaction = FactionTools.GetFaction();
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             string backgroundprompt = "Create a brief background file on the target.\r\n";
 
@@ -174,7 +179,7 @@ namespace FrankyCLI.questgen_tools
             npc.Name = name;
             npc.EditorID = "npc_" + (name.ToLower()).Replace(" ","");
 
-            Random wrand = new Random();
+            Random wrand = RandomUtils.random;
             foreach (var facemorph in npc.FaceMorphs)
             {
                 foreach (var inner in facemorph.MorphGroups)
@@ -264,7 +269,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetUpbringing()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> upbringinglist = new List<string>()
             {
@@ -385,7 +390,7 @@ namespace FrankyCLI.questgen_tools
 
         public string Getflaws()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<string> personalityFlaws = new List<string>()
             {
                 "Impulsive",
@@ -494,7 +499,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetTrait()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> traitlist = new List<string>()
             {
@@ -709,14 +714,14 @@ namespace FrankyCLI.questgen_tools
                 "Keeps everything meticulously organized"
             };
 
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             return habitsAndBehaviors[random.Next(habitsAndBehaviors.Count)];
         }
 
         public string GetFears()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<string> fearsAndPhobias = new List<string>()
             {
                 "Fear of heights",
@@ -824,8 +829,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetGoals()
         {
-            Random random = new Random();
-
+            Random random = RandomUtils.random;
             List<string> motivationsAndGoals = new List<string>()
             {
                 "Seeking wealth",
@@ -933,7 +937,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetJob()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> joblist = new List<string>()
             {
@@ -1194,7 +1198,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetNationality()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> nationalityList = new List<string>()
             {

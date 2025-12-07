@@ -8,7 +8,6 @@ namespace FrankyCLI.questgen_tools.Interfaces
 {
     public interface ITemplateManager
     {
-        public void PrintManagerInfo();
         public MissionTemplate GetShowdownMissionTemplate(string missionName);
         public MissionTemplate GetInvestigationMissionTemplate(string missionName);
         public MissionTemplate GetDiscoveryMissionTemplate();

@@ -1,17 +1,18 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
 using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Starfield;
-using Noggog;
 
 namespace FrankyCLI.questgen_quests
 {
@@ -148,7 +149,7 @@ namespace FrankyCLI.questgen_quests
             }
             catch
             {
-                Random rand = new Random();
+                Random rand = RandomUtils.random;
                 markerused = rec[rand.Next(rec.Count)];
 
             }

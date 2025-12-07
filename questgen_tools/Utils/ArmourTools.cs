@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FrankyCLI.questgen_tools.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace FrankyCLI.questgen_tools
     {
         public static uint GetRandomHelmet()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
             {
                 0x00169F58,//Spacesuit_Assault_Helmet_01 "Shocktroop Space Helmet" [ARMO:00169F58]
@@ -56,7 +57,7 @@ namespace FrankyCLI.questgen_tools
         }
         public static uint GetRandomPack()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
             {
                 0x00169F59, // Spacesuit_Assault_Backpack_01 "Shocktroop" [ARMO:00169F59]
@@ -98,7 +99,7 @@ namespace FrankyCLI.questgen_tools
 
         public static uint GetRandomSpacesuit()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
             {
                 0x002265AD, // Spacesuit_Assault_01 "Shocktroop Spacesuit" [ARMO:002265AD]

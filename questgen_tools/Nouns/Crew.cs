@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -28,7 +29,7 @@ namespace FrankyCLI.questgen_tools
             };
             //Dead Named Crew
             var list = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>();
-            Random random = new Random();
+            Random random = RandomUtils.random;
             //Generate a new NPC
             var outfit = NPCTools.GetRandomFactionOutfit(Faction);
 
@@ -56,7 +57,7 @@ namespace FrankyCLI.questgen_tools
                     + ShipName + ". Return only the name in the response.");
                 npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
                
-                Random wrand = new Random();
+                Random wrand = RandomUtils.random;
                 npc.Weight = new NpcWeight()
                 {
                     Fat = (float)wrand.NextDouble(),

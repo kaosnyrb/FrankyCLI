@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -38,7 +39,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetGangName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<string> gangPrefixes = new List<string>
             {
                 "Red", "Black", "Iron", "Steel", "Rust", "Grim", "Dead", "Broken", "Shadow",
@@ -90,7 +91,7 @@ namespace FrankyCLI.questgen_tools
 
         public Mutagen.Bethesda.Starfield.FormList GenerateGang()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             var list = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>();
             
@@ -118,7 +119,7 @@ namespace FrankyCLI.questgen_tools
                     + gangName + " gang member. Return only the name in the response. " +
                     "Don't use any of the names that have appeared before.");
                 npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
-                Random wrand = new Random();
+                Random wrand = RandomUtils.random;
                 npc.Weight = new NpcWeight()
                 {
                     Fat = (float)wrand.NextDouble(),

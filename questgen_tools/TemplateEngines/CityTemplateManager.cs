@@ -1,6 +1,7 @@
 ﻿using DynamicData;
 using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools.Interfaces;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -48,7 +49,7 @@ namespace FrankyCLI.questgen_tools
 
         public MissionTemplate GetShowdownMissionTemplate(string mission)
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             if (mission.Length > 0)
             {
@@ -103,7 +104,7 @@ namespace FrankyCLI.questgen_tools
         public MissionTemplate GetInvestigationMissionTemplate(string mission)
         {
             if (MergedLib.InvestigationTemplates.Count == 0) return null;
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             if (mission.Length > 0)
             {
@@ -159,7 +160,7 @@ namespace FrankyCLI.questgen_tools
         public MissionTemplate GetDiscoveryMissionTemplate()
         {
             if (MergedLib.DiscoveryTemplates.Count == 0) return null;
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             if (AITools.AIMODE && false)
             {
@@ -200,12 +201,5 @@ namespace FrankyCLI.questgen_tools
 
             }
         }
-        public void PrintManagerInfo()
-        {
-            Console.WriteLine("City Template Manager");
-        }
-
     }
-
-
 }

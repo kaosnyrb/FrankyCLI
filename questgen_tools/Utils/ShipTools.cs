@@ -1,18 +1,19 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
 
@@ -22,7 +23,7 @@ namespace FrankyCLI.questgen_tools
     {
         public static uint GetCargoShip()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> shiplist = new List<uint>()
             {
                 0x0018D3E2, // EncShip_UCCitizen_A_Cargo_MULE01 [GBFM:0018D3E2]
@@ -64,7 +65,7 @@ namespace FrankyCLI.questgen_tools
         public static uint GetAClassShip()
         {
             //Note  the faction ones seem to work but the manufactor ones don't
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> shiplist = new List<uint>()
             {
                 0x0031DF00, // EncShip_CrimsonFleet_A_Ghost01 [GBFM:0031DF00]
@@ -96,7 +97,7 @@ namespace FrankyCLI.questgen_tools
         public static uint GetBClassShip()
         {
             //Note  the faction ones seem to work but the manufactor ones don't
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<uint> shiplist = new List<uint>()
             {
                 0x00322BE9, // EncShip_CrimsonFleet_B_Banshee01 [GBFM:00322BE9]
@@ -171,7 +172,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetTradeAuthoritySailingCodeName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Old-world merchant & sailing-inspired ship names (single word, classy)
             List<string> singleWordNames = new List<string>
@@ -205,7 +206,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetMercenaryCodeName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Tactical, military-style code prefixes
             List<string> codePrefixes = new List<string>
@@ -243,7 +244,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetShipName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
             List<string> spaceshipPrefixes = new List<string>
             {
                 "Star", "Nova", "Nebula", "Galaxy", "Cosmic", "Solar", "Lunar", "Quantum", "Stellar",
@@ -278,7 +279,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetSpacerCodeName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Scavenger / bandit-style prefixes
             List<string> codePrefixes = new List<string>
@@ -313,7 +314,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetFreestarCodeName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Military-style prefixes for Freestar
             List<string> codePrefixes = new List<string>
@@ -342,7 +343,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetUCShipCode()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Military-style prefix letters
             List<string> shipPrefixes = new List<string>
@@ -361,7 +362,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetCrimsonFleetCodeName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Aggressive, outlaw-style prefixes suitable for Crimson Fleet
             List<string> codePrefixes = new List<string>
@@ -397,7 +398,7 @@ namespace FrankyCLI.questgen_tools
 
         public static string GetGalBankCodeName()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             // Corporate / banking military-style prefixes
             List<string> codePrefixes = new List<string>

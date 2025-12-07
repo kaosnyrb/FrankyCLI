@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FrankyCLI.questgen_tools.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace FrankyCLI.questgen_tools
     {
         public static string GetWallModel()
         {
-            Random random = new Random();
+            Random random = RandomUtils.random;
 
             List<string> wallmodel = new List<string>()
             {
@@ -120,7 +121,7 @@ namespace FrankyCLI.questgen_tools
                     Model = "duout\\space_vault.nif"
                 },
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
             return activatorTypes[random.Next(activatorTypes.Count)];
 
         }
@@ -300,7 +301,7 @@ namespace FrankyCLI.questgen_tools
                 },
 
             };
-            Random random = new Random();
+            Random random = RandomUtils.random;
             return activatorTypes[random.Next(activatorTypes.Count)];
         }
 
@@ -865,7 +866,7 @@ namespace FrankyCLI.questgen_tools
             //
 
 
-            Random random = new Random();
+            Random random = RandomUtils.random;
             return activatorTypes[random.Next(activatorTypes.Count)];
         }
     }

@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda;
+﻿using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -142,7 +143,7 @@ namespace FrankyCLI.questgen_tools
 
             };
 
-            Random random = new Random();
+            Random random = RandomUtils.random;
             var Choosen = Markers[random.Next(Markers.Count)];
             var quest = gen_quest_main._StarfieldMod.Quests[new FormKey(gen_quest_main.StarfieldModKey, Choosen.QuestID)];
             var alias = quest.Aliases[Choosen.AliasID];
