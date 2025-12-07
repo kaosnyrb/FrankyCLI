@@ -34,6 +34,7 @@ namespace FrankyCLI.questgen_tools.Nouns
                 Summary = Quest.Summary,
                 VirtualMachineAdapter = Quest.VirtualMachineAdapter
             };
+            gen_quest_main.myMod.Quests.Add(quest);
         }
 
         public bool SetLogMessage(int StageIndex,int LogEntry, string Content)
@@ -41,6 +42,13 @@ namespace FrankyCLI.questgen_tools.Nouns
             quest.Stages[StageIndex].LogEntries[LogEntry].Entry = Content;
             return true;
         }
+
+        public bool SetObjective(int ObjectiveIndex, string text)
+        {
+            quest.Objectives[ObjectiveIndex].DisplayText = text; 
+            return true;
+        }
+
         public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
             foreach(var script in quest.VirtualMachineAdapter.Scripts)
@@ -65,6 +73,28 @@ namespace FrankyCLI.questgen_tools.Nouns
         {
             quest.VirtualMachineAdapter.Aliases[AliasIndex].Property.Object = Value;
             return true;
+        }
+
+        public bool SetQuestReferenceCreateAlias(String AliasName, IFormLink<IStarfieldMajorRecordGetter> Value)
+        {
+            foreach (var alias in quest.Aliases)
+            {
+                try
+                {
+                    var CastedAlias = (IQuestReferenceAlias)alias;
+                    if (CastedAlias.Name == AliasName)
+                    {
+                        CastedAlias.CreateReferenceToObject.Object = Value;
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+            }
+            return false;
         }
 
         public bool SetQuestReferenceAlias(String AliasName, FormKey formKey)
@@ -110,9 +140,5 @@ namespace FrankyCLI.questgen_tools.Nouns
             return false;
         }
 
-        public void Finalise()
-        {
-            gen_quest_main.myMod.Quests.Add(quest);
-        }
     }
 }
