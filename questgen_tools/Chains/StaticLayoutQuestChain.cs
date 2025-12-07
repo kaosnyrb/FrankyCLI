@@ -75,7 +75,7 @@ namespace FrankyCLI.questgen_tools
                 var forktemplates = new Templates_Fork();
                 ForkInvestigationMissionTemplate = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
             }
-            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("City Activator - Neon Core");
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("Planet side Activator - Abandoned Bionics Lab");
             var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);

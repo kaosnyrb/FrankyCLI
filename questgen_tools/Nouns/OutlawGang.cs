@@ -28,13 +28,16 @@ namespace FrankyCLI.questgen_tools
     {
         public StarfieldMod myMod;
         public string gangName;
+        public Mutagen.Bethesda.Starfield.FormList gangList;
 
-        public OutlawGang(StarfieldMod myModparam, string gangNameparam)
+        public OutlawGang(StarfieldMod myModparam)
         {
             myMod = myModparam;
-            gangName = gangNameparam;
+            gangName = GetGangName();
 
             AITools.RunPrompt("<Lore> There is a gang of people called " + gangName + " who are assiting the target");
+
+            gangList = GenerateGang();
         }
 
         public static string GetGangName()

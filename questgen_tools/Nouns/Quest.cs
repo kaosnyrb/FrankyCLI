@@ -118,6 +118,28 @@ namespace FrankyCLI.questgen_tools.Nouns
             return false;
         }
 
+        public bool SetQuestPCMTypeKeyword(string AliasName, IFormLinkNullable<IKeywordGetter> Value)
+        {
+            foreach (var alias in quest.Aliases)
+            {
+                try
+                {
+                    var CastedAlias = (QuestLocationAlias)alias;
+                    if (CastedAlias.Name == AliasName)
+                    {
+                        CastedAlias.ALPS.PcmTypeKeyword = Value;
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+            }
+            return false;
+        }
+
         public bool SetQuestLocationAlias(string AliasName, IFormLinkNullable<ILocationGetter> Value)
         {
             foreach (var alias in quest.Aliases)

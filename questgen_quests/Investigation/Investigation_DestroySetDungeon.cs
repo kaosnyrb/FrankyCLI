@@ -64,12 +64,7 @@ namespace FrankyCLI
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            //Generate a gang
-            var gangname = OutlawGang.GetGangName();
-            Console.WriteLine("gangname: " + gangname);
-
-            OutlawGang outlawGang = new OutlawGang(myMod, gangname);
-            var gang = outlawGang.GenerateGang();
+            OutlawGang outlawGang = new OutlawGang(myMod);
 
             //Log Entry
             var logprompt = 
@@ -78,7 +73,7 @@ namespace FrankyCLI
             "Use the following information to build the explaination:\r\n\r\n";
             logprompt += "Location:" + missionTemplate.Location + "\r\n";
             logprompt += "Vital clue to there location: " + datasource + "\r\n";
-            logprompt += "the title of the Gang members who are helping the target: " + gangname + "\r\n";
+            logprompt += "the title of the Gang members who are helping the target: " + outlawGang.gangName + "\r\n";
             logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
 
@@ -116,7 +111,7 @@ namespace FrankyCLI
             {
                 if ( properties[i].Name == "GangMembers")
                 {
-                    ((ScriptObjectProperty)properties[i]).Object = gang.ToLink<IStarfieldMajorRecordGetter>();
+                    ((ScriptObjectProperty)properties[i]).Object = outlawGang.gangList.ToLink<IStarfieldMajorRecordGetter>();
                 }
                 if (properties[i].Name == "BountyTarget")
                 {
