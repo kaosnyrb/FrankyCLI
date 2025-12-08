@@ -63,8 +63,9 @@ namespace FrankyCLI
                 //We have different styles of quest chains, so randomly choose one.
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {
-                    new LoopingLayoutQuestChain(myMod),
-                    new StaticLayoutQuestChain(myMod)
+//                    new LoopingLayoutQuestChain(myMod),
+//                   new StaticLayoutQuestChain(myMod),
+                    new PirateQuestChain(myMod)
                 };
 
                 var outlawQuest = questchains[random.Next(questchains.Count)];
