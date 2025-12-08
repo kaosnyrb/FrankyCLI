@@ -65,10 +65,10 @@ namespace FrankyCLI
             // We set the PCM keyword to be the param. We've build a tree with a 1 to 1 mapping of keywords and POIs
             if (missionTemplate.parameterformid != 0)
             {
-                newQuest.SetQuestPCMTypeKeyword("BountyTarget", myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>());
+                newQuest.SetQuestPCMTypeKeyword("DungeonLocation", myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>());
             }
 
-            newQuest.SetQuestReferenceCreateAlias("", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("BountyTarget", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Generate Voice for the log
             //SpeechTools.AddVoice(outlawNpc.Logfile.ID, newQuest.FormKey.ID, "THIS IS A TEST");

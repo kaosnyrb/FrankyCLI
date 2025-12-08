@@ -81,7 +81,8 @@ namespace FrankyCLI.questgen_quests
             newQuest.SetScriptProperty("duout_space_derelict_quest", "EnemyShipInteriorLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_derelict_quest", "CrewSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_derelict_quest", "ItemSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+            newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", Crew.GetCrewFormList(missionTemplate.parameter1, shipname));
 
             newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipTools.GetGangList(factionID));
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());

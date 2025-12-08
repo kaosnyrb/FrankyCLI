@@ -36,20 +36,31 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("StaticLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
-                    new AICardTemplateManager(),
+                    //new AICardTemplateManager(),
                     new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
+            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\Generic.md");
 
             //AI Seeding
             string MissionSetupPrompt = "";
-            MissionSetupPrompt += "You will be generating the story from the final encounter backwards, try and link things together in way that makes sense.\r\n\r\n";
-            MissionSetupPrompt += "First we'll generate a showdown mission, then a number of investigation missions. As we generate the missions you should reveal less and less about the target (We're generating from the end first).\r\n\r\n";
-            MissionSetupPrompt += "We're doing this so information about the target is slowly revealed over the course of the missions.\r\n\r\n";
-            MissionSetupPrompt += "The theme for this mission is " + PromptFlavourTools.GetQuestTheme() + " when generating for the quest from now on try and keep in this theme.\r\n\r\n";
-            MissionSetupPrompt += "Use the information generated in the last step to inform the current step.\r\n\r\n";
-            MissionSetupPrompt += "You will recheive new <Lore> entries as things are created, use these to flesh out the story. Incorporate at least one relevant lore detail (faction, tech, or city) to ground the scene.\r\n\r\n";
+            MissionSetupPrompt +=
+                "Acknowledge the following instructions, but do not generate any story content yet:\r\n\r\n" +
+
+                "- You will eventually generate the story from the final encounter backwards.\r\n" +
+                "- Ensure later that all stages link together logically.\r\n" +
+                "- A showdown mission will be generated first, followed by investigation missions.\r\n" +
+                "- Each earlier mission should reveal progressively less about the target.\r\n" +
+                "- This structure ensures information about the target is uncovered gradually.\r\n" +
+                "- Use information from each previously generated step to inform the next.\r\n" +
+                "- New <Lore> entries will appear during generation; these must be used to enrich the story.\r\n" +
+                "- At least one relevant lore detail (faction, tech, location, rumor, etc.) should ground each scene.\r\n\r\n" +
+
+                "Respond only with: \"Instructions acknowledged.\"";
+            
             AITools.RunPrompt(MissionSetupPrompt);
+
+            
 
             // Template Choices --------------------------------
             var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
@@ -62,6 +73,25 @@ namespace FrankyCLI.questgen_tools
 
             // NPC Target                
             OutlawNpc outlawNpc = new OutlawNpc(myMod, ShowdownMissionTemplate.needSpacesuit);
+
+            PromptManager.LoreContext = AITools.RunPrompt("You are given a Lore Context File that contains prompts inside structured tags.\r\n" +
+                "Your task is to generate a full lore instance by completing every section that contains instructions.\r\n\r\nRules:\r\n" +
+                "- Follow the structure and tags exactly as provided.\r\n" +
+                "- For each section that contains instructions (such as <Faction>, <TreasureLegend>, <HistoricalContext>, etc.), replace the instructional text with a fully written lore entry.\r\n" +
+                "- Do NOT generate separate entries for each faction; produce a single consolidated lore section per tag, even if multiple factions are mentioned or implied.\r\n" +
+                "- Do NOT add new tags or remove existing ones.\r\n" +
+                "- Each generated lore section must be no more than 3–6 sentences." +
+                "- Preserve the order and hierarchy of the Lore Context file.\r\n" +
+                "- The Lore Context file is based on the Outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
+                "- Use the Characters Background when generating the Lore Context: " + outlawNpc.background + ".\r\n" +
+                "- Update the <Summary> and <StorySummary> to fit the Outlaw we've generated. Keep it's theme.\r\n" +
+                "- Expand only sections that contain generation instructions.\r\n" +
+                "- Do NOT output explanations. Output ONLY the completed lore instance.\r\n\r\n" +
+                "Here is the Lore Context File:\r\n\r\n" +
+                Lorefile +
+                "\r\n\r\n Generate the completed lore instance now.");
+
+
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Outlaw Name: " + outlawNpc.name);
             
