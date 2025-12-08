@@ -52,7 +52,7 @@ namespace FrankyCLI.questgen_tools
             AITools.RunPrompt(MissionSetupPrompt);
 
             // Template Choices --------------------------------
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("City Bounty - Akila City Farms");
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
             bool fork = false;            
             if (random.Next(100) > 0)
             {
@@ -75,7 +75,7 @@ namespace FrankyCLI.questgen_tools
                 var forktemplates = new Templates_Fork();
                 ForkInvestigationMissionTemplate = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
             }
-            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("Space Informant - Crimson Fleet - Class B");
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
             var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);

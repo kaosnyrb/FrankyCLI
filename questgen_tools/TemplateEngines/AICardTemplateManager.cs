@@ -67,7 +67,7 @@ namespace FrankyCLI.questgen_tools
                 }
             }
 
-            YamlExporter.WriteObjToYaml("Missions.txt", MergedLib);
+            //YamlExporter.WriteObjToYaml("Missions.txt", MergedLib);
         }
 
         public MissionTemplate GetShowdownMissionTemplate(string mission)

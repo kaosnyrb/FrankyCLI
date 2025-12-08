@@ -48,6 +48,7 @@ namespace FrankyCLI.questgen_quests
 
             string choiceprompt = "Generate a paragraph that explains that the player has a choice on which lead to follow. " +
                 "The player will only do one of these missions." +
+                "Put a new line between the choices." +
                 "Write this from the players point of view and don't break the fourth wall." +
                 "The choices are: \r\n" +
                 "1. " + Quest1.outlawQuest.LogMessage + " \r\n" +
