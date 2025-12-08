@@ -138,23 +138,30 @@ namespace FrankyCLI.questgen_tools.Utils
         public static string GetLogMessage(List<string> Addons)
         {
             var logprompt =
-                "Generate a narrative reason why this objective must be completed at this location.\r\n" +
-                "One paragraph under 100 words with newlines.\r\n\r\n" +
-
-                "Use the Lore Context to draw from:\r\n" +
-                "- Faction details\r\n" +
-                "- Character / target profiles\r\n" +
-                "- Rumors, leads, and mystery\r\n" +
-                "- Locations and their history\r\n" +
-                "- Motives and larger stakes\r\n" +
-                "- Threats and dangers surrounding the area\r\n" +
-                "Do NOT quote lore directly; integrate it naturally.\r\n\r\n" +
-
-                "You may use any relevant sections (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
+                "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
+                "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
+                "Write one paragraph under 100 words with natural flow.\r\n" +
+                "Do NOT introduce item names, quest titles, or made-up proper nouns unless they appear in the lore context.\r\n" +
+                "Do NOT invent new proper nouns unless they exist in the Lore Context.\r\n" +
+                "Write with subtle tension—never blunt exposition.\r\n" +
+                "Focus on mood, motive, tension, and urgency.\r\n" +
+                "Integrate lore naturally without quoting it.\r\n\r\n" +
+                "\r\nStyle Guidelines:\r\n" +
+                "- Do not start with phrases like 'The objective is...' or 'You must...'\r\n" +
+                "- Describe the situation as if briefing an experienced operative.\r\n" +
+                "- Keep it immersive, subtle, and diegetic.\r\n" + 
+            "Draw inspiration from any relevant sections of the Lore Context:\r\n" +
+                "- Factions and their agendas\r\n" +
+                "- Characters or targets\r\n" +
+                "- Rumors, leads, or mysteries\r\n" +
+                "- The location’s atmosphere and history\r\n" +
+                "- Motives, risks, and stakes\r\n" +
+                "- Threats tied to the area\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
+
 
             foreach (var item in Addons)
                 logprompt += item;

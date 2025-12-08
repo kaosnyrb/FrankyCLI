@@ -40,7 +40,7 @@ namespace FrankyCLI.questgen_tools
                     new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
-            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\Generic.md");
+            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\NeonGhost.md");
 
             //AI Seeding
             string MissionSetupPrompt = "";
@@ -84,7 +84,7 @@ namespace FrankyCLI.questgen_tools
                 "- Preserve the order and hierarchy of the Lore Context file.\r\n" +
                 "- The Lore Context file is based on the Outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
                 "- Use the Characters Background when generating the Lore Context: " + outlawNpc.background + ".\r\n" +
-                "- Update the <Summary> and <StorySummary> to fit the Outlaw we've generated. Keep it's theme.\r\n" +
+                "- Update the <Summary> and <StorySummary> to fit the Outlaw we've generated. Keep it's theme and story, merging it with the character backgound.\r\n" +
                 "- Expand only sections that contain generation instructions.\r\n" +
                 "- Do NOT output explanations. Output ONLY the completed lore instance.\r\n\r\n" +
                 "Here is the Lore Context File:\r\n\r\n" +

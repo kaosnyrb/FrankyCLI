@@ -69,7 +69,6 @@ namespace FrankyCLI.questgen_quests
             });
             Console.WriteLine("logmessage: " + logmessage);
 
-            Console.WriteLine(logmessage);
             var newQuest = new QuestNoun(missionTemplate.formid, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
             //We set the spawn marker to one of random ones so the target is in different places
