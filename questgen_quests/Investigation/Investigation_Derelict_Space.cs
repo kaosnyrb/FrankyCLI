@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -40,41 +41,33 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("shipname: " + shipname);
             var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, factionID);
 
-            //Create the datasource
-            var datasourceprompt =
-                "A three word or less log file that contains a clue to the characters location.\r\n" +
-                "Only include the data source name in the response.\r\n\r\n" +
-                "This quest is about finding a lead on this character, this is the link to them.\r\n\r\n";
-            var datasource = AITools.RunPrompt(datasourceprompt);
+            var datasource = PromptManager.GetActivatorName(new List<string>()
+            {
+                "Location:" + missionTemplate.Location + "\r\n",
+                "Type: Data tablet \r\n",
+
+            });
             Console.WriteLine("datasource: " + datasource);
 
-            var questprompt = 
-                "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
-                "This quest is about finding the location of this character\r\n\r\n" +
-                "Keep it to one paragraph with newlines\r\n\r\n" +
-                "Use the following information to build the quest name:\r\n\r\n";
-            questprompt += "Vital clue to their location: " + datasource + "\r\n";
-            questprompt += "Spaceship holding the information: " + shipname + "\r\n";
-
-            var questname = AITools.RunPrompt(questprompt);
+            var questname = PromptManager.GetQuestName(new List<string>()
+            {
+                "Vital clue to their location:" + datasource,
+                "Location:" + missionTemplate.Location + "\r\n",
+                "Spaceship holding the information: " + shipname + "\r\n"
+            });
             Console.WriteLine("questname: " + questname);
+
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            
+
             //Log Entry
-            var logprompt = 
-            "Generate a short flavour text story which is an explaination on why the data needed to find this character is at this location.\r\n\r\n" +
-            "Explain why the ship is derelict and how the crew died.\r\n\r\n" +            
-            "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
-            "Use the following information to build the explaination:\r\n\r\n";
-            logprompt += "Location:" + missionTemplate.Location + "\r\n";
-            logprompt += "Vital clue to there location: " + datasource + "\r\n";
-            logprompt += "Spaceship guarding the information: " + shipname + "\r\n";
-            logprompt += "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n";
-
-            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
-            var logmessage = AITools.RunPrompt(logprompt);
-
-            Console.WriteLine(logmessage);
+            var logmessage = PromptManager.GetLogMessage(new List<string>()
+            {
+                "Location:" + missionTemplate.Location + "\r\n",
+                "Objective: Board the " + shipname + " and find the " + datasource + "\r\n",
+                "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
+                "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
+            });
+            Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
@@ -94,15 +87,14 @@ namespace FrankyCLI.questgen_quests
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 
-            //Log Entry
-            var booklogprompt =
-            "Generate a short data file which is a log stream from the target.\r\n\r\n" +
-            "This log explains why the target is at the next location\r\n\r\n" +
-            "Keep it to two paragraphs under 100 words with newlines\r\n\r\n" +
-            "Use the following information to build the explaination:\r\n\r\n";
-            booklogprompt += "Location:" + nextQuest.QuestLocation + "\r\n";
-            booklogprompt = PromptFlavourTools.AddFlavourToTargetBook(booklogprompt);
-            var booklogmessage = AITools.RunPrompt(booklogprompt);
+            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>()
+            {
+                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
+                "Current Location:" + missionTemplate.Location + "\r\n",
+                "Objective: Board the " + shipname + " and find the " + datasource + "\r\n",
+                "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
+                "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
+            });
             var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
 
             var frmlst = new FormList(myMod)

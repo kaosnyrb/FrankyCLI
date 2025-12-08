@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -41,26 +42,19 @@ namespace FrankyCLI
             Console.WriteLine("Generating Bounty Planet Quest...");
             questloc = missionTemplate.Location;
 
-            var questprompt =
-                "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n";
-            var questname = AITools.RunPrompt(questprompt);
+            var questname = PromptManager.GetQuestName(new List<string>());
             Console.WriteLine("questname: " + questname);
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            //Log Entry
-            var logprompt = 
-                "Include newline characters in your response.\r\n" +
-                "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
-                "Generate a short quest objective for the game Starfield on why this character is at this location.\r\n\r\n" +
-                "It should explain why the character is at the location and that the player should kill them.\r\n\r\n" +            
-                "Use the following information to build the explaination:\r\n\r\n";
-
-            logprompt += "Location:" + missionTemplate.Location + "\r\n";
-            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
-            var logmessage = AITools.RunPrompt(logprompt);
-
+            var logmessage = PromptManager.GetLogMessage(new List<string>()
+            {
+                "Location:" + missionTemplate.Location + "\r\n",
+                "Objective: Kill the Outlaw target " + outlawNpc.name + "\r\n"
+            });
             Console.WriteLine("logmessage: " + logmessage);
+
+
             var newQuest = new QuestNoun(missionTemplate.formid, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
