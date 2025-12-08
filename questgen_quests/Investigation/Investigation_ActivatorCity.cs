@@ -67,9 +67,9 @@ namespace FrankyCLI
             Console.WriteLine("questname: " + questname);
 
             // Quest
-            var newQuest = new QuestInstance(missionTemplate.formid, questname);
-            newQuest.SetScriptAlias(0, newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             var markerused = RandomUtils.GetRandomMarker("doout_city_activator_marker_" + missionTemplate.parameter1);
             newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
@@ -101,21 +101,21 @@ namespace FrankyCLI
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);
             Console.WriteLine("pickupmessage: " + pickupmessage);
-            var message = new MessageBox(0x000844, pickupmessage);
+            var message = new MessageNoun(0x000844, pickupmessage);
 
             //Create the Activator
-            var newActivator = new OutlawActivator(0x000836, datasource, questActivator.Model);
-            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.message.ToLink<IStarfieldMajorRecordGetter>());
-            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            var newActivator = new ActivatorNoun(0x000836, datasource, questActivator.Model);
+            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_completenstart", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
-            newQuest.SetQuestReferenceCreateAlias("BountyTarget", newActivator.newActivator.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("BountyTarget", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the interfaces
-            questform = newQuest.quest;
+            questform = newQuest.instance;
             logMessage = logmessage;
 
-            return newQuest.quest;
+            return newQuest.instance;
         }
 
     }

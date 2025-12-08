@@ -20,14 +20,14 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools.Nouns
 {
-    public class OutlawActivator
+    public class ActivatorNoun
     {
-        public Mutagen.Bethesda.Starfield.Activator newActivator;
-        public OutlawActivator(uint FormID, string Name, string model) {
+        public Mutagen.Bethesda.Starfield.Activator instance;
+        public ActivatorNoun(uint FormID, string Name, string model) {
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             var ActivatorClone = gen_quest_main.myMod.Activators[new FormKey(gen_quest_main.myMod.ModKey, FormID)].DeepCopy();
-            newActivator = new Mutagen.Bethesda.Starfield.Activator(gen_quest_main.myMod)
+            instance = new Mutagen.Bethesda.Starfield.Activator(gen_quest_main.myMod)
             {
                 ActivateSound = ActivatorClone.ActivateSound,
                 Properties = ActivatorClone.Properties,
@@ -46,14 +46,14 @@ namespace FrankyCLI.questgen_tools.Nouns
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };
-            newActivator.Model.File = model;
+            instance.Model.File = model;
 
-            gen_quest_main.myMod.Activators.Add(newActivator);
+            gen_quest_main.myMod.Activators.Add(instance);
         }
 
         public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
-            foreach (var script in newActivator.VirtualMachineAdapter.Scripts)
+            foreach (var script in instance.VirtualMachineAdapter.Scripts)
             {
                 if (script.Name == Scriptname)
                 {

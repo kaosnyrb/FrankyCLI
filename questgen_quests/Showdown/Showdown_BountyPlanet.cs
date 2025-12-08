@@ -1,18 +1,19 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI
 {
@@ -45,7 +46,6 @@ namespace FrankyCLI
             var questname = AITools.RunPrompt(questprompt);
             Console.WriteLine("questname: " + questname);
 
-
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
@@ -61,67 +61,29 @@ namespace FrankyCLI
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine("logmessage: " + logmessage);
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            newQuest.SetLogMessage(0, 0, logmessage);
+            newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questname,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                DialogTopics = new ExtendedList<DialogTopic>(),
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
-
-            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
-
-            //set quest alias to self in scripts
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
-            // Set the scripts
-            var questprops = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < questprops.Count; i++)
-            {
-                if (questprops[i].Name == "DeathItems")
-                {
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (questprops[i].Name == "BountyTarget")
-                {
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "DeathItems", myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>());
 
             // We set the PCM keyword to be the param. We've build a tree with a 1 to 1 mapping of keywords and POIs
             if (missionTemplate.parameterformid != 0)
-            {                
-                ((Mutagen.Bethesda.Starfield.QuestLocationAlias)newQuest.Aliases[0]).ALPS.PcmTypeKeyword = myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>();
+            {
+                newQuest.SetQuestPCMTypeKeyword("BountyTarget", myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>());
             }
 
-
-            //Set the NPC to be the quest target
-            ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
-            myMod.Quests.Add(newQuest);
+            newQuest.SetQuestReferenceCreateAlias("", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Generate Voice for the log
             //SpeechTools.AddVoice(outlawNpc.Logfile.ID, newQuest.FormKey.ID, "THIS IS A TEST");
-
-
             //Set the interfaces
-            questform = newQuest;
+            questform = newQuest.instance;
             logMessage = logmessage;
+            questloc = missionTemplate.Location;
 
-            return newQuest;
+            return newQuest.instance;
         }
     }
 }

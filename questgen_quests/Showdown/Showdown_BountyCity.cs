@@ -1,5 +1,6 @@
 ﻿using DynamicData;
 using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -48,7 +49,6 @@ namespace FrankyCLI
             var questname = AITools.RunPrompt(questprompt);
             Console.WriteLine("questname: " + questname);
 
-
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
@@ -64,77 +64,25 @@ namespace FrankyCLI
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine("logmessage: " + logmessage);
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            newQuest.SetLogMessage(0, 0, logmessage);
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questname,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                DialogTopics = new ExtendedList<DialogTopic>(),
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
-
-            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
-
-            //set quest alias to self in scripts
-            ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "DeathItems", myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("BountyTarget", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
             
+            var marker = RandomUtils.GetRandomMarker("doout_city_showdown_marker_" + missionTemplate.parameter1);
+            newQuest.SetQuestReferenceAlias("BountyTargetMarker", marker.FormKey);
 
-            //Set the NPC to be the quest target
-            ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = outlawNpc.GeneratedNPC.ToLink<IStarfieldMajorRecordGetter>();
-            myMod.Quests.Add(newQuest);
-
-            //Find a target marker to use
-            List<IMajorRecord> rec = new List<IMajorRecord>();
-            foreach (var record in myMod.EnumerateMajorRecords())
-            {
-                if (record.EditorID != null)
-                {
-                    if (record.EditorID.Contains("doout_city_showdown_marker_" + missionTemplate.parameter1))
-                    {
-                        rec.Add(record);
-                    }
-                }
-            }
-
-            Random rand = RandomUtils.random;
-            ((IQuestReferenceAlias)Quest.Aliases[1]).ForcedReference.FormKey = rec[rand.Next(rec.Count)].FormKey;
-
-            //Set Location            
             var locaform = gen_quest_main._StarfieldMod.Locations[new FormKey(gen_quest_main.StarfieldModKey, missionTemplate.parameterformid)];
-            ((IQuestLocationAlias)Quest.Aliases[0]).SpecificLocation = locaform.ToNullableLink<ILocationGetter>();
-
-            //Set death items
-            var questprops = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < questprops.Count; i++)
-            {
-                if (questprops[i].Name == "DeathItems")
-                {
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (questprops[i].Name == "BountyTarget")
-                {
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
+            newQuest.SetQuestLocationAlias("DungeonLocation", locaform.ToNullableLink<ILocationGetter>());
 
             //Set the interfaces
-            questform = newQuest;
+            questform = newQuest.instance;
             logMessage = logmessage;
+            questloc = missionTemplate.Location;
 
-            return newQuest;
+            return newQuest.instance;
         }
     }
 }

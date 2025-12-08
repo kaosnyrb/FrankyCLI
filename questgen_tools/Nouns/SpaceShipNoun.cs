@@ -18,22 +18,22 @@ using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class SpaceShip
+    public class SpaceShipNoun
     {
         public string Name { get; set; }
         public uint FactionID { get; set; }
         public uint ShipID { get; set; }
 
-        public GenericBaseForm Instance { get; set; }
+        public GenericBaseForm instance { get; set; }
 
-        public SpaceShip(string ShipName, uint ShipFormID, uint ShipFaction)
+        public SpaceShipNoun(string ShipName, uint ShipFormID, uint ShipFaction)
         {
             Name=ShipName;
             FactionID = ShipFaction;
             ShipID = ShipFormID;
 
             var ship = gen_quest_main._StarfieldMod.GenericBaseForms[new FormKey(gen_quest_main.StarfieldModKey, ShipFormID)].DeepCopy();
-            Instance = new GenericBaseForm(gen_quest_main.myMod)
+            instance = new GenericBaseForm(gen_quest_main.myMod)
             {
                 EditorID = "encship_" + Guid.NewGuid().ToString().Substring(0, 8),
                 ObjectBounds = ship.ObjectBounds,
@@ -44,7 +44,7 @@ namespace FrankyCLI.questgen_tools
             };
 
             bool setFaction = false;
-            foreach (var component in Instance.Components)
+            foreach (var component in instance.Components)
             {
                 var typestring = component.GetType().ToString();
                 //Console.WriteLine(component.GetType().ToString());
@@ -92,7 +92,7 @@ namespace FrankyCLI.questgen_tools
 
 
 
-            gen_quest_main.myMod.GenericBaseForms.Add(Instance);
+            gen_quest_main.myMod.GenericBaseForms.Add(instance);
         }
 
     }

@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools.Nouns
 {
-    public class QuestInstance
+    public class QuestNoun
     {
-        public Quest quest;
-        public QuestInstance(uint Basequest, string Questname) {
+        public Quest instance;
+        public QuestNoun(uint Basequest, string Questname) {
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
             var Quest = gen_quest_main.myMod.Quests[new FormKey(gen_quest_main.myMod.ModKey, Basequest)].DeepCopy();
-            quest = new Quest(gen_quest_main.myMod)
+            instance = new Quest(gen_quest_main.myMod)
             {
                 Name = Questname,
                 Aliases = Quest.Aliases,
@@ -34,24 +34,24 @@ namespace FrankyCLI.questgen_tools.Nouns
                 Summary = Quest.Summary,
                 VirtualMachineAdapter = Quest.VirtualMachineAdapter
             };
-            gen_quest_main.myMod.Quests.Add(quest);
+            gen_quest_main.myMod.Quests.Add(instance);
         }
 
         public bool SetLogMessage(int StageIndex,int LogEntry, string Content)
         {
-            quest.Stages[StageIndex].LogEntries[LogEntry].Entry = Content;
+            instance.Stages[StageIndex].LogEntries[LogEntry].Entry = Content;
             return true;
         }
 
         public bool SetObjective(int ObjectiveIndex, string text)
         {
-            quest.Objectives[ObjectiveIndex].DisplayText = text; 
+            instance.Objectives[ObjectiveIndex].DisplayText = text; 
             return true;
         }
 
         public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
-            foreach(var script in quest.VirtualMachineAdapter.Scripts)
+            foreach(var script in instance.VirtualMachineAdapter.Scripts)
             {
                 if (script.Name == Scriptname)
                 {
@@ -71,13 +71,13 @@ namespace FrankyCLI.questgen_tools.Nouns
 
         public bool SetScriptAlias(int AliasIndex, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
-            quest.VirtualMachineAdapter.Aliases[AliasIndex].Property.Object = Value;
+            instance.VirtualMachineAdapter.Aliases[AliasIndex].Property.Object = Value;
             return true;
         }
 
         public bool SetQuestReferenceCreateAlias(String AliasName, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
-            foreach (var alias in quest.Aliases)
+            foreach (var alias in instance.Aliases)
             {
                 try
                 {
@@ -99,7 +99,7 @@ namespace FrankyCLI.questgen_tools.Nouns
 
         public bool SetQuestReferenceSpaceLocationAlias(String AliasName, Condition Value)
         {
-            foreach (var alias in quest.Aliases)
+            foreach (var alias in instance.Aliases)
             {
                 try
                 {
@@ -121,7 +121,7 @@ namespace FrankyCLI.questgen_tools.Nouns
 
         public bool SetQuestReferenceAlias(String AliasName, FormKey formKey)
         {
-            foreach(var alias in quest.Aliases)
+            foreach(var alias in instance.Aliases)
             {
                 try
                 {
@@ -142,7 +142,7 @@ namespace FrankyCLI.questgen_tools.Nouns
 
         public bool SetQuestPCMTypeKeyword(string AliasName, IFormLinkNullable<IKeywordGetter> Value)
         {
-            foreach (var alias in quest.Aliases)
+            foreach (var alias in instance.Aliases)
             {
                 try
                 {
@@ -164,7 +164,7 @@ namespace FrankyCLI.questgen_tools.Nouns
 
         public bool SetQuestLocationAlias(string AliasName, IFormLinkNullable<ILocationGetter> Value)
         {
-            foreach (var alias in quest.Aliases)
+            foreach (var alias in instance.Aliases)
             {
                 try
                 {

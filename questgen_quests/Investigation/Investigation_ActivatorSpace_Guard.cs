@@ -38,7 +38,7 @@ namespace FrankyCLI.questgen_quests
 
             Console.WriteLine("shipname: " + shipname);
 
-            var ship = new SpaceShip(shipname, missionTemplate.parameterformid, ShipTools.GetFactionID(missionTemplate.parameter1));
+            var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, ShipTools.GetFactionID(missionTemplate.parameter1));
 
             var questActivator = ActivatorTools.GetRandomSpaceType();
 
@@ -76,15 +76,15 @@ namespace FrankyCLI.questgen_quests
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);
-            var newQuest = new QuestInstance(missionTemplate.formid, questname);
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
             //We set the spawn marker to one of random ones so the target is in different places
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             newQuest.SetQuestReferenceSpaceLocationAlias("PatrolMarker01", SpaceCellTools.GetSpaceMarkerCondition());
-            newQuest.SetScriptAlias(0, newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             //Set the guard ship
-            newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.Instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create the activation message
             var pickuppromt = 
@@ -98,24 +98,24 @@ namespace FrankyCLI.questgen_quests
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);
             Console.WriteLine("pickupmessage: " + pickupmessage);
-            var message = new MessageBox(0x000844, pickupmessage);
+            var message = new MessageNoun(0x000844, pickupmessage);
 
             //Create the Activator
-            var newActivator = new OutlawActivator(0x000901, datasource, questActivator.Model);
+            var newActivator = new ActivatorNoun(0x000901, datasource, questActivator.Model);
 
             //Set the Current quest and next quest so when you use the activator it progresses the mission
-            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.message.ToLink<IStarfieldMajorRecordGetter>());
-            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_completenstart", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
-            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.newActivator.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the interfaces
-            questform = newQuest.quest;
+            questform = newQuest.instance;
             logMessage = logmessage;
             questloc = missionTemplate.Location;
 
-            return newQuest.quest;
+            return newQuest.instance;
         }
 
     }

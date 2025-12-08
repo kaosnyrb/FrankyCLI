@@ -60,7 +60,7 @@ namespace FrankyCLI
             var questname = AITools.RunPrompt(questprompt);
             Console.WriteLine("questname: " + questname);
 
-            OutlawGang outlawGang = new OutlawGang(myMod);
+            GangNoun outlawGang = new GangNoun(myMod);
 
             //Log Entry
             var logprompt = 
@@ -74,9 +74,9 @@ namespace FrankyCLI
             var logmessage = AITools.RunPrompt(logprompt);
 
             Console.WriteLine(logmessage);
-            var newQuest = new QuestInstance(missionTemplate.formid, questname);
-            newQuest.SetScriptAlias(0, newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "GangMembers", outlawGang.gangList.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetLogMessage(0, 0, logmessage);
 
@@ -99,22 +99,22 @@ namespace FrankyCLI
 
             var pickupmessage = AITools.RunPrompt(pickuppromt);
             Console.WriteLine("pickupmessage: " + pickupmessage);
-            var message = new MessageBox(0x000844, pickupmessage);
+            var message = new MessageNoun(0x000844, pickupmessage);
 
             //Create the Activator
-            var newActivator = new OutlawActivator(0x000836, datasource, questActivator.Model);
-            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.message.ToLink<IStarfieldMajorRecordGetter>());
-            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.quest.ToLink<IStarfieldMajorRecordGetter>());
+            var newActivator = new ActivatorNoun(0x000836, datasource, questActivator.Model);
+            newActivator.SetScriptProperty("duout_activator_completenstart", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_activator_completenstart", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_completenstart", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
-            newQuest.SetQuestReferenceCreateAlias("BountyTarget", newActivator.newActivator.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("BountyTarget", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the interfaces
-            questform = newQuest.quest;
+            questform = newQuest.instance;
             logMessage = logmessage;
             questloc = missionTemplate.Location;
 
-            return newQuest.quest;
+            return newQuest.instance;
         }
 
     }

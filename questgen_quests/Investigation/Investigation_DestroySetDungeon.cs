@@ -1,18 +1,20 @@
-﻿using Mutagen.Bethesda.Environments;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Mutagen.Bethesda;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI.Chat;
-using OpenAI;
-using System.Security.Policy;
-using FrankyCLI.questgen_tools;
+using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
 namespace FrankyCLI
 {
@@ -39,11 +41,7 @@ namespace FrankyCLI
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Destroy Planet Quest...");
-
             var questActivator = ActivatorTools.GetRandomDestroyGroundType();
-
-
-            questloc = missionTemplate.Location;
 
             var datasourceprompt =
                 "A three word or less contraband that must be destroyed to reveal the characters location.\r\n" +
@@ -57,16 +55,11 @@ namespace FrankyCLI
                 "A four word or less quest name.\r\nOnly include the quest name in the response.\r\n\r\n" +
                 "This quest is about finding the location of this character\r\n\r\n";
             questprompt += "Vital clue to their location: " + datasource + "\r\n";
-
             var questname = AITools.RunPrompt(questprompt);
             Console.WriteLine("questname: " + questname);
 
+            GangNoun outlawGang = new GangNoun(myMod);
 
-            var questID = Guid.NewGuid().ToString().Substring(0, 8);
-
-            OutlawGang outlawGang = new OutlawGang(myMod);
-
-            //Log Entry
             var logprompt = 
             "Generate a short flavour text story which is an explaination on why this needs to be destryoed to find this character and why it's stored here.\r\n\r\n" +
             "Keep it to one paragraph under 100 words with newlines\r\n\r\n" +
@@ -76,56 +69,15 @@ namespace FrankyCLI
             logprompt += "the title of the Gang members who are helping the target: " + outlawGang.gangName + "\r\n";
             logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
             var logmessage = AITools.RunPrompt(logprompt);
-
             Console.WriteLine(logmessage);
 
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            newQuest.SetLogMessage(0, 0, logmessage);
+            newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "GangMembers", outlawGang.gangList.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestPCMTypeKeyword("DungeonLocation", myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>());
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questname,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
-
-            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
-
-            //set quest alias to self in scripts
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
-            //Set the enemy gang to the new gang
-            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < properties.Count;i++)
-            {
-                if ( properties[i].Name == "GangMembers")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = outlawGang.gangList.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (properties[i].Name == "BountyTarget")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
-            // We set the PCM keyword to be the param. We've build a tree with a 1 to 1 mapping of keywords and POIs
-            if (missionTemplate.parameterformid != 0)
-            {
-                ((Mutagen.Bethesda.Starfield.QuestLocationAlias)newQuest.Aliases[0]).ALPS.PcmTypeKeyword = myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>();
-            }
-
-
-            //Create the activation message
             var pickuppromt = 
             "Include newline characters in your response.\r\n" +
             "Generate a short flavour text story which explains to the player that they have found the location of the next stage via this clue.\r\n\r\n" +
@@ -134,77 +86,26 @@ namespace FrankyCLI
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + nextQuest.QuestLocation + "\r\n";
             pickuppromt += "Vital clue to there location: " + datasource + "\r\n";
-
             var pickupmessage = AITools.RunPrompt(pickuppromt);
             Console.WriteLine("pickupmessage: " + pickupmessage);
 
-            var messageClone = myMod.Messages[new FormKey(myMod.ModKey, 0x000844)].DeepCopy();
-            Message message = new Message(myMod)
-            {
-                Name = messageClone.Name,
-                BNAM = messageClone.BNAM,
-                EditorID = "message_" + questID,
-                Description = pickupmessage,
-                Flags = messageClone.Flags
-            };
-            
-            myMod.Messages.Add(message);
-
+            var message = new MessageNoun(0x000844, pickupmessage);
 
             //Create the Activator
-
-            var ActivatorClone = myMod.Activators[new FormKey(myMod.ModKey, 0x0008BB)].DeepCopy();
-            Mutagen.Bethesda.Starfield.Activator newActivator = new Mutagen.Bethesda.Starfield.Activator(myMod)
-            {
-                ActivateSound = ActivatorClone.ActivateSound,
-                Properties = ActivatorClone.Properties,
-                VirtualMachineAdapter = ActivatorClone.VirtualMachineAdapter,
-                ActivateTextOverride = ActivatorClone.ActivateTextOverride,
-                ActivationAngle = ActivatorClone.ActivationAngle,
-                Components = ActivatorClone.Components,
-                Flags = ActivatorClone.Flags,
-                Conditions = ActivatorClone.Conditions,
-                EditorID = "activator_" + questID,
-                Destructible = ActivatorClone.Destructible,
-                Keywords = ActivatorClone.Keywords,
-                Name = datasource,
-                ObjectBounds = ActivatorClone.ObjectBounds,
-                ODTY = ActivatorClone.ODTY,
-                Model = ActivatorClone.Model,
-                XALG = ActivatorClone.XALG
-            };
-            newActivator.Model.File = questActivator.Model;
-
-            //Set the Current quest and next quest so when you use the activator it progresses the mission
-
-            var activatorproperties = newActivator.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < activatorproperties.Count; i++)
-            {
-                if (activatorproperties[i].Name == "messagetext")
-                {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (activatorproperties[i].Name == "currentquest")
-                {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (activatorproperties[i].Name == "nextquest")
-                {
-                    ((ScriptObjectProperty)newActivator.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
-
-            myMod.Activators.Add(newActivator);
+            var newActivator = new ActivatorNoun(0x0008BB, datasource, questActivator.Model);
+            newActivator.SetScriptProperty("duout_destroy_completenstart", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_destroy_completenstart", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newActivator.SetScriptProperty("duout_destroy_completenstart", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the Activator to be the quest target
-            ((IQuestReferenceAlias)Quest.Aliases[3]).CreateReferenceToObject.Object = newActivator.ToLink<IStarfieldMajorRecordGetter>();
-            myMod.Quests.Add(newQuest);
-            
-            //Set the interfaces
-            questform = newQuest;
-            logMessage = logmessage;
+            newQuest.SetQuestReferenceCreateAlias("BountyTarget", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            return Quest;
+            //Set the interfaces
+            questform = newQuest.instance;
+            logMessage = logmessage;
+            questloc = missionTemplate.Location;
+
+            return newQuest.instance;
         }
 
     }

@@ -35,7 +35,7 @@ namespace FrankyCLI.questgen_tools
 
         public bool female;
 
-        public Npc GeneratedNPC;
+        public Npc instance;
 
 
         public FormKey deathItems;
@@ -203,7 +203,7 @@ namespace FrankyCLI.questgen_tools
             lev.LevelMult = 0.25f + (float)wrand.NextDouble();
             npc.Level = lev;
 
-            var legendary = new LegendaryArmour(name);
+            var legendary = new LegendaryArmourNoun(name);
 
             npc.Items = new ExtendedList<ContainerEntry>
             {
@@ -223,7 +223,7 @@ namespace FrankyCLI.questgen_tools
             myMod.FormLists.Add(frmlst);
 
             myMod.Npcs.Add(npc);
-            GeneratedNPC = npc;
+            instance = npc;
 
             return npc;
         }

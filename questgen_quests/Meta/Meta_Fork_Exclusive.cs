@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -34,26 +35,8 @@ namespace FrankyCLI.questgen_quests
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questID,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
 
+            var newQuest = new QuestNoun(missionTemplate.formid, questID);
 
             //Quest 1
             var Quest1 = missionTemplate.Lib1.GetInvestigationMissionTemplate("");
@@ -71,59 +54,28 @@ namespace FrankyCLI.questgen_quests
                 "2. " + Quest2.outlawQuest.LogMessage + " \r\n";
             string description = AITools.RunPrompt(choiceprompt);
 
-            var messageClone = myMod.Messages[new FormKey(myMod.ModKey, 0x0008BA)].DeepCopy();
-            Message message = new Message(myMod)
-            {
-                Name = messageClone.Name,
-                BNAM = messageClone.BNAM,
-                EditorID = "message_" + questID,
-                Description = description,
-                Flags = messageClone.Flags,
-                MenuButtons = messageClone.MenuButtons,
-            };
+            var message = new MessageNoun(0x0008BA, description);
 
             string choice_one_prompt = "Convert this to a menu option saying you'll look into it. No more that 10 words.: " + Quest1.outlawQuest.LogMessage;
             string choice_two_prompt = "Convert this to a menu option saying you'll look into it. No more that 10 words.: " + Quest2.outlawQuest.LogMessage;
 
-
             var choice_one = AITools.RunPrompt(choice_one_prompt);
             var choice_two = AITools.RunPrompt(choice_two_prompt);
 
-            message.MenuButtons[0].Text = choice_one;
-            message.MenuButtons[1].Text = choice_two;
+            message.SetChoice(0,choice_one);
+            message.SetChoice(1,choice_two);
 
-
-            myMod.Messages.Add(message);
-
-
-
-            //Set the enemy gang to the new gang
-            var properties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < properties.Count; i++)
-            {
-                if (properties[i].Name == "messagetext")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = message.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (properties[i].Name == "currentquest")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (properties[i].Name == "nextquest_1")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = Quest1.outlawQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (properties[i].Name == "nextquest_2")
-                {
-                    ((ScriptObjectProperty)properties[i]).Object = Quest2.outlawQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }
-            myMod.Quests.Add(newQuest);
+            newQuest.SetScriptProperty("duout_branching_quest", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_branching_quest", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_branching_quest", "nextquest_1", Quest1.outlawQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_branching_quest", "nextquest_2", Quest2.outlawQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the interfaces
-            questform = newQuest;
-            logMessage = description;
-            return newQuest;
+            questform = newQuest.instance;
+            logMessage = "";
+            questloc = missionTemplate.Location;
+
+            return newQuest.instance;
         }
     }
 }

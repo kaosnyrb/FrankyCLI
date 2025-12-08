@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -40,7 +41,7 @@ namespace FrankyCLI.questgen_quests
 
             string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
             Console.WriteLine("shipname: " + shipname);
-            var ship = new SpaceShip(shipname, missionTemplate.parameterformid, factionID);
+            var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, factionID);
 
             //Create the datasource
             var datasourceprompt =
@@ -80,54 +81,16 @@ namespace FrankyCLI.questgen_quests
 
             Console.WriteLine(logmessage);
 
+            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            newQuest.SetLogMessage(0, 0, logmessage);
+            newQuest.SetObjective(0, "Recover the " + datasource + " from the " + shipname + " cargo hold");
+            newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            var Quest = myMod.Quests[new FormKey(myMod.ModKey, missionTemplate.formid)].DeepCopy();
-            Quest newQuest = new Quest(myMod)
-            {
-                Name = questname,
-                Aliases = Quest.Aliases,
-                Components = Quest.Components,
-                Data = Quest.Data,
-                EditorID = "quest_" + questID,
-                Keywords = Quest.Keywords,
-                Location = Quest.Location,
-                MajorFlags = Quest.MajorFlags,
-                Objectives = Quest.Objectives,
-                MissionTypeKeyword = Quest.MissionTypeKeyword,
-                QuestType = Quest.QuestType,
-                ScriptComment = Quest.ScriptComment,
-                Stages = Quest.Stages,
-                Summary = Quest.Summary,
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
-            };
-
-            newQuest.Stages[0].LogEntries[0].Entry = logmessage; //"I've found a dataslate containing the location of <Alias=BountyTarget>, who is hiding out at <Alias=DungeonLocation> on <Alias=TargetPlanet>. The Trackers Alliance will pay for taking out the bounty.";
-
-            newQuest.Objectives[0].DisplayText = "Recover the " + datasource + " from the " + shipname + " cargo hold";
-            //set quest alias to self in scripts
-            newQuest.VirtualMachineAdapter.Aliases[0].Property.Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-
-            //We set the spawn marker to one of random ones so the target is in different places
-            ((QuestReferenceAlias)newQuest.Aliases[2]).Conditions[0] = SpaceCellTools.GetSpaceMarkerCondition();
-
-            //Set the gang members
-            var questproperties = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < questproperties.Count; i++)
-            {
-                if (questproperties[i].Name == "BountyTarget")
-                {
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = newQuest.ToLink<IStarfieldMajorRecordGetter>();
-                }
-                if (questproperties[i].Name == "GangMembers")
-                {
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = ShipTools.GetGangList(factionID);
-                }
-            }
-
-            //Set the target ship
-            ((IQuestReferenceAlias)Quest.Aliases[4]).CreateReferenceToObject.Object = ship.Instance.ToLink<IStarfieldMajorRecordGetter>();
-            myMod.Quests.Add(newQuest);
-
+            newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
+            newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
+            newQuest.SetScriptProperty("duout_space_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_bounty_quest", "GangMembers", ShipTools.GetGangList(factionID));
+            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Log Entry
             var booklogprompt =
@@ -139,29 +102,7 @@ namespace FrankyCLI.questgen_quests
             booklogprompt += "Write in the style of a " + datasource + "\r\n";
             var booklogmessage = AITools.RunPrompt(booklogprompt);
 
-            var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
-            Book bountybook = new Book(myMod)
-            {
-                CNAM = Book.CNAM,
-                Components = Book.Components,
-                Description = booklogmessage,
-                DNAMUnknown = Book.DNAMUnknown,
-                DropdownSound = Book.DropdownSound,
-                EditorID = "book_" + questID,
-                Keywords = Book.Keywords,
-                ENAM = Book.ENAM,
-                FeaturedItemMessage = Book.FeaturedItemMessage,
-                Flags = Book.Flags,
-                FNAM = Book.FNAM,
-                InventoryArt = Book.InventoryArt,
-                Model = Book.Model,
-                Name = datasource,
-                ODTY = Book.ODTY,
-                Value = Book.Value,
-                Weight = Book.Weight,
-                VirtualMachineAdapter = Book.VirtualMachineAdapter,
-                Transforms = Book.Transforms,
-            };
+            var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
 
             var frmlst = new FormList(myMod)
             {
@@ -169,31 +110,17 @@ namespace FrankyCLI.questgen_quests
                 Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
             };
 
-            frmlst.Items.Add(bountybook);
+            frmlst.Items.Add(bountybook.instance);
             myMod.FormLists.Add(frmlst);
-
-            //set  the  book to start the new quest
-            ((ScriptObjectProperty)bountybook.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-
-            bountybook.ENAM = "Data Slate #" + questID;
-            myMod.Books.Add(bountybook);
-
-            
-            // Death Items
-            var questprops = newQuest.VirtualMachineAdapter.Scripts[0].Properties;
-            for (int i = 0; i < questprops.Count; i++)
-            {
-                if (questprops[i].Name == "DeathItems")
-                {                    
-                    ((ScriptObjectProperty)newQuest.VirtualMachineAdapter.Scripts[0].Properties[i]).Object = frmlst.ToLink<IStarfieldMajorRecordGetter>();
-                }
-            }            
+            bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_bounty_quest", "DeathItems", frmlst.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the interfaces
-            questform = newQuest;
+            questform = newQuest.instance;
             logMessage = logmessage;
+            questloc = missionTemplate.Location;
 
-            return Quest;
+            return newQuest.instance;
         }
 
     }

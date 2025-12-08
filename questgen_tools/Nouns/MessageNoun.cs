@@ -8,23 +8,30 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools.Nouns
 {
-    public class MessageBox
+    public class MessageNoun
     {
-        public Message message;
-        public MessageBox(uint Formid, string Message) {
+        public Message instance;
+        public MessageNoun(uint Formid, string Message) {
             
             var messageClone = gen_quest_main.myMod.Messages[new FormKey(gen_quest_main.myMod.ModKey, Formid)].DeepCopy();
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            message = new Message(gen_quest_main.myMod)
+            instance = new Message(gen_quest_main.myMod)
             {
                 Name = messageClone.Name,
                 BNAM = messageClone.BNAM,
                 EditorID = "message_" + questID,
                 Description = Message,
-                Flags = messageClone.Flags
+                Flags = messageClone.Flags,
+                MenuButtons = messageClone.MenuButtons,                
             };
-            gen_quest_main.myMod.Messages.Add(message);
+            gen_quest_main.myMod.Messages.Add(instance);
+        }
+
+        public bool SetChoice(int ChoiceID, string ChoiceText)
+        {
+            instance.MenuButtons[ChoiceID].Text = ChoiceText;
+            return true;
         }
 
     }

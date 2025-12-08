@@ -24,13 +24,13 @@ namespace FrankyCLI.questgen_tools
     // Spacers are an example of an vanilla gang.
     // This will create a formlist of NPCs with generic names that can be spawned in the missions.
 
-    public  class OutlawGang
+    public  class GangNoun
     {
         public StarfieldMod myMod;
         public string gangName;
         public Mutagen.Bethesda.Starfield.FormList gangList;
 
-        public OutlawGang(StarfieldMod myModparam)
+        public GangNoun(StarfieldMod myModparam)
         {
             myMod = myModparam;
             gangName = GetGangName();

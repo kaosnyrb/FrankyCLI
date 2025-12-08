@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class LegendaryArmour
+    public class LegendaryArmourNoun
     {
         public IFormLinkNullable<ILeveledItemGetter> LeveledItemGetter {  get; set; }
 
-        public LegendaryArmour(string OutlawName)
+        public LegendaryArmourNoun(string OutlawName)
         {
             uint armourid = 0;
 

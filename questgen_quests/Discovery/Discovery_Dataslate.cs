@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -47,39 +48,8 @@ namespace FrankyCLI.questgen_quests
             prompt += "LogMessage: " + nextQuest.LogMessage;
             string bookcontents = AITools.RunPrompt(prompt);
 
-            // Book
-            var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
-            Book bountybook = new Book(myMod)
-            {
-                CNAM = Book.CNAM,
-                Components = Book.Components,
-                Description = bookcontents,//outlawNpc.background + "\r\n\r\n" + nextQuest.LogMessage,
-                DNAMUnknown = Book.DNAMUnknown,
-                DropdownSound = Book.DropdownSound,
-                EditorID = "book_" + questID,
-                Keywords = Book.Keywords,
-                ENAM = Book.ENAM,
-                FeaturedItemMessage = Book.FeaturedItemMessage,
-                Flags = Book.Flags,
-                FNAM = Book.FNAM,
-                InventoryArt = Book.InventoryArt,
-                Model = Book.Model,
-                Name = "Bounty: " + outlawNpc.name,
-                ODTY = Book.ODTY,
-                Value = Book.Value,
-                Weight = Book.Weight,
-                VirtualMachineAdapter = Book.VirtualMachineAdapter,
-                Transforms = Book.Transforms,
-            };
-            
-            //set  the  book to start the new quest
-            ((ScriptObjectProperty)bountybook.VirtualMachineAdapter.Scripts[0].Properties[0]).Object = nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>();
-
-            bountybook.ENAM = "Data Slate #" + questID;
-            myMod.Books.Add(bountybook);
-
-            //Find the levelled list
-            //duout_LL_QuestBooks [LVLI:02000843]
+            var bountybook = new BookNoun(0x000800, "Bounty: " + outlawNpc.name, "Data Slate #" + questID, bookcontents);
+            bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
             //We have a condictional so that the dataslate only drops until you complete the next quest.
             //This means you more likely to find missions you haven't done.
@@ -89,7 +59,7 @@ namespace FrankyCLI.questgen_quests
             myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries.Add(new LeveledItemEntry()
             {
                 Count = 1,
-                Reference = bountybook.ToLink<IItemGetter>(),
+                Reference = bountybook.instance.ToLink<IItemGetter>(),
                 ChanceNone = new Percent(0),
                 Level = 1,
                 Conditions = new ExtendedList<Condition>() { condition }
