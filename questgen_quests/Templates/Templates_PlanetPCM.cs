@@ -25,7 +25,13 @@ namespace FrankyCLI.questgen_quests
                 Location = "A remote location",
                 formid = 0x000835,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorPlanet()
+                outlawQuest = new Investigation_ActivatorPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "planetside",
+                }
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -34,7 +40,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A remote location",
                 formid = 0x000907,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorPlanet()
+                outlawQuest = new Investigation_ActivatorPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "planetside",
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -43,7 +54,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A remote location",
                 formid = 0x000908,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorPlanet()
+                outlawQuest = new Investigation_ActivatorPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "planetside",
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -52,7 +68,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A remote location",
                 formid = 0x000909,
                 needSpacesuit = false,
-                outlawQuest = new Investigation_ActivatorPlanet()
+                outlawQuest = new Investigation_ActivatorPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "planetside",
+                }
             });
 
             //-------------------------------  SHOWDOWN ------------------------------------------
@@ -63,7 +84,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A small remote civilan installation",
                 formid = 0x000803,
                 needSpacesuit = false,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -72,7 +98,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A small remote civilan installation on a planet with a poor atmosphere",
                 formid = 0x000830,
                 needSpacesuit = true,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -81,7 +112,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A Occupied Complex",
                 formid = 0x000831,
                 needSpacesuit = false,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -90,7 +126,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A Occupied Industrial Complex",
                 formid = 0x000834,
                 needSpacesuit = true,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -99,7 +140,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A Old Military Base",
                 formid = 0x000840,
                 needSpacesuit = true,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -108,7 +154,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A Mining Operation",
                 formid = 0x000841,
                 needSpacesuit = true,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -117,7 +168,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A Occupied Base where they are meeting with a boss",
                 formid = 0x000916,
                 needSpacesuit = false,
-                outlawQuest = new Showdown_BountyPlanet()
+                outlawQuest = new Showdown_BountyPlanet(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "planetside",
+                }
             });
 
         }

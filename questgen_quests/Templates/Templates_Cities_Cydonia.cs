@@ -25,7 +25,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FF7,
                 needSpacesuit = true,
                 parameter1 = "cydoniaoutskirts",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -36,7 +42,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FF7,
                 needSpacesuit = true,
                 parameter1 = "cydoniacentralhub",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -47,7 +59,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FF7,
                 needSpacesuit = true,
                 parameter1 = "cydoniaresidential",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             //-------------------------------  SHOWDOWN ------------------------------------------            
@@ -60,7 +78,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "cydoniaoutskirts",
                 parameterformid = 0x00015FF7,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
             });
 
         }

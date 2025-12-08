@@ -22,7 +22,12 @@ namespace FrankyCLI.questgen_quests
                 Location = "A clue hidden in orbit around a planet",
                 formid = 0x000900,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace()
+                outlawQuest = new Investigation_ActivatorSpace(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                }
             });
             //Crimson Fleet
             InvestigationTemplates.Add(new MissionTemplate()
@@ -34,7 +39,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "crimson_fleet"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -45,7 +56,14 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "crimson_fleet"
+                }
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -56,7 +74,14 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "crimson_fleet"
+                }
+
             });
             //Spacer
             InvestigationTemplates.Add(new MissionTemplate()
@@ -68,7 +93,14 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "spacer"
+                }
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -79,7 +111,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "spacer"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -90,7 +128,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "spacer"
+                }
             });
 
             //Ecliptic
@@ -103,7 +147,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "ecliptic"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -115,7 +165,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "ecliptic"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -127,7 +183,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Guard()
+                outlawQuest = new Investigation_ActivatorSpace_Guard(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "ecliptic"
+                }
             });
 
             // Traps
@@ -139,7 +201,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x00090F,
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_ActivatorSpace_Trapped()
+                outlawQuest = new Investigation_ActivatorSpace_Trapped(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "crimson_fleet"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -149,7 +217,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x00090F,
                 parameter1 = "Spacer",
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Trapped()
+                outlawQuest = new Investigation_ActivatorSpace_Trapped(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "space"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -159,7 +233,13 @@ namespace FrankyCLI.questgen_quests
                 parameter1 = "Ecliptic",
                 formid = 0x00090F,
                 needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpace_Trapped()
+                outlawQuest = new Investigation_ActivatorSpace_Trapped(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "space",
+                    "ecliptic"
+                }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
 

@@ -24,7 +24,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilafarms",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -35,7 +41,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilawalls",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -46,7 +58,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilacoeplaza",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -57,7 +75,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilathestretch",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -68,7 +92,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilathecore",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -79,7 +109,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilamidtown",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -90,7 +126,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilaspaceport",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
 
@@ -103,7 +145,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 parameter1 = "akilafarms",
                 parameterformid = 0x00010DFB,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
             });
         }
     }

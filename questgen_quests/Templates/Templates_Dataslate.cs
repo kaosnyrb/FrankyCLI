@@ -24,7 +24,12 @@ namespace FrankyCLI.questgen_quests
                     Location = "A remote location",
                     formid = 0,
                     needSpacesuit = true,
-                    outlawQuest = new Discovery_Dataslate()
+                    outlawQuest = new Discovery_Dataslate(),
+                    MissionTags = new List<string>()
+                    {
+                        "discovery",
+
+                    }
                 });
             /*
             DiscoveryTemplates.Add(

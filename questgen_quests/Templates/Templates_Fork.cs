@@ -25,7 +25,12 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new PlanetTemplateManager(),
-                Lib2 = new SpaceTemplateManager()
+                Lib2 = new SpaceTemplateManager(),
+                MissionTags = new List<string>()
+                {
+                    "space",
+                    "planetside",
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -37,7 +42,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new CityTemplateManager(),
-                Lib2 = new SpaceTemplateManager()
+                Lib2 = new SpaceTemplateManager(),
+                MissionTags = new List<string>()
+                {
+                    "space",
+                    "city",
+                }
+
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -50,6 +61,12 @@ namespace FrankyCLI.questgen_quests
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new CityTemplateManager(),
                 Lib2 = new PlanetTemplateManager(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                }
+
             });
 
         }

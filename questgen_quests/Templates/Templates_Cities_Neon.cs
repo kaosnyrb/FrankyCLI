@@ -25,7 +25,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neoncore",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -37,7 +43,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonryujin",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -49,7 +61,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonebbside",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -61,7 +79,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonrooftops",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -73,7 +97,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonunderbelly",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -85,7 +115,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonstarport",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -97,7 +133,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonastrallounge",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------            
             ShowdownTemplates.Add(new MissionTemplate()
@@ -109,7 +151,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 parameter1 = "neonstarport",
                 parameterformid = 0x00015FFE,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -120,7 +168,14 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 parameter1 = "neonunderbelly",
                 parameterformid = 0x00015FFE,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
+
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -131,7 +186,14 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 parameter1 = "neonebbside",
                 parameterformid = 0x00015FFE,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
+
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -142,7 +204,14 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 parameter1 = "neonrooftops",
                 parameterformid = 0x00015FFE,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
+
             });
         }
     }

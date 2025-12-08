@@ -25,7 +25,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x002CC1EF,
                 needSpacesuit = false,
                 parameter1 = "waggonerfarm",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -36,7 +42,14 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x0021702B,
                 needSpacesuit = false,
                 parameter1 = "newhomestead",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "follow_clue"
+                }
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -47,7 +60,14 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00265018,
                 needSpacesuit = false,
                 parameter1 = "gagarinlanding",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "follow_clue"
+                }
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -58,7 +78,14 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x0001295A,
                 needSpacesuit = false,
                 parameter1 = "newatlantis",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -69,7 +96,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x0019A5C2,
                 needSpacesuit = false,
                 parameter1 = "thewell",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -80,7 +113,13 @@ namespace FrankyCLI.questgen_quests
                 parameterformid = 0x00016027,
                 needSpacesuit = false,
                 parameter1 = "hopetown",
-                outlawQuest = new Investigation_ActivatorCity()
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "follow_clue"
+                }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
             ShowdownTemplates.Add(new MissionTemplate()
@@ -92,7 +131,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = false,
                 parameter1 = "waggonerfarm",
                 parameterformid = 0x002CC1EF,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "kill_target"
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -103,7 +148,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "newhomestead",
                 parameterformid = 0x0021702B,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "kill_target"
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -114,7 +165,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "gagarinlanding",
                 parameterformid = 0x00265018,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "kill_target"
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -125,7 +182,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "newatlantis",
                 parameterformid = 0x0001295A,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -136,7 +199,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "thewell",
                 parameterformid = 0x0019A5C2,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "city",
+                    "planetside",
+                    "kill_target"
+                }
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -147,7 +216,13 @@ namespace FrankyCLI.questgen_quests
                 needSpacesuit = true,
                 parameter1 = "hopetown",
                 parameterformid = 0x00016027,
-                outlawQuest = new Showdown_BountyCity()
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "kill_target"
+                }
             });
         }
     }

@@ -14,6 +14,7 @@ namespace FrankyCLI.questgen_quests
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
+
             //-------------------------------  INVESTIGATION ------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -24,7 +25,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "crimson_fleet"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -35,7 +42,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Spacer",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "spacer"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -46,7 +59,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Ecliptic",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "ecliptic"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -57,7 +76,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "crimson_fleet"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -68,7 +93,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Spacer",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "spacer"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -79,7 +110,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Ecliptic",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "ecliptic"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -90,7 +127,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "crimson_fleet"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -101,7 +144,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Spacer",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "spacer"
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -112,7 +161,13 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x000808,
                 needSpacesuit = true,
                 parameter1 = "Ecliptic",
-                outlawQuest = new Investigation_Informant_Space()
+                outlawQuest = new Investigation_Informant_Space(),
+                MissionTags = new List<string>()
+                {
+                    "kill_target",
+                    "space",
+                    "ecliptic"
+                }
             });
 
             //-------------------------------  SHOWDOWN ------------------------------------------

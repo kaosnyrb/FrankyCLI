@@ -30,7 +30,12 @@ namespace FrankyCLI.questgen_quests
                         formid = 0x0008B9,
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
-                        outlawQuest = new Investigation_ActivatorSetDungeon()
+                        outlawQuest = new Investigation_ActivatorSetDungeon(),
+                        MissionTags = new List<string>()
+                        {
+                            "follow_clue",
+                            "planetside",
+                        }
                     });
                     InvestigationTemplates.Add(new MissionTemplate()
                     {
@@ -40,11 +45,13 @@ namespace FrankyCLI.questgen_quests
                         formid = 0x000842,
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
-                        outlawQuest = new Investigation_DestroySetDungeon()
+                        outlawQuest = new Investigation_DestroySetDungeon(),
+                        MissionTags = new List<string>()
+                        {
+                            "destroy_object",
+                            "planetside",
+                        }
                     });
-
-
-                    
 
                     //-------------------------------  SHOWDOWN ------------------------------------------
                     ShowdownTemplates.Add(new MissionTemplate()
@@ -55,7 +62,12 @@ namespace FrankyCLI.questgen_quests
                         formid = 0x000811,
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
-                        outlawQuest = new Showdown_BountyPlanet()
+                        outlawQuest = new Showdown_BountyPlanet(),
+                        MissionTags = new List<string>()
+                        {
+                            "kill_target",
+                            "planetside",
+                        }
                     });
                 }
             }
