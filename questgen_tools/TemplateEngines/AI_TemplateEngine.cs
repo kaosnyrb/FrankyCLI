@@ -82,7 +82,8 @@ namespace FrankyCLI.questgen_tools
                 sb.AppendLine("Return ONLY the index number of the best choice. Do not explain your reasoning.");
                 sb.AppendLine();
 
-                int count = 10 + random.Next(10);
+                //int count = 10 + random.Next(10);
+                int count = AvailableTemplateLib.ShowdownTemplates.Count;
                 List<MissionTemplate> selected = AvailableTemplateLib.ShowdownTemplates
                     .OrderBy(x => random.Next())
                     .Take(count)
@@ -153,6 +154,12 @@ namespace FrankyCLI.questgen_tools
                 sb.AppendLine("- Favour variety of environment while still feeling connected to the existing lore themes.");
                 sb.AppendLine("- Do NOT pick something that feels like an unrelated one-off if others fit better.");
                 sb.AppendLine();
+                sb.AppendLine("Mission Tags and Variety:");
+                sb.AppendLine("- Each mission below has a set of mission tags (e.g. 'space', 'mine', 'city', 'crimson_fleet', 'research', 'wilderness').");
+                sb.AppendLine("- Treat these tags as shorthand for environment, tone, faction involvement, and mission style.");
+                sb.AppendLine("- Where possible, choose a mission whose tags provide a distinct flavour or escalation compared to earlier quest stages, rather than repeating exactly the same tag combination.");
+                sb.AppendLine("- However, do not pick something random: the tags should still feel like a natural climax to the journey implied by the quest state and LoreContext.");
+                sb.AppendLine();
                 sb.AppendLine("If a <QuestStage> tag is present:");
                 sb.AppendLine("- Treat it as the current stage of the quest (e.g. InitialInvestigation, ForkInvestigation, DeepInvestigation).");
                 sb.AppendLine("- Choose a mission whose tone and stakes match that stage (early = tentative, mid = branching/conflicting, deep = converging patterns).");
@@ -186,7 +193,9 @@ namespace FrankyCLI.questgen_tools
                 sb.AppendLine("Return ONLY the index number of the best choice. Do not output anything else.");
                 sb.AppendLine();
 
+                
                 int count = 10 + random.Next(15);
+                
                 List<MissionTemplate> selected = AvailableTemplateLib.InvestigationTemplates
                     .OrderBy(x => random.Next())
                     .Take(count)
@@ -250,6 +259,9 @@ namespace FrankyCLI.questgen_tools
                 sb.AppendLine("- Prefer missions whose description and location can plausibly serve as the first contact with the mystery (a clue, rumor, odd incident, or job that goes sideways).");
                 sb.AppendLine("- Look for tags that make sense as an opener: exploration, first clue, small job, routine contract that reveals something unexpected.");
                 sb.AppendLine("- Avoid missions that already feel like a final showdown or heavily escalated conflict.");
+                sb.AppendLine();
+                sb.AppendLine("You must NOT pick a mission with a name, description, or location identical to any earlier selected stage.");
+                sb.AppendLine("If a mission repeats a previous location or template, treat it as INVALID and do not choose it.");
                 sb.AppendLine();
                 sb.AppendLine("If a <QuestStage> tag is present:");
                 sb.AppendLine("- Treat it as the current stage of the quest (for Discovery, it will usually indicate an early or starting phase).");

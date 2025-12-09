@@ -1,10 +1,17 @@
-﻿using System;
+﻿using Mutagen.Bethesda.Archives;
+using Mutagen.Bethesda.Starfield;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Joins;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static System.Collections.Specialized.BitVector32;
 
 namespace FrankyCLI.questgen_tools.Utils
 {
@@ -258,7 +265,13 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- InitialInvestigations: this place feels like one of several uncertain starting points.\r\n" +
                 "- ForkInvestigations: this place matters because choosing it means committing to a particular line of inquiry.\r\n" +
                 "- DeepInvestigations: this place is where separate threads begin to cross.\r\n" +
-                "- FinalShowdown: this place is where consequences can no longer be delayed.\r\n\r\n" +
+                "- FinalShowdown: this place is where the target’s long-running actions finally come into focus." +
+                "Clearly describe what the target has been doing up to this moment—whether manipulating factions, extracting illicit resources, exploiting locals, hiding evidence, preparing a weapon, or orchestrating a larger scheme." +
+                "Show how every clue from earlier investigations points to their ongoing operation: mention the pattern behind their movements, the purpose of the items they stole, or the deeper motive behind the trail they left." +
+                "Emphasize what the target is attempting right now as you arrive—securing a final asset, activating dangerous tech, eliminating a witness, fleeing with critical data, or destroying the last proof of their crimes." + 
+                "Highlight why this exact location matters to their plan, and why stopping them here prevents the situation from escalating into something far worse." + 
+                "The tone should convey culmination, rising danger, and the sense that their scheme is seconds away from succeeding if left unchecked."+
+
 
                 "If a <QuestProgress> tag is present:\r\n" +
                 "- Low values (0–25): emphasize confusion, rumor, and risk with limited insight.\r\n" +
