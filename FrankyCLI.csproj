@@ -15,10 +15,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="questgen_quests\Lorefiles\DrBlood.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="questgen_quests\Lorefiles\DrEvil.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="questgen_quests\Lorefiles\Generic.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="questgen_quests\Lorefiles\Gilded_Viper_Lore.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="questgen_quests\Lorefiles\ListPirate.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="questgen_quests\Lorefiles\LostMarine.md">

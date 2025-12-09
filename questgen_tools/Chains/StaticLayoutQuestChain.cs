@@ -44,12 +44,16 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("StaticLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
-                    new AllTemplateManager(new AI_TemplateEngine()),
-                    new FrontierTemplateManager(new AI_TemplateEngine()),
-                    new RandomTemplateManager()
+                    //new AllTemplateManager(new AI_TemplateEngine()),
+                    //new FrontierTemplateManager(new AI_TemplateEngine()),
+                    new NoPOITemplateManager(new AI_TemplateEngine()),
+                    //new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
-            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
+
+
+            //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
+            var Lorefile = PromptManager.LoadRandomLoreFile();
 
             //AI Seeding
             string MissionSetupPrompt = "";

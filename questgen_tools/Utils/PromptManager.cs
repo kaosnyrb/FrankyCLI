@@ -11,6 +11,25 @@ namespace FrankyCLI.questgen_tools.Utils
     public class PromptManager
     {
         public static string LoreContext;
+        public static string LoadRandomLoreFile()
+        {
+            string loreDir = @".\questgen_quests\Lorefiles";
+
+            // Get all .md files
+            var files = Directory.GetFiles(loreDir, "*.md", SearchOption.TopDirectoryOnly);
+
+            if (files.Length == 0)
+            {
+                throw new FileNotFoundException($"No .md files found in: {Path.GetFullPath(loreDir)}");
+            }
+
+            // Pick random file
+            string randomFile = files[RandomUtils.random.Next(files.Length)];
+
+            // Return contents
+            return File.ReadAllText(randomFile);
+        }
+
         // ------------------------------
         // Quest Name
         // ------------------------------
