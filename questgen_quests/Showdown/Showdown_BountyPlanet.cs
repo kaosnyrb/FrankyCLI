@@ -42,12 +42,12 @@ namespace FrankyCLI
             Console.WriteLine("Generating Bounty Planet Quest...");
             questloc = missionTemplate.Location;
 
-            var questname = PromptManager.GetQuestName(new List<string>());
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons));
             Console.WriteLine("questname: " + questname);
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var logmessage = PromptManager.GetLogMessage(new List<string>()
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Kill the Outlaw target " + outlawNpc.name + "\r\n"

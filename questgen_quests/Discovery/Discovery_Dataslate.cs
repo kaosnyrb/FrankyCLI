@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -40,15 +41,17 @@ namespace FrankyCLI.questgen_quests
 
             //Merge the background and log message.
 
-            string prompt = "Merge the background info the bounty and the first investigation mission Log message into the contents of a dataslate that tells the player who they are chasing and how they'll find them. " +
-                "Keep it to 200 words.";
-            prompt = PromptFlavourTools.AddFlavourToLogMessage(prompt);
+            string bookcontents = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons) {
+                "Background: " + outlawNpc.background,
+                "LogMessage: " + nextQuest.LogMessage,                
+            });
 
-            prompt += "Background: " + outlawNpc.background;
-            prompt += "LogMessage: " + nextQuest.LogMessage;
-            string bookcontents = AITools.RunPrompt(prompt);
+            var bookname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons) {
+                "Background: " + outlawNpc.background,
+                "LogMessage: " + nextQuest.LogMessage,
+            });
 
-            var bountybook = new BookNoun(0x000800, "Bounty: " + outlawNpc.name, "Data Slate #" + questID, bookcontents);
+            var bountybook = new BookNoun(0x000800, bookname, "Data Slate #" + questID, bookcontents);
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
             //We have a condictional so that the dataslate only drops until you complete the next quest.

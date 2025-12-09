@@ -38,7 +38,7 @@ namespace FrankyCLI.questgen_quests
             questloc = missionTemplate.Location;
 
             var factionID = ShipTools.GetFactionID(missionTemplate.parameter1);
-            var datasource = PromptManager.GetActivatorName(new List<string>()
+            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Type: Data tablet \r\n",
@@ -50,7 +50,7 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("shipname: " + shipname);
             var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, factionID);
 
-            var questname = PromptManager.GetQuestName(new List<string>()
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Spaceship holding the information: " + shipname + "\r\n"
@@ -59,7 +59,7 @@ namespace FrankyCLI.questgen_quests
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var logmessage = PromptManager.GetLogMessage(new List<string>()
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Recover the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
@@ -79,7 +79,7 @@ namespace FrankyCLI.questgen_quests
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Log Entry
-            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>()
+            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",

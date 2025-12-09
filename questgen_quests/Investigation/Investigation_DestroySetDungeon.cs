@@ -45,7 +45,7 @@ namespace FrankyCLI
             var questActivator = ActivatorTools.GetRandomDestroyGroundType();
 
 
-            var destroytarget = PromptManager.GetDestroyActivatorName(new List<string>()
+            var destroytarget = PromptManager.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -53,7 +53,7 @@ namespace FrankyCLI
             Console.WriteLine("destroytarget: " + destroytarget);
 
 
-            var questname = PromptManager.GetQuestName(new List<string>()
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Item we must destroy: " + destroytarget + "\r\n"
@@ -62,7 +62,7 @@ namespace FrankyCLI
 
             GangNoun outlawGang = new GangNoun(myMod);
 
-            var logmessage = PromptManager.GetLogMessage(new List<string>()
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Destroy the " + destroytarget + " to lead you to " + outlawNpc.name + "\r\n",
@@ -77,7 +77,7 @@ namespace FrankyCLI
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetQuestPCMTypeKeyword("DungeonLocation", myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>());
 
-            var pickupmessage = PromptManager.GetDestroyMessage(new List<string>()
+            var pickupmessage = PromptManager.GetDestroyMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Item we must destroy: " + destroytarget + "\r\n"

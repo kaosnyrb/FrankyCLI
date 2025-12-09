@@ -21,5 +21,6 @@ namespace FrankyCLI.questgen_tools
         public ITemplateManager Lib2;
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
         public List<string> MissionTags;
+        public List<string> Addons;
     }
 }

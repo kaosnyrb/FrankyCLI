@@ -38,14 +38,14 @@ namespace FrankyCLI.questgen_quests
 
             var questActivator = ActivatorTools.GetRandomSpaceType();
 
-            var datasource = PromptManager.GetActivatorName(new List<string>()
+            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = PromptManager.GetQuestName(new List<string>()
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -56,7 +56,7 @@ namespace FrankyCLI.questgen_quests
 
             //Log Entry
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>()
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
@@ -71,7 +71,7 @@ namespace FrankyCLI.questgen_quests
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create the activation message
-            var pickupmessage = PromptManager.GetPickupMessage(new List<string>()
+            var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Vital clue to there location: " + datasource + "\r\n"

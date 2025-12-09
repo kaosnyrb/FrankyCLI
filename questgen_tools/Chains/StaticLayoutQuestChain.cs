@@ -28,6 +28,14 @@ namespace FrankyCLI.questgen_tools
             myMod = myModparam;
         }
 
+        private void AddStageLocation(MissionTemplate template, string stage, string location)
+        {
+            template.Addons.Add(
+                $"<QuestStageLocation stage=\"{stage}\">{location}</QuestStageLocation>"
+            );
+        }
+
+
 
         public bool GenerateQuest()
         {
@@ -36,11 +44,11 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("StaticLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
-                    //new AICardTemplateManager(),
-                    new RandomTemplateManager()
+                    new AICardTemplateManager(),
+                    //new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
-            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\NeonGhost.md");
+            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\Gilded_Viper_Lore.md");
 
             //AI Seeding
             string MissionSetupPrompt = "";
@@ -64,6 +72,12 @@ namespace FrankyCLI.questgen_tools
 
             // Template Choices --------------------------------
             var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
+            ShowdownMissionTemplate.Addons = new List<string>()
+            {
+                "<QuestStage>Showdown</QuestStage>",
+                "<QuestProgress>90%</QuestProgress>"
+            };
+
             bool fork = false;            
             if (random.Next(100) > 0)
             {
@@ -100,13 +114,48 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("Feeding the stages into the AI...");
             AITools.RunPrompt("<Summary> The next section contains all the locations and types of missions that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
+            DeepInvestigationMissionTemplate.Addons = new List<string>()
+            {
+                "<QuestStage>DeepInvestigation</QuestStage>",
+                "<QuestProgress>70%</QuestProgress>"
+            };
             if (fork)
             {
                 var forktemplates = new Templates_Fork();
                 ForkInvestigationMissionTemplate = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
+                ForkInvestigationMissionTemplate.Addons = new List<string>()
+                {
+                    "<QuestStage>ForkInvestigation</QuestStage>",
+                    "<QuestProgress>40%</QuestProgress>"
+                };
             }
             var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
+            InvestigationMissionTemplate.Addons = new List<string>()
+            {
+                "<QuestStage>InitialInvestigation</QuestStage>",
+                "<QuestProgress>10%</QuestProgress>"
+            };
             var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
+            DiscoveryMissionTemplate.Addons = new List<string>()
+            {
+                "<QuestStage>Discovery</QuestStage>",
+                "<QuestProgress>0%</QuestProgress>"
+            };
+
+            //Now we go forwards to let the templates know where we've been.
+            AddStageLocation(ShowdownMissionTemplate, "InitialInvestigation", InvestigationMissionTemplate.Location);
+            AddStageLocation(ShowdownMissionTemplate, "DeepInvestigation", DeepInvestigationMissionTemplate.Location);
+
+            AddStageLocation(DeepInvestigationMissionTemplate, "InitialInvestigation", InvestigationMissionTemplate.Location);
+
+            if (fork)
+            {
+                AddStageLocation(ShowdownMissionTemplate, "ForkInvestigation", ForkInvestigationMissionTemplate.Location);
+                AddStageLocation(DeepInvestigationMissionTemplate, "ForkInvestigation", ForkInvestigationMissionTemplate.Location);
+
+                AddStageLocation(ForkInvestigationMissionTemplate, "InitialInvestigation", InvestigationMissionTemplate.Location);
+            }
+
 
             AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
             AITools.RunPrompt("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);
