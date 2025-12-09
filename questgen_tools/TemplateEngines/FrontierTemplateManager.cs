@@ -1,20 +1,10 @@
-﻿using DynamicData;
-using FrankyCLI.questgen_quests;
+﻿using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools.Interfaces;
-using FrankyCLI.questgen_tools.Utils;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
-using Noggog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class SpaceTemplateManager : ITemplateManager
+    
+    public class FrontierTemplateManager : ITemplateManager
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
@@ -26,8 +16,17 @@ namespace FrankyCLI.questgen_tools
 
         ITemplateEngine templateEngine;
 
-        public SpaceTemplateManager(ITemplateEngine templateEngine)
+        public FrontierTemplateManager(ITemplateEngine templateEngine)
         {
+            
+            //TemplateLibs.Add(new Templates_Fork());
+
+            TemplateLibs.Add(new Templates_Dataslate());
+
+            planetlib.ImportTemplates(new Templates_PlanetPCM());
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
+            TemplateLibs.Add(planetlib);
+
             spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
             spacelib.ImportTemplates(new Templates_Derelicts());
@@ -47,7 +46,7 @@ namespace FrankyCLI.questgen_tools
                 {
                     CompleteLib.InvestigationTemplates.Add(dis);
                 }
-                foreach (var dis in templateLib.ShowdownTemplates)
+                foreach(var dis in templateLib.ShowdownTemplates)
                 {
                     CompleteLib.ShowdownTemplates.Add(dis);
                 }
@@ -60,7 +59,7 @@ namespace FrankyCLI.questgen_tools
 
         public MissionTemplate GetShowdownMissionTemplate(string missionName, List<string> addons = null)
         {
-            return templateEngine.GetShowdownMissionTemplate(missionName, addons);
+            return templateEngine.GetShowdownMissionTemplate(missionName,addons);
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string missionName, List<string> addons = null)

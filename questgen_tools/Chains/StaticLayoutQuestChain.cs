@@ -45,10 +45,11 @@ namespace FrankyCLI.questgen_tools
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
                     new AllTemplateManager(new AI_TemplateEngine()),
-                    //new RandomTemplateManager()
+                    new FrontierTemplateManager(new AI_TemplateEngine()),
+                    new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
-            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\Gilded_Viper_Lore.md");
+            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
 
             //AI Seeding
             string MissionSetupPrompt = "";

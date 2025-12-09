@@ -27,9 +27,6 @@
     <None Update="questgen_quests\Lorefiles\NeonGhost.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="questgen_quests\Lorefiles\PirateTreasure.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="questgen_quests\Lorefiles\STARVEDPROPHET.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
