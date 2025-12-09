@@ -117,10 +117,14 @@ namespace FrankyCLI.questgen_tools
                 string Gender = "Male";
                 if (isfemale) Gender = "Female";
 
-                 npc.Name = AITools.RunPrompt("Generate a first name and last name for a "
-                    + Gender + " "
-                    + gangName + " gang member. Return only the name in the response. " +
-                    "Don't use any of the names that have appeared before.");
+                npc.Name = AITools.RunPrompt(
+                    "Generate a unique full name (first and last) for a " + Gender +
+                    " member of the " + gangName + " gang.\r\n" +
+                    "The name should feel appropriate for someone living and operating within a criminal gang culture—gritty, believable, and grounded.\r\n" +
+                    "Do NOT reuse or repeat any names that have appeared previously in this session.\r\n" +
+                    "Do NOT include titles, ranks, nicknames, or extra commentary.\r\n" +
+                    "Return only the name."
+                );
                 npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
                 Random wrand = RandomUtils.random;
                 npc.Weight = new NpcWeight()
@@ -147,10 +151,18 @@ namespace FrankyCLI.questgen_tools
                 {
                     //We do this last as we know all the crew now. Also only once as they are a bit samey.
                     Console.WriteLine("Generating Crew Log file...");
-                    string BookPrompt = "Write a personal diary entry for " + npc.Name + ", a " + Gender + " member of the " + gangName + ".";
-                    BookPrompt += "Use a first - person voice that reflects their personality, emotional state, and current circumstances.";
-                    BookPrompt += "Use the previously generated crew names for this gang.";
-                    BookPrompt += "Make the entry feel immersive, introspective, character-driven and suitable as lore flavor for a quest.";
+                    string BookPrompt =
+                        "Write a personal diary entry for " + npc.Name + ", a " + Gender +
+                        " member of the " + gangName + " gang.\r\n" +
+                        "Use a first-person voice that reflects their personality, emotional state, and day-to-day life inside the gang.\r\n" +
+                        "Let the tone be shaped by the gang's culture—its pressure, loyalties, violence, rituals, and internal politics.\r\n" +
+                        "Use the previously generated gang member names naturally, as people the writer knows, fears, trusts, envies, or resents.\r\n" +
+                        "Subtly weave in any relevant rumours, secrets, tensions, or whispered stories implied by the LoreContext, but do NOT quote the LoreContext directly or mention it by name.\r\n" +
+                        "These elements should appear as personal suspicions, overheard conversations, unverified gossip, or things the character is worried might be true.\r\n" +
+                        "Make the entry immersive, introspective, and character-driven—suitable as lore flavor for a quest.\r\n" +
+                        "Avoid exposition or summarising the gang; write as if the character already knows their world intimately.\r\n" +
+                        "Do not break the fourth wall or reference prompts or readers.\r\n" +
+                        "Return only the diary entry.";
 
                     BookPrompt = PromptFlavourTools.AddFlavourToGangBook(BookPrompt);
 

@@ -47,10 +47,19 @@ namespace FrankyCLI.questgen_tools
 
             Console.WriteLine("Generating Legendary Name...");
             string Armournameprompt =
-                "Reply only with the following information:\r\n\r\n" +
-                "A legendary " + Type + " belonging to " + OutlawName + " . \r\n\r\n" +
-                "The orginal item this is based on is called the " + armour.Name + ".\r\n\r\n" +
-                "Limit it to two to four words and only response with those words";
+                "Generate an evocative legendary name for a piece of " + Type +
+                " belonging to the outlaw " + OutlawName + ".\r\n" +
+                "The original base item is called \"" + armour.Name + "\".\r\n\r\n" +
+
+                "Guidelines:\r\n" +
+                "- The legendary name must feel iconic, mysterious, and feared—something spoken about in frontier bars, black markets, or bounty briefings.\r\n" +
+                "- Capture themes that might surround " + OutlawName +
+                " such as their reputation, crimes, fighting style, rumours, or symbolic traits.\r\n" +
+                "- The name should NOT include the outlaw’s actual name.\r\n" +
+                "- The name must be 2–4 words total.\r\n" +
+                "- Do not include punctuation, numbers, subtitles, or explanations.\r\n" +
+                "- Return ONLY the final legendary item name.\r\n";
+
             string ArmourName = AITools.RunPrompt(Armournameprompt);
             //Console.WriteLine(ArmourName);
 

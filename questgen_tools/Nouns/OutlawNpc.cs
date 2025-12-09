@@ -74,38 +74,50 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateName()
         {
-            string namestogenerate = "first name, nickname and surname.";
-
-            Random rand = RandomUtils.random;
-            int nametype = rand.Next(130);
-            if(nametype <= 33)
-            {
-                namestogenerate = "first name, nickname and surname.";
-            }
-            if (nametype > 33 && nametype <= 66)
-            {
-                namestogenerate = "nickname and surname.";
-            }
-            if(nametype >66 && nametype <= 100)
-            {
-                namestogenerate = "first name and nickname";
-            }
-            if (nametype > 100 && nametype <= 120)
-            {
-                namestogenerate = "first name and surname.";
-            }
-            if (nametype >120)
-            {
-                namestogenerate = "cool pseudonym";
-            }
-            Console.WriteLine("Generating Outlaw Name...");
-
             string nameprompt =
-                "Reply only with the following information:\r\n\r\n" +
-                "A " + gender + " " + namestogenerate + " \r\n\r\n" +
-                "The nickname should reflect a " + job + "  and be in English.\r\n\r\n" +
-                "The name should reflect the Nationality: " + GetNationality() + ".\r\n\r\n" +
-                "Only include the names in the response. Generate 10 examples then return number " + rand.Next(10) + ". Only return the choosen entry";
+                "Generate a single character name following all rules below. " +
+                "Do NOT explain anything. Output ONLY one final name.\r\n\r\n" +
+
+                "NAME STYLE SELECTION:\r\n" +
+                "- Choose ONE of the following naming formats (select whichever feels most fitting for the nationality, occupation, and implied lore themes):\r\n" +
+                "  1. First name, nickname, and surname.\r\n" +
+                "  2. Nickname and surname.\r\n" +
+                "  3. First name and nickname.\r\n" +
+                "  4. First name and surname.\r\n" +
+                "  5. A cool pseudonym (a single stylized alias).\r\n\r\n" +
+
+                "The AI must choose the format naturally—do NOT output the list or the number. " +
+                "Just produce a single final name in ONE of these formats.\r\n\r\n" +
+
+                "CONSTRAINTS:\r\n" +
+                "- Gender of character: " + gender + ".\r\n" +
+                "- Nationality should influence any real-life name components: " + GetNationality() + ".\r\n" +
+                "- Nicknames (if used) must reflect the character’s occupation: " + job + ".\r\n" +
+                "- Nicknames must be in English, short, sharp, and evocative.\r\n" +
+                "- A pseudonym should feel like a legendary callsign or underworld alias.\r\n" +
+                "- Avoid comedy or cliché names.\r\n" +
+                "- The name should subtly reflect themes, tone, and personality implied by the ongoing lore context without quoting it.\r\n\r\n" +
+
+                "OCCUPATION-BASED NICKNAME RULES:\r\n" +
+                "- Combat roles: intimidation, precision, violence, or grit (e.g., \"Deadbolt\", \"Longshot\").\r\n" +
+                "- Engineering/mechanics: metal, tools, construction, precision (e.g., \"Torque\", \"Rivet\").\r\n" +
+                "- Pilots/navigators: speed, sky, vectors, stellar motifs (e.g., \"Afterburn\", \"Vector\").\r\n" +
+                "- Science/medicine: knowledge, biology, chemistry, calm precision (e.g., \"Catalyst\", \"Stitch\").\r\n" +
+                "- Criminal roles: stealth, notoriety, underworld reputation (e.g., \"Ghostline\", \"Blackjack\").\r\n" +
+                "- Labor roles: strength, endurance, earth/mining motifs (e.g., \"Dustback\", \"Hardpan\").\r\n\r\n" +
+
+                "LORE-AWARE GUIDANCE:\r\n" +
+                "- Infuse subtle hints of personality, background, or reputation influenced by the broader lore context.\r\n" +
+                "- Never quote lore directly; imply connections through mood, tone, or style.\r\n" +
+                "- Do not invent new lore—names should feel inspired by, not contradictory to, established themes.\r\n\r\n" +
+
+                "FORMATTING RULES:\r\n" +
+                "- If a nickname is included, place it in quotes.\r\n" +
+                "- If using a pseudonym, output only the pseudonym.\r\n" +
+                "- Do NOT include any explanations, lists, or extra text—only the final name.\r\n\r\n" +
+
+                "Now output the ONE final character name.";
+
             var name = AITools.RunPrompt(nameprompt);
 
             return name;
@@ -116,54 +128,99 @@ namespace FrankyCLI.questgen_tools
             BountyFaction = FactionTools.GetFaction();
             Random random = RandomUtils.random;
 
-            string backgroundprompt = "Create a brief background file on the target.\r\n";
+            var sb = new StringBuilder();
 
-            backgroundprompt = PromptFlavourTools.AddReportTypes(backgroundprompt);
+            sb.AppendLine("You are writing an internal " + BountyFaction + " intelligence report on a bounty target.");
+            sb.AppendLine("Create a concise background file on the target for use by field operatives.");
+            sb.AppendLine();
 
-            backgroundprompt += "Ensure the total output stays under 500 words, regardless of format.\r\n";
+            // Let your flavour helper decorate the report style
+            var promptHeader = sb.ToString();
+            promptHeader = PromptFlavourTools.AddReportTypes(promptHeader);
+            sb.Clear();
+            sb.Append(promptHeader);
 
-            backgroundprompt += "The entry must be written in the tone of an internal " + BountyFaction + " report.\r\n";
-            backgroundprompt += "Avoid complex terminology. \r\n";
-            backgroundprompt += "Use only locations and details present in the provided background information.\r\n";
-            backgroundprompt += "Do not break the fourth wall.";
-            backgroundprompt += "Avoid fictional place names.";
-            backgroundprompt += "Avoid starting every sentence with a pronoun.";
+            sb.AppendLine("Overall constraints:");
+            sb.AppendLine("- The total output must stay under 500 words.");
+            sb.AppendLine("- Write in the tone and style of an internal " + BountyFaction + " report.");
+            sb.AppendLine("- Use clear, plain language. Avoid overly complex or academic terminology.");
+            sb.AppendLine("- Do not break the fourth wall. Do not mention that this is a prompt, a game, or an AI.");
+            sb.AppendLine("- Do not invent fictional place names. If you must reference locations, keep them generic (e.g., \"a mining colony\", \"a frontier outpost\").");
+            sb.AppendLine("- Avoid starting every sentence with a pronoun (he, she, they). Vary sentence structure.");
+            sb.AppendLine("- Write in third person, as if a profiler or analyst is summarizing the target.");
+            sb.AppendLine();
 
-            backgroundprompt += "Include the character’s background details naturally:";
+            sb.AppendLine("Content goals:");
+            sb.AppendLine("- Provide a brief narrative of the target’s background and how they became a problem for " + BountyFaction + ".");
+            sb.AppendLine("- Highlight useful operational details: temperament, reliability, known associates, likely habits, and risk level.");
+            sb.AppendLine("- Integrate the provided character details naturally into the report, not as a raw list.");
+            sb.AppendLine();
 
-            backgroundprompt += "Name: " + name + "\r\n";
-            backgroundprompt += "Upbringing: " + GetUpbringing() + "\r\n";
-            backgroundprompt += "Job: " + job + "\r\n";
+            sb.AppendLine("Character details (for your reference; do NOT list these verbatim as bullets):");
+            sb.AppendLine("Name: " + name);
+            sb.AppendLine("Upbringing: " + GetUpbringing());
+            sb.AppendLine("Job: " + job);
 
+            // Optional flavor details
+            if (random.Next(100) > 50) sb.AppendLine("Trait: " + GetTrait());
+            if (random.Next(100) > 50) sb.AppendLine("Habits: " + GetHabit());
+            if (random.Next(100) > 50) sb.AppendLine("Gender: " + gender);
+            if (random.Next(100) > 50) sb.AppendLine("Hair Color: " + NPCTools.SanitiseHairColor(Haircolor));
+            if (random.Next(100) > 50) sb.AppendLine("Eye Color: " + Eyecolor);
+            if (random.Next(100) > 50) sb.AppendLine("Flaws: " + Getflaws());
+            if (random.Next(100) > 50) sb.AppendLine("Fears: " + GetFears());
+            if (random.Next(100) > 50) sb.AppendLine("Goals: " + GetGoals());
 
-            //These are optional details to spice things up.
-            if (random.Next(100) > 50) backgroundprompt += "Trait: " + GetTrait() + "\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Habits: " + GetHabit() + "\r\n\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Gender: " + gender + "\r\n\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Hair Color: " + NPCTools.SanitiseHairColor(Haircolor) + "\r\n\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Eye Color: " + Eyecolor + "\r\n\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Flaws: " + Getflaws() + "\r\n\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Fears: " + GetFears() + "\r\n\r\n";
-            if (random.Next(100) > 50) backgroundprompt += "Goals: " + GetGoals() + "\r\n\r\n";
-
+            sb.AppendLine();
+            sb.AppendLine("Write a single cohesive report-style entry that weaves these details into a believable history and current profile of the target.");
+            sb.AppendLine("Do not include headings like 'Name:' or 'Upbringing:' in the final output; use prose paragraphs instead.");
 
             Console.WriteLine("Generating Outlaw Background...");
 
-            string background = AITools.RunPrompt(backgroundprompt);
-
-            
+            string background = AITools.RunPrompt(sb.ToString());
             return background;
         }
 
         public string GenerateLogfile()
         {
-            string backgroundprompt =
-                "Generate the dairy entries of the bounty target, " +
-                "discussing plans and why they've fled to this location. " +
-                "Write in the first person in a style that suits the background of the character." +
-                "Use all the steps and generated data so far to build the narrative, you don't have to include everything." +                
-                "Avoid using place names that aren't in the background infomation and don't break the fourth wall. \r\n\r\n" +
-                "Only include the background in the response.\r\n\r\n";
+            var sb = new StringBuilder();
+
+            sb.AppendLine("You are writing a series of personal diary/log entries from the perspective of a bounty target.");
+            sb.AppendLine("These entries should cover their plans, their fears, and the reasons they fled to their current location.");
+            sb.AppendLine();
+            sb.AppendLine("Writing style and constraints:");
+            sb.AppendLine("- Write in the first person, in a voice that fits the character’s background and temperament.");
+            sb.AppendLine("- The tone should feel consistent with the target’s life as described in the lore (work, trauma, habits, ideology, faction ties).");
+            sb.AppendLine("- Use a natural, informal diary tone: confessional, honest, sometimes evasive or defensive.");
+            sb.AppendLine("- You may structure the output as several short dated or undated entries, but keep it as a single continuous text block.");
+            sb.AppendLine("- Do not break the fourth wall. Do not mention prompts, AI, quests, or game mechanics.");
+            sb.AppendLine("- Avoid over-explaining; let motives and plans emerge through what the character chooses to write about.");
+            sb.AppendLine();
+            sb.AppendLine("Lore usage:");
+            sb.AppendLine("- Use the LoreContext to infer factions, locations, threats, and history that matter to the target.");
+            sb.AppendLine("- Reflect important details from the lore indirectly through memories, grudges, regrets, and plans.");
+            sb.AppendLine("- Only use specific place names, factions, and organizations that appear in the LoreContext or prior background information.");
+            sb.AppendLine("- If a detail is not present in the lore, describe it generically (e.g. \"that mining station\" rather than inventing a new proper noun).");
+            sb.AppendLine("- Do not quote the LoreContext text directly or mention it by name; integrate it as lived experience.");
+            sb.AppendLine();
+            sb.AppendLine("Narrative focus:");
+            sb.AppendLine("- Explain, from the target’s point of view, why they chose to flee and why this particular location made sense to them.");
+            sb.AppendLine("- Hint at what they hope to achieve next, and what they are most afraid will catch up with them.");
+            sb.AppendLine("- You may allude to past incidents, deals, betrayals, or battles that are consistent with the LoreContext.");
+            sb.AppendLine();
+            sb.AppendLine("Output rules:");
+            sb.AppendLine("- Only include the diary/log entries in the response.");
+            sb.AppendLine("- Do not restate these instructions, and do not include headings like \"Diary\" or \"Character Background\" unless they feel diegetic.");
+            sb.AppendLine("- Keep the total length reasonably concise (aim for under 600 words).");
+            sb.AppendLine();
+
+            sb.AppendLine("LoreContext:");
+            sb.AppendLine("<LoreContext>");
+            sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
+            sb.AppendLine("</LoreContext>");
+
+            string backgroundprompt = sb.ToString();
+
             Console.WriteLine("Generating Outlaw Log...");
 
             backgroundprompt = PromptFlavourTools.AddFlavourToTargetBook(backgroundprompt);
@@ -171,6 +228,7 @@ namespace FrankyCLI.questgen_tools
             string background = AITools.RunPrompt(backgroundprompt);
             return background;
         }
+
 
         public Npc GenerateNPC()
         {

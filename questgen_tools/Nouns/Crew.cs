@@ -51,10 +51,14 @@ namespace FrankyCLI.questgen_tools
                 Console.WriteLine("Generating Crew Name...");
                 string Gender = "Male";
                 if (isfemale) Gender = "Female";
-                npc.Name = AITools.RunPrompt("Generate a first name and last name for a " 
-                    + Gender + " "
-                    + Faction + " crew member onboard the " 
-                    + ShipName + ". Return only the name in the response.");
+                npc.Name = AITools.RunPrompt(
+                    "Generate a believable full name (first and last) for a " + Gender +
+                    " crew member serving with the " + Faction +
+                    " aboard the starship " + ShipName + ".\r\n" +
+                    "The name should subtly reflect the faction's culture, tone, and typical naming style.\r\n" +
+                    "Do not include titles, ranks, or additional commentary.\r\n" +
+                    "Return only the name."
+                );
                 npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
                
                 Random wrand = RandomUtils.random;
@@ -86,10 +90,19 @@ namespace FrankyCLI.questgen_tools
                 {
                     //We do this last as we know all the crew now. Also only once as they are a bit samey.
                     Console.WriteLine("Generating Crew Log file...");
-                    string BookPrompt = "Write a personal diary entry for " + npc.Name + ", a " + Gender + " crew member aboard the " + ShipName + ".";
-                    BookPrompt += "Use a first - person voice that reflects their personality, emotional state, and current circumstances.";
-                    BookPrompt += "Use the previously generated crew names for this ship.";
-                    BookPrompt += "Make the entry feel immersive, introspective, character-driven and suitable as lore flavor for a quest.";
+                    string BookPrompt =
+                        "Write a personal diary entry for " + npc.Name + ", a " + Gender +
+                        " crew member serving aboard the starship " + ShipName + ".\r\n" +
+                        "Use a first-person voice that reflects their personality, emotional state, and day-to-day reality onboard.\r\n" +
+                        "Incorporate subtle references to the ship’s routine, recent events, and interpersonal dynamics among the crew.\r\n" +
+                        "Use the previously generated crew names for this ship naturally, as people the writer interacts with, trusts, avoids, or worries about.\r\n" +
+                        "Gently weave in rumours, whispered concerns, unverified secrets, or quiet tensions implied by the LoreContext. Present them as things the writer has overheard, suspects, or privately wonders about.\r\n" +
+                        "Do NOT quote or reference the LoreContext directly, and do not introduce new proper nouns that do not appear in the existing lore.\r\n" +
+                        "Make the entry immersive, introspective, and character-driven—something suitable as subtle lore flavor for a quest.\r\n" +
+                        "Avoid exposition or formal reporting; write as if the character is confiding in their personal diary.\r\n" +
+                        "Do not break the fourth wall, mention a prompt, or acknowledge the reader.\r\n" +
+                        "Focus on mood, personal thoughts, fears, frustrations, hopes, relationships, and the shifting atmosphere aboard the ship.\r\n" +
+                        "Return only the diary entry.";
 
                     BookPrompt = PromptFlavourTools.AddFlavourToShipBook(BookPrompt);
 
