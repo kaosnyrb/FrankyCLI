@@ -72,28 +72,31 @@ namespace FrankyCLI.questgen_tools
         {
             Random random = RandomUtils.random;
 
+            MissionTemplate template = null;
             if (mission.Length > 0)
             {
-                return MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
+                template = MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
             }
 
             if (MergedLib.ShowdownTemplates.Count == 0) return null;
 
             if (mission != "")
             {
-                return MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
+                template = MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
             }
             else
             {
-                return MergedLib.ShowdownTemplates[random.Next(MergedLib.ShowdownTemplates.Count)];
+                template = MergedLib.ShowdownTemplates[random.Next(MergedLib.ShowdownTemplates.Count)];
             }
-
+            template.Addons = addons;
+            return template;
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string mission, List<string> addons = null)
         {
             if (MergedLib.InvestigationTemplates.Count == 0) return null;
             Random random = RandomUtils.random;
+            MissionTemplate template = null;
 
             if (mission != "")
             {
@@ -103,21 +106,24 @@ namespace FrankyCLI.questgen_tools
             else
             {
                 int selected = random.Next(MergedLib.InvestigationTemplates.Count);
-                var template = MergedLib.InvestigationTemplates[selected];
+                template = MergedLib.InvestigationTemplates[selected];
                 MergedLib.InvestigationTemplates.RemoveAt(selected);
-                return template;
             }
+            template.Addons = addons;
+            return template;
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate(string mission, List<string> addons = null)
         {
+            MissionTemplate template = null;
             if (MergedLib.DiscoveryTemplates.Count == 0) return null;
             Random random = RandomUtils.random;
 
-        int selected = random.Next(MergedLib.DiscoveryTemplates.Count);
-        var template = MergedLib.DiscoveryTemplates[selected];
-        MergedLib.DiscoveryTemplates.RemoveAt(selected);
-        return template;
+            int selected = random.Next(MergedLib.DiscoveryTemplates.Count);
+            template = MergedLib.DiscoveryTemplates[selected];
+            MergedLib.DiscoveryTemplates.RemoveAt(selected);
+            template.Addons = addons;
+            return template;
 
         }
     }

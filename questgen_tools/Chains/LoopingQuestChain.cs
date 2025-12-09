@@ -54,7 +54,8 @@ namespace FrankyCLI.questgen_tools
             var templateManager = templates[random.Next(templates.Count)];
 
             //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
-            var Lorefile = PromptManager.LoadRandomLoreFile();
+            //var Lorefile = PromptManager.LoadRandomLoreFile();
+            var Lorefile = PromptManager.GenerateLoreFile();
 
             // AI Seeding (instructions only)
             string MissionSetupPrompt =
@@ -78,23 +79,37 @@ namespace FrankyCLI.questgen_tools
 
             // Build LoreContext from Lorefile and NPC
             PromptManager.LoreContext = AITools.RunPrompt(
-                "You are given a Lore Context File that contains prompts inside structured tags.\r\n" +
-                "Your task is to generate a full lore instance by completing every section that contains instructions.\r\n\r\nRules:\r\n" +
+                "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
+                "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +
+                "You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.\r\n\r\n" +
+
+                "Here is the Lore Context File you MUST build from and respect:\r\n\r\n" +
+                Lorefile + "\r\n\r\n" +
+
+                "Here is the outlaw NPC this Lore must be aligned with:\r\n" +
+                "- Name: " + outlawNpc.name + "\r\n" +
+                //"- Background: " + outlawNpc.background + "\r\n\r\n" +
+
+                "Your task: generate a full lore instance by completing every section that contains instructions.\r\n\r\n" +
+                "Rules:\r\n" +
+                "- Treat the existing Lore Context File as canon. Do NOT contradict it.\r\n" +
+                "- Reuse and expand on existing names, locations, factions, motifs, and events already in the Lore Context File whenever possible.\r\n" +
+                "- Only introduce new factions, locations, or concepts when a section explicitly calls for it or when absolutely necessary.\r\n" +
                 "- Follow the structure and tags exactly as provided.\r\n" +
                 "- For each section that contains instructions (such as <Faction>, <TreasureLegend>, <HistoricalContext>, etc.), replace the instructional text with a fully written lore entry.\r\n" +
                 "- Do NOT generate separate entries for each faction; produce a single consolidated lore section per tag, even if multiple factions are mentioned or implied.\r\n" +
                 "- Do NOT add new tags or remove existing ones.\r\n" +
                 "- Each generated lore section must be no more than 3–6 sentences.\r\n" +
-                "- Preserve the order and hierarchy of the Lore Context file.\r\n" +
-                "- The Lore Context file is based on the Outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
-                "- Use the character's background when generating the Lore Context: " + outlawNpc.background + ".\r\n" +
-                "- Update the <Summary> and <StorySummary> to fit the Outlaw we've generated. Keep its theme and story, merging it with the character background.\r\n" +
+                "- Preserve the order and hierarchy of the Lore Context File.\r\n" +
+                "- The Lore Context File is based on the outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
+                "- Use the character's background to interpret and color the existing Lore Context, but do NOT discard or ignore the original lore.\r\n" +
+                "- Update the <Summary> and <StorySummary> to fit the outlaw we’ve generated, by merging the existing lore with the character background.\r\n" +
+                "- When updating <Summary> and <StorySummary>, preserve core themes, key events, and factions from the original Lore Context File.\r\n" +
                 "- Expand only sections that contain generation instructions.\r\n" +
                 "- Do NOT output explanations. Output ONLY the completed lore instance.\r\n\r\n" +
-                "Here is the Lore Context File:\r\n\r\n" +
-                Lorefile +
-                "\r\n\r\nGenerate the completed lore instance now."
+                "Generate the completed lore instance now."
             );
+
 
             // Template Choices --------------------------------
 

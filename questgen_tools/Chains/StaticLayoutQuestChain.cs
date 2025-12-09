@@ -53,7 +53,8 @@ namespace FrankyCLI.questgen_tools
 
 
             //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
-            var Lorefile = PromptManager.LoadRandomLoreFile();
+            //var Lorefile = PromptManager.LoadRandomLoreFile();
+            var Lorefile = PromptManager.GenerateLoreFile();
 
             //AI Seeding
             string MissionSetupPrompt = "";
@@ -92,7 +93,7 @@ namespace FrankyCLI.questgen_tools
                 "- Each generated lore section must be no more than 3–6 sentences." +
                 "- Preserve the order and hierarchy of the Lore Context file.\r\n" +
                 "- The Lore Context file is based on the Outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
-                "- Use the Characters Background when generating the Lore Context: " + outlawNpc.background + ".\r\n" +
+                //"- Use the Characters Background when generating the Lore Context: " + outlawNpc.background + ".\r\n" +
                 "- Update the <Summary> and <StorySummary> to fit the Outlaw we've generated. Keep it's theme and story, merging it with the character backgound.\r\n" +
                 "- Expand only sections that contain generation instructions.\r\n" +
                 "- Do NOT output explanations. Output ONLY the completed lore instance.\r\n\r\n" +

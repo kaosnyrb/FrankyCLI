@@ -22,9 +22,9 @@ namespace FrankyCLI.questgen_tools
         public StarfieldMod myMod;
 
         public string name;
-        public string job;
+        //public string job;
         public string gender;
-        public string background;
+        //public string background;
 
         public string Haircolor;
         public string Eyecolor;
@@ -64,11 +64,11 @@ namespace FrankyCLI.questgen_tools
             Haircolor = NPCTools.GetHairColour();
             Eyecolor = NPCTools.GetEyeColour();
 
-            job = GetJob();
+            //job = GetJob();
 
             Console.WriteLine("Building Outlaw NPC...");
             name = GenerateName();
-            background = GenerateBackground();
+            //background = GenerateBackground();
             //GenerateNPC();
         }
 
@@ -92,7 +92,7 @@ namespace FrankyCLI.questgen_tools
                 "CONSTRAINTS:\r\n" +
                 "- Gender of character: " + gender + ".\r\n" +
                 "- Nationality should influence any real-life name components: " + GetNationality() + ".\r\n" +
-                "- Nicknames (if used) must reflect the character’s occupation: " + job + ".\r\n" +
+                //"- Nicknames (if used) must reflect the character’s occupation: " + job + ".\r\n" +
                 "- Nicknames must be in English, short, sharp, and evocative.\r\n" +
                 "- A pseudonym should feel like a legendary callsign or underworld alias.\r\n" +
                 "- Avoid comedy or cliché names.\r\n" +
@@ -159,7 +159,7 @@ namespace FrankyCLI.questgen_tools
             sb.AppendLine("Character details (for your reference; do NOT list these verbatim as bullets):");
             sb.AppendLine("Name: " + name);
             sb.AppendLine("Upbringing: " + GetUpbringing());
-            sb.AppendLine("Job: " + job);
+            //sb.AppendLine("Job: " + job);
 
             // Optional flavor details
             if (random.Next(100) > 50) sb.AppendLine("Trait: " + GetTrait());

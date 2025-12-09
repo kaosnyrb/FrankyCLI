@@ -42,12 +42,12 @@ namespace FrankyCLI.questgen_quests
             //Merge the background and log message.
 
             string bookcontents = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons) {
-                "Background: " + outlawNpc.background,
+                //"Background: " + outlawNpc.background,
                 "LogMessage: " + nextQuest.LogMessage,                
             });
 
             var bookname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons) {
-                "Background: " + outlawNpc.background,
+                //"Background: " + outlawNpc.background,
                 "LogMessage: " + nextQuest.LogMessage,
             });
 
