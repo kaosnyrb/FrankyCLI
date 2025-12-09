@@ -44,7 +44,7 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("StaticLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
-                    new AICardTemplateManager(),
+                    new AllTemplateManager(new AI_TemplateEngine()),
                     //new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
@@ -68,16 +68,6 @@ namespace FrankyCLI.questgen_tools
             
             AITools.RunPrompt(MissionSetupPrompt);
 
-            
-
-            // Template Choices --------------------------------
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("");
-            ShowdownMissionTemplate.Addons = new List<string>()
-            {
-                "<QuestStage>Showdown</QuestStage>",
-                "<QuestProgress>90%</QuestProgress>"
-            };
-
             bool fork = false;            
             if (random.Next(100) > 0)
             {
@@ -86,7 +76,7 @@ namespace FrankyCLI.questgen_tools
             MissionTemplate ForkInvestigationMissionTemplate = new MissionTemplate();
 
             // NPC Target                
-            OutlawNpc outlawNpc = new OutlawNpc(myMod, ShowdownMissionTemplate.needSpacesuit);
+            OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
             PromptManager.LoreContext = AITools.RunPrompt("You are given a Lore Context File that contains prompts inside structured tags.\r\n" +
                 "Your task is to generate a full lore instance by completing every section that contains instructions.\r\n\r\nRules:\r\n" +
@@ -105,6 +95,16 @@ namespace FrankyCLI.questgen_tools
                 Lorefile +
                 "\r\n\r\n Generate the completed lore instance now.");
 
+            // Template Choices --------------------------------
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("", new List<string>()
+            {
+                "<QuestStage>Showdown</QuestStage>",
+                "<QuestProgress>90%</QuestProgress>"
+            });
+            outlawNpc.spacesuit = ShowdownMissionTemplate.needSpacesuit;
+            outlawNpc.GenerateNPC();
+
+
 
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Outlaw Name: " + outlawNpc.name);
@@ -113,12 +113,11 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Feeding the stages into the AI...");
             AITools.RunPrompt("<Summary> The next section contains all the locations and types of missions that will be happening. Use this to tie things together.");
-            var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
-            DeepInvestigationMissionTemplate.Addons = new List<string>()
+            var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("", new List<string>()
             {
                 "<QuestStage>DeepInvestigation</QuestStage>",
                 "<QuestProgress>70%</QuestProgress>"
-            };
+            });
             if (fork)
             {
                 var forktemplates = new Templates_Fork();
@@ -129,18 +128,16 @@ namespace FrankyCLI.questgen_tools
                     "<QuestProgress>40%</QuestProgress>"
                 };
             }
-            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("");
-            InvestigationMissionTemplate.Addons = new List<string>()
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("", new List<string>()
             {
                 "<QuestStage>InitialInvestigation</QuestStage>",
                 "<QuestProgress>10%</QuestProgress>"
-            };
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
-            DiscoveryMissionTemplate.Addons = new List<string>()
+            });
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", new List<string>()
             {
                 "<QuestStage>Discovery</QuestStage>",
                 "<QuestProgress>0%</QuestProgress>"
-            };
+            });
 
             //Now we go forwards to let the templates know where we've been.
             AddStageLocation(ShowdownMissionTemplate, "InitialInvestigation", InvestigationMissionTemplate.Location);

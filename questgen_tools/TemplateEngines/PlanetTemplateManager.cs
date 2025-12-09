@@ -18,193 +18,63 @@ namespace FrankyCLI.questgen_tools
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
-        public TemplateLib MergedLib = new TemplateLib();
+        public TemplateLib CompleteLib = new TemplateLib();
 
-        public static TemplateLib planetlib = new TemplateLib();
-        public static TemplateLib spacelib = new TemplateLib();
-        public static TemplateLib citieslib = new TemplateLib();
+        public TemplateLib planetlib = new TemplateLib();
+        public TemplateLib spacelib = new TemplateLib();
+        public TemplateLib citieslib = new TemplateLib();
 
-        public PlanetTemplateManager()
+        ITemplateEngine templateEngine;
+
+        public PlanetTemplateManager(ITemplateEngine templateEngine)
         {
 
+            //TemplateLibs.Add(new Templates_Fork());
+
+            //TemplateLibs.Add(new Templates_Dataslate());
             planetlib.ImportTemplates(new Templates_PlanetPCM());
-            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());
             TemplateLibs.Add(planetlib);
 
-            MergedLib.DiscoveryTemplates = new List<MissionTemplate>();
-            MergedLib.InvestigationTemplates = new List<MissionTemplate>();
-            MergedLib.ShowdownTemplates = new List<MissionTemplate>();
+
+            CompleteLib.DiscoveryTemplates = new List<MissionTemplate>();
+            CompleteLib.InvestigationTemplates = new List<MissionTemplate>();
+            CompleteLib.ShowdownTemplates = new List<MissionTemplate>();
 
             foreach (TemplateLib templateLib in TemplateLibs)
             {
                 foreach (var dis in templateLib.DiscoveryTemplates)
                 {
-                    MergedLib.DiscoveryTemplates.Add(dis);
+                    CompleteLib.DiscoveryTemplates.Add(dis);
                 }
                 foreach (var dis in templateLib.InvestigationTemplates)
                 {
-                    MergedLib.InvestigationTemplates.Add(dis);
+                    CompleteLib.InvestigationTemplates.Add(dis);
                 }
-                foreach(var dis in templateLib.ShowdownTemplates)
+                foreach (var dis in templateLib.ShowdownTemplates)
                 {
-                    MergedLib.ShowdownTemplates.Add(dis);
+                    CompleteLib.ShowdownTemplates.Add(dis);
                 }
             }
+            templateEngine.AvailableTemplateLib = CompleteLib;
+            this.templateEngine = templateEngine;
+
+            //YamlExporter.WriteObjToYaml("Missions.txt", MergedLib);
         }
 
-        public MissionTemplate GetShowdownMissionTemplate(string mission)
+        public MissionTemplate GetShowdownMissionTemplate(string missionName, List<string> addons = null)
         {
-            Random random = RandomUtils.random;
-
-            if (mission.Length > 0)
-            {
-                return MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
-            }
-
-            //Should showdowns use ai at all?
-            if (AITools.AIMODE && false)
-            {
-                //AI Test
-                string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
-                ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
-
-                int count = 5 + random.Next(10);
-                List<MissionTemplate> selected = MergedLib.ShowdownTemplates
-                    .OrderBy(x => random.Next())
-                    .Take(count).ToList();
-                for (int i = 0; i < selected.Count; i++)
-                {
-                    ItemPrompts += i + " : " + selected[i].Location + " " + selected[i].Description + "\r\n";
-                }
-                var result = AITools.RunPrompt(ItemPrompts);
-                int index = 0;
-                try
-                {
-                    int.TryParse(result, out index);
-                    return selected[index];
-                }
-                catch
-                {
-                    int randselected = random.Next(MergedLib.ShowdownTemplates.Count);
-                    var template = MergedLib.ShowdownTemplates[randselected];
-                    MergedLib.ShowdownTemplates.RemoveAt(randselected);
-                    return template;
-                }
-            }
-            else
-            {
-                if (MergedLib.ShowdownTemplates.Count == 0) return null;
-                if (mission != "")
-                {
-                    return MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
-                }
-                else
-                {
-                    return MergedLib.ShowdownTemplates[random.Next(MergedLib.ShowdownTemplates.Count)];
-                }
-            }
-
+            return templateEngine.GetShowdownMissionTemplate(missionName, addons);
         }
 
-        public MissionTemplate GetInvestigationMissionTemplate(string mission)
+        public MissionTemplate GetInvestigationMissionTemplate(string missionName, List<string> addons = null)
         {
-            if (MergedLib.InvestigationTemplates.Count == 0) return null;
-            Random random = RandomUtils.random;
-
-            if (mission.Length > 0)
-            {
-                return MergedLib.InvestigationTemplates.Where(x => x.Name == mission).Single();
-            }
-
-            if (AITools.AIMODE && false)
-            {
-                //AI Test
-                string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
-                ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
-
-                int count = 5 + random.Next(10);
-                List<MissionTemplate> selected = MergedLib.InvestigationTemplates
-                    .OrderBy(x => random.Next())
-                    .Take(count).ToList();
-                for (int i = 0; i < selected.Count; i++)
-                {
-                    ItemPrompts += i + " : " + selected[i].Location + " " + selected[i].Description + "\r\n";
-                }
-
-
-                var result = AITools.RunPrompt(ItemPrompts);
-                int index = 0;
-                try
-                {
-                    int.TryParse(result, out index);
-                    return MergedLib.InvestigationTemplates[index];
-                }
-                catch
-                {
-                    int randselected = random.Next(MergedLib.InvestigationTemplates.Count);
-                    var template = MergedLib.InvestigationTemplates[randselected];
-                    MergedLib.InvestigationTemplates.RemoveAt(randselected);
-                    return template;
-                }
-            }
-
-            if (mission != "")
-            {
-                //Don't really care about deleting as this is for testing
-                return MergedLib.InvestigationTemplates.Where(x => x.Name == mission).Single();
-            }
-            else
-            {
-                int selected = random.Next(MergedLib.InvestigationTemplates.Count);
-                var template = MergedLib.InvestigationTemplates[selected];
-                MergedLib.InvestigationTemplates.RemoveAt(selected);
-                return template;
-            }
+            return templateEngine.GetInvestigationMissionTemplate(missionName, addons);
         }
 
-        public MissionTemplate GetDiscoveryMissionTemplate()
+        public MissionTemplate GetDiscoveryMissionTemplate(string missionName, List<string> addons = null)
         {
-            if (MergedLib.DiscoveryTemplates.Count == 0) return null;
-            Random random = RandomUtils.random;
-
-            if (AITools.AIMODE && false)
-            {
-                //AI Test
-                string ItemPrompts = "The following list is the missions that can be choosen for the next step.";
-                ItemPrompts += "Return just the number of the item that makes the most sense story wise." + "\r\n";
-
-                int count = 5 + random.Next(10);
-                List<MissionTemplate> selected = MergedLib.DiscoveryTemplates
-                    .OrderBy(x => random.Next())
-                    .Take(count).ToList();
-                for (int i = 0; i < selected.Count; i++)
-                {
-                    ItemPrompts += i + " : " + selected[i].Location + " " + selected[i].Description + "\r\n";
-                }
-
-                var result = AITools.RunPrompt(ItemPrompts);
-                int index = 0;
-                try
-                {
-                    int.TryParse(result, out index);
-                    return MergedLib.DiscoveryTemplates[index];
-                }
-                catch
-                {
-                    int randselected = random.Next(MergedLib.DiscoveryTemplates.Count);
-                    var template = MergedLib.DiscoveryTemplates[randselected];
-                    MergedLib.DiscoveryTemplates.RemoveAt(randselected);
-                    return template;
-                }
-            }
-            else
-            {
-                int selected = random.Next(MergedLib.DiscoveryTemplates.Count);
-                var template = MergedLib.DiscoveryTemplates[selected];
-                MergedLib.DiscoveryTemplates.RemoveAt(selected);
-                return template;
-
-            }
+            return templateEngine.GetDiscoveryMissionTemplate(missionName, addons);
         }
     }
 }

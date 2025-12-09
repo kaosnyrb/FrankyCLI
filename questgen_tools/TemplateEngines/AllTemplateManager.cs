@@ -1,20 +1,10 @@
-﻿using DynamicData;
-using FrankyCLI.questgen_quests;
+﻿using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools.Interfaces;
-using FrankyCLI.questgen_tools.Utils;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
-using Noggog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class SpaceTemplateManager : ITemplateManager
+    //This is the libary
+    public class AllTemplateManager : ITemplateManager
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
@@ -26,16 +16,28 @@ namespace FrankyCLI.questgen_tools
 
         ITemplateEngine templateEngine;
 
-        public SpaceTemplateManager(ITemplateEngine templateEngine)
+        public AllTemplateManager(ITemplateEngine templateEngine)
         {
-
+            
             //TemplateLibs.Add(new Templates_Fork());
 
-            //TemplateLibs.Add(new Templates_Dataslate());
+            TemplateLibs.Add(new Templates_Dataslate());
+
             planetlib.ImportTemplates(new Templates_PlanetPCM());
-            planetlib.ImportTemplates(new Templates_SpecificDungeons());
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
             TemplateLibs.Add(planetlib);
 
+            spacelib.ImportTemplates(new Templates_SpaceActivator());
+            spacelib.ImportTemplates(new Templates_SpaceInformant());
+            spacelib.ImportTemplates(new Templates_Derelicts());
+            TemplateLibs.Add(spacelib);
+
+
+            citieslib.ImportTemplates(new Templates_Cities());
+            citieslib.ImportTemplates(new Templates_Cities_Neon());
+            citieslib.ImportTemplates(new Templates_Cities_Cydonia());
+            citieslib.ImportTemplates(new Templates_Cities_Akila());
+            TemplateLibs.Add(citieslib);
 
             CompleteLib.DiscoveryTemplates = new List<MissionTemplate>();
             CompleteLib.InvestigationTemplates = new List<MissionTemplate>();
@@ -51,7 +53,7 @@ namespace FrankyCLI.questgen_tools
                 {
                     CompleteLib.InvestigationTemplates.Add(dis);
                 }
-                foreach (var dis in templateLib.ShowdownTemplates)
+                foreach(var dis in templateLib.ShowdownTemplates)
                 {
                     CompleteLib.ShowdownTemplates.Add(dis);
                 }
@@ -64,7 +66,7 @@ namespace FrankyCLI.questgen_tools
 
         public MissionTemplate GetShowdownMissionTemplate(string missionName, List<string> addons = null)
         {
-            return templateEngine.GetShowdownMissionTemplate(missionName, addons);
+            return templateEngine.GetShowdownMissionTemplate(missionName,addons);
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string missionName, List<string> addons = null)

@@ -34,7 +34,7 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("LoopingLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
-                    new AICardTemplateManager(),
+                    new AllTemplateManager(new AI_TemplateEngine()),
                     new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
@@ -86,7 +86,7 @@ namespace FrankyCLI.questgen_tools
 
             // Finally build the discovery step
             Console.WriteLine("---------------------------------------------------------------------------------");
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate();
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("");
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, lastoutlaw);
 
             //We have now generated all the stages. Do any final linking steps

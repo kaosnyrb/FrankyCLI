@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
+using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -39,28 +40,34 @@ namespace FrankyCLI.questgen_quests
             var newQuest = new QuestNoun(missionTemplate.formid, questID);
 
             //Quest 1
-            var Quest1 = missionTemplate.Lib1.GetInvestigationMissionTemplate("");
-            Quest1.Addons = new List<string>(missionTemplate.Addons)
-            {
-                "<IsFork>true</IsFork>"
-            };
+            var Quest1 = missionTemplate.Lib1.GetInvestigationMissionTemplate("", missionTemplate.Addons);
             Quest1.outlawQuest.Setup(myMod, outlawNpc, Quest1, nextQuest);
 
             //Quest 2
-            var Quest2 = missionTemplate.Lib2.GetInvestigationMissionTemplate("");
-            Quest2.Addons = new List<string>(missionTemplate.Addons)
-            {
-                "<IsFork>true</IsFork>"
-            };
+            var Quest2 = missionTemplate.Lib2.GetInvestigationMissionTemplate("", missionTemplate.Addons);            
             Quest2.outlawQuest.Setup(myMod, outlawNpc, Quest2, nextQuest);
 
-            string choiceprompt = "Generate a paragraph that explains that the player has a choice on which lead to follow. " +
-                "The player will only do one of these missions." +
-                "Put a new line between the choices." +
-                "Write this from the players point of view and don't break the fourth wall." +
-                "The choices are: \r\n" +
-                "1. " + Quest1.outlawQuest.LogMessage + " \r\n" +
-                "2. " + Quest2.outlawQuest.LogMessage + " \r\n";
+            string choiceprompt =
+                "You are writing an in-character quest journal entry for a spacefaring hunter at a branching point in their investigation.\r\n" +
+                "The hunter has uncovered two different leads and must choose which one to follow next.\r\n\r\n" +
+
+                "Write from the player's first-person perspective, as if they are thinking through their options in a private log.\r\n" +
+                "Do not break the fourth wall. Do not mention 'quests', 'objectives', or game mechanics.\r\n" +
+                "Keep the total output under 200 words.\r\n\r\n" +
+
+                "Structure:\r\n" +
+                "- Write two short paragraphs, one for each lead.\r\n" +
+                "- Each paragraph should make that lead feel distinct in tone, risk, and potential payoff.\r\n" +
+                "- Put a single blank line between the two paragraphs.\r\n\r\n" +
+
+                "Use the Lore Context to shape factions, stakes, and atmosphere:\r\n" +
+                "<LoreContext>\r\n" + PromptManager.LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+
+                "Base the two leads on these briefing blurbs:\r\n" +
+                "Lead 1:\r\n" + Quest1.outlawQuest.LogMessage + "\r\n\r\n" +
+                "Lead 2:\r\n" + Quest2.outlawQuest.LogMessage + "\r\n";
+
+            
             string description = AITools.RunPrompt(choiceprompt);
 
             var message = new MessageNoun(0x0008BA, description);

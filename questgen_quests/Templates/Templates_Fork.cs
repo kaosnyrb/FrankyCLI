@@ -24,8 +24,8 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x0008BC,
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
-                Lib1 = new PlanetTemplateManager(),
-                Lib2 = new SpaceTemplateManager(),
+                Lib1 = new AllTemplateManager(new AI_TemplateEngine()),
+                Lib2 = new AllTemplateManager(new AI_TemplateEngine()),
                 MissionTags = new List<string>()
                 {
                     "space",
@@ -41,8 +41,8 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x0008BC,
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
-                Lib1 = new CityTemplateManager(),
-                Lib2 = new SpaceTemplateManager(),
+                Lib1 = new AllTemplateManager(new AI_TemplateEngine()),
+                Lib2 = new AllTemplateManager(new AI_TemplateEngine()),
                 MissionTags = new List<string>()
                 {
                     "space",
@@ -59,8 +59,8 @@ namespace FrankyCLI.questgen_quests
                 formid = 0x0008BC,
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
-                Lib1 = new CityTemplateManager(),
-                Lib2 = new PlanetTemplateManager(),
+                Lib1 = new AllTemplateManager(new AI_TemplateEngine()),
+                Lib2 = new AllTemplateManager(new AI_TemplateEngine()),
                 MissionTags = new List<string>()
                 {
                     "city",
