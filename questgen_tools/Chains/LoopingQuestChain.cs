@@ -47,14 +47,18 @@ namespace FrankyCLI.questgen_tools
             List<ITemplateManager> templates = new List<ITemplateManager>()
             {
                 new AllTemplateManager(new AI_TemplateEngine()),
-                new FrontierTemplateManager(new AI_TemplateEngine()),
-                new NoPOITemplateManager(new AI_TemplateEngine()),
-                new RandomTemplateManager()
+                //new FrontierTemplateManager(new AI_TemplateEngine()),
+                //new NoPOITemplateManager(new AI_TemplateEngine()),
+                //new CombatTemplateManager(new AI_TemplateEngine()),
+                //new RandomTemplateManager()
             };
             var templateManager = templates[random.Next(templates.Count)];
 
+            Console.WriteLine(templateManager.GetType());
+
             //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
             //var Lorefile = PromptManager.LoadRandomLoreFile();
+            Console.WriteLine("Generating Lore File...");
             var Lorefile = PromptManager.GenerateLoreFile();
 
             // AI Seeding (instructions only)
@@ -72,12 +76,15 @@ namespace FrankyCLI.questgen_tools
 
                 "Respond only with: \"Instructions acknowledged.\"";
 
+            Console.WriteLine("Informing AI of Mission Setup...");
             AITools.RunPrompt(MissionSetupPrompt);
 
             // NPC Target (base setup) --------------------------------
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
             // Build LoreContext from Lorefile and NPC
+            Console.WriteLine("Building Lore Context...");
+
             PromptManager.LoreContext = AITools.RunPrompt(
                 "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
                 "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +

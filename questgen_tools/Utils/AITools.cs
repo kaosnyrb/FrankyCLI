@@ -98,7 +98,7 @@ namespace FrankyCLI.questgen_tools
 
             // 4. Do your existing cleanup
             textres = textres.Replace(" — ", " "); // No EM-dashes with spaces
-            textres = textres.Replace("—", "");    // No EM-dashes
+            textres = textres.Replace("—", " ");    // No EM-dashes
             textres = textres.Replace("“", "\"");  // Weird quotes
             textres = textres.Replace("”", "\"");
             textres = textres.Replace("’", "'");

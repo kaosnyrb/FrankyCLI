@@ -24,7 +24,7 @@ namespace FrankyCLI.questgen_quests
                     //-------------------------------  INVESTIGATION ------------------------------------------
                     InvestigationTemplates.Add(new MissionTemplate()
                     {
-                        Name = "Planet side Activator - " + PCMName,
+                        Name = "Dungeon Activator - " + PCMName,
                         Description = "Find a lead to the target at a " + PCMName,
                         Location = PCMName,
                         formid = 0x0008B9,
@@ -39,7 +39,7 @@ namespace FrankyCLI.questgen_quests
                     });
                     InvestigationTemplates.Add(new MissionTemplate()
                     {
-                        Name = "Planet side Destroy - " + PCMName,
+                        Name = "Dungeon Destroy - " + PCMName,
                         Description = "Destroy an object at a " + PCMName,
                         Location = PCMName,
                         formid = 0x000842,
@@ -56,7 +56,7 @@ namespace FrankyCLI.questgen_quests
                     //-------------------------------  SHOWDOWN ------------------------------------------
                     ShowdownTemplates.Add(new MissionTemplate()
                     {
-                        Name = "Planet side Bounty - " + PCMName,
+                        Name = "Dungeon Bounty - " + PCMName,
                         Description = "Kill the target who is hiding out at a " + PCMName,
                         Location = PCMName,
                         formid = 0x000811,

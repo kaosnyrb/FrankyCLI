@@ -187,7 +187,14 @@ namespace FrankyCLI.questgen_tools.Utils
             sb.AppendLine("- No copyrighted text; fully original content.");
 
             var prompt = sb.ToString();
-            return AITools.RunPrompt(prompt);
+
+            var results = AITools.RunPrompt(prompt);
+            
+            if (results.Length < 100)
+            {
+                throw new Exception("Really short Lore File. Abandoning Generation");
+            }
+            return results;
         }
 
         // ------------------------------
@@ -349,7 +356,15 @@ namespace FrankyCLI.questgen_tools.Utils
             foreach (var item in Addons)
                 pickuppromt += item;
 
-            return AITools.RunPrompt(pickuppromt);
+
+            var results = AITools.RunPrompt(pickuppromt);
+
+            if (results.Length < 100)
+            {
+                throw new Exception("Really short DestroyMessage. Abandoning Generation");
+            }
+            return results;
+
         }
 
         // ------------------------------
@@ -396,7 +411,13 @@ namespace FrankyCLI.questgen_tools.Utils
             foreach (var item in Addons)
                 pickuppromt += item;
 
-            return AITools.RunPrompt(pickuppromt);
+            var results = AITools.RunPrompt(pickuppromt);
+
+            if (results.Length < 100)
+            {
+                throw new Exception("Really short GetPickupMessage. Abandoning Generation");
+            }
+            return results;
         }
 
         // ------------------------------
@@ -463,7 +484,14 @@ namespace FrankyCLI.questgen_tools.Utils
                 logprompt += item;
 
             logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
-            return AITools.RunPrompt(logprompt);
+
+            var results = AITools.RunPrompt(logprompt);
+
+            if (results.Length < 100)
+            {
+                throw new Exception("Really short GetLogMessage. Abandoning Generation");
+            }
+            return results;
         }
 
         // ------------------------------
@@ -508,7 +536,14 @@ namespace FrankyCLI.questgen_tools.Utils
                 logprompt += item;
 
             logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
-            return AITools.RunPrompt(logprompt);
+
+            var results = AITools.RunPrompt(logprompt);
+
+            if (results.Length < 100)
+            {
+                throw new Exception("Really short GetFirstPersonAccount. Abandoning Generation");
+            }
+            return results;
         }
 
     }

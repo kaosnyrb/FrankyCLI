@@ -3,8 +3,8 @@ using FrankyCLI.questgen_tools.Interfaces;
 
 namespace FrankyCLI.questgen_tools
 {
-    
-    public class NoPOITemplateManager : ITemplateManager
+    //This is the libary
+    public class CombatTemplateManager : ITemplateManager
     {
         List<TemplateLib> TemplateLibs = new List<TemplateLib>();
 
@@ -16,28 +16,16 @@ namespace FrankyCLI.questgen_tools
 
         ITemplateEngine templateEngine;
 
-        public NoPOITemplateManager(ITemplateEngine templateEngine)
+        public CombatTemplateManager(ITemplateEngine templateEngine)
         {
-            
-            //TemplateLibs.Add(new Templates_Fork());
-
-            TemplateLibs.Add(new Templates_Dataslate());
-
-            citieslib.ImportTemplates(new Templates_Cities());
-            citieslib.ImportTemplates(new Templates_Cities_Neon());
-            citieslib.ImportTemplates(new Templates_Cities_Cydonia());
-            citieslib.ImportTemplates(new Templates_Cities_Akila());
-            TemplateLibs.Add(citieslib);
-
-            planetlib.ImportTemplates(new Templates_PlanetInvestigate());
-
-            //planetlib.ImportTemplates(new Templates_SpecificDungeons());           
+            planetlib.ImportTemplates(new Templates_PlanetCombat());
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
             TemplateLibs.Add(planetlib);
 
-            spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
-            spacelib.ImportTemplates(new Templates_Derelicts());
             TemplateLibs.Add(spacelib);
+
+            TemplateLibs.Add(citieslib);
 
             CompleteLib.DiscoveryTemplates = new List<MissionTemplate>();
             CompleteLib.InvestigationTemplates = new List<MissionTemplate>();

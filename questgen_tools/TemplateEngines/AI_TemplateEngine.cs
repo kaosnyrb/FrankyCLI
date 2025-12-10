@@ -1,10 +1,15 @@
 ﻿using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools.Utils;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Starfield;
+using Noggog.StructuredStrings.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Core.Tokens;
 
 namespace FrankyCLI.questgen_tools
 {
@@ -14,6 +19,9 @@ namespace FrankyCLI.questgen_tools
         public TemplateLib AvailableTemplateLib = new TemplateLib();
 
         TemplateLib ITemplateEngine.AvailableTemplateLib { get => AvailableTemplateLib; set => AvailableTemplateLib = value; }
+
+        public List<string> UsedTags = new List<string>();
+        public List<string> UsedMissions = new List<string>();
 
 
         // Helper to apply addons to a selected template
@@ -39,6 +47,7 @@ namespace FrankyCLI.questgen_tools
 
             if (AITools.AIMODE)
             {
+                Console.WriteLine("AI_TemplateEngine: Choosing Showdown Mission Template...");
                 var sb = new StringBuilder();
                 sb.AppendLine("You are a Starfield quest designer choosing the FINAL SHOWDOWN mission for an ongoing bounty hunt.");
                 sb.AppendLine("Use the LoreContext, quest state, and mission options to decide which location makes the most dramatic and logical climax.");
@@ -61,6 +70,32 @@ namespace FrankyCLI.questgen_tools
                 sb.AppendLine("If one or more <QuestStageLocation> tags are present:");
                 sb.AppendLine("- Treat them as the investigative trail the player has followed so far.");
                 sb.AppendLine("- Prefer missions that feel like a logical culmination of that path, rather than a disconnected detour.");
+                sb.AppendLine();
+
+                sb.AppendLine("Tag Reuse Rules:");
+                sb.AppendLine("- Below is a list of tags that have already been used earlier in the quest chain.");
+                sb.AppendLine("- AVOID choosing any mission whose tags significantly overlap with the previously used tags.");
+                sb.AppendLine("- Prefer missions that introduce NEW themes, NEW tags, or NEW mission types.");
+                sb.AppendLine("- Reuse of a tag should only occur if absolutely necessary.");
+                sb.AppendLine("- If every option includes at least one reused tag, choose the mission with the FEWEST overlaps.");
+                sb.AppendLine();
+                sb.AppendLine("Previously used tags:");
+                foreach (var ut in UsedTags)
+                    sb.AppendLine($"- {ut}");
+                sb.AppendLine();
+
+                sb.AppendLine("Mission Name Reuse Rules:");
+                sb.AppendLine("- Below is a list of mission template names that have already been used earlier in the quest chain.");
+                sb.AppendLine("- You MUST avoid selecting any mission whose name is identical to, or strongly resembles, any previously used mission name.");
+                sb.AppendLine("- Treat missions as 'similar' if they share the same leading keywords, prefix, or pattern.");
+                sb.AppendLine("  Examples: two missions starting with 'Space Derelict -', 'City Activator -', or 'Branching Node -'.");
+                sb.AppendLine("- Do NOT pick missions that appear to be variations of an already used mission family.");
+                sb.AppendLine("- Prefer missions whose names introduce a NEW mission type, NEW prefix, or NEW scenario family.");
+                sb.AppendLine("- If avoiding all similar names is impossible, prefer the mission with the least similarity to those already used.");
+                sb.AppendLine();
+                sb.AppendLine("Previously used mission names:");
+                foreach (var um in UsedMissions)
+                    sb.AppendLine($"- {um}");
                 sb.AppendLine();
 
                 sb.AppendLine("LoreContext:");
@@ -106,7 +141,15 @@ namespace FrankyCLI.questgen_tools
                 int index;
                 if (int.TryParse(result, out index) && index >= 0 && index < selected.Count)
                 {
-                    return ApplyAddons(selected[index], addons);
+                    var ChoosenTemplate = selected[index];
+                    UsedMissions.Add(ChoosenTemplate.Name);
+                    Console.WriteLine("AI_TemplateEngine: Choose " + ChoosenTemplate.Name);
+
+                    foreach (var tag in ChoosenTemplate.MissionTags)
+                    {
+                        UsedTags.Add(tag);
+                    }
+                    return ApplyAddons(ChoosenTemplate, addons);
                 }
 
                 // Fallback: random showdown, remove to avoid reuse
@@ -141,8 +184,11 @@ namespace FrankyCLI.questgen_tools
                 return ApplyAddons(template, addons);
             }
 
+            
+
             if (AITools.AIMODE)
             {
+                Console.WriteLine("AI_TemplateEngine: Choosing Investigation Mission Template...");
                 var sb = new StringBuilder();
                 sb.AppendLine("You are a Starfield quest designer choosing the next INVESTIGATION mission in a bounty hunt.");
                 sb.AppendLine("This mission should feel like a step in the pursuit: following leads, exposing patterns, or escalating tension.");
@@ -194,7 +240,7 @@ namespace FrankyCLI.questgen_tools
                 sb.AppendLine();
 
                 
-                int count = 10 + random.Next(15);
+                int count = 10 + random.Next(25);
                 
                 List<MissionTemplate> selected = AvailableTemplateLib.InvestigationTemplates
                     .OrderBy(x => random.Next())
@@ -218,9 +264,24 @@ namespace FrankyCLI.questgen_tools
                 int index;
                 if (int.TryParse(result, out index) && index >= 0 && index < selected.Count)
                 {
-                    return ApplyAddons(selected[index], addons);
-                }
+                    var ChoosenTemplate = selected[index];
+                    Console.WriteLine("AI_TemplateEngine: Choose " + ChoosenTemplate.Name);
+                    //Clear out the same tagged missions.
+                    string type = ChoosenTemplate.Name.Split("-")[0];
 
+                    for (int i = 0; i< AvailableTemplateLib.InvestigationTemplates.Count; i++)
+                    {
+                        if (AvailableTemplateLib.InvestigationTemplates[i].Name.Contains(type))
+                        {
+                            AvailableTemplateLib.InvestigationTemplates.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
+
+                    return ApplyAddons(ChoosenTemplate, addons);
+                }
+               
                 // Fallback: random investigation, remove to avoid reuse
                 int randselected = random.Next(AvailableTemplateLib.InvestigationTemplates.Count);
                 var fallback = AvailableTemplateLib.InvestigationTemplates[randselected];
