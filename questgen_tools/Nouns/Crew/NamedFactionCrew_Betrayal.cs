@@ -165,9 +165,8 @@ namespace FrankyCLI.questgen_tools
 
 
                     string BookContents = AITools.RunPrompt(BookPrompt);
-                    BookNoun bountybook = new BookNoun(0x000905, npc.Name.ToString() + " " + RandomUtils.GetLogSynonym(), "", BookContents);
+                    BookNoun bountybook = new BookNoun(0x000905, npc.Name.ToString() + " " + RandomUtils.GetLogSynonym(), Guid.NewGuid().ToString().Substring(0, 8), BookContents);
 
-                    gen_quest_main.myMod.Books.Add(bountybook.instance);
                     npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest_main.myMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });
                 }
 

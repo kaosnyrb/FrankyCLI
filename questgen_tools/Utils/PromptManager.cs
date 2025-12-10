@@ -445,6 +445,7 @@ namespace FrankyCLI.questgen_tools.Utils
         // ------------------------------
         public static string GetLogMessage(List<string> Addons)
         {
+            
             var logprompt =
                 "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
                 "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
@@ -482,6 +483,13 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
                 "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
+                // NEW SUMMARY REQUIREMENT
+                "Summary Requirement:\r\n" +
+                "- After the atmospheric narrative, output a short summary (2–3 sentences) clearly describing what has been learned so far in the quest chain.\r\n" +
+                "- This summary must synthesize the clues, leads, patterns, or suspicions implied by earlier mission stages.\r\n" +
+                "- Do NOT reference tag names directly.\r\n" +
+                "- Summaries should feel like a brief investigative recap: what the trail has revealed, what patterns emerged, and what conclusions the investigation is converging on.\r\n" +
+                "- Keep the summary factual, concise, and entirely based on information available in the LoreContext and prior investigation stages.\r\n\r\n" +
 
                 "\r\nStyle Guidelines:\r\n" +
                 "- Do not start with phrases like 'The objective is...' or 'You must...'\r\n" +
@@ -518,10 +526,23 @@ namespace FrankyCLI.questgen_tools.Utils
         // ------------------------------
         public static string GetFirstPersonAccount(List<string> Addons)
         {
+            DateTime dateTime = new DateTime(2330, 5, 6);
             var logprompt =
                 "Generate a first-person log entry from someone directly affected by the events described in the Lore Context.\r\n" +
                 "Use the Lore Context to guide tone, personality, emotion, and perspective—especially mystery, fear, resentment, greed, or ambition.\r\n" +
                 "Do NOT quote lore directly; reflect it through lived experience.\r\n\r\n" +
+
+                // NEW DATE RULES
+                "Date Instructions:\r\n" +
+                "- Begin the entry with a date.\r\n" +
+                "- The date must fall within the year leading up to " + dateTime.ToString("yyyy-MM-dd") + ".\r\n" +
+                "- Choose any date between " +
+                    dateTime.AddYears(-1).ToString("yyyy-MM-dd") +
+                    " and " +
+                    dateTime.ToString("yyyy-MM-dd") +
+                    " inclusive.\r\n" +
+                "- Format the date like: YYYY-MM-DD.\r\n" +
+                "- After the date, write the narrative as normal.\r\n\r\n" +
 
                 "If a <QuestStage> tag is present, shape what the speaker understands:\r\n" +
                 "- InitialInvestigations: the speaker senses something is wrong, but details are unclear.\r\n" +

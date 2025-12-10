@@ -13,12 +13,21 @@ namespace FrankyCLI.questgen_tools
         public string Name;
         public string Description;
         public string Location;
-        public string parameter1;
-        public uint parameterformid;
-        public uint formid;
+
+
+        //Used to configure the differences in missions
+        public Dictionary<string, object> parameters;
+
+
+        //Old Params
         public bool needSpacesuit;
         public ITemplateManager Lib1;
         public ITemplateManager Lib2;
+        public string parameter1;
+        public uint parameterformid;
+        public uint formid;
+
+
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
         public List<string> MissionTags;
         public List<string> Addons;

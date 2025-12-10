@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -142,35 +143,12 @@ namespace FrankyCLI.questgen_tools
                         BookPrompt = PromptFlavourTools.AddFlavourToGangBook(BookPrompt);
 
                         string BookContents = AITools.RunPrompt(BookPrompt);
-                        var Book = gen_quest_main.myMod.Books[new FormKey(gen_quest_main.myMod.ModKey, 0x000905)].DeepCopy();
-                        Book bountybook = new Book(gen_quest_main.myMod)
-                        {
-                            CNAM = Book.CNAM,
-                            Components = Book.Components,
-                            Description = BookContents,
-                            DNAMUnknown = Book.DNAMUnknown,
-                            DropdownSound = Book.DropdownSound,
-                            EditorID = "book_" + (npc.Name.ToString().ToLower()).Replace(" ", ""),
-                            Keywords = Book.Keywords,
-                            ENAM = Book.ENAM,
-                            FeaturedItemMessage = Book.FeaturedItemMessage,
-                            Flags = Book.Flags,
-                            FNAM = Book.FNAM,
-                            InventoryArt = Book.InventoryArt,
-                            Model = Book.Model,
-                            Name = npc.Name.ToString() + " Salvage Log",
-                            ODTY = Book.ODTY,
-                            Value = Book.Value,
-                            Weight = Book.Weight,
-                            VirtualMachineAdapter = Book.VirtualMachineAdapter,
-                            Transforms = Book.Transforms,
-                        };
+                        BookNoun bountybook = new BookNoun(0x000905, gangName + " " + RandomUtils.GetLogSynonym(), Guid.NewGuid().ToString().Substring(0, 8), BookContents);
+                        npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest_main.myMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });
 
-                        gen_quest_main.myMod.Books.Add(bountybook);
-                        npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = gen_quest_main.myMod.Books[bountybook.FormKey].ToLink(), Count = 1 } });
-                    }
+                }
 
-                    myMod.Npcs.Add(npc);
+                myMod.Npcs.Add(npc);
                     // Add it to the list
                     list.Add(npc);
                 }
