@@ -189,10 +189,10 @@ namespace FrankyCLI.questgen_tools.Utils
             var prompt = sb.ToString();
 
             var results = AITools.RunPrompt(prompt);
-            
-            if (results.Length < 100)
+
+            for (int i = 0; i < 10 && results.Length < 200; i++)
             {
-                throw new Exception("Really short Lore File. Abandoning Generation");
+                results = AITools.RunPrompt(prompt);
             }
             return results;
         }
@@ -221,10 +221,9 @@ namespace FrankyCLI.questgen_tools.Utils
 
 
             var results = AITools.RunPrompt(questnameprompt);
-
-            if (results.Length > 200)
+            for (int i = 0; i < 10 && results.Length > 200; i++)
             {
-                throw new Exception("Really long GetQuestName. Abandoning Generation");
+                results = AITools.RunPrompt(questnameprompt);
             }
             return results;
 
@@ -274,10 +273,9 @@ namespace FrankyCLI.questgen_tools.Utils
 
 
             var results = AITools.RunPrompt(datasourceprompt);
-
-            if (results.Length > 200)
+            for (int i = 0; i < 10 && results.Length > 200; i++)
             {
-                throw new Exception("Really long GetActivatorName. Abandoning Generation");
+                results = AITools.RunPrompt(datasourceprompt);
             }
             return results;
         }
@@ -325,11 +323,11 @@ namespace FrankyCLI.questgen_tools.Utils
                 datasourceprompt += item;
 
             var results = AITools.RunPrompt(datasourceprompt);
-
-            if (results.Length > 200)
+            for (int i = 0; i < 10 && results.Length > 200; i++)
             {
-                throw new Exception("Really long GetDestroyActivatorName. Abandoning Generation");
+                results = AITools.RunPrompt(datasourceprompt);
             }
+
             return results;
 
         }
@@ -380,11 +378,11 @@ namespace FrankyCLI.questgen_tools.Utils
 
 
             var results = AITools.RunPrompt(pickuppromt);
-
-            if (results.Length < 100)
+            for (int i = 0; i < 10 && results.Length < 100; i++)
             {
-                throw new Exception("Really short DestroyMessage. Abandoning Generation");
+                results = AITools.RunPrompt(pickuppromt);
             }
+
             return results;
 
         }
@@ -434,11 +432,11 @@ namespace FrankyCLI.questgen_tools.Utils
                 pickuppromt += item;
 
             var results = AITools.RunPrompt(pickuppromt);
-
-            if (results.Length < 100)
+            for (int i = 0; i < 10 && results.Length < 100; i++)
             {
-                throw new Exception("Really short GetPickupMessage. Abandoning Generation");
+                results = AITools.RunPrompt(pickuppromt);
             }
+
             return results;
         }
 
@@ -508,10 +506,9 @@ namespace FrankyCLI.questgen_tools.Utils
             logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
 
             var results = AITools.RunPrompt(logprompt);
-
-            if (results.Length < 100)
+            for(int i = 0; i < 10 && results.Length < 100; i++)
             {
-                throw new Exception("Really short GetLogMessage. Abandoning Generation");
+                results = AITools.RunPrompt(logprompt);
             }
             return results;
         }
@@ -561,9 +558,9 @@ namespace FrankyCLI.questgen_tools.Utils
 
             var results = AITools.RunPrompt(logprompt);
 
-            if (results.Length < 100)
+            for (int i = 0; i < 10 && results.Length < 100; i++)
             {
-                throw new Exception("Really short GetFirstPersonAccount. Abandoning Generation");
+                results = AITools.RunPrompt(logprompt);
             }
             return results;
         }
