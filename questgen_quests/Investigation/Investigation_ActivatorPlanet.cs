@@ -58,7 +58,7 @@ namespace FrankyCLI
             });
 
             Console.WriteLine("questname: " + questname);
-            GangNoun outlawGang = new GangNoun(myMod);
+            IGang outlawGang = GangManager.GetGang();
 
             //Log Entry
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)

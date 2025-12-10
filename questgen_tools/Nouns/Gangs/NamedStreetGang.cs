@@ -20,25 +20,26 @@ using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
 namespace FrankyCLI.questgen_tools
 {
-    // A gang is a collection of nameless goons that are used in missions.
-    // Spacers are an example of an vanilla gang.
-    // This will create a formlist of NPCs with generic names that can be spawned in the missions.
-
-    public  class GangNoun
+    // A gang is a collection of npcs that fight the player.
+    // This will create a formlist of the NPCs that can be used by scripts to spawn them.
+    public  class NamedStreetGang : IGang
     {
         public StarfieldMod myMod;
-        public string gangName;
+        public string interal_gangName;
         public Mutagen.Bethesda.Starfield.FormList gangList;
 
-        public GangNoun(StarfieldMod myModparam)
+        public NamedStreetGang()
         {
-            myMod = myModparam;
-            gangName = GetGangName();
+            myMod = gen_quest_main.myMod;
+            interal_gangName = GetGangName();
 
-            AITools.RunPrompt("<Lore> There is a gang of people called " + gangName + " who are assiting the target");
+            //AITools.RunPrompt("<Lore> There is a gang of people called " + interal_gangName + " who are assiting the target");
 
             gangList = GenerateGang();
         }
+
+        public string gangName { get => interal_gangName; set => interal_gangName = value; }
+        Mutagen.Bethesda.Starfield.FormList IGang.gangList { get => gangList; set => gangList = value; }
 
         public static string GetGangName()
         {
@@ -119,7 +120,7 @@ namespace FrankyCLI.questgen_tools
 
                 npc.Name = AITools.RunPrompt(
                     "Generate a unique full name (first and last) for a " + Gender +
-                    " member of the " + gangName + " gang.\r\n" +
+                    " member of the " + interal_gangName + " gang.\r\n" +
                     "The name should feel appropriate for someone living and operating within a criminal gang culture—gritty, believable, and grounded.\r\n" +
                     "Do NOT reuse or repeat any names that have appeared previously in this session.\r\n" +
                     "Do NOT include titles, ranks, nicknames, or extra commentary.\r\n" +
@@ -153,7 +154,7 @@ namespace FrankyCLI.questgen_tools
                     Console.WriteLine("Generating Crew Log file...");
                     string BookPrompt =
                         "Write a personal diary entry for " + npc.Name + ", a " + Gender +
-                        " member of the " + gangName + " gang.\r\n" +
+                        " member of the " + interal_gangName + " gang.\r\n" +
                         "Use a first-person voice that reflects their personality, emotional state, and day-to-day life inside the gang.\r\n" +
                         "Let the tone be shaped by the gang's culture—its pressure, loyalties, violence, rituals, and internal politics.\r\n" +
                         "Use the previously generated gang member names naturally, as people the writer knows, fears, trusts, envies, or resents.\r\n" +
@@ -184,7 +185,7 @@ namespace FrankyCLI.questgen_tools
                         FNAM = Book.FNAM,
                         InventoryArt = Book.InventoryArt,
                         Model = Book.Model,
-                        Name = npc.Name.ToString() + " Logs",
+                        Name = npc.Name.ToString() + " " + RandomUtils.GetLogSynonym(),
                         ODTY = Book.ODTY,
                         Value = Book.Value,
                         Weight = Book.Weight,

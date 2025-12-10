@@ -17,7 +17,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FrankyCLI.questgen_tools.Utils
+namespace FrankyCLI.questgen_tools
 {
     public static class RandomUtils
     {
@@ -39,5 +39,50 @@ namespace FrankyCLI.questgen_tools.Utils
             }
             return rec[random.Next(rec.Count)];
         }
+
+        public static string GetLogSynonym()
+        {
+            Random r = RandomUtils.random;
+
+            var synonyms = new List<string>
+            {
+                "Ship Notes",
+                "Crew Notes",
+                "Duty Records",
+                "Mission Notes",
+                "Mission Records",
+                "Daily Entries",
+                "Service Entries",
+                "Personal Records",
+                "Crew Journals",
+                "Field Notes",
+                "Status Reports",
+                "Shift Reports",
+                "Voyage Notes",
+                "Travel Records",
+                "Operations Logs",
+                "Observation Notes",
+                "Shipboard Records",
+                "Work Entries",
+                "Duty Journals",
+                "Activity Reports",
+                "Notes",
+                "Ledger",
+                "Recordings",
+                "Memoranda",
+                "Transcript",
+                "Summary",
+                "Documentation",
+                "Overview",
+                "Statement",
+                "Recount",
+                "Diary"
+            };
+
+            return synonyms[r.Next(synonyms.Count)];
+        }
     }
+
+
+
 }

@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools.Interfaces;
 using FrankyCLI.questgen_tools.Utils;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda;
@@ -18,9 +19,9 @@ using static Loqui.EqualsMaskHelper;
 
 namespace FrankyCLI.questgen_tools
 {
-    public class Crew
+    public class NamedFactionCrew : ICrew
     {
-        public static IFormLink<IStarfieldMajorRecordGetter> GetCrewFormList(string Faction,string ShipName)
+        public IFormLink<IStarfieldMajorRecordGetter> GetCrewFormList(string Faction,string ShipName)
         {
             var frmlst = new FormList(gen_quest_main.myMod)
             {
@@ -124,7 +125,7 @@ namespace FrankyCLI.questgen_tools
                         FNAM = Book.FNAM,
                         InventoryArt = Book.InventoryArt,
                         Model = Book.Model,
-                        Name = npc.Name.ToString() + " Logs",
+                        Name = npc.Name.ToString() + " " + RandomUtils.GetLogSynonym(),
                         ODTY = Book.ODTY,
                         Value = Book.Value,
                         Weight = Book.Weight,

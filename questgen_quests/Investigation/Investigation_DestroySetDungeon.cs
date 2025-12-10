@@ -60,7 +60,7 @@ namespace FrankyCLI
             });
             Console.WriteLine("questname: " + destroytarget);
 
-            GangNoun outlawGang = new GangNoun(myMod);
+            IGang outlawGang = GangManager.GetGang();
 
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {

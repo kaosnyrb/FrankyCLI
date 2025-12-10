@@ -308,7 +308,7 @@ namespace FrankyCLI.questgen_tools
                 FNAM = Book.FNAM,
                 InventoryArt = Book.InventoryArt,
                 Model = Book.Model,
-                Name = name + " Logs",
+                Name = name + " " + RandomUtils.GetLogSynonym(),
                 ODTY = Book.ODTY,
                 Value = Book.Value,
                 Weight = Book.Weight,
