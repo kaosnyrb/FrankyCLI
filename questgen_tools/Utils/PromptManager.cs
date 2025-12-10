@@ -449,7 +449,7 @@ namespace FrankyCLI.questgen_tools.Utils
             var logprompt =
                 "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
                 "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
-                "Write one paragraph under 100 words with natural flow.\r\n" +
+                "Write one paragraph under 80 words with natural flow.\r\n" +
                 "Do NOT introduce item names, quest titles, or made-up proper nouns unless they appear in the lore context.\r\n" +
                 "Do NOT invent new proper nouns unless they exist in the Lore Context.\r\n" +
                 "Write with subtle tension—never blunt exposition.\r\n" +
@@ -485,7 +485,7 @@ namespace FrankyCLI.questgen_tools.Utils
 
                 // NEW SUMMARY REQUIREMENT
                 "Summary Requirement:\r\n" +
-                "- After the atmospheric narrative, output a short summary (2–3 sentences) clearly describing what has been learned so far in the quest chain.\r\n" +
+                "- After the atmospheric narrative, output a short summary (one paragraph under 80 words) clearly describing what has been learned so far in the quest chain.\r\n" +
                 "- This summary must synthesize the clues, leads, patterns, or suspicions implied by earlier mission stages.\r\n" +
                 "- Do NOT reference tag names directly.\r\n" +
                 "- Summaries should feel like a brief investigative recap: what the trail has revealed, what patterns emerged, and what conclusions the investigation is converging on.\r\n" +
@@ -565,12 +565,23 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
                 "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
+                "Length and Style Requirements:\r\n" +
+                "- The log entry should be approximately 400 words.\r\n" +
+                "- It may vary slightly (e.g., 350–450 words) as long as the narrative flows naturally.\r\n" +
+                "- The entry should read like a personal, intimate account—raw, unpolished, and emotionally grounded.\r\n" +
+                "- Prioritize sensory impressions, half-understood implications, and the speaker’s internal conflict.\r\n" +
+                "- Maintain first-person perspective throughout.\r\n" +
+                "- Do NOT summarize; immerse the reader in the moment as the speaker lived it.\r\n" +
+                "- Avoid melodrama, but allow quiet dread, tension, or determination to emerge from the speaker’s voice.\r\n" +
+                "- The log should feel like a real spacers’ or settlers’ journal entry, not a formal report.\r\n" +
+                "- Ensure subtle continuity with the investigative history without repeating events verbatim.\r\n\r\n" + 
 
                 "You may draw on any relevant sections (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
+
 
             foreach (var item in Addons)
                 logprompt += item;

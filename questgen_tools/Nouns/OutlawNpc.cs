@@ -211,7 +211,7 @@ namespace FrankyCLI.questgen_tools
             sb.AppendLine("Output rules:");
             sb.AppendLine("- Only include the diary/log entries in the response.");
             sb.AppendLine("- Do not restate these instructions, and do not include headings like \"Diary\" or \"Character Background\" unless they feel diegetic.");
-            sb.AppendLine("- Keep the total length reasonably concise (aim for under 600 words).");
+            sb.AppendLine("- Keep the total length reasonably concise (aim for under 400 words).");
             sb.AppendLine();
 
             sb.AppendLine("LoreContext:");
