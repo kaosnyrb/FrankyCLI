@@ -219,7 +219,15 @@ namespace FrankyCLI.questgen_tools.Utils
             foreach (var item in Addons)
                 questnameprompt += item;
 
-            return AITools.RunPrompt(questnameprompt);
+
+            var results = AITools.RunPrompt(questnameprompt);
+
+            if (results.Length > 200)
+            {
+                throw new Exception("Really long GetQuestName. Abandoning Generation");
+            }
+            return results;
+
         }
 
         // ------------------------------
@@ -264,7 +272,14 @@ namespace FrankyCLI.questgen_tools.Utils
             foreach (var item in Addons)
                 datasourceprompt += item;
 
-            return AITools.RunPrompt(datasourceprompt);
+
+            var results = AITools.RunPrompt(datasourceprompt);
+
+            if (results.Length > 200)
+            {
+                throw new Exception("Really long GetActivatorName. Abandoning Generation");
+            }
+            return results;
         }
 
         // ------------------------------
@@ -309,7 +324,14 @@ namespace FrankyCLI.questgen_tools.Utils
             foreach (var item in Addons)
                 datasourceprompt += item;
 
-            return AITools.RunPrompt(datasourceprompt);
+            var results = AITools.RunPrompt(datasourceprompt);
+
+            if (results.Length > 200)
+            {
+                throw new Exception("Really long GetDestroyActivatorName. Abandoning Generation");
+            }
+            return results;
+
         }
 
         // ------------------------------
