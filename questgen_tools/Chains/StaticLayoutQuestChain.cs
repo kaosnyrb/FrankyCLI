@@ -77,7 +77,7 @@ namespace FrankyCLI.questgen_tools
             AITools.RunPrompt(MissionSetupPrompt);
 
             bool fork = false;            
-            if (random.Next(100) > 0)
+            if (random.Next(100) > 100)
             {
                 fork = true;
             }
@@ -136,7 +136,7 @@ namespace FrankyCLI.questgen_tools
                     "<QuestProgress>40%</QuestProgress>"
                 };
             }
-            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("", new List<string>()
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("Planet side Smallbase Destroy - Small Marker", new List<string>()
             {
                 "<QuestStage>InitialInvestigation</QuestStage>",
                 "<QuestProgress>10%</QuestProgress>"

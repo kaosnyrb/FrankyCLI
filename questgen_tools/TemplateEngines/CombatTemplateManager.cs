@@ -19,10 +19,14 @@ namespace FrankyCLI.questgen_tools
         public CombatTemplateManager(ITemplateEngine templateEngine)
         {
             planetlib.ImportTemplates(new Templates_PlanetCombat());
-            planetlib.ImportTemplates(new Templates_SpecificDungeons());           
+            planetlib.ImportTemplates(new Templates_SpecificDungeons());
+            planetlib.ImportTemplates(new Templates_PlanetSmallBaseDestroy());
+
             TemplateLibs.Add(planetlib);
 
             spacelib.ImportTemplates(new Templates_SpaceInformant());
+            spacelib.ImportTemplates(new Templates_SpaceDestroy());
+
             TemplateLibs.Add(spacelib);
 
             TemplateLibs.Add(citieslib);

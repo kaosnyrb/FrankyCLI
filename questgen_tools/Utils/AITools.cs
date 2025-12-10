@@ -206,6 +206,11 @@ namespace FrankyCLI.questgen_tools
 
             result += "The game starts on May 7th 2330. Use this to figure out any dates needed. \r\n";
 
+            //Weapons
+
+
+
+
             result += "This marks the end of the background information section. Following this is more detail on the prompt to carry out.\r\n\r\n";
 
             return result;

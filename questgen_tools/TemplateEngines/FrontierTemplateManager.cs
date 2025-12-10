@@ -25,12 +25,15 @@ namespace FrankyCLI.questgen_tools
 
             planetlib.ImportTemplates(new Templates_PlanetInvestigate());
             planetlib.ImportTemplates(new Templates_PlanetCombat());
+            planetlib.ImportTemplates(new Templates_PlanetSmallBaseDestroy());
 
             planetlib.ImportTemplates(new Templates_SpecificDungeons());           
             TemplateLibs.Add(planetlib);
 
             spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
+            spacelib.ImportTemplates(new Templates_SpaceDestroy());
+
             spacelib.ImportTemplates(new Templates_Derelicts());
             TemplateLibs.Add(spacelib);
 

@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="questgen_quests\Investigation\Investigation_DestroySpace_Guard.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Mutagen.Bethesda.FormKeys.Starfield" Version="3.2.0" />
     <PackageReference Include="Mutagen.Bethesda.Starfield" Version="0.44.0" />
     <PackageReference Include="OpenAI" Version="2.6.0" />

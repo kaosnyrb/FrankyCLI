@@ -30,6 +30,7 @@ namespace FrankyCLI.questgen_tools
         {
             spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
+            spacelib.ImportTemplates(new Templates_SpaceDestroy());
             //spacelib.ImportTemplates(new Templates_Derelicts());
             TemplateLibs.Add(spacelib);
 

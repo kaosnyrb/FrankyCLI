@@ -37,6 +37,8 @@ namespace FrankyCLI.questgen_tools
             spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
             spacelib.ImportTemplates(new Templates_Derelicts());
+            spacelib.ImportTemplates(new Templates_SpaceDestroy());
+
             TemplateLibs.Add(spacelib);
 
             CompleteLib.DiscoveryTemplates = new List<MissionTemplate>();
