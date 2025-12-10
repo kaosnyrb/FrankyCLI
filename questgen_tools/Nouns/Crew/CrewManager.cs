@@ -17,7 +17,8 @@ namespace FrankyCLI.questgen_tools.Nouns.Crew
             List<ICrew> crews = new List<ICrew>()
             {
                 new NamedFactionCrew(),
-                new NamedFactionCrew_Betrayal()
+                new NamedFactionCrew_Betrayal(),
+                new GenericCrew()
             };
             return crews[RandomUtils.random.Next(crews.Count)].GetCrewFormList(Faction, ShipName);
         }
