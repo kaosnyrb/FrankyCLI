@@ -305,6 +305,28 @@ namespace FrankyCLI.questgen_tools
             return activatorTypes[random.Next(activatorTypes.Count)];
         }
 
+        public static ActivatorType GetRandomLargeGroundType()
+        {
+            //We duplicate the models here but the different names give flavour
+            List<ActivatorType> activatorTypes = new List<ActivatorType>()
+            {
+                new ActivatorType(){
+                    Name = "Computer Core",
+                    Model = "duout\\large_scanner.nif"
+                },
+                new ActivatorType(){
+                    Name = "Contraband",
+                    Model = "duout\\large_contraband.nif"
+                },
+                new ActivatorType(){
+                    Name = "Chemicals",
+                    Model = "duout\\large_chemical.nif"
+                },
+            };
+            Random random = RandomUtils.random;
+            return activatorTypes[random.Next(activatorTypes.Count)];
+        }
+
         public static ActivatorType GetRandomGroundType()
         {
             //We duplicate the models here but the different names give flavour

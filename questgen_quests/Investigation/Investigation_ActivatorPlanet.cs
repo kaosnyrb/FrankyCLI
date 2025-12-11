@@ -42,7 +42,7 @@ namespace FrankyCLI
         {
             Console.WriteLine("Generating Activator Planet Quest...");
 
-            var questActivator = ActivatorTools.GetRandomGroundType();
+            var questActivator = ActivatorTools.GetRandomLargeGroundType();
 
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {

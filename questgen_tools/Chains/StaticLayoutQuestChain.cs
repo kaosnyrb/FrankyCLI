@@ -39,6 +39,12 @@ namespace FrankyCLI.questgen_tools
 
         public bool GenerateQuest()
         {
+            //Debugging Tools
+            string ShowdownTemplate = "";
+            string DeepTempalte = "Planet side Smallbase Destroy - Small Marker";
+            string InvestigationTemplate = "Planet side Activator - Important Marker Breathable";
+            string DiscoveryTemplate = "";
+
             // Story Setup --------------------------------
             Random random = RandomUtils.random;
             Console.WriteLine("StaticLayoutQuestChain");
@@ -104,7 +110,7 @@ namespace FrankyCLI.questgen_tools
                 "\r\n\r\n Generate the completed lore instance now.");
 
             // Template Choices --------------------------------
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("", new List<string>()
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(ShowdownTemplate, new List<string>()
             {
                 "<QuestStage>Showdown</QuestStage>",
                 "<QuestProgress>90%</QuestProgress>"
@@ -121,7 +127,7 @@ namespace FrankyCLI.questgen_tools
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Feeding the stages into the AI...");
             AITools.RunPrompt("<Summary> The next section contains all the locations and types of missions that will be happening. Use this to tie things together.");
-            var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("", new List<string>()
+            var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate(DeepTempalte, new List<string>()
             {
                 "<QuestStage>DeepInvestigation</QuestStage>",
                 "<QuestProgress>70%</QuestProgress>"
@@ -136,12 +142,12 @@ namespace FrankyCLI.questgen_tools
                     "<QuestProgress>40%</QuestProgress>"
                 };
             }
-            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate("Planet side Smallbase Destroy - Small Marker", new List<string>()
+            var InvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate(InvestigationTemplate, new List<string>()
             {
                 "<QuestStage>InitialInvestigation</QuestStage>",
                 "<QuestProgress>10%</QuestProgress>"
             });
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", new List<string>()
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate(DiscoveryTemplate, new List<string>()
             {
                 "<QuestStage>Discovery</QuestStage>",
                 "<QuestProgress>0%</QuestProgress>"

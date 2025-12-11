@@ -483,13 +483,12 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
                 "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
-                // NEW SUMMARY REQUIREMENT
                 "Summary Requirement:\r\n" +
-                "- After the atmospheric narrative, output a short summary (one paragraph under 80 words) clearly describing what has been learned so far in the quest chain.\r\n" +
-                "- This summary must synthesize the clues, leads, patterns, or suspicions implied by earlier mission stages.\r\n" +
-                "- Do NOT reference tag names directly.\r\n" +
-                "- Summaries should feel like a brief investigative recap: what the trail has revealed, what patterns emerged, and what conclusions the investigation is converging on.\r\n" +
-                "- Keep the summary factual, concise, and entirely based on information available in the LoreContext and prior investigation stages.\r\n\r\n" +
+                "- After the atmospheric narrative, the hunter sets down a brief recap in their notes—a compact paragraph under eighty words capturing where the investigation currently stands.\r\n" +
+                "- This recap gathers the trail so far: clues uncovered, rumors traded, patterns glimpsed, and suspicions that have started to take shape.\r\n" +
+                "- It stays inside the fiction: no system labels, no tag names, only details the hunter or their sources could plausibly put into words.\r\n" +
+                "- The summary should feel like an investigator’s quick briefing: what the trail has revealed, what seems to connect, and which conclusions the chase is drifting toward.\r\n" +
+                "- Keep this recap factual, tight, and grounded in what the records, memories, and prior steps have already established—no guesses about what has not yet been discovered.\r\n\r\n" +
 
                 "\r\nStyle Guidelines:\r\n" +
                 "- Do not start with phrases like 'The objective is...' or 'You must...'\r\n" +
@@ -532,7 +531,6 @@ namespace FrankyCLI.questgen_tools.Utils
                 "Use the Lore Context to guide tone, personality, emotion, and perspective—especially mystery, fear, resentment, greed, or ambition.\r\n" +
                 "Do NOT quote lore directly; reflect it through lived experience.\r\n\r\n" +
 
-                // NEW DATE RULES
                 "Date Instructions:\r\n" +
                 "- Begin the entry with a date.\r\n" +
                 "- The date must fall within the year leading up to " + dateTime.ToString("yyyy-MM-dd") + ".\r\n" +
@@ -566,8 +564,13 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
                 "Length and Style Requirements:\r\n" +
-                "- The log entry should be approximately 400 words.\r\n" +
-                "- It may vary slightly (e.g., 350–450 words) as long as the narrative flows naturally.\r\n" +
+                "- The entire log entry must stay under 250 words; do not exceed this limit.\r\n" + 
+                "- Favor tight, precise language over filler—every sentence should reveal character, world, or stakes.\r\n" +
+                "- Avoid repeating the same idea in different words; once something is established, build on it instead of restating it.\r\n" +
+                "- Do not spend words summarizing the LoreContext; assume it exists off-page and focus on what the speaker feels, remembers, or is living through right now.\r\n" +
+                "- Prefer concrete details, specific memories, and sharp impressions over vague generalities or broad statements.\r\n" +
+                "- If in doubt, cut adjectives, hedging, or restated thoughts before cutting sensory or emotional beats.\r\n\r\n" +
+                "- It may vary slightly (e.g., 100–250 words) as long as the narrative flows naturally.\r\n" +
                 "- The entry should read like a personal, intimate account—raw, unpolished, and emotionally grounded.\r\n" +
                 "- Prioritize sensory impressions, half-understood implications, and the speaker’s internal conflict.\r\n" +
                 "- Maintain first-person perspective throughout.\r\n" +

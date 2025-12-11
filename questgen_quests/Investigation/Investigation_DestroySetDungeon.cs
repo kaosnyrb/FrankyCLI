@@ -42,7 +42,7 @@ namespace FrankyCLI
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Destroy Planet Quest...");
-            var questActivator = ActivatorTools.GetRandomDestroyGroundType();
+            var questActivator = ActivatorTools.GetRandomLargeGroundType();
 
 
             var destroytarget = PromptManager.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
