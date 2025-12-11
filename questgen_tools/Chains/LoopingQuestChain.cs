@@ -198,7 +198,10 @@ namespace FrankyCLI.questgen_tools
                 "<QuestProgress>0%</QuestProgress>"
             };
 
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", discoveryAddons);
+
+            var DiscoveryTemplateManager = new AllTemplateManager(new AI_TemplateEngine());
+            //var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", discoveryAddons); // We currently don't handle the fact that not all template libs have discovery missions.
+            var DiscoveryMissionTemplate = DiscoveryTemplateManager.GetDiscoveryMissionTemplate("", discoveryAddons);
 
             // Now we build a story-ordered list for stage location history:
             // Discovery -> earliest investigation -> ... -> closest investigation -> Showdown

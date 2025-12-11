@@ -143,7 +143,10 @@ namespace FrankyCLI.questgen_tools
                 "<QuestStage>InitialInvestigation</QuestStage>",
                 "<QuestProgress>10%</QuestProgress>"
             });
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate(DiscoveryTemplate, new List<string>()
+
+            var DiscoveryTemplateManager = new AllTemplateManager(new AI_TemplateEngine());
+            //var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", discoveryAddons); // We currently don't handle the fact that not all template libs have discovery missions.
+            var DiscoveryMissionTemplate = DiscoveryTemplateManager.GetDiscoveryMissionTemplate("", new List<string>()
             {
                 "<QuestStage>Discovery</QuestStage>",
                 "<QuestProgress>0%</QuestProgress>"
