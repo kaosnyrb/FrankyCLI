@@ -484,7 +484,8 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
                 "Summary Requirement:\r\n" +
-                "- After the atmospheric narrative, the hunter sets down a brief recap in their notes—a compact paragraph under eighty words capturing where the investigation currently stands.\r\n" +
+                "- After the atmospheric narrative, the hunter sets down a brief recap in their notes—a compact paragraph under fifty words capturing where the investigation currently stands.\r\n" +
+                "- Don't include a header..\r\n" +
                 "- This recap gathers the trail so far: clues uncovered, rumors traded, patterns glimpsed, and suspicions that have started to take shape.\r\n" +
                 "- It stays inside the fiction: no system labels, no tag names, only details the hunter or their sources could plausibly put into words.\r\n" +
                 "- The summary should feel like an investigator’s quick briefing: what the trail has revealed, what seems to connect, and which conclusions the chase is drifting toward.\r\n" +

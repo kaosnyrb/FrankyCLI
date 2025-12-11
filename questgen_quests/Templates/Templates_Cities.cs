@@ -121,6 +121,48 @@ namespace FrankyCLI.questgen_quests
                     "follow_clue"
                 }
             });
+
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "City Activator - Red Mile",
+                Description = "Find info about the target in The Red Mile",
+                Location = "Red Mile",
+                formid = 0x001379,
+                parameterformid = 0x002CE0C9,
+                needSpacesuit = false,
+                parameter1 = "redmile",
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "follow_clue"
+                }
+            });
+
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "City Activator - Red Mile Crater",
+                Description = "Find info about the target in The Red Mile Crater",
+                Location = "Red Mile Crater",
+                formid = 0x001379,
+                parameterformid = 0x002CE0C9,
+                needSpacesuit = false,
+                parameter1 = "redmilecrater",
+                outlawQuest = new Investigation_ActivatorCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "follow_clue"
+                },
+                parameters= new Dictionary<string, object>()
+                {
+                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runners’ survival and the extreme danger posed by the local Red Mile Mauler predators." }
+                }
+                
+            });
+
             //-------------------------------  SHOWDOWN ------------------------------------------
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -223,6 +265,46 @@ namespace FrankyCLI.questgen_quests
                     "planetside",
                     "kill_target"
                 }
+            });
+
+            ShowdownTemplates.Add(new MissionTemplate()
+            {
+                Name = "City Bounty - Red Mile",
+                Description = "Kill the target at The Red Mile",
+                Location = "Red Mile",
+                formid = 0x0012BE,
+                needSpacesuit = true,
+                parameter1 = "redmile",
+                parameterformid = 0x002CE0C9,
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "kill_target"
+                }
+            });
+            ShowdownTemplates.Add(new MissionTemplate()
+            {
+                Name = "City Bounty - Red Mile Crater",
+                Description = "Kill the target at The Red Mile Crater",
+                Location = "Red Mile",
+                formid = 0x0012BE,
+                needSpacesuit = true,
+                parameter1 = "redmilecrater",
+                parameterformid = 0x002CE0C9,
+                outlawQuest = new Showdown_BountyCity(),
+                MissionTags = new List<string>()
+                {
+                    "settlement",
+                    "planetside",
+                    "kill_target"
+                },
+                parameters = new Dictionary<string, object>()
+                {
+                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runners’ survival and the extreme danger posed by the local Red Mile Mauler predators." }
+                }
+
             });
         }
     }

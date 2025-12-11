@@ -46,6 +46,14 @@ namespace FrankyCLI
             Console.WriteLine("Generating Activator City Quest...");
             questloc = missionTemplate.Location;
 
+            if(missionTemplate.parameters != null)
+            {
+                if (missionTemplate.parameters.ContainsKey("ExtraLore"))
+                {
+                    missionTemplate.Addons.Add(missionTemplate.parameters["ExtraLore"].ToString());
+                }
+            }
+
             var questActivator = ActivatorTools.GetRandomGroundType();
 
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
@@ -67,7 +75,7 @@ namespace FrankyCLI
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            var markerused = RandomUtils.GetRandomMarker("doout_city_activator_marker_" + missionTemplate.parameter1);
+            var markerused = RandomUtils.GetRandomMarker("doout_city_activator_marker_" + missionTemplate.parameter1 + "_");
             newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
 
             var locaform = gen_quest_main._StarfieldMod.Locations[new FormKey(gen_quest_main.StarfieldModKey, missionTemplate.parameterformid)];

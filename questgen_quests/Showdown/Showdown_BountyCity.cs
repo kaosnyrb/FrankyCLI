@@ -42,6 +42,13 @@ namespace FrankyCLI
         public Quest Setup(StarfieldMod myMod, OutlawNpc outlawNpc, MissionTemplate missionTemplate, IOutlawQuest nextQuest)
         {
             Console.WriteLine("Generating Bounty Planet Quest...");
+            if (missionTemplate.parameters != null)
+            {
+                if (missionTemplate.parameters.ContainsKey("ExtraLore"))
+                {
+                    missionTemplate.Addons.Add(missionTemplate.parameters["ExtraLore"].ToString());
+                }
+            }
 
             var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons));
             Console.WriteLine("questname: " + questname);
@@ -62,7 +69,7 @@ namespace FrankyCLI
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
             
-            var marker = RandomUtils.GetRandomMarker("doout_city_showdown_marker_" + missionTemplate.parameter1);
+            var marker = RandomUtils.GetRandomMarker("doout_city_showdown_marker_" + missionTemplate.parameter1 + "_");
             newQuest.SetQuestReferenceAlias("BountyTargetMarker", marker.FormKey);
 
             var locaform = gen_quest_main._StarfieldMod.Locations[new FormKey(gen_quest_main.StarfieldModKey, missionTemplate.parameterformid)];
