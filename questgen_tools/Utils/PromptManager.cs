@@ -449,7 +449,8 @@ namespace FrankyCLI.questgen_tools.Utils
             var logprompt =
                 "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
                 "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
-                "Write one paragraph under 80 words with natural flow.\r\n" +
+                "Write a single continuous paragraph under 130 words with natural flow.\r\n" +
+                "That paragraph must first justify why this objective must be completed here, then seamlessly fold into a brief investigative recap at the end.\r\n" +
                 "Do NOT introduce item names, quest titles, or made-up proper nouns unless they appear in the lore context.\r\n" +
                 "Do NOT invent new proper nouns unless they exist in the Lore Context.\r\n" +
                 "Write with subtle tension—never blunt exposition.\r\n" +
@@ -460,13 +461,12 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- InitialInvestigations: this place feels like one of several uncertain starting points.\r\n" +
                 "- ForkInvestigations: this place matters because choosing it means committing to a particular line of inquiry.\r\n" +
                 "- DeepInvestigations: this place is where separate threads begin to cross.\r\n" +
-                "- FinalShowdown: this place is where the target’s long-running actions finally come into focus." +
-                "Clearly describe what the target has been doing up to this moment—whether manipulating factions, extracting illicit resources, exploiting locals, hiding evidence, preparing a weapon, or orchestrating a larger scheme." +
-                "Show how every clue from earlier investigations points to their ongoing operation: mention the pattern behind their movements, the purpose of the items they stole, or the deeper motive behind the trail they left." +
-                "Emphasize what the target is attempting right now as you arrive—securing a final asset, activating dangerous tech, eliminating a witness, fleeing with critical data, or destroying the last proof of their crimes." + 
-                "Highlight why this exact location matters to their plan, and why stopping them here prevents the situation from escalating into something far worse." + 
-                "The tone should convey culmination, rising danger, and the sense that their scheme is seconds away from succeeding if left unchecked."+
-
+                "- FinalShowdown: this place is where the target’s long-running actions finally come into focus. " +
+                "Clearly describe what the target has been doing up to this moment—whether manipulating factions, extracting illicit resources, exploiting locals, hiding evidence, preparing a weapon, or orchestrating a larger scheme. " +
+                "Show how every clue from earlier investigations points to their ongoing operation: mention the pattern behind their movements, the purpose of the items they stole, or the deeper motive behind the trail they left. " +
+                "Emphasize what the target is attempting right now as you arrive—securing a final asset, activating dangerous tech, eliminating a witness, fleeing with critical data, or destroying the last proof of their crimes. " +
+                "Highlight why this exact location matters to their plan, and why stopping them here prevents the situation from escalating into something far worse. " +
+                "The tone should convey culmination, rising danger, and the sense that their scheme is seconds away from succeeding if left unchecked.\r\n\r\n" +
 
                 "If a <QuestProgress> tag is present:\r\n" +
                 "- Low values (0–25): emphasize confusion, rumor, and risk with limited insight.\r\n" +
@@ -474,7 +474,7 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- High values (76–100): emphasize urgency, inevitability, and the narrow margin for action.\r\n\r\n" +
 
                 "If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed so far.\r\n" +
+                "- Treat them as the investigative trail the player has followed before reaching the CURRENT objective.\r\n" +
                 "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
                 "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
                 "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
@@ -483,18 +483,19 @@ namespace FrankyCLI.questgen_tools.Utils
                 "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
                 "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
-                "Summary Requirement:\r\n" +
-                "- After the atmospheric narrative, the hunter sets down a brief recap in their notes—a compact paragraph under fifty words capturing where the investigation currently stands.\r\n" +
-                "- Don't include a header..\r\n" +
+                "Summary Requirement (merged into the same paragraph):\r\n" +
+                "- At the end of the SAME paragraph, the hunter folds in a brief recap—a compact segment under fifty words capturing where the investigation currently stands.\r\n" +
+                "- This recap is appended directly to the atmospheric justification with no header, no label, and no visual separator.\r\n" +
+                "- The recap MUST exclude the current objective and this location’s immediate events; it only summarizes what was discovered in prior stages and locations.\r\n" +
                 "- This recap gathers the trail so far: clues uncovered, rumors traded, patterns glimpsed, and suspicions that have started to take shape.\r\n" +
                 "- It stays inside the fiction: no system labels, no tag names, only details the hunter or their sources could plausibly put into words.\r\n" +
-                "- The summary should feel like an investigator’s quick briefing: what the trail has revealed, what seems to connect, and which conclusions the chase is drifting toward.\r\n" +
+                "- The recap should feel like an investigator’s quick briefing: what the trail has revealed, what seems to connect, and which conclusions the chase is drifting toward.\r\n" +
                 "- Keep this recap factual, tight, and grounded in what the records, memories, and prior steps have already established—no guesses about what has not yet been discovered.\r\n\r\n" +
 
-                "\r\nStyle Guidelines:\r\n" +
+                "Style Guidelines:\r\n" +
                 "- Do not start with phrases like 'The objective is...' or 'You must...'\r\n" +
                 "- Describe the situation as if briefing an experienced operative.\r\n" +
-                "- Keep it immersive, subtle, and diegetic.\r\n" + 
+                "- Keep it immersive, subtle, and diegetic.\r\n" +
                 "Draw inspiration from any relevant sections of the Lore Context:\r\n" +
                 "- Factions and their agendas\r\n" +
                 "- Characters or targets\r\n" +
@@ -506,6 +507,7 @@ namespace FrankyCLI.questgen_tools.Utils
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
+
 
 
             foreach (var item in Addons)
@@ -533,15 +535,14 @@ namespace FrankyCLI.questgen_tools.Utils
                 "Do NOT quote lore directly; reflect it through lived experience.\r\n\r\n" +
 
                 "Date Instructions:\r\n" +
-                "- Begin the entry with a date.\r\n" +
-                "- The date must fall within the year leading up to " + dateTime.ToString("yyyy-MM-dd") + ".\r\n" +
-                "- Choose any date between " +
-                    dateTime.AddYears(-1).ToString("yyyy-MM-dd") +
+                "- You may reference a date naturally within the narrative, but it is not required.\r\n" +
+                "- If a date is used, it must fall within the three years leading up to " + dateTime.ToString("yyyy-MM-dd") + ".\r\n" +
+                "- Valid dates may fall anywhere between " +
+                    dateTime.AddYears(-3).ToString("yyyy-MM-dd") +
                     " and " +
                     dateTime.ToString("yyyy-MM-dd") +
                     " inclusive.\r\n" +
-                "- Format the date like: YYYY-MM-DD.\r\n" +
-                "- After the date, write the narrative as normal.\r\n\r\n" +
+                "- Any date mentioned should feel incidental or diegetic—woven into memory, record-keeping, or spoken context rather than formatted as a header.\r\n\r\n" +
 
                 "If a <QuestStage> tag is present, shape what the speaker understands:\r\n" +
                 "- InitialInvestigations: the speaker senses something is wrong, but details are unclear.\r\n" +

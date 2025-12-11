@@ -184,10 +184,12 @@ namespace FrankyCLI.questgen_tools
         public string GenerateLogfile()
         {
             var sb = new StringBuilder();
+            DateTime dateTime = new DateTime(2330, 5, 6);
 
             sb.AppendLine("You are writing a series of personal diary/log entries from the perspective of a bounty target.");
             sb.AppendLine("These entries should cover their plans, their fears, and the reasons they fled to their current location.");
             sb.AppendLine();
+
             sb.AppendLine("Writing style and constraints:");
             sb.AppendLine("- Write in the first person, in a voice that fits the character’s background and temperament.");
             sb.AppendLine("- The tone should feel consistent with the target’s life as described in the lore (work, trauma, habits, ideology, faction ties).");
@@ -196,6 +198,15 @@ namespace FrankyCLI.questgen_tools
             sb.AppendLine("- Do not break the fourth wall. Do not mention prompts, AI, quests, or game mechanics.");
             sb.AppendLine("- Avoid over-explaining; let motives and plans emerge through what the character chooses to write about.");
             sb.AppendLine();
+
+            sb.AppendLine("Date Instructions:");
+            sb.AppendLine("- Dates are optional; include them only if they feel natural for the character.");
+            sb.AppendLine("- If a date is used, it must fall within the three years leading up to " + dateTime.ToString("yyyy-MM-dd") + ".");
+            sb.AppendLine("- Valid dates may fall anywhere between " +
+                dateTime.AddYears(-3).ToString("yyyy-MM-dd") + " and " + dateTime.ToString("yyyy-MM-dd") + ".");
+            sb.AppendLine("- Any date included should appear casually within the writing—woven into the character’s thoughts or records rather than formatted as a header.");
+            sb.AppendLine();
+
             sb.AppendLine("Lore usage:");
             sb.AppendLine("- Use the LoreContext to infer factions, locations, threats, and history that matter to the target.");
             sb.AppendLine("- Reflect important details from the lore indirectly through memories, grudges, regrets, and plans.");
@@ -203,11 +214,13 @@ namespace FrankyCLI.questgen_tools
             sb.AppendLine("- If a detail is not present in the lore, describe it generically (e.g. \"that mining station\" rather than inventing a new proper noun).");
             sb.AppendLine("- Do not quote the LoreContext text directly or mention it by name; integrate it as lived experience.");
             sb.AppendLine();
+
             sb.AppendLine("Narrative focus:");
             sb.AppendLine("- Explain, from the target’s point of view, why they chose to flee and why this particular location made sense to them.");
             sb.AppendLine("- Hint at what they hope to achieve next, and what they are most afraid will catch up with them.");
             sb.AppendLine("- You may allude to past incidents, deals, betrayals, or battles that are consistent with the LoreContext.");
             sb.AppendLine();
+
             sb.AppendLine("Output rules:");
             sb.AppendLine("- Only include the diary/log entries in the response.");
             sb.AppendLine("- Do not restate these instructions, and do not include headings like \"Diary\" or \"Character Background\" unless they feel diegetic.");
@@ -218,6 +231,7 @@ namespace FrankyCLI.questgen_tools
             sb.AppendLine("<LoreContext>");
             sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
             sb.AppendLine("</LoreContext>");
+
 
             string backgroundprompt = sb.ToString();
 
