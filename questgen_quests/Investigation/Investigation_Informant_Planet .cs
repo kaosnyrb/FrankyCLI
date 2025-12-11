@@ -96,8 +96,10 @@ namespace FrankyCLI
             {
                 if (missionTemplate.parameters.ContainsKey("IsTargetDead"))
                 {
-                    NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
-
+                    if ((bool)missionTemplate.parameters["IsTargetDead"])
+                    {
+                        NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
+                    }
                 }
             }
             Npc npc = NPCTools.CloneNPC(myMod, NPC);

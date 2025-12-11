@@ -42,7 +42,7 @@ namespace FrankyCLI.questgen_tools
             //Debugging Tools
             string ShowdownTemplate = "";
             string DeepTempalte = "";
-            string InvestigationTemplate = "Planet side Smallbase Informant - Medium Marker";
+            string InvestigationTemplate = "";
             string DiscoveryTemplate = "";
 
             // Story Setup --------------------------------
@@ -51,17 +51,14 @@ namespace FrankyCLI.questgen_tools
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
                     new AllTemplateManager(new AI_TemplateEngine()),
-                    //new FrontierTemplateManager(new AI_TemplateEngine()),
-                    //new NoPOITemplateManager(new AI_TemplateEngine()),
-                    //new CombatTemplateManager(new AI_TemplateEngine()),
-                    //new RandomTemplateManager()
+                    new FrontierTemplateManager(new AI_TemplateEngine()),
+                    new NoPOITemplateManager(new AI_TemplateEngine()),
+                    new CombatTemplateManager(new AI_TemplateEngine()),
+                    new RandomTemplateManager()
                 };
             var templateManager = templates[random.Next(templates.Count)];
             Console.WriteLine(templateManager.GetType());
 
-
-            //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
-            //var Lorefile = PromptManager.LoadRandomLoreFile();
             var Lorefile = PromptManager.GenerateLoreFile();
 
             //AI Seeding
@@ -83,7 +80,7 @@ namespace FrankyCLI.questgen_tools
             AITools.RunPrompt(MissionSetupPrompt);
 
             bool fork = false;            
-            if (random.Next(100) > 100)
+            if (random.Next(100) > 75)
             {
                 fork = true;
             }
@@ -101,7 +98,6 @@ namespace FrankyCLI.questgen_tools
                 "- Each generated lore section must be no more than 3–6 sentences." +
                 "- Preserve the order and hierarchy of the Lore Context file.\r\n" +
                 "- The Lore Context file is based on the Outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
-                //"- Use the Characters Background when generating the Lore Context: " + outlawNpc.background + ".\r\n" +
                 "- Update the <Summary> and <StorySummary> to fit the Outlaw we've generated. Keep it's theme and story, merging it with the character backgound.\r\n" +
                 "- Expand only sections that contain generation instructions.\r\n" +
                 "- Do NOT output explanations. Output ONLY the completed lore instance.\r\n\r\n" +
