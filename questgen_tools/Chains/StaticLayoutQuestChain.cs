@@ -40,9 +40,9 @@ namespace FrankyCLI.questgen_tools
         public bool GenerateQuest()
         {
             //Debugging Tools
-            string ShowdownTemplate = "City Bounty - Paradiso";
-            string DeepTempalte = "City Activator - Paradiso";
-            string InvestigationTemplate = "City Activator - The Den";
+            string ShowdownTemplate = "";
+            string DeepTempalte = "";
+            string InvestigationTemplate = "Planet side Smallbase Informant - Medium Marker";
             string DiscoveryTemplate = "";
 
             // Story Setup --------------------------------
