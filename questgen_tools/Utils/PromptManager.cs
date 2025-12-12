@@ -395,7 +395,7 @@ namespace FrankyCLI.questgen_tools.Utils
             var pickuppromt =
                 "Generate a short flavour-text story explaining how this clue reveals the next stage of the quest.\r\n" +
                 "Use newline characters.\r\n" +
-                "One paragraph, under 50 words.\r\n\r\n" +
+                "One paragraph, under 30 words.\r\n\r\n" +
 
                 "Use the Lore Context to shape tone, mystery, symbolism, faction behaviour, and how this clue fits into the wider conflict or hunt.\r\n" +
                 "Do NOT quote lore—use it indirectly.\r\n\r\n" +
@@ -449,7 +449,7 @@ namespace FrankyCLI.questgen_tools.Utils
             var logprompt =
                 "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
                 "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
-                "Write a single continuous paragraph under 130 words with natural flow.\r\n" +
+                "Write 100 words with natural flow.\r\n" +
                 "That paragraph must first justify why this objective must be completed here, then seamlessly fold into a brief investigative recap at the end.\r\n" +
                 "Do NOT introduce item names, quest titles, or made-up proper nouns unless they appear in the lore context.\r\n" +
                 "Do NOT invent new proper nouns unless they exist in the Lore Context.\r\n" +
