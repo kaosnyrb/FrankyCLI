@@ -60,6 +60,9 @@ namespace FrankyCLI
                         }
                     }
                 }
+
+                StationNoun stationNoun = new StationNoun();
+                /*
                 //We have different styles of quest chains, so randomly choose one.
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {
@@ -69,7 +72,7 @@ namespace FrankyCLI
 
                 var outlawQuest = questchains[random.Next(questchains.Count)];
 
-                outlawQuest.GenerateQuest();
+                outlawQuest.GenerateQuest();*/
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {
