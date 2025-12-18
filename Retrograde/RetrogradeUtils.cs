@@ -153,6 +153,72 @@ namespace FrankyCLI
         }
     }
 
+    public static class RgRotation
+    {
+        // steps: 0=0°, 1=90°, 2=180°, 3=270° (clockwise or CCW depends on your coord system)
+        public static P3Float RotateYaw90(P3Float v, int steps)
+        {
+            steps = ((steps % 4) + 4) % 4;
+
+            // NOTE: This assumes a typical X/Y plane with +Z up.
+            // If the direction comes out mirrored in game, swap the sign pattern.
+            return steps switch
+            {
+                0 => v,
+                1 => new P3Float(v.Y, -v.X, v.Z),
+                2 => new P3Float(-v.X, -v.Y, v.Z),
+                3 => new P3Float(-v.Y, v.X, v.Z),
+                _ => v
+            };
+        }
+
+        public static ConnectorDirection RotateDir(ConnectorDirection d, int steps)
+        {
+            steps = ((steps % 4) + 4) % 4;
+
+            if (d == ConnectorDirection.Unknown)
+                return d;
+
+            // Order here must match the vector rotation above.
+            // If your RotateYaw90 ends up inverted, flip this mapping too.
+            for (int i = 0; i < steps; i++)
+            {
+                d = d switch
+                {
+                    ConnectorDirection.North => ConnectorDirection.East,
+                    ConnectorDirection.East => ConnectorDirection.South,
+                    ConnectorDirection.South => ConnectorDirection.West,
+                    ConnectorDirection.West => ConnectorDirection.North,
+                    _ => ConnectorDirection.Unknown
+                };
+            }
+            return d;
+        }
+
+        public static float EulerToRadCardinals(int euler)
+        {
+            switch (euler)
+            {
+                case 0:
+                    return 0;
+                case 90:
+                    return 1.57079632f;
+                case 180:
+                    return 3.14159f;
+                case 270:
+                    return 4.71239f;
+            }
+            return 0;
+        }
+
+        public static P3Float RotationToP3Float(int yawSteps)
+        {
+            // Put yaw on Z assuming X/Y plane.
+            return new P3Float(0, 0, EulerToRadCardinals(yawSteps * 90));
+        }
+    }
+
+
     public struct RgConnectorInstance
     {
         public string EditorId;          // rg_conn_n_D1_station
@@ -170,7 +236,7 @@ namespace FrankyCLI
     {
         public RoomPrefab Prefab;
         public P3Float WorldPos;
-        public P3Float Rotation;
+        public int YawSteps; // 0..3
         public List<RgConnectorInstance> Connectors;
     }
 

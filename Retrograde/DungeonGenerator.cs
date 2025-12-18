@@ -91,16 +91,30 @@ namespace FrankyCLI
             };
         }
 
-        private List<RgConnectorInstance> GetConnectors(RoomPrefab prefab)
+        private static List<RgConnectorInstance> GetConnectors(RoomPrefab prefab, int yawSteps = 0)
         {
             return prefab.Markers
-                .Select(m => new RgConnectorInstance
+                .Select(m =>
                 {
-                    EditorId = m.MarkerEditorId,
-                    Parsed = RgConnectorParser.Parse(m.MarkerEditorId),
-                    LocalPos = m.Position
+                    var parsed = RgConnectorParser.Parse(m.MarkerEditorId);
+                    if (!parsed.IsValid) return (RgConnectorInstance?)null;
+
+                    return new RgConnectorInstance
+                    {
+                        EditorId = m.MarkerEditorId,
+                        Parsed = new RgConnector
+                        {
+                            RawEditorId = parsed.RawEditorId,
+                            Direction = RgRotation.RotateDir(parsed.Direction, yawSteps),
+                            DoorSize = parsed.DoorSize,
+                            Tileset = parsed.Tileset,
+                            IsValid = parsed.IsValid
+                        },
+                        LocalPos = RgRotation.RotateYaw90(m.Position, yawSteps)
+                    };
                 })
-                .Where(x => x.Parsed.IsValid)
+                .Where(x => x.HasValue)
+                .Select(x => x.Value)
                 .ToList();
         }
 
@@ -134,6 +148,46 @@ namespace FrankyCLI
             return false;
         }
 
+        private static RgAabb ToWorldAabbRotated(ObjectBounds boundsLocal, P3Float worldPos, int yawSteps)
+        {
+            // Rotate 8 corners of the local AABB; then take min/max in world space.
+            var min = boundsLocal.First;
+            var max = boundsLocal.Second;
+
+            P3Float[] corners =
+            {
+        new P3Float(min.X, min.Y, min.Z),
+        new P3Float(min.X, min.Y, max.Z),
+        new P3Float(min.X, max.Y, min.Z),
+        new P3Float(min.X, max.Y, max.Z),
+        new P3Float(max.X, min.Y, min.Z),
+        new P3Float(max.X, min.Y, max.Z),
+        new P3Float(max.X, max.Y, min.Z),
+        new P3Float(max.X, max.Y, max.Z),
+    };
+
+            var first = worldPos + RgRotation.RotateYaw90(corners[0], yawSteps);
+            float minX = first.X, minY = first.Y, minZ = first.Z;
+            float maxX = first.X, maxY = first.Y, maxZ = first.Z;
+
+            for (int i = 1; i < corners.Length; i++)
+            {
+                var w = worldPos + RgRotation.RotateYaw90(corners[i], yawSteps);
+                if (w.X < minX) minX = w.X;
+                if (w.Y < minY) minY = w.Y;
+                if (w.Z < minZ) minZ = w.Z;
+                if (w.X > maxX) maxX = w.X;
+                if (w.Y > maxY) maxY = w.Y;
+                if (w.Z > maxZ) maxZ = w.Z;
+            }
+
+            return new RgAabb
+            {
+                Min = new P3Float(minX, minY, minZ),
+                Max = new P3Float(maxX, maxY, maxZ),
+            };
+        }
+
 
         public void GenerateDungeon(Cell cell, string theme)
         {
@@ -141,10 +195,8 @@ namespace FrankyCLI
                 .OfType<PlacedObject>()
                 .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));
 
-            var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
-
             if (startingMarker == null) throw new Exception("rg_conn_n not found.");
-            
+            var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
 
             var roomPrefab = new RoomPrefab(GetRoom(startingConnector.Tileset));
 
@@ -178,7 +230,7 @@ namespace FrankyCLI
             });
 
             // Inputs / knobs
-            int maxRoomsToPlace = 10;          // hard limit (rooms)
+            int maxRoomsToPlace = 20;          // hard limit (rooms)
             int maxAttempts = 50;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
@@ -195,7 +247,7 @@ namespace FrankyCLI
             {
                 Prefab = roomPrefab,
                 WorldPos = prefabWorldPos,
-                Rotation = new P3Float(),
+                YawSteps = 0,
                 Connectors = startConnectors
             });
 
@@ -237,65 +289,70 @@ namespace FrankyCLI
                 bool placed = false;
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
-                {                    
+                {
                     var nextPrefab = new RoomPrefab(GetRoom(target.Parsed.Tileset));
-                    var nextConnectors = GetConnectors(nextPrefab);
 
-                    var compatible = nextConnectors
-                        .Where(c =>
-                            c.Parsed.Direction == requiredDir &&
-                            string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
-                            string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-
-                    if (compatible.Count == 0)
-                        continue;
-
-                    var chosen = compatible[rng.Next(compatible.Count)];
-
-                    // Align
-                    P3Float nextPos = target.WorldPos - chosen.LocalPos;
-
-                    // Collision test (AABB vs all placed rooms)
-                    var candidateAabb = ToWorldAabb(nextPrefab.packin_instance.ObjectBounds, nextPos);
-                    if (CollidesWithAny(candidateAabb, placedRooms, collisionPadding))
-                        continue;
-
-                    // Place it
-                    cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                    for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
-                        Count = 1,
-                        Rotation = new P3Float(),
-                        Position = nextPos,
-                        Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                    });
+                        var nextConnectors = GetConnectors(nextPrefab, yawSteps);
 
-                    // Record for second pass
-                    placedRooms.Add(new PlacedRoom
-                    {
-                        Prefab = nextPrefab,
-                        WorldPos = nextPos,
-                        Rotation = new P3Float(),
-                        Connectors = nextConnectors
-                    });
+                        var compatible = nextConnectors
+                            .Where(c =>
+                                c.Parsed.Direction == requiredDir &&
+                                string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
 
-                    roomsPlaced++;
-                    placed = true;
-
-                    // Add newly-open connectors except the consumed one
-                    foreach (var c in nextConnectors)
-                    {
-                        if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
+                        if (compatible.Count == 0)
                             continue;
 
-                        openConnectors.Add(new OpenConnector
+                        var chosen = compatible[rng.Next(compatible.Count)];
+
+                        // Align using ROTATED local connector
+                        P3Float nextPos = target.WorldPos - chosen.LocalPos;
+
+                        // Collision using ROTATED bounds
+                        var candidateAabb = ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                        if (CollidesWithAny(candidateAabb, placedRooms, collisionPadding))
+                            continue;
+
+                        // Place it with rotation
+                        cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
                         {
-                            Parsed = c.Parsed,
-                            WorldPos = nextPos + c.LocalPos
+                            Count = 1,
+                            Rotation = RgRotation.RotationToP3Float(yawSteps),
+                            Position = nextPos,
+                            Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
                         });
+
+                        placedRooms.Add(new PlacedRoom
+                        {
+                            Prefab = nextPrefab,
+                            WorldPos = nextPos,
+                            YawSteps = yawSteps,
+                            Connectors = nextConnectors
+                        });
+
+                        roomsPlaced++;
+                        placed = true;
+
+                        foreach (var c in nextConnectors)
+                        {
+                            if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
+                                continue;
+
+                            openConnectors.Add(new OpenConnector
+                            {
+                                Parsed = c.Parsed,
+                                WorldPos = nextPos + c.LocalPos
+                            });
+                        }
+
+                        break;
                     }
 
-                    break;
+                    if (placed)
+                        break;
                 }
 
                 // If we couldn't place anything for this connector, we just move on.
