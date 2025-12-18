@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FrankyCLI.questgen_tools
+namespace FrankyCLI
 {
     public class RoomPrefab
     {
@@ -84,15 +84,21 @@ namespace FrankyCLI.questgen_tools
                     }
                 }
             }
-
-            Console.WriteLine(PrefabCell.Temporary.Count);
-
         }
+
 
         public string PrefabEditorId;
         public PackIn packin_instance { get; set; }
 
         public List<PrefabMarker> Markers;
+
+        public P3Float StartingMarkerPosition;
+    }
+
+    public struct RgAabb
+    {
+        public P3Float Min;
+        public P3Float Max;
     }
 
     public class PrefabMarker
@@ -104,8 +110,90 @@ namespace FrankyCLI.questgen_tools
         public P3Float Rotation;
 
     }
+    public static class RgConnectorParser
+    {
+        public static RgConnector Parse(string editorId)
+        {
+            var result = new RgConnector
+            {
+                RawEditorId = editorId,
+                IsValid = false
+            };
 
-    public class StationUtils
+            if (string.IsNullOrWhiteSpace(editorId))
+                return result;
+
+            var parts = editorId.Split('_');
+
+            // Expected: rg conn n D1 station  => 5 parts
+            if (parts.Length < 5)
+                return result;
+
+            if (parts[0] != "rg" || parts[1] != "conn")
+                return result;
+
+            result.Direction = ParseDirection(parts[2]);
+            result.DoorSize = parts[3];
+            result.Tileset = parts[4];
+            result.IsValid = result.Direction != ConnectorDirection.Unknown;
+
+            return result;
+        }
+
+        private static ConnectorDirection ParseDirection(string dir)
+        {
+            switch (dir.ToLowerInvariant())
+            {
+                case "n": return ConnectorDirection.North;
+                case "s": return ConnectorDirection.South;
+                case "e": return ConnectorDirection.East;
+                case "w": return ConnectorDirection.West;
+                default: return ConnectorDirection.Unknown;
+            }
+        }
+    }
+
+    public struct RgConnectorInstance
+    {
+        public string EditorId;          // rg_conn_n_D1_station
+        public RgConnector Parsed;       // parsed metadata
+        public P3Float LocalPos;         // marker.Position (local space)
+    }
+
+    public struct OpenConnector
+    {
+        public RgConnector Parsed;       // direction/door/tileset
+        public P3Float WorldPos;         // world-space position of this connector
+    }
+
+    public struct PlacedRoom
+    {
+        public RoomPrefab Prefab;
+        public P3Float WorldPos;
+        public P3Float Rotation;
+        public List<RgConnectorInstance> Connectors;
+    }
+
+    public struct RgConnector
+    {
+        public string RawEditorId;
+
+        public ConnectorDirection Direction;
+        public string DoorSize;
+        public string Tileset;
+
+        public bool IsValid;
+    }
+    public enum ConnectorDirection
+    {
+        North,
+        South,
+        East,
+        West,
+        Unknown
+    }
+
+    public class RetrogradeUtils
     {
         public static Cell CloneCellById(string id)
         {

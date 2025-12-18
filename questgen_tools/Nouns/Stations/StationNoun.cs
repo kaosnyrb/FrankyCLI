@@ -19,7 +19,7 @@ namespace FrankyCLI.questgen_tools
             string StationID = Guid.NewGuid().ToString().Substring(0, 8);
             
             //Clone the Interior
-            var intcell = StationUtils.CloneCellById("duout02stationtestintcell");
+            var intcell = RetrogradeUtils.CloneCellById("duout02stationtestintcell");
             intcell.EditorID = "Station_int_" + StationID;
             //Set the Interior door to be linked
             PlacedObject doorreference = null;            
@@ -43,7 +43,7 @@ namespace FrankyCLI.questgen_tools
             gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(intcell);
 
             //Clone the Exterior
-            var extcell = StationUtils.CloneCellById("duout02stationtestextcell");
+            var extcell = RetrogradeUtils.CloneCellById("duout02stationtestextcell");
             extcell.EditorID = "Station_ext_" + StationID;
 
 
@@ -88,42 +88,9 @@ namespace FrankyCLI.questgen_tools
             gen_quest_main.myMod.GenericBaseForms.Add(instance);
 
             //Now generate the dungeon....
-            GenerateDungeon(intcell);
-        }
 
-        public void GenerateDungeon(Cell cell)
-        {
-            //Build the list of prefabs we can use.
-            RoomPrefab roomPrefab = new RoomPrefab("du_template_prefab_room_01");
-
-            //Find starting point
-            PlacedObject StartingMarker = null;
-            foreach(var marker in cell.Persistent)
-            {
-                if (marker.EditorID != null)
-                {
-                    if ( marker.EditorID == "dumarker_start")
-                    {
-                        StartingMarker = (PlacedObject)marker;
-                    }
-                }
-            }
-
-            //Place a prefab
-            var nextmarker = roomPrefab.Markers.Single(e => e.MarkerEditorId == "dumarker_south");            
-            P3Float pos = StartingMarker.Position + nextmarker.Position;
-            
-
-            cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-            {
-                Count = 1,
-                Rotation = new P3Float(),
-                Position = pos,
-                Base = roomPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-            });
-
-            //
-        }
-        
+            DungeonGenerator dungeonGenerator = new DungeonGenerator();
+            dungeonGenerator.GenerateDungeon(intcell, "rg_roomlist_station");
+        }        
     }
 }
