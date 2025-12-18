@@ -188,6 +188,20 @@ namespace FrankyCLI
             };
         }
 
+        private string GetDoorBlocker(string doorSize, string tileset)
+        {
+            // Prefer: tileset-specific blockers, fallback to generic
+            // e.g. rg_blocker_D1_station, rg_blocker_D1_generic
+            // Replace with your real IDs / lookup.
+            return doorSize switch
+            {
+                "D1" => $"rg_blocker_D1_{tileset}",
+                "D2" => $"rg_blocker_D2_{tileset}",
+                _ => $"rg_blocker_{tileset}"
+            };
+        }
+
+
 
         public void GenerateDungeon(Cell cell, string theme)
         {
@@ -260,6 +274,7 @@ namespace FrankyCLI
                     openConnectors.Add(new OpenConnector
                     {
                         Parsed = c.Parsed,
+                        YawSteps = 0,
                         WorldPos = prefabWorldPos + c.LocalPos
                     });
 
@@ -344,6 +359,7 @@ namespace FrankyCLI
                             openConnectors.Add(new OpenConnector
                             {
                                 Parsed = c.Parsed,
+                                YawSteps = yawSteps,
                                 WorldPos = nextPos + c.LocalPos
                             });
                         }
@@ -362,6 +378,59 @@ namespace FrankyCLI
                     continue;
                 }
             }
+
+            // ------------------------
+            // SECOND PASS: Door blockers
+            // ------------------------
+            foreach (var open in openConnectors)
+    {
+        // Pick blocker prefab based on door size / tileset
+        var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
+        var blockerPrefab = new RoomPrefab(blockerId);
+
+        // Blocker should have a connector that will attach to the OPEN connector.
+        // If the open connector faces North, the blocker needs a South-facing connector to mate.
+        var requiredDir = Opposite(open.Parsed.Direction);
+
+        // Try yaw steps 0..3 to orient blocker correctly (same approach as rooms)
+        bool placed = false;
+
+        for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+        {
+            var blockerConns = GetConnectors(blockerPrefab, yawSteps);
+
+            // Find a connector on the blocker that matches required direction and same door size/tileset.
+            // If your blocker is generic and doesn’t encode tileset, drop that constraint.
+            var attach = blockerConns.FirstOrDefault(c =>
+                c.Parsed.Direction == requiredDir &&
+                string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase));
+
+            if (!attach.Parsed.IsValid)
+                continue;
+
+            // Align blocker so its attach connector lands exactly at the open connector position
+            var blockerPos = open.WorldPos - attach.LocalPos;
+
+            cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+            {
+                Count = 1,
+                Rotation = RgRotation.RotationToP3Float(yawSteps),
+                Position = blockerPos,
+                Base = blockerPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+            });
+
+            placed = true;
+            break;
         }
+
+        // Optional: log missing blocker connector rather than hard fail
+        if (!placed)
+        {
+            // You may want to add logging here, e.g. Debug.WriteLine(...)
+        }
+    }
+        }
+
     }
 }

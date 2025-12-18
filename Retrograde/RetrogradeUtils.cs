@@ -229,6 +229,7 @@ namespace FrankyCLI
     public struct OpenConnector
     {
         public RgConnector Parsed;       // direction/door/tileset
+        public int YawSteps;         // 0..3
         public P3Float WorldPos;         // world-space position of this connector
     }
 
