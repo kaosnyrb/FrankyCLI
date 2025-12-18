@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.Retrograde;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -74,9 +75,36 @@ namespace FrankyCLI
 
         public string GetRoom(string theme)
         {
-            theme = "rg_roomlist_" + theme;
-            var key = roomTemplates[theme].Items[RandomUtils.random.Next(roomTemplates[theme].Items.Count)].FormKey;
-            return gen_quest_main.myMod.PackIns[key].EditorID;
+            var listKey = "rg_roomlist_" + theme;
+
+            if (!roomTemplates.TryGetValue(listKey, out var formList) || formList?.Items == null || formList.Items.Count == 0)
+                throw new Exception($"Room theme list not found or empty: {listKey}");
+
+            // Resolve all candidate EditorIDs once
+            var candidates = new List<string>(formList.Items.Count);
+
+            foreach (var item in formList.Items)
+            {
+                // Defensive: skip unresolved keys
+                if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
+                    continue;
+
+                candidates.Add(packIn.EditorID);
+            }
+
+            if (candidates.Count == 0)
+                throw new Exception($"No PackIns resolved for list: {listKey}");
+
+            // Prefer rooms over blockers (simple heuristic: exclude blocker IDs first)
+            var rooms = candidates
+                .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                .ToList();
+
+            if (rooms.Count > 0)
+                return rooms[RandomUtils.random.Next(rooms.Count)];
+
+            // Fallback: if the list only contains blockers, return one of them
+            return candidates[RandomUtils.random.Next(candidates.Count)];
         }
 
         private ConnectorDirection Opposite(ConnectorDirection d)
@@ -156,15 +184,15 @@ namespace FrankyCLI
 
             P3Float[] corners =
             {
-        new P3Float(min.X, min.Y, min.Z),
-        new P3Float(min.X, min.Y, max.Z),
-        new P3Float(min.X, max.Y, min.Z),
-        new P3Float(min.X, max.Y, max.Z),
-        new P3Float(max.X, min.Y, min.Z),
-        new P3Float(max.X, min.Y, max.Z),
-        new P3Float(max.X, max.Y, min.Z),
-        new P3Float(max.X, max.Y, max.Z),
-    };
+                new P3Float(min.X, min.Y, min.Z),
+                new P3Float(min.X, min.Y, max.Z),
+                new P3Float(min.X, max.Y, min.Z),
+                new P3Float(min.X, max.Y, max.Z),
+                new P3Float(max.X, min.Y, min.Z),
+                new P3Float(max.X, min.Y, max.Z),
+                new P3Float(max.X, max.Y, min.Z),
+                new P3Float(max.X, max.Y, max.Z),
+            };
 
             var first = worldPos + RgRotation.RotateYaw90(corners[0], yawSteps);
             float minX = first.X, minY = first.Y, minZ = first.Z;
@@ -212,24 +240,39 @@ namespace FrankyCLI
             if (startingMarker == null) throw new Exception("rg_conn_n not found.");
             var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
 
-            var roomPrefab = new RoomPrefab(GetRoom(startingConnector.Tileset));
+            RoomPrefab roomPrefab = null;
+            PrefabMarker south0 = new PrefabMarker();
+            PrefabMarker north0 = new PrefabMarker();
 
-            var connectors = roomPrefab.Markers
-                .Select(m => new
+            for (int i = 0; i < 20; i++)
+            {
+                var candidate = new RoomPrefab(GetRoom(startingConnector.Tileset));
+
+                var candConnectors = candidate.Markers
+                    .Select(m => new
+                    {
+                        Marker = m,
+                        Conn = RgConnectorParser.Parse(m.MarkerEditorId)
+                    })
+                    .Where(x => x.Conn.IsValid)
+                    .ToList();
+
+                var entry = candConnectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)?.Marker;
+
+                if (entry != null && candConnectors.Any(x => x.Conn.Direction != ConnectorDirection.South))
                 {
-                    Marker = m,
-                    Conn = RgConnectorParser.Parse(m.MarkerEditorId)
-                })
-                .Where(x => x.Conn.IsValid)
-                .ToList();
+                    roomPrefab = candidate;
+                    var connectors = candConnectors;
+                    south0 = connectors.First(x => x.Conn.Direction == ConnectorDirection.South).Marker;
+                    north0 = connectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.North)?.Marker;
+                    break;
+                }
+            }
 
-            var south0 = connectors
-                .FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)
-                ?.Marker;
+            if (roomPrefab == null)
+                throw new Exception("Failed to find a starting room with open connectors.");
 
-            var north0 = connectors
-                .FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.North)
-                ?.Marker;
+
 
             // Place first prefab so its SOUTH marker lands on the starting marker.
             // prefabWorldPos + southLocal = startWorld  =>  prefabWorldPos = startWorld - southLocal
@@ -244,9 +287,9 @@ namespace FrankyCLI
             });
 
             // Inputs / knobs
-            int maxRoomsToPlace = 20;          // hard limit (rooms)
-            int maxAttempts = 50;              // hard limit (failed tries) to avoid infinite loops
-            float collisionPadding = -1f; // tweak: world units clearance
+            int maxRoomsToPlace = 50;          // hard limit (rooms)
+            int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
+            float collisionPadding = -2f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
 
             var rng = new Random();
@@ -292,6 +335,12 @@ namespace FrankyCLI
                 // Choose a random open connector to fill
                 int openIndex = rng.Next(openConnectors.Count);
                 var target = openConnectors[openIndex];
+
+                if (target.WorldPos.Y < startingMarker.Position.Y)
+                {
+                    //MAKE SURE YOU DON'T GO -Y
+                    continue;
+                }
 
                 // Remove it now to ensure we "try to iterate through all open connectors"
                 // (if we fail to place, we can choose to discard or re-add; discarding avoids loops)
@@ -375,6 +424,7 @@ namespace FrankyCLI
                 // (We already removed it from openConnectors to ensure forward progress.)
                 if (!placed)
                 {
+                    openConnectors.Add(target);//Return it to the list so we close it later.
                     continue;
                 }
             }
@@ -383,54 +433,62 @@ namespace FrankyCLI
             // SECOND PASS: Door blockers
             // ------------------------
             foreach (var open in openConnectors)
-    {
-        // Pick blocker prefab based on door size / tileset
-        var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
-        var blockerPrefab = new RoomPrefab(blockerId);
-
-        // Blocker should have a connector that will attach to the OPEN connector.
-        // If the open connector faces North, the blocker needs a South-facing connector to mate.
-        var requiredDir = Opposite(open.Parsed.Direction);
-
-        // Try yaw steps 0..3 to orient blocker correctly (same approach as rooms)
-        bool placed = false;
-
-        for (int yawSteps = 0; yawSteps < 4; yawSteps++)
-        {
-            var blockerConns = GetConnectors(blockerPrefab, yawSteps);
-
-            // Find a connector on the blocker that matches required direction and same door size/tileset.
-            // If your blocker is generic and doesn’t encode tileset, drop that constraint.
-            var attach = blockerConns.FirstOrDefault(c =>
-                c.Parsed.Direction == requiredDir &&
-                string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(c.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase));
-
-            if (!attach.Parsed.IsValid)
-                continue;
-
-            // Align blocker so its attach connector lands exactly at the open connector position
-            var blockerPos = open.WorldPos - attach.LocalPos;
-
-            cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
             {
-                Count = 1,
-                Rotation = RgRotation.RotationToP3Float(yawSteps),
-                Position = blockerPos,
-                Base = blockerPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-            });
+                // Pick blocker prefab based on door size / tileset
+                var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
+                var blockerPrefab = new RoomPrefab(blockerId);
 
-            placed = true;
-            break;
-        }
+                // Blocker should have a connector that will attach to the OPEN connector.
+                // If the open connector faces North, the blocker needs a South-facing connector to mate.
+                var requiredDir = Opposite(open.Parsed.Direction);
 
-        // Optional: log missing blocker connector rather than hard fail
-        if (!placed)
-        {
-            // You may want to add logging here, e.g. Debug.WriteLine(...)
-        }
-    }
-        }
+                // Try yaw steps 0..3 to orient blocker correctly (same approach as rooms)
+                bool placed = false;
 
+                for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                {
+                    var blockerConns = GetConnectors(blockerPrefab, yawSteps);
+
+                    // Find a connector on the blocker that matches required direction and same door size/tileset.
+                    // If your blocker is generic and doesn’t encode tileset, drop that constraint.
+                    var attach = blockerConns.FirstOrDefault(c =>
+                        c.Parsed.Direction == requiredDir &&
+                        string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(c.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase));
+
+                    if (!attach.Parsed.IsValid)
+                        continue;
+
+                    // Align blocker so its attach connector lands exactly at the open connector position
+                    var blockerPos = open.WorldPos - attach.LocalPos;
+
+                    cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                    {
+                        Count = 1,
+                        Rotation = RgRotation.RotationToP3Float(yawSteps),
+                        Position = blockerPos,
+                        Base = blockerPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                    });
+
+                    placed = true;
+                    break;
+                }
+
+                // Optional: log missing blocker connector rather than hard fail
+                if (!placed)
+                {
+                    // You may want to add logging here, e.g. Debug.WriteLine(...)
+                }
+            }
+
+            //Final pass - Light occluder
+            lightoccluder lightoccluder = new lightoccluder();
+            lightoccluder.BuildHollowCubeAroundDungeon(
+                cell,
+                placedRooms,
+                panelPackInEditorId: "rg_panel_8x4_lightoccluder",
+                padding: 48f
+            );
+        }
     }
 }

@@ -62,6 +62,7 @@ namespace FrankyCLI
                 }
 
                 StationNoun stationNoun = new StationNoun();
+                
                 /*
                 //We have different styles of quest chains, so randomly choose one.
                 List<IQuestchain> questchains = new List<IQuestchain>
