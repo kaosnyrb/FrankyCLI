@@ -27,7 +27,9 @@ namespace FrankyCLI.questgen_quests
                 {
                     "destroy_clue",
                     "space",
-                }
+                },
+                Addons = new List<string>(),
+
             });
             //Crimson ------------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
@@ -45,7 +47,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "crimson_fleet"
-                }
+                },
+                Addons = new List<string>(),
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -62,7 +65,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "crimson_fleet"
-                }
+                },
+                Addons = new List<string>(),
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -79,7 +83,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "crimson_fleet"
-                }
+                },
+                Addons = new List<string>(),
             });
             //Spacer ------------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
@@ -97,7 +102,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "spacer"
-                }
+                },
+                Addons = new List<string>(),
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -114,7 +120,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "spacer"
-                }
+                },
+                Addons = new List<string>(),
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -131,7 +138,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "spacer"
-                }
+                },
+                Addons = new List<string>(),
             });
             //Ecliptic
             InvestigationTemplates.Add(new MissionTemplate()
@@ -166,7 +174,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "ecliptic"
-                }
+                },
+                Addons = new List<string>(),
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -183,7 +192,8 @@ namespace FrankyCLI.questgen_quests
                     "destroy_clue",
                     "space",
                     "ecliptic"
-                }
+                },
+                Addons = new List<string>(),               
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
 

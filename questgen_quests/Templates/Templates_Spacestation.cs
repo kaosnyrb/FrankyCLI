@@ -27,7 +27,9 @@ namespace FrankyCLI.questgen_quests
                 {
                     "follow_clue",
                     "space",
-                }
+                },
+                Addons = new List<string>(),
+
             });
             
             //-------------------------------  SHOWDOWN ------------------------------------------

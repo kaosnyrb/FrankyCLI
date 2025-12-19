@@ -53,6 +53,7 @@ namespace FrankyCLI
                 {
                     for (int i = 0; i < env.LoadOrder.Count; i++)
                     {
+
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
@@ -66,7 +67,7 @@ namespace FrankyCLI
                 AITools.AIMODE = false;
                 var outlawQuest = new StaticLayoutQuestChain(myMod);
                 outlawQuest.InvestigationTemplate = "Space Station Activator - unguarded";
-                outlawQuest.DeepTempalte = "Space Station Activator - unguarded";
+                outlawQuest.DeepTempalte = "Space Destroy - unguarded";
                 outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
                 /*
                 List<IQuestchain> questchains = new List<IQuestchain>

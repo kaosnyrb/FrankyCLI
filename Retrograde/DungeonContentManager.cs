@@ -66,10 +66,13 @@ namespace FrankyCLI.Retrograde
                 return null;
 
             var item = list.Items[RandomUtils.random.Next(list.Items.Count)];
+
+
             if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
                 return null;
 
             return packIn.EditorID;
+            
         }
 
         public void PopulateRoomMarkersPass(Cell cell, List<PlacedRoom> placedRooms)

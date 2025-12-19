@@ -93,7 +93,7 @@ namespace FrankyCLI.questgen_tools
             AITools.RunPrompt(MissionSetupPrompt);
 
             bool fork = false;            
-            if (random.Next(100) > 75)
+            if (random.Next(100) > 175)
             {
                 fork = true;
             }
