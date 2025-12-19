@@ -50,21 +50,21 @@ namespace FrankyCLI
             for (int i = 0; i < PrefabCell.Temporary.Count; i++) {
                 if (PrefabCell.Temporary[i] != null)
                 {
-                    var placed = (PlacedObject)PrefabCell.Temporary[i];
-                    if ( placed.EditorID != null)
+                    var entry = PrefabCell.Temporary[i];
+
+                    switch (entry)
                     {
-                        if (placed.EditorID.Contains(""))
-                        {
-                            Markers.Add(new PrefabMarker()
-                            {
-                                MarkerEditorId = placed.EditorID,
-                                Position = placed.Position,
-                                Rotation = placed.Rotation
-                            });
-                        }
+                        case PlacedObject po:
+                            TryAddMarker(po.EditorID, po.Position, po.Rotation, Markers);
+                            break;
+
+                        case PlacedNpc pn:
+                            TryAddMarker(pn.EditorID, pn.Position, pn.Rotation, Markers);
+                            break;
                     }
                 }
             }
+
             for (int i = 0; i < PrefabCell.Persistent.Count; i++)
             {
                 if (PrefabCell.Persistent[i] != null)
@@ -93,7 +93,29 @@ namespace FrankyCLI
         public List<PrefabMarker> Markers;
 
         public P3Float StartingMarkerPosition;
+
+        private void TryAddMarker(
+            string editorId,
+            P3Float position,
+            P3Float rotation,
+            List<PrefabMarker> markers)
+        {
+            if (string.IsNullOrEmpty(editorId))
+                return;
+
+            if (!editorId.Contains("")) // your filter
+                return;
+
+            markers.Add(new PrefabMarker
+            {
+                MarkerEditorId = editorId,
+                Position = position,
+                Rotation = rotation
+            });
+        }
+
     }
+
 
     public struct RgAabb
     {

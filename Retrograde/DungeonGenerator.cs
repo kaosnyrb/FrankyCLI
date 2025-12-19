@@ -163,7 +163,7 @@ namespace FrankyCLI
             });
 
             // Inputs / knobs
-            int maxRoomsToPlace = 50;          // hard limit (rooms)
+            int maxRoomsToPlace = 10;          // hard limit (rooms)
             int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -2f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
@@ -359,7 +359,7 @@ namespace FrankyCLI
 
 
             //Fill the markers with there prefabs
-            DecoratorPass decoratorPass = new DecoratorPass();
+            DungeonContentManager decoratorPass = new DungeonContentManager();
             decoratorPass.PopulateRoomMarkersPass(cell, placedRooms);
 
             //Final pass - Light occluder

@@ -17,10 +17,12 @@ namespace FrankyCLI.Retrograde
         public P3Float LocalRot;  // marker.Rotation (local) - optional if available
     }
 
-    public class DecoratorPass
+    public class DungeonContentManager
     {
         private readonly Dictionary<string, Mutagen.Bethesda.Starfield.FormList> _slotListsCache
     = new(StringComparer.OrdinalIgnoreCase);
+
+        public string enemyType = "";
 
         private static string StripNumericSuffix(string id)
         {
@@ -89,6 +91,16 @@ namespace FrankyCLI.Retrograde
                     // Optional: only consider rg_ markers
                     if (!id.StartsWith("rg_", StringComparison.OrdinalIgnoreCase))
                         continue;
+
+                    if (id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
+                    {
+                        //If it's an enemy then we need to choose a faction.
+                        if (enemyType == "")
+                        {
+                            enemyType = "spacer";
+                        }
+                        id = "rg_enemy_spawn_" + enemyType + "_001";
+                    }
 
                     // Look up slot list (FormList EditorID == marker EditorID)
                     var list = FindSlotList(id);
