@@ -61,10 +61,14 @@ namespace FrankyCLI
                     }
                 }
 
-                StationNoun stationNoun = new StationNoun();
-                
-                /*
                 //We have different styles of quest chains, so randomly choose one.
+
+                AITools.AIMODE = false;
+                var outlawQuest = new StaticLayoutQuestChain(myMod);
+                outlawQuest.InvestigationTemplate = "Space Station Activator - unguarded";
+                outlawQuest.DeepTempalte = "Space Station Activator - unguarded";
+                outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
+                /*
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {
                    new LoopingLayoutQuestChain(myMod),
@@ -72,8 +76,8 @@ namespace FrankyCLI
                 };
 
                 var outlawQuest = questchains[random.Next(questchains.Count)];
-
-                outlawQuest.GenerateQuest();*/
+                */
+                outlawQuest.GenerateQuest();
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

@@ -26,6 +26,7 @@ namespace FrankyCLI.questgen_tools
             TemplateLibs.Add(planetlib);
 
             spacelib.ImportTemplates(new Templates_SpaceInformant());
+            spacelib.ImportTemplates(new Templates_Spacestation());
             spacelib.ImportTemplates(new Templates_SpaceDestroy());
 
             TemplateLibs.Add(spacelib);

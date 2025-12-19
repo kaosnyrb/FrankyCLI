@@ -20,9 +20,9 @@ namespace FrankyCLI.questgen_tools
 
         public TemplateLib MergedLib = new TemplateLib();
 
-        public static TemplateLib planetlib = new TemplateLib();
-        public static TemplateLib spacelib = new TemplateLib();
-        public static TemplateLib citieslib = new TemplateLib();
+        public TemplateLib planetlib = new TemplateLib();
+        public TemplateLib spacelib = new TemplateLib();
+        public TemplateLib citieslib = new TemplateLib();
 
         public RandomTemplateManager()
         {
@@ -42,6 +42,7 @@ namespace FrankyCLI.questgen_tools
             spacelib.ImportTemplates(new Templates_SpaceActivator());
             spacelib.ImportTemplates(new Templates_SpaceInformant());
             spacelib.ImportTemplates(new Templates_SpaceDestroy());
+            spacelib.ImportTemplates(new Templates_Spacestation());
 
             spacelib.ImportTemplates(new Templates_Derelicts());
             TemplateLibs.Add(spacelib);

@@ -24,12 +24,22 @@ namespace FrankyCLI.questgen_tools
     {
         public StarfieldMod myMod;
 
+        //Debugging Tools
+        public string ShowdownTemplate = "";
+        public string DeepTempalte = "";
+        public string InvestigationTemplate = "";
+        public string DiscoveryTemplate = "";
+
         public StaticLayoutQuestChain(StarfieldMod myModparam) {
             myMod = myModparam;
         }
 
         private void AddStageLocation(MissionTemplate template, string stage, string location)
         {
+            if (template.Addons == null)
+            {
+                template.Addons = new List<string>();
+            }
             template.Addons.Add(
                 $"<QuestStageLocation stage=\"{stage}\">{location}</QuestStageLocation>"
             );
@@ -39,11 +49,7 @@ namespace FrankyCLI.questgen_tools
 
         public bool GenerateQuest()
         {
-            //Debugging Tools
-            string ShowdownTemplate = "";
-            string DeepTempalte = "";
-            string InvestigationTemplate = "";
-            string DiscoveryTemplate = "";
+
 
             // Story Setup --------------------------------
             Random random = RandomUtils.random;
@@ -56,7 +62,14 @@ namespace FrankyCLI.questgen_tools
                     new CombatTemplateManager(new AI_TemplateEngine()),
                     new RandomTemplateManager()
                 };
+
+
             var templateManager = templates[random.Next(templates.Count)];
+            if (AITools.AIMODE == false)
+            {
+                templateManager = new RandomTemplateManager();
+            }
+
             Console.WriteLine(templateManager.GetType());
 
             var Lorefile = PromptManager.GenerateLoreFile();

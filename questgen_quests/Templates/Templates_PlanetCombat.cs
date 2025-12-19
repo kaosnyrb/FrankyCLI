@@ -22,7 +22,7 @@ namespace FrankyCLI.questgen_quests
             //-------------------------------  SHOWDOWN ------------------------------------------
             ShowdownTemplates.Add(new MissionTemplate()
             {
-                Name = "Planet side Bounty",
+                Name = "Planet side Bounty - breathable atmosphere",
                 Description = "Kill the target on a planet with a breathable atmosphere",
                 Location = "A small remote civilan installation",
                 formid = 0x000803,
@@ -36,7 +36,7 @@ namespace FrankyCLI.questgen_quests
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
-                Name = "Planet side Bounty",
+                Name = "Planet side Bounty - poor atmosphere",
                 Description = "Kill the target on a planet with a poor atmosphere",
                 Location = "A small remote civilan installation on a planet with a poor atmosphere",
                 formid = 0x000830,

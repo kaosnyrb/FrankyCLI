@@ -36,6 +36,7 @@ namespace FrankyCLI.questgen_tools
             planetlib.ImportTemplates(new Templates_PlanetCombat());
             planetlib.ImportTemplates(new Templates_PlanetSmallBaseDestroy());
             planetlib.ImportTemplates(new Templates_PlanetSmallBaseInformant());
+            spacelib.ImportTemplates(new Templates_Spacestation());
 
             planetlib.ImportTemplates(new Templates_SpecificDungeons());
             TemplateLibs.Add(planetlib);
