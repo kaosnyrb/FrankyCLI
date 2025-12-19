@@ -107,130 +107,6 @@ namespace FrankyCLI
             return candidates[RandomUtils.random.Next(candidates.Count)];
         }
 
-        private ConnectorDirection Opposite(ConnectorDirection d)
-        {
-            return d switch
-            {
-                ConnectorDirection.North => ConnectorDirection.South,
-                ConnectorDirection.South => ConnectorDirection.North,
-                ConnectorDirection.East => ConnectorDirection.West,
-                ConnectorDirection.West => ConnectorDirection.East,
-                _ => ConnectorDirection.Unknown
-            };
-        }
-
-        private static List<RgConnectorInstance> GetConnectors(RoomPrefab prefab, int yawSteps = 0)
-        {
-            return prefab.Markers
-                .Select(m =>
-                {
-                    var parsed = RgConnectorParser.Parse(m.MarkerEditorId);
-                    if (!parsed.IsValid) return (RgConnectorInstance?)null;
-
-                    return new RgConnectorInstance
-                    {
-                        EditorId = m.MarkerEditorId,
-                        Parsed = new RgConnector
-                        {
-                            RawEditorId = parsed.RawEditorId,
-                            Direction = RgRotation.RotateDir(parsed.Direction, yawSteps),
-                            DoorSize = parsed.DoorSize,
-                            Tileset = parsed.Tileset,
-                            IsValid = parsed.IsValid
-                        },
-                        LocalPos = RgRotation.RotateYaw90(m.Position, yawSteps)
-                    };
-                })
-                .Where(x => x.HasValue)
-                .Select(x => x.Value)
-                .ToList();
-        }
-
-        private static RgAabb ToWorldAabb(ObjectBounds boundsLocal, P3Float worldPos)
-        {
-            // Local AABB translated into world space (no rotation assumed)
-            return new RgAabb
-            {
-                Min = worldPos + boundsLocal.First,
-                Max = worldPos + boundsLocal.Second
-            };
-        }
-
-        private static bool Intersects(RgAabb a, RgAabb b, float padding = 0f)
-        {
-            // Optional padding expands A slightly to keep a clearance gap.
-            return
-                a.Min.X - padding <= b.Max.X && a.Max.X + padding >= b.Min.X &&
-                a.Min.Y - padding <= b.Max.Y && a.Max.Y + padding >= b.Min.Y &&
-                a.Min.Z - padding <= b.Max.Z && a.Max.Z + padding >= b.Min.Z;
-        }
-
-        private static bool CollidesWithAny(RgAabb candidate, List<PlacedRoom> placedRooms, float padding = 0f)
-        {
-            foreach (var r in placedRooms)
-            {
-                var placedAabb = ToWorldAabb(r.Prefab.packin_instance.ObjectBounds, r.WorldPos);
-                if (Intersects(candidate, placedAabb, padding))
-                    return true;
-            }
-            return false;
-        }
-
-        private static RgAabb ToWorldAabbRotated(ObjectBounds boundsLocal, P3Float worldPos, int yawSteps)
-        {
-            // Rotate 8 corners of the local AABB; then take min/max in world space.
-            var min = boundsLocal.First;
-            var max = boundsLocal.Second;
-
-            P3Float[] corners =
-            {
-                new P3Float(min.X, min.Y, min.Z),
-                new P3Float(min.X, min.Y, max.Z),
-                new P3Float(min.X, max.Y, min.Z),
-                new P3Float(min.X, max.Y, max.Z),
-                new P3Float(max.X, min.Y, min.Z),
-                new P3Float(max.X, min.Y, max.Z),
-                new P3Float(max.X, max.Y, min.Z),
-                new P3Float(max.X, max.Y, max.Z),
-            };
-
-            var first = worldPos + RgRotation.RotateYaw90(corners[0], yawSteps);
-            float minX = first.X, minY = first.Y, minZ = first.Z;
-            float maxX = first.X, maxY = first.Y, maxZ = first.Z;
-
-            for (int i = 1; i < corners.Length; i++)
-            {
-                var w = worldPos + RgRotation.RotateYaw90(corners[i], yawSteps);
-                if (w.X < minX) minX = w.X;
-                if (w.Y < minY) minY = w.Y;
-                if (w.Z < minZ) minZ = w.Z;
-                if (w.X > maxX) maxX = w.X;
-                if (w.Y > maxY) maxY = w.Y;
-                if (w.Z > maxZ) maxZ = w.Z;
-            }
-
-            return new RgAabb
-            {
-                Min = new P3Float(minX, minY, minZ),
-                Max = new P3Float(maxX, maxY, maxZ),
-            };
-        }
-
-        private string GetDoorBlocker(string doorSize, string tileset)
-        {
-            // Prefer: tileset-specific blockers, fallback to generic
-            // e.g. rg_blocker_D1_station, rg_blocker_D1_generic
-            // Replace with your real IDs / lookup.
-            return doorSize switch
-            {
-                "D1" => $"rg_blocker_D1_{tileset}",
-                "D2" => $"rg_blocker_D2_{tileset}",
-                _ => $"rg_blocker_{tileset}"
-            };
-        }
-
-
-
         public void GenerateDungeon(Cell cell, string theme)
         {
             var startingMarker = cell.Persistent
@@ -298,7 +174,7 @@ namespace FrankyCLI
             var placedRooms = new List<PlacedRoom>();
 
             // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
-            var startConnectors = GetConnectors(roomPrefab);
+            var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
 
             placedRooms.Add(new PlacedRoom
             {
@@ -348,7 +224,7 @@ namespace FrankyCLI
 
                 // We need a connector on nextPrefab that is OPPOSITE direction to target,
                 // and compatible on door/tileset (simple equality checks here).
-                var requiredDir = Opposite(target.Parsed.Direction);
+                var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
 
                 bool placed = false;
 
@@ -358,7 +234,7 @@ namespace FrankyCLI
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
-                        var nextConnectors = GetConnectors(nextPrefab, yawSteps);
+                        var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
 
                         var compatible = nextConnectors
                             .Where(c =>
@@ -376,8 +252,8 @@ namespace FrankyCLI
                         P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                         // Collision using ROTATED bounds
-                        var candidateAabb = ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                        if (CollidesWithAny(candidateAabb, placedRooms, collisionPadding))
+                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                        if (ConnectorUtils.CollidesWithAny(candidateAabb, placedRooms, collisionPadding))
                             continue;
 
                         // Place it with rotation
@@ -435,19 +311,19 @@ namespace FrankyCLI
             foreach (var open in openConnectors)
             {
                 // Pick blocker prefab based on door size / tileset
-                var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
+                var blockerId = ConnectorUtils.GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
                 var blockerPrefab = new RoomPrefab(blockerId);
 
                 // Blocker should have a connector that will attach to the OPEN connector.
                 // If the open connector faces North, the blocker needs a South-facing connector to mate.
-                var requiredDir = Opposite(open.Parsed.Direction);
+                var requiredDir = ConnectorUtils.Opposite(open.Parsed.Direction);
 
                 // Try yaw steps 0..3 to orient blocker correctly (same approach as rooms)
                 bool placed = false;
 
                 for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                 {
-                    var blockerConns = GetConnectors(blockerPrefab, yawSteps);
+                    var blockerConns = ConnectorUtils.GetConnectors(blockerPrefab, yawSteps);
 
                     // Find a connector on the blocker that matches required direction and same door size/tileset.
                     // If your blocker is generic and doesn’t encode tileset, drop that constraint.
@@ -480,6 +356,11 @@ namespace FrankyCLI
                     // You may want to add logging here, e.g. Debug.WriteLine(...)
                 }
             }
+
+
+            //Fill the markers with there prefabs
+            DecoratorPass decoratorPass = new DecoratorPass();
+            decoratorPass.PopulateRoomMarkersPass(cell, placedRooms);
 
             //Final pass - Light occluder
             lightoccluder lightoccluder = new lightoccluder();
