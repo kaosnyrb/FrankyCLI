@@ -1,4 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -17,10 +18,9 @@ namespace FrankyCLI.Retrograde
         public P3Float LocalRot;  // marker.Rotation (local) - optional if available
     }
 
-    public class DungeonContentManager
+    public class ContentPass : IGenPass
     {
-        private readonly Dictionary<string, Mutagen.Bethesda.Starfield.FormList> _slotListsCache
-    = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, FormList> _slotListsCache = new(StringComparer.OrdinalIgnoreCase);
 
         public string enemyType = "";
 
@@ -33,7 +33,7 @@ namespace FrankyCLI.Retrograde
             return id.Substring(0, lastUnderscore);
         }
 
-        private Mutagen.Bethesda.Starfield.FormList FindSlotList(string slotId)
+        private FormList FindSlotList(string slotId)
         {
             if (string.IsNullOrWhiteSpace(slotId))
                 return null;
@@ -60,7 +60,7 @@ namespace FrankyCLI.Retrograde
             return found;
         }
 
-        private string PickRandomPackInEditorIdFromFormList(Mutagen.Bethesda.Starfield.FormList list)
+        private string PickRandomPackInEditorIdFromFormList(FormList list)
         {
             if (list?.Items == null || list.Items.Count == 0)
                 return null;
@@ -75,9 +75,9 @@ namespace FrankyCLI.Retrograde
             
         }
 
-        public void PopulateRoomMarkersPass(Cell cell, List<PlacedRoom> placedRooms)
+        public void RunPass(DungeonState state)
         {
-            foreach (var placed in placedRooms)
+            foreach (var placed in state.placedRooms)
             {
                 // Iterate all markers that are NOT connectors
                 foreach (var marker in placed.Prefab.Markers)
@@ -126,7 +126,7 @@ namespace FrankyCLI.Retrograde
                     // If marker has a rotation field and you want to add it, see note below.
                     var worldRot = RgRotation.RotationToP3Float(placed.YawSteps);
 
-                    cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                    state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
                     {
                         Count = 1,
                         Rotation = worldRot,

@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda;
+﻿using FrankyCLI.Retrograde.Passes;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
@@ -9,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.Retrograde
 {
-    internal class lightoccluder
+    //This is an pass only needed for ships/stations, it blocks space lights
+    public class LightOccluderPass : IGenPass
     {
         private static RgAabb ComputeDungeonBounds(List<PlacedRoom> placedRooms)
         {
@@ -87,18 +89,16 @@ namespace FrankyCLI.Retrograde
             };
         }
 
-        public void BuildHollowCubeAroundDungeon(
-            Cell cell,
-            List<PlacedRoom> placedRooms,
-            string panelPackInEditorId,
-            float padding = 32f,     // “space around all the rooms”
-            float panelW = 8f,
-            float panelH = 4f,
-            float surfaceOffset = 0.5f // small push outward to avoid z-fighting
-        )
+        public void RunPass(DungeonState state)
         {
+            string panelPackInEditorId = "rg_panel_8x4_lightoccluder";
+            float padding = 48f;     // “space around all the rooms”
+            float panelW = 8f;
+            float panelH = 4f;
+            float surfaceOffset = 0.5f; // small push outward to avoid z-fighting
+
             // 1) Compute and expand bounds
-            var bounds = ComputeDungeonBounds(placedRooms);
+            var bounds = ComputeDungeonBounds(state.placedRooms);
 
             float roofsquish = 6;
 
@@ -114,16 +114,16 @@ namespace FrankyCLI.Retrograde
             var panelPrefab = new RoomPrefab(panelPackInEditorId);
 
             // Walls at X = min.X and max.X (grid in Y/Z)
-            PlaceWall_X(cell, panelPrefab, min.X - surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 1); // facing +X
-            PlaceWall_X(cell, panelPrefab, max.X + surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 3); // facing -X
+            PlaceWall_X(state.instance, panelPrefab, min.X - surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 1); // facing +X
+            PlaceWall_X(state.instance, panelPrefab, max.X + surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 3); // facing -X
 
             // Walls at Y = min.Y and max.Y (grid in X/Z)
-            PlaceWall_Y(cell, panelPrefab, min.Y - surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 0); // facing +Y (adjust if needed)
-            PlaceWall_Y(cell, panelPrefab, max.Y + surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 2); // facing -Y
+            PlaceWall_Y(state.instance, panelPrefab, min.Y - surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 0); // facing +Y (adjust if needed)
+            PlaceWall_Y(state.instance, panelPrefab, max.Y + surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 2); // facing -Y
 
             // Floor/Ceiling at Z = min.Z and max.Z (grid in X/Y)
-            PlaceCap_Z(cell, panelPrefab, min.Z - surfaceOffset + roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 90f);  // floor (panel facing up)
-            PlaceCap_Z(cell, panelPrefab, max.Z + surfaceOffset - roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 270f); // ceiling (panel facing down)
+            PlaceCap_Z(state.instance, panelPrefab, min.Z - surfaceOffset + roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 90f);  // floor (panel facing up)
+            PlaceCap_Z(state.instance, panelPrefab, max.Z + surfaceOffset - roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 270f); // ceiling (panel facing down)
         }
 
         private void PlaceWall_X(

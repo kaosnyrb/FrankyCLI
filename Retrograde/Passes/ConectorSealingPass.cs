@@ -1,0 +1,65 @@
+﻿using Mutagen.Bethesda;
+using Mutagen.Bethesda.Starfield;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FrankyCLI.Retrograde.Passes
+{
+    public class ConectorSealingPass : IGenPass
+    {
+        public void RunPass(DungeonState state)
+        {
+            foreach (var open in state.openConnectors)
+            {
+                // Pick blocker prefab based on door size / tileset
+                var blockerId = ConnectorUtils.GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
+                var blockerPrefab = new RoomPrefab(blockerId);
+
+                // Blocker should have a connector that will attach to the OPEN connector.
+                // If the open connector faces North, the blocker needs a South-facing connector to mate.
+                var requiredDir = ConnectorUtils.Opposite(open.Parsed.Direction);
+
+                // Try yaw steps 0..3 to orient blocker correctly (same approach as rooms)
+                bool placed = false;
+
+                for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                {
+                    var blockerConns = ConnectorUtils.GetConnectors(blockerPrefab, yawSteps);
+
+                    // Find a connector on the blocker that matches required direction and same door size/tileset.
+                    // If your blocker is generic and doesn’t encode tileset, drop that constraint.
+                    var attach = blockerConns.FirstOrDefault(c =>
+                        c.Parsed.Direction == requiredDir &&
+                        string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(c.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase));
+
+                    if (!attach.Parsed.IsValid)
+                        continue;
+
+                    // Align blocker so its attach connector lands exactly at the open connector position
+                    var blockerPos = open.WorldPos - attach.LocalPos;
+
+                    state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                    {
+                        Count = 1,
+                        Rotation = RgRotation.RotationToP3Float(yawSteps),
+                        Position = blockerPos,
+                        Base = blockerPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                    });
+
+                    placed = true;
+                    break;
+                }
+
+                // Optional: log missing blocker connector rather than hard fail
+                if (!placed)
+                {
+                    // You may want to add logging here, e.g. Debug.WriteLine(...)
+                }
+            }
+        }
+    }
+}
