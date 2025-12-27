@@ -106,12 +106,15 @@ namespace FrankyCLI
             int roomsPlaced = 0;
             int attempts = 0;
 
+            state.YMin = startingMarker.Position.Y;
+
             while (roomsPlaced < maxRoomsToPlace && state.openConnectors.Count > 0 && attempts < maxAttempts)
             {
                 attempts++;
-                
-                // Choose a random open connector to fill
-                int openIndex = RandomUtils.random.Next(state.openConnectors.Count);
+
+                // Choose the open connector farthest from the current cluster center to push outward
+                var clusterCenter = CalculateClusterCenter(state);
+                int openIndex = ChooseFarthestOpenConnectorIndex(state.openConnectors, clusterCenter);
                 var target = state.openConnectors[openIndex];
 
                 if (target.WorldPos.Y < startingMarker.Position.Y)
@@ -148,7 +151,7 @@ namespace FrankyCLI
                         if (compatible.Count == 0)
                             continue;
 
-                        var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
+                        var chosen = ChooseMostOutwardConnector(compatible, target.WorldPos, clusterCenter);
 
                         // Align using ROTATED local connector
                         P3Float nextPos = target.WorldPos - chosen.LocalPos;
@@ -206,6 +209,85 @@ namespace FrankyCLI
                     continue;
                 }
             }
+        }
+
+        private static int ChooseFarthestOpenConnectorIndex(List<OpenConnector> openConnectors, P3Float clusterCenter)
+        {
+            float maxDist = float.MinValue;
+            int bestIndex = 0;
+            for (int i = 0; i < openConnectors.Count; i++)
+            {
+                var dist = DistanceSquared(openConnectors[i].WorldPos, clusterCenter);
+                if (dist > maxDist)
+                {
+                    maxDist = dist;
+                    bestIndex = i;
+                }
+            }
+            return bestIndex;
+        }
+
+        private static RgConnectorInstance ChooseMostOutwardConnector(List<RgConnectorInstance> compatibles, P3Float targetWorldPos, P3Float clusterCenter)
+        {
+            RgConnectorInstance best = compatibles[0];
+            float bestDist = DistanceSquared(targetWorldPos - best.LocalPos, clusterCenter);
+
+            foreach (var c in compatibles)
+            {
+                float dist = DistanceSquared(targetWorldPos - c.LocalPos, clusterCenter);
+                if (dist > bestDist)
+                {
+                    bestDist = dist;
+                    best = c;
+                }
+            }
+
+            return best;
+        }
+
+        private static P3Float CalculateClusterCenter(DungeonState state)
+        {
+            if (state.placedRooms.Count > 0)
+            {
+                float sumX = 0;
+                float sumY = 0;
+                float sumZ = 0;
+                foreach (var room in state.placedRooms)
+                {
+                    sumX += room.WorldPos.X;
+                    sumY += room.WorldPos.Y;
+                    sumZ += room.WorldPos.Z;
+                }
+
+                float count = state.placedRooms.Count;
+                return new P3Float(sumX / count, sumY / count, sumZ / count);
+            }
+
+            if (state.openConnectors.Count > 0)
+            {
+                float sumX = 0;
+                float sumY = 0;
+                float sumZ = 0;
+                foreach (var connector in state.openConnectors)
+                {
+                    sumX += connector.WorldPos.X;
+                    sumY += connector.WorldPos.Y;
+                    sumZ += connector.WorldPos.Z;
+                }
+
+                float count = state.openConnectors.Count;
+                return new P3Float(sumX / count, sumY / count, sumZ / count);
+            }
+
+            return new P3Float(0, 0, 0);
+        }
+
+        private static float DistanceSquared(P3Float a, P3Float b)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+            float dz = a.Z - b.Z;
+            return dx * dx + dy * dy + dz * dz;
         }
 
     }

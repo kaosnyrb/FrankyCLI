@@ -14,6 +14,10 @@ namespace FrankyCLI
 {
     public class DistrictTopologyPass : IGenPass
     {
+        string district = null;
+        public DistrictTopologyPass(string districtType = null) {         
+            district = districtType;
+        }
         public void RunPass(DungeonState state)
         {
             // Inputs / knobs
@@ -21,6 +25,7 @@ namespace FrankyCLI
             int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
+            int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
 
             RoomUtils roomUtils = new RoomUtils();
 
@@ -31,12 +36,13 @@ namespace FrankyCLI
             while (roomsPlaced < maxRoomsToPlace && state.openConnectors.Count > 0 && attempts < maxAttempts)
             {
                 attempts++;
-                
-                // Choose a random open connector to fill
-                int openIndex = RandomUtils.random.Next(state.openConnectors.Count);
+
+                // Choose an open connector near the current cluster center to keep rooms close together
+                var clusterCenter = CalculateClusterCenter(state);
+                int openIndex = ChooseConnectorIndexNearCenter(state.openConnectors, clusterCenter, proximitySample);
                 var target = state.openConnectors[openIndex];
 
-                if (target.WorldPos.Y < StationDungeonGenerator.YBound)
+                if (target.WorldPos.Y < state.YMin)
                 {
                     //MAKE SURE YOU DON'T GO -Y
                     continue;
@@ -54,7 +60,7 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset));
+                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -128,6 +134,66 @@ namespace FrankyCLI
                     continue;
                 }
             }
+        }
+
+        private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
+        {
+            var prioritized = openConnectors
+                .Select((c, idx) => new
+                {
+                    Index = idx,
+                    DistSq = DistanceSquared(c.WorldPos, clusterCenter)
+                })
+                .OrderBy(p => p.DistSq)
+                .ToList();
+
+            int takeCount = Math.Min(sampleSize, prioritized.Count);
+            return prioritized[RandomUtils.random.Next(takeCount)].Index;
+        }
+
+        private static P3Float CalculateClusterCenter(DungeonState state)
+        {
+            if (state.placedRooms.Count > 0)
+            {
+                float sumX = 0;
+                float sumY = 0;
+                float sumZ = 0;
+                foreach (var room in state.placedRooms)
+                {
+                    sumX += room.WorldPos.X;
+                    sumY += room.WorldPos.Y;
+                    sumZ += room.WorldPos.Z;
+                }
+
+                float count = state.placedRooms.Count;
+                return new P3Float(sumX / count, sumY / count, sumZ / count);
+            }
+
+            if (state.openConnectors.Count > 0)
+            {
+                float sumX = 0;
+                float sumY = 0;
+                float sumZ = 0;
+                foreach (var connector in state.openConnectors)
+                {
+                    sumX += connector.WorldPos.X;
+                    sumY += connector.WorldPos.Y;
+                    sumZ += connector.WorldPos.Z;
+                }
+
+                float count = state.openConnectors.Count;
+                return new P3Float(sumX / count, sumY / count, sumZ / count);
+            }
+
+            return new P3Float(0, 0, 0);
+        }
+
+        private static float DistanceSquared(P3Float a, P3Float b)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+            float dz = a.Z - b.Z;
+            return dx * dx + dy * dy + dz * dz;
         }
 
     }

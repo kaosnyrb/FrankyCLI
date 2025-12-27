@@ -22,5 +22,7 @@ namespace FrankyCLI.Retrograde.Passes
         public Cell instance;
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
+
+        public float YMin = 0;
     }
 }

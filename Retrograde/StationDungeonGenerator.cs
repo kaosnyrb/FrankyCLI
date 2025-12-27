@@ -55,10 +55,7 @@ namespace FrankyCLI
         rg_slot_clutter_large
         rg_slot_light_main
         */
-
-        public static int YBound = 40;
-
-        
+               
         public StationDungeonGenerator() {
 
         }
