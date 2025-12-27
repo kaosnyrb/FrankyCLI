@@ -34,7 +34,7 @@ namespace FrankyCLI.Retrograde
             Console.WriteLine("Lists: " + roomTemplates.Count);
         }
 
-        public string GetRoom(string theme)
+        public string GetRoom(string theme, string type = null)
         {
             var listKey = "rg_roomlist_" + theme;
 
@@ -49,6 +49,12 @@ namespace FrankyCLI.Retrograde
                 // Defensive: skip unresolved keys
                 if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
                     continue;
+
+                if (type != null)
+                {
+                    if (!packIn.EditorID.Contains(type))
+                        continue;
+                }
 
                 candidates.Add(packIn.EditorID);
             }

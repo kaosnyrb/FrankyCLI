@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI
 {
-    public class TopologyPass : IGenPass
+    public class SpineTopologyPass : IGenPass
     {
         public void RunPass(DungeonState state)
         {
@@ -31,7 +31,7 @@ namespace FrankyCLI
 
             for (int i = 0; i < 20; i++)
             {
-                var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset));
+                var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "spine"));
 
                 var candConnectors = candidate.Markers
                     .Select(m => new
@@ -57,8 +57,6 @@ namespace FrankyCLI
             if (roomPrefab == null)
                 throw new Exception("Failed to find a starting room with open connectors.");
 
-
-
             // Place first prefab so its SOUTH marker lands on the starting marker.
             // prefabWorldPos + southLocal = startWorld  =>  prefabWorldPos = startWorld - southLocal
             P3Float prefabWorldPos = startingMarker.Position - south0.Position;
@@ -72,15 +70,11 @@ namespace FrankyCLI
             });
 
             // Inputs / knobs
-            int maxRoomsToPlace = 15;          // hard limit (rooms)
+            int maxRoomsToPlace = 5;          // hard limit (rooms)
             int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
-            float collisionPadding = -2f; // tweak: world units clearance
+            float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
 
-            var rng = new Random();
-
-            // This will be used for the second pass
-            
             // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
             var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
 
@@ -115,9 +109,9 @@ namespace FrankyCLI
             while (roomsPlaced < maxRoomsToPlace && state.openConnectors.Count > 0 && attempts < maxAttempts)
             {
                 attempts++;
-
+                
                 // Choose a random open connector to fill
-                int openIndex = rng.Next(state.openConnectors.Count);
+                int openIndex = RandomUtils.random.Next(state.openConnectors.Count);
                 var target = state.openConnectors[openIndex];
 
                 if (target.WorldPos.Y < startingMarker.Position.Y)
@@ -138,7 +132,7 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset));
+                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset,"spine"));
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -154,7 +148,7 @@ namespace FrankyCLI
                         if (compatible.Count == 0)
                             continue;
 
-                        var chosen = compatible[rng.Next(compatible.Count)];
+                        var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
 
                         // Align using ROTATED local connector
                         P3Float nextPos = target.WorldPos - chosen.LocalPos;

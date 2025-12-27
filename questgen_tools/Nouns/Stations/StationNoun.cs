@@ -89,7 +89,7 @@ namespace FrankyCLI.questgen_tools
 
             //Now generate the dungeon....
 
-            DungeonGenerator dungeonGenerator = new DungeonGenerator();
+            StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator();
             dungeonGenerator.GenerateDungeon(intcell, "rg_roomlist_station");
         }        
     }

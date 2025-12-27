@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI
 {
-    public class DungeonGenerator
+    public class StationDungeonGenerator
     {
         /*
         Assembles prefabs into a dungeons.
@@ -56,8 +56,10 @@ namespace FrankyCLI
         rg_slot_light_main
         */
 
+        public static int YBound = 40;
+
         
-        public DungeonGenerator() {
+        public StationDungeonGenerator() {
 
         }
 
@@ -70,7 +72,8 @@ namespace FrankyCLI
             //Multi-Pass Generation Pipeline
             List<IGenPass> passes = new List<IGenPass>
             {
-                new TopologyPass(),
+                new SpineTopologyPass(),
+                new DistrictTopologyPass(),
                 new ConectorSealingPass(),
                 new ContentPass(),
                 new LightOccluderPass()
