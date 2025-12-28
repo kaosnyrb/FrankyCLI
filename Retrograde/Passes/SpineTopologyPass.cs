@@ -30,6 +30,7 @@ namespace FrankyCLI
             PrefabMarker north0 = new PrefabMarker();
 
             RoomUtils roomUtils = new RoomUtils("rg_spinelist");
+            var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             for (int i = 0; i < 20; i++)
             {
@@ -73,9 +74,9 @@ namespace FrankyCLI
 
             // Inputs / knobs
             int maxRoomsToPlace = 5;          // hard limit (rooms)
-            int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
+            int maxAttempts = 1500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
-            int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
+            int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
 
             // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
             var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
@@ -87,6 +88,7 @@ namespace FrankyCLI
                 YawSteps = 0,
                 Connectors = startConnectors
             });
+            usedPrefabIds.Add(roomPrefab.PrefabEditorId);
 
             // Seed open connectors from the starting room (all connectors become candidates)
             
@@ -138,6 +140,8 @@ namespace FrankyCLI
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
                     var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset,"spine"));
+                    if (usedPrefabIds.Contains(nextPrefab.PrefabEditorId))
+                        continue;
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -179,6 +183,7 @@ namespace FrankyCLI
                             YawSteps = yawSteps,
                             Connectors = nextConnectors
                         });
+                        usedPrefabIds.Add(nextPrefab.PrefabEditorId);
 
                         roomsPlaced++;
                         placed = true;

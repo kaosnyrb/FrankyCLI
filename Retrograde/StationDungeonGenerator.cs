@@ -73,6 +73,7 @@ namespace FrankyCLI
                 new SpineTopologyPass(),
                 new DistrictTopologyPass(),
                 new BossTopologyPass("boss"),
+                new DoorPass(),
                 //Seal connectors
                 new WindowSealingPass(),
                 new ConectorSealingPass(),
