@@ -26,7 +26,7 @@ namespace FrankyCLI
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
 
-            RoomUtils roomUtils = new RoomUtils();
+            RoomUtils roomUtils = new RoomUtils("rg_bosslist");
 
             // Main placement loop: iterates over open connectors, but bounded
             int roomsPlaced = 0;

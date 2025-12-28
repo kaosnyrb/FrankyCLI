@@ -27,7 +27,7 @@ namespace FrankyCLI
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
 
-            RoomUtils roomUtils = new RoomUtils();
+            RoomUtils roomUtils = new RoomUtils("rg_roomlist");
 
             // Main placement loop: iterates over open connectors, but bounded
             int roomsPlaced = 0;

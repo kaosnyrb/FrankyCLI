@@ -19,8 +19,10 @@ namespace FrankyCLI.Retrograde
 
         public Dictionary<string, FormList> roomTemplates;
 
-        public RoomUtils() {
-            roomlist = gen_quest_main.myMod.FormLists.FirstOrDefault(fl => fl.EditorID == "rg_roomlist");
+        public string listName;
+
+        public RoomUtils(string listname) {
+            roomlist = gen_quest_main.myMod.FormLists.FirstOrDefault(fl => fl.EditorID == listname);
 
             roomTemplates = new Dictionary<string, FormList>();
             foreach (var f in roomlist.Items)
@@ -28,7 +30,7 @@ namespace FrankyCLI.Retrograde
                 ; var list = gen_quest_main.myMod.FormLists.FirstOrDefault(fl => fl.FormKey == f.FormKey);
                 roomTemplates.Add(list.EditorID, list);
             }
-
+            listName = listname;
             //Load the prefabs for the theme
 
             Console.WriteLine("Lists: " + roomTemplates.Count);
@@ -36,7 +38,7 @@ namespace FrankyCLI.Retrograde
 
         public string GetRoom(string theme, string type = null)
         {
-            var listKey = "rg_roomlist_" + theme;
+            var listKey = listName + "_" + theme;
 
             if (!roomTemplates.TryGetValue(listKey, out var formList) || formList?.Items == null || formList.Items.Count == 0)
                 throw new Exception($"Room theme list not found or empty: {listKey}");

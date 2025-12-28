@@ -29,7 +29,7 @@ namespace FrankyCLI
             PrefabMarker south0 = new PrefabMarker();
             PrefabMarker north0 = new PrefabMarker();
 
-            RoomUtils roomUtils = new RoomUtils();
+            RoomUtils roomUtils = new RoomUtils("rg_spinelist");
 
             for (int i = 0; i < 20; i++)
             {
