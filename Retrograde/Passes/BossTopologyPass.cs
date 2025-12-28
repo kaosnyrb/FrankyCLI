@@ -21,11 +21,10 @@ namespace FrankyCLI
         public void RunPass(DungeonState state)
         {
             // Inputs / knobs
-            int maxRoomsToPlace = 10;          // hard limit (rooms)
+            int maxRoomsToPlace = 1;          // boss: only place a single room
             int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
-            int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
 
             RoomUtils roomUtils = new RoomUtils();
 
@@ -37,9 +36,8 @@ namespace FrankyCLI
             {
                 attempts++;
 
-                // Choose an open connector near the current cluster center to keep rooms close together
-                var clusterCenter = CalculateClusterCenter(state);
-                int openIndex = ChooseConnectorIndexNearCenter(state.openConnectors, clusterCenter, proximitySample);
+                // Choose the open connector farthest from the starting position to anchor the boss room
+                int openIndex = ChooseFarthestFromStart(state.openConnectors, state.StartingPosition);
                 var target = state.openConnectors[openIndex];
 
                 if (target.WorldPos.Y < state.YMin)
@@ -136,56 +134,20 @@ namespace FrankyCLI
             }
         }
 
-        private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
+        private static int ChooseFarthestFromStart(List<OpenConnector> openConnectors, P3Float startingPosition)
         {
-            var prioritized = openConnectors
-                .Select((c, idx) => new
-                {
-                    Index = idx,
-                    DistSq = DistanceSquared(c.WorldPos, clusterCenter)
-                })
-                .OrderBy(p => p.DistSq)
-                .ToList();
-
-            int takeCount = Math.Min(sampleSize, prioritized.Count);
-            return prioritized[RandomUtils.random.Next(takeCount)].Index;
-        }
-
-        private static P3Float CalculateClusterCenter(DungeonState state)
-        {
-            if (state.placedRooms.Count > 0)
+            float maxDist = float.MinValue;
+            int bestIndex = 0;
+            for (int i = 0; i < openConnectors.Count; i++)
             {
-                float sumX = 0;
-                float sumY = 0;
-                float sumZ = 0;
-                foreach (var room in state.placedRooms)
+                var dist = DistanceSquared(openConnectors[i].WorldPos, startingPosition);
+                if (dist > maxDist)
                 {
-                    sumX += room.WorldPos.X;
-                    sumY += room.WorldPos.Y;
-                    sumZ += room.WorldPos.Z;
+                    maxDist = dist;
+                    bestIndex = i;
                 }
-
-                float count = state.placedRooms.Count;
-                return new P3Float(sumX / count, sumY / count, sumZ / count);
             }
-
-            if (state.openConnectors.Count > 0)
-            {
-                float sumX = 0;
-                float sumY = 0;
-                float sumZ = 0;
-                foreach (var connector in state.openConnectors)
-                {
-                    sumX += connector.WorldPos.X;
-                    sumY += connector.WorldPos.Y;
-                    sumZ += connector.WorldPos.Z;
-                }
-
-                float count = state.openConnectors.Count;
-                return new P3Float(sumX / count, sumY / count, sumZ / count);
-            }
-
-            return new P3Float(0, 0, 0);
+            return bestIndex;
         }
 
         private static float DistanceSquared(P3Float a, P3Float b)

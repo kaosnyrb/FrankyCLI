@@ -71,6 +71,8 @@ namespace FrankyCLI
             {
                 new SpineTopologyPass(),
                 new DistrictTopologyPass(),
+                new BossTopologyPass("boss"),
+                new WindowSealingPass(),
                 new ConectorSealingPass(),
                 new ContentPass(),
                 new LightOccluderPass()

@@ -131,5 +131,18 @@ namespace FrankyCLI.Retrograde
                 _ => $"rg_blocker_{tileset}"
             };
         }
+
+        public static string GetWindowBlocker(string doorSize, string tileset)
+        {
+            // Prefer: tileset-specific blockers, fallback to generic
+            // e.g. rg_blocker_D1_station, rg_blocker_D1_generic
+            // Replace with your real IDs / lookup.
+            return doorSize switch
+            {
+                "D1" => $"rg_windowblocker_D1_{tileset}",
+                "D2" => $"rg_windowblocker_D2_{tileset}",
+                _ => $"rg_blocker_{tileset}"
+            };
+        }
     }
 }
