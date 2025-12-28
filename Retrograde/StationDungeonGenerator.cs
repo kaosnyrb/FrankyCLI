@@ -69,12 +69,16 @@ namespace FrankyCLI
             //Multi-Pass Generation Pipeline
             List<IGenPass> passes = new List<IGenPass>
             {
+                //Place rooms
                 new SpineTopologyPass(),
                 new DistrictTopologyPass(),
                 new BossTopologyPass("boss"),
+                //Seal connectors
                 new WindowSealingPass(),
                 new ConectorSealingPass(),
+                //Fill content
                 new ContentPass(),
+                //util
                 new LightOccluderPass()
             };
 

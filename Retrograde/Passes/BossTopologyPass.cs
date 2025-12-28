@@ -36,8 +36,13 @@ namespace FrankyCLI
             {
                 attempts++;
 
-                // Choose the open connector farthest from the starting position to anchor the boss room
-                int openIndex = ChooseFarthestFromStart(state.openConnectors, state.StartingPosition);
+                // Choose the NORTH-facing open connector farthest from the starting position to anchor the boss room
+                int openIndex = ChooseFarthestNorthFromStart(state.openConnectors, state.StartingPosition);
+                if (openIndex < 0)
+                {
+                    // No suitable north-facing connector remains
+                    break;
+                }
                 var target = state.openConnectors[openIndex];
 
                 if (target.WorldPos.Y < state.YMin)
@@ -134,14 +139,17 @@ namespace FrankyCLI
             }
         }
 
-        private static int ChooseFarthestFromStart(List<OpenConnector> openConnectors, P3Float startingPosition)
+        private static int ChooseFarthestNorthFromStart(List<OpenConnector> openConnectors, P3Float startingPosition)
         {
             float maxDist = float.MinValue;
-            int bestIndex = 0;
+            int bestIndex = -1;
             for (int i = 0; i < openConnectors.Count; i++)
             {
+                if (openConnectors[i].Parsed.Direction != ConnectorDirection.North)
+                    continue;
+
                 var dist = DistanceSquared(openConnectors[i].WorldPos, startingPosition);
-                if (dist > maxDist)
+                if (dist > maxDist || bestIndex == -1)
                 {
                     maxDist = dist;
                     bestIndex = i;

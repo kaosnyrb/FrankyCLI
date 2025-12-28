@@ -13,15 +13,18 @@ namespace FrankyCLI.Retrograde.Passes
     {
         public void RunPass(DungeonState state)
         {
-            const float maxSightDistance = 100f;
+            const float edgeTolerance = 0.1f;
+
+            if (state.placedRooms == null || state.placedRooms.Count == 0)
+                return;
 
             // Iterate backwards so we can safely remove connectors that get sealed
             for (int i = state.openConnectors.Count - 1; i >= 0; i--)
             {
                 var open = state.openConnectors[i];
 
-                // Seal if any room is visible within the first 100 units ahead
-                if (!HasRoomInLineOfSight(open, state.placedRooms, maxSightDistance))
+                // Only consider connectors on the extreme outer edge and facing outward
+                if (!IsOnOuterEdgeFacingOut(open, state.placedRooms, edgeTolerance))
                     continue;
 
                 // Pick blocker prefab based on door size / tileset
@@ -77,63 +80,55 @@ namespace FrankyCLI.Retrograde.Passes
             }
         }
 
-        private static bool HasRoomInLineOfSight(OpenConnector open, List<PlacedRoom> placedRooms, float maxDistance, float tolerance = 0.01f)
+        private static bool IsOnOuterEdgeFacingOut(OpenConnector open, List<PlacedRoom> placedRooms, float tolerance)
         {
-            foreach (var room in placedRooms)
-            {
-                var bounds = ConnectorUtils.ToWorldAabbRotated(room.Prefab.packin_instance.ObjectBounds, room.WorldPos, room.YawSteps);
+            if (!TryGetPlacedBounds(placedRooms, out var bounds))
+                return false;
 
-                // Skip the room that owns the connector (connector position lies inside its bounds)
-                if (PointInside(bounds, open.WorldPos, tolerance))
-                    continue;
-
-                if (IsForwardOfConnector(open, bounds, maxDistance, tolerance))
-                    return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsForwardOfConnector(OpenConnector open, RgAabb bounds, float maxDistance, float tolerance)
-        {
-            var pos = open.WorldPos;
             switch (open.Parsed.Direction)
             {
                 case ConnectorDirection.North:
-                    return bounds.Max.Y >= pos.Y + tolerance &&
-                           bounds.Min.Y <= pos.Y + maxDistance &&
-                           AxisOverlap(pos.X, bounds.Min.X, bounds.Max.X, tolerance) &&
-                           AxisOverlap(pos.Z, bounds.Min.Z, bounds.Max.Z, tolerance);
+                    return open.WorldPos.Y >= bounds.Max.Y - tolerance;
                 case ConnectorDirection.South:
-                    return bounds.Min.Y <= pos.Y - tolerance &&
-                           bounds.Max.Y >= pos.Y - maxDistance &&
-                           AxisOverlap(pos.X, bounds.Min.X, bounds.Max.X, tolerance) &&
-                           AxisOverlap(pos.Z, bounds.Min.Z, bounds.Max.Z, tolerance);
+                    return false; // never place south-facing windows
                 case ConnectorDirection.East:
-                    return bounds.Max.X >= pos.X + tolerance &&
-                           bounds.Min.X <= pos.X + maxDistance &&
-                           AxisOverlap(pos.Y, bounds.Min.Y, bounds.Max.Y, tolerance) &&
-                           AxisOverlap(pos.Z, bounds.Min.Z, bounds.Max.Z, tolerance);
+                    return open.WorldPos.X >= bounds.Max.X - tolerance;
                 case ConnectorDirection.West:
-                    return bounds.Min.X <= pos.X - tolerance &&
-                           bounds.Max.X >= pos.X - maxDistance &&
-                           AxisOverlap(pos.Y, bounds.Min.Y, bounds.Max.Y, tolerance) &&
-                           AxisOverlap(pos.Z, bounds.Min.Z, bounds.Max.Z, tolerance);
+                    return open.WorldPos.X <= bounds.Min.X + tolerance;
                 default:
                     return false;
             }
         }
 
-        private static bool PointInside(RgAabb bounds, P3Float point, float tolerance)
+        private static bool TryGetPlacedBounds(List<PlacedRoom> placedRooms, out RgAabb bounds)
         {
-            return AxisOverlap(point.X, bounds.Min.X, bounds.Max.X, tolerance) &&
-                   AxisOverlap(point.Y, bounds.Min.Y, bounds.Max.Y, tolerance) &&
-                   AxisOverlap(point.Z, bounds.Min.Z, bounds.Max.Z, tolerance);
+            bounds = default;
+            if (placedRooms == null || placedRooms.Count == 0)
+                return false;
+
+            var first = ConnectorUtils.ToWorldAabbRotated(placedRooms[0].Prefab.packin_instance.ObjectBounds, placedRooms[0].WorldPos, placedRooms[0].YawSteps);
+            float minX = first.Min.X, minY = first.Min.Y, minZ = first.Min.Z;
+            float maxX = first.Max.X, maxY = first.Max.Y, maxZ = first.Max.Z;
+
+            for (int i = 1; i < placedRooms.Count; i++)
+            {
+                var aabb = ConnectorUtils.ToWorldAabbRotated(placedRooms[i].Prefab.packin_instance.ObjectBounds, placedRooms[i].WorldPos, placedRooms[i].YawSteps);
+                if (aabb.Min.X < minX) minX = aabb.Min.X;
+                if (aabb.Min.Y < minY) minY = aabb.Min.Y;
+                if (aabb.Min.Z < minZ) minZ = aabb.Min.Z;
+                if (aabb.Max.X > maxX) maxX = aabb.Max.X;
+                if (aabb.Max.Y > maxY) maxY = aabb.Max.Y;
+                if (aabb.Max.Z > maxZ) maxZ = aabb.Max.Z;
+            }
+
+            bounds = new RgAabb
+            {
+                Min = new P3Float(minX, minY, minZ),
+                Max = new P3Float(maxX, maxY, maxZ)
+            };
+
+            return true;
         }
 
-        private static bool AxisOverlap(float value, float min, float max, float tolerance)
-        {
-            return value >= min - tolerance && value <= max + tolerance;
-        }
     }
 }
