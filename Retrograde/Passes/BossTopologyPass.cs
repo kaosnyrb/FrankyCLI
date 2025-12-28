@@ -12,114 +12,37 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI
 {
-    public class SpineTopologyPass : IGenPass
+    public class BossTopologyPass : IGenPass
     {
+        string district = null;
+        public BossTopologyPass(string districtType = null) {         
+            district = districtType;
+        }
         public void RunPass(DungeonState state)
         {
-            var startingMarker = state.instance.Persistent
-                .OfType<PlacedObject>()
-                .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));
-
-            if (startingMarker == null) throw new Exception("rg_conn_n not found.");
-            var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
-
-            state.StartingPosition = startingMarker.Position;
-
-            RoomPrefab roomPrefab = null;
-            PrefabMarker south0 = new PrefabMarker();
-            PrefabMarker north0 = new PrefabMarker();
-
-            RoomUtils roomUtils = new RoomUtils();
-
-            for (int i = 0; i < 20; i++)
-            {
-                var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "spine"));
-
-                var candConnectors = candidate.Markers
-                    .Select(m => new
-                    {
-                        Marker = m,
-                        Conn = RgConnectorParser.Parse(m.MarkerEditorId)
-                    })
-                    .Where(x => x.Conn.IsValid)
-                    .ToList();
-
-                var entry = candConnectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)?.Marker;
-
-                if (entry != null && candConnectors.Any(x => x.Conn.Direction != ConnectorDirection.South))
-                {
-                    roomPrefab = candidate;
-                    var connectors = candConnectors;
-                    south0 = connectors.First(x => x.Conn.Direction == ConnectorDirection.South).Marker;
-                    north0 = connectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.North)?.Marker;
-                    break;
-                }
-            }
-
-            if (roomPrefab == null)
-                throw new Exception("Failed to find a starting room with open connectors.");
-
-            // Place first prefab so its SOUTH marker lands on the starting marker.
-            // prefabWorldPos + southLocal = startWorld  =>  prefabWorldPos = startWorld - southLocal
-            P3Float prefabWorldPos = startingMarker.Position - south0.Position;
-
-            state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-            {
-                Count = 1,
-                Rotation = new P3Float(),
-                Position = prefabWorldPos,
-                Base = roomPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-            });
-
             // Inputs / knobs
-            int maxRoomsToPlace = 5;          // hard limit (rooms)
+            int maxRoomsToPlace = 10;          // hard limit (rooms)
             int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
+            int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
 
-            // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
-            var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
-
-            state.placedRooms.Add(new PlacedRoom
-            {
-                Prefab = roomPrefab,
-                WorldPos = prefabWorldPos,
-                YawSteps = 0,
-                Connectors = startConnectors
-            });
-
-            // Seed open connectors from the starting room (all connectors become candidates)
-            
-            foreach (var c in startConnectors)
-            {
-                if (c.Parsed.Direction != ConnectorDirection.South)
-                {
-                    state.openConnectors.Add(new OpenConnector
-                    {
-                        Parsed = c.Parsed,
-                        YawSteps = 0,
-                        WorldPos = prefabWorldPos + c.LocalPos
-                    });
-
-                }
-            }
+            RoomUtils roomUtils = new RoomUtils();
 
             // Main placement loop: iterates over open connectors, but bounded
             int roomsPlaced = 0;
             int attempts = 0;
 
-            state.YMin = startingMarker.Position.Y;
-
             while (roomsPlaced < maxRoomsToPlace && state.openConnectors.Count > 0 && attempts < maxAttempts)
             {
                 attempts++;
 
-                // Choose the open connector farthest from the current cluster center to push outward
+                // Choose an open connector near the current cluster center to keep rooms close together
                 var clusterCenter = CalculateClusterCenter(state);
-                int openIndex = ChooseFarthestOpenConnectorIndex(state.openConnectors, clusterCenter);
+                int openIndex = ChooseConnectorIndexNearCenter(state.openConnectors, clusterCenter, proximitySample);
                 var target = state.openConnectors[openIndex];
 
-                if (target.WorldPos.Y < startingMarker.Position.Y)
+                if (target.WorldPos.Y < state.YMin)
                 {
                     //MAKE SURE YOU DON'T GO -Y
                     continue;
@@ -137,7 +60,7 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset,"spine"));
+                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -153,7 +76,7 @@ namespace FrankyCLI
                         if (compatible.Count == 0)
                             continue;
 
-                        var chosen = ChooseMostOutwardConnector(compatible, target.WorldPos, clusterCenter);
+                        var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
 
                         // Align using ROTATED local connector
                         P3Float nextPos = target.WorldPos - chosen.LocalPos;
@@ -213,38 +136,19 @@ namespace FrankyCLI
             }
         }
 
-        private static int ChooseFarthestOpenConnectorIndex(List<OpenConnector> openConnectors, P3Float clusterCenter)
+        private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
         {
-            float maxDist = float.MinValue;
-            int bestIndex = 0;
-            for (int i = 0; i < openConnectors.Count; i++)
-            {
-                var dist = DistanceSquared(openConnectors[i].WorldPos, clusterCenter);
-                if (dist > maxDist)
+            var prioritized = openConnectors
+                .Select((c, idx) => new
                 {
-                    maxDist = dist;
-                    bestIndex = i;
-                }
-            }
-            return bestIndex;
-        }
+                    Index = idx,
+                    DistSq = DistanceSquared(c.WorldPos, clusterCenter)
+                })
+                .OrderBy(p => p.DistSq)
+                .ToList();
 
-        private static RgConnectorInstance ChooseMostOutwardConnector(List<RgConnectorInstance> compatibles, P3Float targetWorldPos, P3Float clusterCenter)
-        {
-            RgConnectorInstance best = compatibles[0];
-            float bestDist = DistanceSquared(targetWorldPos - best.LocalPos, clusterCenter);
-
-            foreach (var c in compatibles)
-            {
-                float dist = DistanceSquared(targetWorldPos - c.LocalPos, clusterCenter);
-                if (dist > bestDist)
-                {
-                    bestDist = dist;
-                    best = c;
-                }
-            }
-
-            return best;
+            int takeCount = Math.Min(sampleSize, prioritized.Count);
+            return prioritized[RandomUtils.random.Next(takeCount)].Index;
         }
 
         private static P3Float CalculateClusterCenter(DungeonState state)

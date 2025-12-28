@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Noggog;
 
 namespace FrankyCLI.Retrograde.Passes
 {
@@ -22,6 +23,8 @@ namespace FrankyCLI.Retrograde.Passes
         public Cell instance;
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
+
+        public P3Float StartingPosition;
 
         public float YMin = 0;
     }
