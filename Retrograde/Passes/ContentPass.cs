@@ -95,6 +95,7 @@ namespace FrankyCLI.Retrograde
                     if (!id.StartsWith("rg_", StringComparison.OrdinalIgnoreCase))
                         continue;
 
+                    //TODO Extract enemy logic
                     if (id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
                     {
                         //If it's an enemy then we need to choose a faction.
@@ -104,10 +105,12 @@ namespace FrankyCLI.Retrograde
                         }
                         id = "rg_enemy_spawn_" + enemyType + "_001";
                     }
-
-                    //Culling -- We don't want EVERY marker filled, do 50%
-                    //if (RandomUtils.random.Next(10) < 5)
-                    //    continue;
+                    else
+                    {
+                        //Culling -- We don't want EVERY marker filled, do 50%
+                        if (RandomUtils.random.Next(10) < 5)
+                            continue;
+                    }
 
 
                     // Look up slot list (FormList EditorID == marker EditorID)
