@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda;
+﻿using FrankyCLI.Utils;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Starfield;
@@ -54,7 +55,8 @@ namespace FrankyCLI.questgen_tools
 
 
             //Clone the Base Form
-            var ship = gen_quest_main.myMod.GenericBaseForms[new FormKey(gen_quest_main.myMod.ModKey, 0x016CC2)].DeepCopy();
+
+            var ship = gen_quest_main.myMod.GenericBaseForms[FormKeyLookup.GetFormKey("duout02_stationtest")].DeepCopy();
             instance = new GenericBaseForm(gen_quest_main.myMod)
             {
                 EditorID = "station_form_" + StationID,

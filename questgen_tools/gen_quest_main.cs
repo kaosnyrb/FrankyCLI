@@ -82,10 +82,10 @@ namespace FrankyCLI
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {
-                if (rec.EditorID != null)
-                {
-                    Console.WriteLine(rec.EditorID.ToString() + " : " + rec.FormKey.ToString());
-                }
+                //if (rec.EditorID != null)
+                //{
+                //    Console.WriteLine(rec.EditorID.ToString() + " : " + rec.FormKey.ToString());
+                //}
                 rec.IsCompressed = false;
             }
 
