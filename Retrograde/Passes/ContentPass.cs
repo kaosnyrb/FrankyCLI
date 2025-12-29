@@ -105,6 +105,11 @@ namespace FrankyCLI.Retrograde
                         id = "rg_enemy_spawn_" + enemyType + "_001";
                     }
 
+                    //Culling -- We don't want EVERY marker filled, do 50%
+                    //if (RandomUtils.random.Next(10) < 5)
+                    //    continue;
+
+
                     // Look up slot list (FormList EditorID == marker EditorID)
                     var list = FindSlotList(id);
                     if (list == null)
@@ -122,9 +127,8 @@ namespace FrankyCLI.Retrograde
                     var worldPos = placed.WorldPos + rotatedLocal;
 
                     // Compute final rotation:
-                    // simplest version: inherit room yaw only
-                    // If marker has a rotation field and you want to add it, see note below.
-                    var worldRot = RgRotation.RotationToP3Float(placed.YawSteps);
+                    // combine marker's local rotation with the room's yaw
+                    var worldRot = marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
 
                     state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
                     {
