@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - unguarded",
                 Description = "Find info about the target from a clue in orbit around a planet",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x000900,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace(),
                 MissionTags = new List<string>()
@@ -35,7 +36,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Crimson Fleet A Class",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
@@ -52,7 +53,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Crimson Fleet B Class",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
@@ -70,7 +71,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Crimson Fleet Cargo",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
@@ -89,7 +90,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Spacer Small",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
@@ -107,7 +108,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Spacer Large",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
@@ -124,7 +125,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Spacer Cargo",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
@@ -143,7 +144,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Ecliptic Small",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
@@ -161,7 +162,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Ecliptic Large",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
@@ -179,7 +180,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Guarded by Ecliptic Cargo",
                 Description = "Find info about the target from a clue in orbit around a planet guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x00090D,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_guarded"),
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
@@ -198,7 +199,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Crimson Fleet Trap",
                 Description = "Find info about the target from a clue in orbit around a planet. Crimson Fleet attack when the player uses the beacon",
                 Location = "An clue hidden in an asteroid field",
-                formid = 0x00090F,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_trapped"),
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_ActivatorSpace_Trapped(),
@@ -214,7 +215,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Activator - Spacer Trap",
                 Description = "Find info about the target from a clue in orbit around a planet. Spacer attack when the player uses the beacon",
                 Location = "An clue hidden in an asteroid field",
-                formid = 0x00090F,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_trapped"),
                 parameter1 = "Spacer",
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Trapped(),
@@ -231,7 +232,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "Find info about the target from a clue in orbit around a planet. Ecliptic attack when the player uses the beacon",
                 Location = "An clue hidden in an asteroid field",
                 parameter1 = "Ecliptic",
-                formid = 0x00090F,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator_trapped"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpace_Trapped(),
                 MissionTags = new List<string>()
@@ -246,3 +247,5 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+
+

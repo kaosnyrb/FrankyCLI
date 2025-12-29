@@ -37,7 +37,7 @@ namespace FrankyCLI.questgen_quests
         {
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var newQuest = new QuestNoun(missionTemplate.formid, questID);
+            var newQuest = new QuestNoun(missionTemplate.formid.ID, questID);
 
             //Quest 1
             var Quest1 = missionTemplate.Lib1.GetInvestigationMissionTemplate("", missionTemplate.Addons);

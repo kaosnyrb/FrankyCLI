@@ -1,5 +1,6 @@
-﻿using FrankyCLI.questgen_quests;
+using FrankyCLI.questgen_quests;
 using FrankyCLI.questgen_tools.Interfaces;
+using Mutagen.Bethesda.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace FrankyCLI.questgen_tools
         public ITemplateManager Lib2;
         public string parameter1;
         public uint parameterformid;
-        public uint formid;
+        public FormKey formid;
 
 
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
@@ -33,3 +34,4 @@ namespace FrankyCLI.questgen_tools
         public List<string> Addons;
     }
 }
+

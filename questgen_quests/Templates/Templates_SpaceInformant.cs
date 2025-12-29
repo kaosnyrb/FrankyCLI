@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Crimson Fleet ship has the data in there hold",
                 Location = "A cargo ship",
                 parameterformid = ShipTools.GetCargoShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -39,7 +40,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Spacer ship has the data in there hold",
                 Location = "A cargo ship",
                 parameterformid = ShipTools.GetCargoShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Spacer",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -56,7 +57,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Ecliptic ship has the data in there hold",
                 Location = "A cargo ship",
                 parameterformid = ShipTools.GetCargoShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Ecliptic",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -73,7 +74,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Crimson Fleet ship has the data in there hold",
                 Location = "A small ship",
                 parameterformid = ShipTools.GetAClassShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -90,7 +91,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Spacer ship has the data in there hold",
                 Location = "A small ship",
                 parameterformid = ShipTools.GetAClassShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Spacer",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -107,7 +108,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Ecliptic ship has the data in there hold",
                 Location = "A small ship",
                 parameterformid = ShipTools.GetAClassShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Ecliptic",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -124,7 +125,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Crimson Fleet ship has the data in there hold",
                 Location = "A strong medium sized ship",
                 parameterformid = ShipTools.GetBClassShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Crimson Fleet",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -141,7 +142,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Spacer ship has the data in there hold",
                 Location = "A strong medium sized ship",
                 parameterformid = ShipTools.GetBClassShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Spacer",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -158,7 +159,7 @@ namespace FrankyCLI.questgen_quests
                 Description = "A Ecliptic ship has the data in there hold",
                 Location = "A strong medium sized ship",
                 parameterformid = ShipTools.GetBClassShip(),
-                formid = 0x000808,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_informant"),
                 needSpacesuit = true,
                 parameter1 = "Ecliptic",
                 outlawQuest = new Investigation_Informant_Space(),
@@ -175,3 +176,5 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+
+

@@ -71,7 +71,7 @@ namespace FrankyCLI
             Console.WriteLine("questname: " + questname);
 
             // Quest
-            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 

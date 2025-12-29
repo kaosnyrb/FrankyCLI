@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -23,7 +24,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Activator - Small Marker",
                 Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
-                formid = 0x000835,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
@@ -38,7 +39,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Activator - Captive",
                 Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
-                formid = 0x000907,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_captive"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
@@ -52,7 +53,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Activator -  Large Marker",
                 Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
-                formid = 0x000908,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_large"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
@@ -66,7 +67,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Activator - Important Marker Breathable",
                 Description = "Find info about the target on a nearby planet at a small facility with a breathable atmosphere",
                 Location = "A remote location",
-                formid = 0x000909,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_important"),
                 needSpacesuit = false,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
@@ -82,3 +83,4 @@ namespace FrankyCLI.questgen_quests
 
     }
 }
+

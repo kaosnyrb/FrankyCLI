@@ -1,4 +1,4 @@
-ï»¿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
 using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Waggoner Farm",
                 Description = "Find info about the target in Waggoner Farm",
                 Location = "Waggoner Farm",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x002CC1EF,
                 needSpacesuit = false,
                 parameter1 = "waggonerfarm",
@@ -39,7 +39,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - New Homestead",
                 Description = "Find info about the target in New Homestead",
                 Location = "New Homestead",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x0021702B,
                 needSpacesuit = false,
                 parameter1 = "newhomestead",
@@ -57,7 +57,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Gagarin Landing",
                 Description = "Find info about the target in Gagarin Landing",
                 Location = "Gagarin Landing",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00265018,
                 needSpacesuit = false,
                 parameter1 = "gagarinlanding",
@@ -75,7 +75,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - New Atlantis",
                 Description = "Find info about the target in New Atlantis",
                 Location = "New Atlantis",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x0001295A,
                 needSpacesuit = false,
                 parameter1 = "newatlantis",
@@ -93,7 +93,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - The Well",
                 Description = "Find info about the target in The Well",
                 Location = "The Well",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x0019A5C2,
                 needSpacesuit = false,
                 parameter1 = "thewell",
@@ -110,7 +110,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - HopeTown",
                 Description = "Find info about the target in HopeTown",
                 Location = "HopeTown",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00016027,
                 needSpacesuit = false,
                 parameter1 = "hopetown",
@@ -128,7 +128,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Red Mile",
                 Description = "Find info about the target in The Red Mile",
                 Location = "Red Mile",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x002CE0C9,
                 needSpacesuit = false,
                 parameter1 = "redmile",
@@ -146,7 +146,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Red Mile Crater",
                 Description = "Find info about the target in The Red Mile Crater",
                 Location = "Red Mile Crater",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x002CE0C9,
                 needSpacesuit = false,
                 parameter1 = "redmilecrater",
@@ -159,7 +159,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters= new Dictionary<string, object>()
                 {
-                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runnersâ€™ survival and the extreme danger posed by the local Red Mile Mauler predators." }
+                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runners’ survival and the extreme danger posed by the local Red Mile Mauler predators." }
                 }
                 
             });
@@ -169,7 +169,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - The Den",
                 Description = "Find info about the target in The Den",
                 Location = "The Den",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x002A0EF4,
                 needSpacesuit = false,
                 parameter1 = "theden",
@@ -190,7 +190,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - The Clinic",
                 Description = "Find info about the target in The Clinic",
                 Location = "The Clinic",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x001DE8C0,
                 needSpacesuit = false,
                 parameter1 = "theclinic",
@@ -212,7 +212,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Paradiso",
                 Description = "Find info about the target in Paradiso",
                 Location = "Paradiso",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x0026310D,
                 needSpacesuit = false,
                 parameter1 = "paradiso",
@@ -234,7 +234,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Waggoner Farm",
                 Description = "Kill the target at Waggoner Farm",
                 Location = "Waggoner Farm",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "waggonerfarm",
                 parameterformid = 0x002CC1EF,
@@ -251,7 +251,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - New Homestead",
                 Description = "Kill the target at New Homestead",
                 Location = "New Homestead",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "newhomestead",
                 parameterformid = 0x0021702B,
@@ -268,7 +268,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Gagarin Landing",
                 Description = "Kill the target at Gagarin Landing",
                 Location = "Gagarin Landing",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "gagarinlanding",
                 parameterformid = 0x00265018,
@@ -285,7 +285,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - New Atlantis",
                 Description = "Kill the target at New Atlantis",
                 Location = "New Atlantis",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "newatlantis",
                 parameterformid = 0x0001295A,
@@ -302,7 +302,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - The Well",
                 Description = "Kill the target at The Well",
                 Location = "The Well",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "thewell",
                 parameterformid = 0x0019A5C2,
@@ -319,7 +319,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - HopeTown",
                 Description = "Kill the target at HopeTown",
                 Location = "HopeTown",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "hopetown",
                 parameterformid = 0x00016027,
@@ -337,7 +337,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Red Mile",
                 Description = "Kill the target at The Red Mile",
                 Location = "Red Mile",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "redmile",
                 parameterformid = 0x002CE0C9,
@@ -354,7 +354,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Red Mile Crater",
                 Description = "Kill the target at The Red Mile Crater",
                 Location = "Red Mile",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = true,
                 parameter1 = "redmilecrater",
                 parameterformid = 0x002CE0C9,
@@ -367,7 +367,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runnersâ€™ survival and the extreme danger posed by the local Red Mile Mauler predators." }
+                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runners’ survival and the extreme danger posed by the local Red Mile Mauler predators." }
                 }
             });
 
@@ -376,7 +376,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Paradiso",
                 Description = "Kill the target at Paradiso",
                 Location = "Paradiso",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "paradiso",
                 parameterformid = 0x0026310D,
@@ -395,3 +395,4 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+

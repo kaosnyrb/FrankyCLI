@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Station Activator - unguarded",
                 Description = "Find info about the target from a clue in a space station",
                 Location = "A clue hidden on a space station",
-                formid = 0x000900,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_activator"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpacestation(),
                 MissionTags = new List<string>()
@@ -37,3 +38,5 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+
+

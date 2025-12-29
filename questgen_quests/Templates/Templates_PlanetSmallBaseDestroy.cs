@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -23,7 +24,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Smallbase Destroy - Small Marker",
                 Description = "Destroy a dangerous object a nearby planet at a small facility",
                 Location = "A remote location",
-                formid = 0x000835,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySmallBase(),
                 MissionTags = new List<string>()
@@ -39,3 +40,4 @@ namespace FrankyCLI.questgen_quests
 
     }
 }
+

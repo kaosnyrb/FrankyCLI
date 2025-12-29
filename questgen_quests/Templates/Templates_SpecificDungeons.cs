@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace FrankyCLI.questgen_quests
                         Name = "Dungeon Activator - " + PCMName,
                         Description = "Find a lead to the target at a " + PCMName,
                         Location = PCMName,
-                        formid = 0x0008B9,
+                        formid = FormKeyLookup.GetFormKey("duout_info_dungeon_activator_small"),
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
                         outlawQuest = new Investigation_ActivatorSetDungeon(),
@@ -42,7 +43,7 @@ namespace FrankyCLI.questgen_quests
                         Name = "Dungeon Destroy - " + PCMName,
                         Description = "Destroy an object at a " + PCMName,
                         Location = PCMName,
-                        formid = 0x000842,
+                        formid = FormKeyLookup.GetFormKey("duout_info_dungeon_destroy_small"),
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
                         outlawQuest = new Investigation_DestroySetDungeon(),
@@ -59,7 +60,7 @@ namespace FrankyCLI.questgen_quests
                         Name = "Dungeon Bounty - " + PCMName,
                         Description = "Kill the target who is hiding out at a " + PCMName,
                         Location = PCMName,
-                        formid = 0x000811,
+                        formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_setdungon_bossloc"),
                         parameterformid = PCM.FormKey.ID,
                         needSpacesuit = true,
                         outlawQuest = new Showdown_BountyPlanet(),
@@ -74,3 +75,5 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+
+

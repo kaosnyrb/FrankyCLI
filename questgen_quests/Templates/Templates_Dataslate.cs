@@ -1,4 +1,4 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace FrankyCLI.questgen_quests
                     Name = "Dataslate in levelled item",
                     Description = "The player finds a dataslate containing a lead to the target.",
                     Location = "A remote location",
-                    formid = 0,
+                    formid = new Mutagen.Bethesda.Plugins.FormKey(),
                     needSpacesuit = true,
                     outlawQuest = new Discovery_Dataslate(),
                     MissionTags = new List<string>()
@@ -46,3 +46,4 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+

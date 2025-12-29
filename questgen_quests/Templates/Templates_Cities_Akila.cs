@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City Farms",
                 Description = "Find info about the target in Akila City Farms",
                 Location = "Akila City Farms",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilafarms",
@@ -37,7 +38,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City Walls",
                 Description = "Find info about the target in Akila City Wall",
                 Location = "Akila City Walls",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilawalls",
@@ -54,7 +55,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City Coe Plaza",
                 Description = "Find info about the target in Akila City, Coe Plaza",
                 Location = "Akila City Coe Plaza",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilacoeplaza",
@@ -71,7 +72,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City The Stretch",
                 Description = "Find info about the target in Akila City, The Stretch",
                 Location = "Akila City The Stretch",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilathestretch",
@@ -88,7 +89,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City The Core",
                 Description = "Find info about the target in Akila City, The Core",
                 Location = "Akila City The Core",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilathecore",
@@ -105,7 +106,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City Midtown",
                 Description = "Find info about the target in Akila City, Midtown",
                 Location = "Akila City Midtown",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilamidtown",
@@ -122,7 +123,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Akila City Spaceport",
                 Description = "Find info about the target in Akila City, Spaceport",
                 Location = "Akila City Spaceport",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00010DFB,
                 needSpacesuit = false,
                 parameter1 = "akilaspaceport",
@@ -141,7 +142,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Akila City Farms",
                 Description = "Kill the target at Akila City Farms",
                 Location = "Akila City Farms",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "akilafarms",
                 parameterformid = 0x00010DFB,
@@ -156,3 +157,4 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+

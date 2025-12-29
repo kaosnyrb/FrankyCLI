@@ -70,7 +70,7 @@ namespace FrankyCLI.questgen_quests
             });
             Console.WriteLine("logmessage: " + logmessage);
 
-            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
             newQuest.SetObjective(0, "Recover the " + datasource + " from the " + shipname);
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());

@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Outskirts of Cydonia",
                 Description = "Find info about the target at the Outskirts of Cydonia",
                 Location = "Outskirts of Cydonia",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FF7,
                 needSpacesuit = true,
                 parameter1 = "cydoniaoutskirts",
@@ -38,7 +39,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Cydonia Central Hub",
                 Description = "Find info about the target at the Cydonia Central Hub",
                 Location = "Cydonia Central Hub",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FF7,
                 needSpacesuit = true,
                 parameter1 = "cydoniacentralhub",
@@ -55,7 +56,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Cydonia Residential Level",
                 Description = "Find info about the target at the Cydonia Residential Level",
                 Location = "Cydonia Residential Level",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FF7,
                 needSpacesuit = true,
                 parameter1 = "cydoniaresidential",
@@ -74,7 +75,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Outskirts of Cydonia",
                 Description = "Kill the target at Outskirts of Cydonia",
                 Location = "Outskirts of Cydonia",
-                formid = 0x000917,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_cydonia"),
                 needSpacesuit = true,
                 parameter1 = "cydoniaoutskirts",
                 parameterformid = 0x00015FF7,
@@ -90,3 +91,4 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+

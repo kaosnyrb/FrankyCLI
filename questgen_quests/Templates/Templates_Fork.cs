@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Branching Node - planet/space",
                 Location = "",
                 Description = "",
-                formid = 0x0008BC,
+                formid = FormKeyLookup.GetFormKey("duout_info_branch"),
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new PlanetTemplateManager(new AI_TemplateEngine()),
@@ -38,7 +39,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Branching Node - city/space",
                 Location = "",
                 Description = "",
-                formid = 0x0008BC,
+                formid = FormKeyLookup.GetFormKey("duout_info_branch"),
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new CityTemplateManager(new AI_TemplateEngine()),
@@ -56,7 +57,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Branching Node - city/planet",
                 Location = "",
                 Description = "",
-                formid = 0x0008BC,
+                formid = FormKeyLookup.GetFormKey("duout_info_branch"),
                 needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new CityTemplateManager(new AI_TemplateEngine()),
@@ -72,3 +73,4 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+

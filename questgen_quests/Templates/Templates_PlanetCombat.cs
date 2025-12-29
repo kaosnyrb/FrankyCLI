@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -25,7 +26,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - breathable atmosphere",
                 Description = "Kill the target on a planet with a breathable atmosphere",
                 Location = "A small remote civilan installation",
-                formid = 0x000803,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_nohostile_breathable"),
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -39,7 +40,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - poor atmosphere",
                 Description = "Kill the target on a planet with a poor atmosphere",
                 Location = "A small remote civilan installation on a planet with a poor atmosphere",
-                formid = 0x000830,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_nohostile_unbreathable"),
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -53,7 +54,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - Breathable Dungeon",
                 Description = "Kill the target on a planet with a breathable atmosphere at a protected Dungeon",
                 Location = "A Occupied Complex",
-                formid = 0x000831,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_dung_breathable"),
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -67,7 +68,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - Industrial Dungeon",
                 Description = "Kill the target on a planet with a breathable atmosphere at a protected Industrial themed Dungeon",
                 Location = "A Occupied Industrial Complex",
-                formid = 0x000834,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_indust_dung_nonbreathable"),
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -81,7 +82,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - Military Dungeon",
                 Description = "Kill the target on a planet with a breathable atmosphere at a protected Military themed Dungeon",
                 Location = "A Old Military Base",
-                formid = 0x000840,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_milt_dung_nonbreathable"),
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -95,7 +96,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - Mining Dungeon",
                 Description = "Kill the target on a planet with a breathable atmosphere at a protected Mining themed Dungeon",
                 Location = "A Mining Operation",
-                formid = 0x000841,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_mining_dung_nonbreathable"),
                 needSpacesuit = true,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -109,7 +110,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Bounty - Breathable Dungeon boss marker",
                 Description = "Kill the target on a planet with a breathable atmosphere at a protected Dungeon",
                 Location = "A Occupied Base where they are meeting with a boss",
-                formid = 0x000916,
+                formid = FormKeyLookup.GetFormKey("duout_show_planet_kill_dung_breathable_boss"),
                 needSpacesuit = false,
                 outlawQuest = new Showdown_BountyPlanet(),
                 MissionTags = new List<string>()
@@ -123,3 +124,4 @@ namespace FrankyCLI.questgen_quests
 
     }
 }
+

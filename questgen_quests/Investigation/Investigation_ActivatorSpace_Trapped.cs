@@ -64,7 +64,7 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("logmessage: " + logmessage);
 
             Console.WriteLine(logmessage);
-            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());

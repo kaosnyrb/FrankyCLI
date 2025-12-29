@@ -62,7 +62,7 @@ namespace FrankyCLI
             });
             Console.WriteLine("logmessage: " + logmessage);
 
-            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
 
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "DeathItems", myMod.FormLists[outlawNpc.deathItems].ToLink<IStarfieldMajorRecordGetter>());

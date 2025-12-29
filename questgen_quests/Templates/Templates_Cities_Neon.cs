@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Core",
                 Description = "Find info about the target in Neon Core District",
                 Location = "Neon Core",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neoncore",
@@ -39,7 +40,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Ryujin",
                 Description = "Find info about the target in Neon Ryujin HQ",
                 Location = "Neon Ryujin HQ",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonryujin",
@@ -57,7 +58,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Ebbside",
                 Description = "Find info about the target in Neon Ebbside",
                 Location = "Neon Ebbside",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonebbside",
@@ -75,7 +76,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Rooftops",
                 Description = "Find info about the target in Neon Rooftops",
                 Location = "Neon Rooftops",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonrooftops",
@@ -93,7 +94,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Underbelly",
                 Description = "Find info about the target in Neon Underbelly",
                 Location = "Neon Underbelly",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonunderbelly",
@@ -111,7 +112,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Starport",
                 Description = "Find info about the target in Neon Starport",
                 Location = "Neon Starport",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonstarport",
@@ -129,7 +130,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Activator - Neon Astrall Lounge",
                 Description = "Find info about the target in Neon Astrall Lounge",
                 Location = "Neon Astrall Lounge",
-                formid = 0x001379,
+                formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
                 parameterformid = 0x00015FFE,
                 needSpacesuit = false,
                 parameter1 = "neonastrallounge",
@@ -147,7 +148,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Neon Starport",
                 Description = "Kill the target at Neon Starport",
                 Location = "Neon Starport",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "neonstarport",
                 parameterformid = 0x00015FFE,
@@ -164,7 +165,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Neon Underbelly",
                 Description = "Kill the target at Neon Underbelly",
                 Location = "Neon Underbelly",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "neonunderbelly",
                 parameterformid = 0x00015FFE,
@@ -182,7 +183,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Neon Ebbside",
                 Description = "Kill the target at Neon Ebbside",
                 Location = "Neon Ebbside",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "neonebbside",
                 parameterformid = 0x00015FFE,
@@ -200,7 +201,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "City Bounty - Neon Rooftops",
                 Description = "Kill the target at Neon Rooftops",
                 Location = "Neon Rooftops",
-                formid = 0x0012BE,
+                formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
                 needSpacesuit = false,
                 parameter1 = "neonrooftops",
                 parameterformid = 0x00015FFE,
@@ -216,3 +217,4 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+

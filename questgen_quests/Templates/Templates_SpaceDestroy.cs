@@ -1,4 +1,5 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - unguarded",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BD,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
@@ -37,7 +38,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Crimson Fleet A Class",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
@@ -55,7 +56,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Crimson Fleet B Class",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
@@ -73,7 +74,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Crimson Fleet Cargo",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Crimson Fleet",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
@@ -92,7 +93,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Spacer Small",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
@@ -110,7 +111,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Spacer Large",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
@@ -128,7 +129,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Spacer Cargo",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Spacer",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
@@ -147,7 +148,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Ecliptic Small",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetAClassShip(),
                 needSpacesuit = true,
@@ -164,7 +165,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Ecliptic Large",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetBClassShip(),
                 needSpacesuit = true,
@@ -182,7 +183,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Space Destroy - Guarded by Ecliptic Cargo",
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
-                formid = 0x0008BF,
+                formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
                 parameter1 = "Ecliptic",
                 parameterformid = ShipTools.GetCargoShip(),
                 needSpacesuit = true,
@@ -200,3 +201,5 @@ namespace FrankyCLI.questgen_quests
         }
     }
 }
+
+

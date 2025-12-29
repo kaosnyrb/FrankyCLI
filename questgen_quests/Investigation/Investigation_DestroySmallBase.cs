@@ -70,7 +70,7 @@ namespace FrankyCLI
             Console.WriteLine("logmessage: " + logmessage);
 
 
-            var newQuest = new QuestNoun(missionTemplate.formid, questname);
+            var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
             newQuest.SetLogMessage(0, 0, logmessage);
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetObjective(0, "Destroy the <Alias=BountyTarget> At <Alias=DungeonLocation>");

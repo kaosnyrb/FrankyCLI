@@ -1,4 +1,5 @@
-ï»¿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Utils;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -23,7 +24,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planet side Smallbase Informant - Ageis Agent",
                 Description = "Collect a vital clue from an Informant",
                 Location = "A remote location",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -43,7 +44,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Marshal Operative",
                 Description = "Gather intel from a dead Marshal Operative.",
                 Location = "Frontier planetside shelter",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -54,7 +55,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The Marshal Operative had traced the targetâ€™s movements across several frontier claims."},
+                    {"ExtraLore", "The Marshal Operative had traced the target’s movements across several frontier claims."},
                     {"IsTargetDead", true}
                 }
             });
@@ -63,7 +64,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Crimson Fleet Defector",
                 Description = "Meet a defector hiding from their former crew.",
                 Location = "Derelict planetary industrial node",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -84,7 +85,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Ryujin Espionage Asset",
                 Description = "Acquire corporate intel from a discreet Ryujin contact.",
                 Location = "Remote research module",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = false,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -96,7 +97,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "They were tracking a data-theft chain the target disruptedâ€”possibly intentionally."},
+                    {"ExtraLore", "They were tracking a data-theft chain the target disrupted—possibly intentionally."},
                     {"IsTargetDead", true}
                 }
             });
@@ -105,7 +106,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Sanctum Universal Missioner",
                 Description = "Speak with a Missioner who gathered testimonies from locals.",
                 Location = "Rugged planetside retreat",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -127,7 +128,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Trade Authority Broker",
                 Description = "Recover contraband manifests from a TA broker in hiding.",
                 Location = "Moonside cargo relay module",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -139,7 +140,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The broker has been fencing items tied to the fugitiveâ€™s smuggling route and holds fragments of their manifest."},
+                    {"ExtraLore", "The broker has been fencing items tied to the fugitive’s smuggling route and holds fragments of their manifest."},
                     {"IsTargetDead", true}
                 }
             });
@@ -149,7 +150,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Crimson Fleet Info Broker",
                 Description = "Confront a Crimson Fleet information broker holding key intel.",
                 Location = "Hidden pirate relay shack",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -171,7 +172,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Crimson Fleet Black-Market Quartermaster",
                 Description = "Force a Fleet quartermaster to yield contraband records tied to the fugitive.",
                 Location = "Makeshift supply cavern",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -194,7 +195,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Crimson Fleet Smuggling Liaison",
                 Description = "Extract information from a Fleet liaison who coordinated smuggling routes.",
                 Location = "Run-down orbital-drop shelter",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -216,7 +217,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Spacer Raid Planner",
                 Description = "Confront a Spacer strategist who mapped out ambush routes used by the fugitive.",
                 Location = "Collapsed raider command post",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -228,7 +229,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The raid planner studied the fugitiveâ€™s movements to prepare an ambush but lost their team in the attemptâ€”leaving behind tactical notes the player can recover."},
+                    {"ExtraLore", "The raid planner studied the fugitive’s movements to prepare an ambush but lost their team in the attempt—leaving behind tactical notes the player can recover."},
                     {"IsTargetDead", false}
                 }
             });
@@ -237,7 +238,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Spacer Scrap Dealer",
                 Description = "Recover stolen data from a Spacer who pulled hardware off a derelict visited by the fugitive.",
                 Location = "Jury-rigged salvage pit",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -258,7 +259,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Spacer Enforcer",
                 Description = "Force a wounded Spacer enforcer to give up the clues they overheard during a failed ambush.",
                 Location = "Makeshift medical hideout",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -279,7 +280,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - UC Navy Deserter Technician",
                 Description = "Confront a former UC field tech who fled with restricted sensor data.",
                 Location = "Abandoned UC relay bunker",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -292,7 +293,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "This deserter stole atmospheric scan logs from a UC patrol gridâ€”logs that captured the fugitiveâ€™s movement through restricted airspace."},
+                    {"ExtraLore", "This deserter stole atmospheric scan logs from a UC patrol grid—logs that captured the fugitive’s movement through restricted airspace."},
                     {"IsTargetDead", false}
                 }
             });
@@ -301,7 +302,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - UC Marine Deserter Scout",
                 Description = "Force a former UC recon scout to hand over their surveillance notes.",
                 Location = "Derelict recon hide",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -323,7 +324,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - UC Black Ops Analyst",
                 Description = "Interrogate a covert analyst who abandoned a classified assignment.",
                 Location = "Sealed subterranean monitoring pod",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -336,7 +337,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The analyst decrypted fragments of a clandestine UC operations fileâ€”one that also logged the fugitive crossing paths with an unauthorized asset."},
+                    {"ExtraLore", "The analyst decrypted fragments of a clandestine UC operations file—one that also logged the fugitive crossing paths with an unauthorized asset."},
                     {"IsTargetDead", false}
                 }
             });
@@ -345,7 +346,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Ranger Deserter Tracker",
                 Description = "Track down a former Ranger who abandoned their post and kept unauthorized pursuit logs.",
                 Location = "Deserted frontier watchpost",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -358,7 +359,7 @@ namespace FrankyCLI.questgen_quests
                 },
                             parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The deserter recorded a private tracking effort after going rogue, following faint sign trails that crossed paths with the fugitiveâ€™s movements."},
+                    {"ExtraLore", "The deserter recorded a private tracking effort after going rogue, following faint sign trails that crossed paths with the fugitive’s movements."},
                     {"IsTargetDead", false}
                 }
             });
@@ -367,7 +368,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Ranger Deserter Peacekeeper",
                 Description = "Confront a disgraced peacekeeper who fled after refusing an official order.",
                 Location = "Abandoned settler homestead",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = false,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -380,7 +381,7 @@ namespace FrankyCLI.questgen_quests
                 },
                             parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "While drifting between settlements, the deserter gathered whispered accounts and scraps of testimony that reveal the fugitiveâ€™s earlier movements."},
+                    {"ExtraLore", "While drifting between settlements, the deserter gathered whispered accounts and scraps of testimony that reveal the fugitive’s earlier movements."},
                     {"IsTargetDead", false}
                 }
             });
@@ -389,7 +390,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Ranger Deserter Scout Sniper",
                 Description = "Force a former Ranger sniper to surrender their reconnaissance data.",
                 Location = "Overlooked ridge bunker",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -411,7 +412,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Ranger Frontier Liaison",
                 Description = "Meet a Ranger serving as a liaison to frontier settlers who gathered key information.",
                 Location = "Ranger support outpost",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = false,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -423,7 +424,7 @@ namespace FrankyCLI.questgen_quests
                 },
                             parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The liaison collected accounts from settlers who witnessed unusual activity matching the fugitiveâ€™s trail."},
+                    {"ExtraLore", "The liaison collected accounts from settlers who witnessed unusual activity matching the fugitive’s trail."},
                     {"IsTargetDead", true}
                 }
             });
@@ -432,7 +433,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Ranger Environmental Scout",
                 Description = "Speak with a Ranger scout who tracked environmental disturbances linked to recent movement.",
                 Location = "Rugged trail-monitoring hut",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = true,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -445,7 +446,7 @@ namespace FrankyCLI.questgen_quests
                 },
                             parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "The scout identified disrupted terrain and thermal anomalies that align with the fugitiveâ€™s passage across the region."},
+                    {"ExtraLore", "The scout identified disrupted terrain and thermal anomalies that align with the fugitive’s passage across the region."},
                     {"IsTargetDead", true}
                 }
             });
@@ -454,7 +455,7 @@ namespace FrankyCLI.questgen_quests
                 Name = "Planetside Smallbase Informant - Freestar Ranger Deputy Investigator",
                 Description = "Retrieve investigative notes from a Ranger deputy working a parallel case.",
                 Location = "Freestar field command trailer",
-                formid = 0x0008C0,
+                formid = FormKeyLookup.GetFormKey("duout_info_planet_informant_small"),
                 needSpacesuit = false,
                 outlawQuest = new Investigation_Informant_Planet(),
                 MissionTags = new List<string>()
@@ -467,7 +468,7 @@ namespace FrankyCLI.questgen_quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore", "While pursuing a separate case, the deputy documented a lead that intersects with the fugitiveâ€™s known pattern of movement."},
+                    {"ExtraLore", "While pursuing a separate case, the deputy documented a lead that intersects with the fugitive’s known pattern of movement."},
                     {"IsTargetDead", true}
                 }
             });
@@ -478,3 +479,5 @@ namespace FrankyCLI.questgen_quests
 
     }
 }
+
+
