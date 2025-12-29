@@ -5,17 +5,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI.Retrograde.Passes
 {
     public class ConectorSealingPass : IGenPass
     {
+        public string GetDoorBlocker(string doorSize, string tileset)
+        {
+            // Prefer: tileset-specific blockers, fallback to generic
+            var blockerId = doorSize switch
+            {
+                "D1" => $"rg_blocker_D1_{tileset}",
+                "D2" => $"rg_blocker_D2_{tileset}",
+                _ => $"rg_blocker_{tileset}"
+            };
+
+            // Gather all prefabs whose editor IDs contain the blocker ID, pick one at random.
+            var candidates = new List<string>();
+
+            foreach (var packin in gen_quest_main.myMod.PackIns)
+            {
+                if (packin?.EditorID == null)
+                    continue;
+
+                if (packin.EditorID.IndexOf(blockerId, StringComparison.OrdinalIgnoreCase) >= 0)
+                    candidates.Add(packin.EditorID);
+            }
+
+            if (candidates.Count > 0)
+                return candidates[RandomUtils.random.Next(candidates.Count)];
+
+            return blockerId;
+        }
+
         public void RunPass(DungeonState state)
         {
             foreach (var open in state.openConnectors)
             {
                 // Pick blocker prefab based on door size / tileset
-                var blockerId = ConnectorUtils.GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
+                var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
                 var blockerPrefab = new RoomPrefab(blockerId);
 
                 // Blocker should have a connector that will attach to the OPEN connector.
