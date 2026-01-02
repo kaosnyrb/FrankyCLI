@@ -105,7 +105,14 @@ namespace FrankyCLI.Retrograde
             if (chosenSpawns.Count == 0)
                 return;
 
-            foreach (var spawn in chosenSpawns)
+            // Avoid clustering too many enemies in the same small area.
+            const int maxClusterSize = 5;
+            const float clusterRadius = 32;
+            var spacedSpawns = EnforceClusterLimit(chosenSpawns, maxClusterSize, clusterRadius);
+            if (spacedSpawns.Count == 0)
+                return;
+
+            foreach (var spawn in spacedSpawns)
             {
                 var placed = spawn.Room;
                 var contentPackInId = PickRandomPackInEditorIdFromFormList(slotList);
@@ -114,9 +121,7 @@ namespace FrankyCLI.Retrograde
 
                 var contentPrefab = new RoomPrefab(contentPackInId);
 
-                var rotatedLocal = RgRotation.RotateYaw90(spawn.Marker.Position, placed.YawSteps);
-                var worldPos = placed.WorldPos + rotatedLocal;
-
+                var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
 
                 state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
@@ -202,6 +207,42 @@ namespace FrankyCLI.Retrograde
             }
 
             return chosen;
+        }
+
+        private static List<SpawnCandidate> EnforceClusterLimit(
+            List<SpawnCandidate> chosenSpawns,
+            int maxClusterSize,
+            float clusterRadius)
+        {
+            if (maxClusterSize <= 0 || clusterRadius <= 0f)
+                return chosenSpawns;
+
+            float radiusSq = clusterRadius * clusterRadius;
+            var spaced = new List<SpawnCandidate>();
+
+            foreach (var spawn in chosenSpawns)
+            {
+                var worldPos = CalculateWorldPosition(spawn);
+                int nearby = 0;
+
+                for (int i = 0; i < spaced.Count; i++)
+                {
+                    var otherPos = CalculateWorldPosition(spaced[i]);
+                    if (DistanceSquared(worldPos, otherPos) <= radiusSq)
+                    {
+                        nearby++;
+                        if (nearby >= maxClusterSize)
+                            break;
+                    }
+                }
+
+                if (nearby >= maxClusterSize)
+                    continue;
+
+                spaced.Add(spawn);
+            }
+
+            return spaced;
         }
 
         private static float CalculateProgress(
@@ -300,6 +341,12 @@ namespace FrankyCLI.Retrograde
         private static float Dot(P3Float a, P3Float b)
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+        }
+
+        private static P3Float CalculateWorldPosition(SpawnCandidate spawn)
+        {
+            var rotatedLocal = RgRotation.RotateYaw90(spawn.Marker.Position, spawn.Room.YawSteps);
+            return spawn.Room.WorldPos + rotatedLocal;
         }
 
         private static P3Float Subtract(P3Float a, P3Float b)

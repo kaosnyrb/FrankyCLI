@@ -90,6 +90,8 @@ namespace FrankyCLI.Retrograde
             var maxY = Math.Max(bounds.First.Y, bounds.Second.Y);
             var maxZ = Math.Max(bounds.First.Z, bounds.Second.Z);
 
+            const float edgeTolerance = 0.05f; // allow connectors sitting right on the boundary
+
             foreach (var marker in prefab.Markers)
             {
                 if (string.IsNullOrWhiteSpace(marker.MarkerEditorId) ||
@@ -97,9 +99,9 @@ namespace FrankyCLI.Retrograde
                     continue;
 
                 var pos = marker.Position;
-                if (pos.X < minX || pos.X > maxX ||
-                    pos.Y < minY || pos.Y > maxY ||
-                    pos.Z < minZ || pos.Z > maxZ)
+                if (pos.X < minX - edgeTolerance || pos.X > maxX + edgeTolerance ||
+                    pos.Y < minY - edgeTolerance || pos.Y > maxY + edgeTolerance ||
+                    pos.Z < minZ - edgeTolerance || pos.Z > maxZ + edgeTolerance)
                 {
                     Console.WriteLine(
                         $"Connector marker '{marker.MarkerEditorId}' in prefab '{packIn.EditorID}' (list '{listKey}') is outside prefab bounds. " +
