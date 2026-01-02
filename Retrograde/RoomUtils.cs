@@ -58,6 +58,8 @@ namespace FrankyCLI.Retrograde
                         continue;
                 }
 
+                EnsureConnectorsWithinBounds(listKey, packIn);
+
                 candidates.Add(packIn.EditorID);
             }
 
@@ -74,6 +76,36 @@ namespace FrankyCLI.Retrograde
 
             // Fallback: if the list only contains blockers, return one of them
             return candidates[RandomUtils.random.Next(candidates.Count)];
+        }
+
+        private void EnsureConnectorsWithinBounds(string listKey, PackIn packIn)
+        {
+            var prefab = new RoomPrefab(packIn.EditorID);
+            var bounds = packIn.ObjectBounds;
+
+            var minX = Math.Min(bounds.First.X, bounds.Second.X);
+            var minY = Math.Min(bounds.First.Y, bounds.Second.Y);
+            var minZ = Math.Min(bounds.First.Z, bounds.Second.Z);
+            var maxX = Math.Max(bounds.First.X, bounds.Second.X);
+            var maxY = Math.Max(bounds.First.Y, bounds.Second.Y);
+            var maxZ = Math.Max(bounds.First.Z, bounds.Second.Z);
+
+            foreach (var marker in prefab.Markers)
+            {
+                if (string.IsNullOrWhiteSpace(marker.MarkerEditorId) ||
+                    !marker.MarkerEditorId.StartsWith("rg_conn_", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var pos = marker.Position;
+                if (pos.X < minX || pos.X > maxX ||
+                    pos.Y < minY || pos.Y > maxY ||
+                    pos.Z < minZ || pos.Z > maxZ)
+                {
+                    Console.WriteLine(
+                        $"Connector marker '{marker.MarkerEditorId}' in prefab '{packIn.EditorID}' (list '{listKey}') is outside prefab bounds. " +
+                        $"Position=({pos.X:F2},{pos.Y:F2},{pos.Z:F2}) BoundsMin=({minX:F2},{minY:F2},{minZ:F2}) BoundsMax=({maxX:F2},{maxY:F2},{maxZ:F2})");
+                }
+            }
         }
     }
 }
