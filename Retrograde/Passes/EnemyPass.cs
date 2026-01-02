@@ -19,6 +19,13 @@ namespace FrankyCLI.Retrograde
 
         public string enemyType = "";
 
+        private struct SpawnCandidate
+        {
+            public PrefabMarker Marker;
+            public PlacedRoom Room;
+            public float Weight;
+        }
+
         private static string StripNumericSuffix(string id)
         {
             int lastUnderscore = id.LastIndexOf('_');
@@ -72,9 +79,77 @@ namespace FrankyCLI.Retrograde
 
         public void RunPass(DungeonState state)
         {
+            if (state?.placedRooms == null || state.placedRooms.Count == 0)
+                return;
+
+            enemyType = string.IsNullOrWhiteSpace(enemyType) ? state.Faction : enemyType;
+            var enemySlotId = $"rg_enemy_spawn_{enemyType}_001";
+
+            var slotList = FindSlotList(enemySlotId);
+            if (slotList == null)
+                return;
+
+            var bossAnchor = DetermineBossAnchor(state);
+            var bossVector = Subtract(bossAnchor, state.StartingPosition);
+            var bossDistance = Length(bossVector);
+            var fallbackDistance = Math.Max(1f, CalculateFarthestDistance(state));
+
+            int enemyCap = Math.Max(1, (int)Math.Ceiling(state.placedRooms.Count * 1.5f));
+
+            var candidates = BuildCandidates(state, bossVector, bossDistance, fallbackDistance);
+            if (candidates.Count == 0)
+                return;
+
+            enemyCap = Math.Min(enemyCap, candidates.Count);
+            var chosenSpawns = ChooseCandidates(candidates, enemyCap);
+            if (chosenSpawns.Count == 0)
+                return;
+
+            foreach (var spawn in chosenSpawns)
+            {
+                var placed = spawn.Room;
+                var contentPackInId = PickRandomPackInEditorIdFromFormList(slotList);
+                if (contentPackInId == null)
+                    continue;
+
+                var contentPrefab = new RoomPrefab(contentPackInId);
+
+                var rotatedLocal = RgRotation.RotateYaw90(spawn.Marker.Position, placed.YawSteps);
+                var worldPos = placed.WorldPos + rotatedLocal;
+
+                var worldRot = spawn.Marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
+
+                state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                {
+                    Count = 1,
+                    Rotation = worldRot,
+                    Position = worldPos,
+                    Base = contentPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                });
+            }
+        }
+
+        private List<SpawnCandidate> BuildCandidates(
+            DungeonState state,
+            P3Float bossVector,
+            float bossDistance,
+            float fallbackDistance)
+        {
+            var result = new List<SpawnCandidate>();
+
             foreach (var placed in state.placedRooms)
             {
-                // Iterate all markers that are NOT connectors
+                if (placed.Prefab?.Markers == null || placed.Prefab.Markers.Count == 0)
+                    continue;
+
+                if (IsBossRoom(placed))
+                    continue;
+
+                var progress = CalculateProgress(state.StartingPosition, bossVector, bossDistance, fallbackDistance, placed.WorldPos);
+                var weight = ComputeWeight(progress);
+                if (weight <= 0f)
+                    continue;
+
                 foreach (var marker in placed.Prefab.Markers)
                 {
                     var id = marker.MarkerEditorId;
@@ -85,43 +160,163 @@ namespace FrankyCLI.Retrograde
                     if (!id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-
-
-                    if (enemyType == "")
+                    result.Add(new SpawnCandidate
                     {
-                        enemyType = state.Faction;
-                    }
-                    id = "rg_enemy_spawn_" + enemyType + "_001";
-
-                    // Look up slot list (FormList EditorID == marker EditorID)
-                    var list = FindSlotList(id);
-                    if (list == null)
-                        continue;
-
-                    var contentPackInId = PickRandomPackInEditorIdFromFormList(list);
-                    if (contentPackInId == null)
-                        continue;
-
-                    var contentPrefab = new RoomPrefab(contentPackInId);
-
-                    // Compute world position for marker:
-                    // world = roomWorld + rotate(markerLocal, roomYaw)
-                    var rotatedLocal = RgRotation.RotateYaw90(marker.Position, placed.YawSteps);
-                    var worldPos = placed.WorldPos + rotatedLocal;
-
-                    // Compute final rotation:
-                    // combine marker's local rotation with the room's yaw
-                    var worldRot = marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
-
-                    state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-                    {
-                        Count = 1,
-                        Rotation = worldRot,
-                        Position = worldPos,
-                        Base = contentPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                        Marker = marker,
+                        Room = placed,
+                        Weight = weight
                     });
                 }
             }
+
+            return result;
+        }
+
+        private static List<SpawnCandidate> ChooseCandidates(List<SpawnCandidate> candidates, int targetCount)
+        {
+            var pool = new List<SpawnCandidate>(candidates);
+            var chosen = new List<SpawnCandidate>();
+
+            for (int i = 0; i < targetCount && pool.Count > 0; i++)
+            {
+                float totalWeight = pool.Sum(c => c.Weight);
+                if (totalWeight <= 0f)
+                    break;
+
+                float roll = (float)(RandomUtils.random.NextDouble() * totalWeight);
+                float cumulative = 0f;
+                int chosenIndex = 0;
+
+                for (int idx = 0; idx < pool.Count; idx++)
+                {
+                    cumulative += pool[idx].Weight;
+                    if (roll <= cumulative)
+                    {
+                        chosenIndex = idx;
+                        break;
+                    }
+                }
+
+                chosen.Add(pool[chosenIndex]);
+                pool.RemoveAt(chosenIndex);
+            }
+
+            return chosen;
+        }
+
+        private static float CalculateProgress(
+            P3Float start,
+            P3Float bossVector,
+            float bossDistance,
+            float fallbackDistance,
+            P3Float roomPos)
+        {
+            var roomVector = Subtract(roomPos, start);
+
+            if (bossDistance > 0.01f)
+            {
+                var along = Dot(roomVector, bossVector) / bossDistance;
+                var normalized = Clamp01(along / bossDistance);
+
+                if (!float.IsNaN(normalized) && !float.IsInfinity(normalized))
+                    return normalized;
+            }
+
+            var roomDistance = Length(roomVector);
+            if (fallbackDistance <= 0f)
+                return 0f;
+
+            return Clamp01(roomDistance / fallbackDistance);
+        }
+
+        private static float ComputeWeight(float progress)
+        {
+            return 0.2f + 0.8f * progress * progress;
+        }
+
+        private static bool IsBossRoom(PlacedRoom room)
+        {
+            var id = room.Prefab?.PrefabEditorId;
+            return !string.IsNullOrEmpty(id) && id.IndexOf("boss", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static P3Float DetermineBossAnchor(DungeonState state)
+        {
+            var bossRoom = FindBossRoom(state);
+            if (bossRoom.HasValue)
+                return bossRoom.Value.WorldPos;
+
+            return FindFarthestRoomFrom(state.StartingPosition, state.placedRooms);
+        }
+
+        private static PlacedRoom? FindBossRoom(DungeonState state)
+        {
+            for (int i = 0; i < state.placedRooms.Count; i++)
+            {
+                var candidate = state.placedRooms[i];
+                if (IsBossRoom(candidate))
+                    return candidate;
+            }
+
+            return null;
+        }
+
+        private static P3Float FindFarthestRoomFrom(P3Float origin, List<PlacedRoom> rooms)
+        {
+            var best = origin;
+            float bestDistance = float.MinValue;
+
+            foreach (var room in rooms)
+            {
+                float dist = DistanceSquared(room.WorldPos, origin);
+                if (dist > bestDistance)
+                {
+                    bestDistance = dist;
+                    best = room.WorldPos;
+                }
+            }
+
+            return best;
+        }
+
+        private static float CalculateFarthestDistance(DungeonState state)
+        {
+            float maxDistSq = 0f;
+            foreach (var room in state.placedRooms)
+            {
+                var distSq = DistanceSquared(room.WorldPos, state.StartingPosition);
+                if (distSq > maxDistSq)
+                    maxDistSq = distSq;
+            }
+
+            return (float)Math.Sqrt(maxDistSq);
+        }
+
+        private static float Length(P3Float v)
+        {
+            return (float)Math.Sqrt(Dot(v, v));
+        }
+
+        private static float Dot(P3Float a, P3Float b)
+        {
+            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+        }
+
+        private static P3Float Subtract(P3Float a, P3Float b)
+        {
+            return new P3Float(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+
+        private static float DistanceSquared(P3Float a, P3Float b)
+        {
+            return Dot(Subtract(a, b), Subtract(a, b));
+        }
+
+        private static float Clamp01(float v)
+        {
+            if (v < 0f) return 0f;
+            if (v > 1f) return 1f;
+            return v;
         }
     }
 }
