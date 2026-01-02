@@ -73,10 +73,10 @@ namespace FrankyCLI
             });
 
             // Inputs / knobs
-            int maxRoomsToPlace = 5;          // hard limit (rooms)
-            int maxAttempts = 1500;              // hard limit (failed tries) to avoid infinite loops
+            int maxRoomsToPlace = 10;          // hard limit (rooms)
+            int maxAttempts = 2500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
-            int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
+            int maxCandidatePrefabsPerConnector = 64; // avoid thrashing on a single open connector
 
             // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
             var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);

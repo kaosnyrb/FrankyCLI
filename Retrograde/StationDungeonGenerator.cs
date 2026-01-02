@@ -70,9 +70,10 @@ namespace FrankyCLI
             List<IGenPass> passes = new List<IGenPass>
             {
                 //Place rooms
-                new SpineTopologyPass(),
-                new DistrictTopologyPass(),
+                new SpineTopologyPass(),            
+                new DistrictTopologyPass("rg_livinglist"),
                 new BossTopologyPass("boss"),
+                new UtilTopologyPass("rg_utillist"),
                 new DoorPass(),
                 //Seal connectors
                 new WindowSealingPass(),
