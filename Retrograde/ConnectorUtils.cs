@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.Retrograde
 {
+    public struct MarkerSlot
+    {
+        public string SlotId;     // MarkerEditorId (non-connector)
+        public P3Float LocalPos;  // marker.Position (local)
+        public P3Float LocalRot;  // marker.Rotation (local) - optional if available
+    }
+
     public class ConnectorUtils
     {
         public static ConnectorDirection Opposite(ConnectorDirection d)

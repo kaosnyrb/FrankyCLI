@@ -27,5 +27,7 @@ namespace FrankyCLI.Retrograde.Passes
         public P3Float StartingPosition;
 
         public float YMin = 0;
+
+        public string Faction = "spacer";
     }
 }

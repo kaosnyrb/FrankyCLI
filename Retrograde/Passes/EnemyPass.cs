@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.Retrograde
 {
-    public class ContentPass : IGenPass
+
+
+    public class EnemyPass : IGenPass
     {
         private readonly Dictionary<string, FormList> _slotListsCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -80,26 +82,16 @@ namespace FrankyCLI.Retrograde
                     if (string.IsNullOrWhiteSpace(id))
                         continue;
 
-                    // Skip connectors
-                    if (id.StartsWith("rg_conn_", StringComparison.OrdinalIgnoreCase))
+                    if (!id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    // Optional: only consider rg_ markers
-                    if (!id.StartsWith("rg_", StringComparison.OrdinalIgnoreCase))
-                        continue;
 
-                    //TODO enemies are handled in the enemy pass logic
-                    if (id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
+
+                    if (enemyType == "")
                     {
-                        continue;
+                        enemyType = state.Faction;
                     }
-                    else
-                    {
-                        //Culling -- We don't want EVERY marker filled, do 50%
-                        if (RandomUtils.random.Next(10) < 5)
-                            continue;
-                    }
-
+                    id = "rg_enemy_spawn_" + enemyType + "_001";
 
                     // Look up slot list (FormList EditorID == marker EditorID)
                     var list = FindSlotList(id);
