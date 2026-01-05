@@ -80,6 +80,22 @@ namespace FrankyCLI
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 64; // avoid thrashing on a single open connector
 
+
+            //Sizing tweaks
+            switch (state.Size)
+            {
+                case "Small":
+                    maxRoomsToPlace = 2 + RandomUtils.random.Next(2);
+                    break;
+                case "Medium":
+                    maxRoomsToPlace = 4 + RandomUtils.random.Next(4);
+                    break;
+                case "Large":
+                    maxRoomsToPlace = 6 + RandomUtils.random.Next(6);
+                    break;
+            }
+
+
             // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
             var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
 

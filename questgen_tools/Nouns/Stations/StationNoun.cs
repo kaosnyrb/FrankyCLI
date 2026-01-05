@@ -65,7 +65,7 @@ namespace FrankyCLI.questgen_tools
             return $"{stationPart} {letterPart}-{numberPart}";
         }
 
-        public StationNoun(string stationName)
+        public StationNoun(string stationName, string faction, string size)
         {
             string StationID = Guid.NewGuid().ToString().Substring(0, 8);
             
@@ -160,7 +160,7 @@ namespace FrankyCLI.questgen_tools
             //Now generate the dungeon....
 
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator();
-            dungeonGenerator.GenerateDungeon(intcell, location, "rg_roomlist_station");
+            dungeonGenerator.GenerateDungeon(intcell, location, "rg_roomlist_station", faction,size);
         }        
     }
 }

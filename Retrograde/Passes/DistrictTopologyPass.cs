@@ -31,6 +31,21 @@ namespace FrankyCLI
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
             RoomUtils roomUtils = new RoomUtils(roomlist);
 
+            //Sizing tweaks
+            switch (state.Size)
+            {
+                case "Small":
+                    maxRoomsToPlace = 2 + RandomUtils.random.Next(2);
+                    break;
+                case "Medium":
+                    maxRoomsToPlace = 4 + RandomUtils.random.Next(4);
+                    break;
+                case "Large":
+                    maxRoomsToPlace = 6 + RandomUtils.random.Next(6);
+                    break;
+            }
+
+
             // Main placement loop: iterates over open connectors, but bounded
             int roomsPlaced = 0;
             int attempts = 0;

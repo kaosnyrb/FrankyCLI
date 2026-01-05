@@ -70,6 +70,26 @@ namespace FrankyCLI.questgen_tools.Nouns
             return false;            
         }
 
+        public bool SetScriptProperty(String Scriptname, String Name, int Value)
+        {
+            foreach (var script in instance.VirtualMachineAdapter.Scripts)
+            {
+                if (script.Name == Scriptname)
+                {
+                    var properties = script.Properties;
+                    for (int i = 0; i < properties.Count; i++)
+                    {
+                        if (properties[i].Name == Name)
+                        {
+                            ((ScriptIntProperty)properties[i]).Data = Value;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         public bool SetScriptAlias(int AliasIndex, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
             instance.VirtualMachineAdapter.Aliases[AliasIndex].Property.Object = Value;

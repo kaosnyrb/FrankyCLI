@@ -31,5 +31,7 @@ namespace FrankyCLI.Retrograde.Passes
         public float YMin = 0;
 
         public string Faction = "spacer";
+        public string Size = "Small";
+
     }
 }

@@ -72,7 +72,10 @@ namespace FrankyCLI.questgen_quests
             newQuest.SetScriptProperty("duout_space_station_quest", "EnemyShipInteriorLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_station_quest", "CrewSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_station_quest", "ItemSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_station_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
 
+            newQuest.SetScriptProperty("duout_space_station_quest", "MinGangMembers", (int)missionTemplate.parameters["DefendingShipCountMin"]);
+            newQuest.SetScriptProperty("duout_space_station_quest", "MaxGangMembers", (int)missionTemplate.parameters["DefendingShipCountMax"]);
 
             var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
@@ -100,7 +103,7 @@ namespace FrankyCLI.questgen_quests
 
 
             //Create the spacestation;
-            StationNoun stationNoun = new StationNoun(stationname);
+            StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString());
             
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
 

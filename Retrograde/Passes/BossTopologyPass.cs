@@ -139,11 +139,14 @@ namespace FrankyCLI
                 // (We already removed it from openConnectors to ensure forward progress.)
                 if (!placed)
                 {
-                    //We're fucked. Kill the run.
-                    throw new Exception("Couldn't place boss room");
                     state.openConnectors.Add(target);//Return it to the list so we close it later.
                     continue;
                 }
+            }
+            if (roomsPlaced == 0)
+            {
+                //We're fucked. Kill the run.
+                throw new Exception("Couldn't place boss room");
             }
         }
 
