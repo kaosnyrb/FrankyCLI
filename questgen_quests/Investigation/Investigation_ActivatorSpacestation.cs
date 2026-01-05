@@ -4,6 +4,7 @@ using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,8 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("questname: " + questname);
 
 
+            var stationname = "Station01";
+
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
@@ -66,22 +69,41 @@ namespace FrankyCLI.questgen_quests
 
             newQuest.SetLogMessage(0, 0, logmessage);
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+
+            newQuest.SetScriptProperty("duout_space_station_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_station_quest", "EnemyShipInteriorLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_station_quest", "CrewSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_station_quest", "ItemSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+
+            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            {
+                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
+                "Current Location:" + missionTemplate.Location + "\r\n",
+                "Objective: Board the " + stationname + " and find the " + datasource + "\r\n",
+                "Spacestation containing the Objective: " + stationname + "\r\n",
+                "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
+            });
+            var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
+
+            var frmlst = new FormList(myMod)
+            {
+                EditorID = questID + "_deathitems",
+                Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
+            };
+            frmlst.Items.Add(bountybook.instance);
+            myMod.FormLists.Add(frmlst);
+
+            bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_station_quest", "DeathItems", frmlst.ToLink<IStarfieldMajorRecordGetter>());
+
             //We set the spawn marker to one of random ones so the target is in different places
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
 
-            //Create the activation message
-            var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + nextQuest.QuestLocation + "\r\n",
-                "Vital clue to there location: " + datasource + "\r\n"
-            });
-            Console.WriteLine("pickupmessage: " + pickupmessage);
-            var message = new MessageNoun(0x000844, pickupmessage);
 
             //Create the spacestation;
-
-            StationNoun stationNoun = new StationNoun();
+            StationNoun stationNoun = new StationNoun(stationname);
             
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
 

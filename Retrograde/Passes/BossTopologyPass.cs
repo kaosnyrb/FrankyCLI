@@ -27,6 +27,7 @@ namespace FrankyCLI
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
+            RoomUtils spineUtils = new RoomUtils("rg_spinelist");
 
             // Main placement loop: iterates over open connectors, but bounded
             int roomsPlaced = 0;
@@ -40,6 +41,11 @@ namespace FrankyCLI
                 int openIndex = ChooseFarthestNorthFromStart(state.openConnectors, state.StartingPosition);
                 if (openIndex < 0)
                 {
+                    if (TryPlaceSpineNorthConnector(state, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
+                    {
+                        // We added a north-facing connector; try again.
+                        continue;
+                    }
                     // No suitable north-facing connector remains
                     break;
                 }
@@ -137,6 +143,104 @@ namespace FrankyCLI
                     continue;
                 }
             }
+        }
+
+        private static bool TryPlaceSpineNorthConnector(
+            DungeonState state,
+            RoomUtils spineUtils,
+            float collisionPadding,
+            int maxCandidatePrefabsPerConnector)
+        {
+            if (state.openConnectors.Count == 0)
+                return false;
+
+            // Prefer targets further north to grow toward the boss goal.
+            var targets = state.openConnectors
+                .OrderByDescending(c => c.WorldPos.Y)
+                .ThenByDescending(c => DistanceSquared(c.WorldPos, state.StartingPosition))
+                .ToList();
+
+            foreach (var target in targets)
+            {
+                if (target.WorldPos.Y < state.YMin)
+                    continue;
+
+                var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
+                int targetIndex = state.openConnectors.IndexOf(target);
+                if (targetIndex < 0)
+                    continue;
+
+                for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
+                {
+                    var nextPrefab = new RoomPrefab(spineUtils.GetRoom(target.Parsed.Tileset, "spine"));
+
+                    for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                    {
+                        var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
+
+                        var compatible = nextConnectors
+                            .Where(c =>
+                                c.Parsed.Direction == requiredDir &&
+                                string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
+                        if (compatible.Count == 0)
+                            continue;
+
+                        foreach (var chosen in compatible)
+                        {
+                            bool hasNorthAvailable = nextConnectors.Any(c =>
+                                c.Parsed.Direction == ConnectorDirection.North &&
+                                !(c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos)));
+
+                            if (!hasNorthAvailable)
+                                continue;
+
+                            P3Float nextPos = target.WorldPos - chosen.LocalPos;
+
+                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
+                                continue;
+
+                            state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                            {
+                                Count = 1,
+                                Rotation = RgRotation.RotationToP3Float(yawSteps),
+                                Position = nextPos,
+                                Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                            });
+
+                            state.placedRooms.Add(new PlacedRoom
+                            {
+                                Prefab = nextPrefab,
+                                WorldPos = nextPos,
+                                YawSteps = yawSteps,
+                                Connectors = nextConnectors
+                            });
+
+                            state.openConnectors.RemoveAt(targetIndex);
+
+                            foreach (var c in nextConnectors)
+                            {
+                                if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
+                                    continue;
+
+                                state.openConnectors.Add(new OpenConnector
+                                {
+                                    Parsed = c.Parsed,
+                                    YawSteps = yawSteps,
+                                    WorldPos = nextPos + c.LocalPos
+                                });
+                            }
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static int ChooseFarthestNorthFromStart(List<OpenConnector> openConnectors, P3Float startingPosition)

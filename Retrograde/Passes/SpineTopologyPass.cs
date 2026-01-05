@@ -14,6 +14,8 @@ namespace FrankyCLI
 {
     public class SpineTopologyPass : IGenPass
     {
+        private static readonly Random Rng = new Random();
+
         public void RunPass(DungeonState state)
         {
             var startingMarker = state.instance.Persistent
@@ -118,8 +120,15 @@ namespace FrankyCLI
 
                 // Choose the open connector farthest from the current cluster center to push outward
                 var clusterCenter = CalculateClusterCenter(state);
-                int openIndex = ChooseFarthestOpenConnectorIndex(state.openConnectors, clusterCenter);
-                var target = state.openConnectors[openIndex];
+                var northConnectors = state.openConnectors.Where(c => c.Parsed.Direction == ConnectorDirection.North).ToList();
+                bool useNorthBias = northConnectors.Count > 0 && Rng.NextDouble() < 0.8;
+
+                var target = ChooseFarthestOpenConnector(useNorthBias ? northConnectors : state.openConnectors, clusterCenter);
+                int openIndex = state.openConnectors.IndexOf(target);
+                if (openIndex < 0)
+                {
+                    continue;
+                }
 
                 if (target.WorldPos.Y < startingMarker.Position.Y)
                 {
@@ -218,20 +227,20 @@ namespace FrankyCLI
             }
         }
 
-        private static int ChooseFarthestOpenConnectorIndex(List<OpenConnector> openConnectors, P3Float clusterCenter)
+        private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)
         {
             float maxDist = float.MinValue;
-            int bestIndex = 0;
+            OpenConnector best = openConnectors[0];
             for (int i = 0; i < openConnectors.Count; i++)
             {
                 var dist = DistanceSquared(openConnectors[i].WorldPos, clusterCenter);
                 if (dist > maxDist)
                 {
                     maxDist = dist;
-                    bestIndex = i;
+                    best = openConnectors[i];
                 }
             }
-            return bestIndex;
+            return best;
         }
 
         private static RgConnectorInstance ChooseMostOutwardConnector(List<RgConnectorInstance> compatibles, P3Float targetWorldPos, P3Float clusterCenter)

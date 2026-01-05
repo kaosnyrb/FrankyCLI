@@ -15,7 +15,7 @@ namespace FrankyCLI.questgen_tools
     public class StationNoun
     {
         public GenericBaseForm instance;
-        public StationNoun()
+        public StationNoun(string stationName)
         {
             string StationID = Guid.NewGuid().ToString().Substring(0, 8);
             
@@ -78,7 +78,7 @@ namespace FrankyCLI.questgen_tools
                 if (typestring == "Mutagen.Bethesda.Starfield.FullNameComponent")
                 {
                     FullNameComponent fullName = (FullNameComponent)component;
-                    fullName.Name = "Station " + StationID;
+                    fullName.Name = stationName;
                 }
                 if (typestring == "Mutagen.Bethesda.Starfield.FormLinkDataComponent")
                 {

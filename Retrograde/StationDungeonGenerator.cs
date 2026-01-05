@@ -81,6 +81,7 @@ namespace FrankyCLI
                 //Fill content
                 new EnemyPass(),
                 new ContentPass(),
+                new ShipMarkerPass(),
                 //util
                 new LightOccluderPass()
             };
