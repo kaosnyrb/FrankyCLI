@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
@@ -29,12 +30,25 @@ namespace FrankyCLI.Retrograde
                     var worldPos = placed.WorldPos + rotatedLocal;
                     var worldRot = shipMarker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
 
-                    state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                    var newplaced = new PlacedObject(gen_quest_main.myMod)
                     {
                         Count = 1,
                         Rotation = worldRot,
                         Position = worldPos,
                         Base = shipMarker.Base
+                    };
+                    state.instance.Temporary.Add(newplaced);
+
+                    //Find the marker from the base
+                    var baseform = gen_quest_main._StarfieldMod.Statics[shipMarker.Base.FormKey];
+                    var reftype = baseform.ForcedLocations[0];
+                    var locreftype = gen_quest_main._StarfieldMod.LocationReferenceTypes[reftype.FormKey];
+
+                    state.location.LocationCellStaticReferences.Add(new LocationCellStaticReference()
+                    {
+                        Location = state.instance.ToNullableLink<IComplexLocationGetter>(),
+                        Marker = newplaced.ToLink(),
+                        LocationRefType = locreftype.ToLink()
                     });
                 }
             }
@@ -44,8 +58,7 @@ namespace FrankyCLI.Retrograde
         {
             foreach (var entry in prefabCell.Temporary)
             {
-                if (entry is PlacedObject po && !string.IsNullOrWhiteSpace(po.EditorID) &&
-                    po.EditorID.StartsWith("ShipMarker_", StringComparison.OrdinalIgnoreCase))
+                if (entry is PlacedObject po && IsShipMarker(po))
                 {
                     yield return po;
                 }
@@ -53,12 +66,25 @@ namespace FrankyCLI.Retrograde
 
             foreach (var entry in prefabCell.Persistent)
             {
-                if (entry is PlacedObject po && !string.IsNullOrWhiteSpace(po.EditorID) &&
-                    po.EditorID.StartsWith("ShipMarker_", StringComparison.OrdinalIgnoreCase))
+                if (entry is PlacedObject po && IsShipMarker(po))
                 {
                     yield return po;
                 }
             }
+        }
+
+        private static bool IsShipMarker(PlacedObject po)
+        {
+            if ( po.Base.FormKey.ModKey.Name == "Starfield")
+            {
+                if (gen_quest_main._StarfieldMod.Statics.ContainsKey(po.Base.FormKey))
+                {
+                    var stat = gen_quest_main._StarfieldMod.Statics[po.Base.FormKey].EditorID;
+                    bool result = stat.StartsWith("ShipMarker_");
+                    return result;
+                }
+            }
+            return false;
         }
 
         private static Cell ResolvePrefabCell(RoomPrefab prefab)

@@ -4,6 +4,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Assets;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Noggog.StructuredStrings.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,55 @@ namespace FrankyCLI.questgen_tools
     public class StationNoun
     {
         public GenericBaseForm instance;
+
+        /// <summary>
+        /// Generate a station name like "Station Bf-394" using themed call-sign fragments.
+        /// </summary>
+        /// <returns>Formatted station name string.</returns>
+        public static string GenerateStationName()
+        {
+            Random random = RandomUtils.random;
+
+            // Call signs evoke registry codes and transponder shorthand.
+            List<string> callLetters = new List<string>
+            {
+                "BF", "XR", "NS", "OD", "VA", "HG", "ZE", "PH", "IR", "KQ",
+                "LM", "TR", "UV", "QA", "CY", "RN", "SD", "WG", "TX", "JY"
+            };
+
+            string letterPart = callLetters[random.Next(callLetters.Count)];
+
+            // Occasionally generate a fresh 3-digit run to reduce repetition.
+            string numberPart = random.Next(10, 1000).ToString("D3");
+
+            List<string> stationtypes = new List<string>
+            {
+                "Station",
+                "Outpost",
+                "Facility",
+                "Platform",
+                "Installation",
+                "Complex",
+                "Depot",
+                "Hub",
+                "Relay",
+                "Array",
+                "Terminal",
+                "Dock",
+                "Yard",
+                "Anchorage",
+                "Spindle",
+                "Spire",
+                "Module",
+                "Node",
+                "Enclave"
+            };
+
+            string stationPart = stationtypes[random.Next(stationtypes.Count)];
+
+            return $"{stationPart} {letterPart}-{numberPart}";
+        }
+
         public StationNoun(string stationName)
         {
             string StationID = Guid.NewGuid().ToString().Substring(0, 8);
@@ -22,6 +72,22 @@ namespace FrankyCLI.questgen_tools
             //Clone the Interior
             var intcell = RetrogradeUtils.CloneCellById("duout02stationtestintcell");
             intcell.EditorID = "Station_int_" + StationID;
+
+            //Create and attack the location to the int cell so we can find it in quests
+            var location = new Location(gen_quest_main.myMod)
+            {
+                EditorID = intcell.EditorID + "_loc",
+                LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
+                LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
+                LocationCellUniques = new ExtendedList<LocationCellUnique>(),
+                LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
+                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>()
+
+            };
+            gen_quest_main.myMod.Locations.Add(location);
+
+            intcell.Location = location.ToNullableLink<ILocationGetter>();
+
             //Set the Interior door to be linked
             PlacedObject doorreference = null;            
             PlacedObject xmarker = null;
@@ -89,10 +155,12 @@ namespace FrankyCLI.questgen_tools
             }
             gen_quest_main.myMod.GenericBaseForms.Add(instance);
 
+
+
             //Now generate the dungeon....
 
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator();
-            dungeonGenerator.GenerateDungeon(intcell, "rg_roomlist_station");
+            dungeonGenerator.GenerateDungeon(intcell, location, "rg_roomlist_station");
         }        
     }
 }

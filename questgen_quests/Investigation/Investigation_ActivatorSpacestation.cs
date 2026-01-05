@@ -36,11 +36,8 @@ namespace FrankyCLI.questgen_quests
         {
             Console.WriteLine("Generating Activator Space Station Quest...");
 
-            var questActivator = ActivatorTools.GetRandomSpaceType();
-
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
-                "Spacestation Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
             });
             Console.WriteLine("datasource: " + datasource);
@@ -53,7 +50,7 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("questname: " + questname);
 
 
-            var stationname = "Station01";
+            var stationname = StationNoun.GenerateStationName();
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 

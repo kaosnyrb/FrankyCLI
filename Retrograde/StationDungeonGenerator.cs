@@ -62,9 +62,9 @@ namespace FrankyCLI
 
 
 
-        public void GenerateDungeon(Cell cell, string theme)
+        public void GenerateDungeon(Cell cell, Location location, string theme)
         {
-            DungeonState state = new DungeonState(cell);
+            DungeonState state = new DungeonState(cell, location);
 
             //Multi-Pass Generation Pipeline
             List<IGenPass> passes = new List<IGenPass>

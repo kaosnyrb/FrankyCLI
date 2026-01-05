@@ -15,12 +15,14 @@ namespace FrankyCLI.Retrograde.Passes
 
     public class DungeonState
     {
-        public DungeonState(Cell cell) {
+        public DungeonState(Cell cell, Location plocation) {
             placedRooms = new List<PlacedRoom>();
             openConnectors = new List<OpenConnector>();
             instance = cell;
+            location = plocation;
         }
         public Cell instance;
+        public Location location;
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
 

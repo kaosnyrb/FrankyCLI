@@ -22,9 +22,9 @@ namespace FrankyCLI
         {
             // Inputs / knobs
             int maxRoomsToPlace = 1;          // boss: only place a single room
-            int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
+            int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
-            int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
+            int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_spinelist");
@@ -139,6 +139,8 @@ namespace FrankyCLI
                 // (We already removed it from openConnectors to ensure forward progress.)
                 if (!placed)
                 {
+                    //We're fucked. Kill the run.
+                    throw new Exception("Couldn't place boss room");
                     state.openConnectors.Add(target);//Return it to the list so we close it later.
                     continue;
                 }
