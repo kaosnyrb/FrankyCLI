@@ -59,73 +59,7 @@ namespace FrankyCLI.questgen_tools.Utils
             sb.AppendLine();
             sb.AppendLine("    < StorySeed >");
             sb.AppendLine("        Describe the narrative direction YOU have chosen for this LoreFile.");
-            sb.AppendLine("        Randomly select or invent an outlaw archetype from a broad conceptual pool.");
-            sb.AppendLine("        Possible example categories include:");
-            sb.AppendLine("        - \"War-scarred UC Marine suffering untreated combat trauma\"");
-            sb.AppendLine("        - \"Former Freestar Ranger who broke the code and fled\"");
-            sb.AppendLine("        - \"Corporate researcher accused of sabotaging a rival in Xenofresh\"");
-            sb.AppendLine("        - \"Crimson Fleet defector carrying sensitive intel\"");
-            sb.AppendLine("        - \"Spacer lieutenant building their own breakaway cell\"");
-            sb.AppendLine("        - \"Illegal cybernetics technician modifying settlers off the grid\"");
-            sb.AppendLine("        - \"Ex-Armistice negotiator manipulating factions from the shadows\"");
-            sb.AppendLine("        - \"Frontier homesteader who retaliated violently against land claims\"");
-            sb.AppendLine("        - \"Retired mercenary acting on old war grudges\"");
-            sb.AppendLine("        - \"Former Ryujin operative blackmailing corporate executives\"");
-            sb.AppendLine("        - \"Deep-space miner who abandoned their crew after a cave-in\"");
-            sb.AppendLine("        - \"Smuggler caught stealing from the Trade Authority\"");
-            sb.AppendLine("        - \"Runaway Chrysalis Pharmaceuticals bio-tech assistant\"");
-            sb.AppendLine("        - \"Terraforming technician accused of sabotaging colony habitats\"");
-            sb.AppendLine("        - \"Freestar colonist who formed a small outlaw family militia\"");
-            sb.AppendLine("        - \"UC scientific analyst who falsified research and fled with samples\"");
-            sb.AppendLine("        - \"Combat medic selling stolen military-grade stimulants\"");
-            sb.AppendLine("        - \"Salvager who looted a classified UC wreck and panicked\"");
-            sb.AppendLine("        - \"Disgraced starship engineer responsible for fatal drive failures\"");
-            sb.AppendLine("        - \"Ranger academy dropout spreading anti-Freestar propaganda\"");
-            sb.AppendLine("        - \"Former security contractor running illegal protection rackets\"");
-            sb.AppendLine("        - \"Prospector who hid a major mineral find and murdered rivals\"");
-            sb.AppendLine("        - \"Asteroid hauler captain smuggling cryo-stolen goods\"");
-            sb.AppendLine("        - \"Trade Authority junior broker who sold counterfeit permits\"");
-            sb.AppendLine("        - \"House Va’ruun convert spreading dangerous extremist beliefs\"");
-            sb.AppendLine("        - \"Ex-constellation hopeful who fabricated star anomalies\"");
-            sb.AppendLine("        - \"Agritech scientist distributing unlicensed crop mutagens\"");
-            sb.AppendLine("        - \"Former UC investigator covering up their own corruption\"");
-            sb.AppendLine("        - \"Illegal surveyor mapping restricted military zones\"");
-            sb.AppendLine("        - \"Freestar militia deserter hiding from bounty crews\"");
-            sb.AppendLine("        - \"Former spacer mechanic building improvised warships\"");
-            sb.AppendLine("        - \"Pirate saboteur planting tracking beacons on merchant vessels\"");
-            sb.AppendLine("        - \"Disowned corporate heir using hired muscle to reclaim assets\"");
-            sb.AppendLine("        - \"Smuggler pilot who transports runaway clones for profit\"");
-            sb.AppendLine("        - \"Ex-Va’ruun cult dropout who still believes in cryptic omens\"");
-            sb.AppendLine("        - \"Deep-space researcher who hid a dangerous field report\"");
-            sb.AppendLine("        - \"Freestar settler who poisoned a rival ranch’s water supply\"");
-            sb.AppendLine("        - \"Former UC Navy technician running contraband through war zones\"");
-            sb.AppendLine("        - \"Crimson Fleet quartermaster skimming ship parts\"");
-            sb.AppendLine("        - \"Runaway mech technician selling black-market exosuit mods\"");
-            sb.AppendLine("        - \"Outpost supervisor who covered up accidental crew deaths\"");
-            sb.AppendLine("        - \"Biomedical archivist leaking classified patient data\"");
-            sb.AppendLine("        - \"Orbital tug pilot hijacking abandoned cargo containers\"");
-            sb.AppendLine("        - \"Rogue starship architect whose unlicensed designs exploded\"");
-            sb.AppendLine("        - \"Research intern who smuggled experimental grav-drive components\"");
-            sb.AppendLine("        - \"Disillusioned missionary spreading volatile ideologies\"");
-            sb.AppendLine("        - \"UC veteran convinced hostile powers still operate sleeper cells\"");
-            sb.AppendLine("        - \"Former Freestar marshal hiding evidence from an unsolved case\"");
-            sb.AppendLine("        - \"Outland freelancer replaced by cheaper robots and retaliating\"");
-            sb.AppendLine("        - \"Failed xenobiology grad student illegally collecting wildlife DNA\"");
-            sb.AppendLine("        - \"Shipbreaker who dismantled the wrong classified vessel\"");
-            sb.AppendLine("        - \"Frontier judge who turned their settlement into a personal fiefdom\"");
-            sb.AppendLine("        - \"Black-market starmap dealer fabricating false route data\"");
-            sb.AppendLine("        - \"Deimos shipyard worker accused of espionage and fled instead of trial\"");
-            sb.AppendLine("        - \"Medical courier stealing and reselling restricted pharmaceuticals\"");
-            sb.AppendLine("        - \"Former colony warden running a rogue penal settlement\"");
-            sb.AppendLine("        - \"Ryujin data analyst who disappeared with proprietary algorithms\"");
-            sb.AppendLine("        - \"Spacer recruiter exploiting desperate colonists\"");
-            sb.AppendLine("        - \"Freestar homesteader claiming UC agents are stalking them\"");
-            sb.AppendLine("        - \"UC bioweapons tech smuggling classified petri samples\"");
-            sb.AppendLine("        - \"Low-tier pirate captain whose mutinous crew wants them dead\"");
-            sb.AppendLine("        - \"Starmap cartographer falsifying charts to mislead competitors\"");
-            sb.AppendLine("        - \"Crimson Fleet spy embedded in a peaceful agrarian colony\"");
-            sb.AppendLine("        - \"Once-respected Terrabrew supplier now running a stimulant ring\"");
-            sb.AppendLine("        These are examples ONLY — you must generate a fresh archetype.");
+            sb.AppendLine("        Randomly select or invent an outlaw archetype from a broad conceptual pool.");            
             sb.AppendLine("        Explain why this archetype creates strong story hooks.");
             sb.AppendLine("    </ StorySeed >");
             sb.AppendLine();
@@ -240,28 +174,6 @@ namespace FrankyCLI.questgen_tools.Utils
                 "Do NOT quote lore; infer from it.\r\n" +
                 "Only output the object name.\r\n\r\n" +
 
-                "If a <QuestStage> tag is present, shape the name to match that stage of an investigation:\r\n" +
-                "- InitialInvestigations: vague, suggestive names that raise questions.\r\n" +
-                "- ForkInvestigations: names that imply conflicting routes, choices, or double meanings.\r\n" +
-                "- DeepInvestigations: names that hint at deeper patterns, handlers, or systems.\r\n" +
-                "- FinalShowdown: names that feel direct, risky, or closely tied to the target.\r\n\r\n" +
-
-                "If a <QuestProgress> tag is present:\r\n" +
-                "- Low values (0–25): keep the clue name mysterious and indirect.\r\n" +
-                "- Mid values (26–75): allow clearer hints about routes, assets, or people.\r\n" +
-                "- High values (76–100): allow the name to strongly imply what or where the clue points to.\r\n\r\n" +
-
-                "If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed so far.\r\n" +
-                "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
-                "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
-                "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
-                "- Early-stage locations (InitialInvestigation) should influence the tone with uncertainty or fragmented clues.\r\n" +
-                "- ForkInvestigation locations should imply conflicting leads or divergent paths.\r\n" +
-                "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
-                "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
-
-
                 "You may use any relevant elements in the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
@@ -290,28 +202,6 @@ namespace FrankyCLI.questgen_tools.Utils
                 "It should thematically match the Lore Context and feel appropriate for the kind of conflict, intrigue, and stakes described there.\r\n" +
                 "Think in terms of illicit items, forbidden data, compromised artifacts, or black-market goods that could drive the story forward.\r\n" +
                 "Only output the contraband name.\r\n\r\n" +
-
-                "If a <QuestStage> tag is present, let it influence how explicit the contraband feels:\r\n" +
-                "- InitialInvestigations: ambiguous contraband that could be one part of a larger operation.\r\n" +
-                "- ForkInvestigations: contraband that could plausibly point to more than one faction or route.\r\n" +
-                "- DeepInvestigations: contraband that clearly ties to the emerging conspiracy.\r\n" +
-                "- FinalShowdown: contraband that feels central, dangerous, or directly linked to the target's endgame.\r\n\r\n" +
-
-                "If a <QuestProgress> tag is present:\r\n" +
-                "- Low values (0–25): keep the name suggestive, without revealing the true function.\r\n" +
-                "- Mid values (26–75): let the name imply purpose or risk more clearly.\r\n" +
-                "- High values (76–100): the name can strongly signal why destroying it matters.\r\n\r\n" +
-
-                " If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed so far.\r\n" +
-                "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
-                "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
-                "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
-                "- Early-stage locations (InitialInvestigation) should influence the tone with uncertainty or fragmented clues.\r\n" +
-                "- ForkInvestigation locations should imply conflicting leads or divergent paths.\r\n" +
-                "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
-                "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
-
 
                 "Use any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements) for tone and flavor.\r\n\r\n" +
 
@@ -344,28 +234,6 @@ namespace FrankyCLI.questgen_tools.Utils
 
                 "Use the Lore Context to influence atmosphere, mystery, faction tension, stakes, and the sense of uncovering a deeper plot.\r\n" +
                 "Do NOT quote the lore directly—blend it subtly.\r\n\r\n" +
-
-                "If a <QuestStage> tag is present, adjust how much this destruction reveals:\r\n" +
-                "- InitialInvestigations: mostly raise new questions, only hint at a pattern.\r\n" +
-                "- ForkInvestigations: suggest that the destroyed item ruled out one path or confirmed another.\r\n" +
-                "- DeepInvestigations: show how this removal exposes a key link or vulnerable route.\r\n" +
-                "- FinalShowdown: destroying it should feel like cutting off the last safeguard or mask.\r\n\r\n" +
-
-                "If a <QuestProgress> tag is present:\r\n" +
-                "- Low values (0–25): keep the consequences subtle and uncertain.\r\n" +
-                "- Mid values (26–75): let the outcome clearly advance the investigation without fully explaining everything.\r\n" +
-                "- High values (76–100): make the destruction feel decisive and close to the final truth.\r\n\r\n" +
-
-                " If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed so far.\r\n" +
-                "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
-                "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
-                "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
-                "- Early-stage locations (InitialInvestigation) should influence the tone with uncertainty or fragmented clues.\r\n" +
-                "- ForkInvestigation locations should imply conflicting leads or divergent paths.\r\n" +
-                "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
-                "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
-
 
                 "You may draw on any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
@@ -400,28 +268,6 @@ namespace FrankyCLI.questgen_tools.Utils
                 "Use the Lore Context to shape tone, mystery, symbolism, faction behaviour, and how this clue fits into the wider conflict or hunt.\r\n" +
                 "Do NOT quote lore—use it indirectly.\r\n\r\n" +
 
-                "If a <QuestStage> tag is present, treat this as one step in an ongoing pursuit:\r\n" +
-                "- InitialInvestigations: the clue should feel fragile or incomplete, hinting that more digging is needed.\r\n" +
-                "- ForkInvestigations: show how the clue pushes the hunter toward one of several conflicting leads.\r\n" +
-                "- DeepInvestigations: make the clue feel like a connector between earlier fragments.\r\n" +
-                "- FinalShowdown: the clue should point almost directly at the confrontation or final location.\r\n\r\n" +
-
-                "If a <QuestProgress> tag is present:\r\n" +
-                "- Low values (0–25): focus on uncertainty and possibility.\r\n" +
-                "- Mid values (26–75): highlight patterns, recurring names, or locations.\r\n" +
-                "- High values (76–100): highlight urgency and how little room is left to maneuver.\r\n\r\n" +
-
-                " If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed so far.\r\n" +
-                "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
-                "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
-                "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
-                "- Early-stage locations (InitialInvestigation) should influence the tone with uncertainty or fragmented clues.\r\n" +
-                "- ForkInvestigation locations should imply conflicting leads or divergent paths.\r\n" +
-                "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
-                "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
-
-
                 "You may draw on any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
@@ -449,48 +295,12 @@ namespace FrankyCLI.questgen_tools.Utils
             var logprompt =
                 "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
                 "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
-                "Write 100 words with natural flow.\r\n" +
-                "That paragraph must first justify why this objective must be completed here, then seamlessly fold into a brief investigative recap at the end.\r\n" +
+                "Write 50 words with natural flow.\r\n" +
+                "That paragraph must first justify why this objective must be completed here\r\n" +
                 "Do NOT introduce item names, quest titles, or made-up proper nouns unless they appear in the lore context.\r\n" +
                 "Do NOT invent new proper nouns unless they exist in the Lore Context.\r\n" +
                 "Write with subtle tension—never blunt exposition.\r\n" +
-                "Focus on mood, motive, tension, and urgency.\r\n" +
                 "Integrate lore naturally without quoting it.\r\n\r\n" +
-
-                "If a <QuestStage> tag is present, frame the justification according to that stage:\r\n" +
-                "- InitialInvestigations: this place feels like one of several uncertain starting points.\r\n" +
-                "- ForkInvestigations: this place matters because choosing it means committing to a particular line of inquiry.\r\n" +
-                "- DeepInvestigations: this place is where separate threads begin to cross.\r\n" +
-                "- FinalShowdown: this place is where the target’s long-running actions finally come into focus. " +
-                "Clearly describe what the target has been doing up to this moment—whether manipulating factions, extracting illicit resources, exploiting locals, hiding evidence, preparing a weapon, or orchestrating a larger scheme. " +
-                "Show how every clue from earlier investigations points to their ongoing operation: mention the pattern behind their movements, the purpose of the items they stole, or the deeper motive behind the trail they left. " +
-                "Emphasize what the target is attempting right now as you arrive—securing a final asset, activating dangerous tech, eliminating a witness, fleeing with critical data, or destroying the last proof of their crimes. " +
-                "Highlight why this exact location matters to their plan, and why stopping them here prevents the situation from escalating into something far worse. " +
-                "The tone should convey culmination, rising danger, and the sense that their scheme is seconds away from succeeding if left unchecked.\r\n\r\n" +
-
-                "If a <QuestProgress> tag is present:\r\n" +
-                "- Low values (0–25): emphasize confusion, rumor, and risk with limited insight.\r\n" +
-                "- Mid values (26–75): emphasize connections, patterns, and rising pressure.\r\n" +
-                "- High values (76–100): emphasize urgency, inevitability, and the narrow margin for action.\r\n\r\n" +
-
-                "If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed before reaching the CURRENT objective.\r\n" +
-                "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
-                "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
-                "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
-                "- Early-stage locations (InitialInvestigation) should influence the tone with uncertainty or fragmented clues.\r\n" +
-                "- ForkInvestigation locations should imply conflicting leads or divergent paths.\r\n" +
-                "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
-                "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
-
-                "Summary Requirement (merged into the same paragraph):\r\n" +
-                "- At the end of the SAME paragraph, the hunter folds in a brief recap—a compact segment under fifty words capturing where the investigation currently stands.\r\n" +
-                "- This recap is appended directly to the atmospheric justification with no header, no label, and no visual separator.\r\n" +
-                "- The recap MUST exclude the current objective and this location’s immediate events; it only summarizes what was discovered in prior stages and locations.\r\n" +
-                "- This recap gathers the trail so far: clues uncovered, rumors traded, patterns glimpsed, and suspicions that have started to take shape.\r\n" +
-                "- It stays inside the fiction: no system labels, no tag names, only details the hunter or their sources could plausibly put into words.\r\n" +
-                "- The recap should feel like an investigator’s quick briefing: what the trail has revealed, what seems to connect, and which conclusions the chase is drifting toward.\r\n" +
-                "- Keep this recap factual, tight, and grounded in what the records, memories, and prior steps have already established—no guesses about what has not yet been discovered.\r\n\r\n" +
 
                 "Style Guidelines:\r\n" +
                 "- Do not start with phrases like 'The objective is...' or 'You must...'\r\n" +
@@ -544,35 +354,15 @@ namespace FrankyCLI.questgen_tools.Utils
                     " inclusive.\r\n" +
                 "- Any date mentioned should feel incidental or diegetic—woven into memory, record-keeping, or spoken context rather than formatted as a header.\r\n\r\n" +
 
-                "If a <QuestStage> tag is present, shape what the speaker understands:\r\n" +
-                "- InitialInvestigations: the speaker senses something is wrong, but details are unclear.\r\n" +
-                "- ForkInvestigations: the speaker has seen conflicting signs and is unsure who to trust.\r\n" +
-                "- DeepInvestigations: the speaker recognizes patterns or suspects a larger plan.\r\n" +
-                "- FinalShowdown: the speaker understands how serious the situation is, even if they still lack full answers.\r\n\r\n" +
-
-                "If a <QuestProgress> tag is present:\r\n" +
-                "- Low values (0–25): the speaker should be mostly confused or anxious.\r\n" +
-                "- Mid values (26–75): the speaker should be troubled by how pieces are starting to fit together.\r\n" +
-                "- High values (76–100): the speaker should feel trapped between what they know and what they cannot stop.\r\n\r\n" +
-
-                "If one or more <QuestStageLocation> tags are present:\r\n" +
-                "- Treat them as the investigative trail the player has followed so far.\r\n" +
-                "- Each entry describes a past mission stage and the location where it occurred.\r\n" +
-                "- Use this history to maintain narrative continuity and acknowledge where previous clues were found.\r\n" +
-                "- Refer to past locations subtly—do not quote tag names or restate them verbatim.\r\n" +
-                "- Early-stage locations (InitialInvestigation) should influence the tone with uncertainty or fragmented clues.\r\n" +
-                "- ForkInvestigation locations should imply conflicting leads or divergent paths.\r\n" +
-                "- DeepInvestigation locations should reinforce emerging patterns or connections.\r\n" +
-                "- FinalShowdown outputs may treat earlier locations as foreshadowing or context for the target’s plans.\r\n\r\n" +
 
                 "Length and Style Requirements:\r\n" +
-                "- The entire log entry must stay under 250 words; do not exceed this limit.\r\n" + 
+                "- The entire log entry must stay under 100 words; do not exceed this limit.\r\n" + 
                 "- Favor tight, precise language over filler—every sentence should reveal character, world, or stakes.\r\n" +
                 "- Avoid repeating the same idea in different words; once something is established, build on it instead of restating it.\r\n" +
                 "- Do not spend words summarizing the LoreContext; assume it exists off-page and focus on what the speaker feels, remembers, or is living through right now.\r\n" +
                 "- Prefer concrete details, specific memories, and sharp impressions over vague generalities or broad statements.\r\n" +
                 "- If in doubt, cut adjectives, hedging, or restated thoughts before cutting sensory or emotional beats.\r\n\r\n" +
-                "- It may vary slightly (e.g., 100–250 words) as long as the narrative flows naturally.\r\n" +
+                "- It may vary slightly (e.g., 50–150 words) as long as the narrative flows naturally.\r\n" +
                 "- The entry should read like a personal, intimate account—raw, unpolished, and emotionally grounded.\r\n" +
                 "- Prioritize sensory impressions, half-understood implications, and the speaker’s internal conflict.\r\n" +
                 "- Maintain first-person perspective throughout.\r\n" +

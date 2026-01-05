@@ -22,7 +22,7 @@ namespace FrankyCLI
         {
             // Inputs / knobs
             int maxRoomsToPlace = 1;          // boss: only place a single room
-            int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
+            int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
 
@@ -39,7 +39,7 @@ namespace FrankyCLI
 
                 // Choose the NORTH-facing open connector farthest from the starting position to anchor the boss room
                 int openIndex = ChooseFarthestNorthFromStart(state.openConnectors, state.StartingPosition);
-                if (openIndex < 0)
+                if (openIndex < 0 || attempts > maxAttempts - 5)
                 {
                     if (TryPlaceSpineNorthConnector(state, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
                     {

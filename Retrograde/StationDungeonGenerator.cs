@@ -62,7 +62,7 @@ namespace FrankyCLI
 
 
 
-        public void GenerateDungeon(Cell cell, Location location, string theme, string faction, string size)
+        public void GenerateDungeon(Cell cell, Location location, string faction, string size)
         {
             DungeonState state = new DungeonState(cell, location);
             state.Faction = faction;
@@ -71,9 +71,9 @@ namespace FrankyCLI
             List<IGenPass> passes = new List<IGenPass>
             {
                 //Place rooms
-                new SpineTopologyPass(),            
-                new DistrictTopologyPass("rg_livinglist"),
+                new SpineTopologyPass(),
                 new BossTopologyPass("boss"),
+                new DistrictTopologyPass("rg_livinglist"),
                 new UtilTopologyPass("rg_utillist"),
                 new DoorPass(),
                 //Seal connectors
