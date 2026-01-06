@@ -66,6 +66,7 @@ namespace FrankyCLI
         {
             DungeonState state = new DungeonState(cell, location);
             state.Faction = faction;
+            state.Size = size;
 
             //Multi-Pass Generation Pipeline
             List<IGenPass> passes = new List<IGenPass>
