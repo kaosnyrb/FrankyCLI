@@ -66,7 +66,7 @@ namespace FrankyCLI
 
                 AITools.AIMODE = false;
                 var outlawQuest = new StaticLayoutQuestChain(myMod);
-                outlawQuest.InvestigationTemplate = "Space Station Activator - spacer small light guard";
+                outlawQuest.InvestigationTemplate = "Space Station Activator - spacer Medium light guard";
                 //outlawQuest.DeepTempalte = "Space Destroy - unguarded";
                 //outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
                 /*
