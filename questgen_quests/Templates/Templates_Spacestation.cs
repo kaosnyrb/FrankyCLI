@@ -18,7 +18,7 @@ namespace FrankyCLI.questgen_quests
             //-------------------------------  INVESTIGATION ------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Space Station Activator - unguarded",
+                Name = "Space Station Activator - spacer small light guard",
                 Description = "Find info about the target from a clue in a space station",
                 Location = "A clue hidden on a lightly defended small space station taken over by a Spacer Gang",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_station"),

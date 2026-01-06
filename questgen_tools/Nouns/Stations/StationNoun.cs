@@ -29,7 +29,9 @@ namespace FrankyCLI.questgen_tools
             List<string> callLetters = new List<string>
             {
                 "BF", "XR", "NS", "OD", "VA", "HG", "ZE", "PH", "IR", "KQ",
-                "LM", "TR", "UV", "QA", "CY", "RN", "SD", "WG", "TX", "JY"
+                "LM", "TR", "UV", "QA", "CY", "RN", "SD", "WG", "TX", "JY",
+                "AL","CP","DK","EM","FS","GV","HT","JC","KN","LP",
+                "MQ","NW","OY","PR","QS","RU","SV","TY","WX","ZA"
             };
 
             string letterPart = callLetters[random.Next(callLetters.Count)];
@@ -39,25 +41,13 @@ namespace FrankyCLI.questgen_tools
 
             List<string> stationtypes = new List<string>
             {
-                "Station",
-                "Outpost",
-                "Facility",
-                "Platform",
-                "Installation",
-                "Complex",
-                "Depot",
-                "Hub",
-                "Relay",
-                "Array",
-                "Terminal",
-                "Dock",
-                "Yard",
-                "Anchorage",
-                "Spindle",
-                "Spire",
-                "Module",
-                "Node",
-                "Enclave"
+                "Station","Outpost","Facility","Platform","Installation","Complex","Depot","Hub","Relay","Array",
+                "Terminal","Dock","Yard","Anchorage","Spindle","Spire","Module","Node","Enclave",
+                "Bastion","Citadel","Stronghold","Redoubt","Sanctum","Vault","Foundry","Forge","Works","Refinery",
+                "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor","ListeningPost","Watchtower",
+                "Harbor","Drydock",
+                "Arcology","Habitat","Hab","Colony","Settlement","Commune","Barracks","Garrison","Command",
+                "Operations","Control","CommandPost","Headquarters","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
             };
 
             string stationPart = stationtypes[random.Next(stationtypes.Count)];

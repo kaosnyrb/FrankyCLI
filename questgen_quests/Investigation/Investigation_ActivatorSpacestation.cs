@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
+using FrankyCLI.questgen_tools.Nouns.Crew;
 using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -39,6 +40,8 @@ namespace FrankyCLI.questgen_quests
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
+                "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
+                "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
             });
             Console.WriteLine("datasource: " + datasource);
 
@@ -46,6 +49,8 @@ namespace FrankyCLI.questgen_quests
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
+                "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
+                "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
             });
             Console.WriteLine("questname: " + questname);
 
@@ -58,7 +63,9 @@ namespace FrankyCLI.questgen_quests
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
+                "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
+                "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
+                "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
             });
             Console.WriteLine("logmessage: " + logmessage);
 
@@ -83,7 +90,7 @@ namespace FrankyCLI.questgen_quests
                 "Current Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Board the " + stationname + " and find the " + datasource + "\r\n",
                 "Spacestation containing the Objective: " + stationname + "\r\n",
-                "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
+                "Faction this station belongs to: " + missionTemplate.parameters["Faction"].ToString() + "\r\n"
             });
             var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
 
@@ -98,9 +105,14 @@ namespace FrankyCLI.questgen_quests
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_station_quest", "DeathItems", frmlst.ToLink<IStarfieldMajorRecordGetter>());
 
+
+            //NPCS
+            var gang = GangManager.GetGang();
+            var npclst = gang.GenerateGang();
+            newQuest.SetScriptProperty("duout_space_station_quest", "Corpses", npclst.ToLink());
+
             //We set the spawn marker to one of random ones so the target is in different places
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
-
 
             //Create the spacestation;
             StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString());

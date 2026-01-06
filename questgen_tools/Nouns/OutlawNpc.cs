@@ -74,6 +74,91 @@ namespace FrankyCLI.questgen_tools
 
         public string GenerateName()
         {
+            var random = RandomUtils.random;
+
+            var seedOccupations = new List<string>()
+            {
+                "salvage runner",
+                "data slicer",
+                "frontier prospector",
+                "blockade runner",
+                "exo-suit merc",
+                "station fixer",
+                "freight hijacker",
+                "deep space surveyor",
+                "guild enforcer",
+                "black-market courier",
+                "asteroid miner",
+                "stealth pilot",
+                "shipboard engineer",
+                "contraband broker",
+                "gunship navigator"
+            };
+
+            var seedTraits = new List<string>()
+            {
+                "ruthless patience",
+                "cold precision",
+                "reckless daring",
+                "quiet calculation",
+                "loyal streak",
+                "grudge holder",
+                "opportunist",
+                "methodical thinker",
+                "sharp tongue",
+                "stoic resolve",
+                "paranoid caution",
+                "flashy bravado"
+            };
+
+            var seedGearOptions = new List<string>()
+            {
+                "coil pistol",
+                "ion cutter",
+                "scrambler rig",
+                "grav boots",
+                "patched flight jacket",
+                "signal jammer",
+                "lockbreaker kit",
+                "plasma blade",
+                "long-range scope",
+                "cargo drone"
+            };
+
+            var seedElements = new List<string>()
+            {
+                "cinder",
+                "frost",
+                "ember",
+                "iron",
+                "cobalt",
+                "amber",
+                "slate",
+                "quartz",
+                "ash",
+                "jet"
+            };
+
+            var seedLocales = new List<string>()
+            {
+                "outer ring stations",
+                "frontier refineries",
+                "illicit starports",
+                "ore haulers",
+                "low-orbit docks",
+                "dust-world towns",
+                "frozen moons",
+                "orbital scrapyards",
+                "smuggler lanes",
+                "secluded research outposts"
+            };
+
+            string seedOccupation = seedOccupations[random.Next(seedOccupations.Count)];
+            string seedTrait = seedTraits[random.Next(seedTraits.Count)];
+            string seedGearCue = seedGearOptions[random.Next(seedGearOptions.Count)];
+            string seedElement = seedElements[random.Next(seedElements.Count)];
+            string seedLocale = seedLocales[random.Next(seedLocales.Count)];
+
             string nameprompt =
                 "Generate a single character name following all rules below. " +
                 "Do NOT explain anything. Output ONLY one final name.\r\n\r\n" +
@@ -106,10 +191,18 @@ namespace FrankyCLI.questgen_tools
                 "- Criminal roles: stealth, notoriety, underworld reputation (e.g., \"Ghostline\", \"Blackjack\").\r\n" +
                 "- Labor roles: strength, endurance, earth/mining motifs (e.g., \"Dustback\", \"Hardpan\").\r\n\r\n" +
 
+                "SEED CUES (use 1-2 of these directly to inspire the nickname or alias; avoid generic sci-fi words):\r\n" +
+                "- Occupation vibe: " + seedOccupation + ".\r\n" +
+                "- Personality edge: " + seedTrait + ".\r\n" +
+                "- Signature gear: " + seedGearCue + ".\r\n" +
+                "- Element/colour motif: " + seedElement + ".\r\n" +
+                "- Operating locale: " + seedLocale + ".\r\n" +
+                "- Avoid overused callsigns like Vector, Vektor, Shadow, Phantom, Ghost.\r\n\r\n" +
+
                 "LORE-AWARE GUIDANCE:\r\n" +
                 "- Infuse subtle hints of personality, background, or reputation influenced by the broader lore context.\r\n" +
                 "- Never quote lore directly; imply connections through mood, tone, or style.\r\n" +
-                "- Do not invent new lore—names should feel inspired by, not contradictory to, established themes.\r\n\r\n" +
+                "- Do not invent new lore-names should feel inspired by, not contradictory to, established themes.\r\n\r\n" +
 
                 "FORMATTING RULES:\r\n" +
                 "- If a nickname is included, place it in quotes.\r\n" +
@@ -224,7 +317,7 @@ namespace FrankyCLI.questgen_tools
             sb.AppendLine("Output rules:");
             sb.AppendLine("- Only include the diary/log entries in the response.");
             sb.AppendLine("- Do not restate these instructions, and do not include headings like \"Diary\" or \"Character Background\" unless they feel diegetic.");
-            sb.AppendLine("- Keep the total length reasonably concise (aim for under 400 words).");
+            sb.AppendLine("- Keep the total length reasonably concise (aim for under 300 words).");
             sb.AppendLine();
 
             sb.AppendLine("LoreContext:");

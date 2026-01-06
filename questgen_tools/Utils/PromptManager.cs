@@ -76,38 +76,6 @@ namespace FrankyCLI.questgen_tools.Utils
             sb.AppendLine("        or long-term plans. Give 2–4 key drivers that explain their actions.");
             sb.AppendLine("    </ Motives >");
             sb.AppendLine();
-            sb.AppendLine("    < Rumors >");
-            sb.AppendLine("        Provide 3–6 conflicting rumors circulating about the fugitive.");
-            sb.AppendLine("        Include misinformation, half-truths, and red herrings.");
-            sb.AppendLine("    </ Rumors >");
-            sb.AppendLine();
-            sb.AppendLine("    < Leads >");
-            sb.AppendLine("        Provide 3–5 actionable investigative leads or threads.");
-            sb.AppendLine("        These should map naturally to mission templates: ");
-            sb.AppendLine("        informants, scenes of violence, abandoned tech, hacked logs, ");
-            sb.AppendLine("        family ties, shady factions, medical cover-ups, etc.");
-            sb.AppendLine("    </ Leads >");
-            sb.AppendLine();
-            sb.AppendLine("    < Locations >");
-            sb.AppendLine("        Provide 3–6 interesting locations connected to the fugitive’s journey.");
-            sb.AppendLine("        Include contrasts: frontier towns, corporate sites, derelicts, outposts, ");
-            sb.AppendLine("        cult shrines, black-market haunts, or war debris fields.");
-            sb.AppendLine("        Add 1–2 \"hidden\" or \"unknown\" locations as potential twists.");
-            sb.AppendLine("    </ Locations >");
-            sb.AppendLine();
-            sb.AppendLine("    < Threats >");
-            sb.AppendLine("        Describe the dangers surrounding the fugitive:");
-            sb.AppendLine("        - Environmental hazards");
-            sb.AppendLine("        - Faction enemies");
-            sb.AppendLine("        - Loyal allies");
-            sb.AppendLine("        - Traps, paranoia, or psychological breakdowns");
-            sb.AppendLine("    </ Threats >");
-            sb.AppendLine();
-            sb.AppendLine("    < MysteryElements >");
-            sb.AppendLine("        Add 2–3 unresolved questions or secrets about the fugitive’s past.");
-            sb.AppendLine("        These should be open-ended so different quests can resolve them differently.");
-            sb.AppendLine("    </ MysteryElements >");
-            sb.AppendLine();
             sb.AppendLine("</ LoreFile >");
             sb.AppendLine();
             sb.AppendLine("----------------------------------------------------------------------");
@@ -137,12 +105,17 @@ namespace FrankyCLI.questgen_tools.Utils
         public static string GetQuestName(List<string> Addons)
         {
             var questnameprompt =
-                "Generate a quest name inspired by the lore and themes provided.\r\n" +
+                "Generate a quest name grounded in the lore and themes provided.\r\n" +
                 "Constraints:\r\n" +
-                "- Four words or less.\r\n" +
-                "- Only output the quest name (no punctuation or explanation).\r\n\r\n" +
+                "- 2-4 clear words in everyday language.\r\n" +
+                "- Only output the quest name (no punctuation or explanation).\r\n" +
+                "- Reflect one concrete element from <LoreContext> (faction, place, action); avoid vague mood words.\r\n" +
+                "- Do not invent new names or factions beyond <LoreContext>.\r\n" +
+                "- Style: plain, declarative; no metaphor, riddles, or mysterious phrasing.\r\n" +
+                "- Flavor: prefer a strong action verb or specific noun from <LoreContext> to add punch (e.g., \"Seize\", \"Amber Smelter\", \"Dock Raid\").\r\n" +
+                "- If using an adjective, make it concrete (e.g., \"Rust\", \"Frozen\", \"Broken\") not abstract (no \"Eternal\", \"Mysterious\").\r\n\r\n" +
 
-                "Use the Lore Context model below for tone, theme, factions, mystery, and narrative flavor.\r\n" +
+                "Use the Lore Context model below for tone, theme and narrative flavor.\r\n" +
                 "You may draw on any relevant parts (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n" +
                 "Do NOT quote the lore; derive meaning and style from it.\r\n\r\n" +
 
@@ -172,7 +145,10 @@ namespace FrankyCLI.questgen_tools.Utils
                 "Generate a three-word-or-less object name that contains a clue to a character's location, intentions, or next move.\r\n" +
                 "Use tone, themes, symbols, and motifs from the Lore Context.\r\n" +
                 "Do NOT quote lore; infer from it.\r\n" +
-                "Only output the object name.\r\n\r\n" +
+                "Only output the object name.\r\n" +
+                "- Use literal descriptors pulled from <LoreContext> (e.g., 'Dockmaster Ledger', 'Sealed Cargo Case').\r\n" +
+                "- No cryptic phrases or invented names beyond <LoreContext>.\r\n" +
+                "- Style: plain and concrete.\r\n\r\n" +
 
                 "You may use any relevant elements in the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
@@ -201,7 +177,10 @@ namespace FrankyCLI.questgen_tools.Utils
                 "Generate a three-word-or-less contraband item name.\r\n" +
                 "It should thematically match the Lore Context and feel appropriate for the kind of conflict, intrigue, and stakes described there.\r\n" +
                 "Think in terms of illicit items, forbidden data, compromised artifacts, or black-market goods that could drive the story forward.\r\n" +
-                "Only output the contraband name.\r\n\r\n" +
+                "Only output the contraband name.\r\n" +
+                "- Use literal descriptors tied to <LoreContext>; avoid cryptic wording.\r\n" +
+                "- No invented proper nouns beyond <LoreContext>.\r\n" +
+                "- Style: plain and direct.\r\n\r\n" +
 
                 "Use any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements) for tone and flavor.\r\n\r\n" +
 
@@ -230,10 +209,14 @@ namespace FrankyCLI.questgen_tools.Utils
             var pickuppromt =
                 "Generate a short flavour-text story explaining how destroying this contraband reveals the next step of the quest.\r\n" +
                 "Use newline characters.\r\n" +
-                "One paragraph, under 50 words.\r\n\r\n" +
+                "One paragraph, under 50 words.\r\n" +
+                "Clarity:\r\n" +
+                "- State what was destroyed, what it revealed, and the immediate next lead in plain language.\r\n" +
+                "- Avoid mood adjectives, riddles, or teasing lines.\r\n" +
+                "- Use only concrete details present in <LoreContext>; do not invent new names.\r\n\r\n" +
 
                 "Use the Lore Context to influence atmosphere, mystery, faction tension, stakes, and the sense of uncovering a deeper plot.\r\n" +
-                "Do NOT quote the lore directly—blend it subtly.\r\n\r\n" +
+                "Do NOT quote the lore directly-blend it subtly.\r\n\r\n" +
 
                 "You may draw on any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
@@ -263,10 +246,14 @@ namespace FrankyCLI.questgen_tools.Utils
             var pickuppromt =
                 "Generate a short flavour-text story explaining how this clue reveals the next stage of the quest.\r\n" +
                 "Use newline characters.\r\n" +
-                "One paragraph, under 30 words.\r\n\r\n" +
+                "One paragraph, under 30 words.\r\n" +
+                "Clarity:\r\n" +
+                "- State what was found and how it points to the next step.\r\n" +
+                "- Avoid mood adjectives, riddles, or vague teasing.\r\n" +
+                "- Use only concrete details present in <LoreContext>; do not invent new names.\r\n\r\n" +
 
                 "Use the Lore Context to shape tone, mystery, symbolism, faction behaviour, and how this clue fits into the wider conflict or hunt.\r\n" +
-                "Do NOT quote lore—use it indirectly.\r\n\r\n" +
+                "Do NOT quote lore-use it indirectly.\r\n\r\n" +
 
                 "You may draw on any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
@@ -293,24 +280,21 @@ namespace FrankyCLI.questgen_tools.Utils
         {
             
             var logprompt =
-                "Generate a short, atmospheric narrative explaining why the objective must be completed at this location.\r\n" +
+                "Generate a short, declarative briefing explaining why the objective must be completed at this location.\r\n" +
                 "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
-                "Write 50 words with natural flow.\r\n" +
-                "That paragraph must first justify why this objective must be completed here\r\n" +
-                "Do NOT introduce item names, quest titles, or made-up proper nouns unless they appear in the lore context.\r\n" +
-                "Do NOT invent new proper nouns unless they exist in the Lore Context.\r\n" +
-                "Write with subtle tension—never blunt exposition.\r\n" +
-                "Integrate lore naturally without quoting it.\r\n\r\n" +
-
+                "Write 50 words.\r\n" +
+                "First justify why this objective must be completed here.\r\n" +
+                "Explicitly mention the bounty target by name exactly as given in <LoreContext>; weave it naturally into the paragraph.\r\n" +
+                "Do NOT introduce item names, quest titles, or proper nouns unless they appear in the lore context.\r\n" +
                 "Style Guidelines:\r\n" +
-                "- Do not start with phrases like 'The objective is...' or 'You must...'\r\n" +
+                "- Plain, direct language; no metaphor, riddles, or ominous hints.\r\n" +
                 "- Describe the situation as if briefing an experienced operative.\r\n" +
-                "- Keep it immersive, subtle, and diegetic.\r\n" +
+                "- Use one or two concrete details from <LoreContext>; if absent, leave them out rather than inventing.\r\n" +
                 "Draw inspiration from any relevant sections of the Lore Context:\r\n" +
                 "- Factions and their agendas\r\n" +
                 "- Characters or targets\r\n" +
                 "- Rumors, leads, or mysteries\r\n" +
-                "- The location’s atmosphere and history\r\n" +
+                "- The location's atmosphere and history\r\n" +
                 "- Motives, risks, and stakes\r\n" +
                 "- Threats tied to the area\r\n\r\n" +
 
@@ -341,8 +325,14 @@ namespace FrankyCLI.questgen_tools.Utils
             DateTime dateTime = new DateTime(2330, 5, 6);
             var logprompt =
                 "Generate a first-person log entry from someone directly affected by the events described in the Lore Context.\r\n" +
-                "Use the Lore Context to guide tone, personality, emotion, and perspective—especially mystery, fear, resentment, greed, or ambition.\r\n" +
-                "Do NOT quote lore directly; reflect it through lived experience.\r\n\r\n" +
+                "Use the Lore Context to guide tone, personality, emotion, and perspective-especially mystery, fear, resentment, greed, or ambition.\r\n" +
+                "Do NOT quote lore directly; reflect it through lived experience.\r\n" +
+                "Style and Clarity:\r\n" +
+                "- Under 100 words; tight, precise language.\r\n" +
+                "- Plain speech; avoid metaphor, riddles, or vague dread.\r\n" +
+                "- Describe one moment or observation; do not recap the whole context.\r\n" +
+                "- Mention one or two concrete details (place, action, consequence) from <LoreContext> only; do not invent names.\r\n" +
+                "- Maintain first-person perspective throughout.\r\n\r\n" +
 
                 "Date Instructions:\r\n" +
                 "- You may reference a date naturally within the narrative, but it is not required.\r\n" +
@@ -357,18 +347,16 @@ namespace FrankyCLI.questgen_tools.Utils
 
                 "Length and Style Requirements:\r\n" +
                 "- The entire log entry must stay under 100 words; do not exceed this limit.\r\n" + 
-                "- Favor tight, precise language over filler—every sentence should reveal character, world, or stakes.\r\n" +
+                "- Favor tight, precise language over filler-every sentence should reveal character, world, or stakes.\r\n" +
                 "- Avoid repeating the same idea in different words; once something is established, build on it instead of restating it.\r\n" +
                 "- Do not spend words summarizing the LoreContext; assume it exists off-page and focus on what the speaker feels, remembers, or is living through right now.\r\n" +
                 "- Prefer concrete details, specific memories, and sharp impressions over vague generalities or broad statements.\r\n" +
                 "- If in doubt, cut adjectives, hedging, or restated thoughts before cutting sensory or emotional beats.\r\n\r\n" +
-                "- It may vary slightly (e.g., 50–150 words) as long as the narrative flows naturally.\r\n" +
-                "- The entry should read like a personal, intimate account—raw, unpolished, and emotionally grounded.\r\n" +
-                "- Prioritize sensory impressions, half-understood implications, and the speaker’s internal conflict.\r\n" +
-                "- Maintain first-person perspective throughout.\r\n" +
+                "- The entry should read like a personal, intimate account-raw, unpolished, and emotionally grounded.\r\n" +
+                "- Prioritize sensory impressions, half-understood implications, and the speaker's internal conflict.\r\n" +
                 "- Do NOT summarize; immerse the reader in the moment as the speaker lived it.\r\n" +
-                "- Avoid melodrama, but allow quiet dread, tension, or determination to emerge from the speaker’s voice.\r\n" +
-                "- The log should feel like a real spacers’ or settlers’ journal entry, not a formal report.\r\n" +
+                "- Avoid melodrama, but allow quiet dread, tension, or determination to emerge from the speaker's voice.\r\n" +
+                "- The log should feel like a real spacers' or settlers' journal entry, not a formal report.\r\n" +
                 "- Ensure subtle continuity with the investigative history without repeating events verbatim.\r\n\r\n" + 
 
                 "You may draw on any relevant sections (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
@@ -386,6 +374,41 @@ namespace FrankyCLI.questgen_tools.Utils
             var results = AITools.RunPrompt(logprompt);
 
             for (int i = 0; i < 10 && results.Length < 100; i++)
+            {
+                results = AITools.RunPrompt(logprompt);
+            }
+            return results;
+        }
+
+        // ------------------------------
+        // Mission Briefing Dataslate
+        // ------------------------------
+        public static string GetMissonBriefingDataslate(List<string> Addons)
+        {
+            var logprompt =
+                "Write a mission briefing dataslate for the player.\r\n" +
+                "- Length: ~200 words (aim for 180-220).\r\n" +
+                "- Tone: concise field report written for a professional hunter.\r\n" +
+                "- Purpose: give the first breadcrumb to track the bounty target at the initial location.\r\n" +
+                "- Explicitly name the target exactly as it appears in <LoreContext> and summarize who they are and why we're hunting them.\r\n" +
+                "- Identify the first destination from provided context and explain why the target is likely there and what to do upon arrival.\r\n" +
+                "- Include one or two concrete details from <LoreContext> (faction, habit, method, recent sighting) to ground the lead.\r\n" +
+                "- No riddles, no mystery tone; clear actionable intelligence.\r\n" +
+                "- Do NOT invent new names, factions, or locations beyond <LoreContext> and the provided add-ons.\r\n\r\n" +
+
+                "Use any relevant sections (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
+
+                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+
+                "Additional Information:\r\n";
+
+            foreach (var item in Addons)
+                logprompt += item;
+
+            var results = AITools.RunPrompt(logprompt);
+
+            // retry if the model undershoots the length significantly
+            for (int i = 0; i < 5 && results.Length < 800; i++)
             {
                 results = AITools.RunPrompt(logprompt);
             }
