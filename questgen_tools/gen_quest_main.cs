@@ -64,7 +64,7 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = true;
+                AITools.AIMODE = false;
                 var outlawQuest = new StaticLayoutQuestChain(myMod);
                 outlawQuest.InvestigationTemplate = "Space Station Activator - spacer small light guard";
                 //outlawQuest.DeepTempalte = "Space Destroy - unguarded";

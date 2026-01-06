@@ -30,6 +30,15 @@ namespace FrankyCLI
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
             RoomUtils roomUtils = new RoomUtils(roomlist);
+            var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var room in state.placedRooms)
+            {
+                if (!string.IsNullOrEmpty(room.Prefab?.PrefabEditorId))
+                {
+                    usedPrefabIds.Add(room.Prefab.PrefabEditorId);
+                }
+            }
 
             //Sizing tweaks
             switch (state.Size)
@@ -77,7 +86,8 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
+                    var prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
+                    var nextPrefab = new RoomPrefab(prefabId);
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -119,6 +129,7 @@ namespace FrankyCLI
                             YawSteps = yawSteps,
                             Connectors = nextConnectors
                         });
+                        usedPrefabIds.Add(nextPrefab.PrefabEditorId);
 
                         roomsPlaced++;
                         placed = true;
@@ -213,5 +224,63 @@ namespace FrankyCLI
             return dx * dx + dy * dy + dz * dz;
         }
 
+        private static string ChoosePrefabId(
+            RoomUtils roomUtils,
+            string tileset,
+            string district,
+            HashSet<string> usedPrefabIds)
+        {
+            var listKey = roomUtils.listName + "_" + tileset;
+            if (roomUtils.roomTemplates.TryGetValue(listKey, out var formList) &&
+                formList?.Items != null &&
+                formList.Items.Count > 0)
+            {
+                var allCandidates = new List<string>();
+
+                foreach (var item in formList.Items)
+                {
+                    if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) ||
+                        string.IsNullOrEmpty(packIn?.EditorID))
+                    {
+                        continue;
+                    }
+
+                    if (!string.IsNullOrEmpty(district) &&
+                        !packIn.EditorID.Contains(district, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    allCandidates.Add(packIn.EditorID);
+                }
+
+                var unusedRooms = allCandidates
+                    .Where(id => !usedPrefabIds.Contains(id) &&
+                                 id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                    .ToList();
+
+                if (unusedRooms.Count > 0)
+                    return unusedRooms[RandomUtils.random.Next(unusedRooms.Count)];
+
+                var unusedAny = allCandidates
+                    .Where(id => !usedPrefabIds.Contains(id))
+                    .ToList();
+
+                if (unusedAny.Count > 0)
+                    return unusedAny[RandomUtils.random.Next(unusedAny.Count)];
+
+                var rooms = allCandidates
+                    .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                    .ToList();
+
+                if (rooms.Count > 0)
+                    return rooms[RandomUtils.random.Next(rooms.Count)];
+
+                if (allCandidates.Count > 0)
+                    return allCandidates[RandomUtils.random.Next(allCandidates.Count)];
+            }
+
+            return roomUtils.GetRoom(tileset, district);
+        }
     }
 }
