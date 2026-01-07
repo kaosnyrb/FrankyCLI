@@ -67,10 +67,10 @@ namespace FrankyCLI
 
             // Inputs / knobs
             int maxRoomsToPlace = 10;          // hard limit (rooms)
-            int maxAttempts = 2500;              // hard limit (failed tries) to avoid infinite loops
+            int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.5f; // tweak: world units clearance
-            int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
-            const int maxPlans = 20; // cap number of planning retries
+            int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
+            const int maxPlans = 30; // cap number of planning retries
 
 
             //Sizing tweaks

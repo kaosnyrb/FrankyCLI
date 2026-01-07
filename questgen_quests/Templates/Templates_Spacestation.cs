@@ -64,6 +64,7 @@ namespace FrankyCLI.questgen_quests
                     {"DefendingShipCountMax", 2 }
                 }
             });
+
             //-------------------------------  SHOWDOWN ------------------------------------------
 
         }
