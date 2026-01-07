@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FrankyCLI.questgen_tools;
+using Noggog;
 
 namespace FrankyCLI.Retrograde.Passes
 {
@@ -41,6 +42,10 @@ namespace FrankyCLI.Retrograde.Passes
 
         public void RunPass(DungeonState state)
         {
+            const float positionTolerance = 0.01f;
+            const float startPosTolerance = 0.01f; // start connector sits exactly at StartingPosition
+            var sealedPositions = new HashSet<string>();
+
             // Close any connectors below the allowed Y plane first, then process the rest.
             var ordered = state.openConnectors
                 .OrderBy(c => c.WorldPos.Y < state.YMin ? 0 : 1)
@@ -48,6 +53,9 @@ namespace FrankyCLI.Retrograde.Passes
 
             foreach (var open in ordered)
             {
+                if (ShouldSkipStartConnector(open, state, startPosTolerance))
+                    continue;
+
                 bool belowYMin = open.WorldPos.Y < state.YMin;
 
                 // First try with strict matching; if we're below YMin, relax tileset matching to ensure we seal it.
@@ -57,12 +65,21 @@ namespace FrankyCLI.Retrograde.Passes
                     placed = TryPlaceBlocker(open, state, requireTilesetMatch: false);
                 }
 
+                if (placed)
+                {
+                    sealedPositions.Add(PositionKey(open.WorldPos, positionTolerance));
+                }
+
                 // Optional: log missing blocker connector rather than hard fail
                 if (!placed)
                 {
                     // You may want to add logging here, e.g. Debug.WriteLine(...)
                 }
             }
+
+            // After the usual open-connector sealing, sweep every placed room for any stray connectors
+            // that failed to connect and close them off.
+            SealUnconnectedPlacedMarkers(state, sealedPositions, positionTolerance);
         }
 
         private bool TryPlaceBlocker(OpenConnector open, DungeonState state, bool requireTilesetMatch)
@@ -106,6 +123,111 @@ namespace FrankyCLI.Retrograde.Passes
             }
 
             return false;
+        }
+
+        private void SealUnconnectedPlacedMarkers(DungeonState state, HashSet<string> sealedPositions, float tolerance)
+        {
+            if (state.placedRooms == null || state.placedRooms.Count == 0)
+                return;
+
+            var connectors = new List<(OpenConnector Conn, int RoomIndex)>();
+            for (int roomIndex = 0; roomIndex < state.placedRooms.Count; roomIndex++)
+            {
+                var room = state.placedRooms[roomIndex];
+                if (room.Connectors == null)
+                    continue;
+
+                foreach (var connector in room.Connectors)
+                {
+                    connectors.Add((
+                        new OpenConnector
+                        {
+                            Parsed = connector.Parsed,
+                            YawSteps = room.YawSteps,
+                            WorldPos = room.WorldPos + connector.LocalPos
+                        },
+                        roomIndex));
+                }
+            }
+
+            if (connectors.Count == 0)
+                return;
+
+            var matched = new bool[connectors.Count];
+            for (int i = 0; i < connectors.Count; i++)
+            {
+                if (matched[i])
+                    continue;
+
+                for (int j = i + 1; j < connectors.Count; j++)
+                {
+                    if (matched[j])
+                        continue;
+
+                    if (connectors[i].RoomIndex == connectors[j].RoomIndex)
+                        continue;
+
+                    if (!SamePosition(connectors[i].Conn.WorldPos, connectors[j].Conn.WorldPos, tolerance))
+                        continue;
+
+                    if (ConnectorUtils.Opposite(connectors[i].Conn.Parsed.Direction) != connectors[j].Conn.Parsed.Direction)
+                        continue;
+
+                    if (!string.Equals(connectors[i].Conn.Parsed.DoorSize, connectors[j].Conn.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (!string.Equals(connectors[i].Conn.Parsed.Tileset, connectors[j].Conn.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    matched[i] = matched[j] = true;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < connectors.Count; i++)
+            {
+                if (matched[i])
+                    continue;
+
+                var open = connectors[i].Conn;
+                if (ShouldSkipStartConnector(open, state, tolerance))
+                    continue;
+
+                var key = PositionKey(open.WorldPos, tolerance);
+                if (sealedPositions.Contains(key))
+                    continue;
+
+                bool placed = TryPlaceBlocker(open, state, requireTilesetMatch: true);
+                if (!placed && open.WorldPos.Y < state.YMin)
+                {
+                    placed = TryPlaceBlocker(open, state, requireTilesetMatch: false);
+                }
+
+                if (placed)
+                {
+                    sealedPositions.Add(key);
+                }
+            }
+        }
+
+        private static bool SamePosition(P3Float a, P3Float b, float tolerance)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+            float dz = a.Z - b.Z;
+            return dx * dx + dy * dy + dz * dz <= tolerance * tolerance;
+        }
+
+        private static string PositionKey(P3Float pos, float tolerance)
+        {
+            float scale = 1f / tolerance;
+            return $"{MathF.Round(pos.X * scale)}|{MathF.Round(pos.Y * scale)}|{MathF.Round(pos.Z * scale)}";
+        }
+
+        private static bool ShouldSkipStartConnector(OpenConnector open, DungeonState state, float posTolerance)
+        {
+            // Protect the initial spine/start connector: sits exactly at StartingPosition.
+            return SamePosition(open.WorldPos, state.StartingPosition, posTolerance);
         }
     }
 }
