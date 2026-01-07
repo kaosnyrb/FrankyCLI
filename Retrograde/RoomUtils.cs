@@ -33,7 +33,7 @@ namespace FrankyCLI.Retrograde
             listName = listname;
             //Load the prefabs for the theme
 
-            Console.WriteLine("Lists: " + roomTemplates.Count);
+            //Console.WriteLine("Lists: " + roomTemplates.Count);
         }
 
         public string GetRoom(string theme, string type = null)
@@ -90,7 +90,7 @@ namespace FrankyCLI.Retrograde
             var maxY = Math.Max(bounds.First.Y, bounds.Second.Y);
             var maxZ = Math.Max(bounds.First.Z, bounds.Second.Z);
 
-            const float edgeTolerance = 0.05f; // allow connectors sitting right on the boundary
+            const float edgeTolerance = 0.01f; // allow connectors sitting right on the boundary
 
             foreach (var marker in prefab.Markers)
             {

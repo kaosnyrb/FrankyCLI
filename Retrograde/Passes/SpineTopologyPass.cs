@@ -78,7 +78,7 @@ namespace FrankyCLI
             int maxRoomsToPlace = 10;          // hard limit (rooms)
             int maxAttempts = 2500;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
-            int maxCandidatePrefabsPerConnector = 64; // avoid thrashing on a single open connector
+            int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
 
 
             //Sizing tweaks
@@ -94,8 +94,6 @@ namespace FrankyCLI
                     maxRoomsToPlace = 6 + RandomUtils.random.Next(6);
                     break;
             }
-
-
             // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
             var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
 
@@ -241,6 +239,8 @@ namespace FrankyCLI
                     continue;
                 }
             }
+
+            Console.WriteLine("Spine rooms placed: " + roomsPlaced + " / " + maxRoomsToPlace);
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)

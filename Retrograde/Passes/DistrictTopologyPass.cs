@@ -25,9 +25,9 @@ namespace FrankyCLI
         {
             // Inputs / knobs
             int maxRoomsToPlace = 10;          // hard limit (rooms)
-            int maxAttempts = 500;              // hard limit (failed tries) to avoid infinite loops
-            float collisionPadding = -1.5f; // tweak: world units clearance
-            int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
+            int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
+            float collisionPadding = -0.3f; // tweak: world units clearance
+            int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
             RoomUtils roomUtils = new RoomUtils(roomlist);
             var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -162,6 +162,8 @@ namespace FrankyCLI
                     continue;
                 }
             }
+            Console.WriteLine("District rooms placed: " + roomsPlaced + " / " + maxRoomsToPlace);
+
         }
 
         private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
