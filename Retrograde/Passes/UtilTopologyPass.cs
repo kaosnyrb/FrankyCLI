@@ -30,8 +30,17 @@ namespace FrankyCLI
                 : Math.Max(1, (int)Math.Round(startingOpenConnectors * 0.5f)); // aim for ~50% coverage
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
+            float samePrefabMinDistance = 30f; // keep identical util prefabs separated
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
             RoomUtils roomUtils = new RoomUtils(roomlist);
+            var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var room in state.placedRooms)
+            {
+                if (!string.IsNullOrEmpty(room.Prefab?.PrefabEditorId))
+                {
+                    usedPrefabIds.Add(room.Prefab.PrefabEditorId);
+                }
+            }
 
             if (maxRoomsToPlace == 0)
                 return;
@@ -66,7 +75,8 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
+                    var prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
+                    var nextPrefab = new RoomPrefab(prefabId);
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -91,6 +101,8 @@ namespace FrankyCLI
                         var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
                         if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
                             continue;
+                        if (IsTooCloseToSamePrefab(nextPrefab.PrefabEditorId, nextPos, state.placedRooms, samePrefabMinDistance))
+                            continue;
 
                         // Place it with rotation
                         state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
@@ -108,6 +120,7 @@ namespace FrankyCLI
                             YawSteps = yawSteps,
                             Connectors = nextConnectors
                         });
+                        usedPrefabIds.Add(nextPrefab.PrefabEditorId);
 
                         roomsPlaced++;
                         placed = true;
@@ -140,6 +153,96 @@ namespace FrankyCLI
                     continue;
                 }
             }
+        }
+
+        private static string ChoosePrefabId(
+            RoomUtils roomUtils,
+            string tileset,
+            string district,
+            HashSet<string> usedPrefabIds)
+        {
+            var listKey = roomUtils.listName + "_" + tileset;
+            if (roomUtils.roomTemplates.TryGetValue(listKey, out var formList) &&
+                formList?.Items != null &&
+                formList.Items.Count > 0)
+            {
+                var allCandidates = new List<string>();
+
+                foreach (var item in formList.Items)
+                {
+                    if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) ||
+                        string.IsNullOrEmpty(packIn?.EditorID))
+                    {
+                        continue;
+                    }
+
+                    if (!string.IsNullOrEmpty(district) &&
+                        !packIn.EditorID.Contains(district, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    allCandidates.Add(packIn.EditorID);
+                }
+
+                var unusedRooms = allCandidates
+                    .Where(id => !usedPrefabIds.Contains(id) &&
+                                 id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                    .ToList();
+
+                if (unusedRooms.Count > 0)
+                    return unusedRooms[RandomUtils.random.Next(unusedRooms.Count)];
+
+                var unusedAny = allCandidates
+                    .Where(id => !usedPrefabIds.Contains(id))
+                    .ToList();
+
+                if (unusedAny.Count > 0)
+                    return unusedAny[RandomUtils.random.Next(unusedAny.Count)];
+
+                var rooms = allCandidates
+                    .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                    .ToList();
+
+                if (rooms.Count > 0)
+                    return rooms[RandomUtils.random.Next(rooms.Count)];
+
+                if (allCandidates.Count > 0)
+                    return allCandidates[RandomUtils.random.Next(allCandidates.Count)];
+            }
+
+            return roomUtils.GetRoom(tileset, district);
+        }
+
+        private static bool IsTooCloseToSamePrefab(
+            string prefabId,
+            P3Float candidatePos,
+            List<PlacedRoom> placedRooms,
+            float minDistance)
+        {
+            if (string.IsNullOrEmpty(prefabId))
+                return false;
+
+            float minDistSq = minDistance * minDistance;
+            for (int i = 0; i < placedRooms.Count; i++)
+            {
+                var placed = placedRooms[i];
+                if (placed.Prefab?.PrefabEditorId == null)
+                    continue;
+
+                if (!prefabId.Equals(placed.Prefab.PrefabEditorId, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                float dx = placed.WorldPos.X - candidatePos.X;
+                float dy = placed.WorldPos.Y - candidatePos.Y;
+                float dz = placed.WorldPos.Z - candidatePos.Z;
+                float distSq = dx * dx + dy * dy + dz * dz;
+
+                if (distSq < minDistSq)
+                    return true;
+            }
+
+            return false;
         }
     }
 }
