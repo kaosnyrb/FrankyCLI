@@ -165,10 +165,6 @@ namespace FrankyCLI
                         {
                             var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
 
-                            // Early rooms must avoid prefabs that expose south connectors after rotation.
-                            if (roomsPlaced < 2 && nextConnectors.Any(c => c.Parsed.Direction == ConnectorDirection.South))
-                                continue;
-
                             var compatible = nextConnectors
                                 .Where(c =>
                                     c.Parsed.Direction == requiredDir &&
@@ -237,7 +233,7 @@ namespace FrankyCLI
                 bool success = roomsPlaced >= maxRoomsToPlace;
                 if (!success)
                 {
-                    Console.WriteLine("[Plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);                            
+                    Console.WriteLine("[Spine Plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);                            
                     continue;
                 }
 
@@ -248,7 +244,7 @@ namespace FrankyCLI
                 state.placedRooms = plannedRooms;
                 state.openConnectors = plannedOpenConnectors;
                 state.YMin = yMin;
-                Console.WriteLine("[Plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
+                Console.WriteLine("[Spine Plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
                 return;
             }
 

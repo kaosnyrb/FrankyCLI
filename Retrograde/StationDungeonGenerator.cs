@@ -79,7 +79,7 @@ namespace FrankyCLI
                 new DoorPass(),
                 //Seal connectors
                 new WindowSealingPass(),
-                new ConectorSealingPass(),
+                new ConnectorSealingPass(),
                 //Fill content
                 new EnemyPass(),
                 new ContentPass(),

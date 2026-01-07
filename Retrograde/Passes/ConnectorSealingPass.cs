@@ -9,7 +9,7 @@ using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI.Retrograde.Passes
 {
-    public class ConectorSealingPass : IGenPass
+    public class ConnectorSealingPass : IGenPass
     {
         public string GetDoorBlocker(string doorSize, string tileset)
         {

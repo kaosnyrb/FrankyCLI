@@ -25,153 +25,196 @@ namespace FrankyCLI
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
+            const int maxPlans = 10;
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_spinelist");
 
-            // Main placement loop: iterates over open connectors, but bounded
-            int roomsPlaced = 0;
-            int attempts = 0;
-
-            while (roomsPlaced < maxRoomsToPlace && state.openConnectors.Count > 0 && attempts < maxAttempts)
+            for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
-                attempts++;
-
-                // Choose the NORTH-facing open connector farthest from the starting position to anchor the boss room
-                int openIndex = ChooseFarthestNorthFromStart(state.openConnectors, state.StartingPosition);
-                if (openIndex < 0 || attempts > maxAttempts - 5)
+                var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var room in state.placedRooms)
                 {
-                    if (TryPlaceSpineNorthConnector(state, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
+                    if (!string.IsNullOrEmpty(room.Prefab?.PrefabEditorId))
                     {
-                        // We added a north-facing connector; try again.
+                        usedPrefabIds.Add(room.Prefab.PrefabEditorId);
+                    }
+                }
+
+                var plannedRooms = new List<PlacedRoom>(state.placedRooms);
+                var plannedOpenConnectors = new List<OpenConnector>(state.openConnectors);
+                var plannedPlacements = new List<PlacedObject>();
+
+                int roomsPlaced = 0;
+                int attempts = 0;
+
+                // Ensure we start with an open north connector by extending the spine if needed.
+                if (!plannedOpenConnectors.Any(c => c.Parsed.Direction == ConnectorDirection.North))
+                {
+                    if (!TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
+                    {
+                            Console.WriteLine("[Boss plan] {0}/{1} failed to seed north connector.", planAttempt + 1, maxPlans);
                         continue;
                     }
-                    // No suitable north-facing connector remains
-                    break;
-                }
-                var target = state.openConnectors[openIndex];
-
-                if (target.WorldPos.Y < state.YMin)
-                {
-                    //MAKE SURE YOU DON'T GO -Y
-                    continue;
                 }
 
-                // Remove it now to ensure we "try to iterate through all open connectors"
-                // (if we fail to place, we can choose to discard or re-add; discarding avoids loops)
-                state.openConnectors.RemoveAt(openIndex);
-
-                // We need a connector on nextPrefab that is OPPOSITE direction to target,
-                // and compatible on door/tileset (simple equality checks here).
-                var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
-
-                bool placed = false;
-
-                for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
+                // Main placement loop: iterates over open connectors, but bounded
+                while (roomsPlaced < maxRoomsToPlace && plannedOpenConnectors.Count > 0 && attempts < maxAttempts)
                 {
-                    var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
+                    attempts++;
 
-                    for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                    // Choose the NORTH-facing open connector farthest from the starting position to anchor the boss room
+                    int openIndex = ChooseFarthestNorthFromStart(plannedOpenConnectors, state.StartingPosition);
+                    if (openIndex < 0 || attempts > maxAttempts - 5)
                     {
-                        var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
-
-                        var compatible = nextConnectors
-                            .Where(c =>
-                                c.Parsed.Direction == requiredDir &&
-                                string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
-                                string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-
-                        if (compatible.Count == 0)
+                        if (TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
+                        {
+                            // We added a north-facing connector; try again.
                             continue;
-
-                        var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
-
-                        // Align using ROTATED local connector
-                        P3Float nextPos = target.WorldPos - chosen.LocalPos;
-
-                        // Collision using ROTATED bounds
-                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                        if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
-                            continue;
-
-                        // Place it with rotation
-                        state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-                        {
-                            Count = 1,
-                            Rotation = RgRotation.RotationToP3Float(yawSteps),
-                            Position = nextPos,
-                            Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                        });
-
-                        state.placedRooms.Add(new PlacedRoom
-                        {
-                            Prefab = nextPrefab,
-                            WorldPos = nextPos,
-                            YawSteps = yawSteps,
-                            Connectors = nextConnectors
-                        });
-
-                        roomsPlaced++;
-                        placed = true;
-
-                        foreach (var c in nextConnectors)
-                        {
-                            if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
-                                continue;
-
-                            state.openConnectors.Add(new OpenConnector
-                            {
-                                Parsed = c.Parsed,
-                                YawSteps = yawSteps,
-                                WorldPos = nextPos + c.LocalPos
-                            });
                         }
-
+                        // No suitable north-facing connector remains
                         break;
                     }
+                    var target = plannedOpenConnectors[openIndex];
 
-                    if (placed)
-                        break;
+                    if (target.WorldPos.Y < state.YMin)
+                    {
+                        //MAKE SURE YOU DON'T GO -Y
+                        continue;
+                    }
+
+                    // Remove it now to ensure we "try to iterate through all open connectors"
+                    plannedOpenConnectors.RemoveAt(openIndex);
+
+                    // We need a connector on nextPrefab that is OPPOSITE direction to target,
+                    // and compatible on door/tileset (simple equality checks here).
+                    var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
+
+                    bool placed = false;
+
+                    for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
+                    {
+                        var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
+
+                        for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                        {
+                            var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
+
+                            var compatible = nextConnectors
+                                .Where(c =>
+                                    c.Parsed.Direction == requiredDir &&
+                                    string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                                .ToList();
+
+                            if (compatible.Count == 0)
+                                continue;
+
+                            var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
+
+                            // Align using ROTATED local connector
+                            P3Float nextPos = target.WorldPos - chosen.LocalPos;
+
+                            // Collision using ROTATED bounds
+                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
+                                continue;
+
+                            // Place it with rotation (planned)
+                            plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
+                            {
+                                Count = 1,
+                                Rotation = RgRotation.RotationToP3Float(yawSteps),
+                                Position = nextPos,
+                                Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                            });
+
+                            plannedRooms.Add(new PlacedRoom
+                            {
+                                Prefab = nextPrefab,
+                                WorldPos = nextPos,
+                                YawSteps = yawSteps,
+                                Connectors = nextConnectors
+                            });
+
+                            roomsPlaced++;
+                            placed = true;
+
+                            foreach (var c in nextConnectors)
+                            {
+                                if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
+                                    continue;
+
+                                plannedOpenConnectors.Add(new OpenConnector
+                                {
+                                    Parsed = c.Parsed,
+                                    YawSteps = yawSteps,
+                                    WorldPos = nextPos + c.LocalPos
+                                });
+                            }
+
+                            break;
+                        }
+
+                        if (placed)
+                            break;
+                    }
+
+                    // If we couldn't place anything for this connector, we just move on.
+                    if (!placed)
+                    {
+                        plannedOpenConnectors.Add(target);//Return it to the list so we close it later.
+                        continue;
+                    }
                 }
 
-                // If we couldn't place anything for this connector, we just move on.
-                // (We already removed it from openConnectors to ensure forward progress.)
-                if (!placed)
+                bool success = roomsPlaced >= maxRoomsToPlace;
+                if (!success)
                 {
-                    state.openConnectors.Add(target);//Return it to the list so we close it later.
+                    Console.WriteLine("[Boss plan]  {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
                     continue;
                 }
+
+                foreach (var placement in plannedPlacements)
+                {
+                    state.instance.Temporary.Add(placement);
+                }
+                state.placedRooms = plannedRooms;
+                state.openConnectors = plannedOpenConnectors;
+                Console.WriteLine("[Boss plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
+                return;
             }
-            if (roomsPlaced == 0)
-            {
-                //We're fucked. Kill the run.
-                throw new Exception("Couldn't place boss room");
-            }
+
+            //We're fucked. Kill the run.
+            throw new Exception("Couldn't place boss room");
         }
 
         private static bool TryPlaceSpineNorthConnector(
-            DungeonState state,
+            List<PlacedRoom> plannedRooms,
+            List<OpenConnector> plannedOpenConnectors,
+            List<PlacedObject> plannedPlacements,
+            P3Float startingPosition,
+            float yMin,
             RoomUtils spineUtils,
             float collisionPadding,
             int maxCandidatePrefabsPerConnector)
         {
-            if (state.openConnectors.Count == 0)
+            if (plannedOpenConnectors.Count == 0)
                 return false;
 
             // Prefer targets further north to grow toward the boss goal.
-            var targets = state.openConnectors
+            var targets = plannedOpenConnectors
                 .OrderByDescending(c => c.WorldPos.Y)
-                .ThenByDescending(c => DistanceSquared(c.WorldPos, state.StartingPosition))
+                .ThenByDescending(c => DistanceSquared(c.WorldPos, startingPosition))
                 .ToList();
 
             foreach (var target in targets)
             {
-                if (target.WorldPos.Y < state.YMin)
+                if (target.WorldPos.Y < yMin)
                     continue;
 
                 var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
-                int targetIndex = state.openConnectors.IndexOf(target);
+                int targetIndex = plannedOpenConnectors.IndexOf(target);
                 if (targetIndex < 0)
                     continue;
 
@@ -205,10 +248,10 @@ namespace FrankyCLI
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                            if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
+                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
 
-                            state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                            plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
                             {
                                 Count = 1,
                                 Rotation = RgRotation.RotationToP3Float(yawSteps),
@@ -216,7 +259,7 @@ namespace FrankyCLI
                                 Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
                             });
 
-                            state.placedRooms.Add(new PlacedRoom
+                            plannedRooms.Add(new PlacedRoom
                             {
                                 Prefab = nextPrefab,
                                 WorldPos = nextPos,
@@ -224,14 +267,14 @@ namespace FrankyCLI
                                 Connectors = nextConnectors
                             });
 
-                            state.openConnectors.RemoveAt(targetIndex);
+                            plannedOpenConnectors.RemoveAt(targetIndex);
 
                             foreach (var c in nextConnectors)
                             {
                                 if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
                                     continue;
 
-                                state.openConnectors.Add(new OpenConnector
+                                plannedOpenConnectors.Add(new OpenConnector
                                 {
                                     Parsed = c.Parsed,
                                     YawSteps = yawSteps,
