@@ -29,7 +29,7 @@ namespace FrankyCLI
             float collisionPadding = -0.1f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
-            const int maxPlans = 10; // retry count for full planning attempts
+            const int maxPlans = 30; // retry count for full planning attempts
             RoomUtils roomUtils = new RoomUtils(roomlist);
 
             //Sizing tweaks

@@ -28,7 +28,7 @@ namespace FrankyCLI
             const int maxPlans = 10;
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
-            RoomUtils spineUtils = new RoomUtils("rg_spinelist");
+            RoomUtils spineUtils = new RoomUtils("rg_trunklist");
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -220,7 +220,7 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(spineUtils.GetRoom(target.Parsed.Tileset, "spine"));
+                    var nextPrefab = new RoomPrefab(spineUtils.GetRoom(target.Parsed.Tileset, "_trk_"));
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {

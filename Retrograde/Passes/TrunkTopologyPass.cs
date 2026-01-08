@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI
 {
-    public class SpineTopologyPass : IGenPass
+    public class TrunkTopologyPass : IGenPass
     {
         private static readonly Random Rng = new Random();
 
@@ -31,11 +31,11 @@ namespace FrankyCLI
             PrefabMarker south0 = new PrefabMarker();
             PrefabMarker north0 = new PrefabMarker();
 
-            RoomUtils roomUtils = new RoomUtils("rg_spinelist");
+            RoomUtils roomUtils = new RoomUtils("rg_trunklist");
 
             for (int i = 0; i < 20; i++)
             {
-                var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "spine"));
+                var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "_trk_"));
 
                 var candConnectors = candidate.Markers
                     .Select(m => new
@@ -157,7 +157,7 @@ namespace FrankyCLI
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
-                        var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset,"spine"));
+                        var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset,"_trk_"));
                         if (usedPrefabIds.Contains(nextPrefab.PrefabEditorId))
                             continue;
 
@@ -233,7 +233,7 @@ namespace FrankyCLI
                 bool success = roomsPlaced >= maxRoomsToPlace;
                 if (!success)
                 {
-                    Console.WriteLine("[Spine Plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);                            
+                    Console.WriteLine("[Trunk Plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);                            
                     continue;
                 }
 
@@ -244,11 +244,11 @@ namespace FrankyCLI
                 state.placedRooms = plannedRooms;
                 state.openConnectors = plannedOpenConnectors;
                 state.YMin = yMin;
-                Console.WriteLine("[Spine Plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
+                Console.WriteLine("[Trunk Plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
                 return;
             }
 
-            Console.WriteLine("SpineTopologyPass failed after {0} plan attempts.", maxPlans);
+            Console.WriteLine("TrunkTopologyPass failed after {0} plan attempts.", maxPlans);
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)
