@@ -18,62 +18,13 @@ namespace FrankyCLI
 
         public void RunPass(DungeonState state)
         {
-            var startingMarker = state.instance.Persistent
-                .OfType<PlacedObject>()
-                .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));
-
-            if (startingMarker == null) throw new Exception("rg_conn_n not found.");
-            var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
-
-            state.StartingPosition = startingMarker.Position;
-
-            RoomPrefab roomPrefab = null;
-            PrefabMarker south0 = new PrefabMarker();
-            PrefabMarker north0 = new PrefabMarker();
-
-            RoomUtils roomUtils = new RoomUtils("rg_trunklist");
-
-            for (int i = 0; i < 20; i++)
-            {
-                var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "_trk_"));
-
-                var candConnectors = candidate.Markers
-                    .Select(m => new
-                    {
-                        Marker = m,
-                        Conn = RgConnectorParser.Parse(m.MarkerEditorId)
-                    })
-                    .Where(x => x.Conn.IsValid)
-                    .ToList();
-
-                var entry = candConnectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)?.Marker;
-
-                if (entry != null && candConnectors.Any(x => x.Conn.Direction != ConnectorDirection.South))
-                {
-                    roomPrefab = candidate;
-                    var connectors = candConnectors;
-                    south0 = connectors.First(x => x.Conn.Direction == ConnectorDirection.South).Marker;
-                    north0 = connectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.North)?.Marker;
-                    break;
-                }
-            }
-
-            if (roomPrefab == null)
-                throw new Exception("Failed to find a starting room with open connectors.");
-
-            // Place first prefab so its SOUTH marker lands on the starting marker.
-            // prefabWorldPos + southLocal = startWorld  =>  prefabWorldPos = startWorld - southLocal
-            P3Float prefabWorldPos = startingMarker.Position - south0.Position;
-
             // Inputs / knobs
             int maxRoomsToPlace = 10;          // hard limit (rooms)
             int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
             const int maxPlans = 30; // cap number of planning retries
-
-
-            //Sizing tweaks
+                                     
             switch (state.Size)
             {
                 case "Small":
@@ -86,11 +37,58 @@ namespace FrankyCLI
                     maxRoomsToPlace = 6 + RandomUtils.random.Next(6);
                     break;
             }
-            // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
-            var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
+
+            var startingMarker = state.instance.Persistent
+                .OfType<PlacedObject>()
+                .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));
+
+            if (startingMarker == null) throw new Exception("rg_conn_n not found.");
+            var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
+
+            state.StartingPosition = startingMarker.Position;
+
+            RoomPrefab roomPrefab = null;
+            PrefabMarker south0 = new PrefabMarker();
+            PrefabMarker north0 = new PrefabMarker();
+            RoomUtils roomUtils = new RoomUtils("rg_trunklist");
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
+                for (int i = 0; i < 20; i++)
+                {
+                    var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "_trk_"));
+
+                    var candConnectors = candidate.Markers
+                        .Select(m => new
+                        {
+                            Marker = m,
+                            Conn = RgConnectorParser.Parse(m.MarkerEditorId)
+                        })
+                        .Where(x => x.Conn.IsValid)
+                        .ToList();
+
+                    var entry = candConnectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)?.Marker;
+
+                    if (entry != null && candConnectors.Any(x => x.Conn.Direction != ConnectorDirection.South))
+                    {
+                        roomPrefab = candidate;
+                        var connectors = candConnectors;
+                        south0 = connectors.First(x => x.Conn.Direction == ConnectorDirection.South).Marker;
+                        north0 = connectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.North)?.Marker;
+                        break;
+                    }
+                }
+
+                if (roomPrefab == null)
+                    throw new Exception("Failed to find a starting room with open connectors.");
+
+                // Place first prefab so its SOUTH marker lands on the starting marker.
+                // prefabWorldPos + southLocal = startWorld  =>  prefabWorldPos = startWorld - southLocal
+                P3Float prefabWorldPos = startingMarker.Position - south0.Position;
+                // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
+                var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
+
+
                 var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { roomPrefab.PrefabEditorId };
                 var plannedRooms = new List<PlacedRoom>();
                 var plannedOpenConnectors = new List<OpenConnector>();
@@ -125,7 +123,8 @@ namespace FrankyCLI
                     }
                 }
 
-                int roomsPlaced = 0;
+                // Count the initially placed room toward our plan so limits and logs reflect the total.
+                int roomsPlaced = 1;
                 int attempts = 0;
                 var yMin = startingMarker.Position.Y;
 
