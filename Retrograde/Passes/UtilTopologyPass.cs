@@ -29,7 +29,7 @@ namespace FrankyCLI
                 ? 0
                 : Math.Max(1, (int)Math.Round(startingOpenConnectors * 0.5f)); // aim for ~50% coverage
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
-            float collisionPadding = -1.5f; // tweak: world units clearance
+            float collisionPadding = -0.1f; // tweak: match DistrictTopologyPass collision clearance
             float samePrefabMinDistance = 30f; // keep identical util prefabs separated
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
             RoomUtils roomUtils = new RoomUtils(roomlist);

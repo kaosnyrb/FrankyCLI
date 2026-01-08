@@ -30,6 +30,7 @@ namespace FrankyCLI
             int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
             const int maxPlans = 30; // retry count for full planning attempts
+            const float connectorEmbedTolerance = 0.01f; // prevent connectors from sitting inside other room bounds
             RoomUtils roomUtils = new RoomUtils(roomlist);
 
             //Sizing tweaks
@@ -117,6 +118,10 @@ namespace FrankyCLI
                             // Collision using ROTATED bounds
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
+                                continue;
+                            if (AnyConnectorInsideExistingBounds(nextConnectors, nextPos, plannedRooms, connectorEmbedTolerance))
+                                continue;
+                            if (AnyExistingConnectorInsideCandidate(candidateAabb, plannedRooms, connectorEmbedTolerance))
                                 continue;
 
                             // Place it with rotation (planned)
@@ -248,6 +253,67 @@ namespace FrankyCLI
             float dy = a.Y - b.Y;
             float dz = a.Z - b.Z;
             return dx * dx + dy * dy + dz * dz;
+        }
+
+        private static bool AnyConnectorInsideExistingBounds(
+            List<RgConnectorInstance> connectors,
+            P3Float roomWorldPos,
+            List<PlacedRoom> placedRooms,
+            float tolerance)
+        {
+            if (placedRooms == null || placedRooms.Count == 0)
+                return false;
+
+            foreach (var placed in placedRooms)
+            {
+                if (placed.Prefab?.packin_instance == null)
+                    continue;
+
+                var placedAabb = ConnectorUtils.ToWorldAabbRotated(placed.Prefab.packin_instance.ObjectBounds, placed.WorldPos, placed.YawSteps);
+
+                foreach (var conn in connectors)
+                {
+                    var worldPos = roomWorldPos + conn.LocalPos;
+                    if (IsPointStrictlyInside(worldPos, placedAabb, tolerance))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool AnyExistingConnectorInsideCandidate(
+            RgAabb candidateAabb,
+            List<PlacedRoom> placedRooms,
+            float tolerance)
+        {
+            if (placedRooms == null || placedRooms.Count == 0)
+                return false;
+
+            foreach (var placed in placedRooms)
+            {
+                if (placed.Connectors == null)
+                    continue;
+
+                foreach (var conn in placed.Connectors)
+                {
+                    var worldPos = placed.WorldPos + conn.LocalPos;
+                    if (IsPointStrictlyInside(worldPos, candidateAabb, tolerance))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsPointStrictlyInside(P3Float point, RgAabb aabb, float tolerance)
+        {
+            return point.X > aabb.Min.X + tolerance &&
+                   point.X < aabb.Max.X - tolerance &&
+                   point.Y > aabb.Min.Y + tolerance &&
+                   point.Y < aabb.Max.Y - tolerance &&
+                   point.Z > aabb.Min.Z + tolerance &&
+                   point.Z < aabb.Max.Z - tolerance;
         }
 
         private static string ChoosePrefabId(
