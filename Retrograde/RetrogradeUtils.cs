@@ -253,6 +253,7 @@ namespace FrankyCLI
         public RgConnector Parsed;       // direction/door/tileset
         public int YawSteps;         // 0..3
         public P3Float WorldPos;         // world-space position of this connector
+        public string DistrictType;      // owning room's district (e.g., trunk, hab)
     }
 
     public struct PlacedRoom

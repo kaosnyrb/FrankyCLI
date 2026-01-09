@@ -93,7 +93,8 @@ namespace FrankyCLI.Retrograde.Passes
                         {
                             Parsed = c.Parsed,
                             YawSteps = room.YawSteps,
-                            WorldPos = room.WorldPos + c.LocalPos
+                            WorldPos = room.WorldPos + c.LocalPos,
+                            DistrictType = room.DistrictType
                         },
                         roomIndex));
                 }

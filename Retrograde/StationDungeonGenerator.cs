@@ -74,7 +74,7 @@ namespace FrankyCLI
                 //Place rooms
                 new TrunkTopologyPass(),
                 new BossTopologyPass("boss"),
-                new DistrictTopologyPass("rg_livinglist"),
+                new DistrictTopologyPass("rg_hablist"),
                 new UtilTopologyPass("rg_utillist"),
                 new DoorPass(),
                 //Seal connectors

@@ -12,9 +12,20 @@ namespace FrankyCLI.Retrograde.Passes
 {
     public class ConnectorSealingPass : IGenPass
     {
-        public string GetDoorBlocker(string doorSize, string tileset)
+        public string GetDoorBlocker(string doorSize, string tileset, string districtType)
         {
-            // Prefer: tileset-specific blockers, fallback to generic
+            // Prefer: pull blockers from a FormList named after the tileset (e.g. rg_blocker_station_hab).
+            var primaryListId = string.IsNullOrWhiteSpace(districtType)
+                ? $"rg_blocker_{tileset}"
+                : $"rg_blocker_{tileset}_{districtType}";
+
+            var list = FindBlockerFormList(primaryListId)
+                       ?? (string.IsNullOrWhiteSpace(districtType) ? null : FindBlockerFormList($"rg_blocker_{tileset}"));
+            var fromList = PickBlockerFromFormList(list, doorSize);
+            if (!string.IsNullOrEmpty(fromList))
+                return fromList;
+
+            // Fallback: legacy ID-based search to avoid breaking if the FormList is missing.
             var blockerId = doorSize switch
             {
                 "D1" => $"rg_blocker_D1_{tileset}",
@@ -85,7 +96,7 @@ namespace FrankyCLI.Retrograde.Passes
         private bool TryPlaceBlocker(OpenConnector open, DungeonState state, bool requireTilesetMatch)
         {
             // Pick blocker prefab based on door size / tileset
-            var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset);
+            var blockerId = GetDoorBlocker(open.Parsed.DoorSize, open.Parsed.Tileset, open.DistrictType);
             var blockerPrefab = new RoomPrefab(blockerId);
 
             // Blocker should have a connector that will attach to the OPEN connector.
@@ -144,7 +155,8 @@ namespace FrankyCLI.Retrograde.Passes
                         {
                             Parsed = connector.Parsed,
                             YawSteps = room.YawSteps,
-                            WorldPos = room.WorldPos + connector.LocalPos
+                            WorldPos = room.WorldPos + connector.LocalPos,
+                            DistrictType = room.DistrictType
                         },
                         roomIndex));
                 }
@@ -228,6 +240,45 @@ namespace FrankyCLI.Retrograde.Passes
         {
             // Protect the initial spine/start connector: sits exactly at StartingPosition.
             return SamePosition(open.WorldPos, state.StartingPosition, posTolerance);
+        }
+
+        private static FormList FindBlockerFormList(string listEditorId)
+        {
+            foreach (var fl in gen_quest_main.myMod.FormLists)
+            {
+                if (string.Equals(fl.EditorID, listEditorId, StringComparison.OrdinalIgnoreCase))
+                    return fl;
+            }
+
+            return null;
+        }
+
+        private static string PickBlockerFromFormList(FormList list, string doorSize)
+        {
+            if (list?.Items == null || list.Items.Count == 0)
+                return null;
+
+            var candidates = new List<string>();
+            foreach (var item in list.Items)
+            {
+                if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(packIn?.EditorID))
+                    continue;
+
+                candidates.Add(packIn.EditorID);
+            }
+
+            if (candidates.Count == 0)
+                return null;
+
+            var sizeMatches = string.IsNullOrWhiteSpace(doorSize)
+                ? null
+                : candidates.Where(id => id.IndexOf(doorSize, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+            var pool = sizeMatches != null && sizeMatches.Count > 0 ? sizeMatches : candidates;
+            return pool[RandomUtils.random.Next(pool.Count)];
         }
     }
 }

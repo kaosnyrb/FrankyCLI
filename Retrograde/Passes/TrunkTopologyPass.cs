@@ -120,7 +120,8 @@ namespace FrankyCLI
                         {
                             Parsed = c.Parsed,
                             YawSteps = 0,
-                            WorldPos = prefabWorldPos + c.LocalPos
+                            WorldPos = prefabWorldPos + c.LocalPos,
+                            DistrictType = districtType
                         });
                     }
                 }
@@ -214,7 +215,8 @@ namespace FrankyCLI
                                 {
                                     Parsed = c.Parsed,
                                     YawSteps = yawSteps,
-                                    WorldPos = nextPos + c.LocalPos
+                                    WorldPos = nextPos + c.LocalPos,
+                                    DistrictType = districtType
                                 });
                             }
 
