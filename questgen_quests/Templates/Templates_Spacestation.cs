@@ -59,7 +59,7 @@ namespace FrankyCLI.questgen_quests
                 parameters = new Dictionary<string, object>
                 {
                     {"Faction","Spacer" },
-                    {"StationSize","Large" },
+                    {"StationSize","Medium" },
                     {"DefendingShipCountMin", 0 },
                     {"DefendingShipCountMax", 2 }
                 }

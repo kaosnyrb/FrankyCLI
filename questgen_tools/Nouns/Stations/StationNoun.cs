@@ -44,7 +44,7 @@ namespace FrankyCLI.questgen_tools
                 "Station","Outpost","Facility","Platform","Installation","Complex","Depot","Hub","Relay","Array",
                 "Terminal","Dock","Yard","Anchorage","Spindle","Spire","Module","Node","Enclave",
                 "Bastion","Citadel","Stronghold","Redoubt","Sanctum","Vault","Foundry","Forge","Works","Refinery",
-                "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor","ListeningPost","Watchtower",
+                "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor","ListeningPost",
                 "Harbor","Drydock",
                 "Arcology","Habitat","Hab","Colony","Settlement","Commune","Barracks","Garrison","Command",
                 "Operations","Control","CommandPost","Headquarters","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
