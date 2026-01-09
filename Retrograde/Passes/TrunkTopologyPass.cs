@@ -246,8 +246,7 @@ namespace FrankyCLI
                 Console.WriteLine("[Trunk Plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
                 return;
             }
-
-            Console.WriteLine("TrunkTopologyPass failed after {0} plan attempts.", maxPlans);
+            throw new Exception("TrunkTopologyPass failed after " + maxPlans + " plan attempts.");
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)

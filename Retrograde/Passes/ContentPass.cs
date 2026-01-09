@@ -95,8 +95,8 @@ namespace FrankyCLI.Retrograde
                     }
                     else
                     {
-                        //Culling -- We don't want EVERY marker filled, do 50%
-                        if (RandomUtils.random.Next(10) < 5)
+                        //Culling -- We don't want EVERY marker filled, do 70%
+                        if (RandomUtils.random.Next(10) < 3)
                             continue;
                     }
 

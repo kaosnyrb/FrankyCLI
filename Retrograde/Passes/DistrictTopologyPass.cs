@@ -29,7 +29,7 @@ namespace FrankyCLI
             float collisionPadding = -0.1f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
-            const int maxPlans = 30; // retry count for full planning attempts
+            const int maxPlans = 50; // retry count for full planning attempts
             const float connectorEmbedTolerance = 0.01f; // prevent connectors from sitting inside other room bounds
             RoomUtils roomUtils = new RoomUtils(roomlist);
 
@@ -191,8 +191,8 @@ namespace FrankyCLI
                 return;
             }
 
-            Console.WriteLine("DistrictTopologyPass failed after {0} plan attempts.", maxPlans);
-
+            //Console.WriteLine("DistrictTopologyPass failed after {0} plan attempts.", maxPlans);
+            throw new Exception("DistrictTopologyPass failed after "+ maxPlans+ " plan attempts." );
         }
 
         private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
