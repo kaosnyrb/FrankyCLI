@@ -18,6 +18,7 @@ namespace FrankyCLI
 
         public void RunPass(DungeonState state)
         {
+            const string districtType = "trunk";
             // Inputs / knobs
             int maxRoomsToPlace = 10;          // hard limit (rooms)
             int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
@@ -107,6 +108,7 @@ namespace FrankyCLI
                     Prefab = roomPrefab,
                     WorldPos = prefabWorldPos,
                     YawSteps = 0,
+                    DistrictType = districtType,
                     Connectors = startConnectors
                 });
 
@@ -195,6 +197,7 @@ namespace FrankyCLI
                                 Prefab = nextPrefab,
                                 WorldPos = nextPos,
                                 YawSteps = yawSteps,
+                                DistrictType = districtType,
                                 Connectors = nextConnectors
                             });
                             usedPrefabIds.Add(nextPrefab.PrefabEditorId);

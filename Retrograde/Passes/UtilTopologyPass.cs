@@ -16,10 +16,12 @@ namespace FrankyCLI
     {
         string district = null;
         public string roomlist = "";
+        private readonly string districtTypeLabel;
 
         public UtilTopologyPass(string p_roomlist, string districtType = null) {         
             district = districtType;
             roomlist = p_roomlist;
+            districtTypeLabel = DeriveDistrictType(p_roomlist, districtType, "util");
         }
         public void RunPass(DungeonState state)
         {
@@ -118,6 +120,7 @@ namespace FrankyCLI
                             Prefab = nextPrefab,
                             WorldPos = nextPos,
                             YawSteps = yawSteps,
+                            DistrictType = districtTypeLabel,
                             Connectors = nextConnectors
                         });
                         usedPrefabIds.Add(nextPrefab.PrefabEditorId);
@@ -243,6 +246,23 @@ namespace FrankyCLI
             }
 
             return false;
+        }
+
+        private static string DeriveDistrictType(string roomList, string provided, string fallback)
+        {
+            if (!string.IsNullOrWhiteSpace(provided))
+                return provided;
+
+            if (string.IsNullOrWhiteSpace(roomList))
+                return fallback;
+
+            var normalized = roomList;
+            if (normalized.StartsWith("rg_", StringComparison.OrdinalIgnoreCase))
+                normalized = normalized.Substring(3);
+            if (normalized.EndsWith("list", StringComparison.OrdinalIgnoreCase))
+                normalized = normalized.Substring(0, normalized.Length - 4);
+
+            return string.IsNullOrWhiteSpace(normalized) ? fallback : normalized;
         }
     }
 }

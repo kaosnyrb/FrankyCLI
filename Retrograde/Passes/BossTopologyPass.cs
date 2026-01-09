@@ -15,11 +15,14 @@ namespace FrankyCLI
     public class BossTopologyPass : IGenPass
     {
         string district = null;
+        private readonly string districtTypeLabel;
         public BossTopologyPass(string districtType = null) {         
             district = districtType;
+            districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
         }
         public void RunPass(DungeonState state)
         {
+            const string spineDistrictType = "trunk";
             // Inputs / knobs
             int maxRoomsToPlace = 1;          // boss: only place a single room
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
@@ -51,7 +54,7 @@ namespace FrankyCLI
                 // Ensure we start with an open north connector by extending the spine if needed.
                 if (!plannedOpenConnectors.Any(c => c.Parsed.Direction == ConnectorDirection.North))
                 {
-                    if (!TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
+                    if (!TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector, spineDistrictType))
                     {
                             Console.WriteLine("[Boss plan] {0}/{1} failed to seed north connector.", planAttempt + 1, maxPlans);
                         continue;
@@ -67,7 +70,7 @@ namespace FrankyCLI
                     int openIndex = ChooseFarthestNorthFromStart(plannedOpenConnectors, state.StartingPosition);
                     if (openIndex < 0 || attempts > maxAttempts - 5)
                     {
-                        if (TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector))
+                        if (TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector, spineDistrictType))
                         {
                             // We added a north-facing connector; try again.
                             continue;
@@ -134,6 +137,7 @@ namespace FrankyCLI
                                 Prefab = nextPrefab,
                                 WorldPos = nextPos,
                                 YawSteps = yawSteps,
+                                DistrictType = districtTypeLabel,
                                 Connectors = nextConnectors
                             });
 
@@ -197,7 +201,8 @@ namespace FrankyCLI
             float yMin,
             RoomUtils spineUtils,
             float collisionPadding,
-            int maxCandidatePrefabsPerConnector)
+            int maxCandidatePrefabsPerConnector,
+            string districtType)
         {
             if (plannedOpenConnectors.Count == 0)
                 return false;
@@ -264,6 +269,7 @@ namespace FrankyCLI
                                 Prefab = nextPrefab,
                                 WorldPos = nextPos,
                                 YawSteps = yawSteps,
+                                DistrictType = districtType,
                                 Connectors = nextConnectors
                             });
 

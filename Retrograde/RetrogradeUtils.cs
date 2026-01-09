@@ -260,6 +260,7 @@ namespace FrankyCLI
         public RoomPrefab Prefab;
         public P3Float WorldPos;
         public int YawSteps; // 0..3
+        public string DistrictType;
         public List<RgConnectorInstance> Connectors;
     }
 

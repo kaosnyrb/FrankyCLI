@@ -68,6 +68,32 @@ namespace FrankyCLI.Retrograde
             
         }
 
+        private bool ShouldCullMarker(PlacedRoom room)
+        {
+            var cullChance = GetCullChance(room.DistrictType);
+            return RandomUtils.random.NextDouble() < cullChance;
+        }
+
+        private static double GetCullChance(string districtType)
+        {
+            if (string.IsNullOrWhiteSpace(districtType))
+                return 0.3; // preserve previous default
+
+            if (districtType.IndexOf("boss", StringComparison.OrdinalIgnoreCase) >= 0)
+                return 0.1; // keep boss rooms packed
+
+            if (districtType.IndexOf("util", StringComparison.OrdinalIgnoreCase) >= 0)
+                return 0.55; // utility areas stay sparse
+
+            if (districtType.IndexOf("living", StringComparison.OrdinalIgnoreCase) >= 0)
+                return 0.1; // more clutter in living spaces
+
+            if (districtType.IndexOf("trunk", StringComparison.OrdinalIgnoreCase) >= 0)
+                return 0.35; // corridors carry some dressing
+
+            return 0.3;
+        }
+
         public void RunPass(DungeonState state)
         {
             foreach (var placed in state.placedRooms)
@@ -95,8 +121,8 @@ namespace FrankyCLI.Retrograde
                     }
                     else
                     {
-                        //Culling -- We don't want EVERY marker filled, do 70%
-                        if (RandomUtils.random.Next(10) < 3)
+                        //Culling tuned by district
+                        if (ShouldCullMarker(placed))
                             continue;
                     }
 
