@@ -25,10 +25,10 @@ namespace FrankyCLI
             const string spineDistrictType = "trunk";
             // Inputs / knobs
             int maxRoomsToPlace = 1;          // boss: only place a single room
-            int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
+            int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
-            const int maxPlans = 10;
+            const int maxPlans = 20;
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_trunklist");

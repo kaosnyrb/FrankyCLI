@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FrankyCLI.questgen_tools;
 
 namespace FrankyCLI.Retrograde
 {
@@ -139,13 +140,30 @@ namespace FrankyCLI.Retrograde
 
         public static string GetDoor(string doorSize, string tileset)
         {
-            // Prefer: tileset-specific blockers, fallback to generic
-            return doorSize switch
+            // Prefer: tileset-specific blockers, fallback to generic; allow numbered variants
+            var baseId = doorSize switch
             {
                 "D1" => $"rg_doorblocker_D1_{tileset}",
                 "D2" => $"rg_doorblocker_D2_{tileset}",
                 _ => $"rg_blocker_{tileset}"
             };
+
+            var candidates = new List<string>();
+
+            foreach (var packIn in gen_quest_main.myMod.PackIns)
+            {
+                var editorId = packIn?.EditorID;
+                if (string.IsNullOrWhiteSpace(editorId))
+                    continue;
+
+                if (editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
+                    candidates.Add(editorId);
+            }
+
+            if (candidates.Count == 0)
+                return baseId;
+
+            return candidates[RandomUtils.random.Next(candidates.Count)];
         }
     }
 }

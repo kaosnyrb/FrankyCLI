@@ -21,15 +21,19 @@ namespace FrankyCLI.Retrograde.Passes
             if (connections.Count == 0)
                 return;
 
-            // Randomize and take 50% of the available connections
-            var shuffled = connections.OrderBy(_ => RandomUtils.random.Next()).ToList();
-            int toCover = (int)Math.Floor(shuffled.Count * coverageRatio);
+            // Favor doors between larger rooms, but still keep some randomness
+            var prioritized = connections
+                .OrderByDescending(c => c.SizeScore)
+                .ThenBy(_ => RandomUtils.random.Next())
+                .ToList();
+
+            int toCover = (int)Math.Floor(prioritized.Count * coverageRatio);
             if (toCover <= 0)
                 return;
 
             for (int idx = 0; idx < toCover; idx++)
             {
-                var connection = shuffled[idx];
+                var connection = prioritized[idx];
                 var open = connection.A;
 
                 // Pick blocker prefab based on door size / tileset
@@ -82,6 +86,10 @@ namespace FrankyCLI.Retrograde.Passes
 
         private static List<DoorConnection> CollectConnectorPairs(List<PlacedRoom> placedRooms, float tolerance)
         {
+            var roomVolumes = placedRooms
+                .Select(ComputeRoomVolume)
+                .ToList();
+
             var connectors = new List<(OpenConnector Conn, int RoomIndex)>();
             for (int roomIndex = 0; roomIndex < placedRooms.Count; roomIndex++)
             {
@@ -132,7 +140,8 @@ namespace FrankyCLI.Retrograde.Passes
                     pairs.Add(new DoorConnection
                     {
                         A = connectors[i].Conn,
-                        B = connectors[j].Conn
+                        B = connectors[j].Conn,
+                        SizeScore = (roomVolumes[connectors[i].RoomIndex] + roomVolumes[connectors[j].RoomIndex]) * 0.5f
                     }); // place door using one side of the matched pair
                     break;
                 }
@@ -145,6 +154,7 @@ namespace FrankyCLI.Retrograde.Passes
         {
             public OpenConnector A;
             public OpenConnector B;
+            public float SizeScore;
         }
 
         private static bool SamePosition(P3Float a, P3Float b, float tolerance)
@@ -158,6 +168,18 @@ namespace FrankyCLI.Retrograde.Passes
             float dy = a.Y - b.Y;
             float dz = a.Z - b.Z;
             return dx * dx + dy * dy + dz * dz;
+        }
+
+        private static float ComputeRoomVolume(PlacedRoom room)
+        {
+            if (room.Prefab?.packin_instance == null)
+                return 0f;
+
+            var aabb = ConnectorUtils.ToWorldAabbRotated(room.Prefab.packin_instance.ObjectBounds, room.WorldPos, room.YawSteps);
+            var dx = Math.Max(0f, aabb.Max.X - aabb.Min.X);
+            var dy = Math.Max(0f, aabb.Max.Y - aabb.Min.Y);
+            var dz = Math.Max(0f, aabb.Max.Z - aabb.Min.Z);
+            return dx * dy * dz;
         }
     }
 }
