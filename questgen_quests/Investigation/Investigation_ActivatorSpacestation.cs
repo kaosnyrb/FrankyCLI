@@ -55,7 +55,7 @@ namespace FrankyCLI.questgen_quests
             Console.WriteLine("questname: " + questname);
 
 
-            var stationname = StationNoun.GenerateStationName();
+            var stationname = StationNoun.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 

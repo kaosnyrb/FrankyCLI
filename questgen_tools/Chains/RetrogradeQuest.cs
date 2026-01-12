@@ -45,20 +45,27 @@ namespace FrankyCLI.questgen_tools
            //     "Ecliptic":
             // "Crimsonfleet":
            //"Varuun":
-                var missionTemplate = new MissionTemplate()
+
+            List<string> Factions = new List<string>()
+            {
+                "Crimsonfleet","Ecliptic","Varuun","Spacer"
+            };
+            List<string> Sizes = new List<string>()
+            {
+                "Small","Medium","Large"
+            };
+            var missionTemplate = new MissionTemplate()
             {
                 formid = FormKeyLookup.GetFormKey("RG_station_quest"),
                 parameters = new Dictionary<string, object>
                 {
-                    {"Faction","Crimsonfleet" },
-                    {"StationSize","Medium" },
-                    {"DefendingShipCountMin", 0 },
-                    {"DefendingShipCountMax", 2 }
+                    {"Faction",Factions[RandomUtils.random.Next(Factions.Count)] },
+                    {"StationSize",Sizes[RandomUtils.random.Next(Sizes.Count)] },
                 }
             };
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            var stationname = StationNoun.GenerateStationName();
+            var stationname = StationNoun.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
 
             MessageNoun stationnamemessage = new MessageNoun(FormKeyLookup.GetFormKey("RG_SE_Name").ID, stationname);
             stationnamemessage.instance.Name = stationname;
