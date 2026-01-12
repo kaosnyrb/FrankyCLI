@@ -19,6 +19,58 @@ namespace FrankyCLI.questgen_tools
 
     public class SpaceCellTools
     {
+        public static Condition GetSafeSpaceMarkerCondition()
+        {
+            //Stations need to be out of asteroid fields etc
+            var Markers = new List<MarkerLocation>
+            {               
+                new MarkerLocation()
+                {
+                    EditorID = "se_TravelMarkerLocRefA01",
+                    QuestID = 0x000277A4,
+                    AliasID = 19,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_TravelMarkerLocRefA02",
+                    QuestID = 0x000277A4,
+                    AliasID = 20,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_TravelMarkerLocRefA03",
+                    QuestID = 0x000277A4,
+                    AliasID = 21,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_TravelMarkerLocRefB01",
+                    QuestID = 0x000277A4,
+                    AliasID = 22,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_TravelMarkerLocRefB02",
+                    QuestID = 0x000277A4,
+                    AliasID = 23,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_TravelMarkerLocRefB03",
+                    QuestID = 0x000277A4,
+                    AliasID = 24,
+                },
+            };
+
+            Random random = RandomUtils.random;
+            var Choosen = Markers[random.Next(Markers.Count)];
+            var quest = gen_quest_main._StarfieldMod.Quests[new FormKey(gen_quest_main.StarfieldModKey, Choosen.QuestID)];
+            var alias = quest.Aliases[Choosen.AliasID];
+            var blah = ((IQuestReferenceAliasGetter)alias).Conditions[0];
+
+            return blah.DeepCopy();
+        }
+
         public static Condition GetSpaceMarkerCondition()
         {
             //Yeah this looks stupid.
@@ -121,26 +173,6 @@ namespace FrankyCLI.questgen_tools
                     QuestID = 0x000277A4,
                     AliasID = 24,
                 },
-                /* /Had a mission that failed to start cus of these. Disable for now. Prob enough others not to care
-                new MarkerLocation()
-                {
-                    EditorID = "se_PatrolStartMarkerLocRef01",
-                    QuestID = 0x000277A4,
-                    AliasID = 16,
-                },
-                new MarkerLocation()
-                {
-                    EditorID = "se_PatrolStartMarkerLocRef02",
-                    QuestID = 0x00127FA8,
-                    AliasID = 9,
-                },
-                new MarkerLocation()
-                {
-                    EditorID = "se_PatrolStartMarkerLocRef03",
-                    QuestID = 0x00127FA8,
-                    AliasID = 10,
-                },*/
-
             };
 
             Random random = RandomUtils.random;

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace FrankyCLI.questgen_tools.Nouns
 {
@@ -93,6 +94,44 @@ namespace FrankyCLI.questgen_tools.Nouns
         public bool SetScriptAlias(int AliasIndex, IFormLink<IStarfieldMajorRecordGetter> Value)
         {
             instance.VirtualMachineAdapter.Aliases[AliasIndex].Property.Object = Value;
+            return true;
+        }
+
+        public bool SetScriptAliasScriptObject(string scriptname, string scriptprop, IFormLink<IStarfieldMajorRecordGetter> Value)
+        {
+            foreach (var Alias  in instance.VirtualMachineAdapter.Aliases)
+            {
+                foreach (var script in Alias.Scripts)
+                {
+                    if (script.Name == scriptname)
+                    {
+                        var properties = script.Properties;
+                        for (int i = 0; i < properties.Count; i++)
+                        {
+                            if (properties[i].Name == scriptprop)
+                            {
+                                ((ScriptObjectProperty)properties[i]).Object = Value;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        public bool SetScriptFragmentAlias(string AliasName, IFormLink<IStarfieldMajorRecordGetter> Value)
+        {
+            var fragments = instance.VirtualMachineAdapter.Script;
+            var properties = fragments.Properties;
+            for (int i = 0; i < properties.Count; i++)
+            {
+                if (properties[i].Name == AliasName)
+                {
+                    ((ScriptObjectProperty)properties[i]).Object = Value;
+                    return true;
+                }
+            }
             return true;
         }
 
