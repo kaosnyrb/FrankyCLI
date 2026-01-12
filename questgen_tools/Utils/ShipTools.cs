@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Utils;
+using FrankyCLI.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -454,6 +455,24 @@ namespace FrankyCLI.questgen_tools
 
             }
             return 0;
+        }
+
+        public static IStarfieldMajorRecordGetter GetFactionShipChance(string faction)
+        {
+            
+            switch (faction)
+            {
+                case "Spacer":
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Spacer_Combat_50")];
+                case "Ecliptic":
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Ecliptic_Combat_50")];
+                case "Crimsonfleet":
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_CrimsonFleet_Combat_50")];
+                case "Varuun":
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_HouseVaruun_Combat_50")];
+
+            }
+            return null;
         }
 
         //LShip_UCNavy_Cargo [LVLB:000D320F]

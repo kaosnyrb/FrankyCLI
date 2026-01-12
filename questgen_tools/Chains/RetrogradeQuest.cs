@@ -45,7 +45,7 @@ namespace FrankyCLI.questgen_tools
                 formid = FormKeyLookup.GetFormKey("RG_station_quest"),
                 parameters = new Dictionary<string, object>
                 {
-                    {"Faction","Spacer" },
+                    {"Faction","Crimsonfleet" },
                     {"StationSize","Small" },
                     {"DefendingShipCountMin", 0 },
                     {"DefendingShipCountMax", 2 }
@@ -89,6 +89,15 @@ namespace FrankyCLI.questgen_tools
 
             //Set station
             newQuest.SetQuestReferenceCreateAlias("Enemy01", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+            //Setthe enemy ships
+
+            var lvlship = ShipTools.GetFactionShipChance(missionTemplate.parameters["Faction"].ToString());
+
+            newQuest.SetQuestReferenceCreateAlias("Enemy02", lvlship.ToLink());
+            newQuest.SetQuestReferenceCreateAlias("Enemy03", lvlship.ToLink());
+            newQuest.SetQuestReferenceCreateAlias("Enemy04", lvlship.ToLink());
+
 
             //Add to POI tree
             var rg_se_poi_node = myMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];

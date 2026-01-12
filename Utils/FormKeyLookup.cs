@@ -22,8 +22,19 @@ namespace FrankyCLI.Utils
                     }
                 }
             }
-            
-            foreach(var rec in gen_quest_main._StarfieldMod.EnumerateMajorRecords())
+
+            foreach (var rec in gen_quest_main._StarfieldMod.GenericBaseForms)
+            {
+                if (rec.EditorID != null)
+                {
+                    if (rec.EditorID == EditorID)
+                    {
+                        return rec.FormKey;
+                    }
+                }
+            }
+
+            foreach (var rec in gen_quest_main._StarfieldMod.EnumerateMajorRecords())
             {
                 if (rec.EditorID != null)
                 {
