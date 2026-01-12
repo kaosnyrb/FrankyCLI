@@ -45,8 +45,8 @@ namespace FrankyCLI.questgen_tools
                 formid = FormKeyLookup.GetFormKey("RG_station_quest"),
                 parameters = new Dictionary<string, object>
                 {
-                    {"Faction","Crimsonfleet" },
-                    {"StationSize","Small" },
+                    {"Faction","Ecliptic" },
+                    {"StationSize","Medium" },
                     {"DefendingShipCountMin", 0 },
                     {"DefendingShipCountMax", 2 }
                 }

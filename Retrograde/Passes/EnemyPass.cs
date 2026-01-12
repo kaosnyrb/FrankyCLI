@@ -147,9 +147,6 @@ namespace FrankyCLI.Retrograde
                 if (placed.Prefab?.Markers == null || placed.Prefab.Markers.Count == 0)
                     continue;
 
-                if (IsBossRoom(placed))
-                    continue;
-
                 var progress = CalculateProgress(state.StartingPosition, bossVector, bossDistance, fallbackDistance, placed.WorldPos);
                 var weight = ComputeWeight(progress);
                 if (weight <= 0f)
