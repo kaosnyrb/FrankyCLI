@@ -40,12 +40,17 @@ namespace FrankyCLI.questgen_tools
         {
             //Retrograde creates a Space POI that is randomly discovered.
             //We only have one quest
-            var missionTemplate = new MissionTemplate()
+
+            //                "Spacer":
+           //     "Ecliptic":
+            // "Crimsonfleet":
+           //"Varuun":
+                var missionTemplate = new MissionTemplate()
             {
                 formid = FormKeyLookup.GetFormKey("RG_station_quest"),
                 parameters = new Dictionary<string, object>
                 {
-                    {"Faction","Ecliptic" },
+                    {"Faction","Crimsonfleet" },
                     {"StationSize","Medium" },
                     {"DefendingShipCountMin", 0 },
                     {"DefendingShipCountMax", 2 }

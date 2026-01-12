@@ -74,6 +74,47 @@ namespace FrankyCLI.Retrograde
             return RandomUtils.random.NextDouble() < cullChance;
         }
 
+        private static bool IsNearDuplicate(
+            string packInId,
+            P3Float position,
+            Dictionary<string, List<P3Float>> placedByPackIn,
+            float minDistance)
+        {
+            if (!placedByPackIn.TryGetValue(packInId, out var positions) || positions == null)
+                return false;
+
+            float thresholdSq = minDistance * minDistance;
+            for (int i = 0; i < positions.Count; i++)
+            {
+                if (DistanceSquared(positions[i], position) <= thresholdSq)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static void RecordPlacement(
+            string packInId,
+            P3Float position,
+            Dictionary<string, List<P3Float>> placedByPackIn)
+        {
+            if (!placedByPackIn.TryGetValue(packInId, out var positions) || positions == null)
+            {
+                positions = new List<P3Float>();
+                placedByPackIn[packInId] = positions;
+            }
+
+            positions.Add(position);
+        }
+
+        private static float DistanceSquared(P3Float a, P3Float b)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+            float dz = a.Z - b.Z;
+            return dx * dx + dy * dy + dz * dz;
+        }
+
         private static double GetCullChance(string districtType)
         {
             if (string.IsNullOrWhiteSpace(districtType))
@@ -96,6 +137,9 @@ namespace FrankyCLI.Retrograde
 
         public void RunPass(DungeonState state)
         {
+            const float duplicateSpacing = 30f;
+            var placedByPackIn = new Dictionary<string, List<P3Float>>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var placed in state.placedRooms)
             {
                 // Iterate all markers that are NOT connectors
@@ -142,6 +186,8 @@ namespace FrankyCLI.Retrograde
                     // world = roomWorld + rotate(markerLocal, roomYaw)
                     var rotatedLocal = RgRotation.RotateYaw90(marker.Position, placed.YawSteps);
                     var worldPos = placed.WorldPos + rotatedLocal;
+                    if (IsNearDuplicate(contentPackInId, worldPos, placedByPackIn, duplicateSpacing))
+                        continue;
 
                     // Compute final rotation:
                     // combine marker's local rotation with the room's yaw
@@ -154,6 +200,8 @@ namespace FrankyCLI.Retrograde
                         Position = worldPos,
                         Base = contentPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
                     });
+
+                    RecordPlacement(contentPackInId, worldPos, placedByPackIn);
                 }
             }
         }

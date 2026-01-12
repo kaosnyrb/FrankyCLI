@@ -470,7 +470,8 @@ namespace FrankyCLI.questgen_tools
                     return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_CrimsonFleet_Combat_50")];
                 case "Varuun":
                     return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_HouseVaruun_Combat_50")];
-
+                default:
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Spacer_Combat_50")];
             }
             return null;
         }
