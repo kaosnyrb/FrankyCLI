@@ -40,23 +40,9 @@ namespace FrankyCLI.questgen_tools
         {
             //Retrograde creates a Space POI that is randomly discovered.
             //We only have one quest
-
             var missionTemplate = new MissionTemplate()
             {
-                Name = "Space Station Activator - spacer small light guard",
-                Description = "Find info about the target from a clue in a space station",
-                Location = "A clue hidden on a lightly defended small space station taken over by a Spacer Gang",
                 formid = FormKeyLookup.GetFormKey("RG_station_quest"),
-                needSpacesuit = true,
-                outlawQuest = new Investigation_ActivatorSpacestation(),
-                MissionTags = new List<string>()
-                {
-                    "follow_clue",
-                    "space",
-                    "Small station",
-                    "Light or no spaceship defense"
-                },
-                Addons = new List<string>(),
                 parameters = new Dictionary<string, object>
                 {
                     {"Faction","Spacer" },
