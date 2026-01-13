@@ -75,20 +75,11 @@ namespace FrankyCLI.questgen_tools
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
             //Set Aliases
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptAlias(1, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptAlias(2, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptAlias(3, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptAlias(4, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             //SEScript
             newQuest.SetScriptProperty("SEScript", "HailingShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("SEScript", "MapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("SEScript", "OrbitLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("SEScript", "PlayerShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            //Script Fragments
-            newQuest.SetScriptFragmentAlias("Alias_Enemy01", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptFragmentAlias("Alias_Enemy02", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptFragmentAlias("Alias_Enemy03", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptFragmentAlias("Alias_Enemy04", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             // POI Name
             newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());

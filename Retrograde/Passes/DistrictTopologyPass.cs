@@ -39,7 +39,7 @@ namespace FrankyCLI
             switch (state.Size)
             {
                 case "Small":
-                    maxRoomsToPlace = 2 + RandomUtils.random.Next(2);
+                    maxRoomsToPlace = 3 + RandomUtils.random.Next(2);
                     break;
                 case "Medium":
                     maxRoomsToPlace = 4 + RandomUtils.random.Next(4);

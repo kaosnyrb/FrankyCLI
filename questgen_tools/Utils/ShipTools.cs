@@ -463,15 +463,15 @@ namespace FrankyCLI.questgen_tools
             switch (faction)
             {
                 case "Spacer":
-                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Spacer_Combat_50")];
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Spacer_Combat")];
                 case "Ecliptic":
-                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Ecliptic_Combat_50")];
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Ecliptic_Combat")];
                 case "Crimsonfleet":
-                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_CrimsonFleet_Combat_50")];
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_CrimsonFleet_Combat")];
                 case "Varuun":
-                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_HouseVaruun_Combat_50")];
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_HouseVaruun_Combat")];
                 default:
-                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Spacer_Combat_50")];
+                    return gen_quest_main._StarfieldMod.GenericBaseForms[FormKeyLookup.GetFormKey("LvlShip_Spacer_Combat")];
             }
             return null;
         }
