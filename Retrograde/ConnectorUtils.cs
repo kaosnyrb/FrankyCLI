@@ -165,5 +165,27 @@ namespace FrankyCLI.Retrograde
 
             return candidates[RandomUtils.random.Next(candidates.Count)];
         }
+
+        public static string GetPlug(string doorSize, string tileset)
+        {
+            // Prefer: tileset-specific plugs, fallback to base id; allow numbered variants
+            var baseId = $"rg_plug_{doorSize}_{tileset}";
+            var candidates = new List<string>();
+
+            foreach (var packIn in gen_quest_main.myMod.PackIns)
+            {
+                var editorId = packIn?.EditorID;
+                if (string.IsNullOrWhiteSpace(editorId))
+                    continue;
+
+                if (editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
+                    candidates.Add(editorId);
+            }
+
+            if (candidates.Count == 0)
+                return baseId;
+
+            return candidates[RandomUtils.random.Next(candidates.Count)];
+        }
     }
 }

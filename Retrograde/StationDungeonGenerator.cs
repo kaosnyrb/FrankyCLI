@@ -76,6 +76,7 @@ namespace FrankyCLI
                 new BossTopologyPass("boss"),
                 new DistrictTopologyPass("rg_hablist"),
                 new UtilTopologyPass("rg_utillist"),
+                new PlugPass(),
                 new DoorPass(),
                 //Seal connectors
                 new WindowSealingPass(),

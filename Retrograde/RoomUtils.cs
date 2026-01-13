@@ -103,9 +103,11 @@ namespace FrankyCLI.Retrograde
                     pos.Y < minY - edgeTolerance || pos.Y > maxY + edgeTolerance ||
                     pos.Z < minZ - edgeTolerance || pos.Z > maxZ + edgeTolerance)
                 {
+                    /*
                     Console.WriteLine(
                         $"Connector marker '{marker.MarkerEditorId}' in prefab '{packIn.EditorID}' (list '{listKey}') is outside prefab bounds. " +
                         $"Position=({pos.X:F2},{pos.Y:F2},{pos.Z:F2}) BoundsMin=({minX:F2},{minY:F2},{minZ:F2}) BoundsMax=({maxX:F2},{maxY:F2},{maxZ:F2})");
+                    */
                 }
             }
         }
