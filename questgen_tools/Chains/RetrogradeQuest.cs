@@ -76,10 +76,8 @@ namespace FrankyCLI.questgen_tools
             //Set Aliases
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             //SEScript
-            newQuest.SetScriptProperty("SEScript", "HailingShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("SEScript", "MapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("SEScript", "OrbitLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("SEScript", "PlayerShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("retrograde_quest", "MapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("retrograde_quest", "PlayerShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             // POI Name
             newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());
@@ -93,14 +91,12 @@ namespace FrankyCLI.questgen_tools
             //Set station
             newQuest.SetQuestReferenceCreateAlias("Enemy01", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            //Setthe enemy ships
-
+            //Set the enemy ships
             var lvlship = ShipTools.GetFactionShipChance(missionTemplate.parameters["Faction"].ToString());
-
             newQuest.SetQuestReferenceCreateAlias("Enemy02", lvlship.ToLink());
             newQuest.SetQuestReferenceCreateAlias("Enemy03", lvlship.ToLink());
-            newQuest.SetQuestReferenceCreateAlias("Enemy04", lvlship.ToLink());
-
+            newQuest.SetQuestReferenceSpaceLocationAlias("GeneralMarker04", SpaceCellTools.GetSpaceMarkerCondition());
+            newQuest.SetQuestReferenceSpaceLocationAlias("GeneralMarker06", SpaceCellTools.GetSpaceMarkerCondition());
 
             //Add to POI tree
             var rg_se_poi_node = myMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
