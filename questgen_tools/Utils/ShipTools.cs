@@ -15,6 +15,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
 
@@ -438,6 +439,8 @@ namespace FrankyCLI.questgen_tools
                     return 0x000B13A8;
                 case "Ecliptic":
                     return 0x000AE4F3;
+                case "Varuun":
+                    return 0x000B19CF;
                 case "UC Navy":
                     return 0x000D320E;
                 case "UC Vanguard":
@@ -490,6 +493,9 @@ namespace FrankyCLI.questgen_tools
                     break;
                 case 0x000B13A8: //LShip_Spacer_Template [LVLB:000B13A8]
                     ganglistEditorID = "duout_GangMembersList_Space_Spacer";
+                    break;
+                case 0x000B19CF: //LShip_HouseVaruun_Template [LVLB:000B19CF]
+                    ganglistEditorID = "duout_GangMembersList_Space_Varuun";
                     break;
                 default:
                     ganglistEditorID = "duout_GangMembersList_Space_Spacer";

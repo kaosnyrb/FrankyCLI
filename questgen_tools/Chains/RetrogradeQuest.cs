@@ -39,13 +39,6 @@ namespace FrankyCLI.questgen_tools
         public bool GenerateQuest()
         {
             //Retrograde creates a Space POI that is randomly discovered.
-            //We only have one quest
-
-            //                "Spacer":
-           //     "Ecliptic":
-            // "Crimsonfleet":
-           //"Varuun":
-
             List<string> Factions = new List<string>()
             {
                 "Crimsonfleet","Ecliptic","Varuun","Spacer"
@@ -78,6 +71,9 @@ namespace FrankyCLI.questgen_tools
             //SEScript
             newQuest.SetScriptProperty("retrograde_quest", "MapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("retrograde_quest", "PlayerShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("retrograde_quest", "Station", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
+
 
             // POI Name
             newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());
@@ -91,16 +87,8 @@ namespace FrankyCLI.questgen_tools
             //Set station
             newQuest.SetQuestReferenceCreateAlias("Enemy01", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            //Set the enemy ships
-            var lvlship = ShipTools.GetFactionShipChance(missionTemplate.parameters["Faction"].ToString());
-            newQuest.SetQuestReferenceCreateAlias("Enemy02", lvlship.ToLink());
-            newQuest.SetQuestReferenceCreateAlias("Enemy03", lvlship.ToLink());
-            newQuest.SetQuestReferenceSpaceLocationAlias("GeneralMarker04", SpaceCellTools.GetSpaceMarkerCondition());
-            newQuest.SetQuestReferenceSpaceLocationAlias("GeneralMarker06", SpaceCellTools.GetSpaceMarkerCondition());
-
             //Add to POI tree
             var rg_se_poi_node = myMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
-
 
             //Remove the template quest from the node            
             if (gen_quest_main.myMod.Quests[rg_se_poi_node.Quests[0].Quest.FormKey].EditorID == "RG_station_quest")
