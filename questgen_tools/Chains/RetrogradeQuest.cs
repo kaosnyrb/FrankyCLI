@@ -60,7 +60,7 @@ namespace FrankyCLI.questgen_tools
                 parameters = new Dictionary<string, object>
                 {
                     {"Faction",Factions[RandomUtils.random.Next(Factions.Count)] },
-                    {"StationSize",Sizes[RandomUtils.random.Next(Sizes.Count)] },
+                    {"StationSize","Large" },//Sizes[RandomUtils.random.Next(Sizes.Count)] },
                 }
             };
 
@@ -100,6 +100,14 @@ namespace FrankyCLI.questgen_tools
 
             //Add to POI tree
             var rg_se_poi_node = myMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
+
+
+            //Remove the template quest from the node            
+            if (gen_quest_main.myMod.Quests[rg_se_poi_node.Quests[0].Quest.FormKey].EditorID == "RG_station_quest")
+            {
+                rg_se_poi_node.Quests.RemoveAt(0);
+            }
+
             rg_se_poi_node.Quests.Add(new StoryManagerQuest()
             {
                 Quest = newQuest.instance.ToNullableLink<IQuestGetter>(),

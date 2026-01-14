@@ -35,7 +35,7 @@ namespace FrankyCLI
                     maxRoomsToPlace = 4 + RandomUtils.random.Next(4);
                     break;
                 case "Large":
-                    maxRoomsToPlace = 6 + RandomUtils.random.Next(6);
+                    maxRoomsToPlace = 6 + RandomUtils.random.Next(2);
                     break;
             }
 
