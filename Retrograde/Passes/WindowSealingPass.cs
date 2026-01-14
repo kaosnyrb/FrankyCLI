@@ -74,6 +74,7 @@ namespace FrankyCLI.Retrograde.Passes
                 }
                 else
                 {
+                    state.windowConnectors.Add(open.WorldPos);
                     // Remove the connector now that it has been filled
                     state.openConnectors.RemoveAt(i);
                 }

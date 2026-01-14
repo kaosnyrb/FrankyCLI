@@ -67,6 +67,9 @@ namespace FrankyCLI.Retrograde.Passes
                 if (ShouldSkipStartConnector(open, state, startPosTolerance))
                     continue;
 
+                if (IsWindowPlacedAt(open.WorldPos, state, positionTolerance))
+                    continue;
+
                 bool belowYMin = open.WorldPos.Y < state.YMin;
 
                 // First try with strict matching; if we're below YMin, relax tileset matching to ensure we seal it.
@@ -205,6 +208,9 @@ namespace FrankyCLI.Retrograde.Passes
                 if (ShouldSkipStartConnector(open, state, tolerance))
                     continue;
 
+                if (IsWindowPlacedAt(open.WorldPos, state, tolerance))
+                    continue;
+
                 var key = PositionKey(open.WorldPos, tolerance);
                 if (sealedPositions.Contains(key))
                     continue;
@@ -240,6 +246,20 @@ namespace FrankyCLI.Retrograde.Passes
         {
             // Protect the initial spine/start connector: sits exactly at StartingPosition.
             return SamePosition(open.WorldPos, state.StartingPosition, posTolerance);
+        }
+
+        private static bool IsWindowPlacedAt(P3Float pos, DungeonState state, float tolerance)
+        {
+            if (state.windowConnectors == null || state.windowConnectors.Count == 0)
+                return false;
+
+            foreach (var windowPos in state.windowConnectors)
+            {
+                if (SamePosition(windowPos, pos, tolerance))
+                    return true;
+            }
+
+            return false;
         }
 
         private static FormList FindBlockerFormList(string listEditorId)

@@ -18,6 +18,7 @@ namespace FrankyCLI.Retrograde.Passes
         public DungeonState(Cell cell, Location plocation) {
             placedRooms = new List<PlacedRoom>();
             openConnectors = new List<OpenConnector>();
+            windowConnectors = new List<P3Float>();
             instance = cell;
             location = plocation;
         }
@@ -25,6 +26,7 @@ namespace FrankyCLI.Retrograde.Passes
         public Location location;
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
+        public List<P3Float> windowConnectors;
 
         public P3Float StartingPosition;
 
