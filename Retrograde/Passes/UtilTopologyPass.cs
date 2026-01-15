@@ -17,6 +17,11 @@ namespace FrankyCLI
         string district = null;
         public string roomlist = "";
         private readonly string districtTypeLabel;
+        private static readonly List<string> PrefabsToForcePlacement = new List<string>
+        {
+            // Add prefab EditorIDs here to force a placement attempt for testing new prefabs.
+            "rg_sts_end_workshop_001"
+        };
 
         public UtilTopologyPass(string p_roomlist, string districtType = null) {         
             district = districtType;
@@ -43,6 +48,9 @@ namespace FrankyCLI
                     usedPrefabIds.Add(room.Prefab.PrefabEditorId);
                 }
             }
+            var requiredPrefabs = PrefabsToForcePlacement
+                .Where(id => !string.IsNullOrWhiteSpace(id) && !usedPrefabIds.Contains(id))
+                .ToList();
 
             if (maxRoomsToPlace == 0)
                 return;
@@ -74,10 +82,17 @@ namespace FrankyCLI
                 var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
 
                 bool placed = false;
+                bool attemptedRequiredForThisConnector = false;
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
+                    bool useRequired = requiredPrefabs.Count > 0 && !attemptedRequiredForThisConnector;
+                    if (useRequired)
+                        attemptedRequiredForThisConnector = true;
+
+                    var prefabId = useRequired
+                        ? requiredPrefabs[0]
+                        : ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
                     var nextPrefab = new RoomPrefab(prefabId);
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
@@ -124,6 +139,11 @@ namespace FrankyCLI
                             Connectors = nextConnectors
                         });
                         usedPrefabIds.Add(nextPrefab.PrefabEditorId);
+                        if (useRequired && requiredPrefabs.Count > 0 &&
+                            string.Equals(prefabId, requiredPrefabs[0], StringComparison.OrdinalIgnoreCase))
+                        {
+                            requiredPrefabs.RemoveAt(0);
+                        }
 
                         roomsPlaced++;
                         placed = true;
