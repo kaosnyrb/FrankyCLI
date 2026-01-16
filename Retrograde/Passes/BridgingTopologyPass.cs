@@ -46,10 +46,10 @@ namespace FrankyCLI
             districtTypeLabel = DeriveDistrictType(bridgeRoomLists[0], districtType, "bridge");
             roomUtils = bridgeRoomLists.Select(name => new RoomUtils(name)).ToList();
         }
+
+
         public void RunPass(DungeonState state)
         {
-
-
             if (state.openConnectors == null || state.openConnectors.Count < 2)
                 return;
 
@@ -68,6 +68,7 @@ namespace FrankyCLI
 
                 if (placedAny || planAttempt == maxPlans - 1)
                 {
+                    Console.WriteLine("PlacedAny = " + placedAny);
                     foreach (var placement in plannedPlacements)
                     {
                         state.instance.Temporary.Add(placement);
@@ -79,7 +80,6 @@ namespace FrankyCLI
                     return;
                 }
             }
-
         }
 
         private bool PlanBridges(
