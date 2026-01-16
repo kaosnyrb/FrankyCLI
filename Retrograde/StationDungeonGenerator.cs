@@ -75,7 +75,7 @@ namespace FrankyCLI
                 new TrunkTopologyPass(),
                 new BossTopologyPass("boss"),
                 new DistrictTopologyPass("rg_hablist"),
-                //new BridgeHelperPass(),
+                new BridgeHelperPass(),
                 new BridgingTopologyPass(new List<string> {"rg_trunklist","rg_bridgelist"}),
                 new UtilTopologyPass("rg_utillist"),
                 new PlugPass(),
