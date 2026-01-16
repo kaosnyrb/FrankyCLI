@@ -20,7 +20,7 @@ namespace FrankyCLI
         private static readonly List<string> PrefabsToForcePlacement = new List<string>
         {
             // Add prefab EditorIDs here to force a placement attempt for testing new prefabs.
-            "rg_sts_end_workshop_001"
+            //"rg_sts_end_workshop_001"
         };
 
         public UtilTopologyPass(string p_roomlist, string districtType = null) {         
