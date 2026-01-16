@@ -15,8 +15,10 @@ namespace FrankyCLI
         private const float ConnectorPositionTolerance = 0.05f;
         private float collisionPadding = -0.5f; // prefer to fail rather than overlap
         private const float connectorEmbedTolerance = 0.05f;
-        private const int maxPlans = 50;
+        private const int maxPlans = 5;
         private const int maxPrefabsToTryPerPair = 48;
+        private const int maxBridgeDepth = 5;
+        private const int maxBridgeSearchAttempts = 500;
 
         private readonly List<string> bridgeRoomLists;
         private readonly List<RoomUtils> roomUtils;
@@ -68,7 +70,6 @@ namespace FrankyCLI
 
                 if (placedAny || planAttempt == maxPlans - 1)
                 {
-                    Console.WriteLine("PlacedAny = " + placedAny);
                     foreach (var placement in plannedPlacements)
                     {
                         state.instance.Temporary.Add(placement);
@@ -93,6 +94,7 @@ namespace FrankyCLI
         {
             bool placedAny = false;
             bool progress = true;
+            int chainsPlaced = 0;
 
             while (progress && plannedOpenConnectors.Count >= 2)
             {
@@ -108,18 +110,38 @@ namespace FrankyCLI
                         if (!ArePairCompatible(a, b))
                             continue;
 
-                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, out var placedRoom, out var placement, out var newConnectors))
+                        // Skip if both connectors come from the same room.
+                        int ownerA = GetOwningRoomIndex(plannedRooms, a, ConnectorPositionTolerance);
+                        int ownerB = GetOwningRoomIndex(plannedRooms, b, ConnectorPositionTolerance);
+                        if (ownerA >= 0 && ownerA == ownerB)
+                            continue;
+
+                        // Skip overly long spans.
+                        if (DistanceSquared(a.WorldPos, b.WorldPos) > 40f * 40f)
+                            continue;
+
+                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, out var placedRoomsChain, out var placementsChain, out var newConnectors, out var searchAttempts))
                         {
-                            plannedPlacements.Add(placement);
-                            plannedRooms.Add(placedRoom);
-                            usedPrefabIds.Add(placedRoom.Prefab.PrefabEditorId);
+                            plannedPlacements.AddRange(placementsChain);
+                            plannedRooms.AddRange(placedRoomsChain);
+                            foreach (var r in placedRoomsChain)
+                            {
+                                usedPrefabIds.Add(r.Prefab.PrefabEditorId);
+                            }
 
                             plannedOpenConnectors.RemoveAt(j);
                             plannedOpenConnectors.RemoveAt(i);
                             plannedOpenConnectors.AddRange(newConnectors);
 
                             placedAny = true;
+                            chainsPlaced++;
                             progress = true;
+
+                            Console.WriteLine($"[Bridge chain] placed {chainsPlaced}/3 after {searchAttempts}/{maxBridgeSearchAttempts} attempts between {FormatPos(a.WorldPos)} and {FormatPos(b.WorldPos)}");
+
+                            if (chainsPlaced >= 3)
+                                return placedAny;
+
                             goto NextIteration;
                         }
                     }
@@ -142,15 +164,68 @@ namespace FrankyCLI
             float collisionPadding,
             float connectorEmbedTolerance,
             int maxPrefabsToTryPerPair,
-            out PlacedRoom placedRoom,
-            out PlacedObject placedObject,
+            out List<PlacedRoom> placedRoomsChain,
+            out List<PlacedObject> placedObjectsChain,
+            out List<OpenConnector> resultingOpenConnectors,
+            out int searchAttempts)
+        {
+            placedRoomsChain = null;
+            placedObjectsChain = null;
+            resultingOpenConnectors = null;
+            searchAttempts = 0;
+
+            bool success = TryBuildBridgeChain(
+                a,
+                b,
+                0,
+                maxBridgeDepth,
+                plannedRooms,
+                usedPrefabIds,
+                collisionPadding,
+                connectorEmbedTolerance,
+                maxPrefabsToTryPerPair,
+                ref searchAttempts,
+                out placedRoomsChain,
+                out placedObjectsChain,
+                out resultingOpenConnectors);
+
+            var attemptsMsg = $"{searchAttempts}/{maxBridgeSearchAttempts}";
+
+            if (!success && searchAttempts >= maxBridgeSearchAttempts)
+            {
+                Console.WriteLine($"[Bridge chain] attempt limit hit {attemptsMsg} between connectors at {FormatPos(a.WorldPos)} and {FormatPos(b.WorldPos)}");
+            }
+            else
+            {
+                Console.WriteLine($"[Bridge chain] attempts={attemptsMsg} success={success}");
+            }
+            return success;
+        }
+
+        private bool TryBuildBridgeChain(
+            OpenConnector anchor,
+            OpenConnector goal,
+            int depth,
+            int maxDepth,
+            List<PlacedRoom> contextRooms,
+            HashSet<string> usedPrefabIds,
+            float collisionPadding,
+            float connectorEmbedTolerance,
+            int maxPrefabsToTryPerPair,
+            ref int searchAttempts,
+            out List<PlacedRoom> chainRooms,
+            out List<PlacedObject> chainPlacements,
             out List<OpenConnector> resultingOpenConnectors)
         {
-            placedRoom = default;
-            placedObject = null;
+            chainRooms = null;
+            chainPlacements = null;
             resultingOpenConnectors = null;
 
-            var candidates = BuildPrefabCandidates(a.Parsed.Tileset, usedPrefabIds);
+            searchAttempts++;
+            if (searchAttempts > maxBridgeSearchAttempts)
+                return false;
+
+            var candidates = BuildPrefabCandidates(anchor.Parsed.Tileset, usedPrefabIds);
             if (candidates.Count == 0)
                 return false;
 
@@ -167,66 +242,108 @@ namespace FrankyCLI
                 {
                     var connectors = ConnectorUtils.GetConnectors(prefab, yawSteps);
 
-                    var matchesA = connectors.Where(c => MatchesOpenConnector(a, c)).ToList();
-                    var matchesB = connectors.Where(c => MatchesOpenConnector(b, c)).ToList();
-
-                    if (matchesA.Count == 0 || matchesB.Count == 0)
+                    var matchesAnchor = connectors.Where(c => MatchesOpenConnector(anchor, c)).ToList();
+                    if (matchesAnchor.Count == 0)
                         continue;
 
-                    foreach (var connA in matchesA)
+                    foreach (var connAnchor in matchesAnchor)
                     {
-                        foreach (var connB in matchesB)
+                        var prefabPos = anchor.WorldPos - connAnchor.LocalPos;
+
+                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
+                        if (ConnectorUtils.CollidesWithAny(candidateAabb, contextRooms, collisionPadding))
+                            continue;
+                        if (AnyConnectorInsideExistingBounds(connectors, prefabPos, contextRooms, connectorEmbedTolerance))
+                            continue;
+                        if (AnyExistingConnectorInsideCandidate(candidateAabb, contextRooms, connectorEmbedTolerance))
+                            continue;
+
+                        var placedObject = new PlacedObject(gen_quest_main.myMod)
                         {
-                            if (IsSameConnector(connA, connB))
+                            Count = 1,
+                            Rotation = RgRotation.RotationToP3Float(yawSteps),
+                            Position = prefabPos,
+                            Base = prefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                        };
+
+                        var placedRoom = new PlacedRoom
+                        {
+                            Prefab = prefab,
+                            WorldPos = prefabPos,
+                            YawSteps = yawSteps,
+                            DistrictType = districtTypeLabel,
+                            Connectors = connectors
+                        };
+
+                        var newOpen = new List<OpenConnector>();
+                        bool goalSatisfied = false;
+
+                        foreach (var c in connectors)
+                        {
+                            if (IsSameConnector(c, connAnchor))
                                 continue;
 
-                            var prefabPos = a.WorldPos - connA.LocalPos;
-                            var expectedB = prefabPos + connB.LocalPos;
-
-                            if (!PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
-                                continue;
-
-                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
-                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
-                                continue;
-                            if (AnyConnectorInsideExistingBounds(connectors, prefabPos, plannedRooms, connectorEmbedTolerance))
-                                continue;
-                            if (AnyExistingConnectorInsideCandidate(candidateAabb, plannedRooms, connectorEmbedTolerance))
-                                continue;
-
-                            placedObject = new PlacedObject(gen_quest_main.myMod)
+                            var worldPos = prefabPos + c.LocalPos;
+                            if (PositionsClose(worldPos, goal.WorldPos, ConnectorPositionTolerance) &&
+                                MatchesOpenConnector(goal, c))
                             {
-                                Count = 1,
-                                Rotation = RgRotation.RotationToP3Float(yawSteps),
-                                Position = prefabPos,
-                                Base = prefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                            };
-
-                            placedRoom = new PlacedRoom
-                            {
-                                Prefab = prefab,
-                                WorldPos = prefabPos,
-                                YawSteps = yawSteps,
-                                DistrictType = districtTypeLabel,
-                                Connectors = connectors
-                            };
-
-                            resultingOpenConnectors = new List<OpenConnector>();
-                            foreach (var c in connectors)
-                            {
-                                if (IsSameConnector(c, connA) || IsSameConnector(c, connB))
-                                    continue;
-
-                                resultingOpenConnectors.Add(new OpenConnector
-                                {
-                                    Parsed = c.Parsed,
-                                    YawSteps = yawSteps,
-                                    WorldPos = prefabPos + c.LocalPos,
-                                    DistrictType = districtTypeLabel
-                                });
+                                goalSatisfied = true;
+                                continue;
                             }
 
+                            newOpen.Add(new OpenConnector
+                            {
+                                Parsed = c.Parsed,
+                                YawSteps = yawSteps,
+                                WorldPos = worldPos,
+                                DistrictType = districtTypeLabel
+                            });
+                        }
+
+                        if (goalSatisfied)
+                        {
+                            chainRooms = new List<PlacedRoom> { placedRoom };
+                            chainPlacements = new List<PlacedObject> { placedObject };
+                            resultingOpenConnectors = newOpen;
                             return true;
+                        }
+
+                        if (depth >= maxDepth)
+                            continue;
+
+                        var extendedRooms = new List<PlacedRoom>(contextRooms) { placedRoom };
+                        var extendedUsed = new HashSet<string>(usedPrefabIds, StringComparer.OrdinalIgnoreCase);
+                        extendedUsed.Add(placedRoom.Prefab.PrefabEditorId);
+
+                        foreach (var nextAnchor in newOpen.Where(o => ArePairCompatible(o, goal)))
+                        {
+                            var remainingAfterAnchor = newOpen.Where(o => !IsSameOpenConnector(o, nextAnchor)).ToList();
+
+                            if (TryBuildBridgeChain(
+                                nextAnchor,
+                                goal,
+                                depth + 1,
+                                maxDepth,
+                                extendedRooms,
+                                extendedUsed,
+                                collisionPadding,
+                                connectorEmbedTolerance,
+                                maxPrefabsToTryPerPair,
+                                ref searchAttempts,
+                                out var tailRooms,
+                                out var tailPlacements,
+                                out var tailOpen))
+                            {
+                                chainRooms = new List<PlacedRoom> { placedRoom };
+                                chainRooms.AddRange(tailRooms);
+
+                                chainPlacements = new List<PlacedObject> { placedObject };
+                                chainPlacements.AddRange(tailPlacements);
+
+                                resultingOpenConnectors = remainingAfterAnchor;
+                                resultingOpenConnectors.AddRange(tailOpen);
+                                return true;
+                            }
                         }
                     }
                 }
@@ -313,6 +430,14 @@ namespace FrankyCLI
                    string.Equals(candidate.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsSameOpenConnector(OpenConnector a, OpenConnector b)
+        {
+            return PositionsClose(a.WorldPos, b.WorldPos, ConnectorPositionTolerance) &&
+                   a.Parsed.Direction == b.Parsed.Direction &&
+                   string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase);
+        }
+
         private static bool IsSameConnector(RgConnectorInstance a, RgConnectorInstance b)
         {
             return string.Equals(a.EditorId, b.EditorId, StringComparison.OrdinalIgnoreCase) &&
@@ -329,6 +454,39 @@ namespace FrankyCLI
         private static bool IsBlocker(string editorId)
         {
             return editorId.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static int GetOwningRoomIndex(List<PlacedRoom> rooms, OpenConnector target, float tolerance)
+        {
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                var room = rooms[i];
+                if (room.Connectors == null)
+                    continue;
+
+                foreach (var conn in room.Connectors)
+                {
+                    var worldPos = room.WorldPos + conn.LocalPos;
+                    bool matches =
+                        PositionsClose(worldPos, target.WorldPos, tolerance) &&
+                        conn.Parsed.Direction == target.Parsed.Direction &&
+                        string.Equals(conn.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(conn.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase);
+
+                    if (matches)
+                        return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static float DistanceSquared(P3Float a, P3Float b)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+            float dz = a.Z - b.Z;
+            return dx * dx + dy * dy + dz * dz;
         }
 
         private static List<T> Shuffle<T>(IEnumerable<T> source)
@@ -395,6 +553,11 @@ namespace FrankyCLI
                    point.Y < aabb.Max.Y - tolerance &&
                    point.Z > aabb.Min.Z + tolerance &&
                    point.Z < aabb.Max.Z - tolerance;
+        }
+
+        private static string FormatPos(P3Float pos)
+        {
+            return $"({pos.X:0.##},{pos.Y:0.##},{pos.Z:0.##})";
         }
 
         private static string DeriveDistrictType(string roomList, string provided, string fallback)
