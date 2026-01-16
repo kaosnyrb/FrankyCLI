@@ -81,7 +81,7 @@ namespace FrankyCLI.Retrograde
         {
             foreach (var r in placedRooms)
             {
-                var placedAabb = ToWorldAabb(r.Prefab.packin_instance.ObjectBounds, r.WorldPos);
+                var placedAabb = ToWorldAabbRotated(r.Prefab.packin_instance.ObjectBounds, r.WorldPos, r.YawSteps);
                 if (Intersects(candidate, placedAabb, padding))
                     return true;
             }
