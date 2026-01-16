@@ -214,6 +214,9 @@ namespace FrankyCLI
                             resultingOpenConnectors = new List<OpenConnector>();
                             foreach (var c in connectors)
                             {
+                                if (IsSameConnector(c, connA) || IsSameConnector(c, connB))
+                                    continue;
+
                                 resultingOpenConnectors.Add(new OpenConnector
                                 {
                                     Parsed = c.Parsed,
