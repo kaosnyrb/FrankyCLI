@@ -17,6 +17,8 @@ namespace FrankyCLI
         string district = null;
         public string roomlist = "";
         private readonly string districtTypeLabel;
+        private static readonly string[] BridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
+        private static readonly Lazy<HashSet<string>> BridgePrefabKeys = new Lazy<HashSet<string>>(BuildBridgePrefabKeys);
 
         public DistrictTopologyPass(string p_roomlist, string districtType = null) {         
             district = districtType;
@@ -31,10 +33,11 @@ namespace FrankyCLI
             float collisionPadding = -0.1f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
             int proximitySample = 5; // bias: pick from the closest N connectors to keep the cluster tight
-            const int maxPlans = 50; // retry count for full planning attempts
+            const int maxPlans = 100; // retry count for full planning attempts
             const float connectorEmbedTolerance = 0.01f; // prevent connectors from sitting inside other room bounds
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
+            const int targetBridgeCount = 50; // aim to leave enough pairs for bridge pass
             RoomUtils roomUtils = new RoomUtils(roomlist);
 
             //Sizing tweaks
@@ -51,6 +54,12 @@ namespace FrankyCLI
                     break;
             }
 
+
+            int bestBridgeablePairs = -1;
+            int initialPlacedCount = state.placedRooms?.Count ?? 0;
+            List<PlacedRoom> bestPlannedRooms = null;
+            List<OpenConnector> bestPlannedOpenConnectors = null;
+            List<PlacedObject> bestPlannedPlacements = null;
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -96,7 +105,7 @@ namespace FrankyCLI
                     var bestPlacement = (PlacedObject)null;
                     PlacedRoom bestRoom = new PlacedRoom();
                     List<OpenConnector> bestNewOpenConnectors = null;
-                    int bestBridgeScore = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset);
+                    int bestBridgeScore = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
@@ -151,7 +160,7 @@ namespace FrankyCLI
                             var newOpenConnectors = BuildOpenConnectors(nextConnectors, chosen, yawSteps, nextPos, districtTypeLabel);
                             var connectorsAfterPlacement = new List<OpenConnector>(plannedOpenConnectors);
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
-                            int bridgeScore = CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset);
+                            int bridgeScore = CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
 
                             if (bestPlacement == null || bridgeScore > bestBridgeScore)
                             {
@@ -177,22 +186,35 @@ namespace FrankyCLI
                     plannedOpenConnectors.AddRange(bestNewOpenConnectors);
                 }
 
-                bool success = roomsPlaced >= maxRoomsToPlace;
-                if (!success)
+                var bridgeablePairs = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
+                if (bridgeablePairs > bestBridgeablePairs)
                 {
-                    Console.WriteLine("[District plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                    continue;
+                    bestBridgeablePairs = bridgeablePairs;
+                    bestPlannedRooms = plannedRooms;
+                    bestPlannedOpenConnectors = plannedOpenConnectors;
+                    bestPlannedPlacements = plannedPlacements;
                 }
 
-                foreach (var placement in plannedPlacements)
+                bool success = roomsPlaced >= maxRoomsToPlace && bridgeablePairs >= targetBridgeCount;
+                if (success || planAttempt == maxPlans - 1)
                 {
-                    state.instance.Temporary.Add(placement);
-                }
-                state.placedRooms = plannedRooms;
-                state.openConnectors = plannedOpenConnectors;
+                    var chosenRooms = success ? plannedRooms : bestPlannedRooms ?? plannedRooms;
+                    var chosenOpenConnectors = success ? plannedOpenConnectors : bestPlannedOpenConnectors ?? plannedOpenConnectors;
+                    var chosenPlacements = success ? plannedPlacements : bestPlannedPlacements ?? plannedPlacements;
+                    int placedCount = success ? roomsPlaced : (chosenRooms.Count - initialPlacedCount);
+                    int bridgeReport = success ? bridgeablePairs : bestBridgeablePairs;
 
-                Console.WriteLine("[District plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                return;
+                    foreach (var placement in chosenPlacements)
+                    {
+                        state.instance.Temporary.Add(placement);
+                    }
+                    state.placedRooms = chosenRooms;
+                    state.openConnectors = chosenOpenConnectors;
+
+                    var status = success ? "success" : "best-effort";
+                    Console.WriteLine($"[District plan] {planAttempt + 1}/{maxPlans} {status}: placed {placedCount}/{maxRoomsToPlace} rooms, bridgeable pairs {bridgeReport}/{targetBridgeCount}.");
+                    return;
+                }
             }
 
             //Console.WriteLine("DistrictTopologyPass failed after {0} plan attempts.", maxPlans);
@@ -417,7 +439,7 @@ namespace FrankyCLI
             return open;
         }
 
-        private static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset)
+        private static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset, HashSet<string> bridgeKeys)
         {
             if (connectors == null || connectors.Count < 2)
                 return 0;
@@ -450,11 +472,151 @@ namespace FrankyCLI
                     if (MathF.Abs(dz) > maxVerticalOffset)
                         continue;
 
+                    if (bridgeKeys != null && bridgeKeys.Count > 0)
+                    {
+                        if (!TryBuildBridgeKey(a, b, out var key))
+                            continue;
+                        if (!bridgeKeys.Contains(key))
+                            continue;
+                    }
+
                     count++;
                 }
             }
 
             return count;
+        }
+
+        private static bool TryBuildBridgeKey(OpenConnector a, OpenConnector b, out string key)
+        {
+            key = null;
+            if (!a.Parsed.IsValid || !b.Parsed.IsValid)
+                return false;
+
+            var anchorTargetDir = ConnectorUtils.Opposite(a.Parsed.Direction);
+            int yawToMatchA = DirectionToYawSteps(anchorTargetDir);
+            if (yawToMatchA < 0)
+                return false;
+
+            var delta = b.WorldPos - a.WorldPos;
+            var localDelta = RgRotation.RotateYaw90(delta, -yawToMatchA);
+
+            int rx = (int)MathF.Round(localDelta.X);
+            int ry = (int)MathF.Round(localDelta.Y);
+            int rz = (int)MathF.Round(localDelta.Z);
+
+            if (rx == 0 && ry == 0 && rz == 0)
+                return false;
+
+            var otherDir = RgRotation.RotateDir(
+                ConnectorUtils.Opposite(b.Parsed.Direction),
+                -yawToMatchA);
+
+            key = $"{a.Parsed.Tileset}|{a.Parsed.DoorSize}|{yawToMatchA}|{otherDir}|{rx},{ry},{rz}";
+            return true;
+        }
+
+        private static int DirectionToYawSteps(ConnectorDirection dir)
+        {
+            return dir switch
+            {
+                ConnectorDirection.North => 0,
+                ConnectorDirection.East => 1,
+                ConnectorDirection.South => 2,
+                ConnectorDirection.West => 3,
+                _ => -1
+            };
+        }
+
+        private static HashSet<string> BuildBridgePrefabKeys()
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var list in BridgeRoomLists)
+            {
+                if (string.IsNullOrWhiteSpace(list))
+                    continue;
+
+                var utils = new RoomUtils(list);
+                if (utils?.roomTemplates == null)
+                    continue;
+
+                foreach (var entry in utils.roomTemplates)
+                {
+                    var formList = entry.Value;
+                    if (formList?.Items == null || formList.Items.Count == 0)
+                        continue;
+
+                    foreach (var item in formList.Items)
+                    {
+                        if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn))
+                            continue;
+
+                        var editorId = packIn?.EditorID;
+                        if (string.IsNullOrWhiteSpace(editorId))
+                            continue;
+
+                        var prefab = new RoomPrefab(editorId);
+                        var connectors = ConnectorUtils.GetConnectors(prefab);
+                        if (connectors.Count < 2)
+                            continue;
+
+                        for (int i = 0; i < connectors.Count - 1; i++)
+                        {
+                            for (int j = i + 1; j < connectors.Count; j++)
+                            {
+                                TryRegisterPrefabSignature(connectors[i], connectors[j], keys);
+                                TryRegisterPrefabSignature(connectors[j], connectors[i], keys);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return keys;
+        }
+
+        private static void TryRegisterPrefabSignature(RgConnectorInstance anchor, RgConnectorInstance other, HashSet<string> keys)
+        {
+            if (!anchor.Parsed.IsValid || !other.Parsed.IsValid)
+                return;
+
+            var a = ToOpenConnector(anchor);
+            var b = ToOpenConnector(other);
+
+            if (!ArePairCompatible(a, b))
+                return;
+
+            if (!TryBuildBridgeKey(a, b, out var key))
+                return;
+
+            keys.Add(key);
+        }
+
+        private static OpenConnector ToOpenConnector(RgConnectorInstance conn)
+        {
+            return new OpenConnector
+            {
+                Parsed = new RgConnector
+                {
+                    RawEditorId = conn.Parsed.RawEditorId,
+                    Direction = ConnectorUtils.Opposite(conn.Parsed.Direction),
+                    DoorSize = conn.Parsed.DoorSize,
+                    Tileset = conn.Parsed.Tileset,
+                    IsValid = conn.Parsed.IsValid
+                },
+                WorldPos = conn.LocalPos,
+                YawSteps = 0,
+                DistrictType = null
+            };
+        }
+
+        private static bool ArePairCompatible(OpenConnector a, OpenConnector b)
+        {
+            return a.Parsed.IsValid &&
+                   b.Parsed.IsValid &&
+                   string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

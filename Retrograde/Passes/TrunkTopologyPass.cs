@@ -15,6 +15,8 @@ namespace FrankyCLI
     public class TrunkTopologyPass : IGenPass
     {
         private static readonly Random Rng = new Random();
+        private static readonly string[] BridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
+        private static readonly Lazy<HashSet<string>> BridgePrefabKeys = new Lazy<HashSet<string>>(BuildBridgePrefabKeys);
 
         public void RunPass(DungeonState state)
         {
@@ -24,10 +26,11 @@ namespace FrankyCLI
             int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
-            const int maxPlans = 30; // cap number of planning retries
+            const int maxPlans = 100; // cap number of planning retries
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
-                                     
+            const int targetBridgeCount = 50; // aim to leave enough pairs for bridge pass
+                                      
             switch (state.Size)
             {
                 case "Small":
@@ -54,6 +57,12 @@ namespace FrankyCLI
             PrefabMarker south0 = new PrefabMarker();
             PrefabMarker north0 = new PrefabMarker();
             RoomUtils roomUtils = new RoomUtils("rg_trunklist");
+
+            int bestBridgeablePairs = -1;
+            List<PlacedRoom> bestPlannedRooms = null;
+            List<OpenConnector> bestPlannedOpenConnectors = null;
+            List<PlacedObject> bestPlannedPlacements = null;
+            int bestRoomsPlaced = 0;
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -160,7 +169,7 @@ namespace FrankyCLI
                     var bestPlacement = (PlacedObject)null;
                     PlacedRoom bestRoom = new PlacedRoom();
                     List<OpenConnector> bestNewOpenConnectors = null;
-                    int bestBridgeScore = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset);
+                    int bestBridgeScore = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
@@ -210,7 +219,7 @@ namespace FrankyCLI
                             var newOpenConnectors = BuildOpenConnectors(nextConnectors, chosen, yawSteps, nextPos, districtType);
                             var connectorsAfterPlacement = new List<OpenConnector>(plannedOpenConnectors);
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
-                            int bridgeScore = CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset);
+                            int bridgeScore = CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
 
                             if (bestPlacement == null || bridgeScore > bestBridgeScore)
                             {
@@ -236,21 +245,37 @@ namespace FrankyCLI
                 }
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
-                if (!success)
+                var bridgeablePairs = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
+                if (bridgeablePairs > bestBridgeablePairs)
                 {
-                    Console.WriteLine("[Trunk Plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);                            
-                    continue;
+                    bestBridgeablePairs = bridgeablePairs;
+                    bestPlannedRooms = plannedRooms;
+                    bestPlannedOpenConnectors = plannedOpenConnectors;
+                    bestPlannedPlacements = plannedPlacements;
+                    bestRoomsPlaced = roomsPlaced;
                 }
 
-                foreach (var placement in plannedPlacements)
+                bool bridgeGoal = bridgeablePairs >= targetBridgeCount;
+                if (success && bridgeGoal || planAttempt == maxPlans - 1)
                 {
-                    state.instance.Temporary.Add(placement);
+                    var chosenRooms = success && bridgeGoal ? plannedRooms : bestPlannedRooms ?? plannedRooms;
+                    var chosenOpenConnectors = success && bridgeGoal ? plannedOpenConnectors : bestPlannedOpenConnectors ?? plannedOpenConnectors;
+                    var chosenPlacements = success && bridgeGoal ? plannedPlacements : bestPlannedPlacements ?? plannedPlacements;
+                    int placedCount = success && bridgeGoal ? roomsPlaced : bestRoomsPlaced;
+                    int bridgeReport = success && bridgeGoal ? bridgeablePairs : bestBridgeablePairs;
+
+                    foreach (var placement in chosenPlacements)
+                    {
+                        state.instance.Temporary.Add(placement);
+                    }
+                    state.placedRooms = chosenRooms;
+                    state.openConnectors = chosenOpenConnectors;
+                    state.YMin = yMin;
+
+                    var status = (success && bridgeGoal) ? "success" : "best-effort";
+                    Console.WriteLine($"[Trunk Plan] {planAttempt + 1}/{maxPlans} {status}: placed {placedCount}/{maxRoomsToPlace} rooms, bridgeable pairs {bridgeReport}/{targetBridgeCount}.");
+                    return;
                 }
-                state.placedRooms = plannedRooms;
-                state.openConnectors = plannedOpenConnectors;
-                state.YMin = yMin;
-                Console.WriteLine("[Trunk Plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                return;
             }
             throw new Exception("TrunkTopologyPass failed after " + maxPlans + " plan attempts.");
         }
@@ -355,7 +380,7 @@ namespace FrankyCLI
             return open;
         }
 
-        private static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset)
+        private static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset, HashSet<string> bridgeKeys)
         {
             if (connectors == null || connectors.Count < 2)
                 return 0;
@@ -388,11 +413,151 @@ namespace FrankyCLI
                     if (MathF.Abs(dz) > maxVerticalOffset)
                         continue;
 
+                    if (bridgeKeys != null && bridgeKeys.Count > 0)
+                    {
+                        if (!TryBuildBridgeKey(a, b, out var key))
+                            continue;
+                        if (!bridgeKeys.Contains(key))
+                            continue;
+                    }
+
                     count++;
                 }
             }
 
             return count;
+        }
+
+        private static bool TryBuildBridgeKey(OpenConnector a, OpenConnector b, out string key)
+        {
+            key = null;
+            if (!a.Parsed.IsValid || !b.Parsed.IsValid)
+                return false;
+
+            var anchorTargetDir = ConnectorUtils.Opposite(a.Parsed.Direction);
+            int yawToMatchA = DirectionToYawSteps(anchorTargetDir);
+            if (yawToMatchA < 0)
+                return false;
+
+            var delta = b.WorldPos - a.WorldPos;
+            var localDelta = RgRotation.RotateYaw90(delta, -yawToMatchA);
+
+            int rx = (int)MathF.Round(localDelta.X);
+            int ry = (int)MathF.Round(localDelta.Y);
+            int rz = (int)MathF.Round(localDelta.Z);
+
+            if (rx == 0 && ry == 0 && rz == 0)
+                return false;
+
+            var otherDir = RgRotation.RotateDir(
+                ConnectorUtils.Opposite(b.Parsed.Direction),
+                -yawToMatchA);
+
+            key = $"{a.Parsed.Tileset}|{a.Parsed.DoorSize}|{yawToMatchA}|{otherDir}|{rx},{ry},{rz}";
+            return true;
+        }
+
+        private static int DirectionToYawSteps(ConnectorDirection dir)
+        {
+            return dir switch
+            {
+                ConnectorDirection.North => 0,
+                ConnectorDirection.East => 1,
+                ConnectorDirection.South => 2,
+                ConnectorDirection.West => 3,
+                _ => -1
+            };
+        }
+
+        private static HashSet<string> BuildBridgePrefabKeys()
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var list in BridgeRoomLists)
+            {
+                if (string.IsNullOrWhiteSpace(list))
+                    continue;
+
+                var utils = new RoomUtils(list);
+                if (utils?.roomTemplates == null)
+                    continue;
+
+                foreach (var entry in utils.roomTemplates)
+                {
+                    var formList = entry.Value;
+                    if (formList?.Items == null || formList.Items.Count == 0)
+                        continue;
+
+                    foreach (var item in formList.Items)
+                    {
+                        if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn))
+                            continue;
+
+                        var editorId = packIn?.EditorID;
+                        if (string.IsNullOrWhiteSpace(editorId))
+                            continue;
+
+                        var prefab = new RoomPrefab(editorId);
+                        var connectors = ConnectorUtils.GetConnectors(prefab);
+                        if (connectors.Count < 2)
+                            continue;
+
+                        for (int i = 0; i < connectors.Count - 1; i++)
+                        {
+                            for (int j = i + 1; j < connectors.Count; j++)
+                            {
+                                TryRegisterPrefabSignature(connectors[i], connectors[j], keys);
+                                TryRegisterPrefabSignature(connectors[j], connectors[i], keys);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return keys;
+        }
+
+        private static void TryRegisterPrefabSignature(RgConnectorInstance anchor, RgConnectorInstance other, HashSet<string> keys)
+        {
+            if (!anchor.Parsed.IsValid || !other.Parsed.IsValid)
+                return;
+
+            var a = ToOpenConnector(anchor);
+            var b = ToOpenConnector(other);
+
+            if (!ArePairCompatible(a, b))
+                return;
+
+            if (!TryBuildBridgeKey(a, b, out var key))
+                return;
+
+            keys.Add(key);
+        }
+
+        private static OpenConnector ToOpenConnector(RgConnectorInstance conn)
+        {
+            return new OpenConnector
+            {
+                Parsed = new RgConnector
+                {
+                    RawEditorId = conn.Parsed.RawEditorId,
+                    Direction = ConnectorUtils.Opposite(conn.Parsed.Direction),
+                    DoorSize = conn.Parsed.DoorSize,
+                    Tileset = conn.Parsed.Tileset,
+                    IsValid = conn.Parsed.IsValid
+                },
+                WorldPos = conn.LocalPos,
+                YawSteps = 0,
+                DistrictType = null
+            };
+        }
+
+        private static bool ArePairCompatible(OpenConnector a, OpenConnector b)
+        {
+            return a.Parsed.IsValid &&
+                   b.Parsed.IsValid &&
+                   string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase);
         }
 
     }
