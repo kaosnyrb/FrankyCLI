@@ -1,5 +1,6 @@
 using FrankyCLI.Retrograde;
 using FrankyCLI.Retrograde.Passes;
+using Mutagen.Bethesda;
 using Noggog;
 using System;
 using System.Collections.Generic;
@@ -13,21 +14,35 @@ namespace FrankyCLI
         private readonly string outputPath;
         private readonly float maxHorizontalSpan;
         private readonly float maxVerticalOffset;
+        private readonly List<RoomUtils> roomUtils;
 
         public BridgeHelperPass(
             string outputPath = "Retrograde/bridge_helper_suggestions.txt",
             float maxHorizontalSpan = 40f,
-            float maxVerticalOffset = 8f)
+            float maxVerticalOffset = 8f,
+            IEnumerable<string> bridgeRoomLists = null)
         {
             this.outputPath = outputPath;
             this.maxHorizontalSpan = maxHorizontalSpan;
             this.maxVerticalOffset = maxVerticalOffset;
+
+            var lists = bridgeRoomLists ?? new[] { "rg_trunklist", "rg_bridgelist" };
+            var bridgeLists = lists
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            roomUtils = bridgeLists
+                .Select(name => new RoomUtils(name))
+                .ToList();
         }
 
         public void RunPass(DungeonState state)
         {
             if (state?.openConnectors == null || state.openConnectors.Count < 2)
                 return;
+
+            var existingPieces = BuildExistingBridgeKeys();
 
             var eligible = state.openConnectors
                 .Where(c => c.Parsed.IsValid && c.WorldPos.Y >= state.YMin)
@@ -51,6 +66,9 @@ namespace FrankyCLI
                     if (TryBuildSuggestion(a, b, out var suggestion))
                     {
                         var key = suggestion.GetKey();
+                        if (existingPieces.Contains(key))
+                            continue;
+
                         if (!suggestions.TryGetValue(key, out var existing))
                         {
                             suggestion.Samples.Add((a.WorldPos, b.WorldPos));
@@ -178,6 +196,88 @@ namespace FrankyCLI
         private static string FormatPos(P3Float pos)
         {
             return $"{pos.X:0.##},{pos.Y:0.##},{pos.Z:0.##}";
+        }
+
+        private HashSet<string> BuildExistingBridgeKeys()
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (roomUtils == null || roomUtils.Count == 0)
+                return keys;
+
+            foreach (var utils in roomUtils)
+            {
+                if (utils?.roomTemplates == null)
+                    continue;
+
+                foreach (var entry in utils.roomTemplates)
+                {
+                    var formList = entry.Value;
+                    if (formList?.Items == null || formList.Items.Count == 0)
+                        continue;
+
+                    foreach (var item in formList.Items)
+                    {
+                        if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn))
+                            continue;
+
+                        var editorId = packIn?.EditorID;
+                        if (string.IsNullOrWhiteSpace(editorId))
+                            continue;
+
+                        var prefab = new RoomPrefab(editorId);
+                        var connectors = ConnectorUtils.GetConnectors(prefab);
+                        if (connectors.Count < 2)
+                            continue;
+
+                        for (int i = 0; i < connectors.Count - 1; i++)
+                        {
+                            for (int j = i + 1; j < connectors.Count; j++)
+                            {
+                                TryRegisterPrefabSignature(connectors[i], connectors[j], keys);
+                                TryRegisterPrefabSignature(connectors[j], connectors[i], keys);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return keys;
+        }
+
+        private void TryRegisterPrefabSignature(RgConnectorInstance anchor, RgConnectorInstance other, HashSet<string> keys)
+        {
+            if (!anchor.Parsed.IsValid || !other.Parsed.IsValid)
+                return;
+
+            var a = ToOpenConnector(anchor);
+            var b = ToOpenConnector(other);
+
+            if (!ArePairCompatible(a, b))
+                return;
+
+            if (!TryBuildSuggestion(a, b, out var suggestion))
+                return;
+
+            keys.Add(suggestion.GetKey());
+        }
+
+        private static OpenConnector ToOpenConnector(RgConnectorInstance conn)
+        {
+            return new OpenConnector
+            {
+                Parsed = new RgConnector
+                {
+                    RawEditorId = conn.Parsed.RawEditorId,
+                    Direction = ConnectorUtils.Opposite(conn.Parsed.Direction),
+                    DoorSize = conn.Parsed.DoorSize,
+                    Tileset = conn.Parsed.Tileset,
+                    IsValid = conn.Parsed.IsValid
+                },
+                WorldPos = conn.LocalPos,
+                YawSteps = 0,
+                DistrictType = null
+            };
         }
 
         private struct BridgePrefabSuggestion
