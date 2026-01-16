@@ -91,6 +91,7 @@ namespace FrankyCLI.Retrograde
             var maxZ = Math.Max(bounds.First.Z, bounds.Second.Z);
 
             const float edgeTolerance = 0.01f; // allow connectors sitting right on the boundary
+            const float integerTolerance = 0.01f; // allow minor floating point drift from whole numbers
 
             foreach (var marker in prefab.Markers)
             {
@@ -99,6 +100,15 @@ namespace FrankyCLI.Retrograde
                     continue;
 
                 var pos = marker.Position;
+
+                if (!IsAlmostInteger(pos.X, integerTolerance) ||
+                    !IsAlmostInteger(pos.Y, integerTolerance) ||
+                    !IsAlmostInteger(pos.Z, integerTolerance))
+                {
+                    throw new Exception(
+                        $"Connector marker '{marker.MarkerEditorId}' in prefab '{packIn.EditorID}' (list '{listKey}') must be on integer coordinates but is at ({pos.X:F2},{pos.Y:F2},{pos.Z:F2}).");
+                }
+
                 if (pos.X < minX - edgeTolerance || pos.X > maxX + edgeTolerance ||
                     pos.Y < minY - edgeTolerance || pos.Y > maxY + edgeTolerance ||
                     pos.Z < minZ - edgeTolerance || pos.Z > maxZ + edgeTolerance)
@@ -110,6 +120,11 @@ namespace FrankyCLI.Retrograde
                     */
                 }
             }
+        }
+
+        private static bool IsAlmostInteger(float value, float tolerance)
+        {
+            return Math.Abs(value - MathF.Round(value)) <= tolerance;
         }
     }
 }

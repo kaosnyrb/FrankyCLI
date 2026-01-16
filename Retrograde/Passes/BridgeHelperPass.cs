@@ -11,6 +11,8 @@ namespace FrankyCLI
 {
     public class BridgeHelperPass : IGenPass
     {
+        private const float CorridorPadding = 0.5f;
+        private const float ConnectorMatchTolerance = 0.05f;
         private readonly string outputPath;
         private readonly float maxHorizontalSpan;
         private readonly float maxVerticalOffset;
@@ -42,6 +44,8 @@ namespace FrankyCLI
             if (state?.openConnectors == null || state.openConnectors.Count < 2)
                 return;
 
+            var placedRoomBounds = BuildPlacedRoomBounds(state.placedRooms);
+
             var existingPieces = BuildExistingBridgeKeys();
 
             var eligible = state.openConnectors
@@ -61,6 +65,9 @@ namespace FrankyCLI
                     var b = eligible[j];
 
                     if (!ArePairCompatible(a, b))
+                        continue;
+
+                    if (IsBlockedByExistingRooms(a, b, placedRoomBounds))
                         continue;
 
                     if (TryBuildSuggestion(a, b, out var suggestion))
@@ -277,6 +284,87 @@ namespace FrankyCLI
                 WorldPos = conn.LocalPos,
                 YawSteps = 0,
                 DistrictType = null
+            };
+        }
+
+        private static List<(PlacedRoom Room, RgAabb Bounds)> BuildPlacedRoomBounds(List<PlacedRoom> placedRooms)
+        {
+            var bounds = new List<(PlacedRoom Room, RgAabb Bounds)>();
+            if (placedRooms == null)
+                return bounds;
+
+            foreach (var room in placedRooms)
+            {
+                if (room.Prefab?.packin_instance == null)
+                    continue;
+
+                bounds.Add((room, ConnectorUtils.ToWorldAabbRotated(room.Prefab.packin_instance.ObjectBounds, room.WorldPos, room.YawSteps)));
+            }
+
+            return bounds;
+        }
+
+        private bool IsBlockedByExistingRooms(OpenConnector a, OpenConnector b, List<(PlacedRoom Room, RgAabb Bounds)> placedRoomBounds)
+        {
+            if (placedRoomBounds == null || placedRoomBounds.Count == 0)
+                return false;
+
+            var ownerA = FindOwningRoomIndex(a, placedRoomBounds);
+            var ownerB = FindOwningRoomIndex(b, placedRoomBounds);
+
+            var corridor = BuildCorridorAabb(a.WorldPos, b.WorldPos, CorridorPadding);
+
+            for (int i = 0; i < placedRoomBounds.Count; i++)
+            {
+                if (i == ownerA || i == ownerB)
+                    continue;
+
+                var bounds = placedRoomBounds[i].Bounds;
+                if (ConnectorUtils.Intersects(corridor, bounds))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static int FindOwningRoomIndex(OpenConnector connector, List<(PlacedRoom Room, RgAabb Bounds)> placedRoomBounds)
+        {
+            for (int i = 0; i < placedRoomBounds.Count; i++)
+            {
+                var room = placedRoomBounds[i].Room;
+                if (room.Connectors == null)
+                    continue;
+
+                foreach (var conn in room.Connectors)
+                {
+                    var worldPos = room.WorldPos + conn.LocalPos;
+                    if (PositionsClose(worldPos, connector.WorldPos, ConnectorMatchTolerance))
+                        return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static bool PositionsClose(P3Float a, P3Float b, float tolerance)
+        {
+            return Math.Abs(a.X - b.X) <= tolerance &&
+                   Math.Abs(a.Y - b.Y) <= tolerance &&
+                   Math.Abs(a.Z - b.Z) <= tolerance;
+        }
+
+        private static RgAabb BuildCorridorAabb(P3Float a, P3Float b, float padding)
+        {
+            return new RgAabb
+            {
+                Min = new P3Float(
+                    Math.Min(a.X, b.X) - padding,
+                    Math.Min(a.Y, b.Y) - padding,
+                    Math.Min(a.Z, b.Z) - padding),
+                Max = new P3Float(
+                    Math.Max(a.X, b.X) + padding,
+                    Math.Max(a.Y, b.Y) + padding,
+                    Math.Max(a.Z, b.Z) + padding)
             };
         }
 

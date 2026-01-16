@@ -17,6 +17,7 @@ namespace FrankyCLI
         private const float connectorEmbedTolerance = 0.05f;
         private const int maxPlans = 50;
         private const int maxPrefabsToTryPerPair = 48;
+        private const int targetBridgeCount = 5;
 
         private readonly List<string> bridgeRoomLists;
         private readonly List<RoomUtils> roomUtils;
@@ -53,6 +54,11 @@ namespace FrankyCLI
             if (state.openConnectors == null || state.openConnectors.Count < 2)
                 return;
 
+            int bestBridgesPlaced = -1;
+            List<PlacedRoom> bestPlannedRooms = null;
+            List<OpenConnector> bestPlannedOpenConnectors = null;
+            List<PlacedObject> bestPlannedPlacements = null;
+
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
                 var usedPrefabIds = CollectUsedPrefabIds(state.placedRooms);
@@ -64,37 +70,52 @@ namespace FrankyCLI
                     .ToList();
                 var plannedPlacements = new List<PlacedObject>();
 
-                bool placedAny = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair);
+                int bridgesPlaced = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, targetBridgeCount);
 
-                if (placedAny || planAttempt == maxPlans - 1)
+                if (bridgesPlaced > bestBridgesPlaced)
                 {
-                    Console.WriteLine("PlacedAny = " + placedAny);
-                    foreach (var placement in plannedPlacements)
+                    bestBridgesPlaced = bridgesPlaced;
+                    bestPlannedRooms = plannedRooms;
+                    bestPlannedOpenConnectors = plannedOpenConnectors;
+                    bestPlannedPlacements = plannedPlacements;
+                }
+
+                bool success = bridgesPlaced >= targetBridgeCount;
+                if (success || planAttempt == maxPlans - 1)
+                {
+                    var chosenRooms = success ? plannedRooms : bestPlannedRooms;
+                    var chosenOpenConnectors = success ? plannedOpenConnectors : bestPlannedOpenConnectors;
+                    var chosenPlacements = success ? plannedPlacements : bestPlannedPlacements;
+                    var bridgesReported = success ? bridgesPlaced : bestBridgesPlaced;
+
+                    foreach (var placement in chosenPlacements)
                     {
                         state.instance.Temporary.Add(placement);
                     }
-                    state.placedRooms = plannedRooms;
-                    state.openConnectors = plannedOpenConnectors;
+                    state.placedRooms = chosenRooms;
+                    state.openConnectors = chosenOpenConnectors;
 
-                    Console.WriteLine($"[Bridge plan] {planAttempt + 1}/{maxPlans} {(placedAny ? "success" : "no fits")} - placed {plannedPlacements.Count} bridge prefabs.");
+                    var status = success ? "success" : "best-effort";
+                    Console.WriteLine($"[Bridge plan] {planAttempt + 1}/{maxPlans} {status} - placed {bridgesReported}/{targetBridgeCount} bridge prefabs.");
                     return;
                 }
             }
         }
 
-        private bool PlanBridges(
+        private int PlanBridges(
             List<PlacedRoom> plannedRooms,
             List<OpenConnector> plannedOpenConnectors,
             List<PlacedObject> plannedPlacements,
             HashSet<string> usedPrefabIds,
             float collisionPadding,
             float connectorEmbedTolerance,
-            int maxPrefabsToTryPerPair)
+            int maxPrefabsToTryPerPair,
+            int desiredBridgeCount)
         {
-            bool placedAny = false;
+            int bridgesPlaced = 0;
             bool progress = true;
 
-            while (progress && plannedOpenConnectors.Count >= 2)
+            while (progress && plannedOpenConnectors.Count >= 2 && bridgesPlaced < desiredBridgeCount)
             {
                 progress = false;
 
@@ -118,7 +139,7 @@ namespace FrankyCLI
                             plannedOpenConnectors.RemoveAt(i);
                             plannedOpenConnectors.AddRange(newConnectors);
 
-                            placedAny = true;
+                            bridgesPlaced++;
                             progress = true;
                             goto NextIteration;
                         }
@@ -131,7 +152,7 @@ namespace FrankyCLI
                 continue;
             }
 
-            return placedAny;
+            return bridgesPlaced;
         }
 
         private bool TryPlaceBridgeBetween(
