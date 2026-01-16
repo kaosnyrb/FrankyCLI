@@ -17,7 +17,7 @@ namespace FrankyCLI
         private const float connectorEmbedTolerance = 0.05f;
         private const int maxPlans = 50;
         private const int maxPrefabsToTryPerPair = 48;
-        private const int targetBridgeCount = 5;
+        private const int targetBridgeCount = 10;
 
         private readonly List<string> bridgeRoomLists;
         private readonly List<RoomUtils> roomUtils;

@@ -25,6 +25,8 @@ namespace FrankyCLI
             float collisionPadding = -0.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
             const int maxPlans = 30; // cap number of planning retries
+            float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
+            float bridgeMaxVerticalOffset = 8f;
                                      
             switch (state.Size)
             {
@@ -155,7 +157,10 @@ namespace FrankyCLI
 
                     var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
 
-                    bool placed = false;
+                    var bestPlacement = (PlacedObject)null;
+                    PlacedRoom bestRoom = new PlacedRoom();
+                    List<OpenConnector> bestNewOpenConnectors = null;
+                    int bestBridgeScore = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset);
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
@@ -185,53 +190,49 @@ namespace FrankyCLI
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
 
-                            plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
-                            {
-                                Count = 1,
-                                Rotation = RgRotation.RotationToP3Float(yawSteps),
-                                Position = nextPos,
-                                Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                            });
-
-                            plannedRooms.Add(new PlacedRoom
+                            var candidateRoom = new PlacedRoom
                             {
                                 Prefab = nextPrefab,
                                 WorldPos = nextPos,
                                 YawSteps = yawSteps,
                                 DistrictType = districtType,
                                 Connectors = nextConnectors
-                            });
-                            usedPrefabIds.Add(nextPrefab.PrefabEditorId);
+                            };
 
-                            roomsPlaced++;
-                            placed = true;
-
-                            foreach (var c in nextConnectors)
+                            var candidatePlacement = new PlacedObject(gen_quest_main.myMod)
                             {
-                                if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
-                                    continue;
+                                Count = 1,
+                                Rotation = RgRotation.RotationToP3Float(yawSteps),
+                                Position = nextPos,
+                                Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                            };
 
-                                plannedOpenConnectors.Add(new OpenConnector
-                                {
-                                    Parsed = c.Parsed,
-                                    YawSteps = yawSteps,
-                                    WorldPos = nextPos + c.LocalPos,
-                                    DistrictType = districtType
-                                });
+                            var newOpenConnectors = BuildOpenConnectors(nextConnectors, chosen, yawSteps, nextPos, districtType);
+                            var connectorsAfterPlacement = new List<OpenConnector>(plannedOpenConnectors);
+                            connectorsAfterPlacement.AddRange(newOpenConnectors);
+                            int bridgeScore = CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset);
+
+                            if (bestPlacement == null || bridgeScore > bestBridgeScore)
+                            {
+                                bestBridgeScore = bridgeScore;
+                                bestPlacement = candidatePlacement;
+                                bestRoom = candidateRoom;
+                                bestNewOpenConnectors = newOpenConnectors;
                             }
-
-                            break;
                         }
-
-                        if (placed)
-                            break;
                     }
 
-                    if (!placed)
+                    if (bestPlacement == null)
                     {
                         plannedOpenConnectors.Add(target);//Return it to the list so we close it later.
                         continue;
                     }
+
+                    plannedPlacements.Add(bestPlacement);
+                    plannedRooms.Add(bestRoom);
+                    usedPrefabIds.Add(bestRoom.Prefab.PrefabEditorId);
+                    roomsPlaced++;
+                    plannedOpenConnectors.AddRange(bestNewOpenConnectors);
                 }
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
@@ -331,6 +332,67 @@ namespace FrankyCLI
             float dy = a.Y - b.Y;
             float dz = a.Z - b.Z;
             return dx * dx + dy * dy + dz * dz;
+        }
+
+        private static List<OpenConnector> BuildOpenConnectors(IEnumerable<RgConnectorInstance> connectors, RgConnectorInstance usedConnector, int yawSteps, P3Float roomPos, string districtType)
+        {
+            var open = new List<OpenConnector>();
+
+            foreach (var c in connectors)
+            {
+                if (c.EditorId == usedConnector.EditorId && c.LocalPos.Equals(usedConnector.LocalPos))
+                    continue;
+
+                open.Add(new OpenConnector
+                {
+                    Parsed = c.Parsed,
+                    YawSteps = yawSteps,
+                    WorldPos = roomPos + c.LocalPos,
+                    DistrictType = districtType
+                });
+            }
+
+            return open;
+        }
+
+        private static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset)
+        {
+            if (connectors == null || connectors.Count < 2)
+                return 0;
+
+            int count = 0;
+
+            for (int i = 0; i < connectors.Count - 1; i++)
+            {
+                var a = connectors[i];
+                if (!a.Parsed.IsValid || a.WorldPos.Y < yMin)
+                    continue;
+
+                for (int j = i + 1; j < connectors.Count; j++)
+                {
+                    var b = connectors[j];
+                    if (!b.Parsed.IsValid || b.WorldPos.Y < yMin)
+                        continue;
+
+                    if (!string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase) ||
+                        !string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    float dx = a.WorldPos.X - b.WorldPos.X;
+                    float dy = a.WorldPos.Y - b.WorldPos.Y;
+                    float dz = a.WorldPos.Z - b.WorldPos.Z;
+
+                    if (MathF.Max(MathF.Abs(dx), MathF.Abs(dy)) > maxHorizontalSpan)
+                        continue;
+
+                    if (MathF.Abs(dz) > maxVerticalOffset)
+                        continue;
+
+                    count++;
+                }
+            }
+
+            return count;
         }
 
     }
