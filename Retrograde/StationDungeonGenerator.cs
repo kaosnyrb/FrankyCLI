@@ -74,11 +74,11 @@ namespace FrankyCLI
             state.scoringSystem = new ScoringSystem()
             {
                 BridgingWieght = 1,
-                BridgingOverlapWieght = 1,
-                NorthBiasWeight = 0.8,
+                BridgingOverlapWieght = -1,
+                NorthBiasWeight = 1,
                 NewConnectorsWieght = 1,
-                PlacementWieght = 3,
-                Effort = 30
+                PlacementWieght = 5,
+                Effort = 40
             };
 
             //Multi-Pass Generation Pipeline
