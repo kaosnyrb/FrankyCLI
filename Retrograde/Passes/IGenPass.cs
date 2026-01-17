@@ -15,9 +15,9 @@ namespace FrankyCLI.Retrograde.Passes
 
     public class ScoringSystem
     {
-        public double PlacementWieght;
-        public double BridgingWieght;
-        public double BridgingOverlapWieght;
+        public double PlacementWieght;          //How important is placing all the rooms?
+        public double BridgingWieght;           //How important is having multiple routes?
+        public double BridgingOverlapWieght;    //How important is having multiple routes from A->B
 
         public int Effort;
     }

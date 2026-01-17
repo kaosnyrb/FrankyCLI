@@ -6,19 +6,21 @@ namespace FrankyCLI
 {
     public static class ScoringUtil
     {
-        public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs)
+        public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0)
         {
             var scoring = scoringSystem ?? new ScoringSystem
             {
                 PlacementWieght = 1,
                 BridgingWieght = 1,
+                BridgingOverlapWieght = 0,
                 Effort = 100
             };
 
             var components = new Dictionary<string, double>
             {
                 { "Placement", roomsPlaced * scoring.PlacementWieght },
-                { "Bridging", bridgeablePairs * scoring.BridgingWieght }
+                { "Bridging", bridgeablePairs * scoring.BridgingWieght },
+                { "BridgingOverlap", bridgingOverlapCount * scoring.BridgingOverlapWieght }
             };
 
             return new PlanScore

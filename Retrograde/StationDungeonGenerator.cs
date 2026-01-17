@@ -73,7 +73,7 @@ namespace FrankyCLI
                 BridgingWieght = 1,
                 BridgingOverlapWieght = -1,
                 PlacementWieght = 1,
-                Effort = 10
+                Effort = 20
             };
 
             //Multi-Pass Generation Pipeline

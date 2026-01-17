@@ -100,6 +100,37 @@ namespace FrankyCLI
                    string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool HaveSameOwner(List<PlacedRoom> rooms, OpenConnector a, OpenConnector b, float tolerance)
+        {
+            int ownerA = ResolveConnectorOwner(rooms, a, tolerance);
+            int ownerB = ResolveConnectorOwner(rooms, b, tolerance);
+            return ownerA >= 0 && ownerA == ownerB;
+        }
+
+        public static int ResolveConnectorOwner(List<PlacedRoom> rooms, OpenConnector open, float tolerance)
+        {
+            if (rooms == null || rooms.Count == 0)
+                return -1;
+
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                var room = rooms[i];
+                if (room.Connectors == null)
+                    continue;
+
+                foreach (var conn in room.Connectors)
+                {
+                    var worldPos = room.WorldPos + conn.LocalPos;
+                    if (PositionsClose(worldPos, open.WorldPos, tolerance))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
         public static bool MatchesOpenConnector(OpenConnector open, RgConnectorInstance candidate)
         {
             return candidate.Parsed.Direction == ConnectorUtils.Opposite(open.Parsed.Direction) &&

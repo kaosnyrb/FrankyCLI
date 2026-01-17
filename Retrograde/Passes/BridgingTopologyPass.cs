@@ -57,6 +57,7 @@ namespace FrankyCLI
             maxPlans = state.scoringSystem?.Effort ?? maxPlans;
 
             int bestBridgesPlaced = -1;
+            int bestOverlapCount = 0;
             List<PlacedRoom> bestPlannedRooms = null;
             List<OpenConnector> bestPlannedOpenConnectors = null;
             List<PlacedObject> bestPlannedPlacements = null;
@@ -75,12 +76,13 @@ namespace FrankyCLI
                     .ToList();
                 var plannedPlacements = new List<PlacedObject>();
 
-                int bridgesPlaced = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, targetBridgeCount);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced);
+                var (bridgesPlaced, overlapCount) = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, targetBridgeCount);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount);
 
                 if (planScore.Total > bestPlanScore)
                 {
                     bestBridgesPlaced = bridgesPlaced;
+                    bestOverlapCount = overlapCount;
                     bestPlannedRooms = plannedRooms;
                     bestPlannedOpenConnectors = plannedOpenConnectors;
                     bestPlannedPlacements = plannedPlacements;
@@ -93,13 +95,15 @@ namespace FrankyCLI
             var finalRooms = bestPlannedRooms ?? state.placedRooms;
             var finalOpenConnectors = bestPlannedOpenConnectors ?? state.openConnectors;
             var finalPlacements = bestPlannedPlacements ?? new List<PlacedObject>();
+            var finalOverlapCount = bestOverlapCount;
             var finalScore = bestPlanScoreBreakdown ?? new PlanScore
             {
                 Total = 0,
                 Components = new Dictionary<string, double>
                 {
                     { "Placement", 0 },
-                    { "Bridging", 0 }
+                    { "Bridging", 0 },
+                    { "BridgingOverlap", 0 }
                 }
             };
 
@@ -110,10 +114,10 @@ namespace FrankyCLI
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}).");
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}).");
         }
 
-        private int PlanBridges(
+        private (int bridgesPlaced, int overlapCount) PlanBridges(
             List<PlacedRoom> plannedRooms,
             List<OpenConnector> plannedOpenConnectors,
             List<PlacedObject> plannedPlacements,
@@ -124,6 +128,7 @@ namespace FrankyCLI
             int desiredBridgeCount)
         {
             int bridgesPlaced = 0;
+            int overlapCount = 0;
             bool progress = true;
 
             while (progress && plannedOpenConnectors.Count >= 2 && bridgesPlaced < desiredBridgeCount)
@@ -151,6 +156,10 @@ namespace FrankyCLI
                             plannedOpenConnectors.AddRange(newConnectors);
 
                             bridgesPlaced++;
+                            if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
+                            {
+                                overlapCount++;
+                            }
                             progress = true;
                             goto NextIteration;
                         }
@@ -163,7 +172,7 @@ namespace FrankyCLI
                 continue;
             }
 
-            return bridgesPlaced;
+            return (bridgesPlaced, overlapCount);
         }
 
         private bool TryPlaceBridgeBetween(
