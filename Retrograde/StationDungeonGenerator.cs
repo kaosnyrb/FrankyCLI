@@ -72,8 +72,8 @@ namespace FrankyCLI
             {
                 BridgingWieght = 1,
                 BridgingOverlapWieght = 1,
-                NorthBiasWeight = 0.5,
-                NewConnectorsWieght = -1,
+                NorthBiasWeight = 0.8,
+                NewConnectorsWieght = 1,
                 PlacementWieght = 3,
                 Effort = 30
             };
