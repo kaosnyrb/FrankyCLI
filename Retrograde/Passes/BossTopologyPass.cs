@@ -16,8 +16,7 @@ namespace FrankyCLI
     {
         string district = null;
         private readonly string districtTypeLabel;
-        private static readonly string[] BridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
-        private static readonly Lazy<HashSet<string>> BridgePrefabKeys = new Lazy<HashSet<string>>(() => BridgeUtil.BuildBridgePrefabKeys(BridgeRoomLists));
+        private static readonly string[] DefaultBridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
         public BossTopologyPass(string districtType = null) {         
             district = districtType;
             districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
@@ -33,6 +32,7 @@ namespace FrankyCLI
             int maxPlans = state.scoringSystem?.Effort ?? 20;
             float bridgeMaxHorizontalSpan = 40f;
             float bridgeMaxVerticalOffset = 8f;
+            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(ResolveBridgeRoomLists(state));
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_trunklist");
@@ -187,8 +187,9 @@ namespace FrankyCLI
                 }
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
-                var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, state.YMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0);
+                var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, state.YMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
+                var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea);
 
                 if (planScore.Total > bestPlanScore)
                 {
@@ -219,11 +220,12 @@ namespace FrankyCLI
                 Components = new Dictionary<string, double>
                 {
                     { "Placement", 0 },
-                    { "Bridging", 0 }
+                    { "Bridging", 0 },
+                    { "Area", 0 }
                 }
             };
 
-            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}).");
+            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, area {finalScore.Components["Area"]:0.00}).");
         }
 
         private static bool TryPlaceSpineNorthConnector(
@@ -329,6 +331,14 @@ namespace FrankyCLI
             }
 
             return false;
+        }
+
+        private static List<string> ResolveBridgeRoomLists(DungeonState state)
+        {
+            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
+                return state.BridgeRoomLists;
+
+            return DefaultBridgeRoomLists.ToList();
         }
 
     }

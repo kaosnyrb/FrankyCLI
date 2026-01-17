@@ -20,6 +20,7 @@ namespace FrankyCLI.Retrograde.Passes
         public double BridgingOverlapWieght;    //How important is having multiple routes from A->B
         public double NorthBiasWeight;          //How important is heading north in trunk layout
         public double NewConnectorsWieght;      //How important is exposing new connectors for later passes
+        public double AreaWieght;               //How important is rewarding total floor area
 
         public int Effort;
     }
@@ -30,6 +31,7 @@ namespace FrankyCLI.Retrograde.Passes
             placedRooms = new List<PlacedRoom>();
             openConnectors = new List<OpenConnector>();
             windowConnectors = new List<P3Float>();
+            BridgeRoomLists = new List<string>();
             instance = cell;
             location = plocation;
         }
@@ -38,6 +40,7 @@ namespace FrankyCLI.Retrograde.Passes
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
         public List<P3Float> windowConnectors;
+        public List<string> BridgeRoomLists;
 
         public ScoringSystem scoringSystem;
 

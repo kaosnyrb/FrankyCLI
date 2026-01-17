@@ -70,6 +70,7 @@ namespace FrankyCLI
             DungeonState state = new DungeonState(cell, location);
             state.Faction = faction;
             state.Size = size;
+            state.BridgeRoomLists = new List<string> { "rg_trunklist", "rg_bridgelist" };
 
             state.scoringSystem = new ScoringSystem()
             {
@@ -78,6 +79,7 @@ namespace FrankyCLI
                 NorthBiasWeight = 1,
                 NewConnectorsWieght = 1,
                 PlacementWieght = 5,
+                AreaWieght = 0.01,
                 Effort = 40
             };
 
@@ -89,7 +91,7 @@ namespace FrankyCLI
                 new BossTopologyPass("boss"),
                 new DistrictTopologyPass("rg_hablist"),
                 new BridgeHelperPass(),
-                new BridgingTopologyPass(new List<string> {"rg_trunklist","rg_bridgelist"}),
+                new BridgingTopologyPass(new List<string> {"rg_trunklist"}),
                 new UtilTopologyPass("rg_utillist"),
                 new PlugPass(),
                 new DoorPass(),

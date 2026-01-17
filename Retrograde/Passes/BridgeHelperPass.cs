@@ -16,7 +16,8 @@ namespace FrankyCLI
         private readonly string outputPath;
         private readonly float maxHorizontalSpan;
         private readonly float maxVerticalOffset;
-        private readonly List<RoomUtils> roomUtils;
+        private readonly List<string> fallbackBridgeRoomLists;
+        private readonly List<RoomUtils> fallbackRoomUtils;
 
         public BridgeHelperPass(
             string outputPath = "Retrograde/bridge_helper_suggestions.txt",
@@ -34,7 +35,8 @@ namespace FrankyCLI
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            roomUtils = bridgeLists
+            fallbackBridgeRoomLists = bridgeLists;
+            fallbackRoomUtils = bridgeLists
                 .Select(name => new RoomUtils(name))
                 .ToList();
         }
@@ -44,9 +46,10 @@ namespace FrankyCLI
             if (state?.openConnectors == null || state.openConnectors.Count < 2)
                 return;
 
+            var roomUtils = ResolveRoomUtils(state);
             var placedRoomBounds = BuildPlacedRoomBounds(state.placedRooms);
 
-            var existingPieces = BuildExistingBridgeKeys();
+            var existingPieces = BuildExistingBridgeKeys(roomUtils);
 
             var eligible = state.openConnectors
                 .Where(c => c.Parsed.IsValid && c.WorldPos.Y >= state.YMin)
@@ -97,6 +100,27 @@ namespace FrankyCLI
                 return;
 
             WriteReport(suggestions.Values);
+        }
+
+        private List<RoomUtils> ResolveRoomUtils(DungeonState state)
+        {
+            var bridgeLists = ResolveBridgeRoomLists(state);
+            if (bridgeLists != null && bridgeLists.Count > 0)
+            {
+                return bridgeLists
+                    .Select(name => new RoomUtils(name))
+                    .ToList();
+            }
+
+            return fallbackRoomUtils;
+        }
+
+        private List<string> ResolveBridgeRoomLists(DungeonState state)
+        {
+            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
+                return state.BridgeRoomLists;
+
+            return fallbackBridgeRoomLists;
         }
 
         private bool TryBuildSuggestion(OpenConnector a, OpenConnector b, out BridgePrefabSuggestion suggestion)
@@ -205,11 +229,11 @@ namespace FrankyCLI
             return $"{pos.X:0.##},{pos.Y:0.##},{pos.Z:0.##}";
         }
 
-        private HashSet<string> BuildExistingBridgeKeys()
+        private HashSet<string> BuildExistingBridgeKeys(IEnumerable<RoomUtils> roomUtils)
         {
             var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (roomUtils == null || roomUtils.Count == 0)
+            if (roomUtils == null)
                 return keys;
 
             foreach (var utils in roomUtils)

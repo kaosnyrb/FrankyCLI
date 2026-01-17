@@ -19,11 +19,10 @@ namespace FrankyCLI
         private const int maxPrefabsToTryPerPair = 48;
         private const int targetBridgeCount = 10;
 
-        private readonly List<string> bridgeRoomLists;
-        private readonly List<RoomUtils> roomUtils;
+        private readonly List<string> fallbackBridgeRoomLists;
         private readonly string districtFilter;
         private readonly string districtTypeLabel;
-        public IReadOnlyList<string> BridgeRoomLists => bridgeRoomLists;
+        public IReadOnlyList<string> BridgeRoomLists => fallbackBridgeRoomLists;
 
         public BridgingTopologyPass(string roomList, string districtType = null)
             : this(new[] { roomList }, districtType)
@@ -35,17 +34,16 @@ namespace FrankyCLI
             if (roomLists == null)
                 throw new ArgumentNullException(nameof(roomLists));
 
-            bridgeRoomLists = roomLists
+            fallbackBridgeRoomLists = roomLists
                 .Where(r => !string.IsNullOrWhiteSpace(r))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            if (bridgeRoomLists.Count == 0)
+            if (fallbackBridgeRoomLists.Count == 0)
                 throw new ArgumentException("At least one bridge room list is required.", nameof(roomLists));
 
             districtFilter = districtType;
-            districtTypeLabel = DeriveDistrictType(bridgeRoomLists[0], districtType, "bridge");
-            roomUtils = bridgeRoomLists.Select(name => new RoomUtils(name)).ToList();
+            districtTypeLabel = DeriveDistrictType(fallbackBridgeRoomLists[0], districtType, "bridge");
         }
 
 
@@ -55,6 +53,9 @@ namespace FrankyCLI
                 return;
 
             maxPlans = state.scoringSystem?.Effort ?? maxPlans;
+            var activeBridgeLists = ResolveBridgeRoomLists(state);
+            var activeRoomUtils = activeBridgeLists.Select(name => new RoomUtils(name)).ToList();
+            var activeDistrictTypeLabel = DeriveDistrictType(activeBridgeLists.FirstOrDefault(), districtFilter, districtTypeLabel);
 
             int bestBridgesPlaced = -1;
             int bestOverlapCount = 0;
@@ -76,8 +77,19 @@ namespace FrankyCLI
                     .ToList();
                 var plannedPlacements = new List<PlacedObject>();
 
-                var (bridgesPlaced, overlapCount) = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, targetBridgeCount);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0);
+                var (bridgesPlaced, overlapCount) = PlanBridges(
+                    plannedRooms,
+                    plannedOpenConnectors,
+                    plannedPlacements,
+                    usedPrefabIds,
+                    collisionPadding,
+                    connectorEmbedTolerance,
+                    maxPrefabsToTryPerPair,
+                    targetBridgeCount,
+                    activeRoomUtils,
+                    activeDistrictTypeLabel);
+                var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea);
 
                 if (planScore.Total > bestPlanScore)
                 {
@@ -103,7 +115,8 @@ namespace FrankyCLI
                 {
                     { "Placement", 0 },
                     { "Bridging", 0 },
-                    { "BridgingOverlap", 0 }
+                    { "BridgingOverlap", 0 },
+                    { "Area", 0 }
                 }
             };
 
@@ -114,7 +127,7 @@ namespace FrankyCLI
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}).");
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}).");
         }
 
         private (int bridgesPlaced, int overlapCount) PlanBridges(
@@ -125,7 +138,9 @@ namespace FrankyCLI
             float collisionPadding,
             float connectorEmbedTolerance,
             int maxPrefabsToTryPerPair,
-            int desiredBridgeCount)
+            int desiredBridgeCount,
+            List<RoomUtils> roomUtils,
+            string districtTypeLabel)
         {
             int bridgesPlaced = 0;
             int overlapCount = 0;
@@ -145,7 +160,7 @@ namespace FrankyCLI
                         if (!BridgeUtil.ArePairCompatible(a, b))
                             continue;
 
-                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, out var placedRoom, out var placement, out var newConnectors))
+                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, roomUtils, districtTypeLabel, out var placedRoom, out var placement, out var newConnectors))
                         {
                             plannedPlacements.Add(placement);
                             plannedRooms.Add(placedRoom);
@@ -183,6 +198,8 @@ namespace FrankyCLI
             float collisionPadding,
             float connectorEmbedTolerance,
             int maxPrefabsToTryPerPair,
+            List<RoomUtils> roomUtils,
+            string districtTypeLabel,
             out PlacedRoom placedRoom,
             out PlacedObject placedObject,
             out List<OpenConnector> resultingOpenConnectors)
@@ -191,7 +208,7 @@ namespace FrankyCLI
             placedObject = null;
             resultingOpenConnectors = null;
 
-            var candidates = BuildPrefabCandidates(a.Parsed.Tileset, usedPrefabIds);
+            var candidates = BuildPrefabCandidates(a.Parsed.Tileset, usedPrefabIds, roomUtils);
             if (candidates.Count == 0)
                 return false;
 
@@ -276,7 +293,15 @@ namespace FrankyCLI
             return false;
         }
 
-        private List<string> BuildPrefabCandidates(string tileset, HashSet<string> usedPrefabIds)
+        private List<string> ResolveBridgeRoomLists(DungeonState state)
+        {
+            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
+                return state.BridgeRoomLists;
+
+            return fallbackBridgeRoomLists;
+        }
+
+        private List<string> BuildPrefabCandidates(string tileset, HashSet<string> usedPrefabIds, List<RoomUtils> roomUtils)
         {
             var allCandidates = new List<string>();
 
