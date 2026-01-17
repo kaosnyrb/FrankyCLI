@@ -80,7 +80,7 @@ namespace FrankyCLI
                     attempts++;
 
                     // Choose the NORTH-facing open connector farthest from the starting position to anchor the boss room
-                    int openIndex = ChooseFarthestNorthFromStart(plannedOpenConnectors, state.StartingPosition);
+                    int openIndex = ConnectorUtils.ChooseFarthestNorthFromStart(plannedOpenConnectors, state.StartingPosition);
                     if (openIndex < 0 || attempts > maxAttempts - 5)
                     {
                         if (TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector, spineDistrictType))
@@ -329,25 +329,6 @@ namespace FrankyCLI
             }
 
             return false;
-        }
-
-        private static int ChooseFarthestNorthFromStart(List<OpenConnector> openConnectors, P3Float startingPosition)
-        {
-            float maxDist = float.MinValue;
-            int bestIndex = -1;
-            for (int i = 0; i < openConnectors.Count; i++)
-            {
-                if (openConnectors[i].Parsed.Direction != ConnectorDirection.North)
-                    continue;
-
-                var dist = MathUtil.DistanceSquared(openConnectors[i].WorldPos, startingPosition);
-                if (dist > maxDist || bestIndex == -1)
-                {
-                    maxDist = dist;
-                    bestIndex = i;
-                }
-            }
-            return bestIndex;
         }
 
     }

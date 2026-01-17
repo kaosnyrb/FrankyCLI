@@ -18,6 +18,7 @@ namespace FrankyCLI.Retrograde.Passes
         public double PlacementWieght;          //How important is placing all the rooms?
         public double BridgingWieght;           //How important is having multiple routes?
         public double BridgingOverlapWieght;    //How important is having multiple routes from A->B
+        public double TrunkNorthBiasWeight;          //How important is heading north in trunk layout
 
         public int Effort;
     }

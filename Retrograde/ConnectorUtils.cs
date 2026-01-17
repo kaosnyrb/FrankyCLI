@@ -206,5 +206,24 @@ namespace FrankyCLI.Retrograde
 
             return candidates[RandomUtils.random.Next(candidates.Count)];
         }
+
+        public static int ChooseFarthestNorthFromStart(List<OpenConnector> openConnectors, P3Float startingPosition)
+        {
+            float maxDist = float.MinValue;
+            int bestIndex = -1;
+            for (int i = 0; i < openConnectors.Count; i++)
+            {
+                if (openConnectors[i].Parsed.Direction != ConnectorDirection.North)
+                    continue;
+
+                var dist = MathUtil.DistanceSquared(openConnectors[i].WorldPos, startingPosition);
+                if (dist > maxDist || bestIndex == -1)
+                {
+                    maxDist = dist;
+                    bestIndex = i;
+                }
+            }
+            return bestIndex;
+        }
     }
 }
