@@ -74,12 +74,12 @@ namespace FrankyCLI
                 TrunkRoomLists = new List<string> { "rg_trunklist" },
                 scoringSystem = new ScoringSystem()
                 {
-                    BridgingWeight = 5,
+                    BridgingWeight = 15,
                     BridgingOverlapWeight = 1,
                     NorthBiasWeight = 0.8,
-                    NewConnectorsWeight = -0.2,
-                    PlacementWeight = 15,
-                    AreaWeight = -0.2,
+                    NewConnectorsWeight = -0.5,
+                    PlacementWeight = 5,
+                    AreaWeight = -0.5,
                     Effort = 40
                 },
                 //Multi-Pass Generation Pipeline

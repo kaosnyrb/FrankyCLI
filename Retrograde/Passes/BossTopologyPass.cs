@@ -25,7 +25,7 @@ namespace FrankyCLI
             const string spineDistrictType = "trunk";
             // Inputs / knobs
             int maxRoomsToPlace = 1;          // boss: only place a single room
-            int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
+            int maxAttempts = 100;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
             int maxPlans = state.scoringSystem?.Effort ?? 20;

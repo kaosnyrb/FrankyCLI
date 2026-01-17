@@ -15,7 +15,6 @@ namespace FrankyCLI
     public class TrunkTopologyPass : IGenPass
     {
         private static readonly Random Rng = new Random();
-        private static readonly string[] DefaultBridgeRoomLists = new[] { "rg_trunklist" };
         int maxRoomsToPlace = 10;          // hard limit (rooms)
 
         public TrunkTopologyPass(int roomtarget)
@@ -33,8 +32,7 @@ namespace FrankyCLI
             int maxPlans = state.scoringSystem.Effort; // cap number of planning retries
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
-            const int targetBridgeCount = 50; // aim to leave enough pairs for bridge pass
-            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(ResolveBridgeRoomLists(state));
+            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             var startingMarker = state.instance.Persistent
                 .OfType<PlacedObject>()
@@ -65,7 +63,7 @@ namespace FrankyCLI
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset, "_trk_"));
+                    var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset));
 
                     var candConnectors = candidate.Markers
                         .Select(m => new
@@ -289,7 +287,7 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestYMin;
 
-            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}/{targetBridgeCount}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}).");
+            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}).");
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)
@@ -383,14 +381,5 @@ namespace FrankyCLI
 
             return open;
         }
-
-        private static List<string> ResolveBridgeRoomLists(DungeonState state)
-        {
-            if (state?.TrunkRoomLists != null && state.TrunkRoomLists.Count > 0)
-                return state.TrunkRoomLists;
-
-            return DefaultBridgeRoomLists.ToList();
-        }
-
     }
 }

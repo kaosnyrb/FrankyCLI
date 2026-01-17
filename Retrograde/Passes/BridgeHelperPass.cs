@@ -29,7 +29,7 @@ namespace FrankyCLI
             this.maxHorizontalSpan = maxHorizontalSpan;
             this.maxVerticalOffset = maxVerticalOffset;
 
-            var lists = bridgeRoomLists ?? new[] { "rg_trunklist", "rg_bridgelist" };
+            var lists = bridgeRoomLists ?? new[] { "rg_trunklist"};
             var bridgeLists = lists
                 .Where(name => !string.IsNullOrWhiteSpace(name))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
