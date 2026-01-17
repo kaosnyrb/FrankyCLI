@@ -6,6 +6,7 @@ using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -64,6 +65,8 @@ namespace FrankyCLI
 
         public void GenerateDungeon(Cell cell, Location location, string faction, string size)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             DungeonState state = new DungeonState(cell, location);
             state.Faction = faction;
             state.Size = size;
@@ -105,6 +108,10 @@ namespace FrankyCLI
             {
                 pas.RunPass(state);
             }
+
+            stopwatch.Stop();
+
+            Console.WriteLine("Station Generation Time:"  + stopwatch.Elapsed);
         }
     }
 }
