@@ -75,6 +75,10 @@ namespace FrankyCLI.questgen_tools
             newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
 
 
+            //Debugging
+            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 0);
+
+
             // POI Name
             newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());
 

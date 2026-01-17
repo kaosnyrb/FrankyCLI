@@ -13,6 +13,15 @@ namespace FrankyCLI.Retrograde.Passes
         public void RunPass(DungeonState state);
     }
 
+    public class ScoringSystem
+    {
+        public double PlacementWieght;          //How important is placing all the rooms?
+        public double BridgingWieght;           //How important is having multiple routes?
+        public double BridgingOverlapWieght;    //How important is having multiple routes from A->B
+
+        public int Effort;
+    }
+
     public class DungeonState
     {
         public DungeonState(Cell cell, Location plocation) {
@@ -27,6 +36,8 @@ namespace FrankyCLI.Retrograde.Passes
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
         public List<P3Float> windowConnectors;
+
+        public ScoringSystem scoringSystem;
 
         public P3Float StartingPosition;
 

@@ -86,7 +86,7 @@ namespace FrankyCLI.Retrograde
             float thresholdSq = minDistance * minDistance;
             for (int i = 0; i < positions.Count; i++)
             {
-                if (DistanceSquared(positions[i], position) <= thresholdSq)
+                if (MathUtil.DistanceSquared(positions[i], position) <= thresholdSq)
                     return true;
             }
 
@@ -107,13 +107,7 @@ namespace FrankyCLI.Retrograde
             positions.Add(position);
         }
 
-        private static float DistanceSquared(P3Float a, P3Float b)
-        {
-            float dx = a.X - b.X;
-            float dy = a.Y - b.Y;
-            float dz = a.Z - b.Z;
-            return dx * dx + dy * dy + dz * dz;
-        }
+        private static float DistanceSquared(P3Float a, P3Float b) => MathUtil.DistanceSquared(a, b);
 
         private static double GetCullChance(string districtType)
         {

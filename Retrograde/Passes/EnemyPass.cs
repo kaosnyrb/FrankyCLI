@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde.Passes;
+using FrankyCLI;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -90,8 +91,8 @@ namespace FrankyCLI.Retrograde
                 return;
 
             var bossAnchor = DetermineBossAnchor(state);
-            var bossVector = Subtract(bossAnchor, state.StartingPosition);
-            var bossDistance = Length(bossVector);
+            var bossVector = MathUtil.Subtract(bossAnchor, state.StartingPosition);
+            var bossDistance = MathUtil.Length(bossVector);
             var fallbackDistance = Math.Max(1f, CalculateFarthestDistance(state));
 
             int enemyCap = Math.Max(1, (int)Math.Ceiling(state.placedRooms.Count * 1.5f));
@@ -225,7 +226,7 @@ namespace FrankyCLI.Retrograde
                 for (int i = 0; i < spaced.Count; i++)
                 {
                     var otherPos = CalculateWorldPosition(spaced[i]);
-                    if (DistanceSquared(worldPos, otherPos) <= radiusSq)
+                    if (MathUtil.DistanceSquared(worldPos, otherPos) <= radiusSq)
                     {
                         nearby++;
                         if (nearby >= maxClusterSize)
@@ -249,22 +250,22 @@ namespace FrankyCLI.Retrograde
             float fallbackDistance,
             P3Float roomPos)
         {
-            var roomVector = Subtract(roomPos, start);
+            var roomVector = MathUtil.Subtract(roomPos, start);
 
             if (bossDistance > 0.01f)
             {
-                var along = Dot(roomVector, bossVector) / bossDistance;
-                var normalized = Clamp01(along / bossDistance);
+                var along = MathUtil.Dot(roomVector, bossVector) / bossDistance;
+                var normalized = MathUtil.Clamp01(along / bossDistance);
 
                 if (!float.IsNaN(normalized) && !float.IsInfinity(normalized))
                     return normalized;
             }
 
-            var roomDistance = Length(roomVector);
+            var roomDistance = MathUtil.Length(roomVector);
             if (fallbackDistance <= 0f)
                 return 0f;
 
-            return Clamp01(roomDistance / fallbackDistance);
+            return MathUtil.Clamp01(roomDistance / fallbackDistance);
         }
 
         private static float ComputeWeight(float progress)
@@ -306,7 +307,7 @@ namespace FrankyCLI.Retrograde
 
             foreach (var room in rooms)
             {
-                float dist = DistanceSquared(room.WorldPos, origin);
+                float dist = MathUtil.DistanceSquared(room.WorldPos, origin);
                 if (dist > bestDistance)
                 {
                     bestDistance = dist;
@@ -322,7 +323,7 @@ namespace FrankyCLI.Retrograde
             float maxDistSq = 0f;
             foreach (var room in state.placedRooms)
             {
-                var distSq = DistanceSquared(room.WorldPos, state.StartingPosition);
+                var distSq = MathUtil.DistanceSquared(room.WorldPos, state.StartingPosition);
                 if (distSq > maxDistSq)
                     maxDistSq = distSq;
             }
@@ -330,37 +331,10 @@ namespace FrankyCLI.Retrograde
             return (float)Math.Sqrt(maxDistSq);
         }
 
-        private static float Length(P3Float v)
-        {
-            return (float)Math.Sqrt(Dot(v, v));
-        }
-
-        private static float Dot(P3Float a, P3Float b)
-        {
-            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
-        }
-
         private static P3Float CalculateWorldPosition(SpawnCandidate spawn)
         {
             var rotatedLocal = RgRotation.RotateYaw90(spawn.Marker.Position, spawn.Room.YawSteps);
             return spawn.Room.WorldPos + rotatedLocal;
-        }
-
-        private static P3Float Subtract(P3Float a, P3Float b)
-        {
-            return new P3Float(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
-        }
-
-        private static float DistanceSquared(P3Float a, P3Float b)
-        {
-            return Dot(Subtract(a, b), Subtract(a, b));
-        }
-
-        private static float Clamp01(float v)
-        {
-            if (v < 0f) return 0f;
-            if (v > 1f) return 1f;
-            return v;
         }
     }
 }
