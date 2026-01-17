@@ -77,9 +77,11 @@ namespace FrankyCLI
                     BridgingWeight = 15,
                     BridgingOverlapWeight = 1,
                     NorthBiasWeight = 0.8,
-                    NewConnectorsWeight = -0.5,
+                    NewConnectorsWeight = 0.5,
                     PlacementWeight = 5,
                     AreaWeight = -0.5,
+                    ClusteringWeight = 3,
+                    SizeDiversityWeight = 3,
                     Effort = 40
                 },
                 //Multi-Pass Generation Pipeline
@@ -91,7 +93,7 @@ namespace FrankyCLI
                     new DistrictTopologyPass("rg_hablist",10),
                     new BridgeHelperPass(),
                     new BridgingTopologyPass(),
-                    new UtilTopologyPass("rg_utillist",0.2f),
+                    new UtilTopologyPass("rg_utillist",0.8f),
                     new PlugPass(),
                     new DoorPass(),
                 //Seal connectors

@@ -76,7 +76,9 @@ namespace FrankyCLI
                     activeRoomUtils,
                     activeDistrictTypeLabel);
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea);
+                var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
+                var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity);
 
                 if (planScore.Total > bestPlanScore)
                 {
@@ -103,7 +105,9 @@ namespace FrankyCLI
                     { "Placement", 0 },
                     { "Bridging", 0 },
                     { "BridgingOverlap", 0 },
-                    { "Area", 0 }
+                    { "Area", 0 },
+                    { "Clustering", 0 },
+                    { "SizeDiversity", 0 }
                 }
             };
 
@@ -114,7 +118,7 @@ namespace FrankyCLI
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}).");
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}).");
         }
 
         private (int bridgesPlaced, int overlapCount) PlanBridges(

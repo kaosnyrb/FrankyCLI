@@ -246,7 +246,9 @@ namespace FrankyCLI
                 bool success = roomsPlaced >= maxRoomsToPlace;
                 var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea);
+                var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
+                var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity);
                 if (planScore.Total > bestPlanScore)
                 {
                     bestBridgeablePairs = bridgeablePairs;
@@ -275,7 +277,9 @@ namespace FrankyCLI
                     { "Bridging", 0 },
                     { "BridgingOverlap", 0 },
                     { "NewConnectors", 0 },
-                    { "Area", 0 }
+                    { "Area", 0 },
+                    { "Clustering", 0 },
+                    { "SizeDiversity", 0 }
                 }
             };
 
@@ -287,7 +291,7 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestYMin;
 
-            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}).");
+            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}).");
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)

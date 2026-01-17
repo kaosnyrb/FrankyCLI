@@ -21,6 +21,8 @@ namespace FrankyCLI.Retrograde.Passes
         public double NorthBiasWeight;          //How important is heading north in trunk layout
         public double NewConnectorsWeight;      //How important is exposing new connectors for later passes
         public double AreaWeight;               //How important is rewarding total floor area
+        public double ClusteringWeight;         //How important is spacing out rooms instead of clumping
+        public double SizeDiversityWeight;      //How important is avoiding chains of tiny rooms
 
         public int Effort;
     }
