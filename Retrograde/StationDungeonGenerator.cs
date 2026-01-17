@@ -71,6 +71,7 @@ namespace FrankyCLI
             state.scoringSystem = new ScoringSystem()
             {
                 BridgingWieght = 1,
+                BridgingOverlapWieght = -1,
                 PlacementWieght = 1,
                 Effort = 10
             };

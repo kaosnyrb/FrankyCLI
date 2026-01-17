@@ -16,6 +16,8 @@ namespace FrankyCLI
     {
         string district = null;
         private readonly string districtTypeLabel;
+        private static readonly string[] BridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
+        private static readonly Lazy<HashSet<string>> BridgePrefabKeys = new Lazy<HashSet<string>>(() => BridgeUtil.BuildBridgePrefabKeys(BridgeRoomLists));
         public BossTopologyPass(string districtType = null) {         
             district = districtType;
             districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
@@ -28,10 +30,21 @@ namespace FrankyCLI
             int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -1.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
-            const int maxPlans = 20;
+            int maxPlans = state.scoringSystem?.Effort ?? 20;
+            float bridgeMaxHorizontalSpan = 40f;
+            float bridgeMaxVerticalOffset = 8f;
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_trunklist");
+
+            List<PlacedRoom> bestPlannedRooms = null;
+            List<OpenConnector> bestPlannedOpenConnectors = null;
+            List<PlacedObject> bestPlannedPlacements = null;
+            int bestRoomsPlaced = 0;
+            double bestPlanScore = double.MinValue;
+            PlanScore? bestPlanScoreBreakdown = null;
+            int bestPlanAttempt = -1;
+            int bestBridgeablePairs = -1;
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -174,24 +187,43 @@ namespace FrankyCLI
                 }
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
-                if (!success)
-                {
-                    Console.WriteLine("[Boss plan]  {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                    continue;
-                }
+                var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, state.YMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs);
 
-                foreach (var placement in plannedPlacements)
+                if (planScore.Total > bestPlanScore)
                 {
-                    state.instance.Temporary.Add(placement);
+                    bestPlannedRooms = plannedRooms;
+                    bestPlannedOpenConnectors = plannedOpenConnectors;
+                    bestPlannedPlacements = plannedPlacements;
+                    bestRoomsPlaced = roomsPlaced;
+                    bestPlanScore = planScore.Total;
+                    bestPlanScoreBreakdown = planScore;
+                    bestPlanAttempt = planAttempt;
+                    bestBridgeablePairs = bridgeablePairs;
                 }
-                state.placedRooms = plannedRooms;
-                state.openConnectors = plannedOpenConnectors;
-                Console.WriteLine("[Boss plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                return;
             }
 
-            //We're fucked. Kill the run.
-            throw new Exception("Couldn't place boss room");
+            if (bestPlannedPlacements == null)
+                throw new Exception("Couldn't place boss room");
+
+            foreach (var placement in bestPlannedPlacements)
+            {
+                state.instance.Temporary.Add(placement);
+            }
+            state.placedRooms = bestPlannedRooms;
+            state.openConnectors = bestPlannedOpenConnectors;
+
+            var finalScore = bestPlanScoreBreakdown ?? new PlanScore
+            {
+                Total = 0,
+                Components = new Dictionary<string, double>
+                {
+                    { "Placement", 0 },
+                    { "Bridging", 0 }
+                }
+            };
+
+            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}).");
         }
 
         private static bool TryPlaceSpineNorthConnector(

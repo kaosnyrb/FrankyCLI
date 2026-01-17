@@ -15,7 +15,7 @@ namespace FrankyCLI
         private const float ConnectorPositionTolerance = 0.05f;
         private float collisionPadding = -0.5f; // prefer to fail rather than overlap
         private const float connectorEmbedTolerance = 0.05f;
-        private const int maxPlans = 50;
+        private int maxPlans = 50;
         private const int maxPrefabsToTryPerPair = 48;
         private const int targetBridgeCount = 10;
 
@@ -54,10 +54,15 @@ namespace FrankyCLI
             if (state.openConnectors == null || state.openConnectors.Count < 2)
                 return;
 
+            maxPlans = state.scoringSystem?.Effort ?? maxPlans;
+
             int bestBridgesPlaced = -1;
             List<PlacedRoom> bestPlannedRooms = null;
             List<OpenConnector> bestPlannedOpenConnectors = null;
             List<PlacedObject> bestPlannedPlacements = null;
+            double bestPlanScore = double.MinValue;
+            PlanScore? bestPlanScoreBreakdown = null;
+            int bestPlanAttempt = -1;
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -71,35 +76,41 @@ namespace FrankyCLI
                 var plannedPlacements = new List<PlacedObject>();
 
                 int bridgesPlaced = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, targetBridgeCount);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced);
 
-                if (bridgesPlaced > bestBridgesPlaced)
+                if (planScore.Total > bestPlanScore)
                 {
                     bestBridgesPlaced = bridgesPlaced;
                     bestPlannedRooms = plannedRooms;
                     bestPlannedOpenConnectors = plannedOpenConnectors;
                     bestPlannedPlacements = plannedPlacements;
-                }
-
-                bool success = bridgesPlaced >= targetBridgeCount;
-                if (success || planAttempt == maxPlans - 1)
-                {
-                    var chosenRooms = success ? plannedRooms : bestPlannedRooms;
-                    var chosenOpenConnectors = success ? plannedOpenConnectors : bestPlannedOpenConnectors;
-                    var chosenPlacements = success ? plannedPlacements : bestPlannedPlacements;
-                    var bridgesReported = success ? bridgesPlaced : bestBridgesPlaced;
-
-                    foreach (var placement in chosenPlacements)
-                    {
-                        state.instance.Temporary.Add(placement);
-                    }
-                    state.placedRooms = chosenRooms;
-                    state.openConnectors = chosenOpenConnectors;
-
-                    var status = success ? "success" : "best-effort";
-                    Console.WriteLine($"[Bridge plan] {planAttempt + 1}/{maxPlans} {status} - placed {bridgesReported}/{targetBridgeCount} bridge prefabs.");
-                    return;
+                    bestPlanScore = planScore.Total;
+                    bestPlanScoreBreakdown = planScore;
+                    bestPlanAttempt = planAttempt;
                 }
             }
+
+            var finalRooms = bestPlannedRooms ?? state.placedRooms;
+            var finalOpenConnectors = bestPlannedOpenConnectors ?? state.openConnectors;
+            var finalPlacements = bestPlannedPlacements ?? new List<PlacedObject>();
+            var finalScore = bestPlanScoreBreakdown ?? new PlanScore
+            {
+                Total = 0,
+                Components = new Dictionary<string, double>
+                {
+                    { "Placement", 0 },
+                    { "Bridging", 0 }
+                }
+            };
+
+            foreach (var placement in finalPlacements)
+            {
+                state.instance.Temporary.Add(placement);
+            }
+            state.placedRooms = finalRooms;
+            state.openConnectors = finalOpenConnectors;
+
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}).");
         }
 
         private int PlanBridges(
@@ -126,7 +137,7 @@ namespace FrankyCLI
                         var a = plannedOpenConnectors[i];
                         var b = plannedOpenConnectors[j];
 
-                        if (!ArePairCompatible(a, b))
+                        if (!BridgeUtil.ArePairCompatible(a, b))
                             continue;
 
                         if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, out var placedRoom, out var placement, out var newConnectors))
@@ -188,8 +199,8 @@ namespace FrankyCLI
                 {
                     var connectors = ConnectorUtils.GetConnectors(prefab, yawSteps);
 
-                    var matchesA = connectors.Where(c => MatchesOpenConnector(a, c)).ToList();
-                    var matchesB = connectors.Where(c => MatchesOpenConnector(b, c)).ToList();
+                    var matchesA = connectors.Where(c => BridgeUtil.MatchesOpenConnector(a, c)).ToList();
+                    var matchesB = connectors.Where(c => BridgeUtil.MatchesOpenConnector(b, c)).ToList();
 
                     if (matchesA.Count == 0 || matchesB.Count == 0)
                         continue;
@@ -198,21 +209,21 @@ namespace FrankyCLI
                     {
                         foreach (var connB in matchesB)
                         {
-                            if (IsSameConnector(connA, connB))
+                            if (BridgeUtil.IsSameConnector(connA, connB))
                                 continue;
 
                             var prefabPos = a.WorldPos - connA.LocalPos;
                             var expectedB = prefabPos + connB.LocalPos;
 
-                            if (!PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
+                            if (!BridgeUtil.PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
                                 continue;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
-                            if (AnyConnectorInsideExistingBounds(connectors, prefabPos, plannedRooms, connectorEmbedTolerance))
+                            if (BridgeUtil.AnyConnectorInsideExistingBounds(connectors, prefabPos, plannedRooms, connectorEmbedTolerance))
                                 continue;
-                            if (AnyExistingConnectorInsideCandidate(candidateAabb, plannedRooms, connectorEmbedTolerance))
+                            if (BridgeUtil.AnyExistingConnectorInsideCandidate(candidateAabb, plannedRooms, connectorEmbedTolerance))
                                 continue;
 
                             placedObject = new PlacedObject(gen_quest_main.myMod)
@@ -235,7 +246,7 @@ namespace FrankyCLI
                             resultingOpenConnectors = new List<OpenConnector>();
                             foreach (var c in connectors)
                             {
-                                if (IsSameConnector(c, connA) || IsSameConnector(c, connB))
+                                if (BridgeUtil.IsSameConnector(c, connA) || BridgeUtil.IsSameConnector(c, connB))
                                     continue;
 
                                 resultingOpenConnectors.Add(new OpenConnector
@@ -318,35 +329,6 @@ namespace FrankyCLI
             return usedPrefabIds;
         }
 
-        private static bool ArePairCompatible(OpenConnector a, OpenConnector b)
-        {
-            if (!a.Parsed.IsValid || !b.Parsed.IsValid)
-                return false;
-
-            return string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool MatchesOpenConnector(OpenConnector open, RgConnectorInstance candidate)
-        {
-            return candidate.Parsed.Direction == ConnectorUtils.Opposite(open.Parsed.Direction) &&
-                   string.Equals(candidate.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(candidate.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool IsSameConnector(RgConnectorInstance a, RgConnectorInstance b)
-        {
-            return string.Equals(a.EditorId, b.EditorId, StringComparison.OrdinalIgnoreCase) &&
-                   a.LocalPos.Equals(b.LocalPos);
-        }
-
-        private static bool PositionsClose(P3Float a, P3Float b, float tolerance)
-        {
-            return Math.Abs(a.X - b.X) <= tolerance &&
-                   Math.Abs(a.Y - b.Y) <= tolerance &&
-                   Math.Abs(a.Z - b.Z) <= tolerance;
-        }
-
         private static bool IsBlocker(string editorId)
         {
             return editorId.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -355,67 +337,6 @@ namespace FrankyCLI
         private static List<T> Shuffle<T>(IEnumerable<T> source)
         {
             return source.OrderBy(_ => RandomUtils.random.Next()).ToList();
-        }
-
-        private static bool AnyConnectorInsideExistingBounds(
-            List<RgConnectorInstance> connectors,
-            P3Float roomWorldPos,
-            List<PlacedRoom> placedRooms,
-            float tolerance)
-        {
-            if (placedRooms == null || placedRooms.Count == 0)
-                return false;
-
-            foreach (var placed in placedRooms)
-            {
-                if (placed.Prefab?.packin_instance == null)
-                    continue;
-
-                var placedAabb = ConnectorUtils.ToWorldAabbRotated(placed.Prefab.packin_instance.ObjectBounds, placed.WorldPos, placed.YawSteps);
-
-                foreach (var conn in connectors)
-                {
-                    var worldPos = roomWorldPos + conn.LocalPos;
-                    if (IsPointStrictlyInside(worldPos, placedAabb, tolerance))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool AnyExistingConnectorInsideCandidate(
-            RgAabb candidateAabb,
-            List<PlacedRoom> placedRooms,
-            float tolerance)
-        {
-            if (placedRooms == null || placedRooms.Count == 0)
-                return false;
-
-            foreach (var placed in placedRooms)
-            {
-                if (placed.Connectors == null)
-                    continue;
-
-                foreach (var conn in placed.Connectors)
-                {
-                    var worldPos = placed.WorldPos + conn.LocalPos;
-                    if (IsPointStrictlyInside(worldPos, candidateAabb, tolerance))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsPointStrictlyInside(P3Float point, RgAabb aabb, float tolerance)
-        {
-            return point.X > aabb.Min.X + tolerance &&
-                   point.X < aabb.Max.X - tolerance &&
-                   point.Y > aabb.Min.Y + tolerance &&
-                   point.Y < aabb.Max.Y - tolerance &&
-                   point.Z > aabb.Min.Z + tolerance &&
-                   point.Z < aabb.Max.Z - tolerance;
         }
 
         private static string DeriveDistrictType(string roomList, string provided, string fallback)

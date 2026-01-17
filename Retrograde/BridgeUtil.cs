@@ -3,6 +3,7 @@ using FrankyCLI.Retrograde;
 using Mutagen.Bethesda;
 using System;
 using System.Collections.Generic;
+using Noggog;
 
 namespace FrankyCLI
 {
@@ -99,6 +100,87 @@ namespace FrankyCLI
                    string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool MatchesOpenConnector(OpenConnector open, RgConnectorInstance candidate)
+        {
+            return candidate.Parsed.Direction == ConnectorUtils.Opposite(open.Parsed.Direction) &&
+                   string.Equals(candidate.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(candidate.Parsed.Tileset, open.Parsed.Tileset, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsSameConnector(RgConnectorInstance a, RgConnectorInstance b)
+        {
+            return string.Equals(a.EditorId, b.EditorId, StringComparison.OrdinalIgnoreCase) &&
+                   a.LocalPos.Equals(b.LocalPos);
+        }
+
+        public static bool PositionsClose(P3Float a, P3Float b, float tolerance)
+        {
+            return Math.Abs(a.X - b.X) <= tolerance &&
+                   Math.Abs(a.Y - b.Y) <= tolerance &&
+                   Math.Abs(a.Z - b.Z) <= tolerance;
+        }
+
+        public static bool AnyConnectorInsideExistingBounds(
+            List<RgConnectorInstance> connectors,
+            P3Float roomWorldPos,
+            List<PlacedRoom> placedRooms,
+            float tolerance)
+        {
+            if (placedRooms == null || placedRooms.Count == 0)
+                return false;
+
+            foreach (var placed in placedRooms)
+            {
+                if (placed.Prefab?.packin_instance == null)
+                    continue;
+
+                var placedAabb = ConnectorUtils.ToWorldAabbRotated(placed.Prefab.packin_instance.ObjectBounds, placed.WorldPos, placed.YawSteps);
+
+                foreach (var conn in connectors)
+                {
+                    var worldPos = roomWorldPos + conn.LocalPos;
+                    if (IsPointStrictlyInside(worldPos, placedAabb, tolerance))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool AnyExistingConnectorInsideCandidate(
+            RgAabb candidateAabb,
+            List<PlacedRoom> placedRooms,
+            float tolerance)
+        {
+            if (placedRooms == null || placedRooms.Count == 0)
+                return false;
+
+            foreach (var placed in placedRooms)
+            {
+                if (placed.Connectors == null)
+                    continue;
+
+                foreach (var conn in placed.Connectors)
+                {
+                    var worldPos = placed.WorldPos + conn.LocalPos;
+                    if (IsPointStrictlyInside(worldPos, candidateAabb, tolerance))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool IsPointStrictlyInside(P3Float point, RgAabb aabb, float tolerance)
+        {
+            return point.X > aabb.Min.X + tolerance &&
+                   point.X < aabb.Max.X - tolerance &&
+                   point.Y > aabb.Min.Y + tolerance &&
+                   point.Y < aabb.Max.Y - tolerance &&
+                   point.Z > aabb.Min.Z + tolerance &&
+                   point.Z < aabb.Max.Z - tolerance;
+        }
+
         public static bool TryBuildBridgeKey(OpenConnector a, OpenConnector b, out string key)
         {
             key = null;
@@ -138,6 +220,54 @@ namespace FrankyCLI
                 ConnectorDirection.West => 3,
                 _ => -1
             };
+        }
+
+        public static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset, HashSet<string> bridgeKeys)
+        {
+            if (connectors == null || connectors.Count < 2)
+                return 0;
+
+            int count = 0;
+
+            for (int i = 0; i < connectors.Count - 1; i++)
+            {
+                var a = connectors[i];
+                if (!a.Parsed.IsValid || a.WorldPos.Y < yMin)
+                    continue;
+
+                for (int j = i + 1; j < connectors.Count; j++)
+                {
+                    var b = connectors[j];
+                    if (!b.Parsed.IsValid || b.WorldPos.Y < yMin)
+                        continue;
+
+                    if (!string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase) ||
+                        !string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    float dx = a.WorldPos.X - b.WorldPos.X;
+                    float dy = a.WorldPos.Y - b.WorldPos.Y;
+                    float dz = a.WorldPos.Z - b.WorldPos.Z;
+
+                    if (MathF.Max(MathF.Abs(dx), MathF.Abs(dy)) > maxHorizontalSpan)
+                        continue;
+
+                    if (MathF.Abs(dz) > maxVerticalOffset)
+                        continue;
+
+                    if (bridgeKeys != null && bridgeKeys.Count > 0)
+                    {
+                        if (!TryBuildBridgeKey(a, b, out var key))
+                            continue;
+                        if (!bridgeKeys.Contains(key))
+                            continue;
+                    }
+
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 }

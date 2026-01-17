@@ -173,7 +173,7 @@ namespace FrankyCLI
                     var bestPlacement = (PlacedObject)null;
                     PlacedRoom bestRoom = new PlacedRoom();
                     List<OpenConnector> bestNewOpenConnectors = null;
-                    int bestBridgeScore = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
+                    int bestBridgeScore = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
@@ -223,7 +223,7 @@ namespace FrankyCLI
                             var newOpenConnectors = BuildOpenConnectors(nextConnectors, chosen, yawSteps, nextPos, districtType);
                             var connectorsAfterPlacement = new List<OpenConnector>(plannedOpenConnectors);
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
-                            int bridgeScore = CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
+                            int bridgeScore = BridgeUtil.CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
 
                             if (bestPlacement == null || bridgeScore > bestBridgeScore)
                             {
@@ -249,7 +249,7 @@ namespace FrankyCLI
                 }
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
-                var bridgeablePairs = CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
+                var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs);
                 if (planScore.Total > bestPlanScore)
                 {
@@ -390,52 +390,5 @@ namespace FrankyCLI
             return open;
         }
 
-        private static int CountBridgeablePairs(List<OpenConnector> connectors, float yMin, float maxHorizontalSpan, float maxVerticalOffset, HashSet<string> bridgeKeys)
-        {
-            if (connectors == null || connectors.Count < 2)
-                return 0;
-
-            int count = 0;
-
-            for (int i = 0; i < connectors.Count - 1; i++)
-            {
-                var a = connectors[i];
-                if (!a.Parsed.IsValid || a.WorldPos.Y < yMin)
-                    continue;
-
-                for (int j = i + 1; j < connectors.Count; j++)
-                {
-                    var b = connectors[j];
-                    if (!b.Parsed.IsValid || b.WorldPos.Y < yMin)
-                        continue;
-
-                    if (!string.Equals(a.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase) ||
-                        !string.Equals(a.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    float dx = a.WorldPos.X - b.WorldPos.X;
-                    float dy = a.WorldPos.Y - b.WorldPos.Y;
-                    float dz = a.WorldPos.Z - b.WorldPos.Z;
-
-                    if (MathF.Max(MathF.Abs(dx), MathF.Abs(dy)) > maxHorizontalSpan)
-                        continue;
-
-                    if (MathF.Abs(dz) > maxVerticalOffset)
-                        continue;
-
-                    if (bridgeKeys != null && bridgeKeys.Count > 0)
-                    {
-                        if (!BridgeUtil.TryBuildBridgeKey(a, b, out var key))
-                            continue;
-                        if (!bridgeKeys.Contains(key))
-                            continue;
-                    }
-
-                    count++;
-                }
-            }
-
-            return count;
-        }
     }
 }

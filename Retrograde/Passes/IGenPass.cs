@@ -17,6 +17,8 @@ namespace FrankyCLI.Retrograde.Passes
     {
         public double PlacementWieght;
         public double BridgingWieght;
+        public double BridgingOverlapWieght;
+
         public int Effort;
     }
 
