@@ -18,16 +18,18 @@ namespace FrankyCLI
         public string roomlist = "";
         private readonly string districtTypeLabel;
         private static readonly string[] DefaultBridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
+        int maxRoomsToPlace = 10;
 
-        public DistrictTopologyPass(string p_roomlist, string districtType = null) {         
+        public DistrictTopologyPass(string p_roomlist,int roomtarget, string districtType = null) {         
             district = districtType;
             roomlist = p_roomlist;
             districtTypeLabel = DeriveDistrictType(p_roomlist, districtType, "district");
+            maxRoomsToPlace = roomtarget;
         }
         public void RunPass(DungeonState state)
         {
             // Inputs / knobs
-            int maxRoomsToPlace = 10;          // hard limit (rooms)
+            
             int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.1f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
@@ -39,20 +41,6 @@ namespace FrankyCLI
             const int targetBridgeCount = 50; // aim to leave enough pairs for bridge pass
             RoomUtils roomUtils = new RoomUtils(roomlist);
             var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(ResolveBridgeRoomLists(state));
-
-            //Sizing tweaks
-            switch (state.Size)
-            {
-                case "Small":
-                    maxRoomsToPlace = 3 + RandomUtils.random.Next(2);
-                    break;
-                case "Medium":
-                    maxRoomsToPlace = 4 + RandomUtils.random.Next(4);
-                    break;
-                case "Large":
-                    maxRoomsToPlace = 6 + RandomUtils.random.Next(2);
-                    break;
-            }
 
 
             int bestBridgeablePairs = -1;
@@ -451,8 +439,8 @@ namespace FrankyCLI
 
         private static List<string> ResolveBridgeRoomLists(DungeonState state)
         {
-            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
-                return state.BridgeRoomLists;
+            if (state?.TrunkRoomLists != null && state.TrunkRoomLists.Count > 0)
+                return state.TrunkRoomLists;
 
             return DefaultBridgeRoomLists.ToList();
         }

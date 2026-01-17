@@ -12,22 +12,22 @@ namespace FrankyCLI
         {
             var scoring = scoringSystem ?? new ScoringSystem
             {
-                PlacementWieght = 1,
-                BridgingWieght = 1,
-                BridgingOverlapWieght = 0,
-                NewConnectorsWieght = 0,
-                AreaWieght = 0,
+                PlacementWeight = 1,
+                BridgingWeight = 1,
+                BridgingOverlapWeight = 0,
+                NewConnectorsWeight = 0,
+                AreaWeight = 0,
                 NorthBiasWeight = 0.8,
                 Effort = 100
             };
 
             var components = new Dictionary<string, double>
             {
-                { "Placement", roomsPlaced * scoring.PlacementWieght },
-                { "Bridging", bridgeablePairs * scoring.BridgingWieght },
-                { "BridgingOverlap", bridgingOverlapCount * scoring.BridgingOverlapWieght },
-                { "NewConnectors", newConnectors * scoring.NewConnectorsWieght },
-                { "Area", area * scoring.AreaWieght }
+                { "Placement", roomsPlaced * scoring.PlacementWeight },
+                { "Bridging", bridgeablePairs * scoring.BridgingWeight },
+                { "BridgingOverlap", bridgingOverlapCount * scoring.BridgingOverlapWeight },
+                { "NewConnectors", newConnectors * scoring.NewConnectorsWeight },
+                { "Area", (area/10) * scoring.AreaWeight }
             };
 
             return new PlanScore

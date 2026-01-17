@@ -17,16 +17,19 @@ namespace FrankyCLI
         string district = null;
         public string roomlist = "";
         private readonly string districtTypeLabel;
+
+        private float coverage;
         private static readonly List<string> PrefabsToForcePlacement = new List<string>
         {
             // Add prefab EditorIDs here to force a placement attempt for testing new prefabs.
             //"rg_sts_end_workshop_001"
         };
 
-        public UtilTopologyPass(string p_roomlist, string districtType = null) {         
+        public UtilTopologyPass(string p_roomlist, float targetcoverage, string districtType = null) {         
             district = districtType;
             roomlist = p_roomlist;
             districtTypeLabel = DeriveDistrictType(p_roomlist, districtType, "util");
+            coverage = targetcoverage;
         }
         public void RunPass(DungeonState state)
         {
@@ -34,7 +37,7 @@ namespace FrankyCLI
             int startingOpenConnectors = state.openConnectors.Count;
             int maxRoomsToPlace = startingOpenConnectors == 0
                 ? 0
-                : Math.Max(1, (int)Math.Round(startingOpenConnectors * 0.5f)); // aim for ~50% coverage
+                : Math.Max(1, (int)Math.Round(startingOpenConnectors * coverage));
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.1f; // tweak: match DistrictTopologyPass collision clearance
             float samePrefabMinDistance = 30f; // keep identical util prefabs separated

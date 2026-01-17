@@ -15,12 +15,12 @@ namespace FrankyCLI.Retrograde.Passes
 
     public class ScoringSystem
     {
-        public double PlacementWieght;          //How important is placing all the rooms?
-        public double BridgingWieght;           //How important is having multiple routes?
-        public double BridgingOverlapWieght;    //How important is having multiple routes from A->B
+        public double PlacementWeight;          //How important is placing all the rooms?
+        public double BridgingWeight;           //How important is having multiple routes?
+        public double BridgingOverlapWeight;    //How important is having multiple routes from A->B
         public double NorthBiasWeight;          //How important is heading north in trunk layout
-        public double NewConnectorsWieght;      //How important is exposing new connectors for later passes
-        public double AreaWieght;               //How important is rewarding total floor area
+        public double NewConnectorsWeight;      //How important is exposing new connectors for later passes
+        public double AreaWeight;               //How important is rewarding total floor area
 
         public int Effort;
     }
@@ -31,7 +31,7 @@ namespace FrankyCLI.Retrograde.Passes
             placedRooms = new List<PlacedRoom>();
             openConnectors = new List<OpenConnector>();
             windowConnectors = new List<P3Float>();
-            BridgeRoomLists = new List<string>();
+            TrunkRoomLists = new List<string>();
             instance = cell;
             location = plocation;
         }
@@ -40,7 +40,7 @@ namespace FrankyCLI.Retrograde.Passes
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
         public List<P3Float> windowConnectors;
-        public List<string> BridgeRoomLists;
+        public List<string> TrunkRoomLists;
 
         public ScoringSystem scoringSystem;
 
@@ -50,6 +50,8 @@ namespace FrankyCLI.Retrograde.Passes
 
         public string Faction = "spacer";
         public string Size = "Small";
+
+        public List<IGenPass> passes;
 
     }
 }

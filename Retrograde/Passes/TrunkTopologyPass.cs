@@ -16,16 +16,21 @@ namespace FrankyCLI
     {
         private static readonly Random Rng = new Random();
         private static readonly string[] DefaultBridgeRoomLists = new[] { "rg_trunklist" };
+        int maxRoomsToPlace = 10;          // hard limit (rooms)
+
+        public TrunkTopologyPass(int roomtarget)
+        {
+            maxRoomsToPlace = roomtarget;
+        }
 
         public void RunPass(DungeonState state)
         {
             const string districtType = "trunk";
-            // Inputs / knobs
-            int maxRoomsToPlace = 10;          // hard limit (rooms)
+            // Inputs / knobs            
             int maxAttempts = 1000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.5f; // tweak: world units clearance
             int maxCandidatePrefabsPerConnector = 8; // avoid thrashing on a single open connector
-            int maxPlans = state.scoringSystem?.Effort ?? 100; // cap number of planning retries
+            int maxPlans = state.scoringSystem.Effort; // cap number of planning retries
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
             const int targetBridgeCount = 50; // aim to leave enough pairs for bridge pass
@@ -394,8 +399,8 @@ namespace FrankyCLI
 
         private static List<string> ResolveBridgeRoomLists(DungeonState state)
         {
-            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
-                return state.BridgeRoomLists;
+            if (state?.TrunkRoomLists != null && state.TrunkRoomLists.Count > 0)
+                return state.TrunkRoomLists;
 
             return DefaultBridgeRoomLists.ToList();
         }

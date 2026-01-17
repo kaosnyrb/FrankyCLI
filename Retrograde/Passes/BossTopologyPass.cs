@@ -335,8 +335,8 @@ namespace FrankyCLI
 
         private static List<string> ResolveBridgeRoomLists(DungeonState state)
         {
-            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
-                return state.BridgeRoomLists;
+            if (state?.TrunkRoomLists != null && state.TrunkRoomLists.Count > 0)
+                return state.TrunkRoomLists;
 
             return DefaultBridgeRoomLists.ToList();
         }

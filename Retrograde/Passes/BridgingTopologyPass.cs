@@ -19,31 +19,18 @@ namespace FrankyCLI
         private const int maxPrefabsToTryPerPair = 48;
         private const int targetBridgeCount = 10;
 
-        private readonly List<string> fallbackBridgeRoomLists;
         private readonly string districtFilter;
         private readonly string districtTypeLabel;
-        public IReadOnlyList<string> BridgeRoomLists => fallbackBridgeRoomLists;
 
         public BridgingTopologyPass(string roomList, string districtType = null)
-            : this(new[] { roomList }, districtType)
+            : this(districtType)
         {
         }
 
-        public BridgingTopologyPass(IEnumerable<string> roomLists, string districtType = null)
+        public BridgingTopologyPass(string districtType = null)
         {
-            if (roomLists == null)
-                throw new ArgumentNullException(nameof(roomLists));
-
-            fallbackBridgeRoomLists = roomLists
-                .Where(r => !string.IsNullOrWhiteSpace(r))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            if (fallbackBridgeRoomLists.Count == 0)
-                throw new ArgumentException("At least one bridge room list is required.", nameof(roomLists));
-
             districtFilter = districtType;
-            districtTypeLabel = DeriveDistrictType(fallbackBridgeRoomLists[0], districtType, "bridge");
+            districtTypeLabel = "bridge";
         }
 
 
@@ -53,7 +40,7 @@ namespace FrankyCLI
                 return;
 
             maxPlans = state.scoringSystem?.Effort ?? maxPlans;
-            var activeBridgeLists = ResolveBridgeRoomLists(state);
+            var activeBridgeLists = state.TrunkRoomLists;
             var activeRoomUtils = activeBridgeLists.Select(name => new RoomUtils(name)).ToList();
             var activeDistrictTypeLabel = DeriveDistrictType(activeBridgeLists.FirstOrDefault(), districtFilter, districtTypeLabel);
 
@@ -291,14 +278,6 @@ namespace FrankyCLI
             }
 
             return false;
-        }
-
-        private List<string> ResolveBridgeRoomLists(DungeonState state)
-        {
-            if (state?.BridgeRoomLists != null && state.BridgeRoomLists.Count > 0)
-                return state.BridgeRoomLists;
-
-            return fallbackBridgeRoomLists;
         }
 
         private List<string> BuildPrefabCandidates(string tileset, HashSet<string> usedPrefabIds, List<RoomUtils> roomUtils)
