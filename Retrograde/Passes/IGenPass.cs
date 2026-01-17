@@ -35,6 +35,9 @@ namespace FrankyCLI.Retrograde.Passes
             instance = cell;
             location = plocation;
         }
+
+        public string stateName;
+
         public Cell instance;
         public Location location;
         public List<PlacedRoom> placedRooms;

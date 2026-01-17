@@ -36,19 +36,6 @@ namespace FrankyCLI
             const int targetBridgeCount = 50; // aim to leave enough pairs for bridge pass
             var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(ResolveBridgeRoomLists(state));
 
-            switch (state.Size)
-            {
-                case "Small":
-                    maxRoomsToPlace = 3 + RandomUtils.random.Next(2);
-                    break;
-                case "Medium":
-                    maxRoomsToPlace = 4 + RandomUtils.random.Next(4);
-                    break;
-                case "Large":
-                    maxRoomsToPlace = 6 + RandomUtils.random.Next(2);
-                    break;
-            }
-
             var startingMarker = state.instance.Persistent
                 .OfType<PlacedObject>()
                 .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));

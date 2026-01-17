@@ -16,7 +16,6 @@ namespace FrankyCLI
     {
         string district = null;
         private readonly string districtTypeLabel;
-        private static readonly string[] DefaultBridgeRoomLists = new[] { "rg_trunklist", "rg_bridgelist" };
         public BossTopologyPass(string districtType = null) {         
             district = districtType;
             districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
@@ -32,7 +31,7 @@ namespace FrankyCLI
             int maxPlans = state.scoringSystem?.Effort ?? 20;
             float bridgeMaxHorizontalSpan = 40f;
             float bridgeMaxVerticalOffset = 8f;
-            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(ResolveBridgeRoomLists(state));
+            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_trunklist");
@@ -333,13 +332,6 @@ namespace FrankyCLI
             return false;
         }
 
-        private static List<string> ResolveBridgeRoomLists(DungeonState state)
-        {
-            if (state?.TrunkRoomLists != null && state.TrunkRoomLists.Count > 0)
-                return state.TrunkRoomLists;
-
-            return DefaultBridgeRoomLists.ToList();
-        }
 
     }
 }
