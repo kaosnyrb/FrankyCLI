@@ -188,7 +188,7 @@ namespace FrankyCLI
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
                 var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, state.YMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0);
 
                 if (planScore.Total > bestPlanScore)
                 {

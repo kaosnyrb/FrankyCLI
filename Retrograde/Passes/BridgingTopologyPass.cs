@@ -77,7 +77,7 @@ namespace FrankyCLI
                 var plannedPlacements = new List<PlacedObject>();
 
                 var (bridgesPlaced, overlapCount) = PlanBridges(plannedRooms, plannedOpenConnectors, plannedPlacements, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, targetBridgeCount);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0);
 
                 if (planScore.Total > bestPlanScore)
                 {

@@ -67,6 +67,7 @@ namespace FrankyCLI
             PlanScore? bestPlanScoreBreakdown = null;
             int bestPlanAttempt = -1;
             float bestYMin = state.StartingPosition.Y;
+            int bestNewConnectors = 0;
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -140,6 +141,7 @@ namespace FrankyCLI
                         });
                     }
                 }
+                int connectorsAddedCount = plannedOpenConnectors.Count;
 
                 // Count the initially placed room toward our plan so limits and logs reflect the total.
                 int roomsPlaced = 1;
@@ -152,7 +154,7 @@ namespace FrankyCLI
 
                     var clusterCenter = CalculateClusterCenter(plannedRooms, plannedOpenConnectors);
                     var northConnectors = plannedOpenConnectors.Where(c => c.Parsed.Direction == ConnectorDirection.North).ToList();
-                    double northBiasWeight = state.scoringSystem?.TrunkNorthBiasWeight ?? 0.8;
+                    double northBiasWeight = state.scoringSystem?.NorthBiasWeight ?? 0.8;
                     bool useNorthBias = northConnectors.Count > 0 && Rng.NextDouble() < northBiasWeight;
 
                     var target = ChooseFarthestOpenConnector(useNorthBias ? northConnectors : plannedOpenConnectors, clusterCenter);
@@ -247,11 +249,12 @@ namespace FrankyCLI
                     usedPrefabIds.Add(bestRoom.Prefab.PrefabEditorId);
                     roomsPlaced++;
                     plannedOpenConnectors.AddRange(bestNewOpenConnectors);
+                    connectorsAddedCount += bestNewOpenConnectors?.Count ?? 0;
                 }
 
                 bool success = roomsPlaced >= maxRoomsToPlace;
                 var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount);
                 if (planScore.Total > bestPlanScore)
                 {
                     bestBridgeablePairs = bridgeablePairs;
@@ -263,6 +266,7 @@ namespace FrankyCLI
                     bestPlanScoreBreakdown = planScore;
                     bestPlanAttempt = planAttempt;
                     bestYMin = yMin;
+                    bestNewConnectors = connectorsAddedCount;
                 }
             }
 
@@ -276,7 +280,9 @@ namespace FrankyCLI
                 Components = new Dictionary<string, double>
                 {
                     { "Placement", 0 },
-                    { "Bridging", 0 }
+                    { "Bridging", 0 },
+                    { "BridgingOverlap", 0 },
+                    { "NewConnectors", 0 }
                 }
             };
 
@@ -288,7 +294,7 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestYMin;
 
-            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}/{targetBridgeCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}).");
+            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}/{targetBridgeCount}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}).");
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)

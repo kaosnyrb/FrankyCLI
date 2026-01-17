@@ -64,6 +64,7 @@ namespace FrankyCLI
             PlanScore? bestPlanScoreBreakdown = null;
             int bestPlanAttempt = -1;
             float bestYMin = state.YMin;
+            int bestNewConnectors = 0;
 
             for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
             {
@@ -79,6 +80,7 @@ namespace FrankyCLI
                 var plannedRooms = new List<PlacedRoom>(state.placedRooms);
                 var plannedOpenConnectors = new List<OpenConnector>(state.openConnectors);
                 var plannedPlacements = new List<PlacedObject>();
+                int connectorsAddedCount = 0;
 
                 int roomsPlaced = 0;
                 int attempts = 0;
@@ -188,10 +190,11 @@ namespace FrankyCLI
                     usedPrefabIds.Add(bestRoom.Prefab.PrefabEditorId);
                     roomsPlaced++;
                     plannedOpenConnectors.AddRange(bestNewOpenConnectors);
+                    connectorsAddedCount += bestNewOpenConnectors?.Count ?? 0;
                 }
 
                 var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, BridgePrefabKeys.Value);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount);
                 if (planScore.Total > bestPlanScore)
                 {
                     bestBridgeablePairs = bridgeablePairs;
@@ -203,19 +206,23 @@ namespace FrankyCLI
                     bestPlanScoreBreakdown = planScore;
                     bestPlanAttempt = planAttempt;
                     bestYMin = yMin;
+                    bestNewConnectors = connectorsAddedCount;
                 }
             }
 
             var finalRooms = bestPlannedRooms ?? new List<PlacedRoom>();
             var finalOpenConnectors = bestPlannedOpenConnectors ?? new List<OpenConnector>();
             var finalPlacements = bestPlannedPlacements ?? new List<PlacedObject>();
+            var finalNewConnectors = bestNewConnectors;
             var finalScore = bestPlanScoreBreakdown ?? new PlanScore
             {
                 Total = 0,
                 Components = new Dictionary<string, double>
                 {
                     { "Placement", 0 },
-                    { "Bridging", 0 }
+                    { "Bridging", 0 },
+                    { "BridgingOverlap", 0 },
+                    { "NewConnectors", 0 }
                 }
             };
 
@@ -227,7 +234,7 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestYMin;
 
-            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}/{targetBridgeCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}).");
+            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}/{targetBridgeCount}, new connectors {finalNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}).");
         }
 
         private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
