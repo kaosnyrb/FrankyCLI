@@ -121,7 +121,7 @@ namespace FrankyCLI
                 foreach (var conn in room.Connectors)
                 {
                     var worldPos = room.WorldPos + conn.LocalPos;
-                    if (PositionsClose(worldPos, open.WorldPos, tolerance))
+                    if (MathUtil.PositionsClose(worldPos, open.WorldPos, tolerance))
                     {
                         return i;
                     }
@@ -142,13 +142,6 @@ namespace FrankyCLI
         {
             return string.Equals(a.EditorId, b.EditorId, StringComparison.OrdinalIgnoreCase) &&
                    a.LocalPos.Equals(b.LocalPos);
-        }
-
-        public static bool PositionsClose(P3Float a, P3Float b, float tolerance)
-        {
-            return Math.Abs(a.X - b.X) <= tolerance &&
-                   Math.Abs(a.Y - b.Y) <= tolerance &&
-                   Math.Abs(a.Z - b.Z) <= tolerance;
         }
 
         public static bool AnyConnectorInsideExistingBounds(

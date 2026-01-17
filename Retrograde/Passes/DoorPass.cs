@@ -159,15 +159,7 @@ namespace FrankyCLI.Retrograde.Passes
 
         private static bool SamePosition(P3Float a, P3Float b, float tolerance)
         {
-            return DistanceSquared(a, b) <= tolerance * tolerance;
-        }
-
-        private static float DistanceSquared(P3Float a, P3Float b)
-        {
-            float dx = a.X - b.X;
-            float dy = a.Y - b.Y;
-            float dz = a.Z - b.Z;
-            return dx * dx + dy * dy + dz * dz;
+            return MathUtil.DistanceSquared(a, b) <= tolerance * tolerance;
         }
 
         private static float ComputeRoomVolume(PlacedRoom room)

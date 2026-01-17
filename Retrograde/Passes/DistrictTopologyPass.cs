@@ -236,7 +236,7 @@ namespace FrankyCLI
                 .Select((c, idx) => new
                 {
                     Index = idx,
-                    DistSq = DistanceSquared(c.WorldPos, clusterCenter)
+                    DistSq = MathUtil.DistanceSquared(c.WorldPos, clusterCenter)
                 })
                 .OrderBy(p => p.DistSq)
                 .ToList();
@@ -280,14 +280,6 @@ namespace FrankyCLI
             }
 
             return new P3Float(0, 0, 0);
-        }
-
-        private static float DistanceSquared(P3Float a, P3Float b)
-        {
-            float dx = a.X - b.X;
-            float dy = a.Y - b.Y;
-            float dz = a.Z - b.Z;
-            return dx * dx + dy * dy + dz * dz;
         }
 
         private static bool AnyConnectorInsideExistingBounds(

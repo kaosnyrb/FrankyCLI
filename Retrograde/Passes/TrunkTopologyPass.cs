@@ -296,7 +296,7 @@ namespace FrankyCLI
             OpenConnector best = openConnectors[0];
             for (int i = 0; i < openConnectors.Count; i++)
             {
-                var dist = DistanceSquared(openConnectors[i].WorldPos, clusterCenter);
+                var dist = MathUtil.DistanceSquared(openConnectors[i].WorldPos, clusterCenter);
                 if (dist > maxDist)
                 {
                     maxDist = dist;
@@ -309,11 +309,11 @@ namespace FrankyCLI
         private static RgConnectorInstance ChooseMostOutwardConnector(List<RgConnectorInstance> compatibles, P3Float targetWorldPos, P3Float clusterCenter)
         {
             RgConnectorInstance best = compatibles[0];
-            float bestDist = DistanceSquared(targetWorldPos - best.LocalPos, clusterCenter);
+            float bestDist = MathUtil.DistanceSquared(targetWorldPos - best.LocalPos, clusterCenter);
 
             foreach (var c in compatibles)
             {
-                float dist = DistanceSquared(targetWorldPos - c.LocalPos, clusterCenter);
+                float dist = MathUtil.DistanceSquared(targetWorldPos - c.LocalPos, clusterCenter);
                 if (dist > bestDist)
                 {
                     bestDist = dist;
@@ -359,14 +359,6 @@ namespace FrankyCLI
             }
 
             return new P3Float(0, 0, 0);
-        }
-
-        private static float DistanceSquared(P3Float a, P3Float b)
-        {
-            float dx = a.X - b.X;
-            float dy = a.Y - b.Y;
-            float dz = a.Z - b.Z;
-            return dx * dx + dy * dy + dz * dz;
         }
 
         private static List<OpenConnector> BuildOpenConnectors(IEnumerable<RgConnectorInstance> connectors, RgConnectorInstance usedConnector, int yawSteps, P3Float roomPos, string districtType)

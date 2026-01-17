@@ -243,7 +243,7 @@ namespace FrankyCLI
             // Prefer targets further north to grow toward the boss goal.
             var targets = plannedOpenConnectors
                 .OrderByDescending(c => c.WorldPos.Y)
-                .ThenByDescending(c => DistanceSquared(c.WorldPos, startingPosition))
+                .ThenByDescending(c => MathUtil.DistanceSquared(c.WorldPos, startingPosition))
                 .ToList();
 
             foreach (var target in targets)
@@ -340,7 +340,7 @@ namespace FrankyCLI
                 if (openConnectors[i].Parsed.Direction != ConnectorDirection.North)
                     continue;
 
-                var dist = DistanceSquared(openConnectors[i].WorldPos, startingPosition);
+                var dist = MathUtil.DistanceSquared(openConnectors[i].WorldPos, startingPosition);
                 if (dist > maxDist || bestIndex == -1)
                 {
                     maxDist = dist;
@@ -348,14 +348,6 @@ namespace FrankyCLI
                 }
             }
             return bestIndex;
-        }
-
-        private static float DistanceSquared(P3Float a, P3Float b)
-        {
-            float dx = a.X - b.X;
-            float dy = a.Y - b.Y;
-            float dz = a.Z - b.Z;
-            return dx * dx + dy * dy + dz * dz;
         }
 
     }

@@ -224,7 +224,7 @@ namespace FrankyCLI
                             var prefabPos = a.WorldPos - connA.LocalPos;
                             var expectedB = prefabPos + connB.LocalPos;
 
-                            if (!BridgeUtil.PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
+                            if (!MathUtil.PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
                                 continue;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
