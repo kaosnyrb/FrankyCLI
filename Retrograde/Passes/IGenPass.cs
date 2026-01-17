@@ -13,6 +13,13 @@ namespace FrankyCLI.Retrograde.Passes
         public void RunPass(DungeonState state);
     }
 
+    public class ScoringSystem
+    {
+        public double PlacementWieght;
+        public double BridgingWieght;
+        public int Effort;
+    }
+
     public class DungeonState
     {
         public DungeonState(Cell cell, Location plocation) {
@@ -27,6 +34,8 @@ namespace FrankyCLI.Retrograde.Passes
         public List<PlacedRoom> placedRooms;
         public List<OpenConnector> openConnectors;
         public List<P3Float> windowConnectors;
+
+        public ScoringSystem scoringSystem;
 
         public P3Float StartingPosition;
 

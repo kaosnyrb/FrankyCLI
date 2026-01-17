@@ -68,6 +68,13 @@ namespace FrankyCLI
             state.Faction = faction;
             state.Size = size;
 
+            state.scoringSystem = new ScoringSystem()
+            {
+                BridgingWieght = 1,
+                PlacementWieght = 1,
+                Effort = 10
+            };
+
             //Multi-Pass Generation Pipeline
             List<IGenPass> passes = new List<IGenPass>
             {
