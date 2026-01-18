@@ -80,7 +80,8 @@ namespace FrankyCLI
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
                 var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity, planRoomReuse);
+                var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
 
                 if (planScore.Total > bestPlanScore)
                 {
@@ -110,7 +111,8 @@ namespace FrankyCLI
                     { "Area", 0 },
                     { "Clustering", 0 },
                     { "SizeDiversity", 0 },
-                    { "RoomReuse", 0 }
+                    { "RoomReuse", 0 },
+                    { "ConnectorViability", 0 }
                 }
             };
 
@@ -121,7 +123,7 @@ namespace FrankyCLI
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}, roomReuse {finalScore.Components["RoomReuse"]:0.00}).");
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}, roomReuse {finalScore.Components["RoomReuse"]:0.00}, connectorViability {finalScore.Components["ConnectorViability"]:0.00}).");
         }
 
         private (int bridgesPlaced, int overlapCount) PlanBridges(

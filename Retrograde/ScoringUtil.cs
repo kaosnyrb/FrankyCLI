@@ -9,7 +9,7 @@ namespace FrankyCLI
 {
     public static class ScoringUtil
     {
-        public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0)
+        public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0, double connectorViability = 0)
         {
 
             var components = new Dictionary<string, double>
@@ -21,7 +21,8 @@ namespace FrankyCLI
                 { "Area", (area/10) * scoringSystem.AreaWeight },
                 { "Clustering", (clustering/10) * scoringSystem.ClusteringWeight },
                 { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight },
-                { "RoomReuse", roomReuseScore * scoringSystem.RoomReuseWeight }
+                { "RoomReuse", roomReuseScore * scoringSystem.RoomReuseWeight },
+                { "ConnectorViability", connectorViability * scoringSystem.ConnectorViabilityWeight }
             };
 
             return new PlanScore
@@ -132,6 +133,66 @@ namespace FrankyCLI
             }
 
             return reuse;
+        }
+
+        public static double CalculateConnectorViabilityArea(IReadOnlyList<PlacedRoom> rooms, IReadOnlyList<OpenConnector> openConnectors, double defaultDepth = 20, double apertureWidth = 1)
+        {
+            if (openConnectors == null || openConnectors.Count == 0)
+                return 0;
+
+            var roomBounds = new List<RgAabb>();
+            if (rooms != null)
+            {
+                foreach (var room in rooms)
+                {
+                    if (room.Prefab?.packin_instance == null)
+                        continue;
+                    roomBounds.Add(ConnectorUtils.ToWorldAabbRotated(room.Prefab.packin_instance.ObjectBounds, room.WorldPos, room.YawSteps));
+                }
+            }
+
+            double totalArea = 0;
+            foreach (var open in openConnectors)
+            {
+                var dir = open.Parsed.Direction;
+                double minClearance = defaultDepth;
+
+                foreach (var aabb in roomBounds)
+                {
+                    switch (dir)
+                    {
+                        case ConnectorDirection.North:
+                            if (open.WorldPos.X < aabb.Min.X || open.WorldPos.X > aabb.Max.X) break;
+                            if (open.WorldPos.Z < aabb.Min.Z || open.WorldPos.Z > aabb.Max.Z) break;
+                            if (aabb.Min.Y > open.WorldPos.Y)
+                                minClearance = Math.Min(minClearance, aabb.Min.Y - open.WorldPos.Y);
+                            break;
+                        case ConnectorDirection.South:
+                            if (open.WorldPos.X < aabb.Min.X || open.WorldPos.X > aabb.Max.X) break;
+                            if (open.WorldPos.Z < aabb.Min.Z || open.WorldPos.Z > aabb.Max.Z) break;
+                            if (aabb.Max.Y < open.WorldPos.Y)
+                                minClearance = Math.Min(minClearance, open.WorldPos.Y - aabb.Max.Y);
+                            break;
+                        case ConnectorDirection.East:
+                            if (open.WorldPos.Y < aabb.Min.Y || open.WorldPos.Y > aabb.Max.Y) break;
+                            if (open.WorldPos.Z < aabb.Min.Z || open.WorldPos.Z > aabb.Max.Z) break;
+                            if (aabb.Min.X > open.WorldPos.X)
+                                minClearance = Math.Min(minClearance, aabb.Min.X - open.WorldPos.X);
+                            break;
+                        case ConnectorDirection.West:
+                            if (open.WorldPos.Y < aabb.Min.Y || open.WorldPos.Y > aabb.Max.Y) break;
+                            if (open.WorldPos.Z < aabb.Min.Z || open.WorldPos.Z > aabb.Max.Z) break;
+                            if (aabb.Max.X < open.WorldPos.X)
+                                minClearance = Math.Min(minClearance, open.WorldPos.X - aabb.Max.X);
+                            break;
+                    }
+                }
+
+                minClearance = Math.Max(0, minClearance);
+                totalArea += minClearance * apertureWidth;
+            }
+
+            return totalArea;
         }
 
         private static double GetRoomFootprintArea(PlacedRoom room)

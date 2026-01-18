@@ -79,6 +79,7 @@ namespace FrankyCLI
                     ClusteringWeight = 2,
                     SizeDiversityWeight = 5,
                     RoomReuseWeight = -1,
+                    ConnectorViabilityWeight = 0.75,
                     Effort = 40
                 },
                 //Multi-Pass Generation Pipeline

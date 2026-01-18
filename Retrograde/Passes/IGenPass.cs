@@ -24,6 +24,7 @@ namespace FrankyCLI.Retrograde.Passes
         public double ClusteringWeight;         //How important is spacing out rooms instead of clumping
         public double SizeDiversityWeight;      //How important is avoiding chains of tiny rooms
         public double RoomReuseWeight;          //How important is reusing the same prefab multiple times
+        public double ConnectorViabilityWeight; //How important is leaving connectors with viable space for the next room
 
         public int Effort;
     }
