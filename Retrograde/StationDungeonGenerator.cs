@@ -28,10 +28,6 @@ namespace FrankyCLI
         rg_research_lab_medium_01
         rg_habitation_sleep_quarters_03
 
-        We have a formlist called rg_roomlist which contains a link to all the formlists for the tilesets.
-        Eg
-        rg_roomlist_station
-
         Each prefab has various markers inside it.
 
         First is the connectors, these are used to build the topolgy of the dungeon:
@@ -91,7 +87,7 @@ namespace FrankyCLI
                 //Place rooms
                     new TrunkTopologyPass(8),
                     new BossTopologyPass("boss"),
-                    new DistrictTopologyPass("rg_hablist",10),
+                    new DistrictTopologyPass("rg_hablist",6),
                     new BridgeHelperPass(),
                     new BridgingTopologyPass(),
                     new UtilTopologyPass("rg_utillist",0.8f),

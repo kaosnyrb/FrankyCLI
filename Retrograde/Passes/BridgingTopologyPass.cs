@@ -155,6 +155,9 @@ namespace FrankyCLI
                             !RoomHasMoreThanTwoConnectors(plannedRooms, b, ConnectorPositionTolerance))
                             continue;
 
+                        if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
+                            continue;
+
                         if (!BridgeUtil.ArePairCompatible(a, b))
                             continue;
 
