@@ -32,6 +32,42 @@ namespace FrankyCLI
             };
         }
 
+        public static string PrettyPrintScore(PlanScore score, bool includeNewConnectors = false, bool includeBridgingOverlap = false)
+        {
+            if (score == null)
+                return "score unavailable";
+
+            var lines = new List<string>
+            {
+                $"score {score.Total:0.00}"
+            };
+
+            lines.Add("  " + FormatComponent(score, "Placement", "placement"));
+            lines.Add("  " + FormatComponent(score, "Bridging", "bridging"));
+
+            if (includeBridgingOverlap)
+                lines.Add("  " + FormatComponent(score, "BridgingOverlap", "overlap"));
+
+            if (includeNewConnectors)
+                lines.Add("  " + FormatComponent(score, "NewConnectors", "new connectors"));
+
+            lines.Add("  " + FormatComponent(score, "Area", "area"));
+            lines.Add("  " + FormatComponent(score, "Clustering", "clustering"));
+            lines.Add("  " + FormatComponent(score, "SizeDiversity", "sizeDiversity"));
+            lines.Add("  " + FormatComponent(score, "RoomReuse", "roomReuse"));
+            lines.Add("  " + FormatComponent(score, "ConnectorViability", "connectorViability"));
+
+            return string.Join(Environment.NewLine, lines);
+        }
+
+        private static string FormatComponent(PlanScore score, string key, string label)
+        {
+            if (score.Components != null && score.Components.TryGetValue(key, out var value))
+                return $"{label} {value:0.00}";
+
+            return $"{label} n/a";
+        }
+
         public static double CalculateTotalArea(IEnumerable<PlacedRoom> rooms)
         {
             if (rooms == null)

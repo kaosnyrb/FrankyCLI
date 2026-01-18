@@ -86,9 +86,9 @@ namespace FrankyCLI
                 passes = new List<IGenPass>
                 {
                 //Place rooms
-                    new TrunkTopologyPass(8),
+                    new TrunkTopologyPass(4),
                     new BossTopologyPass("boss"),
-                    new DistrictTopologyPass("rg_hablist",6),
+                    new DistrictTopologyPass("rg_hablist",4),
                     new BridgeHelperPass(),
                     new BridgingTopologyPass(),
                     new UtilTopologyPass("rg_utillist",0.8f),

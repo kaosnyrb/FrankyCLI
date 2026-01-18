@@ -228,7 +228,7 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestYMin;
 
-            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}, roomReuse {finalScore.Components["RoomReuse"]:0.00}, connectorViability {finalScore.Components["ConnectorViability"]:0.00}).");
+            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
         }
 
         private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)

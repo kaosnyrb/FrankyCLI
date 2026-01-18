@@ -238,7 +238,7 @@ namespace FrankyCLI
                 }
             };
 
-            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}, roomReuse {finalScore.Components["RoomReuse"]:0.00}, connectorViability {finalScore.Components["ConnectorViability"]:0.00}).");
+            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
         }
 
         private static bool TryPlaceSpineNorthConnector(
