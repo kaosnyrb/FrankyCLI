@@ -144,7 +144,7 @@ namespace FrankyCLI
 
                     var clusterCenter = CalculateClusterCenter(plannedRooms, plannedOpenConnectors);
                     var northConnectors = plannedOpenConnectors.Where(c => c.Parsed.Direction == ConnectorDirection.North).ToList();
-                    double northBiasWeight = state.scoringSystem?.NorthBiasWeight ?? 0.8;
+                    double northBiasWeight = state.scoringSystem.NorthBiasWeight;
                     bool useNorthBias = northConnectors.Count > 0 && Rng.NextDouble() < northBiasWeight;
 
                     var target = ChooseFarthestOpenConnector(useNorthBias ? northConnectors : plannedOpenConnectors, clusterCenter);

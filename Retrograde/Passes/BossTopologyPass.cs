@@ -191,6 +191,12 @@ namespace FrankyCLI
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
                 var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea, planClustering, planSizeDiversity);
+                
+                //Boss room must have placed a room
+                if (roomsPlaced == 0)
+                {
+                    planScore.Total = double.MinValue;
+                }
 
                 if (planScore.Total > bestPlanScore)
                 {

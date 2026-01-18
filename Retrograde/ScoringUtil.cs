@@ -11,28 +11,16 @@ namespace FrankyCLI
     {
         public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0)
         {
-            var scoring = scoringSystem ?? new ScoringSystem
-            {
-                PlacementWeight = 1,
-                BridgingWeight = 1,
-                BridgingOverlapWeight = 0,
-                NewConnectorsWeight = 0,
-                AreaWeight = 0,
-                ClusteringWeight = 0,
-                SizeDiversityWeight = 0,
-                NorthBiasWeight = 0.8,
-                Effort = 100
-            };
 
             var components = new Dictionary<string, double>
             {
-                { "Placement", roomsPlaced * scoring.PlacementWeight },
-                { "Bridging", bridgeablePairs * scoring.BridgingWeight },
-                { "BridgingOverlap", bridgingOverlapCount * scoring.BridgingOverlapWeight },
-                { "NewConnectors", newConnectors * scoring.NewConnectorsWeight },
-                { "Area", (area/10) * scoring.AreaWeight },
-                { "Clustering", (clustering/10) * scoring.ClusteringWeight },
-                { "SizeDiversity", sizeDiversityPenalty * scoring.SizeDiversityWeight }
+                { "Placement", roomsPlaced * scoringSystem.PlacementWeight },
+                { "Bridging", bridgeablePairs * scoringSystem.BridgingWeight },
+                { "BridgingOverlap", bridgingOverlapCount * scoringSystem.BridgingOverlapWeight },
+                { "NewConnectors", newConnectors * scoringSystem.NewConnectorsWeight },
+                { "Area", (area/10) * scoringSystem.AreaWeight },
+                { "Clustering", (clustering/10) * scoringSystem.ClusteringWeight },
+                { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight }
             };
 
             return new PlanScore

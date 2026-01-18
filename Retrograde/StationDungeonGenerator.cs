@@ -77,11 +77,11 @@ namespace FrankyCLI
                     BridgingWeight = 15,
                     BridgingOverlapWeight = 1,
                     NorthBiasWeight = 0.8,
-                    NewConnectorsWeight = 0.5,
+                    NewConnectorsWeight = 0.75,
                     PlacementWeight = 5,
-                    AreaWeight = -0.5,
-                    ClusteringWeight = 3,
-                    SizeDiversityWeight = 3,
+                    AreaWeight = -0.25,
+                    ClusteringWeight = 1,
+                    SizeDiversityWeight = 1,
                     Effort = 40
                 },
                 //Multi-Pass Generation Pipeline
