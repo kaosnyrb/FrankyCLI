@@ -60,6 +60,7 @@ namespace FrankyCLI
                 var plannedRooms = new List<PlacedRoom>(state.placedRooms);
                 var plannedOpenConnectors = state.openConnectors
                     .Where(c => c.WorldPos.Y >= state.YMin)
+                    .Where(c => RoomHasMoreThanTwoConnectors(state.placedRooms, c, ConnectorPositionTolerance))
                     .OrderBy(_ => RandomUtils.random.Next())
                     .ToList();
                 var plannedPlacements = new List<PlacedObject>();
@@ -78,7 +79,8 @@ namespace FrankyCLI
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
                 var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity);
+                var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity, planRoomReuse);
 
                 if (planScore.Total > bestPlanScore)
                 {
@@ -107,7 +109,8 @@ namespace FrankyCLI
                     { "BridgingOverlap", 0 },
                     { "Area", 0 },
                     { "Clustering", 0 },
-                    { "SizeDiversity", 0 }
+                    { "SizeDiversity", 0 },
+                    { "RoomReuse", 0 }
                 }
             };
 
@@ -118,7 +121,7 @@ namespace FrankyCLI
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}).");
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, overlap {finalScore.Components["BridgingOverlap"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}, roomReuse {finalScore.Components["RoomReuse"]:0.00}).");
         }
 
         private (int bridgesPlaced, int overlapCount) PlanBridges(
@@ -147,6 +150,10 @@ namespace FrankyCLI
                     {
                         var a = plannedOpenConnectors[i];
                         var b = plannedOpenConnectors[j];
+
+                        if (!RoomHasMoreThanTwoConnectors(plannedRooms, a, ConnectorPositionTolerance) ||
+                            !RoomHasMoreThanTwoConnectors(plannedRooms, b, ConnectorPositionTolerance))
+                            continue;
 
                         if (!BridgeUtil.ArePairCompatible(a, b))
                             continue;
@@ -344,6 +351,19 @@ namespace FrankyCLI
             }
 
             return usedPrefabIds;
+        }
+
+        private static bool RoomHasMoreThanTwoConnectors(List<PlacedRoom> placedRooms, OpenConnector open, float tolerance)
+        {
+            if (placedRooms == null || placedRooms.Count == 0)
+                return false;
+
+            int ownerIndex = BridgeUtil.ResolveConnectorOwner(placedRooms, open, tolerance);
+            if (ownerIndex < 0 || ownerIndex >= placedRooms.Count)
+                return false;
+
+            var owner = placedRooms[ownerIndex];
+            return owner.Connectors != null && owner.Connectors.Count > 2;
         }
 
         private static bool IsBlocker(string editorId)

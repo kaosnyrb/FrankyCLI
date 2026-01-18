@@ -76,7 +76,7 @@ namespace FrankyCLI
 
                     var entry = candConnectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)?.Marker;
 
-                    if (entry != null && candConnectors.Any(x => x.Conn.Direction != ConnectorDirection.South))
+                    if (entry != null && candConnectors.Count(x => x.Conn.Direction != ConnectorDirection.South) >= 2)
                     {
                         roomPrefab = candidate;
                         var connectors = candConnectors;
@@ -248,7 +248,8 @@ namespace FrankyCLI
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
                 var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity);
+                var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity, planRoomReuse);
                 if (planScore.Total > bestPlanScore)
                 {
                     bestBridgeablePairs = bridgeablePairs;
@@ -279,7 +280,8 @@ namespace FrankyCLI
                     { "NewConnectors", 0 },
                     { "Area", 0 },
                     { "Clustering", 0 },
-                    { "SizeDiversity", 0 }
+                    { "SizeDiversity", 0 },
+                    { "RoomReuse", 0 }
                 }
             };
 
@@ -291,7 +293,7 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestYMin;
 
-            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}).");
+            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}, score {finalScore.Total:0.00} (placement {finalScore.Components["Placement"]:0.00}, bridging {finalScore.Components["Bridging"]:0.00}, new connectors {finalScore.Components["NewConnectors"]:0.00}, area {finalScore.Components["Area"]:0.00}, clustering {finalScore.Components["Clustering"]:0.00}, sizeDiversity {finalScore.Components["SizeDiversity"]:0.00}, roomReuse {finalScore.Components["RoomReuse"]:0.00}).");
         }
 
         private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)

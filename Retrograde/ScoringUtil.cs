@@ -9,7 +9,7 @@ namespace FrankyCLI
 {
     public static class ScoringUtil
     {
-        public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0)
+        public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0)
         {
 
             var components = new Dictionary<string, double>
@@ -20,7 +20,8 @@ namespace FrankyCLI
                 { "NewConnectors", newConnectors * scoringSystem.NewConnectorsWeight },
                 { "Area", (area/10) * scoringSystem.AreaWeight },
                 { "Clustering", (clustering/10) * scoringSystem.ClusteringWeight },
-                { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight }
+                { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight },
+                { "RoomReuse", roomReuseScore * scoringSystem.RoomReuseWeight }
             };
 
             return new PlanScore
@@ -103,6 +104,34 @@ namespace FrankyCLI
 
             // Penalize streaks longer than 1 (two tiny rooms back-to-back starts to hurt)
             return Math.Max(0, maxStreak - 1);
+        }
+
+        public static double CalculateRoomReuseScore(IReadOnlyList<PlacedRoom> rooms)
+        {
+            if (rooms == null || rooms.Count == 0)
+                return 0;
+
+            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var room in rooms)
+            {
+                var id = room.Prefab?.PrefabEditorId;
+                if (string.IsNullOrWhiteSpace(id))
+                    continue;
+
+                counts[id] = counts.TryGetValue(id, out var c) ? c + 1 : 1;
+            }
+
+            double reuse = 0;
+            foreach (var kvp in counts)
+            {
+                if (kvp.Value > 1)
+                {
+                    // count duplicates beyond the first
+                    reuse += kvp.Value - 1;
+                }
+            }
+
+            return reuse;
         }
 
         private static double GetRoomFootprintArea(PlacedRoom room)
