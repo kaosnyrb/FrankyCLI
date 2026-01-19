@@ -107,7 +107,6 @@ namespace FrankyCLI.Retrograde
             positions.Add(position);
         }
 
-        private static float DistanceSquared(P3Float a, P3Float b) => MathUtil.DistanceSquared(a, b);
 
         private static double GetCullChance(string districtType)
         {
@@ -124,7 +123,7 @@ namespace FrankyCLI.Retrograde
                 return 0.1; // more clutter in living spaces
 
             if (districtType.IndexOf("trunk", StringComparison.OrdinalIgnoreCase) >= 0)
-                return 0.35; // corridors carry some dressing
+                return 0; // corridors have all dressing
 
             return 0.3;
         }
