@@ -18,8 +18,18 @@ namespace FrankyCLI.Retrograde.Passes
             if (connectors.Count == 0)
                 return;
 
+            const float sealedTolerance = 0.01f;
+            var sealedKeys = state.SealedConnectorPositionKeys;
+
             foreach (var open in connectors)
             {
+                if (sealedKeys != null && sealedKeys.Count > 0)
+                {
+                    var key = PositionKey(open.WorldPos, sealedTolerance);
+                    if (sealedKeys.Contains(key))
+                        continue;
+                }
+
                 // Pick plug prefab based on connector size / tileset
                 var plugId = ConnectorUtils.GetPlug(open.Parsed.DoorSize, open.Parsed.Tileset);
                 var plugPrefab = new RoomPrefab(plugId);
@@ -86,6 +96,12 @@ namespace FrankyCLI.Retrograde.Passes
             }
 
             return connectors;
+        }
+
+        private static string PositionKey(P3Float pos, float tolerance)
+        {
+            float scale = 1f / tolerance;
+            return $"{MathF.Round(pos.X * scale)}|{MathF.Round(pos.Y * scale)}|{MathF.Round(pos.Z * scale)}";
         }
     }
 }

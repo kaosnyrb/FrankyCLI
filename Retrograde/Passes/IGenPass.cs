@@ -36,6 +36,7 @@ namespace FrankyCLI.Retrograde.Passes
             openConnectors = new List<OpenConnector>();
             windowConnectors = new List<P3Float>();
             TrunkRoomLists = new List<string>();
+            SealedConnectorPositionKeys = new HashSet<string>();
             instance = cell;
             location = plocation;
         }
@@ -48,6 +49,7 @@ namespace FrankyCLI.Retrograde.Passes
         public List<OpenConnector> openConnectors;
         public List<P3Float> windowConnectors;
         public List<string> TrunkRoomLists;
+        public HashSet<string> SealedConnectorPositionKeys;
 
         public ScoringSystem scoringSystem;
 

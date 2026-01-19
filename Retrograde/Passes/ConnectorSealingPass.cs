@@ -55,7 +55,8 @@ namespace FrankyCLI.Retrograde.Passes
         {
             const float positionTolerance = 0.01f;
             const float startPosTolerance = 0.01f; // start connector sits exactly at StartingPosition
-            var sealedPositions = new HashSet<string>();
+            var sealedPositions = state.SealedConnectorPositionKeys ??= new HashSet<string>();
+            sealedPositions.Clear();
 
             // Close any connectors below the allowed Y plane first, then process the rest.
             var ordered = state.openConnectors

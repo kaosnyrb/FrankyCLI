@@ -92,11 +92,12 @@ namespace FrankyCLI
                     new BridgeHelperPass(),
                     new BridgingTopologyPass(),
                     new UtilTopologyPass("rg_utillist",0.8f),
-                    new PlugPass(),
-                    new DoorPass(),
                 //Seal connectors
                     new WindowSealingPass(),
                     new ConnectorSealingPass(),
+                //Doors and plugs
+                    new PlugPass(),
+                    new DoorPass(),
                 //Fill content
                     new EnemyPass(),
                     new ContentPass(),
