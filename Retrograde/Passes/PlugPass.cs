@@ -19,16 +19,14 @@ namespace FrankyCLI.Retrograde.Passes
                 return;
 
             const float sealedTolerance = 0.01f;
-            var sealedKeys = state.SealedConnectorPositionKeys;
+            var sealedKeys = state.SealedConnectorPositionKeys ?? new HashSet<string>();
+            var occupiedKeys = new HashSet<string>(sealedKeys);
 
             foreach (var open in connectors)
             {
-                if (sealedKeys != null && sealedKeys.Count > 0)
-                {
-                    var key = PositionKey(open.WorldPos, sealedTolerance);
-                    if (sealedKeys.Contains(key))
-                        continue;
-                }
+                var key = PositionKey(open.WorldPos, sealedTolerance);
+                if (occupiedKeys.Contains(key))
+                    continue;
 
                 // Pick plug prefab based on connector size / tileset
                 var plugId = ConnectorUtils.GetPlug(open.Parsed.DoorSize, open.Parsed.Tileset);
@@ -66,6 +64,7 @@ namespace FrankyCLI.Retrograde.Passes
                     });
 
                     placed = true;
+                    occupiedKeys.Add(key);
                     break;
                 }
 

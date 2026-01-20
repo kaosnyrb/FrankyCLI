@@ -326,20 +326,15 @@ namespace FrankyCLI
 
             var distinct = allCandidates.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
-            var unusedRooms = distinct
-                .Where(id => !usedPrefabIds.Contains(id) && !IsBlocker(id))
-                .ToList();
-            var unusedAny = distinct
+            var unused = distinct
                 .Where(id => !usedPrefabIds.Contains(id))
                 .ToList();
-            var rooms = distinct
-                .Where(id => !IsBlocker(id))
-                .ToList();
+
+            var unusedRooms = unused.Where(id => !IsBlocker(id)).ToList();
+            var unusedAny = unused;
 
             return Shuffle(unusedRooms)
-                .Concat(Shuffle(unusedAny))
-                .Concat(Shuffle(rooms))
-                .Concat(Shuffle(distinct))
+                .Concat(Shuffle(unusedAny.Except(unusedRooms, StringComparer.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
