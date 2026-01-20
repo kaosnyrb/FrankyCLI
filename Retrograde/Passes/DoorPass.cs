@@ -38,7 +38,7 @@ namespace FrankyCLI.Retrograde.Passes
 
                 // Pick blocker prefab based on door size / tileset
                 var blockerId = ConnectorUtils.GetDoor(open.Parsed.DoorSize, open.Parsed.Tileset);
-                var blockerPrefab = new RoomPrefab(blockerId);
+                var blockerPrefab = PrefabCache.GetPrefab(blockerId);
 
                 // Blocker should have a connector that will attach to the OPEN connector.
                 // If the open connector faces North, the blocker needs a South-facing connector to mate.

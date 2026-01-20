@@ -30,7 +30,7 @@ namespace FrankyCLI.Retrograde.Passes
 
                 // Pick plug prefab based on connector size / tileset
                 var plugId = ConnectorUtils.GetPlug(open.Parsed.DoorSize, open.Parsed.Tileset);
-                var plugPrefab = new RoomPrefab(plugId);
+                var plugPrefab = PrefabCache.GetPrefab(plugId);
 
                 // Plug should have a connector that will attach to the OPEN connector.
                 // If the open connector faces North, the plug needs a South-facing connector to mate.

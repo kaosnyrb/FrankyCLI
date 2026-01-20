@@ -141,6 +141,11 @@ namespace FrankyCLI.Retrograde
             };
         }
 
+        public static bool IsBelowYMin(RgAabb aabb, float yMin)
+        {
+            return aabb.Min.Y < yMin;
+        }
+
         public static string GetWindowBlocker(string doorSize, string tileset)
         {
             // Prefer: tileset-specific blockers, fallback to generic

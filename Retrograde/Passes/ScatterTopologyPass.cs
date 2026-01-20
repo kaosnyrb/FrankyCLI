@@ -83,7 +83,7 @@ namespace FrankyCLI
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
                         var prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
-                        var nextPrefab = new RoomPrefab(prefabId);
+                        var nextPrefab = PrefabCache.GetPrefab(prefabId);
 
                         var yawOrder = Enumerable.Range(0, 4)
                             .OrderBy(_ => RandomUtils.random.Next())
@@ -109,8 +109,10 @@ namespace FrankyCLI
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                             // Collision using ROTATED bounds
-                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
+                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                        if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                            continue;
+                        if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
                             if (AnyConnectorInsideExistingBounds(nextConnectors, nextPos, plannedRooms, connectorEmbedTolerance))
                                 continue;

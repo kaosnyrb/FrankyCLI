@@ -109,7 +109,7 @@ namespace FrankyCLI
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
-                        var nextPrefab = new RoomPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
+                        var nextPrefab = PrefabCache.GetPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
 
                         for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                         {
@@ -132,6 +132,8 @@ namespace FrankyCLI
 
                             // Collision using ROTATED bounds
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                                continue;
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
 
@@ -273,7 +275,7 @@ namespace FrankyCLI
 
                 for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                 {
-                    var nextPrefab = new RoomPrefab(spineUtils.GetRoom(target.Parsed.Tileset, "_trk_"));
+                    var nextPrefab = PrefabCache.GetPrefab(spineUtils.GetRoom(target.Parsed.Tileset, "_trk_"));
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -301,6 +303,8 @@ namespace FrankyCLI
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, yMin))
+                                continue;
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
 

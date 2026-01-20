@@ -127,6 +127,8 @@ namespace FrankyCLI
 
                             // Collision using ROTATED bounds
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                                continue;
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
                             if (AnyConnectorInsideExistingBounds(nextConnectors, nextPos, plannedRooms, connectorEmbedTolerance))

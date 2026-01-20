@@ -234,6 +234,8 @@ namespace FrankyCLI
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                                continue;
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
 

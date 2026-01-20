@@ -120,7 +120,7 @@ namespace FrankyCLI.Retrograde
                 if (contentPackInId == null)
                     continue;
 
-                var contentPrefab = new RoomPrefab(contentPackInId);
+                var contentPrefab = PrefabCache.GetPrefab(contentPackInId);
 
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);

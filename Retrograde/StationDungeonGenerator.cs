@@ -80,7 +80,7 @@ namespace FrankyCLI
                     SizeDiversityWeight = 5,
                     RoomReuseWeight = -1,
                     ConnectorViabilityWeight = 0.75,
-                    Effort = 40
+                    Effort = 100
                 },
                 //Multi-Pass Generation Pipeline
                 passes = new List<IGenPass>

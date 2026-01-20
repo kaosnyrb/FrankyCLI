@@ -111,7 +111,7 @@ namespace FrankyCLI
                             continue;
                         }
                     }
-                    var nextPrefab = new RoomPrefab(prefabId);
+                    var nextPrefab = PrefabCache.GetPrefab(prefabId);
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -134,6 +134,8 @@ namespace FrankyCLI
 
                         // Collision using ROTATED bounds
                         var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                        if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                            continue;
                         if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
                             continue;
                         if (IsTooCloseToSamePrefab(nextPrefab.PrefabEditorId, nextPos, state.placedRooms, samePrefabMinDistance))

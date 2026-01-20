@@ -111,7 +111,7 @@ namespace FrankyCLI.Retrograde
             max = new P3Float(SnapUp(max.X, panelW), SnapUp(max.Y, panelW), SnapUp(max.Z, panelH));
 
             // 3) Place faces
-            var panelPrefab = new RoomPrefab(panelPackInEditorId);
+            var panelPrefab = PrefabCache.GetPrefab(panelPackInEditorId);
 
             // Walls at X = min.X and max.X (grid in Y/Z)
             PlaceWall_X(state.instance, panelPrefab, min.X - surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 1); // facing +X
@@ -143,15 +143,15 @@ namespace FrankyCLI.Retrograde
             {
                 for (float z = zStart; z <= zMax - stepZ * 0.5f; z += stepZ)
                 {
-                    cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-                    {
-                        Count = 1,
-                        Rotation = RgRotation.RotationToP3Float(yawSteps),
-                        Position = new P3Float(x, y, z),
-                        Base = panelPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                    });
+                    AddPanel(cell, panelPrefab, new P3Float(x, y, z), RgRotation.RotationToP3Float(yawSteps));
                 }
             }
+
+            // Extra corner coverage to close gaps
+            AddPanel(cell, panelPrefab, new P3Float(x, yMin, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, panelPrefab, new P3Float(x, yMin, zMax), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, panelPrefab, new P3Float(x, yMax, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, panelPrefab, new P3Float(x, yMax, zMax), RgRotation.RotationToP3Float(yawSteps));
         }
 
         private void PlaceWall_Y(
@@ -171,15 +171,15 @@ namespace FrankyCLI.Retrograde
             {
                 for (float z = zStart; z <= zMax - stepZ * 0.5f; z += stepZ)
                 {
-                    cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-                    {
-                        Count = 1,
-                        Rotation = RgRotation.RotationToP3Float(yawSteps),
-                        Position = new P3Float(x, y, z),
-                        Base = panelPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                    });
+                    AddPanel(cell, panelPrefab, new P3Float(x, y, z), RgRotation.RotationToP3Float(yawSteps));
                 }
             }
+
+            // Extra corner coverage
+            AddPanel(cell, panelPrefab, new P3Float(xMin, y, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, panelPrefab, new P3Float(xMin, y, zMax), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, panelPrefab, new P3Float(xMax, y, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, panelPrefab, new P3Float(xMax, y, zMax), RgRotation.RotationToP3Float(yawSteps));
         }
 
         private void PlaceCap_Z(
@@ -199,15 +199,26 @@ namespace FrankyCLI.Retrograde
             {
                 for (float y = yStart; y <= yMax - stepY * 0.5f; y += stepY)
                 {
-                    cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
-                    {
-                        Count = 1,
-                        Rotation = new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f), // pitch-only; adjust axis if your Euler differs
-                        Position = new P3Float(x, y, z),
-                        Base = panelPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                    });
+                    AddPanel(cell, panelPrefab, new P3Float(x, y, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
                 }
             }
+
+            // Extra corner coverage
+            AddPanel(cell, panelPrefab, new P3Float(xMin, yMin, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, panelPrefab, new P3Float(xMin, yMax, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, panelPrefab, new P3Float(xMax, yMin, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, panelPrefab, new P3Float(xMax, yMax, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+        }
+
+        private static void AddPanel(Cell cell, RoomPrefab panelPrefab, P3Float position, P3Float rotation)
+        {
+            cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+            {
+                Count = 1,
+                Rotation = rotation,
+                Position = position,
+                Base = panelPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+            });
         }
     }
 }

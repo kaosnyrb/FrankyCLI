@@ -75,7 +75,8 @@ namespace FrankyCLI
                     maxPrefabsToTryPerPair,
                     targetBridgeCount,
                     activeRoomUtils,
-                    activeDistrictTypeLabel);
+                    activeDistrictTypeLabel,
+                    state.YMin);
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
                 var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
@@ -136,7 +137,8 @@ namespace FrankyCLI
             int maxPrefabsToTryPerPair,
             int desiredBridgeCount,
             List<RoomUtils> roomUtils,
-            string districtTypeLabel)
+            string districtTypeLabel,
+            float yMin)
         {
             int bridgesPlaced = 0;
             int overlapCount = 0;
@@ -163,7 +165,7 @@ namespace FrankyCLI
                         if (!BridgeUtil.ArePairCompatible(a, b))
                             continue;
 
-                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, roomUtils, districtTypeLabel, out var placedRoom, out var placement, out var newConnectors))
+                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, roomUtils, districtTypeLabel, yMin, out var placedRoom, out var placement, out var newConnectors))
                         {
                             plannedPlacements.Add(placement);
                             plannedRooms.Add(placedRoom);
@@ -203,6 +205,7 @@ namespace FrankyCLI
             int maxPrefabsToTryPerPair,
             List<RoomUtils> roomUtils,
             string districtTypeLabel,
+            float yMin,
             out PlacedRoom placedRoom,
             out PlacedObject placedObject,
             out List<OpenConnector> resultingOpenConnectors)
@@ -248,6 +251,8 @@ namespace FrankyCLI
                                 continue;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, yMin))
+                                continue;
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
                             if (BridgeUtil.AnyConnectorInsideExistingBounds(connectors, prefabPos, plannedRooms, connectorEmbedTolerance))

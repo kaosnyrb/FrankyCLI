@@ -173,7 +173,7 @@ namespace FrankyCLI.Retrograde
                     if (contentPackInId == null)
                         continue;
 
-                    var contentPrefab = new RoomPrefab(contentPackInId);
+                    var contentPrefab = PrefabCache.GetPrefab(contentPackInId);
 
                     // Compute world position for marker:
                     // world = roomWorld + rotate(markerLocal, roomYaw)
