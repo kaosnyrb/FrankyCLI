@@ -100,6 +100,10 @@ namespace FrankyCLI
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
                         var prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
+                        if (string.IsNullOrEmpty(prefabId))
+                        {
+                            break;
+                        }
                         var nextPrefab = new RoomPrefab(prefabId);
 
                         for (int yawSteps = 0; yawSteps < 4; yawSteps++)
@@ -355,7 +359,7 @@ namespace FrankyCLI
                 formList?.Items != null &&
                 formList.Items.Count > 0)
             {
-                var allCandidates = new List<string>();
+                var unusedCandidates = new List<string>();
 
                 foreach (var item in formList.Items)
                 {
@@ -371,36 +375,24 @@ namespace FrankyCLI
                         continue;
                     }
 
-                    allCandidates.Add(packIn.EditorID);
+                    if (usedPrefabIds.Contains(packIn.EditorID))
+                        continue;
+
+                    unusedCandidates.Add(packIn.EditorID);
                 }
 
-                var unusedRooms = allCandidates
-                    .Where(id => !usedPrefabIds.Contains(id) &&
-                                 id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                var unusedRooms = unusedCandidates
+                    .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
                     .ToList();
 
                 if (unusedRooms.Count > 0)
                     return unusedRooms[RandomUtils.random.Next(unusedRooms.Count)];
 
-                var unusedAny = allCandidates
-                    .Where(id => !usedPrefabIds.Contains(id))
-                    .ToList();
-
-                if (unusedAny.Count > 0)
-                    return unusedAny[RandomUtils.random.Next(unusedAny.Count)];
-
-                var rooms = allCandidates
-                    .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
-                    .ToList();
-
-                if (rooms.Count > 0)
-                    return rooms[RandomUtils.random.Next(rooms.Count)];
-
-                if (allCandidates.Count > 0)
-                    return allCandidates[RandomUtils.random.Next(allCandidates.Count)];
+                if (unusedCandidates.Count > 0)
+                    return unusedCandidates[RandomUtils.random.Next(unusedCandidates.Count)];
             }
 
-            return roomUtils.GetRoom(tileset, district);
+            return null;
         }
 
         private static string DeriveDistrictType(string roomList, string provided, string fallback)

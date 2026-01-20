@@ -19,7 +19,7 @@ namespace FrankyCLI
         private static readonly List<string> PrefabsToForcePlacement = new List<string>
         {
             // Add prefab EditorIDs here to force a placement attempt for testing new prefabs.
-            "rg_sts_trk_big_004"
+            //"rg_sts_trk_big_006"
         };
 
         public TrunkTopologyPass(int roomtarget)
@@ -70,6 +70,14 @@ namespace FrankyCLI
                 var requiredPrefabs = PrefabsToForcePlacement
                     .Where(id => !string.IsNullOrWhiteSpace(id))
                     .ToList();
+                var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var room in state.placedRooms)
+                {
+                    if (!string.IsNullOrWhiteSpace(room.Prefab?.PrefabEditorId))
+                    {
+                        usedPrefabIds.Add(room.Prefab.PrefabEditorId);
+                    }
+                }
 
                 for (int i = 0; i < 20; i++)
                 {
@@ -106,7 +114,7 @@ namespace FrankyCLI
                 var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
 
 
-                var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { roomPrefab.PrefabEditorId };
+                usedPrefabIds.Add(roomPrefab.PrefabEditorId);
                 requiredPrefabs.RemoveAll(id => usedPrefabIds.Contains(id));
                 var plannedRooms = new List<PlacedRoom>();
                 var plannedOpenConnectors = new List<OpenConnector>();
@@ -190,18 +198,22 @@ namespace FrankyCLI
                             attemptedRequiredForThisConnector = true;
                         }
 
-                        var prefabId = useRequired
-                            ? requiredPrefabs[0]
-                            : roomUtils.GetRoom(target.Parsed.Tileset, "_trk_");
-                        var nextPrefab = new RoomPrefab(prefabId);
-                        if (usedPrefabIds.Contains(nextPrefab.PrefabEditorId))
+                        string prefabId;
+                        if (useRequired)
                         {
-                            if (useRequired)
+                            prefabId = requiredPrefabs.FirstOrDefault(id => !usedPrefabIds.Contains(id));
+                            requiredPrefabs.RemoveAll(id => usedPrefabIds.Contains(id));
+                            if (string.IsNullOrEmpty(prefabId))
                             {
-                                requiredPrefabs.RemoveAll(id => id.Equals(nextPrefab.PrefabEditorId, StringComparison.OrdinalIgnoreCase));
+                                continue;
                             }
+                        }
+                        else if (!TryGetUnusedPrefabId(roomUtils, target.Parsed.Tileset, "_trk_", usedPrefabIds, maxCandidatePrefabsPerConnector * 2, out prefabId))
+                        {
                             continue;
                         }
+
+                        var nextPrefab = new RoomPrefab(prefabId);
 
                         for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                         {
@@ -434,6 +446,29 @@ namespace FrankyCLI
             }
 
             return open;
+        }
+
+        private static bool TryGetUnusedPrefabId(
+            RoomUtils roomUtils,
+            string tileset,
+            string typeFilter,
+            HashSet<string> usedPrefabIds,
+            int maxTries,
+            out string prefabId)
+        {
+            prefabId = null;
+
+            for (int i = 0; i < maxTries; i++)
+            {
+                var candidate = roomUtils.GetRoom(tileset, typeFilter);
+                if (!usedPrefabIds.Contains(candidate))
+                {
+                    prefabId = candidate;
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
