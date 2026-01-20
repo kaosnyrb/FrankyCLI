@@ -39,6 +39,7 @@ namespace FrankyCLI.Retrograde.Passes
             SealedConnectorPositionKeys = new HashSet<string>();
             instance = cell;
             location = plocation;
+            RoomUtilsCache = new Dictionary<string, RoomUtils>(StringComparer.OrdinalIgnoreCase);
         }
 
         public string stateName;
@@ -55,6 +56,7 @@ namespace FrankyCLI.Retrograde.Passes
 
         public P3Float StartingPosition;
         public HashSet<string> BridgePrefabKeys;
+        public Dictionary<string, RoomUtils> RoomUtilsCache;
 
         public float YMin = 0;
 
@@ -63,5 +65,18 @@ namespace FrankyCLI.Retrograde.Passes
 
         public List<IGenPass> passes;
 
+        public RoomUtils GetRoomUtils(string listName)
+        {
+            if (string.IsNullOrWhiteSpace(listName))
+                throw new ArgumentException("Room list name cannot be null or empty.", nameof(listName));
+
+            if (!RoomUtilsCache.TryGetValue(listName, out var utils))
+            {
+                utils = new RoomUtils(listName);
+                RoomUtilsCache[listName] = utils;
+            }
+
+            return utils;
+        }
     }
 }

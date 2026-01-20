@@ -9,7 +9,7 @@ namespace FrankyCLI
 {
     public static class BridgeUtil
     {
-        public static HashSet<string> BuildBridgePrefabKeys(IEnumerable<string> bridgeRoomLists)
+        public static HashSet<string> BuildBridgePrefabKeys(IEnumerable<string> bridgeRoomLists, Func<string, RoomUtils> roomUtilsFactory = null)
         {
             var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -18,7 +18,7 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(list))
                     continue;
 
-                var utils = new RoomUtils(list);
+                var utils = roomUtilsFactory?.Invoke(list) ?? new RoomUtils(list);
                 if (utils?.roomTemplates == null)
                     continue;
 

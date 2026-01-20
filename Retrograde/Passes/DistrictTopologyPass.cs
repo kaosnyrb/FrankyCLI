@@ -36,7 +36,7 @@ namespace FrankyCLI
             const float connectorEmbedTolerance = 0.01f; // prevent connectors from sitting inside other room bounds
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
-            RoomUtils roomUtils = new RoomUtils(roomlist);
+            RoomUtils roomUtils = state.GetRoomUtils(roomlist);
             var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             int bestBridgeablePairs = -1;

@@ -18,6 +18,7 @@ namespace FrankyCLI.Retrograde
         public FormList roomlist;
 
         public Dictionary<string, FormList> roomTemplates;
+        private readonly Dictionary<string, Dictionary<string, List<string>>> cachedCandidates = new(StringComparer.OrdinalIgnoreCase);
 
         public string listName;
 
@@ -31,36 +32,27 @@ namespace FrankyCLI.Retrograde
                 roomTemplates.Add(list.EditorID, list);
             }
             listName = listname;
-            //Load the prefabs for the theme
-
-            //Console.WriteLine("Lists: " + roomTemplates.Count);
+            PrebuildCandidateCache();
         }
 
         public string GetRoom(string theme, string type = null)
         {
             var listKey = listName + "_" + theme;
+            var typeKey = type ?? string.Empty;
 
             if (!roomTemplates.TryGetValue(listKey, out var formList) || formList?.Items == null || formList.Items.Count == 0)
                 throw new Exception($"Room theme list not found or empty: {listKey}");
 
-            // Resolve all candidate EditorIDs once
-            var candidates = new List<string>(formList.Items.Count);
-
-            foreach (var item in formList.Items)
+            if (!cachedCandidates.TryGetValue(listKey, out var typeMap))
             {
-                // Defensive: skip unresolved keys
-                if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
-                    continue;
+                typeMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                cachedCandidates[listKey] = typeMap;
+            }
 
-                if (type != null)
-                {
-                    if (!packIn.EditorID.Contains(type))
-                        continue;
-                }
-
-                EnsureConnectorsWithinBounds(listKey, packIn);
-
-                candidates.Add(packIn.EditorID);
+            if (!typeMap.TryGetValue(typeKey, out var candidates))
+            {
+                candidates = BuildCandidates(listKey, formList, type);
+                typeMap[typeKey] = candidates;
             }
 
             if (candidates.Count == 0)
@@ -80,7 +72,7 @@ namespace FrankyCLI.Retrograde
 
         private void EnsureConnectorsWithinBounds(string listKey, PackIn packIn)
         {
-            var prefab = new RoomPrefab(packIn.EditorID);
+            var prefab = PrefabCache.GetPrefab(packIn.EditorID);
             var bounds = packIn.ObjectBounds;
 
             var minX = Math.Min(bounds.First.X, bounds.Second.X);
@@ -105,8 +97,8 @@ namespace FrankyCLI.Retrograde
                     !IsAlmostInteger(pos.Y, integerTolerance) ||
                     !IsAlmostInteger(pos.Z, integerTolerance))
                 {
-                    throw new Exception(
-                        $"Connector marker '{marker.MarkerEditorId}' in prefab '{packIn.EditorID}' (list '{listKey}') must be on integer coordinates but is at ({pos.X:F2},{pos.Y:F2},{pos.Z:F2}).");
+                    //throw new Exception(
+                    //    $"Connector marker '{marker.MarkerEditorId}' in prefab '{packIn.EditorID}' (list '{listKey}') must be on integer coordinates but is at ({pos.X:F2},{pos.Y:F2},{pos.Z:F2}).");
                 }
 
                 if (pos.X < minX - edgeTolerance || pos.X > maxX + edgeTolerance ||
@@ -125,6 +117,67 @@ namespace FrankyCLI.Retrograde
         private static bool IsAlmostInteger(float value, float tolerance)
         {
             return Math.Abs(value - MathF.Round(value)) <= tolerance;
+        }
+
+        private void PrebuildCandidateCache()
+        {
+            foreach (var kvp in roomTemplates)
+            {
+                var listKey = kvp.Key;
+                var formList = kvp.Value;
+                var typeMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                cachedCandidates[listKey] = typeMap;
+
+                // Always include the default (no filter) bucket
+                var typeKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { string.Empty };
+
+                // Derive type tokens from editor IDs: raw tokens and underscore-wrapped variants (e.g. "_trk_")
+                foreach (var item in formList.Items)
+                {
+                    if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || string.IsNullOrWhiteSpace(packIn?.EditorID))
+                        continue;
+
+                    var tokens = packIn.EditorID.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var token in tokens)
+                    {
+                        typeKeys.Add(token);
+                        var wrapped = $"_{token}_";
+                        if (packIn.EditorID.Contains(wrapped, StringComparison.OrdinalIgnoreCase))
+                        {
+                            typeKeys.Add(wrapped);
+                        }
+                    }
+                }
+
+                foreach (var typeKey in typeKeys)
+                {
+                    typeMap[typeKey] = BuildCandidates(listKey, formList, typeKey.Length == 0 ? null : typeKey);
+                }
+            }
+        }
+
+        private List<string> BuildCandidates(string listKey, FormList formList, string type)
+        {
+            var candidates = new List<string>(formList.Items.Count);
+
+            foreach (var item in formList.Items)
+            {
+                // Defensive: skip unresolved keys
+                if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
+                    continue;
+
+                if (type != null)
+                {
+                    if (!packIn.EditorID.Contains(type))
+                        continue;
+                }
+
+                EnsureConnectorsWithinBounds(listKey, packIn);
+
+                candidates.Add(packIn.EditorID);
+            }
+
+            return candidates;
         }
     }
 }

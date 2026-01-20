@@ -106,7 +106,7 @@ namespace FrankyCLI
                     new LightOccluderPass()
                 }
             };
-            state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
+            state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
             foreach (IGenPass pas in state.passes)
             {

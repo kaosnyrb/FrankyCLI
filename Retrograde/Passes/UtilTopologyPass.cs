@@ -42,7 +42,7 @@ namespace FrankyCLI
             float collisionPadding = -0.1f; // tweak: match DistrictTopologyPass collision clearance
             float samePrefabMinDistance = 30f; // keep identical util prefabs separated
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
-            RoomUtils roomUtils = new RoomUtils(roomlist);
+            RoomUtils roomUtils = state.GetRoomUtils(roomlist);
             var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var room in state.placedRooms)
             {

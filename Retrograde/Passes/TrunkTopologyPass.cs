@@ -51,7 +51,7 @@ namespace FrankyCLI
             RoomPrefab roomPrefab = null;
             PrefabMarker south0 = new PrefabMarker();
             PrefabMarker north0 = new PrefabMarker();
-            RoomUtils roomUtils = new RoomUtils("rg_trunklist");
+            RoomUtils roomUtils = state.GetRoomUtils("rg_trunklist");
 
             int bestBridgeablePairs = -1;
             List<PlacedRoom> bestPlannedRooms = null;

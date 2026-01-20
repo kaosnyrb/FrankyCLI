@@ -33,8 +33,8 @@ namespace FrankyCLI
             float bridgeMaxVerticalOffset = 8f;
             var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
-            RoomUtils roomUtils = new RoomUtils("rg_bosslist");
-            RoomUtils spineUtils = new RoomUtils("rg_trunklist");
+            RoomUtils roomUtils = state.GetRoomUtils("rg_bosslist");
+            RoomUtils spineUtils = state.GetRoomUtils("rg_trunklist");
 
             List<PlacedRoom> bestPlannedRooms = null;
             List<OpenConnector> bestPlannedOpenConnectors = null;

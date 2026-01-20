@@ -41,7 +41,7 @@ namespace FrankyCLI
 
             maxPlans = state.scoringSystem?.Effort ?? maxPlans;
             var activeBridgeLists = state.TrunkRoomLists;
-            var activeRoomUtils = activeBridgeLists.Select(name => new RoomUtils(name)).ToList();
+            var activeRoomUtils = activeBridgeLists.Select(name => state.GetRoomUtils(name)).ToList();
             var activeDistrictTypeLabel = DeriveDistrictType(activeBridgeLists.FirstOrDefault(), districtFilter, districtTypeLabel);
 
             int bestBridgesPlaced = -1;

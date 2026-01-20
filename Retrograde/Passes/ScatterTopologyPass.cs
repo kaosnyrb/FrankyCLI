@@ -34,7 +34,7 @@ namespace FrankyCLI
             int maxCandidatePrefabsPerConnector = 16; // avoid thrashing on a single open connector
             const int maxPlans = 50; // retry count for full planning attempts
             const float connectorEmbedTolerance = 0.01f; // prevent connectors from sitting inside other room bounds
-            RoomUtils roomUtils = new RoomUtils(roomlist);
+            RoomUtils roomUtils = state.GetRoomUtils(roomlist);
 
             maxRoomsToPlace = 1 + RandomUtils.random.Next(maxroomcount);
 
