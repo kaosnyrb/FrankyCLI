@@ -31,7 +31,7 @@ namespace FrankyCLI
             int maxPlans = state.scoringSystem?.Effort ?? 20;
             float bridgeMaxHorizontalSpan = 40f;
             float bridgeMaxVerticalOffset = 8f;
-            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
+            var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             RoomUtils roomUtils = new RoomUtils("rg_bosslist");
             RoomUtils spineUtils = new RoomUtils("rg_trunklist");

@@ -37,7 +37,7 @@ namespace FrankyCLI
             int maxPlans = state.scoringSystem.Effort; // cap number of planning retries
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
-            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
+            var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             var startingMarker = state.instance.Persistent
                 .OfType<PlacedObject>()
@@ -81,7 +81,7 @@ namespace FrankyCLI
 
                 for (int i = 0; i < 20; i++)
                 {
-                    var candidate = new RoomPrefab(roomUtils.GetRoom(startingConnector.Tileset));
+                    var candidate = PrefabCache.GetPrefab(roomUtils.GetRoom(startingConnector.Tileset));
 
                     var candConnectors = candidate.Markers
                         .Select(m => new
@@ -213,7 +213,7 @@ namespace FrankyCLI
                             continue;
                         }
 
-                        var nextPrefab = new RoomPrefab(prefabId);
+                        var nextPrefab = PrefabCache.GetPrefab(prefabId);
 
                         for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                         {

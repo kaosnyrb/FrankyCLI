@@ -222,7 +222,7 @@ namespace FrankyCLI
 
             foreach (var prefabId in prefabsToTry)
             {
-                var prefab = new RoomPrefab(prefabId);
+                var prefab = PrefabCache.GetPrefab(prefabId);
 
                 for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                 {

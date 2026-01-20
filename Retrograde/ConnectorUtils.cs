@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace FrankyCLI.Retrograde
 {
@@ -19,6 +20,8 @@ namespace FrankyCLI.Retrograde
 
     public class ConnectorUtils
     {
+        private static readonly ConcurrentDictionary<string, (P3Float Min, P3Float Max)> RotatedBoundsCache = new();
+
         public static ConnectorDirection Opposite(ConnectorDirection d)
         {
             return d switch
@@ -32,6 +35,11 @@ namespace FrankyCLI.Retrograde
         }
 
         public static List<RgConnectorInstance> GetConnectors(RoomPrefab prefab, int yawSteps = 0)
+        {
+            return PrefabCache.GetConnectors(prefab, yawSteps);
+        }
+
+        internal static List<RgConnectorInstance> BuildConnectors(RoomPrefab prefab, int yawSteps = 0)
         {
             return prefab.Markers
                 .Select(m =>
@@ -90,41 +98,46 @@ namespace FrankyCLI.Retrograde
 
         public static RgAabb ToWorldAabbRotated(ObjectBounds boundsLocal, P3Float worldPos, int yawSteps)
         {
-            // Rotate 8 corners of the local AABB; then take min/max in world space.
-            var min = boundsLocal.First;
-            var max = boundsLocal.Second;
-
-            P3Float[] corners =
+            var key = $"{boundsLocal.First.X},{boundsLocal.First.Y},{boundsLocal.First.Z}|{boundsLocal.Second.X},{boundsLocal.Second.Y},{boundsLocal.Second.Z}|{yawSteps}";
+            var rotated = RotatedBoundsCache.GetOrAdd(key, _ =>
             {
-                new P3Float(min.X, min.Y, min.Z),
-                new P3Float(min.X, min.Y, max.Z),
-                new P3Float(min.X, max.Y, min.Z),
-                new P3Float(min.X, max.Y, max.Z),
-                new P3Float(max.X, min.Y, min.Z),
-                new P3Float(max.X, min.Y, max.Z),
-                new P3Float(max.X, max.Y, min.Z),
-                new P3Float(max.X, max.Y, max.Z),
-            };
+                var min = boundsLocal.First;
+                var max = boundsLocal.Second;
 
-            var first = worldPos + RgRotation.RotateYaw90(corners[0], yawSteps);
-            float minX = first.X, minY = first.Y, minZ = first.Z;
-            float maxX = first.X, maxY = first.Y, maxZ = first.Z;
+                P3Float[] corners =
+                {
+                    new P3Float(min.X, min.Y, min.Z),
+                    new P3Float(min.X, min.Y, max.Z),
+                    new P3Float(min.X, max.Y, min.Z),
+                    new P3Float(min.X, max.Y, max.Z),
+                    new P3Float(max.X, min.Y, min.Z),
+                    new P3Float(max.X, min.Y, max.Z),
+                    new P3Float(max.X, max.Y, min.Z),
+                    new P3Float(max.X, max.Y, max.Z),
+                };
 
-            for (int i = 1; i < corners.Length; i++)
-            {
-                var w = worldPos + RgRotation.RotateYaw90(corners[i], yawSteps);
-                if (w.X < minX) minX = w.X;
-                if (w.Y < minY) minY = w.Y;
-                if (w.Z < minZ) minZ = w.Z;
-                if (w.X > maxX) maxX = w.X;
-                if (w.Y > maxY) maxY = w.Y;
-                if (w.Z > maxZ) maxZ = w.Z;
-            }
+                var first = RgRotation.RotateYaw90(corners[0], yawSteps);
+                float minX = first.X, minY = first.Y, minZ = first.Z;
+                float maxX = first.X, maxY = first.Y, maxZ = first.Z;
+
+                for (int i = 1; i < corners.Length; i++)
+                {
+                    var w = RgRotation.RotateYaw90(corners[i], yawSteps);
+                    if (w.X < minX) minX = w.X;
+                    if (w.Y < minY) minY = w.Y;
+                    if (w.Z < minZ) minZ = w.Z;
+                    if (w.X > maxX) maxX = w.X;
+                    if (w.Y > maxY) maxY = w.Y;
+                    if (w.Z > maxZ) maxZ = w.Z;
+                }
+
+                return (new P3Float(minX, minY, minZ), new P3Float(maxX, maxY, maxZ));
+            });
 
             return new RgAabb
             {
-                Min = new P3Float(minX, minY, minZ),
-                Max = new P3Float(maxX, maxY, maxZ),
+                Min = worldPos + rotated.Min,
+                Max = worldPos + rotated.Max
             };
         }
 

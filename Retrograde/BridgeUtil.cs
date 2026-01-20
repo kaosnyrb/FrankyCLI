@@ -37,7 +37,7 @@ namespace FrankyCLI
                         if (string.IsNullOrWhiteSpace(editorId))
                             continue;
 
-                        var prefab = new RoomPrefab(editorId);
+                        var prefab = PrefabCache.GetPrefab(editorId);
                         var connectors = ConnectorUtils.GetConnectors(prefab);
                         if (connectors.Count < 2)
                             continue;

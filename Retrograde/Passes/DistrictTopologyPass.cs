@@ -37,7 +37,7 @@ namespace FrankyCLI
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
             RoomUtils roomUtils = new RoomUtils(roomlist);
-            var bridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
+            var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             int bestBridgeablePairs = -1;
             List<PlacedRoom> bestPlannedRooms = null;
@@ -104,7 +104,7 @@ namespace FrankyCLI
                         {
                             break;
                         }
-                        var nextPrefab = new RoomPrefab(prefabId);
+                        var nextPrefab = PrefabCache.GetPrefab(prefabId);
 
                         for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                         {

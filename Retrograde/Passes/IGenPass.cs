@@ -54,6 +54,7 @@ namespace FrankyCLI.Retrograde.Passes
         public ScoringSystem scoringSystem;
 
         public P3Float StartingPosition;
+        public HashSet<string> BridgePrefabKeys;
 
         public float YMin = 0;
 
