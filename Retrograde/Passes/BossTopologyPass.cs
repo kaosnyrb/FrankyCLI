@@ -44,6 +44,17 @@ namespace FrankyCLI
             RoomUtils roomUtils = state.GetRoomUtils("rg_bosslist");
             RoomUtils spineUtils = state.GetRoomUtils("rg_trunklist");
 
+            string chosenBossRoomEditorId = null;
+            string GetOrChooseBossRoom(string tileset)
+            {
+                if (!string.IsNullOrWhiteSpace(chosenBossRoomEditorId))
+                    return chosenBossRoomEditorId;
+
+                chosenBossRoomEditorId = roomUtils.GetRoom(tileset, district);
+                Console.WriteLine($"[Boss plan] Selected boss room prefab: {chosenBossRoomEditorId}");
+                return chosenBossRoomEditorId;
+            }
+
             var bestOutcome = PlanRunner.RunBest<BossPlanMeta>(maxPlans, planAttempt =>
             {
                 var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -106,76 +117,71 @@ namespace FrankyCLI
 
                     bool placed = false;
 
-                    for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
+                    var bossPrefabEditorId = GetOrChooseBossRoom(target.Parsed.Tileset);
+                    var nextPrefab = PrefabCache.GetPrefab(bossPrefabEditorId);
+
+                    for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
-                        var nextPrefab = PrefabCache.GetPrefab(roomUtils.GetRoom(target.Parsed.Tileset, district));
+                        var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
 
-                        for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                        var compatible = nextConnectors
+                            .Where(c =>
+                                c.Parsed.Direction == requiredDir &&
+                                string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
+                        if (compatible.Count == 0)
+                            continue;
+
+                        var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
+
+                        // Align using ROTATED local connector
+                        P3Float nextPos = target.WorldPos - chosen.LocalPos;
+
+                        // Collision using ROTATED bounds
+                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                        if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                            continue;
+                        if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
+                            continue;
+
+                        // Place it with rotation (planned)
+                        plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
                         {
-                            var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
+                            Count = 1,
+                            Rotation = RgRotation.RotationToP3Float(yawSteps),
+                            Position = nextPos,
+                            Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                        });
 
-                            var compatible = nextConnectors
-                                .Where(c =>
-                                    c.Parsed.Direction == requiredDir &&
-                                    string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
-                                    string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
+                        plannedRooms.Add(new PlacedRoom
+                        {
+                            Prefab = nextPrefab,
+                            WorldPos = nextPos,
+                            YawSteps = yawSteps,
+                            DistrictType = districtTypeLabel,
+                            Connectors = nextConnectors
+                        });
 
-                            if (compatible.Count == 0)
+                        roomsPlaced++;
+                        placed = true;
+
+                        foreach (var c in nextConnectors)
+                        {
+                            if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
                                 continue;
 
-                            var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
-
-                            // Align using ROTATED local connector
-                            P3Float nextPos = target.WorldPos - chosen.LocalPos;
-
-                            // Collision using ROTATED bounds
-                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                            if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
-                                continue;
-                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
-                                continue;
-
-                            // Place it with rotation (planned)
-                            plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
+                            plannedOpenConnectors.Add(new OpenConnector
                             {
-                                Count = 1,
-                                Rotation = RgRotation.RotationToP3Float(yawSteps),
-                                Position = nextPos,
-                                Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                            });
-
-                            plannedRooms.Add(new PlacedRoom
-                            {
-                                Prefab = nextPrefab,
-                                WorldPos = nextPos,
+                                Parsed = c.Parsed,
                                 YawSteps = yawSteps,
-                                DistrictType = districtTypeLabel,
-                                Connectors = nextConnectors
+                                WorldPos = nextPos + c.LocalPos,
+                                DistrictType = districtTypeLabel
                             });
-
-                            roomsPlaced++;
-                            placed = true;
-
-                            foreach (var c in nextConnectors)
-                            {
-                                if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
-                                    continue;
-
-                                plannedOpenConnectors.Add(new OpenConnector
-                                {
-                                    Parsed = c.Parsed,
-                                    YawSteps = yawSteps,
-                                    WorldPos = nextPos + c.LocalPos,
-                                    DistrictType = districtTypeLabel
-                                });
-                            }
-
-                            break;
                         }
 
-                        if (placed)
-                            break;
+                        break;
                     }
 
                     // If we couldn't place anything for this connector, we just move on.
@@ -186,12 +192,12 @@ namespace FrankyCLI
                     }
                 }
 
-                var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, state.YMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
-                var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
-                var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
-                var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
+                var bridgeablePairs = 0; // Boss placement ignores bridgeablePairs
+                var planClustering = 0; // Boss placement planSizeDiversity
+                var planSizeDiversity = 0; // Boss placement planSizeDiversity
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
-                var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
+                var connectorViability = 0; // Boss placement planSizeDiversity
+                const double planArea = 0; // Boss placement ignores area weighting
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
                 
                 //Boss room must have placed a room
