@@ -76,8 +76,8 @@ namespace FrankyCLI
                     attempts++;
 
                     // Choose an open connector near the current cluster center to keep rooms close together
-                    var clusterCenter = CalculateClusterCenter(plannedRooms, plannedOpenConnectors);
-                    int openIndex = ChooseConnectorIndexNearCenter(plannedOpenConnectors, clusterCenter, proximitySample);
+                    var clusterCenter = ConnectorSelectionUtil.CalculateClusterCenter(plannedRooms, plannedOpenConnectors);
+                    int openIndex = ConnectorSelectionUtil.ChooseConnectorIndexNearCenter(plannedOpenConnectors, clusterCenter, proximitySample);
                     var target = plannedOpenConnectors[openIndex];
 
                     if (target.WorldPos.Y < yMin)
@@ -237,57 +237,6 @@ namespace FrankyCLI
             Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
         }
 
-        private static int ChooseConnectorIndexNearCenter(List<OpenConnector> openConnectors, P3Float clusterCenter, int sampleSize)
-        {
-            var prioritized = openConnectors
-                .Select((c, idx) => new
-                {
-                    Index = idx,
-                    DistSq = MathUtil.DistanceSquared(c.WorldPos, clusterCenter)
-                })
-                .OrderBy(p => p.DistSq)
-                .ToList();
-
-            int takeCount = Math.Min(sampleSize, prioritized.Count);
-            return prioritized[RandomUtils.random.Next(takeCount)].Index;
-        }
-
-        private static P3Float CalculateClusterCenter(List<PlacedRoom> placedRooms, List<OpenConnector> openConnectors)
-        {
-            if (placedRooms.Count > 0)
-            {
-                float sumX = 0;
-                float sumY = 0;
-                float sumZ = 0;
-                foreach (var room in placedRooms)
-                {
-                    sumX += room.WorldPos.X;
-                    sumY += room.WorldPos.Y;
-                    sumZ += room.WorldPos.Z;
-                }
-
-                float count = placedRooms.Count;
-                return new P3Float(sumX / count, sumY / count, sumZ / count);
-            }
-
-            if (openConnectors.Count > 0)
-            {
-                float sumX = 0;
-                float sumY = 0;
-                float sumZ = 0;
-                foreach (var connector in openConnectors)
-                {
-                    sumX += connector.WorldPos.X;
-                    sumY += connector.WorldPos.Y;
-                    sumZ += connector.WorldPos.Z;
-                }
-
-                float count = openConnectors.Count;
-                return new P3Float(sumX / count, sumY / count, sumZ / count);
-            }
-
-            return new P3Float(0, 0, 0);
-        }
 
         private static bool AnyConnectorInsideExistingBounds(
             List<RgConnectorInstance> connectors,

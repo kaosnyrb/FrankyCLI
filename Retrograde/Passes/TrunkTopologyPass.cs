@@ -161,12 +161,12 @@ namespace FrankyCLI
                 {
                     attempts++;
 
-                    var clusterCenter = CalculateClusterCenter(plannedRooms, plannedOpenConnectors);
+                    var clusterCenter = ConnectorSelectionUtil.CalculateClusterCenter(plannedRooms, plannedOpenConnectors);
                     var northConnectors = plannedOpenConnectors.Where(c => c.Parsed.Direction == ConnectorDirection.North).ToList();
                     double northBiasWeight = state.scoringSystem.NorthBiasWeight;
                     bool useNorthBias = northConnectors.Count > 0 && Rng.NextDouble() < northBiasWeight;
 
-                    var target = ChooseFarthestOpenConnector(useNorthBias ? northConnectors : plannedOpenConnectors, clusterCenter);
+                    var target = ConnectorSelectionUtil.ChooseFarthestOpenConnector(useNorthBias ? northConnectors : plannedOpenConnectors, clusterCenter);
                     int openIndex = plannedOpenConnectors.IndexOf(target);
                     if (openIndex < 0)
                     {
@@ -229,7 +229,7 @@ namespace FrankyCLI
                             if (compatible.Count == 0)
                                 continue;
 
-                            var chosen = ChooseMostOutwardConnector(compatible, target.WorldPos, clusterCenter);
+                            var chosen = ConnectorSelectionUtil.ChooseMostOutwardConnector(compatible, target.WorldPos, clusterCenter);
 
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
@@ -358,76 +358,6 @@ namespace FrankyCLI
             Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
         }
 
-        private static OpenConnector ChooseFarthestOpenConnector(List<OpenConnector> openConnectors, P3Float clusterCenter)
-        {
-            float maxDist = float.MinValue;
-            OpenConnector best = openConnectors[0];
-            for (int i = 0; i < openConnectors.Count; i++)
-            {
-                var dist = MathUtil.DistanceSquared(openConnectors[i].WorldPos, clusterCenter);
-                if (dist > maxDist)
-                {
-                    maxDist = dist;
-                    best = openConnectors[i];
-                }
-            }
-            return best;
-        }
-
-        private static RgConnectorInstance ChooseMostOutwardConnector(List<RgConnectorInstance> compatibles, P3Float targetWorldPos, P3Float clusterCenter)
-        {
-            RgConnectorInstance best = compatibles[0];
-            float bestDist = MathUtil.DistanceSquared(targetWorldPos - best.LocalPos, clusterCenter);
-
-            foreach (var c in compatibles)
-            {
-                float dist = MathUtil.DistanceSquared(targetWorldPos - c.LocalPos, clusterCenter);
-                if (dist > bestDist)
-                {
-                    bestDist = dist;
-                    best = c;
-                }
-            }
-
-            return best;
-        }
-
-        private static P3Float CalculateClusterCenter(List<PlacedRoom> placedRooms, List<OpenConnector> openConnectors)
-        {
-            if (placedRooms.Count > 0)
-            {
-                float sumX = 0;
-                float sumY = 0;
-                float sumZ = 0;
-                foreach (var room in placedRooms)
-                {
-                    sumX += room.WorldPos.X;
-                    sumY += room.WorldPos.Y;
-                    sumZ += room.WorldPos.Z;
-                }
-
-                float count = placedRooms.Count;
-                return new P3Float(sumX / count, sumY / count, sumZ / count);
-            }
-
-            if (openConnectors.Count > 0)
-            {
-                float sumX = 0;
-                float sumY = 0;
-                float sumZ = 0;
-                foreach (var connector in openConnectors)
-                {
-                    sumX += connector.WorldPos.X;
-                    sumY += connector.WorldPos.Y;
-                    sumZ += connector.WorldPos.Z;
-                }
-
-                float count = openConnectors.Count;
-                return new P3Float(sumX / count, sumY / count, sumZ / count);
-            }
-
-            return new P3Float(0, 0, 0);
-        }
 
         private static List<OpenConnector> BuildOpenConnectors(IEnumerable<RgConnectorInstance> connectors, RgConnectorInstance usedConnector, int yawSteps, P3Float roomPos, string districtType)
         {
