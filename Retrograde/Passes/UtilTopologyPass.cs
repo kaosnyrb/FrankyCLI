@@ -39,11 +39,13 @@ namespace FrankyCLI
                 ? 0
                 : Math.Max(1, (int)Math.Round(startingOpenConnectors * coverage));
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
-            float collisionPadding = -0.1f; // tweak: match DistrictTopologyPass collision clearance
-            float samePrefabMinDistance = 30f; // keep identical util prefabs separated
-            float similarPrefabMinDistance = 45f; // spread similar prefab archetypes
-            float similarPrefabSameParentMinDistance = 60f; // extra spread when siblings off same parent
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
+            float collisionPadding = -0.1f; // tweak: match DistrictTopologyPass collision clearance
+            
+            float samePrefabMinDistance = 30f; // keep identical util prefabs separated
+            float similarPrefabMinDistance = 30f; // spread similar prefab archetypes
+            float similarPrefabSameParentMinDistance = 25f; // extra spread when siblings off same parent
+
             RoomUtils roomUtils = state.GetRoomUtils(roomlist);
             var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var room in state.placedRooms)
@@ -325,8 +327,8 @@ namespace FrankyCLI
             var tokens = prefabId.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
             if (tokens.Length >= 3)
             {
-                // Use the first three tokens (e.g., rg_sts_end) as the archetype key.
-                return string.Join("_", tokens.Take(3)).ToLowerInvariant();
+                // Use the first four tokens (e.g., rg_sts_end_office) as the archetype key.
+                return string.Join("_", tokens.Take(4)).ToLowerInvariant();
             }
 
             return StripTrailingDigits(prefabId).ToLowerInvariant();
