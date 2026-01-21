@@ -19,6 +19,11 @@ namespace FrankyCLI
         private readonly string districtTypeLabel;
         int maxroomcount = 0;
 
+        private class ScatterPlanMeta
+        {
+            public int RoomsPlaced;
+        }
+
         public ScatterTopologyPass(string p_roomlist, int maxcount, string districtType = null) {         
             district = districtType;
             roomlist = p_roomlist;
@@ -38,7 +43,7 @@ namespace FrankyCLI
 
             maxRoomsToPlace = 1 + RandomUtils.random.Next(maxroomcount);
 
-            for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
+            var bestOutcome = PlanRunner.RunBest<ScatterPlanMeta>(maxPlans, planAttempt =>
             {
                 var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var room in state.placedRooms)
@@ -57,18 +62,18 @@ namespace FrankyCLI
                 int attempts = 0;
                 var yMin = state.YMin;
 
-            // Main placement loop: iterates over open connectors, but bounded
-            while (roomsPlaced < maxRoomsToPlace && plannedOpenConnectors.Count > 0 && attempts < maxAttempts)
-            {
-                attempts++;
-
-                // Pick a truly random connector to scatter placement rather than clustering
-                int openIndex = RandomUtils.random.Next(plannedOpenConnectors.Count);
-                var target = plannedOpenConnectors[openIndex];
-
-                if (target.WorldPos.Y < yMin)
+                // Main placement loop: iterates over open connectors, but bounded
+                while (roomsPlaced < maxRoomsToPlace && plannedOpenConnectors.Count > 0 && attempts < maxAttempts)
                 {
-                    continue;
+                    attempts++;
+
+                    // Pick a truly random connector to scatter placement rather than clustering
+                    int openIndex = RandomUtils.random.Next(plannedOpenConnectors.Count);
+                    var target = plannedOpenConnectors[openIndex];
+
+                    if (target.WorldPos.Y < yMin)
+                    {
+                        continue;
                     }
 
                     // Remove it now to ensure we "try to iterate through all open connectors"
@@ -109,10 +114,10 @@ namespace FrankyCLI
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                             // Collision using ROTATED bounds
-                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                        if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
-                            continue;
-                        if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
+                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                                continue;
+                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
                             if (AnyConnectorInsideExistingBounds(nextConnectors, nextPos, plannedRooms, connectorEmbedTolerance))
                                 continue;
@@ -174,21 +179,39 @@ namespace FrankyCLI
                 if (!success)
                 {
                     Console.WriteLine("[Scatter plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                    continue;
+                    return new PlanOutcome<ScatterPlanMeta>
+                    {
+                        Score = double.MinValue
+                    };
                 }
 
-                foreach (var placement in plannedPlacements)
+                return new PlanOutcome<ScatterPlanMeta>
                 {
-                    PlacementUtil.AddToTemporary(state.instance, placement);
-                }
-                state.placedRooms = plannedRooms;
-                state.openConnectors = plannedOpenConnectors;
+                    Score = roomsPlaced,
+                    Rooms = plannedRooms,
+                    OpenConnectors = plannedOpenConnectors,
+                    Placements = plannedPlacements,
+                    Metadata = new ScatterPlanMeta
+                    {
+                        RoomsPlaced = roomsPlaced
+                    }
+                };
+            });
 
-                Console.WriteLine("[Scatter plan] {0}/{1} success: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
-                return;
+            if (bestOutcome?.Placements == null)
+                throw new Exception("ScatterTopologyPass failed after " + maxPlans+ " plan attempts.");
+
+            foreach (var placement in bestOutcome.Placements)
+            {
+                PlacementUtil.AddToTemporary(state.instance, placement);
             }
+            state.placedRooms = bestOutcome.Rooms;
+            state.openConnectors = bestOutcome.OpenConnectors;
 
-            throw new Exception("ScatterTopologyPass failed after " + maxPlans+ " plan attempts." );
+            int bestPlanAttempt = (bestOutcome.AttemptIndex) + 1;
+            int bestRoomsPlaced = bestOutcome.Metadata?.RoomsPlaced ?? 0;
+
+            Console.WriteLine("[Scatter plan] {0}/{1} success: placed {2}/{3} rooms.", bestPlanAttempt, maxPlans, bestRoomsPlaced, maxRoomsToPlace);
         }
 
         private static bool AnyConnectorInsideExistingBounds(

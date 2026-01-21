@@ -27,6 +27,15 @@ namespace FrankyCLI
             maxRoomsToPlace = roomtarget;
         }
 
+        private class TrunkPlanMeta
+        {
+            public int RoomsPlaced;
+            public int BridgeablePairs;
+            public int NewConnectors;
+            public int MissingRequiredPrefabs;
+            public PlanScore Score;
+        }
+
         public void RunPass(DungeonState state)
         {
             const string districtType = "trunk";
@@ -53,19 +62,7 @@ namespace FrankyCLI
             PrefabMarker north0 = new PrefabMarker();
             RoomUtils roomUtils = state.GetRoomUtils("rg_trunklist");
 
-            int bestBridgeablePairs = -1;
-            List<PlacedRoom> bestPlannedRooms = null;
-            List<OpenConnector> bestPlannedOpenConnectors = null;
-            List<PlacedObject> bestPlannedPlacements = null;
-            int bestRoomsPlaced = 0;
-            double bestPlanScoreWithPenalty = double.MinValue;
-            PlanScore? bestPlanScoreBreakdown = null;
-            int bestPlanAttempt = -1;
-            float bestYMin = state.StartingPosition.Y;
-            int bestNewConnectors = 0;
-            int bestMissingRequiredPrefabs = PrefabsToForcePlacement.Count;
-
-            for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
+            var bestOutcome = PlanRunner.RunBest<TrunkPlanMeta>(maxPlans, planAttempt =>
             {
                 var requiredPrefabs = PrefabsToForcePlacement
                     .Where(id => !string.IsNullOrWhiteSpace(id))
@@ -296,7 +293,6 @@ namespace FrankyCLI
                     connectorsAddedCount += bestNewOpenConnectors?.Count ?? 0;
                 }
 
-                bool success = roomsPlaced >= maxRoomsToPlace;
                 var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
@@ -306,27 +302,29 @@ namespace FrankyCLI
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
                 int missingRequiredPrefabs = requiredPrefabs.Count;
                 double adjustedPlanScore = planScore.Total - (missingRequiredPrefabs > 0 ? 100000 * missingRequiredPrefabs : 0);
-                if (adjustedPlanScore > bestPlanScoreWithPenalty)
-                {
-                    bestBridgeablePairs = bridgeablePairs;
-                    bestPlannedRooms = plannedRooms;
-                    bestPlannedOpenConnectors = plannedOpenConnectors;
-                    bestPlannedPlacements = plannedPlacements;
-                    bestRoomsPlaced = roomsPlaced;
-                    bestPlanScoreWithPenalty = adjustedPlanScore;
-                    bestPlanScoreBreakdown = planScore;
-                    bestPlanAttempt = planAttempt;
-                    bestYMin = yMin;
-                    bestNewConnectors = connectorsAddedCount;
-                    bestMissingRequiredPrefabs = missingRequiredPrefabs;
-                }
-            }
 
-            // Apply the best scoring plan after all attempts.
-            var finalRooms = bestPlannedRooms ?? new List<PlacedRoom>();
-            var finalOpenConnectors = bestPlannedOpenConnectors ?? new List<OpenConnector>();
-            var finalPlacements = bestPlannedPlacements ?? new List<PlacedObject>();
-            var finalScore = bestPlanScoreBreakdown ?? new PlanScore
+                return new PlanOutcome<TrunkPlanMeta>
+                {
+                    Score = adjustedPlanScore,
+                    Rooms = plannedRooms,
+                    OpenConnectors = plannedOpenConnectors,
+                    Placements = plannedPlacements,
+                    YMin = yMin,
+                    Metadata = new TrunkPlanMeta
+                    {
+                        RoomsPlaced = roomsPlaced,
+                        BridgeablePairs = bridgeablePairs,
+                        NewConnectors = connectorsAddedCount,
+                        MissingRequiredPrefabs = missingRequiredPrefabs,
+                        Score = planScore
+                    }
+                };
+            });
+
+            var finalRooms = bestOutcome?.Rooms ?? new List<PlacedRoom>();
+            var finalOpenConnectors = bestOutcome?.OpenConnectors ?? new List<OpenConnector>();
+            var finalPlacements = bestOutcome?.Placements ?? new List<PlacedObject>();
+            var finalScore = bestOutcome?.Metadata?.Score ?? new PlanScore
             {
                 Total = 0,
                 Components = new Dictionary<string, double>
@@ -349,13 +347,18 @@ namespace FrankyCLI
             }
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
-            state.YMin = bestYMin;
+            state.YMin = bestOutcome?.YMin ?? state.YMin;
 
             var forcedInfo = PrefabsToForcePlacement.Count > 0
-                ? $", forced remaining {bestMissingRequiredPrefabs}"
+                ? $", forced remaining {bestOutcome?.Metadata?.MissingRequiredPrefabs ?? PrefabsToForcePlacement.Count}"
                 : string.Empty;
 
-            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
+            int bestPlanAttempt = (bestOutcome?.AttemptIndex ?? -1) + 1;
+            int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
+            int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
+            int bestNewConnectors = bestOutcome?.Metadata?.NewConnectors ?? 0;
+
+            Console.WriteLine($"[Trunk Plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {bestNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
         }
 
 

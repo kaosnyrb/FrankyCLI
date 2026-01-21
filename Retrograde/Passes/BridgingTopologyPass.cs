@@ -33,6 +33,12 @@ namespace FrankyCLI
             districtTypeLabel = "bridge";
         }
 
+        private class BridgePlanMeta
+        {
+            public int BridgesPlaced;
+            public int OverlapCount;
+            public PlanScore Score;
+        }
 
         public void RunPass(DungeonState state)
         {
@@ -44,16 +50,7 @@ namespace FrankyCLI
             var activeRoomUtils = activeBridgeLists.Select(name => state.GetRoomUtils(name)).ToList();
             var activeDistrictTypeLabel = DeriveDistrictType(activeBridgeLists.FirstOrDefault(), districtFilter, districtTypeLabel);
 
-            int bestBridgesPlaced = -1;
-            int bestOverlapCount = 0;
-            List<PlacedRoom> bestPlannedRooms = null;
-            List<OpenConnector> bestPlannedOpenConnectors = null;
-            List<PlacedObject> bestPlannedPlacements = null;
-            double bestPlanScore = double.MinValue;
-            PlanScore? bestPlanScoreBreakdown = null;
-            int bestPlanAttempt = -1;
-
-            for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
+            var bestOutcome = PlanRunner.RunBest<BridgePlanMeta>(maxPlans, planAttempt =>
             {
                 var usedPrefabIds = CollectUsedPrefabIds(state.placedRooms);
 
@@ -84,24 +81,26 @@ namespace FrankyCLI
                 var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
 
-                if (planScore.Total > bestPlanScore)
+                return new PlanOutcome<BridgePlanMeta>
                 {
-                    bestBridgesPlaced = bridgesPlaced;
-                    bestOverlapCount = overlapCount;
-                    bestPlannedRooms = plannedRooms;
-                    bestPlannedOpenConnectors = plannedOpenConnectors;
-                    bestPlannedPlacements = plannedPlacements;
-                    bestPlanScore = planScore.Total;
-                    bestPlanScoreBreakdown = planScore;
-                    bestPlanAttempt = planAttempt;
-                }
-            }
+                    Score = planScore.Total,
+                    Rooms = plannedRooms,
+                    OpenConnectors = plannedOpenConnectors,
+                    Placements = plannedPlacements,
+                    Metadata = new BridgePlanMeta
+                    {
+                        BridgesPlaced = bridgesPlaced,
+                        OverlapCount = overlapCount,
+                        Score = planScore
+                    }
+                };
+            });
 
-            var finalRooms = bestPlannedRooms ?? state.placedRooms;
-            var finalOpenConnectors = bestPlannedOpenConnectors ?? state.openConnectors;
-            var finalPlacements = bestPlannedPlacements ?? new List<PlacedObject>();
-            var finalOverlapCount = bestOverlapCount;
-            var finalScore = bestPlanScoreBreakdown ?? new PlanScore
+            var finalRooms = bestOutcome?.Rooms ?? state.placedRooms;
+            var finalOpenConnectors = bestOutcome?.OpenConnectors ?? state.openConnectors;
+            var finalPlacements = bestOutcome?.Placements ?? new List<PlacedObject>();
+            var finalOverlapCount = bestOutcome?.Metadata?.OverlapCount ?? 0;
+            var finalScore = bestOutcome?.Metadata?.Score ?? new PlanScore
             {
                 Total = 0,
                 Components = new Dictionary<string, double>
@@ -124,7 +123,10 @@ namespace FrankyCLI
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
+            int bestPlanAttempt = (bestOutcome?.AttemptIndex ?? -1) + 1;
+            int bestBridgesPlaced = bestOutcome?.Metadata?.BridgesPlaced ?? -1;
+
+            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
         }
 
         private (int bridgesPlaced, int overlapCount) PlanBridges(

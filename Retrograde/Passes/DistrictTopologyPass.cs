@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde;
 using FrankyCLI.Retrograde.Passes;
+using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -25,6 +26,14 @@ namespace FrankyCLI
             districtTypeLabel = DeriveDistrictType(p_roomlist, districtType, "district");
             maxRoomsToPlace = roomtarget;
         }
+        private class DistrictPlanMeta
+        {
+            public int RoomsPlaced;
+            public int BridgeablePairs;
+            public int NewConnectors;
+            public PlanScore Score;
+        }
+
         public void RunPass(DungeonState state)
         {
             // Inputs / knobs
@@ -39,18 +48,7 @@ namespace FrankyCLI
             RoomUtils roomUtils = state.GetRoomUtils(roomlist);
             var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
-            int bestBridgeablePairs = -1;
-            List<PlacedRoom> bestPlannedRooms = null;
-            List<OpenConnector> bestPlannedOpenConnectors = null;
-            List<PlacedObject> bestPlannedPlacements = null;
-            int bestRoomsPlaced = 0;
-            double bestPlanScore = double.MinValue;
-            PlanScore? bestPlanScoreBreakdown = null;
-            int bestPlanAttempt = -1;
-            float bestYMin = state.YMin;
-            int bestNewConnectors = 0;
-
-            for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
+            var bestOutcome = PlanRunner.RunBest<DistrictPlanMeta>(maxPlans, planAttempt =>
             {
                 var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var room in state.placedRooms)
@@ -190,26 +188,29 @@ namespace FrankyCLI
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
                 var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
-                if (planScore.Total > bestPlanScore)
-                {
-                    bestBridgeablePairs = bridgeablePairs;
-                    bestPlannedRooms = plannedRooms;
-                    bestPlannedOpenConnectors = plannedOpenConnectors;
-                    bestPlannedPlacements = plannedPlacements;
-                    bestRoomsPlaced = roomsPlaced;
-                    bestPlanScore = planScore.Total;
-                    bestPlanScoreBreakdown = planScore;
-                    bestPlanAttempt = planAttempt;
-                    bestYMin = yMin;
-                    bestNewConnectors = connectorsAddedCount;
-                }
-            }
 
-            var finalRooms = bestPlannedRooms ?? new List<PlacedRoom>();
-            var finalOpenConnectors = bestPlannedOpenConnectors ?? new List<OpenConnector>();
-            var finalPlacements = bestPlannedPlacements ?? new List<PlacedObject>();
-            var finalNewConnectors = bestNewConnectors;
-            var finalScore = bestPlanScoreBreakdown ?? new PlanScore
+                return new PlanOutcome<DistrictPlanMeta>
+                {
+                    Score = planScore.Total,
+                    Rooms = plannedRooms,
+                    OpenConnectors = plannedOpenConnectors,
+                    Placements = plannedPlacements,
+                    YMin = yMin,
+                    Metadata = new DistrictPlanMeta
+                    {
+                        RoomsPlaced = roomsPlaced,
+                        BridgeablePairs = bridgeablePairs,
+                        NewConnectors = connectorsAddedCount,
+                        Score = planScore
+                    }
+                };
+            });
+
+            var finalRooms = bestOutcome?.Rooms ?? new List<PlacedRoom>();
+            var finalOpenConnectors = bestOutcome?.OpenConnectors ?? new List<OpenConnector>();
+            var finalPlacements = bestOutcome?.Placements ?? new List<PlacedObject>();
+            var finalNewConnectors = bestOutcome?.Metadata?.NewConnectors ?? 0;
+            var finalScore = bestOutcome?.Metadata?.Score ?? new PlanScore
             {
                 Total = 0,
                 Components = new Dictionary<string, double>
@@ -232,9 +233,13 @@ namespace FrankyCLI
             }
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;
-            state.YMin = bestYMin;
+            state.YMin = bestOutcome?.YMin ?? state.YMin;
 
-            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
+            int bestAttemptIndex = (bestOutcome?.AttemptIndex ?? -1) + 1;
+            int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
+            int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
+
+            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestAttemptIndex}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
         }
 
 

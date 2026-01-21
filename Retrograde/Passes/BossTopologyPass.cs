@@ -16,6 +16,14 @@ namespace FrankyCLI
     {
         string district = null;
         private readonly string districtTypeLabel;
+
+        private class BossPlanMeta
+        {
+            public int RoomsPlaced;
+            public int BridgeablePairs;
+            public PlanScore Score;
+        }
+
         public BossTopologyPass(string districtType = null) {         
             district = districtType;
             districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
@@ -36,16 +44,7 @@ namespace FrankyCLI
             RoomUtils roomUtils = state.GetRoomUtils("rg_bosslist");
             RoomUtils spineUtils = state.GetRoomUtils("rg_trunklist");
 
-            List<PlacedRoom> bestPlannedRooms = null;
-            List<OpenConnector> bestPlannedOpenConnectors = null;
-            List<PlacedObject> bestPlannedPlacements = null;
-            int bestRoomsPlaced = 0;
-            double bestPlanScore = double.MinValue;
-            PlanScore? bestPlanScoreBreakdown = null;
-            int bestPlanAttempt = -1;
-            int bestBridgeablePairs = -1;
-
-            for (int planAttempt = 0; planAttempt < maxPlans; planAttempt++)
+            var bestOutcome = PlanRunner.RunBest<BossPlanMeta>(maxPlans, planAttempt =>
             {
                 var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var room in state.placedRooms)
@@ -69,7 +68,7 @@ namespace FrankyCLI
                     if (!TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector, spineDistrictType))
                     {
                             Console.WriteLine("[Boss plan] {0}/{1} failed to seed north connector.", planAttempt + 1, maxPlans);
-                        continue;
+                        return null;
                     }
                 }
 
@@ -187,7 +186,6 @@ namespace FrankyCLI
                     }
                 }
 
-                bool success = roomsPlaced >= maxRoomsToPlace;
                 var bridgeablePairs = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, state.YMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
                 var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
@@ -202,30 +200,32 @@ namespace FrankyCLI
                     planScore.Total = double.MinValue;
                 }
 
-                if (planScore.Total > bestPlanScore)
+                return new PlanOutcome<BossPlanMeta>
                 {
-                    bestPlannedRooms = plannedRooms;
-                    bestPlannedOpenConnectors = plannedOpenConnectors;
-                    bestPlannedPlacements = plannedPlacements;
-                    bestRoomsPlaced = roomsPlaced;
-                    bestPlanScore = planScore.Total;
-                    bestPlanScoreBreakdown = planScore;
-                    bestPlanAttempt = planAttempt;
-                    bestBridgeablePairs = bridgeablePairs;
-                }
-            }
+                    Score = planScore.Total,
+                    Rooms = plannedRooms,
+                    OpenConnectors = plannedOpenConnectors,
+                    Placements = plannedPlacements,
+                    Metadata = new BossPlanMeta
+                    {
+                        RoomsPlaced = roomsPlaced,
+                        BridgeablePairs = bridgeablePairs,
+                        Score = planScore
+                    }
+                };
+            });
 
-            if (bestPlannedPlacements == null)
+            if (bestOutcome?.Placements == null)
                 throw new Exception("Couldn't place boss room");
 
-            foreach (var placement in bestPlannedPlacements)
+            foreach (var placement in bestOutcome.Placements)
             {
                 PlacementUtil.AddToTemporary(state.instance, placement);
             }
-            state.placedRooms = bestPlannedRooms;
-            state.openConnectors = bestPlannedOpenConnectors;
+            state.placedRooms = bestOutcome.Rooms;
+            state.openConnectors = bestOutcome.OpenConnectors;
 
-            var finalScore = bestPlanScoreBreakdown ?? new PlanScore
+            var finalScore = bestOutcome.Metadata?.Score ?? new PlanScore
             {
                 Total = 0,
                 Components = new Dictionary<string, double>
@@ -240,7 +240,11 @@ namespace FrankyCLI
                 }
             };
 
-            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt + 1}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
+            int bestPlanAttempt = (bestOutcome?.AttemptIndex ?? -1) + 1;
+            int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
+            int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
+
+            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
         }
 
         private static bool TryPlaceSpineNorthConnector(
