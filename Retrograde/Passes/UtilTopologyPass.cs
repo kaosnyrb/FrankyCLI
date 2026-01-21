@@ -41,6 +41,8 @@ namespace FrankyCLI
             int maxAttempts = 5000;              // hard limit (failed tries) to avoid infinite loops
             float collisionPadding = -0.1f; // tweak: match DistrictTopologyPass collision clearance
             float samePrefabMinDistance = 30f; // keep identical util prefabs separated
+            float similarPrefabMinDistance = 45f; // spread similar prefab archetypes
+            float similarPrefabSameParentMinDistance = 60f; // extra spread when siblings off same parent
             int maxCandidatePrefabsPerConnector = 32; // avoid thrashing on a single open connector
             RoomUtils roomUtils = state.GetRoomUtils(roomlist);
             var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -84,6 +86,8 @@ namespace FrankyCLI
                 // and compatible on door/tileset (simple equality checks here).
                 var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
 
+                bool hasParentRoom = TryFindParentRoom(target, state.placedRooms, out var parentRoom);
+
                 bool placed = false;
                 bool attemptedRequiredForThisConnector = false;
 
@@ -112,6 +116,7 @@ namespace FrankyCLI
                         }
                     }
                     var nextPrefab = PrefabCache.GetPrefab(prefabId);
+                    var similarityKey = GetSimilarityKey(nextPrefab.PrefabEditorId);
 
                     for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                     {
@@ -139,6 +144,9 @@ namespace FrankyCLI
                         if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
                             continue;
                         if (IsTooCloseToSamePrefab(nextPrefab.PrefabEditorId, nextPos, state.placedRooms, samePrefabMinDistance))
+                            continue;
+                        var similarMinDistance = hasParentRoom ? similarPrefabSameParentMinDistance : similarPrefabMinDistance;
+                        if (IsTooCloseToSimilarPrefab(similarityKey, nextPos, state.placedRooms, similarMinDistance))
                             continue;
 
                         // Place it with rotation
@@ -275,6 +283,103 @@ namespace FrankyCLI
             }
 
             return false;
+        }
+
+        private static bool IsTooCloseToSimilarPrefab(
+            string similarityKey,
+            P3Float candidatePos,
+            List<PlacedRoom> placedRooms,
+            float minDistance)
+        {
+            if (string.IsNullOrEmpty(similarityKey))
+                return false;
+
+            float minDistSq = minDistance * minDistance;
+            for (int i = 0; i < placedRooms.Count; i++)
+            {
+                var placed = placedRooms[i];
+                var placedKey = GetSimilarityKey(placed.Prefab?.PrefabEditorId);
+                if (string.IsNullOrEmpty(placedKey))
+                    continue;
+
+                if (!similarityKey.Equals(placedKey, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                float dx = placed.WorldPos.X - candidatePos.X;
+                float dy = placed.WorldPos.Y - candidatePos.Y;
+                float dz = placed.WorldPos.Z - candidatePos.Z;
+                float distSq = dx * dx + dy * dy + dz * dz;
+
+                if (distSq < minDistSq)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static string GetSimilarityKey(string prefabId)
+        {
+            if (string.IsNullOrWhiteSpace(prefabId))
+                return null;
+
+            var tokens = prefabId.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length >= 3)
+            {
+                // Use the first three tokens (e.g., rg_sts_end) as the archetype key.
+                return string.Join("_", tokens.Take(3)).ToLowerInvariant();
+            }
+
+            return StripTrailingDigits(prefabId).ToLowerInvariant();
+        }
+
+        private static string StripTrailingDigits(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            int i = value.Length - 1;
+            while (i >= 0 && char.IsDigit(value[i]))
+            {
+                i--;
+            }
+            return value.Substring(0, i + 1);
+        }
+
+        private static bool TryFindParentRoom(OpenConnector target, List<PlacedRoom> placedRooms, out PlacedRoom parentRoom)
+        {
+            const float positionTolerance = 0.01f;
+            foreach (var room in placedRooms)
+            {
+                if (room.Connectors == null)
+                    continue;
+
+                foreach (var conn in room.Connectors)
+                {
+                    var worldPos = room.WorldPos + conn.LocalPos;
+                    if (!ArePositionsClose(worldPos, target.WorldPos, positionTolerance))
+                        continue;
+
+                    if (conn.Parsed.Direction != target.Parsed.Direction)
+                        continue;
+                    if (!string.Equals(conn.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (!string.Equals(conn.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    parentRoom = room;
+                    return true;
+                }
+            }
+
+            parentRoom = default;
+            return false;
+        }
+
+        private static bool ArePositionsClose(P3Float a, P3Float b, float tolerance)
+        {
+            return Math.Abs(a.X - b.X) <= tolerance &&
+                   Math.Abs(a.Y - b.Y) <= tolerance &&
+                   Math.Abs(a.Z - b.Z) <= tolerance;
         }
 
         private static string DeriveDistrictType(string roomList, string provided, string fallback)
