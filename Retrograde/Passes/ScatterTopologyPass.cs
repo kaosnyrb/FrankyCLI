@@ -179,7 +179,7 @@ namespace FrankyCLI
 
                 foreach (var placement in plannedPlacements)
                 {
-                    state.instance.Temporary.Add(placement);
+                    PlacementUtil.AddToTemporary(state.instance, placement);
                 }
                 state.placedRooms = plannedRooms;
                 state.openConnectors = plannedOpenConnectors;

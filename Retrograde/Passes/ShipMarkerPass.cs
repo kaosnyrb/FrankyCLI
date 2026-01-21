@@ -37,7 +37,7 @@ namespace FrankyCLI.Retrograde
                         Position = worldPos,
                         Base = shipMarker.Base
                     };
-                    state.instance.Temporary.Add(newplaced);
+                    PlacementUtil.AddToTemporary(state.instance, newplaced);
 
                     //Find the marker from the base
                     var baseform = gen_quest_main._StarfieldMod.Statics[shipMarker.Base.FormKey];

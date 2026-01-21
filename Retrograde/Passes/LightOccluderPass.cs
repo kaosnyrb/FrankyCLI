@@ -212,7 +212,7 @@ namespace FrankyCLI.Retrograde
 
         private static void AddPanel(Cell cell, RoomPrefab panelPrefab, P3Float position, P3Float rotation)
         {
-            cell.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+            PlacementUtil.AddToTemporary(cell, new PlacedObject(gen_quest_main.myMod)
             {
                 Count = 1,
                 Rotation = rotation,

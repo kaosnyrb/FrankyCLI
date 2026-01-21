@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Noggog;
+using FrankyCLI.Retrograde;
 
 namespace FrankyCLI.Retrograde.Passes
 {
@@ -55,7 +56,7 @@ namespace FrankyCLI.Retrograde.Passes
                     // Align plug so its attach connector lands exactly at the open connector position
                     var plugPos = open.WorldPos - attach.LocalPos;
 
-                    state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                    PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                     {
                         Count = 1,
                         Rotation = RgRotation.RotationToP3Float(yawSteps),

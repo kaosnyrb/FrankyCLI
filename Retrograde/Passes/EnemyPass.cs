@@ -125,7 +125,7 @@ namespace FrankyCLI.Retrograde
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
 
-                state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                 {
                     Count = 1,
                     Rotation = worldRot,

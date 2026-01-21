@@ -142,7 +142,7 @@ namespace FrankyCLI
                             continue;
 
                         // Place it with rotation
-                        state.instance.Temporary.Add(new PlacedObject(gen_quest_main.myMod)
+                        PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                         {
                             Count = 1,
                             Rotation = RgRotation.RotationToP3Float(yawSteps),

@@ -220,7 +220,7 @@ namespace FrankyCLI
 
             foreach (var placement in bestPlannedPlacements)
             {
-                state.instance.Temporary.Add(placement);
+                PlacementUtil.AddToTemporary(state.instance, placement);
             }
             state.placedRooms = bestPlannedRooms;
             state.openConnectors = bestPlannedOpenConnectors;
