@@ -88,6 +88,7 @@ namespace FrankyCLI
                 //Place rooms
                     new TrunkTopologyPass(4),
                     new BossTopologyPass("boss"),
+                    new DistrictTopologyPass("rg_orelist",1),
                     new DistrictTopologyPass("rg_hablist",4),
                     new BridgeHelperPass(),
                     new BridgingTopologyPass(),
