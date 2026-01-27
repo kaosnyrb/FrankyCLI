@@ -51,7 +51,10 @@ namespace FrankyCLI
                     return chosenBossRoomEditorId;
 
                 chosenBossRoomEditorId = roomUtils.GetRoom(tileset, district);
-                Console.WriteLine($"[Boss plan] Selected boss room prefab: {chosenBossRoomEditorId}");
+                if (!state.IsHarnessRun)
+                {
+                    Console.WriteLine($"[Boss plan] Selected boss room prefab: {chosenBossRoomEditorId}");
+                }
                 return chosenBossRoomEditorId;
             }
 
@@ -78,7 +81,10 @@ namespace FrankyCLI
                 {
                     if (!TryPlaceSpineNorthConnector(plannedRooms, plannedOpenConnectors, plannedPlacements, state.StartingPosition, state.YMin, spineUtils, collisionPadding, maxCandidatePrefabsPerConnector, spineDistrictType))
                     {
-                            Console.WriteLine("[Boss plan] {0}/{1} failed to seed north connector.", planAttempt + 1, maxPlans);
+                            if (!state.IsHarnessRun)
+                            {
+                                Console.WriteLine("[Boss plan] {0}/{1} failed to seed north connector.", planAttempt + 1, maxPlans);
+                            }
                         return null;
                     }
                 }
@@ -250,7 +256,10 @@ namespace FrankyCLI
             int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
             int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
 
-            Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
+            if (!state.IsHarnessRun)
+            {
+                Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
+            }
         }
 
         private static bool TryPlaceSpineNorthConnector(

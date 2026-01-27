@@ -178,7 +178,10 @@ namespace FrankyCLI
                 bool success = roomsPlaced >= maxRoomsToPlace;
                 if (!success)
                 {
-                    Console.WriteLine("[Scatter plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
+                    if (!state.IsHarnessRun)
+                    {
+                        Console.WriteLine("[Scatter plan] {0}/{1} aborted: placed {2}/{3} rooms.", planAttempt + 1, maxPlans, roomsPlaced, maxRoomsToPlace);
+                    }
                     return new PlanOutcome<ScatterPlanMeta>
                     {
                         Score = double.MinValue
@@ -211,7 +214,10 @@ namespace FrankyCLI
             int bestPlanAttempt = (bestOutcome.AttemptIndex) + 1;
             int bestRoomsPlaced = bestOutcome.Metadata?.RoomsPlaced ?? 0;
 
-            Console.WriteLine("[Scatter plan] {0}/{1} success: placed {2}/{3} rooms.", bestPlanAttempt, maxPlans, bestRoomsPlaced, maxRoomsToPlace);
+            if (!state.IsHarnessRun)
+            {
+                Console.WriteLine("[Scatter plan] {0}/{1} success: placed {2}/{3} rooms.", bestPlanAttempt, maxPlans, bestRoomsPlaced, maxRoomsToPlace);
+            }
         }
 
         private static bool AnyConnectorInsideExistingBounds(

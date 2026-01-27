@@ -126,7 +126,10 @@ namespace FrankyCLI
             int bestPlanAttempt = (bestOutcome?.AttemptIndex ?? -1) + 1;
             int bestBridgesPlaced = bestOutcome?.Metadata?.BridgesPlaced ?? -1;
 
-            Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
+            if (!state.IsHarnessRun)
+            {
+                Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
+            }
         }
 
         private (int bridgesPlaced, int overlapCount) PlanBridges(

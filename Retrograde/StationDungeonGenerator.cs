@@ -64,6 +64,17 @@ namespace FrankyCLI
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            bool harnesstest = false;
+            //
+            if (harnesstest)
+            {
+                var harness = new OreStationWeightHarness(runsPerWeight: 5,designFactory: (() => new OreStation()));
+                harness.FindBest(cell, location);
+                stopwatch.Stop();
+                return;
+            }
+
+
             IStationDesign design = new OreStation();
 
             DungeonState state = new DungeonState(cell, location)

@@ -290,7 +290,10 @@ namespace FrankyCLI
             int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
             int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
 
-            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestAttemptIndex}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
+            if (!state.IsHarnessRun)
+            {
+                Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestAttemptIndex}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
+            }
         }
 
 

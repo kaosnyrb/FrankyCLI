@@ -78,5 +78,8 @@ namespace FrankyCLI.Retrograde.Passes
 
             return utils;
         }
+
+        // Set by harness runs to suppress noisy pass-level logging.
+        public bool IsHarnessRun { get; set; }
     }
 }
