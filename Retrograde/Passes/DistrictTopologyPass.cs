@@ -18,19 +18,27 @@ namespace FrankyCLI
         string district = null;
         public string roomlist = "";
         private readonly string districtTypeLabel;
+        private readonly List<string> prefabsToForcePlacement;
         int maxRoomsToPlace = 10;
 
-        public DistrictTopologyPass(string p_roomlist,int roomtarget, string districtType = null) {         
+        public DistrictTopologyPass(string p_roomlist, int roomtarget, string districtType = null, IEnumerable<string> prefabsToForcePlacement = null)
+        {
             district = districtType;
             roomlist = p_roomlist;
             districtTypeLabel = DeriveDistrictType(p_roomlist, districtType, "district");
             maxRoomsToPlace = roomtarget;
+            this.prefabsToForcePlacement = prefabsToForcePlacement?
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList()
+                ?? new List<string>();
         }
         private class DistrictPlanMeta
         {
             public int RoomsPlaced;
             public int BridgeablePairs;
             public int NewConnectors;
+            public int MissingRequiredPrefabs;
             public PlanScore Score;
         }
 
@@ -50,6 +58,9 @@ namespace FrankyCLI
 
             var bestOutcome = PlanRunner.RunBest<DistrictPlanMeta>(maxPlans, planAttempt =>
             {
+                var requiredPrefabs = prefabsToForcePlacement
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .ToList();
                 var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var room in state.placedRooms)
                 {
@@ -94,10 +105,33 @@ namespace FrankyCLI
                     PlacedRoom bestRoom = new PlacedRoom();
                     List<OpenConnector> bestNewOpenConnectors = null;
                     int bestBridgeScore = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
+                    bool bestPlacementUsesRequired = false;
+                    string bestPlacementPrefabId = null;
+                    bool attemptedRequiredForThisConnector = false;
 
                     for (int prefabTry = 0; prefabTry < maxCandidatePrefabsPerConnector; prefabTry++)
                     {
-                        var prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
+                        bool useRequired = requiredPrefabs.Count > 0 && !attemptedRequiredForThisConnector;
+                        if (useRequired)
+                        {
+                            attemptedRequiredForThisConnector = true;
+                        }
+
+                        string prefabId;
+                        if (useRequired)
+                        {
+                            prefabId = requiredPrefabs.FirstOrDefault(id => !usedPrefabIds.Contains(id));
+                            requiredPrefabs.RemoveAll(id => usedPrefabIds.Contains(id));
+                            if (string.IsNullOrEmpty(prefabId))
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset, district, usedPrefabIds);
+                        }
+
                         if (string.IsNullOrEmpty(prefabId))
                         {
                             break;
@@ -156,12 +190,18 @@ namespace FrankyCLI
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
                             int bridgeScore = BridgeUtil.CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
 
-                            if (bestPlacement == null || bridgeScore > bestBridgeScore)
+                            bool candidateIsForced = useRequired;
+                            if (bestPlacement == null
+                                || (candidateIsForced && !bestPlacementUsesRequired)
+                                || (candidateIsForced && bestPlacementUsesRequired && bridgeScore > bestBridgeScore)
+                                || (!candidateIsForced && !bestPlacementUsesRequired && bridgeScore > bestBridgeScore))
                             {
                                 bestBridgeScore = bridgeScore;
                                 bestPlacement = candidatePlacement;
                                 bestRoom = candidateRoom;
                                 bestNewOpenConnectors = newOpenConnectors;
+                                bestPlacementUsesRequired = candidateIsForced;
+                                bestPlacementPrefabId = nextPrefab.PrefabEditorId;
                             }
                         }
                     }
@@ -176,6 +216,10 @@ namespace FrankyCLI
                     plannedPlacements.Add(bestPlacement);
                     plannedRooms.Add(bestRoom);
                     usedPrefabIds.Add(bestRoom.Prefab.PrefabEditorId);
+                    if (bestPlacementUsesRequired && !string.IsNullOrEmpty(bestPlacementPrefabId))
+                    {
+                        requiredPrefabs.RemoveAll(id => id.Equals(bestPlacementPrefabId, StringComparison.OrdinalIgnoreCase));
+                    }
                     roomsPlaced++;
                     plannedOpenConnectors.AddRange(bestNewOpenConnectors);
                     connectorsAddedCount += bestNewOpenConnectors?.Count ?? 0;
@@ -188,10 +232,12 @@ namespace FrankyCLI
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
                 var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
+                int missingRequiredPrefabs = requiredPrefabs.Count;
+                double adjustedPlanScore = planScore.Total - (missingRequiredPrefabs > 0 ? 100000 * missingRequiredPrefabs : 0);
 
                 return new PlanOutcome<DistrictPlanMeta>
                 {
-                    Score = planScore.Total,
+                    Score = adjustedPlanScore,
                     Rooms = plannedRooms,
                     OpenConnectors = plannedOpenConnectors,
                     Placements = plannedPlacements,
@@ -201,6 +247,7 @@ namespace FrankyCLI
                         RoomsPlaced = roomsPlaced,
                         BridgeablePairs = bridgeablePairs,
                         NewConnectors = connectorsAddedCount,
+                        MissingRequiredPrefabs = missingRequiredPrefabs,
                         Score = planScore
                     }
                 };
@@ -235,11 +282,15 @@ namespace FrankyCLI
             state.openConnectors = finalOpenConnectors;
             state.YMin = bestOutcome?.YMin ?? state.YMin;
 
+            var forcedInfo = prefabsToForcePlacement.Count > 0
+                ? $", forced remaining {bestOutcome?.Metadata?.MissingRequiredPrefabs ?? prefabsToForcePlacement.Count}"
+                : string.Empty;
+
             int bestAttemptIndex = (bestOutcome?.AttemptIndex ?? -1) + 1;
             int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
             int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
 
-            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestAttemptIndex}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
+            Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestAttemptIndex}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
         }
 
 
