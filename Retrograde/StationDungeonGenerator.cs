@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde;
 using FrankyCLI.Retrograde.Passes;
+using FrankyCLI.Retrograde.StationDesigns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -63,49 +64,15 @@ namespace FrankyCLI
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            IStationDesign design = new OreStation();
+
             DungeonState state = new DungeonState(cell, location)
             {
                 Faction = faction,
                 Size = size,
                 TrunkRoomLists = new List<string> { "rg_trunklist" },
-                scoringSystem = new ScoringSystem()
-                {
-                    BridgingWeight = 10,
-                    BridgingOverlapWeight = -1,
-                    NorthBiasWeight = 0.8,
-                    NewConnectorsWeight = 0.75,
-                    PlacementWeight = 50,
-                    AreaWeight = -0.25,
-                    ClusteringWeight = 2,
-                    SizeDiversityWeight = 5,
-                    RoomReuseWeight = -1,
-                    ConnectorViabilityWeight = 0.75,
-                    Effort = 100
-                },
-                //Multi-Pass Generation Pipeline
-                passes = new List<IGenPass>
-                {
-                //Place rooms
-                    new TrunkTopologyPass(4),
-                    new BossTopologyPass("boss"),
-                    new DistrictTopologyPass("rg_orelist",2,"ore", new List<string>(){"rg_sts_ore_inc_003"}),
-                    new DistrictTopologyPass("rg_hablist",4,"hab"),
-                    new BridgeHelperPass(),
-                    new BridgingTopologyPass(),
-                    new UtilTopologyPass("rg_utillist",0.8f),
-                //Seal connectors
-                    new WindowSealingPass(),
-                    new ConnectorSealingPass(),
-                //Doors and plugs
-                    new PlugPass(),
-                    new DoorPass(),
-                //Fill content
-                    new EnemyPass(),
-                    new ContentPass(),
-                    new ShipMarkerPass(),
-                //util
-                    new LightOccluderPass()
-                }
+                scoringSystem = design.scoringSystem,
+                passes = design.stationPasses
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
