@@ -38,16 +38,16 @@ namespace FrankyCLI.Retrograde.StationDesigns
 
             scoringSystem = new ScoringSystem()
             {
-                BridgingWeight = 12,
-                BridgingOverlapWeight = -1,
-                NorthBiasWeight = 0.8,
-                NewConnectorsWeight = 0.75,
-                PlacementWeight = 650,
-                AreaWeight = 0.05,
-                ClusteringWeight = 2,
-                SizeDiversityWeight = 5,
-                RoomReuseWeight = -1,
-                ConnectorViabilityWeight = 0.56,
+                BridgingWeight = 23.12,
+                BridgingOverlapWeight = -3.21,
+                NorthBiasWeight = 2.3,
+                NewConnectorsWeight = 26.61,
+                PlacementWeight = 17.33,
+                AreaWeight = 0,
+                ClusteringWeight = 6.42,
+                SizeDiversityWeight = 16.06,
+                RoomReuseWeight = -3.21,
+                ConnectorViabilityWeight = 1.73,
                 Effort = 250
             };
         }

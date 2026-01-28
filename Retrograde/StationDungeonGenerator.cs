@@ -69,8 +69,9 @@ namespace FrankyCLI
             if (harnesstest)
             {
                 var harness = new OreStationWeightHarness(designFactory: (() => new OreStation()));
-                harness.FindBest(cell, location, runs: 2);
+                harness.FindBest(cell, location, runs: 10);
                 stopwatch.Stop();
+                Console.WriteLine("Harness Time:" + stopwatch.Elapsed);
                 return;
             }
 

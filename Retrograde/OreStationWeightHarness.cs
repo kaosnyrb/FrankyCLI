@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
 using FrankyCLI.Retrograde.Passes;
@@ -23,7 +25,9 @@ namespace FrankyCLI.Retrograde
         private readonly List<string> _trunkRoomLists;
         private readonly string _faction;
         private readonly string _size;
-        private readonly Random _rng = new Random();
+        private static readonly ThreadLocal<Random> _rng = new(() => new Random(Guid.NewGuid().GetHashCode()));
+        private readonly object _logLock = new();
+        private readonly object _bestLock = new();
 
         public OreStationWeightHarness(
             Func<IStationDesign>? designFactory = null,
@@ -69,69 +73,60 @@ namespace FrankyCLI.Retrograde
             int total = runs;
             int done = 0;
 
-            for (int runIndex = 0; runIndex < runs; runIndex++)
+            Parallel.For(0, runs, runIndex =>
             {
-                done++;
+                var current = Interlocked.Increment(ref done);
 
-                var line = new string('-', 64);
-                var bestSoFar = best != null
-                    ? $"current leader avg {best.AverageScore:0.00} (best {best.BestScore:0.00})"
-                    : "no leader yet";
-
-                WriteLog(line);
-                WriteLog($"Run {done}/{total} | {bestSoFar}");
-                WriteLog(line);
-
-                var weights = CloneWeights(weightSets[_rng.Next(weightSets.Count)]);
-                var lastScore = GenerateOnce(cell, location, weights);
+                var weights = CloneWeights(weightSets[_rng.Value!.Next(weightSets.Count)]);
+                var normWeights = NormalizeWeights(weights, 100.0);
+                var lastScore = GenerateOnce(cell, location, normWeights);
 
                 var summary = new WeightRunSummary(
-                    CloneWeights(weights),
+                    CloneWeights(normWeights),
                     lastScore.Total,
                     lastScore.Total,
                     lastScore.Total,
                     lastScore!,
                     runIndex + 1);
 
-                WriteLog(
-                    $"Weights:\n" +
-                    $"  PlacementWeight            {weights.PlacementWeight:0.##}\n" +
-                    $"  BridgingWeight             {weights.BridgingWeight:0.##}\n" +
-                    $"  BridgingOverlapWeight      {weights.BridgingOverlapWeight:0.##}\n" +
-                    $"  NorthBiasWeight            {weights.NorthBiasWeight:0.##}\n" +
-                    $"  NewConnectorsWeight        {weights.NewConnectorsWeight:0.##}\n" +
-                    $"  AreaWeight                 {weights.AreaWeight:0.##}\n" +
-                    $"  ClusteringWeight           {weights.ClusteringWeight:0.##}\n" +
-                    $"  SizeDiversityWeight        {weights.SizeDiversityWeight:0.##}\n" +
-                    $"  RoomReuseWeight            {weights.RoomReuseWeight:0.##}\n" +
-                    $"  ConnectorViabilityWeight   {weights.ConnectorViabilityWeight:0.##}\n" +
-                    $"  Effort                     {weights.Effort}\n" +
-                    $"Results:\n" +
-                    $"  Score {summary.LastRunScore.Total:0.00}");
-
-                if (best == null || summary.AverageScore > best.AverageScore)
+                lock (_bestLock)
                 {
-                    best = summary;
+                    if (best == null || summary.AverageScore > best.AverageScore)
+                    {
+                        best = summary;
+                    }
                 }
-            }
+
+                WeightRunSummary? bestSnapshot;
+                lock (_bestLock)
+                {
+                    bestSnapshot = best;
+                }
+
+                lock (_logLock)
+                {
+                    WriteLog(
+                        $"Run {current}/{total} | score {summary.LastRunScore.Total:0.00} | weights PW {normWeights.PlacementWeight:0.##}, BW {normWeights.BridgingWeight:0.##}, Area {normWeights.AreaWeight:0.##}, Conn {normWeights.ConnectorViabilityWeight:0.##} | leader avg {(bestSnapshot?.AverageScore ?? 0):0.00}");
+                }
+            });
 
             if (best != null)
             {
                 WriteLog("==== Overall best result after all tests ====");
-                WriteLog(
-                    $"Best weights after {best.Runs} runs:");
-                WriteLog(
-                    $"  PlacementWeight            {best.Weights.PlacementWeight:0.##}\n" +
-                    $"  BridgingWeight             {best.Weights.BridgingWeight:0.##}\n" +
-                    $"  BridgingOverlapWeight      {best.Weights.BridgingOverlapWeight:0.##}\n" +
-                    $"  NorthBiasWeight            {best.Weights.NorthBiasWeight:0.##}\n" +
-                    $"  NewConnectorsWeight        {best.Weights.NewConnectorsWeight:0.##}\n" +
-                    $"  AreaWeight                 {best.Weights.AreaWeight:0.##}\n" +
-                    $"  ClusteringWeight           {best.Weights.ClusteringWeight:0.##}\n" +
-                    $"  SizeDiversityWeight        {best.Weights.SizeDiversityWeight:0.##}\n" +
-                    $"  RoomReuseWeight            {best.Weights.RoomReuseWeight:0.##}\n" +
-                    $"  ConnectorViabilityWeight   {best.Weights.ConnectorViabilityWeight:0.##}\n" +
-                    $"  Effort                     {best.Weights.Effort}");
+                WriteLog("scoringSystem = new ScoringSystem()");
+                WriteLog("{");
+                WriteLog($"    BridgingWeight = {best.Weights.BridgingWeight:0.##},");
+                WriteLog($"    BridgingOverlapWeight = {best.Weights.BridgingOverlapWeight:0.##},");
+                WriteLog($"    NorthBiasWeight = {best.Weights.NorthBiasWeight:0.##},");
+                WriteLog($"    NewConnectorsWeight = {best.Weights.NewConnectorsWeight:0.##},");
+                WriteLog($"    PlacementWeight = {best.Weights.PlacementWeight:0.##},");
+                WriteLog($"    AreaWeight = {best.Weights.AreaWeight:0.##},");
+                WriteLog($"    ClusteringWeight = {best.Weights.ClusteringWeight:0.##},");
+                WriteLog($"    SizeDiversityWeight = {best.Weights.SizeDiversityWeight:0.##},");
+                WriteLog($"    RoomReuseWeight = {best.Weights.RoomReuseWeight:0.##},");
+                WriteLog($"    ConnectorViabilityWeight = {best.Weights.ConnectorViabilityWeight:0.##},");
+                WriteLog($"    Effort = {best.Weights.Effort}");
+                WriteLog("};");
 
                 File.WriteAllText(reportPath, string.Join(Environment.NewLine, log));
                 WriteLog($"Report written to {reportPath}");
@@ -191,6 +186,41 @@ namespace FrankyCLI.Retrograde
                 sizeDiversity,
                 roomReuse,
                 connectorViability);
+        }
+
+        private static ScoringSystem NormalizeWeights(ScoringSystem src, double budget)
+        {
+            double total =
+                Math.Abs(src.PlacementWeight) +
+                Math.Abs(src.BridgingWeight) +
+                Math.Abs(src.BridgingOverlapWeight) +
+                Math.Abs(src.NorthBiasWeight) +
+                Math.Abs(src.NewConnectorsWeight) +
+                Math.Abs(src.AreaWeight) +
+                Math.Abs(src.ClusteringWeight) +
+                Math.Abs(src.SizeDiversityWeight) +
+                Math.Abs(src.RoomReuseWeight) +
+                Math.Abs(src.ConnectorViabilityWeight);
+
+            if (total <= 0.0001)
+                return CloneWeights(src);
+
+            var scale = budget / total;
+
+            return new ScoringSystem
+            {
+                PlacementWeight = src.PlacementWeight * scale,
+                BridgingWeight = src.BridgingWeight * scale,
+                BridgingOverlapWeight = src.BridgingOverlapWeight * scale,
+                NorthBiasWeight = src.NorthBiasWeight * scale,
+                NewConnectorsWeight = src.NewConnectorsWeight * scale,
+                AreaWeight = src.AreaWeight * scale,
+                ClusteringWeight = src.ClusteringWeight * scale,
+                SizeDiversityWeight = src.SizeDiversityWeight * scale,
+                RoomReuseWeight = src.RoomReuseWeight * scale,
+                ConnectorViabilityWeight = src.ConnectorViabilityWeight * scale,
+                Effort = src.Effort
+            };
         }
 
         private List<ScoringSystem> BuildDefaultWeightSets()
