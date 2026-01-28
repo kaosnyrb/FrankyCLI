@@ -87,7 +87,7 @@ namespace FrankyCLI.Retrograde
 
                 for (int run = 0; run < _runsPerWeight; run++)
                 {
-                    ResetCell(cell);
+                    PlacementUtil.Reset();
                     lastScore = GenerateOnce(cell, location, weights);
                     scores.Add(lastScore.Total);
                 }
@@ -152,10 +152,13 @@ namespace FrankyCLI.Retrograde
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
+            PlacementUtil.Reset();
+
             foreach (var pass in state.passes)
             {
                 pass.RunPass(state);
             }
+
 
             return ScoreState(state, weights);
         }
@@ -186,11 +189,6 @@ namespace FrankyCLI.Retrograde
                 sizeDiversity,
                 roomReuse,
                 connectorViability);
-        }
-
-        private static void ResetCell(Cell cell)
-        {
-            cell.Temporary.Clear();
         }
 
         private List<ScoringSystem> BuildDefaultWeightSets()

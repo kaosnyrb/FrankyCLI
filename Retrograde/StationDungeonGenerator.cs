@@ -87,10 +87,14 @@ namespace FrankyCLI
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
+            PlacementUtil.Reset();
+
             foreach (IGenPass pas in state.passes)
             {
                 pas.RunPass(state);
             }
+
+            PlacementUtil.Finalise();
 
             stopwatch.Stop();
 
