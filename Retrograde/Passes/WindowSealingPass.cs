@@ -1,4 +1,4 @@
-﻿using Mutagen.Bethesda;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using FrankyCLI.Retrograde;
@@ -44,7 +44,7 @@ namespace FrankyCLI.Retrograde.Passes
                     var blockerConns = ConnectorUtils.GetConnectors(blockerPrefab, yawSteps);
 
                     // Find a connector on the blocker that matches required direction and same door size/tileset.
-                    // If your blocker is generic and doesn’t encode tileset, drop that constraint.
+                    // If your blocker is generic and doesn�t encode tileset, drop that constraint.
                     var attach = blockerConns.FirstOrDefault(c =>
                         c.Parsed.Direction == requiredDir &&
                         string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
@@ -56,7 +56,7 @@ namespace FrankyCLI.Retrograde.Passes
                     // Align blocker so its attach connector lands exactly at the open connector position
                     var blockerPos = open.WorldPos - attach.LocalPos;
 
-                    PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                    state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                     {
                         Count = 1,
                         Rotation = RgRotation.RotationToP3Float(yawSteps),

@@ -19,20 +19,18 @@ namespace FrankyCLI.Retrograde
             PlanScore LastRunScore,
             int Runs);
 
-        private readonly int _runsPerWeight;
         private readonly Func<IStationDesign> _designFactory;
         private readonly List<string> _trunkRoomLists;
         private readonly string _faction;
         private readonly string _size;
+        private readonly Random _rng = new Random();
 
         public OreStationWeightHarness(
-            int runsPerWeight = 3,
             Func<IStationDesign>? designFactory = null,
             IEnumerable<string>? trunkRoomLists = null,
             string faction = "spacer",
             string size = "Small")
         {
-            _runsPerWeight = Math.Max(1, runsPerWeight);
             _designFactory = designFactory ?? (() => new OreStation());
             _trunkRoomLists = trunkRoomLists?.ToList() ?? new List<string> { "rg_trunklist" };
             _faction = faction;
@@ -42,10 +40,12 @@ namespace FrankyCLI.Retrograde
         public WeightRunSummary FindBest(
             Cell cell,
             Location location,
+            int runs,
             IEnumerable<ScoringSystem>? customWeights = null)
         {
             if (cell == null) throw new ArgumentNullException(nameof(cell));
             if (location == null) throw new ArgumentNullException(nameof(location));
+            if (runs <= 0) throw new ArgumentOutOfRangeException(nameof(runs), "Runs must be positive.");
 
             var log = new List<string>();
             void WriteLog(string message)
@@ -66,10 +66,10 @@ namespace FrankyCLI.Retrograde
 
             WeightRunSummary? best = null;
 
-            int total = weightSets.Count;
+            int total = runs;
             int done = 0;
 
-            foreach (var weights in weightSets)
+            for (int runIndex = 0; runIndex < runs; runIndex++)
             {
                 done++;
 
@@ -79,26 +79,19 @@ namespace FrankyCLI.Retrograde
                     : "no leader yet";
 
                 WriteLog(line);
-                WriteLog($"Weights set {done}/{total} | {bestSoFar}");
+                WriteLog($"Run {done}/{total} | {bestSoFar}");
                 WriteLog(line);
 
-                var scores = new List<double>();
-                PlanScore? lastScore = null;
-
-                for (int run = 0; run < _runsPerWeight; run++)
-                {
-                    PlacementUtil.Reset();
-                    lastScore = GenerateOnce(cell, location, weights);
-                    scores.Add(lastScore.Total);
-                }
+                var weights = CloneWeights(weightSets[_rng.Next(weightSets.Count)]);
+                var lastScore = GenerateOnce(cell, location, weights);
 
                 var summary = new WeightRunSummary(
                     CloneWeights(weights),
-                    scores.Average(),
-                    scores.Max(),
-                    scores.Min(),
+                    lastScore.Total,
+                    lastScore.Total,
+                    lastScore.Total,
                     lastScore!,
-                    _runsPerWeight);
+                    runIndex + 1);
 
                 WriteLog(
                     $"Weights:\n" +
@@ -114,7 +107,7 @@ namespace FrankyCLI.Retrograde
                     $"  ConnectorViabilityWeight   {weights.ConnectorViabilityWeight:0.##}\n" +
                     $"  Effort                     {weights.Effort}\n" +
                     $"Results:\n" +
-                    $"  Average {summary.AverageScore:0.00} | Best {summary.BestScore:0.00} | Worst {summary.WorstScore:0.00} | Last {summary.LastRunScore.Total:0.00}");
+                    $"  Score {summary.LastRunScore.Total:0.00}");
 
                 if (best == null || summary.AverageScore > best.AverageScore)
                 {
@@ -124,9 +117,21 @@ namespace FrankyCLI.Retrograde
 
             if (best != null)
             {
+                WriteLog("==== Overall best result after all tests ====");
                 WriteLog(
-                    $"Best set after {best.Runs} runs: avg {best.AverageScore:0.00} (best {best.BestScore:0.00})");
-                WriteLog(ScoringUtil.PrettyPrintScore(best.LastRunScore, includeNewConnectors: true));
+                    $"Best weights after {best.Runs} runs:");
+                WriteLog(
+                    $"  PlacementWeight            {best.Weights.PlacementWeight:0.##}\n" +
+                    $"  BridgingWeight             {best.Weights.BridgingWeight:0.##}\n" +
+                    $"  BridgingOverlapWeight      {best.Weights.BridgingOverlapWeight:0.##}\n" +
+                    $"  NorthBiasWeight            {best.Weights.NorthBiasWeight:0.##}\n" +
+                    $"  NewConnectorsWeight        {best.Weights.NewConnectorsWeight:0.##}\n" +
+                    $"  AreaWeight                 {best.Weights.AreaWeight:0.##}\n" +
+                    $"  ClusteringWeight           {best.Weights.ClusteringWeight:0.##}\n" +
+                    $"  SizeDiversityWeight        {best.Weights.SizeDiversityWeight:0.##}\n" +
+                    $"  RoomReuseWeight            {best.Weights.RoomReuseWeight:0.##}\n" +
+                    $"  ConnectorViabilityWeight   {best.Weights.ConnectorViabilityWeight:0.##}\n" +
+                    $"  Effort                     {best.Weights.Effort}");
 
                 File.WriteAllText(reportPath, string.Join(Environment.NewLine, log));
                 WriteLog($"Report written to {reportPath}");
@@ -152,13 +157,10 @@ namespace FrankyCLI.Retrograde
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
-            PlacementUtil.Reset();
-
             foreach (var pass in state.passes)
             {
                 pass.RunPass(state);
             }
-
 
             return ScoreState(state, weights);
         }

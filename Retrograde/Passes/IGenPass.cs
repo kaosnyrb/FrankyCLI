@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Starfield;
+using Mutagen.Bethesda.Starfield;
+using FrankyCLI.Retrograde;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,7 @@ namespace FrankyCLI.Retrograde.Passes
             instance = cell;
             location = plocation;
             RoomUtilsCache = new Dictionary<string, RoomUtils>(StringComparer.OrdinalIgnoreCase);
+            PlacementUtil = new PlacementUtil();
         }
 
         public string stateName;
@@ -57,6 +59,7 @@ namespace FrankyCLI.Retrograde.Passes
         public P3Float StartingPosition;
         public HashSet<string> BridgePrefabKeys;
         public Dictionary<string, RoomUtils> RoomUtilsCache;
+        public PlacementUtil PlacementUtil { get; }
 
         public float YMin = 0;
 

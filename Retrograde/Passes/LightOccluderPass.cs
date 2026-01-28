@@ -114,20 +114,21 @@ namespace FrankyCLI.Retrograde
             var panelPrefab = PrefabCache.GetPrefab(panelPackInEditorId);
 
             // Walls at X = min.X and max.X (grid in Y/Z)
-            PlaceWall_X(state.instance, panelPrefab, min.X - surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 1); // facing +X
-            PlaceWall_X(state.instance, panelPrefab, max.X + surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 3); // facing -X
+            PlaceWall_X(state.instance, state.PlacementUtil, panelPrefab, min.X - surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 1); // facing +X
+            PlaceWall_X(state.instance, state.PlacementUtil, panelPrefab, max.X + surfaceOffset, min.Y, max.Y, min.Z, max.Z, panelW, panelH, yawSteps: 3); // facing -X
 
             // Walls at Y = min.Y and max.Y (grid in X/Z)
-            PlaceWall_Y(state.instance, panelPrefab, min.Y - surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 0); // facing +Y (adjust if needed)
-            PlaceWall_Y(state.instance, panelPrefab, max.Y + surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 2); // facing -Y
+            PlaceWall_Y(state.instance, state.PlacementUtil, panelPrefab, min.Y - surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 0); // facing +Y (adjust if needed)
+            PlaceWall_Y(state.instance, state.PlacementUtil, panelPrefab, max.Y + surfaceOffset, min.X, max.X, min.Z, max.Z, panelW, panelH, yawSteps: 2); // facing -Y
 
             // Floor/Ceiling at Z = min.Z and max.Z (grid in X/Y)
-            PlaceCap_Z(state.instance, panelPrefab, min.Z - surfaceOffset + roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 90f);  // floor (panel facing up)
-            PlaceCap_Z(state.instance, panelPrefab, max.Z + surfaceOffset - roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 270f); // ceiling (panel facing down)
+            PlaceCap_Z(state.instance, state.PlacementUtil, panelPrefab, min.Z - surfaceOffset + roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 90f);  // floor (panel facing up)
+            PlaceCap_Z(state.instance, state.PlacementUtil, panelPrefab, max.Z + surfaceOffset - roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 270f); // ceiling (panel facing down)
         }
 
         private void PlaceWall_X(
             Cell cell,
+            PlacementUtil placementUtil,
             RoomPrefab panelPrefab,
             float x,
             float yMin, float yMax,
@@ -143,19 +144,20 @@ namespace FrankyCLI.Retrograde
             {
                 for (float z = zStart; z <= zMax - stepZ * 0.5f; z += stepZ)
                 {
-                    AddPanel(cell, panelPrefab, new P3Float(x, y, z), RgRotation.RotationToP3Float(yawSteps));
+                    AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, y, z), RgRotation.RotationToP3Float(yawSteps));
                 }
             }
 
             // Extra corner coverage to close gaps
-            AddPanel(cell, panelPrefab, new P3Float(x, yMin, zMin), RgRotation.RotationToP3Float(yawSteps));
-            AddPanel(cell, panelPrefab, new P3Float(x, yMin, zMax), RgRotation.RotationToP3Float(yawSteps));
-            AddPanel(cell, panelPrefab, new P3Float(x, yMax, zMin), RgRotation.RotationToP3Float(yawSteps));
-            AddPanel(cell, panelPrefab, new P3Float(x, yMax, zMax), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, yMin, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, yMin, zMax), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, yMax, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, yMax, zMax), RgRotation.RotationToP3Float(yawSteps));
         }
 
         private void PlaceWall_Y(
             Cell cell,
+            PlacementUtil placementUtil,
             RoomPrefab panelPrefab,
             float y,
             float xMin, float xMax,
@@ -171,19 +173,20 @@ namespace FrankyCLI.Retrograde
             {
                 for (float z = zStart; z <= zMax - stepZ * 0.5f; z += stepZ)
                 {
-                    AddPanel(cell, panelPrefab, new P3Float(x, y, z), RgRotation.RotationToP3Float(yawSteps));
+                    AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, y, z), RgRotation.RotationToP3Float(yawSteps));
                 }
             }
 
             // Extra corner coverage
-            AddPanel(cell, panelPrefab, new P3Float(xMin, y, zMin), RgRotation.RotationToP3Float(yawSteps));
-            AddPanel(cell, panelPrefab, new P3Float(xMin, y, zMax), RgRotation.RotationToP3Float(yawSteps));
-            AddPanel(cell, panelPrefab, new P3Float(xMax, y, zMin), RgRotation.RotationToP3Float(yawSteps));
-            AddPanel(cell, panelPrefab, new P3Float(xMax, y, zMax), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMin, y, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMin, y, zMax), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMax, y, zMin), RgRotation.RotationToP3Float(yawSteps));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMax, y, zMax), RgRotation.RotationToP3Float(yawSteps));
         }
 
         private void PlaceCap_Z(
             Cell cell,
+            PlacementUtil placementUtil,
             RoomPrefab panelPrefab,
             float z,
             float xMin, float xMax,
@@ -199,20 +202,20 @@ namespace FrankyCLI.Retrograde
             {
                 for (float y = yStart; y <= yMax - stepY * 0.5f; y += stepY)
                 {
-                    AddPanel(cell, panelPrefab, new P3Float(x, y, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+                    AddPanel(cell, placementUtil, panelPrefab, new P3Float(x, y, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
                 }
             }
 
             // Extra corner coverage
-            AddPanel(cell, panelPrefab, new P3Float(xMin, yMin, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
-            AddPanel(cell, panelPrefab, new P3Float(xMin, yMax, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
-            AddPanel(cell, panelPrefab, new P3Float(xMax, yMin, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
-            AddPanel(cell, panelPrefab, new P3Float(xMax, yMax, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMin, yMin, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMin, yMax, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMax, yMin, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
+            AddPanel(cell, placementUtil, panelPrefab, new P3Float(xMax, yMax, z), new P3Float(RgRotation.EulerToRadCardinals((int)pitch), 0f, 0f));
         }
 
-        private static void AddPanel(Cell cell, RoomPrefab panelPrefab, P3Float position, P3Float rotation)
+        private static void AddPanel(Cell cell, PlacementUtil placementUtil, RoomPrefab panelPrefab, P3Float position, P3Float rotation)
         {
-            PlacementUtil.AddToTemporary(cell, new PlacedObject(gen_quest_main.myMod)
+            placementUtil.AddToTemporary(cell, new PlacedObject(gen_quest_main.myMod)
             {
                 Count = 1,
                 Rotation = rotation,

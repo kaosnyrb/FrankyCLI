@@ -3,13 +3,13 @@ using Mutagen.Bethesda.Starfield;
 
 namespace FrankyCLI.Retrograde
 {
-    public static class PlacementUtil
+    public class PlacementUtil
     {
-        private static readonly List<(Cell cell, PlacedObject placedObject)> _pendingPlacements = new();
+        private readonly List<(Cell cell, PlacedObject placedObject)> _pendingPlacements = new();
 
-        public static readonly List<PlacedObject> PlacedObjects = new();
+        public readonly List<PlacedObject> PlacedObjects = new();
 
-        public static void AddToTemporary(Cell cell, PlacedObject placedObject)
+        public void AddToTemporary(Cell cell, PlacedObject placedObject)
         {
             if (cell == null || placedObject == null)
             {
@@ -19,7 +19,7 @@ namespace FrankyCLI.Retrograde
             _pendingPlacements.Add((cell, placedObject));
         }
 
-        public static void Finalise()
+        public void Finalise()
         {
             foreach (var (cell, placedObject) in _pendingPlacements)
             {
@@ -30,7 +30,7 @@ namespace FrankyCLI.Retrograde
             _pendingPlacements.Clear();
         }
 
-        public static void Reset()
+        public void Reset()
         {
             _pendingPlacements.Clear();
             PlacedObjects.Clear();

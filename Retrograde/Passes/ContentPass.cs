@@ -1,4 +1,4 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
@@ -186,7 +186,7 @@ namespace FrankyCLI.Retrograde
                     // combine marker's local rotation with the room's yaw
                     var worldRot = marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
 
-                    PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                    state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                     {
                         Count = 1,
                         Rotation = worldRot,

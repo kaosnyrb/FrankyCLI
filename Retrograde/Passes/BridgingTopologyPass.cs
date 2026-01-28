@@ -1,4 +1,4 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde;
 using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
@@ -118,7 +118,7 @@ namespace FrankyCLI
 
             foreach (var placement in finalPlacements)
             {
-                PlacementUtil.AddToTemporary(state.instance, placement);
+                state.PlacementUtil.AddToTemporary(state.instance, placement);
             }
             state.placedRooms = finalRooms;
             state.openConnectors = finalOpenConnectors;

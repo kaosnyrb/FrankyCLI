@@ -1,4 +1,4 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde;
 using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
@@ -152,7 +152,7 @@ namespace FrankyCLI
                             continue;
 
                         // Place it with rotation
-                        PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                        state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                         {
                             Count = 1,
                             Rotation = RgRotation.RotationToP3Float(yawSteps),

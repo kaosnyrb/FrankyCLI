@@ -68,8 +68,8 @@ namespace FrankyCLI
             //
             if (harnesstest)
             {
-                var harness = new OreStationWeightHarness(runsPerWeight: 5,designFactory: (() => new OreStation()));
-                harness.FindBest(cell, location);
+                var harness = new OreStationWeightHarness(designFactory: (() => new OreStation()));
+                harness.FindBest(cell, location, runs: 2);
                 stopwatch.Stop();
                 return;
             }
@@ -87,14 +87,12 @@ namespace FrankyCLI
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
-            PlacementUtil.Reset();
-
             foreach (IGenPass pas in state.passes)
             {
                 pas.RunPass(state);
             }
 
-            PlacementUtil.Finalise();
+            state.PlacementUtil.Finalise();
 
             stopwatch.Stop();
 

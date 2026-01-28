@@ -1,4 +1,4 @@
-﻿using Mutagen.Bethesda;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using FrankyCLI.questgen_tools;
 using System;
@@ -56,7 +56,7 @@ namespace FrankyCLI.Retrograde.Passes
                     // Align plug so its attach connector lands exactly at the open connector position
                     var plugPos = open.WorldPos - attach.LocalPos;
 
-                    PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                    state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                     {
                         Count = 1,
                         Rotation = RgRotation.RotationToP3Float(yawSteps),

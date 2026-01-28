@@ -1,4 +1,4 @@
-﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.questgen_tools;
 using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins.Aspects;
@@ -37,7 +37,7 @@ namespace FrankyCLI.Retrograde
                         Position = worldPos,
                         Base = shipMarker.Base
                     };
-                    PlacementUtil.AddToTemporary(state.instance, newplaced);
+                    state.PlacementUtil.AddToTemporary(state.instance, newplaced);
 
                     //Find the marker from the base
                     var baseform = gen_quest_main._StarfieldMod.Statics[shipMarker.Base.FormKey];
