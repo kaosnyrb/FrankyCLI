@@ -68,7 +68,7 @@ namespace FrankyCLI
             //
             if (harnesstest)
             {
-                var harness = new OreStationWeightHarness(designFactory: (() => new OreStation()));
+                var harness = new OreStationWeightHarness(designFactory: (() => new HabStation()));
                 harness.FindBest(cell, location, runs: 10);
                 stopwatch.Stop();
                 Console.WriteLine("Harness Time:" + stopwatch.Elapsed);
@@ -76,7 +76,7 @@ namespace FrankyCLI
             }
 
 
-            IStationDesign design = new OreStation();
+            IStationDesign design = new HabStation();
 
             DungeonState state = new DungeonState(cell, location)
             {

@@ -47,20 +47,12 @@ namespace FrankyCLI
             float bridgeMaxHorizontalSpan = 40f; // keep connectors within ranges bridge prefabs can span
             float bridgeMaxVerticalOffset = 8f;
             var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
-
-            var startingMarker = state.instance.Persistent
-                .OfType<PlacedObject>()
-                .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));
-
-            if (startingMarker == null) throw new Exception("rg_conn_n not found.");
-            var startingConnector = RgConnectorParser.Parse(startingMarker.EditorID);
-
-            state.StartingPosition = startingMarker.Position;
-
-            RoomPrefab roomPrefab = null;
-            PrefabMarker south0 = new PrefabMarker();
-            PrefabMarker north0 = new PrefabMarker();
             RoomUtils roomUtils = state.GetRoomUtils("rg_trunklist");
+
+            if (state.openConnectors == null || state.openConnectors.Count == 0)
+            {
+                throw new Exception("TrunkTopologyPass requires at least one open connector. Run StationSetupPass first.");
+            }
 
             var bestOutcome = PlanRunner.RunBest<TrunkPlanMeta>(maxPlans, planAttempt =>
             {
@@ -76,83 +68,14 @@ namespace FrankyCLI
                     }
                 }
 
-                for (int i = 0; i < 20; i++)
-                {
-                    var candidate = PrefabCache.GetPrefab(roomUtils.GetRoom(startingConnector.Tileset));
-
-                    var candConnectors = candidate.Markers
-                        .Select(m => new
-                        {
-                            Marker = m,
-                            Conn = RgConnectorParser.Parse(m.MarkerEditorId)
-                        })
-                        .Where(x => x.Conn.IsValid)
-                        .ToList();
-
-                    var entry = candConnectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.South)?.Marker;
-
-                    if (entry != null && candConnectors.Count(x => x.Conn.Direction != ConnectorDirection.South) >= 2)
-                    {
-                        roomPrefab = candidate;
-                        var connectors = candConnectors;
-                        south0 = connectors.First(x => x.Conn.Direction == ConnectorDirection.South).Marker;
-                        north0 = connectors.FirstOrDefault(x => x.Conn.Direction == ConnectorDirection.North)?.Marker;
-                        break;
-                    }
-                }
-
-                if (roomPrefab == null)
-                    throw new Exception("Failed to find a starting room with open connectors.");
-
-                // Place first prefab so its SOUTH marker lands on the starting marker.
-                // prefabWorldPos + southLocal = startWorld  =>  prefabWorldPos = startWorld - southLocal
-                P3Float prefabWorldPos = startingMarker.Position - south0.Position;
-                // Build initial room record (assumes you already placed roomPrefab at prefabWorldPos)
-                var startConnectors = ConnectorUtils.GetConnectors(roomPrefab);
-
-
-                usedPrefabIds.Add(roomPrefab.PrefabEditorId);
-                requiredPrefabs.RemoveAll(id => usedPrefabIds.Contains(id));
-                var plannedRooms = new List<PlacedRoom>();
-                var plannedOpenConnectors = new List<OpenConnector>();
+                var plannedRooms = new List<PlacedRoom>(state.placedRooms);
+                var plannedOpenConnectors = new List<OpenConnector>(state.openConnectors);
                 var plannedPlacements = new List<PlacedObject>();
 
-                plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
-                {
-                    Count = 1,
-                    Rotation = new P3Float(),
-                    Position = prefabWorldPos,
-                    Base = roomPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                });
-
-                plannedRooms.Add(new PlacedRoom
-                {
-                    Prefab = roomPrefab,
-                    WorldPos = prefabWorldPos,
-                    YawSteps = 0,
-                    DistrictType = districtType,
-                    Connectors = startConnectors
-                });
-
-                foreach (var c in startConnectors)
-                {
-                    if (c.Parsed.Direction != ConnectorDirection.South)
-                    {
-                        plannedOpenConnectors.Add(new OpenConnector
-                        {
-                            Parsed = c.Parsed,
-                            YawSteps = 0,
-                            WorldPos = prefabWorldPos + c.LocalPos,
-                            DistrictType = districtType
-                        });
-                    }
-                }
-                int connectorsAddedCount = plannedOpenConnectors.Count;
-
-                // Count the initially placed room toward our plan so limits and logs reflect the total.
-                int roomsPlaced = 1;
+                int connectorsAddedCount = 0;
+                int roomsPlaced = 0;
                 int attempts = 0;
-                var yMin = startingMarker.Position.Y;
+                var yMin = state.YMin;
 
                 while (roomsPlaced < maxRoomsToPlace && plannedOpenConnectors.Count > 0 && attempts < maxAttempts)
                 {
@@ -163,14 +86,20 @@ namespace FrankyCLI
                     double northBiasWeight = state.scoringSystem.NorthBiasWeight;
                     bool useNorthBias = northConnectors.Count > 0 && Rng.NextDouble() < northBiasWeight;
 
-                    var target = ConnectorSelectionUtil.ChooseFarthestOpenConnector(useNorthBias ? northConnectors : plannedOpenConnectors, clusterCenter);
+                    var targetPool = useNorthBias ? northConnectors : plannedOpenConnectors;
+                    if (targetPool == null || targetPool.Count == 0)
+                    {
+                        break;
+                    }
+
+                    var target = ConnectorSelectionUtil.ChooseFarthestOpenConnector(targetPool, clusterCenter);
                     int openIndex = plannedOpenConnectors.IndexOf(target);
                     if (openIndex < 0)
                     {
                         continue;
                     }
 
-                    if (target.WorldPos.Y < startingMarker.Position.Y)
+                    if (target.WorldPos.Y < yMin)
                     {
                         continue;
                     }
@@ -231,7 +160,7 @@ namespace FrankyCLI
                             P3Float nextPos = target.WorldPos - chosen.LocalPos;
 
                             var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                            if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                            if (ConnectorUtils.IsBelowYMin(candidateAabb, yMin))
                                 continue;
                             if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
                                 continue;
@@ -256,7 +185,7 @@ namespace FrankyCLI
                             var newOpenConnectors = BuildOpenConnectors(nextConnectors, chosen, yawSteps, nextPos, districtType);
                             var connectorsAfterPlacement = new List<OpenConnector>(plannedOpenConnectors);
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
-                            
+
                             int bridgeScore = BridgeUtil.CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
 
                             bool candidateIsForced = useRequired;

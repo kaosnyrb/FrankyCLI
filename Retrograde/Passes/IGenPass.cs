@@ -84,5 +84,6 @@ namespace FrankyCLI.Retrograde.Passes
 
         // Set by harness runs to suppress noisy pass-level logging.
         public bool IsHarnessRun { get; set; }
+        public RgConnector StartingConnector { get; internal set; }
     }
 }

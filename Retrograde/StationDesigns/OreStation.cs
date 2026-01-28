@@ -15,10 +15,8 @@ namespace FrankyCLI.Retrograde.StationDesigns
             stationPasses = new List<IGenPass>()
             {
                 //Place rooms
-                new TrunkTopologyPass(2),
-                  new DistrictTopologyPass("rg_orelist",1,"ore", new List<string>(){}),
-                  new DistrictTopologyPass("rg_trunklist",1),
-                  new DistrictTopologyPass("rg_orelist",1,"ore"),
+                new StationSetupPass(),
+                  new DistrictTopologyPass("rg_orelist",4,"ore", new List<string>(){"rg_sts_ore_inc_003"}),
                     new BossTopologyPass("boss"),
                     new BridgingTopologyPass(),
                     new UtilTopologyPass("rg_utillist", 0.5f),

@@ -14,6 +14,7 @@ namespace FrankyCLI.Retrograde.StationDesigns
             stationPasses = new List<IGenPass>()
             {
                 //Place rooms
+                new StationSetupPass(),
                 new TrunkTopologyPass(4),
                     new BossTopologyPass("boss"),
                     new DistrictTopologyPass("rg_hablist", 4, "hab"),
@@ -36,16 +37,16 @@ namespace FrankyCLI.Retrograde.StationDesigns
 
             scoringSystem = new ScoringSystem()
             {
-                BridgingWeight = 10,
-                BridgingOverlapWeight = -1,
-                NorthBiasWeight = 0.8,
-                NewConnectorsWeight = 0.75,
-                PlacementWeight = 50,
-                AreaWeight = -0.25,
-                ClusteringWeight = 2,
-                SizeDiversityWeight = 5,
-                RoomReuseWeight = -1,
-                ConnectorViabilityWeight = 0.75,
+                BridgingWeight = 9.5,
+                BridgingOverlapWeight = -1.19,
+                NorthBiasWeight = 0.95,
+                NewConnectorsWeight = 0.89,
+                PlacementWeight = 77.16,
+                AreaWeight = -0.15,
+                ClusteringWeight = 2.37,
+                SizeDiversityWeight = 5.94,
+                RoomReuseWeight = -1.19,
+                ConnectorViabilityWeight = 0.67,
                 Effort = 100
             };
         }
