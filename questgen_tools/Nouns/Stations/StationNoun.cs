@@ -29,25 +29,46 @@ namespace FrankyCLI.questgen_tools
 
 
             //Create and attack the location to the int cell so we can find it in quests
-            var location = new Location(gen_quest_main.myMod)
+            //scGenRocky01Location "Sensor Contact" [LCTN:001A3ED8]
+            //var scGenRocky01Location = gen_quest_main._StarfieldMod.Locations[new FormKey(gen_quest_main.StarfieldModKey, 0x001A3ED8)];
+
+
+            var ShipExteriorlocation = new Location(gen_quest_main.myMod)
             {
-                EditorID = stationName + "_loc",
+                EditorID = stationName + "_shipext_loc",
                 Name = stationName,
                 LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
                 LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
                 LocationCellUniques = new ExtendedList<LocationCellUnique>(),
                 LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>()
-            };
-            gen_quest_main.myMod.Locations.Add(location);
+                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
 
+                //ParentLocation = scGenRocky01Location.ToNullableLink()
+            };
+            gen_quest_main.myMod.Locations.Add(ShipExteriorlocation);
+
+
+            var ShipIntlocation = new Location(gen_quest_main.myMod)
+            {
+                EditorID = stationName + "_shipint_loc",
+                Name = stationName,
+                LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
+                LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
+                LocationCellUniques = new ExtendedList<LocationCellUnique>(),
+                LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
+                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
+
+                ParentLocation = ShipExteriorlocation.ToNullableLink()
+            };
+            gen_quest_main.myMod.Locations.Add(ShipIntlocation);
+            
             // Ship Interior Cell
 
             //Clone the Ship Interior
-            var shipintcell = RetrogradeUtils.CloneCellById("duout02stationtestintcell");
-            shipintcell.EditorID = "Station_shipint_" + StationID;
-            shipintcell.Location = location.ToNullableLink<ILocationGetter>();
-            shipintcell.Name = stationName;
+            var ShipInteriorCell = RetrogradeUtils.CloneCellById("duout02stationtestintcell");
+            ShipInteriorCell.EditorID = "Station_shipint_" + StationID;
+            ShipInteriorCell.Location = ShipIntlocation.ToNullableLink<ILocationGetter>();
+            ShipInteriorCell.Name = stationName;
 
             //Set the Interior door to be linked
             PlacedObject shipint_doorreference = null;
@@ -55,7 +76,7 @@ namespace FrankyCLI.questgen_tools
             PlacedObject shipint_xmarker = null;
 
             //Find the markers
-            foreach (var persistant in shipintcell.Persistent)
+            foreach (var persistant in ShipInteriorCell.Persistent)
             {
                 if (persistant.EditorID == "duoutstationtestdoor")
                 {
@@ -79,19 +100,38 @@ namespace FrankyCLI.questgen_tools
 
             shipint_doorreference.LinkedReferences[0].Reference = shipint_xmarker.ToLink<ILinkedReferenceGetter>();
 
-            gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(shipintcell);
+            gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(ShipInteriorCell);
 
 
             // Interior Cell
-            var intcell = RetrogradeUtils.CloneCellById("duoutstationtest02interior");
-            intcell.EditorID = "Station_int_" + StationID;
-            intcell.Location = location.ToNullableLink<ILocationGetter>();
+            //Create and attack the location to the int cell so we can find it in quests
+            
+            var InteriorCellLocation = new Location(gen_quest_main.myMod)
+            {
+                EditorID = stationName + "_interior_loc",
+                Name = stationName,
+                LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
+                LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
+                LocationCellUniques = new ExtendedList<LocationCellUnique>(),
+                LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
+                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
+                ParentLocation = ShipIntlocation.ToNullableLink(),
+            };
+            gen_quest_main.myMod.Locations.Add(InteriorCellLocation);
+            
+
+            var InteriorCell = RetrogradeUtils.CloneCellById("duoutstationtest02interior");
+            InteriorCell.EditorID = "Station_int_" + StationID;
+            InteriorCell.Name = stationName;
+            InteriorCell.Location = InteriorCellLocation.ToNullableLink<ILocationGetter>();
+
+            //rockyloc.ToNullableLink<ILocationGetter>();
             //Set the Interior door to be linked
             PlacedObject int_doorreference = null;
             PlacedObject int_xmarker = null;
 
             //Find the markers
-            foreach (var persistant in intcell.Persistent)
+            foreach (var persistant in InteriorCell.Persistent)
             {
                 if (persistant.EditorID == "du_intcelldoor")
                 {
@@ -103,25 +143,26 @@ namespace FrankyCLI.questgen_tools
                 }
             }
             //int_doorreference.LinkedReferences[0].Reference = int_xmarker.ToLink<ILinkedReferenceGetter>();
-            gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(intcell);
+            gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(InteriorCell);
 
 
 
             // Ship Exterior Cell
             //Clone the Exterior
-            var extcell = RetrogradeUtils.CloneCellById("duout02stationtestextcell");
-            extcell.EditorID = "Station_ext_" + StationID;
-
+            var ExteriorCell = RetrogradeUtils.CloneCellById("duout02stationtestextcell");
+            ExteriorCell.Name = stationName;
+            ExteriorCell.EditorID = "Station_ext_" + StationID;
+            ExteriorCell.Location = ShipExteriorlocation.ToNullableLink<ILocationGetter>();
             //Set the Doors to be linked
 
             //Ship Exterior to Ship Int
-            ((PlacedObject)extcell.Persistent[0]).LinkedReferences[0].Reference = shipint_doorreference.ToLink<ILinkedReferenceGetter>();
+            ((PlacedObject)ExteriorCell.Persistent[0]).LinkedReferences[0].Reference = shipint_doorreference.ToLink<ILinkedReferenceGetter>();
             
             //Ship Int to Int
             shipinttoint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
             int_doorreference.TeleportDestination.Door = shipinttoint_doorreference.ToLink<IPlacedObjectGetter>();
 
-            gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(extcell);
+            gen_quest_main.myMod.Cells[0].SubBlocks[0].Cells.Add(ExteriorCell);
 
 
             //Clone the Base Form
@@ -152,8 +193,8 @@ namespace FrankyCLI.questgen_tools
                 if (typestring == "Mutagen.Bethesda.Starfield.FormLinkDataComponent")
                 {
                     FormLinkDataComponent formLinkDataComponent = (FormLinkDataComponent)component;
-                    formLinkDataComponent.Links[0].LinkedForm = shipintcell.ToNullableLink<IStarfieldMajorRecordGetter>();
-                    formLinkDataComponent.Links[1].LinkedForm = extcell.ToNullableLink<IStarfieldMajorRecordGetter>();
+                    formLinkDataComponent.Links[0].LinkedForm = ShipInteriorCell.ToNullableLink<IStarfieldMajorRecordGetter>();
+                    formLinkDataComponent.Links[1].LinkedForm = ExteriorCell.ToNullableLink<IStarfieldMajorRecordGetter>();
                 }
             }
             gen_quest_main.myMod.GenericBaseForms.Add(instance);
@@ -163,7 +204,8 @@ namespace FrankyCLI.questgen_tools
             //Now generate the dungeon....
 
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator(stationDesign);
-            dungeonGenerator.GenerateDungeon(intcell, location, faction, size);
+
+            dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size);
         }        
     }
 }
