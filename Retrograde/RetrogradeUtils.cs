@@ -156,10 +156,18 @@ namespace FrankyCLI
 
             result.Direction = ParseDirection(parts[2]);
             result.DoorSize = parts[3];
-            result.Tileset = parts[4];
+            result.Tileset = StripDigits(parts[4]);
             result.IsValid = result.Direction != ConnectorDirection.Unknown;
 
             return result;
+        }
+
+        private static string StripDigits(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            return new string(value.Where(c => !char.IsDigit(c)).ToArray());
         }
 
         private static ConnectorDirection ParseDirection(string dir)

@@ -2,6 +2,7 @@
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Nouns.Crew;
 using FrankyCLI.questgen_tools.Utils;
+using FrankyCLI.Retrograde.StationDesigns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -54,8 +55,10 @@ namespace FrankyCLI.questgen_quests
             });
             Console.WriteLine("questname: " + questname);
 
+            //Select the Station Design
+            IStationDesign stationDesign = new HabStation();
 
-            var stationname = StationNoun.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
+            var stationname = stationDesign.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
@@ -114,8 +117,10 @@ namespace FrankyCLI.questgen_quests
             //We set the spawn marker to one of random ones so the target is in different places
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
 
+
+
             //Create the spacestation;
-            StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString());
+            StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString(), stationDesign);
             
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
 

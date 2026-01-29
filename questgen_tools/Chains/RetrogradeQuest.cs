@@ -3,6 +3,7 @@ using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Interfaces;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
+using FrankyCLI.Retrograde.StationDesigns;
 using FrankyCLI.Utils;
 using GameFinder.Common;
 using Mutagen.Bethesda;
@@ -52,13 +53,15 @@ namespace FrankyCLI.questgen_tools
                 formid = FormKeyLookup.GetFormKey("RG_station_quest"),
                 parameters = new Dictionary<string, object>
                 {
-                    {"Faction",Factions[RandomUtils.random.Next(Factions.Count)] },
+                    {"Faction",Factions[RandomUtils.random.Next(Factions.Count)]},//,
                     {"StationSize","Large" },//Sizes[RandomUtils.random.Next(Sizes.Count)] },
                 }
             };
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            var stationname = StationNoun.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
+
+            IStationDesign stationDesign = new HabStation();
+            var stationname = stationDesign.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
 
             MessageNoun stationnamemessage = new MessageNoun(FormKeyLookup.GetFormKey("RG_SE_Name").ID, stationname);
             stationnamemessage.instance.Name = stationname;
@@ -76,7 +79,7 @@ namespace FrankyCLI.questgen_tools
 
 
             //Debugging
-            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 0);
+            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 3);
 
 
             // POI Name
@@ -86,7 +89,7 @@ namespace FrankyCLI.questgen_tools
             newQuest.SetQuestReferenceSpaceLocationAlias("GeneralMarker05", SpaceCellTools.GetSafeSpaceMarkerCondition());
 
             //Generate station
-            StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString());
+            StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString(), stationDesign);
 
             //Set station
             newQuest.SetQuestReferenceCreateAlias("Enemy01", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());

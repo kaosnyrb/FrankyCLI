@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.Retrograde.StationDesigns
 {
-    public class IStationDesign
+    public interface IStationDesign
     {
-        public List<IGenPass> stationPasses;
-        public ScoringSystem scoringSystem;
+        List<IGenPass> stationPasses { get; set; }
+        ScoringSystem scoringSystem { get; set; }
+        public string GenerateStationName(string Faction);
     }
 
     

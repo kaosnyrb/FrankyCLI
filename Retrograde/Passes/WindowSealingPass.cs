@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace FrankyCLI.Retrograde.Passes
 {
+
+    //We used to build the dungeon in the ship interior cell, but the lighting was all over the show.
+    //This used to place windows on connectors but we don't want that anymore as there's no star field to look at.
     public class WindowSealingPass : IGenPass
     {
         public void RunPass(DungeonState state)

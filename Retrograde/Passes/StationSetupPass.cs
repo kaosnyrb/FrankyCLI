@@ -13,7 +13,7 @@ namespace FrankyCLI.Retrograde.Passes
         {
             var startingMarker = state.instance.Persistent
                 .OfType<PlacedObject>()
-                .FirstOrDefault(m => m.EditorID.Contains("rg_conn_n"));
+                .FirstOrDefault(m => m.EditorID != null && m.EditorID.Contains("rg_conn_n"));
 
             if (startingMarker == null) throw new Exception("rg_conn_n not found.");
 

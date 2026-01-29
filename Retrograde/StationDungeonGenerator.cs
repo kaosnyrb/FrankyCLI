@@ -53,12 +53,12 @@ namespace FrankyCLI
         rg_slot_clutter_large
         rg_slot_light_main
         */
+
+        IStationDesign stationDesign;
                
-        public StationDungeonGenerator() {
-
+        public StationDungeonGenerator(IStationDesign design) {
+            stationDesign = design;
         }
-
-
 
         public void GenerateDungeon(Cell cell, Location location, string faction, string size)
         {
@@ -75,16 +75,13 @@ namespace FrankyCLI
                 return;
             }
 
-
-            IStationDesign design = new HabStation();
-
             DungeonState state = new DungeonState(cell, location)
             {
                 Faction = faction,
                 Size = size,
                 TrunkRoomLists = new List<string> { "rg_trunklist" },
-                scoringSystem = design.scoringSystem,
-                passes = design.stationPasses
+                scoringSystem = stationDesign.scoringSystem,
+                passes = stationDesign.stationPasses
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 

@@ -1,4 +1,5 @@
-﻿using FrankyCLI.Retrograde.Passes;
+﻿using FrankyCLI.questgen_tools;
+using FrankyCLI.Retrograde.Passes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,11 @@ namespace FrankyCLI.Retrograde.StationDesigns
 {
     public class OreStation : IStationDesign
     {
+        private List<IGenPass> stationPasses;
+        private ScoringSystem scoringSystem;
+
+        List<IGenPass> IStationDesign.stationPasses { get => stationPasses; set => stationPasses = value; }
+        ScoringSystem IStationDesign.scoringSystem { get => scoringSystem; set => scoringSystem = value; }
 
         public OreStation()
         {
@@ -21,7 +27,6 @@ namespace FrankyCLI.Retrograde.StationDesigns
                     new BridgingTopologyPass(),
                     new UtilTopologyPass("rg_utillist", 0.5f),
                 //Seal connectors
-                    new WindowSealingPass(),
                     new ConnectorSealingPass(),
                 //Doors and plugs
                     new PlugPass(),
@@ -30,8 +35,6 @@ namespace FrankyCLI.Retrograde.StationDesigns
                     new EnemyPass(),
                     new ContentPass(),
                     new ShipMarkerPass(),
-                //util
-                    new LightOccluderPass()
             };
 
             scoringSystem = new ScoringSystem()
@@ -48,6 +51,128 @@ namespace FrankyCLI.Retrograde.StationDesigns
                 ConnectorViabilityWeight = 1.73,
                 Effort = 250
             };
+
+        }
+        /// <summary>
+        /// Generate a station name like "Station Bf-394" using themed call-sign fragments.
+        /// </summary>
+        /// <returns>Formatted station name string.</returns>
+        public string GenerateStationName(string Faction)
+        {
+            Random random = RandomUtils.random;
+
+            // Call signs evoke registry codes and transponder shorthand.
+            List<string> callLetters = new List<string>
+            {
+                "BF","XR","NS","OD","VA","HG","ZE","PH","IR","KQ",
+                "LM","TR","UV","QA","CY","RN","SD","WG","TX","JY",
+                "AL","CP","DK","EM","FS","GV","HT","JC","KN","LP",
+                "MQ","NW","OY","PR","QS","RU","SV","TY","WX","ZA",
+                "AB","CE","DM","EK","FL","GR","HX","IL","JP","KR",
+                "MT","NZ","OP","RB","SC","UF","VQ","YL","ZX","TD"
+            };
+
+            string letterPart = callLetters[random.Next(callLetters.Count)];
+
+            // Occasionally generate a fresh 3-digit run to reduce repetition.
+            string numberPart = random.Next(10, 1000).ToString("D3");
+
+            List<string> stationtypes = new List<string>();
+
+            switch (Faction)
+            {
+                case "Crimsonfleet":
+                    stationtypes = new List<string>
+                    {
+                        "Grinder","IronGrinder","VoidGrinder","BloodGrinder","DeepGrinder",
+                        "Crush","Stonecrush","Hullcrush","Redcrush","Hardcrush",
+                        "Smelter","BlackSmelter","VoidSmelter","ChainSmelter",
+                        "Foundry","IronFoundry","RedFoundry","GraveFoundry",
+                        "Refinery","BlackRefinery","VoidRefinery","BloodRefinery",
+                        "Breaker","Hullbreaker","Rockbreaker","Chainbreaker","Voidbreaker",
+                        "Oreworks","Ironworks","Voidworks","Bloodworks",
+                        "Forge","BlackForge","VoidForge","ChainForge","GraveForge",
+                        "SalvageWorks","ScrapWorks","BreakWorks","CutWorks",
+                        "Fuelworks","BlackFuel","VoidFuel","RedFuel",
+                        "Kiln","BlastKiln","VoidKiln","IronKiln",
+                        "Press","Hammer","Anvil","Die"
+                    };
+
+                    break;
+                case "Ecliptic":
+                    stationtypes = new List<string>
+                    {
+                        "Arsenal","PrimaryArsenal","ForwardArsenal","OrbitalArsenal",
+                        "Foundry","AdvancedFoundry","WeaponsFoundry","AlloyFoundry",
+                        "Manufacture","ManufacturingNode","ProductionNode","AssemblyNode",
+                        "Assembly","FinalAssembly","ModularAssembly","WeaponsAssembly",
+                        "Refinery","FuelRefinery","IsotopeRefinery","MaterialRefinery",
+                        "Processing","OreProcessing","MaterialProcessing","SalvageProcessing",
+                        "Logistics","LogisticsHub","SupplyHub","DistributionHub",
+                        "Depot","MunitionsDepot","SupplyDepot","OrbitalDepot",
+                        "Stockpile","StrategicStockpile","ReserveStockpile",
+                        "Works","HeavyWorks","OrdnanceWorks","DefenseWorks",
+                        "Fabrication","FabricationBay","FabricationSector","FabricationRing",
+                        "Forge","PrecisionForge","MilitaryForge",
+                        "Plant","IndustrialPlant","WeaponsPlant","FuelPlant",
+                        "Terminal","IndustrialTerminal","CargoTerminal"
+                    };
+
+                    break;
+                case "Varuun":
+                    stationtypes = new List<string>
+                    {
+                        "Anvil","SacredAnvil","BlackAnvil","ConsecratedAnvil",
+                        "Foundry","SanctifiedFoundry","VoidFoundry","SerpentFoundry",
+                        "Forge","RitualForge","IronForge","ObsidianForge",
+                        "Refinery","ConsecratedRefinery","VoidRefinery","BloodRefinery",
+                        "Works","SacredWorks","HiddenWorks","SilentWorks",
+                        "Processing","SanctifiedProcessing","Purification","Refinement",
+                        "Crucible","BlackCrucible","VoidCrucible","SerpentCrucible",
+                        "Kiln","RiteKiln","AshKiln","ObsidianKiln",
+                        "Extraction","SacredExtraction","DeepExtraction","HiddenExtraction",
+                        "Smelter","BlackSmelter","VoidSmelter","RitualSmelter",
+                        "Laborium","SilentLaborium","ConsecratedLaborium",
+                        "Vaultworks","ReliquaryWorks","DoctrineWorks",
+                        "Plant","SanctifiedPlant","IndustrialPlant"
+                    };
+                    break;
+                case "Spacer":
+                    stationtypes = new List<string>
+                    {
+                        "Scrapworks","Rustworks","Breakworks","Cutworks",
+                        "Grinder","ScrapGrinder","BoneGrinder","HullGrinder",
+                        "Crusher","RockCrusher","PlateCrusher","ChainCrusher",
+                        "Smelter","JurySmelter","BlackSmelter","RustSmelter",
+                        "Refinery","BadRefinery","PatchRefinery","LeakRefinery",
+                        "Breaker","HullBreaker","ScrapBreaker","SpineBreaker",
+                        "Strip","StripMine","VoidStrip","HardStrip",
+                        "Kiln","CrackKiln","SmokeKiln","HotKiln",
+                        "Forge","HackForge","WeldForge","PatchForge",
+                        "Salvage","HotSalvage","DirtySalvage","QuickSalvage",
+                        "Yard","ScrapYard","BreakYard","DeadYard",
+                        "Press","BentPress","WarpPress","CrushPress",
+                        "Plant","BadPlant","HotPlant","FailPlant"
+                    };
+
+                    break;
+                default:
+                    stationtypes = new List<string>
+                    {
+                        "Station","Outpost","Facility","Platform","Installation","Complex","Depot","Hub","Relay","Array",
+                        "Terminal","Dock","Yard","Anchorage","Spindle","Spire","Module","Node","Enclave",
+                        "Bastion","Citadel","Stronghold","Redoubt","Sanctum","Vault","Foundry","Forge","Works","Refinery",
+                        "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor","ListeningPost",
+                        "Harbor","Drydock",
+                        "Arcology","Habitat","Hab","Colony","Settlement","Commune","Barracks","Garrison","Command",
+                        "Operations","Control","CommandPost","Headquarters","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
+                    };
+                    break;
+            }
+
+            string stationPart = stationtypes[random.Next(stationtypes.Count)];
+
+            return $"{stationPart} {letterPart}-{numberPart}";
         }
     }
 }
