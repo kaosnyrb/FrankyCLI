@@ -19,6 +19,11 @@ namespace FrankyCLI.questgen_tools
     {
         public GenericBaseForm instance;
 
+        public Cell ExteriorCell;
+        public Cell ShipInteriorCell;
+        public Cell InteriorCell;
+
+
         public IStationDesign stationDesign;
 
         public StationNoun(string stationName, string faction, string size, IStationDesign design)
@@ -65,7 +70,7 @@ namespace FrankyCLI.questgen_tools
             // Ship Interior Cell
 
             //Clone the Ship Interior
-            var ShipInteriorCell = RetrogradeUtils.CloneCellById("duout02stationtestintcell");
+            ShipInteriorCell = RetrogradeUtils.CloneCellById("duout02stationtestintcell");
             ShipInteriorCell.EditorID = "Station_shipint_" + StationID;
             ShipInteriorCell.Location = ShipIntlocation.ToNullableLink<ILocationGetter>();
             ShipInteriorCell.Name = stationName;
@@ -120,7 +125,7 @@ namespace FrankyCLI.questgen_tools
             gen_quest_main.myMod.Locations.Add(InteriorCellLocation);
             
 
-            var InteriorCell = RetrogradeUtils.CloneCellById("duoutstationtest02interior");
+            InteriorCell = RetrogradeUtils.CloneCellById("duoutstationtest02interior");
             InteriorCell.EditorID = "Station_int_" + StationID;
             InteriorCell.Name = stationName;
             InteriorCell.Location = InteriorCellLocation.ToNullableLink<ILocationGetter>();
@@ -149,7 +154,7 @@ namespace FrankyCLI.questgen_tools
 
             // Ship Exterior Cell
             //Clone the Exterior
-            var ExteriorCell = RetrogradeUtils.CloneCellById("duout02stationtestextcell");
+            ExteriorCell = RetrogradeUtils.CloneCellById("duout02stationtestextcell");
             ExteriorCell.Name = stationName;
             ExteriorCell.EditorID = "Station_ext_" + StationID;
             ExteriorCell.Location = ShipExteriorlocation.ToNullableLink<ILocationGetter>();

@@ -78,6 +78,8 @@ namespace FrankyCLI.questgen_tools
             newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
 
 
+
+
             //Debugging
             newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 3);
 
@@ -93,6 +95,10 @@ namespace FrankyCLI.questgen_tools
 
             //Set station
             newQuest.SetQuestReferenceCreateAlias("Enemy01", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+            //Set the Cell so we can reset when we leave
+            newQuest.SetScriptProperty("retrograde_quest", "StationCell", stationNoun.InteriorCell.ToLink<IStarfieldMajorRecordGetter>());
+
 
             //Add to POI tree
             var rg_se_poi_node = myMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
