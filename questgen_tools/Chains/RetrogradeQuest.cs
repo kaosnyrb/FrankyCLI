@@ -81,7 +81,9 @@ namespace FrankyCLI.questgen_tools
 
 
             //Debugging
-            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 3);
+            newQuest.SetScriptProperty("retrograde_quest", "MinGangMembers", 0);
+            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 0);
+
 
 
             // POI Name

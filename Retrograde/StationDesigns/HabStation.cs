@@ -24,7 +24,7 @@ namespace FrankyCLI.Retrograde.StationDesigns
                 new StationSetupPass(),
                 new TrunkTopologyPass(4),
                     new BossTopologyPass("boss"),
-                    new DistrictTopologyPass("rg_hablist", 4, "hab",  new List<string>(){"rg_sts_hab_csy_003"}),
+                    new DistrictTopologyPass("rg_hablist", 4, "hab",  new List<string>(){}),
                     //new BridgeHelperPass(),
                     new BridgingTopologyPass(),
                     new UtilTopologyPass("rg_utillist", 0.8f),
