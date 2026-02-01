@@ -345,6 +345,10 @@ namespace FrankyCLI.questgen_tools
                     Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
                     Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
                     break;
+                case "Crimsonfleet":
+                    Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
+                    Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
+                    break;
                 case "Spacer":
                     Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
                     Outfits.Add(0x0015E246);//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
