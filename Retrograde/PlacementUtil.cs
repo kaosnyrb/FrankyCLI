@@ -5,9 +5,9 @@ namespace FrankyCLI.Retrograde
 {
     public class PlacementUtil
     {
-        private readonly List<(Cell cell, PlacedObject placedObject)> _pendingPlacements = new();
+        private readonly List<(Cell cell, IPlaced placedObject)> _pendingPlacements = new();
 
-        public readonly List<PlacedObject> PlacedObjects = new();
+        public readonly List<IPlaced> PlacedObjects = new();
 
         public void AddToTemporary(Cell cell, PlacedObject placedObject)
         {
@@ -15,6 +15,19 @@ namespace FrankyCLI.Retrograde
             {
                 return;
             }
+
+            _pendingPlacements.Add((cell, placedObject));
+        }
+
+        public void NPCAddToTemporary(Cell cell, PlacedNpc placedObject)
+        {
+            
+            if (cell == null || placedObject == null)
+            {
+                return;
+            }
+
+            placedObject.LevelModifier = Level.Medium;
 
             _pendingPlacements.Add((cell, placedObject));
         }
