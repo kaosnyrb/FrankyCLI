@@ -421,5 +421,152 @@ namespace FrankyCLI.questgen_tools
                 return outfit;
             }
         }
+
+        public static RankPlacement GetFaction(string Faction)
+        {
+            switch (Faction)
+            {
+                case "Crimsonfleet":
+                    return new RankPlacement()
+                    {
+                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x00010B30)].ToLink(), //CrimeFactionCrimsonFleet "Crimson Fleet" [FACT:00010B30]
+                        Rank = 0
+                    };
+                case "Ecliptic":
+                    return new RankPlacement()
+                    {
+                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027028D)].ToLink(), //EclipticFaction [FACT:0027028D]
+                        Rank = 0
+                    };
+                case "Varuun":
+                    return new RankPlacement()
+                    {
+                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027872A)].ToLink(), //VaruunFaction [FACT:0027872A]
+                        Rank = 0
+                    };
+                case "Spacer":
+                    return new RankPlacement()
+                    {
+                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027BB8C)].ToLink(), //SpacerFaction [FACT:0027BB8C]
+                        Rank = 0
+                    };
+                default:
+                    return new RankPlacement()
+                    {
+                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027BB8C)].ToLink(), //SpacerFaction [FACT:0027BB8C]
+                        Rank = 0
+                    };
+            }
+        }
+
+        public static IFormLinkNullable<IVoiceTypeGetter> GetVoice(string Faction, bool isfemale)
+        {
+            switch (Faction)
+            {
+                case "Crimsonfleet":
+                    if (isfemale)
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x00010B2C,//CrimsonFleetFemale01 [VTYP:00010B2C]
+                            0x00010B2D,//CrimsonFleetFemale02 [VTYP:00010B2D]
+                            0x002BCA4B,//CrimsonFleetFemale03 [VTYP:002BCA4B]
+                            0x002BCA4C,//CrimsonFleetFemale04 [VTYP:002BCA4C]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+
+                    }
+                    else
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x00010B2A,//CrimsonFleetMale01 [VTYP:00010B2A]
+                            0x00010B2B,//CrimsonFleetMale02 [VTYP:00010B2B]
+                            0x0024A9FD,//CrimsonFleetMale03 [VTYP:0024A9FD]
+                            0x0024A9FE,//CrimsonFleetMale04 [VTYP:0024A9FE]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                    }
+                case "Ecliptic":
+                    if (isfemale)
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x002BCA4D,//EclipticFemale01 [VTYP:002BCA4D]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+
+                    }
+                    else
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x002BCA4E,//EclipticMale01 [VTYP:002BCA4E]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                    }
+                case "Varuun":
+                    if (isfemale)
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x0028DFF4,//VaruunZealotFemale01 [VTYP:0028DFF4]
+                            0x0028DFF3,//VaruunZealotFemale02 [VTYP:0028DFF3]
+                       };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+
+                    }
+                    else
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x0028DFF1,//VaruunZealotMale01 [VTYP:0028DFF1]
+                            0x0028DFF2,//VaruunZealotMale02 [VTYP:0028DFF2]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                    }
+                case "Spacer":
+                    if (isfemale)
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x002BCA3D,//SpacerFemale01 [VTYP:002BCA3D]
+                            0x002A2C77,//SpacerFemale02 [VTYP:002A2C77]
+                            0x002A2C78,//SpacerFemale03 [VTYP:002A2C78]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+
+                    }
+                    else
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x002BCA3E,//SpacerMale01 [VTYP:002BCA3E]
+                            0x002BCA3C,//SpacerMale02 [VTYP:002BCA3C]
+                            0x002A2C75,//SpacerMale03 [VTYP:002A2C75]
+                            0x002A2C76,//SpacerMale04 [VTYP:002A2C76]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                    }
+                default:
+                    if (isfemale)
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x002BCA30,//GenericFemale01 [VTYP:002BCA30]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+
+                    }
+                    else
+                    {
+                        List<uint> voices = new List<uint>()
+                        {
+                            0x002BCA32,//GenericMale01 [VTYP:002BCA32]
+                        };
+                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                    }
+            }
+        }
     }
 }
