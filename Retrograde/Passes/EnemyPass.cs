@@ -1,6 +1,7 @@
-using FrankyCLI.questgen_tools;
-using FrankyCLI.Retrograde.Passes;
 using FrankyCLI;
+using FrankyCLI.questgen_tools;
+using FrankyCLI.Retrograde.FactionMembers;
+using FrankyCLI.Retrograde.Passes;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -63,21 +64,6 @@ namespace FrankyCLI.Retrograde
             return found;
         }
 
-        private string PickRandomPackInEditorIdFromFormList(FormList list)
-        {
-            if (list?.Items == null || list.Items.Count == 0)
-                return null;
-
-            var item = list.Items[RandomUtils.random.Next(list.Items.Count)];
-
-
-            if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
-                return null;
-
-            return packIn.EditorID;
-            
-        }
-
         public void RunPass(DungeonState state)
         {
             if (state?.placedRooms == null || state.placedRooms.Count == 0)
@@ -115,30 +101,40 @@ namespace FrankyCLI.Retrograde
 
 
             //Generate the crew
-            StationFactionCrew stationFactionCrew = new StationFactionCrew();
-            var enemies = stationFactionCrew.GetCrewFormList(state.Faction,state.stateName);
-            FormList list = gen_quest_main.myMod.FormLists[enemies.FormKey];
-            int listpos = 0;
+            IFactionMembers stationFactionCrew = null;
 
+            switch(state.Faction)
+            {
+                case "Crimsonfleet":
+                    stationFactionCrew = new CrimsonFleetFactionCrew();
+                    break;
+                default:
+                    stationFactionCrew = new CrimsonFleetFactionCrew();
+                    break;
+            }
+
+            bool bossplaced = false;
             foreach (var spawn in spacedSpawns)
             {
                 var placed = spawn.Room;
 
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation;
-                
+
+                Npc selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
+
+                if (spawn.Room.DistrictType == "boss" && !bossplaced)
+                {
+                    selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
+                    bossplaced = true;                
+                }
+
                 state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
                 {
                     Rotation = worldRot,
                     Position = worldPos,
-                    Base = list.Items[listpos].FormKey.ToLink<INpcGetter>()
+                    Base = selected.ToLink<INpcGetter>()
                 });
-
-                listpos++;
-                if (listpos >= list.Items.Count)
-                {
-                    listpos = 0;
-                }
             }
         }
 
