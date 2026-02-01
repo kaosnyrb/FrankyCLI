@@ -55,7 +55,8 @@ namespace FrankyCLI
         */
 
         IStationDesign stationDesign;
-               
+
+
         public StationDungeonGenerator(IStationDesign design) {
             stationDesign = design;
         }
@@ -81,7 +82,8 @@ namespace FrankyCLI
                 Size = size,
                 TrunkRoomLists = new List<string> { "rg_trunklist" },
                 scoringSystem = stationDesign.scoringSystem,
-                passes = stationDesign.stationPasses
+                passes = stationDesign.stationPasses,
+                stateName = stationDesign.dungeonName
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 

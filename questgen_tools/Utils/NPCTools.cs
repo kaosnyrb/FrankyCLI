@@ -353,6 +353,11 @@ namespace FrankyCLI.questgen_tools
                     Outfits.Add(0x0027027D);//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
                     Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
                     break;
+                case "Varuun":
+                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                    Outfits.Add(0x00278715);//Outfit_Spacesuit_Varuun [OTFT:00278715]
+                    Outfits.Add(0x000D6FA8);//Outfit_Spacesuit_Varuun_NoHelmetNoBackpack [OTFT:000D6FA8]
+                    break;
                 case "Trade Authority":
                     Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
                     break;

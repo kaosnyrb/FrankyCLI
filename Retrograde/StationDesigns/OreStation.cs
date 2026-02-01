@@ -12,9 +12,11 @@ namespace FrankyCLI.Retrograde.StationDesigns
     {
         private List<IGenPass> stationPasses;
         private ScoringSystem scoringSystem;
+        private string dungname;
 
         List<IGenPass> IStationDesign.stationPasses { get => stationPasses; set => stationPasses = value; }
         ScoringSystem IStationDesign.scoringSystem { get => scoringSystem; set => scoringSystem = value; }
+        public string dungeonName { get => dungname; set => dungname = value; }
 
         public OreStation()
         {
@@ -172,7 +174,8 @@ namespace FrankyCLI.Retrograde.StationDesigns
 
             string stationPart = stationtypes[random.Next(stationtypes.Count)];
 
-            return $"{stationPart} {letterPart}-{numberPart}";
+            dungeonName = $"{stationPart} {letterPart}-{numberPart}";
+            return dungeonName;
         }
     }
 }

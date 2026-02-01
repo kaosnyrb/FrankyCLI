@@ -113,25 +113,35 @@ namespace FrankyCLI.Retrograde
             if (spacedSpawns.Count == 0)
                 return;
 
+
+            //Generate the crew
+
+            StationFactionCrew stationFactionCrew = new StationFactionCrew();
+            var enemies = stationFactionCrew.GetCrewFormList(state.Faction,state.stateName);
+
+
+            
             foreach (var spawn in spacedSpawns)
             {
                 var placed = spawn.Room;
+
+                /*
                 var contentPackInId = PickRandomPackInEditorIdFromFormList(slotList);
                 if (contentPackInId == null)
                     continue;
 
                 var contentPrefab = PrefabCache.GetPrefab(contentPackInId);
-
+                */
                 var worldPos = CalculateWorldPosition(spawn);
-                var worldRot = spawn.Marker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
-
+                var worldRot = spawn.Marker.Rotation;
+                /*
                 state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
                 {
                     Count = 1,
                     Rotation = worldRot,
                     Position = worldPos,
                     Base = contentPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                });
+                });*/
             }
         }
 

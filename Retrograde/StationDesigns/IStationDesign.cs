@@ -12,6 +12,8 @@ namespace FrankyCLI.Retrograde.StationDesigns
         List<IGenPass> stationPasses { get; set; }
         ScoringSystem scoringSystem { get; set; }
         public string GenerateStationName(string Faction);
+
+        public string dungeonName {  get; set; }
     }
 
     
