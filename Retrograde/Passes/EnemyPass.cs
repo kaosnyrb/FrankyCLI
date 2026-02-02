@@ -199,13 +199,17 @@ namespace FrankyCLI.Retrograde
                 case "boss":
                     min = 2; max = 4;
                     break;
-                case "barracks":
-                case "security":
+                case "hab":
+                case "ore":
+                case "district":
                     min = 2; max = 3;
                     break;
-                case "storage":
-                case "maintenance":
+                case "util":
                     min = 1; max = 1;
+                    break;
+                case "trunk":
+                case "bridge":
+                    min = 1; max = 2;
                     break;
                 default:
                     min = 1; max = 2;
