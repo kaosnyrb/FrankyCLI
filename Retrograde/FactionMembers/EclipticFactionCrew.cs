@@ -185,7 +185,6 @@ namespace FrankyCLI.questgen_tools
             Random random = RandomUtils.random;
             List<uint> Outfits = new List<uint>
             {
-                0x00042D85,// Outfit_Worker [OTFT:00042D85]
                 0x0029B9D4,// LL_Clothes_Settler_Any [LVLI:0029B9D4]
                 0x0003A0CF,// LL_Clothes_Worker_Any [LVLI:0003A0CF]
             };
@@ -199,6 +198,8 @@ namespace FrankyCLI.questgen_tools
             List<uint> Outfits = new List<uint>
             {
                 0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
+                0x0013E5D0,//Outfit_Spacesuit_Ecliptic_NoHelmet [OTFT:0013E5D0]
+                0x00056D4A,//Outfit_Spacesuit_Ecliptic_NoHelmet_NoBackpack [OTFT:00056D4A]
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
@@ -210,6 +211,8 @@ namespace FrankyCLI.questgen_tools
             List<uint> Outfits = new List<uint>
             {
                 0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
+                0x0013E5D0,//Outfit_Spacesuit_Ecliptic_NoHelmet [OTFT:0013E5D0]
+                0x00056D4A,//Outfit_Spacesuit_Ecliptic_NoHelmet_NoBackpack [OTFT:00056D4A]
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
@@ -221,8 +224,8 @@ namespace FrankyCLI.questgen_tools
             Random r = RandomUtils.random;
             var prefixes = new List<string>
             {
-                "Ecliptic","Eclipse","Merc","Mercenary","Contractor",
-                "Operative","Hired Gun","Sellsword","Freelancer","Soldier",
+                "Ecliptic","Contractor",
+                "Operative",
                 "Professional","Militant","Enforcer","Gunhand","Tactician",
                 "Vanguard","Sentinel","Warden","Striker","Dragoon",
                 "Trooper","Conscript","Ranger","Commando","Legionnaire",

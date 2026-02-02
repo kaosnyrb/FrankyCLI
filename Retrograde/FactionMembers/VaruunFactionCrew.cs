@@ -210,6 +210,7 @@ namespace FrankyCLI.questgen_tools
             List<uint> Outfits = new List<uint>
             {
                 0x00278715,//Outfit_Spacesuit_Varuun [OTFT:00278715]
+                0x000D6FA8,//Outfit_Spacesuit_Varuun_NoHelmetNoBackpack [OTFT:000D6FA8]
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
@@ -284,11 +285,8 @@ namespace FrankyCLI.questgen_tools
             Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
                 {
-                    0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
-                    0x003D0947,//LLI_Spacer_Charger [LVLI:003D0947]
-                    0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
-                    0x003D094B,//LLI_Spacer_Sniper [LVLI:003D094B]
-                    0x003D094A,//LLI_Spacer_Recruit [LVLI:003D094A]
+                    0x001BEF71,//LLI_Varuun_Charger [LVLI:001BEF71]
+                    0x001BEF75,//LLI_Varuun_AssaultDefaultRole [LVLI:001BEF75]
                 };
             IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
@@ -299,10 +297,10 @@ namespace FrankyCLI.questgen_tools
             Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
                 {
-                    0x003D0949,//LLI_Spacer_Officer [LVLI:003D0949]
-                    0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
-                    0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
-                    0x003D094B,//LLI_Spacer_Sniper [LVLI:003D094B]
+                    0x001BEF71,//LLI_Varuun_Charger [LVLI:001BEF71]
+                    0x001BEF75,//LLI_Varuun_AssaultDefaultRole [LVLI:001BEF75]
+                    0x0025C601,//LLI_Varuun_Heavy_Boss [LVLI:0025C601]
+
                 };
             IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
@@ -313,8 +311,8 @@ namespace FrankyCLI.questgen_tools
             Random random = RandomUtils.random;
             List<uint> gearlist = new List<uint>()
                 {
-                    0x003D0949,//LLI_Spacer_Officer [LVLI:003D0949]
-                    0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
+                    0x001BEF75,//LLI_Varuun_AssaultDefaultRole [LVLI:001BEF75]
+                    0x0025C601,//LLI_Varuun_Heavy_Boss [LVLI:0025C601]
                 };
             IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;

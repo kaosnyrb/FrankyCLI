@@ -186,9 +186,6 @@ namespace FrankyCLI.questgen_tools
             List<uint> Outfits = new List<uint>
             {
                 0x002EB236,// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
-                0x0029B9D4,// LL_Clothes_Settler_Any [LVLI:0029B9D4]
-                0x0003A0CF,// LL_Clothes_Worker_Any [LVLI:0003A0CF]
-
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
@@ -225,7 +222,7 @@ namespace FrankyCLI.questgen_tools
             Random r = RandomUtils.random;
             var prefixes = new List<string>
             {
-                "Crimson","Fleet","Crimson Fleet","Pirate","Buccaneer",
+                "Crimson","Pirate","Buccaneer",
                 "Corsair","Raider","Marauder","Freebooter","Privateer",
                 "Reaver","Plunderer","Cutthroat","Smuggler","Brigand",
                 "Rogue","Outcast","Scourge","Pillager","Blackguard",
