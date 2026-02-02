@@ -10,14 +10,23 @@ using System.Linq;
 
 namespace FrankyCLI
 {
+    /// <summary>
+    /// Places bridge prefabs between pairs of open connectors on different rooms,
+    /// linking separate dungeon branches into a connected topology.
+    /// </summary>
     public class BridgingTopologyPass : IGenPass
     {
+        // Connector matching tolerances
         private const float ConnectorPositionTolerance = 0.05f;
-        private float collisionPadding = -0.5f; // prefer to fail rather than overlap
-        private const float connectorEmbedTolerance = 0.05f;
-        private int maxPlans = 50;
-        private const int maxPrefabsToTryPerPair = 48;
-        private const int targetBridgeCount = 10;
+        private const float ConnectorEmbedTolerance = 0.05f;
+
+        // Collision and spacing parameters
+        private const float CollisionPadding = -0.5f; // Prefer to fail rather than overlap
+
+        // Bridge placement limits
+        private const int MaxPrefabsToTryPerPair = 48;
+        private const int TargetBridgeCount = 10;
+        private const int DefaultMaxPlans = 50;
 
         private readonly string districtFilter;
         private readonly string districtTypeLabel;
@@ -40,53 +49,82 @@ namespace FrankyCLI
             public PlanScore Score;
         }
 
+        /// <summary>
+        /// Bundles mutable plan state and shared configuration for bridge placement methods.
+        /// </summary>
+        private class BridgePlacementContext
+        {
+            public List<PlacedRoom> PlannedRooms { get; set; }
+            public List<OpenConnector> PlannedOpenConnectors { get; set; }
+            public List<PlacedObject> PlannedPlacements { get; set; }
+            public HashSet<string> UsedPrefabIds { get; set; }
+            public List<RoomUtils> RoomUtils { get; set; }
+            public string DistrictTypeLabel { get; set; }
+            public string DistrictFilter { get; set; }
+            public float YMin { get; set; }
+        }
+
+        /// <summary>
+        /// Result of successfully placing a bridge prefab between two connectors.
+        /// </summary>
+        private class BridgePlacementResult
+        {
+            public PlacedRoom PlacedRoom { get; set; }
+            public PlacedObject PlacementObject { get; set; }
+            public List<OpenConnector> NewConnectors { get; set; }
+        }
+
+        /// <summary>
+        /// Main algorithm: Connects dungeon branches by placing bridge prefabs between
+        /// compatible open connector pairs on different rooms.
+        /// Uses multi-plan evaluation to find the best bridging layout.
+        /// </summary>
         public void RunPass(DungeonState state)
         {
             if (state.openConnectors == null || state.openConnectors.Count < 2)
                 return;
 
-            maxPlans = state.scoringSystem?.Effort ?? maxPlans;
+            int maxPlans = state.scoringSystem?.Effort ?? DefaultMaxPlans;
             var activeBridgeLists = state.TrunkRoomLists;
             var activeRoomUtils = activeBridgeLists.Select(name => state.GetRoomUtils(name)).ToList();
             var activeDistrictTypeLabel = DeriveDistrictType(activeBridgeLists.FirstOrDefault(), districtFilter, districtTypeLabel);
 
+            // Stage 1: Multi-plan generation - run multiple attempts to find optimal bridging
             var bestOutcome = PlanRunner.RunBest<BridgePlanMeta>(maxPlans, planAttempt =>
             {
-                var usedPrefabIds = CollectUsedPrefabIds(state.placedRooms);
+                var context = new BridgePlacementContext
+                {
+                    PlannedRooms = new List<PlacedRoom>(state.placedRooms),
+                    PlannedOpenConnectors = state.openConnectors
+                        .Where(c => c.WorldPos.Y >= state.YMin)
+                        .Where(c => RoomHasMoreThanTwoConnectors(state.placedRooms, c, ConnectorPositionTolerance))
+                        .OrderBy(_ => RandomUtils.random.Next())
+                        .ToList(),
+                    PlannedPlacements = new List<PlacedObject>(),
+                    UsedPrefabIds = CollectUsedPrefabIds(state.placedRooms),
+                    RoomUtils = activeRoomUtils,
+                    DistrictTypeLabel = activeDistrictTypeLabel,
+                    DistrictFilter = districtFilter,
+                    YMin = state.YMin
+                };
 
-                var plannedRooms = new List<PlacedRoom>(state.placedRooms);
-                var plannedOpenConnectors = state.openConnectors
-                    .Where(c => c.WorldPos.Y >= state.YMin)
-                    .Where(c => RoomHasMoreThanTwoConnectors(state.placedRooms, c, ConnectorPositionTolerance))
-                    .OrderBy(_ => RandomUtils.random.Next())
-                    .ToList();
-                var plannedPlacements = new List<PlacedObject>();
+                // Stage 2: Iterative bridge placement loop
+                var (bridgesPlaced, overlapCount) = PlanBridges(context);
 
-                var (bridgesPlaced, overlapCount) = PlanBridges(
-                    plannedRooms,
-                    plannedOpenConnectors,
-                    plannedPlacements,
-                    usedPrefabIds,
-                    collisionPadding,
-                    connectorEmbedTolerance,
-                    maxPrefabsToTryPerPair,
-                    targetBridgeCount,
-                    activeRoomUtils,
-                    activeDistrictTypeLabel,
-                    state.YMin);
-                var planArea = ScoringUtil.CalculateTotalArea(plannedRooms);
-                var planClustering = ScoringUtil.CalculateAverageMinimumDistance(plannedRooms);
-                var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(plannedRooms);
-                var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
-                var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
+                // Stage 3: Evaluate this plan using scoring metrics
+                var planArea = ScoringUtil.CalculateTotalArea(context.PlannedRooms);
+                var planClustering = ScoringUtil.CalculateAverageMinimumDistance(context.PlannedRooms);
+                var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(context.PlannedRooms);
+                var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(context.PlannedRooms);
+                var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(context.PlannedRooms, context.PlannedOpenConnectors);
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
 
                 return new PlanOutcome<BridgePlanMeta>
                 {
                     Score = planScore.Total,
-                    Rooms = plannedRooms,
-                    OpenConnectors = plannedOpenConnectors,
-                    Placements = plannedPlacements,
+                    Rooms = context.PlannedRooms,
+                    OpenConnectors = context.PlannedOpenConnectors,
+                    Placements = context.PlannedPlacements,
                     Metadata = new BridgePlanMeta
                     {
                         BridgesPlaced = bridgesPlaced,
@@ -96,6 +134,7 @@ namespace FrankyCLI
                 };
             });
 
+            // Stage 4: Apply the best plan to the dungeon state
             var finalRooms = bestOutcome?.Rooms ?? state.placedRooms;
             var finalOpenConnectors = bestOutcome?.OpenConnectors ?? state.openConnectors;
             var finalPlacements = bestOutcome?.Placements ?? new List<PlacedObject>();
@@ -128,66 +167,50 @@ namespace FrankyCLI
 
             if (!state.IsHarnessRun)
             {
-                Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{targetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
+                Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{TargetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
             }
         }
 
-        private (int bridgesPlaced, int overlapCount) PlanBridges(
-            List<PlacedRoom> plannedRooms,
-            List<OpenConnector> plannedOpenConnectors,
-            List<PlacedObject> plannedPlacements,
-            HashSet<string> usedPrefabIds,
-            float collisionPadding,
-            float connectorEmbedTolerance,
-            int maxPrefabsToTryPerPair,
-            int desiredBridgeCount,
-            List<RoomUtils> roomUtils,
-            string districtTypeLabel,
-            float yMin)
+        /// <summary>
+        /// Iteratively pairs open connectors and attempts to place bridge prefabs between them.
+        /// Restarts pair search after each successful placement since connector lists change.
+        /// </summary>
+        private static (int bridgesPlaced, int overlapCount) PlanBridges(BridgePlacementContext ctx)
         {
             int bridgesPlaced = 0;
             int overlapCount = 0;
             bool progress = true;
 
-            while (progress && plannedOpenConnectors.Count >= 2 && bridgesPlaced < desiredBridgeCount)
+            while (progress && ctx.PlannedOpenConnectors.Count >= 2 && bridgesPlaced < TargetBridgeCount)
             {
                 progress = false;
 
-                for (int i = 0; i < plannedOpenConnectors.Count - 1; i++)
+                for (int i = 0; i < ctx.PlannedOpenConnectors.Count - 1; i++)
                 {
-                    for (int j = i + 1; j < plannedOpenConnectors.Count; j++)
+                    for (int j = i + 1; j < ctx.PlannedOpenConnectors.Count; j++)
                     {
-                        var a = plannedOpenConnectors[i];
-                        var b = plannedOpenConnectors[j];
+                        var a = ctx.PlannedOpenConnectors[i];
+                        var b = ctx.PlannedOpenConnectors[j];
 
-                        if (!RoomHasMoreThanTwoConnectors(plannedRooms, a, ConnectorPositionTolerance) ||
-                            !RoomHasMoreThanTwoConnectors(plannedRooms, b, ConnectorPositionTolerance))
+                        // Stage 2a: Filter to valid connector pairs
+                        if (!IsValidBridgePair(a, b, ctx.PlannedRooms))
                             continue;
 
-                        if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
+                        // Stage 2b: Try to place a bridge prefab connecting this pair
+                        var result = TryPlaceBridgeBetween(a, b, ctx);
+                        if (result == null)
                             continue;
 
-                        if (!BridgeUtil.ArePairCompatible(a, b))
-                            continue;
+                        // Stage 2c: Accept placement and update state
+                        AcceptBridgePlacement(ctx, result, i, j);
 
-                        if (TryPlaceBridgeBetween(a, b, plannedRooms, usedPrefabIds, collisionPadding, connectorEmbedTolerance, maxPrefabsToTryPerPair, roomUtils, districtTypeLabel, yMin, out var placedRoom, out var placement, out var newConnectors))
+                        bridgesPlaced++;
+                        if (BridgeUtil.HaveSameOwner(ctx.PlannedRooms, a, b, ConnectorPositionTolerance))
                         {
-                            plannedPlacements.Add(placement);
-                            plannedRooms.Add(placedRoom);
-                            usedPrefabIds.Add(placedRoom.Prefab.PrefabEditorId);
-
-                            plannedOpenConnectors.RemoveAt(j);
-                            plannedOpenConnectors.RemoveAt(i);
-                            plannedOpenConnectors.AddRange(newConnectors);
-
-                            bridgesPlaced++;
-                            if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
-                            {
-                                overlapCount++;
-                            }
-                            progress = true;
-                            goto NextIteration;
+                            overlapCount++;
                         }
+                        progress = true;
+                        goto NextIteration;
                     }
                 }
 
@@ -200,32 +223,52 @@ namespace FrankyCLI
             return (bridgesPlaced, overlapCount);
         }
 
-        private bool TryPlaceBridgeBetween(
-            OpenConnector a,
-            OpenConnector b,
-            List<PlacedRoom> plannedRooms,
-            HashSet<string> usedPrefabIds,
-            float collisionPadding,
-            float connectorEmbedTolerance,
-            int maxPrefabsToTryPerPair,
-            List<RoomUtils> roomUtils,
-            string districtTypeLabel,
-            float yMin,
-            out PlacedRoom placedRoom,
-            out PlacedObject placedObject,
-            out List<OpenConnector> resultingOpenConnectors)
+        /// <summary>
+        /// Checks whether two open connectors form a valid candidate pair for bridging:
+        /// both owners must have 3+ connectors, belong to different rooms, and be compatible.
+        /// </summary>
+        private static bool IsValidBridgePair(OpenConnector a, OpenConnector b, List<PlacedRoom> plannedRooms)
         {
-            placedRoom = default;
-            placedObject = null;
-            resultingOpenConnectors = null;
-
-            var candidates = BuildPrefabCandidates(a.Parsed.Tileset, usedPrefabIds, roomUtils);
-            if (candidates.Count == 0)
+            if (!RoomHasMoreThanTwoConnectors(plannedRooms, a, ConnectorPositionTolerance) ||
+                !RoomHasMoreThanTwoConnectors(plannedRooms, b, ConnectorPositionTolerance))
                 return false;
+
+            if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
+                return false;
+
+            return BridgeUtil.ArePairCompatible(a, b);
+        }
+
+        /// <summary>
+        /// Updates plan state after a successful bridge placement: adds room/placement,
+        /// removes consumed connectors, and adds new open connectors from the bridge.
+        /// </summary>
+        private static void AcceptBridgePlacement(BridgePlacementContext ctx, BridgePlacementResult result, int connectorIndexA, int connectorIndexB)
+        {
+            ctx.PlannedPlacements.Add(result.PlacementObject);
+            ctx.PlannedRooms.Add(result.PlacedRoom);
+            ctx.UsedPrefabIds.Add(result.PlacedRoom.Prefab.PrefabEditorId);
+
+            ctx.PlannedOpenConnectors.RemoveAt(connectorIndexB);
+            ctx.PlannedOpenConnectors.RemoveAt(connectorIndexA);
+            ctx.PlannedOpenConnectors.AddRange(result.NewConnectors);
+        }
+
+        /// <summary>
+        /// Attempts to find a bridge prefab that connects two open connectors.
+        /// Evaluates random candidate prefabs across all rotations, checking that
+        /// the prefab aligns both connectors and does not collide with existing rooms.
+        /// </summary>
+        /// <returns>Placement result if a valid bridge was found, null otherwise.</returns>
+        private static BridgePlacementResult TryPlaceBridgeBetween(OpenConnector a, OpenConnector b, BridgePlacementContext ctx)
+        {
+            var candidates = BuildPrefabCandidates(a.Parsed.Tileset, ctx.UsedPrefabIds, ctx.RoomUtils, ctx.DistrictFilter);
+            if (candidates.Count == 0)
+                return null;
 
             var prefabsToTry = candidates
                 .OrderBy(_ => RandomUtils.random.Next())
-                .Take(Math.Max(1, Math.Min(maxPrefabsToTryPerPair, candidates.Count)))
+                .Take(Math.Max(1, Math.Min(MaxPrefabsToTryPerPair, candidates.Count)))
                 .ToList();
 
             foreach (var prefabId in prefabsToTry)
@@ -234,79 +277,119 @@ namespace FrankyCLI
 
                 for (int yawSteps = 0; yawSteps < 4; yawSteps++)
                 {
-                    var connectors = ConnectorUtils.GetConnectors(prefab, yawSteps);
-
-                    var matchesA = connectors.Where(c => BridgeUtil.MatchesOpenConnector(a, c)).ToList();
-                    var matchesB = connectors.Where(c => BridgeUtil.MatchesOpenConnector(b, c)).ToList();
-
-                    if (matchesA.Count == 0 || matchesB.Count == 0)
-                        continue;
-
-                    foreach (var connA in matchesA)
-                    {
-                        foreach (var connB in matchesB)
-                        {
-                            if (BridgeUtil.IsSameConnector(connA, connB))
-                                continue;
-
-                            var prefabPos = a.WorldPos - connA.LocalPos;
-                            var expectedB = prefabPos + connB.LocalPos;
-
-                            if (!MathUtil.PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
-                                continue;
-
-                            var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
-                            if (ConnectorUtils.IsBelowYMin(candidateAabb, yMin))
-                                continue;
-                            if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
-                                continue;
-                            if (BridgeUtil.AnyConnectorInsideExistingBounds(connectors, prefabPos, plannedRooms, connectorEmbedTolerance))
-                                continue;
-                            if (BridgeUtil.AnyExistingConnectorInsideCandidate(candidateAabb, plannedRooms, connectorEmbedTolerance))
-                                continue;
-
-                            placedObject = new PlacedObject(gen_quest_main.myMod)
-                            {
-                                Count = 1,
-                                Rotation = RgRotation.RotationToP3Float(yawSteps),
-                                Position = prefabPos,
-                                Base = prefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                            };
-
-                            placedRoom = new PlacedRoom
-                            {
-                                Prefab = prefab,
-                                WorldPos = prefabPos,
-                                YawSteps = yawSteps,
-                                DistrictType = districtTypeLabel,
-                                Connectors = connectors
-                            };
-
-                            resultingOpenConnectors = new List<OpenConnector>();
-                            foreach (var c in connectors)
-                            {
-                                if (BridgeUtil.IsSameConnector(c, connA) || BridgeUtil.IsSameConnector(c, connB))
-                                    continue;
-
-                                resultingOpenConnectors.Add(new OpenConnector
-                                {
-                                    Parsed = c.Parsed,
-                                    YawSteps = yawSteps,
-                                    WorldPos = prefabPos + c.LocalPos,
-                                    DistrictType = districtTypeLabel
-                                });
-                            }
-
-                            return true;
-                        }
-                    }
+                    var result = EvaluatePrefabRotation(a, b, prefab, yawSteps, ctx);
+                    if (result != null)
+                        return result;
                 }
             }
 
-            return false;
+            return null;
         }
 
-        private List<string> BuildPrefabCandidates(string tileset, HashSet<string> usedPrefabIds, List<RoomUtils> roomUtils)
+        /// <summary>
+        /// Evaluates a single prefab at a specific rotation to see if it bridges two connectors.
+        /// Finds connector pairs that match both endpoints, verifies position alignment,
+        /// then checks collision, embedding, and height constraints.
+        /// </summary>
+        private static BridgePlacementResult EvaluatePrefabRotation(
+            OpenConnector a,
+            OpenConnector b,
+            RoomPrefab prefab,
+            int yawSteps,
+            BridgePlacementContext ctx)
+        {
+            var connectors = ConnectorUtils.GetConnectors(prefab, yawSteps);
+
+            var matchesA = connectors.Where(c => BridgeUtil.MatchesOpenConnector(a, c)).ToList();
+            var matchesB = connectors.Where(c => BridgeUtil.MatchesOpenConnector(b, c)).ToList();
+
+            if (matchesA.Count == 0 || matchesB.Count == 0)
+                return null;
+
+            foreach (var connA in matchesA)
+            {
+                foreach (var connB in matchesB)
+                {
+                    if (BridgeUtil.IsSameConnector(connA, connB))
+                        continue;
+
+                    var prefabPos = a.WorldPos - connA.LocalPos;
+                    var expectedB = prefabPos + connB.LocalPos;
+
+                    if (!MathUtil.PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
+                        continue;
+
+                    // Validate placement constraints
+                    var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
+                    if (ConnectorUtils.IsBelowYMin(candidateAabb, ctx.YMin))
+                        continue;
+                    if (ConnectorUtils.CollidesWithAny(candidateAabb, ctx.PlannedRooms, CollisionPadding))
+                        continue;
+                    if (BridgeUtil.AnyConnectorInsideExistingBounds(connectors, prefabPos, ctx.PlannedRooms, ConnectorEmbedTolerance))
+                        continue;
+                    if (BridgeUtil.AnyExistingConnectorInsideCandidate(candidateAabb, ctx.PlannedRooms, ConnectorEmbedTolerance))
+                        continue;
+
+                    return BuildBridgePlacementResult(prefab, prefabPos, yawSteps, connectors, connA, connB, ctx.DistrictTypeLabel);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Constructs the placement result objects for a validated bridge placement.
+        /// </summary>
+        private static BridgePlacementResult BuildBridgePlacementResult(
+            RoomPrefab prefab,
+            P3Float prefabPos,
+            int yawSteps,
+            List<RgConnectorInstance> connectors,
+            RgConnectorInstance connA,
+            RgConnectorInstance connB,
+            string districtTypeLabel)
+        {
+            var placementObject = new PlacedObject(gen_quest_main.myMod)
+            {
+                Count = 1,
+                Rotation = RgRotation.RotationToP3Float(yawSteps),
+                Position = prefabPos,
+                Base = prefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+            };
+
+            var placedRoom = new PlacedRoom
+            {
+                Prefab = prefab,
+                WorldPos = prefabPos,
+                YawSteps = yawSteps,
+                DistrictType = districtTypeLabel,
+                Connectors = connectors
+            };
+
+            var newConnectors = new List<OpenConnector>();
+            foreach (var c in connectors)
+            {
+                if (BridgeUtil.IsSameConnector(c, connA) || BridgeUtil.IsSameConnector(c, connB))
+                    continue;
+
+                newConnectors.Add(new OpenConnector
+                {
+                    Parsed = c.Parsed,
+                    YawSteps = yawSteps,
+                    WorldPos = prefabPos + c.LocalPos,
+                    DistrictType = districtTypeLabel
+                });
+            }
+
+            return new BridgePlacementResult
+            {
+                PlacedRoom = placedRoom,
+                PlacementObject = placementObject,
+                NewConnectors = newConnectors
+            };
+        }
+
+        private static List<string> BuildPrefabCandidates(string tileset, HashSet<string> usedPrefabIds, List<RoomUtils> roomUtils, string districtFilter)
         {
             var allCandidates = new List<string>();
 
