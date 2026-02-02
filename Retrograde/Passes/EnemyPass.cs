@@ -81,10 +81,14 @@ namespace FrankyCLI.Retrograde
             var bossDistance = MathUtil.Length(bossVector);
             var fallbackDistance = Math.Max(1f, CalculateFarthestDistance(state));
 
-            // Randomize enemy density between 1.0x and 2.0x rooms so each
-            // run feels different — skeleton crew vs. heavily fortified.
-            float densityMultiplier = 1.0f + (float)RandomUtils.random.NextDouble();
-            int enemyCap = Math.Max(1, (int)Math.Ceiling(state.placedRooms.Count * densityMultiplier));
+            // Scale enemy count on dungeon area so large sprawling stations
+            // get more enemies than compact ones, then apply a random density
+            // multiplier (0.8x–1.4x) for per-run variety.
+            float dungeonArea = CalculateDungeonArea(state);
+            const float areaPerEnemy = 512f; // tuning: square units per expected enemy
+            int areaBasedCap = Math.Max(1, (int)Math.Ceiling(dungeonArea / areaPerEnemy));
+            float densityMultiplier = 0.8f + (float)RandomUtils.random.NextDouble() * 0.6f;
+            int enemyCap = Math.Max(1, (int)Math.Ceiling(areaBasedCap * densityMultiplier));
 
             var candidates = BuildCandidates(state, bossVector, bossDistance, fallbackDistance);
             if (candidates.Count == 0)
@@ -464,6 +468,27 @@ namespace FrankyCLI.Retrograde
             }
 
             return (float)Math.Sqrt(maxDistSq);
+        }
+
+        private static float CalculateDungeonArea(DungeonState state)
+        {
+            if (state.placedRooms.Count <= 1)
+                return 1f;
+
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
+
+            foreach (var room in state.placedRooms)
+            {
+                if (room.WorldPos.X < minX) minX = room.WorldPos.X;
+                if (room.WorldPos.X > maxX) maxX = room.WorldPos.X;
+                if (room.WorldPos.Y < minY) minY = room.WorldPos.Y;
+                if (room.WorldPos.Y > maxY) maxY = room.WorldPos.Y;
+            }
+
+            float width = Math.Max(1f, maxX - minX);
+            float height = Math.Max(1f, maxY - minY);
+            return width * height;
         }
 
         private static P3Float CalculateWorldPosition(SpawnCandidate spawn)
