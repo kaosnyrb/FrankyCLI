@@ -108,6 +108,15 @@ namespace FrankyCLI.Retrograde
                 case "Crimsonfleet":
                     stationFactionCrew = new CrimsonFleetFactionCrew();
                     break;
+                case "Ecliptic":
+                    stationFactionCrew = new EclipticFactionCrew();
+                    break;
+                case "Varuun":
+                    stationFactionCrew = new VaruunFactionCrew();
+                    break;
+                case "Spacer":
+                    stationFactionCrew = new SpacerFactionCrew();
+                    break;
                 default:
                     stationFactionCrew = new CrimsonFleetFactionCrew();
                     break;
