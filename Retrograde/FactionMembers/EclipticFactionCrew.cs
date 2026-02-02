@@ -17,11 +17,13 @@ namespace FrankyCLI.questgen_tools
         List<Npc> LowRank { get; set; }
         List<Npc> HighRank { get; set; }
         List<Npc> Bosses { get; set; }
+        string FactionName { get; set; }
         public EclipticFactionCrew()
         {
             string Faction = "Ecliptic";
             Random random = RandomUtils.random;
             string Crewname = Faction;
+            FactionName = GetFactionPrefix();
 
             int lowrank_crewcount = 10;
             int highrank_crewcount = 5;
@@ -44,7 +46,7 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetLowRank_Outfit();
-                npc.Name = "Ecliptic" + " " + GetLowRank_Name();
+                npc.Name = GetFactionPrefix() + " " + GetLowRank_Name();
                 var gear = GetLowRank_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 0.5f + ((float)random.NextDouble()/2);
@@ -68,7 +70,7 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetHighRank_Outfit();
-                npc.Name = "Ecliptic" + " " + GetHighRank_Name();
+                npc.Name = GetFactionPrefix() + " " + GetHighRank_Name();
                 var gear = GetHighRank_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 0.75f + (float)random.NextDouble();
@@ -91,7 +93,7 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetBoss_Outfit();
-                npc.Name = "Ecliptic" + " " + GetBoss_Name();
+                npc.Name = GetFactionPrefix() + " " + GetBoss_Name();
                 var gear = GetBoss_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 1 + (float)random.NextDouble();
@@ -211,6 +213,22 @@ namespace FrankyCLI.questgen_tools
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
+        }
+
+        private string GetFactionPrefix()
+        {
+            if (FactionName != null) return FactionName;
+            Random r = RandomUtils.random;
+            var prefixes = new List<string>
+            {
+                "Ecliptic","Eclipse","Merc","Mercenary","Contractor",
+                "Operative","Hired Gun","Sellsword","Freelancer","Soldier",
+                "Professional","Militant","Enforcer","Gunhand","Tactician",
+                "Vanguard","Sentinel","Warden","Striker","Dragoon",
+                "Trooper","Conscript","Ranger","Commando","Legionnaire",
+                "Wardog","Ironside","Partisan","Outrider","Bulwark"
+            };
+            return prefixes[r.Next(prefixes.Count)];
         }
 
         public string GetLowRank_Name()
