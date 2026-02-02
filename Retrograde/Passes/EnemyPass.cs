@@ -113,7 +113,7 @@ namespace FrankyCLI.Retrograde
 
             // Avoid clustering too many enemies in the same small area.
             const int maxClusterSize = 5;
-            const float clusterRadius = 32;
+            const float clusterRadius = 20;
             var spacedSpawns = EnforceClusterLimit(chosenSpawns, maxClusterSize, clusterRadius);
             if (spacedSpawns.Count == 0)
                 return;
