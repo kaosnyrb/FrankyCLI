@@ -161,17 +161,43 @@ namespace FrankyCLI.Retrograde
                 }
             }
 
-            // Place remaining enemies.
-            foreach (var spawn in spacedSpawns)
+            // Pick a miniboss candidate: 30% chance per non-boss spawn in
+            // high-progress rooms (hab, ore, district). At most one miniboss.
+            int minibossIndex = -1;
+            if (spacedSpawns.Count > 0)
             {
+                var eligibleIndices = new List<int>();
+                for (int i = 0; i < spacedSpawns.Count; i++)
+                {
+                    var dt = spacedSpawns[i].Room.DistrictType;
+                    if (dt != "boss" && dt != "util" && dt != "trunk")
+                        eligibleIndices.Add(i);
+                }
+                if (eligibleIndices.Count > 0 && RandomUtils.random.Next(100) < 30)
+                {
+                    minibossIndex = eligibleIndices[RandomUtils.random.Next(eligibleIndices.Count)];
+                }
+            }
+
+            // Place remaining enemies.
+            for (int spawnIdx = 0; spawnIdx < spacedSpawns.Count; spawnIdx++)
+            {
+                var spawn = spacedSpawns[spawnIdx];
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation;
+                bool isMiniboss = spawnIdx == minibossIndex;
 
-                int groupSize = DetermineGroupSize(spawn.Room.DistrictType);
+                int groupSize = isMiniboss
+                    ? DetermineGroupSize("boss")
+                    : DetermineGroupSize(spawn.Room.DistrictType);
 
                 for (int memberIdx = 0; memberIdx < groupSize; memberIdx++)
                 {
-                    Npc selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
+                    Npc selected;
+                    if (isMiniboss && memberIdx == 0)
+                        selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
+                    else
+                        selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
 
                     var memberPos = memberIdx == 0
                         ? worldPos
