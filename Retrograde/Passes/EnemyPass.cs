@@ -130,21 +130,71 @@ namespace FrankyCLI.Retrograde
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation;
 
-                Npc selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
+                int groupSize = DetermineGroupSize(spawn.Room.DistrictType);
 
-                if (spawn.Room.DistrictType == "boss" && !bossplaced)
+                for (int memberIdx = 0; memberIdx < groupSize; memberIdx++)
                 {
-                    selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
-                    bossplaced = true;                
+                    Npc selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
+
+                    if (memberIdx == 0 && spawn.Room.DistrictType == "boss" && !bossplaced)
+                    {
+                        selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
+                        bossplaced = true;
+                    }
+
+                    var memberPos = memberIdx == 0
+                        ? worldPos
+                        : OffsetPosition(worldPos, memberIdx);
+
+                    state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
+                    {
+                        Rotation = worldRot,
+                        Position = memberPos,
+                        Base = selected.ToLink<INpcGetter>()
+                    });
                 }
-
-                state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
-                {
-                    Rotation = worldRot,
-                    Position = worldPos,
-                    Base = selected.ToLink<INpcGetter>()
-                });
             }
+        }
+
+        /// <summary>
+        /// Determines how many NPCs to spawn at a single marker based on room purpose.
+        /// Combat-heavy districts get squads; quieter areas get lone sentries.
+        /// </summary>
+        private static int DetermineGroupSize(string districtType)
+        {
+            int min, max;
+            switch (districtType)
+            {
+                case "boss":
+                    min = 2; max = 4;
+                    break;
+                case "barracks":
+                case "security":
+                    min = 2; max = 3;
+                    break;
+                case "storage":
+                case "maintenance":
+                    min = 1; max = 1;
+                    break;
+                default:
+                    min = 1; max = 2;
+                    break;
+            }
+
+            return RandomUtils.random.Next(min, max + 1);
+        }
+
+        /// <summary>
+        /// Offsets additional group members slightly from the spawn marker so they
+        /// don't stack on top of each other. Uses a small circle around the origin.
+        /// </summary>
+        private static P3Float OffsetPosition(P3Float origin, int index)
+        {
+            const float offsetRadius = 1.5f;
+            double angle = index * (2.0 * Math.PI / 3.0); // evenly space up to 3 extras
+            float dx = (float)(Math.Cos(angle) * offsetRadius);
+            float dy = (float)(Math.Sin(angle) * offsetRadius);
+            return new P3Float(origin.X + dx, origin.Y + dy, origin.Z);
         }
 
         private List<SpawnCandidate> BuildCandidates(
