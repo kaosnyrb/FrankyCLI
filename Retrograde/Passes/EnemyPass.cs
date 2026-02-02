@@ -87,9 +87,21 @@ namespace FrankyCLI.Retrograde
             if (candidates.Count == 0)
                 return;
 
+            // Reserve a boss spawn before general selection so it's guaranteed.
+            SpawnCandidate? reservedBoss = null;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                if (candidates[i].Room.DistrictType == "boss")
+                {
+                    reservedBoss = candidates[i];
+                    candidates.RemoveAt(i);
+                    break;
+                }
+            }
+
             enemyCap = Math.Min(enemyCap, candidates.Count);
             var chosenSpawns = ChooseCandidates(candidates, enemyCap);
-            if (chosenSpawns.Count == 0)
+            if (chosenSpawns.Count == 0 && reservedBoss == null)
                 return;
 
             // Avoid clustering too many enemies in the same small area.
@@ -122,11 +134,36 @@ namespace FrankyCLI.Retrograde
                     break;
             }
 
-            bool bossplaced = false;
+            // Place guaranteed boss encounter first.
+            if (reservedBoss.HasValue)
+            {
+                var bossSpawn = reservedBoss.Value;
+                var bossPos = CalculateWorldPosition(bossSpawn);
+                var bossRot = bossSpawn.Marker.Rotation;
+                int bossGroupSize = DetermineGroupSize(bossSpawn.Room.DistrictType);
+
+                for (int memberIdx = 0; memberIdx < bossGroupSize; memberIdx++)
+                {
+                    Npc selected = memberIdx == 0
+                        ? stationFactionCrew.GetBoss(bossSpawn.Room.DistrictType)
+                        : stationFactionCrew.GetCrewMember(bossSpawn.Room.DistrictType);
+
+                    var memberPos = memberIdx == 0
+                        ? bossPos
+                        : OffsetPosition(bossPos, memberIdx);
+
+                    state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
+                    {
+                        Rotation = bossRot,
+                        Position = memberPos,
+                        Base = selected.ToLink<INpcGetter>()
+                    });
+                }
+            }
+
+            // Place remaining enemies.
             foreach (var spawn in spacedSpawns)
             {
-                var placed = spawn.Room;
-
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation;
 
@@ -135,12 +172,6 @@ namespace FrankyCLI.Retrograde
                 for (int memberIdx = 0; memberIdx < groupSize; memberIdx++)
                 {
                     Npc selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
-
-                    if (memberIdx == 0 && spawn.Room.DistrictType == "boss" && !bossplaced)
-                    {
-                        selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
-                        bossplaced = true;
-                    }
 
                     var memberPos = memberIdx == 0
                         ? worldPos
