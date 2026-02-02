@@ -226,9 +226,9 @@ namespace FrankyCLI.questgen_tools
                 "Platinum",
                 "SaltAndBrown",
                 "BrownDark",
-                "Violet",
-                "White",
-                "Ruby",
+                //"Violet",
+                //"White",
+                //"Ruby",
                 "SaltAndPepper",
                 "Blonde"
             };

@@ -124,6 +124,11 @@ namespace FrankyCLI.questgen_tools
             npc.HairColor = NPCTools.GetHairColour();
             npc.SkinToneIndex = (byte)random.Next(8);
             npc.HeadParts.Add(GetHaircut(isfemale));
+            if (RandomUtils.random.Next(100) > 50)
+            {
+                npc.HeadParts.Add(GetExtraHeadParts(isfemale));
+            }
+
             npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = gear, Count = 1 } },
@@ -177,6 +182,60 @@ namespace FrankyCLI.questgen_tools
                     0x0012F26F,//Human_Male_Hair_Viking_Braids [HDPT:0012F26F]
                 };
                 return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+            }
+        }
+
+        private IFormLinkNullable<IHeadPartGetter> GetExtraHeadParts(bool female)
+        {
+            Random random = RandomUtils.random;
+            if (female)
+            {
+                List<uint> partlist = new List<uint>()
+                {
+                    0x001F7EF3,//Human_Female_Jewelry_Bridge_01_F "Human_Female_Jewelry_Bridge_01_F" [HDPT:001F7EF3]
+                    0x001F7EF4,//Human_Female_Jewelry_Bridge_02_F "Human_Female_Jewelry_Bridge_02_F" [HDPT:001F7EF4]
+                    0x001F7EF5,//Human_Female_Jewelry_Double_Earrings_F "Human_Female_Jewelry_Double_Earrings_F" [HDPT:001F7EF5]
+                    0x001F7EF2,//Human_Female_Jewelry_Double_Earrings_Left_F "Human_Female_Jewelry_Double_Earrings_Left_F" [HDPT:001F7EF2]
+                    0x001F7EF6,//Human_Female_Jewelry_Double_Earrings_Right_F "Human_Female_Jewelry_Double_Earrings_Right_F" [HDPT:001F7EF6]
+                    0x00026EB7,//Human_Female_Jewelry_Lobe_Diamond_F "Human_Female_Jewelry_Lobe_Diamond_F" [HDPT:00026EB7]
+                    0x001F7EF8,//Human_Female_Jewelry_Lobe_Gauge_F "Human_Female_Jewelry_Lobe_Gauge_F" [HDPT:001F7EF8]
+                    0x001F7EFD,//Human_Female_Jewelry_Nostril_Ball_F "Human_Female_Jewelry_Nostril_Ball_F" [HDPT:001F7EFD]
+                    0x001F7EFE,//Human_Female_Jewelry_Nostril_Ball_Left_F "Human_Female_Jewelry_Nostril_Ball_Left_F" [HDPT:001F7EFE]
+                    0x001F7EFF,//Human_Female_Jewelry_Nostril_Ball_Right_F "Human_Female_Jewelry_Nostril_Ball_Right_F" [HDPT:001F7EFF]
+                    0x001F7F00,//Human_Female_Jewelry_Rings_Assorted_F "Human_Female_Jewelry_Rings_Assorted_F" [HDPT:001F7F00]
+                    0x001F7F01,//Human_Female_Jewelry_Rings_Assorted_Left_F "Human_Female_Jewelry_Rings_Assorted_Left_F" [HDPT:001F7F01]
+                    0x001F7F02,//Human_Female_Jewelry_Rings_Assorted_Right_F "Human_Female_Jewelry_Rings_Assorted_Right_F" [HDPT:001F7F02]
+                    0x001F7F03,//Human_Female_Jewelry_Septum_01_F "Human_Female_Jewelry_Septum_01_F" [HDPT:001F7F03]
+                    0x001F7F04,//Human_Female_Jewelry_Septum_02_F "Human_Female_Jewelry_Septum_02_F" [HDPT:001F7F04]
+                    0x001F7F05,//Human_Female_Jewelry_Septum_03_F "Human_Female_Jewelry_Septum_03_F" [HDPT:001F7F05]
+                };
+                return new FormKey(gen_quest_main.StarfieldModKey, partlist[random.Next(partlist.Count)]).ToNullableLink<IHeadPartGetter>();
+            }
+            else
+            {
+                List<uint> partlist = new List<uint>()
+                {
+                    0x00160C2C,//Human_Male_Beard_BeardStache "Human_Male_Beard_BeardStache" [HDPT:00160C2C]
+                    0x0015E754,//Human_Male_Beard_ChinCurtain "Human_Male_Beard_ChinCurtain" [HDPT:0015E754]
+                    0x00160C2D,//Human_Male_Beard_ChinFade "Human_Male_Beard_ChinFade" [HDPT:00160C2D]
+                    0x0015F5A6,//Human_Male_Beard_ClassicBeard "Human_Male_Beard_ClassicBeard" [HDPT:0015F5A6]
+                    0x0015FD51,//Human_Male_Beard_CleanThin "Human_Male_Beard_CleanThin" [HDPT:0015FD51]
+                    0x002CDD7D,//Human_Male_Beard_Full_rugged "Human_Male_Beard_Full_rugged" [HDPT:002CDD7D]
+                    0x00160C2F,//Human_Male_Beard_Goatee "Human_Male_Beard_Goatee" [HDPT:00160C2F]
+                    0x00160C2E,//Human_Male_Beard_HeavyStubble "Human_Male_Beard_HeavyStubble" [HDPT:00160C2E]
+                    0x00160C2B,//Human_Male_Beard_PaintersMoustache "Human_Male_Beard_PaintersMoustache" [HDPT:00160C2B]
+                    0x00160369,//Human_Male_Beard_PatchStache "Human_Male_Beard_PatchStache" [HDPT:00160369]
+                    0x001F764A,//Human_Male_Beard_Patchy "Human_Male_Beard_Patchy" [HDPT:001F764A]
+                    0x00160C30,//Human_Male_Beard_PencilMoustache "Human_Male_Beard_PencilMoustache" [HDPT:00160C30]
+                    0x0016036B,//Human_Male_Beard_PirateThick "Human_Male_Beard_PirateThick" [HDPT:0016036B]
+                    0x0015F353,//Human_Male_Beard_PirateThin "Human_Male_Beard_PirateThin" [HDPT:0015F353]
+                    0x00193431,//Human_Male_Beard_Stubble_Heavy "Human_Male_Beard_Stubble_Heavy" [HDPT:00193431]
+                    0x00193430,//Human_Male_Beard_Stubble_Light "Human_Male_Beard_Stubble_Light" [HDPT:00193430]
+                    0x00193432,//Human_Male_Beard_Stubble_Patchy "Human_Male_Beard_Stubble_Patchy" [HDPT:00193432]
+                    0x001150DC,//Human_Male_Beard_Wildman "Human_Male_Beard_Wildman" [HDPT:001150DC]
+                    0x001676CF,//Human_Male_Beard_Wolfchops "Human_Male_Beard_Wolfchops" [HDPT:001676CF]
+                };
+                return new FormKey(gen_quest_main.StarfieldModKey, partlist[random.Next(partlist.Count)]).ToNullableLink<IHeadPartGetter>();
             }
         }
 
