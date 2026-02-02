@@ -83,7 +83,8 @@ namespace FrankyCLI
                 TrunkRoomLists = new List<string> { "rg_trunklist" },
                 scoringSystem = stationDesign.scoringSystem,
                 passes = stationDesign.stationPasses,
-                stateName = stationDesign.dungeonName
+                stateName = stationDesign.dungeonName,
+                AreaPerEnemy = stationDesign.AreaPerEnemy
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 

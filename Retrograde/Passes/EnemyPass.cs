@@ -81,15 +81,34 @@ namespace FrankyCLI.Retrograde
             var bossDistance = MathUtil.Length(bossVector);
             var fallbackDistance = Math.Max(1f, CalculateFarthestDistance(state));
 
-            int enemyCap = Math.Max(1, (int)Math.Ceiling(state.placedRooms.Count * 1.5f));
+            // Scale enemy count on dungeon area so large sprawling stations
+            // get more enemies than compact ones, then apply a random density
+            // multiplier (0.8x–1.4x) for per-run variety.
+            float dungeonArea = CalculateDungeonArea(state);
+            float areaPerEnemy = Math.Max(1f, state.AreaPerEnemy);
+            int areaBasedCap = Math.Max(1, (int)Math.Ceiling(dungeonArea / areaPerEnemy));
+            float densityMultiplier = 0.8f + (float)RandomUtils.random.NextDouble() * 0.6f;
+            int enemyCap = Math.Max(1, (int)Math.Ceiling(areaBasedCap * densityMultiplier));
 
             var candidates = BuildCandidates(state, bossVector, bossDistance, fallbackDistance);
             if (candidates.Count == 0)
                 return;
 
+            // Reserve a boss spawn before general selection so it's guaranteed.
+            SpawnCandidate? reservedBoss = null;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                if (candidates[i].Room.DistrictType == "boss")
+                {
+                    reservedBoss = candidates[i];
+                    candidates.RemoveAt(i);
+                    break;
+                }
+            }
+
             enemyCap = Math.Min(enemyCap, candidates.Count);
             var chosenSpawns = ChooseCandidates(candidates, enemyCap);
-            if (chosenSpawns.Count == 0)
+            if (chosenSpawns.Count == 0 && reservedBoss == null)
                 return;
 
             // Avoid clustering too many enemies in the same small area.
@@ -122,29 +141,128 @@ namespace FrankyCLI.Retrograde
                     break;
             }
 
-            bool bossplaced = false;
-            foreach (var spawn in spacedSpawns)
+            // Place guaranteed boss encounter first.
+            if (reservedBoss.HasValue)
             {
-                var placed = spawn.Room;
+                var bossSpawn = reservedBoss.Value;
+                var bossPos = CalculateWorldPosition(bossSpawn);
+                var bossRot = bossSpawn.Marker.Rotation;
+                int bossGroupSize = DetermineGroupSize(bossSpawn.Room.DistrictType);
 
+                for (int memberIdx = 0; memberIdx < bossGroupSize; memberIdx++)
+                {
+                    Npc selected = memberIdx == 0
+                        ? stationFactionCrew.GetBoss(bossSpawn.Room.DistrictType)
+                        : stationFactionCrew.GetCrewMember(bossSpawn.Room.DistrictType);
+
+                    var memberPos = memberIdx == 0
+                        ? bossPos
+                        : OffsetPosition(bossPos, memberIdx);
+
+                    state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
+                    {
+                        Rotation = bossRot,
+                        Position = memberPos,
+                        Base = selected.ToLink<INpcGetter>()
+                    });
+                }
+            }
+
+            // Pick a miniboss candidate: 30% chance per non-boss spawn in
+            // high-progress rooms (hab, ore, district). At most one miniboss.
+            int minibossIndex = -1;
+            if (spacedSpawns.Count > 0)
+            {
+                var eligibleIndices = new List<int>();
+                for (int i = 0; i < spacedSpawns.Count; i++)
+                {
+                    var dt = spacedSpawns[i].Room.DistrictType;
+                    if (dt != "boss" && dt != "util" && dt != "trunk")
+                        eligibleIndices.Add(i);
+                }
+                if (eligibleIndices.Count > 0 && RandomUtils.random.Next(100) < 30)
+                {
+                    minibossIndex = eligibleIndices[RandomUtils.random.Next(eligibleIndices.Count)];
+                }
+            }
+
+            // Place remaining enemies.
+            for (int spawnIdx = 0; spawnIdx < spacedSpawns.Count; spawnIdx++)
+            {
+                var spawn = spacedSpawns[spawnIdx];
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation;
+                bool isMiniboss = spawnIdx == minibossIndex;
 
-                Npc selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
+                int groupSize = isMiniboss
+                    ? DetermineGroupSize("boss")
+                    : DetermineGroupSize(spawn.Room.DistrictType);
 
-                if (spawn.Room.DistrictType == "boss" && !bossplaced)
+                for (int memberIdx = 0; memberIdx < groupSize; memberIdx++)
                 {
-                    selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
-                    bossplaced = true;                
+                    Npc selected;
+                    if (isMiniboss && memberIdx == 0)
+                        selected = stationFactionCrew.GetBoss(spawn.Room.DistrictType);
+                    else
+                        selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
+
+                    var memberPos = memberIdx == 0
+                        ? worldPos
+                        : OffsetPosition(worldPos, memberIdx);
+
+                    state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
+                    {
+                        Rotation = worldRot,
+                        Position = memberPos,
+                        Base = selected.ToLink<INpcGetter>()
+                    });
                 }
-
-                state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
-                {
-                    Rotation = worldRot,
-                    Position = worldPos,
-                    Base = selected.ToLink<INpcGetter>()
-                });
             }
+        }
+
+        /// <summary>
+        /// Determines how many NPCs to spawn at a single marker based on room purpose.
+        /// Combat-heavy districts get squads; quieter areas get lone sentries.
+        /// </summary>
+        private static int DetermineGroupSize(string districtType)
+        {
+            int min, max;
+            switch (districtType)
+            {
+                case "boss":
+                    min = 2; max = 4;
+                    break;
+                case "hab":
+                case "ore":
+                case "district":
+                    min = 2; max = 3;
+                    break;
+                case "util":
+                    min = 1; max = 1;
+                    break;
+                case "trunk":
+                case "bridge":
+                    min = 1; max = 2;
+                    break;
+                default:
+                    min = 1; max = 2;
+                    break;
+            }
+
+            return RandomUtils.random.Next(min, max + 1);
+        }
+
+        /// <summary>
+        /// Offsets additional group members slightly from the spawn marker so they
+        /// don't stack on top of each other. Uses a small circle around the origin.
+        /// </summary>
+        private static P3Float OffsetPosition(P3Float origin, int index)
+        {
+            const float offsetRadius = 1.5f;
+            double angle = index * (2.0 * Math.PI / 3.0); // evenly space up to 3 extras
+            float dx = (float)(Math.Cos(angle) * offsetRadius);
+            float dy = (float)(Math.Sin(angle) * offsetRadius);
+            return new P3Float(origin.X + dx, origin.Y + dy, origin.Z);
         }
 
         private List<SpawnCandidate> BuildCandidates(
@@ -280,9 +398,18 @@ namespace FrankyCLI.Retrograde
             return MathUtil.Clamp01(roomDistance / fallbackDistance);
         }
 
-        private static float ComputeWeight(float progress)
+        // Randomized once per pass so every run has a different quiet intro.
+        private readonly float _safeZone = 0.05f + (float)RandomUtils.random.NextDouble() * 0.15f;
+
+        private float ComputeWeight(float progress)
         {
-            return 0.2f + 0.8f * progress * progress;
+            // No enemies in the safe zone so the player has breathing
+            // room to orient themselves on entry (varies 5%–20% per run).
+            if (progress < _safeZone)
+                return 0f;
+
+            float adjusted = (progress - _safeZone) / (1f - _safeZone);
+            return 0.2f + 0.8f * adjusted * adjusted;
         }
 
         private static bool IsBossRoom(PlacedRoom room)
@@ -341,6 +468,27 @@ namespace FrankyCLI.Retrograde
             }
 
             return (float)Math.Sqrt(maxDistSq);
+        }
+
+        private static float CalculateDungeonArea(DungeonState state)
+        {
+            if (state.placedRooms.Count <= 1)
+                return 1f;
+
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
+
+            foreach (var room in state.placedRooms)
+            {
+                if (room.WorldPos.X < minX) minX = room.WorldPos.X;
+                if (room.WorldPos.X > maxX) maxX = room.WorldPos.X;
+                if (room.WorldPos.Y < minY) minY = room.WorldPos.Y;
+                if (room.WorldPos.Y > maxY) maxY = room.WorldPos.Y;
+            }
+
+            float width = Math.Max(1f, maxX - minX);
+            float height = Math.Max(1f, maxY - minY);
+            return width * height;
         }
 
         private static P3Float CalculateWorldPosition(SpawnCandidate spawn)
