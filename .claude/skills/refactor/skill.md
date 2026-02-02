@@ -128,3 +128,10 @@ private class BossPlacementResult
 - **Parameter reduction**: `PlanBridges` 11 params → 1 (context); `TryPlaceBridgeBetween` 13 params (10 in + 3 out) → 3 params returning a result object
 - **Documentation**: Added XML summaries to class and all extracted methods; added stage comments (Stages 1-4, 2a-2c)
 - **Impact**: Max nesting reduced from 4 to 2 levels; main loop body reads as high-level steps
+
+### ConnectorSealingPass.cs
+- **Constants**: Promoted `positionTolerance` and `startPosTolerance` to class-level `const` fields; removed tolerance parameters from all helper methods
+- **Method extraction**: Broke `SealUnconnectedPlacedMarkers` (~90 lines, 3 stages) into `CollectPlacedConnectors`, `FindMatchedConnectors`, and `AreConnectorsMated`; extracted `TrySealConnector` to encapsulate the strict→relaxed blocker placement pattern
+- **Dead code**: Removed empty `if (!placed)` block with placeholder comment
+- **Documentation**: Added XML summaries to class and all extracted methods; added stage comments (Stages 1-2, 2a-2c)
+- **Impact**: Max nesting reduced from 3 to 2 levels; `SealUnconnectedPlacedMarkers` reads as three high-level stages; helper signatures simplified by removing repeated tolerance parameters

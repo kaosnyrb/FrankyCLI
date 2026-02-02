@@ -11,8 +11,17 @@ using Noggog;
 
 namespace FrankyCLI.Retrograde.Passes
 {
+    /// <summary>
+    /// Seals all open (unconnected) connectors in the dungeon by placing blocker prefabs.
+    /// Runs in two sweeps: first seals explicit open connectors, then sweeps placed rooms
+    /// for any stray unmatched connector markers.
+    /// </summary>
     public class ConnectorSealingPass : IGenPass
     {
+        // ── Position matching ───────────────────────────────────────────
+        private const float PositionTolerance = 0.01f;
+        private const float StartPosTolerance = 0.01f;
+
         public string GetDoorBlocker(string doorSize, string tileset, string districtType)
         {
             // Prefer: pull blockers from a FormList named after the tileset (e.g. rg_blocker_station_hab).
@@ -54,48 +63,44 @@ namespace FrankyCLI.Retrograde.Passes
 
         public void RunPass(DungeonState state)
         {
-            const float positionTolerance = 0.01f;
-            const float startPosTolerance = 0.01f; // start connector sits exactly at StartingPosition
             var sealedPositions = state.SealedConnectorPositionKeys ??= new HashSet<string>();
             sealedPositions.Clear();
 
-            // Close any connectors below the allowed Y plane first, then process the rest.
+            // Stage 1: Seal explicit open connectors (below-YMin first to guarantee closure)
             var ordered = state.openConnectors
                 .OrderBy(c => c.WorldPos.Y < state.YMin ? 0 : 1)
                 .ToList();
 
             foreach (var open in ordered)
             {
-                if (ShouldSkipStartConnector(open, state, startPosTolerance))
+                if (ShouldSkipStartConnector(open, state))
                     continue;
 
-                if (IsWindowPlacedAt(open.WorldPos, state, positionTolerance))
+                if (IsWindowPlacedAt(open.WorldPos, state))
                     continue;
 
-                bool belowYMin = open.WorldPos.Y < state.YMin;
-
-                // First try with strict matching; if we're below YMin, relax tileset matching to ensure we seal it.
-                bool placed = TryPlaceBlocker(open, state, requireTilesetMatch: true);
-                if (!placed && belowYMin)
-                {
-                    placed = TryPlaceBlocker(open, state, requireTilesetMatch: false);
-                }
-
-                if (placed)
-                {
-                    sealedPositions.Add(PositionKey(open.WorldPos, positionTolerance));
-                }
-
-                // Optional: log missing blocker connector rather than hard fail
-                if (!placed)
-                {
-                    // You may want to add logging here, e.g. Debug.WriteLine(...)
-                }
+                if (TrySealConnector(open, state, sealedPositions))
+                    continue;
             }
 
-            // After the usual open-connector sealing, sweep every placed room for any stray connectors
-            // that failed to connect and close them off.
-            SealUnconnectedPlacedMarkers(state, sealedPositions, positionTolerance);
+            // Stage 2: Sweep placed rooms for stray unmatched connector markers
+            SealUnconnectedPlacedMarkers(state, sealedPositions);
+        }
+
+        /// <summary>
+        /// Attempts to seal a single open connector, relaxing tileset matching for below-YMin connectors.
+        /// Returns true if a blocker was placed.
+        /// </summary>
+        private bool TrySealConnector(OpenConnector open, DungeonState state, HashSet<string> sealedPositions)
+        {
+            bool placed = TryPlaceBlocker(open, state, requireTilesetMatch: true);
+            if (!placed && open.WorldPos.Y < state.YMin)
+                placed = TryPlaceBlocker(open, state, requireTilesetMatch: false);
+
+            if (placed)
+                sealedPositions.Add(PositionKey(open.WorldPos));
+
+            return placed;
         }
 
         private bool TryPlaceBlocker(OpenConnector open, DungeonState state, bool requireTilesetMatch)
@@ -141,11 +146,49 @@ namespace FrankyCLI.Retrograde.Passes
             return false;
         }
 
-        private void SealUnconnectedPlacedMarkers(DungeonState state, HashSet<string> sealedPositions, float tolerance)
+        /// <summary>
+        /// Sweeps every placed room for connector markers that didn't pair up with another room,
+        /// and seals them with blockers.
+        /// </summary>
+        private void SealUnconnectedPlacedMarkers(DungeonState state, HashSet<string> sealedPositions)
         {
             if (state.placedRooms == null || state.placedRooms.Count == 0)
                 return;
 
+            // Stage 2a: Collect all connector markers from placed rooms
+            var connectors = CollectPlacedConnectors(state);
+            if (connectors.Count == 0)
+                return;
+
+            // Stage 2b: Mark connectors that are properly mated (same position, opposing direction, matching size/tileset)
+            var matched = FindMatchedConnectors(connectors);
+
+            // Stage 2c: Seal any unmatched connectors
+            for (int i = 0; i < connectors.Count; i++)
+            {
+                if (matched[i])
+                    continue;
+
+                var open = connectors[i].Conn;
+                if (ShouldSkipStartConnector(open, state))
+                    continue;
+
+                if (IsWindowPlacedAt(open.WorldPos, state))
+                    continue;
+
+                var key = PositionKey(open.WorldPos);
+                if (sealedPositions.Contains(key))
+                    continue;
+
+                TrySealConnector(open, state, sealedPositions);
+            }
+        }
+
+        /// <summary>
+        /// Gathers all connector markers from placed rooms as world-space OpenConnectors.
+        /// </summary>
+        private static List<(OpenConnector Conn, int RoomIndex)> CollectPlacedConnectors(DungeonState state)
+        {
             var connectors = new List<(OpenConnector Conn, int RoomIndex)>();
             for (int roomIndex = 0; roomIndex < state.placedRooms.Count; roomIndex++)
             {
@@ -167,9 +210,15 @@ namespace FrankyCLI.Retrograde.Passes
                 }
             }
 
-            if (connectors.Count == 0)
-                return;
+            return connectors;
+        }
 
+        /// <summary>
+        /// Pairs up connectors that face each other at the same position with matching size and tileset.
+        /// Returns an array where true means the connector at that index is properly mated.
+        /// </summary>
+        private static bool[] FindMatchedConnectors(List<(OpenConnector Conn, int RoomIndex)> connectors)
+        {
             var matched = new bool[connectors.Count];
             for (int i = 0; i < connectors.Count; i++)
             {
@@ -181,19 +230,7 @@ namespace FrankyCLI.Retrograde.Passes
                     if (matched[j])
                         continue;
 
-                    if (connectors[i].RoomIndex == connectors[j].RoomIndex)
-                        continue;
-
-                    if (!SamePosition(connectors[i].Conn.WorldPos, connectors[j].Conn.WorldPos, tolerance))
-                        continue;
-
-                    if (ConnectorUtils.Opposite(connectors[i].Conn.Parsed.Direction) != connectors[j].Conn.Parsed.Direction)
-                        continue;
-
-                    if (!string.Equals(connectors[i].Conn.Parsed.DoorSize, connectors[j].Conn.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    if (!string.Equals(connectors[i].Conn.Parsed.Tileset, connectors[j].Conn.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                    if (!AreConnectorsMated(connectors[i], connectors[j]))
                         continue;
 
                     matched[i] = matched[j] = true;
@@ -201,63 +238,65 @@ namespace FrankyCLI.Retrograde.Passes
                 }
             }
 
-            for (int i = 0; i < connectors.Count; i++)
-            {
-                if (matched[i])
-                    continue;
-
-                var open = connectors[i].Conn;
-                if (ShouldSkipStartConnector(open, state, tolerance))
-                    continue;
-
-                if (IsWindowPlacedAt(open.WorldPos, state, tolerance))
-                    continue;
-
-                var key = PositionKey(open.WorldPos, tolerance);
-                if (sealedPositions.Contains(key))
-                    continue;
-
-                bool placed = TryPlaceBlocker(open, state, requireTilesetMatch: true);
-                if (!placed && open.WorldPos.Y < state.YMin)
-                {
-                    placed = TryPlaceBlocker(open, state, requireTilesetMatch: false);
-                }
-
-                if (placed)
-                {
-                    sealedPositions.Add(key);
-                }
-            }
+            return matched;
         }
 
-        private static bool SamePosition(P3Float a, P3Float b, float tolerance)
+        /// <summary>
+        /// Returns true if two connectors from different rooms are at the same position,
+        /// face opposite directions, and share the same door size and tileset.
+        /// </summary>
+        private static bool AreConnectorsMated(
+            (OpenConnector Conn, int RoomIndex) a,
+            (OpenConnector Conn, int RoomIndex) b)
+        {
+            if (a.RoomIndex == b.RoomIndex)
+                return false;
+
+            if (!SamePosition(a.Conn.WorldPos, b.Conn.WorldPos))
+                return false;
+
+            if (ConnectorUtils.Opposite(a.Conn.Parsed.Direction) != b.Conn.Parsed.Direction)
+                return false;
+
+            if (!string.Equals(a.Conn.Parsed.DoorSize, b.Conn.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (!string.Equals(a.Conn.Parsed.Tileset, b.Conn.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return true;
+        }
+
+        private static bool SamePosition(P3Float a, P3Float b)
         {
             float dx = a.X - b.X;
             float dy = a.Y - b.Y;
             float dz = a.Z - b.Z;
-            return dx * dx + dy * dy + dz * dz <= tolerance * tolerance;
+            return dx * dx + dy * dy + dz * dz <= PositionTolerance * PositionTolerance;
         }
 
-        private static string PositionKey(P3Float pos, float tolerance)
+        private static string PositionKey(P3Float pos)
         {
-            float scale = 1f / tolerance;
+            float scale = 1f / PositionTolerance;
             return $"{MathF.Round(pos.X * scale)}|{MathF.Round(pos.Y * scale)}|{MathF.Round(pos.Z * scale)}";
         }
 
-        private static bool ShouldSkipStartConnector(OpenConnector open, DungeonState state, float posTolerance)
+        private static bool ShouldSkipStartConnector(OpenConnector open, DungeonState state)
         {
-            // Protect the initial spine/start connector: sits exactly at StartingPosition.
-            return SamePosition(open.WorldPos, state.StartingPosition, posTolerance);
+            float dx = open.WorldPos.X - state.StartingPosition.X;
+            float dy = open.WorldPos.Y - state.StartingPosition.Y;
+            float dz = open.WorldPos.Z - state.StartingPosition.Z;
+            return dx * dx + dy * dy + dz * dz <= StartPosTolerance * StartPosTolerance;
         }
 
-        private static bool IsWindowPlacedAt(P3Float pos, DungeonState state, float tolerance)
+        private static bool IsWindowPlacedAt(P3Float pos, DungeonState state)
         {
             if (state.windowConnectors == null || state.windowConnectors.Count == 0)
                 return false;
 
             foreach (var windowPos in state.windowConnectors)
             {
-                if (SamePosition(windowPos, pos, tolerance))
+                if (SamePosition(windowPos, pos))
                     return true;
             }
 
