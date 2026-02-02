@@ -14,7 +14,18 @@ namespace FrankyCLI
 {
     public class BossTopologyPass : IGenPass
     {
-        string district = null;
+        // Room placement limits
+        private const int MaxRoomsToPlace = 1; // Boss rooms: only place a single room
+        private const int MaxAttempts = 100; // Hard limit to avoid infinite loops
+
+        // Collision and spacing parameters
+        private const float CollisionPadding = -1.5f; // World units clearance
+
+        // Bridge placement constraints (unused for boss, but kept for consistency)
+        private const float BridgeMaxHorizontalSpan = 40f;
+        private const float BridgeMaxVerticalOffset = 8f;
+
+        private readonly string district;
         private readonly string districtTypeLabel;
 
         private class BossPlanMeta
@@ -24,23 +35,35 @@ namespace FrankyCLI
             public PlanScore Score;
         }
 
-        public BossTopologyPass(string districtType = null) {         
+        /// <summary>
+        /// Result of attempting to place a boss room at a connector.
+        /// </summary>
+        private class BossPlacementResult
+        {
+            public PlacedRoom PlacedRoom { get; set; }
+            public PlacedObject PlacementObject { get; set; }
+            public List<OpenConnector> NewConnectors { get; set; }
+        }
+
+        public BossTopologyPass(string districtType = null) {
             district = districtType;
             districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
         }
+
+        /// <summary>
+        /// Main algorithm: Places a single boss room at the connector farthest from the dungeon start.
+        /// Uses a multi-plan approach to find the best placement based on scoring criteria.
+        /// Strategy: Boss rooms anchor at the end of the dungeon to create a climactic encounter.
+        /// </summary>
         public void RunPass(DungeonState state)
         {
-            // Inputs / knobs
-            int maxRoomsToPlace = 1;          // boss: only place a single room
-            int maxAttempts = 100;              // hard limit (failed tries) to avoid infinite loops
-            float collisionPadding = -1.5f; // tweak: world units clearance
+            // Configuration: computed at runtime
             int maxPlans = state.scoringSystem?.Effort ?? 20;
-            float bridgeMaxHorizontalSpan = 40f;
-            float bridgeMaxVerticalOffset = 8f;
             var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
 
             RoomUtils roomUtils = state.GetRoomUtils("rg_bosslist");
 
+            // Helper: Selects and caches the boss room prefab for consistency across plans
             string chosenBossRoomEditorId = null;
             string GetOrChooseBossRoom(string tileset)
             {
@@ -55,17 +78,9 @@ namespace FrankyCLI
                 return chosenBossRoomEditorId;
             }
 
+            // Stage 1: Multi-plan generation - run multiple planning attempts to find optimal placement
             var bestOutcome = PlanRunner.RunBest<BossPlanMeta>(maxPlans, planAttempt =>
             {
-                var usedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var room in state.placedRooms)
-                {
-                    if (!string.IsNullOrEmpty(room.Prefab?.PrefabEditorId))
-                    {
-                        usedPrefabIds.Add(room.Prefab.PrefabEditorId);
-                    }
-                }
-
                 var plannedRooms = new List<PlacedRoom>(state.placedRooms);
                 var plannedOpenConnectors = new List<OpenConnector>(state.openConnectors);
                 var plannedPlacements = new List<PlacedObject>();
@@ -73,26 +88,17 @@ namespace FrankyCLI
                 int roomsPlaced = 0;
                 int attempts = 0;
 
-                // Main placement loop: iterates over open connectors, but bounded
-                while (roomsPlaced < maxRoomsToPlace && plannedOpenConnectors.Count > 0 && attempts < maxAttempts)
+                // Stage 2: Room placement loop - find and place the boss room
+                while (roomsPlaced < MaxRoomsToPlace && plannedOpenConnectors.Count > 0 && attempts < MaxAttempts)
                 {
                     attempts++;
 
-                    // Choose the open connector farthest from the starting position to anchor the boss room
-                    int openIndex = -1;
-                    float bestDist = float.MinValue;
-                    for (int i = 0; i < plannedOpenConnectors.Count; i++)
-                    {
-                        float dist = MathUtil.DistanceSquared(plannedOpenConnectors[i].WorldPos, state.StartingPosition);
-                        if (dist > bestDist)
-                        {
-                            bestDist = dist;
-                            openIndex = i;
-                        }
-                    }
+                    // Stage 2a: Select the connector farthest from start
+                    // Strategy: Place boss room at dungeon's end for climactic encounter
+                    var target = ConnectorSelectionUtil.ChooseFarthestOpenConnector(plannedOpenConnectors, state.StartingPosition);
+                    int openIndex = plannedOpenConnectors.IndexOf(target);
                     if (openIndex < 0)
                         break;
-                    var target = plannedOpenConnectors[openIndex];
 
                     if (target.WorldPos.Y < state.YMin)
                     {
@@ -103,87 +109,27 @@ namespace FrankyCLI
                     // Remove it now to ensure we "try to iterate through all open connectors"
                     plannedOpenConnectors.RemoveAt(openIndex);
 
-                    // We need a connector on nextPrefab that is OPPOSITE direction to target,
-                    // and compatible on door/tileset (simple equality checks here).
-                    var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
-
-                    bool placed = false;
-
+                    // Stage 2b: Try to place boss room at selected connector
                     var bossPrefabEditorId = GetOrChooseBossRoom(target.Parsed.Tileset);
-                    var nextPrefab = PrefabCache.GetPrefab(bossPrefabEditorId);
+                    var bossPrefab = PrefabCache.GetPrefab(bossPrefabEditorId);
 
-                    for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                    var placementResult = TryPlaceBossRoomAtConnector(target, bossPrefab, plannedRooms, state.YMin, districtTypeLabel);
+
+                    if (placementResult == null)
                     {
-                        var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
-
-                        var compatible = nextConnectors
-                            .Where(c =>
-                                c.Parsed.Direction == requiredDir &&
-                                string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
-                                string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-
-                        if (compatible.Count == 0)
-                            continue;
-
-                        var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
-
-                        // Align using ROTATED local connector
-                        P3Float nextPos = target.WorldPos - chosen.LocalPos;
-
-                        // Collision using ROTATED bounds
-                        var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
-                        if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
-                            continue;
-                        if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, collisionPadding))
-                            continue;
-
-                        // Place it with rotation (planned)
-                        plannedPlacements.Add(new PlacedObject(gen_quest_main.myMod)
-                        {
-                            Count = 1,
-                            Rotation = RgRotation.RotationToP3Float(yawSteps),
-                            Position = nextPos,
-                            Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                        });
-
-                        plannedRooms.Add(new PlacedRoom
-                        {
-                            Prefab = nextPrefab,
-                            WorldPos = nextPos,
-                            YawSteps = yawSteps,
-                            DistrictType = districtTypeLabel,
-                            Connectors = nextConnectors
-                        });
-
-                        roomsPlaced++;
-                        placed = true;
-
-                        foreach (var c in nextConnectors)
-                        {
-                            if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
-                                continue;
-
-                            plannedOpenConnectors.Add(new OpenConnector
-                            {
-                                Parsed = c.Parsed,
-                                YawSteps = yawSteps,
-                                WorldPos = nextPos + c.LocalPos,
-                                DistrictType = districtTypeLabel
-                            });
-                        }
-
-                        break;
-                    }
-
-                    // If we couldn't place anything for this connector, we just move on.
-                    if (!placed)
-                    {
-                        plannedOpenConnectors.Add(target);//Return it to the list so we close it later.
+                        // No valid placement found - return connector to list for later closure
+                        plannedOpenConnectors.Add(target);
                         continue;
                     }
+
+                    // Stage 2c: Accept the placement and update state
+                    plannedPlacements.Add(placementResult.PlacementObject);
+                    plannedRooms.Add(placementResult.PlacedRoom);
+                    plannedOpenConnectors.AddRange(placementResult.NewConnectors);
+                    roomsPlaced++;
                 }
 
+                // Stage 3: Evaluate this plan using scoring metrics
                 var bridgeablePairs = 0; // Boss placement ignores bridgeablePairs
                 var planClustering = 0; // Boss placement planSizeDiversity
                 var planSizeDiversity = 0; // Boss placement planSizeDiversity
@@ -191,8 +137,8 @@ namespace FrankyCLI
                 var connectorViability = 0; // Boss placement planSizeDiversity
                 const double planArea = 0; // Boss placement ignores area weighting
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
-                
-                //Boss room must have placed a room
+
+                // Validation: Boss room must have been placed successfully
                 if (roomsPlaced == 0)
                 {
                     planScore.Total = double.MinValue;
@@ -213,6 +159,7 @@ namespace FrankyCLI
                 };
             });
 
+            // Stage 4: Apply the best plan to the dungeon state
             if (bestOutcome?.Placements == null)
                 throw new Exception("Couldn't place boss room");
 
@@ -244,8 +191,97 @@ namespace FrankyCLI
 
             if (!state.IsHarnessRun)
             {
-                Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
+                Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{MaxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
             }
+        }
+
+        /// <summary>
+        /// Attempts to place a boss room at the target connector by evaluating all rotations.
+        /// Tries all 4 rotations (0°, 90°, 180°, 270°) to find a compatible, non-colliding placement.
+        /// </summary>
+        /// <returns>Placement result if successful, null if no valid placement found.</returns>
+        private static BossPlacementResult TryPlaceBossRoomAtConnector(
+            OpenConnector target,
+            RoomPrefab bossPrefab,
+            List<PlacedRoom> plannedRooms,
+            float yMin,
+            string districtTypeLabel)
+        {
+            var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
+
+            // Evaluate all 4 rotations
+            for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+            {
+                var nextConnectors = ConnectorUtils.GetConnectors(bossPrefab, yawSteps);
+
+                // Find compatible connectors (matching direction, door size, and tileset)
+                var compatible = nextConnectors
+                    .Where(c =>
+                        c.Parsed.Direction == requiredDir &&
+                        string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (compatible.Count == 0)
+                    continue;
+
+                // Randomly choose one compatible connector
+                var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
+
+                // Calculate world position by aligning the chosen connector with the target
+                P3Float nextPos = target.WorldPos - chosen.LocalPos;
+
+                // Check collision and height constraints
+                var candidateAabb = ConnectorUtils.ToWorldAabbRotated(bossPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                if (ConnectorUtils.IsBelowYMin(candidateAabb, yMin))
+                    continue;
+                if (ConnectorUtils.CollidesWithAny(candidateAabb, plannedRooms, CollisionPadding))
+                    continue;
+
+                // Valid placement found - create placement objects
+                var placementObject = new PlacedObject(gen_quest_main.myMod)
+                {
+                    Count = 1,
+                    Rotation = RgRotation.RotationToP3Float(yawSteps),
+                    Position = nextPos,
+                    Base = bossPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                };
+
+                var placedRoom = new PlacedRoom
+                {
+                    Prefab = bossPrefab,
+                    WorldPos = nextPos,
+                    YawSteps = yawSteps,
+                    DistrictType = districtTypeLabel,
+                    Connectors = nextConnectors
+                };
+
+                // Collect all new open connectors (excluding the one we connected to)
+                var newConnectors = new List<OpenConnector>();
+                foreach (var c in nextConnectors)
+                {
+                    if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
+                        continue;
+
+                    newConnectors.Add(new OpenConnector
+                    {
+                        Parsed = c.Parsed,
+                        YawSteps = yawSteps,
+                        WorldPos = nextPos + c.LocalPos,
+                        DistrictType = districtTypeLabel
+                    });
+                }
+
+                return new BossPlacementResult
+                {
+                    PlacedRoom = placedRoom,
+                    PlacementObject = placementObject,
+                    NewConnectors = newConnectors
+                };
+            }
+
+            // No valid placement found in any rotation
+            return null;
         }
 
     }
