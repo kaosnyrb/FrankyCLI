@@ -17,11 +17,13 @@ namespace FrankyCLI.questgen_tools
         List<Npc> LowRank { get; set; }
         List<Npc> HighRank { get; set; }
         List<Npc> Bosses { get; set; }
+        string FactionName { get; set; }
         public CrimsonFleetFactionCrew()
         {
             string Faction = "Crimsonfleet";
             Random random = RandomUtils.random;
             string Crewname = Faction;
+            FactionName = GetFactionPrefix();
 
             int lowrank_crewcount = 10;
             int highrank_crewcount = 5;
@@ -219,6 +221,7 @@ namespace FrankyCLI.questgen_tools
 
         private string GetFactionPrefix()
         {
+            if (FactionName != null) return FactionName;
             Random r = RandomUtils.random;
             var prefixes = new List<string>
             {
