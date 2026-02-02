@@ -394,14 +394,17 @@ namespace FrankyCLI.Retrograde
             return MathUtil.Clamp01(roomDistance / fallbackDistance);
         }
 
-        private static float ComputeWeight(float progress)
+        // Randomized once per pass so every run has a different quiet intro.
+        private readonly float _safeZone = 0.05f + (float)RandomUtils.random.NextDouble() * 0.15f;
+
+        private float ComputeWeight(float progress)
         {
-            // No enemies in the first 10% of the dungeon so the player
-            // has breathing room to orient themselves on entry.
-            if (progress < 0.1f)
+            // No enemies in the safe zone so the player has breathing
+            // room to orient themselves on entry (varies 5%–20% per run).
+            if (progress < _safeZone)
                 return 0f;
 
-            float adjusted = (progress - 0.1f) / 0.9f;
+            float adjusted = (progress - _safeZone) / (1f - _safeZone);
             return 0.2f + 0.8f * adjusted * adjusted;
         }
 
