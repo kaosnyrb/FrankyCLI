@@ -44,7 +44,7 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetLowRank_Outfit();
-                npc.Name = "Crimson" + " " + GetLowRank_Name();
+                npc.Name = GetFactionPrefix() + " " + GetLowRank_Name();
                 var gear = GetLowRank_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 0.5f + ((float)random.NextDouble()/2);
@@ -68,7 +68,7 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetHighRank_Outfit();
-                npc.Name = "Crimson" + " " + GetHighRank_Name();
+                npc.Name = GetFactionPrefix() + " " + GetHighRank_Name();
                 var gear = GetHighRank_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 0.75f + (float)random.NextDouble();
@@ -91,7 +91,7 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetBoss_Outfit();
-                npc.Name = "Crimson" + " " + GetBoss_Name();
+                npc.Name = GetFactionPrefix() + " " + GetBoss_Name();
                 var gear = GetBoss_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 1 + (float)random.NextDouble();
@@ -215,6 +215,17 @@ namespace FrankyCLI.questgen_tools
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
+        }
+
+        private string GetFactionPrefix()
+        {
+            Random r = RandomUtils.random;
+            var prefixes = new List<string>
+            {
+                "Crimson","Fleet","Crimson Fleet","Pirate","Buccaneer",
+                "Corsair","Raider","Marauder","Freebooter","Privateer"
+            };
+            return prefixes[r.Next(prefixes.Count)];
         }
 
         public string GetLowRank_Name()
