@@ -128,12 +128,30 @@ namespace FrankyCLI.questgen_tools
             {
                 npc.HeadParts.Add(GetExtraHeadParts(isfemale));
             }
+            npc.CombatStyle = GetCombatStyle();
 
             npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = gear, Count = 1 } },
                 };
             gen_quest_main.myMod.Npcs.Add(npc);
+        }
+
+        private IFormLinkNullable<ICombatStyleGetter> GetCombatStyle()
+        {
+            Random random = RandomUtils.random;
+            // Use extras as theres only 2
+            List<uint> combatlist = new List<uint>()
+            {
+                0x0026FDB6,//csVaruun_Assault [CSTY:0026FDB6]
+                0x002C562A,//csVaruun_Charger [CSTY:002C562A]                
+                0x002C5631,//csEcliptic_Charger [CSTY:002C5631]
+                0x002C5630,//csEcliptic_Heavy [CSTY:002C5630]
+                0x0026FDB1,//csEcliptic_Officer [CSTY:0026FDB1]
+                0x002C562F,//csEcliptic_Sniper [CSTY:002C562F]
+                0x002C562E,//csEcliptic_Support [CSTY:002C562E]
+            };
+            return new FormKey(gen_quest_main.StarfieldModKey, combatlist[random.Next(combatlist.Count)]).ToNullableLink<ICombatStyleGetter>();
         }
 
         private IFormLinkNullable<IHeadPartGetter> GetExtraHeadParts(bool female)

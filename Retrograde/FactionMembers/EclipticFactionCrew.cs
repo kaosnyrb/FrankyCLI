@@ -129,11 +129,28 @@ namespace FrankyCLI.questgen_tools
                 npc.HeadParts.Add(GetExtraHeadParts(isfemale));
             }
 
+            npc.CombatStyle = GetCombatStyle();
+
             npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = gear, Count = 1 } },
                 };
             gen_quest_main.myMod.Npcs.Add(npc);
+        }
+
+        private IFormLinkNullable<ICombatStyleGetter> GetCombatStyle()
+        {
+            Random random = RandomUtils.random;
+            List<uint> combatlist = new List<uint>()
+            {
+                0x002C5632,//csEcliptic_Assault [CSTY:002C5632]
+                0x002C5631,//csEcliptic_Charger [CSTY:002C5631]
+                0x002C5630,//csEcliptic_Heavy [CSTY:002C5630]
+                0x0026FDB1,//csEcliptic_Officer [CSTY:0026FDB1]
+                0x002C562F,//csEcliptic_Sniper [CSTY:002C562F]
+                0x002C562E,//csEcliptic_Support [CSTY:002C562E]
+            };
+            return new FormKey(gen_quest_main.StarfieldModKey, combatlist[random.Next(combatlist.Count)]).ToNullableLink<ICombatStyleGetter>();
         }
 
         private IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
@@ -287,7 +304,6 @@ namespace FrankyCLI.questgen_tools
                 "Operative",
                 "Professional","Militant","Enforcer","Gunhand","Tactician",
                 "Vanguard","Sentinel","Warden","Striker","Dragoon",
-                "Trooper","Conscript","Ranger","Commando","Legionnaire",
                 "Wardog","Ironside","Partisan","Outrider","Bulwark"
             };
             return prefixes[r.Next(prefixes.Count)];

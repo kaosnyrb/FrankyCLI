@@ -60,7 +60,7 @@ namespace FrankyCLI.questgen_tools
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            IStationDesign stationDesign = new HabStation();
+            IStationDesign stationDesign = new OreStation();
             var stationname = stationDesign.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
 
             MessageNoun stationnamemessage = new MessageNoun(FormKeyLookup.GetFormKey("RG_SE_Name").ID, stationname);

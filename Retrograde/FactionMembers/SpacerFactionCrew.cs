@@ -129,6 +129,7 @@ namespace FrankyCLI.questgen_tools
             {
                 npc.HeadParts.Add(GetExtraHeadParts(isfemale));
             }
+            npc.CombatStyle = GetCombatStyle();
 
             npc.Items = new ExtendedList<ContainerEntry>
                 {
@@ -136,6 +137,21 @@ namespace FrankyCLI.questgen_tools
                 };
             gen_quest_main.myMod.Npcs.Add(npc);
         }
+
+        private IFormLinkNullable<ICombatStyleGetter> GetCombatStyle()
+        {
+            Random random = RandomUtils.random;
+            List<uint> combatlist = new List<uint>()
+            {
+                0x002C562D,//csSpacer_Assault [CSTY:002C562D]
+                0x002C562C,//csSpacer_Charger [CSTY:002C562C]
+                0x000D2143,//csSpacer_Heavy [CSTY:000D2143]
+                0x002C562B,//csSpacer_Recruit [CSTY:002C562B]
+                0x000D2144,//csSpacer_Sniper [CSTY:000D2144]
+            };
+            return new FormKey(gen_quest_main.StarfieldModKey, combatlist[random.Next(combatlist.Count)]).ToNullableLink<ICombatStyleGetter>();
+        }
+
 
         private IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
         {

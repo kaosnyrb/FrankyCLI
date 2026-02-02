@@ -140,11 +140,28 @@ namespace FrankyCLI.questgen_tools
                 }
             }
 
+            npc.CombatStyle = GetCombatStyle();
+
             npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = gear, Count = 1 } },
                 };
             gen_quest_main.myMod.Npcs.Add(npc);
+        }
+
+        private IFormLinkNullable<ICombatStyleGetter> GetCombatStyle()
+        {
+            Random random = RandomUtils.random;
+            List<uint> combatlist = new List<uint>()
+            {
+                0x002C5632,//csCrimsonFleet_Assault [CSTY:002C5638]
+                0x002C5631,//csCrimsonFleet_Charger [CSTY:002C5637]
+                0x002C5630,//csCrimsonFleet_Heavy [CSTY:002C5636]
+                0x0026FDB1,//csCrimsonFleet_LowLevel [CSTY:00178CA4]
+                0x002C562F,//csCrimsonFleet_Recruit [CSTY:002C5635]
+                0x002C562E,//csCrimsonFleet_Sniper [CSTY:002C5634]
+            };
+            return new FormKey(gen_quest_main.StarfieldModKey, combatlist[random.Next(combatlist.Count)]).ToNullableLink<ICombatStyleGetter>();
         }
 
         private IFormLinkNullable<IHeadPartGetter> GetExtraHeadParts(bool female)
