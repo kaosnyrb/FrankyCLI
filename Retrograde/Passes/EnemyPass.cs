@@ -393,7 +393,13 @@ namespace FrankyCLI.Retrograde
 
         private static float ComputeWeight(float progress)
         {
-            return 0.2f + 0.8f * progress * progress;
+            // No enemies in the first 10% of the dungeon so the player
+            // has breathing room to orient themselves on entry.
+            if (progress < 0.1f)
+                return 0f;
+
+            float adjusted = (progress - 0.1f) / 0.9f;
+            return 0.2f + 0.8f * adjusted * adjusted;
         }
 
         private static bool IsBossRoom(PlacedRoom room)
