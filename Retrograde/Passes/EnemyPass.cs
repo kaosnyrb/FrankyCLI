@@ -81,7 +81,10 @@ namespace FrankyCLI.Retrograde
             var bossDistance = MathUtil.Length(bossVector);
             var fallbackDistance = Math.Max(1f, CalculateFarthestDistance(state));
 
-            int enemyCap = Math.Max(1, (int)Math.Ceiling(state.placedRooms.Count * 1.5f));
+            // Randomize enemy density between 1.0x and 2.0x rooms so each
+            // run feels different — skeleton crew vs. heavily fortified.
+            float densityMultiplier = 1.0f + (float)RandomUtils.random.NextDouble();
+            int enemyCap = Math.Max(1, (int)Math.Ceiling(state.placedRooms.Count * densityMultiplier));
 
             var candidates = BuildCandidates(state, bossVector, bossDistance, fallbackDistance);
             if (candidates.Count == 0)
