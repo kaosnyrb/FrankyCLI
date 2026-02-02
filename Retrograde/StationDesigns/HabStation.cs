@@ -14,9 +14,12 @@ namespace FrankyCLI.Retrograde.StationDesigns
         private ScoringSystem scoringSystem;
         private string dungname;
 
+        private float areaPerEnemy = 640f;
+
         List<IGenPass> IStationDesign.stationPasses { get => stationPasses; set => stationPasses = value;  }
         ScoringSystem IStationDesign.scoringSystem { get => scoringSystem; set => scoringSystem = value; }
         public string dungeonName { get => dungname; set => dungname =value; }
+        public float AreaPerEnemy { get => areaPerEnemy; set => areaPerEnemy = value; }
 
         public HabStation()
         {

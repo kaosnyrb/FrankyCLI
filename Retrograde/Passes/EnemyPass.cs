@@ -85,7 +85,7 @@ namespace FrankyCLI.Retrograde
             // get more enemies than compact ones, then apply a random density
             // multiplier (0.8x–1.4x) for per-run variety.
             float dungeonArea = CalculateDungeonArea(state);
-            const float areaPerEnemy = 512f; // tuning: square units per expected enemy
+            float areaPerEnemy = Math.Max(1f, state.AreaPerEnemy);
             int areaBasedCap = Math.Max(1, (int)Math.Ceiling(dungeonArea / areaPerEnemy));
             float densityMultiplier = 0.8f + (float)RandomUtils.random.NextDouble() * 0.6f;
             int enemyCap = Math.Max(1, (int)Math.Ceiling(areaBasedCap * densityMultiplier));

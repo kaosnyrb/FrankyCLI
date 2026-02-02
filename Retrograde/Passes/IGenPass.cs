@@ -65,6 +65,7 @@ namespace FrankyCLI.Retrograde.Passes
 
         public string Faction = "spacer";
         public string Size = "Small";
+        public float AreaPerEnemy = 512f;
 
         public List<IGenPass> passes;
 

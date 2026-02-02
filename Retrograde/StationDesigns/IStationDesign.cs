@@ -14,6 +14,12 @@ namespace FrankyCLI.Retrograde.StationDesigns
         public string GenerateStationName(string Faction);
 
         public string dungeonName {  get; set; }
+
+        /// <summary>
+        /// Square units of dungeon area per expected enemy spawn.
+        /// Lower values produce denser enemy populations.
+        /// </summary>
+        float AreaPerEnemy { get; set; }
     }
 
     
