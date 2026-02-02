@@ -222,7 +222,11 @@ namespace FrankyCLI.questgen_tools
             var prefixes = new List<string>
             {
                 "Zealot","Varuun","Fanatic","Believer","Devout",
-                "Faithful","Chosen","Pilgrim","Disciple","Adherent"
+                "Faithful","Chosen","Pilgrim","Disciple","Adherent",
+                "Acolyte","Penitent","Ascendant","Prophet","Herald",
+                "Ordained","Anointed","Sanctified","Seeker","Witness",
+                "Evangel","Crusader","Templar","Inquisitor","Harbinger",
+                "Apostle","Confessor","Mystic","Revenant","Oracle"
             };
             return prefixes[r.Next(prefixes.Count)];
         }

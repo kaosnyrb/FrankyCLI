@@ -226,7 +226,11 @@ namespace FrankyCLI.questgen_tools
             var prefixes = new List<string>
             {
                 "Crimson","Fleet","Crimson Fleet","Pirate","Buccaneer",
-                "Corsair","Raider","Marauder","Freebooter","Privateer"
+                "Corsair","Raider","Marauder","Freebooter","Privateer",
+                "Reaver","Plunderer","Cutthroat","Smuggler","Brigand",
+                "Rogue","Outcast","Scourge","Pillager","Blackguard",
+                "Desperado","Swashbuckler","Dread","Renegade","Bandit",
+                "Ravager","Prowler","Skulker","Warmonger","Exile"
             };
             return prefixes[r.Next(prefixes.Count)];
         }

@@ -222,7 +222,11 @@ namespace FrankyCLI.questgen_tools
             var prefixes = new List<string>
             {
                 "Spacer","Vagrant","Outlaw","Rogue","Bandit",
-                "Scavenger","Drifter","Prowler","Raider","Wretch"
+                "Scavenger","Drifter","Prowler","Raider","Wretch",
+                "Derelict","Squatter","Marauder","Lowlife","Vermin",
+                "Mongrel","Scrapper","Guttersnipe","Wildling","Castoff",
+                "Stray","Skulker","Creeper","Waster","Feral",
+                "Hooligan","Miscreant","Ruffian","Vagrant","Degenerate"
             };
             return prefixes[r.Next(prefixes.Count)];
         }

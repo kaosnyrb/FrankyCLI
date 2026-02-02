@@ -222,7 +222,11 @@ namespace FrankyCLI.questgen_tools
             var prefixes = new List<string>
             {
                 "Ecliptic","Eclipse","Merc","Mercenary","Contractor",
-                "Operative","Hired Gun","Sellsword","Freelancer","Soldier"
+                "Operative","Hired Gun","Sellsword","Freelancer","Soldier",
+                "Professional","Militant","Enforcer","Gunhand","Tactician",
+                "Vanguard","Sentinel","Warden","Striker","Dragoon",
+                "Trooper","Conscript","Ranger","Commando","Legionnaire",
+                "Wardog","Ironside","Partisan","Outrider","Bulwark"
             };
             return prefixes[r.Next(prefixes.Count)];
         }
