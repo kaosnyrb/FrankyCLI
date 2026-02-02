@@ -121,12 +121,61 @@ namespace FrankyCLI.questgen_tools
             npc.EyeColor = NPCTools.GetEyeColour();
             npc.HairColor = NPCTools.GetHairColour();
             npc.SkinToneIndex = (byte)random.Next(8);
-            npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
+            npc.HeadParts.Add(GetHaircut(isfemale));
             npc.Items = new ExtendedList<ContainerEntry>
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = gear, Count = 1 } },
                 };
             gen_quest_main.myMod.Npcs.Add(npc);
+        }
+
+        private IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
+        {
+            Random random = RandomUtils.random;
+            if (female)
+            {
+                List<uint> hairlist = new List<uint>()
+                {
+                    0x00127395,//Human_Female_Hair_Bob [HDPT:00127395]
+                    0x0015578B,//Human_Female_Hair_Business [HDPT:0015578B]
+                    0x00159AF2,//Human_Female_Hair_Buzz_Mohawk [HDPT:00159AF2]
+                    0x00172588,//Human_Female_Hair_CyberFade [HDPT:00172588]
+                    0x0012FDE2,//Human_Female_Hair_Dreadlocks_HairMesh [HDPT:0012FDE2]
+                    0x0012FDE3,//Human_Female_Hair_Dreadlocks_HairTie [HDPT:0012FDE3]
+                    0x00132C5A,//Human_Female_Hair_Even_Buzz_Back [HDPT:00132C5A]
+                    0x00128008,//Human_Female_Hair_Hairspray_Bob [HDPT:00128008]
+                    0x0015B029,//Human_Female_Hair_High_and_Tight [HDPT:0015B029]
+                    0x00133E4E,//Human_Female_Hair_Hollywood_curls [HDPT:00133E4E]
+                    0x0014AFDD,//Human_Female_Hair_Messy_Bob [HDPT:0014AFDD]
+                    0x00134EB1,//Human_Female_Hair_Messy_Business [HDPT:00134EB1]
+                    0x0005B53C,//Human_Female_Hair_Messy_Updo [HDPT:0005B53C]
+                    0x000D9D3A,//Human_Female_Hair_Mullet [HDPT:000D9D3A]
+                };
+                return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+            }
+            else
+            {
+                List<uint> hairlist = new List<uint>()
+                {
+                    0x00127396,//Human_Male_Hair_Bob [HDPT:00127396]
+                    0x0015578A,//Human_Male_Hair_Business [HDPT:0015578A]
+                    0x00159AF3,//Human_Male_Hair_Buzz_Mohawk [HDPT:00159AF3]
+                    0x00266092,//Human_Male_Hair_Choppy_Bob [HDPT:00266092]
+                    0x0013F87D,//Human_Male_Hair_Coily_Mohawk [HDPT:0013F87D]
+                    0x001177D1,//Human_Male_Hair_Cornrows_Beads [HDPT:001177D1]
+                    0x0013EB51,//Human_Male_Hair_Cropped [HDPT:0013EB51]
+                    0x00169ED3,//Human_Male_Hair_CyberFade [HDPT:00169ED3]
+                    0x00132C59,//Human_Male_Hair_Even_Buzz_Front [HDPT:00132C59]
+                    0x0014781F,//Human_Male_Hair_Flat_Top [HDPT:0014781F]
+                    0x00134EB0,//Human_Male_Hair_Messy_Business [HDPT:00134EB0]
+                    0x00264EFA,//Human_Male_Hair_None [HDPT:00264EFA]
+                    0x000D9D39,//Human_Male_Hair_Mullet [HDPT:000D9D39]
+                    0x00141E96,//Human_Male_Hair_Shaggy [HDPT:00141E96]
+                    0x0015335C,//Human_Male_Hair_Spiked [HDPT:0015335C]
+                    0x0012F26F,//Human_Male_Hair_Viking_Braids [HDPT:0012F26F]
+                };
+                return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+            }
         }
 
         public IFormLinkNullable<IOutfitGetter> GetLowRank_Outfit()
