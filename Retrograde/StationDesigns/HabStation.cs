@@ -43,7 +43,7 @@ namespace FrankyCLI.Retrograde.StationDesigns
             optionalRoomPasses = new List<OptionalPass>()
             {
                 // Add optional passes here, e.g.:
-                new OptionalPass(new LockedLootRoomPass("rg_utillist"), 1),
+                //new OptionalPass(new LockedLootRoomPass("rg_utillist"), 1),
                 new OptionalPass(new NPCKeyLootRoomPass("rg_utillist"), 1),
             };
 
