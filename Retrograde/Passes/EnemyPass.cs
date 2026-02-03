@@ -186,6 +186,12 @@ namespace FrankyCLI.Retrograde
                 }
             }
 
+            // Track which rooms receive enemies so we can add patrols to empty ones.
+            var roomsWithEnemies = new HashSet<PlacedRoom>();
+
+            if (reservedBoss.HasValue)
+                roomsWithEnemies.Add(reservedBoss.Value.Room);
+
             // Place remaining enemies.
             for (int spawnIdx = 0; spawnIdx < spacedSpawns.Count; spawnIdx++)
             {
@@ -193,6 +199,8 @@ namespace FrankyCLI.Retrograde
                 var worldPos = CalculateWorldPosition(spawn);
                 var worldRot = spawn.Marker.Rotation;
                 bool isMiniboss = spawnIdx == minibossIndex;
+
+                roomsWithEnemies.Add(spawn.Room);
 
                 int groupSize = isMiniboss
                     ? DetermineGroupSize("boss")
@@ -218,6 +226,11 @@ namespace FrankyCLI.Retrograde
                     });
                 }
             }
+
+            // Add lone patrol enemies to sections with no enemies.
+            // This ensures there are no completely dead areas while maintaining
+            // the peaks and lulls of the main encounter pacing.
+            PlaceLonePatrols(state, stationFactionCrew, roomsWithEnemies, candidates);
         }
 
         /// <summary>
@@ -250,6 +263,84 @@ namespace FrankyCLI.Retrograde
             }
 
             return RandomUtils.random.Next(min, max + 1);
+        }
+
+        /// <summary>
+        /// Places lone patrol enemies in rooms that have no enemies after main placement.
+        /// This fills in the "lulls" with sparse encounters to prevent completely dead zones
+        /// while still maintaining the contrast with high-intensity peak areas.
+        /// Also covers safe zone rooms that were excluded from main placement.
+        /// </summary>
+        private void PlaceLonePatrols(
+            DungeonState state,
+            IFactionMembers factionCrew,
+            HashSet<PlacedRoom> roomsWithEnemies,
+            List<SpawnCandidate> allCandidates)
+        {
+            // Build a list of all rooms with spawn markers (including safe zone rooms
+            // that weren't in the candidate list due to zero weight).
+            var allSpawnableRooms = new Dictionary<PlacedRoom, PrefabMarker>();
+
+            // First, add all rooms from candidates.
+            foreach (var candidate in allCandidates)
+            {
+                if (!allSpawnableRooms.ContainsKey(candidate.Room))
+                    allSpawnableRooms[candidate.Room] = candidate.Marker;
+            }
+
+            // Also scan for rooms that might have been excluded from candidates
+            // (e.g., safe zone rooms) but still have spawn markers.
+            foreach (var placed in state.placedRooms)
+            {
+                if (allSpawnableRooms.ContainsKey(placed) || roomsWithEnemies.Contains(placed))
+                    continue;
+
+                if (placed.Prefab?.Markers == null)
+                    continue;
+
+                foreach (var marker in placed.Prefab.Markers)
+                {
+                    var id = marker.MarkerEditorId;
+                    if (!string.IsNullOrWhiteSpace(id) &&
+                        id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
+                    {
+                        allSpawnableRooms[placed] = marker;
+                        break;
+                    }
+                }
+            }
+
+            // Find rooms that have spawn markers but didn't get any enemies.
+            var emptyRooms = new List<(PlacedRoom Room, PrefabMarker Marker)>();
+            foreach (var kvp in allSpawnableRooms)
+            {
+                if (!roomsWithEnemies.Contains(kvp.Key))
+                {
+                    emptyRooms.Add((kvp.Key, kvp.Value));
+                }
+            }
+
+            if (emptyRooms.Count == 0)
+                return;
+
+            // Place a lone patrol in each empty room.
+            // These are single enemies that create atmosphere without overwhelming the player.
+            foreach (var (room, marker) in emptyRooms)
+            {
+                var spawn = new SpawnCandidate { Room = room, Marker = marker, Weight = 1f };
+                var worldPos = CalculateWorldPosition(spawn);
+                var worldRot = marker.Rotation;
+
+                // Single patrol enemy - not a group, just one sentry.
+                Npc patrolNpc = factionCrew.GetCrewMember(room.DistrictType);
+
+                state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(gen_quest_main.myMod)
+                {
+                    Rotation = worldRot,
+                    Position = worldPos,
+                    Base = patrolNpc.ToLink<INpcGetter>()
+                });
+            }
         }
 
         /// <summary>
@@ -401,6 +492,13 @@ namespace FrankyCLI.Retrograde
         // Randomized once per pass so every run has a different quiet intro.
         private readonly float _safeZone = 0.05f + (float)RandomUtils.random.NextDouble() * 0.15f;
 
+        // Pacing wave parameters for peaks and lulls of combat.
+        // WaveFrequency controls how many intensity cycles occur across the dungeon.
+        // WaveAmplitude controls how much the intensity varies (0 = flat, 1 = full swing).
+        private readonly float _waveFrequency = 2.5f + (float)RandomUtils.random.NextDouble() * 1.5f; // 2.5-4 cycles
+        private readonly float _waveAmplitude = 0.4f + (float)RandomUtils.random.NextDouble() * 0.2f; // 40-60% variation
+        private readonly float _wavePhase = (float)RandomUtils.random.NextDouble() * (float)Math.PI; // Random start phase
+
         private float ComputeWeight(float progress)
         {
             // No enemies in the safe zone so the player has breathing
@@ -409,7 +507,19 @@ namespace FrankyCLI.Retrograde
                 return 0f;
 
             float adjusted = (progress - _safeZone) / (1f - _safeZone);
-            return 0.2f + 0.8f * adjusted * adjusted;
+
+            // Base weight increases with progress (original behavior).
+            float baseWeight = 0.2f + 0.8f * adjusted * adjusted;
+
+            // Apply a sine wave to create peaks and lulls of intensity.
+            // The wave oscillates between (1 - amplitude) and (1 + amplitude).
+            // This creates exciting high-density areas and quieter exploration zones.
+            float wave = (float)Math.Sin(adjusted * _waveFrequency * Math.PI * 2 + _wavePhase);
+            float intensityModifier = 1f + wave * _waveAmplitude;
+
+            // Ensure we never go below a minimum threshold to prevent completely dead zones.
+            float finalWeight = baseWeight * intensityModifier;
+            return Math.Max(0.1f, finalWeight);
         }
 
         private static bool IsBossRoom(PlacedRoom room)
