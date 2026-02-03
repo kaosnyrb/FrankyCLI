@@ -12,24 +12,24 @@ namespace FrankyCLI.Retrograde.Passes
     /// <summary>
     /// Prototype pass that creates a locked loot room scenario:
     /// 1. Designates an existing room as the "loot room"
-    /// 2. Places a locked door on the connector leading to that room
-    /// 3. Places a key in an earlier room that unlocks the door
+    /// 2. Creates a key by copying from Starfield.esm and adds to mod
+    /// 3. Places a locked door on the connector leading to that room (linked to key)
+    /// 4. Places the key in an earlier room
     ///
     /// TODOs for later:
-    /// - Add actual key item prefab (currently uses placeholder)
     /// - Add dedicated loot room prefab/room list
-    /// - Wire up key FormKey to door's Lock.Key property
+    /// - Better key placement (use markers instead of room center)
     /// </summary>
     public class LockedLootRoomPass : IGenPass
     {
-        // TODO: Replace with actual key prefab when available
-        private const string KeyPrefabId = "rg_key_item";
-
         // Stores the FormKey of the door base object found in the prefab
         private FormKey? _doorBaseFormKey;
 
         // Stores the placed door reference for wiring up the key later
         private PlacedObject _placedDoor;
+
+        // The created key for this locked room
+        private Key _createdKey;
 
         public void RunPass(DungeonState state)
         {
@@ -46,16 +46,55 @@ namespace FrankyCLI.Retrograde.Passes
             if (doorConnection == null)
                 return;
 
-            // Step 3: Place the locked door
+            // Step 3: Create the key (need FormKey before placing door)
+            CreateKey(state);
+            if (_createdKey == null)
+                return;
+
+            // Step 4: Place the locked door (linked to the key)
             PlaceLockedDoor(state, doorConnection.Value);
 
-            // Step 4: Select a room for key placement (away from loot room, closer to start)
+            // Step 5: Select a room for key placement (away from loot room, closer to start)
             var keyRoom = SelectKeyRoom(state, lootRoom.Value);
             if (keyRoom == null)
                 return;
 
-            // Step 5: Place the key in the key room
+            // Step 6: Place the key in the key room
             PlaceKey(state, keyRoom.Value);
+        }
+
+        /// <summary>
+        /// Creates a key by copying an existing key from Starfield.esm.
+        /// The key is renamed using the station name and added to the current mod.
+        /// </summary>
+        private void CreateKey(DungeonState state)
+        {
+            // Find a key template from Starfield.esm
+            Key templateKey = null;
+            foreach (var key in gen_quest_main._StarfieldMod.Keys)
+            {
+                if (key != null)
+                {
+                    templateKey = key;
+                    break;
+                }
+            }
+
+            if (templateKey == null)
+                return;
+
+            // Generate unique EditorID using station name
+            var stationName = state.stateName ?? "LockedRoom";
+            var sanitizedName = stationName.Replace(" ", "").Replace("-", "_");
+            var editorId = $"rg_key_{sanitizedName}_{Guid.NewGuid().ToString().Substring(0, 8)}";
+
+            // Create new key by deep copying the template
+            _createdKey = templateKey.DeepCopy();
+            _createdKey.EditorID = editorId;
+            _createdKey.Name = $"{stationName} Key";
+
+            // Add the key to the current mod
+            gen_quest_main.myMod.Keys.Add(_createdKey);
         }
 
         /// <summary>
@@ -211,8 +250,7 @@ namespace FrankyCLI.Retrograde.Passes
                     Lock = new LockData
                     {
                         Level = LockLevel.RequiresKey,
-                        // TODO: Set Key property to link to the actual key item
-                        // Key = keyFormLink
+                        Key = _createdKey.ToLink()
                     }
                 };
 
@@ -359,24 +397,11 @@ namespace FrankyCLI.Retrograde.Passes
         }
 
         /// <summary>
-        /// Places the key item in the specified room.
-        /// TODO: Currently uses placeholder prefab - needs actual key item.
+        /// Places the created key item in the specified room.
         /// </summary>
         private void PlaceKey(DungeonState state, PlacedRoom keyRoom)
         {
-            RoomPrefab keyPrefab;
-            try
-            {
-                keyPrefab = PrefabCache.GetPrefab(KeyPrefabId);
-            }
-            catch
-            {
-                // TODO: Key prefab not found - this is expected until we have actual key items
-                // For now, skip key placement
-                return;
-            }
-
-            if (keyPrefab?.packin_instance == null)
+            if (_createdKey == null)
                 return;
 
             // Place key at room center
@@ -388,10 +413,8 @@ namespace FrankyCLI.Retrograde.Passes
                 Count = 1,
                 Rotation = new P3Float(0, 0, 0),
                 Position = keyPos,
-                Base = keyPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                Base = _createdKey.ToLink<IPlaceableObjectGetter>()
             });
-
-            // TODO: Associate this key with the locked door via keyword/quest state
         }
 
         private static bool ArePositionsClose(P3Float a, P3Float b, float tolerance)
