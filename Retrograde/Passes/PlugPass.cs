@@ -23,6 +23,9 @@ namespace FrankyCLI.Retrograde.Passes
             var sealedKeys = state.SealedConnectorPositionKeys ?? new HashSet<string>();
             var occupiedKeys = new HashSet<string>(sealedKeys);
 
+            int plugsPlaced = 0;
+            int plugsFailed = 0;
+
             foreach (var open in connectors)
             {
                 var key = PositionKey(open.WorldPos, sealedTolerance);
@@ -69,12 +72,13 @@ namespace FrankyCLI.Retrograde.Passes
                     break;
                 }
 
-                // Optional: log missing blocker connector rather than hard fail
-                if (!placed)
-                {
-                    // You may want to add logging here, e.g. Debug.WriteLine(...)
-                }
+                if (placed)
+                    plugsPlaced++;
+                else
+                    plugsFailed++;
             }
+
+            Console.WriteLine($"[Plug] Placed {plugsPlaced} plugs, {plugsFailed} failed");
         }
 
         private static List<OpenConnector> CollectConnectors(List<PlacedRoom> placedRooms)

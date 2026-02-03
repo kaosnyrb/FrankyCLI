@@ -207,6 +207,8 @@ namespace FrankyCLI
                     continue;
                 }
             }
+
+            Console.WriteLine($"[Util] Placed {roomsPlaced}/{maxRoomsToPlace} rooms, {state.openConnectors.Count} open connectors remaining");
         }
 
         private static string ChoosePrefabId(

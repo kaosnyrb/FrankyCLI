@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(dotnet build:*)",
-      "Bash(move:*)"
+      "Bash(move:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ]
   }
 }

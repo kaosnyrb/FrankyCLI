@@ -34,6 +34,8 @@ namespace FrankyCLI.Retrograde.Passes
                 WorldPos = startingMarker.Position,
                 DistrictType = "trunk"
             });
+
+            Console.WriteLine($"[StationSetup] Starting position: ({startingMarker.Position.X:F0}, {startingMarker.Position.Y:F0}, {startingMarker.Position.Z:F0})");
         }
     }
 }

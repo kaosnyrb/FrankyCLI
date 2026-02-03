@@ -66,6 +66,8 @@ namespace FrankyCLI.Retrograde.Passes
             var sealedPositions = state.SealedConnectorPositionKeys ??= new HashSet<string>();
             sealedPositions.Clear();
 
+            int stage1Sealed = 0;
+
             // Stage 1: Seal explicit open connectors (below-YMin first to guarantee closure)
             var ordered = state.openConnectors
                 .OrderBy(c => c.WorldPos.Y < state.YMin ? 0 : 1)
@@ -80,11 +82,16 @@ namespace FrankyCLI.Retrograde.Passes
                     continue;
 
                 if (TrySealConnector(open, state, sealedPositions))
+                {
+                    stage1Sealed++;
                     continue;
+                }
             }
 
             // Stage 2: Sweep placed rooms for stray unmatched connector markers
-            SealUnconnectedPlacedMarkers(state, sealedPositions);
+            int stage2Sealed = SealUnconnectedPlacedMarkers(state, sealedPositions);
+
+            Console.WriteLine($"[ConnectorSealing] Sealed {stage1Sealed} open connectors, {stage2Sealed} stray markers");
         }
 
         /// <summary>
@@ -150,18 +157,21 @@ namespace FrankyCLI.Retrograde.Passes
         /// Sweeps every placed room for connector markers that didn't pair up with another room,
         /// and seals them with blockers.
         /// </summary>
-        private void SealUnconnectedPlacedMarkers(DungeonState state, HashSet<string> sealedPositions)
+        /// <returns>Number of connectors sealed in this stage.</returns>
+        private int SealUnconnectedPlacedMarkers(DungeonState state, HashSet<string> sealedPositions)
         {
             if (state.placedRooms == null || state.placedRooms.Count == 0)
-                return;
+                return 0;
 
             // Stage 2a: Collect all connector markers from placed rooms
             var connectors = CollectPlacedConnectors(state);
             if (connectors.Count == 0)
-                return;
+                return 0;
 
             // Stage 2b: Mark connectors that are properly mated (same position, opposing direction, matching size/tileset)
             var matched = FindMatchedConnectors(connectors);
+
+            int sealedCount = 0;
 
             // Stage 2c: Seal any unmatched connectors
             for (int i = 0; i < connectors.Count; i++)
@@ -180,8 +190,11 @@ namespace FrankyCLI.Retrograde.Passes
                 if (sealedPositions.Contains(key))
                     continue;
 
-                TrySealConnector(open, state, sealedPositions);
+                if (TrySealConnector(open, state, sealedPositions))
+                    sealedCount++;
             }
+
+            return sealedCount;
         }
 
         /// <summary>

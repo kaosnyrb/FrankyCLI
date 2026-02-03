@@ -17,6 +17,8 @@ namespace FrankyCLI.Retrograde
         
         public void RunPass(DungeonState state)
         {
+            int markersPlaced = 0;
+
             // Copy any ShipMarker_* objects from prefabs into the live cell so the game can find them
             foreach (var placed in state.placedRooms)
             {
@@ -50,8 +52,12 @@ namespace FrankyCLI.Retrograde
                         Marker = newplaced.ToLink(),
                         LocationRefType = locreftype.ToLink()
                     });
+
+                    markersPlaced++;
                 }
             }
+
+            Console.WriteLine($"[ShipMarker] Placed {markersPlaced} ship markers");
         }
 
         private static IEnumerable<PlacedObject> EnumerateShipMarkers(Cell prefabCell)

@@ -124,6 +124,9 @@ namespace FrankyCLI.Retrograde
             // Floor/Ceiling at Z = min.Z and max.Z (grid in X/Y)
             PlaceCap_Z(state.instance, state.PlacementUtil, panelPrefab, min.Z - surfaceOffset + roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 90f);  // floor (panel facing up)
             PlaceCap_Z(state.instance, state.PlacementUtil, panelPrefab, max.Z + surfaceOffset - roofsquish, min.X, max.X, min.Y, max.Y, panelW, panelH, pitch: 270f); // ceiling (panel facing down)
+
+            var boundsSize = new P3Float(max.X - min.X, max.Y - min.Y, max.Z - min.Z);
+            Console.WriteLine($"[LightOccluder] Placed occluder box {boundsSize.X:F0}x{boundsSize.Y:F0}x{boundsSize.Z:F0} around dungeon");
         }
 
         private void PlaceWall_X(

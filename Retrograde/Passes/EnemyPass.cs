@@ -230,7 +230,10 @@ namespace FrankyCLI.Retrograde
             // Add lone patrol enemies to sections with no enemies.
             // This ensures there are no completely dead areas while maintaining
             // the peaks and lulls of the main encounter pacing.
-            PlaceLonePatrols(state, stationFactionCrew, roomsWithEnemies, candidates);
+            int patrolCount = PlaceLonePatrols(state, stationFactionCrew, roomsWithEnemies, candidates);
+
+            int totalNpcs = (reservedBoss.HasValue ? 1 : 0) + spacedSpawns.Count + patrolCount;
+            Console.WriteLine($"[Enemy] Placed {totalNpcs} NPCs ({spacedSpawns.Count} spawns, {patrolCount} patrols), faction: {state.Faction}");
         }
 
         /// <summary>
@@ -271,7 +274,8 @@ namespace FrankyCLI.Retrograde
         /// while still maintaining the contrast with high-intensity peak areas.
         /// Also covers safe zone rooms that were excluded from main placement.
         /// </summary>
-        private void PlaceLonePatrols(
+        /// <returns>Number of patrol enemies placed.</returns>
+        private int PlaceLonePatrols(
             DungeonState state,
             IFactionMembers factionCrew,
             HashSet<PlacedRoom> roomsWithEnemies,
@@ -321,7 +325,7 @@ namespace FrankyCLI.Retrograde
             }
 
             if (emptyRooms.Count == 0)
-                return;
+                return 0;
 
             // Place a lone patrol in each empty room.
             // These are single enemies that create atmosphere without overwhelming the player.
@@ -341,6 +345,8 @@ namespace FrankyCLI.Retrograde
                     Base = patrolNpc.ToLink<INpcGetter>()
                 });
             }
+
+            return emptyRooms.Count;
         }
 
         /// <summary>

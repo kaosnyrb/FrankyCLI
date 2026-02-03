@@ -22,6 +22,9 @@ namespace FrankyCLI.Retrograde.Passes
             if (state.placedRooms == null || state.placedRooms.Count == 0)
                 return;
 
+            int windowsPlaced = 0;
+            int windowsFailed = 0;
+
             // Iterate backwards so we can safely remove connectors that get sealed
             for (int i = state.openConnectors.Count - 1; i >= 0; i--)
             {
@@ -47,7 +50,7 @@ namespace FrankyCLI.Retrograde.Passes
                     var blockerConns = ConnectorUtils.GetConnectors(blockerPrefab, yawSteps);
 
                     // Find a connector on the blocker that matches required direction and same door size/tileset.
-                    // If your blocker is generic and doesn’t encode tileset, drop that constraint.
+                    // If your blocker is generic and doesnï¿½t encode tileset, drop that constraint.
                     var attach = blockerConns.FirstOrDefault(c =>
                         c.Parsed.Direction == requiredDir &&
                         string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
@@ -71,18 +74,20 @@ namespace FrankyCLI.Retrograde.Passes
                     break;
                 }
 
-                // Optional: log missing blocker connector rather than hard fail
                 if (!placed)
                 {
-                    // You may want to add logging here, e.g. Debug.WriteLine(...)
+                    windowsFailed++;
                 }
                 else
                 {
+                    windowsPlaced++;
                     state.windowConnectors.Add(open.WorldPos);
                     // Remove the connector now that it has been filled
                     state.openConnectors.RemoveAt(i);
                 }
             }
+
+            Console.WriteLine($"[WindowSealing] Placed {windowsPlaced} window blockers, {windowsFailed} failed");
         }
 
         private static bool IsOnOuterEdgeFacingOut(OpenConnector open, List<PlacedRoom> placedRooms, float tolerance)

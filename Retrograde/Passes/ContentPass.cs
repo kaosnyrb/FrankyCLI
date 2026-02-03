@@ -132,6 +132,9 @@ namespace FrankyCLI.Retrograde
         {
             const float duplicateSpacing = 30f;
             var placedByPackIn = new Dictionary<string, List<P3Float>>(StringComparer.OrdinalIgnoreCase);
+            int itemsPlaced = 0;
+            int markersCulled = 0;
+            int markersSkipped = 0;
 
             foreach (var placed in state.placedRooms)
             {
@@ -160,7 +163,10 @@ namespace FrankyCLI.Retrograde
                     {
                         //Culling tuned by district
                         if (ShouldCullMarker(placed))
+                        {
+                            markersCulled++;
                             continue;
+                        }
                     }
 
 
@@ -180,7 +186,10 @@ namespace FrankyCLI.Retrograde
                     var rotatedLocal = RgRotation.RotateYaw90(marker.Position, placed.YawSteps);
                     var worldPos = placed.WorldPos + rotatedLocal;
                     if (IsNearDuplicate(contentPackInId, worldPos, placedByPackIn, duplicateSpacing))
+                    {
+                        markersSkipped++;
                         continue;
+                    }
 
                     // Compute final rotation:
                     // combine marker's local rotation with the room's yaw
@@ -195,8 +204,11 @@ namespace FrankyCLI.Retrograde
                     });
 
                     RecordPlacement(contentPackInId, worldPos, placedByPackIn);
+                    itemsPlaced++;
                 }
             }
+
+            Console.WriteLine($"[Content] Placed {itemsPlaced} items, {markersCulled} culled, {markersSkipped} duplicates skipped");
         }
     }
 }

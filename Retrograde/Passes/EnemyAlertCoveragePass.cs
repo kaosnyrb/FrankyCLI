@@ -8,62 +8,53 @@ using System.Collections.Generic;
 namespace FrankyCLI.Retrograde.Passes
 {
     /// <summary>
-    /// Scatters enemy alert area boxes (rg_enemy_alert) over the dungeon to provide
-    /// coverage with minimal overlap. Each alert box is 25x25x25 units.
+    /// Places enemy alert boxes to create localized combat zones.
+    /// Divides rooms into even blocks and places alert boxes at block boundaries/edges
+    /// so enemies engage locally but can traverse nearby areas.
     /// </summary>
     public class EnemyAlertCoveragePass : IGenPass
     {
-        private const float AlertBoxSize = 25f;
-        private const string AlertPrefabId = "rg_enemy_alert";
+        // Alert prefabs ordered by size (largest first for efficient coverage)
+        private static readonly (string prefabId, float size)[] AlertPrefabs = new[]
+        {
+            ("rg_enemy_alert_25_Defend", 25f),
+            ("rg_enemy_alert_20_Defend", 20f),
+            //("rg_enemy_alert_10_Defend", 10f),
+        };
 
         public void RunPass(DungeonState state)
         {
             if (state?.placedRooms == null || state.placedRooms.Count == 0)
                 return;
 
-            // Get the alert prefab
-            RoomPrefab alertPrefab;
-            try
+            // Load all available alert prefabs
+            var availablePrefabs = new List<(RoomPrefab prefab, float size)>();
+            foreach (var (prefabId, size) in AlertPrefabs)
             {
-                alertPrefab = PrefabCache.GetPrefab(AlertPrefabId);
-            }
-            catch
-            {
-                // Prefab not found - skip pass
-                return;
-            }
-
-            if (alertPrefab?.packin_instance == null)
-                return;
-
-            // Calculate the 3D bounding box of the entire dungeon
-            var dungeonBounds = CalculateDungeonBounds(state);
-
-            // Generate grid positions with AlertBoxSize spacing
-            var gridPositions = GenerateGridPositions(dungeonBounds, AlertBoxSize);
-
-            // Place alert boxes at each grid position
-            foreach (var position in gridPositions)
-            {
-                state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                try
                 {
-                    Count = 1,
-                    Rotation = new P3Float(0, 0, 0),
-                    Position = position,
-                    Base = alertPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                });
+                    var prefab = PrefabCache.GetPrefab(prefabId);
+                    if (prefab?.packin_instance != null)
+                    {
+                        availablePrefabs.Add((prefab, size));
+                    }
+                }
+                catch
+                {
+                    // Prefab not found - continue with others
+                }
             }
-        }
 
-        /// <summary>
-        /// Calculates the 3D bounding box encompassing all placed rooms.
-        /// Uses the rotated bounds of each room to get accurate coverage.
-        /// </summary>
-        private static RgAabb CalculateDungeonBounds(DungeonState state)
-        {
-            float minX = float.MaxValue, maxX = float.MinValue;
-            float minY = float.MaxValue, maxY = float.MinValue;
-            float minZ = float.MaxValue, maxZ = float.MinValue;
+            if (availablePrefabs.Count == 0)
+                return;
+
+            // Use the largest available prefab size for block divisions
+            var (alertPrefab, blockSize) = availablePrefabs[0];
+
+            // Process each room - divide into blocks and place at edges
+            int totalBoxes = 0;
+            var coveredRooms = new List<string>();
+            var uncoveredRooms = new List<string>();
 
             foreach (var room in state.placedRooms)
             {
@@ -75,57 +66,143 @@ namespace FrankyCLI.Retrograde.Passes
                     room.WorldPos,
                     room.YawSteps);
 
-                if (roomBounds.Min.X < minX) minX = roomBounds.Min.X;
-                if (roomBounds.Max.X > maxX) maxX = roomBounds.Max.X;
-                if (roomBounds.Min.Y < minY) minY = roomBounds.Min.Y;
-                if (roomBounds.Max.Y > maxY) maxY = roomBounds.Max.Y;
-                if (roomBounds.Min.Z < minZ) minZ = roomBounds.Min.Z;
-                if (roomBounds.Max.Z > maxZ) maxZ = roomBounds.Max.Z;
-            }
+                string roomName = room.Prefab.packin_instance.EditorID ?? "Unknown";
+                int boxesPlaced = PlaceAlertBoxesAtEdges(state, roomBounds, alertPrefab, blockSize);
 
-            // Handle edge case where no valid bounds were found
-            if (minX == float.MaxValue)
-            {
-                return new RgAabb
+                if (boxesPlaced > 0)
                 {
-                    Min = new P3Float(0, 0, 0),
-                    Max = new P3Float(0, 0, 0)
-                };
+                    coveredRooms.Add(roomName);
+                    totalBoxes += boxesPlaced;
+                }
+                else
+                {
+                    uncoveredRooms.Add(roomName);
+                }
             }
 
-            return new RgAabb
+            // Log coverage results
+            Console.WriteLine($"[EnemyAlert] Placed {totalBoxes} boxes across {coveredRooms.Count} rooms, {uncoveredRooms.Count} uncovered");
+            if (uncoveredRooms.Count > 0)
             {
-                Min = new P3Float(minX, minY, minZ),
-                Max = new P3Float(maxX, maxY, maxZ)
-            };
+                Console.WriteLine($"[EnemyAlert] Uncovered rooms: {string.Join(", ", uncoveredRooms)}");
+            }
         }
 
         /// <summary>
-        /// Generates a grid of positions covering the bounding box with the specified spacing.
-        /// Positions are offset by half the spacing to center the grid cells.
+        /// Divides a room into even blocks and places alert boxes at the block edges/boundaries.
+        /// This creates overlapping coverage at room subdivisions for smooth enemy response.
         /// </summary>
-        private static List<P3Float> GenerateGridPositions(RgAabb bounds, float spacing)
+        /// <returns>Number of boxes placed.</returns>
+        private static int PlaceAlertBoxesAtEdges(
+            DungeonState state,
+            RgAabb roomBounds,
+            RoomPrefab alertPrefab,
+            float blockSize)
         {
-            var positions = new List<P3Float>();
+            // Calculate room dimensions
+            float roomWidth = roomBounds.Max.X - roomBounds.Min.X;
+            float roomDepth = roomBounds.Max.Y - roomBounds.Min.Y;
+            float roomHeight = roomBounds.Max.Z - roomBounds.Min.Z;
 
-            // Offset by half spacing so boxes are centered on the grid
-            float halfSpacing = spacing / 2f;
-            float startX = bounds.Min.X + halfSpacing;
-            float startY = bounds.Min.Y + halfSpacing;
-            float startZ = bounds.Min.Z + halfSpacing;
+            // Calculate how many blocks to divide the room into (minimum 1)
+            int blocksX = Math.Max(1, (int)Math.Round(roomWidth / blockSize));
+            int blocksY = Math.Max(1, (int)Math.Round(roomDepth / blockSize));
+            int blocksZ = Math.Max(1, (int)Math.Round(roomHeight / blockSize));
 
-            for (float x = startX; x < bounds.Max.X; x += spacing)
+            // Calculate the actual block size to evenly divide the room
+            float actualBlockX = roomWidth / blocksX;
+            float actualBlockY = roomDepth / blocksY;
+            float actualBlockZ = roomHeight / blocksZ;
+
+            int boxesPlaced = 0;
+
+            // Place boxes at block boundaries (edges)
+            // We place at each grid line intersection, which means blocksX+1 positions in X, etc.
+            // But we place at the CENTER of each block edge, not at corners
+            // So we iterate through each block and place at its edges
+            for (int bx = 0; bx < blocksX; bx++)
             {
-                for (float y = startY; y < bounds.Max.Y; y += spacing)
+                for (int by = 0; by < blocksY; by++)
                 {
-                    for (float z = startZ; z < bounds.Max.Z; z += spacing)
+                    for (int bz = 0; bz < blocksZ; bz++)
                     {
-                        positions.Add(new P3Float(x, y, z));
+                        // Calculate the center of this block
+                        float blockCenterX = roomBounds.Min.X + (bx + 0.5f) * actualBlockX;
+                        float blockCenterY = roomBounds.Min.Y + (by + 0.5f) * actualBlockY;
+                        float blockCenterZ = roomBounds.Min.Z + (bz + 0.5f) * actualBlockZ;
+
+                        // Place a box at each face of this block that's on the room edge
+                        // or at internal block boundaries
+
+                        // X-axis edges (left and right faces of block)
+                        if (bx == 0) // Left room edge
+                        {
+                            PlaceBox(state, alertPrefab, roomBounds.Min.X, blockCenterY, blockCenterZ);
+                            boxesPlaced++;
+                        }
+                        if (bx == blocksX - 1) // Right room edge
+                        {
+                            PlaceBox(state, alertPrefab, roomBounds.Max.X, blockCenterY, blockCenterZ);
+                            boxesPlaced++;
+                        }
+                        else // Internal boundary - place at right edge of this block
+                        {
+                            float edgeX = roomBounds.Min.X + (bx + 1) * actualBlockX;
+                            PlaceBox(state, alertPrefab, edgeX, blockCenterY, blockCenterZ);
+                            boxesPlaced++;
+                        }
+
+                        // Y-axis edges (front and back faces of block)
+                        if (by == 0) // Front room edge
+                        {
+                            PlaceBox(state, alertPrefab, blockCenterX, roomBounds.Min.Y, blockCenterZ);
+                            boxesPlaced++;
+                        }
+                        if (by == blocksY - 1) // Back room edge
+                        {
+                            PlaceBox(state, alertPrefab, blockCenterX, roomBounds.Max.Y, blockCenterZ);
+                            boxesPlaced++;
+                        }
+                        else // Internal boundary
+                        {
+                            float edgeY = roomBounds.Min.Y + (by + 1) * actualBlockY;
+                            PlaceBox(state, alertPrefab, blockCenterX, edgeY, blockCenterZ);
+                            boxesPlaced++;
+                        }
+
+                        // Z-axis edges (top and bottom faces of block)
+                        if (bz == 0) // Bottom room edge
+                        {
+                            PlaceBox(state, alertPrefab, blockCenterX, blockCenterY, roomBounds.Min.Z);
+                            boxesPlaced++;
+                        }
+                        if (bz == blocksZ - 1) // Top room edge
+                        {
+                            PlaceBox(state, alertPrefab, blockCenterX, blockCenterY, roomBounds.Max.Z);
+                            boxesPlaced++;
+                        }
+                        else // Internal boundary
+                        {
+                            float edgeZ = roomBounds.Min.Z + (bz + 1) * actualBlockZ;
+                            PlaceBox(state, alertPrefab, blockCenterX, blockCenterY, edgeZ);
+                            boxesPlaced++;
+                        }
                     }
                 }
             }
 
-            return positions;
+            return boxesPlaced;
+        }
+
+        private static void PlaceBox(DungeonState state, RoomPrefab prefab, float x, float y, float z)
+        {
+            state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+            {
+                Count = 1,
+                Rotation = new P3Float(0, 0, 0),
+                Position = new P3Float(x, y, z),
+                Base = prefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+            });
         }
     }
 }

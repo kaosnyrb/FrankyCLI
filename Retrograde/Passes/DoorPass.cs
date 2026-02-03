@@ -32,6 +32,9 @@ namespace FrankyCLI.Retrograde.Passes
             if (toCover <= 0)
                 return;
 
+            int doorsPlaced = 0;
+            int doorsFailed = 0;
+
             for (int idx = 0; idx < toCover; idx++)
             {
                 var connection = prioritized[idx];
@@ -53,7 +56,7 @@ namespace FrankyCLI.Retrograde.Passes
                     var blockerConns = ConnectorUtils.GetConnectors(blockerPrefab, yawSteps);
 
                     // Find a connector on the blocker that matches required direction and same door size/tileset.
-                    // If your blocker is generic and doesn’t encode tileset, drop that constraint.
+                    // If your blocker is generic and doesnï¿½t encode tileset, drop that constraint.
                     var attach = blockerConns.FirstOrDefault(c =>
                         c.Parsed.Direction == requiredDir &&
                         string.Equals(c.Parsed.DoorSize, open.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
@@ -77,12 +80,13 @@ namespace FrankyCLI.Retrograde.Passes
                     break;
                 }
 
-                // Optional: log missing blocker connector rather than hard fail
-                if (!placed)
-                {
-                    // You may want to add logging here, e.g. Debug.WriteLine(...)
-                }
+                if (placed)
+                    doorsPlaced++;
+                else
+                    doorsFailed++;
             }
+
+            Console.WriteLine($"[Door] Placed {doorsPlaced} doors, {doorsFailed} failed, {connections.Count} total connections");
         }
 
         private static List<DoorConnection> CollectConnectorPairs(List<PlacedRoom> placedRooms, float tolerance)
