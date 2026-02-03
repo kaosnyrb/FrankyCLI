@@ -147,12 +147,33 @@ namespace FrankyCLI.Retrograde
                 Size = _size,
                 TrunkRoomLists = new List<string>(_trunkRoomLists),
                 scoringSystem = CloneWeights(weights),
-                passes = design.stationPasses,
                 IsHarnessRun = true
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
-            foreach (var pass in state.passes)
+            // Run main room passes
+            foreach (var pass in design.MainRoomPasses)
+            {
+                pass.RunPass(state);
+            }
+
+            // Run optional room passes (chance-based)
+            foreach (var optPass in design.OptionalRoomPasses)
+            {
+                if (_rng.Value!.NextDouble() < optPass.Chance)
+                {
+                    optPass.Pass.RunPass(state);
+                }
+            }
+
+            // Run connector sealing passes
+            foreach (var pass in design.ConnectorSealingPasses)
+            {
+                pass.RunPass(state);
+            }
+
+            // Run content passes
+            foreach (var pass in design.ContentPasses)
             {
                 pass.RunPass(state);
             }

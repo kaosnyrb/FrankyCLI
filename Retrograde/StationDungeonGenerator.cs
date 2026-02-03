@@ -82,15 +82,36 @@ namespace FrankyCLI
                 Size = size,
                 TrunkRoomLists = new List<string> { "rg_trunklist" },
                 scoringSystem = stationDesign.scoringSystem,
-                passes = stationDesign.stationPasses,
                 stateName = stationDesign.dungeonName,
                 AreaPerEnemy = stationDesign.AreaPerEnemy
             };
             state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
-            foreach (IGenPass pas in state.passes)
+            // Run main room passes
+            foreach (IGenPass pass in stationDesign.MainRoomPasses)
             {
-                pas.RunPass(state);
+                pass.RunPass(state);
+            }
+
+            // Run optional room passes (chance-based)
+            foreach (OptionalPass optPass in stationDesign.OptionalRoomPasses)
+            {
+                if (RandomUtils.random.NextDouble() < optPass.Chance)
+                {
+                    optPass.Pass.RunPass(state);
+                }
+            }
+
+            // Run connector sealing passes
+            foreach (IGenPass pass in stationDesign.ConnectorSealingPasses)
+            {
+                pass.RunPass(state);
+            }
+
+            // Run content passes
+            foreach (IGenPass pass in stationDesign.ContentPasses)
+            {
+                pass.RunPass(state);
             }
 
             state.PlacementUtil.Finalise();

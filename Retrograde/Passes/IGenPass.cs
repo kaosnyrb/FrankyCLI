@@ -14,6 +14,22 @@ namespace FrankyCLI.Retrograde.Passes
         public void RunPass(DungeonState state);
     }
 
+    /// <summary>
+    /// Wraps an IGenPass with a chance to run (0.0 to 1.0).
+    /// Used for optional content passes like loot rooms.
+    /// </summary>
+    public class OptionalPass
+    {
+        public IGenPass Pass { get; set; }
+        public float Chance { get; set; }
+
+        public OptionalPass(IGenPass pass, float chance)
+        {
+            Pass = pass;
+            Chance = chance;
+        }
+    }
+
     public class ScoringSystem
     {
         public double PlacementWeight;          //How important is placing all the rooms?
@@ -67,7 +83,6 @@ namespace FrankyCLI.Retrograde.Passes
         public string Size = "Small";
         public float AreaPerEnemy = 512f;
 
-        public List<IGenPass> passes;
 
         public RoomUtils GetRoomUtils(string listName)
         {

@@ -10,37 +10,57 @@ namespace FrankyCLI.Retrograde.StationDesigns
 {
     public class OreStation : IStationDesign
     {
-        private List<IGenPass> stationPasses;
+        private List<IGenPass> mainRoomPasses;
+        private List<OptionalPass> optionalRoomPasses;
+        private List<IGenPass> connectorSealingPasses;
+        private List<IGenPass> contentPasses;
         private ScoringSystem scoringSystem;
         private string dungname;
 
         private float areaPerEnemy = 384f;
 
-        List<IGenPass> IStationDesign.stationPasses { get => stationPasses; set => stationPasses = value; }
+        List<IGenPass> IStationDesign.MainRoomPasses { get => mainRoomPasses; set => mainRoomPasses = value; }
+        List<OptionalPass> IStationDesign.OptionalRoomPasses { get => optionalRoomPasses; set => optionalRoomPasses = value; }
+        List<IGenPass> IStationDesign.ConnectorSealingPasses { get => connectorSealingPasses; set => connectorSealingPasses = value; }
+        List<IGenPass> IStationDesign.ContentPasses { get => contentPasses; set => contentPasses = value; }
         ScoringSystem IStationDesign.scoringSystem { get => scoringSystem; set => scoringSystem = value; }
         public string dungeonName { get => dungname; set => dungname = value; }
         public float AreaPerEnemy { get => areaPerEnemy; set => areaPerEnemy = value; }
 
         public OreStation()
         {
-            stationPasses = new List<IGenPass>()
+            // Main room topology passes
+            mainRoomPasses = new List<IGenPass>()
             {
-                //Place rooms
                 new StationSetupPass(),
-                  new DistrictTopologyPass("rg_orelist",4,"ore", new List<string>(){"rg_sts_ore_hallway_002"}),
-                    new BossTopologyPass("boss"),
-                    new BridgingTopologyPass(),
-                    new UtilTopologyPass("rg_utillist", 0.5f),
-                //Seal connectors
-                    new ConnectorSealingPass(),
-                //Doors and plugs
-                    new PlugPass(),
-                    new DoorPass(),
-                //Fill content
-                    new EnemyPass(),
-                    new ContentPass(),
-                    new ShipMarkerPass(),
-                    new EnemyAlertCoveragePass(),
+                new DistrictTopologyPass("rg_orelist", 4, "ore", new List<string>(){"rg_sts_ore_hallway_002"}),
+                new BossTopologyPass("boss"),
+                new BridgingTopologyPass(),
+            };
+
+            // Optional room passes (with chance to run)
+            optionalRoomPasses = new List<OptionalPass>()
+            {
+                // Add optional passes here, e.g.:
+                // new OptionalPass(new LockedLootRoomPass(), 0.5f),
+            };
+
+            // Connector sealing passes
+            connectorSealingPasses = new List<IGenPass>()
+            {
+                new UtilTopologyPass("rg_utillist", 0.5f),
+                new ConnectorSealingPass(),
+            };
+
+            // Content passes (doors, plugs, enemies, etc.)
+            contentPasses = new List<IGenPass>()
+            {
+                new PlugPass(),
+                new DoorPass(),
+                new EnemyPass(),
+                new ContentPass(),
+                new ShipMarkerPass(),
+                new EnemyAlertCoveragePass(),
             };
 
             scoringSystem = new ScoringSystem()
