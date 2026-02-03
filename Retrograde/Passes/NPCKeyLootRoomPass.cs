@@ -463,8 +463,8 @@ namespace FrankyCLI.Retrograde.Passes
         /// </summary>
         private bool CreateAndPlaceKeyHolderNPC(DungeonState state, PlacedRoom lootRoom)
         {
-            // Get faction crew to create NPC
-            IFactionMembers factionCrew = GetFactionCrew(state.Faction);
+            // Use the shared faction crew from DungeonState
+            var factionCrew = state.FactionCrew;
             if (factionCrew == null)
                 return false;
 
@@ -474,7 +474,7 @@ namespace FrankyCLI.Retrograde.Passes
                 return false;
 
             // Create a unique NPC to hold the key
-            _keyHolderNpc = CreateKeyHolderNPC(state, factionCrew);
+            _keyHolderNpc = CreateKeyHolderNPC(factionCrew);
             if (_keyHolderNpc == null)
                 return false;
 
@@ -493,30 +493,10 @@ namespace FrankyCLI.Retrograde.Passes
         }
 
         /// <summary>
-        /// Gets the appropriate faction crew based on faction name.
-        /// </summary>
-        private static IFactionMembers GetFactionCrew(string faction)
-        {
-            switch (faction)
-            {
-                case "Crimsonfleet":
-                    return new CrimsonFleetFactionCrew();
-                case "Ecliptic":
-                    return new EclipticFactionCrew();
-                case "Varuun":
-                    return new VaruunFactionCrew();
-                case "Spacer":
-                    return new SpacerFactionCrew();
-                default:
-                    return new SpacerFactionCrew();
-            }
-        }
-
-        /// <summary>
         /// Creates a unique NPC that holds the key.
         /// Based on high-rank crew member with the key added to inventory.
         /// </summary>
-        private Npc CreateKeyHolderNPC(DungeonState state, IFactionMembers factionCrew)
+        private Npc CreateKeyHolderNPC(IFactionMembers factionCrew)
         {
             // Get a high-rank crew member as base (they're more likely to have keys)
             var baseNpc = factionCrew.GetCrewMember("district");
