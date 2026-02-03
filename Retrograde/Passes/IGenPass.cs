@@ -1,5 +1,7 @@
 using Mutagen.Bethesda.Starfield;
 using FrankyCLI.Retrograde;
+using FrankyCLI.Retrograde.FactionMembers;
+using FrankyCLI.questgen_tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +86,37 @@ namespace FrankyCLI.Retrograde.Passes
         public string Faction = "spacer";
         public string Size = "Small";
         public float AreaPerEnemy = 512f;
+
+        // Lazy-initialized faction crew shared by all passes
+        private IFactionMembers _factionCrew;
+        public IFactionMembers FactionCrew
+        {
+            get
+            {
+                if (_factionCrew == null)
+                {
+                    _factionCrew = CreateFactionCrew(Faction);
+                }
+                return _factionCrew;
+            }
+        }
+
+        private static IFactionMembers CreateFactionCrew(string faction)
+        {
+            switch (faction)
+            {
+                case "Crimsonfleet":
+                    return new CrimsonFleetFactionCrew();
+                case "Ecliptic":
+                    return new EclipticFactionCrew();
+                case "Varuun":
+                    return new VaruunFactionCrew();
+                case "Spacer":
+                    return new SpacerFactionCrew();
+                default:
+                    return new SpacerFactionCrew();
+            }
+        }
 
 
         public RoomUtils GetRoomUtils(string listName)

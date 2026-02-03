@@ -119,27 +119,8 @@ namespace FrankyCLI.Retrograde
                 return;
 
 
-            //Generate the crew
-            IFactionMembers stationFactionCrew = null;
-
-            switch(state.Faction)
-            {
-                case "Crimsonfleet":
-                    stationFactionCrew = new CrimsonFleetFactionCrew();
-                    break;
-                case "Ecliptic":
-                    stationFactionCrew = new EclipticFactionCrew();
-                    break;
-                case "Varuun":
-                    stationFactionCrew = new VaruunFactionCrew();
-                    break;
-                case "Spacer":
-                    stationFactionCrew = new SpacerFactionCrew();
-                    break;
-                default:
-                    stationFactionCrew = new CrimsonFleetFactionCrew();
-                    break;
-            }
+            // Use the shared faction crew from DungeonState
+            var stationFactionCrew = state.FactionCrew;
 
             // Place guaranteed boss encounter first.
             if (reservedBoss.HasValue)
