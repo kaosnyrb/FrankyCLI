@@ -1,5 +1,6 @@
 using FrankyCLI.questgen_tools;
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
@@ -16,18 +17,19 @@ namespace FrankyCLI.Retrograde.Passes
     ///
     /// TODOs for later:
     /// - Add actual key item prefab (currently uses placeholder)
-    /// - Add locked door prefab with key-lock mechanics (currently uses regular door)
     /// - Add dedicated loot room prefab/room list
-    /// - Connect key/door via quest scripting or keyword system
+    /// - Wire up key FormKey to door's Lock.Key property
     /// </summary>
     public class LockedLootRoomPass : IGenPass
     {
         // TODO: Replace with actual key prefab when available
         private const string KeyPrefabId = "rg_key_item";
 
-        // TODO: Replace with locked door variant when available
-        // For now uses regular door blocker as placeholder
-        private const string LockedDoorPrefabId = null; // Will fall back to ConnectorUtils.GetDoor()
+        // Stores the FormKey of the door base object found in the prefab
+        private FormKey? _doorBaseFormKey;
+
+        // Stores the placed door reference for wiring up the key later
+        private PlacedObject _placedDoor;
 
         public void RunPass(DungeonState state)
         {
@@ -149,12 +151,12 @@ namespace FrankyCLI.Retrograde.Passes
 
         /// <summary>
         /// Places the locked door at the specified connection.
-        /// TODO: Currently uses regular door - replace with locked variant.
+        /// Finds the actual door object inside the door prefab and places it with lock settings.
         /// </summary>
         private void PlaceLockedDoor(DungeonState state, DoorConnectionInfo connection)
         {
-            // Get door prefab - use locked door if available, otherwise fall back to regular
-            var doorId = LockedDoorPrefabId ?? ConnectorUtils.GetDoor(connection.DoorSize, connection.Tileset);
+            // Get door prefab
+            var doorId = ConnectorUtils.GetDoor(connection.DoorSize, connection.Tileset);
 
             RoomPrefab doorPrefab;
             try
@@ -168,6 +170,14 @@ namespace FrankyCLI.Retrograde.Passes
 
             if (doorPrefab?.packin_instance == null)
                 return;
+
+            // Find the door object inside the prefab
+            var doorObjectInfo = FindDoorInPrefab(doorPrefab);
+            if (doorObjectInfo == null)
+                return;
+
+            // Store the door base FormKey for later use
+            _doorBaseFormKey = doorObjectInfo.Value.BaseFormKey;
 
             var requiredDir = ConnectorUtils.Opposite(connection.Direction);
 
@@ -186,19 +196,134 @@ namespace FrankyCLI.Retrograde.Passes
 
                 var doorPos = connection.Position - attachConnector.LocalPos;
 
-                state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                // Calculate the door object's world position
+                var rotatedDoorLocal = RgRotation.RotateYaw90(doorObjectInfo.Value.LocalPosition, yawSteps);
+                var doorObjectWorldPos = doorPos + rotatedDoorLocal;
+                var doorObjectWorldRot = doorObjectInfo.Value.LocalRotation + RgRotation.RotationToP3Float(yawSteps);
+
+                // Create the door PlacedObject with Lock settings
+                _placedDoor = new PlacedObject(gen_quest_main.myMod)
                 {
                     Count = 1,
-                    Rotation = RgRotation.RotationToP3Float(yawSteps),
-                    Position = doorPos,
-                    Base = doorPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
-                });
+                    Rotation = doorObjectWorldRot,
+                    Position = doorObjectWorldPos,
+                    Base = new FormLink<IPlaceableObjectGetter>(doorObjectInfo.Value.BaseFormKey),
+                    Lock = new LockData
+                    {
+                        Level = LockLevel.RequiresKey,
+                        // TODO: Set Key property to link to the actual key item
+                        // Key = keyFormLink
+                    }
+                };
 
-                // TODO: Associate this door with a key keyword/quest state
-                // For now the door is placed but not actually "locked" in game terms
+                state.PlacementUtil.AddToTemporary(state.instance, _placedDoor);
 
                 return;
             }
+        }
+
+        /// <summary>
+        /// Finds the door object inside a door prefab by searching the prefab's cell.
+        /// Returns the door's base FormKey and local position/rotation.
+        /// </summary>
+        private DoorObjectInfo? FindDoorInPrefab(RoomPrefab prefab)
+        {
+            var prefabCell = ResolvePrefabCell(prefab);
+            if (prefabCell == null)
+                return null;
+
+            // Search Temporary list for door objects
+            foreach (var entry in prefabCell.Temporary)
+            {
+                if (entry is PlacedObject po && IsDoorObject(po))
+                {
+                    return new DoorObjectInfo
+                    {
+                        BaseFormKey = po.Base.FormKey,
+                        LocalPosition = po.Position,
+                        LocalRotation = po.Rotation
+                    };
+                }
+            }
+
+            // Search Persistent list for door objects
+            foreach (var entry in prefabCell.Persistent)
+            {
+                if (entry is PlacedObject po && IsDoorObject(po))
+                {
+                    return new DoorObjectInfo
+                    {
+                        BaseFormKey = po.Base.FormKey,
+                        LocalPosition = po.Position,
+                        LocalRotation = po.Rotation
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks if a PlacedObject is a door by checking if its Base is a Door record.
+        /// </summary>
+        private static bool IsDoorObject(PlacedObject po)
+        {
+            if (po?.Base == null || po.Base.IsNull)
+                return false;
+
+            // Try to find the base in the Doors collection
+            // Check both the mod and Starfield.esm
+            try
+            {
+                if (gen_quest_main.myMod.Doors.ContainsKey(po.Base.FormKey))
+                    return true;
+
+                if (gen_quest_main._StarfieldMod.Doors.ContainsKey(po.Base.FormKey))
+                    return true;
+            }
+            catch
+            {
+                // Collection access failed, fall back to EditorID check
+            }
+
+            // Fallback: check if EditorID contains "door" (case insensitive)
+            if (po.EditorID?.Contains("door", StringComparison.OrdinalIgnoreCase) == true)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves the Cell associated with a prefab's PackIn.
+        /// </summary>
+        private static Cell ResolvePrefabCell(RoomPrefab prefab)
+        {
+            var cellFormKey = prefab.packin_instance?.Cell?.FormKey;
+            if (cellFormKey == null)
+                return null;
+
+            for (int i = 0; i < gen_quest_main.myMod.Cells.Count; i++)
+            {
+                for (int j = 0; j < gen_quest_main.myMod.Cells[i].SubBlocks.Count; j++)
+                {
+                    for (int k = 0; k < gen_quest_main.myMod.Cells[i].SubBlocks[j].Cells.Count; k++)
+                    {
+                        if (gen_quest_main.myMod.Cells[i].SubBlocks[j].Cells[k].FormKey == cellFormKey)
+                        {
+                            return gen_quest_main.myMod.Cells[i].SubBlocks[j].Cells[k];
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private struct DoorObjectInfo
+        {
+            public FormKey BaseFormKey;
+            public P3Float LocalPosition;
+            public P3Float LocalRotation;
         }
 
         /// <summary>
