@@ -9,11 +9,11 @@ namespace FrankyCLI.Retrograde.Passes
 {
     /// <summary>
     /// Scatters enemy alert area boxes (rg_enemy_alert) over the dungeon to provide
-    /// coverage with minimal overlap. Each alert box is 10x10x10 units.
+    /// coverage with minimal overlap. Each alert box is 25x25x25 units.
     /// </summary>
     public class EnemyAlertCoveragePass : IGenPass
     {
-        private const float AlertBoxSize = 10f;
+        private const float AlertBoxSize = 25f;
         private const string AlertPrefabId = "rg_enemy_alert";
 
         public void RunPass(DungeonState state)
