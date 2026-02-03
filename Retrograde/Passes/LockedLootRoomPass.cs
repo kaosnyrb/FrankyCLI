@@ -234,15 +234,18 @@ namespace FrankyCLI.Retrograde.Passes
         private void CreateKey(DungeonState state)
         {
             // Find a key template from Starfield.esm
-            Key templateKey = null;
+            Key templateKey = new Key(gen_quest_main.myMod);
+            Key refkey = null;
             foreach (var key in gen_quest_main._StarfieldMod.Keys)
             {
                 if (key != null)
                 {
-                    templateKey = key.DeepCopy();
+                    refkey = key.DeepCopy();
                     break;
                 }
             }
+
+            templateKey.Model = refkey.Model;
 
             if (templateKey == null)
                 return;
@@ -323,14 +326,25 @@ namespace FrankyCLI.Retrograde.Passes
                     Lock = new LockData
                     {
                         Level = LockLevel.RequiresKey,
-                        Key = _createdKey.ToLink()
+                        Key = _createdKey.ToLink(),
+                        Unused = 1
                     }
                 };
 
                 state.PlacementUtil.AddToTemporary(state.instance, _placedDoor);
 
+                // Mark this connector position as having a door so DoorPass skips it
+                state.UsedDoorPositions.Add(PositionKey(connection.Position));
+
                 return;
             }
+        }
+
+        private static string PositionKey(P3Float pos)
+        {
+            const float tolerance = 0.01f;
+            float scale = 1f / tolerance;
+            return $"{MathF.Round(pos.X * scale)}|{MathF.Round(pos.Y * scale)}|{MathF.Round(pos.Z * scale)}";
         }
 
         /// <summary>
@@ -439,12 +453,15 @@ namespace FrankyCLI.Retrograde.Passes
 
         /// <summary>
         /// Selects a room to place the key in.
-        /// Prefers rooms closer to the start and away from the loot room.
+        /// Prefers rooms with ShipMarker_* objects, closer to start, and away from loot room.
+        /// Falls back to any room if no rooms with markers are found.
         /// </summary>
         private PlacedRoom? SelectKeyRoom(DungeonState state, PlacedRoom lootRoom)
         {
-            PlacedRoom? bestRoom = null;
-            float bestScore = float.MinValue;
+            PlacedRoom? bestRoomWithMarker = null;
+            PlacedRoom? bestRoomFallback = null;
+            float bestScoreWithMarker = float.MinValue;
+            float bestScoreFallback = float.MinValue;
 
             foreach (var room in state.placedRooms)
             {
@@ -455,31 +472,60 @@ namespace FrankyCLI.Retrograde.Passes
                 // Calculate score: prefer rooms close to start and far from loot room
                 float distanceFromStart = (float)Math.Sqrt(MathUtil.DistanceSquared(room.WorldPos, state.StartingPosition));
                 float distanceFromLoot = (float)Math.Sqrt(MathUtil.DistanceSquared(room.WorldPos, lootRoom.WorldPos));
-
-                // Score: closer to start = better, further from loot = better
                 float score = distanceFromLoot - distanceFromStart;
 
-                if (score > bestScore)
+                // Check if room has ShipMarker_* objects
+                var prefabCell = ResolvePrefabCell(room.Prefab);
+                bool hasMarkers = prefabCell != null && EnumerateShipMarkers(prefabCell).Any();
+
+                if (hasMarkers)
                 {
-                    bestScore = score;
-                    bestRoom = room;
+                    if (score > bestScoreWithMarker)
+                    {
+                        bestScoreWithMarker = score;
+                        bestRoomWithMarker = room;
+                    }
+                }
+                else
+                {
+                    if (score > bestScoreFallback)
+                    {
+                        bestScoreFallback = score;
+                        bestRoomFallback = room;
+                    }
                 }
             }
 
-            return bestRoom;
+            // Prefer rooms with markers, fall back to any room
+            return bestRoomWithMarker ?? bestRoomFallback;
         }
 
         /// <summary>
         /// Places the created key item in the specified room.
+        /// Uses ShipMarker_* positions if available, otherwise falls back to room center.
         /// </summary>
         private void PlaceKey(DungeonState state, PlacedRoom keyRoom)
         {
             if (_createdKey == null)
                 return;
 
-            // Place key at room center
-            // TODO: Could place at a marker position for better placement
+            // Try to find a ShipMarker in the key room to place the key at
             var keyPos = keyRoom.WorldPos;
+            var prefabCell = ResolvePrefabCell(keyRoom.Prefab);
+
+            if (prefabCell != null)
+            {
+                var markers = EnumerateShipMarkers(prefabCell).ToList();
+                if (markers.Count > 0)
+                {
+                    // Pick a random marker
+                    var chosenMarker = markers[RandomUtils.random.Next(markers.Count)];
+
+                    // Transform marker position to world coordinates
+                    var rotatedLocal = RgRotation.RotateYaw90(chosenMarker.Position, keyRoom.YawSteps);
+                    keyPos = keyRoom.WorldPos + rotatedLocal;
+                }
+            }
 
             state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
             {
@@ -488,6 +534,44 @@ namespace FrankyCLI.Retrograde.Passes
                 Position = keyPos,
                 Base = _createdKey.ToLink<IPlaceableObjectGetter>()
             });
+        }
+
+        /// <summary>
+        /// Enumerates all ShipMarker_* objects in a prefab cell.
+        /// </summary>
+        private static IEnumerable<PlacedObject> EnumerateShipMarkers(Cell prefabCell)
+        {
+            foreach (var entry in prefabCell.Temporary)
+            {
+                if (entry is PlacedObject po && IsShipMarker(po))
+                {
+                    yield return po;
+                }
+            }
+
+            foreach (var entry in prefabCell.Persistent)
+            {
+                if (entry is PlacedObject po && IsShipMarker(po))
+                {
+                    yield return po;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if a PlacedObject is a ShipMarker_* static.
+        /// </summary>
+        private static bool IsShipMarker(PlacedObject po)
+        {
+            if (po.Base.FormKey.ModKey.Name == "Starfield")
+            {
+                if (gen_quest_main._StarfieldMod.Statics.ContainsKey(po.Base.FormKey))
+                {
+                    var stat = gen_quest_main._StarfieldMod.Statics[po.Base.FormKey].EditorID;
+                    return stat?.StartsWith("ShipMarker_") == true;
+                }
+            }
+            return false;
         }
 
         private struct DoorConnectionInfo

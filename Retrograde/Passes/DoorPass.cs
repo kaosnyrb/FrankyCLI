@@ -40,6 +40,10 @@ namespace FrankyCLI.Retrograde.Passes
                 var connection = prioritized[idx];
                 var open = connection.A;
 
+                // Skip if a door was already placed here (e.g., by LockedLootRoomPass)
+                if (state.UsedDoorPositions != null && state.UsedDoorPositions.Contains(PositionKey(open.WorldPos)))
+                    continue;
+
                 // Pick blocker prefab based on door size / tileset
                 var blockerId = ConnectorUtils.GetDoor(open.Parsed.DoorSize, open.Parsed.Tileset);
                 var blockerPrefab = PrefabCache.GetPrefab(blockerId);
@@ -166,6 +170,13 @@ namespace FrankyCLI.Retrograde.Passes
         private static bool SamePosition(P3Float a, P3Float b, float tolerance)
         {
             return MathUtil.DistanceSquared(a, b) <= tolerance * tolerance;
+        }
+
+        private static string PositionKey(P3Float pos)
+        {
+            const float tolerance = 0.01f;
+            float scale = 1f / tolerance;
+            return $"{MathF.Round(pos.X * scale)}|{MathF.Round(pos.Y * scale)}|{MathF.Round(pos.Z * scale)}";
         }
 
         private static float ComputeRoomVolume(PlacedRoom room)

@@ -54,6 +54,7 @@ namespace FrankyCLI.Retrograde.Passes
             windowConnectors = new List<P3Float>();
             TrunkRoomLists = new List<string>();
             SealedConnectorPositionKeys = new HashSet<string>();
+            UsedDoorPositions = new HashSet<string>();
             instance = cell;
             location = plocation;
             RoomUtilsCache = new Dictionary<string, RoomUtils>(StringComparer.OrdinalIgnoreCase);
@@ -69,6 +70,7 @@ namespace FrankyCLI.Retrograde.Passes
         public List<P3Float> windowConnectors;
         public List<string> TrunkRoomLists;
         public HashSet<string> SealedConnectorPositionKeys;
+        public HashSet<string> UsedDoorPositions;
 
         public ScoringSystem scoringSystem;
 
