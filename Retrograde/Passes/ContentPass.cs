@@ -208,7 +208,8 @@ namespace FrankyCLI.Retrograde
                 }
             }
 
-            Console.WriteLine($"[Content] Placed {itemsPlaced} items, {markersCulled} culled, {markersSkipped} duplicates skipped");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[Content] Placed {itemsPlaced} items, {markersCulled} culled, {markersSkipped} duplicates skipped");
         }
     }
 }

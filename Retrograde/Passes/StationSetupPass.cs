@@ -35,7 +35,8 @@ namespace FrankyCLI.Retrograde.Passes
                 DistrictType = "trunk"
             });
 
-            Console.WriteLine($"[StationSetup] Starting position: ({startingMarker.Position.X:F0}, {startingMarker.Position.Y:F0}, {startingMarker.Position.Z:F0})");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[StationSetup] Starting position: ({startingMarker.Position.X:F0}, {startingMarker.Position.Y:F0}, {startingMarker.Position.Z:F0})");
         }
     }
 }

@@ -87,7 +87,8 @@ namespace FrankyCLI.Retrograde.Passes
                 }
             }
 
-            Console.WriteLine($"[WindowSealing] Placed {windowsPlaced} window blockers, {windowsFailed} failed");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[WindowSealing] Placed {windowsPlaced} window blockers, {windowsFailed} failed");
         }
 
         private static bool IsOnOuterEdgeFacingOut(OpenConnector open, List<PlacedRoom> placedRooms, float tolerance)

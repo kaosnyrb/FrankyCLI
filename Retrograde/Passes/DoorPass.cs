@@ -86,7 +86,8 @@ namespace FrankyCLI.Retrograde.Passes
                     doorsFailed++;
             }
 
-            Console.WriteLine($"[Door] Placed {doorsPlaced} doors, {doorsFailed} failed, {connections.Count} total connections");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[Door] Placed {doorsPlaced} doors, {doorsFailed} failed, {connections.Count} total connections");
         }
 
         private static List<DoorConnection> CollectConnectorPairs(List<PlacedRoom> placedRooms, float tolerance)

@@ -57,7 +57,8 @@ namespace FrankyCLI.Retrograde
                 }
             }
 
-            Console.WriteLine($"[ShipMarker] Placed {markersPlaced} ship markers");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[ShipMarker] Placed {markersPlaced} ship markers");
         }
 
         private static IEnumerable<PlacedObject> EnumerateShipMarkers(Cell prefabCell)

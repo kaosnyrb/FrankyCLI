@@ -91,7 +91,8 @@ namespace FrankyCLI.Retrograde.Passes
             // Stage 2: Sweep placed rooms for stray unmatched connector markers
             int stage2Sealed = SealUnconnectedPlacedMarkers(state, sealedPositions);
 
-            Console.WriteLine($"[ConnectorSealing] Sealed {stage1Sealed} open connectors, {stage2Sealed} stray markers");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[ConnectorSealing] Sealed {stage1Sealed} open connectors, {stage2Sealed} stray markers");
         }
 
         /// <summary>

@@ -233,7 +233,8 @@ namespace FrankyCLI.Retrograde
             int patrolCount = PlaceLonePatrols(state, stationFactionCrew, roomsWithEnemies, candidates);
 
             int totalNpcs = (reservedBoss.HasValue ? 1 : 0) + spacedSpawns.Count + patrolCount;
-            Console.WriteLine($"[Enemy] Placed {totalNpcs} NPCs ({spacedSpawns.Count} spawns, {patrolCount} patrols), faction: {state.Faction}");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[Enemy] Placed {totalNpcs} NPCs ({spacedSpawns.Count} spawns, {patrolCount} patrols), faction: {state.Faction}");
         }
 
         /// <summary>

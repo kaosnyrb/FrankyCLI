@@ -78,7 +78,8 @@ namespace FrankyCLI.Retrograde.Passes
                     plugsFailed++;
             }
 
-            Console.WriteLine($"[Plug] Placed {plugsPlaced} plugs, {plugsFailed} failed");
+            if (!state.IsHarnessRun)
+                Console.WriteLine($"[Plug] Placed {plugsPlaced} plugs, {plugsFailed} failed");
         }
 
         private static List<OpenConnector> CollectConnectors(List<PlacedRoom> placedRooms)

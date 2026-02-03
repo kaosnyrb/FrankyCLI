@@ -82,9 +82,12 @@ namespace FrankyCLI.Retrograde.Passes
             // Step 5: Place the key in the key room
             PlaceKey(state, keyRoom.Value);
 
-            var lootRoomName = _placedLootRoom?.Prefab?.PrefabEditorId ?? "unknown";
-            var keyRoomName = keyRoom.Value.Prefab?.PrefabEditorId ?? "unknown";
-            Console.WriteLine($"[LockedLootRoom] Placed loot room '{lootRoomName}', key in '{keyRoomName}'");
+            if (!state.IsHarnessRun)
+            {
+                var lootRoomName = _placedLootRoom?.Prefab?.PrefabEditorId ?? "unknown";
+                var keyRoomName = keyRoom.Value.Prefab?.PrefabEditorId ?? "unknown";
+                Console.WriteLine($"[LockedLootRoom] Placed loot room '{lootRoomName}', key in '{keyRoomName}'");
+            }
         }
 
         /// <summary>
