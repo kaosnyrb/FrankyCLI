@@ -4,7 +4,8 @@
       "Bash(dotnet build:*)",
       "Bash(move:*)",
       "Bash(ls:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git mv:*)"
     ]
   }
 }
