@@ -9,16 +9,22 @@ namespace FrankyCLI.Retrograde.Passes
 {
     /// <summary>
     /// Places enemy alert boxes in a grid across the dungeon for localized combat zones.
+    /// Randomly picks from available alert types at each grid position for varied behavior.
+    /// Boss rooms always get Defend prefabs for aggressive enemy response.
     /// </summary>
     public class EnemyAlertCoveragePass : IGenPass
     {
-        // Alert prefabs ordered by size (largest first for efficient coverage)
-        private static readonly (string prefabId, float size)[] AlertPrefabs = new[]
+        // Alert prefabs - all same size (25), different behaviors
+        private const string DefendPrefabId = "rg_enemy_alert_25_SandboxEngagedPreferredDefendHold"; // Hold the area
+        private static readonly string[] AlertPrefabIds = new[]
         {
-            ("rg_enemy_alert_25_Defend", 25f),
-            ("rg_enemy_alert_20_Defend", 20f),
-            //("rg_enemy_alert_10_Defend", 10f),
+            DefendPrefabId,
+            "rg_enemy_alert_25_EngagedPreferred", //Defend unless a fight is near
+            "rg_enemy_alert_25_Engaged", // Hold Until Engaged
+            "rg_enemy_alert_25_Chase" //Chase the player
         };
+
+        private const float GridSpacing = 25f;
 
         public void RunPass(DungeonState state)
         {
@@ -26,15 +32,19 @@ namespace FrankyCLI.Retrograde.Passes
                 return;
 
             // Load all available alert prefabs
-            var availablePrefabs = new List<(RoomPrefab prefab, float size)>();
-            foreach (var (prefabId, size) in AlertPrefabs)
+            var availablePrefabs = new List<RoomPrefab>();
+            RoomPrefab? defendPrefab = null;
+
+            foreach (var prefabId in AlertPrefabIds)
             {
                 try
                 {
                     var prefab = PrefabCache.GetPrefab(prefabId);
                     if (prefab?.packin_instance != null)
                     {
-                        availablePrefabs.Add((prefab, size));
+                        availablePrefabs.Add(prefab);
+                        if (prefabId == DefendPrefabId)
+                            defendPrefab = prefab;
                     }
                 }
                 catch
@@ -46,28 +56,73 @@ namespace FrankyCLI.Retrograde.Passes
             if (availablePrefabs.Count == 0)
                 return;
 
-            // Use the largest available prefab for grid spacing
-            var (alertPrefab, gridSpacing) = availablePrefabs[0];
+            // Fallback if defend prefab not found
+            if (defendPrefab == null)
+                defendPrefab = availablePrefabs[0];
 
             // Compute dungeon bounds from all placed rooms
             var bounds = ComputeDungeonBounds(state.placedRooms);
 
+            // Pre-compute boss room bounds for checking
+            var bossRoomBounds = ComputeBossRoomBounds(state.placedRooms);
+
             // Place alert boxes in a grid across the dungeon
             int boxesPlaced = 0;
-            for (float x = bounds.Min.X; x <= bounds.Max.X; x += gridSpacing)
+            for (float x = bounds.Min.X; x <= bounds.Max.X; x += GridSpacing)
             {
-                for (float y = bounds.Min.Y; y <= bounds.Max.Y; y += gridSpacing)
+                for (float y = bounds.Min.Y; y <= bounds.Max.Y; y += GridSpacing)
                 {
-                    for (float z = bounds.Min.Z; z <= bounds.Max.Z; z += gridSpacing)
+                    for (float z = bounds.Min.Z; z <= bounds.Max.Z; z += GridSpacing)
                     {
-                        PlaceBox(state, alertPrefab, x, y, z);
+                        // Use Defend prefab in boss rooms, random elsewhere
+                        RoomPrefab prefab;
+                        if (IsInsideBossRoom(x, y, z, bossRoomBounds))
+                            prefab = defendPrefab;
+                        else
+                            prefab = availablePrefabs[RandomUtils.random.Next(availablePrefabs.Count)];
+
+                        PlaceBox(state, prefab, x, y, z);
                         boxesPlaced++;
                     }
                 }
             }
 
             if (!state.IsHarnessRun)
-                Console.WriteLine($"[EnemyAlert] Placed {boxesPlaced} alert boxes in grid");
+                Console.WriteLine($"[EnemyAlert] Placed {boxesPlaced} alert boxes in grid ({availablePrefabs.Count} types)");
+        }
+
+        private static List<RgAabb> ComputeBossRoomBounds(List<PlacedRoom> placedRooms)
+        {
+            var bossRoomBounds = new List<RgAabb>();
+            foreach (var room in placedRooms)
+            {
+                if (room.DistrictType != "boss")
+                    continue;
+
+                if (room.Prefab?.packin_instance?.ObjectBounds == null)
+                    continue;
+
+                var bounds = ConnectorUtils.ToWorldAabbRotated(
+                    room.Prefab.packin_instance.ObjectBounds,
+                    room.WorldPos,
+                    room.YawSteps);
+                bossRoomBounds.Add(bounds);
+            }
+            return bossRoomBounds;
+        }
+
+        private static bool IsInsideBossRoom(float x, float y, float z, List<RgAabb> bossRoomBounds)
+        {
+            foreach (var bounds in bossRoomBounds)
+            {
+                if (x >= bounds.Min.X && x <= bounds.Max.X &&
+                    y >= bounds.Min.Y && y <= bounds.Max.Y &&
+                    z >= bounds.Min.Z && z <= bounds.Max.Z)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static RgAabb ComputeDungeonBounds(List<PlacedRoom> placedRooms)
