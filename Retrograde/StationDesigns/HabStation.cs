@@ -44,7 +44,9 @@ namespace FrankyCLI.Retrograde.StationDesigns
             {
                 // Add optional passes here, e.g.:
                 //new OptionalPass(new LockedLootRoomPass("rg_utillist"), 1),
-                new OptionalPass(new NPCKeyLootRoomPass("rg_utillist"), 1),
+                //new OptionalPass(new NPCKeyLootRoomPass("rg_utillist"), 1),
+                //new OptionalPass(new BountyTargetEventPass(), 1),
+                new OptionalPass(new InfectionEventPass(), 1)  
             };
 
             // Connector sealing passes
