@@ -327,8 +327,8 @@ namespace FrankyCLI.Retrograde.Passes
                     {
                         Level = LockLevel.RequiresKey,
                         Key = _createdKey.ToLink(),
-                        Unused = 1
-                    }
+                        Flags = (LockData.Flag)1
+                    },
                 };
 
                 state.PlacementUtil.AddToTemporary(state.instance, _placedDoor);
