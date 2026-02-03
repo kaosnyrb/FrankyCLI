@@ -11,17 +11,19 @@ namespace FrankyCLI.Retrograde.Passes
 {
     /// <summary>
     /// Prototype pass that creates a locked loot room scenario:
-    /// 1. Designates an existing room as the "loot room"
+    /// 1. Places a new loot room from a prefab list
     /// 2. Creates a key by copying from Starfield.esm and adds to mod
     /// 3. Places a locked door on the connector leading to that room (linked to key)
     /// 4. Places the key in an earlier room
     ///
     /// TODOs for later:
-    /// - Add dedicated loot room prefab/room list
     /// - Better key placement (use markers instead of room center)
     /// </summary>
     public class LockedLootRoomPass : IGenPass
     {
+        private readonly string _roomList;
+        private const string DistrictTypeLabel = "lootroom";
+
         // Stores the FormKey of the door base object found in the prefab
         private FormKey? _doorBaseFormKey;
 
@@ -31,36 +33,191 @@ namespace FrankyCLI.Retrograde.Passes
         // The created key for this locked room
         private Key _createdKey;
 
+        // The placed loot room
+        private PlacedRoom? _placedLootRoom;
+
+        // The connector used to attach the loot room (for door placement)
+        private OpenConnector? _usedConnector;
+
+        public LockedLootRoomPass(string roomList)
+        {
+            _roomList = roomList;
+        }
+
         public void RunPass(DungeonState state)
         {
-            if (state?.placedRooms == null || state.placedRooms.Count < 3)
-                return; // Need at least 3 rooms for meaningful key placement
+            if (state?.openConnectors == null || state.openConnectors.Count == 0)
+                return; // Need open connectors to attach the loot room
 
-            // Step 1: Select the loot room (furthest from starting position)
-            var lootRoom = SelectLootRoom(state);
-            if (lootRoom == null)
+            // Step 1: Place the loot room from prefab list
+            if (!PlaceLootRoom(state))
                 return;
 
-            // Step 2: Find the connector/door leading into the loot room
-            var doorConnection = FindDoorConnection(state, lootRoom.Value);
-            if (doorConnection == null)
-                return;
-
-            // Step 3: Create the key (need FormKey before placing door)
+            // Step 2: Create the key (need FormKey before placing door)
             CreateKey(state);
             if (_createdKey == null)
                 return;
 
-            // Step 4: Place the locked door (linked to the key)
-            PlaceLockedDoor(state, doorConnection.Value);
+            // Step 3: Place the locked door at the connector used for the loot room
+            if (_usedConnector.HasValue)
+            {
+                var doorConnection = new DoorConnectionInfo
+                {
+                    Position = _usedConnector.Value.WorldPos,
+                    Direction = _usedConnector.Value.Parsed.Direction,
+                    DoorSize = _usedConnector.Value.Parsed.DoorSize,
+                    Tileset = _usedConnector.Value.Parsed.Tileset
+                };
+                PlaceLockedDoor(state, doorConnection);
+            }
 
-            // Step 5: Select a room for key placement (away from loot room, closer to start)
-            var keyRoom = SelectKeyRoom(state, lootRoom.Value);
+            // Step 4: Select a room for key placement (away from loot room, closer to start)
+            if (!_placedLootRoom.HasValue)
+                return;
+
+            var keyRoom = SelectKeyRoom(state, _placedLootRoom.Value);
             if (keyRoom == null)
                 return;
 
-            // Step 6: Place the key in the key room
+            // Step 5: Place the key in the key room
             PlaceKey(state, keyRoom.Value);
+        }
+
+        /// <summary>
+        /// Places a new loot room from the prefab list at an open connector.
+        /// </summary>
+        private bool PlaceLootRoom(DungeonState state)
+        {
+            RoomUtils roomUtils = state.GetRoomUtils(_roomList);
+            int maxAttempts = 100;
+            float collisionPadding = -0.1f;
+
+            for (int attempt = 0; attempt < maxAttempts && state.openConnectors.Count > 0; attempt++)
+            {
+                // Pick a random open connector
+                int openIndex = RandomUtils.random.Next(state.openConnectors.Count);
+                var target = state.openConnectors[openIndex];
+
+                if (target.WorldPos.Y < state.YMin)
+                    continue;
+
+                var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
+
+                // Try to find a compatible prefab
+                string prefabId = ChoosePrefabId(roomUtils, target.Parsed.Tileset);
+                if (string.IsNullOrEmpty(prefabId))
+                    continue;
+
+                var nextPrefab = PrefabCache.GetPrefab(prefabId);
+                if (nextPrefab?.packin_instance == null)
+                    continue;
+
+                // Try all rotations
+                for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                {
+                    var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
+
+                    var compatible = nextConnectors
+                        .Where(c =>
+                            c.Parsed.Direction == requiredDir &&
+                            string.Equals(c.Parsed.DoorSize, target.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(c.Parsed.Tileset, target.Parsed.Tileset, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (compatible.Count == 0)
+                        continue;
+
+                    var chosen = compatible[RandomUtils.random.Next(compatible.Count)];
+
+                    // Align using rotated local connector
+                    P3Float nextPos = target.WorldPos - chosen.LocalPos;
+
+                    // Collision check
+                    var candidateAabb = ConnectorUtils.ToWorldAabbRotated(nextPrefab.packin_instance.ObjectBounds, nextPos, yawSteps);
+                    if (ConnectorUtils.IsBelowYMin(candidateAabb, state.YMin))
+                        continue;
+                    if (ConnectorUtils.CollidesWithAny(candidateAabb, state.placedRooms, collisionPadding))
+                        continue;
+
+                    // Place the room
+                    state.PlacementUtil.AddToTemporary(state.instance, new PlacedObject(gen_quest_main.myMod)
+                    {
+                        Count = 1,
+                        Rotation = RgRotation.RotationToP3Float(yawSteps),
+                        Position = nextPos,
+                        Base = nextPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                    });
+
+                    var placedRoom = new PlacedRoom
+                    {
+                        Prefab = nextPrefab,
+                        WorldPos = nextPos,
+                        YawSteps = yawSteps,
+                        DistrictType = DistrictTypeLabel,
+                        Connectors = nextConnectors
+                    };
+
+                    state.placedRooms.Add(placedRoom);
+                    _placedLootRoom = placedRoom;
+                    _usedConnector = target;
+
+                    // Remove the used connector from open list
+                    state.openConnectors.RemoveAt(openIndex);
+
+                    // Add new connectors from the placed room (except the one we used)
+                    foreach (var c in nextConnectors)
+                    {
+                        if (c.EditorId == chosen.EditorId && c.LocalPos.Equals(chosen.LocalPos))
+                            continue;
+
+                        state.openConnectors.Add(new OpenConnector
+                        {
+                            Parsed = c.Parsed,
+                            YawSteps = yawSteps,
+                            WorldPos = nextPos + c.LocalPos,
+                            DistrictType = DistrictTypeLabel
+                        });
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Chooses a prefab ID from the room list.
+        /// </summary>
+        private string ChoosePrefabId(RoomUtils roomUtils, string tileset)
+        {
+            var listKey = roomUtils.listName + "_" + tileset;
+            if (roomUtils.roomTemplates.TryGetValue(listKey, out var formList) &&
+                formList?.Items != null &&
+                formList.Items.Count > 0)
+            {
+                var candidates = new List<string>();
+
+                foreach (var item in formList.Items)
+                {
+                    if (!gen_quest_main.myMod.PackIns.TryGetValue(item.FormKey, out var packIn) ||
+                        string.IsNullOrEmpty(packIn?.EditorID))
+                    {
+                        continue;
+                    }
+
+                    // Skip blockers
+                    if (packIn.EditorID.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) >= 0)
+                        continue;
+
+                    candidates.Add(packIn.EditorID);
+                }
+
+                if (candidates.Count > 0)
+                    return candidates[RandomUtils.random.Next(candidates.Count)];
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -95,97 +252,6 @@ namespace FrankyCLI.Retrograde.Passes
 
             // Add the key to the current mod
             gen_quest_main.myMod.Keys.Add(_createdKey);
-        }
-
-        /// <summary>
-        /// Selects the room to be the loot room.
-        /// Currently picks the room furthest from the starting position,
-        /// preferring non-trunk rooms.
-        /// </summary>
-        private PlacedRoom? SelectLootRoom(DungeonState state)
-        {
-            PlacedRoom? bestRoom = null;
-            float maxDistance = -1f;
-
-            foreach (var room in state.placedRooms)
-            {
-                // Skip trunk rooms - they're corridors, not good loot destinations
-                if (room.DistrictType?.Contains("trunk", StringComparison.OrdinalIgnoreCase) == true)
-                    continue;
-
-                // Skip boss rooms - they have their own rewards
-                if (room.DistrictType?.Contains("boss", StringComparison.OrdinalIgnoreCase) == true)
-                    continue;
-
-                float distance = MathUtil.DistanceSquared(room.WorldPos, state.StartingPosition);
-                if (distance > maxDistance)
-                {
-                    maxDistance = distance;
-                    bestRoom = room;
-                }
-            }
-
-            // Fallback: if no suitable room found, pick any non-trunk room
-            if (bestRoom == null)
-            {
-                bestRoom = state.placedRooms
-                    .FirstOrDefault(r => r.DistrictType?.Contains("trunk", StringComparison.OrdinalIgnoreCase) != true);
-            }
-
-            return bestRoom;
-        }
-
-        /// <summary>
-        /// Finds the connector pair between the loot room and an adjacent room.
-        /// This is where we'll place the locked door.
-        /// </summary>
-        private DoorConnectionInfo? FindDoorConnection(DungeonState state, PlacedRoom lootRoom)
-        {
-            const float positionTolerance = 0.01f;
-
-            foreach (var connector in lootRoom.Connectors)
-            {
-                var connectorWorldPos = lootRoom.WorldPos + connector.LocalPos;
-                var requiredDir = ConnectorUtils.Opposite(connector.Parsed.Direction);
-
-                // Find the matching connector from another room
-                foreach (var otherRoom in state.placedRooms)
-                {
-                    if (otherRoom.WorldPos.Equals(lootRoom.WorldPos) &&
-                        otherRoom.YawSteps == lootRoom.YawSteps)
-                        continue; // Same room
-
-                    foreach (var otherConnector in otherRoom.Connectors)
-                    {
-                        var otherWorldPos = otherRoom.WorldPos + otherConnector.LocalPos;
-
-                        if (!ArePositionsClose(connectorWorldPos, otherWorldPos, positionTolerance))
-                            continue;
-
-                        if (otherConnector.Parsed.Direction != requiredDir)
-                            continue;
-
-                        if (!string.Equals(connector.Parsed.DoorSize, otherConnector.Parsed.DoorSize,
-                            StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        if (!string.Equals(connector.Parsed.Tileset, otherConnector.Parsed.Tileset,
-                            StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        // Found a valid connection
-                        return new DoorConnectionInfo
-                        {
-                            Position = connectorWorldPos,
-                            Direction = connector.Parsed.Direction,
-                            DoorSize = connector.Parsed.DoorSize,
-                            Tileset = connector.Parsed.Tileset
-                        };
-                    }
-                }
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -415,13 +481,6 @@ namespace FrankyCLI.Retrograde.Passes
                 Position = keyPos,
                 Base = _createdKey.ToLink<IPlaceableObjectGetter>()
             });
-        }
-
-        private static bool ArePositionsClose(P3Float a, P3Float b, float tolerance)
-        {
-            return Math.Abs(a.X - b.X) <= tolerance &&
-                   Math.Abs(a.Y - b.Y) <= tolerance &&
-                   Math.Abs(a.Z - b.Z) <= tolerance;
         }
 
         private struct DoorConnectionInfo
