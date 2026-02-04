@@ -46,13 +46,14 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetLowRank_Outfit();
+                var spaceOutfit = GetLowRank_SpaceOutfit();
                 npc.Name = GetFactionPrefix() + " " + GetLowRank_Name();
                 var gear = GetLowRank_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 0.5f + ((float)random.NextDouble()/2);
                 npc.Level = lev;
 
-                CreateNPC(Faction, random, isfemale, npc, outfit, gear);
+                CreateNPC(Faction, random, isfemale, npc, outfit, spaceOutfit, gear);
 
                 LowRank.Add(npc);
             }
@@ -70,13 +71,14 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetHighRank_Outfit();
+                var spaceOutfit = GetHighRank_SpaceOutfit();
                 npc.Name = GetFactionPrefix() + " " + GetHighRank_Name();
                 var gear = GetHighRank_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 0.75f + (float)random.NextDouble();
                 npc.Level = lev;
 
-                CreateNPC(Faction, random, isfemale, npc, outfit, gear);
+                CreateNPC(Faction, random, isfemale, npc, outfit, spaceOutfit, gear);
                 HighRank.Add(npc);
 
             }
@@ -93,18 +95,19 @@ namespace FrankyCLI.questgen_tools
 
                 //Ranked Info
                 var outfit = GetBoss_Outfit();
+                var spaceOutfit = GetBoss_SpaceOutfit();
                 npc.Name = GetFactionPrefix() + " " + GetBoss_Name();
                 var gear = GetBoss_Gear();
                 var lev = new PcLevelMult();
                 lev.LevelMult = 1 + (float)random.NextDouble();
                 npc.Level = lev;
 
-                CreateNPC(Faction, random, isfemale, npc, outfit, gear);
+                CreateNPC(Faction, random, isfemale, npc, outfit, spaceOutfit, gear);
                 Bosses.Add(npc);
             }
         }
 
-        private void CreateNPC(string Faction, Random random, bool isfemale, Npc npc, IFormLinkNullable<IOutfitGetter> outfit, IFormLinkNullable<ILeveledItemGetter> gear)
+        private void CreateNPC(string Faction, Random random, bool isfemale, Npc npc, IFormLinkNullable<IOutfitGetter> outfit, IFormLinkNullable<IOutfitGetter> spaceOutfit, IFormLinkNullable<ILeveledItemGetter> gear)
         {
             //Generate Member
             string Gender = "Male";
@@ -119,7 +122,8 @@ namespace FrankyCLI.questgen_tools
                 Muscular = (float)random.NextDouble(),
                 Thin = (float)random.NextDouble()/2
             };
-            npc.SpaceOutfit = outfit;
+            npc.DefaultOutfit = outfit;
+            npc.SpaceOutfit = spaceOutfit;
             npc.EyeColor = NPCTools.GetEyeColour();
             npc.HairColor = NPCTools.GetHairColour();
             npc.SkinToneIndex = (byte)random.Next(8);
@@ -273,6 +277,21 @@ namespace FrankyCLI.questgen_tools
 
         public IFormLinkNullable<IOutfitGetter> GetHighRank_Outfit()
         {
+            return FormLinkNullable<IOutfitGetter>.Null;
+        }
+
+        public IFormLinkNullable<IOutfitGetter> GetBoss_Outfit()
+        {
+            return FormLinkNullable<IOutfitGetter>.Null;
+        }
+
+        public IFormLinkNullable<IOutfitGetter> GetLowRank_SpaceOutfit()
+        {
+            return FormLinkNullable<IOutfitGetter>.Null;
+        }
+
+        public IFormLinkNullable<IOutfitGetter> GetHighRank_SpaceOutfit()
+        {
             Random random = RandomUtils.random;
             List<uint> Outfits = new List<uint>
             {
@@ -282,7 +301,7 @@ namespace FrankyCLI.questgen_tools
             return outfit;
         }
 
-        public IFormLinkNullable<IOutfitGetter> GetBoss_Outfit()
+        public IFormLinkNullable<IOutfitGetter> GetBoss_SpaceOutfit()
         {
             Random random = RandomUtils.random;
             List<uint> Outfits = new List<uint>

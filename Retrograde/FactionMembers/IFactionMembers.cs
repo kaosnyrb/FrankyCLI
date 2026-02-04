@@ -20,6 +20,10 @@ namespace FrankyCLI.Retrograde.FactionMembers
         IFormLinkNullable<IOutfitGetter> GetHighRank_Outfit();
         IFormLinkNullable<IOutfitGetter> GetBoss_Outfit();
 
+        IFormLinkNullable<IOutfitGetter> GetLowRank_SpaceOutfit();
+        IFormLinkNullable<IOutfitGetter> GetHighRank_SpaceOutfit();
+        IFormLinkNullable<IOutfitGetter> GetBoss_SpaceOutfit();
+
         IFormLinkNullable<ILeveledItemGetter> GetLowRank_Gear();
         IFormLinkNullable<ILeveledItemGetter> GetHighRank_Gear();
         IFormLinkNullable<ILeveledItemGetter> GetBoss_Gear();
