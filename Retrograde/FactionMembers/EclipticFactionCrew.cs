@@ -261,8 +261,7 @@ namespace FrankyCLI.questgen_tools
             Random random = RandomUtils.random;
             List<uint> Outfits = new List<uint>
             {
-                0x0029B9D4,// LL_Clothes_Settler_Any [LVLI:0029B9D4]
-                0x0003A0CF,// LL_Clothes_Worker_Any [LVLI:0003A0CF]
+                0x00056D4A,//Outfit_Spacesuit_Ecliptic_NoHelmet_NoBackpack [OTFT:00056D4A]
             };
             IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
