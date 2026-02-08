@@ -36,9 +36,9 @@ namespace FrankyCLI.Retrograde.Passes
             if (state?.placedRooms == null || state.placedRooms.Count == 0)
                 return;
 
-            // Resolve activator base records by editor ID
-            var availableActivators = new List<Activator>();
-            Activator? defendActivator = null;
+            // Resolve activator base records from Starfield data by editor ID
+            var availableActivators = new List<IActivatorGetter>();
+            IActivatorGetter? defendActivator = null;
 
             foreach (var actId in AlertActivatorIds)
             {
@@ -88,7 +88,7 @@ namespace FrankyCLI.Retrograde.Passes
                 float sy = section.Max.Y - section.Min.Y;
                 float sz = section.Max.Z - section.Min.Z;
 
-                Activator activator;
+                IActivatorGetter activator;
                 if (IsInsideBossRoom(cx, cy, cz, bossRoomBounds))
                     activator = defendActivator;
                 else
@@ -214,9 +214,9 @@ namespace FrankyCLI.Retrograde.Passes
             return result;
         }
 
-        private static Activator? FindActivator(string editorId)
+        private static IActivatorGetter? FindActivator(string editorId)
         {
-            foreach (var acti in gen_quest_main.myMod.Activators)
+            foreach (var acti in gen_quest_main._StarfieldMod.Activators)
             {
                 if (acti.EditorID == editorId)
                     return acti;
@@ -224,7 +224,7 @@ namespace FrankyCLI.Retrograde.Passes
             return null;
         }
 
-        private static void PlacePrimitiveBox(DungeonState state, Activator activator, float x, float y, float z, P3Float extents)
+        private static void PlacePrimitiveBox(DungeonState state, IActivatorGetter activator, float x, float y, float z, P3Float extents)
         {
             var placed = new PlacedObject(gen_quest_main.myMod)
             {
