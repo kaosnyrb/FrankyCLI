@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Interfaces;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -61,6 +62,9 @@ namespace FrankyCLI
                         }
                     }
                 }
+
+                // Initialize the Retrograde context for library access
+                RetrogradeContext.Current = new ModContextImpl();
 
                 //We have different styles of quest chains, so randomly choose one.
 

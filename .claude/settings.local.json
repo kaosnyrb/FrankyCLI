@@ -7,7 +7,9 @@
       "Bash(grep:*)",
       "Bash(git mv:*)",
       "Bash(dir:*)",
-      "Bash(dotnet clean:*)"
+      "Bash(dotnet clean:*)",
+      "Bash(Select-String -Pattern \"error|Error|Build succeeded\")",
+      "Bash(Select-Object -First 20)"
     ]
   }
 }

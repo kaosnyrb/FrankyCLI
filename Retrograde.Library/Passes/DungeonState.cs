@@ -22,7 +22,7 @@ public class DungeonState
         UsedDoorPositions = new HashSet<string>();
         instance = cell;
         this.location = location;
-        RoomUtilsCache = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        RoomUtilsCache = new Dictionary<string, RoomUtils>(StringComparer.OrdinalIgnoreCase);
         PlacementUtil = new PlacementUtil();
     }
 
@@ -41,8 +41,25 @@ public class DungeonState
 
     public P3Float StartingPosition;
     public HashSet<string>? BridgePrefabKeys;
-    public Dictionary<string, object> RoomUtilsCache;
+    public Dictionary<string, RoomUtils> RoomUtilsCache;
     public PlacementUtil PlacementUtil { get; }
+
+    /// <summary>
+    /// Gets or creates a RoomUtils for the given list name.
+    /// </summary>
+    public RoomUtils GetRoomUtils(string listName)
+    {
+        if (string.IsNullOrWhiteSpace(listName))
+            throw new ArgumentException("Room list name cannot be null or empty.", nameof(listName));
+
+        if (!RoomUtilsCache.TryGetValue(listName, out var utils))
+        {
+            utils = new RoomUtils(listName);
+            RoomUtilsCache[listName] = utils;
+        }
+
+        return utils;
+    }
 
     public float YMin = 0;
 
