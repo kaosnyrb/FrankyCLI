@@ -17,14 +17,19 @@ namespace FrankyCLI.Retrograde.Passes
     public class EnemyAlertPrimitiveCoveragePass : IGenPass
     {
         // Alert activator editor IDs for different combat behaviors
-        private const string DefendActivatorId = "rg_enemy_alert_SandboxEngagedPreferredDefendHold";
-        private static readonly string[] AlertActivatorIds = new[]
+        private const string DefendActivatorId = "DMP_Room_SandboxEngagedPreferredDefend";
+
+        // Alert type options for random selection per section
+        private static readonly string[] AlertOptions = new[]
         {
             DefendActivatorId,
-            "rg_enemy_alert_EngagedPreferred",
-            "rg_enemy_alert_Engaged",
-            "rg_enemy_alert_Chase"
+            "DMP_Room_PreferredDefend",
+            "DMP_Room_EngagedPreferred",
+            "DMP_Room_Engaged"
         };
+
+        // Chance (0.0 to 1.0) that a non-boss section gets no alert box
+        private const float NoneChance = 0.2f;
 
         // BSP subdivision limits
         private const float MinSectionSize = 10f;
@@ -35,34 +40,6 @@ namespace FrankyCLI.Retrograde.Passes
         {
             if (state?.placedRooms == null || state.placedRooms.Count == 0)
                 return;
-
-            // Resolve activator base records from Starfield data by editor ID
-            var availableActivators = new List<IActivatorGetter>();
-            IActivatorGetter? defendActivator = null;
-
-            foreach (var actId in AlertActivatorIds)
-            {
-                try
-                {
-                    var activator = FindActivator(actId);
-                    if (activator != null)
-                    {
-                        availableActivators.Add(activator);
-                        if (actId == DefendActivatorId)
-                            defendActivator = activator;
-                    }
-                }
-                catch
-                {
-                    // Activator not found - continue with others
-                }
-            }
-
-            if (availableActivators.Count == 0)
-                return;
-
-            if (defendActivator == null)
-                defendActivator = availableActivators[0];
 
             // Get world-space AABB for every placed room
             var roomBounds = ComputeAllRoomBounds(state.placedRooms);
@@ -76,8 +53,9 @@ namespace FrankyCLI.Retrograde.Passes
             var sections = new List<RgAabb>();
             Subdivide(dungeonBounds, roomBounds, sections, 0);
 
-            // Place a primitive for each section
+            // Place a primitive for each section (one type per section, or none)
             int boxesPlaced = 0;
+            int sectionsSkipped = 0;
             foreach (var section in sections)
             {
                 float cx = (section.Min.X + section.Max.X) * 0.5f;
@@ -88,18 +66,29 @@ namespace FrankyCLI.Retrograde.Passes
                 float sy = section.Max.Y - section.Min.Y;
                 float sz = section.Max.Z - section.Min.Z;
 
-                IActivatorGetter activator;
-                if (IsInsideBossRoom(cx, cy, cz, bossRoomBounds))
-                    activator = defendActivator;
-                else
-                    activator = availableActivators[RandomUtils.random.Next(availableActivators.Count)];
+                bool isBossRoom = IsInsideBossRoom(cx, cy, cz, bossRoomBounds);
+
+                // Non-boss sections have a chance to be skipped entirely
+                if (!isBossRoom && RandomUtils.random.NextDouble() < NoneChance)
+                {
+                    sectionsSkipped++;
+                    continue;
+                }
+
+                string selectedOption = isBossRoom
+                    ? DefendActivatorId
+                    : AlertOptions[RandomUtils.random.Next(AlertOptions.Length)];
+
+                var activator = FindActivator(selectedOption);
+                if (activator == null)
+                    continue;
 
                 PlacePrimitiveBox(state, activator, cx, cy, cz, new P3Float(sx, sy, sz));
                 boxesPlaced++;
             }
 
             if (!state.IsHarnessRun)
-                Console.WriteLine($"[EnemyAlertPrimitive] Placed {boxesPlaced} primitive alert boxes across {roomBounds.Count} rooms ({availableActivators.Count} types)");
+                Console.WriteLine($"[EnemyAlertPrimitive] Placed {boxesPlaced} primitive alert boxes across {roomBounds.Count} rooms ({sectionsSkipped} sections skipped)");
         }
 
         /// <summary>
