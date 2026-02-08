@@ -1,26 +1,13 @@
-﻿using Retrograde.Quests;
-using Retrograde.Quests.TemplateEngines;
-using FrankyCLI.questgen_tools;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
-using Retrograde.Nouns;
-using FrankyCLI.questgen_tools.Utils;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Noggog;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI;
-using OpenAI.Chat;
+using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
+using Retrograde.Nouns;
+using Retrograde.Quests;
+using Retrograde.Quests.TemplateEngines;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FrankyCLI.questgen_tools
+namespace Retrograde.Chains
 {
     public class LoopingLayoutQuestChain : IQuestchain
     {
@@ -44,7 +31,7 @@ namespace FrankyCLI.questgen_tools
         public bool GenerateQuest()
         {
             // Story Setup --------------------------------
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             Console.WriteLine("LoopingLayoutQuestChain");
 
             List<ITemplateManager> templates = new List<ITemplateManager>()
@@ -62,7 +49,7 @@ namespace FrankyCLI.questgen_tools
             //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
             //var Lorefile = PromptManager.LoadRandomLoreFile();
             Console.WriteLine("Generating Lore File...");
-            var Lorefile = PromptManager.GenerateLoreFile();
+            var Lorefile = AIRunner.GenerateLoreFile();
 
             // AI Seeding (instructions only)
             string MissionSetupPrompt =
@@ -80,7 +67,7 @@ namespace FrankyCLI.questgen_tools
                 "Respond only with: \"Instructions acknowledged.\"";
 
             Console.WriteLine("Informing AI of Mission Setup...");
-            AITools.RunPrompt(MissionSetupPrompt);
+            AIRunner.RunPrompt(MissionSetupPrompt);
 
             // NPC Target (base setup) --------------------------------
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
@@ -88,7 +75,7 @@ namespace FrankyCLI.questgen_tools
             // Build LoreContext from Lorefile and NPC
             Console.WriteLine("Building Lore Context...");
 
-            PromptManager.LoreContext = AITools.RunPrompt(
+            AIRunner.LoreContext = AIRunner.RunPrompt(
                 "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
                 "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +
                 "You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.\r\n\r\n" +
@@ -260,7 +247,7 @@ namespace FrankyCLI.questgen_tools
                 // After the first investigation, remind the AI not to spoil the showdown location
                 if (i == 0)
                 {
-                    AITools.RunPrompt(
+                    AIRunner.RunPrompt(
                         "Important note: From now on, the player does not know where the final showdown takes place. " +
                         "Do not state the showdown location explicitly, but you may hint at clues that point toward it."
                     );

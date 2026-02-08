@@ -18,7 +18,10 @@
       "Bash(git -C \"c:/Git/FrankyCLI\" show 1b0ae31:retrograde/RetrogradeUtils.cs)",
       "Bash(git -C \"c:/Git/FrankyCLI\" diff --cached --name-status)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(for f in *.cs)",
+      "Bash(do sed -i 's/using Retrograde.Utils;/using Retrograde.Utils;\\\\nusing Retrograde;/' \"$f\")",
+      "Bash(done)"
     ]
   }
 }

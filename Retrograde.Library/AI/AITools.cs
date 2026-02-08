@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FrankyCLI.questgen_tools
+namespace Retrograde.AI
 {
     public class AITools
     {

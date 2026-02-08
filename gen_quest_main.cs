@@ -1,23 +1,13 @@
-﻿using FrankyCLI.questgen_tools;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
-using FrankyCLI.questgen_tools.Utils;
-using Retrograde;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI;
-using OpenAI.Chat;
+using Retrograde;
+using Retrograde.AI;
+using Retrograde.Chains;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace FrankyCLI
 {
@@ -29,7 +19,7 @@ namespace FrankyCLI
 
         public static int Generate(string[] args)
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             //StarfieldMod myMod;
             string modname = args[0];
             string mode = args[1];

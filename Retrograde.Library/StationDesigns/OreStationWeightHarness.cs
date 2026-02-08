@@ -9,7 +9,7 @@ using Retrograde.Passes;
 using Retrograde.StationDesigns;
 using Mutagen.Bethesda.Starfield;
 
-namespace FrankyCLI.Retrograde
+namespace Retrograde.StationDesigns
 {
     // Generates station layouts across many scoring weight combinations and surfaces the best performer.
     public class OreStationWeightHarness

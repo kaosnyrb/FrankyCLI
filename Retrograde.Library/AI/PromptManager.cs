@@ -1,5 +1,6 @@
 ﻿using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Starfield;
+using Retrograde;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Collections.Specialized.BitVector32;
 
-namespace FrankyCLI.questgen_tools.Utils
+namespace Retrograde.AI.Utils
 {
     public class PromptManager
     {
@@ -31,7 +32,7 @@ namespace FrankyCLI.questgen_tools.Utils
             }
 
             // Pick random file
-            string randomFile = files[RandomUtils.random.Next(files.Length)];
+            string randomFile = files[RandomProvider.Random.Next(files.Length)];
 
             // Return contents
             return File.ReadAllText(randomFile);

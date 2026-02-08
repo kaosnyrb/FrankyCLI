@@ -1,27 +1,13 @@
-﻿using Retrograde.Quests;
-using Retrograde.Quests.TemplateEngines;
-using FrankyCLI.questgen_tools;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
-using Retrograde.Nouns;
-using FrankyCLI.questgen_tools.Utils;
-using GameFinder.Common;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Noggog;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI;
-using OpenAI.Chat;
+using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
+using Retrograde.Nouns;
+using Retrograde.Quests;
+using Retrograde.Quests.TemplateEngines;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FrankyCLI.questgen_tools
+namespace Retrograde.Chains
 {
     public class StaticLayoutQuestChain : IQuestchain
     {
@@ -55,7 +41,7 @@ namespace FrankyCLI.questgen_tools
 
 
             // Story Setup --------------------------------
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             Console.WriteLine("StaticLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
@@ -68,14 +54,14 @@ namespace FrankyCLI.questgen_tools
 
 
             var templateManager = templates[random.Next(templates.Count)];
-            if (AITools.AIMODE == false)
+            if (AIRunner.AIMode == false)
             {
                 templateManager = new RandomTemplateManager();
             }
 
             Console.WriteLine(templateManager.GetType());
 
-            var Lorefile = PromptManager.GenerateLoreFile();
+            var Lorefile = AIRunner.GenerateLoreFile();
 
             //AI Seeding
             string MissionSetupPrompt = "";
@@ -93,7 +79,7 @@ namespace FrankyCLI.questgen_tools
 
                 "Respond only with: \"Instructions acknowledged.\"";
             
-            AITools.RunPrompt(MissionSetupPrompt);
+            AIRunner.RunPrompt(MissionSetupPrompt);
 
             bool fork = false;            
             if (random.Next(100) > 175)
@@ -105,7 +91,7 @@ namespace FrankyCLI.questgen_tools
             // NPC Target                
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
-            PromptManager.LoreContext = AITools.RunPrompt("You are given a Lore Context File that contains prompts inside structured tags.\r\n" +
+            AIRunner.LoreContext = AIRunner.RunPrompt("You are given a Lore Context File that contains prompts inside structured tags.\r\n" +
                 "Your task is to generate a full lore instance by completing every section that contains instructions.\r\n\r\nRules:\r\n" +
                 "- Follow the structure and tags exactly as provided.\r\n" +
                 "- For each section that contains instructions (such as <Faction>, <TreasureLegend>, <HistoricalContext>, etc.), replace the instructional text with a fully written lore entry.\r\n" +
@@ -138,7 +124,7 @@ namespace FrankyCLI.questgen_tools
             //Quest Steps
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Feeding the stages into the AI...");
-            AITools.RunPrompt("<Summary> The next section contains all the locations and types of missions that will be happening. Use this to tie things together.");
+            AIRunner.RunPrompt("<Summary> The next section contains all the locations and types of missions that will be happening. Use this to tie things together.");
             var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate(DeepTempalte, new List<string>()
             {
                 "<QuestStage>DeepInvestigation</QuestStage>",
@@ -183,38 +169,38 @@ namespace FrankyCLI.questgen_tools
             }
 
 
-            AITools.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
-            AITools.RunPrompt("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);
+            AIRunner.RunPrompt("<Showdown Summary>" + ShowdownMissionTemplate.Description  +  " Location: " + ShowdownMissionTemplate.Location);
+            AIRunner.RunPrompt("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);
             if (fork)
             {
-                AITools.RunPrompt("<ForkInvestigation Summary>" + ForkInvestigationMissionTemplate.Description + " Location: " + ForkInvestigationMissionTemplate.Location);
+                AIRunner.RunPrompt("<ForkInvestigation Summary>" + ForkInvestigationMissionTemplate.Description + " Location: " + ForkInvestigationMissionTemplate.Location);
             }
-            AITools.RunPrompt("<InitialInvestigation Summary>" + InvestigationMissionTemplate.Description + " Location: " + InvestigationMissionTemplate.Location);
-            AITools.RunPrompt("<Discovery Summary>" + DiscoveryMissionTemplate.Description + " Location: " + DiscoveryMissionTemplate.Location);
+            AIRunner.RunPrompt("<InitialInvestigation Summary>" + InvestigationMissionTemplate.Description + " Location: " + InvestigationMissionTemplate.Location);
+            AIRunner.RunPrompt("<Discovery Summary>" + DiscoveryMissionTemplate.Description + " Location: " + DiscoveryMissionTemplate.Location);
 
-            AITools.RunPrompt("</Summary>That was the summary, we are now generating the stages.");
+            AIRunner.RunPrompt("</Summary>That was the summary, we are now generating the stages.");
 
-            AITools.RunPrompt("<Showdown>");
+            AIRunner.RunPrompt("<Showdown>");
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
             Console.WriteLine("---------------------------------------------------------------------------------");
-            AITools.RunPrompt("<DeepInvestigation>");
+            AIRunner.RunPrompt("<DeepInvestigation>");
             Console.WriteLine("Investigation: " + DeepInvestigationMissionTemplate.Name);
             var InvestigationMission = DeepInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DeepInvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
-            AITools.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
+            AIRunner.RunPrompt("When generating from this point on the player doesn't know where the <Showdown> will take place. Don't reveal it but you can hint at clues.");
 
             if (fork)
             {
                 //ForkInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                AITools.RunPrompt("<ForkInvestigation>");
+                AIRunner.RunPrompt("<ForkInvestigation>");
                 Console.WriteLine("ForkInvestigation: " + ForkInvestigationMissionTemplate.Name);
                 Quest formmission = ForkInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ForkInvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
 
                 //InitialInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                AITools.RunPrompt("<InitialInvestigation>");
+                AIRunner.RunPrompt("<InitialInvestigation>");
                 Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
                 Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ForkInvestigationMissionTemplate.outlawQuest);
             }
@@ -222,14 +208,14 @@ namespace FrankyCLI.questgen_tools
             {
                 //InitialInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                AITools.RunPrompt("<InitialInvestigation>");
+                AIRunner.RunPrompt("<InitialInvestigation>");
                 Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
                 Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
             }
 
             // Finally build the discovery step
             Console.WriteLine("---------------------------------------------------------------------------------");
-            AITools.RunPrompt("<Discovery>");
+            AIRunner.RunPrompt("<Discovery>");
 
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 

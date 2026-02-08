@@ -1,18 +1,16 @@
-﻿using DynamicData;
 using Retrograde.Chains.Interfaces;
 using Retrograde.Chains;
 using Retrograde.FactionMembers;
 using Retrograde.Utils;
+using Retrograde;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
-namespace FrankyCLI.questgen_tools
+namespace Retrograde.FactionMembers
 {
     public class EclipticFactionCrew : IFactionMembers
     {
@@ -23,7 +21,7 @@ namespace FrankyCLI.questgen_tools
         public EclipticFactionCrew()
         {
             string Faction = "Ecliptic";
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             string Crewname = Faction;
             FactionName = GetFactionPrefix();
 
@@ -43,8 +41,8 @@ namespace FrankyCLI.questgen_tools
                 {
                     isfemale = true;
                 }
-                var NPC = gen_quest_main.myMod.Npcs[new FormKey(gen_quest_main.myMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(gen_quest_main.myMod, NPC);
+                var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
 
                 //Ranked Info
                 var outfit = GetLowRank_Outfit();
@@ -67,8 +65,8 @@ namespace FrankyCLI.questgen_tools
                 {
                     isfemale = true;
                 }
-                var NPC = gen_quest_main.myMod.Npcs[new FormKey(gen_quest_main.myMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(gen_quest_main.myMod, NPC);
+                var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
 
                 //Ranked Info
                 var outfit = GetHighRank_Outfit();
@@ -90,8 +88,8 @@ namespace FrankyCLI.questgen_tools
                 {
                     isfemale = true;
                 }
-                var NPC = gen_quest_main.myMod.Npcs[new FormKey(gen_quest_main.myMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(gen_quest_main.myMod, NPC);
+                var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
 
                 //Ranked Info
                 var outfit = GetBoss_Outfit();
@@ -126,7 +124,7 @@ namespace FrankyCLI.questgen_tools
             npc.HairColor = NPCTools.GetHairColour();
             npc.SkinToneIndex = (byte)random.Next(8);
             npc.HeadParts.Add(GetHaircut(isfemale));
-            if (RandomUtils.random.Next(100) > 50)
+            if (RandomProvider.Random.Next(100) > 50)
             {
                 npc.HeadParts.Add(GetExtraHeadParts(isfemale));
             }
@@ -137,12 +135,12 @@ namespace FrankyCLI.questgen_tools
                 {
                     new ContainerEntry() { Item = new ContainerItem() { Item = gear, Count = 1 } },
                 };
-            gen_quest_main.myMod.Npcs.Add(npc);
+            RetrogradeContext.Current.TargetMod.Npcs.Add(npc);
         }
 
         private IFormLinkNullable<ICombatStyleGetter> GetCombatStyle()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> combatlist = new List<uint>()
             {
                 0x002C5632,//csEcliptic_Assault [CSTY:002C5632]
@@ -152,12 +150,12 @@ namespace FrankyCLI.questgen_tools
                 0x002C562F,//csEcliptic_Sniper [CSTY:002C562F]
                 0x002C562E,//csEcliptic_Support [CSTY:002C562E]
             };
-            return new FormKey(gen_quest_main.StarfieldModKey, combatlist[random.Next(combatlist.Count)]).ToNullableLink<ICombatStyleGetter>();
+            return new FormKey(RetrogradeContext.Current.StarfieldModKey, combatlist[random.Next(combatlist.Count)]).ToNullableLink<ICombatStyleGetter>();
         }
 
         private IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             if (female)
             {
                 List<uint> hairlist = new List<uint>()
@@ -177,7 +175,7 @@ namespace FrankyCLI.questgen_tools
                     0x0005B53C,//Human_Female_Hair_Messy_Updo [HDPT:0005B53C]
                     0x000D9D3A,//Human_Female_Hair_Mullet [HDPT:000D9D3A]
                 };
-                return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                return new FormKey(RetrogradeContext.Current.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
             }
             else
             {
@@ -200,13 +198,13 @@ namespace FrankyCLI.questgen_tools
                     0x0015335C,//Human_Male_Hair_Spiked [HDPT:0015335C]
                     0x0012F26F,//Human_Male_Hair_Viking_Braids [HDPT:0012F26F]
                 };
-                return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                return new FormKey(RetrogradeContext.Current.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
             }
         }
 
         private IFormLinkNullable<IHeadPartGetter> GetExtraHeadParts(bool female)
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             if (female)
             {
                 List<uint> partlist = new List<uint>()
@@ -228,7 +226,7 @@ namespace FrankyCLI.questgen_tools
                     0x001F7F04,//Human_Female_Jewelry_Septum_02_F "Human_Female_Jewelry_Septum_02_F" [HDPT:001F7F04]
                     0x001F7F05,//Human_Female_Jewelry_Septum_03_F "Human_Female_Jewelry_Septum_03_F" [HDPT:001F7F05]
                 };
-                return new FormKey(gen_quest_main.StarfieldModKey, partlist[random.Next(partlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                return new FormKey(RetrogradeContext.Current.StarfieldModKey, partlist[random.Next(partlist.Count)]).ToNullableLink<IHeadPartGetter>();
             }
             else
             {
@@ -254,51 +252,51 @@ namespace FrankyCLI.questgen_tools
                     0x001150DC,//Human_Male_Beard_Wildman "Human_Male_Beard_Wildman" [HDPT:001150DC]
                     0x001676CF,//Human_Male_Beard_Wolfchops "Human_Male_Beard_Wolfchops" [HDPT:001676CF]
                 };
-                return new FormKey(gen_quest_main.StarfieldModKey, partlist[random.Next(partlist.Count)]).ToNullableLink<IHeadPartGetter>();
+                return new FormKey(RetrogradeContext.Current.StarfieldModKey, partlist[random.Next(partlist.Count)]).ToNullableLink<IHeadPartGetter>();
             }
         }
 
         public IFormLinkNullable<IOutfitGetter> GetLowRank_Outfit()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> Outfits = new List<uint>
             {
                 0x00056D4A,//Outfit_Spacesuit_Ecliptic_NoHelmet_NoBackpack [OTFT:00056D4A]
             };
-            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
+            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(RetrogradeContext.Current.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
         }
 
         public IFormLinkNullable<IOutfitGetter> GetHighRank_Outfit()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> Outfits = new List<uint>
             {
                 0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
                 0x0013E5D0,//Outfit_Spacesuit_Ecliptic_NoHelmet [OTFT:0013E5D0]
                 0x00056D4A,//Outfit_Spacesuit_Ecliptic_NoHelmet_NoBackpack [OTFT:00056D4A]
             };
-            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
+            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(RetrogradeContext.Current.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
         }
 
         public IFormLinkNullable<IOutfitGetter> GetBoss_Outfit()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> Outfits = new List<uint>
             {
                 0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
                 0x0013E5D0,//Outfit_Spacesuit_Ecliptic_NoHelmet [OTFT:0013E5D0]
                 0x00056D4A,//Outfit_Spacesuit_Ecliptic_NoHelmet_NoBackpack [OTFT:00056D4A]
             };
-            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
+            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(RetrogradeContext.Current.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
             return outfit;
         }
 
         private string GetFactionPrefix()
         {
             if (FactionName != null) return FactionName;
-            Random r = RandomUtils.random;
+            Random r = RandomProvider.Random;
             var prefixes = new List<string>
             {
                 "Ecliptic","Contractor",
@@ -312,7 +310,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetLowRank_Name()
         {
-            Random r = RandomUtils.random;
+            Random r = RandomProvider.Random;
             var roles = new List<string>
             {
                 "Recruit","Field Recruit","New Recruit","Fresh Recruit",
@@ -329,7 +327,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetHighRank_Name()
         {
-            Random r = RandomUtils.random;
+            Random r = RandomProvider.Random;
             var roles = new List<string>
             {
                 "Squad Lead","Fire Team Lead","Patrol Lead","Assault Lead",
@@ -344,7 +342,7 @@ namespace FrankyCLI.questgen_tools
 
         public string GetBoss_Name()
         {
-            Random r = RandomUtils.random;
+            Random r = RandomProvider.Random;
             var roles = new List<string>
             {
                 "Commander","Field Commander","Station Commander","Operations Commander",
@@ -360,7 +358,7 @@ namespace FrankyCLI.questgen_tools
 
         public IFormLinkNullable<ILeveledItemGetter> GetLowRank_Gear()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> gearlist = new List<uint>()
                 {
                     0x003D60AF,//LLI_Ecliptic_AssaultDefaultRole [LVLI:003D60AF]
@@ -370,13 +368,13 @@ namespace FrankyCLI.questgen_tools
                     0x003D60B3,//LLI_Ecliptic_Recruit [LVLI:003D60B3]
                     0x003D60B5,//LLI_Ecliptic_Support [LVLI:003D60B5]
                 };
-            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
+            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(RetrogradeContext.Current.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
         }
 
         public IFormLinkNullable<ILeveledItemGetter> GetHighRank_Gear()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> gearlist = new List<uint>()
                 {
                     0x003D60B2,//LLI_Ecliptic_Officer [LVLI:003D60B2]
@@ -384,40 +382,40 @@ namespace FrankyCLI.questgen_tools
                     0x003D60B1,//LLI_Ecliptic_Heavy [LVLI:003D60B1]
                     0x003D60B4,//LLI_Ecliptic_Sniper [LVLI:003D60B4]
                 };
-            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
+            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(RetrogradeContext.Current.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
         }
 
         public IFormLinkNullable<ILeveledItemGetter> GetBoss_Gear()
         {
-            Random random = RandomUtils.random;
+            Random random = RandomProvider.Random;
             List<uint> gearlist = new List<uint>()
                 {
                     0x003D60B2,//LLI_Ecliptic_Officer [LVLI:003D60B2]
                     0x003D60B1,//LLI_Ecliptic_Heavy [LVLI:003D60B1]
                 };
-            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
+            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(RetrogradeContext.Current.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
             return gear;
         }
 
         public Npc GetCrewMember(string Room)
         {
             Npc selected = null;
-            int roll = RandomUtils.random.Next(100);
+            int roll = RandomProvider.Random.Next(100);
             if (roll > 60)
             {
-                selected = HighRank[RandomUtils.random.Next(HighRank.Count)];
+                selected = HighRank[RandomProvider.Random.Next(HighRank.Count)];
             }
             else
             {
-                selected = LowRank[RandomUtils.random.Next(LowRank.Count)];
+                selected = LowRank[RandomProvider.Random.Next(LowRank.Count)];
             }
             return selected;
         }
 
         public Npc GetBoss(string Room)
         {
-            return Bosses[RandomUtils.random.Next(Bosses.Count)];
+            return Bosses[RandomProvider.Random.Next(Bosses.Count)];
         }
     }
 }
