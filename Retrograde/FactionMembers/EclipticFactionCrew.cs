@@ -1,6 +1,6 @@
 ﻿using DynamicData;
 using FrankyCLI.questgen_tools.Interfaces;
-using FrankyCLI.Retrograde.FactionMembers;
+using Retrograde.FactionMembers;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;

@@ -3,7 +3,7 @@ using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Interfaces;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
-using FrankyCLI.Retrograde.StationDesigns;
+using Retrograde.StationDesigns;
 using FrankyCLI.Utils;
 using GameFinder.Common;
 using Mutagen.Bethesda;

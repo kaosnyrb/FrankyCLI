@@ -4,8 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
-using FrankyCLI.Retrograde.Passes;
-using FrankyCLI.Retrograde.StationDesigns;
+using Retrograde;
+using Retrograde.Passes;
+using Retrograde.StationDesigns;
 using Mutagen.Bethesda.Starfield;
 
 namespace FrankyCLI.Retrograde

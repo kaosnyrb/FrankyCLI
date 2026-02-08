@@ -1,5 +1,7 @@
 ﻿using FrankyCLI.questgen_tools.Nouns;
-using FrankyCLI.Retrograde.StationDesigns;
+using Retrograde;
+using Retrograde.Generator;
+using Retrograde.StationDesigns;
 using FrankyCLI.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;

@@ -2,7 +2,7 @@
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Nouns.Crew;
 using FrankyCLI.questgen_tools.Utils;
-using FrankyCLI.Retrograde.StationDesigns;
+using Retrograde.StationDesigns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
