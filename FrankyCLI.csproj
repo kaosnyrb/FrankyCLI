@@ -8,13 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="questgen_quests\**" />
     <Compile Remove="Retrograde.Library\**" />
+    <EmbeddedResource Remove="questgen_quests\**" />
     <EmbeddedResource Remove="Retrograde.Library\**" />
+    <None Remove="questgen_quests\**" />
     <None Remove="Retrograde.Library\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="questgen_quests\Investigation\Investigation_DestroySpace_Guard.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,33 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="Retrograde.Library\Retrograde.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="questgen_quests\Lorefiles\DrBlood.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\DrEvil.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\Generic.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\Gilded_Viper_Lore.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\ListPirate.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\LostMarine.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\NeonGhost.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="questgen_quests\Lorefiles\STARVEDPROPHET.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
