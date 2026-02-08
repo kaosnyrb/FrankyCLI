@@ -64,7 +64,7 @@ namespace FrankyCLI.Retrograde.StationDesigns
                 new EnemyPass(),
                 new ContentPass(),
                 new ShipMarkerPass(),
-                new EnemyAlertCoveragePass(),
+                new EnemyAlertPrimitiveCoveragePass(),
             };
 
             scoringSystem = new ScoringSystem()
