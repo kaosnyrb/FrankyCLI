@@ -16,7 +16,9 @@
       "Bash(git -C \"c:/Git/FrankyCLI\" status --short retrograde/RetrogradeUtils.cs)",
       "Bash(git -C \"c:/Git/FrankyCLI\" log --oneline -5)",
       "Bash(git -C \"c:/Git/FrankyCLI\" show 1b0ae31:retrograde/RetrogradeUtils.cs)",
-      "Bash(git -C \"c:/Git/FrankyCLI\" diff --cached --name-status)"
+      "Bash(git -C \"c:/Git/FrankyCLI\" diff --cached --name-status)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

@@ -1,5 +1,5 @@
 ﻿using FrankyCLI.questgen_tools;
-using FrankyCLI.questgen_tools.Nouns;
+using Retrograde.Nouns;
 using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;

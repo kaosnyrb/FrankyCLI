@@ -1,5 +1,6 @@
 ﻿using DynamicData;
-using FrankyCLI.questgen_tools.Interfaces;
+using Retrograde.Chains.Interfaces;
+using Retrograde.Chains;
 using Retrograde.FactionMembers;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -111,9 +112,9 @@ namespace FrankyCLI.questgen_tools
             string Gender = "Male";
             if (isfemale) Gender = "Female";
             npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
-            npc.Voice = NPCToolsEx.GetVoice(Faction, isfemale);
+            npc.Voice = NPCTools.GetVoice(Faction, isfemale);
             npc.Factions.Clear();
-            npc.Factions.Add(NPCToolsEx.GetFaction(Faction));
+            npc.Factions.Add(NPCTools.GetFaction(Faction));
             npc.Weight = new NpcWeight()
             {
                 Fat = (float)random.NextDouble() /2,

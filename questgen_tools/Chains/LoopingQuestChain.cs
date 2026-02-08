@@ -1,6 +1,9 @@
-﻿using FrankyCLI.questgen_quests;
+﻿using Retrograde.Quests;
+using Retrograde.Quests.TemplateEngines;
 using FrankyCLI.questgen_tools;
-using FrankyCLI.questgen_tools.Interfaces;
+using Retrograde.Chains.Interfaces;
+using Retrograde.Chains;
+using Retrograde.Nouns;
 using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;

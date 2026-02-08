@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
-using FrankyCLI.questgen_tools.Interfaces;
+using Retrograde.Chains.Interfaces;
+using Retrograde.Chains;
 using FrankyCLI.questgen_tools.Utils;
 using Retrograde;
 using Mutagen.Bethesda;
@@ -70,7 +71,7 @@ namespace FrankyCLI
 
                 AITools.AIMODE = false;
 
-                var outlawQuest = new RetrogradeQuest(myMod);
+                var outlawQuest = new RetrogradeQuest();
 
                 //var outlawQuest = new StaticLayoutQuestChain(myMod);
                 //outlawQuest.InvestigationTemplate = "Space Station Activator - spacer Medium light guard";

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git -C \"c:/Git/FrankyCLI\" log --oneline -20)"
+      "Bash(git -C \"c:/Git/FrankyCLI\" log --oneline -20)",
+      "Bash(del \"c:\\\\Git\\\\FrankyCLI\\\\questgen_tools\\\\Utils\\\\NPCTools.cs\")"
     ]
   }
 }

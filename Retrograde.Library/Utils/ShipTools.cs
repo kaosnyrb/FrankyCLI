@@ -1,3 +1,6 @@
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
 
@@ -191,5 +194,52 @@ public static class ShipTools
             "Trackers Alliance" => 0x000AE4D3,
             _ => 0
         };
+    }
+
+    /// <summary>
+    /// Gets the faction ship chance leveled list from Starfield.esm.
+    /// </summary>
+    public static IStarfieldMajorRecordGetter GetFactionShipChance(string faction)
+    {
+        string editorId = faction switch
+        {
+            "Spacer" => "LvlShip_Spacer_Combat",
+            "Ecliptic" => "LvlShip_Ecliptic_Combat",
+            "Crimsonfleet" => "LvlShip_CrimsonFleet_Combat",
+            "Varuun" => "LvlShip_HouseVaruun_Combat",
+            _ => "LvlShip_Spacer_Combat"
+        };
+
+        foreach (var rec in RetrogradeContext.Current.StarfieldMod.GenericBaseForms)
+        {
+            if (rec.EditorID == editorId)
+                return rec;
+        }
+
+        throw new Exception($"Could not find ship chance for faction: {faction}");
+    }
+
+    /// <summary>
+    /// Gets the gang members form list for the specified ship faction.
+    /// </summary>
+    public static IFormLink<IStarfieldMajorRecordGetter>? GetGangList(uint ShipFaction)
+    {
+        string ganglistEditorID = ShipFaction switch
+        {
+            0x000AE4F3 => "duout_GangMembersList_Space_Ecliptic",     // LShip_Ecliptic_Template
+            0x000B1375 => "duout_GangMembersList_Space_Crimsonfleet", // LShip_CrimsonFleet_Template
+            0x000B13A8 => "duout_GangMembersList_Space_Spacer",       // LShip_Spacer_Template
+            0x000B19CF => "duout_GangMembersList_Space_Varuun",       // LShip_HouseVaruun_Template
+            _ => "duout_GangMembersList_Space_Spacer"
+        };
+
+        foreach (var record in RetrogradeContext.Current.TargetMod.EnumerateMajorRecords())
+        {
+            if (record.EditorID != null && record.EditorID.Contains(ganglistEditorID))
+            {
+                return record.ToLink<IStarfieldMajorRecordGetter>();
+            }
+        }
+        return null;
     }
 }
