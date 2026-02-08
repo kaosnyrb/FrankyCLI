@@ -3,6 +3,7 @@ using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Nouns.Crew;
 using FrankyCLI.questgen_tools.Utils;
 using Retrograde.StationDesigns;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -82,7 +83,7 @@ namespace FrankyCLI.questgen_quests
             newQuest.SetScriptProperty("duout_space_station_quest", "EnemyShipInteriorLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_station_quest", "CrewSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_station_quest", "ItemSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_space_station_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
+            newQuest.SetScriptProperty("duout_space_station_quest", "GangMembers", ShipToolsEx.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
 
             newQuest.SetScriptProperty("duout_space_station_quest", "MinGangMembers", (int)missionTemplate.parameters["DefendingShipCountMin"]);
             newQuest.SetScriptProperty("duout_space_station_quest", "MaxGangMembers", (int)missionTemplate.parameters["DefendingShipCountMax"]);

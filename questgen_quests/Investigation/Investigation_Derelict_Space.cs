@@ -2,6 +2,7 @@
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Nouns.Crew;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -86,7 +87,7 @@ namespace FrankyCLI.questgen_quests
             
             newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", CrewManager.GetCrew(missionTemplate.parameter1, shipname));
 
-            newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipTools.GetGangList(factionID));
+            newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipToolsEx.GetGangList(factionID));
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 

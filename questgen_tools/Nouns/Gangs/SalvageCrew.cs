@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -96,7 +97,7 @@ namespace FrankyCLI.questgen_tools
             var list = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>();
 
             // Salvagers are almost always space-suited
-            var outfit = NPCTools.GetRandomOutfit(true);
+            var outfit = NPCToolsEx.GetRandomOutfit(true);
 
             int crewSize = 3 + random.Next(5); // 3–7 salvagers
 
@@ -130,7 +131,7 @@ namespace FrankyCLI.questgen_tools
                 npc.EyeColor = NPCTools.GetEyeColour();
                 npc.HairColor = NPCTools.GetHairColour();
                 npc.SkinToneIndex = (byte)wrand.Next(8);
-                npc.HeadParts.Add(NPCTools.GetHaircut(isFemale));
+                npc.HeadParts.Add(NPCToolsEx.GetHaircut(isFemale));
 
                 npc.Items = new ExtendedList<ContainerEntry>
                 {
@@ -138,7 +139,7 @@ namespace FrankyCLI.questgen_tools
                     {
                         Item = new ContainerItem()
                         {
-                            Item = NPCTools.GetRandomGear(),
+                            Item = NPCToolsEx.GetRandomGear(),
                             Count = 1
                         }
                     }

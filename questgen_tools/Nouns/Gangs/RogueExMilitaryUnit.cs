@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -76,7 +77,7 @@ namespace FrankyCLI.questgen_tools
 
             // Generate a new NPC group
 
-            var outfit = NPCTools.GetRandomOutfit(true);
+            var outfit = NPCToolsEx.GetRandomOutfit(true);
 
             int gangmembers = 2 + random.Next(5);
 
@@ -118,10 +119,10 @@ namespace FrankyCLI.questgen_tools
                 npc.EyeColor = NPCTools.GetEyeColour();
                 npc.HairColor = NPCTools.GetHairColour();
                 npc.SkinToneIndex = (byte)wrand.Next(8);
-                npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
+                npc.HeadParts.Add(NPCToolsEx.GetHaircut(isfemale));
                 npc.Items = new ExtendedList<ContainerEntry>
                 {
-                    new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } }
+                    new ContainerEntry() { Item = new ContainerItem() { Item = NPCToolsEx.GetRandomGear(), Count = 1 } }
                 };
 
                 // Logfile for Unit Member

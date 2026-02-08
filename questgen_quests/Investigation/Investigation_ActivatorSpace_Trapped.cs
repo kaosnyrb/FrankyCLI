@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
@@ -87,7 +88,7 @@ namespace FrankyCLI.questgen_quests
             newActivator.SetScriptProperty("duout_activator_spacetrap", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_spacetrap", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_spacetrap", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
-            newActivator.SetScriptProperty("duout_activator_spacetrap", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameter1)));
+            newActivator.SetScriptProperty("duout_activator_spacetrap", "GangMembers", ShipToolsEx.GetGangList(ShipTools.GetFactionID(missionTemplate.parameter1)));
 
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
 

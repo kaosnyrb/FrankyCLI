@@ -1,576 +1,333 @@
-﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Utils;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Noggog;
-using Noggog.StructuredStrings.CSharp;
-using OpenAI;
-using OpenAI.Chat;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using static Mutagen.Bethesda.FormKeys.Starfield.Starfield;
 
+namespace FrankyCLI.questgen_tools;
 
-namespace FrankyCLI.questgen_tools
+/// <summary>
+/// NPC tools that depend on gen_quest_main.
+/// Pure data methods are in Retrograde.Utils.NPCTools.
+/// </summary>
+public static class NPCToolsEx
 {
-    public class NPCTools
+    public static IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
     {
-        public static uint GetTemplateNPC(bool female)
+        var random = RandomUtils.random;
+        if (female)
         {
-            Random random = RandomUtils.random;
-
-            if (female)
+            List<uint> hairlist = new List<uint>()
             {
-                List<uint> npclist = new List<uint>()
-                {
-                    0x000818,
-                    0x000856,
-                    0x000857,
-                    0x000858,
-                    0x00085C,
-                    0x00085D,
-                    0x00085E,
-                    0x00085F,
-                    0x000860,
-                    0x000861,
-                };
-                return npclist[random.Next(npclist.Count)];
-            }
-            else
-            {
-                List<uint> npclist = new List<uint>()
-                {
-                    0x000826,
-                    0x000862,
-                    0x000863,
-                    0x000865,
-                    0x000866,
-                    0x000867,
-                    0x000868,                
-                };
-                return npclist[random.Next(npclist.Count)];
-            }
-        }
-
-        public static uint GetTemplateDeadNPC(bool female)
-        {
-            Random random = RandomUtils.random;
-
-            if (female)
-            {
-                List<uint> npclist = new List<uint>()
-                {
-                    0x000902,
-                    0x00090A,
-                    0x00090B,
-                    0x00090C,
-                    0x000912,
-                    0x000915,
-                    0x000918,
-                    0x000919,
-                    0x00091A,
-                    0x00091B,
-                };
-                return npclist[random.Next(npclist.Count)];
-            }
-            else
-            {
-                List<uint> npclist = new List<uint>()
-                {
-                    0x000904,
-                    0x00091C,
-                    0x00091D,
-                    0x000920,
-                    0x000921,
-                    0x000922,
-                    0x000923,
-                };
-                return npclist[random.Next(npclist.Count)];
-            }
-        }
-        public static Npc CloneNPC(StarfieldMod myMod, Npc NPC)
-        {
-
-            return new Npc(myMod)
-            {
-                EditorID = "npc_" + Guid.NewGuid().ToString().Substring(0, 8),
-                ObjectBounds = NPC.ObjectBounds,
-                AttackRace = NPC.AttackRace,
-                ActorEffect = NPC.ActorEffect,
-                AttachParentSlots = NPC.AttachParentSlots,
-                BodyMorphRegionValues = NPC.BodyMorphRegionValues,
-                CalcMaxLevel = NPC.CalcMaxLevel,
-                CalcMinLevel = NPC.CalcMinLevel,
-                Class = NPC.Class,
-                CalculatedHealth = NPC.CalculatedHealth,
-                CombatStyle = NPC.CombatStyle,
-                Components = NPC.Components,
-                DefaultOutfit = NPC.DefaultOutfit,
-                EnergyLevel = NPC.EnergyLevel,
-                FaceMorphs = NPC.FaceMorphs,
-                EyeColor = NPC.EyeColor,
-                CrimeFaction = NPC.CrimeFaction,
-                Assistance = NPC.Assistance,
-                ActivateTextOverride = NPC.ActivateTextOverride,
-                CalculatedActionPoints = NPC.CalculatedActionPoints,
-                CombatOverridePackageList = NPC.CombatOverridePackageList,
-                Aggression = NPC.Aggression,
-                CompanionInfoDialogue = NPC.CompanionInfoDialogue,
-                CompanionInfoQuest = NPC.CompanionInfoQuest,
-                Confidence = NPC.Confidence,
-                DeathItem = NPC.DeathItem,
-                DefaultPackageList = NPC.DefaultPackageList,
-                DefaultTemplate = NPC.DefaultTemplate,
-                DispositionBase = NPC.DispositionBase,
-                EyebrowColor = NPC.EyebrowColor,
-                FaceDialPositions = NPC.FaceDialPositions,
-                FacialHairColor = NPC.FacialHairColor,
-                Factions = NPC.Factions,
-                FarAwayModelDistance = NPC.FarAwayModelDistance,
-                Flags = NPC.Flags,
-                FLEE = NPC.FLEE,
-                ForcedLocations = NPC.ForcedLocations,
-                FormationFaction = NPC.FormationFaction,
-                HairColor = NPC.HairColor,
-                HeadParts = NPC.HeadParts,
-                HeightMax = NPC.HeightMax,
-                HeightMin = NPC.HeightMin,
-                GearedUpWeapons = NPC.GearedUpWeapons,
-                Items = NPC.Items,
-                JewelryColor = NPC.JewelryColor,
-                LegendaryChance = NPC.LegendaryChance,
-                Level = NPC.Level,
-                Keywords = NPC.Keywords,
-                LongName = NPC.LongName,
-                ObjectTemplates = NPC.ObjectTemplates,
-                MajorFlags = NPC.MajorFlags,
-                ODTY = NPC.ODTY,
-                NAM5 = NPC.NAM5,
-                MorphBlends = NPC.MorphBlends,
-                ONA2 = NPC.ONA2,
-                Perks = NPC.Perks,
-                SkinToneIndex = NPC.SkinToneIndex,
-                Skin = NPC.Skin,
-                Mood = NPC.Mood,
-                Properties = NPC.Properties,
-                RDSAs = NPC.RDSAs,
-                Weight = NPC.Weight,
-                Tints = NPC.Tints,
-                SpaceOutfit = NPC.SpaceOutfit,
-                TeethColor = NPC.TeethColor,
-                Pronoun = NPC.Pronoun,
-                UnknownAIDT = NPC.UnknownAIDT,
-                Race = NPC.Race,
-                XpValueOffset = NPC.XpValueOffset,
-                VirtualMachineAdapter = NPC.VirtualMachineAdapter,
-                Packages = NPC.Packages,
-                XALG = NPC.XALG
+                0x00127395,//Human_Female_Hair_Bob "Human_Female_Hair_Bob" [HDPT:00127395]
+                0x0015578B,//Human_Female_Hair_Business "Human_Female_Hair_Business" [HDPT:0015578B]
+                0x00159AF2,//Human_Female_Hair_Buzz_Mohawk "Human_Female_Hair_Buzz_Mohawk" [HDPT:00159AF2]
+                0x00172588,//Human_Female_Hair_CyberFade "Human_Female_Hair_CyberFade" [HDPT:00172588]
+                0x0012FDE2,//Human_Female_Hair_Dreadlocks_HairMesh "Human_Female_Hair_Dreadlocks_HairMesh" [HDPT:0012FDE2]
+                0x0012FDE3,//Human_Female_Hair_Dreadlocks_HairTie "Human_Female_Hair_Dreadlocks_HairTie" [HDPT:0012FDE3]
+                0x00132C5A,//Human_Female_Hair_Even_Buzz_Back "Human_Female_Hair_Even_Buzz_Back" [HDPT:00132C5A]
+                0x00128008,//Human_Female_Hair_Hairspray_Bob "Human_Female_Hair_Hairspray_Bob" [HDPT:00128008]
+                0x0015B029,//Human_Female_Hair_High_and_Tight "Human_Female_Hair_High_and_Tight" [HDPT:0015B029]
+                0x00133E4E,//Human_Female_Hair_Hollywood_curls "Human_Female_Hair_Hollywood_curls" [HDPT:00133E4E]
+                0x0014AFDD,//Human_Female_Hair_Messy_Bob "Human_Female_Hair_Messy_Bob" [HDPT:0014AFDD]
+                0x00134EB1,//Human_Female_Hair_Messy_Business "Human_Female_Hair_Messy_Business" [HDPT:00134EB1]
+                0x0005B53C,//Human_Female_Hair_Messy_Updo "Human_Female_Hair_Messy_Updo" [HDPT:0005B53C]
+                0x000D9D3A//Human_Female_Hair_Mullet "Human_Female_Hair_Mullet" [HDPT:000D9D3A]
             };
+            return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+        }
+        else
+        {
+            List<uint> hairlist = new List<uint>()
+            {
+                0x00127396,//Human_Male_Hair_Bob "Human_Male_Hair_Bob" [HDPT:00127396]
+                0x0015578A,//Human_Male_Hair_Business "Human_Male_Hair_Business" [HDPT:0015578A]
+                0x00159AF3,//Human_Male_Hair_Buzz_Mohawk "Human_Male_Hair_Buzz_Mohawk" [HDPT:00159AF3]
+                0x00266092,//Human_Male_Hair_Choppy_Bob "Human_Male_Hair_Choppy_Bob" [HDPT:00266092]
+                0x0013F87D,//Human_Male_Hair_Coily_Mohawk "Human_Male_Hair_Coily_Mohawk" [HDPT:0013F87D]
+                0x001177D1,//Human_Male_Hair_Cornrows_Beads "Human_Male_Hair_Cornrows_Beads" [HDPT:001177D1]
+                0x0013EB51,//Human_Male_Hair_Cropped "Human_Male_Hair_Cropped" [HDPT:0013EB51]
+                0x00169ED3,//Human_Male_Hair_CyberFade "Human_Male_Hair_CyberFade" [HDPT:00169ED3]
+                0x00132C59,//Human_Male_Hair_Even_Buzz_Front "Human_Male_Hair_Even_Buzz_Front" [HDPT:00132C59]
+                0x0014781F,//Human_Male_Hair_Flat_Top "Human_Male_Hair_Flat_Top" [HDPT:0014781F]
+                0x00134EB0,//Human_Male_Hair_Messy_Business "Human_Male_Hair_Messy_Business" [HDPT:00134EB0]
+                0x00264EFA,//Human_Male_Hair_None "Human_Male_Hair_None" [HDPT:00264EFA]
+                0x000D9D39,//Human_Male_Hair_Mullet "Human_Male_Hair_Mullet" [HDPT:000D9D39]
+                0x00141E96,//Human_Male_Hair_Shaggy "Human_Male_Hair_Shaggy" [HDPT:00141E96]
+                0x0015335C,//Human_Male_Hair_Spiked "Human_Male_Hair_Spiked" [HDPT:0015335C]
+                0x0012F26F//Human_Male_Hair_Viking_Braids "Human_Male_Hair_Viking_Braids" [HDPT:0012F26F]
+            };
+            return new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
+        }
+    }
+
+    public static IFormLinkNullable<ILeveledItemGetter> GetRandomGear()
+    {
+        var random = RandomUtils.random;
+        List<uint> gearlist = new List<uint>()
+        {
+            0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
+            0x003D0947,//LLI_Spacer_Charger [LVLI:003D0947]
+            0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
+            0x003D094A,//LLI_Spacer_Recruit [LVLI:003D094A]
+            0x003D094B,//LLI_Spacer_Sniper [LVLI:003D094B]
+            0x003D60AF,//LLI_Ecliptic_AssaultDefaultRole [LVLI:003D60AF]
+            0x003D60B1,//LLI_Ecliptic_Heavy [LVLI:003D60B1]
+            0x003D60B2,//LLI_Ecliptic_Officer [LVLI:003D60B2]
+            0x003D60B4,//LLI_Ecliptic_Sniper [LVLI:003D60B4]
+            0x003D60B5,//LLI_Ecliptic_Support [LVLI:003D60B5]
+        };
+        return new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
+    }
+
+    public static IFormLinkNullable<IOutfitGetter> GetRandomFactionOutfit(string Faction)
+    {
+        var random = RandomUtils.random;
+        List<uint> Outfits = new List<uint>();
+        switch (Faction)
+        {
+            case "UC Navy":
+                Outfits.Add(0x0015CF45);//Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
+                break;
+            case "UC Vanguard":
+                Outfits.Add(0x002B211A);//Outfit_Citizen [OTFT:002B211A]
+                Outfits.Add(0x0009653C);//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
+                Outfits.Add(0x0009653C);//Outfit_Spacesuit_UCVanguard_NoHelmet[OTFT: 0000697C]
+                break;
+            case "UC SysDef":
+                Outfits.Add(0x0015CF45);//Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
+                Outfits.Add(0x002BE711);//Outfit_Spacesuit_UC_Pilot_SysDef_with_Helmet [OTFT:002BE711]
+                Outfits.Add(0x0030F3DF);//Outfit_Spacesuit_UC_Pilot_SysDef_NoHelmet [OTFT:0030F3DF]
+                break;
+            case "Freestar Security":
+                Outfits.Add(0x000E6944);//Outfit_Clothes_Akila_Security [OTFT:000E6944]
+                break;
+            case "Trackers Alliance":
+                Outfits.Add(0x00270258);//Outfit_BountyHunter [OTFT:00270258]
+                Outfits.Add(0x0026B102);//Outfit_Spacesuit_BountyHunter [OTFT:0026B102]
+                Outfits.Add(0x000A5637);//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
+                break;
+            case "Galbank":
+                Outfits.Add(0x00067C92);//Outfit_Spacesuit_Settler [OTFT:00067C92]
+                Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                break;
+            case "Crimson Fleet":
+                Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
+                Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
+                break;
+            case "Crimsonfleet":
+                Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
+                Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
+                break;
+            case "Spacer":
+                Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                Outfits.Add(0x0015E246);//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
+                break;
+            case "Ecliptic":
+                Outfits.Add(0x0027027D);//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
+                Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                break;
+            case "Varuun":
+                Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                Outfits.Add(0x00278715);//Outfit_Spacesuit_Varuun [OTFT:00278715]
+                Outfits.Add(0x000D6FA8);//Outfit_Spacesuit_Varuun_NoHelmetNoBackpack [OTFT:000D6FA8]
+                break;
+            case "Trade Authority":
+                Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
+                break;
         }
 
-        public static string GetEyeColour()
-        {
-            Random random = RandomUtils.random;
+        return new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
+    }
 
-            List<string> eyelist = new List<string>()
+    public static IFormLinkNullable<IOutfitGetter> GetRandomOutfit(bool spacesuit)
+    {
+        var random = RandomUtils.random;
+        if (spacesuit)
+        {
+            List<uint> outfitlist = new List<uint>()
             {
-                "Blue",
-                "Brown",
-                "Red",
-                "Iron",
-                "Grey",
-                "Hazel",
-                "Green",
-                "Sulfur",
+                0x0015E248,//Outfit_Spacesuit_BountyHunter [OTFT:0026B102]
+                0x000A5637,//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
+                0x00018DCF,//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
+                0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
+                0x0026B103,//Outfit_Spacesuit_Miner [OTFT:0026B103]
+                0x00026BF4,//Outfit_Spacesuit_Miner_Deimos [OTFT:00026BF4]
+                0x0006AC02,//Outfit_Spacesuit_Miner_Orange [OTFT:0006AC02]
+                0x0006AC02,//Outfit_Spacesuit_Settler [OTFT:00067C92]
+                0x0006AC02,//Outfit_Spacesuit_ShockArmor [OTFT:00203FB7]
+                0x0006AC02,//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
+                0x0006AC02,//Outfit_Spacesuit_TheFirst [OTFT:0012B42F]
+                0x0006AC02,//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
             };
 
-            return eyelist[random.Next(eyelist.Count)];
+            return new FormKey(gen_quest_main.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
         }
-
-        public static string SanitiseHairColor(string haircolor)
+        else
         {
-            switch (haircolor) {
-                case "DirtyBlonde":
-                    return "Blonde";
-                case "BlackBrown":
-                    return "Brown";
-                case "SaltAndBrown":
-                    return "Brown";
-                case "BrownDark":
-                    return "Brown";
-                case "SaltAndPepper":
-                    return "Greying";
-                default:
-                    return haircolor;
-            }
-        }
-
-        public static string GetHairColour()
-        {
-            Random random = RandomUtils.random;
-
-            List<string> hairlist = new List<string>()
+            List<uint> outfitlist = new List<uint>()
             {
-                "Jet",
-                "DirtyBlonde",
-                "BlackBrown",
-                "Black",
-                "Amber",
-                "Copper",
-                "Platinum",
-                "SaltAndBrown",
-                "BrownDark",
-                //"Violet",
-                //"White",
-                //"Ruby",
-                "SaltAndPepper",
-                "Blonde"
+                0x002B211A, // Outfit_Citizen [OTFT:002B211A]
+                0x00270258, // Outfit_BountyHunter [OTFT:00270258]
+                0x002E2BBC, // Outfit_Citizen_UC [OTFT:002E2BBC]
+                0x000E6944, // Outfit_Clothes_Akila_Security [OTFT:000E6944]
+                0x001341D9, // Outfit_Clothes_Argos_Jumpsuit [OTFT:001341D9]
+                0x002EB236, // Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
+                0x0015CF45, // Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
+                0x0026B0FC, // Outfit_Colonist [OTFT:0026B0FC]
+                0x00253B9B, // Outfit_Clothes_ScienceLabTec [OTFT:00253B9B]
+                0x00034115, // Outfit_Clothes_ScienceLabTec_02 [OTFT:00034115]
+                0x00392EE8, // Outfit_Clothes_Service_Uniform_RedMile [OTFT:00392EE8]
+                0x00253B8A, // Outfit_Clothes_BusinessSuit [OTFT:00253B8A]
+                0x00133D75, // Outfit_Clothes_Colonist_Adventurous_01_with_Hat [OTFT:00133D75]
+                0x00133D56, // Outfit_Clothes_Farmer_01_NoHat [OTFT:00133D56]
+                0x0026FB5C, // Outfit_TheFirst [OTFT:0026FB5C]
+                0x00042D85, // Outfit_Worker [OTFT:00042D85]
             };
 
-            return hairlist[random.Next(hairlist.Count)];
+            return new FormKey(gen_quest_main.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
         }
+    }
 
-        public static IFormLinkNullable<IHeadPartGetter> GetHaircut(bool female)
+    public static RankPlacement GetFaction(string Faction)
+    {
+        switch (Faction)
         {
-            Random random = RandomUtils.random;
-            if (female)
-            {
-                List<uint> hairlist = new List<uint>()
+            case "Crimsonfleet":
+                return new RankPlacement()
                 {
-                    0x00127395,//Human_Female_Hair_Bob "Human_Female_Hair_Bob" [HDPT:00127395]
-                    0x0015578B,//Human_Female_Hair_Business "Human_Female_Hair_Business" [HDPT:0015578B]
-                    0x00159AF2,//Human_Female_Hair_Buzz_Mohawk "Human_Female_Hair_Buzz_Mohawk" [HDPT:00159AF2]
-                    0x00172588,//Human_Female_Hair_CyberFade "Human_Female_Hair_CyberFade" [HDPT:00172588]
-                    0x0012FDE2,//Human_Female_Hair_Dreadlocks_HairMesh "Human_Female_Hair_Dreadlocks_HairMesh" [HDPT:0012FDE2]
-                    0x0012FDE3,//Human_Female_Hair_Dreadlocks_HairTie "Human_Female_Hair_Dreadlocks_HairTie" [HDPT:0012FDE3]
-                    0x00132C5A,//Human_Female_Hair_Even_Buzz_Back "Human_Female_Hair_Even_Buzz_Back" [HDPT:00132C5A]
-                    0x00128008,//Human_Female_Hair_Hairspray_Bob "Human_Female_Hair_Hairspray_Bob" [HDPT:00128008]
-                    0x0015B029,//Human_Female_Hair_High_and_Tight "Human_Female_Hair_High_and_Tight" [HDPT:0015B029]
-                    0x00133E4E,//Human_Female_Hair_Hollywood_curls "Human_Female_Hair_Hollywood_curls" [HDPT:00133E4E]
-                    0x0014AFDD,//Human_Female_Hair_Messy_Bob "Human_Female_Hair_Messy_Bob" [HDPT:0014AFDD]
-                    0x00134EB1,//Human_Female_Hair_Messy_Business "Human_Female_Hair_Messy_Business" [HDPT:00134EB1]
-                    0x0005B53C,//Human_Female_Hair_Messy_Updo "Human_Female_Hair_Messy_Updo" [HDPT:0005B53C]
-                    0x000D9D3A//Human_Female_Hair_Mullet "Human_Female_Hair_Mullet" [HDPT:000D9D3A]
-
+                    Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x00010B30)].ToLink(), //CrimeFactionCrimsonFleet "Crimson Fleet" [FACT:00010B30]
+                    Rank = 0
                 };
-                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
-                return outfit;
-            }
-            else
-            {
-                List<uint> hairlist = new List<uint>()
+            case "Ecliptic":
+                return new RankPlacement()
                 {
-                    0x00127396,//Human_Male_Hair_Bob "Human_Male_Hair_Bob" [HDPT:00127396]
-                    0x0015578A,//Human_Male_Hair_Business "Human_Male_Hair_Business" [HDPT:0015578A]
-                    0x00159AF3,//Human_Male_Hair_Buzz_Mohawk "Human_Male_Hair_Buzz_Mohawk" [HDPT:00159AF3]
-                    0x00266092,//Human_Male_Hair_Choppy_Bob "Human_Male_Hair_Choppy_Bob" [HDPT:00266092]
-                    0x0013F87D,//Human_Male_Hair_Coily_Mohawk "Human_Male_Hair_Coily_Mohawk" [HDPT:0013F87D]
-                    0x001177D1,//Human_Male_Hair_Cornrows_Beads "Human_Male_Hair_Cornrows_Beads" [HDPT:001177D1]
-                    0x0013EB51,//Human_Male_Hair_Cropped "Human_Male_Hair_Cropped" [HDPT:0013EB51]
-                    0x00169ED3,//Human_Male_Hair_CyberFade "Human_Male_Hair_CyberFade" [HDPT:00169ED3]
-                    0x00132C59,//Human_Male_Hair_Even_Buzz_Front "Human_Male_Hair_Even_Buzz_Front" [HDPT:00132C59]
-                    0x0014781F,//Human_Male_Hair_Flat_Top "Human_Male_Hair_Flat_Top" [HDPT:0014781F]
-                    0x00134EB0,//Human_Male_Hair_Messy_Business "Human_Male_Hair_Messy_Business" [HDPT:00134EB0]
-                    0x00264EFA,//Human_Male_Hair_None "Human_Male_Hair_None" [HDPT:00264EFA]
-                    0x000D9D39,//Human_Male_Hair_Mullet "Human_Male_Hair_Mullet" [HDPT:000D9D39]
-                    0x00141E96,//Human_Male_Hair_Shaggy "Human_Male_Hair_Shaggy" [HDPT:00141E96]
-                    0x0015335C,//Human_Male_Hair_Spiked "Human_Male_Hair_Spiked" [HDPT:0015335C]
-                    0x0012F26F//Human_Male_Hair_Viking_Braids "Human_Male_Hair_Viking_Braids" [HDPT:0012F26F]
-
+                    Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027028D)].ToLink(), //EclipticFaction [FACT:0027028D]
+                    Rank = 0
                 };
-                IFormLinkNullable<IHeadPartGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, hairlist[random.Next(hairlist.Count)]).ToNullableLink<IHeadPartGetter>();
-                return outfit;
-            }
-        }
-
-        public static IFormLinkNullable<ILeveledItemGetter> GetRandomGear()
-        {
-            Random random = RandomUtils.random;
-            List<uint> gearlist = new List<uint>()
+            case "Varuun":
+                return new RankPlacement()
                 {
-                    0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
-                    0x003D0947,//LLI_Spacer_Charger [LVLI:003D0947]
-                    0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
-                    0x003D094A,//LLI_Spacer_Recruit [LVLI:003D094A]
-                    0x003D094B,//LLI_Spacer_Sniper [LVLI:003D094B]
-                    0x003D60AF,//LLI_Ecliptic_AssaultDefaultRole [LVLI:003D60AF]
-                    0x003D60B1,//LLI_Ecliptic_Heavy [LVLI:003D60B1]
-                    0x003D60B2,//LLI_Ecliptic_Officer [LVLI:003D60B2]
-                    0x003D60B4,//LLI_Ecliptic_Sniper [LVLI:003D60B4]
-                    0x003D60B5,//LLI_Ecliptic_Support [LVLI:003D60B5]
-
+                    Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027872A)].ToLink(), //VaruunFaction [FACT:0027872A]
+                    Rank = 0
                 };
-            IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(gen_quest_main.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
-            return gear;
-        }
-
-        public static IFormLinkNullable<IOutfitGetter> GetRandomFactionOutfit(string Faction)
-        {
-            Random random = RandomUtils.random;
-            List<uint> Outfits = new List<uint>();
-            switch (Faction)
-            {
-                case "UC Navy":
-                    Outfits.Add(0x0015CF45);//Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
-                    break;
-                case "UC Vanguard":
-                    Outfits.Add(0x002B211A);//Outfit_Citizen [OTFT:002B211A]
-                    Outfits.Add(0x0009653C);//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
-                    Outfits.Add(0x0009653C);//Outfit_Spacesuit_UCVanguard_NoHelmet[OTFT: 0000697C]
-                    break;
-                case "UC SysDef":
-                    Outfits.Add(0x0015CF45);//Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
-                    Outfits.Add(0x002BE711);//Outfit_Spacesuit_UC_Pilot_SysDef_with_Helmet [OTFT:002BE711]
-                    Outfits.Add(0x0030F3DF);//Outfit_Spacesuit_UC_Pilot_SysDef_NoHelmet [OTFT:0030F3DF]
-                    break;
-                case "Freestar Security":
-                    Outfits.Add(0x000E6944);//Outfit_Clothes_Akila_Security [OTFT:000E6944]
-                    break;
-                case "Trackers Alliance":
-                    Outfits.Add(0x00270258);//Outfit_BountyHunter [OTFT:00270258]
-                    Outfits.Add(0x0026B102);//Outfit_Spacesuit_BountyHunter [OTFT:0026B102]
-                    Outfits.Add(0x000A5637);//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
-                    break;
-                case "Galbank":
-                    Outfits.Add(0x00067C92);//Outfit_Spacesuit_Settler [OTFT:00067C92]
-                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
-                    break;
-                case "Crimson Fleet":
-                    Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
-                    Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
-                    break;
-                case "Crimsonfleet":
-                    Outfits.Add(0x002EB236);// Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
-                    Outfits.Add(0x00018DCF);//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
-                    break;
-                case "Spacer":
-                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
-                    Outfits.Add(0x0015E246);//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
-                    break;
-                case "Ecliptic":
-                    Outfits.Add(0x0027027D);//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
-                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
-                    break;
-                case "Varuun":
-                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
-                    Outfits.Add(0x00278715);//Outfit_Spacesuit_Varuun [OTFT:00278715]
-                    Outfits.Add(0x000D6FA8);//Outfit_Spacesuit_Varuun_NoHelmetNoBackpack [OTFT:000D6FA8]
-                    break;
-                case "Trade Authority":
-                    Outfits.Add(0x00042D85);//Outfit_Worker [OTFT:00042D85]
-                    break;
-
-            }
-
-            IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, Outfits[random.Next(Outfits.Count)]).ToNullableLink<IOutfitGetter>();
-            return outfit;
-
-        }
-
-        public static IFormLinkNullable<IOutfitGetter> GetRandomOutfit(bool spacesuit)
-        {
-            Random random = RandomUtils.random;
-            if (spacesuit)
-            {
-                List<uint> outfitlist = new List<uint>()
+            case "Spacer":
+                return new RankPlacement()
                 {
-                    0x0015E248,//Outfit_Spacesuit_BountyHunter [OTFT:0026B102]
-                    0x000A5637,//Outfit_Spacesuit_BountyHunter_02 [OTFT:000A5637]
-                    0x00018DCF,//Outfit_Spacesuit_CrimsonFleet [OTFT:00018DCF]
-                    0x0027027D,//Outfit_Spacesuit_Ecliptic [OTFT:0027027D]
-                    0x0026B103,//Outfit_Spacesuit_Miner [OTFT:0026B103]
-                    0x00026BF4,//Outfit_Spacesuit_Miner_Deimos [OTFT:00026BF4]
-                    0x0006AC02,//Outfit_Spacesuit_Miner_Orange [OTFT:0006AC02]
-                    0x0006AC02,//Outfit_Spacesuit_Settler [OTFT:00067C92]
-                    0x0006AC02,//Outfit_Spacesuit_ShockArmor [OTFT:00203FB7]
-                    0x0006AC02,//Outfit_Spacesuit_Spacer_Any [OTFT:0015E246]
-                    0x0006AC02,//Outfit_Spacesuit_TheFirst [OTFT:0012B42F]
-                    0x0006AC02,//Outfit_Spacesuit_UCVanguard [OTFT:0009653C]
+                    Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027BB8C)].ToLink(), //SpacerFaction [FACT:0027BB8C]
+                    Rank = 0
                 };
-
-                IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
-                return outfit;
-            }
-            else
-            {
-                List<uint> outfitlist = new List<uint>()
+            default:
+                return new RankPlacement()
                 {
-                    0x002B211A, // Outfit_Citizen [OTFT:002B211A]
-                    0x00270258, // Outfit_BountyHunter [OTFT:00270258]
-                    0x002E2BBC, // Outfit_Citizen_UC [OTFT:002E2BBC]
-                    0x000E6944, // Outfit_Clothes_Akila_Security [OTFT:000E6944]
-                    0x001341D9, // Outfit_Clothes_Argos_Jumpsuit [OTFT:001341D9]
-                    0x002EB236, // Outfit_Clothes_CrimsonFleet_Any [OTFT:002EB236]
-                    0x0015CF45, // Outfit_Clothes_UCNavy_Crew [OTFT:0015CF45]
-                    0x0026B0FC, // Outfit_Colonist [OTFT:0026B0FC]
-                    0x00253B9B, // Outfit_Clothes_ScienceLabTec [OTFT:00253B9B]
-                    0x00034115, // Outfit_Clothes_ScienceLabTec_02 [OTFT:00034115]
-                    0x00392EE8, // Outfit_Clothes_Service_Uniform_RedMile [OTFT:00392EE8]
-                    0x00253B8A, // Outfit_Clothes_BusinessSuit [OTFT:00253B8A]
-                    0x00133D75, // Outfit_Clothes_Colonist_Adventurous_01_with_Hat [OTFT:00133D75]
-                    0x00133D56, // Outfit_Clothes_Farmer_01_NoHat [OTFT:00133D56]
-                    0x0026FB5C, // Outfit_TheFirst [OTFT:0026FB5C]
-                    0x00042D85, // Outfit_Worker [OTFT:00042D85]
-
-
+                    Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027BB8C)].ToLink(), //SpacerFaction [FACT:0027BB8C]
+                    Rank = 0
                 };
-
-                IFormLinkNullable<IOutfitGetter> outfit = new FormKey(gen_quest_main.StarfieldModKey, outfitlist[random.Next(outfitlist.Count)]).ToNullableLink<IOutfitGetter>();
-                return outfit;
-            }
         }
+    }
 
-        public static RankPlacement GetFaction(string Faction)
+    public static IFormLinkNullable<IVoiceTypeGetter> GetVoice(string Faction, bool isfemale)
+    {
+        switch (Faction)
         {
-            switch (Faction)
-            {
-                case "Crimsonfleet":
-                    return new RankPlacement()
+            case "Crimsonfleet":
+                if (isfemale)
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x00010B30)].ToLink(), //CrimeFactionCrimsonFleet "Crimson Fleet" [FACT:00010B30]
-                        Rank = 0
+                        0x00010B2C,//CrimsonFleetFemale01 [VTYP:00010B2C]
+                        0x00010B2D,//CrimsonFleetFemale02 [VTYP:00010B2D]
+                        0x002BCA4B,//CrimsonFleetFemale03 [VTYP:002BCA4B]
+                        0x002BCA4C,//CrimsonFleetFemale04 [VTYP:002BCA4C]
                     };
-                case "Ecliptic":
-                    return new RankPlacement()
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+                else
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027028D)].ToLink(), //EclipticFaction [FACT:0027028D]
-                        Rank = 0
+                        0x00010B2A,//CrimsonFleetMale01 [VTYP:00010B2A]
+                        0x00010B2B,//CrimsonFleetMale02 [VTYP:00010B2B]
+                        0x0024A9FD,//CrimsonFleetMale03 [VTYP:0024A9FD]
+                        0x0024A9FE,//CrimsonFleetMale04 [VTYP:0024A9FE]
                     };
-                case "Varuun":
-                    return new RankPlacement()
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+            case "Ecliptic":
+                if (isfemale)
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027872A)].ToLink(), //VaruunFaction [FACT:0027872A]
-                        Rank = 0
+                        0x002BCA4D,//EclipticFemale01 [VTYP:002BCA4D]
                     };
-                case "Spacer":
-                    return new RankPlacement()
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+                else
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027BB8C)].ToLink(), //SpacerFaction [FACT:0027BB8C]
-                        Rank = 0
+                        0x002BCA4E,//EclipticMale01 [VTYP:002BCA4E]
                     };
-                default:
-                    return new RankPlacement()
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+            case "Varuun":
+                if (isfemale)
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        Faction = gen_quest_main._StarfieldMod.Factions[new FormKey(gen_quest_main.StarfieldModKey, 0x0027BB8C)].ToLink(), //SpacerFaction [FACT:0027BB8C]
-                        Rank = 0
+                        0x0028DFF4,//VaruunZealotFemale01 [VTYP:0028DFF4]
+                        0x0028DFF3,//VaruunZealotFemale02 [VTYP:0028DFF3]
                     };
-            }
-        }
-
-        public static IFormLinkNullable<IVoiceTypeGetter> GetVoice(string Faction, bool isfemale)
-        {
-            switch (Faction)
-            {
-                case "Crimsonfleet":
-                    if (isfemale)
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+                else
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x00010B2C,//CrimsonFleetFemale01 [VTYP:00010B2C]
-                            0x00010B2D,//CrimsonFleetFemale02 [VTYP:00010B2D]
-                            0x002BCA4B,//CrimsonFleetFemale03 [VTYP:002BCA4B]
-                            0x002BCA4C,//CrimsonFleetFemale04 [VTYP:002BCA4C]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-
-                    }
-                    else
+                        0x0028DFF1,//VaruunZealotMale01 [VTYP:0028DFF1]
+                        0x0028DFF2,//VaruunZealotMale02 [VTYP:0028DFF2]
+                    };
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+            case "Spacer":
+                if (isfemale)
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x00010B2A,//CrimsonFleetMale01 [VTYP:00010B2A]
-                            0x00010B2B,//CrimsonFleetMale02 [VTYP:00010B2B]
-                            0x0024A9FD,//CrimsonFleetMale03 [VTYP:0024A9FD]
-                            0x0024A9FE,//CrimsonFleetMale04 [VTYP:0024A9FE]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-                    }
-                case "Ecliptic":
-                    if (isfemale)
+                        0x002BCA3D,//SpacerFemale01 [VTYP:002BCA3D]
+                        0x002A2C77,//SpacerFemale02 [VTYP:002A2C77]
+                        0x002A2C78,//SpacerFemale03 [VTYP:002A2C78]
+                    };
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+                else
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x002BCA4D,//EclipticFemale01 [VTYP:002BCA4D]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-
-                    }
-                    else
+                        0x002BCA3E,//SpacerMale01 [VTYP:002BCA3E]
+                        0x002BCA3C,//SpacerMale02 [VTYP:002BCA3C]
+                        0x002A2C75,//SpacerMale03 [VTYP:002A2C75]
+                        0x002A2C76,//SpacerMale04 [VTYP:002A2C76]
+                    };
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+            default:
+                if (isfemale)
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x002BCA4E,//EclipticMale01 [VTYP:002BCA4E]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-                    }
-                case "Varuun":
-                    if (isfemale)
+                        0x002BCA30,//GenericFemale01 [VTYP:002BCA30]
+                    };
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
+                else
+                {
+                    List<uint> voices = new List<uint>()
                     {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x0028DFF4,//VaruunZealotFemale01 [VTYP:0028DFF4]
-                            0x0028DFF3,//VaruunZealotFemale02 [VTYP:0028DFF3]
-                       };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-
-                    }
-                    else
-                    {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x0028DFF1,//VaruunZealotMale01 [VTYP:0028DFF1]
-                            0x0028DFF2,//VaruunZealotMale02 [VTYP:0028DFF2]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-                    }
-                case "Spacer":
-                    if (isfemale)
-                    {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x002BCA3D,//SpacerFemale01 [VTYP:002BCA3D]
-                            0x002A2C77,//SpacerFemale02 [VTYP:002A2C77]
-                            0x002A2C78,//SpacerFemale03 [VTYP:002A2C78]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-
-                    }
-                    else
-                    {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x002BCA3E,//SpacerMale01 [VTYP:002BCA3E]
-                            0x002BCA3C,//SpacerMale02 [VTYP:002BCA3C]
-                            0x002A2C75,//SpacerMale03 [VTYP:002A2C75]
-                            0x002A2C76,//SpacerMale04 [VTYP:002A2C76]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-                    }
-                default:
-                    if (isfemale)
-                    {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x002BCA30,//GenericFemale01 [VTYP:002BCA30]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-
-                    }
-                    else
-                    {
-                        List<uint> voices = new List<uint>()
-                        {
-                            0x002BCA32,//GenericMale01 [VTYP:002BCA32]
-                        };
-                        return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
-                    }
-            }
+                        0x002BCA32,//GenericMale01 [VTYP:002BCA32]
+                    };
+                    return gen_quest_main._StarfieldMod.VoiceTypes[new FormKey(gen_quest_main.StarfieldModKey, voices[RandomUtils.random.Next(voices.Count)])].ToNullableLink();
+                }
         }
     }
 }

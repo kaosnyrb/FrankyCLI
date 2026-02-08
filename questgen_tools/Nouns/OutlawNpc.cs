@@ -1,5 +1,6 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -359,11 +360,11 @@ namespace FrankyCLI.questgen_tools
                 Thin = (float)wrand.NextDouble()
             };
 
-            npc.SpaceOutfit = NPCTools.GetRandomOutfit(spacesuit);
+            npc.SpaceOutfit = NPCToolsEx.GetRandomOutfit(spacesuit);
             npc.EyeColor = Eyecolor;
             npc.HairColor = Haircolor;
             npc.SkinToneIndex = (byte)wrand.Next(8);
-            npc.HeadParts.Add(NPCTools.GetHaircut(female));
+            npc.HeadParts.Add(NPCToolsEx.GetHaircut(female));
             var lev = new PcLevelMult();
             lev.LevelMult = 0.25f + (float)wrand.NextDouble();
             npc.Level = lev;
@@ -372,7 +373,7 @@ namespace FrankyCLI.questgen_tools
 
             npc.Items = new ExtendedList<ContainerEntry>
             {
-                new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } },
+                new ContainerEntry() { Item = new ContainerItem() { Item = NPCToolsEx.GetRandomGear(), Count = 1 } },
                  //new ContainerEntry() { Item = new ContainerItem() { Item = legendary, Count = 1 } }//Instead of adding the legendary here create a deathitems list
              };
 

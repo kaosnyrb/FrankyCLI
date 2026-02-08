@@ -4,6 +4,7 @@ using FrankyCLI.questgen_tools.Interfaces;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
 using Retrograde.StationDesigns;
+using Retrograde.Utils;
 using FrankyCLI.Utils;
 using GameFinder.Common;
 using Mutagen.Bethesda;
@@ -75,7 +76,7 @@ namespace FrankyCLI.questgen_tools
             newQuest.SetScriptProperty("retrograde_quest", "MapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("retrograde_quest", "PlayerShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("retrograde_quest", "Station", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
+            newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipToolsEx.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
 
 
 

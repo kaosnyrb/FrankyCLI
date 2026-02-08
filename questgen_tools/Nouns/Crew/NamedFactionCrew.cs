@@ -2,6 +2,7 @@
 using FrankyCLI.questgen_tools.Interfaces;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -33,7 +34,7 @@ namespace FrankyCLI.questgen_tools
             var list = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>();
             Random random = RandomUtils.random;
             //Generate a new NPC
-            var outfit = NPCTools.GetRandomFactionOutfit(Faction);
+            var outfit = NPCToolsEx.GetRandomFactionOutfit(Faction);
 
             bool generatebook = false;
             int crewcount = 5;
@@ -78,11 +79,11 @@ namespace FrankyCLI.questgen_tools
                 npc.EyeColor = NPCTools.GetEyeColour();
                 npc.HairColor = NPCTools.GetHairColour();
                 npc.SkinToneIndex = (byte)wrand.Next(8);
-                npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
+                npc.HeadParts.Add(NPCToolsEx.GetHaircut(isfemale));
 
                 npc.Items = new ExtendedList<ContainerEntry>
                 {
-                    new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } },
+                    new ContainerEntry() { Item = new ContainerItem() { Item = NPCToolsEx.GetRandomGear(), Count = 1 } },
 
                 };
 

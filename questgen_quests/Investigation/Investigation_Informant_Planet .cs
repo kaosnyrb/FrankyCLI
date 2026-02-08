@@ -1,6 +1,7 @@
 ﻿using FrankyCLI.questgen_tools;
 using FrankyCLI.questgen_tools.Nouns;
 using FrankyCLI.questgen_tools.Utils;
+using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
@@ -84,7 +85,7 @@ namespace FrankyCLI
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "GangMembers", outlawGang.gangList.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create Boss NPC
-            var outfit = NPCTools.GetRandomOutfit(true);
+            var outfit = NPCToolsEx.GetRandomOutfit(true);
             bool isfemale = false;
             if (RandomUtils.random.Next(100) > 50)
             {
@@ -128,10 +129,10 @@ namespace FrankyCLI
             npc.EyeColor = NPCTools.GetEyeColour();
             npc.HairColor = NPCTools.GetHairColour();
             npc.SkinToneIndex = (byte)wrand.Next(8);
-            npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
+            npc.HeadParts.Add(NPCToolsEx.GetHaircut(isfemale));
             npc.Items = new ExtendedList<ContainerEntry>
             {
-                new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } }
+                new ContainerEntry() { Item = new ContainerItem() { Item = NPCToolsEx.GetRandomGear(), Count = 1 } }
             };
             myMod.Npcs.Add(npc);
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
