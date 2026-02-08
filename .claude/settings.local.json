@@ -5,7 +5,9 @@
       "Bash(move:*)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(dir:*)",
+      "Bash(dotnet clean:*)"
     ]
   }
 }

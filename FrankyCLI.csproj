@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Retrograde.Library\**" />
+    <EmbeddedResource Remove="Retrograde.Library\**" />
+    <None Remove="Retrograde.Library\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="questgen_quests\Investigation\Investigation_DestroySpace_Guard.cs" />
   </ItemGroup>
 
@@ -16,6 +22,10 @@
     <PackageReference Include="Mutagen.Bethesda.Starfield" Version="0.44.0" />
     <PackageReference Include="OpenAI" Version="2.6.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Retrograde.Library\Retrograde.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,44 @@
+using Retrograde.Abstractions;
+
+namespace Retrograde;
+
+/// <summary>
+/// Static accessor for the mod context. Must be initialized before using Retrograde.
+/// This enables utilities that don't receive DungeonState to access the mod context.
+/// </summary>
+public static class RetrogradeContext
+{
+    private static IModContext? _current;
+
+    /// <summary>
+    /// Gets or sets the current mod context. Throws if accessed before initialization.
+    /// </summary>
+    public static IModContext Current
+    {
+        get => _current ?? throw new InvalidOperationException(
+            "RetrogradeContext.Current not initialized. Call RetrogradeContext.Initialize() first.");
+        set => _current = value;
+    }
+
+    /// <summary>
+    /// Returns true if the context has been initialized.
+    /// </summary>
+    public static bool IsInitialized => _current != null;
+
+    /// <summary>
+    /// Initializes the Retrograde context with the provided mod context.
+    /// Should be called once at startup before any Retrograde operations.
+    /// </summary>
+    public static void Initialize(IModContext context)
+    {
+        _current = context ?? throw new ArgumentNullException(nameof(context));
+    }
+
+    /// <summary>
+    /// Resets the context. Call this when done generating to clean up.
+    /// </summary>
+    public static void Reset()
+    {
+        _current = null;
+    }
+}
