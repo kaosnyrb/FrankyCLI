@@ -2,10 +2,11 @@
 
 ## Project Overview
 
-FrankyCLI is a .NET 6.0 CLI tool for procedural content generation for **Starfield** modding. It has two major subsystems:
+FrankyCLI is a .NET 6.0 CLI tool for procedural content generation for **Starfield** modding. It has three major subsystems:
 
 1. **Ship Part Generation** - Creates ESM/ESP mod files for Starfield ship components (CO, GBFM, PKIN, CELL, MSTT records)
-2. **Retrograde** - Procedural dungeon/station generation and AI-driven quest creation
+2. **Retrograde** - Procedural space station and dungeon generation
+3. **Outlaws** - Procedural quest generation with AI-driven scripting
 
 ## Build & Run
 
@@ -50,7 +51,7 @@ Defined in `Program.cs`:
 FrankyCLI/
 ├── Program.cs                  # Entry point - mode dispatch
 ├── gen_*.cs                    # Top-level generator modules
-├── Retrograde/                 # Procedural station/dungeon system
+├── Retrograde/                 # Retrograde: procedural station/dungeon generation
 │   ├── Passes/                 # Generation passes (pipeline architecture)
 │   │   ├── Topology/           # Room layout (Trunk, District, Boss, Scatter, Bridging)
 │   │   ├── Content/            # Doors, enemies, loot
@@ -61,12 +62,12 @@ FrankyCLI/
 │   ├── StationDesigns/         # Station design implementations
 │   ├── FactionMembers/         # Faction-specific crew definitions
 │   └── [Utils]                 # ConnectorUtils, BridgeUtil, ScoringUtil, etc.
-├── questgen_tools/             # Quest generation framework
+├── questgen_tools/             # Outlaws: quest generation framework
 │   ├── Nouns/                  # Quest entities (Gangs, NPCs, Ships)
 │   ├── Chains/                 # Quest chain implementations
 │   ├── Interfaces/             # Quest system interfaces
 │   └── TemplateEngines/        # Quest template managers
-├── questgen_quests/            # Quest content and templates
+├── questgen_quests/            # Outlaws: quest content and templates
 │   ├── Discovery/              # Discovery quest templates
 │   ├── Investigation/          # Investigation quest templates
 │   ├── Showdown/               # Showdown quest templates
@@ -83,9 +84,9 @@ FrankyCLI/
 - **OpenAI** (v2.6.0) - AI-driven quest script generation
 - **YamlDotNet** (v16.3.0) - YAML serialization
 
-## Architecture: Retrograde Pass Pipeline
+## Architecture: Retrograde (Station Generation) Pass Pipeline
 
-The Retrograde system uses a **pass-based pipeline**. Each pass implements `IGenPass` and operates on a shared `DungeonState` object:
+Retrograde uses a **pass-based pipeline**. Each pass implements `IGenPass` and operates on a shared `DungeonState` object:
 
 1. **Topology passes** - Build room layout (trunk, districts, boss rooms, scatter, bridges)
 2. **Content passes** - Populate with doors, enemies, loot, alert coverage
@@ -94,6 +95,19 @@ The Retrograde system uses a **pass-based pipeline**. Each pass implements `IGen
 5. **Utility passes** - Setup, plugin wiring, lights, ship markers
 
 A `PlanRunner` evaluates multiple generated plans using a `ScoringSystem` and selects the best.
+
+## Architecture: Outlaws (Quest Generation)
+
+Outlaws generates multi-stage quests with dynamic storylines. Key components:
+
+- `gen_quest_main` - Orchestrator entry point
+- `questgen_tools/Chains/` - Quest chain implementations (e.g., `RetrogradeQuest`)
+- `questgen_tools/Interfaces/` - Interfaces like `IQuestchain`, `IOutlawQuest`
+- `questgen_tools/TemplateEngines/` - Template selection (`ITemplateManager`)
+- `questgen_tools/Nouns/` - Quest entities (Gangs, NPCs, Ships)
+- `questgen_quests/` - Quest content organized by type (Discovery, Investigation, Showdown)
+- Integrates with OpenAI for AI-driven quest scripting
+- Lore files in `questgen_quests/Lorefiles/` provide faction/character context
 
 ## Coding Conventions
 
