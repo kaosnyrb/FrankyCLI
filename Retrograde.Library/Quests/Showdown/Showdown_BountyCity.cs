@@ -1,7 +1,7 @@
 ﻿using DynamicData;
-using Retrograde.Chains.Interfaces;
+using Retrograde.AI.Utils;
 using Retrograde.Chains;
-using Retrograde.Nouns;
+using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -47,12 +47,12 @@ namespace Retrograde.Quests
                 }
             }
 
-            var questname = AIRunner.GetQuestName(new List<string>(missionTemplate.Addons));
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons));
             Console.WriteLine("questname: " + questname);
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var logmessage = AIRunner.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Kill the Outlaw target " + outlawNpc.name + "\r\n"

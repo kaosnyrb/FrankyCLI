@@ -1,5 +1,6 @@
-using Retrograde.Chains.Interfaces;
+using Retrograde.AI;
 using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -60,7 +61,7 @@ namespace Retrograde.Quests
             "Use the following information to build the explaination:\r\n\r\n";
             pickuppromt += "Location:" + nextQuest.QuestLocation + "\r\n";
 
-            var pickupmessage = AIRunner.RunPrompt(pickuppromt);
+            var pickupmessage = AITools.RunPrompt(pickuppromt);
             Console.WriteLine("pickupmessage: " + pickupmessage);
 
             var messageClone = myMod.Messages[new FormKey(myMod.ModKey, 0x000844)].DeepCopy();
@@ -140,7 +141,7 @@ namespace Retrograde.Quests
             {
                 question += i + " : " + rec[i].EditorID + " \r\n";
             }
-            var result = AIRunner.RunPrompt(question);
+            var result = AITools.RunPrompt(question);
             int index = 0;
             IMajorRecord markerused;
             try

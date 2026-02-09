@@ -1,8 +1,6 @@
 using Retrograde.Nouns;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
+using Retrograde.AI.Utils;
 using Retrograde.Interfaces;
-using Retrograde.Nouns;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -14,6 +12,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
 
 namespace Retrograde.Quests
 {
@@ -43,7 +43,7 @@ namespace Retrograde.Quests
             var questActivator = ActivatorTools.GetRandomLargeGroundType();
 
 
-            var destroytarget = AIRunner.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
+            var destroytarget = PromptManager.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -51,7 +51,7 @@ namespace Retrograde.Quests
             Console.WriteLine("destroytarget: " + destroytarget);
 
 
-            var questname = AIRunner.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Item we must destroy: " + destroytarget + "\r\n"
@@ -60,7 +60,7 @@ namespace Retrograde.Quests
 
             IGang outlawGang = GangManager.GetGang();
 
-            var logmessage = AIRunner.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Destroy the " + destroytarget + " to lead you to " + outlawNpc.name + "\r\n",
@@ -75,7 +75,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetQuestPCMTypeKeyword("DungeonLocation", myMod.Keywords[new FormKey(myMod.ModKey, missionTemplate.parameterformid)].ToNullableLink<IKeywordGetter>());
 
-            var pickupmessage = AIRunner.GetDestroyMessage(new List<string>(missionTemplate.Addons)
+            var pickupmessage = PromptManager.GetDestroyMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Item we must destroy: " + destroytarget + "\r\n"

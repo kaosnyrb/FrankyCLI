@@ -1,4 +1,5 @@
 using Retrograde.Interfaces;
+using Retrograde.Nouns.Gangs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,6 @@ namespace Retrograde.Nouns
 {
     public class GangManager
     {
-        /// <summary>
-        /// Factory delegate for creating gang instances.
-        /// This must be set by the consuming application before calling GetGang().
-        /// </summary>
-        public static Func<string, IGang> GangFactory { get; set; }
-
         public static IGang GetGang()
         {
             List<string> gangs = new List<string>()
@@ -27,14 +22,27 @@ namespace Retrograde.Nouns
                 "SalvageCrew",
             };
 
-            var gangType = gangs[RandomProvider.Random.Next(gangs.Count)];
+            Random rand = RandomProvider.Random;
 
-            if (GangFactory != null)
+            //We generate when we create them.
+            switch (gangs[rand.Next(gangs.Count)])
             {
-                return GangFactory(gangType);
-            }
+                case "NamedStreetGang":
+                    return new NamedStreetGang();
+                case "NamedMercenaryGang":
+                    return new NamedMercenaryGang();
+                case "RogueExMilitaryUnit":
+                    return new RogueExMilitaryUnit();
+                case "StarshipWreckSalvagerCrew":
+                    return new StarshipWreckSalvagerCrew();
+                case "StreetGang":
+                    return new StreetGang();
+                case "SalvageCrew":
+                    return new SalvageCrew();
 
-            throw new InvalidOperationException("GangManager.GangFactory must be set before calling GetGang()");
+                default:
+                    return new NamedStreetGang();
+            }
         }
     }
 }

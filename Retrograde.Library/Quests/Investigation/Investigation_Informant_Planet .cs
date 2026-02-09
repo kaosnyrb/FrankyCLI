@@ -1,8 +1,7 @@
 using Retrograde.Nouns;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
+using Retrograde.AI.Utils;
+using Retrograde.AI;
 using Retrograde.Interfaces;
-using Retrograde.Nouns;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -14,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
 
 namespace Retrograde.Quests
 {
@@ -51,7 +52,7 @@ namespace Retrograde.Quests
 
             var questActivator = ActivatorTools.GetRandomLargeGroundType();
 
-            var datasource = AIRunner.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Type: Data tablet \r\n",
@@ -59,7 +60,7 @@ namespace Retrograde.Quests
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = AIRunner.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -69,7 +70,7 @@ namespace Retrograde.Quests
             IGang outlawGang = GangManager.GetGang();
             
             //Log Entry
-            var logmessage = AIRunner.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
@@ -105,7 +106,7 @@ namespace Retrograde.Quests
             string Gender = "Male";
             if (isfemale) Gender = "Female";
 
-            npc.Name = AIRunner.RunPrompt(
+            npc.Name = AITools.RunPrompt(
                 "Generate a unique full name (first and last) for a " + Gender +
                 "The name should feel appropriate for someone living and operating within a criminal gang culture—gritty, believable, and grounded.\r\n" +
                 "Do NOT reuse or repeat any names that have appeared previously in this session.\r\n" +
@@ -138,7 +139,7 @@ namespace Retrograde.Quests
 
             //Book
 
-            var booklogmessage = AIRunner.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Log Entry should mention how this character has located the next clue on the target.\r\n",

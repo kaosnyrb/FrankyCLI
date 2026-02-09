@@ -1,7 +1,5 @@
 using Retrograde.Nouns;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
-using Retrograde.Nouns;
+using Retrograde.AI.Utils;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -12,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
 
 namespace Retrograde.Quests
 {
@@ -40,7 +40,7 @@ namespace Retrograde.Quests
             questloc = missionTemplate.Location;
 
             var factionID = ShipTools.GetFactionID(missionTemplate.parameter1);
-            var datasource = AIRunner.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Type: Data tablet \r\n",
@@ -52,7 +52,7 @@ namespace Retrograde.Quests
             Console.WriteLine("shipname: " + shipname);
             var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, factionID);
 
-            var questname = AIRunner.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Spaceship holding the information: " + shipname + "\r\n"
@@ -61,7 +61,7 @@ namespace Retrograde.Quests
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var logmessage = AIRunner.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Recover the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
@@ -81,7 +81,7 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Log Entry
-            var booklogmessage = AIRunner.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",

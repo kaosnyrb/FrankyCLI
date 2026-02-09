@@ -1,7 +1,7 @@
+using Retrograde.AI.Utils;
 using Retrograde.Nouns;
-using Retrograde.Chains.Interfaces;
 using Retrograde.Chains;
-using Retrograde.Nouns;
+using Retrograde.Chains.Interfaces;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -42,12 +42,12 @@ namespace Retrograde.Quests
 
             //Merge the background and log message.
 
-            string bookcontents = AIRunner.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons) {
+            string bookcontents = PromptManager.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons) {
                 //"Background: " + outlawNpc.background,
                 "LogMessage: " + nextQuest.LogMessage,                
             });
 
-            var bookname = AIRunner.GetQuestName(new List<string>(missionTemplate.Addons) {
+            var bookname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons) {
                 //"Background: " + outlawNpc.background,
                 "LogMessage: " + nextQuest.LogMessage,
             });

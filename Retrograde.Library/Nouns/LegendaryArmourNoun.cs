@@ -10,18 +10,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.AI;
 
 namespace Retrograde.Nouns
 {
     public class LegendaryArmourNoun
     {
         public IFormLinkNullable<ILeveledItemGetter> LeveledItemGetter { get; set; }
-
-        /// <summary>
-        /// Delegate for generating names using AI or other methods.
-        /// Must be set by the consuming application before using LegendaryArmourNoun.
-        /// </summary>
-        public static Func<string, string> NameGenerator { get; set; }
 
         public LegendaryArmourNoun(string OutlawName)
         {
@@ -70,7 +65,8 @@ namespace Retrograde.Nouns
                 "- Do not include punctuation, numbers, subtitles, or explanations.\r\n" +
                 "- Return ONLY the final legendary item name.\r\n";
 
-            string ArmourName = NameGenerator?.Invoke(Armournameprompt) ?? "Legendary " + Type;
+            
+            string ArmourName = AITools.RunPrompt(Armournameprompt);
             //Console.WriteLine(ArmourName);
 
             //We generate 5 versions of the base, to give high level items

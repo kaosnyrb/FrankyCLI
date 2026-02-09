@@ -1,7 +1,5 @@
 using Retrograde.Nouns;
-using Retrograde.Chains.Interfaces;
-using Retrograde.Chains;
-using Retrograde.Nouns;
+using Retrograde.AI.Utils;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
@@ -14,6 +12,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
 
 namespace Retrograde.Quests
 {
@@ -53,14 +53,14 @@ namespace Retrograde.Quests
 
             var questActivator = ActivatorTools.GetRandomGroundType();
 
-            var datasource = AIRunner.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = AIRunner.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -78,7 +78,7 @@ namespace Retrograde.Quests
             var locaform = RetrogradeContext.Current.StarfieldMod.Locations[new FormKey(RetrogradeContext.Current.StarfieldModKey, missionTemplate.parameterformid)];
             newQuest.SetQuestLocationAlias("DungeonLocation", locaform.ToNullableLink<ILocationGetter>());
             //Log Entry
-            var logmessage = AIRunner.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
@@ -89,7 +89,7 @@ namespace Retrograde.Quests
             newQuest.SetObjective(0, "Locate the <Alias=BountyTarget> At " + missionTemplate.Location);
 
             //Create the activation message
-            var pickupmessage = AIRunner.GetPickupMessage(new List<string>(missionTemplate.Addons)
+            var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Vital clue to there location: " + datasource + "\r\n"

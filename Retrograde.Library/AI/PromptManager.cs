@@ -384,7 +384,7 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         // Mission Briefing Dataslate
         // ------------------------------
-        public static string GetMissonBriefingDataslate(List<string> Addons)
+        public static string GetMissionBriefingDataslate(List<string> Addons)
         {
             var logprompt =
                 "Write a mission briefing dataslate for the player.\r\n" +

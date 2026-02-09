@@ -1,5 +1,6 @@
 using Mutagen.Bethesda.Starfield;
-using Retrograde.Chains;
+using Retrograde.AI;
+using Retrograde.AI.Utils;
 using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Retrograde.Quests;
@@ -49,7 +50,7 @@ namespace Retrograde.Chains
             //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
             //var Lorefile = PromptManager.LoadRandomLoreFile();
             Console.WriteLine("Generating Lore File...");
-            var Lorefile = AIRunner.GenerateLoreFile();
+            var Lorefile = PromptManager.GenerateLoreFile();
 
             // AI Seeding (instructions only)
             string MissionSetupPrompt =
@@ -67,7 +68,7 @@ namespace Retrograde.Chains
                 "Respond only with: \"Instructions acknowledged.\"";
 
             Console.WriteLine("Informing AI of Mission Setup...");
-            AIRunner.RunPrompt(MissionSetupPrompt);
+            AITools.RunPrompt(MissionSetupPrompt);
 
             // NPC Target (base setup) --------------------------------
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
@@ -75,7 +76,7 @@ namespace Retrograde.Chains
             // Build LoreContext from Lorefile and NPC
             Console.WriteLine("Building Lore Context...");
 
-            AIRunner.LoreContext = AIRunner.RunPrompt(
+            PromptManager.LoreContext = AITools.RunPrompt(
                 "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
                 "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +
                 "You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.\r\n\r\n" +
@@ -247,7 +248,7 @@ namespace Retrograde.Chains
                 // After the first investigation, remind the AI not to spoil the showdown location
                 if (i == 0)
                 {
-                    AIRunner.RunPrompt(
+                    AITools.RunPrompt(
                         "Important note: From now on, the player does not know where the final showdown takes place. " +
                         "Do not state the showdown location explicitly, but you may hint at clues that point toward it."
                     );

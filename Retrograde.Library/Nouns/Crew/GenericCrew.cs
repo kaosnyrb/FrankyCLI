@@ -14,12 +14,6 @@ namespace Retrograde.Nouns.Crew
 {
     public class GenericCrew : ICrew
     {
-        /// <summary>
-        /// Delegate for generating book content.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> BookGenerator { get; set; }
-
         public static string GetCrewName()
         {
             Random random = RandomProvider.Random;

@@ -1,7 +1,8 @@
+using Retrograde.AI;
+using Retrograde.AI.Utils;
 using Retrograde.Nouns;
-using Retrograde.Chains.Interfaces;
 using Retrograde.Chains;
-using Retrograde.Nouns;
+using Retrograde.Chains.Interfaces;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -62,22 +63,22 @@ namespace Retrograde.Quests
                 "- Put a single blank line between the two paragraphs.\r\n\r\n" +
 
                 "Use the Lore Context to shape factions, stakes, and atmosphere:\r\n" +
-                "<LoreContext>\r\n" + AIRunner.LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "<LoreContext>\r\n" + PromptManager.LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Base the two leads on these briefing blurbs:\r\n" +
                 "Lead 1:\r\n" + Quest1.outlawQuest.LogMessage + "\r\n\r\n" +
                 "Lead 2:\r\n" + Quest2.outlawQuest.LogMessage + "\r\n";
 
             
-            string description = AIRunner.RunPrompt(choiceprompt);
+            string description = AITools.RunPrompt(choiceprompt);
 
             var message = new MessageNoun(0x0008BA, description);
 
             string choice_one_prompt = "Convert this to a menu option saying you'll look into it. No more that 10 words.: " + Quest1.outlawQuest.LogMessage;
             string choice_two_prompt = "Convert this to a menu option saying you'll look into it. No more that 10 words.: " + Quest2.outlawQuest.LogMessage;
 
-            var choice_one = AIRunner.RunPrompt(choice_one_prompt);
-            var choice_two = AIRunner.RunPrompt(choice_two_prompt);
+            var choice_one = AITools.RunPrompt(choice_one_prompt);
+            var choice_two = AITools.RunPrompt(choice_two_prompt);
 
             message.SetChoice(0,choice_one);
             message.SetChoice(1,choice_two);

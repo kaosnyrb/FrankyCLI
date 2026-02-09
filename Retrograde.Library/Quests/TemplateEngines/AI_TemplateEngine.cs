@@ -1,5 +1,7 @@
-using Retrograde.Chains.Interfaces;
+using Retrograde.AI;
+using Retrograde.AI.Utils;
 using Retrograde.Chains;
+using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
@@ -45,7 +47,7 @@ namespace Retrograde.Quests.TemplateEngines
                 return ApplyAddons(template, addons);
             }
 
-            if (AIRunner.AIMode)
+            if (AITools.AIMODE)
             {
                 Console.WriteLine("AI_TemplateEngine: Choosing Showdown Mission Template...");
                 var sb = new StringBuilder();
@@ -100,7 +102,7 @@ namespace Retrograde.Quests.TemplateEngines
 
                 sb.AppendLine("LoreContext:");
                 sb.AppendLine("<LoreContext>");
-                sb.AppendLine(AIRunner.LoreContext ?? string.Empty);
+                sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
                 sb.AppendLine("</LoreContext>");
                 sb.AppendLine();
 
@@ -137,7 +139,7 @@ namespace Retrograde.Quests.TemplateEngines
                     sb.AppendLine();
                 }
 
-                var result = AIRunner.RunPrompt(sb.ToString());
+                var result = AITools.RunPrompt(sb.ToString());
                 int index;
                 if (int.TryParse(result, out index) && index >= 0 && index < selected.Count)
                 {
@@ -186,7 +188,7 @@ namespace Retrograde.Quests.TemplateEngines
 
             
 
-            if (AIRunner.AIMode)
+            if (AITools.AIMODE)
             {
                 Console.WriteLine("AI_TemplateEngine: Choosing Investigation Mission Template...");
                 var sb = new StringBuilder();
@@ -222,7 +224,7 @@ namespace Retrograde.Quests.TemplateEngines
 
                 sb.AppendLine("LoreContext:");
                 sb.AppendLine("<LoreContext>");
-                sb.AppendLine(AIRunner.LoreContext ?? string.Empty);
+                sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
                 sb.AppendLine("</LoreContext>");
                 sb.AppendLine();
 
@@ -260,7 +262,7 @@ namespace Retrograde.Quests.TemplateEngines
                     sb.AppendLine();
                 }
 
-                var result = AIRunner.RunPrompt(sb.ToString());
+                var result = AITools.RunPrompt(sb.ToString());
                 int index;
                 if (int.TryParse(result, out index) && index >= 0 && index < selected.Count)
                 {
@@ -309,7 +311,7 @@ namespace Retrograde.Quests.TemplateEngines
             if (AvailableTemplateLib.DiscoveryTemplates.Count == 0) return null;
             Random random = RandomProvider.Random;
 
-            if (AIRunner.AIMode)
+            if (AITools.AIMODE)
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("You are a Starfield quest designer choosing the opening DISCOVERY mission for a bounty-style quest chain.");
@@ -339,7 +341,7 @@ namespace Retrograde.Quests.TemplateEngines
 
                 sb.AppendLine("LoreContext:");
                 sb.AppendLine("<LoreContext>");
-                sb.AppendLine(AIRunner.LoreContext ?? string.Empty);
+                sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
                 sb.AppendLine("</LoreContext>");
                 sb.AppendLine();
 
@@ -375,7 +377,7 @@ namespace Retrograde.Quests.TemplateEngines
                     sb.AppendLine();
                 }
 
-                var result = AIRunner.RunPrompt(sb.ToString());
+                var result = AITools.RunPrompt(sb.ToString());
                 int index;
                 if (int.TryParse(result, out index) && index >= 0 && index < selected.Count)
                 {
