@@ -5,7 +5,24 @@
       "Bash(move:*)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(dir:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(Select-String -Pattern \"error|Error|Build succeeded\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(find:*)",
+      "Bash(git -C \"c:/Git/FrankyCLI\" show HEAD:retrograde/RetrogradeUtils.cs)",
+      "Bash(git -C \"c:/Git/FrankyCLI\" log --oneline --all -- retrograde/RetrogradeUtils.cs)",
+      "Bash(git -C \"c:/Git/FrankyCLI\" status --short retrograde/RetrogradeUtils.cs)",
+      "Bash(git -C \"c:/Git/FrankyCLI\" log --oneline -5)",
+      "Bash(git -C \"c:/Git/FrankyCLI\" show 1b0ae31:retrograde/RetrogradeUtils.cs)",
+      "Bash(git -C \"c:/Git/FrankyCLI\" diff --cached --name-status)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File:*)",
+      "Bash(git checkout:*)",
+      "Bash(for f in *.cs)",
+      "Bash(do sed -i 's/using Retrograde.Utils;/using Retrograde.Utils;\\\\nusing Retrograde;/' \"$f\")",
+      "Bash(done)",
+      "Bash(del \"c:\\\\Git\\\\FrankyCLI\\\\Retrograde.Library\\\\Chains\\\\AIRunner.cs\")"
     ]
   }
 }

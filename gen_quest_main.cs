@@ -1,0 +1,98 @@
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
+using Retrograde;
+using Retrograde.AI;
+using Retrograde.Chains;
+using System;
+using System.IO;
+
+namespace FrankyCLI
+{
+    public class gen_quest_main
+    {
+        public static ModKey StarfieldModKey;
+        public static IStarfieldModGetter _StarfieldMod;
+        public static StarfieldMod myMod;
+
+        public static int Generate(string[] args)
+        {
+            Random random = RandomProvider.Random;
+            //StarfieldMod myMod;
+            string modname = args[0];
+            string mode = args[1];
+            string prefix = args[2];
+            string item = args[3];
+            string form = args[4];
+
+            string datapath = "";
+            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            {
+                StarfieldModKey = new ModKey("Starfield", ModType.Master);
+                var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
+                datapath = env.DataFolderPath;
+                _StarfieldMod = env.LoadOrder[0].Mod;
+                //Find the modkey 
+                ModKey newMod = new ModKey(modname, ModType.Master);
+                myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);
+                if (!env.LoadOrder.ModExists(newMod))
+                {
+                    myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);
+                }
+                else
+                {
+                    for (int i = 0; i < env.LoadOrder.Count; i++)
+                    {
+
+                        if (env.LoadOrder[i].FileName == modname + ".esm")
+                        {
+                            ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                        }
+                    }
+                }
+
+                // Initialize the Retrograde context for library access
+                RetrogradeContext.Current = new ModContextImpl();
+
+                //We have different styles of quest chains, so randomly choose one.
+
+                AITools.AIMODE = true;
+
+                //var outlawQuest = new RetrogradeQuest();
+
+                var outlawQuest = new StaticLayoutQuestChain(myMod);
+                //outlawQuest.InvestigationTemplate = "Space Station Activator - spacer Medium light guard";
+                //outlawQuest.DeepTempalte = "Space Destroy - unguarded";
+                //outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
+                /*
+                List<IQuestchain> questchains = new List<IQuestchain>
+                {
+                   new LoopingLayoutQuestChain(myMod),
+                   new StaticLayoutQuestChain(myMod),
+                };
+
+                var outlawQuest = questchains[random.Next(questchains.Count)];
+                */
+                outlawQuest.GenerateQuest();
+            }
+            foreach (var rec in myMod.EnumerateMajorRecords())
+            {
+                //if (rec.EditorID != null)
+                //{
+                //    Console.WriteLine(rec.EditorID.ToString() + " : " + rec.FormKey.ToString());
+                //}
+                rec.IsCompressed = false;
+            }
+
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            AITools.ExportConversation();
+            Console.WriteLine("Finished");
+            return 0;
+        }
+        
+
+    }
+}
