@@ -548,10 +548,9 @@ namespace Retrograde.Passes
                     if (!id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    // Calculate score: prefer rooms close to start and far from loot room
+                    // Calculate score: prefer rooms far from start so the player finds the locked door first
                     float distanceFromStart = (float)Math.Sqrt(MathUtil.DistanceSquared(room.WorldPos, state.StartingPosition));
-                    float distanceFromLoot = (float)Math.Sqrt(MathUtil.DistanceSquared(room.WorldPos, lootRoom.WorldPos));
-                    float score = distanceFromLoot - distanceFromStart;
+                    float score = distanceFromStart;
 
                     candidates.Add(new SpawnInfo
                     {
@@ -565,12 +564,19 @@ namespace Retrograde.Passes
             if (candidates.Count == 0)
                 return null;
 
-            // Sort by score (highest first) and pick from top candidates with some randomness
+            // Sort by score (highest first = farthest from start)
             candidates.Sort((a, b) => b.Score.CompareTo(a.Score));
 
-            // Pick from top 3 candidates randomly for variety
-            int pickRange = Math.Min(3, candidates.Count);
-            return candidates[RandomProvider.Random.Next(pickRange)];
+            // Filter out candidates in the closest half to the start
+            float maxDist = candidates[0].Score;
+            float minAllowedDist = maxDist * 0.5f;
+            var farCandidates = candidates.Where(c => c.Score >= minAllowedDist).ToList();
+            if (farCandidates.Count == 0)
+                farCandidates = candidates; // fallback if filter is too aggressive
+
+            // Pick from top 3 far candidates randomly for variety
+            int pickRange = Math.Min(3, farCandidates.Count);
+            return farCandidates[RandomProvider.Random.Next(pickRange)];
         }
 
         private static P3Float CalculateWorldPosition(PlacedRoom room, PrefabMarker marker)

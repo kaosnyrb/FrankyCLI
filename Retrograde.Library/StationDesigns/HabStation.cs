@@ -17,7 +17,7 @@ public class HabStation : IStationDesign
     private ScoringSystem scoringSystem;
     private string dungname;
 
-    private float areaPerEnemy = 540f;
+    private float areaPerEnemy = 840f;
 
     List<IGenPass> IStationDesign.MainRoomPasses { get => mainRoomPasses; set => mainRoomPasses = value; }
     List<OptionalPass> IStationDesign.OptionalRoomPasses { get => optionalRoomPasses; set => optionalRoomPasses = value; }
@@ -44,7 +44,7 @@ public class HabStation : IStationDesign
         {
             // Add optional passes here, e.g.:
             //new OptionalPass(new LockedLootRoomPass("rg_utillist"), 1),
-            //new OptionalPass(new NPCKeyLootRoomPass("rg_utillist"), 1),
+            new OptionalPass(new NPCKeyLootRoomPass("rg_lootroom"), 1),
             //new OptionalPass(new BountyTargetEventPass(), 1),
             //new OptionalPass(new InfectionEventPass(), 1)
         };

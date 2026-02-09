@@ -17,6 +17,7 @@ public class EnemyAlertPrimitiveCoveragePass : IGenPass
 {
     // Alert activator editor IDs for different combat behaviors
     private const string DefendActivatorId = "DMP_Room_SandboxEngagedPreferredDefend";
+    private const string ReactionAttackActivatorId = "Guard_ReactionAttack";
 
     // Alert type options for random selection per section
     private static readonly string[] AlertOptions = new[]
@@ -53,8 +54,10 @@ public class EnemyAlertPrimitiveCoveragePass : IGenPass
         Subdivide(dungeonBounds, roomBounds, sections, 0);
 
         // Place a primitive for each section (one type per section, or none)
+        // Every section also gets a Guard_ReactionAttack activator
         int boxesPlaced = 0;
         int sectionsSkipped = 0;
+        var reactionAttackActivator = FindActivator(ReactionAttackActivatorId);
         foreach (var section in sections)
         {
             float cx = (section.Min.X + section.Max.X) * 0.5f;
@@ -65,9 +68,14 @@ public class EnemyAlertPrimitiveCoveragePass : IGenPass
             float sy = section.Max.Y - section.Min.Y;
             float sz = section.Max.Z - section.Min.Z;
 
+            var extents = new P3Float(sx, sy, sz);
             bool isBossRoom = IsInsideBossRoom(cx, cy, cz, bossRoomBounds);
 
-            // Non-boss sections have a chance to be skipped entirely
+            // Always place the reaction attack activator
+            if (reactionAttackActivator != null)
+                PlacePrimitiveBox(state, reactionAttackActivator, cx, cy, cz, extents);
+
+            // Non-boss sections have a chance to skip the alert box
             if (!isBossRoom && RandomProvider.Random.NextDouble() < NoneChance)
             {
                 sectionsSkipped++;
@@ -82,7 +90,7 @@ public class EnemyAlertPrimitiveCoveragePass : IGenPass
             if (activator == null)
                 continue;
 
-            PlacePrimitiveBox(state, activator, cx, cy, cz, new P3Float(sx, sy, sz));
+            PlacePrimitiveBox(state, activator, cx, cy, cz, extents);
             boxesPlaced++;
         }
 
