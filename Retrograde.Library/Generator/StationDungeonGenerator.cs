@@ -53,16 +53,12 @@ public class StationDungeonGenerator
     }
 
     /// <summary>
-    /// Generates a complete dungeon in the specified cell.
+    /// Generates the room topology (main, optional, and sealing passes) without content.
+    /// Returns the DungeonState for inspection or visualization before content is placed.
     /// </summary>
-    /// <param name="cell">The cell to generate the dungeon in.</param>
-    /// <param name="location">The location record for the dungeon.</param>
-    /// <param name="faction">The faction controlling the station.</param>
-    /// <param name="size">The size category (Small, Medium, Large).</param>
-    public void GenerateDungeon(Cell cell, Location location, string faction, string size)
+    public DungeonState GenerateTopology(Cell cell, Location location, string faction, string size,
+        Action<IGenPass> onPassStarted = null)
     {
-        Stopwatch stopwatch = Stopwatch.StartNew();
-
         DungeonState state = new DungeonState(cell, location)
         {
             Faction = faction,
@@ -78,6 +74,7 @@ public class StationDungeonGenerator
         // Run main room passes
         foreach (IGenPass pass in stationDesign.MainRoomPasses)
         {
+            onPassStarted?.Invoke(pass);
             pass.RunPass(state);
         }
 
@@ -86,6 +83,7 @@ public class StationDungeonGenerator
         {
             if (RandomProvider.Random.NextDouble() < optPass.Chance)
             {
+                onPassStarted?.Invoke(optPass.Pass);
                 optPass.Pass.RunPass(state);
             }
         }
@@ -93,16 +91,40 @@ public class StationDungeonGenerator
         // Run connector sealing passes
         foreach (IGenPass pass in stationDesign.ConnectorSealingPasses)
         {
-            pass.RunPass(state);
-        }
-
-        // Run content passes
-        foreach (IGenPass pass in stationDesign.ContentPasses)
-        {
+            onPassStarted?.Invoke(pass);
             pass.RunPass(state);
         }
 
         state.PlacementUtil.Finalise();
+
+        return state;
+    }
+
+    /// <summary>
+    /// Runs content passes (doors, enemies, loot, etc.) on an already-generated topology.
+    /// </summary>
+    public void RunContentPasses(DungeonState state, Action<IGenPass> onPassStarted = null)
+    {
+        foreach (IGenPass pass in stationDesign.ContentPasses)
+        {
+            onPassStarted?.Invoke(pass);
+            pass.RunPass(state);
+        }
+    }
+
+    /// <summary>
+    /// Generates a complete dungeon in the specified cell.
+    /// </summary>
+    /// <param name="cell">The cell to generate the dungeon in.</param>
+    /// <param name="location">The location record for the dungeon.</param>
+    /// <param name="faction">The faction controlling the station.</param>
+    /// <param name="size">The size category (Small, Medium, Large).</param>
+    public void GenerateDungeon(Cell cell, Location location, string faction, string size)
+    {
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        DungeonState state = GenerateTopology(cell, location, faction, size);
+        RunContentPasses(state);
 
         stopwatch.Stop();
         Console.WriteLine("Station Generation Time:" + stopwatch.Elapsed);

@@ -28,54 +28,42 @@ namespace Retrograde.Chains
 
         public bool GenerateQuest()
         {
-            var targetMod = RetrogradeContext.Current.TargetMod;
-
-            //Retrograde creates a Space POI that is randomly discovered.
             List<string> Factions = new List<string>()
             {
                 "Crimsonfleet","Ecliptic","Varuun","Spacer"
             };
-            List<string> Sizes = new List<string>()
-            {
-                "Small","Medium","Large"
-            };
-            var missionTemplate = new MissionTemplate()
-            {
-                formid = FormKeyLookup.GetFormKey("RG_station_quest"),
-                parameters = new Dictionary<string, object>
-                {
-                    {"Faction",Factions[RandomProvider.Random.Next(Factions.Count)]},
-                    {"StationSize","Large" },
-                }
-            };
 
-            var questID = Guid.NewGuid().ToString().Substring(0, 8);
-
+            var faction = Factions[RandomProvider.Random.Next(Factions.Count)];
+            var size = "Large";
             IStationDesign stationDesign = new HabStation();
-            var stationname = stationDesign.GenerateStationName(missionTemplate.parameters["Faction"].ToString());
+            var stationname = stationDesign.GenerateStationName(faction);
+
+            return GenerateQuest(stationname, faction, size, stationDesign);
+        }
+
+        public bool GenerateQuest(string stationname, string faction, string size, IStationDesign stationDesign)
+        {
+            var targetMod = RetrogradeContext.Current.TargetMod;
+
+            var questFormKey = FormKeyLookup.GetFormKey("RG_station_quest");
 
             MessageNoun stationnamemessage = new MessageNoun(FormKeyLookup.GetFormKey("RG_SE_Name").ID, stationname);
             stationnamemessage.instance.Name = stationname;
 
             var questname = "rg_poi_" + stationname;
             //Clone Quest
-            var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
+            var newQuest = new QuestNoun(questFormKey.ID, questname);
             //Set Aliases
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             //SEScript
             newQuest.SetScriptProperty("retrograde_quest", "MapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("retrograde_quest", "PlayerShip", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("retrograde_quest", "Station", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameters["Faction"].ToString())));
-
-
-
+            newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(faction)));
 
             //Debugging
             newQuest.SetScriptProperty("retrograde_quest", "MinGangMembers", 0);
             newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 0);
-
-
 
             // POI Name
             newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());
@@ -84,14 +72,13 @@ namespace Retrograde.Chains
             newQuest.SetQuestReferenceSpaceLocationAlias("GeneralMarker05", SpaceCellTools.GetSpaceMarkerCondition());
 
             //Generate station
-            StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString(), stationDesign);
+            StationNoun stationNoun = new StationNoun(stationname, faction, size, stationDesign);
 
             //Set station
             newQuest.SetQuestReferenceCreateAlias("Enemy01", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the Cell so we can reset when we leave
             newQuest.SetScriptProperty("retrograde_quest", "StationCell", stationNoun.InteriorCell.ToLink<IStarfieldMajorRecordGetter>());
-
 
             //Add to POI tree
             var rg_se_poi_node = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
