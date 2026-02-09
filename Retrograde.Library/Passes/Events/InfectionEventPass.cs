@@ -11,17 +11,22 @@ namespace Retrograde.Passes
     /// <summary>
     /// Event pass that spawns an alien infection in the dungeon:
     /// - Several pests (Heatleech/Xenogrub) scattered across the map
-    /// - A Terrormorph miniboss far from both the boss room and entrance
+    /// - Mature Gryllobas scattered across the station
+    /// - A Grylloba hive room with a concentrated spawn
     /// </summary>
     public class InfectionEventPass : IGenPass
     {
         // FormKeys for the infection creatures
         private static readonly FormKey PestFormKey = new(RetrogradeContext.Current.StarfieldModKey, 0x0006AAD2); // LvlInvasivePest_HeatleechOrXenogrub
-        private static readonly FormKey TerrormorphFormKey = new(RetrogradeContext.Current.StarfieldModKey, 0x002B2293); // LvlTerrormorph
+        private static readonly FormKey GryllobaFormKey = new(RetrogradeContext.Current.StarfieldModKey, 0x0032DB12); // LC030_EncGryllobaMelee06 "Mature Grylloba"
 
         // Configuration
         private const int MinPests = 3;
         private const int MaxPests = 6;
+        private const int MinScatteredGryllobas = 2;
+        private const int MaxScatteredGryllobas = 4;
+        private const int MinHiveGryllobas = 3;
+        private const int MaxHiveGryllobas = 5;
 
         // Ensures only one infection is placed per pass instance
         private bool _hasPlaced;
@@ -37,14 +42,17 @@ namespace Retrograde.Passes
             // Step 1: Scatter pests across the dungeon
             int pestCount = SpawnPests(state);
 
-            // Step 2: Spawn Terrormorph miniboss (far from boss room and entrance)
-            bool terrormorphPlaced = SpawnTerrormorph(state);
+            // Step 2: Scatter Gryllobas across the station
+            int scatteredCount = SpawnScatteredGryllobas(state);
+
+            // Step 3: Spawn a Grylloba hive in one room
+            int hiveCount = SpawnGryllobaHive(state);
 
             _hasPlaced = true;
 
             if (!state.IsHarnessRun)
             {
-                Console.WriteLine($"[Infection] Spawned {pestCount} pests and Terrormorph: {terrormorphPlaced}");
+                Console.WriteLine($"[Infection] Spawned {pestCount} pests, {scatteredCount} scattered Gryllobas, hive with {hiveCount} Gryllobas");
             }
         }
 
@@ -79,59 +87,91 @@ namespace Retrograde.Passes
         }
 
         /// <summary>
-        /// Spawns the Terrormorph miniboss far from boss room and entrance.
+        /// Spawns Gryllobas scattered across the station, one per room.
         /// </summary>
-        private bool SpawnTerrormorph(DungeonState state)
+        private int SpawnScatteredGryllobas(DungeonState state)
         {
             var spawnPoints = CollectSpawnPoints(state, includeBossRoom: false);
             if (spawnPoints.Count == 0)
-                return false;
+                return 0;
 
-            // Score spawn points: want far from start AND far from boss room
-            var scored = new List<(SpawnInfo Spawn, float Score)>();
+            // Group by room so we pick at most one per room for scatter
+            var byRoom = spawnPoints.GroupBy(s => s.Room).ToList();
+            var shuffledRooms = byRoom.OrderBy(_ => RandomProvider.Random.Next()).ToList();
 
-            foreach (var spawn in spawnPoints)
+            int count = RandomProvider.Random.Next(MinScatteredGryllobas, MaxScatteredGryllobas + 1);
+            count = Math.Min(count, shuffledRooms.Count);
+
+            int placed = 0;
+            foreach (var roomGroup in shuffledRooms.Take(count))
             {
-                float distFromStart = (float)Math.Sqrt(MathUtil.DistanceSquared(spawn.Room.WorldPos, state.StartingPosition));
+                var markers = roomGroup.ToList();
+                var spawn = markers[RandomProvider.Random.Next(markers.Count)];
+                var worldPos = CalculateWorldPosition(spawn.Room, spawn.Marker);
 
-                // Find distance to nearest boss room
-                float distFromBoss = float.MaxValue;
-                foreach (var room in state.placedRooms)
+                state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(RetrogradeContext.Current.TargetMod)
                 {
-                    if (!string.IsNullOrEmpty(room.DistrictType) &&
-                        room.DistrictType.Contains("boss", StringComparison.OrdinalIgnoreCase))
-                    {
-                        float dist = (float)Math.Sqrt(MathUtil.DistanceSquared(spawn.Room.WorldPos, room.WorldPos));
-                        distFromBoss = Math.Min(distFromBoss, dist);
-                    }
-                }
-
-                // If no boss room, just use distance from start
-                if (distFromBoss == float.MaxValue)
-                    distFromBoss = distFromStart;
-
-                // Score: balance between far from start and far from boss
-                float score = Math.Min(distFromStart, distFromBoss);
-                scored.Add((spawn, score));
+                    Rotation = spawn.Marker.Rotation,
+                    Position = worldPos,
+                    Base = new FormLink<INpcGetter>(GryllobaFormKey)
+                });
+                placed++;
             }
 
-            // Sort by score descending (highest = farthest from both)
-            scored.Sort((a, b) => b.Score.CompareTo(a.Score));
+            return placed;
+        }
 
-            // Pick from top candidates
-            int pickRange = Math.Min(3, scored.Count);
-            var chosen = scored[RandomProvider.Random.Next(pickRange)].Spawn;
+        /// <summary>
+        /// Picks one room as a hive and spawns a concentrated group of Gryllobas.
+        /// </summary>
+        private int SpawnGryllobaHive(DungeonState state)
+        {
+            var spawnPoints = CollectSpawnPoints(state, includeBossRoom: false);
+            if (spawnPoints.Count == 0)
+                return 0;
 
-            var worldPos = CalculateWorldPosition(chosen.Room, chosen.Marker);
+            // Group by room, filter out rooms too close to the entrance, then prefer rooms with the most spawn points
+            float minHiveDistance = 500f;
+            var byRoom = spawnPoints.GroupBy(s => s.Room)
+                .Select(g => new { Group = g, Distance = (float)Math.Sqrt(MathUtil.DistanceSquared(g.Key.WorldPos, state.StartingPosition)) })
+                .Where(r => r.Distance >= minHiveDistance)
+                .OrderByDescending(r => r.Group.Count())
+                .ToList();
 
-            state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(RetrogradeContext.Current.TargetMod)
+            // Fallback: if all rooms are near the entrance, just pick the farthest one
+            if (byRoom.Count == 0)
             {
-                Rotation = chosen.Marker.Rotation,
-                Position = worldPos,
-                Base = new FormLink<INpcGetter>(TerrormorphFormKey)
-            });
+                byRoom = spawnPoints.GroupBy(s => s.Room)
+                    .Select(g => new { Group = g, Distance = (float)Math.Sqrt(MathUtil.DistanceSquared(g.Key.WorldPos, state.StartingPosition)) })
+                    .OrderByDescending(r => r.Distance)
+                    .Take(1)
+                    .ToList();
+            }
 
-            return true;
+            if (byRoom.Count == 0)
+                return 0;
+
+            var hiveRoom = byRoom[0].Group;
+            var hiveMarkers = hiveRoom.OrderBy(_ => RandomProvider.Random.Next()).ToList();
+
+            int hiveCount = RandomProvider.Random.Next(MinHiveGryllobas, MaxHiveGryllobas + 1);
+            hiveCount = Math.Min(hiveCount, hiveMarkers.Count);
+
+            int placed = 0;
+            foreach (var spawn in hiveMarkers.Take(hiveCount))
+            {
+                var worldPos = CalculateWorldPosition(spawn.Room, spawn.Marker);
+
+                state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(RetrogradeContext.Current.TargetMod)
+                {
+                    Rotation = spawn.Marker.Rotation,
+                    Position = worldPos,
+                    Base = new FormLink<INpcGetter>(GryllobaFormKey)
+                });
+                placed++;
+            }
+
+            return placed;
         }
 
         /// <summary>

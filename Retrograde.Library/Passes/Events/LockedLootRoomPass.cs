@@ -9,6 +9,9 @@ using System.Linq;
 namespace Retrograde.Passes
 {
     /// <summary>
+    /// 
+    /// Not sure about this one, the key is very hard to see.
+    /// 
     /// Prototype pass that creates a locked loot room scenario:
     /// 1. Places a new loot room from a prefab list
     /// 2. Creates a key by copying from Starfield.esm and adds to mod
