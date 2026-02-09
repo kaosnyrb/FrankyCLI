@@ -26,18 +26,6 @@ namespace Retrograde.Nouns.Stations
 
         public IStationDesign stationDesign;
 
-        /// <summary>
-        /// Delegate for cloning cells by EditorID.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, Cell> CellCloner { get; set; }
-
-        /// <summary>
-        /// Delegate for looking up FormKey by EditorID.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, FormKey> FormKeyLookup { get; set; }
-
         public StationNoun(string stationName, string faction, string size, IStationDesign design)
         {
             var targetMod = RetrogradeContext.Current.TargetMod;
@@ -77,8 +65,8 @@ namespace Retrograde.Nouns.Stations
             // Ship Interior Cell
 
             //Clone the Ship Interior
-            ShipInteriorCell = CellCloner?.Invoke("duout02stationtestintcell") ??
-                throw new InvalidOperationException("StationNoun.CellCloner must be set");
+
+            ShipInteriorCell = CellTools.CloneCellById("duout02stationtestintcell");
             ShipInteriorCell.EditorID = "Station_shipint_" + StationID;
             ShipInteriorCell.Location = ShipIntlocation.ToNullableLink<ILocationGetter>();
             ShipInteriorCell.Name = stationName;
@@ -128,8 +116,8 @@ namespace Retrograde.Nouns.Stations
             targetMod.Locations.Add(InteriorCellLocation);
 
 
-            InteriorCell = CellCloner?.Invoke("duoutstationtest02interior") ??
-                throw new InvalidOperationException("StationNoun.CellCloner must be set");
+            InteriorCell = CellTools.CloneCellById("duoutstationtest02interior");
+
             InteriorCell.EditorID = "Station_int_" + StationID;
             InteriorCell.Name = stationName;
             InteriorCell.Location = InteriorCellLocation.ToNullableLink<ILocationGetter>();
@@ -156,8 +144,8 @@ namespace Retrograde.Nouns.Stations
 
             // Ship Exterior Cell
             //Clone the Exterior
-            ExteriorCell = CellCloner?.Invoke("duout02stationtestextcell") ??
-                throw new InvalidOperationException("StationNoun.CellCloner must be set");
+            ExteriorCell = CellTools.CloneCellById("duout02stationtestextcell");
+
             ExteriorCell.Name = stationName;
             ExteriorCell.EditorID = "Station_ext_" + StationID;
             ExteriorCell.Location = ShipExteriorlocation.ToNullableLink<ILocationGetter>();
@@ -174,8 +162,7 @@ namespace Retrograde.Nouns.Stations
 
 
             //Clone the Base Form
-            var formKey = FormKeyLookup?.Invoke("duout02_stationtest") ??
-                throw new InvalidOperationException("StationNoun.FormKeyLookup must be set");
+            var formKey = FormKeyLookup.GetFormKey("duout02_stationtest");
             var ship = targetMod.GenericBaseForms[formKey].DeepCopy();
             instance = new GenericBaseForm(targetMod)
             {

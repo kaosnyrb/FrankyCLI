@@ -72,6 +72,7 @@ public class StationDungeonGenerator
             stateName = stationDesign.dungeonName,
             AreaPerEnemy = stationDesign.AreaPerEnemy
         };
+
         state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
 
         // Run main room passes

@@ -67,28 +67,33 @@ public class DungeonState
     public string Size = "Small";
     public float AreaPerEnemy = 512f;
 
-    /// <summary>
-    /// Factory function to create faction crew members.
-    /// Must be set by the host application before passes that need faction NPCs.
-    /// </summary>
-    public Func<string, IFactionMembers>? FactionCrewFactory { get; set; }
-
-    private IFactionMembers? _factionCrew;
-
-    /// <summary>
-    /// Lazily-initialized faction crew. Uses FactionCrewFactory if set.
-    /// </summary>
-    public IFactionMembers? FactionCrew
+    private IFactionMembers _factionCrew;
+    public IFactionMembers FactionCrew
     {
         get
         {
-            if (_factionCrew == null && FactionCrewFactory != null)
+            if (_factionCrew == null)
             {
-                _factionCrew = FactionCrewFactory(Faction);
+                _factionCrew = CreateFactionCrew(Faction);
             }
             return _factionCrew;
         }
-        set => _factionCrew = value;
+    }
+    private static IFactionMembers CreateFactionCrew(string faction)
+    {
+        switch (faction)
+        {
+            case "Crimsonfleet":
+                return new CrimsonFleetFactionCrew();
+            case "Ecliptic":
+                return new EclipticFactionCrew();
+            case "Varuun":
+                return new VaruunFactionCrew();
+            case "Spacer":
+                return new SpacerFactionCrew();
+            default:
+                return new SpacerFactionCrew();
+        }
     }
 
     // Set by harness runs to suppress noisy pass-level logging.
