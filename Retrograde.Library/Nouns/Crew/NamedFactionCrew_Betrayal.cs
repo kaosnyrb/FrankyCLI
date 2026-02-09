@@ -1,3 +1,4 @@
+using Retrograde.AI;
 using Retrograde.Interfaces;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -14,17 +15,6 @@ namespace Retrograde.Nouns.Crew
 {
     public class NamedFactionCrew_Betrayal : ICrew
     {
-        /// <summary>
-        /// Delegate for generating names using AI or other methods.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> NameGenerator { get; set; }
-
-        /// <summary>
-        /// Delegate for generating book content.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> BookGenerator { get; set; }
 
         public IFormLink<IStarfieldMajorRecordGetter> GetCrewFormList(string Faction,string ShipName)
         {
@@ -67,7 +57,7 @@ namespace Retrograde.Nouns.Crew
                 "Do not include titles, ranks, or additional commentary.\r\n" +
                 "Return only the name.";
 
-            Betrayernpc.Name = NameGenerator?.Invoke(betrayerNamePrompt) ?? (Faction + " Betrayer");
+            Betrayernpc.Name = AITools.RunPrompt(betrayerNamePrompt);
             Betrayernpc.EditorID = "npc_" + (Betrayernpc.Name.ToString().ToLower()).Replace(" ", "");
 
             Random betrayer_wrand = RandomProvider.Random;
@@ -117,7 +107,7 @@ namespace Retrograde.Nouns.Crew
                     "Do not include titles, ranks, or additional commentary.\r\n" +
                     "Return only the name.";
 
-                npc.Name = NameGenerator?.Invoke(namePrompt) ?? (Faction + " Crew Member");
+                npc.Name = AITools.RunPrompt(namePrompt);
                 npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
 
                 Random wrand = RandomProvider.Random;
@@ -145,7 +135,7 @@ namespace Retrograde.Nouns.Crew
 
 
                 //Logfile for Crew Member
-                if (i == crewcount-1 && BookGenerator != null)
+                if (i == crewcount-1 && AITools.AIMODE)
                 {
                     //We do this last as we know all the crew now. Also only once as they are a bit samey.
                     Console.WriteLine("Generating Crew Log file...");
@@ -156,7 +146,7 @@ namespace Retrograde.Nouns.Crew
                         "One crew member, named " + Betrayernpc.Name + ", has betrayed the crew.\r\n" +
                         "Return only the diary entry.";
 
-                    string BookContents = BookGenerator(BookPrompt);
+                    string BookContents = AITools.RunPrompt(BookPrompt);
                     BookNoun bountybook = new BookNoun(0x000905, npc.Name.ToString() + " Log", Guid.NewGuid().ToString().Substring(0, 8), BookContents);
 
                     npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = targetMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });

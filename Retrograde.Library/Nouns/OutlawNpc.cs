@@ -1,3 +1,4 @@
+using Retrograde.AI;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -33,29 +34,7 @@ namespace Retrograde.Nouns
 
         public FormKey Logfile;
 
-        /// <summary>
-        /// Delegate for generating names using AI or other methods.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> NameGenerator { get; set; }
 
-        /// <summary>
-        /// Delegate for generating background/log content.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> ContentGenerator { get; set; }
-
-        /// <summary>
-        /// Delegate for getting the bounty faction.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string> FactionProvider { get; set; }
-
-        /// <summary>
-        /// Delegate for getting a random log synonym.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string> LogSynonymProvider { get; set; }
 
 
         public OutlawNpc(StarfieldMod myModparam, bool hasspacesuit) {
@@ -199,14 +178,14 @@ namespace Retrograde.Nouns
 
                 "Now output the ONE final character name.";
 
-            var generatedName = NameGenerator?.Invoke(nameprompt) ?? ("Outlaw " + Guid.NewGuid().ToString().Substring(0, 4));
+            var generatedName = AITools.RunPrompt(nameprompt);
 
             return generatedName;
         }
 
         public string GenerateBackground()
         {
-            BountyFaction = FactionProvider?.Invoke() ?? "Unknown Faction";
+            BountyFaction = FactionTools.GetFaction();
             Random random = RandomProvider.Random;
 
             var sb = new StringBuilder();
@@ -230,7 +209,7 @@ namespace Retrograde.Nouns
 
             Console.WriteLine("Generating Outlaw Background...");
 
-            string background = ContentGenerator?.Invoke(sb.ToString()) ?? "No background available.";
+            string background = AITools.RunPrompt(sb.ToString());
             return background;
         }
 
@@ -246,7 +225,7 @@ namespace Retrograde.Nouns
 
             Console.WriteLine("Generating Outlaw Log...");
 
-            string background = ContentGenerator?.Invoke(sb.ToString()) ?? "No log available.";
+            string background = AITools.RunPrompt(sb.ToString());
             return background;
         }
 
@@ -311,7 +290,7 @@ namespace Retrograde.Nouns
         {
             var log = GenerateLogfile();
             var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
-            string logSynonym = LogSynonymProvider?.Invoke() ?? "Log";
+            string logSynonym = RandomProvider.GetLogSynonym();
             Book logbook = new Book(myMod)
             {
                 CNAM = Book.CNAM,

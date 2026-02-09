@@ -1,3 +1,4 @@
+using Retrograde.AI;
 using Retrograde.Interfaces;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -14,6 +15,7 @@ namespace Retrograde.Nouns.Crew
 {
     public class GenericCrew : ICrew
     {
+
         public static string GetCrewName()
         {
             Random random = RandomProvider.Random;
@@ -120,7 +122,7 @@ namespace Retrograde.Nouns.Crew
 
 
                 //Logfile for Crew Member
-                if (i == crewcount-1 && BookGenerator != null)
+                if (i == crewcount-1 && AITools.AIMODE)
                 {
                     //We do this last as we know all the crew now. Also only once as they are a bit samey.
                     Console.WriteLine("Generating Crew Log file...");
@@ -130,7 +132,7 @@ namespace Retrograde.Nouns.Crew
                         "Instead, write it as an objective lore tidbit—something that might appear in a datapad, archived report, trader rumor collection, or a minor encyclopedic entry.\r\n" +
                         "Return only the lore excerpt.";
 
-                    string BookContents = BookGenerator(BookPrompt);
+                    string BookContents = AITools.RunPrompt(BookPrompt);
                     BookNoun bountybook = new BookNoun(0x000905, Crewname.ToString() + " Log", Guid.NewGuid().ToString().Substring(0, 8), BookContents);
 
                     npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = targetMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });

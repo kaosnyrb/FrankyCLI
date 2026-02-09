@@ -1,3 +1,4 @@
+using Retrograde.AI;
 using Retrograde.Interfaces;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -22,17 +23,6 @@ namespace Retrograde.Nouns.Gangs
         public string interal_crewName;
         public Mutagen.Bethesda.Starfield.FormList gangList;
 
-        /// <summary>
-        /// Delegate for generating names using AI or other methods.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> NameGenerator { get; set; }
-
-        /// <summary>
-        /// Delegate for generating book content.
-        /// Must be set by the consuming application.
-        /// </summary>
-        public static Func<string, string> BookGenerator { get; set; }
 
         public StarshipWreckSalvagerCrew()
         {
@@ -103,7 +93,7 @@ namespace Retrograde.Nouns.Gangs
                     "Do NOT include titles, callsigns, or extra commentary.\r\n" +
                     "Return only the name.";
 
-                npc.Name = NameGenerator?.Invoke(namePrompt) ?? (interal_crewName + " Salvager");
+                npc.Name = AITools.RunPrompt(namePrompt);
 
                 npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
                 Random wrand = RandomProvider.Random;
@@ -127,7 +117,7 @@ namespace Retrograde.Nouns.Gangs
                 };
 
                 // Logfile for Crew Member
-                if (i == gangmembers - 1 && BookGenerator != null)
+                if (i == gangmembers - 1 && AITools.AIMODE)
                 {
                     Console.WriteLine("Generating Salvager Crew Log file...");
                     string BookPrompt =
@@ -136,7 +126,7 @@ namespace Retrograde.Nouns.Gangs
                         "Use a first-person voice that reflects their personality, their relationship with danger, and the day-to-day grind of boarding and stripping derelict ships.\r\n" +
                         "Return only the diary entry.";
 
-                    string BookContents = BookGenerator(BookPrompt);
+                    string BookContents = AITools.RunPrompt(BookPrompt);
                     BookNoun bountybook = new BookNoun(0x000905, gangName + " Log", Guid.NewGuid().ToString().Substring(0, 8), BookContents);
                     npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = myMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });
                 }
