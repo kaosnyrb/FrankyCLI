@@ -35,7 +35,11 @@ namespace Retrograde.Nouns
                 ScriptComment = Quest.ScriptComment,
                 Stages = Quest.Stages,
                 Summary = Quest.Summary,
-                VirtualMachineAdapter = Quest.VirtualMachineAdapter
+                VirtualMachineAdapter = Quest.VirtualMachineAdapter,
+                MissionBoardDescription = Quest.MissionBoardDescription,
+                MissionBoardInfoPanels = Quest.MissionBoardInfoPanels,
+                TextDisplayGlobals = Quest.TextDisplayGlobals,
+                Event = Quest.Event                
             };
             targetMod.Quests.Add(instance);
         }
@@ -71,6 +75,38 @@ namespace Retrograde.Nouns
             }
             return false;
         }
+
+        public bool SetScriptPropertyStruct(String Scriptname, String Name,String Structname, IFormLink<IStarfieldMajorRecordGetter> Value)
+        {
+            foreach (var script in instance.VirtualMachineAdapter.Scripts)
+            {
+                if (script.Name == Scriptname)
+                {
+                    var properties = script.Properties;
+                    for (int i = 0; i < properties.Count; i++)
+                    {
+                        if (properties[i].Name == Name)
+                        {
+                            var structs = ((ScriptStructListProperty)properties[i]).Structs;
+                            for (int j = 0; j < structs.Count;j++)
+                            {
+                                for(int k = 0;k< structs[j].Members.Count;k++)
+                                {
+                                    if (structs[j].Members[k].Name  == Structname)
+                                    {
+                                        ((ScriptObjectProperty)structs[j].Members[k]).Object = Value;
+                                        return true;
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
 
         public bool SetScriptProperty(String Scriptname, String Name, int Value)
         {

@@ -99,4 +99,9 @@ public class DungeonState
     // Set by harness runs to suppress noisy pass-level logging.
     public bool IsHarnessRun { get; set; }
     public RgConnector StartingConnector { get; internal set; }
+
+    /// <summary>
+    /// The boss NPC placed in the persistent layer. Use FormKey to reference later.
+    /// </summary>
+    public PlacedNpc BossPlacedNpc { get; set; }
 }

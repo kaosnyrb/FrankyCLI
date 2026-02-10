@@ -22,7 +22,8 @@
       "Bash(for f in *.cs)",
       "Bash(do sed -i 's/using Retrograde.Utils;/using Retrograde.Utils;\\\\nusing Retrograde;/' \"$f\")",
       "Bash(done)",
-      "Bash(del \"c:\\\\Git\\\\FrankyCLI\\\\Retrograde.Library\\\\Chains\\\\AIRunner.cs\")"
+      "Bash(del \"c:\\\\Git\\\\FrankyCLI\\\\Retrograde.Library\\\\Chains\\\\AIRunner.cs\")",
+      "Read(//c/Users/kaosn/.nuget/packages//**)"
     ]
   }
 }

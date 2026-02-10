@@ -135,12 +135,22 @@ public class EnemyPass : IGenPass
                     ? bossPos
                     : OffsetPosition(bossPos, memberIdx);
 
-                state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(RetrogradeContext.Current.TargetMod)
+                var placedNpc = new PlacedNpc(RetrogradeContext.Current.TargetMod)
                 {
                     Rotation = bossRot,
                     Position = memberPos,
                     Base = selected.ToLink<INpcGetter>()
-                });
+                };
+
+                if (memberIdx == 0)
+                {
+                    state.PlacementUtil.NPCAddToPersistent(state.instance, placedNpc);
+                    state.BossPlacedNpc = placedNpc;
+                }
+                else
+                {
+                    state.PlacementUtil.NPCAddToTemporary(state.instance, placedNpc);
+                }
             }
         }
 

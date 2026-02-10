@@ -52,11 +52,15 @@ namespace Retrograde.Chains
 
             var questname = "rg_mb_" + stationname;
             //Clone Quest
-            var newQuest = new QuestNoun(questFormKey.ID, questname);
+            var newQuest = new QuestNoun(questFormKey.ID, "Defeat the <Alias=BountyNpc> on <Alias=PrimaryRef>");
+
             //Set Aliases
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptAlias(1, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             //SEScript
+
+            newQuest.SetScriptPropertyStruct("defaultquestchangelocationscript", "ChangeLocationStages", "targetLocationAlias",newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+
             newQuest.SetScriptProperty("retrograde_bounty_quest", "BountyTargetNPC", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             newQuest.SetScriptProperty("retrograde_bounty_quest", "SpaceMapMarker", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
@@ -88,6 +92,7 @@ namespace Retrograde.Chains
 
             //Set the Cell so we can reset when we leave
             newQuest.SetScriptProperty("retrograde_bounty_quest", "StationCell", stationNoun.InteriorCell.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("retrograde_bounty_quest", "StationInteriorLocation", stationNoun.dungeonState.location.ToLink());
 
             //Add to POI tree
             var RG_MissionNodeBountySpace = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_MissionNodeBountySpace")];
@@ -99,9 +104,7 @@ namespace Retrograde.Chains
 
             // Set the boss NPC
 
-            //Create the boss
-
-            //newQuest.SetQuestReferenceAlias("BountyNpc",stationNoun.InteriorCell.Temporary)
+            newQuest.SetQuestReferenceAlias("BountyNpc", stationNoun.dungeonState.BossPlacedNpc.FormKey);
 
             return true;
         }
