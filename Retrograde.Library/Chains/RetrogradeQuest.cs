@@ -84,9 +84,12 @@ namespace Retrograde.Chains
             var rg_se_poi_node = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
 
             //Remove the template quest from the node
-            if (targetMod.Quests[rg_se_poi_node.Quests[0].Quest.FormKey].EditorID == "RG_station_quest")
+            if (rg_se_poi_node.Quests.Count > 0)
             {
-                rg_se_poi_node.Quests.RemoveAt(0);
+                if (targetMod.Quests[rg_se_poi_node.Quests[0].Quest.FormKey].EditorID == "RG_station_quest")
+                {
+                    rg_se_poi_node.Quests.RemoveAt(0);
+                }
             }
 
             rg_se_poi_node.Quests.Add(new StoryManagerQuest()

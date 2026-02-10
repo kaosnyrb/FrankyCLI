@@ -75,6 +75,11 @@ public static class RgConnectorParser
         if (string.IsNullOrWhiteSpace(editorId))
             return result;
 
+        if (editorId.Contains("DUPLICATE"))
+        {
+            editorId = editorId.Substring(0, editorId.IndexOf("DUPLICATE"));
+        }
+
         var parts = editorId.Split('_');
 
         // Expected: rg conn n D1 station  => 5 parts

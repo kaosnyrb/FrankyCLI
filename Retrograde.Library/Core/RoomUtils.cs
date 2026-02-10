@@ -1,5 +1,6 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +37,13 @@ public class RoomUtils
 
     public string GetRoom(string theme, string? type = null)
     {
+        if (theme.Contains("DUPLICATE"))
+        {
+            theme = theme.Substring(0,theme.IndexOf("DUPLICATE"));
+        }
         var listKey = listName + "_" + theme;
         var typeKey = type ?? string.Empty;
+
 
         if (!roomTemplates.TryGetValue(listKey, out var formList) || formList?.Items == null || formList.Items.Count == 0)
             throw new Exception($"Room theme list not found or empty: {listKey}");

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.Passes;
 
 namespace Retrograde.Nouns.Stations
 {
@@ -22,6 +23,8 @@ namespace Retrograde.Nouns.Stations
         public Cell ExteriorCell;
         public Cell ShipInteriorCell;
         public Cell InteriorCell;
+
+        public DungeonState dungeonState;
 
 
         public IStationDesign stationDesign;
@@ -79,15 +82,15 @@ namespace Retrograde.Nouns.Stations
             //Find the markers
             foreach (var persistant in ShipInteriorCell.Persistent)
             {
-                if (persistant.EditorID == "duoutstationtestdoor")
+                if (persistant.EditorID == "duoutstationtestdoor" || persistant.EditorID == "duoutstationtestdoorDUPLICATE000")
                 {
                     shipint_doorreference = (PlacedObject)persistant;
                 }
-                if (persistant.EditorID == "intdoorxmarker")
+                if (persistant.EditorID == "intdoorxmarker" || persistant.EditorID == "intdoorxmarkerDUPLICATE000")
                 {
                     shipint_xmarker = (PlacedObject)persistant;
                 }
-                if (persistant.EditorID == "du_shipinttointodoor")
+                if (persistant.EditorID == "du_shipinttointodoor" || persistant.EditorID == "du_shipinttointodoorDUPLICATE000")
                 {
                     shipinttoint_doorreference = (PlacedObject)persistant;
                 }
@@ -129,11 +132,11 @@ namespace Retrograde.Nouns.Stations
             //Find the markers
             foreach (var persistant in InteriorCell.Persistent)
             {
-                if (persistant.EditorID == "du_intcelldoor")
+                if (persistant.EditorID == "du_intcelldoor" || persistant.EditorID == "du_intcelldoorDUPLICATE000")
                 {
                     int_doorreference = (PlacedObject)persistant;
                 }
-                if (persistant.EditorID == "intdoorxmarker003")
+                if (persistant.EditorID == "intdoorxmarker003" || persistant.EditorID == "intdoorxmarker003DUPLICATE000")
                 {
                     int_xmarker = (PlacedObject)persistant;
                 }
@@ -202,7 +205,7 @@ namespace Retrograde.Nouns.Stations
 
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator(stationDesign);
 
-            dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size);
+            dungeonState = dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size);
         }
     }
 }

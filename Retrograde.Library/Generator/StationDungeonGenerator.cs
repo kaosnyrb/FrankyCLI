@@ -110,6 +110,8 @@ public class StationDungeonGenerator
             onPassStarted?.Invoke(pass);
             pass.RunPass(state);
         }
+
+        state.PlacementUtil.Finalise();
     }
 
     /// <summary>
@@ -119,7 +121,7 @@ public class StationDungeonGenerator
     /// <param name="location">The location record for the dungeon.</param>
     /// <param name="faction">The faction controlling the station.</param>
     /// <param name="size">The size category (Small, Medium, Large).</param>
-    public void GenerateDungeon(Cell cell, Location location, string faction, string size)
+    public DungeonState GenerateDungeon(Cell cell, Location location, string faction, string size)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -128,5 +130,6 @@ public class StationDungeonGenerator
 
         stopwatch.Stop();
         Console.WriteLine("Station Generation Time:" + stopwatch.Elapsed);
+        return state;
     }
 }
