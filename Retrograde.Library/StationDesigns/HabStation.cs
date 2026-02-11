@@ -89,16 +89,51 @@ public class HabStation : IStationDesign
     {
         var random = RandomProvider.Random;
 
-        // Call signs evoke registry codes and transponder shorthand.
-        List<string> callLetters = new List<string>
+        // Faction-themed transponder call signs.
+        List<string> callLetters;
+        switch (Faction)
         {
-            "BF","XR","NS","OD","VA","HG","ZE","PH","IR","KQ",
-            "LM","TR","UV","QA","CY","RN","SD","WG","TX","JY",
-            "AL","CP","DK","EM","FS","GV","HT","JC","KN","LP",
-            "MQ","NW","OY","PR","QS","RU","SV","TY","WX","ZA",
-            "AB","CE","DM","EK","FL","GR","HX","IL","JP","KR",
-            "MT","NZ","OP","RB","SC","UF","VQ","YL","ZX","TD"
-        };
+            case "Crimsonfleet":
+                // Pirate hull tags and stolen registry marks.
+                callLetters = new List<string>
+                {
+                    "RD","BK","SK","GR","CR","DK","HK","VX","KL","DR",
+                    "BG","MK","JK","NX","ZR","RX","SV","TS","VR","BN"
+                };
+                break;
+            case "Ecliptic":
+                // Clean military NATO-style designators.
+                callLetters = new List<string>
+                {
+                    "AL","BR","CH","DL","EC","FX","GL","HQ","KP","LT",
+                    "MR","NV","PL","QR","RS","ST","TV","UX","WC","YR"
+                };
+                break;
+            case "Varuun":
+                // Archaic mystical shorthand.
+                callLetters = new List<string>
+                {
+                    "AZ","VN","SN","KH","TH","IX","NU","OM","PH","RA",
+                    "SE","UR","VE","XA","YN","ZE","AN","EL","OX","AT"
+                };
+                break;
+            case "Spacer":
+                // Rough scrawled junk codes.
+                callLetters = new List<string>
+                {
+                    "XZ","QK","JB","WR","FT","ZB","KV","GX","DQ","HJ",
+                    "MZ","PT","RW","SX","TK","VB","WQ","YX","NJ","BX"
+                };
+                break;
+            default:
+                // Standard registry codes.
+                callLetters = new List<string>
+                {
+                    "BF","XR","NS","OD","VA","HG","ZE","PH","IR","KQ",
+                    "LM","TR","UV","QA","CY","RN","SD","WG","TX","JY"
+                };
+                break;
+        }
 
         string letterPart = callLetters[random.Next(callLetters.Count)];
 
@@ -112,84 +147,58 @@ public class HabStation : IStationDesign
             case "Crimsonfleet":
                 stationtypes = new List<string>
                 {
-                    "Freehold","RedFreehold","BlackFreehold","LastFreehold",
-                    "Haven","RedHaven","BlackHaven","GraveHaven","FalseHaven",
-                    "Shanty","ShantyRing","Shantyhold","ShantyRow",
-                    "Driftown","Driftward","Driftstead","DriftHab",
-                    "Crowspoint","Crowshold","Crowshaven",
-                    "LowDeck","DeepDeck","GunDeck","HabDeck",
-                    "Scumline","Rotline","Bloodline","Redline",
-                    "Gutside","Hullside","Darkside","Voidside",
-                    "The Warrens","IronWarrens","RedWarrens","SkullWarrens",
-                    "Dogtown","Rattown","Scraptown","Voidtown",
-                    "Holdrow","Bilgerow","Keelrow","Chainrow",
-                    "LastBerth","DeadBerth","HardBerth","RedBerth",
-                    "NooseNest","CrowNest","ViperNest","SkullNest"
+                    "Freehold","Haven","Shanty","Lair","Den",
+                    "Hideout","Berth","Nest","Warren","Roost",
+                    "Dive","Hovel","Foxhole","Bunkroom","Rathole",
+                    "Hideaway","Safehouse","Crib","Squat","Dugout",
+                    "Dogtown","Rattown","Scraptown","Drifttown",
+                    "Brig","Stash","Flop","Galley","Bilge",
+                    "Gutter","Holdfast","Stockade","Cathouse","Grotto"
                 };
                 break;
             case "Ecliptic":
                 stationtypes = new List<string>
                 {
-                    "Barracks","HighBarracks","DeepBarracks","CentralBarracks",
-                    "Quarters","SecureQuarters","OfficerQuarters","ContractorQuarters",
-                    "Residency","ControlledResidency","AuthorizedResidency",
-                    "HabRing","PrimaryHab","SecondaryHab","HabBlock","HabSector",
-                    "Lodging","StandardLodging","ExtendedLodging","RotationalLodging",
-                    "Compound","ResidentialCompound","SecureCompound","InnerCompound",
-                    "Cantonment","GarrisonHab","DeploymentHab","StagingHab",
-                    "Housing","PersonnelHousing","StaffHousing","CommandHousing",
-                    "Block","ResidentialBlock","HabBlock-A","HabBlock-B",
-                    "Zone","LivingZone","ResidentialZone","RestrictedZone",
-                    "Annex","HabAnnex","ResidentialAnnex","PersonnelAnnex"
+                    "Barracks","Quarters","Billet","Garrison","Compound",
+                    "Bunker","Wardroom","Dormitory","Annex","Block",
+                    "Sector","Module","Berth","Bay","Bunkhouse",
+                    "Lodging","Bivouac","Outpost","Depot","Facility",
+                    "Pillbox","Redoubt","Bastion","Citadel","Stockade",
+                    "Encampment","Precinct","Bulkhead","Foxhole","Turret"
                 };
                 break;
             case "Varuun":
                 stationtypes = new List<string>
                 {
-                    "Sanctuary","InnerSanctuary","DeepSanctuary","HiddenSanctuary",
-                    "Cloister","InnerCloister","SealedCloister","SilentCloister",
-                    "Conclave","LivingConclave","LowerConclave","VeiledConclave",
-                    "Habitat","SacredHabitat","ConsecratedHab","InnerHab",
-                    "Dormitory","VotiveDormitory","AsceticDormitory","CommonDormitory",
-                    "Communion","LivingCommunion","SharedCommunion",
-                    "Enclosure","InnerEnclosure","BlessedEnclosure","SealedEnclosure",
-                    "Ward","DevoutWard","PilgrimWard","InitiateWard",
-                    "Residence","ConsecratedResidence","FaithboundResidence",
-                    "Refuge","SilentRefuge","SerpentRefuge","HiddenRefuge",
-                    "Quarter","InnerQuarter","CovenantQuarter","AnointedQuarter",
-                    "HabRing","SacredRing","InnerRing","PilgrimRing"
+                    "Sanctuary","Cloister","Conclave","Enclave","Refuge",
+                    "Sanctum","Priory","Vestry","Abbey","Hermitage",
+                    "Chapel","Haven","Hospice","Commune","Narthex",
+                    "Rectory","Monastery","Tabernacle",
+                    "Scriptorium","Oratory","Reliquary","Sacristy","Chancel",
+                    "Chantry","Apse","Basilica","Cenacle","Refectory"
                 };
                 break;
             case "Spacer":
                 stationtypes = new List<string>
                 {
-                    "Shack","HabShack","TinShack","VoidShack",
-                    "LeanTo","HabLean","PatchLean","DriftLean",
-                    "Hole","HabHole","DeepHole","BlackHole",
-                    "Nest","ScrapNest","RatNest","VoidNest",
-                    "Warren","RustWarren","IronWarren","DeepWarren",
-                    "Row","HabRow","ScrapRow","BoltRow",
-                    "Deck","LowDeck","DeadDeck","RedDeck",
-                    "Block","HabBlock","ScrapBlock","CrowdBlock",
-                    "Side","Hullside","Darkside","Outerside",
-                    "Pen","HabPen","HoldingPen","PeoplePen",
-                    "Barrio","VoidBarrio","ScrapBarrio",
-                    "Camp","DriftCamp","ScrapCamp","HardCamp",
-                    "Flats","ColdFlats","IronFlats","LowFlats",
-                    "Stack","HabStack","ScrapStack","WreckStack",
-                    "Lot","Gravelot","DeadLot","RustLot"
+                    "Shack","Hole","Nest","Warren","Squat",
+                    "Hovel","Dump","Pen","Flats","Stack",
+                    "Hutch","Burrow","Bolthole","Rathole","Cubby",
+                    "Coop","Dugout","Crawlspace","Hellhole","Doss",
+                    "Sty","Kennel","Cage","Crate","Nook",
+                    "Alcove","Closet","Cellar","Loft","Garret"
                 };
                 break;
             default:
                 stationtypes = new List<string>
                 {
-                    "Station","Outpost","Facility","Platform","Installation","Complex","Depot","Hub","Relay","Array",
+                    "Station","Outpost","Facility","Platform","Complex","Depot","Hub","Relay","Array",
                     "Terminal","Dock","Yard","Anchorage","Spindle","Spire","Module","Node","Enclave",
                     "Bastion","Citadel","Stronghold","Redoubt","Sanctum","Vault","Foundry","Forge","Works","Refinery",
-                    "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor","ListeningPost",
+                    "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor",
                     "Harbor","Drydock",
-                    "Arcology","Habitat","Hab","Colony","Settlement","Commune","Barracks","Garrison","Command",
-                    "Operations","Control","CommandPost","Headquarters","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
+                    "Arcology","Habitat","Colony","Settlement","Commune","Barracks","Garrison","Command",
+                    "Operations","Control","CommandPost","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
                 };
                 break;
         }

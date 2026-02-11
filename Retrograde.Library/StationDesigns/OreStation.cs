@@ -86,16 +86,51 @@ public class OreStation : IStationDesign
     {
         var random = RandomProvider.Random;
 
-        // Call signs evoke registry codes and transponder shorthand.
-        List<string> callLetters = new List<string>
+        // Faction-themed industrial transponder codes.
+        List<string> callLetters;
+        switch (Faction)
         {
-            "BF","XR","NS","OD","VA","HG","ZE","PH","IR","KQ",
-            "LM","TR","UV","QA","CY","RN","SD","WG","TX","JY",
-            "AL","CP","DK","EM","FS","GV","HT","JC","KN","LP",
-            "MQ","NW","OY","PR","QS","RU","SV","TY","WX","ZA",
-            "AB","CE","DM","EK","FL","GR","HX","IL","JP","KR",
-            "MT","NZ","OP","RB","SC","UF","VQ","YL","ZX","TD"
-        };
+            case "Crimsonfleet":
+                // Heavy industry pirate forge marks.
+                callLetters = new List<string>
+                {
+                    "FG","HM","KR","SL","GD","VK","TX","BL","MK","NK",
+                    "PR","WR","ZK","JR","XR","DR","BR","SK","CR","RN"
+                };
+                break;
+            case "Ecliptic":
+                // Military logistics and supply chain codes.
+                callLetters = new List<string>
+                {
+                    "SC","PD","LG","DP","MN","SR","FN","HD","KT","OD",
+                    "QL","RG","TN","WD","CL","EQ","GP","JL","NR","AD"
+                };
+                break;
+            case "Varuun":
+                // Alchemical element shorthand.
+                callLetters = new List<string>
+                {
+                    "AQ","HG","AU","FE","CU","AG","SN","PB","ZN","CR",
+                    "TI","NI","CO","PT","OS","IR","RU","MG","AL","BI"
+                };
+                break;
+            case "Spacer":
+                // Scratched-in junk identifiers.
+                callLetters = new List<string>
+                {
+                    "XX","ZZ","QQ","BX","FK","GZ","HV","KX","LZ","MX",
+                    "PX","RZ","SZ","TZ","VZ","WZ","XJ","YZ","JJ","NX"
+                };
+                break;
+            default:
+                // Standard industrial registry codes.
+                callLetters = new List<string>
+                {
+                    "AL","CP","DK","EM","FS","GV","HT","JC","KN","LP",
+                    "MQ","NW","OY","PR","QS","RU","SV","TY","WX","ZA"
+                };
+                break;
+        }
 
         string letterPart = callLetters[random.Next(callLetters.Count)];
 
@@ -109,85 +144,59 @@ public class OreStation : IStationDesign
             case "Crimsonfleet":
                 stationtypes = new List<string>
                 {
-                    "Grinder","IronGrinder","VoidGrinder","BloodGrinder","DeepGrinder",
-                    "Crush","Stonecrush","Hullcrush","Redcrush","Hardcrush",
-                    "Smelter","BlackSmelter","VoidSmelter","ChainSmelter",
-                    "Foundry","IronFoundry","RedFoundry","GraveFoundry",
-                    "Refinery","BlackRefinery","VoidRefinery","BloodRefinery",
-                    "Breaker","Hullbreaker","Rockbreaker","Chainbreaker","Voidbreaker",
-                    "Oreworks","Ironworks","Voidworks","Bloodworks",
-                    "Forge","BlackForge","VoidForge","ChainForge","GraveForge",
-                    "SalvageWorks","ScrapWorks","BreakWorks","CutWorks",
-                    "Fuelworks","BlackFuel","VoidFuel","RedFuel",
-                    "Kiln","BlastKiln","VoidKiln","IronKiln",
-                    "Press","Hammer","Anvil","Die"
+                    "Grinder","Smelter","Foundry","Forge","Breaker",
+                    "Kiln","Anvil","Press","Hammer","Furnace",
+                    "Crucible","Ironworks","Sweatshop","Chopshop",
+                    "Boneyard","Pit","Scrapheap","Junkworks",
+                    "Hellforge","Die",
+                    "Galleyworks","Bellows","Ladle","Slag",
+                    "Cinder","Clinker","Maw","Gutworks","Trough","Cruciform"
                 };
                 break;
             case "Ecliptic":
                 stationtypes = new List<string>
                 {
-                    "Arsenal","PrimaryArsenal","ForwardArsenal","OrbitalArsenal",
-                    "Foundry","AdvancedFoundry","WeaponsFoundry","AlloyFoundry",
-                    "Manufacture","ManufacturingNode","ProductionNode","AssemblyNode",
-                    "Assembly","FinalAssembly","ModularAssembly","WeaponsAssembly",
-                    "Refinery","FuelRefinery","IsotopeRefinery","MaterialRefinery",
-                    "Processing","OreProcessing","MaterialProcessing","SalvageProcessing",
-                    "Logistics","LogisticsHub","SupplyHub","DistributionHub",
-                    "Depot","MunitionsDepot","SupplyDepot","OrbitalDepot",
-                    "Stockpile","StrategicStockpile","ReserveStockpile",
-                    "Works","HeavyWorks","OrdnanceWorks","DefenseWorks",
-                    "Fabrication","FabricationBay","FabricationSector","FabricationRing",
-                    "Forge","PrecisionForge","MilitaryForge",
-                    "Plant","IndustrialPlant","WeaponsPlant","FuelPlant",
-                    "Terminal","IndustrialTerminal","CargoTerminal"
+                    "Arsenal","Foundry","Assembly","Refinery","Depot",
+                    "Stockpile","Plant","Terminal","Forge","Works",
+                    "Fabricator","Armory","Munitions","Factory",
+                    "Smelter","Furnace","Dockyard","Metalworks",
+                    "Millworks","Manufactory",
+                    "Warehouse","Storehouse","Silo","Hangar","Drydock",
+                    "Shipyard","Proving","Crucible","Lathe","Workshop"
                 };
                 break;
             case "Varuun":
                 stationtypes = new List<string>
                 {
-                    "Anvil","SacredAnvil","BlackAnvil","ConsecratedAnvil",
-                    "Foundry","SanctifiedFoundry","VoidFoundry","SerpentFoundry",
-                    "Forge","RitualForge","IronForge","ObsidianForge",
-                    "Refinery","ConsecratedRefinery","VoidRefinery","BloodRefinery",
-                    "Works","SacredWorks","HiddenWorks","SilentWorks",
-                    "Processing","SanctifiedProcessing","Purification","Refinement",
-                    "Crucible","BlackCrucible","VoidCrucible","SerpentCrucible",
-                    "Kiln","RiteKiln","AshKiln","ObsidianKiln",
-                    "Extraction","SacredExtraction","DeepExtraction","HiddenExtraction",
-                    "Smelter","BlackSmelter","VoidSmelter","RitualSmelter",
-                    "Laborium","SilentLaborium","ConsecratedLaborium",
-                    "Vaultworks","ReliquaryWorks","DoctrineWorks",
-                    "Plant","SanctifiedPlant","IndustrialPlant"
+                    "Crucible","Forge","Kiln","Furnace","Smelter",
+                    "Reliquary","Laborium","Purgatory","Sanctum",
+                    "Ossuary","Athanor","Alembic","Crematory",
+                    "Anvil","Foundry","Refinery","Works","Altar",
+                    "Censer","Thurible","Catacomb","Sepulcher","Vestry",
+                    "Tabernacle","Sanctorum","Chalice","Pyre","Brazier"
                 };
                 break;
             case "Spacer":
                 stationtypes = new List<string>
                 {
-                    "Scrapworks","Rustworks","Breakworks","Cutworks",
-                    "Grinder","ScrapGrinder","BoneGrinder","HullGrinder",
-                    "Crusher","RockCrusher","PlateCrusher","ChainCrusher",
-                    "Smelter","JurySmelter","BlackSmelter","RustSmelter",
-                    "Refinery","BadRefinery","PatchRefinery","LeakRefinery",
-                    "Breaker","HullBreaker","ScrapBreaker","SpineBreaker",
-                    "Strip","StripMine","VoidStrip","HardStrip",
-                    "Kiln","CrackKiln","SmokeKiln","HotKiln",
-                    "Forge","HackForge","WeldForge","PatchForge",
-                    "Salvage","HotSalvage","DirtySalvage","QuickSalvage",
-                    "Yard","ScrapYard","BreakYard","DeadYard",
-                    "Press","BentPress","WarpPress","CrushPress",
-                    "Plant","BadPlant","HotPlant","FailPlant"
+                    "Scrapyard","Grinder","Crusher","Smelter","Breaker",
+                    "Junkyard","Salvage","Pit","Chopshop","Dump",
+                    "Heap","Yard","Scrapheap","Junkheap","Tinworks",
+                    "Rustworks","Kiln","Press","Forge","Furnace",
+                    "Hacksaw","Torchworks","Welders","Cutters","Shredder",
+                    "Compactor","Slagheap","Burnhole","Ashpit","Trashworks"
                 };
                 break;
             default:
                 stationtypes = new List<string>
                 {
-                    "Station","Outpost","Facility","Platform","Installation","Complex","Depot","Hub","Relay","Array",
+                    "Station","Outpost","Facility","Platform","Complex","Depot","Hub","Relay","Array",
                     "Terminal","Dock","Yard","Anchorage","Spindle","Spire","Module","Node","Enclave",
                     "Bastion","Citadel","Stronghold","Redoubt","Sanctum","Vault","Foundry","Forge","Works","Refinery",
-                    "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor","ListeningPost",
+                    "Exchange","Concourse","Crossing","Waypoint","Observatory","Surveyor",
                     "Harbor","Drydock",
-                    "Arcology","Habitat","Hab","Colony","Settlement","Commune","Barracks","Garrison","Command",
-                    "Operations","Control","CommandPost","Headquarters","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
+                    "Arcology","Habitat","Colony","Settlement","Commune","Barracks","Garrison","Command",
+                    "Operations","Control","CommandPost","Center","Core","Nexus","Axis","Pylon","Anchor","Keystone"
                 };
                 break;
         }
