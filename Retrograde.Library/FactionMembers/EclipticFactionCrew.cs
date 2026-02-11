@@ -365,7 +365,6 @@ namespace Retrograde.FactionMembers
                     0x003D60B0,//LLI_Ecliptic_Charger [LVLI:003D60B0]
                     0x003D60B1,//LLI_Ecliptic_Heavy [LVLI:003D60B1]
                     0x003D60B4,//LLI_Ecliptic_Sniper [LVLI:003D60B4]
-                    0x003D60B3,//LLI_Ecliptic_Recruit [LVLI:003D60B3]
                     0x003D60B5,//LLI_Ecliptic_Support [LVLI:003D60B5]
                 };
             IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(RetrogradeContext.Current.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();

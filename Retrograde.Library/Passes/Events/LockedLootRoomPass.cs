@@ -264,6 +264,7 @@ namespace Retrograde.Passes
 
             // Add the key to the current mod
             RetrogradeContext.Current.TargetMod.Keys.Add(_createdKey);
+            state.ItemsToRemove.Add(_createdKey.FormKey);
         }
 
         /// <summary>

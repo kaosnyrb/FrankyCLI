@@ -1,3 +1,4 @@
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.FactionMembers;
@@ -24,6 +25,7 @@ public class DungeonState
         this.location = location;
         RoomUtilsCache = new Dictionary<string, RoomUtils>(StringComparer.OrdinalIgnoreCase);
         PlacementUtil = new PlacementUtil();
+        ItemsToRemove = new List<FormKey>();
     }
 
     public string stateName;
@@ -104,4 +106,6 @@ public class DungeonState
     /// The boss NPC placed in the persistent layer. Use FormKey to reference later.
     /// </summary>
     public PlacedNpc BossPlacedNpc { get; set; }
+
+    public List<FormKey> ItemsToRemove { get; set; }
 }

@@ -1,11 +1,12 @@
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
 using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Retrograde.Nouns.Stations;
 using Retrograde.StationDesigns;
 using Retrograde.Utils;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,6 +106,22 @@ namespace Retrograde.Chains
             // Set the boss NPC
 
             newQuest.SetQuestReferenceAlias("BountyNpc", stationNoun.dungeonState.BossPlacedNpc.FormKey);
+
+            //Add any items to remove to a list if we need to. These are keys etc
+            if (stationNoun.dungeonState.ItemsToRemove.Count > 0 )
+            {
+                var frmlst = new FormList(targetMod)
+                {
+                    EditorID = stationname + "_cleanupitems",
+                    Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
+                };
+                for(int i = 0; i < stationNoun.dungeonState.ItemsToRemove.Count; i++)
+                {
+                    frmlst.Items.Add(stationNoun.dungeonState.ItemsToRemove[i]);
+                }
+                targetMod.FormLists.Add(frmlst);
+                newQuest.SetScriptProperty("retrograde_bounty_quest", "ItemsToRemove", frmlst.ToLink());
+            }
 
             return true;
         }

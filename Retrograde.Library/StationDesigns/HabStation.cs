@@ -43,7 +43,7 @@ public class HabStation : IStationDesign
         optionalRoomPasses = new List<OptionalPass>()
         {
             // Add optional passes here, e.g.:
-            //new OptionalPass(new NPCKeyLootRoomPass("rg_lootroom"), 1),
+            new OptionalPass(new NPCKeyLootRoomPass("rg_lootroom"), 1),
             //new OptionalPass(new BountyTargetEventPass(), 1),
             //new OptionalPass(new InfectionEventPass(), 1)
         };
