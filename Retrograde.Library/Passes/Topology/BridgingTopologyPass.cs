@@ -27,16 +27,18 @@ namespace Retrograde.Passes
 
         private readonly string districtFilter;
         private readonly string districtTypeLabel;
+        private readonly int maxOverlapBridges;
 
-        public BridgingTopologyPass(string roomList, string districtType = null)
-            : this(districtType)
+        public BridgingTopologyPass(string roomList, string districtType = null, int maxOverlapBridges = int.MaxValue)
+            : this(districtType, maxOverlapBridges)
         {
         }
 
-        public BridgingTopologyPass(string districtType = null)
+        public BridgingTopologyPass(string districtType = null, int maxOverlapBridges = int.MaxValue)
         {
             districtFilter = districtType;
             districtTypeLabel = "bridge";
+            this.maxOverlapBridges = maxOverlapBridges;
         }
 
         private class BridgePlanMeta
@@ -59,6 +61,7 @@ namespace Retrograde.Passes
             public string DistrictTypeLabel { get; set; }
             public string DistrictFilter { get; set; }
             public float YMin { get; set; }
+            public int MaxOverlapBridges { get; set; } = int.MaxValue;
         }
 
         /// <summary>
@@ -102,7 +105,8 @@ namespace Retrograde.Passes
                     RoomUtils = activeRoomUtils,
                     DistrictTypeLabel = activeDistrictTypeLabel,
                     DistrictFilter = districtFilter,
-                    YMin = state.YMin
+                    YMin = state.YMin,
+                    MaxOverlapBridges = maxOverlapBridges
                 };
 
                 // Stage 2: Iterative bridge placement loop
@@ -182,6 +186,8 @@ namespace Retrograde.Passes
             {
                 progress = false;
 
+                // Build candidate pairs, prioritizing cross-district bridges
+                var candidatePairs = new List<(int i, int j, bool crossDistrict)>();
                 for (int i = 0; i < ctx.PlannedOpenConnectors.Count - 1; i++)
                 {
                     for (int j = i + 1; j < ctx.PlannedOpenConnectors.Count; j++)
@@ -189,32 +195,40 @@ namespace Retrograde.Passes
                         var a = ctx.PlannedOpenConnectors[i];
                         var b = ctx.PlannedOpenConnectors[j];
 
-                        // Stage 2a: Filter to valid connector pairs
                         if (!IsValidBridgePair(a, b, ctx.PlannedRooms))
                             continue;
 
-                        // Stage 2b: Try to place a bridge prefab connecting this pair
-                        var result = TryPlaceBridgeBetween(a, b, ctx);
-                        if (result == null)
-                            continue;
-
-                        // Stage 2c: Accept placement and update state
-                        AcceptBridgePlacement(ctx, result, i, j);
-
-                        bridgesPlaced++;
-                        if (BridgeUtil.HaveSameOwner(ctx.PlannedRooms, a, b, ConnectorPositionTolerance))
-                        {
-                            overlapCount++;
-                        }
-                        progress = true;
-                        goto NextIteration;
+                        bool crossDistrict = !string.Equals(a.DistrictType, b.DistrictType, StringComparison.OrdinalIgnoreCase);
+                        candidatePairs.Add((i, j, crossDistrict));
                     }
                 }
 
-                break;
+                // Try cross-district pairs first, then same-district
+                candidatePairs.Sort((x, y) => y.crossDistrict.CompareTo(x.crossDistrict));
 
-            NextIteration:
-                continue;
+                foreach (var (ci, cj, _) in candidatePairs)
+                {
+                    var a = ctx.PlannedOpenConnectors[ci];
+                    var b = ctx.PlannedOpenConnectors[cj];
+
+                    // Stage 2b: Try to place a bridge prefab connecting this pair
+                    var result = TryPlaceBridgeBetween(a, b, ctx);
+                    if (result == null)
+                        continue;
+
+                    // Stage 2c: Accept placement and update state
+                    AcceptBridgePlacement(ctx, result, ci, cj);
+
+                    bridgesPlaced++;
+                    if (BridgeUtil.HaveSameOwner(ctx.PlannedRooms, a, b, ConnectorPositionTolerance))
+                    {
+                        overlapCount++;
+                        if (overlapCount >= ctx.MaxOverlapBridges)
+                            return (bridgesPlaced, overlapCount);
+                    }
+                    progress = true;
+                    break;
+                }
             }
 
             return (bridgesPlaced, overlapCount);
