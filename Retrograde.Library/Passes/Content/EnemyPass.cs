@@ -89,15 +89,15 @@ public class EnemyPass : IGenPass
         if (candidates.Count == 0)
             return;
 
-        // Reserve a boss spawn before general selection so it's guaranteed.
+        // Reserve a boss spawn and remove ALL boss-room candidates so only
+        // the boss group spawns there — no extra enemies leak in.
         SpawnCandidate? reservedBoss = null;
-        for (int i = 0; i < candidates.Count; i++)
+        for (int i = candidates.Count - 1; i >= 0; i--)
         {
             if (candidates[i].Room.DistrictType == "boss")
             {
-                reservedBoss = candidates[i];
+                reservedBoss ??= candidates[i];
                 candidates.RemoveAt(i);
-                break;
             }
         }
 
@@ -233,7 +233,7 @@ public class EnemyPass : IGenPass
         switch (districtType)
         {
             case "boss":
-                min = 2; max = 3;
+                min = 3; max = 6;
                 break;
             case "hab":
             case "ore":
