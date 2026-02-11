@@ -233,7 +233,7 @@ public class EnemyPass : IGenPass
         switch (districtType)
         {
             case "boss":
-                min = 2; max = 4;
+                min = 2; max = 3;
                 break;
             case "hab":
             case "ore":
