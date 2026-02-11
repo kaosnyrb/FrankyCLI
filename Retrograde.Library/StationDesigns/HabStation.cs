@@ -1,3 +1,4 @@
+using Mutagen.Bethesda.Starfield;
 using Retrograde.Passes;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ public class HabStation : IStationDesign
         {
             new StationSetupPass(),
             new TrunkTopologyPass(4),
-            new BossTopologyPass("boss"),
+            new BossTopologyPass("boss",new List<string>(){"rg_sts_boss_cargo_002"}),
             new DistrictTopologyPass("rg_hablist", 4, "hab", new List<string>(){}),
             new BridgingTopologyPass(),
         };

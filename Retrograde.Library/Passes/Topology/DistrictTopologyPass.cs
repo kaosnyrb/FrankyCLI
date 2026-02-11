@@ -134,7 +134,11 @@ namespace Retrograde.Passes
                         }
                         var nextPrefab = PrefabCache.GetPrefab(prefabId);
 
-                        for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+                        var yawOrder = Enumerable.Range(0, 4)
+                            .OrderBy(_ => RandomProvider.Random.Next())
+                            .ToList();
+
+                        foreach (var yawSteps in yawOrder)
                         {
                             var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
 

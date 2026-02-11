@@ -409,7 +409,11 @@ namespace Retrograde.Passes
             CandidatePlacement? bestCandidate = null;
             int bestBridgeScore = -1;
 
-            for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+            var yawOrder = Enumerable.Range(0, 4)
+                .OrderBy(_ => RandomProvider.Random.Next())
+                .ToList();
+
+            foreach (var yawSteps in yawOrder)
             {
                 var nextConnectors = ConnectorUtils.GetConnectors(nextPrefab, yawSteps);
 

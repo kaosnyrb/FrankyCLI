@@ -24,11 +24,13 @@ namespace Retrograde.Passes
 
         private readonly string district;
         private readonly string districtTypeLabel;
+        private readonly List<string> prefabsToForcePlacement;
 
         private class BossPlanMeta
         {
             public int RoomsPlaced;
             public int BridgeablePairs;
+            public int MissingRequiredPrefabs;
             public PlanScore Score;
         }
 
@@ -42,9 +44,14 @@ namespace Retrograde.Passes
             public List<OpenConnector> NewConnectors { get; set; }
         }
 
-        public BossTopologyPass(string districtType = null) {
+        public BossTopologyPass(string districtType = null, IEnumerable<string> prefabsToForcePlacement = null) {
             district = districtType;
             districtTypeLabel = string.IsNullOrWhiteSpace(districtType) ? "boss" : districtType;
+            this.prefabsToForcePlacement = prefabsToForcePlacement?
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList()
+                ?? new List<string>();
         }
 
         /// <summary>
@@ -67,7 +74,16 @@ namespace Retrograde.Passes
                 if (!string.IsNullOrWhiteSpace(chosenBossRoomEditorId))
                     return chosenBossRoomEditorId;
 
-                chosenBossRoomEditorId = roomUtils.GetRoom(tileset, district);
+                // Prefer forced prefab if one is specified
+                if (prefabsToForcePlacement.Count > 0)
+                {
+                    chosenBossRoomEditorId = prefabsToForcePlacement[0];
+                }
+                else
+                {
+                    chosenBossRoomEditorId = roomUtils.GetRoom(tileset, district);
+                }
+
                 if (!state.IsHarnessRun)
                 {
                     Console.WriteLine($"[Boss plan] Selected boss room prefab: {chosenBossRoomEditorId}");
@@ -135,15 +151,35 @@ namespace Retrograde.Passes
                 const double planArea = 0; // Boss placement ignores area weighting
                 var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
 
+                // Check if forced prefab was actually placed
+                int missingRequiredPrefabs = 0;
+                if (prefabsToForcePlacement.Count > 0 && roomsPlaced > 0)
+                {
+                    var placedPrefabIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var room in plannedRooms)
+                    {
+                        if (!string.IsNullOrEmpty(room.Prefab?.PrefabEditorId))
+                            placedPrefabIds.Add(room.Prefab.PrefabEditorId);
+                    }
+                    missingRequiredPrefabs = prefabsToForcePlacement
+                        .Count(id => !placedPrefabIds.Contains(id));
+                }
+                else if (prefabsToForcePlacement.Count > 0)
+                {
+                    missingRequiredPrefabs = prefabsToForcePlacement.Count;
+                }
+
+                double adjustedScore = planScore.Total - (missingRequiredPrefabs > 0 ? 100000 * missingRequiredPrefabs : 0);
+
                 // Validation: Boss room must have been placed successfully
                 if (roomsPlaced == 0)
                 {
-                    planScore.Total = double.MinValue;
+                    adjustedScore = double.MinValue;
                 }
 
                 return new PlanOutcome<BossPlanMeta>
                 {
-                    Score = planScore.Total,
+                    Score = adjustedScore,
                     Rooms = plannedRooms,
                     OpenConnectors = plannedOpenConnectors,
                     Placements = plannedPlacements,
@@ -151,6 +187,7 @@ namespace Retrograde.Passes
                     {
                         RoomsPlaced = roomsPlaced,
                         BridgeablePairs = bridgeablePairs,
+                        MissingRequiredPrefabs = missingRequiredPrefabs,
                         Score = planScore
                     }
                 };
@@ -186,9 +223,13 @@ namespace Retrograde.Passes
             int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
             int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
 
+            var forcedInfo = prefabsToForcePlacement.Count > 0
+                ? $", forced remaining {bestOutcome?.Metadata?.MissingRequiredPrefabs ?? prefabsToForcePlacement.Count}"
+                : string.Empty;
+
             if (!state.IsHarnessRun)
             {
-                Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{MaxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
+                Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{MaxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
             }
         }
 
@@ -206,8 +247,12 @@ namespace Retrograde.Passes
         {
             var requiredDir = ConnectorUtils.Opposite(target.Parsed.Direction);
 
-            // Evaluate all 4 rotations
-            for (int yawSteps = 0; yawSteps < 4; yawSteps++)
+            // Evaluate all 4 rotations in random order
+            var yawOrder = Enumerable.Range(0, 4)
+                .OrderBy(_ => RandomProvider.Random.Next())
+                .ToList();
+
+            foreach (var yawSteps in yawOrder)
             {
                 var nextConnectors = ConnectorUtils.GetConnectors(bossPrefab, yawSteps);
 
