@@ -500,7 +500,7 @@ namespace Retrograde.Passes
         private Npc CreateKeyHolderNPC(IFactionMembers factionCrew)
         {
             // Get a high-rank crew member as base (they're more likely to have keys)
-            var baseNpc = factionCrew.GetCrewMember("district");
+            var baseNpc = factionCrew.GetHighLevelTarget();
             if (baseNpc == null)
                 return null;
 

@@ -415,5 +415,24 @@ namespace Retrograde.FactionMembers
         {
             return Bosses[RandomProvider.Random.Next(Bosses.Count)];
         }
+
+        public Npc GetHighLevelTarget()
+        {
+            string Faction = "Spacer";
+            Random random = RandomProvider.Random;
+            bool isfemale = random.Next(100) > 50;
+            var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+            Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
+
+            var outfit = GetHighRank_Outfit();
+            npc.Name = GetFactionPrefix() + " " + GetHighRank_Name();
+            var gear = GetHighRank_Gear();
+            var lev = new PcLevelMult();
+            lev.LevelMult = 0.75f + (float)random.NextDouble();
+            npc.Level = lev;
+
+            CreateNPC(Faction, random, isfemale, npc, outfit, gear);
+            return npc;
+        }
     }
 }

@@ -12,6 +12,7 @@ public interface IFactionMembers
 {
     Npc GetCrewMember(string room);
     Npc GetBoss(string room);
+    Npc GetHighLevelTarget();
 
     IFormLinkNullable<IOutfitGetter> GetLowRank_Outfit();
     IFormLinkNullable<IOutfitGetter> GetHighRank_Outfit();
