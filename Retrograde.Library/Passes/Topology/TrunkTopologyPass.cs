@@ -25,6 +25,10 @@ namespace Retrograde.Passes
         private const float BridgeMaxHorizontalSpan = 40f; // Keep connectors within bridge prefab span range
         private const float BridgeMaxVerticalOffset = 8f;  // Maximum vertical difference for bridgeable connectors
 
+        // Direction quota: reject placements that leave the connector pool too lopsided
+        private const float MaxDirectionRatio = 0.7f; // No single direction may exceed this fraction of the pool
+        private const int DirectionQuotaMinPool = 4;   // Only enforce when pool has at least this many connectors
+
         // Testing: force specific prefabs to be placed
         private static readonly List<string> PrefabsToForcePlacement = new List<string>
         {
@@ -460,6 +464,16 @@ namespace Retrograde.Passes
                 var newOpenConnectors = BuildOpenConnectors(nextConnectors, chosen, yawSteps, nextPos, context.DistrictType);
                 var connectorsAfterPlacement = new List<OpenConnector>(context.PlannedOpenConnectors);
                 connectorsAfterPlacement.AddRange(newOpenConnectors);
+
+                // Direction quota: skip if any single direction would dominate the pool
+                if (connectorsAfterPlacement.Count >= DirectionQuotaMinPool)
+                {
+                    int maxCount = connectorsAfterPlacement
+                        .GroupBy(c => c.Parsed.Direction)
+                        .Max(g => g.Count());
+                    if (maxCount > connectorsAfterPlacement.Count * MaxDirectionRatio)
+                        continue;
+                }
 
                 int bridgeScore = BridgeUtil.CountBridgeablePairs(
                     connectorsAfterPlacement,

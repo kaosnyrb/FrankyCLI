@@ -277,9 +277,21 @@ namespace Retrograde.Passes
             if (candidates.Count == 0)
                 return null;
 
+            // Prefer smaller bridge prefabs to conserve collision space, with random jitter
             var prefabsToTry = candidates
-                .OrderBy(_ => RandomProvider.Random.Next())
+                .Select(id => (id, prefab: PrefabCache.GetPrefab(id)))
+                .Select(p =>
+                {
+                    var bounds = p.prefab.packin_instance?.ObjectBounds;
+                    float volume = bounds == null ? 0f :
+                        Math.Abs((bounds.Second.X - bounds.First.X) *
+                                 (bounds.Second.Y - bounds.First.Y) *
+                                 (bounds.Second.Z - bounds.First.Z));
+                    return (p.id, volume);
+                })
+                .OrderBy(p => p.volume + RandomProvider.Random.NextDouble() * 500.0)
                 .Take(Math.Max(1, Math.Min(MaxPrefabsToTryPerPair, candidates.Count)))
+                .Select(p => p.id)
                 .ToList();
 
             foreach (var prefabId in prefabsToTry)
