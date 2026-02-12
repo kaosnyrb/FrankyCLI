@@ -86,15 +86,15 @@ namespace Retrograde.Nouns.Stations
                 {
                     string persistantid = persistant.EditorID.Replace("DUPLICATE000", "");
 
-                    if (persistantid == "duoutstationtestdoor")
+                    if (persistantid.Contains("duoutstationtestdoor"))
                     {
                         shipint_doorreference = (PlacedObject)persistant;
                     }
-                    if (persistantid == "intdoorxmarker")
+                    if (persistantid.Contains("intdoorxmarker"))
                     {
                         shipint_xmarker = (PlacedObject)persistant;
                     }
-                    if (persistantid == "du_shipinttointodoor")
+                    if (persistantid.Contains("du_shipinttointodoor"))
                     {
                         shipinttoint_doorreference = (PlacedObject)persistant;
                     }
@@ -141,11 +141,11 @@ namespace Retrograde.Nouns.Stations
                 {
                     string persistantid = persistant.EditorID.Replace("DUPLICATE000", "");
 
-                    if (persistantid == "du_intcelldoor")
+                    if (persistantid.Contains("du_intcelldoor"))
                     {
                         int_doorreference = (PlacedObject)persistant;
                     }
-                    if (persistantid == "intdoorxmarker003" )
+                    if (persistantid.Contains("intdoorxmarker003") )
                     {
                         int_xmarker = (PlacedObject)persistant;
                     }
