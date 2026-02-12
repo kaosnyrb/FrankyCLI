@@ -83,7 +83,7 @@ namespace Retrograde.Chains
             //newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Move station to outside any danger areas
-            newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
+            newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetBountySpaceMarkerCondition());
 
             //Generate station
             StationNoun stationNoun = new StationNoun(stationname, faction, size, stationDesign);

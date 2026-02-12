@@ -73,6 +73,73 @@ namespace Retrograde.Utils
             return blah.DeepCopy();
         }
 
+        public static Condition GetBountySpaceMarkerCondition()
+        {
+            //Stations need to be out of asteroid fields etc
+            var Markers = new List<MarkerLocation>
+            {
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef01",
+                    QuestID = 0x00127FA8,
+                    AliasID = 8,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef02",
+                    QuestID = 0x000277A4,
+                    AliasID = 9,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef03",
+                    QuestID = 0x000277A4,
+                    AliasID = 10,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef04",
+                    QuestID = 0x000277A4,
+                    AliasID = 11,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef05",
+                    QuestID = 0x000277A4,
+                    AliasID = 12,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef06",
+                    QuestID = 0x000277A4,
+                    AliasID = 13,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef07",
+                    QuestID = 0x000277A4,
+                    AliasID = 14,
+                },
+                new MarkerLocation()
+                {
+                    EditorID = "se_GeneralMarkerLocRef08",
+                    QuestID = 0x000277A4,
+                    AliasID = 15,
+                },
+            };
+
+            var random = RandomProvider.Random;
+            var starfieldMod = RetrogradeContext.Current.StarfieldMod;
+            var starfieldModKey = RetrogradeContext.Current.StarfieldModKey;
+
+            var Choosen = Markers[random.Next(Markers.Count)];
+            var quest = starfieldMod.Quests[new FormKey(starfieldModKey, Choosen.QuestID)];
+            var alias = quest.Aliases[Choosen.AliasID];
+            var blah = ((IQuestReferenceAliasGetter)alias).Conditions[0];
+
+            return blah.DeepCopy();
+        }
+
         public static Condition GetSpaceMarkerCondition()
         {
             //Yeah this looks stupid.

@@ -82,17 +82,22 @@ namespace Retrograde.Nouns.Stations
             //Find the markers
             foreach (var persistant in ShipInteriorCell.Persistent)
             {
-                if (persistant.EditorID == "duoutstationtestdoor" || persistant.EditorID == "duoutstationtestdoorDUPLICATE000")
+                if (persistant.EditorID != null)
                 {
-                    shipint_doorreference = (PlacedObject)persistant;
-                }
-                if (persistant.EditorID == "intdoorxmarker" || persistant.EditorID == "intdoorxmarkerDUPLICATE000")
-                {
-                    shipint_xmarker = (PlacedObject)persistant;
-                }
-                if (persistant.EditorID == "du_shipinttointodoor" || persistant.EditorID == "du_shipinttointodoorDUPLICATE000")
-                {
-                    shipinttoint_doorreference = (PlacedObject)persistant;
+                    string persistantid = persistant.EditorID.Replace("DUPLICATE000", "");
+
+                    if (persistantid == "duoutstationtestdoor")
+                    {
+                        shipint_doorreference = (PlacedObject)persistant;
+                    }
+                    if (persistantid == "intdoorxmarker")
+                    {
+                        shipint_xmarker = (PlacedObject)persistant;
+                    }
+                    if (persistantid == "du_shipinttointodoor")
+                    {
+                        shipinttoint_doorreference = (PlacedObject)persistant;
+                    }
                 }
 
             }
@@ -132,13 +137,18 @@ namespace Retrograde.Nouns.Stations
             //Find the markers
             foreach (var persistant in InteriorCell.Persistent)
             {
-                if (persistant.EditorID == "du_intcelldoor" || persistant.EditorID == "du_intcelldoorDUPLICATE000")
+                if (persistant.EditorID != null)
                 {
-                    int_doorreference = (PlacedObject)persistant;
-                }
-                if (persistant.EditorID == "intdoorxmarker003" || persistant.EditorID == "intdoorxmarker003DUPLICATE000")
-                {
-                    int_xmarker = (PlacedObject)persistant;
+                    string persistantid = persistant.EditorID.Replace("DUPLICATE000", "");
+
+                    if (persistantid == "du_intcelldoor")
+                    {
+                        int_doorreference = (PlacedObject)persistant;
+                    }
+                    if (persistantid == "intdoorxmarker003" )
+                    {
+                        int_xmarker = (PlacedObject)persistant;
+                    }
                 }
             }
             targetMod.Cells[0].SubBlocks[0].Cells.Add(InteriorCell);
