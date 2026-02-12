@@ -39,7 +39,7 @@ namespace Retrograde.Utils
                                     Count = poref.Count,
                                     CurrentZoneCell = poref.CurrentZoneCell,
                                     DebugText = poref.DebugText,
-                                    EditorID = poref.EditorID,
+                                    EditorID = poref.EditorID + RandomProvider.Random.Next(10000),
                                     Emittance = poref.Emittance,
                                     EnableParent = poref.EnableParent,
                                     EncounterZone = poref.EncounterZone,
