@@ -33,7 +33,9 @@ public class OreStation : IStationDesign
         mainRoomPasses = new List<IGenPass>()
         {
             new StationSetupPass(),
-            new DistrictTopologyPass("rg_orelist", 4, "ore", new List<string>(){"rg_sts_ore_hallway_002"}),
+            new DistrictTopologyPass("rg_orelist", 2, "ore", new List<string>(){}),
+            new TrunkTopologyPass(2),
+            new DistrictTopologyPass("rg_orelist", 2, "ore", new List<string>(){}),
             new BossTopologyPass("boss"),
             new BridgingTopologyPass(),
         };
@@ -42,7 +44,9 @@ public class OreStation : IStationDesign
         optionalRoomPasses = new List<OptionalPass>()
         {
             // Add optional passes here, e.g.:
-            // new OptionalPass(new LockedLootRoomPass(), 0.5f),
+            new OptionalPass(new NPCKeyLootRoomPass("rg_lootroom"), 0.1f),
+            new OptionalPass(new BountyTargetEventPass(), 0.1f),
+            new OptionalPass(new InfectionEventPass(), 0.1f)
         };
 
         // Connector sealing passes

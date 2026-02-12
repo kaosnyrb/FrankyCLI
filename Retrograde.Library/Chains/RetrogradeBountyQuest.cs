@@ -36,7 +36,7 @@ namespace Retrograde.Chains
 
             var faction = Factions[RandomProvider.Random.Next(Factions.Count)];
             var size = "Large";
-            IStationDesign stationDesign = new HabStation();
+            IStationDesign stationDesign = new OreStation();
             var stationname = stationDesign.GenerateStationName(faction);
 
             return GenerateQuest(stationname, faction, size, stationDesign);

@@ -44,9 +44,9 @@ public class HabStation : IStationDesign
         optionalRoomPasses = new List<OptionalPass>()
         {
             // Add optional passes here, e.g.:
-            new OptionalPass(new NPCKeyLootRoomPass("rg_lootroom"), 1),
-            //new OptionalPass(new BountyTargetEventPass(), 1),
-            //new OptionalPass(new InfectionEventPass(), 1)
+            new OptionalPass(new NPCKeyLootRoomPass("rg_lootroom"), 0.1f),
+            new OptionalPass(new BountyTargetEventPass(), 0.1f),
+            new OptionalPass(new InfectionEventPass(), 0.1f)
         };
 
         // Connector sealing passes
