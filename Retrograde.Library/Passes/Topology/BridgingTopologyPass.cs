@@ -15,6 +15,7 @@ namespace Retrograde.Passes
     {
         // Connector matching tolerances
         private const float ConnectorPositionTolerance = 0.05f;
+        private const float BridgeAlignmentTolerance = 1.0f;
         private const float ConnectorEmbedTolerance = 0.05f;
 
         // Collision and spacing parameters
@@ -46,11 +47,30 @@ namespace Retrograde.Passes
             public int BridgesPlaced;
             public int OverlapCount;
             public PlanScore Score;
+            public BridgeRejectCounts RejectCounts;
         }
 
         /// <summary>
         /// Bundles mutable plan state and shared configuration for bridge placement methods.
         /// </summary>
+        private class BridgeRejectCounts
+        {
+            public int Alignment;
+            public int BelowYMin;
+            public int Collision;
+            public int ConnectorEmbed;
+            public int ExistingConnectorEmbed;
+            public int NoCandidates;
+            public int NoConnectorMatch;
+            public float ClosestAlignmentMiss = float.MaxValue;
+
+            public override string ToString()
+            {
+                string closest = ClosestAlignmentMiss < float.MaxValue ? $"{ClosestAlignmentMiss:F2}" : "n/a";
+                return $"alignment={Alignment} (closest miss={closest}), noCandidates={NoCandidates}, noConnMatch={NoConnectorMatch}, belowYMin={BelowYMin}, collision={Collision}, connEmbed={ConnectorEmbed}, existConnEmbed={ExistingConnectorEmbed}";
+            }
+        }
+
         private class BridgePlacementContext
         {
             public List<PlacedRoom> PlannedRooms { get; set; }
@@ -62,6 +82,7 @@ namespace Retrograde.Passes
             public string DistrictFilter { get; set; }
             public float YMin { get; set; }
             public int MaxOverlapBridges { get; set; } = int.MaxValue;
+            public BridgeRejectCounts RejectCounts { get; set; } = new BridgeRejectCounts();
         }
 
         /// <summary>
@@ -97,7 +118,7 @@ namespace Retrograde.Passes
                     PlannedRooms = new List<PlacedRoom>(state.placedRooms),
                     PlannedOpenConnectors = state.openConnectors
                         .Where(c => c.WorldPos.Y >= state.YMin)
-                        .Where(c => RoomHasMoreThanTwoConnectors(state.placedRooms, c, ConnectorPositionTolerance))
+                        .Where(c => RoomHasMultipleConnectors(state.placedRooms, c, ConnectorPositionTolerance))
                         .OrderBy(_ => RandomProvider.Random.Next())
                         .ToList(),
                     PlannedPlacements = new List<PlacedObject>(),
@@ -113,12 +134,15 @@ namespace Retrograde.Passes
                 var (bridgesPlaced, overlapCount) = PlanBridges(context);
 
                 // Stage 3: Evaluate this plan using scoring metrics
+                var bridgePrefabKeys = state.BridgePrefabKeys ??= BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists);
+                var bridgeablePairs = BridgeUtil.CountBridgeablePairs(context.PlannedOpenConnectors, context.YMin, 40f, 8f, bridgePrefabKeys);
+                var newConnectors = context.PlannedOpenConnectors.Count - state.openConnectors.Count;
                 var planArea = ScoringUtil.CalculateTotalArea(context.PlannedRooms);
                 var planClustering = ScoringUtil.CalculateAverageMinimumDistance(context.PlannedRooms);
                 var planSizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(context.PlannedRooms);
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(context.PlannedRooms);
                 var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(context.PlannedRooms, context.PlannedOpenConnectors);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgesPlaced, overlapCount, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgeablePairs, overlapCount, Math.Max(0, newConnectors), planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
 
                 return new PlanOutcome<BridgePlanMeta>
                 {
@@ -130,7 +154,8 @@ namespace Retrograde.Passes
                     {
                         BridgesPlaced = bridgesPlaced,
                         OverlapCount = overlapCount,
-                        Score = planScore
+                        Score = planScore,
+                        RejectCounts = context.RejectCounts
                     }
                 };
             });
@@ -169,6 +194,9 @@ namespace Retrograde.Passes
             if (!state.IsHarnessRun)
             {
                 Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{TargetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
+                var rejects = bestOutcome?.Metadata?.RejectCounts;
+                if (rejects != null)
+                    Console.WriteLine($"[Bridge plan] rejects: {rejects}");
             }
         }
 
@@ -203,8 +231,16 @@ namespace Retrograde.Passes
                     }
                 }
 
-                // Try cross-district pairs first, then same-district
-                candidatePairs.Sort((x, y) => y.crossDistrict.CompareTo(x.crossDistrict));
+                // Try cross-district pairs first, then closer pairs before distant ones
+                candidatePairs.Sort((x, y) =>
+                {
+                    int crossCmp = y.crossDistrict.CompareTo(x.crossDistrict);
+                    if (crossCmp != 0) return crossCmp;
+
+                    float distX = SquaredDistance(ctx.PlannedOpenConnectors[x.i], ctx.PlannedOpenConnectors[x.j]);
+                    float distY = SquaredDistance(ctx.PlannedOpenConnectors[y.i], ctx.PlannedOpenConnectors[y.j]);
+                    return distX.CompareTo(distY);
+                });
 
                 foreach (var (ci, cj, _) in candidatePairs)
                 {
@@ -236,12 +272,12 @@ namespace Retrograde.Passes
 
         /// <summary>
         /// Checks whether two open connectors form a valid candidate pair for bridging:
-        /// both owners must have 3+ connectors, belong to different rooms, and be compatible.
+        /// both owners must have 2+ connectors, belong to different rooms, and be compatible.
         /// </summary>
         private static bool IsValidBridgePair(OpenConnector a, OpenConnector b, List<PlacedRoom> plannedRooms)
         {
-            if (!RoomHasMoreThanTwoConnectors(plannedRooms, a, ConnectorPositionTolerance) ||
-                !RoomHasMoreThanTwoConnectors(plannedRooms, b, ConnectorPositionTolerance))
+            if (!RoomHasMultipleConnectors(plannedRooms, a, ConnectorPositionTolerance) ||
+                !RoomHasMultipleConnectors(plannedRooms, b, ConnectorPositionTolerance))
                 return false;
 
             if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
@@ -275,7 +311,10 @@ namespace Retrograde.Passes
         {
             var candidates = BuildPrefabCandidates(a.Parsed.Tileset, ctx.UsedPrefabIds, ctx.RoomUtils, ctx.DistrictFilter);
             if (candidates.Count == 0)
+            {
+                ctx.RejectCounts.NoCandidates++;
                 return null;
+            }
 
             // Prefer smaller bridge prefabs to conserve collision space, with random jitter
             var prefabsToTry = candidates
@@ -297,6 +336,21 @@ namespace Retrograde.Passes
             foreach (var prefabId in prefabsToTry)
             {
                 var prefab = PrefabCache.GetPrefab(prefabId);
+
+                // Pre-check: does this prefab have connectors compatible with both sides
+                // at any rotation? Tileset/doorsize are rotation-invariant, so check once.
+                var rawConnectors = ConnectorUtils.GetConnectors(prefab, 0);
+                bool hasMatchA = rawConnectors.Any(c =>
+                    string.Equals(c.Parsed.DoorSize, a.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(c.Parsed.Tileset, a.Parsed.Tileset, StringComparison.OrdinalIgnoreCase));
+                bool hasMatchB = rawConnectors.Any(c =>
+                    string.Equals(c.Parsed.DoorSize, b.Parsed.DoorSize, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(c.Parsed.Tileset, b.Parsed.Tileset, StringComparison.OrdinalIgnoreCase));
+                if (!hasMatchA || !hasMatchB)
+                {
+                    ctx.RejectCounts.NoConnectorMatch++;
+                    continue;
+                }
 
                 var yawOrder = Enumerable.Range(0, 4)
                     .OrderBy(_ => RandomProvider.Random.Next())
@@ -343,19 +397,38 @@ namespace Retrograde.Passes
                     var prefabPos = a.WorldPos - connA.LocalPos;
                     var expectedB = prefabPos + connB.LocalPos;
 
-                    if (!MathUtil.PositionsClose(expectedB, b.WorldPos, ConnectorPositionTolerance))
+                    if (!MathUtil.PositionsClose(expectedB, b.WorldPos, BridgeAlignmentTolerance))
+                    {
+                        float maxAxis = Math.Max(Math.Abs(expectedB.X - b.WorldPos.X),
+                            Math.Max(Math.Abs(expectedB.Y - b.WorldPos.Y), Math.Abs(expectedB.Z - b.WorldPos.Z)));
+                        if (maxAxis < ctx.RejectCounts.ClosestAlignmentMiss)
+                            ctx.RejectCounts.ClosestAlignmentMiss = maxAxis;
+                        ctx.RejectCounts.Alignment++;
                         continue;
+                    }
 
                     // Validate placement constraints
                     var candidateAabb = ConnectorUtils.ToWorldAabbRotated(prefab.packin_instance.ObjectBounds, prefabPos, yawSteps);
                     if (ConnectorUtils.IsBelowYMin(candidateAabb, ctx.YMin))
+                    {
+                        ctx.RejectCounts.BelowYMin++;
                         continue;
+                    }
                     if (ConnectorUtils.CollidesWithAny(candidateAabb, ctx.PlannedRooms, CollisionPadding))
+                    {
+                        ctx.RejectCounts.Collision++;
                         continue;
+                    }
                     if (BridgeUtil.AnyConnectorInsideExistingBounds(connectors, prefabPos, ctx.PlannedRooms, ConnectorEmbedTolerance))
+                    {
+                        ctx.RejectCounts.ConnectorEmbed++;
                         continue;
+                    }
                     if (BridgeUtil.AnyExistingConnectorInsideCandidate(candidateAabb, ctx.PlannedRooms, ConnectorEmbedTolerance))
+                    {
+                        ctx.RejectCounts.ExistingConnectorEmbed++;
                         continue;
+                    }
 
                     return BuildBridgePlacementResult(prefab, prefabPos, yawSteps, connectors, connA, connB, ctx.DistrictTypeLabel);
                 }
@@ -446,15 +519,13 @@ namespace Retrograde.Passes
 
             var distinct = allCandidates.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
-            var unused = distinct
-                .Where(id => !usedPrefabIds.Contains(id))
-                .ToList();
-
-            var unusedRooms = unused.Where(id => !IsBlocker(id)).ToList();
-            var unusedAny = unused;
+            var unusedRooms = distinct.Where(id => !usedPrefabIds.Contains(id) && !IsBlocker(id)).ToList();
+            var usedRooms = distinct.Where(id => usedPrefabIds.Contains(id) && !IsBlocker(id)).ToList();
+            var blockers = distinct.Where(id => IsBlocker(id)).ToList();
 
             return Shuffle(unusedRooms)
-                .Concat(Shuffle(unusedAny.Except(unusedRooms, StringComparer.OrdinalIgnoreCase)))
+                .Concat(Shuffle(usedRooms))
+                .Concat(Shuffle(blockers))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
@@ -473,7 +544,7 @@ namespace Retrograde.Passes
             return usedPrefabIds;
         }
 
-        private static bool RoomHasMoreThanTwoConnectors(List<PlacedRoom> placedRooms, OpenConnector open, float tolerance)
+        private static bool RoomHasMultipleConnectors(List<PlacedRoom> placedRooms, OpenConnector open, float tolerance)
         {
             if (placedRooms == null || placedRooms.Count == 0)
                 return false;
@@ -483,7 +554,15 @@ namespace Retrograde.Passes
                 return false;
 
             var owner = placedRooms[ownerIndex];
-            return owner.Connectors != null && owner.Connectors.Count > 2;
+            return owner.Connectors != null && owner.Connectors.Count > 1;
+        }
+
+        private static float SquaredDistance(OpenConnector a, OpenConnector b)
+        {
+            float dx = a.WorldPos.X - b.WorldPos.X;
+            float dy = a.WorldPos.Y - b.WorldPos.Y;
+            float dz = a.WorldPos.Z - b.WorldPos.Z;
+            return dx * dx + dy * dy + dz * dz;
         }
 
         private static bool IsBlocker(string editorId)
