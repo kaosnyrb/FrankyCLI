@@ -12,5 +12,6 @@ public static class StationDesignRegistry
             {
                 { "Hab Station", () => new HabStation() },
                 { "Ore Station", () => new OreStation() },
+                { "Warren Station", () => new WarrenStation() },
             });
 }
