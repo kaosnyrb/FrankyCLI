@@ -12,6 +12,7 @@ public class ScoringSystem
     public double SizeDiversityWeight;      // How important is avoiding chains of tiny rooms
     public double RoomReuseWeight;          // How important is reusing the same prefab multiple times
     public double ConnectorViabilityWeight; // How important is leaving connectors with viable space for the next room
+    public double DuplicateRoomPenaltyWeight; // How important is penalising rooms that already appear in other cells
 
     public int Effort;
 }

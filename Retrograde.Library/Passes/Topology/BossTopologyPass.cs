@@ -149,7 +149,8 @@ namespace Retrograde.Passes
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
                 var connectorViability = 0; // Boss placement planSizeDiversity
                 const double planArea = 0; // Boss placement ignores area weighting
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability);
+                var duplicateRoomPenalty = ScoringUtil.CalculateDuplicateRoomPenalty(plannedRooms);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, 0, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability, duplicateRoomPenalty);
 
                 // Check if forced prefab was actually placed
                 int missingRequiredPrefabs = 0;

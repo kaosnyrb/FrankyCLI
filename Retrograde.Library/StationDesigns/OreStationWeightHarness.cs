@@ -126,6 +126,7 @@ namespace Retrograde.StationDesigns
                 WriteLog($"    SizeDiversityWeight = {best.Weights.SizeDiversityWeight:0.##},");
                 WriteLog($"    RoomReuseWeight = {best.Weights.RoomReuseWeight:0.##},");
                 WriteLog($"    ConnectorViabilityWeight = {best.Weights.ConnectorViabilityWeight:0.##},");
+                WriteLog($"    DuplicateRoomPenaltyWeight = {best.Weights.DuplicateRoomPenaltyWeight:0.##},");
                 WriteLog($"    Effort = {best.Weights.Effort}");
                 WriteLog("};");
 
@@ -196,6 +197,7 @@ namespace Retrograde.StationDesigns
             double sizeDiversity = ScoringUtil.CalculateSmallRoomChainPenalty(rooms);
             double roomReuse = ScoringUtil.CalculateRoomReuseScore(rooms);
             double connectorViability = ScoringUtil.CalculateConnectorViabilityArea(rooms, opens);
+            double duplicateRoomPenalty = ScoringUtil.CalculateDuplicateRoomPenalty(rooms);
 
             return ScoringUtil.ScorePlan(
                 weights,
@@ -207,7 +209,8 @@ namespace Retrograde.StationDesigns
                 clustering,
                 sizeDiversity,
                 roomReuse,
-                connectorViability);
+                connectorViability,
+                duplicateRoomPenalty);
         }
 
         private static ScoringSystem NormalizeWeights(ScoringSystem src, double budget)
@@ -222,7 +225,8 @@ namespace Retrograde.StationDesigns
                 Math.Abs(src.ClusteringWeight) +
                 Math.Abs(src.SizeDiversityWeight) +
                 Math.Abs(src.RoomReuseWeight) +
-                Math.Abs(src.ConnectorViabilityWeight);
+                Math.Abs(src.ConnectorViabilityWeight) +
+                Math.Abs(src.DuplicateRoomPenaltyWeight);
 
             if (total <= 0.0001)
                 return CloneWeights(src);
@@ -241,6 +245,7 @@ namespace Retrograde.StationDesigns
                 SizeDiversityWeight = src.SizeDiversityWeight * scale,
                 RoomReuseWeight = src.RoomReuseWeight * scale,
                 ConnectorViabilityWeight = src.ConnectorViabilityWeight * scale,
+                DuplicateRoomPenaltyWeight = src.DuplicateRoomPenaltyWeight * scale,
                 Effort = src.Effort
             };
         }
@@ -285,6 +290,7 @@ namespace Retrograde.StationDesigns
                 SizeDiversityWeight = src.SizeDiversityWeight,
                 RoomReuseWeight = src.RoomReuseWeight,
                 ConnectorViabilityWeight = src.ConnectorViabilityWeight,
+                DuplicateRoomPenaltyWeight = src.DuplicateRoomPenaltyWeight,
                 Effort = src.Effort
             };
         }

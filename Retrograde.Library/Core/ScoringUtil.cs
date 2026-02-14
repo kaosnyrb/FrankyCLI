@@ -1,4 +1,6 @@
+using Mutagen.Bethesda.Plugins;
 using Retrograde.Passes;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +9,7 @@ namespace Retrograde;
 
 public static class ScoringUtil
 {
-    public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0, double connectorViability = 0)
+    public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0, double connectorViability = 0, double duplicateRoomPenalty = 0)
     {
         var components = new Dictionary<string, double>
         {
@@ -19,7 +21,8 @@ public static class ScoringUtil
             { "Clustering", (clustering/10) * scoringSystem.ClusteringWeight },
             { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight },
             { "RoomReuse", roomReuseScore * scoringSystem.RoomReuseWeight },
-            { "ConnectorViability", connectorViability * scoringSystem.ConnectorViabilityWeight }
+            { "ConnectorViability", connectorViability * scoringSystem.ConnectorViabilityWeight },
+            { "DuplicateRoomPenalty", duplicateRoomPenalty * scoringSystem.DuplicateRoomPenaltyWeight }
         };
 
         return new PlanScore
@@ -53,6 +56,7 @@ public static class ScoringUtil
         lines.Add("  " + FormatComponent(score, "SizeDiversity", "sizeDiversity"));
         lines.Add("  " + FormatComponent(score, "RoomReuse", "roomReuse"));
         lines.Add("  " + FormatComponent(score, "ConnectorViability", "connectorViability"));
+        lines.Add("  " + FormatComponent(score, "DuplicateRoomPenalty", "duplicateRoomPenalty"));
 
         return string.Join(Environment.NewLine, lines);
     }
@@ -224,6 +228,42 @@ public static class ScoringUtil
         }
 
         return totalArea;
+    }
+
+    /// <summary>
+    /// Calculates a penalty score based on how many times each room prefab in the
+    /// plan already appears as a temporary placed reference in other cells of the mod.
+    /// Returns the sum of existing placement counts for all rooms in the plan.
+    /// </summary>
+    public static double CalculateDuplicateRoomPenalty(IReadOnlyList<PlacedRoom> rooms)
+    {
+        if (rooms == null || rooms.Count == 0)
+            return 0;
+
+        var packInKeys = new HashSet<FormKey>();
+        foreach (var room in rooms)
+        {
+            if (room.Prefab?.packin_instance != null)
+                packInKeys.Add(room.Prefab.packin_instance.FormKey);
+        }
+
+        if (packInKeys.Count == 0)
+            return 0;
+
+        var counts = DuplicateRoomTools.CountPackInPlacements(packInKeys);
+
+        double penalty = 0;
+        foreach (var room in rooms)
+        {
+            if (room.Prefab?.packin_instance == null)
+                continue;
+
+            var key = room.Prefab.packin_instance.FormKey;
+            if (counts.TryGetValue(key, out var count))
+                penalty += count;
+        }
+
+        return penalty;
     }
 
     private static double GetRoomFootprintArea(PlacedRoom room)
