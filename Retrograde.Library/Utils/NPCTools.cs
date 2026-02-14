@@ -68,8 +68,13 @@ public static class NPCTools
     /// <summary>
     /// Creates a deep copy of an NPC in the specified mod.
     /// </summary>
-    public static Npc CloneNPC(StarfieldMod myMod, Npc NPC)
+    public static Npc CloneNPC(StarfieldMod myMod, Npc NPC, bool respawn = false)
     {
+        var majorFlags = NPC.MajorFlags;
+        if (respawn)
+        {
+            majorFlags |= Npc.MajorFlag.Respawns;
+        }
         return new Npc(myMod)
         {
             EditorID = "npc_" + Guid.NewGuid().ToString().Substring(0, 8),
@@ -122,7 +127,7 @@ public static class NPCTools
             Keywords = NPC.Keywords,
             LongName = NPC.LongName,
             ObjectTemplates = NPC.ObjectTemplates,
-            MajorFlags = NPC.MajorFlags | Npc.MajorFlag.Respawns,
+            MajorFlags = majorFlags,
             ODTY = NPC.ODTY,
             NAM5 = NPC.NAM5,
             MorphBlends = NPC.MorphBlends,
