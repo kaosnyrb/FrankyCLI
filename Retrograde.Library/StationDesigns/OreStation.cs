@@ -79,6 +79,7 @@ public class OreStation : IStationDesign
             SizeDiversityWeight = 16.06,
             RoomReuseWeight = -3.21,
             ConnectorViabilityWeight = 1.73,
+            DuplicateRoomPenaltyWeight = -2.0,
             Effort = 250
         };
     }
