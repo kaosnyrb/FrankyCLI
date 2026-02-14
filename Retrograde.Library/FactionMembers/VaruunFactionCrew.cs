@@ -42,7 +42,7 @@ namespace Retrograde.FactionMembers
                     isfemale = true;
                 }
                 var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
+                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
                 //Ranked Info
                 var outfit = GetLowRank_Outfit();
@@ -66,7 +66,7 @@ namespace Retrograde.FactionMembers
                     isfemale = true;
                 }
                 var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
+                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
                 //Ranked Info
                 var outfit = GetHighRank_Outfit();
@@ -89,7 +89,7 @@ namespace Retrograde.FactionMembers
                     isfemale = true;
                 }
                 var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
+                Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
                 //Ranked Info
                 var outfit = GetBoss_Outfit();
@@ -420,7 +420,7 @@ namespace Retrograde.FactionMembers
             Random random = RandomProvider.Random;
             bool isfemale = random.Next(100) > 50;
             var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
-            Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC);
+            Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
             var outfit = GetHighRank_Outfit();
             npc.Name = GetFactionPrefix() + " " + GetHighRank_Name();
