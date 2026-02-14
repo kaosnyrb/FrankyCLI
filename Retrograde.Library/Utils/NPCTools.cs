@@ -70,10 +70,10 @@ public static class NPCTools
     /// </summary>
     public static Npc CloneNPC(StarfieldMod myMod, Npc NPC, bool respawn = false)
     {
-        var majorFlags = NPC.MajorFlags;
+        var flags = NPC.Flags;
         if (respawn)
         {
-            majorFlags |= Npc.MajorFlag.Respawns;
+            flags |= Npc.Flag.Respawn;
         }
         return new Npc(myMod)
         {
@@ -111,7 +111,7 @@ public static class NPCTools
             FacialHairColor = NPC.FacialHairColor,
             Factions = NPC.Factions,
             FarAwayModelDistance = NPC.FarAwayModelDistance,
-            Flags = NPC.Flags,
+            Flags = flags,
             FLEE = NPC.FLEE,
             ForcedLocations = NPC.ForcedLocations,
             FormationFaction = NPC.FormationFaction,
@@ -127,7 +127,7 @@ public static class NPCTools
             Keywords = NPC.Keywords,
             LongName = NPC.LongName,
             ObjectTemplates = NPC.ObjectTemplates,
-            MajorFlags = majorFlags,
+            MajorFlags = NPC.MajorFlags,
             ODTY = NPC.ODTY,
             NAM5 = NPC.NAM5,
             MorphBlends = NPC.MorphBlends,

@@ -23,7 +23,13 @@
       "Bash(do sed -i 's/using Retrograde.Utils;/using Retrograde.Utils;\\\\nusing Retrograde;/' \"$f\")",
       "Bash(done)",
       "Bash(del \"c:\\\\Git\\\\FrankyCLI\\\\Retrograde.Library\\\\Chains\\\\AIRunner.cs\")",
-      "Read(//c/Users/kaosn/.nuget/packages//**)"
+      "Read(//c/Users/kaosn/.nuget/packages//**)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command:*)",
+      "WebFetch(domain:github.com)"
+    ],
+    "additionalDirectories": [
+      "c:\\Git\\FrankyCLI"
     ]
   }
 }
