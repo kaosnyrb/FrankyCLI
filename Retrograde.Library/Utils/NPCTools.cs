@@ -122,7 +122,7 @@ public static class NPCTools
             Keywords = NPC.Keywords,
             LongName = NPC.LongName,
             ObjectTemplates = NPC.ObjectTemplates,
-            MajorFlags = NPC.MajorFlags,
+            MajorFlags = NPC.MajorFlags | Npc.MajorFlag.Respawns,
             ODTY = NPC.ODTY,
             NAM5 = NPC.NAM5,
             MorphBlends = NPC.MorphBlends,
