@@ -124,6 +124,7 @@ public class EnemyPass : IGenPass
             var bossPos = CalculateWorldPosition(bossSpawn);
             var bossRot = bossSpawn.Marker.Rotation;
             int bossGroupSize = DetermineGroupSize(bossSpawn.Room.DistrictType);
+            var nearbyMarkers = GetNearbyMarkers(bossSpawn.Room, bossSpawn.Marker);
 
             for (int memberIdx = 0; memberIdx < bossGroupSize; memberIdx++)
             {
@@ -131,13 +132,29 @@ public class EnemyPass : IGenPass
                     ? stationFactionCrew.GetBoss(bossSpawn.Room.DistrictType)
                     : stationFactionCrew.GetCrewMember(bossSpawn.Room.DistrictType);
 
-                var memberPos = memberIdx == 0
-                    ? bossPos
-                    : OffsetPosition(bossPos, memberIdx);
+                P3Float memberPos;
+                P3Float memberRot;
+                if (memberIdx == 0)
+                {
+                    memberPos = bossPos;
+                    memberRot = bossRot;
+                }
+                else if (memberIdx - 1 < nearbyMarkers.Count)
+                {
+                    var altMarker = nearbyMarkers[memberIdx - 1];
+                    var altSpawn = new SpawnCandidate { Marker = altMarker, Room = bossSpawn.Room };
+                    memberPos = CalculateWorldPosition(altSpawn);
+                    memberRot = altMarker.Rotation;
+                }
+                else
+                {
+                    // Not enough markers in this room — skip extra members.
+                    continue;
+                }
 
                 var placedNpc = new PlacedNpc(RetrogradeContext.Current.TargetMod)
                 {
-                    Rotation = bossRot,
+                    Rotation = memberRot,
                     Position = memberPos,
                     Base = selected.ToLink<INpcGetter>()
                 };
@@ -192,6 +209,8 @@ public class EnemyPass : IGenPass
                 ? DetermineGroupSize("boss")
                 : DetermineGroupSize(spawn.Room.DistrictType);
 
+            var nearbyMarkers = GetNearbyMarkers(spawn.Room, spawn.Marker);
+
             for (int memberIdx = 0; memberIdx < groupSize; memberIdx++)
             {
                 Npc selected;
@@ -200,13 +219,28 @@ public class EnemyPass : IGenPass
                 else
                     selected = stationFactionCrew.GetCrewMember(spawn.Room.DistrictType);
 
-                var memberPos = memberIdx == 0
-                    ? worldPos
-                    : OffsetPosition(worldPos, memberIdx);
+                P3Float memberPos;
+                P3Float memberRot;
+                if (memberIdx == 0)
+                {
+                    memberPos = worldPos;
+                    memberRot = worldRot;
+                }
+                else if (memberIdx - 1 < nearbyMarkers.Count)
+                {
+                    var altMarker = nearbyMarkers[memberIdx - 1];
+                    var altSpawn = new SpawnCandidate { Marker = altMarker, Room = spawn.Room };
+                    memberPos = CalculateWorldPosition(altSpawn);
+                    memberRot = altMarker.Rotation;
+                }
+                else
+                {
+                    continue;
+                }
 
                 state.PlacementUtil.NPCAddToTemporary(state.instance, new PlacedNpc(RetrogradeContext.Current.TargetMod)
                 {
-                    Rotation = worldRot,
+                    Rotation = memberRot,
                     Position = memberPos,
                     Base = selected.ToLink<INpcGetter>()
                 });
@@ -337,16 +371,30 @@ public class EnemyPass : IGenPass
     }
 
     /// <summary>
-    /// Offsets additional group members slightly from the spawn marker so they
-    /// don't stack on top of each other. Uses a small circle around the origin.
+    /// Collects other enemy-spawn markers in the same room, sorted by distance
+    /// to the primary marker. These provide safe positions for group members
+    /// (markers are pre-placed to avoid walls and furniture).
     /// </summary>
-    private static P3Float OffsetPosition(P3Float origin, int index)
+    private static List<PrefabMarker> GetNearbyMarkers(PlacedRoom room, PrefabMarker primary)
     {
-        const float offsetRadius = 1.5f;
-        double angle = index * (2.0 * Math.PI / 3.0); // evenly space up to 3 extras
-        float dx = (float)(Math.Cos(angle) * offsetRadius);
-        float dy = (float)(Math.Sin(angle) * offsetRadius);
-        return new P3Float(origin.X + dx, origin.Y + dy, origin.Z);
+        var others = new List<(PrefabMarker Marker, float DistSq)>();
+
+        foreach (var marker in room.Prefab.Markers)
+        {
+            if (ReferenceEquals(marker, primary))
+                continue;
+
+            var id = marker.MarkerEditorId;
+            if (string.IsNullOrWhiteSpace(id) ||
+                !id.StartsWith("rg_enemy_spawn", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            float distSq = MathUtil.DistanceSquared(marker.Position, primary.Position);
+            others.Add((marker, distSq));
+        }
+
+        others.Sort((a, b) => a.DistSq.CompareTo(b.DistSq));
+        return others.Select(o => o.Marker).ToList();
     }
 
     private List<SpawnCandidate> BuildCandidates(
