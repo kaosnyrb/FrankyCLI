@@ -41,6 +41,7 @@ public class WarrenStation : IStationDesign
             new TrunkTopologyPass(2),
             new DistrictTopologyPass("rg_orelist", 2, "ore", new List<string>(){}),
             new BossTopologyPass("boss"),
+            new BridgeHelperPass(),
             new BridgingTopologyPass(),
         };
 

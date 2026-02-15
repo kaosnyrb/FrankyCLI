@@ -37,12 +37,13 @@ namespace Retrograde.Chains
             var faction = Factions[RandomProvider.Random.Next(Factions.Count)];
             var size = "Large";
 
+            /*
             int key = RandomProvider.Random.Next(StationDesignRegistry.Designs.Keys.Count());
             IStationDesign random = StationDesignRegistry.Designs.Values.ToList()[key]();
             IStationDesign stationDesign = random;
+            */
 
-
-            //IStationDesign stationDesign = new HabStation();
+            IStationDesign stationDesign = new HabStation();
 
 
             var stationname = stationDesign.GenerateStationName(faction);

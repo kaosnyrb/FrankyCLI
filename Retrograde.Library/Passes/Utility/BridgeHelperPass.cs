@@ -288,6 +288,8 @@ namespace Retrograde.Passes
                 "# HOW TO USE: Each entry below describes a bridge prefab to build.",
                 "#   1. Create a new PackIn prefab in the Creation Kit.",
                 "#   2. Place the two connector markers at the listed positions with the listed EditorIDs.",
+                "#      NOTE: The connector directions are the OPPOSITE of the open connectors they mate with.",
+                "#      An open connector facing North needs a PackIn connector facing South, etc.",
                 "#   3. Build geometry connecting the two markers.",
                 "#   4. Set the PackIn's ObjectBounds to the suggested min bounding box (or larger).",
                 "#   5. Add the prefab to your bridge room list FormList.",
@@ -301,10 +303,13 @@ namespace Retrograde.Passes
             foreach (var (s, cumulative) in ordered)
             {
                 rank++;
-                var dirLetterA = DirectionToLetter(ConnectorDirection.North);
+                var anchorDir = ConnectorDirection.North;
+                var dirLetterA = DirectionToLetter(anchorDir);
                 var dirLetterB = DirectionToLetter(s.OtherConnectorDirection);
                 var markerA = $"rg_conn_{dirLetterA}_{s.DoorSize}_{s.Tileset}";
                 var markerB = $"rg_conn_{dirLetterB}_{s.DoorSize}_{s.Tileset}";
+                var openDirA = ConnectorUtils.Opposite(anchorDir);
+                var openDirB = ConnectorUtils.Opposite(s.OtherConnectorDirection);
 
                 var pos = s.OtherConnectorLocalPos;
                 var dx = Math.Abs(pos.X);
@@ -332,9 +337,9 @@ namespace Retrograde.Passes
 
                 lines.Add($"--- #{rank}  hits={s.HitCount}  cumulative={cumulative}  ({shape}) ---");
                 lines.Add($"  tileset: {s.Tileset}    door: {s.DoorSize}");
-                lines.Add($"  marker A:  {markerA}");
+                lines.Add($"  marker A:  {markerA}  (faces {anchorDir}, mates with open {openDirA})");
                 lines.Add($"             pos = (0, 0, 0)");
-                lines.Add($"  marker B:  {markerB}");
+                lines.Add($"  marker B:  {markerB}  (faces {s.OtherConnectorDirection}, mates with open {openDirB})");
                 lines.Add($"             pos = ({pos.X}, {pos.Y}, {pos.Z})");
                 lines.Add($"  min bounds: ({boundsMin.X}, {boundsMin.Y}, {boundsMin.Z}) to ({boundsMax.X}, {boundsMax.Y}, {boundsMax.Z})");
 
