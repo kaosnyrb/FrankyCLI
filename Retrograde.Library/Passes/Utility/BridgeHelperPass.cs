@@ -12,6 +12,7 @@ namespace Retrograde.Passes
         private const float CorridorPadding = 0.5f;
         private const float ConnectorMatchTolerance = 0.05f;
         private readonly string outputPath;
+        private readonly string historyPath;
         private readonly float maxHorizontalSpan;
         private readonly float maxVerticalOffset;
         private readonly List<string> fallbackBridgeRoomLists;
@@ -24,6 +25,7 @@ namespace Retrograde.Passes
             IEnumerable<string> bridgeRoomLists = null)
         {
             this.outputPath = outputPath;
+            this.historyPath = Path.ChangeExtension(outputPath, ".hits.tsv");
             this.maxHorizontalSpan = maxHorizontalSpan;
             this.maxVerticalOffset = maxVerticalOffset;
 
@@ -79,11 +81,13 @@ namespace Retrograde.Passes
 
                         if (!suggestions.TryGetValue(key, out var existing))
                         {
+                            suggestion.HitCount = 1;
                             suggestion.Samples.Add((a.WorldPos, b.WorldPos));
                             suggestions.Add(key, suggestion);
                         }
                         else
                         {
+                            existing.HitCount++;
                             if (existing.Samples.Count < 10)
                             {
                                 existing.Samples.Add((a.WorldPos, b.WorldPos));
@@ -97,7 +101,10 @@ namespace Retrograde.Passes
             if (suggestions.Count == 0)
                 return;
 
-            WriteReport(suggestions.Values);
+            var previousHits = LoadHitHistory();
+            var mergedHits = MergeHits(suggestions, previousHits);
+            SaveHitHistory(mergedHits);
+            WriteReport(suggestions.Values, mergedHits);
         }
 
         private List<RoomUtils> ResolveRoomUtils(DungeonState state)
@@ -182,19 +189,100 @@ namespace Retrograde.Passes
             };
         }
 
-        private void WriteReport(IEnumerable<BridgePrefabSuggestion> suggestions)
+        private Dictionary<string, int> LoadHitHistory()
+        {
+            var hits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            if (!File.Exists(historyPath))
+                return hits;
+
+            try
+            {
+                foreach (var line in File.ReadLines(historyPath))
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                        continue;
+
+                    var tabIndex = line.IndexOf('\t');
+                    if (tabIndex <= 0 || tabIndex >= line.Length - 1)
+                        continue;
+
+                    var key = line.Substring(0, tabIndex);
+                    if (int.TryParse(line.Substring(tabIndex + 1), out var count) && count > 0)
+                    {
+                        hits[key] = count;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[BridgeHelper] Warning: could not load hit history from {historyPath}: {ex.Message}");
+            }
+
+            return hits;
+        }
+
+        private Dictionary<string, int> MergeHits(
+            Dictionary<string, BridgePrefabSuggestion> currentSuggestions,
+            Dictionary<string, int> previousHits)
+        {
+            var merged = new Dictionary<string, int>(previousHits, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var kvp in currentSuggestions)
+            {
+                merged.TryGetValue(kvp.Key, out var prev);
+                merged[kvp.Key] = prev + kvp.Value.HitCount;
+            }
+
+            return merged;
+        }
+
+        private void SaveHitHistory(Dictionary<string, int> mergedHits)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(historyPath) ?? ".");
+
+                var lines = new List<string>
+                {
+                    $"# BridgeHelper cumulative hit counts – updated {DateTime.UtcNow:O} (UTC)",
+                    "# key\thits"
+                };
+
+                foreach (var kvp in mergedHits.OrderByDescending(h => h.Value))
+                {
+                    lines.Add($"{kvp.Key}\t{kvp.Value}");
+                }
+
+                File.WriteAllLines(historyPath, lines);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[BridgeHelper] Warning: could not save hit history to {historyPath}: {ex.Message}");
+            }
+        }
+
+        private void WriteReport(IEnumerable<BridgePrefabSuggestion> suggestions, Dictionary<string, int> cumulativeHits)
         {
             var ordered = suggestions
-                .OrderBy(s => s.Tileset, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(s => s.DoorSize, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(s => s.AnchorYawToMatch)
-                .ThenBy(s => s.OtherConnectorDirection.ToString(), StringComparer.OrdinalIgnoreCase)
+                .Select(s =>
+                {
+                    cumulativeHits.TryGetValue(s.GetKey(), out var cumulative);
+                    return (Suggestion: s, CumulativeHits: cumulative);
+                })
+                .OrderByDescending(x => x.CumulativeHits)
+                .ThenByDescending(x => x.Suggestion.HitCount)
+                .ThenBy(x => x.Suggestion.Tileset, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(x => x.Suggestion.DoorSize, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             var lines = new List<string>
             {
                 "# Generated by BridgeHelperPass",
                 $"# {DateTime.UtcNow:O} (UTC)",
+                "# Sorted by cumulative hit count (most needed bridge pieces first).",
+                "# hits       = connector pairs that needed this bridge in this run",
+                "# cumulative = total hits across all runs",
                 "# Anchor connector is fixed at (0,0,0) facing North before yaw.",
                 "# AnchorYawToMatch tells how many 90deg steps to rotate to face connector A.",
                 "# Other connector position is rounded to whole units to guide prefab marker placement.",
@@ -202,9 +290,9 @@ namespace Retrograde.Passes
                 ""
             };
 
-            foreach (var s in ordered)
+            foreach (var (s, cumulative) in ordered)
             {
-                lines.Add($"tileset={s.Tileset} door={s.DoorSize} anchorYaw={s.AnchorYawToMatch} otherDir={s.OtherConnectorDirection}");
+                lines.Add($"tileset={s.Tileset} door={s.DoorSize} anchorYaw={s.AnchorYawToMatch} otherDir={s.OtherConnectorDirection}  hits={s.HitCount} cumulative={cumulative}");
                 lines.Add($"  connectorA: dir=North pos=(0,0,0)");
                 lines.Add($"  connectorB: dir={s.OtherConnectorDirection} pos=({s.OtherConnectorLocalPos.X},{s.OtherConnectorLocalPos.Y},{s.OtherConnectorLocalPos.Z})");
 
@@ -219,7 +307,7 @@ namespace Retrograde.Passes
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
             File.WriteAllLines(outputPath, lines);
 
-            Console.WriteLine($"[BridgeHelper] Wrote {ordered.Count} prefab suggestions to {outputPath}");
+            Console.WriteLine($"[BridgeHelper] Wrote {ordered.Count} prefab suggestions to {outputPath} (sorted by hit count, history: {historyPath})");
         }
 
         private static string FormatPos(P3Float pos)
@@ -397,6 +485,7 @@ namespace Retrograde.Passes
             public int AnchorYawToMatch;
             public ConnectorDirection OtherConnectorDirection;
             public IntVector3 OtherConnectorLocalPos;
+            public int HitCount;
             public List<(P3Float A, P3Float B)> Samples;
 
             public string GetKey()
