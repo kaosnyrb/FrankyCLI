@@ -50,9 +50,11 @@ namespace Retrograde.Chains
             MessageNoun stationnamemessage = new MessageNoun(FormKeyLookup.GetFormKey("RG_SE_Name").ID, stationname);
             stationnamemessage.instance.Name = stationname;
 
-            var questname = "rg_poi_" + stationname;
+            string stationsafename = System.Text.RegularExpressions.Regex.Replace(stationname.ToLower(), "[^a-z0-9]", "");
+
+            var questname = "rg_poi_" + stationsafename;
             //Clone Quest
-            var newQuest = new QuestNoun(questFormKey.ID, questname);
+            var newQuest = new QuestNoun(questFormKey.ID, questname, questname);
             //Set Aliases
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             //SEScript
@@ -80,6 +82,7 @@ namespace Retrograde.Chains
             //Set the Cell so we can reset when we leave
             newQuest.SetScriptProperty("retrograde_quest", "StationCell", stationNoun.InteriorCell.ToLink<IStarfieldMajorRecordGetter>());
 
+            
             //Add to POI tree
             var rg_se_poi_node = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
 

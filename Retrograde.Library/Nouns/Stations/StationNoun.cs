@@ -35,6 +35,8 @@ namespace Retrograde.Nouns.Stations
 
             string StationID = Guid.NewGuid().ToString().Substring(0, 8);
 
+            string stationsafename = System.Text.RegularExpressions.Regex.Replace(stationName.ToLower(), "[^a-z0-9]", "");
+
             stationDesign = design;
 
 
@@ -70,7 +72,7 @@ namespace Retrograde.Nouns.Stations
             //Clone the Ship Interior
 
             ShipInteriorCell = CellTools.CloneCellById("duout02stationtestintcell");
-            ShipInteriorCell.EditorID = "Station_shipint_" + StationID;
+            ShipInteriorCell.EditorID = "rg_shipint_" + stationsafename;
             ShipInteriorCell.Location = ShipIntlocation.ToNullableLink<ILocationGetter>();
             ShipInteriorCell.Name = stationName;
 
@@ -126,7 +128,7 @@ namespace Retrograde.Nouns.Stations
 
             InteriorCell = CellTools.CloneCellById("duoutstationtest02interior");
 
-            InteriorCell.EditorID = "Station_int_" + StationID;
+            InteriorCell.EditorID = "rg_intcell_" + stationsafename;
             InteriorCell.Name = stationName;
             InteriorCell.Location = InteriorCellLocation.ToNullableLink<ILocationGetter>();
 
@@ -160,7 +162,7 @@ namespace Retrograde.Nouns.Stations
             ExteriorCell = CellTools.CloneCellById("duout02stationtestextcell");
 
             ExteriorCell.Name = stationName;
-            ExteriorCell.EditorID = "Station_ext_" + StationID;
+            ExteriorCell.EditorID = "rg_extcell_" + stationsafename;
             ExteriorCell.Location = ShipExteriorlocation.ToNullableLink<ILocationGetter>();
             //Set the Doors to be linked
 
@@ -179,7 +181,7 @@ namespace Retrograde.Nouns.Stations
             var ship = targetMod.GenericBaseForms[formKey].DeepCopy();
             instance = new GenericBaseForm(targetMod)
             {
-                EditorID = "station_form_" + StationID,
+                EditorID = "rg_" + stationsafename,
                 ObjectBounds = ship.ObjectBounds,
                 Components = ship.Components,
                 ObjectTemplates = ship.ObjectTemplates,

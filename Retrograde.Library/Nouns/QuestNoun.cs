@@ -14,7 +14,7 @@ namespace Retrograde.Nouns
     public class QuestNoun
     {
         public Quest instance;
-        public QuestNoun(uint Basequest, string Questname) {
+        public QuestNoun(uint Basequest, string Questname, string? editorId = null) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
@@ -25,7 +25,7 @@ namespace Retrograde.Nouns
                 Aliases = Quest.Aliases,
                 Components = Quest.Components,
                 Data = Quest.Data,
-                EditorID = "quest_" + questID,
+                EditorID = editorId ?? "quest_" + questID,
                 Keywords = Quest.Keywords,
                 Location = Quest.Location,
                 MajorFlags = Quest.MajorFlags,
