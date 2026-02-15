@@ -284,7 +284,31 @@ namespace Retrograde.Passes
             if (BridgeUtil.HaveSameOwner(plannedRooms, a, b, ConnectorPositionTolerance))
                 return false;
 
+            if (HaveIdenticalPrefab(plannedRooms, a, b))
+                return false;
+
             return BridgeUtil.ArePairCompatible(a, b);
+        }
+
+        /// <summary>
+        /// Returns true if the two connectors belong to rooms that use the same prefab,
+        /// preventing identical rooms from being placed next to each other via bridging.
+        /// </summary>
+        private static bool HaveIdenticalPrefab(List<PlacedRoom> plannedRooms, OpenConnector a, OpenConnector b)
+        {
+            int ownerA = BridgeUtil.ResolveConnectorOwner(plannedRooms, a, ConnectorPositionTolerance);
+            int ownerB = BridgeUtil.ResolveConnectorOwner(plannedRooms, b, ConnectorPositionTolerance);
+
+            if (ownerA < 0 || ownerB < 0)
+                return false;
+
+            var prefabA = plannedRooms[ownerA].Prefab?.PrefabEditorId;
+            var prefabB = plannedRooms[ownerB].Prefab?.PrefabEditorId;
+
+            if (string.IsNullOrEmpty(prefabA) || string.IsNullOrEmpty(prefabB))
+                return false;
+
+            return string.Equals(prefabA, prefabB, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
