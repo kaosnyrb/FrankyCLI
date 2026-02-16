@@ -23,7 +23,7 @@ namespace FrankyCLI
         {
             if (args.Length < 5)
             {
-                Console.WriteLine("Usage: retrograde <modname> <mode> <prefix> <item> <form> [faction] [stationdesign] [poi|bounty] [quiet]");
+                Console.WriteLine("Usage: retrograde <modname> <mode> <prefix> <item> <form> [faction] [stationdesign] [poi|bounty] [quiet] [exportai]");
                 Console.WriteLine("  modname        - Output mod name (without .esm)");
                 Console.WriteLine("  mode           - Generation mode");
                 Console.WriteLine("  prefix         - EditorID prefix");
@@ -33,6 +33,7 @@ namespace FrankyCLI
                 Console.WriteLine("  stationdesign  - (optional) Station design name");
                 Console.WriteLine("  poi|bounty     - (optional) Quest type (default: bounty)");
                 Console.WriteLine("  quiet          - (optional) Suppress score output");
+                Console.WriteLine("  exportai       - (optional) Export AI conversation to file");
                 return 1;
             }
 
@@ -79,6 +80,10 @@ namespace FrankyCLI
                 // Initialize the Retrograde context for library access
                 RetrogradeContext.Current = new ModContextImpl();
 
+                // Load global room usage tracker for cross-station room diversity
+                var roomTrackerPath = Path.Combine(datapath, modname + "_room_usage.json");
+                GlobalRoomTracker.Load(roomTrackerPath);
+
                 //We have different styles of quest chains, so randomly choose one.
 
                 AITools.AIMODE = false;
@@ -88,8 +93,10 @@ namespace FrankyCLI
                 string stationDesignName = args.Length > 6 ? args[6] : null;
                 string questType = args.Length > 7 ? args[7] : null; // "poi" or "bounty"
                 string quietFlag = args.Length > 8 ? args[8] : null; // "quiet" to suppress scores
+                string exportAiFlag = args.Length > 9 ? args[9] : null; // "exportai" to dump AI conversation
 
                 RetrogradeContext.Quiet = string.Equals(quietFlag, "quiet", StringComparison.OrdinalIgnoreCase);
+                AITools.EXPORT_CONVERSATION = string.Equals(exportAiFlag, "exportai", StringComparison.OrdinalIgnoreCase);
 
                 // Resolve faction - random if not specified
                 List<string> Factions = new List<string>()
@@ -139,6 +146,7 @@ namespace FrankyCLI
             }
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            GlobalRoomTracker.Save();
             AITools.ExportConversation();
             Console.WriteLine("Finished");
             return 0;

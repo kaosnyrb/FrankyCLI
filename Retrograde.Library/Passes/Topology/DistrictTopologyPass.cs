@@ -406,10 +406,14 @@ namespace Retrograde.Passes
                     .ToList();
 
                 if (unusedRooms.Count > 0)
-                    return unusedRooms[RandomProvider.Random.Next(unusedRooms.Count)];
+                    return GlobalRoomTracker.IsLoaded
+                        ? GlobalRoomTracker.ChooseWeighted(unusedRooms)
+                        : unusedRooms[RandomProvider.Random.Next(unusedRooms.Count)];
 
                 if (unusedCandidates.Count > 0)
-                    return unusedCandidates[RandomProvider.Random.Next(unusedCandidates.Count)];
+                    return GlobalRoomTracker.IsLoaded
+                        ? GlobalRoomTracker.ChooseWeighted(unusedCandidates)
+                        : unusedCandidates[RandomProvider.Random.Next(unusedCandidates.Count)];
             }
 
             return null;

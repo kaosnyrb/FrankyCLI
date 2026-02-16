@@ -130,6 +130,18 @@ public class StationDungeonGenerator
         DungeonState state = GenerateTopology(cell, location, faction, size, entranceDoor: entranceDoor);
         RunContentPasses(state);
 
+        // Record placed rooms in the global tracker for cross-station usage balancing
+        if (GlobalRoomTracker.IsLoaded)
+        {
+            foreach (var room in state.placedRooms)
+            {
+                if (!string.IsNullOrEmpty(room.Prefab?.PrefabEditorId))
+                {
+                    GlobalRoomTracker.RecordUsage(room.Prefab.PrefabEditorId);
+                }
+            }
+        }
+
         stopwatch.Stop();
         Console.WriteLine("Station Generation Time:" + stopwatch.Elapsed);
         return state;

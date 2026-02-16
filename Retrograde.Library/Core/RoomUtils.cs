@@ -69,9 +69,13 @@ public class RoomUtils
             .ToList();
 
         if (rooms.Count > 0)
-            return rooms[RandomProvider.Random.Next(rooms.Count)];
+            return GlobalRoomTracker.IsLoaded
+                ? GlobalRoomTracker.ChooseWeighted(rooms)
+                : rooms[RandomProvider.Random.Next(rooms.Count)];
 
-        return candidates[RandomProvider.Random.Next(candidates.Count)];
+        return GlobalRoomTracker.IsLoaded
+            ? GlobalRoomTracker.ChooseWeighted(candidates)
+            : candidates[RandomProvider.Random.Next(candidates.Count)];
     }
 
     private void EnsureConnectorsWithinBounds(string listKey, PackIn packIn)

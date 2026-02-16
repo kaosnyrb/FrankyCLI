@@ -17,6 +17,9 @@ namespace Retrograde.AI
         // We can turn off the chatgpt calls for fast generation.
         public static bool AIMODE = true;
 
+        // When true, ExportConversation() writes the AI history to a file. Off by default.
+        public static bool EXPORT_CONVERSATION = false;
+
         static AITools()
         {
             var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
@@ -43,6 +46,9 @@ namespace Retrograde.AI
 
         public static bool ExportConversation()
         {
+            if (!EXPORT_CONVERSATION)
+                return false;
+
             var loc = Guid.NewGuid().ToString().Substring(0, 8) + ".txt";
 
             string conversation = "";
