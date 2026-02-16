@@ -217,7 +217,7 @@ namespace Retrograde.Nouns.Stations
 
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator(stationDesign);
 
-            dungeonState = dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size);
+            dungeonState = dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size, shipinttoint_doorreference);
         }
     }
 }

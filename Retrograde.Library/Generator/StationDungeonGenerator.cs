@@ -57,7 +57,7 @@ public class StationDungeonGenerator
     /// Returns the DungeonState for inspection or visualization before content is placed.
     /// </summary>
     public DungeonState GenerateTopology(Cell cell, Location location, string faction, string size,
-        Action<IGenPass> onPassStarted = null)
+        Action<IGenPass> onPassStarted = null, PlacedObject entranceDoor = null)
     {
         DungeonState state = new DungeonState(cell, location)
         {
@@ -66,7 +66,8 @@ public class StationDungeonGenerator
             TrunkRoomLists = new List<string> { "rg_trunklist" },
             scoringSystem = stationDesign.scoringSystem,
             stateName = stationDesign.dungeonName,
-            AreaPerEnemy = stationDesign.AreaPerEnemy
+            AreaPerEnemy = stationDesign.AreaPerEnemy,
+            EntranceDoor = entranceDoor
         };
 
         state.BridgePrefabKeys = BridgeUtil.BuildBridgePrefabKeys(state.TrunkRoomLists, state.GetRoomUtils);
@@ -121,11 +122,12 @@ public class StationDungeonGenerator
     /// <param name="location">The location record for the dungeon.</param>
     /// <param name="faction">The faction controlling the station.</param>
     /// <param name="size">The size category (Small, Medium, Large).</param>
-    public DungeonState GenerateDungeon(Cell cell, Location location, string faction, string size)
+    public DungeonState GenerateDungeon(Cell cell, Location location, string faction, string size,
+        PlacedObject entranceDoor = null)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        DungeonState state = GenerateTopology(cell, location, faction, size);
+        DungeonState state = GenerateTopology(cell, location, faction, size, entranceDoor: entranceDoor);
         RunContentPasses(state);
 
         stopwatch.Stop();

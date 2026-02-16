@@ -108,4 +108,15 @@ public class DungeonState
     public PlacedNpc BossPlacedNpc { get; set; }
 
     public List<FormKey> ItemsToRemove { get; set; }
+
+    /// <summary>
+    /// The entrance door into the dungeon interior cell.
+    /// Set by StationNoun before generation so ExitTopologyPass can link the exit door back to it.
+    /// </summary>
+    public PlacedObject EntranceDoor { get; set; }
+
+    /// <summary>
+    /// The exit door placed by ExitTopologyPass. Linked bidirectionally with EntranceDoor.
+    /// </summary>
+    public PlacedObject ExitDoor { get; set; }
 }

@@ -36,8 +36,9 @@ public class HabStation : IStationDesign
             new StationSetupPass(),
             new TrunkTopologyPass(4),
             new BossTopologyPass("boss",new List<string>(){}),
+            new ExitTopologyPass(),
             new DistrictTopologyPass("rg_hablist", 4, "hab", new List<string>(){}),
-            new BridgeHelperPass(),
+            //new BridgeHelperPass(),
             new BridgingTopologyPass(maxOverlapBridges: 2),
         };
 
