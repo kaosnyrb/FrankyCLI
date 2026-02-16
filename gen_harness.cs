@@ -2,6 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using Retrograde;
 using Retrograde.StationDesigns;
 using System;
@@ -15,9 +16,7 @@ namespace FrankyCLI
             string modname = args[0];
             string faction = args.Length > 3 ? args[3] : "spacer";
             string size = args.Length > 4 ? args[4] : "Small";
-            int runs = 100;
-            if (args.Length > 5 && int.TryParse(args[5], out int parsed))
-                runs = parsed;
+            int runs = 5;
 
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
@@ -47,16 +46,31 @@ namespace FrankyCLI
                 {
                     EditorID = "rg_harness_cell"
                 };
+
+                // StationSetupPass needs an rg_conn_n marker in the cell's Persistent list
+                var startMarker = new PlacedObject(gen_quest_main.myMod)
+                {
+                    EditorID = "rg_conn_n_D1_station",
+                    Position = new P3Float(0, 0, 0),
+                    Rotation = new P3Float(0, 0, 0)
+                };
+                cell.Persistent.Add(startMarker);
+
                 var location = new Location(gen_quest_main.myMod)
                 {
-                    EditorID = "rg_harness_loc"
+                    EditorID = "rg_harness_loc",
+                    LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
+                    LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
+                    LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
+                    LocationCellUniques = new ExtendedList<LocationCellUnique>()
+                    
                 };
 
                 Console.WriteLine($"=== Weight Harness ===");
                 Console.WriteLine($"Faction: {faction}, Size: {size}, Runs: {runs}");
 
                 var harness = new OreStationWeightHarness(
-                    designFactory: () => new OreStation(),
+                    designFactory: () => new HabStation(),
                     faction: faction,
                     size: size);
 
