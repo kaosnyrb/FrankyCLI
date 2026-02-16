@@ -105,7 +105,8 @@ public static class GlobalRoomTracker
 
     /// <summary>
     /// Chooses a prefab from the candidate list, biased towards rooms that are below MinimumUsage.
-    /// Rooms below the threshold get higher weight; rooms at or above get weight 1.
+    /// Rooms below the threshold get higher weight; rooms at or above get penalised
+    /// proportionally to how far above the minimum they are.
     /// </summary>
     public static string ChooseWeighted(List<string> candidates)
     {
@@ -115,16 +116,20 @@ public static class GlobalRoomTracker
         if (candidates.Count == 1)
             return candidates[0];
 
-        // Compute weights: rooms below minimum get a boost
+        // Compute weights:
+        //   Below minimum: boost proportional to how far below (e.g. min=10, usage=0 → weight=11)
+        //   At minimum: weight = 1
+        //   Above minimum: penalised — weight = 1 / (1 + overshoot), so overused rooms are less likely
         var weights = new double[candidates.Count];
         double totalWeight = 0;
 
         for (int i = 0; i < candidates.Count; i++)
         {
             int usage = GetUsageCount(candidates[i]);
-            // Rooms below minimum get weight proportional to how far below they are
-            // e.g., if minimum=10 and usage=0, weight=11; if usage=9, weight=2; if usage>=10, weight=1
-            weights[i] = usage < _minimumUsage ? (_minimumUsage - usage + 1) : 1;
+            if (usage < _minimumUsage)
+                weights[i] = _minimumUsage - usage + 1;
+            else
+                weights[i] = 1.0 / (1 + usage - _minimumUsage);
             totalWeight += weights[i];
         }
 
