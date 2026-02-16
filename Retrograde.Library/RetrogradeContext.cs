@@ -26,6 +26,11 @@ public static class RetrogradeContext
     public static bool IsInitialized => _current != null;
 
     /// <summary>
+    /// When true, suppresses score and plan output to the console.
+    /// </summary>
+    public static bool Quiet { get; set; } = false;
+
+    /// <summary>
     /// Initializes the Retrograde context with the provided mod context.
     /// Should be called once at startup before any Retrograde operations.
     /// </summary>

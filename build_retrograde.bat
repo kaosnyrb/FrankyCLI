@@ -73,7 +73,7 @@ echo   Progress: [!BAR!] !PCT!%%
 echo   Time Elapsed: !ELAPSED!
 echo ============================================
 
-%EXE% %MODNAME% gen_retrograde 0 0 0 %~1 "%~2" %~3
+%EXE% %MODNAME% gen_retrograde 0 0 0 %~1 "%~2" %~3 quiet
 
 timeout /t 2 /nobreak >nul
 exit /b

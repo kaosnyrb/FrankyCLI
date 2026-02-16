@@ -195,7 +195,7 @@ namespace Retrograde.Passes
             int bestPlanAttempt = (bestOutcome?.AttemptIndex ?? -1) + 1;
             int bestBridgesPlaced = bestOutcome?.Metadata?.BridgesPlaced ?? -1;
 
-            if (!state.IsHarnessRun)
+            if (!state.IsHarnessRun && !RetrogradeContext.Quiet)
             {
                 Console.WriteLine($"[Bridge plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestBridgesPlaced}/{TargetBridgeCount} bridge prefabs, overlap {finalOverlapCount}, {ScoringUtil.PrettyPrintScore(finalScore, includeBridgingOverlap: true)}.");
                 var rejects = bestOutcome?.Metadata?.RejectCounts;

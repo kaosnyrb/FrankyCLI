@@ -56,6 +56,11 @@ namespace FrankyCLI
                     }
                 }
 
+                // Sync statics to gen_quest_main so ModContextImpl can access them
+                gen_quest_main.StarfieldModKey = StarfieldModKey;
+                gen_quest_main._StarfieldMod = _StarfieldMod;
+                gen_quest_main.myMod = myMod;
+
                 // Initialize the Retrograde context for library access
                 RetrogradeContext.Current = new ModContextImpl();
 
@@ -63,10 +68,13 @@ namespace FrankyCLI
 
                 AITools.AIMODE = false;
 
-                // Parse optional parameters: faction, station design, type (poi/bounty)
+                // Parse optional parameters: faction, station design, type (poi/bounty), quiet
                 string faction = args.Length > 5 ? args[5] : null;
                 string stationDesignName = args.Length > 6 ? args[6] : null;
                 string questType = args.Length > 7 ? args[7] : null; // "poi" or "bounty"
+                string quietFlag = args.Length > 8 ? args[8] : null; // "quiet" to suppress scores
+
+                RetrogradeContext.Quiet = string.Equals(quietFlag, "quiet", StringComparison.OrdinalIgnoreCase);
 
                 // Resolve faction - random if not specified
                 List<string> Factions = new List<string>()

@@ -300,7 +300,7 @@ namespace Retrograde.Passes
             int bestRoomsPlaced = bestOutcome?.Metadata?.RoomsPlaced ?? 0;
             int bestBridgeablePairs = bestOutcome?.Metadata?.BridgeablePairs ?? -1;
 
-            if (!state.IsHarnessRun)
+            if (!state.IsHarnessRun && !RetrogradeContext.Quiet)
             {
                 Console.WriteLine($"[District plan] best of {maxPlans} attempts (attempt {bestAttemptIndex}): placed {bestRoomsPlaced}/{maxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}, new connectors {finalNewConnectors}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore, includeNewConnectors: true)}.");
             }

@@ -228,7 +228,7 @@ namespace Retrograde.Passes
                 ? $", forced remaining {bestOutcome?.Metadata?.MissingRequiredPrefabs ?? prefabsToForcePlacement.Count}"
                 : string.Empty;
 
-            if (!state.IsHarnessRun)
+            if (!state.IsHarnessRun && !RetrogradeContext.Quiet)
             {
                 Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{MaxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
             }
