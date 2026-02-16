@@ -100,9 +100,10 @@ namespace Retrograde.Passes
                     var bestPlacement = (PlacedObject)null;
                     PlacedRoom bestRoom = new PlacedRoom();
                     List<OpenConnector> bestNewOpenConnectors = null;
+                    var baseline = ScoringUtil.ComputePlacementBaseline(plannedRooms);
                     int currentBridgeCount = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
-                    double bestScore = ScoringUtil.ScorePlacementCandidate(
-                        state.scoringSystem, currentBridgeCount, 0, plannedRooms, plannedOpenConnectors);
+                    double bestScore = ScoringUtil.ScoreBaseline(
+                        state.scoringSystem, baseline, currentBridgeCount, 0, plannedOpenConnectors);
                     bool bestPlacementUsesRequired = false;
                     string bestPlacementPrefabId = null;
                     bool attemptedRequiredForThisConnector = false;
@@ -192,9 +193,8 @@ namespace Retrograde.Passes
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
                             int bridgeScore = BridgeUtil.CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
 
-                            var roomsWithCandidate = new List<PlacedRoom>(plannedRooms) { candidateRoom };
                             double candidateScore = ScoringUtil.ScorePlacementCandidate(
-                                state.scoringSystem, bridgeScore, newOpenConnectors.Count, roomsWithCandidate, connectorsAfterPlacement);
+                                state.scoringSystem, baseline, candidateRoom, bridgeScore, newOpenConnectors.Count, connectorsAfterPlacement);
 
                             bool candidateIsForced = useRequired;
                             if (bestPlacement == null
