@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "du_outlaws_template gen_quest 0 0 0 0"
+      "commandLineArgs": "du_outlaws_template gen_retrograde 0 0 0 Spacer \"Ore Station\" poi"
     }
   }
 }

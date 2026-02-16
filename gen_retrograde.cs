@@ -21,6 +21,21 @@ namespace FrankyCLI
 
         public static int Generate(string[] args)
         {
+            if (args.Length < 5)
+            {
+                Console.WriteLine("Usage: retrograde <modname> <mode> <prefix> <item> <form> [faction] [stationdesign] [poi|bounty] [quiet]");
+                Console.WriteLine("  modname        - Output mod name (without .esm)");
+                Console.WriteLine("  mode           - Generation mode");
+                Console.WriteLine("  prefix         - EditorID prefix");
+                Console.WriteLine("  item           - Item identifier");
+                Console.WriteLine("  form           - Form identifier");
+                Console.WriteLine("  faction        - (optional) Crimsonfleet, Ecliptic, Varuun, Spacer");
+                Console.WriteLine("  stationdesign  - (optional) Station design name");
+                Console.WriteLine("  poi|bounty     - (optional) Quest type (default: bounty)");
+                Console.WriteLine("  quiet          - (optional) Suppress score output");
+                return 1;
+            }
+
             Random random = RandomProvider.Random;
             //StarfieldMod myMod;
             string modname = args[0];

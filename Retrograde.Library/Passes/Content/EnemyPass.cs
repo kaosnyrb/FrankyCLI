@@ -101,6 +101,14 @@ public class EnemyPass : IGenPass
             }
         }
 
+        // If there was no boss-room candidate, promote the first regular
+        // candidate so the dungeon always has a boss NPC.
+        if (reservedBoss == null && candidates.Count > 0)
+        {
+            reservedBoss = candidates[0];
+            candidates.RemoveAt(0);
+        }
+
         enemyCap = Math.Min(enemyCap, candidates.Count);
         var chosenSpawns = ChooseCandidates(candidates, enemyCap);
         if (chosenSpawns.Count == 0 && reservedBoss == null)
