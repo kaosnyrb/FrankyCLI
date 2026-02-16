@@ -99,6 +99,9 @@ namespace Retrograde.Passes
             if (state?.placedRooms == null || state.placedRooms.Count == 0)
                 return;
 
+            if (state.IsHarnessRun)
+                return; // Skip actual NPC/armor creation during harness scoring runs
+
             // Step 1: Select a faction-appropriate bounty name
             _bountyName = GetBountyName(state.Faction);
 
@@ -195,10 +198,13 @@ namespace Retrograde.Passes
             if (factionCrew == null)
                 return null;
 
-            // Get a boss-tier NPC for the bounty target
-            var npc = factionCrew.GetBoss("district");
-            if (npc == null)
+            // Get a boss-tier NPC as a template — do NOT mutate the shared instance
+            var template = factionCrew.GetBoss("district");
+            if (template == null)
                 return null;
+
+            // Clone so we don't corrupt the shared boss NPC used by EnemyPass
+            var npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, template, respawn: true);
 
             // Override the name with the bounty name
             npc.Name = bountyName;

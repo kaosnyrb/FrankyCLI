@@ -89,8 +89,8 @@ namespace Retrograde.Chains
             newQuest.SetScriptProperty("retrograde_bounty_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(faction)));
 
             //Debugging
-            newQuest.SetScriptProperty("retrograde_bounty_quest", "MinGangMembers", 0);
-            newQuest.SetScriptProperty("retrograde_bounty_quest", "MaxGangMembers", 0);
+            newQuest.SetScriptProperty("retrograde_bounty_quest", "MinGangMembers", 1);
+            newQuest.SetScriptProperty("retrograde_bounty_quest", "MaxGangMembers", 3);
 
             // POI Name
             //newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());
@@ -323,7 +323,6 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> has turned <Alias=PrimaryRef> into an Ecliptic supply depot in the <Alias=TargetSystemLocation> system. Sever their logistics network.",
                             "<Alias=BountyNpc> is running double shifts on the ore processors at <Alias=PrimaryRef> to fuel Ecliptic expansion. Shut down production.",
                             "Explosives traced to Ecliptic operations were manufactured at <Alias=PrimaryRef> under <Alias=BountyNpc>. Seize the facility and destroy the stockpile.",
-                            "<Alias=BountyNpc> has fortified the cargo bays of <Alias=PrimaryRef> with Ecliptic gun emplacements. Board the station and dismantle the defenses.",
                             "Ecliptic convoys are shuttling processed ore from <Alias=PrimaryRef> to unknown coordinates under <Alias=BountyNpc>. Cut off the pipeline.",
                         };
                     return new List<string>

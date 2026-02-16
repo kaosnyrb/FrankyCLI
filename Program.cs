@@ -67,7 +67,7 @@ switch(mode)
     case "gen_quest":
         res = gen_quest_main.Generate(args);
         break;
-    case "harness":
+    case "gen_harness":
         res = gen_harness.Generate(args);
         break;
     default:

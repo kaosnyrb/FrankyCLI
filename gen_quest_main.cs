@@ -61,8 +61,8 @@ namespace FrankyCLI
 
                 AITools.AIMODE = false;
 
-                //var outlawQuest = new RetrogradeQuest();
-                var outlawQuest = new RetrogradeBountyQuest();
+                var outlawQuest = new RetrogradeQuest();
+                //var outlawQuest = new RetrogradeBountyQuest();
                 //
                 //var outlawQuest = new StaticLayoutQuestChain(myMod);
                 //outlawQuest.InvestigationTemplate = "Space Station Activator - spacer Medium light guard";

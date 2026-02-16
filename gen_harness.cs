@@ -70,7 +70,7 @@ namespace FrankyCLI
                 Console.WriteLine($"Faction: {faction}, Size: {size}, Runs: {runs}");
 
                 var harness = new OreStationWeightHarness(
-                    designFactory: () => new HabStation(),
+                    designFactory: () => new OreStation(),
                     faction: faction,
                     size: size);
 

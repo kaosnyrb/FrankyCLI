@@ -64,8 +64,8 @@ namespace Retrograde.Chains
             newQuest.SetScriptProperty("retrograde_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(faction)));
 
             //Debugging
-            newQuest.SetScriptProperty("retrograde_quest", "MinGangMembers", 0);
-            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 0);
+            newQuest.SetScriptProperty("retrograde_quest", "MinGangMembers", 1);
+            newQuest.SetScriptProperty("retrograde_quest", "MaxGangMembers", 3);
 
             // POI Name
             newQuest.SetScriptAliasScriptObject("DefaultAliasMapMarkerScript", "UnexploredName", stationnamemessage.instance.ToLink<IStarfieldMajorRecordGetter>());

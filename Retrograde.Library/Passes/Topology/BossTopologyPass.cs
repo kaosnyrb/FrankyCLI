@@ -232,6 +232,11 @@ namespace Retrograde.Passes
             {
                 Console.WriteLine($"[Boss plan] best of {maxPlans} attempts (attempt {bestPlanAttempt}): placed {bestRoomsPlaced}/{MaxRoomsToPlace} rooms, bridgeable pairs {bestBridgeablePairs}{forcedInfo}, {ScoringUtil.PrettyPrintScore(finalScore)}.");
             }
+
+            if (bestRoomsPlaced == 0)
+            {
+                throw new Exception("Failed to place boss room");
+            }
         }
 
         /// <summary>
