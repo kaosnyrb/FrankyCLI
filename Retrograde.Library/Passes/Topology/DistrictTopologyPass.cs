@@ -100,7 +100,9 @@ namespace Retrograde.Passes
                     var bestPlacement = (PlacedObject)null;
                     PlacedRoom bestRoom = new PlacedRoom();
                     List<OpenConnector> bestNewOpenConnectors = null;
-                    int bestBridgeScore = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
+                    int currentBridgeCount = BridgeUtil.CountBridgeablePairs(plannedOpenConnectors, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
+                    double bestScore = ScoringUtil.ScorePlacementCandidate(
+                        state.scoringSystem, currentBridgeCount, 0, plannedRooms, plannedOpenConnectors);
                     bool bestPlacementUsesRequired = false;
                     string bestPlacementPrefabId = null;
                     bool attemptedRequiredForThisConnector = false;
@@ -190,13 +192,17 @@ namespace Retrograde.Passes
                             connectorsAfterPlacement.AddRange(newOpenConnectors);
                             int bridgeScore = BridgeUtil.CountBridgeablePairs(connectorsAfterPlacement, yMin, bridgeMaxHorizontalSpan, bridgeMaxVerticalOffset, bridgePrefabKeys);
 
+                            var roomsWithCandidate = new List<PlacedRoom>(plannedRooms) { candidateRoom };
+                            double candidateScore = ScoringUtil.ScorePlacementCandidate(
+                                state.scoringSystem, bridgeScore, newOpenConnectors.Count, roomsWithCandidate, connectorsAfterPlacement);
+
                             bool candidateIsForced = useRequired;
                             if (bestPlacement == null
                                 || (candidateIsForced && !bestPlacementUsesRequired)
-                                || (candidateIsForced && bestPlacementUsesRequired && bridgeScore > bestBridgeScore)
-                                || (!candidateIsForced && !bestPlacementUsesRequired && bridgeScore > bestBridgeScore))
+                                || (candidateIsForced && bestPlacementUsesRequired && candidateScore > bestScore)
+                                || (!candidateIsForced && !bestPlacementUsesRequired && candidateScore > bestScore))
                             {
-                                bestBridgeScore = bridgeScore;
+                                bestScore = candidateScore;
                                 bestPlacement = candidatePlacement;
                                 bestRoom = candidateRoom;
                                 bestNewOpenConnectors = newOpenConnectors;

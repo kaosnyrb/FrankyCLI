@@ -81,6 +81,23 @@ public static class ConnectorSelectionUtil
         return best;
     }
 
+    public static OpenConnector ChooseFromFarthestK(List<OpenConnector> openConnectors, P3Float clusterCenter, int k = 3)
+    {
+        if (openConnectors == null || openConnectors.Count == 0)
+            throw new ArgumentException("openConnectors cannot be empty when choosing a connector.", nameof(openConnectors));
+
+        if (openConnectors.Count <= k)
+            return openConnectors[RandomProvider.Random.Next(openConnectors.Count)];
+
+        var ranked = openConnectors
+            .Select((c, idx) => new { Connector = c, DistSq = MathUtil.DistanceSquared(c.WorldPos, clusterCenter) })
+            .OrderByDescending(p => p.DistSq)
+            .Take(k)
+            .ToList();
+
+        return ranked[RandomProvider.Random.Next(ranked.Count)].Connector;
+    }
+
     public static RgConnectorInstance ChooseMostOutwardConnector(List<RgConnectorInstance> compatibles, P3Float targetWorldPos, P3Float clusterCenter)
     {
         if (compatibles == null || compatibles.Count == 0)

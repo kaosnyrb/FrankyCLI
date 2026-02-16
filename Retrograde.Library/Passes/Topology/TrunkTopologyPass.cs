@@ -65,6 +65,7 @@ namespace Retrograde.Passes
             public List<string> RequiredPrefabs { get; set; } = new List<string>();
             public HashSet<string> UsedPrefabIds { get; set; } = new HashSet<string>();
             public RoomUtils RoomUtils { get; set; } = null!;
+            public ScoringSystem ScoringSystem { get; set; } = null!;
         }
 
         /// <summary>
@@ -115,7 +116,8 @@ namespace Retrograde.Passes
                     DistrictType = districtType,
                     RequiredPrefabs = requiredPrefabs,
                     UsedPrefabIds = usedPrefabIds,
-                    RoomUtils = roomUtils
+                    RoomUtils = roomUtils,
+                    ScoringSystem = state.scoringSystem
                 };
 
                 int connectorsAddedCount = 0;
@@ -140,7 +142,7 @@ namespace Retrograde.Passes
                         break;
                     }
 
-                    var target = ConnectorSelectionUtil.ChooseFarthestOpenConnector(targetPool, context.ClusterCenter);
+                    var target = ConnectorSelectionUtil.ChooseFromFarthestK(targetPool, context.ClusterCenter, 3);
                     int openIndex = context.PlannedOpenConnectors.IndexOf(target);
                     if (openIndex < 0)
                     {
@@ -305,7 +307,7 @@ namespace Retrograde.Passes
             public PlacedObject? Placement;
             public PlacedRoom Room;
             public List<OpenConnector>? NewOpenConnectors;
-            public int BridgeScore;
+            public double Score;
         }
 
         private class PlacementResult
@@ -329,12 +331,14 @@ namespace Retrograde.Passes
             PlacedObject? bestPlacement = null;
             PlacedRoom bestRoom = new PlacedRoom();
             List<OpenConnector>? bestNewOpenConnectors = null;
-            int bestBridgeScore = BridgeUtil.CountBridgeablePairs(
+            int currentBridgeCount = BridgeUtil.CountBridgeablePairs(
                 context.PlannedOpenConnectors,
                 context.YMin,
                 BridgeMaxHorizontalSpan,
                 BridgeMaxVerticalOffset,
                 context.BridgePrefabKeys);
+            double bestScore = ScoringUtil.ScorePlacementCandidate(
+                context.ScoringSystem, currentBridgeCount, 0, context.PlannedRooms, context.PlannedOpenConnectors);
             bool bestPlacementUsesRequired = false;
             string? bestPlacementPrefabId = null;
             bool attemptedRequiredForThisConnector = false;
@@ -375,10 +379,10 @@ namespace Retrograde.Passes
                 bool candidateIsForced = useRequired;
                 if (bestPlacement == null
                     || (candidateIsForced && !bestPlacementUsesRequired)
-                    || (candidateIsForced && bestPlacementUsesRequired && candidate.BridgeScore > bestBridgeScore)
-                    || (!candidateIsForced && !bestPlacementUsesRequired && candidate.BridgeScore > bestBridgeScore))
+                    || (candidateIsForced && bestPlacementUsesRequired && candidate.Score > bestScore)
+                    || (!candidateIsForced && !bestPlacementUsesRequired && candidate.Score > bestScore))
                 {
-                    bestBridgeScore = candidate.BridgeScore;
+                    bestScore = candidate.Score;
                     bestPlacement = candidate.Placement;
                     bestRoom = candidate.Room;
                     bestNewOpenConnectors = candidate.NewOpenConnectors;
@@ -412,7 +416,7 @@ namespace Retrograde.Passes
             PlacementContext context)
         {
             CandidatePlacement? bestCandidate = null;
-            int bestBridgeScore = -1;
+            double bestScore = double.MinValue;
 
             var yawOrder = Enumerable.Range(0, 4)
                 .OrderBy(_ => RandomProvider.Random.Next())
@@ -483,16 +487,20 @@ namespace Retrograde.Passes
                     BridgeMaxVerticalOffset,
                     context.BridgePrefabKeys);
 
-                // Keep the rotation with the best bridge score
-                if (bestCandidate == null || bridgeScore > bestBridgeScore)
+                var roomsWithCandidate = new List<PlacedRoom>(context.PlannedRooms) { candidateRoom };
+                double candidateScore = ScoringUtil.ScorePlacementCandidate(
+                    context.ScoringSystem, bridgeScore, newOpenConnectors.Count, roomsWithCandidate, connectorsAfterPlacement);
+
+                // Keep the rotation with the best composite score
+                if (bestCandidate == null || candidateScore > bestScore)
                 {
-                    bestBridgeScore = bridgeScore;
+                    bestScore = candidateScore;
                     bestCandidate = new CandidatePlacement
                     {
                         Placement = candidatePlacement,
                         Room = candidateRoom,
                         NewOpenConnectors = newOpenConnectors,
-                        BridgeScore = bridgeScore
+                        Score = candidateScore
                     };
                 }
             }

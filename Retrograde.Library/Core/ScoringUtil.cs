@@ -266,6 +266,34 @@ public static class ScoringUtil
         return penalty;
     }
 
+    /// <summary>
+    /// Lightweight composite score for comparing placement candidates within a single step.
+    /// Uses the same weights from ScoringSystem as the plan-level scoring, applied to
+    /// metrics that are cheap to compute per-candidate: bridging, connector viability,
+    /// size diversity, area, clustering, room reuse, and new connector count.
+    /// </summary>
+    public static double ScorePlacementCandidate(
+        ScoringSystem scoring,
+        int bridgeScore,
+        int newConnectorCount,
+        IReadOnlyList<PlacedRoom> roomsIncludingCandidate,
+        IReadOnlyList<OpenConnector> connectorsAfterPlacement)
+    {
+        double viability = CalculateConnectorViabilityArea(roomsIncludingCandidate, connectorsAfterPlacement);
+        double smallChain = CalculateSmallRoomChainPenalty(roomsIncludingCandidate);
+        double area = CalculateTotalArea(roomsIncludingCandidate);
+        double clustering = CalculateAverageMinimumDistance(roomsIncludingCandidate);
+        double roomReuse = CalculateRoomReuseScore(roomsIncludingCandidate);
+
+        return (bridgeScore * scoring.BridgingWeight)
+             + (newConnectorCount * scoring.NewConnectorsWeight)
+             + ((area / 10) * scoring.AreaWeight)
+             + ((clustering / 10) * scoring.ClusteringWeight)
+             + (smallChain * scoring.SizeDiversityWeight)
+             + (roomReuse * scoring.RoomReuseWeight)
+             + (viability * scoring.ConnectorViabilityWeight);
+    }
+
     private static double GetRoomFootprintArea(PlacedRoom room)
     {
         if (room.Prefab?.packin_instance == null)
