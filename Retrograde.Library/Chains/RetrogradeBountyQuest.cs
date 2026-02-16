@@ -247,10 +247,14 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> has been running a smuggling ring from <Alias=PrimaryRef>. Put an end to their operation in the <Alias=TargetSystemLocation> system.",
                             "<Alias=BountyNpc> is harboring wanted pirates aboard <Alias=PrimaryRef> in the <Alias=TargetSystemLocation> system. Storm the habitat decks and bring them to justice.",
                             "Crimson Fleet operatives under <Alias=BountyNpc> have turned <Alias=PrimaryRef> into a black market hub. Shut it down.",
-                            "Distress calls from <Alias=PrimaryRef> confirm <Alias=BountyNpc> has taken the crew hostage. Board the station and end the pirate occupation.",
                             "Intelligence reports link <Alias=BountyNpc> on <Alias=PrimaryRef> to a string of freighter hijackings in the <Alias=TargetSystemLocation> system. Eliminate the threat.",
                             "<Alias=BountyNpc> is recruiting new Crimson Fleet members from the population of <Alias=PrimaryRef>. Put a stop to it before their numbers grow.",
                             "Merchants are refusing to enter the <Alias=TargetSystemLocation> system while <Alias=BountyNpc> operates from <Alias=PrimaryRef>. Remove them from the station.",
+                            "Crimson Fleet activity around <Alias=PrimaryRef> has spiked since <Alias=BountyNpc> arrived. Board the station and shut down their operation.",
+                            "<Alias=BountyNpc> is broadcasting fake distress signals from <Alias=PrimaryRef> to lure in unsuspecting vessels. End the deception.",
+                            "Weapons caches linked to <Alias=BountyNpc> have been tracked to <Alias=PrimaryRef> in the <Alias=TargetSystemLocation> system. Seize the station and confiscate the arms.",
+                            "<Alias=BountyNpc> has declared <Alias=PrimaryRef> sovereign Crimson Fleet territory. Remind them it's not theirs to claim.",
+                            "Patrols have spotted Crimson Fleet ships docking at <Alias=PrimaryRef> under <Alias=BountyNpc>. Board the station and scatter their fleet.",
                         };
                     if (isOre)
                         return new List<string>
@@ -260,11 +264,14 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> is using the mining rigs on <Alias=PrimaryRef> to refine stolen cargo. End their salvage operation.",
                             "Ore shipments from <Alias=PrimaryRef> have stopped since <Alias=BountyNpc> and the Crimson Fleet moved in. Retake the facility.",
                             "<Alias=BountyNpc> is selling stolen minerals from <Alias=PrimaryRef> to fund Crimson Fleet raids across the <Alias=TargetSystemLocation> system. Cut off their income.",
-                            "The mining crews at <Alias=PrimaryRef> are being worked to death by <Alias=BountyNpc>. Board the station and liberate the workers.",
                             "Crimson Fleet smugglers under <Alias=BountyNpc> are hiding contraband in the ore holds of <Alias=PrimaryRef>. Seize the station and confiscate the goods.",
                             "<Alias=BountyNpc> has rigged the refinery on <Alias=PrimaryRef> to process stolen ship components. Shut down their chop shop in the <Alias=TargetSystemLocation> system.",
                             "Pirates led by <Alias=BountyNpc> are using <Alias=PrimaryRef> to strip captured vessels for parts. Board the mining platform and stop them.",
                             "<Alias=BountyNpc> has claimed <Alias=PrimaryRef> and is charging a toll on every mining hauler in the <Alias=TargetSystemLocation> system. End their racket.",
+                            "Crimson Fleet crews under <Alias=BountyNpc> are using <Alias=PrimaryRef> to launder stolen goods through fake ore manifests. Expose and eliminate them.",
+                            "Surveillance drones near <Alias=PrimaryRef> confirm <Alias=BountyNpc> is stockpiling refined metals for the Crimson Fleet. Seize the reserves.",
+                            "<Alias=BountyNpc> has turned the extraction bays of <Alias=PrimaryRef> into a Crimson Fleet armory. Dismantle the operation in the <Alias=TargetSystemLocation> system.",
+                            "Fuel depots around <Alias=PrimaryRef> are being drained by pirates under <Alias=BountyNpc>. Retake the mining station and restore supply lines.",
                         };
                     return new List<string>
                     {
@@ -278,13 +285,17 @@ namespace Retrograde.Chains
                         "Stolen cargo has been traced to <Alias=PrimaryRef> where <Alias=BountyNpc> runs a Crimson Fleet fence operation. Recover what you can and eliminate them.",
                         "The wreck of <Alias=PrimaryRef> is crawling with Crimson Fleet raiders loyal to <Alias=BountyNpc>. Clear every corridor in the <Alias=TargetSystemLocation> system.",
                         "<Alias=BountyNpc> has turned the tangled passages of <Alias=PrimaryRef> into a death trap for bounty hunters. Prove them wrong.",
+                        "Crimson Fleet deserters say <Alias=BountyNpc> has gone rogue and is hoarding loot at <Alias=PrimaryRef>. Collect the bounty.",
+                        "<Alias=BountyNpc> is broadcasting encrypted Crimson Fleet orders from deep inside <Alias=PrimaryRef>. Jam their signal permanently.",
+                        "Salvage teams refuse to enter <Alias=PrimaryRef> while <Alias=BountyNpc> holds the lower decks. Clear a path through the station.",
+                        "Sensor ghosts around <Alias=PrimaryRef> suggest <Alias=BountyNpc> is running electronic warfare for the Crimson Fleet. Board and disable their equipment.",
+                        "<Alias=BountyNpc> has welded blast doors across <Alias=PrimaryRef> to create a Crimson Fleet fortress. Crack it open and take them down.",
                     };
 
                 case "Ecliptic":
                     if (isHab)
                         return new List<string>
                         {
-                            "Ecliptic mercenaries under <Alias=BountyNpc> have occupied <Alias=PrimaryRef> and are holding its crew hostage. Move in and secure the station.",
                             "<Alias=BountyNpc> is running an Ecliptic command post from <Alias=PrimaryRef>. Eliminate their leadership before they launch further attacks.",
                             "An Ecliptic cell led by <Alias=BountyNpc> has seized <Alias=PrimaryRef> in the <Alias=TargetSystemLocation> system. Board the station and restore order.",
                             "<Alias=BountyNpc> has fortified <Alias=PrimaryRef> as an Ecliptic forward base. Dismantle their operation before reinforcements arrive.",
@@ -293,6 +304,11 @@ namespace Retrograde.Chains
                             "Ecliptic operatives under <Alias=BountyNpc> have converted <Alias=PrimaryRef> into a recruitment center. Shut it down before they grow stronger.",
                             "<Alias=BountyNpc> is holding <Alias=PrimaryRef> as leverage in a ransom scheme targeting the <Alias=TargetSystemLocation> system. Neutralize them.",
                             "Reports indicate <Alias=BountyNpc> is stockpiling weapons aboard <Alias=PrimaryRef> for an Ecliptic offensive. Intervene now.",
+                            "<Alias=BountyNpc> has locked down <Alias=PrimaryRef> and is using it as an Ecliptic interrogation site. Storm the station and shut it down.",
+                            "Ecliptic patrols around <Alias=PrimaryRef> have tripled since <Alias=BountyNpc> set up shop. Break through and neutralize their command post.",
+                            "<Alias=BountyNpc> is jamming communications in the <Alias=TargetSystemLocation> system from <Alias=PrimaryRef>. Board the station and restore the network.",
+                            "Ecliptic forces under <Alias=BountyNpc> are using <Alias=PrimaryRef> as a staging area for raids on trade convoys. Disrupt their plans.",
+                            "Surveillance feeds from <Alias=PrimaryRef> show <Alias=BountyNpc> drilling Ecliptic squads for a major assault. Hit them before they launch.",
                         };
                     if (isOre)
                         return new List<string>
@@ -305,6 +321,10 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> is running an illegal smelting operation on <Alias=PrimaryRef> to arm Ecliptic squads. Board the facility and shut it down.",
                             "The refinery at <Alias=PrimaryRef> is producing military-grade alloys for <Alias=BountyNpc> and the Ecliptic. Reclaim the station.",
                             "<Alias=BountyNpc> has turned <Alias=PrimaryRef> into an Ecliptic supply depot in the <Alias=TargetSystemLocation> system. Sever their logistics network.",
+                            "<Alias=BountyNpc> is running double shifts on the ore processors at <Alias=PrimaryRef> to fuel Ecliptic expansion. Shut down production.",
+                            "Explosives traced to Ecliptic operations were manufactured at <Alias=PrimaryRef> under <Alias=BountyNpc>. Seize the facility and destroy the stockpile.",
+                            "<Alias=BountyNpc> has fortified the cargo bays of <Alias=PrimaryRef> with Ecliptic gun emplacements. Board the station and dismantle the defenses.",
+                            "Ecliptic convoys are shuttling processed ore from <Alias=PrimaryRef> to unknown coordinates under <Alias=BountyNpc>. Cut off the pipeline.",
                         };
                     return new List<string>
                     {
@@ -318,6 +338,11 @@ namespace Retrograde.Chains
                         "Ecliptic holdouts loyal to <Alias=BountyNpc> refuse to abandon <Alias=PrimaryRef>. Sweep the station and clear them out.",
                         "Intercepted comms reveal <Alias=BountyNpc> is planning an Ecliptic strike from <Alias=PrimaryRef>. Board the station and stop them cold.",
                         "<Alias=BountyNpc> has wired <Alias=PrimaryRef> with defensive turrets for the Ecliptic. Fight through the corridors and take them down.",
+                        "Ecliptic recon teams under <Alias=BountyNpc> are mapping patrol routes from <Alias=PrimaryRef>. Destroy their intelligence network.",
+                        "<Alias=BountyNpc> has converted <Alias=PrimaryRef> into an Ecliptic arms cache in the <Alias=TargetSystemLocation> system. Breach the station and seize the weapons.",
+                        "Automated distress beacons near <Alias=PrimaryRef> are being disabled by <Alias=BountyNpc> to cover Ecliptic movements. Board the station and stop them.",
+                        "<Alias=BountyNpc> has barricaded the access points of <Alias=PrimaryRef> and is directing Ecliptic raids from within. Find a way inside and take them out.",
+                        "Ecliptic forces loyal to <Alias=BountyNpc> have mined the corridors of <Alias=PrimaryRef>. Navigate the hazards and eliminate the threat.",
                     };
 
                 case "Varuun":
@@ -333,6 +358,11 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> has declared <Alias=PrimaryRef> sacred ground for the Great Serpent in the <Alias=TargetSystemLocation> system. Reclaim the station by force.",
                             "The crew of <Alias=PrimaryRef> have gone silent since <Alias=BountyNpc> and the Va'ruun arrived. Board the station and find out why.",
                             "<Alias=BountyNpc> is indoctrinating captives aboard <Alias=PrimaryRef> into the Va'ruun faith. Storm the living quarters and stop the brainwashing.",
+                            "Va'ruun enforcers under <Alias=BountyNpc> have sealed <Alias=PrimaryRef> and declared it holy ground. Breach the station and reclaim it.",
+                            "<Alias=BountyNpc> is channeling power from <Alias=PrimaryRef> into a Va'ruun signal beacon in the <Alias=TargetSystemLocation> system. Destroy the transmitter.",
+                            "Anomalous energy readings from <Alias=PrimaryRef> suggest <Alias=BountyNpc> is conducting Va'ruun experiments. Investigate and neutralize the threat.",
+                            "<Alias=BountyNpc> has erected Great Serpent shrines throughout <Alias=PrimaryRef>. Tear them down and drive the Va'ruun out.",
+                            "Va'ruun war parties are gathering at <Alias=PrimaryRef> under <Alias=BountyNpc>. Strike before they can organize a crusade across the <Alias=TargetSystemLocation> system.",
                         };
                     if (isOre)
                         return new List<string>
@@ -345,6 +375,10 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> has converted the refinery at <Alias=PrimaryRef> into a Va'ruun forge in the <Alias=TargetSystemLocation> system. Dismantle their operation.",
                             "Mining haulers report Va'ruun patrols around <Alias=PrimaryRef> enforced by <Alias=BountyNpc>. Break through and reclaim the station.",
                             "<Alias=BountyNpc> is stockpiling processed ore at <Alias=PrimaryRef> for a Va'ruun war effort. Board the station and confiscate their reserves.",
+                            "Va'ruun acolytes under <Alias=BountyNpc> have inscribed Great Serpent glyphs into the refinery walls of <Alias=PrimaryRef>. Purge the station.",
+                            "<Alias=BountyNpc> is smelting ore at <Alias=PrimaryRef> to forge Va'ruun ceremonial blades. Destroy the forge and eliminate them.",
+                            "<Alias=BountyNpc> has turned the processing plant at <Alias=PrimaryRef> into a Va'ruun weapons foundry. Shut it down before they arm their crusade.",
+                            "Va'ruun forces under <Alias=BountyNpc> are using <Alias=PrimaryRef> to refine fuel for a pilgrimage fleet. Seize the station in the <Alias=TargetSystemLocation> system.",
                         };
                     return new List<string>
                     {
@@ -358,6 +392,11 @@ namespace Retrograde.Chains
                         "Disappearances near <Alias=PrimaryRef> are linked to <Alias=BountyNpc> and a Va'ruun abduction ring. Board the station and rescue the missing.",
                         "The Great Serpent's influence is spreading from <Alias=PrimaryRef> under <Alias=BountyNpc>. Infiltrate the station and cut off the head.",
                         "<Alias=BountyNpc> has declared a Va'ruun holy war from the depths of <Alias=PrimaryRef>. Enter the station and prove the Serpent wrong.",
+                        "Va'ruun whispers are spreading from <Alias=PrimaryRef> where <Alias=BountyNpc> operates a propaganda network. Silence the broadcast.",
+                        "<Alias=BountyNpc> has filled the corridors of <Alias=PrimaryRef> with toxic incense used in Va'ruun rituals. Push through the haze and end them.",
+                        "Scouts report Va'ruun symbols daubed on every bulkhead of <Alias=PrimaryRef>. <Alias=BountyNpc> is marking territory. Take it back.",
+                        "<Alias=BountyNpc> has converted the lower decks of <Alias=PrimaryRef> into a Great Serpent reliquary. Breach the sanctum and scatter the Va'ruun.",
+                        "Va'ruun fanatics loyal to <Alias=BountyNpc> are ambushing ships from the shadows of <Alias=PrimaryRef>. Clear the station corridor by corridor.",
                     };
 
                 case "Spacer":
@@ -374,6 +413,11 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> is running a chop shop on <Alias=PrimaryRef>, scrapping stolen ships for parts. Board the station and end their enterprise.",
                             "Spacers under <Alias=BountyNpc> are using <Alias=PrimaryRef> to ambush travelers passing through the <Alias=TargetSystemLocation> system. Shut them down.",
                             "No one docks at <Alias=PrimaryRef> anymore since <Alias=BountyNpc> took over with their Spacer crew. Take back the station.",
+                            "<Alias=BountyNpc> is running a protection racket from <Alias=PrimaryRef> in the <Alias=TargetSystemLocation> system. Put them out of business.",
+                            "Spacer gangs under <Alias=BountyNpc> have turned <Alias=PrimaryRef> into a black market bazaar. Board the station and clear them out.",
+                            "<Alias=BountyNpc> has been broadcasting threats from <Alias=PrimaryRef> demanding tribute from passing ships. Silence them.",
+                            "Supply shipments to the <Alias=TargetSystemLocation> system are being intercepted by Spacers operating from <Alias=PrimaryRef> under <Alias=BountyNpc>. End the blockade.",
+                            "<Alias=BountyNpc> has rigged the docking bay of <Alias=PrimaryRef> to trap visiting ships. Board from an alternate entry and take them down.",
                         };
                     if (isOre)
                         return new List<string>
@@ -388,6 +432,11 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> is auctioning off the mineral rights to <Alias=PrimaryRef> to the highest bidder. Board the station and cancel the sale.",
                             "Haulers are being hijacked near <Alias=PrimaryRef> by Spacers working for <Alias=BountyNpc>. Eliminate the source of the problem.",
                             "<Alias=BountyNpc> has rigged the mining charges at <Alias=PrimaryRef> as weapons against intruders. Board carefully and take them out.",
+                            "Spacer crews under <Alias=BountyNpc> are dumping toxic waste from <Alias=PrimaryRef> to keep patrols away. Push through and reclaim the station.",
+                            "<Alias=BountyNpc> has been fencing stolen equipment through the ore docks at <Alias=PrimaryRef>. Shut down the pipeline.",
+                            "The refinery at <Alias=PrimaryRef> is being used by <Alias=BountyNpc> to cook chem supplies for Spacer gangs. Destroy the lab and deal with them.",
+                            "<Alias=BountyNpc> has welded armor plating across the mining bays of <Alias=PrimaryRef>. Breach the station and root out the Spacers.",
+                            "Spacers loyal to <Alias=BountyNpc> are sabotaging competing mining operations from <Alias=PrimaryRef>. Board the station and put an end to it.",
                         };
                     return new List<string>
                     {
@@ -401,6 +450,11 @@ namespace Retrograde.Chains
                         "<Alias=BountyNpc> has welded shut most exits on <Alias=PrimaryRef> to funnel intruders into kill zones. Find another way in and end them.",
                         "A bounty hunter went after <Alias=BountyNpc> on <Alias=PrimaryRef> and never came back. Finish what they started.",
                         "<Alias=BountyNpc> and their Spacers have turned <Alias=PrimaryRef> into a fortress of scrap and salvage. Tear it apart.",
+                        "Spacer scavengers under <Alias=BountyNpc> are stripping the wiring out of <Alias=PrimaryRef> to sell on the black market. Stop them before the station falls apart.",
+                        "<Alias=BountyNpc> has sealed off sections of <Alias=PrimaryRef> and is using them as a Spacer armory. Find a way in and clear them out.",
+                        "Garbled transmissions from <Alias=PrimaryRef> confirm <Alias=BountyNpc> is running Spacer operations deep inside the station. Move in and shut them down.",
+                        "<Alias=BountyNpc> is using the rusted corridors of <Alias=PrimaryRef> to store stolen cargo. Recover the goods and eliminate the Spacers.",
+                        "Spacer scouts at <Alias=PrimaryRef> are feeding target data to <Alias=BountyNpc> for ambushes across the <Alias=TargetSystemLocation> system. Destroy their outpost.",
                     };
             }
         }
