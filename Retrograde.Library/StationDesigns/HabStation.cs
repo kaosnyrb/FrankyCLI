@@ -82,6 +82,8 @@ public class HabStation : IStationDesign
             RoomReuseWeight = -1.19,
             ConnectorViabilityWeight = 0.67,
             DuplicateRoomPenaltyWeight = -2.0,
+            CompactnessWeight = 5.0,
+            DeadConnectorPenaltyWeight = -2.0,
             Effort = 100
         };
     }

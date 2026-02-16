@@ -67,6 +67,9 @@ switch(mode)
     case "gen_quest":
         res = gen_quest_main.Generate(args);
         break;
+    case "harness":
+        res = gen_harness.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;

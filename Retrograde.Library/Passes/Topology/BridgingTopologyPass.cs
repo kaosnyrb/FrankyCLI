@@ -143,7 +143,10 @@ namespace Retrograde.Passes
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(context.PlannedRooms);
                 var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(context.PlannedRooms, context.PlannedOpenConnectors);
                 var duplicateRoomPenalty = ScoringUtil.CalculateDuplicateRoomPenalty(context.PlannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgeablePairs, overlapCount, Math.Max(0, newConnectors), planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability, duplicateRoomPenalty);
+                var planBaseline = ScoringUtil.ComputePlacementBaseline(context.PlannedRooms);
+                var planCompactness = planBaseline.Compactness;
+                var planDeadConnectors = ScoringUtil.CountDeadConnectors(planBaseline.RoomBounds, null, context.PlannedOpenConnectors);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, bridgesPlaced, bridgeablePairs, overlapCount, Math.Max(0, newConnectors), planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability, duplicateRoomPenalty, planCompactness, planDeadConnectors);
 
                 return new PlanOutcome<BridgePlanMeta>
                 {

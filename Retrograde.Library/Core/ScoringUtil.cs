@@ -10,7 +10,7 @@ namespace Retrograde;
 
 public static class ScoringUtil
 {
-    public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0, double connectorViability = 0, double duplicateRoomPenalty = 0)
+    public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0, double connectorViability = 0, double duplicateRoomPenalty = 0, double compactness = 0, int deadConnectors = 0)
     {
         var components = new Dictionary<string, double>
         {
@@ -23,7 +23,9 @@ public static class ScoringUtil
             { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight },
             { "RoomReuse", roomReuseScore * scoringSystem.RoomReuseWeight },
             { "ConnectorViability", connectorViability * scoringSystem.ConnectorViabilityWeight },
-            { "DuplicateRoomPenalty", duplicateRoomPenalty * scoringSystem.DuplicateRoomPenaltyWeight }
+            { "DuplicateRoomPenalty", duplicateRoomPenalty * scoringSystem.DuplicateRoomPenaltyWeight },
+            { "Compactness", compactness * scoringSystem.CompactnessWeight },
+            { "DeadConnectors", deadConnectors * scoringSystem.DeadConnectorPenaltyWeight }
         };
 
         return new PlanScore
@@ -58,6 +60,8 @@ public static class ScoringUtil
         lines.Add("  " + FormatComponent(score, "RoomReuse", "roomReuse"));
         lines.Add("  " + FormatComponent(score, "ConnectorViability", "connectorViability"));
         lines.Add("  " + FormatComponent(score, "DuplicateRoomPenalty", "duplicateRoomPenalty"));
+        lines.Add("  " + FormatComponent(score, "Compactness", "compactness"));
+        lines.Add("  " + FormatComponent(score, "DeadConnectors", "deadConnectors"));
 
         return string.Join(Environment.NewLine, lines);
     }
@@ -116,6 +120,80 @@ public static class ScoringUtil
         }
 
         return sum / rooms.Count;
+    }
+
+    /// <summary>
+    /// Minimum surface-to-surface gap between two AABBs along each axis.
+    /// Returns 0 if they overlap or touch. More spatially accurate than center-to-center.
+    /// </summary>
+    public static double AabbGapDistance(RgAabb a, RgAabb b)
+    {
+        double gapX = Math.Max(0, Math.Max(a.Min.X - b.Max.X, b.Min.X - a.Max.X));
+        double gapY = Math.Max(0, Math.Max(a.Min.Y - b.Max.Y, b.Min.Y - a.Max.Y));
+        double gapZ = Math.Max(0, Math.Max(a.Min.Z - b.Max.Z, b.Min.Z - a.Max.Z));
+        return Math.Sqrt(gapX * gapX + gapY * gapY + gapZ * gapZ);
+    }
+
+    /// <summary>
+    /// Ratio of total room footprint area to the bounding box area of the whole layout.
+    /// 1.0 = perfectly packed, lower = more spread out / elongated. Returns 0 if no rooms.
+    /// </summary>
+    public static double CalculateCompactness(IReadOnlyList<RgAabb> roomBounds, double totalRoomArea)
+    {
+        if (roomBounds == null || roomBounds.Count == 0 || totalRoomArea <= 0)
+            return 0;
+
+        float minX = float.MaxValue, minY = float.MaxValue;
+        float maxX = float.MinValue, maxY = float.MinValue;
+        foreach (var b in roomBounds)
+        {
+            if (b.Min.X < minX) minX = b.Min.X;
+            if (b.Min.Y < minY) minY = b.Min.Y;
+            if (b.Max.X > maxX) maxX = b.Max.X;
+            if (b.Max.Y > maxY) maxY = b.Max.Y;
+        }
+
+        double bbArea = Math.Max(0, (double)(maxX - minX)) * Math.Max(0, (double)(maxY - minY));
+        if (bbArea <= 0)
+            return 0;
+
+        return totalRoomArea / bbArea;
+    }
+
+    /// <summary>
+    /// Counts connectors with viability clearance below a threshold (effectively dead ends
+    /// that will just be sealed). Higher count = more wasted branching potential.
+    /// </summary>
+    public static int CountDeadConnectors(
+        IReadOnlyList<RgAabb> roomBounds,
+        RgAabb? extraBounds,
+        IReadOnlyList<OpenConnector> openConnectors,
+        double deadThreshold = 5,
+        double defaultDepth = 20)
+    {
+        if (openConnectors == null || openConnectors.Count == 0)
+            return 0;
+
+        int deadCount = 0;
+        foreach (var open in openConnectors)
+        {
+            var dir = open.Parsed.Direction;
+            double minClearance = defaultDepth;
+
+            for (int i = 0; i < roomBounds.Count; i++)
+            {
+                UpdateClearance(ref minClearance, open.WorldPos, dir, roomBounds[i]);
+            }
+            if (extraBounds.HasValue)
+            {
+                UpdateClearance(ref minClearance, open.WorldPos, dir, extraBounds.Value);
+            }
+
+            if (Math.Max(0, minClearance) < deadThreshold)
+                deadCount++;
+        }
+
+        return deadCount;
     }
 
     public static double CalculateSmallRoomChainPenalty(IReadOnlyList<PlacedRoom> rooms, double smallAreaThreshold = 200)
@@ -283,6 +361,7 @@ public static class ScoringUtil
         public Dictionary<string, int> PrefabCounts;
         public double RoomReuseScore;
         public List<RgAabb> RoomBounds;
+        public double Compactness;
     }
 
     public static PlacementBaseline ComputePlacementBaseline(IReadOnlyList<PlacedRoom> rooms)
@@ -317,7 +396,7 @@ public static class ScoringUtil
         }
         baseline.Area = totalArea;
 
-        // Clustering: per-room min distances (O(n²) once, then O(n) per candidate)
+        // Clustering: per-room min AABB gap distances (O(n²) once, then O(n) per candidate)
         double sumMinDists = 0;
         if (n >= 2)
         {
@@ -327,8 +406,11 @@ public static class ScoringUtil
                 for (int j = 0; j < n; j++)
                 {
                     if (i == j) continue;
-                    double d = Math.Sqrt(MathUtil.DistanceSquared(baseline.RoomPositions[i], baseline.RoomPositions[j]));
-                    if (d < minDist) minDist = d;
+                    if (i < baseline.RoomBounds.Count && j < baseline.RoomBounds.Count)
+                    {
+                        double d = AabbGapDistance(baseline.RoomBounds[i], baseline.RoomBounds[j]);
+                        if (d < minDist) minDist = d;
+                    }
                 }
                 baseline.PerRoomMinDist[i] = minDist < double.MaxValue ? minDist : 0;
                 sumMinDists += baseline.PerRoomMinDist[i];
@@ -368,6 +450,9 @@ public static class ScoringUtil
         }
         baseline.RoomReuseScore = reuseScore;
 
+        // Compactness
+        baseline.Compactness = CalculateCompactness(baseline.RoomBounds, baseline.Area);
+
         return baseline;
     }
 
@@ -388,6 +473,7 @@ public static class ScoringUtil
         double smallChain = Math.Max(0, baseline.MaxSmallStreak - 1);
         double viability = CalculateConnectorViabilityFromBounds(
             baseline.RoomBounds, null, openConnectors);
+        int deadConnectors = CountDeadConnectors(baseline.RoomBounds, null, openConnectors);
 
         return (bridgeScore * scoring.BridgingWeight)
              + (newConnectorCount * scoring.NewConnectorsWeight)
@@ -395,7 +481,9 @@ public static class ScoringUtil
              + ((clustering / 10) * scoring.ClusteringWeight)
              + (smallChain * scoring.SizeDiversityWeight)
              + (baseline.RoomReuseScore * scoring.RoomReuseWeight)
-             + (viability * scoring.ConnectorViabilityWeight);
+             + (viability * scoring.ConnectorViabilityWeight)
+             + (baseline.Compactness * scoring.CompactnessWeight)
+             + (deadConnectors * scoring.DeadConnectorPenaltyWeight);
     }
 
     /// <summary>
@@ -412,13 +500,20 @@ public static class ScoringUtil
     {
         int n = baseline.RoomCount;
 
+        // Candidate AABB: computed once, used by clustering, viability, compactness, dead connectors
+        RgAabb? candidateAabb = null;
+        if (candidateRoom.Prefab?.packin_instance != null)
+            candidateAabb = ConnectorUtils.ToWorldAabbRotated(
+                candidateRoom.Prefab.packin_instance.ObjectBounds,
+                candidateRoom.WorldPos, candidateRoom.YawSteps);
+
         // Area: O(1) delta
         double candidateArea = GetRoomFootprintArea(candidateRoom);
         double totalArea = baseline.Area + candidateArea;
 
-        // Clustering: O(n) delta instead of O(n²)
+        // Clustering: O(n) delta using AABB gap distances instead of O(n²)
         double clustering;
-        if (n == 0)
+        if (n == 0 || candidateAabb == null)
         {
             clustering = 0;
         }
@@ -426,10 +521,9 @@ public static class ScoringUtil
         {
             double deltaSum = 0;
             double candidateMinDist = double.MaxValue;
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < baseline.RoomBounds.Count; i++)
             {
-                double dist = Math.Sqrt(MathUtil.DistanceSquared(
-                    baseline.RoomPositions[i], candidateRoom.WorldPos));
+                double dist = AabbGapDistance(baseline.RoomBounds[i], candidateAabb.Value);
                 // Existing room might now have a closer neighbor
                 if (dist < baseline.PerRoomMinDist[i])
                     deltaSum += dist - baseline.PerRoomMinDist[i];
@@ -466,13 +560,16 @@ public static class ScoringUtil
         }
 
         // Viability: uses cached room bounds, avoids recomputing AABBs
-        RgAabb? candidateAabb = null;
-        if (candidateRoom.Prefab?.packin_instance != null)
-            candidateAabb = ConnectorUtils.ToWorldAabbRotated(
-                candidateRoom.Prefab.packin_instance.ObjectBounds,
-                candidateRoom.WorldPos, candidateRoom.YawSteps);
         double viability = CalculateConnectorViabilityFromBounds(
             baseline.RoomBounds, candidateAabb, connectorsAfterPlacement);
+
+        // Compactness: recompute with candidate bounds included
+        var allBounds = new List<RgAabb>(baseline.RoomBounds);
+        if (candidateAabb.HasValue) allBounds.Add(candidateAabb.Value);
+        double compactness = CalculateCompactness(allBounds, totalArea);
+
+        // Dead connectors
+        int deadConnectors = CountDeadConnectors(baseline.RoomBounds, candidateAabb, connectorsAfterPlacement);
 
         return (bridgeScore * scoring.BridgingWeight)
              + (newConnectorCount * scoring.NewConnectorsWeight)
@@ -480,7 +577,9 @@ public static class ScoringUtil
              + ((clustering / 10) * scoring.ClusteringWeight)
              + (smallChain * scoring.SizeDiversityWeight)
              + (roomReuse * scoring.RoomReuseWeight)
-             + (viability * scoring.ConnectorViabilityWeight);
+             + (viability * scoring.ConnectorViabilityWeight)
+             + (compactness * scoring.CompactnessWeight)
+             + (deadConnectors * scoring.DeadConnectorPenaltyWeight);
     }
 
     /// <summary>

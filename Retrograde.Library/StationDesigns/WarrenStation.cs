@@ -85,6 +85,8 @@ public class WarrenStation : IStationDesign
             RoomReuseWeight = -2.0,
             ConnectorViabilityWeight = 3.0,
             DuplicateRoomPenaltyWeight = -2.0,
+            CompactnessWeight = 8.0,
+            DeadConnectorPenaltyWeight = -2.0,
             Effort = 300
         };
     }

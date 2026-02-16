@@ -13,6 +13,8 @@ public class ScoringSystem
     public double RoomReuseWeight;          // How important is reusing the same prefab multiple times
     public double ConnectorViabilityWeight; // How important is leaving connectors with viable space for the next room
     public double DuplicateRoomPenaltyWeight; // How important is penalising rooms that already appear in other cells
+    public double CompactnessWeight;         // How important is keeping the layout compact (room area / bounding box area)
+    public double DeadConnectorPenaltyWeight; // How important is penalising connectors with no room to expand
 
     public int Effort;
 }

@@ -238,7 +238,10 @@ namespace Retrograde.Passes
                 var planRoomReuse = ScoringUtil.CalculateRoomReuseScore(plannedRooms);
                 var connectorViability = ScoringUtil.CalculateConnectorViabilityArea(plannedRooms, plannedOpenConnectors);
                 var duplicateRoomPenalty = ScoringUtil.CalculateDuplicateRoomPenalty(plannedRooms);
-                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability, duplicateRoomPenalty);
+                var planBaseline = ScoringUtil.ComputePlacementBaseline(plannedRooms);
+                var planCompactness = planBaseline.Compactness;
+                var planDeadConnectors = ScoringUtil.CountDeadConnectors(planBaseline.RoomBounds, null, plannedOpenConnectors);
+                var planScore = ScoringUtil.ScorePlan(state.scoringSystem, roomsPlaced, bridgeablePairs, 0, connectorsAddedCount, planArea, planClustering, planSizeDiversity, planRoomReuse, connectorViability, duplicateRoomPenalty, planCompactness, planDeadConnectors);
                 int missingRequiredPrefabs = requiredPrefabs.Count;
                 double adjustedPlanScore = planScore.Total - (missingRequiredPrefabs > 0 ? 100000 * missingRequiredPrefabs : 0);
 
