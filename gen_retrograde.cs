@@ -7,12 +7,13 @@ using Retrograde;
 using Retrograde.AI;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.StationDesigns;
 using System;
 using System.IO;
 
 namespace FrankyCLI
 {
-    public class gen_quest_main
+    public class gen_retrograde
     {
         public static ModKey StarfieldModKey;
         public static IStarfieldModGetter _StarfieldMod;
@@ -62,18 +63,48 @@ namespace FrankyCLI
 
                 AITools.AIMODE = false;
 
-                //var outlawQuest = new StaticLayoutQuestChain(myMod);
-                //outlawQuest.InvestigationTemplate = "Space Station Activator - spacer Medium light guard";
-                //outlawQuest.DeepTempalte = "Space Destroy - unguarded";
-                //outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
-                List<IQuestchain> questchains = new List<IQuestchain>
-                {
-                   new LoopingLayoutQuestChain(myMod),
-                   new StaticLayoutQuestChain(myMod),
-                };
+                // Parse optional parameters: faction, station design, type (poi/bounty)
+                string faction = args.Length > 5 ? args[5] : null;
+                string stationDesignName = args.Length > 6 ? args[6] : null;
+                string questType = args.Length > 7 ? args[7] : null; // "poi" or "bounty"
 
-                var outlawQuest = questchains[random.Next(questchains.Count)];
-                outlawQuest.GenerateQuest();
+                // Resolve faction - random if not specified
+                List<string> Factions = new List<string>()
+                {
+                    "Crimsonfleet","Ecliptic","Varuun","Spacer"
+                };
+                if (string.IsNullOrEmpty(faction))
+                {
+                    faction = Factions[RandomProvider.Random.Next(Factions.Count)];
+                }
+
+                // Resolve station design - default to HabStation if not specified or not found
+                IStationDesign stationDesign;
+                if (!string.IsNullOrEmpty(stationDesignName) && StationDesignRegistry.Designs.TryGetValue(stationDesignName, out var designFactory))
+                {
+                    stationDesign = designFactory();
+                }
+                else
+                {
+                    stationDesign = new HabStation();
+                }
+
+                // Resolve type - default to bounty
+                bool isPOI = string.Equals(questType, "poi", StringComparison.OrdinalIgnoreCase);
+
+                var stationname = stationDesign.GenerateStationName(faction);
+                var size = "Large";
+
+                if (isPOI)
+                {
+                    var poiQuest = new RetrogradeQuest();
+                    poiQuest.GenerateQuest(stationname, faction, size, stationDesign);
+                }
+                else
+                {
+                    var bountyQuest = new RetrogradeBountyQuest();
+                    bountyQuest.GenerateQuest(stationname, faction, size, stationDesign);
+                }
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

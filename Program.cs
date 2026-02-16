@@ -1,4 +1,5 @@
 ﻿using FrankyCLI;
+using System.Windows.Markup;
 
 Console.WriteLine("FrankyCLI. Build new ship part.");
 
@@ -67,6 +68,11 @@ switch(mode)
     case "gen_quest":
         res = gen_quest_main.Generate(args);
         break;
+
+    case "gen_retrograde":
+        res = gen_retrograde.Generate(args);
+        break;
+
     case "gen_harness":
         res = gen_harness.Generate(args);
         break;
