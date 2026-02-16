@@ -8,30 +8,78 @@ using System.Linq;
 
 namespace Retrograde;
 
+public static class MetricRanges
+{
+    public const double PlacementMax = 10;
+    public const double BridgingMax = 15;
+    public const double BridgingOverlapMax = 5;
+    public const double NewConnectorsMax = 20;
+    public const double AreaMax = 5000;              // area/10 max (~50k raw)
+    public const double ClusteringMax = 300;         // clustering/10 max
+    public const double SizeDiversityMax = 4;
+    public const double RoomReuseMax = 5;
+    public const double ConnectorViabilityMax = 400;
+    public const double CompactnessMax = 1.0;
+    public const double DeadConnectorsMax = 10;
+    public const double DuplicateRoomPenaltyMax = 10;
+}
+
 public static class ScoringUtil
 {
+    private static double Norm(double value, double max) =>
+        max > 0 ? Math.Clamp(value / max, -1, 1) : 0;
     public static PlanScore ScorePlan(ScoringSystem scoringSystem, int roomsPlaced, int bridgeablePairs, int bridgingOverlapCount = 0, int newConnectors = 0, double area = 0, double clustering = 0, double sizeDiversityPenalty = 0, double roomReuseScore = 0, double connectorViability = 0, double duplicateRoomPenalty = 0, double compactness = 0, int deadConnectors = 0)
     {
+        var nPlacement = Norm(roomsPlaced, MetricRanges.PlacementMax);
+        var nBridging = Norm(bridgeablePairs, MetricRanges.BridgingMax);
+        var nBridgingOverlap = Norm(bridgingOverlapCount, MetricRanges.BridgingOverlapMax);
+        var nNewConnectors = Norm(newConnectors, MetricRanges.NewConnectorsMax);
+        var nArea = Norm(area / 10, MetricRanges.AreaMax);
+        var nClustering = Norm(clustering / 10, MetricRanges.ClusteringMax);
+        var nSizeDiversity = Norm(sizeDiversityPenalty, MetricRanges.SizeDiversityMax);
+        var nRoomReuse = Norm(roomReuseScore, MetricRanges.RoomReuseMax);
+        var nConnViability = Norm(connectorViability, MetricRanges.ConnectorViabilityMax);
+        var nDupPenalty = Norm(duplicateRoomPenalty, MetricRanges.DuplicateRoomPenaltyMax);
+        var nCompactness = Norm(compactness, MetricRanges.CompactnessMax);
+        var nDeadConn = Norm(deadConnectors, MetricRanges.DeadConnectorsMax);
+
         var components = new Dictionary<string, double>
         {
-            { "Placement", roomsPlaced * scoringSystem.PlacementWeight },
-            { "Bridging", bridgeablePairs * scoringSystem.BridgingWeight },
-            { "BridgingOverlap", bridgingOverlapCount * scoringSystem.BridgingOverlapWeight },
-            { "NewConnectors", newConnectors * scoringSystem.NewConnectorsWeight },
-            { "Area", (area/10) * scoringSystem.AreaWeight },
-            { "Clustering", (clustering/10) * scoringSystem.ClusteringWeight },
-            { "SizeDiversity", sizeDiversityPenalty * scoringSystem.SizeDiversityWeight },
-            { "RoomReuse", roomReuseScore * scoringSystem.RoomReuseWeight },
-            { "ConnectorViability", connectorViability * scoringSystem.ConnectorViabilityWeight },
-            { "DuplicateRoomPenalty", duplicateRoomPenalty * scoringSystem.DuplicateRoomPenaltyWeight },
-            { "Compactness", compactness * scoringSystem.CompactnessWeight },
-            { "DeadConnectors", deadConnectors * scoringSystem.DeadConnectorPenaltyWeight }
+            { "Placement", nPlacement * scoringSystem.PlacementWeight },
+            { "Bridging", nBridging * scoringSystem.BridgingWeight },
+            { "BridgingOverlap", nBridgingOverlap * scoringSystem.BridgingOverlapWeight },
+            { "NewConnectors", nNewConnectors * scoringSystem.NewConnectorsWeight },
+            { "Area", nArea * scoringSystem.AreaWeight },
+            { "Clustering", nClustering * scoringSystem.ClusteringWeight },
+            { "SizeDiversity", nSizeDiversity * scoringSystem.SizeDiversityWeight },
+            { "RoomReuse", nRoomReuse * scoringSystem.RoomReuseWeight },
+            { "ConnectorViability", nConnViability * scoringSystem.ConnectorViabilityWeight },
+            { "DuplicateRoomPenalty", nDupPenalty * scoringSystem.DuplicateRoomPenaltyWeight },
+            { "Compactness", nCompactness * scoringSystem.CompactnessWeight },
+            { "DeadConnectors", nDeadConn * scoringSystem.DeadConnectorPenaltyWeight }
+        };
+
+        var normalisedMetrics = new Dictionary<string, double>
+        {
+            { "Placement", nPlacement },
+            { "Bridging", nBridging },
+            { "BridgingOverlap", nBridgingOverlap },
+            { "NewConnectors", nNewConnectors },
+            { "Area", nArea },
+            { "Clustering", nClustering },
+            { "SizeDiversity", nSizeDiversity },
+            { "RoomReuse", nRoomReuse },
+            { "ConnectorViability", nConnViability },
+            { "DuplicateRoomPenalty", nDupPenalty },
+            { "Compactness", nCompactness },
+            { "DeadConnectors", nDeadConn }
         };
 
         return new PlanScore
         {
             Total = components.Values.Sum(),
-            Components = components
+            Components = components,
+            NormalisedMetrics = normalisedMetrics
         };
     }
 
@@ -69,7 +117,12 @@ public static class ScoringUtil
     private static string FormatComponent(PlanScore score, string key, string label)
     {
         if (score.Components != null && score.Components.TryGetValue(key, out var value))
+        {
+            if (score.NormalisedMetrics != null && score.NormalisedMetrics.TryGetValue(key, out var norm))
+                return $"{label} {norm:0.00} = {value:0.00}";
+
             return $"{label} {value:0.00}";
+        }
 
         return $"{label} n/a";
     }
@@ -475,15 +528,15 @@ public static class ScoringUtil
             baseline.RoomBounds, null, openConnectors);
         int deadConnectors = CountDeadConnectors(baseline.RoomBounds, null, openConnectors);
 
-        return (bridgeScore * scoring.BridgingWeight)
-             + (newConnectorCount * scoring.NewConnectorsWeight)
-             + ((baseline.Area / 10) * scoring.AreaWeight)
-             + ((clustering / 10) * scoring.ClusteringWeight)
-             + (smallChain * scoring.SizeDiversityWeight)
-             + (baseline.RoomReuseScore * scoring.RoomReuseWeight)
-             + (viability * scoring.ConnectorViabilityWeight)
-             + (baseline.Compactness * scoring.CompactnessWeight)
-             + (deadConnectors * scoring.DeadConnectorPenaltyWeight);
+        return (Norm(bridgeScore, MetricRanges.BridgingMax) * scoring.BridgingWeight)
+             + (Norm(newConnectorCount, MetricRanges.NewConnectorsMax) * scoring.NewConnectorsWeight)
+             + (Norm(baseline.Area / 10, MetricRanges.AreaMax) * scoring.AreaWeight)
+             + (Norm(clustering / 10, MetricRanges.ClusteringMax) * scoring.ClusteringWeight)
+             + (Norm(smallChain, MetricRanges.SizeDiversityMax) * scoring.SizeDiversityWeight)
+             + (Norm(baseline.RoomReuseScore, MetricRanges.RoomReuseMax) * scoring.RoomReuseWeight)
+             + (Norm(viability, MetricRanges.ConnectorViabilityMax) * scoring.ConnectorViabilityWeight)
+             + (Norm(baseline.Compactness, MetricRanges.CompactnessMax) * scoring.CompactnessWeight)
+             + (Norm(deadConnectors, MetricRanges.DeadConnectorsMax) * scoring.DeadConnectorPenaltyWeight);
     }
 
     /// <summary>
@@ -571,15 +624,15 @@ public static class ScoringUtil
         // Dead connectors
         int deadConnectors = CountDeadConnectors(baseline.RoomBounds, candidateAabb, connectorsAfterPlacement);
 
-        return (bridgeScore * scoring.BridgingWeight)
-             + (newConnectorCount * scoring.NewConnectorsWeight)
-             + ((totalArea / 10) * scoring.AreaWeight)
-             + ((clustering / 10) * scoring.ClusteringWeight)
-             + (smallChain * scoring.SizeDiversityWeight)
-             + (roomReuse * scoring.RoomReuseWeight)
-             + (viability * scoring.ConnectorViabilityWeight)
-             + (compactness * scoring.CompactnessWeight)
-             + (deadConnectors * scoring.DeadConnectorPenaltyWeight);
+        return (Norm(bridgeScore, MetricRanges.BridgingMax) * scoring.BridgingWeight)
+             + (Norm(newConnectorCount, MetricRanges.NewConnectorsMax) * scoring.NewConnectorsWeight)
+             + (Norm(totalArea / 10, MetricRanges.AreaMax) * scoring.AreaWeight)
+             + (Norm(clustering / 10, MetricRanges.ClusteringMax) * scoring.ClusteringWeight)
+             + (Norm(smallChain, MetricRanges.SizeDiversityMax) * scoring.SizeDiversityWeight)
+             + (Norm(roomReuse, MetricRanges.RoomReuseMax) * scoring.RoomReuseWeight)
+             + (Norm(viability, MetricRanges.ConnectorViabilityMax) * scoring.ConnectorViabilityWeight)
+             + (Norm(compactness, MetricRanges.CompactnessMax) * scoring.CompactnessWeight)
+             + (Norm(deadConnectors, MetricRanges.DeadConnectorsMax) * scoring.DeadConnectorPenaltyWeight);
     }
 
     /// <summary>
@@ -664,4 +717,5 @@ public class PlanScore
 {
     public double Total { get; set; }
     public Dictionary<string, double> Components { get; set; } = new Dictionary<string, double>();
+    public Dictionary<string, double> NormalisedMetrics { get; set; } = new Dictionary<string, double>();
 }

@@ -71,19 +71,19 @@ public class HabStation : IStationDesign
 
         scoringSystem = new ScoringSystem()
         {
-            BridgingWeight = 9.5,
-            BridgingOverlapWeight = -1.19,
-            NorthBiasWeight = 0.95,
-            NewConnectorsWeight = 0.89,
-            PlacementWeight = 77.16,
-            AreaWeight = -0.15,
-            ClusteringWeight = 2.37,
-            SizeDiversityWeight = 5.94,
-            RoomReuseWeight = -1.19,
-            ConnectorViabilityWeight = 0.67,
-            DuplicateRoomPenaltyWeight = -2.0,
-            CompactnessWeight = 5.0,
-            DeadConnectorPenaltyWeight = -2.0,
+            BridgingWeight = 6.51,
+            BridgingOverlapWeight = -1.13,
+            NorthBiasWeight = 0.56,
+            NewConnectorsWeight = 2.82,
+            PlacementWeight = 61.99,
+            AreaWeight = -0.42,
+            ClusteringWeight = 2.82,
+            SizeDiversityWeight = 4.51,
+            RoomReuseWeight = -3.13,
+            ConnectorViabilityWeight = 7.94,
+            DuplicateRoomPenaltyWeight = -2.82,
+            CompactnessWeight = 4.51,
+            DeadConnectorPenaltyWeight = -2.82,
             Effort = 100
         };
     }

@@ -74,19 +74,19 @@ public class WarrenStation : IStationDesign
 
         scoringSystem = new ScoringSystem()
         {
-            BridgingWeight = 35.0,
-            BridgingOverlapWeight = -1.0,
-            NorthBiasWeight = 0.5,
-            NewConnectorsWeight = 30.0,
-            PlacementWeight = 15.0,
-            AreaWeight = -1.0,
-            ClusteringWeight = -5.0,
-            SizeDiversityWeight = 10.0,
-            RoomReuseWeight = -2.0,
-            ConnectorViabilityWeight = 3.0,
-            DuplicateRoomPenaltyWeight = -2.0,
-            CompactnessWeight = 8.0,
-            DeadConnectorPenaltyWeight = -2.0,
+            BridgingWeight = 30,
+            BridgingOverlapWeight = -2,
+            NorthBiasWeight = 1,
+            NewConnectorsWeight = 25,
+            PlacementWeight = 12,
+            AreaWeight = -2,
+            ClusteringWeight = -10,
+            SizeDiversityWeight = 8,
+            RoomReuseWeight = -3,
+            ConnectorViabilityWeight = 10,
+            DuplicateRoomPenaltyWeight = -5,
+            CompactnessWeight = 15,
+            DeadConnectorPenaltyWeight = -5,
             Effort = 300
         };
     }

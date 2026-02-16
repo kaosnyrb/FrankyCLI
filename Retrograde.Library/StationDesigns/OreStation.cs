@@ -71,19 +71,19 @@ public class OreStation : IStationDesign
 
         scoringSystem = new ScoringSystem()
         {
-            BridgingWeight = 23.12,
-            BridgingOverlapWeight = -3.21,
-            NorthBiasWeight = 2.3,
-            NewConnectorsWeight = 26.61,
-            PlacementWeight = 17.33,
+            BridgingWeight = 20,
+            BridgingOverlapWeight = -3,
+            NorthBiasWeight = 2,
+            NewConnectorsWeight = 30,
+            PlacementWeight = 15,
             AreaWeight = 0,
-            ClusteringWeight = 6.42,
-            SizeDiversityWeight = 16.06,
-            RoomReuseWeight = -3.21,
-            ConnectorViabilityWeight = 1.73,
-            DuplicateRoomPenaltyWeight = -2.0,
-            CompactnessWeight = 5.0,
-            DeadConnectorPenaltyWeight = -2.0,
+            ClusteringWeight = 8,
+            SizeDiversityWeight = 5,
+            RoomReuseWeight = -3,
+            ConnectorViabilityWeight = 25,
+            DuplicateRoomPenaltyWeight = -5,
+            CompactnessWeight = 5,
+            DeadConnectorPenaltyWeight = -5,
             Effort = 250
         };
     }

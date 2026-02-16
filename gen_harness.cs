@@ -16,7 +16,7 @@ namespace FrankyCLI
             string modname = args[0];
             string faction = args.Length > 3 ? args[3] : "spacer";
             string size = args.Length > 4 ? args[4] : "Small";
-            int runs = 5;
+            int runs = 15;
 
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
