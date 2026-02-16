@@ -309,12 +309,13 @@ namespace Retrograde.FactionMembers
             Random r = RandomProvider.Random;
             var prefixes = new List<string>
             {
-                "Crimson","Pirate","Buccaneer",
-                "Corsair","Raider","Marauder","Freebooter","Privateer",
-                "Reaver","Plunderer","Cutthroat","Smuggler","Brigand",
-                "Rogue","Outcast","Scourge","Pillager","Blackguard",
-                "Desperado","Swashbuckler","Dread","Renegade","Bandit",
-                "Ravager","Prowler","Skulker","Warmonger","Exile"
+                "Crimson","Pirate","Raider",
+                "Smuggler","Cutthroat","Hijacker","Gunrunner","Rogue",
+                "Outcast","Renegade","Bandit","Prowler","Skulker",
+                "Exile","Fence","Broker","Handler","Fixer",
+                "Supplier","Operative","Stringer","Grifter","Hustler",
+                "Bootlegger","Syndicate","Cartel","Racketeer","Trafficker",
+                "Spotter","Wheelman","Triggerman","Enforcer","Coyote"
             };
             return prefixes[r.Next(prefixes.Count)];
         }
@@ -331,7 +332,12 @@ namespace Retrograde.FactionMembers
                 "Scrapper","Hull Scrapper","Wire Scrapper","Chop Scrapper",
                 "Rigger","Cable Rigger","Hull Rigger","Patch Rigger",
                 "Hauler","Crate Hauler","Scrap Hauler","Body Hauler",
-                "Guard","Gate Guard","Lockup Guard","Cargo Guard"
+                "Guard","Gate Guard","Lockup Guard","Cargo Guard",
+                "Stockpiler","Munitions Loader","Manifest Clerk","Supply Grunt",
+                "Welder","Hull Welder","Patch Welder","Arc Welder",
+                "Machinist","Drive Wrench","Wire Monkey",
+                "Mule","Cargo Mule","Drop Mule","Contraband Mule",
+                "Courier","Dead Drop Courier","Package Courier"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -345,8 +351,11 @@ namespace Retrograde.FactionMembers
                 "Senior Hand","Gun Hand Lead","Boarding Lead","Salvage Lead",
                 "Section Lead","Gun Section Lead","Dock Section Lead",
                 "Sergeant","Crew Sergeant","Gun Sergeant","Dock Sergeant",
-                "Enforcer","Senior Enforcer","Gun Enforcer","Dock Enforcer",
-                "Lieutenant","Junior Lieutenant","Acting Lieutenant"
+                "Taskmaster","Senior Taskmaster","Gun Taskmaster","Dock Taskmaster",
+                "Overseer","Junior Overseer","Acting Overseer",
+                "Logistics Officer","Supply Coordinator","Dispatch Lead",
+                "Chief Mechanic","Drive Engineer","Reactor Technician",
+                "Cargo Broker","Contraband Officer","Procurement Lead"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -357,14 +366,15 @@ namespace Retrograde.FactionMembers
             var roles = new List<string>
             {
                 "Crew Boss","Gun Boss","Dock Boss","Raid Boss",
-                "Enforcer Captain","Security Captain","Gun Deck Captain","Boarding Captain",
+                "Strike Captain","Security Captain","Gun Deck Captain","Boarding Captain",
                 "First Mate","Chief Mate","Senior Mate",
                 "Quartermaster","Black Quartermaster","Lootmaster",
                 "Operations Chief","Dock Chief","Salvage Chief","Security Chief",
-                "Lieutenant","Raid Lieutenant","Station Lieutenant",
+                "Warden","Raid Warden","Station Warden",
                 "Commander","Raid Commander","Station Commander",
                 "Captain","Void Captain","Fleet Captain",
-                "Warlord","Pirate Lord","Station Lord"
+                "Warlord","Syndicate Head","Station Boss",
+                "Supply Master","Armory Director","Operations Head"
             };
             return roles[r.Next(roles.Count)];
         }

@@ -299,10 +299,10 @@ namespace Retrograde.FactionMembers
             {
                 "Spacer","Vagrant","Outlaw","Rogue","Bandit",
                 "Scavenger","Drifter","Prowler","Raider","Wretch",
-                "Derelict","Squatter","Marauder","Lowlife","Vermin",
-                "Mongrel","Scrapper","Guttersnipe","Wildling","Castoff",
+                "Derelict","Squatter","Tweaker","Lowlife","Vermin",
+                "Mongrel","Scrapper","Deadbeat","Junker","Castoff",
                 "Stray","Skulker","Creeper","Waster","Feral",
-                "Hooligan","Miscreant","Ruffian","Vagrant","Degenerate"
+                "Hooligan","Burnout","Ruffian","Dropout","Degenerate"
             };
             return prefixes[r.Next(prefixes.Count)];
         }
@@ -315,11 +315,15 @@ namespace Retrograde.FactionMembers
                 "Scav","Hull Scav","Junk Scav","Wire Scav",
                 "Punk","Dock Punk","Station Punk","Cargo Punk",
                 "Rat","Tunnel Rat","Dock Rat","Vent Rat",
-                "Drifter","Armed Drifter","Station Drifter","Void Drifter",
+                "Nomad","Armed Nomad","Station Nomad","Void Nomad",
                 "Thug","Alley Thug","Dock Thug","Cargo Thug",
-                "Scrapper","Hull Scrapper","Junk Scrapper","Wire Scrapper",
+                "Salvager","Hull Salvager","Junk Salvager","Wire Salvager",
                 "Looter","Cargo Looter","Wreck Looter","Station Looter",
-                "Goon","Dock Goon","Gate Goon","Cargo Goon"
+                "Goon","Dock Goon","Gate Goon","Cargo Goon",
+                "Jury Rigger","Spark Jockey","Grease Rat","Wire Cutter",
+                "Torch Hand","Pipe Bender","Bolt Breaker",
+                "Pickpocket","Bag Man","Stash Rat","Junk Peddler",
+                "Parts Hawker","Goods Mover","Crate Flipper"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -333,8 +337,10 @@ namespace Retrograde.FactionMembers
                 "Enforcer","Senior Enforcer","Head Enforcer","Station Enforcer",
                 "Bruiser","Head Bruiser","Dock Bruiser","Senior Bruiser",
                 "Veteran","Combat Veteran","Raid Veteran","Station Veteran",
-                "Raider","Senior Raider","Lead Raider","Void Raider",
-                "Lieutenant","Gang Lieutenant","Station Lieutenant"
+                "Reaver","Senior Reaver","Lead Reaver","Void Reaver",
+                "Lieutenant","Gang Lieutenant","Station Lieutenant",
+                "Chop Shop Boss","Reactor Cracker","Scrap Engineer",
+                "Fence Boss","Black Market Dealer","Salvage Broker"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -347,7 +353,7 @@ namespace Retrograde.FactionMembers
                 "Gang Boss","Dock Boss","Station Boss","Crew Boss",
                 "Warlord","Void Warlord","Station Warlord","Raid Warlord",
                 "Kingpin","Station Kingpin","Sector Kingpin",
-                "Overlord","Gang Overlord","Station Overlord",
+                "Underboss","Gang Underboss","Station Underboss",
                 "Captain","Raid Captain","Crew Captain","Void Captain",
                 "Chief","War Chief","Gang Chief","Station Chief",
                 "Commander","Raid Commander","Gang Commander"

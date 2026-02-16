@@ -302,8 +302,8 @@ namespace Retrograde.FactionMembers
                 "Ecliptic","Contractor",
                 "Operative",
                 "Professional","Militant","Enforcer","Gunhand","Tactician",
-                "Vanguard","Sentinel","Warden","Striker","Dragoon",
-                "Wardog","Ironside","Partisan","Outrider","Bulwark"
+                "Vanguard","Sentinel","Warden","Striker","Spearhead",
+                "Wardog","Hardliner","Partisan","Outrider","Pointman"
             };
             return prefixes[r.Next(prefixes.Count)];
         }
@@ -315,12 +315,16 @@ namespace Retrograde.FactionMembers
             {
                 "Recruit","Field Recruit","New Recruit","Fresh Recruit",
                 "Trooper","Patrol Trooper","Garrison Trooper","Perimeter Trooper",
-                "Operative","Field Operative","Scout Operative","Recon Operative",
+                "Agent","Field Agent","Scout Agent","Recon Agent",
                 "Grunt","Cargo Grunt","Station Grunt","Outpost Grunt",
                 "Sentry","Gate Sentry","Dock Sentry","Tower Sentry",
                 "Technician","Field Technician","Comms Technician","Systems Technician",
                 "Scout","Forward Scout","Perimeter Scout","Patrol Scout",
-                "Guard","Post Guard","Checkpoint Guard","Facility Guard"
+                "Guard","Post Guard","Checkpoint Guard","Facility Guard",
+                "Mechanic","Hull Mechanic","Systems Mechanic","Drive Mechanic",
+                "Wireman","Calibrator","Reactor Attendant",
+                "Inventory Clerk","Requisitions Aide","Manifest Runner","Supply Hand",
+                "Warehouse Attendant","Depot Loader","Quartermaster Aide"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -335,7 +339,9 @@ namespace Retrograde.FactionMembers
                 "Specialist","Weapons Specialist","Demolitions Specialist","Comms Specialist",
                 "Veteran","Combat Veteran","Field Veteran","Senior Veteran",
                 "Officer","Field Officer","Tactical Officer","Watch Officer",
-                "Lieutenant","Junior Lieutenant","Acting Lieutenant"
+                "Lieutenant","Junior Lieutenant","Acting Lieutenant",
+                "Chief Engineer","Systems Architect","Ordnance Expert",
+                "Acquisitions Officer","Supply Chain Lead","Arms Dealer"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -350,7 +356,7 @@ namespace Retrograde.FactionMembers
                 "Colonel","Field Colonel","Senior Colonel",
                 "Director","Operations Director","Field Director","Tactical Director",
                 "Overseer","Station Overseer","Sector Overseer",
-                "Warden","Station Warden","Garrison Warden",
+                "Superintendent","Station Superintendent","Garrison Superintendent",
                 "General","Brigadier","Marshal"
             };
             return roles[r.Next(roles.Count)];

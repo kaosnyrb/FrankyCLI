@@ -300,10 +300,10 @@ namespace Retrograde.FactionMembers
             {
                 "Zealot","Varuun","Fanatic","Believer","Devout",
                 "Faithful","Chosen","Pilgrim","Disciple","Adherent",
-                "Acolyte","Penitent","Ascendant","Prophet","Herald",
-                "Ordained","Anointed","Sanctified","Seeker","Witness",
-                "Evangel","Crusader","Templar","Inquisitor","Harbinger",
-                "Apostle","Confessor","Mystic","Revenant","Oracle"
+                "Penitent","Anointed","Sanctified","Seeker","Witness",
+                "Ordained","Militant","Radical","Remnant","Emissary",
+                "Convert","Loyalist","Insider","Devotee","Operative",
+                "Extremist","Separatist","Purist","Partisan","Ideologue"
             };
             return prefixes[r.Next(prefixes.Count)];
         }
@@ -314,13 +314,17 @@ namespace Retrograde.FactionMembers
             var roles = new List<string>
             {
                 "Initiate","New Initiate","Sworn Initiate","Bound Initiate",
-                "Acolyte","Temple Acolyte","Flame Acolyte","Serpent Acolyte",
-                "Pilgrim","Armed Pilgrim","Devoted Pilgrim","Wandering Pilgrim",
-                "Disciple","Sworn Disciple","Blade Disciple","Faith Disciple",
+                "Novice","Temple Novice","Flame Novice","Serpent Novice",
+                "Wanderer","Armed Wanderer","Devoted Wanderer","Roaming Wanderer",
+                "Supplicant","Sworn Supplicant","Blade Supplicant","Faith Supplicant",
                 "Watcher","Gate Watcher","Night Watcher","Flame Watcher",
-                "Seeker","Truth Seeker","Path Seeker","Void Seeker",
+                "Aspirant","Truth Aspirant","Path Aspirant","Void Aspirant",
                 "Keeper","Relic Keeper","Shrine Keeper","Gate Keeper",
-                "Guard","Temple Guard","Sanctum Guard","Shrine Guard"
+                "Guard","Temple Guard","Sanctum Guard","Shrine Guard",
+                "Technician","Comms Technician","Hull Technician","Systems Technician",
+                "Fabricator","Module Fabricator","Circuit Fabricator",
+                "Tithe Collector","Asset Runner","Supply Carrier","Relic Courier",
+                "Stockroom Attendant","Cache Tender","Offering Bearer"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -330,12 +334,14 @@ namespace Retrograde.FactionMembers
             Random r = RandomProvider.Random;
             var roles = new List<string>
             {
-                "Crusader","Holy Crusader","Flame Crusader","Void Crusader",
-                "Templar","Sworn Templar","Battle Templar","Elder Templar",
-                "Inquisitor","Grand Inquisitor","Faith Inquisitor","Temple Inquisitor",
-                "Ordained","Ordained Blade","Ordained Flame","Ordained Warden",
-                "Zealot Captain","War Captain","Crusade Captain",
-                "Prelate","Battle Prelate","Senior Prelate"
+                "Enforcer","Serpent Enforcer","Void Enforcer","Devoted Enforcer",
+                "Handler","Cell Handler","Field Handler","Senior Handler",
+                "Interrogator","Grand Interrogator","Faith Interrogator","Temple Interrogator",
+                "Indoctrinator","Combat Indoctrinator","Field Indoctrinator","Senior Indoctrinator",
+                "Strike Captain","War Captain","Serpent Captain",
+                "Commissar","Battle Commissar","Senior Commissar",
+                "Lead Technician","Systems Overseer","Reactor Specialist",
+                "Acquisitions Handler","Relic Procurer","Tithe Auditor"
             };
             return roles[r.Next(roles.Count)];
         }
@@ -345,13 +351,13 @@ namespace Retrograde.FactionMembers
             Random r = RandomProvider.Random;
             var roles = new List<string>
             {
-                "High Zealot","Supreme Zealot","Grand Zealot",
-                "Archon","War Archon","Temple Archon","Void Archon",
-                "Prophet","War Prophet","Doom Prophet","Serpent Prophet",
-                "Harbinger","Flame Harbinger","Void Harbinger",
-                "Exarch","Grand Exarch","Battle Exarch",
+                "High Overseer","Supreme Overseer","Grand Overseer",
+                "Commandant","War Commandant","Temple Commandant","Void Commandant",
+                "Deacon","War Deacon","Senior Deacon","Serpent Deacon",
+                "Director","Doctrine Director","Operations Director",
+                "Regent","Grand Regent","Battle Regent",
                 "High Priest","War Priest","Serpent Priest",
-                "Fanatic Lord","Crusade Lord","Temple Lord"
+                "Cell Leader","Crusade Leader","Temple Leader"
             };
             return roles[r.Next(roles.Count)];
         }
