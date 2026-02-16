@@ -116,6 +116,19 @@ namespace Retrograde.Chains
                 Quest = newQuest.instance.ToNullableLink<IQuestGetter>(),
             });
 
+
+            //We don't want to give Crimson Fleet players missions for the fleet as it doesn't work well.
+            //This node has a check that the player is fleet, so only add non fleet missions
+            if (faction != "Crimsonfleet")
+            {
+                var RG_MissionNodeBountySpace_PlayerCrimsonfleet = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_MissionNodeBountySpace_PlayerCrimsonfleet")];
+
+                RG_MissionNodeBountySpace_PlayerCrimsonfleet.Quests.Add(new StoryManagerQuest()
+                {
+                    Quest = newQuest.instance.ToNullableLink<IQuestGetter>(),
+                });
+            }
+
             // Set the boss NPC
 
             newQuest.SetQuestReferenceAlias("BountyNpc", stationNoun.dungeonState.BossPlacedNpc.FormKey);
@@ -232,7 +245,6 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> has turned <Alias=PrimaryRef> into a pirate haven in the <Alias=TargetSystemLocation> system. Clear them out before more ships go missing.",
                             "Crimson Fleet pirates under <Alias=BountyNpc> are using <Alias=PrimaryRef> as a base to raid shipping lanes. Board the station and eliminate their leader.",
                             "<Alias=BountyNpc> has been running a smuggling ring from <Alias=PrimaryRef>. Put an end to their operation in the <Alias=TargetSystemLocation> system.",
-                            "Residents of <Alias=PrimaryRef> are being forced to fence stolen goods by <Alias=BountyNpc>. Free the station from Crimson Fleet control.",
                             "<Alias=BountyNpc> is harboring wanted pirates aboard <Alias=PrimaryRef> in the <Alias=TargetSystemLocation> system. Storm the habitat decks and bring them to justice.",
                             "Crimson Fleet operatives under <Alias=BountyNpc> have turned <Alias=PrimaryRef> into a black market hub. Shut it down.",
                             "Distress calls from <Alias=PrimaryRef> confirm <Alias=BountyNpc> has taken the crew hostage. Board the station and end the pirate occupation.",
@@ -276,7 +288,6 @@ namespace Retrograde.Chains
                             "<Alias=BountyNpc> is running an Ecliptic command post from <Alias=PrimaryRef>. Eliminate their leadership before they launch further attacks.",
                             "An Ecliptic cell led by <Alias=BountyNpc> has seized <Alias=PrimaryRef> in the <Alias=TargetSystemLocation> system. Board the station and restore order.",
                             "<Alias=BountyNpc> has fortified <Alias=PrimaryRef> as an Ecliptic forward base. Dismantle their operation before reinforcements arrive.",
-                            "Ecliptic enforcers loyal to <Alias=BountyNpc> are shaking down the residents of <Alias=PrimaryRef>. Liberate the station in the <Alias=TargetSystemLocation> system.",
                             "<Alias=BountyNpc> is coordinating Ecliptic strikes from the living quarters of <Alias=PrimaryRef>. Board the station and cut off their command structure.",
                             "The crew of <Alias=PrimaryRef> sent a distress signal before <Alias=BountyNpc> jammed their comms. Move in and rescue the survivors.",
                             "Ecliptic operatives under <Alias=BountyNpc> have converted <Alias=PrimaryRef> into a recruitment center. Shut it down before they grow stronger.",
@@ -357,7 +368,6 @@ namespace Retrograde.Chains
                             "Spacers led by <Alias=BountyNpc> have taken over <Alias=PrimaryRef> and are raiding nearby traffic. Board the station and deal with them.",
                             "<Alias=BountyNpc> has turned <Alias=PrimaryRef> into a Spacer den in the <Alias=TargetSystemLocation> system. Clear the station before they hit more ships.",
                             "A gang of Spacers under <Alias=BountyNpc> are squatting on <Alias=PrimaryRef>. Evict them permanently.",
-                            "<Alias=BountyNpc> and a pack of Spacers have been terrorizing the residents of <Alias=PrimaryRef>. Board the station and restore order.",
                             "Spacer thugs under <Alias=BountyNpc> are stripping <Alias=PrimaryRef> for anything they can sell. Stop them before the station is gutted.",
                             "<Alias=BountyNpc> has claimed <Alias=PrimaryRef> as personal territory in the <Alias=TargetSystemLocation> system. Show them it's not theirs to take.",
                             "The hab decks of <Alias=PrimaryRef> have been overrun by Spacers loyal to <Alias=BountyNpc>. Clear the station room by room.",
