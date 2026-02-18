@@ -19,21 +19,16 @@ namespace Retrograde.Nouns
             var Book = targetMod.Books[new FormKey(targetMod.ModKey, Formid)].DeepCopy();
             instance = new Book(targetMod)
             {
-                CNAM = Book.CNAM,
                 Components = Book.Components,
                 Description = Content,
-                DNAMUnknown = Book.DNAMUnknown,
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + questID,
                 Keywords = Book.Keywords,
-                ENAM = Header,
                 FeaturedItemMessage = Book.FeaturedItemMessage,
                 Flags = Book.Flags,
-                FNAM = Book.FNAM,
                 InventoryArt = Book.InventoryArt,
                 Model = Book.Model,
                 Name = Name,
-                ODTY = Book.ODTY,
                 Value = Book.Value,
                 Weight = Book.Weight,
                 VirtualMachineAdapter = Book.VirtualMachineAdapter,

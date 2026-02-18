@@ -34,7 +34,8 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = System.IO.Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            gen_quest_main.myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            gen_quest_main.myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                            gen_quest_main.FixNextFormId(gen_quest_main.myMod);
                         }
                     }
                 }
@@ -59,10 +60,7 @@ namespace FrankyCLI
                 var location = new Location(gen_quest_main.myMod)
                 {
                     EditorID = "rg_harness_loc",
-                    LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
-                    LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-                    LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
-                    LocationCellUniques = new ExtendedList<LocationCellUnique>()
+                    LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>()
                     
                 };
 

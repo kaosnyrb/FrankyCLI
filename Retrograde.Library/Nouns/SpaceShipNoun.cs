@@ -37,7 +37,6 @@ namespace Retrograde.Nouns
                 Components = ship.Components,
                 ObjectTemplates = ship.ObjectTemplates,
                 Template = ship.Template,
-                ObjectPlacementDefaults = ship.ObjectPlacementDefaults,
             };
 
             bool setFaction = false;

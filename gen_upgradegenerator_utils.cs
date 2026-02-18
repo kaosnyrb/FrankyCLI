@@ -739,7 +739,7 @@ namespace FrankyCLI
 
             var cost = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
             {
-                Count = (uint)(1 + random.Next(5)),
+                RequiredCount = (uint)(1 + random.Next(5)),
                 Component = commonresource
             } };
 
@@ -754,7 +754,7 @@ namespace FrankyCLI
 
                 cost.Add(new ConstructibleObjectComponent()
                 {
-                    Count = (uint)(1 + random.Next(8)),
+                    RequiredCount = (uint)(1 + random.Next(8)),
                     Component = commonresourceb
                 });
             }
@@ -770,7 +770,7 @@ namespace FrankyCLI
 
                 cost.Add(new ConstructibleObjectComponent()
                 {
-                    Count = (uint)(1 + random.Next(10)),
+                    RequiredCount = (uint)(1 + random.Next(10)),
                     Component = commonresourcec
                 });
             }

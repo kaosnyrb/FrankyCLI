@@ -44,7 +44,9 @@ namespace Retrograde.Passes
                     var reftype = baseform.ForcedLocations[0];
                     var locreftype = RetrogradeContext.Current.StarfieldMod.LocationReferenceTypes[reftype.FormKey];
 
-                    state.location.LocationCellStaticReferences.Add(new LocationCellStaticReference()
+                    if (state.location.AddedSpecialReferences == null)
+                        state.location.AddedSpecialReferences = new ExtendedList<LocationCellStaticReference>();
+                    state.location.AddedSpecialReferences.Add(new LocationCellStaticReference()
                     {
                         Location = state.instance.ToNullableLink<IComplexLocationGetter>(),
                         Marker = newplaced.ToLink(),

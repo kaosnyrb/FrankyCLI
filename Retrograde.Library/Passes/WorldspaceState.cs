@@ -43,4 +43,16 @@ public class WorldspaceState
 
     public string Faction = "Spacer";
     public bool IsHarnessRun;
+
+    /// <summary>
+    /// Base terrain height sampled from the BTD file at worldspace center.
+    /// Used by TileInstantiationPass to place tiles at the correct elevation.
+    /// </summary>
+    public float TerrainHeight;
+
+    /// <summary>
+    /// Lookup from cell grid point to Cell. Built by the generator so that
+    /// passes can route objects to the correct cell based on world position.
+    /// </summary>
+    public Dictionary<P2Int, Cell> CellLookup = new();
 }

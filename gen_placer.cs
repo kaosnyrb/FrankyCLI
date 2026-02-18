@@ -44,7 +44,8 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                            gen_quest_main.FixNextFormId(myMod);
 
                         }
                     }
@@ -128,7 +129,7 @@ namespace FrankyCLI
                     myMod.Worldspaces.Add(newworldspace);
                 }*/
             }
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Finished");
             return 0;
         }

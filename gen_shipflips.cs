@@ -560,7 +560,8 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                            gen_quest_main.FixNextFormId(myMod);
 
                             //Check if this mod already contains this entry
                             foreach ( var ms in myMod.MoveableStatics)
@@ -623,7 +624,6 @@ namespace FrankyCLI
                     {
                         EditorID = item + direction.ToString(),
                         ObjectBounds = target.ObjectBounds,
-                        ODTY = target.ODTY,
                         Model = target.Model,
                         DATA = target.DATA,
                         Keywords = target.Keywords
@@ -694,7 +694,6 @@ namespace FrankyCLI
                             FogMax = 1,
                             NearHeightRange = 10000,
                             Unknown1 = 1951,
-                            Unknown2 = 3,
                         },
                         WaterHeight = 0,
                         XILS = 1.0f,
@@ -857,7 +856,6 @@ namespace FrankyCLI
                             First = new P3Float(-4, -4, -1.767578f),
                             Second = new P3Float(4, 4, 1.767578f)
                         },
-                        ODTY = 0,
                         Transforms = new Transforms
                         {
                             Ship = link
@@ -940,13 +938,8 @@ namespace FrankyCLI
                     {
                         EditorID = prefix + "_gbfm_" + item + direction.ToString(),
                         ObjectBounds = new ObjectBounds() { First = new P3Float(0, 0, 0), Second = new P3Float(0, 0, 0) },
-                        ODTY = 0,
                         Template = FormSpaceshipModule,
                         Components = gbfm_components,
-                        STRVs = new ExtendedList<string>()
-                        {
-                            "BGSMod_Template_Component"
-                        }
                     };
                     myMod.GenericBaseForms.Add(gbfm);
                     //7 add to fliplist
@@ -968,15 +961,9 @@ namespace FrankyCLI
                     CreatedObject = FlipsList.ToNullableLink<IConstructibleObjectTargetGetter>(),
                     AmountProduced = 1,
                     MenuSortOrder = 1,
-                    TNAM = tnamearry,
                     LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
                     Value = 1000,
                     WorkbenchKeyword = WorkbenchShipBuildingKeyword,
-                    Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
-                        {
-                            Category_ShipMod_Structure
-                        },
-                    RECF = 0,
                 };
 
                 myMod.ConstructibleObjects.Add(co);
@@ -987,7 +974,7 @@ namespace FrankyCLI
                 rec.IsCompressed = false;
             }
 
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Finished");
             return 0;
         }

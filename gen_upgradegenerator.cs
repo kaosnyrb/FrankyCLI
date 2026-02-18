@@ -463,7 +463,8 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                            gen_quest_main.FixNextFormId(myMod);
 
                         }
                     }
@@ -485,10 +486,7 @@ namespace FrankyCLI
                 if (SourceESM == null)
                 {
                     ModPath modPath = Path.Combine(env.DataFolderPath, request.WeaponESM);
-                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, new GroupMask() {
-                        Weapons = true,
-                        ObjectModifications = true 
-                    });
+                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
                 }
 
                 //SourceESM = env.LoadOrder[0].Mod;
@@ -598,7 +596,7 @@ namespace FrankyCLI
                                     };
                                     co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
                                         {
-                                            Count = (uint)random.Next(4),
+                                            RequiredCount = (uint)random.Next(4),
                                             Component = commonresource
                                         } };
                                     myMod.ConstructibleObjects.Add(co);
@@ -728,10 +726,9 @@ namespace FrankyCLI
                             WorkbenchKeyword = WorkbenchBlacksiteKeyword,
                             AmountProduced = 1,
                             LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,                            
-                            Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { WorkbenchBlacksiteFilterKeyword },                            
                         };
-                        co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { 
-                            new ConstructibleObjectComponent() { Component = atbb_upgradeitem, Count = 1 } 
+                        co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() {
+                            new ConstructibleObjectComponent() { Component = atbb_upgradeitem, RequiredCount = 1 }
                         };
                         myMod.ConstructibleObjects.Add(co);
                     }
@@ -859,7 +856,7 @@ namespace FrankyCLI
 
             //Note that FrankyCLI doesn't like gaps in the formIDs. Not sure why. Bascially make loads on enchances, run this then delete them
             //NEXT FORM ID is used! Just set that later than anything in the esm.
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Finished");
             stopwatch.Stop();
 

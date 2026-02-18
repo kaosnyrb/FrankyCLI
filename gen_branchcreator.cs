@@ -43,7 +43,8 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                            gen_quest_main.FixNextFormId(myMod);
 
                         }
                     }
@@ -54,9 +55,6 @@ namespace FrankyCLI
                     var pcmbn = new PlanetContentManagerBranchNode(myMod)
                     {
                         EditorID = "PIP_Quest_" + entry.ToString("000"),
-                        NAM1 = 2,
-                        NAM2 = 0,
-                        NAM5 = false
                     };
                     try
                     {
@@ -72,7 +70,7 @@ namespace FrankyCLI
 
             }
 
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Finished");
 
 

@@ -44,11 +44,7 @@ namespace Retrograde.Nouns.Stations
             {
                 EditorID = stationName + "_shipext_loc",
                 Name = stationName,
-                LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
                 LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
-                LocationCellUniques = new ExtendedList<LocationCellUnique>(),
-                LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
             };
             targetMod.Locations.Add(ShipExteriorlocation);
 
@@ -57,11 +53,7 @@ namespace Retrograde.Nouns.Stations
             {
                 EditorID = stationName + "_shipint_loc",
                 Name = stationName,
-                LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
                 LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
-                LocationCellUniques = new ExtendedList<LocationCellUnique>(),
-                LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
 
                 ParentLocation = ShipExteriorlocation.ToNullableLink()
             };
@@ -104,7 +96,7 @@ namespace Retrograde.Nouns.Stations
 
             }
 
-            shipint_doorreference.LinkedReferences[0].Reference = shipint_xmarker.ToLink<ILinkedReferenceGetter>();
+            shipint_doorreference.LinkedReferences[0].Reference = shipint_xmarker.ToLink<IPlacedGetter>();
 
             targetMod.Cells[0].SubBlocks[0].Cells.Add(ShipInteriorCell);
 
@@ -116,11 +108,7 @@ namespace Retrograde.Nouns.Stations
             {
                 EditorID = stationName + "_interior_loc",
                 Name = stationName,
-                LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
                 LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
-                LocationCellUniques = new ExtendedList<LocationCellUnique>(),
-                LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-                LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
                 ParentLocation = ShipIntlocation.ToNullableLink(),
             };
             targetMod.Locations.Add(InteriorCellLocation);
@@ -167,7 +155,7 @@ namespace Retrograde.Nouns.Stations
             //Set the Doors to be linked
 
             //Ship Exterior to Ship Int
-            ((PlacedObject)ExteriorCell.Persistent[0]).LinkedReferences[0].Reference = shipint_doorreference.ToLink<ILinkedReferenceGetter>();
+            ((PlacedObject)ExteriorCell.Persistent[0]).LinkedReferences[0].Reference = shipint_doorreference.ToLink<IPlacedGetter>();
 
             //Ship Int to Int
             shipinttoint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
@@ -186,9 +174,6 @@ namespace Retrograde.Nouns.Stations
                 Components = ship.Components,
                 ObjectTemplates = ship.ObjectTemplates,
                 Template = ship.Template,
-                ObjectPlacementDefaults = ship.ObjectPlacementDefaults,
-                ODTY = ship.ODTY,
-                STRVs = ship.STRVs,
             };
 
 

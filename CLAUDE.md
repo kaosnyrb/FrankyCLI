@@ -164,6 +164,7 @@ Save automatically patches both height and texture data for dirty cells when `_d
 - **Cell min/max metadata uses UNSCALED heights** — when writing, divide by 8 for Starfield files
 - **Compression**: must use `ZLibStream` (not `DeflateStream`) — requires proper zlib header + Adler32 checksum
 - **Typical terrain heights**: the test BTD (oebb008world) has terrain at ~15–84 world units in a -4000 to 8000 range. `HeightToRaw(0)` = 21845
+- **BtdFile returns 8x-scaled heights** — `SampleHeightAtWorld()` and `RawToHeight()` return values in the Starfield 8x-scaled coordinate space (e.g. -101). `PlacedObject` positions use **unscaled** coordinates (e.g. -12.7). **Always divide BtdFile heights by 8** when using them for object placement: `btd.SampleHeightAtWorld(x, y) / 8f`
 
 ### Edge Cells Are Off-Limits
 
@@ -301,6 +302,103 @@ var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
 - `ShipMarkerPass.cs` — similar pattern for dungeon ship markers
 - `ExitTopologyPass.cs` — similar pattern for dungeon exit prefabs
 - `WorldspacePlacementUtil.cs` — has overloads for both `PlacedObject` and `PlacedNpc`
+
+## SurfaceBlock Records (SFBK)
+
+SurfaceBlock records define terrain data for worldspaces. Each links to a `.btd` file via the ANAM property.
+
+### Key Properties
+
+| Property | Purpose | Typical Value |
+|----------|---------|---------------|
+| `ANAM` | Path to BTD terrain file | `Data\TERRAIN\stbblock001.btd` |
+| `DNAM` | Cell grid dimensions (First=cols, Second=rows) | `(4, 4)` |
+| `ENAM` | Height range as raw floats (First=min, Second=max) | `(-500f, 1000f)` |
+| `NAM1` | Family name | `"OverlayBlock"` |
+| `NAM5` | Parent block link (Null = standalone) | `2C17D4:Starfield.esm` |
+| `WHGT` | Water height | `float.MinValue` (unset) |
+| `GNAM`–`KNAM` | Various flags/indices | `0` |
+| `NAM2`–`NAM4` | Additional metadata | `0` / `(0,0)` |
+
+### Two Categories
+
+- **Standalone** (`NAM5 = Null`): Base terrain blocks for planet surfaces (e.g., `oebb008world`, `oesd008world`)
+- **Overlay** (`NAM5 = parent link`): Used by POIs/worldspaces, reference a parent block. `NAM1 = "OverlayBlock"`
+
+### Creating a SurfaceBlock for a New Worldspace
+
+```csharp
+var newBlock = new SurfaceBlock(targetMod)
+{
+    ANAM = "Data\\Terrain\\" + editorId + ".btd",
+    EditorID = "OverlayBlock" + editorId,
+    NAM1 = "OverlayBlock",
+    NAM5 = new FormKey(starfieldEsm, 0x002C17D4).ToNullableLink<ISurfaceBlockGetter>(),
+    DNAM = new SurfaceBlockIntItem() { First = 4, Second = 4 },
+    WHGT = float.MinValue,
+};
+// Link to worldspace
+((WorldSpaceOverlayComponent)worldspace.Components[0]).SurfaceBlock =
+    newBlock.ToNullableLink<ISurfaceBlockGetter>();
+```
+
+### Sampling Terrain Height for Object Placement
+
+When placing objects in a worldspace, sample the BTD terrain height and **divide by 8** (Starfield scale factor):
+
+```csharp
+var btd = new BtdFile(btdPath);
+float terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
+// terrainHeight is now in PlacedObject coordinate space
+```
+
+This is used by `WorldspaceNoun` to set `WorldspaceState.TerrainHeight`, which `TileInstantiationPass` uses as the Z base for all tile placements.
+
+### Key Files
+
+- `WorldspaceNoun.cs` — creates new SurfaceBlocks linked to worldspaces, samples BTD height
+- `IWorldspaceDesign.cs` — defines `TemplateSurfaceBlockEditorId` property
+- `FortDesign.cs` — uses `stbblock001` template worldspace, `OverlayBlockstbblock001` surface block
+- `TileInstantiationPass.cs` — places tiles using `state.TerrainHeight` for Z position
+
+## Worldspace Cell Grid and Tile Mapping
+
+Worldspaces use a grid of cells, each covering 4096 world units. The grid is configured via `IWorldspaceDesign.CellGridSize` (e.g., 4 = 4x4 cells). Cell coordinates range from `-(gridSize/2)` to `(gridSize/2 - 1)`.
+
+### Tile-to-Cell Assignment
+
+Tiles in the `GenerationMap` are placed at world positions using `(-94 + blocksize*x, 94 - blocksize*y, z)`. Each tile belongs to the cell at `floor(worldPos / 4096)`. With a 50x50 map and `TileWorldSize=4`, the total extent is ~200 units, so all tiles fall within a 2x2 area of cells regardless of `CellGridSize`.
+
+**Do not hardcode cell quadrant bounds.** Use dynamic cell lookup:
+
+```csharp
+// In per-cell passes, skip tiles that don't belong to the current cell
+float worldX = -94 + (blocksize * x);
+float worldY = 94 - (blocksize * y);
+int tileCellX = (int)Math.Floor(worldX / 4096f);
+int tileCellY = (int)Math.Floor(worldY / 4096f);
+if (tileCellX != state.CurrentCellPos.X || tileCellY != state.CurrentCellPos.Y)
+    continue;
+```
+
+### Cross-Cell Object Routing
+
+When unpacking prefabs, individual objects may land outside the tile's cell. `WorldspaceState.CellLookup` (built by the generator from all SubCells) maps `P2Int` grid points to `Cell` instances:
+
+```csharp
+int cellX = (int)Math.Floor(worldPos.X / 4096f);
+int cellY = (int)Math.Floor(worldPos.Y / 4096f);
+if (state.CellLookup.TryGetValue(new P2Int(cellX, cellY), out var cell))
+    return cell;
+return state.CurrentCell; // fallback
+```
+
+### Key Files
+
+- `WorldspaceNoun.cs` — creates subcell grid from `CellGridSize`, one WorldspaceBlock/SubBlock per cell
+- `WorldspaceDungeonGenerator.cs` — builds `CellLookup`, iterates cells for per-cell passes
+- `TileInstantiationPass.cs` — dynamic tile-to-cell check, cross-cell `ResolveCell()`
+- `IWorldspaceDesign.cs` — `CellGridSize` property
 
 ## Copying PlacedObjects
 

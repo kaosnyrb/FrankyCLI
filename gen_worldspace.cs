@@ -54,20 +54,22 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                            gen_quest_main.FixNextFormId(myMod);
                         }
                     }
                 }
 
-                // Discover template mods from load order (any mod with "template" in filename)
+                // Discover template mods from load order (any mod with "template" in filename + Starfield.esm)
                 ModContextImpl.TemplateModsList = new System.Collections.Generic.List<IStarfieldModGetter>();
                 for (int i = 0; i < env.LoadOrder.Count; i++)
                 {
                     var listing = env.LoadOrder[i];
                     var fileName = listing.FileName.ToString();
-                    if (fileName.Contains("template", StringComparison.OrdinalIgnoreCase)
-                        && fileName.EndsWith(".esm", StringComparison.OrdinalIgnoreCase)
-                        && listing.Mod != null)
+                    if (listing.Mod != null &&
+                        (fileName.Contains("template", StringComparison.OrdinalIgnoreCase)
+                         || fileName.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase))
+                        && fileName.EndsWith(".esm", StringComparison.OrdinalIgnoreCase))
                     {
                         ModContextImpl.TemplateModsList.Add(listing.Mod);
                         Console.WriteLine($"Template mod found: {listing.FileName}");
@@ -115,7 +117,7 @@ namespace FrankyCLI
                 rec.IsCompressed = false;
             }
 
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Export complete!");
             return 0;
         }

@@ -11,10 +11,11 @@ public class FortDesign : IWorldspaceDesign
     public List<IWorldspacePass> CellBuildPasses { get; set; }
     public List<IWorldspacePass> ContentPasses { get; set; }
 
-    public string TemplateWorldspaceEditorId => "stbblock001";
-    public string TemplateSurfaceBlockEditorId => "OverlayBlockstbblock001";
+    public string TemplateWorldspaceEditorId => "oejm001world";
+    public string TemplateSurfaceBlockEditorId => "oejm001world";
     public int MapSize => 50;
     public float TileWorldSize => 4f;
+    public int CellGridSize => 4;
     public string DesignName => "Fort";
 
     public FortDesign()
