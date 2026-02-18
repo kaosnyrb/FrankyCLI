@@ -26,7 +26,8 @@
       "Read(//c/Users/kaosn/.nuget/packages//**)",
       "Bash(findstr:*)",
       "Bash(powershell -Command:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(dotnet run:*)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"
