@@ -80,6 +80,10 @@ switch(mode)
     case "gen_report":
         res = gen_report.Generate(args);
         break;
+
+    case "gen_worldspace":
+        res = gen_worldspace.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;
