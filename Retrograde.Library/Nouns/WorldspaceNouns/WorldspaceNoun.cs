@@ -106,6 +106,33 @@ public class WorldspaceNoun
         newBlock.ANAM = newTerrainFile;
         newBlock.EditorID = "OverlayBlock" + editorId;
 
+        // Set ENAM height range from the BTD file; fall back to known template defaults.
+        // SurfaceBlockFloatItem stores raw IEEE 754 bits as uint.
+        if (dataFolderPath != null)
+        {
+            string btdPathForEnam = Path.Combine(dataFolderPath, "Terrain", editorId + ".btd");
+            if (File.Exists(btdPathForEnam))
+            {
+                var btdForEnam = new BtdFile(btdPathForEnam);
+                newBlock.ENAM = new SurfaceBlockFloatItem()
+                {
+                    First  = BitConverter.SingleToUInt32Bits(btdForEnam.WorldHeightMin / 8f),
+                    Second = BitConverter.SingleToUInt32Bits(btdForEnam.WorldHeightMax / 8f),
+                };
+            }
+        }
+        if (newBlock.ENAM == null)
+        {
+            // Template BTDs all use (-500, 1000) unscaled
+            newBlock.ENAM = new SurfaceBlockFloatItem()
+            {
+                First  = BitConverter.SingleToUInt32Bits(-500f),
+                Second = BitConverter.SingleToUInt32Bits(1000f),
+            };
+        }
+
+        int halfGrid = design.CellGridSize / 2;
+
         // Create worldspace from scratch (matching OEBB029World reference values)
         Worldspace = new Worldspace(targetMod)
         {
@@ -133,8 +160,8 @@ public class WorldspaceNoun
             MapData = new WorldspaceMap()
             {
                 UsableDimensions = new P2Int(0, 0),
-                NorthwestCellCoords = new P2Int16(0, 0),
-                SoutheastCellCoords = new P2Int16(0, 0),
+                NorthwestCellCoords = new P2Int16((short)-halfGrid, (short)(halfGrid - 1)),
+                SoutheastCellCoords = new P2Int16((short)(halfGrid - 1), (short)-halfGrid),
             },
             GNAM = 1f,
             DistantLodMultiplier = 1f,
@@ -157,7 +184,6 @@ public class WorldspaceNoun
 
         // Create subcell grid derived from CellGridSize
         // Cell coords range from -(gridSize/2) to (gridSize/2 - 1)
-        int halfGrid = design.CellGridSize / 2;
         int cellid = 0;
         for (int cy = -halfGrid; cy < halfGrid; cy++)
         {
@@ -199,7 +225,7 @@ public class WorldspaceNoun
             if (File.Exists(btdPath))
             {
                 var btd = new BtdFile(btdPath);
-                terrainHeight = 0;// btd.SampleHeightAtWorld(0, 0) / 8f;
+                terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
                 if (!RetrogradeContext.Quiet)
                     Console.WriteLine($"Terrain height at center: {terrainHeight}");
             }
