@@ -1,7 +1,7 @@
 ﻿using FrankyCLI;
 using System.Windows.Markup;
 
-Console.WriteLine("FrankyCLI. Build new ship part.");
+Console.WriteLine("FrankyCLI");
 
 //Process the args
 for (int i = 0; i < args.Length; i++)
@@ -80,9 +80,20 @@ switch(mode)
     case "gen_report":
         res = gen_report.Generate(args);
         break;
-
     case "gen_worldspace":
         res = gen_worldspace.Generate(args);
+        break;
+    case "gen_btd_test":
+        res = gen_btd_test.Generate(args);
+        break;
+    case "gen_btd_flatten":
+        res = gen_btd_flatten.Generate(args);
+        break;
+    case "gen_btd_info":
+        res = gen_btd_info.Generate(args);
+        break;
+    case "gen_btd_flatcircle":
+        res = gen_btd_flatcircle.Generate(args);
         break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
