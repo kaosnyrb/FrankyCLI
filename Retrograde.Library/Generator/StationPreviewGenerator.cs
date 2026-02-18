@@ -38,11 +38,7 @@ public class StationPreviewGenerator
         {
             EditorID = StationName + "_interior_loc",
             Name = StationName,
-            LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
             LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>(),
-            LocationCellUniques = new ExtendedList<LocationCellUnique>(),
-            LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-            LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
         };
 
         InteriorCell.Location = InteriorLocation.ToNullableLink<ILocationGetter>();

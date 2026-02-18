@@ -59,7 +59,7 @@ namespace Retrograde.Utils
                                     LightBarndoorData = poref.LightBarndoorData,
                                     LightColors = poref.LightColors,
                                     LightFlicker = poref.LightFlicker,
-                                    LightGobo = poref.LightGobo,
+                                    GoboAnimatedProperties = poref.GoboAnimatedProperties,
                                     Lighting = poref.Lighting,
                                     LightLayerData = poref.LightLayerData,
                                     LightRoundedness = poref.LightRoundedness,
@@ -99,7 +99,7 @@ namespace Retrograde.Utils
                                     VolumeData = poref.VolumeData,
                                     VirtualMachineAdapter = poref.VirtualMachineAdapter,
                                     XALG = poref.XALG,
-                                    XCZA = poref.XCZA,
+                                    PlacedObjectXCZRXCZA = poref.PlacedObjectXCZRXCZA,
                                     XFLG = poref.XFLG,
                                     XNSE = poref.XNSE,
                                     XPCK = poref.XPCK
@@ -145,7 +145,7 @@ namespace Retrograde.Utils
                                     LightBarndoorData = poref.LightBarndoorData,
                                     LightColors = poref.LightColors,
                                     LightFlicker = poref.LightFlicker,
-                                    LightGobo = poref.LightGobo,
+                                    GoboAnimatedProperties = poref.GoboAnimatedProperties,
                                     Lighting = poref.Lighting,
                                     LightLayerData = poref.LightLayerData,
                                     LightRoundedness = poref.LightRoundedness,
@@ -184,7 +184,7 @@ namespace Retrograde.Utils
                                     VolumeData = poref.VolumeData,
                                     VirtualMachineAdapter = poref.VirtualMachineAdapter,
                                     XALG = poref.XALG,
-                                    XCZA = poref.XCZA,
+                                    PlacedObjectXCZRXCZA = poref.PlacedObjectXCZRXCZA,
                                     XFLG = poref.XFLG,
                                     XNSE = poref.XNSE,
                                     XPCK = poref.XPCK
@@ -198,7 +198,6 @@ namespace Retrograde.Utils
                                 CellSkyRegion = refcell.CellSkyRegion,
                                 Components = refcell.Components,
                                 EditorID = id,
-                                EncounterLocation = refcell.EncounterLocation,
                                 EnvironmentMap = refcell.EnvironmentMap,
                                 Flags = refcell.Flags,
                                 GlobalDirtLayerMaterial = refcell.GlobalDirtLayerMaterial,
@@ -210,7 +209,6 @@ namespace Retrograde.Utils
                                 LinkedReferences = refcell.LinkedReferences,
                                 Location = refcell.Location,
                                 MajorFlags = refcell.MajorFlags,
-                                MHDT = refcell.MHDT,
                                 Music = refcell.Music,
                                 Name = refcell.Name,
                                 Ownership = refcell.Ownership,
@@ -221,14 +219,12 @@ namespace Retrograde.Utils
                                 PersistentUnknownGroupData = refcell.PersistentUnknownGroupData,
                                 Timestamp = refcell.Timestamp,
                                 Water = refcell.Water,
-                                XCIB = refcell.XCIB,
                                 WaterEnvironmentMap = refcell.WaterEnvironmentMap,
                                 WaterHeight = refcell.WaterHeight,
                                 WaterType = refcell.WaterType,
                                 WaterVelocity = refcell.WaterVelocity,
                                 XCLAs = refcell.XCLAs,
-                                XILS = refcell.XILS,
-                                XWCN = refcell.XWCN
+                                XILS = refcell.XILS
                             };
 
                             return cell;

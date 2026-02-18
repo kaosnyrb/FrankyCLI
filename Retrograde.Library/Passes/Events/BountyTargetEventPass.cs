@@ -175,7 +175,6 @@ namespace Retrograde.Passes
                 Health = baseArmor.Health,
                 ObjectTemplates = baseArmor.ObjectTemplates,
                 AttachParentSlots = baseArmor.AttachParentSlots,
-                Footstep = baseArmor.Footstep,
                 DropdownSound = baseArmor.DropdownSound,
                 Keywords = baseArmor.Keywords,
                 Resistances = baseArmor.Resistances,

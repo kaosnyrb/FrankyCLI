@@ -54,9 +54,6 @@ namespace FrankyCLI
                     var pcmbn = new PlanetContentManagerBranchNode(myMod)
                     {
                         EditorID = "PIP_Quest_" + entry.ToString("000"),
-                        NAM1 = 2,
-                        NAM2 = 0,
-                        NAM5 = false
                     };
                     try
                     {

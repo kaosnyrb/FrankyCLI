@@ -36,7 +36,6 @@ namespace Retrograde.Nouns
                 Keywords = ActivatorClone.Keywords,
                 Name = Name,
                 ObjectBounds = ActivatorClone.ObjectBounds,
-                ODTY = ActivatorClone.ODTY,
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };

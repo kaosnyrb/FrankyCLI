@@ -95,7 +95,6 @@ namespace Retrograde.Quests
                 Keywords = ActivatorClone.Keywords,
                 Name = postername,
                 ObjectBounds = ActivatorClone.ObjectBounds,
-                ODTY = ActivatorClone.ODTY,
                 Model = ActivatorClone.Model,
                 XALG = ActivatorClone.XALG
             };

@@ -27,7 +27,13 @@
       "Bash(findstr:*)",
       "Bash(powershell -Command:*)",
       "WebFetch(domain:github.com)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "WebFetch(domain:www.nuget.org)",
+      "Bash(dotnet tool list:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(ilspycmd:*)",
+      "Bash(dotnet list:*)",
+      "Bash(dotnet add reference:*)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"

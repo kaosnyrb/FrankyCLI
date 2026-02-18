@@ -102,7 +102,6 @@ namespace Retrograde.Nouns
                     Health = armour.Health,
                     ObjectTemplates = armour.ObjectTemplates,
                     AttachParentSlots = armour.AttachParentSlots,
-                    Footstep = armour.Footstep,
                     DropdownSound = armour.DropdownSound,
                     //InstanceNaming = armour.InstanceNaming,
                     Keywords = armour.Keywords,
@@ -163,7 +162,6 @@ namespace Retrograde.Nouns
             {
                 EditorID = "leg_" + legID,
                 LegendaryMods = DefaultLegendaryArmor.LegendaryMods,
-                ApplicableItemList = baseleveled.ToNullableLink<ILeveledItemGetter>(),
                 IncludeFilters = DefaultLegendaryArmor.IncludeFilters,
             };
 
@@ -185,16 +183,6 @@ namespace Retrograde.Nouns
                     }
                 }
             };
-
-            //Most are purple, 25% for gold
-            if (rand.Next(100) > 75)
-            {
-                leglevel.LVLL = new byte[] { 3 };
-            }
-            else
-            {
-                leglevel.LVLL = new byte[] { 2 };
-            }
 
             targetMod.LeveledItems.Add(leglevel);
 

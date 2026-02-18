@@ -85,7 +85,9 @@ namespace FrankyCLI
             switch (recordType.ToLowerInvariant())
             {
                 case "surfaceblock":
-                    found += SafeEnumerate(mod.SurfaceBlocks, search, rec => DumpSurfaceBlock(rec), "SurfaceBlock");
+                    foreach (var rec in mod.SurfaceBlocks)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpSurfaceBlock(rec); found++; }
                     break;
                 case "worldspace":
                     foreach (var rec in mod.Worldspaces)

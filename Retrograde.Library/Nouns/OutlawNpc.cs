@@ -293,21 +293,16 @@ namespace Retrograde.Nouns
             string logSynonym = RandomProvider.GetLogSynonym();
             Book logbook = new Book(myMod)
             {
-                CNAM = Book.CNAM,
                 Components = Book.Components,
                 Description = log,
-                DNAMUnknown = Book.DNAMUnknown,
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + (name.ToLower()).Replace(" ", ""),
                 Keywords = Book.Keywords,
-                ENAM = Book.ENAM,
                 FeaturedItemMessage = Book.FeaturedItemMessage,
                 Flags = Book.Flags,
-                FNAM = Book.FNAM,
                 InventoryArt = Book.InventoryArt,
                 Model = Book.Model,
                 Name = name + " " + logSynonym,
-                ODTY = Book.ODTY,
                 Value = Book.Value,
                 Weight = Book.Weight,
                 Transforms = Book.Transforms,

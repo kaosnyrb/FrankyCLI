@@ -57,7 +57,6 @@ public class WorldspaceNoun
             Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>(),
             WorldLocationRadius = 0,
             ActorFadeMult = 1,
-            TNAM = 0,
         };
 
         Location.Keywords.Add(LocTypeDungeon);
@@ -79,10 +78,22 @@ public class WorldspaceNoun
         Worldspace = targetMod.Worldspaces.DuplicateInAsNewRecord(overrideWorld);
         targetMod.Worldspaces.Remove(overrideWorld.FormKey);
 
-        // Create a fresh SurfaceBlock — GetOrAddAsOverride/DeepCopy throw SubrecordException
-        // on SurfaceBlocks with nullable subrecords. ANAM and EditorID are overwritten below
-        // and the actual terrain data lives in the .btd file referenced by ANAM.
-        var newBlock = new SurfaceBlock(targetMod);
+        // Create a fresh SurfaceBlock matching stbblock001 template values.
+        // GetOrAddAsOverride/DeepCopy throw SubrecordException on SurfaceBlocks
+        // with nullable subrecords, so we create from scratch.
+        var newBlock = new SurfaceBlock(targetMod)
+        {
+            NAM1 = "OverlayBlock",
+            NAM5 = new FormKey(starfieldEsm, 0x002C17D4).ToNullableLink<ISurfaceBlockGetter>(),
+            DNAM = new SurfaceBlockIntItem() { First = 4, Second = 4 },
+            WHGT = float.MinValue,
+            GNAM = 0,
+            HNAM = 0,
+            INAM = 0,
+            JNAM = 0,
+            KNAM = 0,
+            NAM2 = 0,
+        };
         targetMod.SurfaceBlocks.Add(newBlock);
 
         // Copy terrain file if data folder path is provided

@@ -485,10 +485,7 @@ namespace FrankyCLI
                 if (SourceESM == null)
                 {
                     ModPath modPath = Path.Combine(env.DataFolderPath, request.WeaponESM);
-                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, new GroupMask() {
-                        Weapons = true,
-                        ObjectModifications = true 
-                    });
+                    SourceESM = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
                 }
 
                 //SourceESM = env.LoadOrder[0].Mod;
@@ -598,7 +595,7 @@ namespace FrankyCLI
                                     };
                                     co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { new ConstructibleObjectComponent()
                                         {
-                                            Count = (uint)random.Next(4),
+                                            RequiredCount = (uint)random.Next(4),
                                             Component = commonresource
                                         } };
                                     myMod.ConstructibleObjects.Add(co);
@@ -728,10 +725,9 @@ namespace FrankyCLI
                             WorkbenchKeyword = WorkbenchBlacksiteKeyword,
                             AmountProduced = 1,
                             LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,                            
-                            Categories = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { WorkbenchBlacksiteFilterKeyword },                            
                         };
-                        co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() { 
-                            new ConstructibleObjectComponent() { Component = atbb_upgradeitem, Count = 1 } 
+                        co.ConstructableComponents = new ExtendedList<ConstructibleObjectComponent>() {
+                            new ConstructibleObjectComponent() { Component = atbb_upgradeitem, RequiredCount = 1 }
                         };
                         myMod.ConstructibleObjects.Add(co);
                     }

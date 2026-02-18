@@ -302,6 +302,51 @@ var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
 - `ExitTopologyPass.cs` — similar pattern for dungeon exit prefabs
 - `WorldspacePlacementUtil.cs` — has overloads for both `PlacedObject` and `PlacedNpc`
 
+## SurfaceBlock Records (SFBK)
+
+SurfaceBlock records define terrain data for worldspaces. Each links to a `.btd` file via the ANAM property.
+
+### Key Properties
+
+| Property | Purpose | Typical Value |
+|----------|---------|---------------|
+| `ANAM` | Path to BTD terrain file | `Data\TERRAIN\stbblock001.btd` |
+| `DNAM` | Cell grid dimensions (First=cols, Second=rows) | `(4, 4)` |
+| `ENAM` | Height range as raw floats (First=min, Second=max) | `(-500f, 1000f)` |
+| `NAM1` | Family name | `"OverlayBlock"` |
+| `NAM5` | Parent block link (Null = standalone) | `2C17D4:Starfield.esm` |
+| `WHGT` | Water height | `float.MinValue` (unset) |
+| `GNAM`–`KNAM` | Various flags/indices | `0` |
+| `NAM2`–`NAM4` | Additional metadata | `0` / `(0,0)` |
+
+### Two Categories
+
+- **Standalone** (`NAM5 = Null`): Base terrain blocks for planet surfaces (e.g., `oebb008world`, `oesd008world`)
+- **Overlay** (`NAM5 = parent link`): Used by POIs/worldspaces, reference a parent block. `NAM1 = "OverlayBlock"`
+
+### Creating a SurfaceBlock for a New Worldspace
+
+```csharp
+var newBlock = new SurfaceBlock(targetMod)
+{
+    ANAM = "Data\\Terrain\\" + editorId + ".btd",
+    EditorID = "OverlayBlock" + editorId,
+    NAM1 = "OverlayBlock",
+    NAM5 = new FormKey(starfieldEsm, 0x002C17D4).ToNullableLink<ISurfaceBlockGetter>(),
+    DNAM = new SurfaceBlockIntItem() { First = 4, Second = 4 },
+    WHGT = float.MinValue,
+};
+// Link to worldspace
+((WorldSpaceOverlayComponent)worldspace.Components[0]).SurfaceBlock =
+    newBlock.ToNullableLink<ISurfaceBlockGetter>();
+```
+
+### Key Files
+
+- `WorldspaceNoun.cs` — creates new SurfaceBlocks linked to worldspaces
+- `IWorldspaceDesign.cs` — defines `TemplateSurfaceBlockEditorId` property
+- `FortDesign.cs` — uses `stbblock001` template worldspace, `OverlayBlockstbblock001` surface block
+
 ## Copying PlacedObjects
 
 When duplicating a `PlacedObject` from a prefab cell into the world, do NOT use `DeepCopy()` — it preserves the original FormKey, causing ID collisions. Instead, create a `new PlacedObject(RetrogradeContext.Current.TargetMod)` (which assigns a fresh FormKey) and copy all properties manually. See `CellTools.CloneCellById` for the canonical pattern.

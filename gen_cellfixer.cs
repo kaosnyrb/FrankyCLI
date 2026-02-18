@@ -72,7 +72,6 @@ namespace FrankyCLI
                         FogMax = 1,
                         NearHeightRange = 10000,
                         Unknown1 = 1951,
-                        Unknown2 = 3,
                     },
                     WaterHeight = 0,
                     XILS = 1.0f,

@@ -59,10 +59,7 @@ namespace FrankyCLI
                 var location = new Location(gen_quest_main.myMod)
                 {
                     EditorID = "rg_harness_loc",
-                    LocationCellStaticReferences = new ExtendedList<LocationCellStaticReference>(),
-                    LocationCellPersistentReferences = new ExtendedList<LocationReference>(),
-                    LocationCellMarkerReference = new ExtendedList<IFormLinkGetter<IPlacedGetter>>(),
-                    LocationCellUniques = new ExtendedList<LocationCellUnique>()
+                    LocationCellUniqueReferences = new ExtendedList<LocationCellUniqueReference>()
                     
                 };
 

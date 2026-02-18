@@ -128,7 +128,6 @@ public static class NPCTools
             LongName = NPC.LongName,
             ObjectTemplates = NPC.ObjectTemplates,
             MajorFlags = NPC.MajorFlags,
-            ODTY = NPC.ODTY,
             NAM5 = NPC.NAM5,
             MorphBlends = NPC.MorphBlends,
             ONA2 = NPC.ONA2,
