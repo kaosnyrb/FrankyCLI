@@ -182,6 +182,7 @@ public static class ShipTools
         return faction switch
         {
             "Crimson Fleet" => 0x000B1375,
+            "CrimsonFleet" => 0x000B1375,
             "Spacer" => 0x000B13A8,
             "Ecliptic" => 0x000AE4F3,
             "Varuun" => 0x000B19CF,
