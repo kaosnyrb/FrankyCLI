@@ -1,5 +1,6 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using System.Collections.Generic;
 
 namespace Retrograde.Abstractions;
 
@@ -25,4 +26,10 @@ public interface IModContext
     /// collections like Cells, PackIns, FormLists, etc.
     /// </summary>
     StarfieldMod TargetMod { get; }
+
+    /// <summary>
+    /// Read-only access to all mods in the load order with "template" in their filename.
+    /// Used for looking up template records (Worldspaces, PackIns, etc.) across multiple source ESMs.
+    /// </summary>
+    IReadOnlyList<IStarfieldModGetter> TemplateMods { get; }
 }

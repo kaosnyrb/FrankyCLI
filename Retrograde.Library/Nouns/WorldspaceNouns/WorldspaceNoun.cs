@@ -1,5 +1,6 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Generator;
@@ -66,12 +67,23 @@ public class WorldspaceNoun
         Location.Keywords.Add(LocTypeOverlay);
         targetMod.Locations.Add(Location);
 
-        // Clone template worldspace and terrain
-        var baseWorld = targetMod.Worldspaces.Where(x => x.EditorID == design.TemplateWorldspaceEditorId).First();
-        Worldspace = targetMod.Worldspaces.DuplicateInAsNewRecord(baseWorld);
+        // Clone template worldspace and terrain from template mods
+        var templateMods = RetrogradeContext.Current.TemplateMods;
 
-        var stbBlock = targetMod.SurfaceBlocks.Where(x => x.EditorID == design.TemplateSurfaceBlockEditorId).First();
-        var newBlock = targetMod.SurfaceBlocks.DuplicateInAsNewRecord(stbBlock);
+        var baseWorld = FindInTemplateMods(templateMods, m => m.Worldspaces, design.TemplateWorldspaceEditorId);
+        if (baseWorld == null)
+            throw new InvalidOperationException($"Template worldspace '{design.TemplateWorldspaceEditorId}' not found in any template mod.");
+        // Use GetOrAddAsOverride + DuplicateInAsNewRecord for binary-level copy
+        // (DeepCopy deserializes all nullable subrecords and can throw SubrecordException)
+        var overrideWorld = targetMod.Worldspaces.GetOrAddAsOverride(baseWorld);
+        Worldspace = targetMod.Worldspaces.DuplicateInAsNewRecord(overrideWorld);
+        targetMod.Worldspaces.Remove(overrideWorld.FormKey);
+
+        // Create a fresh SurfaceBlock — GetOrAddAsOverride/DeepCopy throw SubrecordException
+        // on SurfaceBlocks with nullable subrecords. ANAM and EditorID are overwritten below
+        // and the actual terrain data lives in the .btd file referenced by ANAM.
+        var newBlock = new SurfaceBlock(targetMod);
+        targetMod.SurfaceBlocks.Add(newBlock);
 
         // Copy terrain file if data folder path is provided
         string newTerrainFile = "Data\\Terrain\\" + editorId + ".btd";
@@ -130,5 +142,34 @@ public class WorldspaceNoun
         // Run generation
         var generator = new WorldspaceDungeonGenerator(design);
         State = generator.Generate(Worldspace, Location, seed);
+    }
+
+    /// <summary>
+    /// Safely searches across template mods for a record by EditorID.
+    /// Catches Mutagen SubrecordExceptions from malformed records in mods
+    /// that don't have valid entries for the given collection.
+    /// </summary>
+    private static T FindInTemplateMods<T>(
+        System.Collections.Generic.IReadOnlyList<IStarfieldModGetter> templateMods,
+        Func<IStarfieldModGetter, IEnumerable<T>> collectionSelector,
+        string editorId) where T : class, IMajorRecordGetter
+    {
+        foreach (var mod in templateMods)
+        {
+            try
+            {
+                foreach (var record in collectionSelector(mod))
+                {
+                    try
+                    {
+                        if (record.EditorID == editorId)
+                            return record;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+        return null;
     }
 }

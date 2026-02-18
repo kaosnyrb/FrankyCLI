@@ -23,10 +23,11 @@ public class PackInLibraryPass : IWorldspacePass
 
     public void RunPass(WorldspaceState state)
     {
-        var targetMod = RetrogradeContext.Current.TargetMod;
+        var templateMods = RetrogradeContext.Current.TemplateMods;
         foreach (var (key, searchId) in _packinIds)
         {
-            state.PackInLibrary[key] = targetMod.PackIns
+            state.PackInLibrary[key] = templateMods
+                .SelectMany(m => m.PackIns)
                 .Where(p => p.EditorID != null && p.EditorID.Contains(searchId))
                 .Select(p => p.FormKey)
                 .ToList();

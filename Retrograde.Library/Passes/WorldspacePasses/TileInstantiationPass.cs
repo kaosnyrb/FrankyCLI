@@ -4,20 +4,23 @@ using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Utils;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Retrograde.Passes.WorldspacePasses;
 
 /// <summary>
 /// Per-cell pass that converts map tiles in the current quadrant
-/// into PlacedObject records using the PackIn library.
-/// Ported from StarTiller FortCellGen.BuildCell().
+/// into placed records by unpacking PackIn prefab contents.
+/// Only places objects whose Base form comes from Starfield.esm,
+/// eliminating dependencies on template library mods.
 /// </summary>
 public class TileInstantiationPass : IWorldspacePass
 {
     public void RunPass(WorldspaceState state)
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
+        var templateMods = RetrogradeContext.Current.TemplateMods;
         var rand = state.Rng;
         var map = state.Map;
         int blocksize = (int)state.TileWorldSize;
@@ -32,6 +35,8 @@ public class TileInstantiationPass : IWorldspacePass
         if (state.CurrentCellPos.X == 0) { startx = (map.xsize / 2) - 1; endx = map.xsize; }
         if (state.CurrentCellPos.Y == 0) { starty = 0; endy = (map.ysize / 2) - 1; }
         if (state.CurrentCellPos.Y == -1) { starty = (map.ysize / 2) - 1; endy = map.ysize; }
+
+        int totalPlaced = 0;
 
         for (int x = startx; x < endx; x++)
         {
@@ -50,7 +55,9 @@ public class TileInstantiationPass : IWorldspacePass
                             var prefab = variants[prefabid];
 
                             // Remove non-reusable, non-addon variants after use
-                            var packIn = targetMod.PackIns[prefab];
+                            var packIn = templateMods
+                                .SelectMany(m => m.PackIns)
+                                .FirstOrDefault(p => p.FormKey == prefab);
                             if (packIn != null &&
                                 packIn.EditorID != null &&
                                 !packIn.EditorID.Contains("reuse") &&
@@ -67,35 +74,129 @@ public class TileInstantiationPass : IWorldspacePass
                             {
                                 z = map.tiles[x][y].zoverride;
                             }
-                            P3Float pos = new P3Float(-94 + (blocksize * x), 94 - (blocksize * y), z);
-                            P3Float rot = new P3Float(0, 0, RotationUtils.EulerToRadCardinals(map.tiles[x][y].rotation));
+                            P3Float tilePos = new P3Float(-94 + (blocksize * x), 94 - (blocksize * y), z);
+                            int yawSteps = map.tiles[x][y].rotation / 90;
 
-                            // Persistent vs temporary (Instanced Static flag = 2560)
-                            if (packIn != null && packIn.MajorRecordFlagsRaw == 2560)
+                            // Resolve the PackIn's cell to unpack its contents
+                            var prefabCell = ResolvePrefabCell(prefab, templateMods);
+                            if (prefabCell == null)
                             {
-                                var placed = new PlacedObject(targetMod)
-                                {
-                                    Base = prefab.ToNullableLink<IPlaceableObjectGetter>(),
-                                    Position = pos,
-                                    Rotation = rot,
-                                    MajorRecordFlagsRaw = 66560
-                                };
-                                state.PlacementUtil.AddToPersistent(placed);
+                                Console.WriteLine($"[TileInstantiation] WARNING: Could not resolve cell for PackIn {prefab}, skipping");
+                                continue;
                             }
-                            else
+
+                            // Unpack all placed entries from the prefab cell
+                            foreach (var entry in prefabCell.Temporary)
                             {
-                                var placed = new PlacedObject(targetMod)
+                                if (entry is IPlacedObjectGetter po)
                                 {
-                                    Base = prefab.ToNullableLink<IPlaceableObjectGetter>(),
-                                    Position = pos,
-                                    Rotation = rot,
-                                };
-                                state.PlacementUtil.AddToTemporary(state.CurrentCell, placed);
+                                    var placed = ClonePlacedObject(po, tilePos, yawSteps, targetMod);
+                                    if (placed != null)
+                                    {
+                                        state.PlacementUtil.AddToTemporary(state.CurrentCell, placed);
+                                        totalPlaced++;
+                                    }
+                                }
+                                else if (entry is IPlacedNpcGetter npc)
+                                {
+                                    var placed = ClonePlacedNpc(npc, tilePos, yawSteps, targetMod);
+                                    if (placed != null)
+                                    {
+                                        state.PlacementUtil.AddToTemporary(state.CurrentCell, placed);
+                                        totalPlaced++;
+                                    }
+                                }
+                            }
+
+                            foreach (var entry in prefabCell.Persistent)
+                            {
+                                if (entry is IPlacedObjectGetter po)
+                                {
+                                    var placed = ClonePlacedObject(po, tilePos, yawSteps, targetMod);
+                                    if (placed != null)
+                                    {
+                                        state.PlacementUtil.AddToPersistent(placed);
+                                        totalPlaced++;
+                                    }
+                                }
+                                else if (entry is IPlacedNpcGetter npc)
+                                {
+                                    var placed = ClonePlacedNpc(npc, tilePos, yawSteps, targetMod);
+                                    if (placed != null)
+                                    {
+                                        state.PlacementUtil.AddToPersistent(placed);
+                                        totalPlaced++;
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+        Console.WriteLine($"[TileInstantiation] Unpacked {totalPlaced} objects from prefabs");
+    }
+
+    private static ICellGetter? ResolvePrefabCell(FormKey packinFormKey, IReadOnlyList<IStarfieldModGetter> templateMods)
+    {
+        foreach (var mod in templateMods)
+        {
+            var packin = mod.PackIns.FirstOrDefault(p => p.FormKey == packinFormKey);
+            if (packin?.Cell.FormKey != null)
+            {
+                foreach (var block in mod.Cells)
+                    foreach (var subBlock in block.SubBlocks)
+                        foreach (var cell in subBlock.Cells)
+                            if (cell.FormKey == packin.Cell.FormKey)
+                                return cell;
+            }
+        }
+        return null;
+    }
+
+    private static PlacedObject? ClonePlacedObject(IPlacedObjectGetter source, P3Float tilePos, int yawSteps, StarfieldMod targetMod)
+    {
+        // Only place Starfield.esm forms
+        if (source.Base.FormKey.ModKey.Name != "Starfield") return null;
+
+        var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
+        var worldPos = tilePos + rotatedLocal;
+        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+
+        return new PlacedObject(targetMod)
+        {
+            Base = source.Base.FormKey.ToNullableLink<IPlaceableObjectGetter>(),
+            Position = worldPos,
+            Rotation = worldRot,
+            Scale = source.Scale,
+            Count = source.Count,
+            Primitive = source.Primitive?.DeepCopy(),
+            VolumeData = source.VolumeData?.DeepCopy(),
+            Lighting = source.Lighting?.DeepCopy(),
+            EnableParent = source.EnableParent?.DeepCopy(),
+            Ownership = source.Ownership?.DeepCopy(),
+            MapMarker = source.MapMarker?.DeepCopy(),
+        };
+    }
+
+    private static PlacedNpc? ClonePlacedNpc(IPlacedNpcGetter source, P3Float tilePos, int yawSteps, StarfieldMod targetMod)
+    {
+        // Only place Starfield.esm forms
+        if (source.Base.FormKey.ModKey.Name != "Starfield") return null;
+
+        var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
+        var worldPos = tilePos + rotatedLocal;
+        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+
+        return new PlacedNpc(targetMod)
+        {
+            Base = source.Base.FormKey.ToLink<INpcGetter>(),
+            Position = worldPos,
+            Rotation = worldRot,
+            Scale = source.Scale,
+            LevelModifier = source.LevelModifier,
+            Ownership = source.Ownership?.DeepCopy(),
+        };
     }
 }

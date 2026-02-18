@@ -17,7 +17,19 @@ public class WorldspacePlacementUtil
         _pendingTemporary.Add((cell, placed));
     }
 
+    public void AddToTemporary(Cell cell, PlacedNpc placed)
+    {
+        if (cell == null || placed == null) return;
+        _pendingTemporary.Add((cell, placed));
+    }
+
     public void AddToPersistent(PlacedObject placed)
+    {
+        if (placed == null) return;
+        _pendingPersistent.Add(placed);
+    }
+
+    public void AddToPersistent(PlacedNpc placed)
     {
         if (placed == null) return;
         _pendingPersistent.Add(placed);

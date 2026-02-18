@@ -245,6 +245,63 @@ All BTDs in `Data\terrain\`: oedb508world, oejm008world, oejp008caveworld, oeob0
 - `gen_btd_info` — dumps file structure, section layout, block stats, height distribution (info_btd.bat); pass a directory path to scan all BTD files (info_btd_all.bat)
 - Test BTDs: `C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\terrain\`
 
+## Unpacking PackIn Prefab Contents
+
+To eliminate dependencies on template library mods, PackIn prefabs can be unpacked — placing their individual Starfield.esm base forms directly instead of referencing the PackIn.
+
+### Resolving a PackIn's Cell
+
+PackIn records have a `Cell` property (FormLink). To get the cell contents from template mods:
+
+```csharp
+foreach (var mod in RetrogradeContext.Current.TemplateMods)
+{
+    var packin = mod.PackIns.FirstOrDefault(p => p.FormKey == packinFormKey);
+    if (packin?.Cell.FormKey != null)
+    {
+        foreach (var block in mod.Cells)
+            foreach (var subBlock in block.SubBlocks)
+                foreach (var cell in subBlock.Cells)
+                    if (cell.FormKey == packin.Cell.FormKey)
+                        return cell; // ICellGetter
+    }
+}
+```
+
+### Cloning from Getter Types (Template Mods)
+
+Template mods (`IStarfieldModGetter`) return getter interfaces (`IPlacedObjectGetter`, `ICellGetter`). When cloning from getters into a mutable `PlacedObject`:
+
+- **Simple value types** (P3Float, float?, int?, bool?, FormKey) assign directly
+- **FormLinks**: use `source.Base.FormKey.ToNullableLink<IPlaceableObjectGetter>()` to convert getter link to setter link
+- **Complex sub-objects** (Primitive, Lighting, Ownership, EnableParent, VolumeData, MapMarker): use `.DeepCopy()` on the getter
+- **Collection properties** (Components, LinkedReferences, etc.): also need `.DeepCopy()` or manual conversion — these can't be assigned directly from getter to setter
+- **Skip properties** that aren't needed rather than fighting type conversions — worldspace tiles typically only need Base, Position, Rotation, Scale, Primitive, VolumeData, Lighting
+
+### Filtering to Starfield.esm Only
+
+```csharp
+if (source.Base.FormKey.ModKey.Name != "Starfield") return null;
+```
+
+### World Transform for Unpacked Objects
+
+Convert tile rotation (degrees) to yaw steps, then use `RgRotation`:
+
+```csharp
+int yawSteps = map.tiles[x][y].rotation / 90;
+var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
+var worldPos = tilePos + rotatedLocal;
+var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+```
+
+### Key Files
+
+- `TileInstantiationPass.cs` — worldspace prefab unpacking (iterates PackIn cell contents)
+- `ShipMarkerPass.cs` — similar pattern for dungeon ship markers
+- `ExitTopologyPass.cs` — similar pattern for dungeon exit prefabs
+- `WorldspacePlacementUtil.cs` — has overloads for both `PlacedObject` and `PlacedNpc`
+
 ## Copying PlacedObjects
 
 When duplicating a `PlacedObject` from a prefab cell into the world, do NOT use `DeepCopy()` — it preserves the original FormKey, causing ID collisions. Instead, create a `new PlacedObject(RetrogradeContext.Current.TargetMod)` (which assigns a fresh FormKey) and copy all properties manually. See `CellTools.CloneCellById` for the canonical pattern.
