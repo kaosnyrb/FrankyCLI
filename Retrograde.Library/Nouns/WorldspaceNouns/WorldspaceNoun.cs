@@ -5,6 +5,7 @@ using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Generator;
 using Retrograde.Passes;
+using Retrograde.Utils;
 using Retrograde.WorldspaceDesigns;
 using System;
 using System.IO;
@@ -66,26 +67,12 @@ public class WorldspaceNoun
         Location.Keywords.Add(LocTypeOverlay);
         targetMod.Locations.Add(Location);
 
-        // Clone template worldspace and terrain from template mods
-        var templateMods = RetrogradeContext.Current.TemplateMods;
-
-        var baseWorld = FindInTemplateMods(templateMods, m => m.Worldspaces, design.TemplateWorldspaceEditorId);
-        if (baseWorld == null)
-            throw new InvalidOperationException($"Template worldspace '{design.TemplateWorldspaceEditorId}' not found in any template mod.");
-        // Use GetOrAddAsOverride + DuplicateInAsNewRecord for binary-level copy
-        // (DeepCopy deserializes all nullable subrecords and can throw SubrecordException)
-        var overrideWorld = targetMod.Worldspaces.GetOrAddAsOverride(baseWorld);
-        Worldspace = targetMod.Worldspaces.DuplicateInAsNewRecord(overrideWorld);
-        targetMod.Worldspaces.Remove(overrideWorld.FormKey);
-
-        // Create a fresh SurfaceBlock matching stbblock001 template values.
-        // GetOrAddAsOverride/DeepCopy throw SubrecordException on SurfaceBlocks
-        // with nullable subrecords, so we create from scratch.
+        // Create SurfaceBlock from scratch
         var newBlock = new SurfaceBlock(targetMod)
         {
             NAM1 = "OverlayBlock",
             NAM5 = new FormKey(starfieldEsm, 0x002C17D4).ToNullableLink<ISurfaceBlockGetter>(),
-            DNAM = new SurfaceBlockIntItem() { First = 4, Second = 4 },
+            DNAM = new SurfaceBlockIntItem() { First = (uint)design.CellGridSize, Second = (uint)design.CellGridSize },
             WHGT = float.MinValue,
             GNAM = 0,
             HNAM = 0,
@@ -118,10 +105,31 @@ public class WorldspaceNoun
 
         newBlock.ANAM = newTerrainFile;
         newBlock.EditorID = "OverlayBlock" + editorId;
-        ((WorldSpaceOverlayComponent)Worldspace.Components[0]).SurfaceBlock = newBlock.ToNullableLink<ISurfaceBlockGetter>();
-        Worldspace.EditorID = editorId;
-        Worldspace.Location = Location.ToNullableLink<ILocationGetter>();
-        Worldspace.Name = poiName;
+
+        // Create worldspace from scratch
+        Worldspace = new Worldspace(targetMod)
+        {
+            EditorID = editorId,
+            Name = poiName,
+            Flags = Worldspace.Flag.SmallWorld,
+            Location = Location.ToNullableLink<ILocationGetter>(),
+            LandDefaults = new WorldspaceLandDefaults()
+            {
+                DefaultLandHeight = -2048,
+                DefaultWaterHeight = -200,
+            },
+            Climate = new FormKey(starfieldEsm, 0x00015F).ToNullableLink<IClimateGetter>(),
+            Water = new FormKey(starfieldEsm, 0x000018).ToNullableLink<IWaterGetter>(),
+            Components = new ExtendedList<AComponent>
+            {
+                new WorldSpaceOverlayComponent()
+                {
+                    SurfaceBlock = newBlock.ToNullableLink<ISurfaceBlockGetter>(),
+                },
+                new PlanetContentManagerContentPropertiesComponent(),
+            },
+        };
+        targetMod.Worldspaces.Add(Worldspace);
 
         // Create fresh TopCell
         Worldspace.TopCell = new Cell(targetMod)
@@ -134,25 +142,57 @@ public class WorldspaceNoun
             Persistent = new ExtendedList<IPlaced>()
         };
 
-        // Create fresh subcells
+        // Create subcell grid derived from CellGridSize
+        // Cell coords range from -(gridSize/2) to (gridSize/2 - 1)
+        int halfGrid = design.CellGridSize / 2;
         int cellid = 0;
-        foreach (var sbc in Worldspace.SubCells)
+        for (int cy = -halfGrid; cy < halfGrid; cy++)
         {
-            var point = sbc.Items[0].Items[0].Grid.Point;
-            sbc.Items[0].Items[0] = new Cell(targetMod)
+            for (int cx = -halfGrid; cx < halfGrid; cx++)
             {
-                EditorID = editorId + "cell" + cellid++,
-                Grid = new CellGrid() { Point = point },
-                Flags = Cell.Flag.HasWater,
-                XILS = 1,
-                Temporary = new ExtendedList<IPlaced>(),
-                WaterHeight = -200,
-            };
+                var point = new P2Int(cx, cy);
+                var cell = new Cell(targetMod)
+                {
+                    EditorID = editorId + "cell" + cellid++,
+                    Grid = new CellGrid() { Point = point },
+                    Flags = Cell.Flag.HasWater,
+                    XILS = 1,
+                    Temporary = new ExtendedList<IPlaced>(),
+                    WaterHeight = -200,
+                };
+                var subBlock = new WorldspaceSubBlock()
+                {
+                    BlockNumberX = (short)cx,
+                    BlockNumberY = (short)cy,
+                    Items = new ExtendedList<Cell> { cell },
+                };
+                var block = new WorldspaceBlock()
+                {
+                    BlockNumberX = (short)cx,
+                    BlockNumberY = (short)cy,
+                    Items = new ExtendedList<WorldspaceSubBlock> { subBlock },
+                };
+                Worldspace.SubCells.Add(block);
+            }
+        }
+
+        // Sample terrain height from BTD at worldspace center
+        float terrainHeight = 0;
+        if (dataFolderPath != null)
+        {
+            string btdPath = Path.Combine(dataFolderPath, "Terrain", editorId + ".btd");
+            if (File.Exists(btdPath))
+            {
+                var btd = new BtdFile(btdPath);
+                terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
+                if (!RetrogradeContext.Quiet)
+                    Console.WriteLine($"Terrain height at center: {terrainHeight}");
+            }
         }
 
         // Run generation
         var generator = new WorldspaceDungeonGenerator(design);
-        State = generator.Generate(Worldspace, Location, seed);
+        State = generator.Generate(Worldspace, Location, seed, terrainHeight);
     }
 
     /// <summary>

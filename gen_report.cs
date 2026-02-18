@@ -39,7 +39,8 @@ namespace FrankyCLI
                     if (env.LoadOrder[i].FileName == modname + ".esm")
                     {
                         ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                        mod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                        mod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+                        gen_quest_main.FixNextFormId(mod);
                     }
                 }
 

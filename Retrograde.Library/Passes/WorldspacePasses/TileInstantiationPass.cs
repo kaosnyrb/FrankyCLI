@@ -69,10 +69,10 @@ public class TileInstantiationPass : IWorldspacePass
                                 }
                             }
 
-                            float z = -10;
+                            float z = state.TerrainHeight;
                             if (map.tiles[x][y].zoverride != 0)
                             {
-                                z = map.tiles[x][y].zoverride;
+                                z = state.TerrainHeight + map.tiles[x][y].zoverride;
                             }
                             P3Float tilePos = new P3Float(-94 + (blocksize * x), 94 - (blocksize * y), z);
                             int yawSteps = map.tiles[x][y].rotation / 90;
@@ -93,7 +93,8 @@ public class TileInstantiationPass : IWorldspacePass
                                     var placed = ClonePlacedObject(po, tilePos, yawSteps, targetMod);
                                     if (placed != null)
                                     {
-                                        state.PlacementUtil.AddToTemporary(state.CurrentCell, placed);
+                                        var targetCell = ResolveCell(state, placed.Position);
+                                        state.PlacementUtil.AddToTemporary(targetCell, placed);
                                         totalPlaced++;
                                     }
                                 }
@@ -102,7 +103,8 @@ public class TileInstantiationPass : IWorldspacePass
                                     var placed = ClonePlacedNpc(npc, tilePos, yawSteps, targetMod);
                                     if (placed != null)
                                     {
-                                        state.PlacementUtil.AddToTemporary(state.CurrentCell, placed);
+                                        var targetCell = ResolveCell(state, placed.Position);
+                                        state.PlacementUtil.AddToTemporary(targetCell, placed);
                                         totalPlaced++;
                                     }
                                 }
@@ -136,6 +138,23 @@ public class TileInstantiationPass : IWorldspacePass
         }
 
         Console.WriteLine($"[TileInstantiation] Unpacked {totalPlaced} objects from prefabs");
+    }
+
+    /// <summary>
+    /// Determines which cell a world position belongs to and returns it.
+    /// Falls back to state.CurrentCell if the computed cell isn't in the lookup.
+    /// Each cell is 4096 world units.
+    /// </summary>
+    private static Cell ResolveCell(WorldspaceState state, P3Float worldPos)
+    {
+        int cellX = (int)Math.Floor(worldPos.X / 4096f);
+        int cellY = (int)Math.Floor(worldPos.Y / 4096f);
+        var cellPoint = new P2Int(cellX, cellY);
+
+        if (state.CellLookup.TryGetValue(cellPoint, out var cell))
+            return cell;
+
+        return state.CurrentCell;
     }
 
     private static ICellGetter? ResolvePrefabCell(FormKey packinFormKey, IReadOnlyList<IStarfieldModGetter> templateMods)

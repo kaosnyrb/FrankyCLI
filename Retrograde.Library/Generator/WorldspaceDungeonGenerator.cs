@@ -15,7 +15,7 @@ public class WorldspaceDungeonGenerator
         _design = design;
     }
 
-    public WorldspaceState Generate(Worldspace worldspace, Location location, int seed)
+    public WorldspaceState Generate(Worldspace worldspace, Location location, int seed, float terrainHeight = 0)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -25,12 +25,20 @@ public class WorldspaceDungeonGenerator
             Rng = new Random(seed),
             TileWorldSize = _design.TileWorldSize,
             DesignName = _design.DesignName,
+            TerrainHeight = terrainHeight,
         };
 
         // Phase 1: Map passes (build the 2D tile layout)
         foreach (var pass in _design.MapPasses)
         {
             pass.RunPass(state);
+        }
+
+        // Build cell lookup for cross-boundary placement
+        foreach (var sbc in worldspace.SubCells)
+        {
+            var cell = sbc.Items[0].Items[0];
+            state.CellLookup[cell.Grid.Point] = cell;
         }
 
         // Phase 2: Cell build passes (per quadrant)

@@ -164,6 +164,7 @@ Save automatically patches both height and texture data for dirty cells when `_d
 - **Cell min/max metadata uses UNSCALED heights** — when writing, divide by 8 for Starfield files
 - **Compression**: must use `ZLibStream` (not `DeflateStream`) — requires proper zlib header + Adler32 checksum
 - **Typical terrain heights**: the test BTD (oebb008world) has terrain at ~15–84 world units in a -4000 to 8000 range. `HeightToRaw(0)` = 21845
+- **BtdFile returns 8x-scaled heights** — `SampleHeightAtWorld()` and `RawToHeight()` return values in the Starfield 8x-scaled coordinate space (e.g. -101). `PlacedObject` positions use **unscaled** coordinates (e.g. -12.7). **Always divide BtdFile heights by 8** when using them for object placement: `btd.SampleHeightAtWorld(x, y) / 8f`
 
 ### Edge Cells Are Off-Limits
 
@@ -341,11 +342,24 @@ var newBlock = new SurfaceBlock(targetMod)
     newBlock.ToNullableLink<ISurfaceBlockGetter>();
 ```
 
+### Sampling Terrain Height for Object Placement
+
+When placing objects in a worldspace, sample the BTD terrain height and **divide by 8** (Starfield scale factor):
+
+```csharp
+var btd = new BtdFile(btdPath);
+float terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
+// terrainHeight is now in PlacedObject coordinate space
+```
+
+This is used by `WorldspaceNoun` to set `WorldspaceState.TerrainHeight`, which `TileInstantiationPass` uses as the Z base for all tile placements.
+
 ### Key Files
 
-- `WorldspaceNoun.cs` — creates new SurfaceBlocks linked to worldspaces
+- `WorldspaceNoun.cs` — creates new SurfaceBlocks linked to worldspaces, samples BTD height
 - `IWorldspaceDesign.cs` — defines `TemplateSurfaceBlockEditorId` property
 - `FortDesign.cs` — uses `stbblock001` template worldspace, `OverlayBlockstbblock001` surface block
+- `TileInstantiationPass.cs` — places tiles using `state.TerrainHeight` for Z position
 
 ## Copying PlacedObjects
 

@@ -1,6 +1,9 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
+using Mutagen.Bethesda.Plugins.Order;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde;
@@ -9,6 +12,7 @@ using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace FrankyCLI
 {
@@ -17,6 +21,70 @@ namespace FrankyCLI
         public static ModKey StarfieldModKey;
         public static IStarfieldModGetter _StarfieldMod;
         public static StarfieldMod myMod;
+
+        /// <summary>
+        /// Cached master flags lookup, built once from the load order.
+        /// Uses lightweight snapshots so it survives GameEnvironment disposal.
+        /// </summary>
+        public static Cache<IModMasterStyledGetter, ModKey> MasterFlagsCache;
+
+        /// <summary>
+        /// Lightweight snapshot of a mod's master style, so we don't hold
+        /// references to disposed GameEnvironment mod objects.
+        /// </summary>
+        private class MasterStyleSnapshot : IModMasterStyledGetter
+        {
+            public ModKey ModKey { get; init; }
+            public MasterStyle MasterStyle { get; init; }
+        }
+
+        /// <summary>
+        /// Builds BinaryReadParameters with MasterFlagsLookup from the load order.
+        /// Required by Mutagen 0.46+ for CreateFromBinary and WriteToBinary.
+        /// </summary>
+        public static BinaryReadParameters BuildReadParams<TMod>(ILoadOrderGetter<IModListingGetter<TMod>> loadOrder)
+            where TMod : class, IModGetter
+        {
+            MasterFlagsCache = new Cache<IModMasterStyledGetter, ModKey>(m => m.ModKey);
+            foreach (var listing in loadOrder.ListedOrder)
+            {
+                if (listing.Mod != null)
+                    MasterFlagsCache.Set(new MasterStyleSnapshot
+                    {
+                        ModKey = listing.Mod.ModKey,
+                        MasterStyle = listing.Mod.MasterStyle
+                    });
+            }
+            return new BinaryReadParameters() { MasterFlagsLookup = MasterFlagsCache };
+        }
+
+        /// <summary>
+        /// Builds BinaryWriteParameters with MasterFlagsLookup and NoCheck for FormID uniqueness.
+        /// </summary>
+        public static BinaryWriteParameters BuildWriteParams()
+        {
+            return new BinaryWriteParameters()
+            {
+                MasterFlagsLookup = MasterFlagsCache,
+                FormIDUniqueness = FormIDUniquenessOption.NoCheck
+            };
+        }
+
+        /// <summary>
+        /// After loading a mod via CreateFromBinary, bump NextFormID past the highest
+        /// existing record to prevent FormKey collisions when adding new records.
+        /// </summary>
+        public static void FixNextFormId(StarfieldMod mod)
+        {
+            uint max = mod.ModHeader.Stats.NextFormID;
+            foreach (var rec in mod.EnumerateMajorRecords())
+            {
+                uint id = rec.FormKey.ID;
+                if (id >= max)
+                    max = id + 1;
+            }
+            mod.ModHeader.Stats.NextFormID = max;
+        }
 
         public static int Generate(string[] args)
         {
@@ -50,7 +118,8 @@ namespace FrankyCLI
                         if (env.LoadOrder[i].FileName == modname + ".esm")
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
-                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield);
+                            myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, BuildReadParams(env.LoadOrder));
+                            FixNextFormId(myMod);
                         }
                     }
                 }
@@ -84,7 +153,7 @@ namespace FrankyCLI
                 rec.IsCompressed = false;
             }
 
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm");
+            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             AITools.ExportConversation();
             Console.WriteLine("Finished");
             return 0;

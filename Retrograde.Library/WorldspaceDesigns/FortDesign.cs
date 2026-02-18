@@ -15,6 +15,7 @@ public class FortDesign : IWorldspaceDesign
     public string TemplateSurfaceBlockEditorId => "OverlayBlockstbblock001";
     public int MapSize => 50;
     public float TileWorldSize => 4f;
+    public int CellGridSize => 4;
     public string DesignName => "Fort";
 
     public FortDesign()

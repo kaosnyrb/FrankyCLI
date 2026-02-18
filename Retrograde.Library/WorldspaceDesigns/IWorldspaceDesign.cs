@@ -41,6 +41,13 @@ public interface IWorldspaceDesign
     /// </summary>
     float TileWorldSize { get; }
 
+    /// <summary>
+    /// Cell grid dimensions for the SurfaceBlock DNAM (square).
+    /// Determines how many cells the worldspace terrain has.
+    /// stbblock001 uses 4 (4x4 cells).
+    /// </summary>
+    int CellGridSize { get; }
+
     string GeneratePOIName(int seed);
     string DesignName { get; }
 }
