@@ -562,6 +562,87 @@ namespace Retrograde.Utils
         }
 
         /// <summary>
+        /// Flattens terrain in an axis-aligned rectangle around a world-space point.
+        /// The target height is sampled from the terrain at the center.
+        /// A smooth blend band around the outer edge transitions from flat back to original terrain.
+        /// Respects edge cell boundaries (won't modify outermost ring of cells).
+        /// </summary>
+        /// <param name="worldX">World-space X of rectangle center.</param>
+        /// <param name="worldY">World-space Y of rectangle center.</param>
+        /// <param name="halfWidth">Half-width of the flat area in world units (X axis).</param>
+        /// <param name="halfHeight">Half-height of the flat area in world units (Y axis).</param>
+        /// <param name="blendWidth">Width of the smooth transition band in world units (default 256 = 8 vertices).</param>
+        /// <returns>The world-space height the area was flattened to.</returns>
+        public float FlattenSquare(float worldX, float worldY, float halfWidth, float halfHeight, float blendWidth = 256f)
+        {
+            const float cellSize = 4096f;
+            const float vertSpacing = 32f;
+
+            float targetHeight = SampleHeightAtWorld(worldX, worldY);
+            ushort targetRaw = HeightToRaw(targetHeight);
+
+            float outerHalfW = halfWidth + blendWidth;
+            float outerHalfH = halfHeight + blendWidth;
+
+            int safeMinX = CellMinX + 1;
+            int safeMaxX = CellMaxX - 1;
+            int safeMinY = CellMinY + 1;
+            int safeMaxY = CellMaxY - 1;
+
+            for (int cy = safeMinY; cy <= safeMaxY; cy++)
+            {
+                for (int cx = safeMinX; cx <= safeMaxX; cx++)
+                {
+                    // Quick AABB reject
+                    float cellWorldMinX = cx * cellSize;
+                    float cellWorldMaxX = cellWorldMinX + 127 * vertSpacing;
+                    float cellWorldMinY = cy * cellSize;
+                    float cellWorldMaxY = cellWorldMinY + 127 * vertSpacing;
+
+                    if (cellWorldMaxX < worldX - outerHalfW || cellWorldMinX > worldX + outerHalfW) continue;
+                    if (cellWorldMaxY < worldY - outerHalfH || cellWorldMinY > worldY + outerHalfH) continue;
+
+                    var buf = new ushort[CellResolution * CellResolution];
+                    GetCellHeightMap(buf, cx, cy, 0);
+                    bool modified = false;
+
+                    for (int vy = 0; vy < CellResolution; vy++)
+                    {
+                        float wy = cy * cellSize + vy * vertSpacing;
+                        for (int vx = 0; vx < CellResolution; vx++)
+                        {
+                            float wx = cx * cellSize + vx * vertSpacing;
+
+                            // Signed distance to the rectangle edge (negative = inside, positive = outside)
+                            float distX = Math.Max(0, Math.Abs(wx - worldX) - halfWidth);
+                            float distY = Math.Max(0, Math.Abs(wy - worldY) - halfHeight);
+                            float dist = MathF.Sqrt(distX * distX + distY * distY);
+
+                            if (dist <= 0f)
+                            {
+                                buf[vy * CellResolution + vx] = targetRaw;
+                                modified = true;
+                            }
+                            else if (dist < blendWidth)
+                            {
+                                float t = dist / blendWidth;
+                                float s = t * t * (3f - 2f * t);
+                                ushort original = buf[vy * CellResolution + vx];
+                                buf[vy * CellResolution + vx] = LerpRaw(targetRaw, original, s);
+                                modified = true;
+                            }
+                        }
+                    }
+
+                    if (modified)
+                        SetCellHeightMap(buf, cx, cy);
+                }
+            }
+
+            return targetHeight;
+        }
+
+        /// <summary>
         /// Smooths the edges of dirty cells where they border unmodified cells.
         /// Creates a linear blend over `bandWidth` vertices at each dirty cell edge
         /// that neighbors a clean cell, eliminating hard seams.

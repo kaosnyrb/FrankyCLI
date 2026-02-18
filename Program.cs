@@ -89,6 +89,9 @@ switch(mode)
     case "gen_btd_info":
         res = gen_btd_info.Generate(args);
         break;
+    case "gen_btd_flatcircle":
+        res = gen_btd_flatcircle.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;
