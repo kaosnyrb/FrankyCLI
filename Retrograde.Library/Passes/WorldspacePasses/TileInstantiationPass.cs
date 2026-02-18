@@ -25,23 +25,19 @@ public class TileInstantiationPass : IWorldspacePass
         var map = state.Map;
         int blocksize = (int)state.TileWorldSize;
 
-        // Determine quadrant bounds from cell position
-        int startx = 0;
-        int starty = 0;
-        int endx = map.xsize;
-        int endy = map.ysize;
-
-        if (state.CurrentCellPos.X == -1) { startx = 0; endx = (map.xsize / 2) - 1; }
-        if (state.CurrentCellPos.X == 0) { startx = (map.xsize / 2) - 1; endx = map.xsize; }
-        if (state.CurrentCellPos.Y == 0) { starty = 0; endy = (map.ysize / 2) - 1; }
-        if (state.CurrentCellPos.Y == -1) { starty = (map.ysize / 2) - 1; endy = map.ysize; }
-
         int totalPlaced = 0;
 
-        for (int x = startx; x < endx; x++)
+        for (int x = 0; x < map.xsize; x++)
         {
-            for (int y = starty; y < endy; y++)
+            for (int y = 0; y < map.ysize; y++)
             {
+                // Determine which cell this tile belongs to from its world position
+                float worldX = -94 + (blocksize * x);
+                float worldY = 94 - (blocksize * y);
+                int tileCellX = (int)Math.Floor(worldX / 4096f);
+                int tileCellY = (int)Math.Floor(worldY / 4096f);
+                if (tileCellX != state.CurrentCellPos.X || tileCellY != state.CurrentCellPos.Y)
+                    continue;
                 if (map.tiles[x][y].prefabs.Count > 0)
                 {
                     foreach (var pfb in map.tiles[x][y].prefabs)

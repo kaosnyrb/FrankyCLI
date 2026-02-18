@@ -2,12 +2,14 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using System;
 
 namespace Retrograde.Passes.WorldspacePasses;
 
 /// <summary>
 /// Per-cell pass that places navmesh seed markers at the four corners
 /// of the current quadrant. Required by Starfield's navmesh generator.
+/// Only places markers in cells that contain tiles (skips empty cells).
 /// Ported from StarTiller FortCellGen.BuildCell().
 /// </summary>
 public class NavmeshSeedPass : IWorldspacePass
@@ -22,31 +24,61 @@ public class NavmeshSeedPass : IWorldspacePass
         var map = state.Map;
         int blocksize = (int)state.TileWorldSize;
 
+        // Check if any tiles in this cell have prefabs — skip empty cells
+        bool hasTiles = false;
+        for (int x = 0; x < map.xsize && !hasTiles; x++)
+        {
+            for (int y = 0; y < map.ysize && !hasTiles; y++)
+            {
+                float worldX = -94 + (blocksize * x);
+                float worldY = 94 - (blocksize * y);
+                int tileCellX = (int)Math.Floor(worldX / 4096f);
+                int tileCellY = (int)Math.Floor(worldY / 4096f);
+                if (tileCellX == state.CurrentCellPos.X && tileCellY == state.CurrentCellPos.Y
+                    && map.tiles[x][y].prefabs.Count > 0)
+                {
+                    hasTiles = true;
+                }
+            }
+        }
+
+        if (!hasTiles) return;
+
         IFormLinkNullable<IPlaceableObject> navmeshSeedMarker =
             new FormKey(starfieldEsm, NavmeshSeedMarkerFormId).ToNullableLink<IPlaceableObject>();
 
-        // Determine quadrant bounds
-        int startx = 0, starty = 0, endx = map.xsize, endy = map.ysize;
+        // Find the tile bounds for this cell
+        int startx = int.MaxValue, starty = int.MaxValue;
+        int endx = int.MinValue, endy = int.MinValue;
+        for (int x = 0; x < map.xsize; x++)
+        {
+            for (int y = 0; y < map.ysize; y++)
+            {
+                float worldX = -94 + (blocksize * x);
+                float worldY = 94 - (blocksize * y);
+                int tileCellX = (int)Math.Floor(worldX / 4096f);
+                int tileCellY = (int)Math.Floor(worldY / 4096f);
+                if (tileCellX == state.CurrentCellPos.X && tileCellY == state.CurrentCellPos.Y)
+                {
+                    if (x < startx) startx = x;
+                    if (x > endx) endx = x;
+                    if (y < starty) starty = y;
+                    if (y > endy) endy = y;
+                }
+            }
+        }
 
-        if (state.CurrentCellPos.X == -1) { startx = 0; endx = (map.xsize / 2) - 1; }
-        if (state.CurrentCellPos.X == 0) { startx = (map.xsize / 2) - 1; endx = map.xsize; }
-        if (state.CurrentCellPos.Y == 0) { starty = 0; endy = (map.ysize / 2) - 1; }
-        if (state.CurrentCellPos.Y == -1) { starty = (map.ysize / 2) - 1; endy = map.ysize; }
+        float z = state.TerrainHeight;
 
-        float z = -10.0000f;
-
-        // Top-left corner
+        // Place markers at the four corners of the cell's tile region
         PlaceMarker(targetMod, navmeshSeedMarker, state,
-            new P3Float(-94 + (blocksize * startx), 94 - (blocksize * (starty + 1)), z));
-        // Top-right corner
+            new P3Float(-94 + (blocksize * startx), 94 - (blocksize * starty), z));
         PlaceMarker(targetMod, navmeshSeedMarker, state,
-            new P3Float(-94 + (blocksize * endx), 94 - (blocksize * (starty + 1)), z));
-        // Bottom-left corner
+            new P3Float(-94 + (blocksize * endx), 94 - (blocksize * starty), z));
         PlaceMarker(targetMod, navmeshSeedMarker, state,
-            new P3Float(-94 + (blocksize * startx), 94 - (blocksize * (endy - 1)), z));
-        // Bottom-right corner
+            new P3Float(-94 + (blocksize * startx), 94 - (blocksize * endy), z));
         PlaceMarker(targetMod, navmeshSeedMarker, state,
-            new P3Float(-94 + (blocksize * endx), 94 - (blocksize * (endy - 1)), z));
+            new P3Float(-94 + (blocksize * endx), 94 - (blocksize * endy), z));
     }
 
     private static void PlaceMarker(StarfieldMod targetMod,

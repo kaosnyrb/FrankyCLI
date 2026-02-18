@@ -361,6 +361,45 @@ This is used by `WorldspaceNoun` to set `WorldspaceState.TerrainHeight`, which `
 - `FortDesign.cs` — uses `stbblock001` template worldspace, `OverlayBlockstbblock001` surface block
 - `TileInstantiationPass.cs` — places tiles using `state.TerrainHeight` for Z position
 
+## Worldspace Cell Grid and Tile Mapping
+
+Worldspaces use a grid of cells, each covering 4096 world units. The grid is configured via `IWorldspaceDesign.CellGridSize` (e.g., 4 = 4x4 cells). Cell coordinates range from `-(gridSize/2)` to `(gridSize/2 - 1)`.
+
+### Tile-to-Cell Assignment
+
+Tiles in the `GenerationMap` are placed at world positions using `(-94 + blocksize*x, 94 - blocksize*y, z)`. Each tile belongs to the cell at `floor(worldPos / 4096)`. With a 50x50 map and `TileWorldSize=4`, the total extent is ~200 units, so all tiles fall within a 2x2 area of cells regardless of `CellGridSize`.
+
+**Do not hardcode cell quadrant bounds.** Use dynamic cell lookup:
+
+```csharp
+// In per-cell passes, skip tiles that don't belong to the current cell
+float worldX = -94 + (blocksize * x);
+float worldY = 94 - (blocksize * y);
+int tileCellX = (int)Math.Floor(worldX / 4096f);
+int tileCellY = (int)Math.Floor(worldY / 4096f);
+if (tileCellX != state.CurrentCellPos.X || tileCellY != state.CurrentCellPos.Y)
+    continue;
+```
+
+### Cross-Cell Object Routing
+
+When unpacking prefabs, individual objects may land outside the tile's cell. `WorldspaceState.CellLookup` (built by the generator from all SubCells) maps `P2Int` grid points to `Cell` instances:
+
+```csharp
+int cellX = (int)Math.Floor(worldPos.X / 4096f);
+int cellY = (int)Math.Floor(worldPos.Y / 4096f);
+if (state.CellLookup.TryGetValue(new P2Int(cellX, cellY), out var cell))
+    return cell;
+return state.CurrentCell; // fallback
+```
+
+### Key Files
+
+- `WorldspaceNoun.cs` — creates subcell grid from `CellGridSize`, one WorldspaceBlock/SubBlock per cell
+- `WorldspaceDungeonGenerator.cs` — builds `CellLookup`, iterates cells for per-cell passes
+- `TileInstantiationPass.cs` — dynamic tile-to-cell check, cross-cell `ResolveCell()`
+- `IWorldspaceDesign.cs` — `CellGridSize` property
+
 ## Copying PlacedObjects
 
 When duplicating a `PlacedObject` from a prefab cell into the world, do NOT use `DeepCopy()` — it preserves the original FormKey, causing ID collisions. Instead, create a `new PlacedObject(RetrogradeContext.Current.TargetMod)` (which assigns a fresh FormKey) and copy all properties manually. See `CellTools.CloneCellById` for the canonical pattern.

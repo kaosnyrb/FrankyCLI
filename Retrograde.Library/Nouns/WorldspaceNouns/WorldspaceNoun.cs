@@ -106,7 +106,7 @@ public class WorldspaceNoun
         newBlock.ANAM = newTerrainFile;
         newBlock.EditorID = "OverlayBlock" + editorId;
 
-        // Create worldspace from scratch
+        // Create worldspace from scratch (matching OEBB029World reference values)
         Worldspace = new Worldspace(targetMod)
         {
             EditorID = editorId,
@@ -120,6 +120,8 @@ public class WorldspaceNoun
             },
             Climate = new FormKey(starfieldEsm, 0x00015F).ToNullableLink<IClimateGetter>(),
             Water = new FormKey(starfieldEsm, 0x000018).ToNullableLink<IWaterGetter>(),
+            LodWater = new FormKey(starfieldEsm, 0x000018).ToNullableLink<IWaterGetter>(),
+            LodWaterHeight = 0,
             Components = new ExtendedList<AComponent>
             {
                 new WorldSpaceOverlayComponent()
@@ -128,6 +130,16 @@ public class WorldspaceNoun
                 },
                 new PlanetContentManagerContentPropertiesComponent(),
             },
+            MapData = new WorldspaceMap()
+            {
+                UsableDimensions = new P2Int(0, 0),
+                NorthwestCellCoords = new P2Int16(0, 0),
+                SoutheastCellCoords = new P2Int16(0, 0),
+            },
+            GNAM = 1f,
+            DistantLodMultiplier = 1f,
+            Version2 = 10,
+            WorldMapOffsetScale = 1f,
         };
         targetMod.Worldspaces.Add(Worldspace);
 
@@ -136,8 +148,9 @@ public class WorldspaceNoun
         {
             Flags = Cell.Flag.HasWater,
             Grid = new CellGrid(),
-            WaterHeight = -200,
+            WaterHeight = float.MaxValue,
             XILS = 1,
+            Version2 = 2,
             MajorFlags = Cell.MajorFlag.Persistent,
             Persistent = new ExtendedList<IPlaced>()
         };
@@ -164,12 +177,14 @@ public class WorldspaceNoun
                 {
                     BlockNumberX = (short)cx,
                     BlockNumberY = (short)cy,
+                    GroupType = GroupTypeEnum.ExteriorCellSubBlock,
                     Items = new ExtendedList<Cell> { cell },
                 };
                 var block = new WorldspaceBlock()
                 {
                     BlockNumberX = (short)cx,
                     BlockNumberY = (short)cy,
+                    GroupType = GroupTypeEnum.ExteriorCellBlock,
                     Items = new ExtendedList<WorldspaceSubBlock> { subBlock },
                 };
                 Worldspace.SubCells.Add(block);
@@ -184,7 +199,7 @@ public class WorldspaceNoun
             if (File.Exists(btdPath))
             {
                 var btd = new BtdFile(btdPath);
-                terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
+                terrainHeight = 0;// btd.SampleHeightAtWorld(0, 0) / 8f;
                 if (!RetrogradeContext.Quiet)
                     Console.WriteLine($"Terrain height at center: {terrainHeight}");
             }
