@@ -71,7 +71,9 @@ public class WorldspaceNoun
         var newBlock = new SurfaceBlock(targetMod)
         {
             NAM1 = "OverlayBlock",
-            NAM5 = new FormKey(starfieldEsm, 0x002C17D4).ToNullableLink<ISurfaceBlockGetter>(),
+            // NAM5 must point to a standalone overlay source block with the same DNAM size.
+            // OverlayFieldsDunesMedium01 [2C586B] is a 4x4 source; matches CellGridSize=4.
+            NAM5 = new FormKey(starfieldEsm, 0x002C586B).ToNullableLink<ISurfaceBlockGetter>(),
             DNAM = new SurfaceBlockIntItem() { First = (uint)design.CellGridSize, Second = (uint)design.CellGridSize },
             WHGT = float.MinValue,
             GNAM = 0,
@@ -80,8 +82,18 @@ public class WorldspaceNoun
             JNAM = 0,
             KNAM = 0,
             NAM2 = 0,
+            Version2 = 5,
         };
         targetMod.SurfaceBlocks.Add(newBlock);
+
+        // Copy FNAM from the parent overlay source block — all vanilla overlay SurfaceBlocks
+        // carry this binary field; without it the record may not load correctly in the engine.
+        var parentBlock = FindInTemplateMods(
+            RetrogradeContext.Current.TemplateMods,
+            m => m.SurfaceBlocks,
+            "OverlayFieldsDunesMedium01");
+        if (parentBlock?.FNAM != null)
+            newBlock.FNAM = parentBlock.FNAM.Value.ToArray();
 
         // Copy terrain file if data folder path is provided
         string newTerrainFile = "Data\\Terrain\\" + editorId + ".btd";
@@ -106,30 +118,13 @@ public class WorldspaceNoun
         newBlock.ANAM = newTerrainFile;
         newBlock.EditorID = "OverlayBlock" + editorId;
 
-        // Set ENAM height range from the BTD file; fall back to known template defaults.
+        // Template BTDs all use (-500, 1000) unscaled — set as fallback immediately.
         // SurfaceBlockFloatItem stores raw IEEE 754 bits as uint.
-        if (dataFolderPath != null)
+        newBlock.ENAM = new SurfaceBlockFloatItem()
         {
-            string btdPathForEnam = Path.Combine(dataFolderPath, "Terrain", editorId + ".btd");
-            if (File.Exists(btdPathForEnam))
-            {
-                var btdForEnam = new BtdFile(btdPathForEnam);
-                newBlock.ENAM = new SurfaceBlockFloatItem()
-                {
-                    First  = BitConverter.SingleToUInt32Bits(btdForEnam.WorldHeightMin / 8f),
-                    Second = BitConverter.SingleToUInt32Bits(btdForEnam.WorldHeightMax / 8f),
-                };
-            }
-        }
-        if (newBlock.ENAM == null)
-        {
-            // Template BTDs all use (-500, 1000) unscaled
-            newBlock.ENAM = new SurfaceBlockFloatItem()
-            {
-                First  = BitConverter.SingleToUInt32Bits(-500f),
-                Second = BitConverter.SingleToUInt32Bits(1000f),
-            };
-        }
+            First  = BitConverter.SingleToUInt32Bits(-500f),
+            Second = BitConverter.SingleToUInt32Bits(1000f),
+        };
 
         int halfGrid = design.CellGridSize / 2;
 
@@ -217,7 +212,9 @@ public class WorldspaceNoun
             }
         }
 
-        // Sample terrain height from BTD at worldspace center
+        // Open BTD to set ENAM from actual header values, flatten terrain to height 0
+        // (template BTD carries non-zero heights from oejm001world which would appear as
+        // a mountain), and sample the final terrain height for object placement.
         float terrainHeight = 0;
         if (dataFolderPath != null)
         {
@@ -225,6 +222,25 @@ public class WorldspaceNoun
             if (File.Exists(btdPath))
             {
                 var btd = new BtdFile(btdPath);
+
+                // Override the fallback ENAM with actual values from the BTD header.
+                newBlock.ENAM = new SurfaceBlockFloatItem()
+                {
+                    First  = BitConverter.SingleToUInt32Bits(btd.WorldHeightMin / 8f),
+                    Second = BitConverter.SingleToUInt32Bits(btd.WorldHeightMax / 8f),
+                };
+
+                // Flatten all non-edge cells to height 0 so the overlay sits flush with
+                // the surrounding planet surface instead of appearing as a mountain.
+                ushort flatRaw = btd.HeightToRaw(0f);
+                var flatBuf = new ushort[128 * 128];
+                Array.Fill(flatBuf, flatRaw);
+                for (int cy = btd.CellMinY + 1; cy <= btd.CellMaxY - 1; cy++)
+                    for (int cx = btd.CellMinX + 1; cx <= btd.CellMaxX - 1; cx++)
+                        btd.SetCellHeightMap(flatBuf, cx, cy);
+                btd.SmoothDirtyCellEdges(32);
+                btd.Save(btdPath, updateMinMax: false);
+
                 terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
                 if (!RetrogradeContext.Quiet)
                     Console.WriteLine($"Terrain height at center: {terrainHeight}");
