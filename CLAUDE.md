@@ -79,14 +79,14 @@ var formKey = new FormKey(ModKey.FromFileName("Starfield.esm"), 0x00000043);
 
 ## BTD Terrain Data
 
-BTD files (`.btd`) store terrain heightmaps for Starfield and Fallout 76. Reader/writer: `Retrograde.Library/Utils/BtdTerrainReader.cs`.
+BTD files (`.btd`) store terrain heightmaps for Starfield and Fallout 76. Reader/writer: `Retrograde.Library/Utils/BtdFile.cs`.
 
-### File Format (Version 6, Starfield)
+### File Format (Version 5/6, Starfield)
 
-- **Header** (40 bytes): magic `BTDB`, version (6), HeightMin/Max (floats, unscaled), ResX/ResY, CellMin/MaxX/Y
-- **LTEX form IDs**: uint32 count + array of land texture form IDs
+- **Header** (40 bytes): magic `BTDB`, version (5 or 6), HeightMin/Max (floats, unscaled), ResX/ResY, CellMin/MaxX/Y
+- **LTEX form IDs**: uint32 count + array of land texture form IDs (typically 6-7 shared across all Starfield BTDs)
 - **Cell height min/max map**: 8 bytes/cell (float min, float max) — stored in **unscaled** coordinates (before 8x Starfield multiplier)
-- **Land texture map**: 32 bytes/cell — 8 texture layer indices (bytes referencing LTEX array), repeated 4x (possibly per-quadrant)
+- **Land texture map**: 32 bytes/cell — 4 quadrant palettes of 8 bytes each (Q0=TL, Q1=TR, Q2=BL, Q3=BR; boundary at vertex 64). Each byte is an LTEX array index
 - **Ground cover** (FO76 only, absent in Starfield): form IDs + 32 bytes/cell map
 - **LOD4 height map**: 128 bytes/cell — 8x8 grid of uint16 (downsampled from 128x128, every 16th sample)
 - **LOD4 land textures**: 128 bytes/cell
@@ -98,22 +98,57 @@ BTD files (`.btd`) store terrain heightmaps for Starfield and Fallout 76. Reader
 
 ### Texture Data
 
-Each LOD0 block contains per-vertex texture data (128x128 uint16) in the second half of the decompressed block. The cell also has a **land texture map** (32 bytes in the metadata) that defines which 8 LTEX layers are available for that cell.
+Each LOD0 block contains per-vertex texture data (128x128 uint16) in the second half of the decompressed block. The cell also has a **land texture map** (32 bytes in the metadata) and **LOD4 land textures** (128 bytes/cell) that influence rendering.
 
-The per-vertex uint16 encoding is not yet fully understood. Observed properties:
-- Values range widely (0–32000+), not simple layer indices
-- Many unique values per cell (hundreds), suggesting blend/weight encoding
-- Values cluster in specific ranges (e.g., 2048–4095 most common in test BTD)
-- Setting all hill vertices to one of the existing values does produce a visible texture change
+**Land texture map (32 bytes/cell):**
+- 4 groups of 8 bytes — per-quadrant palettes mapping layer indices to LTEX form IDs
+- Each byte is an index into the global LTEX form ID array
+- Different groups can have different LTEX mappings, causing visible quadrant-based texture splits
+- **Critical**: neighboring cells' palettes influence rendering at cell borders. To avoid quadrant splits, normalize all 4 groups to be identical via `SetCellLandTexMap` on **ALL cells** (including edge cells)
+- Some entries may reference out-of-bounds LTEX indices (renders as default/wrong texture)
 
-Reading/writing texture data:
+**Per-vertex uint16 encoding (partially understood):**
+- The full uint16 value determines which texture is rendered — it is NOT a simple `layer << 12 | blend` encoding (that theory was disproven: different "layers" with the same sub-value produce identical textures)
+- Value 0x0000 = no texture / transparent
+- The value interacts with the land texture map palette, but the exact mapping is complex
+- **Known working values** (tested on oebb008world.btd, palette `06 05 04 03 02 00 01 00`):
+  - 0x0100 = "Base sandy" texture
+  - 0x3000 = "slightly less sandy" texture
+  - 0x4000 = "clean bright sand" texture
+  - 0x6000 = "Clean orangy sand" texture
+  - 0x0800, 0x1000, 0x2000, 0x7000 = all show "patchy sandy" (same texture despite spanning different `>> 12` ranges)
+  - 0x0E00 = "patchy sandy" variant
+  - 0x0FFF = "Clean orangy sand" (but had quadrant issues before full palette normalization)
+  - Values with the same low 12 bits but different top 4 bits (e.g., all `N*4096+2048`) produce **identical** textures
+
+**LOD4 land textures (128 bytes/cell):**
+- Affects rendering; should be zeroed when painting custom textures to avoid interference
+- Read/write via `GetCellLod4LandTex` / `SetCellLod4LandTex`
+
+**Complete texture painting workflow:**
 ```csharp
+var reader = new BtdFile(path);
+
+// 1. Normalize ALL cells' land texture maps to avoid quadrant splits
+var palette = new byte[32];
+reader.GetCellLandTexMap(palette, centerCellX, centerCellY);
+for (int q = 1; q < 4; q++)
+    Array.Copy(palette, 0, palette, q * 8, 8);
+for (int cy = reader.CellMinY; cy <= reader.CellMaxY; cy++)
+    for (int cx = reader.CellMinX; cx <= reader.CellMaxX; cx++)
+        reader.SetCellLandTexMap(palette, cx, cy);
+
+// 2. Paint per-vertex texture data
 var texBuf = new ushort[128 * 128];
-reader.GetCellTextureData(texBuf, cellX, cellY);
-// Modify texBuf values...
+for (int i = 0; i < texBuf.Length; i++)
+    texBuf[i] = 0x4000; // "clean bright sand"
 reader.SetCellTextureData(texBuf, cellX, cellY);
-// Or single vertex:
-reader.SetTexture(cellX, cellY, vertX, vertY, rawValue);
+
+// 3. Zero LOD4 land textures for modified cells
+reader.SetCellLod4LandTex(new byte[128], cellX, cellY);
+
+// 4. Save
+reader.Save(outputPath, updateMinMax: false);
 ```
 
 Save automatically patches both height and texture data for dirty cells when `_dirtyTextures` has data.
@@ -132,7 +167,9 @@ Save automatically patches both height and texture data for dirty cells when `_d
 
 ### Edge Cells Are Off-Limits
 
-The outermost ring of cells in a BTD connects the map to the rest of the world. **Never modify edge cells.** For an NxN cell grid, only cells `(CellMinX+1..CellMaxX-1, CellMinY+1..CellMaxY-1)` are safe to edit. A 3x3 BTD has only 1 editable cell in the center.
+The outermost ring of cells in a BTD connects the map to the rest of the world. **Never modify edge cells' height or per-vertex texture data.** For an NxN cell grid, only cells `(CellMinX+1..CellMaxX-1, CellMinY+1..CellMaxY-1)` are safe to edit. A 3x3 BTD has only 1 editable cell in the center.
+
+**Exception**: the land texture map (32-byte palette) on edge cells CAN and SHOULD be normalized when painting textures, because neighboring cells' palettes influence rendering at cell borders.
 
 ### Writing BTD Files
 
@@ -156,13 +193,24 @@ Key pitfalls discovered during development:
 
 ```csharp
 // Read height
-var reader = new BtdTerrainReader(path);
+var reader = new BtdFile(path);
 float h = reader.GetHeight(cellX, cellY, vertX, vertY);
 float h2 = reader.SampleHeightAtWorld(worldX, worldY);
 
-// Read texture
+// Read/write land texture map (32 bytes/cell, 4 quadrant palettes)
+var palette = new byte[32];
+reader.GetCellLandTexMap(palette, cellX, cellY);
+reader.SetCellLandTexMap(palette, cellX, cellY);
+
+// Read/write per-vertex texture (128x128 uint16)
 var texBuf = new ushort[128 * 128];
 reader.GetCellTextureData(texBuf, cellX, cellY);
+reader.SetCellTextureData(texBuf, cellX, cellY);
+
+// Read/write LOD4 land textures (128 bytes/cell)
+var lod4Tex = new byte[128];
+reader.GetCellLod4LandTex(lod4Tex, cellX, cellY);
+reader.SetCellLod4LandTex(lod4Tex, cellX, cellY);
 
 // Write height + texture (additive edit, skip metadata updates)
 reader.SetCellHeightMap(heightBuf, cellX, cellY);
@@ -178,12 +226,24 @@ ushort raw = reader.HeightToRaw(worldHeight);
 float world = reader.RawToHeight(raw);
 ```
 
+### Cross-File Findings (5 Starfield BTDs validated)
+
+All BTDs in `Data\terrain\`: oedb508world, oejm008world, oejp008caveworld, oeob008world, oesd008world.
+
+- **All Starfield**, same height range (-500 to 1000, span 1500), same LTEX form IDs (6-7 entries)
+- **Versions**: 4 files v6, 1 file v5 (oejp008caveworld) — both parse identically as Starfield
+- **Quadrant palette differences are normal** in vanilla files (e.g. oesd008world: only 3/16 cells uniform). Confirms palette normalization is necessary when painting
+- **Default palette `[6,5,4,3,2,0,1,0]`** appears in nearly every file
+- **0x0E00** is the most common texture value across 4/5 files
+- **0x7000, 0x4000, 0x3000, 0x6000** all confirmed present across multiple files
+- Cell grids range from 3x3 to 5x5; all have 0 empty LOD0 blocks
+
 ### Test Harnesses
 
 - `gen_btd_test` — automated reader/writer verification (test_btd.bat)
 - `gen_btd_flatten` — adds a cosine hill to the center cell for visual verification (flatten_btd.bat)
-- `gen_btd_info` — dumps file structure, section layout, block stats, height distribution (info_btd.bat)
-- Test BTD: `C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\terrain\oebb008world.btd`
+- `gen_btd_info` — dumps file structure, section layout, block stats, height distribution (info_btd.bat); pass a directory path to scan all BTD files (info_btd_all.bat)
+- Test BTDs: `C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\terrain\`
 
 ## Copying PlacedObjects
 

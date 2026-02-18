@@ -16,7 +16,7 @@ namespace Retrograde.Utils
     /// Starfield BTDs are detected by all cell boundary fields being zero, and apply an 8x
     /// height scale factor.
     /// </summary>
-    public class BtdTerrainReader
+    public class BtdFile
     {
         /// <summary>Vertices per cell edge at full (LOD0) resolution.</summary>
         public const int CellResolution = 128;
@@ -46,7 +46,9 @@ namespace Retrograde.Utils
 
         // Metadata section offsets (needed for Save to update min/max and LOD4)
         private long _cellHeightMinMaxOffs;
+        private long _landTexMapOffs;
         private long _lod4HeightMapOffs;
+        private long _lod4LandTexOffs;
 
         // Tile cache: key = (tileY << 16) | tileX
         private readonly Dictionary<uint, TileData> _tileCache = new Dictionary<uint, TileData>();
@@ -66,11 +68,11 @@ namespace Retrograde.Utils
             public ushort[] HeightMap; // TileStride * TileStride
         }
 
-        public BtdTerrainReader()
+        public BtdFile()
         {
         }
 
-        public BtdTerrainReader(string path)
+        public BtdFile(string path)
         {
             Load(path);
         }
@@ -148,7 +150,8 @@ namespace Retrograde.Utils
             _cellHeightMinMaxOffs = pos;
             pos += (long)CellCountY * CellCountX * 8;
 
-            // Land texture map: 32 bytes per cell
+            // Land texture map: 32 bytes per cell (4 quadrant palettes of 8 bytes each)
+            _landTexMapOffs = pos;
             pos += (long)CellCountY * CellCountX * 32;
 
             // Ground cover (not present in Starfield)
@@ -165,6 +168,7 @@ namespace Retrograde.Utils
             pos += (long)CellCountY * CellCountX * 128;
 
             // LOD4 land textures: 128 bytes per cell
+            _lod4LandTexOffs = pos;
             pos += (long)CellCountY * CellCountX * 128;
 
             // Vertex color LOD4 (not present in Starfield)
@@ -385,6 +389,55 @@ namespace Retrograde.Utils
             _dirtyCells.Add(key);
         }
 
+        /// <summary>
+        /// Reads the 32-byte land texture map for a cell (4 quadrant palettes of 8 LTEX indices each).
+        /// </summary>
+        public void GetCellLandTexMap(byte[] buf32, int cellX, int cellY)
+        {
+            int dx = cellX - CellMinX;
+            int dy = cellY - CellMinY;
+            long off = _landTexMapOffs + ((long)dy * CellCountX + dx) * 32;
+            for (int i = 0; i < 32; i++)
+                buf32[i] = _fileData[off + i];
+        }
+
+        /// <summary>
+        /// Writes the 32-byte land texture map for a cell directly into the file data buffer.
+        /// Call before Save() to update quadrant palettes.
+        /// </summary>
+        public void SetCellLandTexMap(byte[] buf32, int cellX, int cellY)
+        {
+            int dx = cellX - CellMinX;
+            int dy = cellY - CellMinY;
+            long off = _landTexMapOffs + ((long)dy * CellCountX + dx) * 32;
+            for (int i = 0; i < 32; i++)
+                _fileData[off + i] = buf32[i];
+        }
+
+        /// <summary>
+        /// Reads the 128-byte LOD4 land texture data for a cell.
+        /// </summary>
+        public void GetCellLod4LandTex(byte[] buf128, int cellX, int cellY)
+        {
+            int dx = cellX - CellMinX;
+            int dy = cellY - CellMinY;
+            long off = _lod4LandTexOffs + ((long)dy * CellCountX + dx) * 128;
+            for (int i = 0; i < 128; i++)
+                buf128[i] = _fileData[off + i];
+        }
+
+        /// <summary>
+        /// Writes the 128-byte LOD4 land texture data for a cell.
+        /// </summary>
+        public void SetCellLod4LandTex(byte[] buf128, int cellX, int cellY)
+        {
+            int dx = cellX - CellMinX;
+            int dy = cellY - CellMinY;
+            long off = _lod4LandTexOffs + ((long)dy * CellCountX + dx) * 128;
+            for (int i = 0; i < 128; i++)
+                _fileData[off + i] = buf128[i];
+        }
+
         private void GetCellTextureDataFromFile(ushort[] buf, int cellX, int cellY)
         {
             int dx = cellX - CellMinX;
@@ -425,6 +478,87 @@ namespace Retrograde.Utils
             tile.HeightMap[(localY + vertY) * TileStride + localX + vertX] = raw;
 
             _dirtyCells.Add((cellX - CellMinX, cellY - CellMinY));
+        }
+
+        /// <summary>
+        /// Flattens terrain in a circle around a world-space point. The target height is
+        /// sampled from the terrain at the center. A smooth blend band around the outer
+        /// edge transitions from flat back to the original terrain.
+        /// Respects edge cell boundaries (won't modify outermost ring of cells).
+        /// </summary>
+        /// <param name="worldX">World-space X of circle center.</param>
+        /// <param name="worldY">World-space Y of circle center.</param>
+        /// <param name="radius">Radius of the flat area in world units.</param>
+        /// <param name="blendWidth">Width of the smooth transition band in world units (default 256 = 8 vertices).</param>
+        /// <returns>The world-space height the area was flattened to.</returns>
+        public float FlattenCircle(float worldX, float worldY, float radius, float blendWidth = 256f)
+        {
+            const float cellSize = 4096f;
+            const float vertSpacing = 32f; // cellSize / CellResolution
+
+            float targetHeight = SampleHeightAtWorld(worldX, worldY);
+            ushort targetRaw = HeightToRaw(targetHeight);
+            float outerRadius = radius + blendWidth;
+
+            // Safe cell range (skip edge cells)
+            int safeMinX = CellMinX + 1;
+            int safeMaxX = CellMaxX - 1;
+            int safeMinY = CellMinY + 1;
+            int safeMaxY = CellMaxY - 1;
+
+            for (int cy = safeMinY; cy <= safeMaxY; cy++)
+            {
+                for (int cx = safeMinX; cx <= safeMaxX; cx++)
+                {
+                    // Quick AABB reject: does this cell overlap the outer circle?
+                    float cellWorldMinX = cx * cellSize;
+                    float cellWorldMaxX = cellWorldMinX + 127 * vertSpacing;
+                    float cellWorldMinY = cy * cellSize;
+                    float cellWorldMaxY = cellWorldMinY + 127 * vertSpacing;
+
+                    float nearX = Math.Clamp(worldX, cellWorldMinX, cellWorldMaxX);
+                    float nearY = Math.Clamp(worldY, cellWorldMinY, cellWorldMaxY);
+                    float nearDist = MathF.Sqrt((nearX - worldX) * (nearX - worldX) + (nearY - worldY) * (nearY - worldY));
+                    if (nearDist > outerRadius)
+                        continue;
+
+                    var buf = new ushort[CellResolution * CellResolution];
+                    GetCellHeightMap(buf, cx, cy, 0);
+                    bool modified = false;
+
+                    for (int vy = 0; vy < CellResolution; vy++)
+                    {
+                        float wy = cy * cellSize + vy * vertSpacing;
+                        for (int vx = 0; vx < CellResolution; vx++)
+                        {
+                            float wx = cx * cellSize + vx * vertSpacing;
+                            float dx = wx - worldX;
+                            float dy = wy - worldY;
+                            float dist = MathF.Sqrt(dx * dx + dy * dy);
+
+                            if (dist <= radius)
+                            {
+                                buf[vy * CellResolution + vx] = targetRaw;
+                                modified = true;
+                            }
+                            else if (dist < outerRadius)
+                            {
+                                float t = (dist - radius) / blendWidth; // 0 at inner edge, 1 at outer edge
+                                // Smooth hermite interpolation for a nice curve
+                                float s = t * t * (3f - 2f * t);
+                                ushort original = buf[vy * CellResolution + vx];
+                                buf[vy * CellResolution + vx] = LerpRaw(targetRaw, original, s);
+                                modified = true;
+                            }
+                        }
+                    }
+
+                    if (modified)
+                        SetCellHeightMap(buf, cx, cy);
+                }
+            }
+
+            return targetHeight;
         }
 
         /// <summary>

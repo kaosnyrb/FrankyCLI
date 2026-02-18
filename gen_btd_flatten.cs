@@ -22,16 +22,16 @@ namespace FrankyCLI
                 return 1;
             }
 
-            var reader = new BtdTerrainReader(btdPath);
+            var reader = new BtdFile(btdPath);
             Console.WriteLine($"  Cells: {reader.CellCountX}x{reader.CellCountY} ({reader.CellMinX},{reader.CellMinY}) to ({reader.CellMaxX},{reader.CellMaxY})");
             Console.WriteLine($"  Height range: {reader.WorldHeightMin} to {reader.WorldHeightMax}");
 
             float centerCellX = (reader.CellMinX + reader.CellMaxX) / 2.0f;
             float centerCellY = (reader.CellMinY + reader.CellMaxY) / 2.0f;
 
-            // Hill parameters — keep proportional to actual terrain heights (~15-84 world units)
-            float hillPeakHeight = 30f; // world units tall at the peak
-            float hillRadiusCells = 0.75f; // 3/4 of a cell radius
+            // Hill parameters — 100% bigger radius (1.5 cells)
+            float hillPeakHeight = 30f;
+            float hillRadiusCells = 1.5f;
             Console.WriteLine($"  Hill: peak {hillPeakHeight} units, radius {hillRadiusCells:F1} cells, center ({centerCellX}, {centerCellY})");
 
             int cellsModified = 0;
@@ -49,34 +49,19 @@ namespace FrankyCLI
             int safeMinY = reader.CellMinY + 1;
             int safeMaxY = reader.CellMaxY - 1;
 
-            // Read center cell's texture data to analyze the encoding
-            int centerCX = (int)centerCellX;
-            int centerCY = (int)centerCellY;
-            var sampleTex = new ushort[128 * 128];
-            reader.GetCellTextureData(sampleTex, centerCX, centerCY);
+            // Texture values: rocky top, sandy base
+            ushort texRocky = 0x0E00;  // "patchy sandy/rocky"
+            ushort texSandy = 0x4000;  // "clean bright sand"
+            Console.WriteLine($"  Textures: rocky=0x{texRocky:X4}, sandy=0x{texSandy:X4}");
 
-            // Find the unique texture values and their frequencies
-            var texFreq = new Dictionary<ushort, int>();
-            foreach (ushort v in sampleTex)
-            {
-                texFreq.TryGetValue(v, out int cnt);
-                texFreq[v] = cnt + 1;
-            }
-            var sorted = texFreq.OrderByDescending(kv => kv.Value).ToList();
-            Console.WriteLine($"  Texture analysis (center cell): {sorted.Count} unique values");
-            for (int i = 0; i < Math.Min(8, sorted.Count); i++)
-                Console.WriteLine($"    value={sorted[i].Key} (0x{sorted[i].Key:X4}) count={sorted[i].Value}");
-
-            // Pick a texture value for the hill:
-            // Use the least common of the top 3 values — should be visually distinct
-            ushort hillTexture;
-            if (sorted.Count >= 3)
-                hillTexture = sorted[2].Key; // 3rd most common
-            else if (sorted.Count >= 2)
-                hillTexture = sorted[1].Key;
-            else
-                hillTexture = sorted[0].Key;
-            Console.WriteLine($"  Hill texture value: {hillTexture} (0x{hillTexture:X4})");
+            // Normalize ALL cells' land texture maps
+            var canonicalPalette = new byte[32];
+            reader.GetCellLandTexMap(canonicalPalette, (int)centerCellX, (int)centerCellY);
+            for (int q = 1; q < 4; q++)
+                Array.Copy(canonicalPalette, 0, canonicalPalette, q * 8, 8);
+            for (int cy = reader.CellMinY; cy <= reader.CellMaxY; cy++)
+                for (int cx = reader.CellMinX; cx <= reader.CellMaxX; cx++)
+                    reader.SetCellLandTexMap(canonicalPalette, cx, cy);
 
             for (int cy = safeMinY; cy <= safeMaxY; cy++)
             {
@@ -87,15 +72,12 @@ namespace FrankyCLI
                     float cellWorldMaxX = cellWorldMinX + 127 * 32f;
                     float cellWorldMinY = cy * 4096f;
                     float cellWorldMaxY = cellWorldMinY + 127 * 32f;
-
-                    // Closest point on cell AABB to hill center
                     float nearX = Math.Clamp(worldCenterX, cellWorldMinX, cellWorldMaxX);
                     float nearY = Math.Clamp(worldCenterY, cellWorldMinY, cellWorldMaxY);
                     float nearDist = MathF.Sqrt((nearX - worldCenterX) * (nearX - worldCenterX) + (nearY - worldCenterY) * (nearY - worldCenterY));
                     if (nearDist > hillRadiusWorld)
-                        continue; // cell is entirely outside the hill
+                        continue;
 
-                    // Read existing height and texture data
                     var buf = new ushort[128 * 128];
                     reader.GetCellHeightMap(buf, cx, cy, 0);
                     var texBuf = new ushort[128 * 128];
@@ -108,25 +90,29 @@ namespace FrankyCLI
                         for (int vx = 0; vx < 128; vx++)
                         {
                             float wx = cx * 4096f + vx * 32f;
-
                             float distX = wx - worldCenterX;
                             float distY = wy - worldCenterY;
                             float dist = MathF.Sqrt(distX * distX + distY * distY);
 
                             if (dist <= hillRadiusWorld)
                             {
-                                // Smooth cosine hill added on top of existing terrain
                                 float t = dist / hillRadiusWorld;
                                 float hillHeight = hillPeakHeight * 0.5f * (1f + MathF.Cos(t * MathF.PI));
                                 float existing = reader.RawToHeight(buf[vy * 128 + vx]);
                                 buf[vy * 128 + vx] = reader.HeightToRaw(existing + hillHeight);
 
-                                // Paint texture on the inner 70% of the hill (leave edge for blending)
-                                if (t < 0.7f)
+                                // Rocky on top (inner 40%), sandy at base (outer 60%), blend in between
+                                if (t < 0.3f)
+                                    texBuf[vy * 128 + vx] = texRocky;
+                                else if (t > 0.6f)
+                                    texBuf[vy * 128 + vx] = texSandy;
+                                else
                                 {
-                                    texBuf[vy * 128 + vx] = hillTexture;
-                                    texelsModified++;
+                                    // Blend zone: interpolate between rocky and sandy values
+                                    float blend = (t - 0.3f) / 0.3f; // 0 at t=0.3, 1 at t=0.6
+                                    texBuf[vy * 128 + vx] = blend < 0.5f ? texRocky : texSandy;
                                 }
+                                texelsModified++;
 
                                 modified = true;
                                 vertsModified++;
@@ -138,6 +124,7 @@ namespace FrankyCLI
                     {
                         reader.SetCellHeightMap(buf, cx, cy);
                         reader.SetCellTextureData(texBuf, cx, cy);
+                        reader.SetCellLod4LandTex(new byte[128], cx, cy);
                         cellsModified++;
                     }
                 }
@@ -149,7 +136,6 @@ namespace FrankyCLI
             reader.SmoothDirtyCellEdges(32);
 
             Console.WriteLine($"  Saving to {btdPath}...");
-
             reader.Save(btdPath, updateMinMax: false);
 
             Console.WriteLine("  Done.");

@@ -13,6 +13,14 @@ namespace FrankyCLI
             if (args.Length >= 6 && !string.IsNullOrWhiteSpace(args[5]))
                 btdPath = args[5];
 
+            // If path is a directory, scan all BTD files in it
+            if (System.IO.Directory.Exists(btdPath))
+                return ScanAllBtdFiles(btdPath);
+
+            // Also check if it's a file in a directory — scan all if --all flag
+            if (args.Length >= 7 && args[6] == "--all" && System.IO.File.Exists(btdPath))
+                return ScanAllBtdFiles(System.IO.Path.GetDirectoryName(btdPath));
+
             Console.WriteLine($"=== BTD Info Dump ===");
             Console.WriteLine($"File: {btdPath}");
             Console.WriteLine();
@@ -42,7 +50,7 @@ namespace FrankyCLI
             Console.WriteLine();
 
             // --- Parsed header via reader ---
-            var reader = new BtdTerrainReader(btdPath);
+            var reader = new BtdFile(btdPath);
             Console.WriteLine("--- Parsed Header ---");
             Console.WriteLine($"  IsStarfield:     {reader.IsStarfield}");
             Console.WriteLine($"  CellMin:         ({reader.CellMinX}, {reader.CellMinY})");
@@ -257,30 +265,29 @@ namespace FrankyCLI
             }
             Console.WriteLine();
 
-            // --- Land texture map sample ---
-            Console.WriteLine("--- Land Texture Map (center cell, 32 bytes) ---");
+            // --- Land texture map for ALL cells ---
+            long ltexMapBase = cellHeightMinMaxOffs + (long)reader.CellCountY * reader.CellCountX * 8;
+            Console.WriteLine("--- Land Texture Map (32 bytes/cell) ---");
+            for (int cdy = 0; cdy < reader.CellCountY; cdy++)
             {
-                int cx = reader.CellCountX / 2;
-                int cy = reader.CellCountY / 2;
-                long off = cellHeightMinMaxOffs + (long)reader.CellCountY * reader.CellCountX * 8
-                         + ((long)cy * reader.CellCountX + cx) * 32;
-                Console.Write("  Hex:");
-                for (int i = 0; i < 32; i++)
-                    Console.Write($" {fileBytes[off + i]:X2}");
-                Console.WriteLine();
-                // Interpret as 8 uint32 values
-                Console.Write("  As uint32:");
-                for (int i = 0; i < 8; i++)
-                    Console.Write($" {ReadUInt32(fileBytes, off + i * 4)}");
-                Console.WriteLine();
-                // Interpret as 16 uint16 values
-                Console.Write("  As uint16:");
-                for (int i = 0; i < 16; i++)
+                for (int cdx = 0; cdx < reader.CellCountX; cdx++)
                 {
-                    ushort v = (ushort)(fileBytes[off + i * 2] | (fileBytes[off + i * 2 + 1] << 8));
-                    Console.Write($" {v}");
+                    int cellXp = cdx + reader.CellMinX;
+                    int cellYp = cdy + reader.CellMinY;
+                    long off = ltexMapBase + ((long)cdy * reader.CellCountX + cdx) * 32;
+                    Console.Write($"  Cell ({cellXp},{cellYp}) hex:");
+                    for (int i = 0; i < 32; i++)
+                        Console.Write($" {fileBytes[off + i]:X2}");
+                    Console.WriteLine();
+                    // Show as 4 groups of 8 bytes (possible quadrants)
+                    for (int q = 0; q < 4; q++)
+                    {
+                        Console.Write($"    Q{q}:");
+                        for (int i = 0; i < 8; i++)
+                            Console.Write($" LTEX[{fileBytes[off + q * 8 + i]}]");
+                        Console.WriteLine();
+                    }
                 }
-                Console.WriteLine();
             }
             Console.WriteLine();
 
@@ -311,11 +318,435 @@ namespace FrankyCLI
             }
             Console.WriteLine();
 
+            // --- Deep Texture Analysis (center cell) ---
+            Console.WriteLine("--- Deep Texture Analysis (center cell) ---");
+            {
+                int cx = reader.CellCountX / 2;
+                int cy = reader.CellCountY / 2;
+                int idx = cy * reader.CellCountX + cx;
+                long off = tableLOD0Offs + (long)idx * 8;
+                uint dataOff = ReadUInt32(fileBytes, off);
+                uint compSize = ReadUInt32(fileBytes, off + 4);
+                if (compSize > 0)
+                {
+                    long absOff = blockDataOffs + dataOff;
+                    byte[] decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
+                    if (decompressed != null)
+                    {
+                        var texVals = new ushort[128 * 128];
+                        for (int i = 0; i < 128 * 128; i++)
+                        {
+                            int toff = 32768 + i * 2;
+                            texVals[i] = (ushort)(decompressed[toff] | (decompressed[toff + 1] << 8));
+                        }
+
+                        // Read cell's land texture map
+                        long ltexOff = ltexMapBase + ((long)cy * reader.CellCountX + cx) * 32;
+                        Console.WriteLine("  Cell land texture map (32 bytes):");
+                        Console.Write("    Bytes:");
+                        byte[] cellLtex = new byte[32];
+                        for (int i = 0; i < 32; i++)
+                        {
+                            cellLtex[i] = fileBytes[ltexOff + i];
+                            Console.Write($" {cellLtex[i]:X2}");
+                        }
+                        Console.WriteLine();
+                        for (int q = 0; q < 4; q++)
+                        {
+                            Console.Write($"    Q{q}:");
+                            for (int li = 0; li < 8; li++)
+                                Console.Write($" [{li}]=LTEX[{cellLtex[q * 8 + li]}]");
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine();
+
+                        // Quadrant analysis: count layer usage in each quadrant of the 128x128 grid
+                        Console.WriteLine("  Quadrant texture layer analysis (layer = value >> 12):");
+                        int[][] qLayerCounts = new int[4][];
+                        for (int q = 0; q < 4; q++) qLayerCounts[q] = new int[8];
+                        for (int vy = 0; vy < 128; vy++)
+                        {
+                            // Quadrant: top-left=0, top-right=1, bottom-left=2, bottom-right=3
+                            int qy = vy < 64 ? 0 : 1;
+                            for (int vx = 0; vx < 128; vx++)
+                            {
+                                int qx = vx < 64 ? 0 : 1;
+                                int quad = qy * 2 + qx;
+                                int layer = texVals[vy * 128 + vx] >> 12;
+                                if (layer < 8) qLayerCounts[quad][layer]++;
+                            }
+                        }
+                        string[] qNames = { "TL(y<64,x<64)", "TR(y<64,x>=64)", "BL(y>=64,x<64)", "BR(y>=64,x>=64)" };
+                        for (int q = 0; q < 4; q++)
+                        {
+                            Console.Write($"    {qNames[q]}:");
+                            for (int li = 0; li < 8; li++)
+                                if (qLayerCounts[q][li] > 0)
+                                    Console.Write($" L{li}={qLayerCounts[q][li]}");
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine();
+
+                        // Hypothesis 1: high byte = layer info, low byte = blend weight
+                        Console.WriteLine("  Hypothesis: highByte encodes layer, lowByte encodes weight");
+                        var highByteFreq = new Dictionary<byte, int>();
+                        foreach (ushort v in texVals)
+                        {
+                            byte hi = (byte)(v >> 8);
+                            highByteFreq.TryGetValue(hi, out int c);
+                            highByteFreq[hi] = c + 1;
+                        }
+                        var sortedHi = highByteFreq.OrderByDescending(kv => kv.Value).ToList();
+                        Console.WriteLine($"    Unique high bytes: {sortedHi.Count}");
+                        foreach (var kv in sortedHi.Take(16))
+                        {
+                            byte hi = kv.Key;
+                            // Find low byte range for this high byte
+                            int loMin = 256, loMax = -1;
+                            foreach (ushort v in texVals)
+                                if ((v >> 8) == hi)
+                                {
+                                    int lo = v & 0xFF;
+                                    if (lo < loMin) loMin = lo;
+                                    if (lo > loMax) loMax = lo;
+                                }
+                            Console.WriteLine($"    hi=0x{hi:X2} ({hi,3}) binary={Convert.ToString(hi, 2).PadLeft(8, '0')} count={kv.Value,6} lowRange=[{loMin}..{loMax}]");
+                        }
+                        Console.WriteLine();
+
+                        // Hypothesis 2: bits [15..N] = layer pair, bits [N-1..0] = blend
+                        // Try different bit splits
+                        Console.WriteLine("  Bit split analysis (value >> N):");
+                        for (int shift = 8; shift <= 13; shift++)
+                        {
+                            var groups = new Dictionary<int, int>();
+                            foreach (ushort v in texVals)
+                            {
+                                int grp = v >> shift;
+                                groups.TryGetValue(grp, out int c);
+                                groups[grp] = c + 1;
+                            }
+                            var sortedG = groups.OrderByDescending(kv => kv.Value).Take(10).ToList();
+                            Console.Write($"    >> {shift,2}: {groups.Count,3} groups, top:");
+                            foreach (var kv in sortedG.Take(8))
+                                Console.Write($" {kv.Key}({kv.Value})");
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine();
+
+                        // Hypothesis 3: value encodes (layerA, layerB, blend)
+                        // If 8 layers, pairs = 8*8=64. Try value / N for various N
+                        Console.WriteLine("  Division analysis (value / N -> group count):");
+                        foreach (int divisor in new[] { 256, 512, 1024, 2048, 4096 })
+                        {
+                            var groups = new Dictionary<int, int>();
+                            foreach (ushort v in texVals)
+                            {
+                                int grp = v / divisor;
+                                groups.TryGetValue(grp, out int c);
+                                groups[grp] = c + 1;
+                            }
+                            var sortedG = groups.OrderBy(kv => kv.Key).ToList();
+                            Console.Write($"    / {divisor,4}: {groups.Count,3} groups:");
+                            foreach (var kv in sortedG)
+                                Console.Write($" {kv.Key}({kv.Value})");
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine();
+
+                        // Show 16x16 spatial map of texture high bytes
+                        Console.WriteLine("  Spatial map (16x16, showing value >> 8):");
+                        for (int sy = 0; sy < 16; sy++)
+                        {
+                            Console.Write("    ");
+                            for (int sx = 0; sx < 16; sx++)
+                            {
+                                int vi = (sy * 8) * 128 + (sx * 8);
+                                Console.Write($"{texVals[vi] >> 8,3:X}");
+                            }
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine();
+
+                        // Show 16x16 spatial map of full values
+                        Console.WriteLine("  Spatial map (16x16, full uint16 values):");
+                        for (int sy = 0; sy < 16; sy++)
+                        {
+                            Console.Write("    ");
+                            for (int sx = 0; sx < 16; sx++)
+                            {
+                                int vi = (sy * 8) * 128 + (sx * 8);
+                                Console.Write($"{texVals[vi],6}");
+                            }
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine();
+
+                        // Show all cells' texture analysis for comparison
+                        Console.WriteLine("  Per-cell texture high byte distribution:");
+                        for (int cdy = 0; cdy < reader.CellCountY; cdy++)
+                        {
+                            for (int cdx = 0; cdx < reader.CellCountX; cdx++)
+                            {
+                                int ci = cdy * reader.CellCountX + cdx;
+                                long coff = tableLOD0Offs + (long)ci * 8;
+                                uint cdataOff = ReadUInt32(fileBytes, coff);
+                                uint ccompSize = ReadUInt32(fileBytes, coff + 4);
+                                if (ccompSize == 0) continue;
+
+                                long cabsOff = blockDataOffs + cdataOff;
+                                byte[] cdecomp = DecompressZlib(fileBytes, cabsOff, ccompSize, 65536);
+                                if (cdecomp == null) continue;
+
+                                var hiFreq = new Dictionary<byte, int>();
+                                for (int i = 0; i < 128 * 128; i++)
+                                {
+                                    int toff2 = 32768 + i * 2;
+                                    byte hi = cdecomp[toff2 + 1];
+                                    hiFreq.TryGetValue(hi, out int c);
+                                    hiFreq[hi] = c + 1;
+                                }
+                                var topHi = hiFreq.OrderByDescending(kv => kv.Value).Take(5).ToList();
+                                int cellXp = cdx + reader.CellMinX;
+                                int cellYp = cdy + reader.CellMinY;
+                                Console.Write($"    Cell ({cellXp,2},{cellYp,2}):");
+                                foreach (var kv in topHi)
+                                    Console.Write($" 0x{kv.Key:X2}={kv.Value}");
+
+                                // Also show this cell's land texture map
+                                long cltexOff = ltexMapBase + ((long)cdy * reader.CellCountX + cdx) * 32;
+                                Console.Write("  ltex:");
+                                for (int i = 0; i < 8; i++)
+                                    Console.Write($" {fileBytes[cltexOff + i]}");
+                                Console.WriteLine();
+                            }
+                        }
+                    }
+                }
+            }
+            Console.WriteLine();
+
             Console.WriteLine("=== Done ===");
             return 0;
         }
 
-        private static void PrintCellMinMax(byte[] data, long baseOffs, BtdTerrainReader reader, int dx, int dy, string label)
+        private static int ScanAllBtdFiles(string directory)
+        {
+            var btdFiles = System.IO.Directory.GetFiles(directory, "*.btd")
+                .OrderBy(f => f)
+                .ToArray();
+
+            Console.WriteLine($"=== BTD Multi-File Scan ===");
+            Console.WriteLine($"Directory: {directory}");
+            Console.WriteLine($"Found {btdFiles.Length} BTD files");
+            Console.WriteLine();
+
+            foreach (var filePath in btdFiles)
+            {
+                string fileName = System.IO.Path.GetFileName(filePath);
+                byte[] fileBytes;
+                try { fileBytes = System.IO.File.ReadAllBytes(filePath); }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"--- {fileName}: ERROR reading: {ex.Message}");
+                    Console.WriteLine();
+                    continue;
+                }
+
+                if (fileBytes.Length < 0x28)
+                {
+                    Console.WriteLine($"--- {fileName}: TOO SMALL ({fileBytes.Length} bytes)");
+                    Console.WriteLine();
+                    continue;
+                }
+
+                string magic = $"{(char)fileBytes[0]}{(char)fileBytes[1]}{(char)fileBytes[2]}{(char)fileBytes[3]}";
+                uint version = ReadUInt32(fileBytes, 0x04);
+                float heightMin = ReadFloat(fileBytes, 0x08);
+                float heightMax = ReadFloat(fileBytes, 0x0C);
+
+                BtdFile reader;
+                try { reader = new BtdFile(filePath); }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"--- {fileName}: PARSE ERROR: {ex.Message}");
+                    Console.WriteLine();
+                    continue;
+                }
+
+                Console.WriteLine($"--- {fileName} ---");
+                Console.WriteLine($"  Size: {fileBytes.Length / 1024.0 / 1024.0:F2} MB, Magic: {magic}, Version: {version}");
+                Console.WriteLine($"  IsStarfield: {reader.IsStarfield}");
+                Console.WriteLine($"  Cells: {reader.CellCountX}x{reader.CellCountY} ({reader.CellMinX},{reader.CellMinY}) to ({reader.CellMaxX},{reader.CellMaxY})");
+                Console.WriteLine($"  Height range: {heightMin:F2} to {heightMax:F2} (span {heightMax - heightMin:F2})");
+
+                // LTEX count
+                long pos = 0x28;
+                uint ltexCnt = ReadUInt32(fileBytes, pos);
+                Console.WriteLine($"  LTEX count: {ltexCnt}");
+                pos += 4;
+
+                // Show first few LTEX form IDs
+                int ltexShow = (int)Math.Min(ltexCnt, 8);
+                Console.Write("    LTEX IDs:");
+                for (int i = 0; i < ltexShow; i++)
+                {
+                    uint fid = ReadUInt32(fileBytes, pos + i * 4);
+                    Console.Write($" 0x{fid:X8}");
+                }
+                if (ltexCnt > 8) Console.Write($" ... +{ltexCnt - 8} more");
+                Console.WriteLine();
+                pos += ltexCnt * 4;
+
+                // Cell height min/max map
+                long cellHeightMinMaxOffs = pos;
+                pos += (long)reader.CellCountY * reader.CellCountX * 8;
+
+                // Land texture map
+                long ltexMapOffs = pos;
+                pos += (long)reader.CellCountY * reader.CellCountX * 32;
+
+                // GCVR for non-Starfield
+                if (!reader.IsStarfield)
+                {
+                    uint gcvrCnt = ReadUInt32(fileBytes, pos);
+                    Console.WriteLine($"  GCVR count: {gcvrCnt}");
+                    pos += 4 + gcvrCnt * 4;
+                    pos += (long)reader.CellCountY * reader.CellCountX * 32;
+                }
+
+                // LOD4 sections
+                pos += (long)reader.CellCountY * reader.CellCountX * 128; // LOD4 height
+                pos += (long)reader.CellCountY * reader.CellCountX * 128; // LOD4 land tex
+
+                if (!reader.IsStarfield)
+                    pos += (long)reader.CellCountY * reader.CellCountX * 128; // vertex color
+
+                // Block tables
+                int countX = reader.CellCountX;
+                int countY = reader.CellCountY;
+                int gridLOD3 = CeilDiv(countY, 8) * CeilDiv(countX, 8);
+                int gridLOD2 = CeilDiv(countY, 4) * CeilDiv(countX, 4);
+                int gridLOD1 = CeilDiv(countY, 2) * CeilDiv(countX, 2);
+                int gridLOD0 = countY * countX;
+
+                pos += (long)gridLOD3 * (reader.IsStarfield ? 8 : 16);
+                pos += (long)gridLOD2 * (reader.IsStarfield ? 8 : 16);
+                long tableLOD1Offs = pos;
+                pos += (long)gridLOD1 * 8;
+                long tableLOD0Offs = pos;
+                pos += (long)gridLOD0 * (reader.IsStarfield ? 8 : 16);
+                long blockDataOffs = pos;
+
+                Console.WriteLine($"  Block data offset: 0x{blockDataOffs:X}, data size: {(fileBytes.Length - blockDataOffs) / 1024.0 / 1024.0:F2} MB");
+
+                // LOD0 block stats
+                int lod0Empty = 0;
+                uint lod0TotalComp = 0;
+                for (int i = 0; i < gridLOD0; i++)
+                {
+                    long off = tableLOD0Offs + (long)i * (reader.IsStarfield ? 8 : 16);
+                    uint compSize = ReadUInt32(fileBytes, off + 4);
+                    if (compSize == 0) lod0Empty++;
+                    else lod0TotalComp += compSize;
+                }
+                Console.WriteLine($"  LOD0: {gridLOD0} blocks, {gridLOD0 - lod0Empty} non-empty, {lod0Empty} empty");
+
+                // Analyze land texture maps — check quadrant consistency
+                int cellsWithUniformQuads = 0;
+                int cellsWithDifferentQuads = 0;
+                int totalCells = reader.CellCountX * reader.CellCountY;
+                var uniquePalettes = new System.Collections.Generic.HashSet<string>();
+
+                for (int cdy = 0; cdy < reader.CellCountY; cdy++)
+                {
+                    for (int cdx = 0; cdx < reader.CellCountX; cdx++)
+                    {
+                        long off = ltexMapOffs + ((long)cdy * reader.CellCountX + cdx) * 32;
+                        bool quadsMatch = true;
+                        for (int q = 1; q < 4; q++)
+                        {
+                            for (int b = 0; b < 8; b++)
+                            {
+                                if (fileBytes[off + q * 8 + b] != fileBytes[off + b])
+                                {
+                                    quadsMatch = false;
+                                    break;
+                                }
+                            }
+                            if (!quadsMatch) break;
+                        }
+                        if (quadsMatch) cellsWithUniformQuads++;
+                        else cellsWithDifferentQuads++;
+
+                        // Collect unique Q0 palettes
+                        var palStr = string.Join(",", Enumerable.Range(0, 8).Select(i => fileBytes[off + i].ToString()));
+                        uniquePalettes.Add(palStr);
+                    }
+                }
+                Console.WriteLine($"  Land tex map: {cellsWithUniformQuads}/{totalCells} uniform quads, {cellsWithDifferentQuads} with quad differences");
+                Console.WriteLine($"  Unique Q0 palettes: {uniquePalettes.Count}");
+
+                // Show a few palette examples
+                int shown = 0;
+                foreach (var pal in uniquePalettes.Take(5))
+                {
+                    Console.WriteLine($"    Palette: [{pal}]");
+                    shown++;
+                }
+                if (uniquePalettes.Count > 5)
+                    Console.WriteLine($"    ... +{uniquePalettes.Count - 5} more");
+
+                // Sample texture values from center cell LOD0 block
+                int centerIdx = (reader.CellCountY / 2) * reader.CellCountX + (reader.CellCountX / 2);
+                long centerOff = tableLOD0Offs + (long)centerIdx * (reader.IsStarfield ? 8 : 16);
+                uint centerDataOff = ReadUInt32(fileBytes, centerOff);
+                uint centerCompSize = ReadUInt32(fileBytes, centerOff + 4);
+                if (centerCompSize > 0)
+                {
+                    long absOff = blockDataOffs + centerDataOff;
+                    byte[] decompressed = DecompressZlib(fileBytes, absOff, centerCompSize, 65536);
+                    if (decompressed != null)
+                    {
+                        // Texture value distribution from center cell
+                        var valFreq = new System.Collections.Generic.Dictionary<ushort, int>();
+                        ushort texMin = ushort.MaxValue, texMax = 0;
+                        for (int i = 0; i < 128 * 128; i++)
+                        {
+                            int toff = 32768 + i * 2;
+                            ushort v = (ushort)(decompressed[toff] | (decompressed[toff + 1] << 8));
+                            if (v < texMin) texMin = v;
+                            if (v > texMax) texMax = v;
+                            valFreq.TryGetValue(v, out int c);
+                            valFreq[v] = c + 1;
+                        }
+                        Console.WriteLine($"  Center cell textures: {valFreq.Count} unique values, range 0x{texMin:X4}..0x{texMax:X4}");
+                        var topVals = valFreq.OrderByDescending(kv => kv.Value).Take(8).ToList();
+                        Console.Write("    Top values:");
+                        foreach (var kv in topVals)
+                            Console.Write($" 0x{kv.Key:X4}({kv.Value})");
+                        Console.WriteLine();
+
+                        // Height stats from center cell
+                        ushort hMin = ushort.MaxValue, hMax = 0;
+                        for (int i = 0; i < 128 * 128; i++)
+                        {
+                            ushort v = (ushort)(decompressed[i * 2] | (decompressed[i * 2 + 1] << 8));
+                            if (v < hMin) hMin = v;
+                            if (v > hMax) hMax = v;
+                        }
+                        Console.WriteLine($"  Center cell heights: raw [{hMin}..{hMax}], world [{reader.RawToHeight(hMin):F2}..{reader.RawToHeight(hMax):F2}]");
+                    }
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("=== Scan Complete ===");
+            return 0;
+        }
+
+        private static void PrintCellMinMax(byte[] data, long baseOffs, BtdFile reader, int dx, int dy, string label)
         {
             long off = baseOffs + ((long)dy * reader.CellCountX + dx) * 8;
             float cMin = ReadFloat(data, off);
@@ -347,7 +778,7 @@ namespace FrankyCLI
             }
         }
 
-        private static void AnalyzeUint16Region(byte[] data, int byteOffset, int count, string label, BtdTerrainReader reader)
+        private static void AnalyzeUint16Region(byte[] data, int byteOffset, int count, string label, BtdFile reader)
         {
             ushort min = ushort.MaxValue, max = ushort.MinValue;
             long sum = 0;

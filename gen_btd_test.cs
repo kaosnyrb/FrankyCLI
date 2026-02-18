@@ -27,10 +27,10 @@ namespace FrankyCLI
             int failed = 0;
 
             // --- Test 1: Load file ---
-            BtdTerrainReader reader;
+            BtdFile reader;
             try
             {
-                reader = new BtdTerrainReader(btdPath);
+                reader = new BtdFile(btdPath);
                 Pass(ref passed, "Load BTD file");
             }
             catch (Exception ex)
@@ -287,7 +287,7 @@ namespace FrankyCLI
                 Pass(ref passed, "Save to temp file");
 
                 // Reload
-                var reader2 = new BtdTerrainReader(tempPath);
+                var reader2 = new BtdFile(tempPath);
                 Pass(ref passed, "Reload saved file");
 
                 // Check header matches
