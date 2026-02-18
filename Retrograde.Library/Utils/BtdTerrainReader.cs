@@ -44,9 +44,20 @@ namespace Retrograde.Utils
         private long _zlibBlkTableOffsLOD2;
         private long _zlibBlkTableOffsLOD3;
 
+        // Metadata section offsets (needed for Save to update min/max and LOD4)
+        private long _cellHeightMinMaxOffs;
+        private long _lod4HeightMapOffs;
+
         // Tile cache: key = (tileY << 16) | tileX
         private readonly Dictionary<uint, TileData> _tileCache = new Dictionary<uint, TileData>();
         private int _tileCacheMaxSize = 16;
+
+        // Tracks which cells have been modified (cellX - CellMinX, cellY - CellMinY)
+        private readonly HashSet<(int, int)> _dirtyCells = new HashSet<(int, int)>();
+
+        // Per-cell texture data cache (only for cells with texture edits)
+        // Key: (dx, dy) relative to CellMin, Value: 128*128 uint16 texture data
+        private readonly Dictionary<(int, int), ushort[]> _dirtyTextures = new Dictionary<(int, int), ushort[]>();
 
         private class TileData
         {
@@ -134,6 +145,7 @@ namespace Retrograde.Utils
             pos += ltexCnt * 4; // skip form ID array
 
             // Cell height min/max map: 8 bytes per cell
+            _cellHeightMinMaxOffs = pos;
             pos += (long)CellCountY * CellCountX * 8;
 
             // Land texture map: 32 bytes per cell
@@ -149,6 +161,7 @@ namespace Retrograde.Utils
             }
 
             // LOD4 height map: 128 bytes per cell
+            _lod4HeightMapOffs = pos;
             pos += (long)CellCountY * CellCountX * 128;
 
             // LOD4 land textures: 128 bytes per cell
@@ -281,6 +294,488 @@ namespace Retrograde.Utils
         public float RawToHeight(ushort raw)
         {
             return WorldHeightMin + (raw / 65535.0f) * (WorldHeightMax - WorldHeightMin);
+        }
+
+        /// <summary>
+        /// Converts a world-space height to a raw uint16 value. Inverse of RawToHeight.
+        /// </summary>
+        public ushort HeightToRaw(float worldHeight)
+        {
+            float t = (worldHeight - WorldHeightMin) / (WorldHeightMax - WorldHeightMin);
+            return (ushort)Math.Clamp((int)(t * 65535.0f + 0.5f), 0, 65535);
+        }
+
+        /// <summary>
+        /// Sets the raw uint16 height map for a single cell at LOD0.
+        /// Buffer must be exactly 128x128 elements.
+        /// </summary>
+        public void SetCellHeightMap(ushort[] buf, int cellX, int cellY)
+        {
+            if (cellX < CellMinX || cellX > CellMaxX || cellY < CellMinY || cellY > CellMaxY)
+                throw new ArgumentOutOfRangeException($"Cell ({cellX}, {cellY}) is out of range");
+
+            var tile = LoadTile(cellX, cellY, 0);
+            int localX = ((cellX - CellMinX) & (TileSize - 1)) * CellResolution;
+            int localY = ((cellY - CellMinY) & (TileSize - 1)) * CellResolution;
+
+            for (int vy = 0; vy < CellResolution; vy++)
+            {
+                int dstRow = (localY + vy) * TileStride + localX;
+                for (int vx = 0; vx < CellResolution; vx++)
+                    tile.HeightMap[dstRow + vx] = buf[vy * CellResolution + vx];
+            }
+
+            _dirtyCells.Add((cellX - CellMinX, cellY - CellMinY));
+        }
+
+        /// <summary>
+        /// Gets the raw uint16 texture data for a single cell at LOD0 (from the compressed block).
+        /// Buffer must be at least 128*128 elements.
+        /// </summary>
+        public void GetCellTextureData(ushort[] buf, int cellX, int cellY)
+        {
+            if (cellX < CellMinX || cellX > CellMaxX || cellY < CellMinY || cellY > CellMaxY)
+                throw new ArgumentOutOfRangeException($"Cell ({cellX}, {cellY}) is out of range");
+
+            var key = (cellX - CellMinX, cellY - CellMinY);
+            if (_dirtyTextures.TryGetValue(key, out var cached))
+            {
+                Array.Copy(cached, buf, CellResolution * CellResolution);
+                return;
+            }
+
+            // Read from original file
+            var fileBuf = new ushort[CellResolution * CellResolution];
+            GetCellTextureDataFromFile(fileBuf, cellX, cellY);
+            Array.Copy(fileBuf, buf, fileBuf.Length);
+        }
+
+        /// <summary>
+        /// Sets the raw uint16 texture data for a single cell at LOD0.
+        /// Buffer must be exactly 128*128 elements.
+        /// </summary>
+        public void SetCellTextureData(ushort[] buf, int cellX, int cellY)
+        {
+            if (cellX < CellMinX || cellX > CellMaxX || cellY < CellMinY || cellY > CellMaxY)
+                throw new ArgumentOutOfRangeException($"Cell ({cellX}, {cellY}) is out of range");
+
+            var key = (cellX - CellMinX, cellY - CellMinY);
+            var copy = new ushort[CellResolution * CellResolution];
+            Array.Copy(buf, copy, copy.Length);
+            _dirtyTextures[key] = copy;
+            _dirtyCells.Add(key);
+        }
+
+        /// <summary>
+        /// Sets a single vertex texture value as raw uint16 at LOD0.
+        /// </summary>
+        public void SetTexture(int cellX, int cellY, int vertX, int vertY, ushort raw)
+        {
+            if (cellX < CellMinX || cellX > CellMaxX || cellY < CellMinY || cellY > CellMaxY)
+                throw new ArgumentOutOfRangeException($"Cell ({cellX}, {cellY}) is out of range");
+
+            var key = (cellX - CellMinX, cellY - CellMinY);
+            if (!_dirtyTextures.TryGetValue(key, out var tex))
+            {
+                tex = new ushort[CellResolution * CellResolution];
+                GetCellTextureDataFromFile(tex, cellX, cellY);
+                _dirtyTextures[key] = tex;
+            }
+            tex[vertY * CellResolution + vertX] = raw;
+            _dirtyCells.Add(key);
+        }
+
+        private void GetCellTextureDataFromFile(ushort[] buf, int cellX, int cellY)
+        {
+            int dx = cellX - CellMinX;
+            int dy = cellY - CellMinY;
+
+            int gridW = CellCountX;
+            int blockIndex = dy * gridW + dx;
+            long tableOffs = _zlibBlkTableOffsLOD0 + blockIndex * 8;
+            uint dataOffset = ReadUInt32(tableOffs);
+            uint compressedSize = ReadUInt32(tableOffs + 4);
+            if (compressedSize == 0) { Array.Clear(buf, 0, buf.Length); return; }
+
+            long absOffset = _zlibBlocksDataOffs + dataOffset;
+            byte[] decompressed = DecompressZlib(_fileData, absOffset, compressedSize, 65536);
+            if (decompressed == null) { Array.Clear(buf, 0, buf.Length); return; }
+
+            // Texture data starts at byte 32768 (after 128*128 uint16 height data)
+            int texOffset = CellResolution * CellResolution * 2;
+            for (int i = 0; i < CellResolution * CellResolution; i++)
+            {
+                int off = texOffset + i * 2;
+                buf[i] = (ushort)(decompressed[off] | (decompressed[off + 1] << 8));
+            }
+        }
+
+        /// <summary>
+        /// Sets a single vertex height as raw uint16 at LOD0.
+        /// vertX/vertY are 0..127 within the cell.
+        /// </summary>
+        public void SetHeight(int cellX, int cellY, int vertX, int vertY, ushort raw)
+        {
+            if (cellX < CellMinX || cellX > CellMaxX || cellY < CellMinY || cellY > CellMaxY)
+                throw new ArgumentOutOfRangeException($"Cell ({cellX}, {cellY}) is out of range");
+
+            var tile = LoadTile(cellX, cellY, 0);
+            int localX = ((cellX - CellMinX) & (TileSize - 1)) * CellResolution;
+            int localY = ((cellY - CellMinY) & (TileSize - 1)) * CellResolution;
+            tile.HeightMap[(localY + vertY) * TileStride + localX + vertX] = raw;
+
+            _dirtyCells.Add((cellX - CellMinX, cellY - CellMinY));
+        }
+
+        /// <summary>
+        /// Smooths the edges of dirty cells where they border unmodified cells.
+        /// Creates a linear blend over `bandWidth` vertices at each dirty cell edge
+        /// that neighbors a clean cell, eliminating hard seams.
+        /// Call this before Save().
+        /// </summary>
+        public void SmoothDirtyCellEdges(int bandWidth = 16)
+        {
+            // Snapshot the dirty set — we'll mark neighbor cells dirty as we blend into them
+            var originalDirty = new HashSet<(int, int)>(_dirtyCells);
+
+            foreach (var (dx, dy) in originalDirty)
+            {
+                int cellX = dx + CellMinX;
+                int cellY = dy + CellMinY;
+
+                // Check each of the 4 neighbors
+                BlendEdge(cellX, cellY, dx, dy, -1, 0, bandWidth, originalDirty); // left
+                BlendEdge(cellX, cellY, dx, dy, 1, 0, bandWidth, originalDirty);  // right
+                BlendEdge(cellX, cellY, dx, dy, 0, -1, bandWidth, originalDirty); // bottom
+                BlendEdge(cellX, cellY, dx, dy, 0, 1, bandWidth, originalDirty);  // top
+            }
+        }
+
+        private void BlendEdge(int cellX, int cellY, int dx, int dy,
+            int dirX, int dirY, int bandWidth, HashSet<(int, int)> originalDirty)
+        {
+            int nx = dx + dirX;
+            int ny = dy + dirY;
+
+            // Skip if neighbor is out of bounds or also dirty
+            if (nx < 0 || nx >= CellCountX || ny < 0 || ny >= CellCountY) return;
+            if (originalDirty.Contains((nx, ny))) return;
+
+            int neighborCellX = nx + CellMinX;
+            int neighborCellY = ny + CellMinY;
+
+            // Load both tiles
+            var dirtyTile = LoadTile(cellX, cellY, 0);
+            int dirtyLocalX = ((cellX - CellMinX) & (TileSize - 1)) * CellResolution;
+            int dirtyLocalY = ((cellY - CellMinY) & (TileSize - 1)) * CellResolution;
+
+            var cleanTile = LoadTile(neighborCellX, neighborCellY, 0);
+            int cleanLocalX = ((neighborCellX - CellMinX) & (TileSize - 1)) * CellResolution;
+            int cleanLocalY = ((neighborCellY - CellMinY) & (TileSize - 1)) * CellResolution;
+
+            // Read original (unmodified) neighbor edge values for reference
+            var neighborBuf = new ushort[CellResolution * CellResolution];
+            GetCellHeightMapFromFile(neighborBuf, neighborCellX, neighborCellY);
+
+            // Also read original dirty cell values for the edge
+            var dirtyOrigBuf = new ushort[CellResolution * CellResolution];
+            GetCellHeightMapFromFile(dirtyOrigBuf, cellX, cellY);
+
+            int bw = Math.Min(bandWidth, CellResolution / 2);
+
+            if (dirX != 0) // horizontal edge (left/right)
+            {
+                // Blend inside the dirty cell near the edge, and inside the neighbor cell near the edge
+                for (int vy = 0; vy < CellResolution; vy++)
+                {
+                    for (int i = 0; i < bw; i++)
+                    {
+                        float t = (i + 1) / (float)(bw + 1); // 0..1 from edge toward interior
+
+                        // Dirty cell side: blend from edge (t=0 → use original) to interior (t=1 → use modified)
+                        int dvx = dirX > 0 ? (CellResolution - 1 - i) : i;
+                        int dirtyIdx = (dirtyLocalY + vy) * TileStride + dirtyLocalX + dvx;
+                        ushort modifiedVal = dirtyTile.HeightMap[dirtyIdx];
+                        ushort originalVal = dirtyOrigBuf[vy * CellResolution + dvx];
+                        dirtyTile.HeightMap[dirtyIdx] = LerpRaw(originalVal, modifiedVal, t);
+
+                        // Neighbor cell side: blend from interior (t=0 → keep original) to edge (t=1 → approach modified)
+                        int nvx = dirX > 0 ? i : (CellResolution - 1 - i);
+                        int cleanIdx = (cleanLocalY + vy) * TileStride + cleanLocalX + nvx;
+                        ushort neighborVal = neighborBuf[vy * CellResolution + nvx];
+
+                        // Get the modified value at the dirty cell's edge for the target
+                        int edgeVx = dirX > 0 ? (CellResolution - 1) : 0;
+                        ushort edgeModified = dirtyTile.HeightMap[(dirtyLocalY + vy) * TileStride + dirtyLocalX + edgeVx];
+                        ushort edgeOriginal = dirtyOrigBuf[vy * CellResolution + edgeVx];
+                        ushort delta = (ushort)Math.Abs(edgeModified - edgeOriginal);
+                        float neighborT = 1f - t; // strongest near edge, fades toward interior
+                        float blend = neighborT * (edgeModified >= edgeOriginal ? delta : -delta) / 65535f;
+                        float nHeight = RawToHeight(neighborVal) + blend * (WorldHeightMax - WorldHeightMin);
+                        cleanTile.HeightMap[cleanIdx] = HeightToRaw(nHeight);
+                    }
+                }
+                _dirtyCells.Add((nx, ny));
+            }
+            else // vertical edge (top/bottom)
+            {
+                for (int vx = 0; vx < CellResolution; vx++)
+                {
+                    for (int i = 0; i < bw; i++)
+                    {
+                        float t = (i + 1) / (float)(bw + 1);
+
+                        int dvy = dirY > 0 ? (CellResolution - 1 - i) : i;
+                        int dirtyIdx = (dirtyLocalY + dvy) * TileStride + dirtyLocalX + vx;
+                        ushort modifiedVal = dirtyTile.HeightMap[dirtyIdx];
+                        ushort originalVal = dirtyOrigBuf[dvy * CellResolution + vx];
+                        dirtyTile.HeightMap[dirtyIdx] = LerpRaw(originalVal, modifiedVal, t);
+
+                        int nvy = dirY > 0 ? i : (CellResolution - 1 - i);
+                        int cleanIdx = (cleanLocalY + nvy) * TileStride + cleanLocalX + vx;
+                        ushort neighborVal = neighborBuf[nvy * CellResolution + vx];
+
+                        int edgeVy = dirY > 0 ? (CellResolution - 1) : 0;
+                        ushort edgeModified = dirtyTile.HeightMap[(dirtyLocalY + edgeVy) * TileStride + dirtyLocalX + vx];
+                        ushort edgeOriginal = dirtyOrigBuf[edgeVy * CellResolution + vx];
+                        ushort delta = (ushort)Math.Abs(edgeModified - edgeOriginal);
+                        float neighborT = 1f - t;
+                        float blend = neighborT * (edgeModified >= edgeOriginal ? delta : -delta) / 65535f;
+                        float nHeight = RawToHeight(neighborVal) + blend * (WorldHeightMax - WorldHeightMin);
+                        cleanTile.HeightMap[cleanIdx] = HeightToRaw(nHeight);
+                    }
+                }
+                _dirtyCells.Add((nx, ny));
+            }
+        }
+
+        private static ushort LerpRaw(ushort a, ushort b, float t)
+        {
+            return (ushort)Math.Clamp((int)(a + (b - a) * t + 0.5f), 0, 65535);
+        }
+
+        /// <summary>
+        /// Reads a cell's height map directly from the original file data (ignoring tile cache modifications).
+        /// </summary>
+        private void GetCellHeightMapFromFile(ushort[] buf, int cellX, int cellY)
+        {
+            int dx = cellX - CellMinX;
+            int dy = cellY - CellMinY;
+
+            if (!IsStarfield)
+            {
+                // Fall back to reading from tile cache for non-Starfield
+                GetCellHeightMap(buf, cellX, cellY, 0);
+                return;
+            }
+
+            int gridW = CellCountX;
+            int blockIndex = dy * gridW + dx;
+            long tableOffs = _zlibBlkTableOffsLOD0 + blockIndex * 8;
+            uint dataOffset = ReadUInt32(tableOffs);
+            uint compressedSize = ReadUInt32(tableOffs + 4);
+            if (compressedSize == 0) { Array.Clear(buf, 0, buf.Length); return; }
+
+            long absOffset = _zlibBlocksDataOffs + dataOffset;
+            byte[] decompressed = DecompressZlib(_fileData, absOffset, compressedSize, 65536);
+            if (decompressed == null) { Array.Clear(buf, 0, buf.Length); return; }
+
+            for (int i = 0; i < CellResolution * CellResolution; i++)
+            {
+                int off = i * 2;
+                buf[i] = (ushort)(decompressed[off] | (decompressed[off + 1] << 8));
+            }
+        }
+
+        /// <summary>
+        /// Saves the BTD to a new file. Modified cells are recompressed; unmodified blocks
+        /// are copied verbatim. Currently only supports Starfield format.
+        /// </summary>
+        public void Save(string outputPath, bool updateMinMax = true)
+        {
+            if (!IsStarfield)
+                throw new NotSupportedException("Save is currently only supported for Starfield BTD files");
+
+            // Copy the prefix (header + metadata + block tables) into a byte array we can patch
+            var prefix = new byte[_zlibBlocksDataOffs];
+            Array.Copy(_fileData, 0, prefix, 0, prefix.Length);
+
+            // Update cell height min/max and LOD4 height map for dirty cells
+            if (updateMinMax)
+            {
+                foreach (var (dx, dy) in _dirtyCells)
+                {
+                    int cellX = dx + CellMinX;
+                    int cellY = dy + CellMinY;
+                    var tile = LoadTile(cellX, cellY, 0);
+                    int localX = ((cellX - CellMinX) & (TileSize - 1)) * CellResolution;
+                    int localY = ((cellY - CellMinY) & (TileSize - 1)) * CellResolution;
+
+                    // Scan for min/max raw height in this cell
+                    ushort cellMin = ushort.MaxValue;
+                    ushort cellMax = ushort.MinValue;
+                    for (int vy = 0; vy < CellResolution; vy++)
+                    {
+                        int row = (localY + vy) * TileStride + localX;
+                        for (int vx = 0; vx < CellResolution; vx++)
+                        {
+                            ushort val = tile.HeightMap[row + vx];
+                            if (val < cellMin) cellMin = val;
+                            if (val > cellMax) cellMax = val;
+                        }
+                    }
+
+                    // Cell height min/max: stored as float pairs in UNSCALED coordinates
+                    // (before Starfield 8x multiplier), row-major (y * countX + x)
+                    long minMaxOffs = _cellHeightMinMaxOffs + ((long)dy * CellCountX + dx) * 8;
+                    float fMin = RawToHeight(cellMin);
+                    float fMax = RawToHeight(cellMax);
+                    if (IsStarfield) { fMin /= 8f; fMax /= 8f; }
+                    Array.Copy(BitConverter.GetBytes(fMin), 0, prefix, minMaxOffs, 4);
+                    Array.Copy(BitConverter.GetBytes(fMax), 0, prefix, minMaxOffs + 4, 4);
+
+                    // LOD4 height map: 128 bytes per cell = 8x8 grid of uint16 values (64 values = 128 bytes)
+                    // Downsample from 128x128 to 8x8 by taking every 16th sample
+                    long lod4Offs = _lod4HeightMapOffs + ((long)dy * CellCountX + dx) * 128;
+                    for (int ly = 0; ly < 8; ly++)
+                    {
+                        int srcRow = (localY + ly * 16) * TileStride + localX;
+                        for (int lx = 0; lx < 8; lx++)
+                        {
+                            ushort val = tile.HeightMap[srcRow + lx * 16];
+                            prefix[lod4Offs] = (byte)(val & 0xFF);
+                            prefix[lod4Offs + 1] = (byte)(val >> 8);
+                            lod4Offs += 2;
+                        }
+                    }
+                }
+            }
+
+            // Build compressed block data into a separate stream, collect table patches
+            using var blockData = new MemoryStream();
+            uint newDataOffset = 0;
+
+            for (int lod = 3; lod >= 0; lod--)
+            {
+                int cellsPerBlock = 1 << lod;
+                int gridW = CeilDiv(CellCountX, cellsPerBlock);
+                int gridH = CeilDiv(CellCountY, cellsPerBlock);
+                long tableBase = GetLodTableOffset(lod);
+
+                for (int gy = 0; gy < gridH; gy++)
+                {
+                    for (int gx = 0; gx < gridW; gx++)
+                    {
+                        int blockIndex = gy * gridW + gx;
+                        long tableOffs = tableBase + blockIndex * 8;
+
+                        uint origDataOffset = ReadUInt32(tableOffs);
+                        uint origCompressedSize = ReadUInt32(tableOffs + 4);
+
+                        if (origCompressedSize == 0)
+                        {
+                            WriteUInt32InArray(prefix, tableOffs, 0);
+                            WriteUInt32InArray(prefix, tableOffs + 4, 0);
+                            continue;
+                        }
+
+                        // Check if any cell in this block is dirty (LOD0: 1 cell per block)
+                        bool isDirty = false;
+                        if (lod == 0)
+                        {
+                            isDirty = _dirtyCells.Contains((gx, gy));
+                        }
+                        else
+                        {
+                            for (int dy = 0; dy < cellsPerBlock && !isDirty; dy++)
+                                for (int dx = 0; dx < cellsPerBlock && !isDirty; dx++)
+                                    isDirty = _dirtyCells.Contains((gx * cellsPerBlock + dx, gy * cellsPerBlock + dy));
+                        }
+
+                        byte[] compressedBlock;
+                        if (isDirty && lod == 0)
+                        {
+                            // Decompress original to get texture data, patch height data, recompress
+                            long absOffset = _zlibBlocksDataOffs + origDataOffset;
+                            byte[] decompressed = DecompressZlib(_fileData, absOffset, origCompressedSize, 65536);
+                            if (decompressed == null)
+                                decompressed = new byte[65536];
+
+                            // Patch height data from tile cache (first 128*128 uint16)
+                            int cellX = gx + CellMinX;
+                            int cellY = gy + CellMinY;
+                            var tile = LoadTile(cellX, cellY, 0);
+                            int localX = ((cellX - CellMinX) & (TileSize - 1)) * CellResolution;
+                            int localY = ((cellY - CellMinY) & (TileSize - 1)) * CellResolution;
+
+                            int pos = 0;
+                            for (int vy = 0; vy < CellResolution; vy++)
+                            {
+                                int srcRow = (localY + vy) * TileStride + localX;
+                                for (int vx = 0; vx < CellResolution; vx++)
+                                {
+                                    ushort val = tile.HeightMap[srcRow + vx];
+                                    decompressed[pos] = (byte)(val & 0xFF);
+                                    decompressed[pos + 1] = (byte)(val >> 8);
+                                    pos += 2;
+                                }
+                            }
+
+                            // Patch texture data if modified (second 128*128 uint16)
+                            if (_dirtyTextures.TryGetValue((gx, gy), out var texData))
+                            {
+                                int texPos = CellResolution * CellResolution * 2; // 32768
+                                for (int i = 0; i < CellResolution * CellResolution; i++)
+                                {
+                                    decompressed[texPos] = (byte)(texData[i] & 0xFF);
+                                    decompressed[texPos + 1] = (byte)(texData[i] >> 8);
+                                    texPos += 2;
+                                }
+                            }
+
+                            compressedBlock = CompressZlib(decompressed);
+                        }
+                        else
+                        {
+                            // Copy original compressed bytes verbatim
+                            long absOffset = _zlibBlocksDataOffs + origDataOffset;
+                            compressedBlock = new byte[origCompressedSize];
+                            Array.Copy(_fileData, absOffset, compressedBlock, 0, origCompressedSize);
+                        }
+
+                        // Patch block table entry in prefix
+                        WriteUInt32InArray(prefix, tableOffs, newDataOffset);
+                        WriteUInt32InArray(prefix, tableOffs + 4, (uint)compressedBlock.Length);
+
+                        // Append compressed block
+                        blockData.Write(compressedBlock, 0, compressedBlock.Length);
+                        newDataOffset += (uint)compressedBlock.Length;
+                    }
+                }
+            }
+
+            // Write prefix + block data
+            using var fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+            fs.Write(prefix, 0, prefix.Length);
+            blockData.WriteTo(fs);
+        }
+
+        private static byte[] CompressZlib(byte[] data)
+        {
+            using var ms = new MemoryStream();
+            using (var zlib = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+            {
+                zlib.Write(data, 0, data.Length);
+            }
+            return ms.ToArray();
+        }
+
+        private static void WriteUInt32InArray(byte[] buf, long offset, uint value)
+        {
+            buf[offset] = (byte)(value & 0xFF);
+            buf[offset + 1] = (byte)((value >> 8) & 0xFF);
+            buf[offset + 2] = (byte)((value >> 16) & 0xFF);
+            buf[offset + 3] = (byte)((value >> 24) & 0xFF);
         }
 
         private TileData LoadTile(int cellX, int cellY, int lod)
@@ -438,17 +933,15 @@ namespace Retrograde.Utils
         {
             try
             {
-                // Zlib format: 2-byte header then deflate data
-                // Skip the 2-byte zlib header for DeflateStream
                 if (compressedSize < 3) return null;
 
-                using var ms = new MemoryStream(data, (int)offset + 2, (int)compressedSize - 2);
-                using var deflate = new DeflateStream(ms, CompressionMode.Decompress);
+                using var ms = new MemoryStream(data, (int)offset, (int)compressedSize);
+                using var zlib = new ZLibStream(ms, CompressionMode.Decompress);
                 var result = new byte[expectedSize];
                 int totalRead = 0;
                 while (totalRead < expectedSize)
                 {
-                    int bytesRead = deflate.Read(result, totalRead, expectedSize - totalRead);
+                    int bytesRead = zlib.Read(result, totalRead, expectedSize - totalRead);
                     if (bytesRead == 0) break;
                     totalRead += bytesRead;
                 }
