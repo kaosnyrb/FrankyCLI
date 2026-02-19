@@ -16,7 +16,18 @@ namespace Retrograde.Nouns
             var targetMod = RetrogradeContext.Current.TargetMod;
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            var Book = targetMod.Books[new FormKey(targetMod.ModKey, Formid)].DeepCopy();
+            IBookGetter? bookSource = targetMod.Books.FirstOrDefault(r => r.FormKey == new FormKey(targetMod.ModKey, Formid));
+            if (bookSource == null)
+            {
+                foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                {
+                    bookSource = tm.Books.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, Formid));
+                    if (bookSource != null) break;
+                }
+            }
+            if (bookSource == null)
+                throw new KeyNotFoundException($"BookNoun: no Book with raw ID 0x{Formid:X6} found in target mod or any template mod.");
+            var Book = bookSource.DeepCopy();
             instance = new Book(targetMod)
             {
                 Components = Book.Components,

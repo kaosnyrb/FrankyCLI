@@ -20,7 +20,18 @@ namespace Retrograde.Nouns
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var ActivatorClone = targetMod.Activators[new FormKey(targetMod.ModKey, FormID)].DeepCopy();
+            IActivatorGetter? activatorSource = targetMod.Activators.FirstOrDefault(r => r.FormKey == new FormKey(targetMod.ModKey, FormID));
+            if (activatorSource == null)
+            {
+                foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                {
+                    activatorSource = tm.Activators.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, FormID));
+                    if (activatorSource != null) break;
+                }
+            }
+            if (activatorSource == null)
+                throw new KeyNotFoundException($"ActivatorNoun: no Activator with raw ID 0x{FormID:X6} found in target mod or any template mod.");
+            var ActivatorClone = activatorSource.DeepCopy();
             instance = new Mutagen.Bethesda.Starfield.Activator(targetMod)
             {
                 ActivateSound = ActivatorClone.ActivateSound,

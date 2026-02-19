@@ -232,7 +232,7 @@ namespace Retrograde.Nouns
 
         public Npc GenerateNPC()
         {
-            var NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateNPC(female))].DeepCopy();
+            var NPC = NPCTools.FindTemplateNpc(female);
             Npc npc = NPCTools.CloneNPC(myMod, NPC);
             npc.Name = name;
             npc.EditorID = "npc_" + (name.ToLower()).Replace(" ","");
@@ -289,7 +289,16 @@ namespace Retrograde.Nouns
         public void GenerateLog()
         {
             var log = GenerateLogfile();
-            var Book = myMod.Books[new FormKey(myMod.ModKey, 0x000800)].DeepCopy();
+            IBookGetter? bookSrc = myMod.Books.FirstOrDefault(r => r.FormKey == new FormKey(myMod.ModKey, 0x000800));
+            if (bookSrc == null)
+                foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                {
+                    bookSrc = tm.Books.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, 0x000800));
+                    if (bookSrc != null) break;
+                }
+            if (bookSrc == null)
+                throw new KeyNotFoundException("OutlawNpc: no Book with raw ID 0x000800 found in target mod or any template mod.");
+            var Book = bookSrc.DeepCopy();
             string logSynonym = RandomProvider.GetLogSynonym();
             Book logbook = new Book(myMod)
             {

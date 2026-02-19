@@ -9,22 +9,26 @@ namespace Retrograde;
 
 public class RoomUtils
 {
-    public FormList? roomlist;
-    public Dictionary<string, FormList> roomTemplates;
+    public IFormListGetter? roomlist;
+    public Dictionary<string, IFormListGetter> roomTemplates;
     private readonly Dictionary<string, Dictionary<string, List<string>>> cachedCandidates = new(StringComparer.OrdinalIgnoreCase);
     public string listName;
 
     public RoomUtils(string listname)
     {
-        var mod = RetrogradeContext.Current.TargetMod;
-        roomlist = mod.FormLists.FirstOrDefault(fl => fl.EditorID == listname);
+        var templateMods = RetrogradeContext.Current.TemplateMods;
+        roomlist = templateMods
+            .SelectMany(m => m.FormLists)
+            .FirstOrDefault(fl => fl.EditorID == listname);
 
-        roomTemplates = new Dictionary<string, FormList>();
+        roomTemplates = new Dictionary<string, IFormListGetter>();
         if (roomlist != null)
         {
             foreach (var f in roomlist.Items)
             {
-                var list = mod.FormLists.FirstOrDefault(fl => fl.FormKey == f.FormKey);
+                var list = templateMods
+                    .SelectMany(m => m.FormLists)
+                    .FirstOrDefault(fl => fl.FormKey == f.FormKey);
                 if (list != null)
                 {
                     roomTemplates.Add(list.EditorID!, list);
@@ -78,7 +82,7 @@ public class RoomUtils
             : candidates[RandomProvider.Random.Next(candidates.Count)];
     }
 
-    private void EnsureConnectorsWithinBounds(string listKey, PackIn packIn)
+    private void EnsureConnectorsWithinBounds(string listKey, IPackInGetter packIn)
     {
         var prefab = PrefabCache.GetPrefab(packIn.EditorID!);
         var bounds = packIn.ObjectBounds;
@@ -111,8 +115,6 @@ public class RoomUtils
 
     private void PrebuildCandidateCache()
     {
-        var mod = RetrogradeContext.Current.TargetMod;
-
         foreach (var kvp in roomTemplates)
         {
             var listKey = kvp.Key;
@@ -124,7 +126,8 @@ public class RoomUtils
 
             foreach (var item in formList.Items)
             {
-                if (!mod.PackIns.TryGetValue(item.FormKey, out var packIn) || string.IsNullOrWhiteSpace(packIn?.EditorID))
+                var packIn = FindPackIn(item.FormKey);
+                if (packIn == null || string.IsNullOrWhiteSpace(packIn.EditorID))
                     continue;
 
                 var tokens = packIn.EditorID.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
@@ -146,14 +149,14 @@ public class RoomUtils
         }
     }
 
-    private List<string> BuildCandidates(string listKey, FormList formList, string? type)
+    private List<string> BuildCandidates(string listKey, IFormListGetter formList, string? type)
     {
-        var mod = RetrogradeContext.Current.TargetMod;
         var candidates = new List<string>(formList.Items.Count);
 
         foreach (var item in formList.Items)
         {
-            if (!mod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
+            var packIn = FindPackIn(item.FormKey);
+            if (packIn?.EditorID == null)
                 continue;
 
             if (type != null)
@@ -168,5 +171,14 @@ public class RoomUtils
         }
 
         return candidates;
+    }
+
+    public static IPackInGetter? FindPackIn(Mutagen.Bethesda.Plugins.FormKey formKey)
+    {
+        var mod = RetrogradeContext.Current.TemplateMods
+            .FirstOrDefault(m => m.ModKey == formKey.ModKey);
+        if (mod != null && mod.PackIns.TryGetValue(formKey, out var packIn))
+            return packIn;
+        return null;
     }
 }

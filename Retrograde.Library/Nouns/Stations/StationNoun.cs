@@ -98,7 +98,7 @@ namespace Retrograde.Nouns.Stations
 
             shipint_doorreference.LinkedReferences[0].Reference = shipint_xmarker.ToLink<IPlacedGetter>();
 
-            targetMod.Cells[0].SubBlocks[0].Cells.Add(ShipInteriorCell);
+            AddCellToMod(targetMod, ShipInteriorCell);
 
 
             // Interior Cell
@@ -141,7 +141,7 @@ namespace Retrograde.Nouns.Stations
                     }
                 }
             }
-            targetMod.Cells[0].SubBlocks[0].Cells.Add(InteriorCell);
+            AddCellToMod(targetMod, InteriorCell);
 
 
 
@@ -161,12 +161,21 @@ namespace Retrograde.Nouns.Stations
             shipinttoint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
             int_doorreference.TeleportDestination.Door = shipinttoint_doorreference.ToLink<IPlacedObjectGetter>();
 
-            targetMod.Cells[0].SubBlocks[0].Cells.Add(ExteriorCell);
+            AddCellToMod(targetMod, ExteriorCell);
 
 
             //Clone the Base Form
             var formKey = FormKeyLookup.GetFormKey("duout02_stationtest");
-            var ship = targetMod.GenericBaseForms[formKey].DeepCopy();
+            IGenericBaseFormGetter? shipSource = targetMod.GenericBaseForms.FirstOrDefault(r => r.FormKey == formKey);
+            if (shipSource == null)
+                foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                {
+                    shipSource = tm.GenericBaseForms.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, formKey.ID));
+                    if (shipSource != null) break;
+                }
+            if (shipSource == null)
+                throw new KeyNotFoundException($"StationNoun: no GenericBaseForm with EditorID 'duout02_stationtest' found in target mod or any template mod.");
+            var ship = shipSource.DeepCopy();
             instance = new GenericBaseForm(targetMod)
             {
                 EditorID = "rg_" + stationsafename,
@@ -203,6 +212,43 @@ namespace Retrograde.Nouns.Stations
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator(stationDesign);
 
             dungeonState = dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size, shipinttoint_doorreference);
+        }
+
+        private static void AddCellToMod(StarfieldMod targetMod, Cell cell)
+        {
+            var keyStr = cell.FormKey.ID.ToString();
+            int blockNumber    = int.Parse(keyStr.Substring(keyStr.Length - 1));
+            int subBlockNumber = int.Parse(keyStr.Substring(keyStr.Length - 2, 1));
+
+            CellBlock cellBlock = null;
+            foreach (var b in targetMod.Cells)
+                if (b.BlockNumber == blockNumber) { cellBlock = b; break; }
+            if (cellBlock == null)
+            {
+                cellBlock = new CellBlock
+                {
+                    BlockNumber = blockNumber,
+                    GroupType = GroupTypeEnum.InteriorCellBlock,
+                    SubBlocks = new ExtendedList<CellSubBlock>()
+                };
+                targetMod.Cells.Add(cellBlock);
+            }
+
+            CellSubBlock subBlock = null;
+            foreach (var s in cellBlock.SubBlocks)
+                if (s.BlockNumber == subBlockNumber) { subBlock = s; break; }
+            if (subBlock == null)
+            {
+                subBlock = new CellSubBlock
+                {
+                    BlockNumber = subBlockNumber,
+                    GroupType = GroupTypeEnum.InteriorCellSubBlock,
+                    Cells = new ExtendedList<Cell>()
+                };
+                cellBlock.SubBlocks.Add(subBlock);
+            }
+
+            subBlock.Cells.Add(cell);
         }
     }
 }

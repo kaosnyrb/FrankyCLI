@@ -14,6 +14,7 @@ namespace Retrograde.Utils
         {
             var targetMod = RetrogradeContext.Current.TargetMod;
             var starfieldMod = RetrogradeContext.Current.StarfieldMod;
+            var templateMods = RetrogradeContext.Current.TemplateMods;
 
             foreach (var rec in targetMod.EnumerateMajorRecords())
             {
@@ -22,6 +23,20 @@ namespace Retrograde.Utils
                     if (rec.EditorID == EditorID)
                     {
                         return rec.FormKey;
+                    }
+                }
+            }
+
+            foreach (var templateMod in templateMods)
+            {
+                foreach (var rec in templateMod.EnumerateMajorRecords())
+                {
+                    if (rec.EditorID != null)
+                    {
+                        if (rec.EditorID == EditorID)
+                        {
+                            return rec.FormKey;
+                        }
                     }
                 }
             }
@@ -48,7 +63,7 @@ namespace Retrograde.Utils
                 }
             }
 
-            return new FormKey();
+            throw new KeyNotFoundException($"FormKeyLookup: no record found with EditorID '{EditorID}'. Check that the record exists in the target mod, a template mod, or Starfield.esm.");
         }
     }
 }

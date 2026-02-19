@@ -84,16 +84,7 @@ namespace Retrograde.Chains
 
             
             //Add to POI tree
-            var rg_se_poi_node = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_SE_POI_Node")];
-
-            //Remove the template quest from the node
-            if (rg_se_poi_node.Quests.Count > 0)
-            {
-                if (targetMod.Quests[rg_se_poi_node.Quests[0].Quest.FormKey].EditorID == "RG_station_quest")
-                {
-                    rg_se_poi_node.Quests.RemoveAt(0);
-                }
-            }
+            var rg_se_poi_node = FindOrCreateNode(targetMod, "RG_SE_POI_Node");
 
             rg_se_poi_node.Quests.Add(new StoryManagerQuest()
             {
@@ -101,6 +92,35 @@ namespace Retrograde.Chains
             });
 
             return true;
+        }
+
+        private static StoryManagerQuestNode FindOrCreateNode(StarfieldMod targetMod, string editorId)
+        {
+            var existing = targetMod.StoryManagerQuestNodes.FirstOrDefault(r => r.EditorID == editorId);
+            if (existing != null) return existing;
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+            {
+                var src = tm.StoryManagerQuestNodes.FirstOrDefault(r => r.EditorID == editorId);
+                if (src != null)
+                {
+                    var node = new StoryManagerQuestNode(targetMod)
+                    {
+                        EditorID = editorId,
+                        Parent = src.Parent.FormKey.ToNullableLink<IAStoryManagerNodeGetter>(),
+                        PreviousSibling = src.PreviousSibling.FormKey.ToNullableLink<IAStoryManagerNodeGetter>(),
+                        Flags = src.Flags,
+                        QuestFlags = src.QuestFlags,
+                        MaxConcurrentQuests = src.MaxConcurrentQuests,
+                        MaxNumQuestsToRun = src.MaxNumQuestsToRun,
+                        HoursUntilReset = src.HoursUntilReset,
+                    };
+                    foreach (var c in src.Conditions)
+                        node.Conditions.Add(c.DeepCopy());
+                    targetMod.StoryManagerQuestNodes.Add(node);
+                    return node;
+                }
+            }
+            throw new KeyNotFoundException($"RetrogradeQuest: StoryManagerQuestNode '{editorId}' not found in any template mod.");
         }
     }
 }

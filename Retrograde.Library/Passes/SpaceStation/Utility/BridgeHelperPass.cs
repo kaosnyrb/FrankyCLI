@@ -393,9 +393,7 @@ namespace Retrograde.Passes.SpaceStation
 
                     foreach (var item in formList.Items)
                     {
-                        if (!RetrogradeContext.Current.TargetMod.PackIns.TryGetValue(item.FormKey, out var packIn))
-                            continue;
-
+                        var packIn = RoomUtils.FindPackIn(item.FormKey);
                         var editorId = packIn?.EditorID;
                         if (string.IsNullOrWhiteSpace(editorId))
                             continue;

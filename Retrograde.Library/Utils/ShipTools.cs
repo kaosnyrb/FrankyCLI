@@ -237,8 +237,14 @@ public static class ShipTools
         foreach (var record in RetrogradeContext.Current.TargetMod.EnumerateMajorRecords())
         {
             if (record.EditorID != null && record.EditorID.Contains(ganglistEditorID))
-            {
                 return record.ToLink<IStarfieldMajorRecordGetter>();
+        }
+        foreach (var tm in RetrogradeContext.Current.TemplateMods)
+        {
+            foreach (var record in tm.EnumerateMajorRecords())
+            {
+                if (record.EditorID != null && record.EditorID.Contains(ganglistEditorID))
+                    return record.ToLink<IStarfieldMajorRecordGetter>();
             }
         }
         return null;

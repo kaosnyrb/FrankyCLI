@@ -334,9 +334,7 @@ namespace Retrograde.Passes.SpaceStation
             var candidates = new List<string>();
             foreach (var item in list.Items)
             {
-                if (!RetrogradeContext.Current.TargetMod.PackIns.TryGetValue(item.FormKey, out var packIn))
-                    continue;
-
+                var packIn = RoomUtils.FindPackIn(item.FormKey);
                 if (string.IsNullOrWhiteSpace(packIn?.EditorID))
                     continue;
 

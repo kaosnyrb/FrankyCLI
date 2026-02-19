@@ -88,7 +88,7 @@ namespace Retrograde.Nouns.Gangs
                     isfemale = true;
                 }
 
-                var NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                var NPC = NPCTools.FindTemplateNpc(isfemale);
                 Npc npc = NPCTools.CloneNPC(myMod, NPC);
                 string Gender = "Male";
                 if (isfemale) Gender = "Female";
@@ -145,7 +145,6 @@ namespace Retrograde.Nouns.Gangs
                 list.Add(npc);
             }
             //Save the list
-            var Formlistclone = myMod.FormLists[new FormKey(myMod.ModKey, 0x000805)].DeepCopy();
             Mutagen.Bethesda.Starfield.FormList formList = new Mutagen.Bethesda.Starfield.FormList(myMod)
             {
                 EditorID = "frmlist_" + Guid.NewGuid().ToString().Substring(0, 8),

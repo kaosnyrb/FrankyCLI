@@ -62,7 +62,7 @@ public class ConnectorUtils
             .ToList();
     }
 
-    public static RgAabb ToWorldAabb(ObjectBounds boundsLocal, P3Float worldPos)
+    public static RgAabb ToWorldAabb(IObjectBoundsGetter boundsLocal, P3Float worldPos)
     {
         // Local AABB translated into world space (no rotation assumed)
         return new RgAabb
@@ -94,7 +94,7 @@ public class ConnectorUtils
         return false;
     }
 
-    public static RgAabb ToWorldAabbRotated(ObjectBounds boundsLocal, P3Float worldPos, int yawSteps)
+    public static RgAabb ToWorldAabbRotated(IObjectBoundsGetter boundsLocal, P3Float worldPos, int yawSteps)
     {
         var key = $"{boundsLocal.First.X},{boundsLocal.First.Y},{boundsLocal.First.Z}|{boundsLocal.Second.X},{boundsLocal.Second.Y},{boundsLocal.Second.Z}|{yawSteps}";
         var rotated = RotatedBoundsCache.GetOrAdd(key, _ =>
@@ -154,17 +154,13 @@ public class ConnectorUtils
         };
 
         var candidates = new List<string>();
-        var mod = RetrogradeContext.Current.TargetMod;
-
-        foreach (var packIn in mod.PackIns)
-        {
-            var editorId = packIn?.EditorID;
-            if (string.IsNullOrWhiteSpace(editorId))
-                continue;
-
-            if (editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
-                candidates.Add(editorId);
-        }
+        foreach (var mod in RetrogradeContext.Current.TemplateMods)
+            foreach (var packIn in mod.PackIns)
+            {
+                var editorId = packIn?.EditorID;
+                if (!string.IsNullOrWhiteSpace(editorId) && editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
+                    candidates.Add(editorId);
+            }
 
         if (candidates.Count == 0)
             return baseId;
@@ -182,17 +178,13 @@ public class ConnectorUtils
         };
 
         var candidates = new List<string>();
-        var mod = RetrogradeContext.Current.TargetMod;
-
-        foreach (var packIn in mod.PackIns)
-        {
-            var editorId = packIn?.EditorID;
-            if (string.IsNullOrWhiteSpace(editorId))
-                continue;
-
-            if (editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
-                candidates.Add(editorId);
-        }
+        foreach (var mod in RetrogradeContext.Current.TemplateMods)
+            foreach (var packIn in mod.PackIns)
+            {
+                var editorId = packIn?.EditorID;
+                if (!string.IsNullOrWhiteSpace(editorId) && editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
+                    candidates.Add(editorId);
+            }
 
         if (candidates.Count == 0)
             return baseId;
@@ -204,17 +196,13 @@ public class ConnectorUtils
     {
         var baseId = $"rg_plug_{doorSize}_{tileset}";
         var candidates = new List<string>();
-        var mod = RetrogradeContext.Current.TargetMod;
-
-        foreach (var packIn in mod.PackIns)
-        {
-            var editorId = packIn?.EditorID;
-            if (string.IsNullOrWhiteSpace(editorId))
-                continue;
-
-            if (editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
-                candidates.Add(editorId);
-        }
+        foreach (var mod in RetrogradeContext.Current.TemplateMods)
+            foreach (var packIn in mod.PackIns)
+            {
+                var editorId = packIn?.EditorID;
+                if (!string.IsNullOrWhiteSpace(editorId) && editorId.StartsWith(baseId, StringComparison.OrdinalIgnoreCase))
+                    candidates.Add(editorId);
+            }
 
         if (candidates.Count == 0)
             return baseId;

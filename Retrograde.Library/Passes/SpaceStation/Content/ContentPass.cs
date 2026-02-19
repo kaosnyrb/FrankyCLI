@@ -47,6 +47,15 @@ public class ContentPass : IGenPass
             }
         }
 
+        if (found == null)
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                foreach (var fl in tm.FormLists)
+                    if (string.Equals(fl.EditorID, normalizedId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = fl.DeepCopy();
+                        break;
+                    }
+
         _slotListsCache[normalizedId] = found;
         return found;
     }
@@ -59,7 +68,17 @@ public class ContentPass : IGenPass
         var item = list.Items[RandomProvider.Random.Next(list.Items.Count)];
 
 
-        if (!RetrogradeContext.Current.TargetMod.PackIns.TryGetValue(item.FormKey, out var packIn) || packIn?.EditorID == null)
+        IPackInGetter packIn = null;
+        if (!RetrogradeContext.Current.TargetMod.PackIns.TryGetValue(item.FormKey, out var mutablePackIn))
+        {
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                if (tm.PackIns.TryGetValue(item.FormKey, out var tmPackIn)) { packIn = tmPackIn; break; }
+        }
+        else
+        {
+            packIn = mutablePackIn;
+        }
+        if (packIn?.EditorID == null)
             return null;
 
         return packIn.EditorID;

@@ -48,7 +48,7 @@ namespace Retrograde.Passes.SpaceStation
         private static float SnapDown(float v, float step) => (float)Math.Floor(v / step) * step;
         private static float SnapUp(float v, float step) => (float)Math.Ceiling(v / step) * step;
 
-        private static RgAabb ToWorldAabbRotated(ObjectBounds boundsLocal, P3Float worldPos, int yawSteps)
+        private static RgAabb ToWorldAabbRotated(IObjectBoundsGetter boundsLocal, P3Float worldPos, int yawSteps)
         {
             // Rotate 8 corners of the local AABB; then take min/max in world space.
             var min = boundsLocal.First;
@@ -223,7 +223,7 @@ namespace Retrograde.Passes.SpaceStation
                 Count = 1,
                 Rotation = rotation,
                 Position = position,
-                Base = panelPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                Base = panelPrefab.packin_instance.FormKey.ToLink<IPlaceableObjectGetter>()
             });
         }
     }

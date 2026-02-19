@@ -55,6 +55,15 @@ public class EnemyPass : IGenPass
             }
         }
 
+        if (found == null)
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                foreach (var fl in tm.FormLists)
+                    if (string.Equals(fl.EditorID, normalizedId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = fl.DeepCopy();
+                        break;
+                    }
+
         _slotListsCache[normalizedId] = found;
         return found;
     }
@@ -118,7 +127,7 @@ public class EnemyPass : IGenPass
         const int maxClusterSize = 5;
         const float clusterRadius = 20;
         var spacedSpawns = EnforceClusterLimit(chosenSpawns, maxClusterSize, clusterRadius);
-        if (spacedSpawns.Count == 0)
+        if (spacedSpawns.Count == 0 && reservedBoss == null)
             return;
 
 

@@ -189,7 +189,7 @@ namespace Retrograde.Passes.SpaceStation
 
             foreach (var entry in prefabCell.Temporary)
             {
-                if (entry is PlacedObject po)
+                if (entry is IPlacedObjectGetter po)
                 {
                     var placed = PlaceContentObject(state, po, exitRoom);
                     if (placed != null)
@@ -202,7 +202,7 @@ namespace Retrograde.Passes.SpaceStation
 
             foreach (var entry in prefabCell.Persistent)
             {
-                if (entry is PlacedObject po)
+                if (entry is IPlacedObjectGetter po)
                 {
                     var placed = PlaceContentObject(state, po, exitRoom);
                     if (placed != null)
@@ -218,93 +218,90 @@ namespace Retrograde.Passes.SpaceStation
         }
 
         /// <summary>
-        /// Creates a new PlacedObject in the world from a prefab content object,
+        /// Creates a new PlacedObject in the world from a template mod prefab content object,
         /// applying the exit room's position and rotation transforms.
+        /// Only clones objects whose base form is from Starfield.esm.
         /// </summary>
-        private static PlacedObject PlaceContentObject(DungeonState state, PlacedObject source, PlacedRoom exitRoom)
+        private static PlacedObject? PlaceContentObject(DungeonState state, IPlacedObjectGetter source, PlacedRoom exitRoom)
         {
+            if (source.Base.FormKey.ModKey.Name != "Starfield")
+                return null;
+
             var rotatedLocal = RgRotation.RotateYaw90(source.Position, exitRoom.YawSteps);
             var worldPos = exitRoom.WorldPos + rotatedLocal;
             var worldRot = source.Rotation + RgRotation.RotationToP3Float(exitRoom.YawSteps);
 
             var placed = new PlacedObject(RetrogradeContext.Current.TargetMod)
             {
-                Action = source.Action,
-                AttachRef = source.AttachRef,
-                Base = source.Base,
-                BlueprintPartOrigin = source.BlueprintPartOrigin,
-                BOLV = source.BOLV,
-                Collision = source.Collision,
-                Comments = source.Comments,
-                Components = source.Components,
-                ConstrainedDecal = source.ConstrainedDecal,
+                // --- Identity & base ---
+                Base = source.Base.FormKey.ToNullableLink<IPlaceableObjectGetter>(),
+                StarfieldMajorRecordFlags = source.StarfieldMajorRecordFlags,
+                Scale = source.Scale,
                 Count = source.Count,
-                CurrentZoneCell = source.CurrentZoneCell,
-                DebugText = source.DebugText,
-                EditorID = source.EditorID,
-                Emittance = source.Emittance,
-                EnableParent = source.EnableParent,
-                EncounterZone = source.EncounterZone,
-                ExternalEmittance = source.ExternalEmittance,
+                // --- Transform (overridden) ---
+                Position = worldPos,
+                Rotation = worldRot,
+                // --- Simple value types (assign directly) ---
+                Action = source.Action,
+                BOLV = source.BOLV,
+                BlueprintPartOrigin = source.BlueprintPartOrigin,
                 FactionRank = source.FactionRank,
                 GeometryDirtinessScale = source.GeometryDirtinessScale,
-                GroupedPackIn = source.GroupedPackIn,
                 HeadTrackingWeight = source.HeadTrackingWeight,
                 HealthPercent = source.HealthPercent,
                 IsActivationPoint = source.IsActivationPoint,
                 IsIgnoredBySandbox = source.IsIgnoredBySandbox,
                 IsLinkedRefTransient = source.IsLinkedRefTransient,
-                Layer = source.Layer,
-                LayeredMaterialSwaps = source.LayeredMaterialSwaps,
-                LevelModifier = source.LevelModifier,
-                LightArea = source.LightArea,
-                LightBarndoorData = source.LightBarndoorData,
-                LightColors = source.LightColors,
-                LightFlicker = source.LightFlicker,
-                GoboAnimatedProperties = source.GoboAnimatedProperties,
-                Lighting = source.Lighting,
-                LightLayerData = source.LightLayerData,
-                LightRoundedness = source.LightRoundedness,
+                LightArea = source.LightArea?.DeepCopy(),
+                LightRoundedness = source.LightRoundedness?.DeepCopy(),
                 LightStaticShadowMap = source.LightStaticShadowMap,
                 LightVolumetricData = source.LightVolumetricData,
-                LinkedReferences = source.LinkedReferences,
-                LocationRefTypes = source.LocationRefTypes,
-                Lock = source.Lock,
-                MapMarker = source.MapMarker,
-                NavigationDoorLink = source.NavigationDoorLink,
                 NumTraversalFluffBytes = source.NumTraversalFluffBytes,
                 OpenByDefault = source.OpenByDefault,
-                Ownership = source.Ownership,
-                Patrol = source.Patrol,
-                PersistentLocation = source.PersistentLocation,
-                PowerLinks = source.PowerLinks,
-                Primitive = source.Primitive,
-                ProjectedDecal = source.ProjectedDecal,
-                ProjectedDecalReferences = source.ProjectedDecalReferences,
                 Radius = source.Radius,
                 RagdollBipedRotation = source.RagdollBipedRotation,
-                Properties = source.Properties,
-                RagdollData = source.RagdollData,
-                ReferenceGroup = source.ReferenceGroup,
-                StarfieldMajorRecordFlags = source.StarfieldMajorRecordFlags,
-                Scale = source.Scale,
-                ShipArrival = source.ShipArrival,
-                SnapLinks = source.SnapLinks,
-                SourcePackIn = source.SourcePackIn,
-                TeleportDestination = source.TeleportDestination,
-                TeleportName = source.TeleportName,
-                Spline = source.Spline,
-                TimeOfDay = source.TimeOfDay,
-                Traversals = source.Traversals,
-                VolumeData = source.VolumeData,
-                VirtualMachineAdapter = source.VirtualMachineAdapter,
                 XALG = source.XALG,
-                PlacedObjectXCZRXCZA = source.PlacedObjectXCZRXCZA,
-                XFLG = source.XFLG,
-                XNSE = source.XNSE,
-                XPCK = source.XPCK,
-                Position = worldPos,
-                Rotation = worldRot
+                // --- FormLink properties ---
+                AttachRef = source.AttachRef?.FormKey.ToNullableLink<IPlacedObjectGetter>(),
+                Emittance = source.Emittance?.FormKey.ToNullableLink<IEmittanceGetter>(),
+                Layer = source.Layer?.FormKey.ToNullableLink<ILayerGetter>(),
+                PersistentLocation = source.PersistentLocation?.FormKey.ToNullableLink<ILocationGetter>(),
+                ReferenceGroup = source.ReferenceGroup?.FormKey.ToNullableLink<IReferenceGroupGetter>(),
+                SourcePackIn = source.SourcePackIn?.FormKey.ToNullableLink<IPackInGetter>(),
+                TeleportName = source.TeleportName?.FormKey.ToNullableLink<IMessageGetter>(),
+                TimeOfDay = source.TimeOfDay?.FormKey.ToNullableLink<ITimeOfDayRecordGetter>(),
+                XPCK = source.XPCK?.FormKey.ToNullableLink<IReferenceGroupGetter>(),
+                // --- DeepCopy-able sub-objects ---
+                Collision = source.Collision?.DeepCopy(),
+                Comments = source.Comments,
+                ConstrainedDecal = source.ConstrainedDecal,
+                CurrentZoneCell = source.CurrentZoneCell?.DeepCopy(),
+                DebugText = source.DebugText?.DeepCopy(),
+                EnableParent = source.EnableParent?.DeepCopy(),
+                ExternalEmittance = source.ExternalEmittance?.DeepCopy(),
+                GoboAnimatedProperties = source.GoboAnimatedProperties?.DeepCopy(),
+                GroupedPackIn = source.GroupedPackIn?.DeepCopy(),
+                LevelModifier = source.LevelModifier,
+                LightBarndoorData = source.LightBarndoorData?.DeepCopy(),
+                LightFlicker = source.LightFlicker?.DeepCopy(),
+                Lighting = source.Lighting?.DeepCopy(),
+                LightLayerData = source.LightLayerData,
+                Lock = source.Lock?.DeepCopy(),
+                MapMarker = source.MapMarker?.DeepCopy(),
+                NavigationDoorLink = source.NavigationDoorLink?.DeepCopy(),
+                Ownership = source.Ownership?.DeepCopy(),
+                Patrol = source.Patrol?.DeepCopy(),
+                Primitive = source.Primitive?.DeepCopy(),
+                ProjectedDecal = source.ProjectedDecal?.DeepCopy(),
+                ShipArrival = source.ShipArrival?.DeepCopy(),
+                Spline = source.Spline?.DeepCopy(),
+                TeleportDestination = source.TeleportDestination?.DeepCopy(),
+                VolumeData = source.VolumeData?.DeepCopy(),
+                VirtualMachineAdapter = source.VirtualMachineAdapter?.DeepCopy(),
+                // --- Read-only collections: skip (not needed for prefab cloning) ---
+                // Components, LayeredMaterialSwaps, LightColors, LinkedReferences,
+                // LocationRefTypes, PowerLinks, ProjectedDecalReferences, Properties,
+                // RagdollData, SnapLinks, Traversals, PlacedObjectXCZRXCZA
             };
 
             state.PlacementUtil.AddToTemporary(state.instance, placed);
@@ -314,7 +311,7 @@ namespace Retrograde.Passes.SpaceStation
         /// <summary>
         /// Checks if the source object is the exit door and stores a reference in DungeonState.
         /// </summary>
-        private static void TryTrackExitDoor(DungeonState state, PlacedObject source, PlacedObject placed)
+        private static void TryTrackExitDoor(DungeonState state, IPlacedObjectGetter source, PlacedObject placed)
         {
             if (string.Equals(source.EditorID, ExitDoorEditorId, StringComparison.OrdinalIgnoreCase))
             {
@@ -422,25 +419,18 @@ namespace Retrograde.Passes.SpaceStation
             return null;
         }
 
-        private static Cell ResolvePrefabCell(RoomPrefab prefab)
+        private static ICellGetter? ResolvePrefabCell(RoomPrefab prefab)
         {
             var cellFormKey = prefab.packin_instance?.Cell?.FormKey;
             if (cellFormKey == null)
                 return null;
 
-            for (int i = 0; i < RetrogradeContext.Current.TargetMod.Cells.Count; i++)
-            {
-                for (int j = 0; j < RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks.Count; j++)
-                {
-                    for (int k = 0; k < RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells.Count; k++)
-                    {
-                        if (RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k].FormKey == cellFormKey)
-                        {
-                            return RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k];
-                        }
-                    }
-                }
-            }
+            foreach (var mod in RetrogradeContext.Current.TemplateMods)
+                foreach (var block in mod.Cells)
+                    foreach (var sub in block.SubBlocks)
+                        foreach (var cell in sub.Cells)
+                            if (cell.FormKey == cellFormKey)
+                                return cell;
 
             return null;
         }
