@@ -92,6 +92,11 @@ public class WorldspaceState
         /// <summary>Flat area side length in vertices.</summary>
         public int AreaVerts;
         /// <summary>
+        /// The edge-gap inset (in vertices) that TerrainFlattenPass kept clear around the
+        /// boundary of the editable region.  TerrainRestorePass uses this as a hard guard.
+        /// </summary>
+        public int EdgeGapVerts;
+        /// <summary>
         /// Original (pre-flatten) height buffers keyed by absolute (cellX, cellY).
         /// Only covers cells that were in the flatten zone.
         /// </summary>

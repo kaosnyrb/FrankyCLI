@@ -103,9 +103,9 @@ public class TerrainFlattenPass : IWorldspacePass
         var btdInfo = new WorldspaceState.FlatAreaBtdInfo
         {
             EditMinX = editMinX, EditMinY = editMinY,
-            BestX0 = bestX0, BestY0 = bestY0, AreaVerts = areaVerts
+            BestX0 = bestX0, BestY0 = bestY0, AreaVerts = areaVerts,
+            EdgeGapVerts = edgeGapVerts
         };
-        var orig = new ushort[BtdFile.CellResolution * BtdFile.CellResolution];
         for (int cy2 = cellY0; cy2 <= cellY1; cy2++)
             for (int cx2 = cellX0; cx2 <= cellX1; cx2++)
             {
