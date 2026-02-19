@@ -1,41 +1,36 @@
 using Retrograde.Utils;
 using System;
-using System.Collections.Generic;
 
 namespace Retrograde.Passes.Worldspace;
 
 /// <summary>
-/// Scans the editable BTD cells to find the flattest rectangular area large enough
-/// to fit the base footprint, then raises and flattens it to a height slightly above
-/// the average surrounding terrain with a smooth hermite blend at the boundary.
+/// Randomly picks a flat area sized to match the fort footprint, then raises and
+/// flattens it to a height slightly above the average surrounding terrain with a
+/// smooth hermite blend at the boundary.
 ///
-/// Updates state.TerrainHeight to the resulting flat elevation (PlacedObject coordinate
-/// space, i.e. already divided by the 8× Starfield scale factor).
+/// The flat area size is derived from state.Map.xsize * state.TileWorldSize (overlay
+/// units) converted to BTD vertices.  A 10 overlay-unit inset is kept clear around
+/// the edges of the editable region.
 ///
-/// Must be added to MapPasses so it runs before tile placement.
-/// Requires state.BtdFile to be set (done automatically when a dataFolderPath is
-/// provided to WorldspaceNoun).
+/// Updates state.TerrainHeight (PlacedObject coordinate space, already / 8) and
+/// state.FlatAreaWorldX/Y to the centre of the chosen area.
+///
+/// Must run before tile placement. Requires state.BtdFile and state.Rng.
 /// </summary>
 public class TerrainFlattenPass : IWorldspacePass
 {
-    private readonly float _coveragePercent;
-
-    /// <param name="coveragePercent">
-    /// Fraction of a cell edge (0–1) that the flat area should cover.
-    /// E.g. 0.5 = 64×64 vertices = 2048×2048 world units per cell.
-    /// Clamped to [0.05, 1.0].
-    /// </param>
-    public TerrainFlattenPass(float coveragePercent)
-    {
-        _coveragePercent = Math.Clamp(coveragePercent, 0.05f, 1.0f);
-    }
-
     public void RunPass(WorldspaceState state)
     {
         var btd = state.BtdFile;
         if (btd == null) return;
 
-        int areaVerts = Math.Max(4, (int)(BtdFile.CellResolution * _coveragePercent));
+        // Flat area sized to the fort footprint.
+        // fort overlay size = map tiles * units-per-tile  (e.g. 50 * 4 = 200 overlay units)
+        // overlay vertex spacing = 100 / CellResolution  ≈ 0.78125 units/vert
+        const float overlayCellSize = 100f;
+        float overlayVertSpacing = overlayCellSize / BtdFile.CellResolution;
+        float fortOverlaySize = state.Map.xsize * state.TileWorldSize;
+        int areaVerts = (int)Math.Ceiling(fortOverlaySize / overlayVertSpacing);
 
         int editMinX = btd.CellMinX + 1;
         int editMinY = btd.CellMinY + 1;
@@ -47,51 +42,23 @@ public class TerrainFlattenPass : IWorldspacePass
         int totalW = (editMaxX - editMinX + 1) * BtdFile.CellResolution;
         int totalH = (editMaxY - editMinY + 1) * BtdFile.CellResolution;
 
-        areaVerts = Math.Min(areaVerts, Math.Min(totalW, totalH));
+        // 10 overlay-unit inset from every edge of the editable region, in vertices.
+        int edgeGapVerts = (int)Math.Ceiling(10f / overlayVertSpacing); // ≈ 13
 
-        // --- Find flattest placement ---
-        // Scan candidate top-left corners with a coarse step; sample sparsely inside each.
-        int scanStep = Math.Max(1, areaVerts / 8);
-        int sampleStep = Math.Max(1, areaVerts / 16);
+        int scanMinX = edgeGapVerts;
+        int scanMaxX = totalW - edgeGapVerts;
+        int scanMinY = edgeGapVerts;
+        int scanMaxY = totalH - edgeGapVerts;
 
-        // Bias: prefer the candidate closest to the editable-area centre on ties.
-        // This ensures that for a flat template BTD (all heights equal) we pick
-        // the centre rather than the first (corner) candidate.
-        float candidateCenterX = (totalW - areaVerts) / 2f;
-        float candidateCenterY = (totalH - areaVerts) / 2f;
-        int bestX0 = (int)candidateCenterX, bestY0 = (int)candidateCenterY;
-        float bestRange = float.MaxValue;
-        float bestDistSq = float.MaxValue;
+        if (scanMinX >= scanMaxX || scanMinY >= scanMaxY) return;
 
-        for (int y0 = 0; y0 + areaVerts <= totalH; y0 += scanStep)
-        {
-            for (int x0 = 0; x0 + areaVerts <= totalW; x0 += scanStep)
-            {
-                float hMin = float.MaxValue, hMax = float.MinValue;
+        areaVerts = Math.Min(areaVerts, Math.Min(scanMaxX - scanMinX, scanMaxY - scanMinY));
 
-                for (int dy = 0; dy < areaVerts; dy += sampleStep)
-                {
-                    for (int dx = 0; dx < areaVerts; dx += sampleStep)
-                    {
-                        float h = GlobalHeight(btd, editMinX, editMinY, x0 + dx, y0 + dy);
-                        if (h < hMin) hMin = h;
-                        if (h > hMax) hMax = h;
-                    }
-                }
-
-                float range = hMax - hMin;
-                float ddx = x0 - candidateCenterX, ddy = y0 - candidateCenterY;
-                float distSq = ddx * ddx + ddy * ddy;
-
-                if (range < bestRange || (range == bestRange && distSq < bestDistSq))
-                {
-                    bestRange = range;
-                    bestDistSq = distSq;
-                    bestX0 = x0;
-                    bestY0 = y0;
-                }
-            }
-        }
+        // Random placement: pick a top-left corner uniformly inside the constrained region.
+        int rangeX = scanMaxX - scanMinX - areaVerts;
+        int rangeY = scanMaxY - scanMinY - areaVerts;
+        int bestX0 = scanMinX + (rangeX > 0 ? state.Rng.Next(rangeX + 1) : 0);
+        int bestY0 = scanMinY + (rangeY > 0 ? state.Rng.Next(rangeY + 1) : 0);
 
         // --- Sample a ring around the chosen area for the surrounding average ---
         int ringStep = Math.Max(1, areaVerts / 16);
@@ -119,13 +86,13 @@ public class TerrainFlattenPass : IWorldspacePass
 
         float surroundAvg = ringCount > 0 ? ringSum / ringCount : btd.SampleHeightAtWorld(0, 0);
 
-        // Slightly above surrounding terrain (1% of total height range)
-        float lift = (btd.WorldHeightMax - btd.WorldHeightMin) * 0.01f;
-        float targetHeight = surroundAvg + lift;
+        // Slightly below surrounding terrain (0.5% of total height range)
+        float lift = (btd.WorldHeightMax - btd.WorldHeightMin) * 0.005f;
+        float targetHeight = surroundAvg - lift;
         ushort targetRaw = btd.HeightToRaw(targetHeight);
 
         // --- Apply flat height with hermite blend to all touched cells ---
-        int blendVerts = 16; // ~512 world units of transition
+        int blendVerts = 16; // ~12.5 overlay units of transition
 
         int cellX0 = Math.Max(editMinX, editMinX + bestX0 / BtdFile.CellResolution - 1);
         int cellX1 = Math.Min(editMaxX, editMinX + (bestX0 + areaVerts - 1) / BtdFile.CellResolution + 1);
@@ -179,23 +146,15 @@ public class TerrainFlattenPass : IWorldspacePass
         // btd heights are 8×-scaled; PlacedObject coordinates need /8
         state.TerrainHeight = targetHeight / 8f;
 
-        // Convert flat area position from BTD-internal coordinates to overlay worldspace coordinates.
-        //
-        // Two separate unit systems:
-        //   BTD internal : 4096 units/cell, 32 units/vertex  (used by BtdFile GetHeight/SampleHeightAtWorld)
-        //   Overlay world : 100 units/cell, 100/128 units/vertex  (used by PlacedObject X/Y)
-        //
-        // Scale factor: overlayUnits = btdUnits * (100 / 4096)
-        //   equivalently: overlay vertex spacing = 100 / CellResolution ≈ 0.78125 units/vert
-        const float overlayCellSize  = 100f;
-        const float overlayVertSpacing = overlayCellSize / BtdFile.CellResolution; // ≈ 0.78125
-        state.FlatAreaWorldX = editMinX * overlayCellSize + (bestX0 + areaVerts * 0.5f) * overlayVertSpacing
+        // Convert flat area centre from BTD-internal vertex space to overlay worldspace coordinates.
+        const float overlayVertSpacingConst = overlayCellSize / BtdFile.CellResolution; // ≈ 0.78125
+        state.FlatAreaWorldX = editMinX * overlayCellSize + (bestX0 + areaVerts * 0.5f) * overlayVertSpacingConst
                                - btd.WorldCenterX * (overlayCellSize / 4096f);
-        state.FlatAreaWorldY = editMinY * overlayCellSize + (bestY0 + areaVerts * 0.5f) * overlayVertSpacing
+        state.FlatAreaWorldY = editMinY * overlayCellSize + (bestY0 + areaVerts * 0.5f) * overlayVertSpacingConst
                                - btd.WorldCenterY * (overlayCellSize / 4096f);
 
         if (!RetrogradeContext.Quiet)
-            Console.WriteLine($"[TerrainFlattenPass] best=({bestX0},{bestY0}) range={bestRange:F4}  FlatArea=({state.FlatAreaWorldX:F2},{state.FlatAreaWorldY:F2})");
+            Console.WriteLine($"[TerrainFlattenPass] origin=({bestX0},{bestY0}) areaVerts={areaVerts}  FlatArea=({state.FlatAreaWorldX:F2},{state.FlatAreaWorldY:F2})");
     }
 
     // Returns height (8×-scaled) at global vertex (gx, gy) within the editable region.

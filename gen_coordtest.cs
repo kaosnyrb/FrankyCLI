@@ -109,7 +109,7 @@ namespace FrankyCLI
 
         public CoordTestDesign()
         {
-            MapPasses = new List<IWorldspacePass> { new TerrainFlattenPass(0.3f) };
+            MapPasses = new List<IWorldspacePass> { new TerrainFlattenPass() };
             CellBuildPasses = new List<IWorldspacePass>();
             ContentPasses = new List<IWorldspacePass> { new CoordMarkerPass() };
         }

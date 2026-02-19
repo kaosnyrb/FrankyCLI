@@ -22,7 +22,7 @@ public class FortDesign : IWorldspaceDesign
         MapPasses = new List<IWorldspacePass>
         {
             new PackInLibraryPass(FortPackInIds()),
-            new TerrainFlattenPass(0.3f),
+            new TerrainFlattenPass(),
             new FortLayoutPass(),
         };
 

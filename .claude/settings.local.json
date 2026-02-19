@@ -34,7 +34,8 @@
       "Bash(ilspycmd:*)",
       "Bash(dotnet list:*)",
       "Bash(dotnet add reference:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(python3:*)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"
