@@ -87,7 +87,7 @@ namespace Retrograde.Nouns.Crew
                     isfemale = true;
                 }
 
-                var NPC = targetMod.Npcs[new FormKey(targetMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
+                var NPC = NPCTools.FindTemplateDeadNpc(isfemale);
                 Npc npc = NPCTools.CloneNPC(targetMod, NPC);
 
                 //Name

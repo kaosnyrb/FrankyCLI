@@ -2,30 +2,25 @@
 setlocal enabledelayedexpansion
 
 rem ===== Configuration =====
-set EXE="C:\Git\FrankyCLI\bin\Debug\net6.0\FrankyCLI.exe"
-set MODNAME=du_outlaws_template
+set EXE="C:\Git\FrankyCLI\bin\Debug\net8.0\FrankyCLI.exe"
+set MODNAME=cleanslate
 
-rem ===== Quest definitions: faction stationDesign questType count =====
-rem Written to a temp file so we can iterate and keep COUNT in scope
-
-set TOTAL=150
+set TOTAL=1
 set COUNT=0
 
 rem ===== Start timer =====
 set START=%TIME%
 
 rem ========================================
-rem  BOUNTY - Hab Station (50)
+rem  Single station for testing
 rem ========================================
-for /L %%i in (1,1,1) do call :Run Spacer       "Hab Station" bounty
+call :Run Spacer "Hab Station" bounty
 
 
 rem ===== Done =====
 call :ElapsedTime "%START%" "%TIME%" ELAPSED
-cls
 echo ============================================
-echo   All %TOTAL% quests completed!
-echo   Total Time: !ELAPSED!
+echo   Done! Total Time: !ELAPSED!
 echo ============================================
 exit /b
 
@@ -33,25 +28,12 @@ exit /b
 :Run
 rem Args: faction stationDesign questType
 set /a COUNT+=1
-set /a PCT=(COUNT*100)/TOTAL
-set /a BARS=PCT/2
-
-set BAR=
-for /L %%A in (1,1,!BARS!) do set BAR=!BAR!#
-for /L %%A in (!BARS!,1,49) do set BAR=!BAR!.
-
-call :ElapsedTime "%START%" "%TIME%" ELAPSED
-
-cls
 echo ============================================
-echo   Quest !COUNT! of %TOTAL%  ^(%~3 / %~1 / %~2^)
-echo   Progress: [!BAR!] !PCT!%%
-echo   Time Elapsed: !ELAPSED!
+echo   Station !COUNT! of %TOTAL%  ^(%~3 / %~1 / %~2^)
 echo ============================================
 
-%EXE% %MODNAME% cleanslate 0 0 0 %~1 "%~2" %~3 quiet
+%EXE% %MODNAME% gen_retrograde 0 0 0 %~1 "%~2" %~3
 
-timeout /t 2 /nobreak >nul
 exit /b
 
 

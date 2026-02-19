@@ -109,7 +109,7 @@ namespace Retrograde.Chains
             newQuest.SetScriptProperty("retrograde_bounty_quest", "StationInteriorLocation", stationNoun.dungeonState.location.ToLink());
 
             //Add to POI tree
-            var RG_MissionNodeBountySpace = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_MissionNodeBountySpace")];
+            var RG_MissionNodeBountySpace = FindOrCreateNode(targetMod, "RG_MissionNodeBountySpace");
 
             RG_MissionNodeBountySpace.Quests.Add(new StoryManagerQuest()
             {
@@ -121,7 +121,7 @@ namespace Retrograde.Chains
             //This node has a check that the player is fleet, so only add non fleet missions
             if (faction != "Crimsonfleet")
             {
-                var RG_MissionNodeBountySpace_PlayerCrimsonfleet = targetMod.StoryManagerQuestNodes[FormKeyLookup.GetFormKey("RG_MissionNodeBountySpace_PlayerCrimsonfleet")];
+                var RG_MissionNodeBountySpace_PlayerCrimsonfleet = FindOrCreateNode(targetMod, "RG_MissionNodeBountySpace_PlayerCrimsonfleet");
 
                 RG_MissionNodeBountySpace_PlayerCrimsonfleet.Quests.Add(new StoryManagerQuest()
                 {
@@ -152,6 +152,35 @@ namespace Retrograde.Chains
             newQuest.instance.MissionBoardDescription = GenerateMissionDescription(faction, stationDesign);
 
             return true;
+        }
+
+        private static StoryManagerQuestNode FindOrCreateNode(StarfieldMod targetMod, string editorId)
+        {
+            var existing = targetMod.StoryManagerQuestNodes.FirstOrDefault(r => r.EditorID == editorId);
+            if (existing != null) return existing;
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+            {
+                var src = tm.StoryManagerQuestNodes.FirstOrDefault(r => r.EditorID == editorId);
+                if (src != null)
+                {
+                    var node = new StoryManagerQuestNode(targetMod)
+                    {
+                        EditorID = editorId,
+                        Parent = src.Parent.FormKey.ToNullableLink<IAStoryManagerNodeGetter>(),
+                        PreviousSibling = src.PreviousSibling.FormKey.ToNullableLink<IAStoryManagerNodeGetter>(),
+                        Flags = src.Flags,
+                        QuestFlags = src.QuestFlags,
+                        MaxConcurrentQuests = src.MaxConcurrentQuests,
+                        MaxNumQuestsToRun = src.MaxNumQuestsToRun,
+                        HoursUntilReset = src.HoursUntilReset,
+                    };
+                    foreach (var c in src.Conditions)
+                        node.Conditions.Add(c.DeepCopy());
+                    targetMod.StoryManagerQuestNodes.Add(node);
+                    return node;
+                }
+            }
+            throw new KeyNotFoundException($"RetrogradeBountyQuest: StoryManagerQuestNode '{editorId}' not found in any template mod.");
         }
 
         private string GenerateQuestName(string faction)

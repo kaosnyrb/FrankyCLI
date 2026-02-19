@@ -11,22 +11,32 @@ namespace Retrograde.Utils
     {
         public static Cell CloneCellById(string id)
         {
+            // Search targetMod first
             for (int i = 0; i < RetrogradeContext.Current.TargetMod.Cells.Count; i++)
-            {
                 for (int j = 0; j < RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks.Count; j++)
-                {
                     for (int k = 0; k < RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells.Count; k++)
-                    {
                         if (RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k].EditorID == id)
-                        {
-                            var refcell = RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k].DeepCopy();
+                            return BuildCell(RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k].DeepCopy(), id);
 
-                            var persistantItems = new Noggog.ExtendedList<IPlaced>();
-                            foreach (var item in refcell.Persistent)
-                            {
-                                PlacedObject poref = (PlacedObject)item;
-                                PlacedObject placedObject = new PlacedObject(RetrogradeContext.Current.TargetMod)
-                                {
+            // Fallback: search template mods
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                foreach (var block in tm.Cells)
+                    foreach (var subBlock in block.SubBlocks)
+                        foreach (var cell in subBlock.Cells)
+                            if (cell.EditorID == id)
+                                return BuildCell(cell.DeepCopy(), id);
+
+            return null;
+        }
+
+        private static Cell BuildCell(Cell refcell, string id)
+        {
+            var persistantItems = new Noggog.ExtendedList<IPlaced>();
+            foreach (var item in refcell.Persistent)
+            {
+                PlacedObject poref = (PlacedObject)item;
+                PlacedObject placedObject = new PlacedObject(RetrogradeContext.Current.TargetMod)
+                {
                                     Action = poref.Action,
                                     AttachRef = poref.AttachRef,
                                     Base = poref.Base,
@@ -227,13 +237,7 @@ namespace Retrograde.Utils
                                 XILS = refcell.XILS
                             };
 
-                            return cell;
-
-                        }
-                    }
-                }
-            }
-            return null;
+                return cell;
         }
     }
 }

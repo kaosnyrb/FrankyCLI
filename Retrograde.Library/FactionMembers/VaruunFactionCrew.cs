@@ -41,7 +41,7 @@ namespace Retrograde.FactionMembers
                 {
                     isfemale = true;
                 }
-                var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                var NPC = NPCTools.FindTemplateNpc(isfemale);
                 Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
                 //Ranked Info
@@ -65,7 +65,7 @@ namespace Retrograde.FactionMembers
                 {
                     isfemale = true;
                 }
-                var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                var NPC = NPCTools.FindTemplateNpc(isfemale);
                 Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
                 //Ranked Info
@@ -88,7 +88,7 @@ namespace Retrograde.FactionMembers
                 {
                     isfemale = true;
                 }
-                var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+                var NPC = NPCTools.FindTemplateNpc(isfemale);
                 Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
                 //Ranked Info
@@ -425,7 +425,7 @@ namespace Retrograde.FactionMembers
             string Faction = "Varuun";
             Random random = RandomProvider.Random;
             bool isfemale = random.Next(100) > 50;
-            var NPC = RetrogradeContext.Current.TargetMod.Npcs[new FormKey(RetrogradeContext.Current.TargetMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+            var NPC = NPCTools.FindTemplateNpc(isfemale);
             Npc npc = NPCTools.CloneNPC(RetrogradeContext.Current.TargetMod, NPC, respawn: true);
 
             var outfit = GetHighRank_Outfit();

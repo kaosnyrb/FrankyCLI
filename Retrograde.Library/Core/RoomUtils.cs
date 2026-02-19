@@ -173,11 +173,12 @@ public class RoomUtils
         return candidates;
     }
 
-    private static IPackInGetter? FindPackIn(Mutagen.Bethesda.Plugins.FormKey formKey)
+    public static IPackInGetter? FindPackIn(Mutagen.Bethesda.Plugins.FormKey formKey)
     {
-        foreach (var mod in RetrogradeContext.Current.TemplateMods)
-            if (mod.PackIns.TryGetValue(formKey, out var packIn))
-                return packIn;
+        var mod = RetrogradeContext.Current.TemplateMods
+            .FirstOrDefault(m => m.ModKey == formKey.ModKey);
+        if (mod != null && mod.PackIns.TryGetValue(formKey, out var packIn))
+            return packIn;
         return null;
     }
 }

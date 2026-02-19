@@ -204,11 +204,9 @@ namespace Retrograde.Passes.SpaceStation
 
                 foreach (var item in formList.Items)
                 {
-                    if (!RetrogradeContext.Current.TargetMod.PackIns.TryGetValue(item.FormKey, out var packIn) ||
-                        string.IsNullOrEmpty(packIn?.EditorID))
-                    {
+                    var packIn = RoomUtils.FindPackIn(item.FormKey);
+                    if (packIn == null || string.IsNullOrEmpty(packIn.EditorID))
                         continue;
-                    }
 
                     // Skip blockers
                     if (packIn.EditorID.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) >= 0)

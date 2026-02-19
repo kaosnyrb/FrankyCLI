@@ -138,7 +138,6 @@ namespace Retrograde.Nouns.Gangs
             }
 
             // Clone a base formlist and create a new one
-            var baseFormList = myMod.FormLists[new FormKey(myMod.ModKey, 0x000805)].DeepCopy();
 
             var formList = new Mutagen.Bethesda.Starfield.FormList(myMod)
             {

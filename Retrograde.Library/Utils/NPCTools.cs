@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Retrograde.Utils;
 
@@ -64,6 +65,26 @@ public static class NPCTools
             return npclist[random.Next(npclist.Count)];
         }
     }
+
+    private static INpcGetter FindNpcById(uint id)
+    {
+        var targetMod = RetrogradeContext.Current.TargetMod;
+        INpcGetter? npc = targetMod.Npcs.FirstOrDefault(r => r.FormKey == new FormKey(targetMod.ModKey, id));
+        if (npc == null)
+        {
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+            {
+                npc = tm.Npcs.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, id));
+                if (npc != null) break;
+            }
+        }
+        if (npc == null)
+            throw new KeyNotFoundException($"NPCTools: no Npc with raw ID 0x{id:X6} found in target mod or any template mod.");
+        return npc;
+    }
+
+    public static Npc FindTemplateNpc(bool female) => FindNpcById(GetTemplateNPC(female)).DeepCopy();
+    public static Npc FindTemplateDeadNpc(bool female) => FindNpcById(GetTemplateDeadNPC(female)).DeepCopy();
 
     /// <summary>
     /// Creates a deep copy of an NPC in the specified mod.

@@ -1,5 +1,6 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using Noggog.StructuredStrings;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,23 @@ namespace Retrograde.Nouns
             var targetMod = RetrogradeContext.Current.TargetMod;
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            var Quest = targetMod.Quests[new FormKey(targetMod.ModKey, Basequest)].DeepCopy();
+
+            IQuestGetter? source = null;
+            var targetKey = new FormKey(targetMod.ModKey, Basequest);
+            source = targetMod.Quests.FirstOrDefault(r => r.FormKey == targetKey);
+            if (source == null)
+            {
+                foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                {
+                    var tmKey = new FormKey(tm.ModKey, Basequest);
+                    source = tm.Quests.FirstOrDefault(r => r.FormKey == tmKey);
+                    if (source != null) break;
+                }
+            }
+            if (source == null)
+                throw new KeyNotFoundException($"QuestNoun: no Quest with raw ID 0x{Basequest:X6} found in target mod or any template mod.");
+
+            var Quest = source.DeepCopy();
             instance = new Quest(targetMod)
             {
                 Name = Questname,
@@ -56,8 +73,10 @@ namespace Retrograde.Nouns
             return true;
         }
 
-        public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter> Value)
+        public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter>? Value)
         {
+            if (Value == null)
+                throw new ArgumentNullException(nameof(Value), $"SetScriptProperty: null link passed for script '{Scriptname}' property '{Name}'. The record was not found in any loaded mod.");
             foreach(var script in instance.VirtualMachineAdapter.Scripts)
             {
                 if (script.Name == Scriptname)

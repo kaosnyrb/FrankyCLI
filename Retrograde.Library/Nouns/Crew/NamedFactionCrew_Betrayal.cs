@@ -41,7 +41,7 @@ namespace Retrograde.Nouns.Crew
                 betrayerisfemale = true;
             }
 
-            var BetraySourceNPC = targetMod.Npcs[new FormKey(targetMod.ModKey, NPCTools.GetTemplateNPC(betrayerisfemale))].DeepCopy();
+            var BetraySourceNPC = NPCTools.FindTemplateNpc(betrayerisfemale);
             Npc Betrayernpc = NPCTools.CloneNPC(targetMod, BetraySourceNPC);
 
             //Name
@@ -91,7 +91,7 @@ namespace Retrograde.Nouns.Crew
                     isfemale = true;
                 }
 
-                var NPC = targetMod.Npcs[new FormKey(targetMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
+                var NPC = NPCTools.FindTemplateDeadNpc(isfemale);
                 Npc npc = NPCTools.CloneNPC(targetMod, NPC);
 
                 //Name
