@@ -162,6 +162,12 @@ public class TerrainRestorePass : IWorldspacePass
             }
         }
 
+        // Smooth cell-boundary seams once, on the final terrain state.
+        // Gap-zone vertices were never written (hard guard above), so the boundary toward
+        // the uneditable edge cells is at original height and SmoothDirtyCellEdges won't
+        // push a visible gradient into those cells.
+        btd.SmoothDirtyCellEdges(16);
+
         if (!RetrogradeContext.Quiet)
             Console.WriteLine($"[TerrainRestorePass] restored {restoredCells} cells outside fort footprint + 1-tile border (blend={BlendVerts}v)");
     }

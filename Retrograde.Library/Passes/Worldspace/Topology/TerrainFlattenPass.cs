@@ -131,6 +131,13 @@ public class TerrainFlattenPass : IWorldspacePass
                     {
                         int gx = (cx - editMinX) * BtdFile.CellResolution + vx;
 
+                        // Never write gap-zone vertices — keeps the cell boundary adjacent to
+                        // the uneditable edge cells at original height so SmoothDirtyCellEdges
+                        // (called in TerrainRestorePass) doesn't contaminate those edge cells.
+                        if (gx < edgeGapVerts || gy < edgeGapVerts ||
+                            gx >= totalW - edgeGapVerts || gy >= totalH - edgeGapVerts)
+                            continue;
+
                         // Chebyshev distance from global vertex to nearest edge of flat area
                         int distX = Math.Max(0, Math.Max(bestX0 - gx, gx - (bestX0 + areaVerts - 1)));
                         int distY = Math.Max(0, Math.Max(bestY0 - gy, gy - (bestY0 + areaVerts - 1)));
@@ -157,7 +164,9 @@ public class TerrainFlattenPass : IWorldspacePass
             }
         }
 
-        btd.SmoothDirtyCellEdges(16);
+        // SmoothDirtyCellEdges is intentionally NOT called here.
+        // TerrainRestorePass runs after FortLayoutPass and calls it once on the final
+        // terrain state, so cell-boundary blending reflects the post-restoration heights.
 
         // btd heights are 8×-scaled; PlacedObject coordinates need /8
         state.TerrainHeight = targetHeight / 8f;
