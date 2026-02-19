@@ -4,7 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Generator;
-using Retrograde.Passes;
+using Retrograde.Passes.Worldspace;
 using Retrograde.Utils;
 using Retrograde.WorldspaceDesigns;
 using System;

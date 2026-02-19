@@ -1,4 +1,4 @@
-using Retrograde.Passes;
+using Retrograde.Passes.SpaceStation;
 using System.Collections.Generic;
 
 namespace Retrograde.StationDesigns;

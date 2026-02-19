@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
 using Retrograde;
-using Retrograde.Passes;
+using Retrograde.Passes.SpaceStation;
 using Retrograde.StationDesigns;
 using Mutagen.Bethesda.Starfield;
 

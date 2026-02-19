@@ -1,5 +1,4 @@
-using Retrograde.Passes;
-using Retrograde.Passes.WorldspacePasses;
+using Retrograde.Passes.Worldspace;
 using System;
 using System.Collections.Generic;
 

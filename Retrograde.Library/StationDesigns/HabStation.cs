@@ -1,5 +1,5 @@
 using Mutagen.Bethesda.Starfield;
-using Retrograde.Passes;
+using Retrograde.Passes.SpaceStation;
 using System;
 using System.Collections.Generic;
 

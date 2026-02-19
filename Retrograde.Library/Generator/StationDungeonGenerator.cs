@@ -1,4 +1,4 @@
-using Retrograde.Passes;
+using Retrograde.Passes.SpaceStation;
 using Retrograde.StationDesigns;
 using Mutagen.Bethesda.Starfield;
 using System;

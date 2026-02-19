@@ -1,6 +1,6 @@
 using Mutagen.Bethesda.Plugins;
 using Noggog;
-using Retrograde.Passes;
+using Retrograde.Passes.SpaceStation;
 using Retrograde.Utils;
 using System;
 using System.Collections.Generic;

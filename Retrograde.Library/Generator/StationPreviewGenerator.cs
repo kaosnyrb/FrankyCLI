@@ -2,7 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
-using Retrograde.Passes;
+using Retrograde.Passes.SpaceStation;
 using Retrograde.StationDesigns;
 using Retrograde.Utils;
 using System;

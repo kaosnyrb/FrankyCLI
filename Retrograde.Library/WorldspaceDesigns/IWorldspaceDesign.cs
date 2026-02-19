@@ -1,4 +1,4 @@
-using Retrograde.Passes;
+using Retrograde.Passes.Worldspace;
 using System.Collections.Generic;
 
 namespace Retrograde.WorldspaceDesigns;
