@@ -105,6 +105,13 @@ namespace FrankyCLI
                             foreach (var cell in subBlock.Cells)
                                 if (MatchesSearch(cell.EditorID, cell.FormKey, search))
                                 { DumpCell(cell); found++; }
+                    // Also search worldspace subcells
+                    foreach (var ws in mod.Worldspaces)
+                        foreach (var wsBlock in ws.SubCells)
+                            foreach (var wsSubBlock in wsBlock.Items)
+                                foreach (var cell in wsSubBlock.Items)
+                                    if (MatchesSearch(cell.EditorID, cell.FormKey, search))
+                                    { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell); found++; }
                     break;
                 case "static":
                     foreach (var rec in mod.Statics)

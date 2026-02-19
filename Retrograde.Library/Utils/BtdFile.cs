@@ -37,6 +37,16 @@ namespace Retrograde.Utils
         public float WorldHeightMax { get; private set; }
         public bool IsStarfield { get; private set; }
 
+        /// <summary>
+        /// World-space X position of the BTD grid centre (in BTD coordinates).
+        /// When the BTD is used by an overlay worldspace, the engine maps
+        /// BTD cell CellMinX → overlay cell −halfGrid, so the BTD centre maps
+        /// to overlay local (0, 0). Subtract this from any BTD world coordinate
+        /// to obtain the overlay-local position; add it to go the other way.
+        /// </summary>
+        public float WorldCenterX => ((float)(CellMinX + CellMaxX + 1) / 2f) * 4096f;
+        public float WorldCenterY => ((float)(CellMinY + CellMaxY + 1) / 2f) * 4096f;
+
         private byte[] _fileData;
         private long _zlibBlocksDataOffs;
         private long _zlibBlkTableOffsLOD0;

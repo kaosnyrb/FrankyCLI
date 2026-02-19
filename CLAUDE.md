@@ -155,16 +155,37 @@ Save automatically patches both height and texture data for dirty cells when `_d
 
 ### Key Concepts
 
-- **Cells**: 128x128 vertices each, 1 cell = 4096 world units, 32 units per vertex
+- **Cells**: 128x128 vertices each
 - **Tiles**: 8x8 groups of cells, the unit of decompression/caching
 - **LOD levels**: LOD0 = 128x128, LOD1 = 64x64, LOD2 = 32x32, LOD3 = 16x16
 - **Height encoding**: uint16 mapped linearly to `[WorldHeightMin, WorldHeightMax]`
 - **Starfield detection**: all 4 cell boundary fields in header are zero; applies 8x height scale to min/max
-- **Starfield cell bounds**: derived from resolution fields: `CellMinX = -(ResX >> 8)`, `CellCountX = ResX >> 7`
+- **Starfield cell bounds**: derived from resolution fields: `CellMinX = -(ResX >> 8)`, `CellCountX = ResX >> 7`; always centered at 0 so `WorldCenterX = 0`
 - **Cell min/max metadata uses UNSCALED heights** — when writing, divide by 8 for Starfield files
 - **Compression**: must use `ZLibStream` (not `DeflateStream`) — requires proper zlib header + Adler32 checksum
 - **Typical terrain heights**: the test BTD (oebb008world) has terrain at ~15–84 world units in a -4000 to 8000 range. `HeightToRaw(0)` = 21845
 - **BtdFile returns 8x-scaled heights** — `SampleHeightAtWorld()` and `RawToHeight()` return values in the Starfield 8x-scaled coordinate space (e.g. -101). `PlacedObject` positions use **unscaled** coordinates (e.g. -12.7). **Always divide BtdFile heights by 8** when using them for object placement: `btd.SampleHeightAtWorld(x, y) / 8f`
+
+### BTD vs Overlay Worldspace Coordinate Systems
+
+Two separate unit systems are in play — do not confuse them:
+
+| | BTD internal | Overlay worldspace (PlacedObject X/Y) |
+|---|---|---|
+| Cell size | 4096 units | **100 units** |
+| Vertex spacing | 32 units | 100/128 ≈ 0.78125 units |
+| Z (height) | 8x-scaled | divide by 8 |
+
+**Converting BTD position → overlay PlacedObject position:**
+```csharp
+float overlayX = btdX * (100f / 4096f);
+// equivalently: overlayVertSpacing = 100f / BtdFile.CellResolution  (≈ 0.78125)
+// overlayX = editMinX * 100f + globalVertexIndex * overlayVertSpacing
+```
+
+`BtdFile.SampleHeightAtWorld(worldX, worldY)` takes **BTD-internal coordinates** (4096-unit scale), not overlay coordinates. Use it only for Z sampling; convert the result to overlay Z by dividing by 8.
+
+For overlay worldspaces, Starfield BTD cell bounds are always `CellMinX = -halfGrid .. CellMaxX = halfGrid-1`, centered at 0, so `btd.WorldCenterX = 0` and no centre-offset correction is needed.
 
 ### Edge Cells Are Off-Limits
 
@@ -382,31 +403,37 @@ This is used by `WorldspaceNoun` to set `WorldspaceState.TerrainHeight`, which `
 
 ## Worldspace Cell Grid and Tile Mapping
 
-Worldspaces use a grid of cells, each covering 4096 world units. The cell grid size is derived automatically from the template SurfaceBlock's `DNAM.First` in `WorldspaceNoun` (no longer a property on `IWorldspaceDesign`). Cell coordinates range from `-(gridSize/2)` to `(gridSize/2 - 1)`.
+Overlay worldspaces (dungeon POIs) use **100 overlay units per cell** for PlacedObject X/Y positions. A 4x4 BTD gives cells −2..1, spanning [−200, +200] overlay units. The cell grid size is derived automatically from the template SurfaceBlock's `DNAM.First` in `WorldspaceNoun` (no longer a property on `IWorldspaceDesign`). Cell coordinates range from `-(gridSize/2)` to `(gridSize/2 - 1)`.
 
 ### Tile-to-Cell Assignment
 
-Tiles in the `GenerationMap` are placed at world positions using `(-94 + blocksize*x, 94 - blocksize*y, z)`. Each tile belongs to the cell at `floor(worldPos / 4096)`. With a 50x50 map and `TileWorldSize=4`, the total extent is ~200 units, so all tiles fall within a 2x2 area of cells regardless of `CellGridSize`.
+Tiles in the `GenerationMap` are placed at world positions centred on `FlatAreaWorldX/Y` (in overlay units). Cell index = `floor(worldPos / 100)`. With a 50×50 map and `TileWorldSize=4`, total extent is 200 overlay units, spanning cells −1..0 around the worldspace origin.
 
 **Do not hardcode cell quadrant bounds.** Use dynamic cell lookup:
 
 ```csharp
 // In per-cell passes, skip tiles that don't belong to the current cell
-float worldX = -94 + (blocksize * x);
-float worldY = 94 - (blocksize * y);
-int tileCellX = (int)Math.Floor(worldX / 4096f);
-int tileCellY = (int)Math.Floor(worldY / 4096f);
+int tileCellX = (int)Math.Floor(worldX / 100f);
+int tileCellY = (int)Math.Floor(worldY / 100f);
 if (tileCellX != state.CurrentCellPos.X || tileCellY != state.CurrentCellPos.Y)
     continue;
 ```
+
+### Placed Object Coordinate System
+
+**PlacedObject positions are absolute overlay worldspace coordinates** (in 100-unit/cell overlay units), not cell-relative. Cell assignment (which SubCell record a placed object lives in) is for spatial streaming only. Do NOT subtract the cell origin from X/Y when storing positions.
+
+- Cell (0,0) spans overlay X/Y [0, 100).
+- Cell (−1,−1) spans overlay X/Y [−100, 0).
+- `ResolveCell()` computes `floor(worldPos / 100)` to determine the right cell.
 
 ### Cross-Cell Object Routing
 
 When unpacking prefabs, individual objects may land outside the tile's cell. `WorldspaceState.CellLookup` (built by the generator from all SubCells) maps `P2Int` grid points to `Cell` instances:
 
 ```csharp
-int cellX = (int)Math.Floor(worldPos.X / 4096f);
-int cellY = (int)Math.Floor(worldPos.Y / 4096f);
+int cellX = (int)Math.Floor(worldPos.X / 100f);
+int cellY = (int)Math.Floor(worldPos.Y / 100f);
 if (state.CellLookup.TryGetValue(new P2Int(cellX, cellY), out var cell))
     return cell;
 return state.CurrentCell; // fallback

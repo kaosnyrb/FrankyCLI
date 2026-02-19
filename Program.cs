@@ -98,6 +98,9 @@ switch(mode)
     case "gen_inspect":
         res = gen_inspect.Generate(args);
         break;
+    case "gen_coordtest":
+        res = gen_coordtest.Generate(args);
+        break;
     default:
         Console.WriteLine("No mode provided, valid types are: (struct)");
         break;

@@ -260,7 +260,9 @@ public class WorldspaceNoun
             Second = BitConverter.SingleToUInt32Bits(btd.WorldHeightMax / 8f),
         };
 
-        float terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
+        // Sample at the BTD's own grid centre — (0,0) in BTD-absolute coordinates
+        // is outside the cell range for template BTDs with large cell offsets.
+        float terrainHeight = btd.SampleHeightAtWorld(btd.WorldCenterX, btd.WorldCenterY) / 8f;
         if (!RetrogradeContext.Quiet)
             Console.WriteLine($"Terrain height at center: {terrainHeight}");
 

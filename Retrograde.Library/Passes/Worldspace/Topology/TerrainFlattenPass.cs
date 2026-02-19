@@ -179,12 +179,23 @@ public class TerrainFlattenPass : IWorldspacePass
         // btd heights are 8×-scaled; PlacedObject coordinates need /8
         state.TerrainHeight = targetHeight / 8f;
 
-        // Store flat area world-space centre so TileInstantiationPass can
-        // centre the tile grid on it. vertSpacing = cellSize / CellResolution = 32.
-        const float vertSpacing = 32f;
-        const float cellSize = 4096f;
-        state.FlatAreaWorldX = editMinX * cellSize + (bestX0 + areaVerts * 0.5f) * vertSpacing;
-        state.FlatAreaWorldY = editMinY * cellSize + (bestY0 + areaVerts * 0.5f) * vertSpacing;
+        // Convert flat area position from BTD-internal coordinates to overlay worldspace coordinates.
+        //
+        // Two separate unit systems:
+        //   BTD internal : 4096 units/cell, 32 units/vertex  (used by BtdFile GetHeight/SampleHeightAtWorld)
+        //   Overlay world : 100 units/cell, 100/128 units/vertex  (used by PlacedObject X/Y)
+        //
+        // Scale factor: overlayUnits = btdUnits * (100 / 4096)
+        //   equivalently: overlay vertex spacing = 100 / CellResolution ≈ 0.78125 units/vert
+        const float overlayCellSize  = 100f;
+        const float overlayVertSpacing = overlayCellSize / BtdFile.CellResolution; // ≈ 0.78125
+        state.FlatAreaWorldX = editMinX * overlayCellSize + (bestX0 + areaVerts * 0.5f) * overlayVertSpacing
+                               - btd.WorldCenterX * (overlayCellSize / 4096f);
+        state.FlatAreaWorldY = editMinY * overlayCellSize + (bestY0 + areaVerts * 0.5f) * overlayVertSpacing
+                               - btd.WorldCenterY * (overlayCellSize / 4096f);
+
+        if (!RetrogradeContext.Quiet)
+            Console.WriteLine($"[TerrainFlattenPass] best=({bestX0},{bestY0}) range={bestRange:F4}  FlatArea=({state.FlatAreaWorldX:F2},{state.FlatAreaWorldY:F2})");
     }
 
     // Returns height (8×-scaled) at global vertex (gx, gy) within the editable region.
