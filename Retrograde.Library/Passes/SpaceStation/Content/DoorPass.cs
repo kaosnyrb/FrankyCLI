@@ -75,7 +75,7 @@ public class DoorPass : IGenPass
                     Count = 1,
                     Rotation = RgRotation.RotationToP3Float(yawSteps),
                     Position = blockerPos,
-                    Base = blockerPrefab.packin_instance.ToLink<IPlaceableObjectGetter>()
+                    Base = blockerPrefab.packin_instance.FormKey.ToLink<IPlaceableObjectGetter>()
                 });
 
                 placed = true;

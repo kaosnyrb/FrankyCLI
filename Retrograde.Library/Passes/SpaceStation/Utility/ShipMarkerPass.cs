@@ -35,7 +35,7 @@ namespace Retrograde.Passes.SpaceStation
                         Count = 1,
                         Rotation = worldRot,
                         Position = worldPos,
-                        Base = shipMarker.Base
+                        Base = shipMarker.Base.FormKey.ToNullableLink<IPlaceableObjectGetter>()
                     };
                     state.PlacementUtil.AddToTemporary(state.instance, newplaced);
 
@@ -61,11 +61,11 @@ namespace Retrograde.Passes.SpaceStation
                 Console.WriteLine($"[ShipMarker] Placed {markersPlaced} ship markers");
         }
 
-        private static IEnumerable<PlacedObject> EnumerateShipMarkers(Cell prefabCell)
+        private static IEnumerable<IPlacedObjectGetter> EnumerateShipMarkers(ICellGetter prefabCell)
         {
             foreach (var entry in prefabCell.Temporary)
             {
-                if (entry is PlacedObject po && IsShipMarker(po))
+                if (entry is IPlacedObjectGetter po && IsShipMarker(po))
                 {
                     yield return po;
                 }
@@ -73,16 +73,16 @@ namespace Retrograde.Passes.SpaceStation
 
             foreach (var entry in prefabCell.Persistent)
             {
-                if (entry is PlacedObject po && IsShipMarker(po))
+                if (entry is IPlacedObjectGetter po && IsShipMarker(po))
                 {
                     yield return po;
                 }
             }
         }
 
-        private static bool IsShipMarker(PlacedObject po)
+        private static bool IsShipMarker(IPlacedObjectGetter po)
         {
-            if ( po.Base.FormKey.ModKey.Name == "Starfield")
+            if (po.Base.FormKey.ModKey.Name == "Starfield")
             {
                 if (RetrogradeContext.Current.StarfieldMod.Statics.ContainsKey(po.Base.FormKey))
                 {
@@ -94,25 +94,18 @@ namespace Retrograde.Passes.SpaceStation
             return false;
         }
 
-        private static Cell ResolvePrefabCell(RoomPrefab prefab)
+        private static ICellGetter? ResolvePrefabCell(RoomPrefab prefab)
         {
             var cellFormKey = prefab.packin_instance?.Cell?.FormKey;
             if (cellFormKey == null)
                 return null;
 
-            for (int i = 0; i < RetrogradeContext.Current.TargetMod.Cells.Count; i++)
-            {
-                for (int j = 0; j < RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks.Count; j++)
-                {
-                    for (int k = 0; k < RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells.Count; k++)
-                    {
-                        if (RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k].FormKey == cellFormKey)
-                        {
-                            return RetrogradeContext.Current.TargetMod.Cells[i].SubBlocks[j].Cells[k];
-                        }
-                    }
-                }
-            }
+            foreach (var mod in RetrogradeContext.Current.TemplateMods)
+                foreach (var block in mod.Cells)
+                    foreach (var sub in block.SubBlocks)
+                        foreach (var cell in sub.Cells)
+                            if (cell.FormKey == cellFormKey)
+                                return cell;
 
             return null;
         }

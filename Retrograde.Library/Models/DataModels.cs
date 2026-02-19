@@ -187,7 +187,7 @@ public static class RgRotation
 public class RoomPrefab
 {
     public string PrefabEditorId { get; private set; }
-    public PackIn? packin_instance { get; set; }
+    public IPackInGetter? packin_instance { get; set; }
     public List<PrefabMarker> Markers { get; private set; } = new();
     public P3Float StartingMarkerPosition;
 
@@ -197,21 +197,19 @@ public class RoomPrefab
     }
 
     /// <summary>
-    /// Initializes the prefab by looking up the PackIn and extracting markers.
+    /// Initializes the prefab by looking up the PackIn in template mods and extracting markers.
     /// This must be called after RetrogradeContext.Current is set.
     /// </summary>
     public void Initialize()
     {
-        var mod = RetrogradeContext.Current.TargetMod;
+        var templateMods = RetrogradeContext.Current.TemplateMods;
 
-        // Find the prefab
-        foreach (var packin in mod.PackIns)
+        // Find the prefab across template mods
+        foreach (var mod in templateMods)
         {
-            if (packin?.EditorID == PrefabEditorId)
-            {
-                packin_instance = packin;
+            packin_instance = mod.PackIns.FirstOrDefault(p => p.EditorID == PrefabEditorId);
+            if (packin_instance != null)
                 break;
-            }
         }
 
         if (packin_instance == null)
@@ -219,7 +217,7 @@ public class RoomPrefab
 
         // Fetch the cell
         var cellFormKey = packin_instance.Cell.FormKey;
-        Cell? prefabCell = FindCellByFormKey(mod, cellFormKey);
+        ICellGetter? prefabCell = FindCellByFormKey(templateMods, cellFormKey);
 
         if (prefabCell == null)
             return;
@@ -231,10 +229,10 @@ public class RoomPrefab
 
             switch (entry)
             {
-                case PlacedObject po:
+                case IPlacedObjectGetter po:
                     TryAddMarker(po.EditorID, po.Position, po.Rotation);
                     break;
-                case PlacedNpc pn:
+                case IPlacedNpcGetter pn:
                     TryAddMarker(pn.EditorID, pn.Position, pn.Rotation);
                     break;
             }
@@ -243,7 +241,7 @@ public class RoomPrefab
         // Extract markers from Persistent
         foreach (var placed in prefabCell.Persistent)
         {
-            if (placed is PlacedObject po && po.EditorID != null)
+            if (placed is IPlacedObjectGetter po && po.EditorID != null)
             {
                 Markers.Add(new PrefabMarker
                 {
@@ -255,19 +253,16 @@ public class RoomPrefab
         }
     }
 
-    private static Cell? FindCellByFormKey(StarfieldMod mod, Mutagen.Bethesda.Plugins.FormKey formKey)
+    private static ICellGetter? FindCellByFormKey(
+        System.Collections.Generic.IReadOnlyList<IStarfieldModGetter> mods,
+        Mutagen.Bethesda.Plugins.FormKey formKey)
     {
-        for (int i = 0; i < mod.Cells.Count; i++)
-        {
-            for (int j = 0; j < mod.Cells[i].SubBlocks.Count; j++)
-            {
-                for (int k = 0; k < mod.Cells[i].SubBlocks[j].Cells.Count; k++)
-                {
-                    if (mod.Cells[i].SubBlocks[j].Cells[k].FormKey == formKey)
-                        return mod.Cells[i].SubBlocks[j].Cells[k];
-                }
-            }
-        }
+        foreach (var mod in mods)
+            foreach (var block in mod.Cells)
+                foreach (var sub in block.SubBlocks)
+                    foreach (var cell in sub.Cells)
+                        if (cell.FormKey == formKey)
+                            return cell;
         return null;
     }
 

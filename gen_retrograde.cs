@@ -78,6 +78,22 @@ namespace FrankyCLI
                 gen_quest_main._StarfieldMod = _StarfieldMod;
                 gen_quest_main.myMod = myMod;
 
+                // Discover template mods from load order (any mod with "template" in filename + Starfield.esm)
+                ModContextImpl.TemplateModsList = new System.Collections.Generic.List<IStarfieldModGetter>();
+                for (int i = 0; i < env.LoadOrder.Count; i++)
+                {
+                    var listing = env.LoadOrder[i];
+                    var fileName = listing.FileName.ToString();
+                    if (listing.Mod != null &&
+                        (fileName.Contains("template", StringComparison.OrdinalIgnoreCase)
+                         || fileName.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase))
+                        && fileName.EndsWith(".esm", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModContextImpl.TemplateModsList.Add(listing.Mod);
+                        Console.WriteLine($"Template mod found: {listing.FileName}");
+                    }
+                }
+
                 // Initialize the Retrograde context for library access
                 RetrogradeContext.Current = new ModContextImpl();
 
