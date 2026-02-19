@@ -67,14 +67,47 @@ public class WorldspaceNoun
         Location.Keywords.Add(LocTypeOverlay);
         targetMod.Locations.Add(Location);
 
+        // Resolve the template worldspace's SurfaceBlock — it provides the source BTD path,
+        // FNAM (required binary field), and NAM5 (parent standalone SurfaceBlock link).
+        var templateWorldspace = FindInTemplateMods(
+            RetrogradeContext.Current.TemplateMods,
+            m => m.Worldspaces,
+            design.TemplateWorldspaceEditorId);
+
+        ISurfaceBlockGetter? templateSurfaceBlock = null;
+        if (templateWorldspace != null)
+        {
+            var overlayComp = templateWorldspace.Components
+                ?.OfType<IWorldSpaceOverlayComponentGetter>()
+                .FirstOrDefault();
+            if (overlayComp?.SurfaceBlock?.FormKey is FormKey sbFormKey && !sbFormKey.IsNull)
+            {
+                templateSurfaceBlock = FindInTemplateMods(
+                    RetrogradeContext.Current.TemplateMods,
+                    m => m.SurfaceBlocks,
+                    sbFormKey);
+            }
+        }
+
+        if (templateSurfaceBlock == null && !RetrogradeContext.Quiet)
+            Console.WriteLine($"Warning: could not resolve SurfaceBlock for template worldspace '{design.TemplateWorldspaceEditorId}'");
+
+        // Derive cell grid size from the template SurfaceBlock's DNAM (cols x rows).
+        // Falls back to 4 if the template couldn't be resolved.
+        int cellGridSize = (int)(templateSurfaceBlock?.DNAM?.First ?? 4);
+        if (!RetrogradeContext.Quiet)
+            Console.WriteLine($"Cell grid size from template: {cellGridSize}x{cellGridSize}");
+
         // Create SurfaceBlock from scratch
         var newBlock = new SurfaceBlock(targetMod)
         {
             NAM1 = "OverlayBlock",
-            // NAM5 must point to a standalone overlay source block with the same DNAM size.
-            // OverlayFieldsDunesMedium01 [2C586B] is a 4x4 source; matches CellGridSize=4.
-            NAM5 = new FormKey(starfieldEsm, 0x002C586B).ToNullableLink<ISurfaceBlockGetter>(),
-            DNAM = new SurfaceBlockIntItem() { First = (uint)design.CellGridSize, Second = (uint)design.CellGridSize },
+            // NAM5 comes from the template worldspace's own SurfaceBlock so both overlay
+            // blocks share the same standalone parent (size / terrain type must match).
+            NAM5 = templateSurfaceBlock?.NAM5?.FormKey is FormKey nam5Key && !nam5Key.IsNull
+                ? nam5Key.ToNullableLink<ISurfaceBlockGetter>()
+                : new FormKey(starfieldEsm, 0x002C586B).ToNullableLink<ISurfaceBlockGetter>(),
+            DNAM = new SurfaceBlockIntItem() { First = (uint)cellGridSize, Second = (uint)cellGridSize },
             WHGT = float.MinValue,
             GNAM = 0,
             HNAM = 0,
@@ -86,33 +119,30 @@ public class WorldspaceNoun
         };
         targetMod.SurfaceBlocks.Add(newBlock);
 
-        // Copy FNAM from the parent overlay source block — all vanilla overlay SurfaceBlocks
+        // Copy FNAM from the template SurfaceBlock — all vanilla overlay SurfaceBlocks
         // carry this binary field; without it the record may not load correctly in the engine.
-        var parentBlock = FindInTemplateMods(
-            RetrogradeContext.Current.TemplateMods,
-            m => m.SurfaceBlocks,
-            "OverlayFieldsDunesMedium01");
-        if (parentBlock?.FNAM != null)
-            newBlock.FNAM = parentBlock.FNAM.Value.ToArray();
+        if (templateSurfaceBlock?.FNAM != null)
+            newBlock.FNAM = templateSurfaceBlock.FNAM.Value.ToArray();
 
         // Copy terrain file if data folder path is provided
         string newTerrainFile = "Data\\Terrain\\" + editorId + ".btd";
         if (dataFolderPath != null)
         {
-            string sourceTerrainPath = Path.Combine(dataFolderPath, "Terrain", design.TemplateWorldspaceEditorId + ".btd");
+            // Derive source filename from the template SurfaceBlock's ANAM; fall back to
+            // the worldspace EditorID convention if ANAM is unavailable.
+            string sourceBtdFile = templateSurfaceBlock?.ANAM is string anam
+                ? Path.GetFileName(anam).ToLowerInvariant()
+                : design.TemplateWorldspaceEditorId.ToLowerInvariant() + ".btd";
+            string sourceTerrainPath = Path.Combine(dataFolderPath, "Terrain", sourceBtdFile);
+            if (!File.Exists(sourceTerrainPath))
+                throw new FileNotFoundException(
+                    $"Source terrain file not found: {sourceTerrainPath}\n" +
+                    $"You need to unpack '{sourceBtdFile}' from the Starfield terrain BSA (Starfield - Terrain*.ba2) into your Data\\Terrain\\ folder.");
+
             string destTerrainPath = Path.Combine(dataFolderPath, "Terrain", editorId + ".btd");
-            try
-            {
-                if (!File.Exists(destTerrainPath))
-                {
-                    File.Copy(sourceTerrainPath, destTerrainPath);
-                }
-            }
-            catch
-            {
-                if (!RetrogradeContext.Quiet)
-                    Console.WriteLine("Terrain file probably already exists");
-            }
+            if (File.Exists(destTerrainPath))
+                File.Delete(destTerrainPath);
+            File.Copy(sourceTerrainPath, destTerrainPath);
         }
 
         newBlock.ANAM = newTerrainFile;
@@ -126,7 +156,7 @@ public class WorldspaceNoun
             Second = BitConverter.SingleToUInt32Bits(1000f),
         };
 
-        int halfGrid = design.CellGridSize / 2;
+        int halfGrid = cellGridSize / 2;
 
         // Create worldspace from scratch (matching OEBB029World reference values)
         Worldspace = new Worldspace(targetMod)
@@ -212,40 +242,27 @@ public class WorldspaceNoun
             }
         }
 
-        // Open BTD to set ENAM from actual header values, flatten terrain to height 0
-        // (template BTD carries non-zero heights from oejm001world which would appear as
-        // a mountain), and sample the final terrain height for object placement.
-        float terrainHeight = 0;
-        if (dataFolderPath != null)
+        // Open BTD to set ENAM from actual header values and sample terrain height
+        // for object placement.
+        if (dataFolderPath == null)
+            throw new InvalidOperationException("dataFolderPath is required to read terrain data.");
+
+        string btdPath = Path.Combine(dataFolderPath, "Terrain", editorId + ".btd");
+        if (!File.Exists(btdPath))
+            throw new FileNotFoundException($"Terrain file not found: {btdPath}");
+
+        var btd = new BtdFile(btdPath);
+
+        // Override the fallback ENAM with actual values from the BTD header.
+        newBlock.ENAM = new SurfaceBlockFloatItem()
         {
-            string btdPath = Path.Combine(dataFolderPath, "Terrain", editorId + ".btd");
-            if (File.Exists(btdPath))
-            {
-                var btd = new BtdFile(btdPath);
+            First  = BitConverter.SingleToUInt32Bits(btd.WorldHeightMin / 8f),
+            Second = BitConverter.SingleToUInt32Bits(btd.WorldHeightMax / 8f),
+        };
 
-                // Override the fallback ENAM with actual values from the BTD header.
-                newBlock.ENAM = new SurfaceBlockFloatItem()
-                {
-                    First  = BitConverter.SingleToUInt32Bits(btd.WorldHeightMin / 8f),
-                    Second = BitConverter.SingleToUInt32Bits(btd.WorldHeightMax / 8f),
-                };
-
-                // Flatten all non-edge cells to height 0 so the overlay sits flush with
-                // the surrounding planet surface instead of appearing as a mountain.
-                ushort flatRaw = btd.HeightToRaw(0f);
-                var flatBuf = new ushort[128 * 128];
-                Array.Fill(flatBuf, flatRaw);
-                for (int cy = btd.CellMinY + 1; cy <= btd.CellMaxY - 1; cy++)
-                    for (int cx = btd.CellMinX + 1; cx <= btd.CellMaxX - 1; cx++)
-                        btd.SetCellHeightMap(flatBuf, cx, cy);
-                btd.SmoothDirtyCellEdges(32);
-                btd.Save(btdPath, updateMinMax: false);
-
-                terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
-                if (!RetrogradeContext.Quiet)
-                    Console.WriteLine($"Terrain height at center: {terrainHeight}");
-            }
-        }
+        float terrainHeight = btd.SampleHeightAtWorld(0, 0) / 8f;
+        if (!RetrogradeContext.Quiet)
+            Console.WriteLine($"Terrain height at center: {terrainHeight}");
 
         // Run generation
         var generator = new WorldspaceDungeonGenerator(design);
@@ -257,7 +274,7 @@ public class WorldspaceNoun
     /// Catches Mutagen SubrecordExceptions from malformed records in mods
     /// that don't have valid entries for the given collection.
     /// </summary>
-    private static T FindInTemplateMods<T>(
+    private static T? FindInTemplateMods<T>(
         System.Collections.Generic.IReadOnlyList<IStarfieldModGetter> templateMods,
         Func<IStarfieldModGetter, IEnumerable<T>> collectionSelector,
         string editorId) where T : class, IMajorRecordGetter
@@ -271,6 +288,33 @@ public class WorldspaceNoun
                     try
                     {
                         if (record.EditorID == editorId)
+                            return record;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Safely searches across template mods for a record by FormKey.
+    /// </summary>
+    private static T? FindInTemplateMods<T>(
+        System.Collections.Generic.IReadOnlyList<IStarfieldModGetter> templateMods,
+        Func<IStarfieldModGetter, IEnumerable<T>> collectionSelector,
+        FormKey formKey) where T : class, IMajorRecordGetter
+    {
+        foreach (var mod in templateMods)
+        {
+            try
+            {
+                foreach (var record in collectionSelector(mod))
+                {
+                    try
+                    {
+                        if (record.FormKey == formKey)
                             return record;
                     }
                     catch { }

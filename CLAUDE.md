@@ -327,19 +327,38 @@ SurfaceBlock records define terrain data for worldspaces. Each links to a `.btd`
 
 ### Creating a SurfaceBlock for a New Worldspace
 
+All SurfaceBlock properties are derived from the template worldspace (via `IWorldspaceDesign.TemplateWorldspaceEditorId`). `WorldspaceNoun` resolves the template worldspace → its `WorldSpaceOverlayComponent.SurfaceBlock` FormKey → the SurfaceBlock record, then reads:
+- `ANAM` → source BTD filename to copy (always lowercase in Starfield)
+- `FNAM` → required binary field copied verbatim
+- `NAM5` → parent standalone SurfaceBlock link (reused unchanged)
+- `DNAM.First` → cell grid size (replaces the old hardcoded `CellGridSize`)
+
+BTD source files must be unpacked from `Starfield - Terrain*.ba2` into `Data\Terrain\` before running. `WorldspaceNoun` throws `FileNotFoundException` with an actionable message if they are missing.
+
 ```csharp
+// WorldspaceNoun does this automatically — shown here for reference:
+var templateWorldspace = FindInTemplateMods(templateMods, m => m.Worldspaces, design.TemplateWorldspaceEditorId);
+var overlayComp = templateWorldspace.Components.OfType<IWorldSpaceOverlayComponentGetter>().First();
+var templateSurfaceBlock = FindInTemplateMods(templateMods, m => m.SurfaceBlocks, overlayComp.SurfaceBlock.FormKey);
+
+int cellGridSize = (int)templateSurfaceBlock.DNAM.First;  // e.g. 4 → 4x4 cells
+string sourceBtdFile = Path.GetFileName(templateSurfaceBlock.ANAM).ToLowerInvariant();
+
 var newBlock = new SurfaceBlock(targetMod)
 {
     ANAM = "Data\\Terrain\\" + editorId + ".btd",
     EditorID = "OverlayBlock" + editorId,
     NAM1 = "OverlayBlock",
-    NAM5 = new FormKey(starfieldEsm, 0x002C17D4).ToNullableLink<ISurfaceBlockGetter>(),
-    DNAM = new SurfaceBlockIntItem() { First = 4, Second = 4 },
+    NAM5 = templateSurfaceBlock.NAM5.FormKey.ToNullableLink<ISurfaceBlockGetter>(),
+    DNAM = new SurfaceBlockIntItem() { First = (uint)cellGridSize, Second = (uint)cellGridSize },
     WHGT = float.MinValue,
+    FNAM = templateSurfaceBlock.FNAM.Value.ToArray(),
+    ENAM = new SurfaceBlockFloatItem()
+    {
+        First  = BitConverter.SingleToUInt32Bits(btd.WorldHeightMin / 8f),
+        Second = BitConverter.SingleToUInt32Bits(btd.WorldHeightMax / 8f),
+    },
 };
-// Link to worldspace
-((WorldSpaceOverlayComponent)worldspace.Components[0]).SurfaceBlock =
-    newBlock.ToNullableLink<ISurfaceBlockGetter>();
 ```
 
 ### Sampling Terrain Height for Object Placement
@@ -356,14 +375,14 @@ This is used by `WorldspaceNoun` to set `WorldspaceState.TerrainHeight`, which `
 
 ### Key Files
 
-- `WorldspaceNoun.cs` — creates new SurfaceBlocks linked to worldspaces, samples BTD height
-- `IWorldspaceDesign.cs` — defines `TemplateSurfaceBlockEditorId` property
-- `FortDesign.cs` — uses `stbblock001` template worldspace, `OverlayBlockstbblock001` surface block
+- `WorldspaceNoun.cs` — resolves template SurfaceBlock, copies BTD, creates new SurfaceBlock, samples terrain height
+- `IWorldspaceDesign.cs` — defines `TemplateWorldspaceEditorId` (single source of truth for terrain setup)
+- `FortDesign.cs` — accepts `templateWorldspaceEditorId` as constructor parameter (default `"DR001World"`)
 - `TileInstantiationPass.cs` — places tiles using `state.TerrainHeight` for Z position
 
 ## Worldspace Cell Grid and Tile Mapping
 
-Worldspaces use a grid of cells, each covering 4096 world units. The grid is configured via `IWorldspaceDesign.CellGridSize` (e.g., 4 = 4x4 cells). Cell coordinates range from `-(gridSize/2)` to `(gridSize/2 - 1)`.
+Worldspaces use a grid of cells, each covering 4096 world units. The cell grid size is derived automatically from the template SurfaceBlock's `DNAM.First` in `WorldspaceNoun` (no longer a property on `IWorldspaceDesign`). Cell coordinates range from `-(gridSize/2)` to `(gridSize/2 - 1)`.
 
 ### Tile-to-Cell Assignment
 
@@ -395,10 +414,9 @@ return state.CurrentCell; // fallback
 
 ### Key Files
 
-- `WorldspaceNoun.cs` — creates subcell grid from `CellGridSize`, one WorldspaceBlock/SubBlock per cell
+- `WorldspaceNoun.cs` — creates subcell grid from `cellGridSize` (derived from template DNAM), one WorldspaceBlock/SubBlock per cell
 - `WorldspaceDungeonGenerator.cs` — builds `CellLookup`, iterates cells for per-cell passes
 - `TileInstantiationPass.cs` — dynamic tile-to-cell check, cross-cell `ResolveCell()`
-- `IWorldspaceDesign.cs` — `CellGridSize` property
 
 ## Copying PlacedObjects
 

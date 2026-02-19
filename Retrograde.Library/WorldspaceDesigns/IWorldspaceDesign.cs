@@ -22,14 +22,10 @@ public interface IWorldspaceDesign
     List<IWorldspacePass> ContentPasses { get; set; }
 
     /// <summary>
-    /// Template worldspace EditorID to clone from the TargetMod.
+    /// Template worldspace EditorID. The SurfaceBlock linked by this worldspace
+    /// determines the BTD source file, FNAM, and NAM5 for the new terrain overlay.
     /// </summary>
     string TemplateWorldspaceEditorId { get; }
-
-    /// <summary>
-    /// Template SurfaceBlock EditorID for terrain overlay.
-    /// </summary>
-    string TemplateSurfaceBlockEditorId { get; }
 
     /// <summary>
     /// Tile grid size (square). StarTiller uses 50.
@@ -40,13 +36,6 @@ public interface IWorldspaceDesign
     /// World units per tile. StarTiller uses 4 (blocksize).
     /// </summary>
     float TileWorldSize { get; }
-
-    /// <summary>
-    /// Cell grid dimensions for the SurfaceBlock DNAM (square).
-    /// Determines how many cells the worldspace terrain has.
-    /// stbblock001 uses 4 (4x4 cells).
-    /// </summary>
-    int CellGridSize { get; }
 
     string GeneratePOIName(int seed);
     string DesignName { get; }

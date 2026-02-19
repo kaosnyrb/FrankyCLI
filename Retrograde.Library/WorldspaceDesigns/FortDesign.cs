@@ -11,15 +11,15 @@ public class FortDesign : IWorldspaceDesign
     public List<IWorldspacePass> CellBuildPasses { get; set; }
     public List<IWorldspacePass> ContentPasses { get; set; }
 
-    public string TemplateWorldspaceEditorId => "oejm001world";
-    public string TemplateSurfaceBlockEditorId => "oejm001world";
+    private readonly string _templateWorldspaceEditorId;
+    public string TemplateWorldspaceEditorId => _templateWorldspaceEditorId;
     public int MapSize => 50;
     public float TileWorldSize => 4f;
-    public int CellGridSize => 4;
     public string DesignName => "Fort";
 
-    public FortDesign()
+    public FortDesign(string templateWorldspaceEditorId = "DR001World")
     {
+        _templateWorldspaceEditorId = templateWorldspaceEditorId;
         MapPasses = new List<IWorldspacePass>
         {
             new PackInLibraryPass(FortPackInIds()),
