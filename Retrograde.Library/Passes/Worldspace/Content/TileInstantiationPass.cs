@@ -27,13 +27,22 @@ public class TileInstantiationPass : IWorldspacePass
 
         int totalPlaced = 0;
 
+        // If TerrainFlattenPass ran, centre the tile grid on the flat area.
+        // Otherwise fall back to the legacy hardcoded origin.
+        float originX = state.FlatAreaWorldX.HasValue
+            ? state.FlatAreaWorldX.Value - blocksize * (map.xsize / 2f)
+            : -94f;
+        float originY = state.FlatAreaWorldY.HasValue
+            ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
+            : 94f;
+
         for (int x = 0; x < map.xsize; x++)
         {
             for (int y = 0; y < map.ysize; y++)
             {
                 // Determine which cell this tile belongs to from its world position
-                float worldX = -94 + (blocksize * x);
-                float worldY = 94 - (blocksize * y);
+                float worldX = originX + (blocksize * x);
+                float worldY = originY - (blocksize * y);
                 int tileCellX = (int)Math.Floor(worldX / 4096f);
                 int tileCellY = (int)Math.Floor(worldY / 4096f);
                 if (tileCellX != state.CurrentCellPos.X || tileCellY != state.CurrentCellPos.Y)
@@ -70,7 +79,7 @@ public class TileInstantiationPass : IWorldspacePass
                             {
                                 z = state.TerrainHeight + map.tiles[x][y].zoverride;
                             }
-                            P3Float tilePos = new P3Float(-94 + (blocksize * x), 94 - (blocksize * y), z);
+                            P3Float tilePos = new P3Float(originX + (blocksize * x), originY - (blocksize * y), z);
                             int yawSteps = map.tiles[x][y].rotation / 90;
 
                             // Resolve the PackIn's cell to unpack its contents

@@ -1,4 +1,5 @@
 using Retrograde.Passes.Worldspace;
+using Retrograde.Utils;
 using Retrograde.WorldspaceDesigns;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -15,7 +16,8 @@ public class WorldspaceDungeonGenerator
         _design = design;
     }
 
-    public WorldspaceState Generate(Worldspace worldspace, Location location, int seed, float terrainHeight = 0)
+    public WorldspaceState Generate(Worldspace worldspace, Location location, int seed,
+        float terrainHeight = 0, BtdFile? btd = null, string? btdPath = null)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -26,6 +28,8 @@ public class WorldspaceDungeonGenerator
             TileWorldSize = _design.TileWorldSize,
             DesignName = _design.DesignName,
             TerrainHeight = terrainHeight,
+            BtdFile = btd,
+            BtdPath = btdPath,
         };
 
         // Phase 1: Map passes (build the 2D tile layout)

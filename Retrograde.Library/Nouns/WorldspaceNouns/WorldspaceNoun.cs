@@ -264,9 +264,13 @@ public class WorldspaceNoun
         if (!RetrogradeContext.Quiet)
             Console.WriteLine($"Terrain height at center: {terrainHeight}");
 
-        // Run generation
+        // Run generation (pass btd so terrain passes can modify it)
         var generator = new WorldspaceDungeonGenerator(design);
-        State = generator.Generate(Worldspace, Location, seed, terrainHeight);
+        State = generator.Generate(Worldspace, Location, seed, terrainHeight, btd, btdPath);
+
+        // Save terrain edits made by any terrain passes
+        if (State.BtdFile != null && State.BtdPath != null)
+            State.BtdFile.Save(State.BtdPath, updateMinMax: false);
     }
 
     /// <summary>

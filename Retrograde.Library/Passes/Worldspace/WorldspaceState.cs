@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Starfield;
 using SfWorldspace = Mutagen.Bethesda.Starfield.Worldspace;
 using Noggog;
 using Retrograde.Models;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -56,4 +57,23 @@ public class WorldspaceState
     /// passes can route objects to the correct cell based on world position.
     /// </summary>
     public Dictionary<P2Int, Cell> CellLookup = new();
+
+    /// <summary>
+    /// World-space centre of the flat base area chosen by TerrainFlattenPass.
+    /// Null until TerrainFlattenPass has run. TileInstantiationPass uses this
+    /// to centre the tile grid on the flat area instead of the worldspace origin.
+    /// </summary>
+    public float? FlatAreaWorldX;
+    public float? FlatAreaWorldY;
+
+    /// <summary>
+    /// The BTD terrain file for this worldspace, available to terrain passes.
+    /// Null if no data folder was provided.
+    /// </summary>
+    public BtdFile? BtdFile;
+
+    /// <summary>
+    /// Full path to the BTD file on disk. Used to save terrain edits after generation.
+    /// </summary>
+    public string? BtdPath;
 }
