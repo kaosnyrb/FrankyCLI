@@ -76,4 +76,25 @@ public class WorldspaceState
     /// Full path to the BTD file on disk. Used to save terrain edits after generation.
     /// </summary>
     public string? BtdPath;
+
+    /// <summary>
+    /// BTD-level details captured by TerrainFlattenPass before it writes anything.
+    /// Used by TerrainRestorePass to put back original terrain outside the fort footprint.
+    /// </summary>
+    public FlatAreaBtdInfo? FlatAreaBtdData;
+
+    public class FlatAreaBtdInfo
+    {
+        /// <summary>First editable cell in each axis (absolute BTD cell coordinates).</summary>
+        public int EditMinX, EditMinY;
+        /// <summary>Top-left corner of the flat area in global vertex space (relative to editMin * CellResolution).</summary>
+        public int BestX0, BestY0;
+        /// <summary>Flat area side length in vertices.</summary>
+        public int AreaVerts;
+        /// <summary>
+        /// Original (pre-flatten) height buffers keyed by absolute (cellX, cellY).
+        /// Only covers cells that were in the flatten zone.
+        /// </summary>
+        public Dictionary<(int cellX, int cellY), ushort[]> OriginalHeights = new();
+    }
 }

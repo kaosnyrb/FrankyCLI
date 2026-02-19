@@ -99,6 +99,22 @@ public class TerrainFlattenPass : IWorldspacePass
         int cellY0 = Math.Max(editMinY, editMinY + bestY0 / BtdFile.CellResolution - 1);
         int cellY1 = Math.Min(editMaxY, editMinY + (bestY0 + areaVerts - 1) / BtdFile.CellResolution + 1);
 
+        // Capture originals before any modification so TerrainRestorePass can recover them.
+        var btdInfo = new WorldspaceState.FlatAreaBtdInfo
+        {
+            EditMinX = editMinX, EditMinY = editMinY,
+            BestX0 = bestX0, BestY0 = bestY0, AreaVerts = areaVerts
+        };
+        var orig = new ushort[BtdFile.CellResolution * BtdFile.CellResolution];
+        for (int cy2 = cellY0; cy2 <= cellY1; cy2++)
+            for (int cx2 = cellX0; cx2 <= cellX1; cx2++)
+            {
+                var snapshot = new ushort[BtdFile.CellResolution * BtdFile.CellResolution];
+                btd.GetCellHeightMap(snapshot, cx2, cy2);
+                btdInfo.OriginalHeights[(cx2, cy2)] = snapshot;
+            }
+        state.FlatAreaBtdData = btdInfo;
+
         var buf = new ushort[BtdFile.CellResolution * BtdFile.CellResolution];
 
         for (int cy = cellY0; cy <= cellY1; cy++)

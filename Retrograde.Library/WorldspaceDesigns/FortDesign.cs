@@ -24,6 +24,7 @@ public class FortDesign : IWorldspaceDesign
             new PackInLibraryPass(FortPackInIds()),
             new TerrainFlattenPass(),
             new FortLayoutPass(),
+            new TerrainRestorePass(),
         };
 
         CellBuildPasses = new List<IWorldspacePass>
