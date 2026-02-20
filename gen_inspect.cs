@@ -186,33 +186,49 @@ namespace FrankyCLI
             if (cell.Persistent.Count > 0)
             {
                 Console.WriteLine("  Persistent entries:");
-                foreach (var entry in cell.Persistent.Take(20))
+                foreach (var entry in cell.Persistent.Take(40))
                 {
                     if (entry is IPlacedObjectGetter po)
-                        Console.WriteLine($"    PlacedObject {po.FormKey} Base={po.Base.FormKey} Pos={po.Position}");
+                    {
+                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position}");
+                        if (po.TeleportDestination != null)
+                        {
+                            var td = po.TeleportDestination;
+                            Console.WriteLine($"      TeleportDestination:");
+                            Console.WriteLine($"        Door:              {td.Door.FormKey}");
+                            Console.WriteLine($"        TransitionInterior:{td.TransitionInterior.FormKey}");
+                            Console.WriteLine($"        Position:          {td.Position}");
+                            Console.WriteLine($"        Rotation:          {td.Rotation}");
+                            Console.WriteLine($"        Flags:             {td.Flags}");
+                        }
+                        if (po.LinkedReferences != null && po.LinkedReferences.Count > 0)
+                        {
+                            Console.WriteLine($"      LinkedReferences: [{po.LinkedReferences.Count}]");
+                            foreach (var lr in po.LinkedReferences)
+                                Console.WriteLine($"        KeywordOrRef={lr.KeywordOrReference.FormKey} Ref={lr.Reference.FormKey}");
+                        }
+                    }
                     else if (entry is IPlacedNpcGetter npc)
-                        Console.WriteLine($"    PlacedNpc {npc.FormKey} Base={npc.Base.FormKey} Pos={npc.Position}");
+                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position}");
                     else
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
-                if (cell.Persistent.Count > 20)
-                    Console.WriteLine($"    ... and {cell.Persistent.Count - 20} more");
+                if (cell.Persistent.Count > 40)
+                    Console.WriteLine($"    ... and {cell.Persistent.Count - 40} more");
             }
 
             if (cell.Temporary.Count > 0)
             {
                 Console.WriteLine("  Temporary entries:");
-                foreach (var entry in cell.Temporary.Take(20))
+                foreach (var entry in cell.Temporary)
                 {
                     if (entry is IPlacedObjectGetter po)
-                        Console.WriteLine($"    PlacedObject {po.FormKey} Base={po.Base.FormKey} Pos={po.Position}");
+                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position}");
                     else if (entry is IPlacedNpcGetter npc)
-                        Console.WriteLine($"    PlacedNpc {npc.FormKey} Base={npc.Base.FormKey} Pos={npc.Position}");
+                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position}");
                     else
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
-                if (cell.Temporary.Count > 20)
-                    Console.WriteLine($"    ... and {cell.Temporary.Count - 20} more");
             }
             Console.WriteLine();
         }

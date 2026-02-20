@@ -66,7 +66,6 @@ namespace FrankyCLI
             return new BinaryWriteParameters()
             {
                 MasterFlagsLookup = MasterFlagsCache,
-                FormIDUniqueness = FormIDUniquenessOption.NoCheck
             };
         }
 

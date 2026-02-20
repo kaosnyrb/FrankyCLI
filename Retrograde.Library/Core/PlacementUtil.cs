@@ -342,6 +342,10 @@ public class PlacementUtil
         if (baseFormKey.ModKey.Name == "Starfield")
             return baseFormKey;
 
+        if (baseFormKey.ModKey.Name == targetMod.ModKey.Name)
+            return baseFormKey;
+
+
         var templateMods = RetrogradeContext.Current.TemplateMods;
 
         foreach (var tm in templateMods)

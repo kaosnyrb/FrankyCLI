@@ -68,7 +68,7 @@ namespace FrankyCLI
                         {
                             ModPath modPath = Path.Combine(env.DataFolderPath, env.LoadOrder[i].FileName);
                             myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                            gen_quest_main.FixNextFormId(myMod);
+                            //gen_quest_main.FixNextFormId(myMod);
                         }
                     }
                 }

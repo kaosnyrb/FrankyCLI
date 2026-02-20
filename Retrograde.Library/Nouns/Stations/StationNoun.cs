@@ -162,6 +162,10 @@ namespace Retrograde.Nouns.Stations
             shipinttoint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
             int_doorreference.TeleportDestination.Door = shipinttoint_doorreference.ToLink<IPlacedObjectGetter>();
 
+            // Docking door: clear the template Door link — docking uses LinkedReferences, not TeleportDestination.Door.
+            if (shipint_doorreference.TeleportDestination != null)
+                shipint_doorreference.TeleportDestination.Door = FormKey.Null.ToLink<IPlacedObjectGetter>();
+
             AddCellToMod(targetMod, ExteriorCell);
 
 
