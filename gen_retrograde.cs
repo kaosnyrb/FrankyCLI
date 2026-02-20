@@ -115,7 +115,7 @@ namespace FrankyCLI
                 RetrogradeContext.Quiet = string.Equals(quietFlag, "quiet", StringComparison.OrdinalIgnoreCase);
                 AITools.EXPORT_CONVERSATION = string.Equals(exportAiFlag, "exportai", StringComparison.OrdinalIgnoreCase);
 
-                // Resolve faction - random if not specified
+                // Resolve faction - random if not specified, error if invalid
                 List<string> Factions = new List<string>()
                 {
                     "Crimsonfleet","Ecliptic","Varuun","Spacer"
@@ -124,16 +124,26 @@ namespace FrankyCLI
                 {
                     faction = Factions[RandomProvider.Random.Next(Factions.Count)];
                 }
+                else if (!Factions.Contains(faction, StringComparer.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Error: Unknown faction '{faction}'. Valid values: {string.Join(", ", Factions)}");
+                    return 1;
+                }
 
-                // Resolve station design - default to HabStation if not specified or not found
+                // Resolve station design - error if specified but not found
                 IStationDesign stationDesign;
-                if (!string.IsNullOrEmpty(stationDesignName) && StationDesignRegistry.Designs.TryGetValue(stationDesignName, out var designFactory))
+                if (string.IsNullOrEmpty(stationDesignName))
+                {
+                    stationDesign = new HabStation();
+                }
+                else if (StationDesignRegistry.Designs.TryGetValue(stationDesignName, out var designFactory))
                 {
                     stationDesign = designFactory();
                 }
                 else
                 {
-                    stationDesign = new HabStation();
+                    Console.WriteLine($"Error: Unknown station design '{stationDesignName}'. Valid values: {string.Join(", ", StationDesignRegistry.Designs.Keys)}");
+                    return 1;
                 }
 
                 // Resolve type - default to bounty
