@@ -28,7 +28,7 @@ namespace Retrograde.Passes.SpaceStation
                 {
                     var rotatedLocal = RgRotation.RotateYaw90(shipMarker.Position, placed.YawSteps);
                     var worldPos = placed.WorldPos + rotatedLocal;
-                    var worldRot = RgRotation.RotateYaw90(shipMarker.Rotation, placed.YawSteps) + RgRotation.RotationToP3Float(placed.YawSteps);
+                    var worldRot = shipMarker.Rotation + RgRotation.RotationToP3Float(placed.YawSteps);
 
                     var newplaced = new PlacedObject(RetrogradeContext.Current.TargetMod)
                     {
