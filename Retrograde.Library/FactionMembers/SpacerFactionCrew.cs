@@ -381,7 +381,6 @@ namespace Retrograde.FactionMembers
             Random random = RandomProvider.Random;
             List<uint> gearlist = new List<uint>()
                 {
-                    0x003D0949,//LLI_Spacer_Officer [LVLI:003D0949]
                     0x003D0946,//LLI_Spacer_AssaultDefaultRole [LVLI:003D0946]
                     0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
                     0x003D094B,//LLI_Spacer_Sniper [LVLI:003D094B]
@@ -395,7 +394,6 @@ namespace Retrograde.FactionMembers
             Random random = RandomProvider.Random;
             List<uint> gearlist = new List<uint>()
                 {
-                    0x003D0949,//LLI_Spacer_Officer [LVLI:003D0949]
                     0x003D0948,//LLI_Spacer_Heavy [LVLI:003D0948]
                 };
             IFormLinkNullable<ILeveledItemGetter> gear = new FormKey(RetrogradeContext.Current.StarfieldModKey, gearlist[random.Next(gearlist.Count)]).ToNullableLink<ILeveledItemGetter>();
