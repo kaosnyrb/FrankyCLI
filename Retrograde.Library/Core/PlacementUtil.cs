@@ -98,6 +98,9 @@ public class PlacementUtil
         if (prefabCell == null)
             return 0;
 
+        // Buffer clones at this level so we can patch ProjectedDecalReferences before committing.
+        var clonedAtThisLevel = new List<IPlaced>();
+        var formKeyRemap = new Dictionary<FormKey, FormKey>();
         int count = 0;
 
         var entries = temporary ? prefabCell.Temporary : prefabCell.Persistent;
@@ -105,7 +108,8 @@ public class PlacementUtil
         {
             if (entry is IPlacedObjectGetter sourcePo)
             {
-                // If this entry is itself a nested PackIn, recurse with composed transforms
+                // If this entry is itself a nested PackIn, recurse with composed transforms.
+                // Nested objects are added directly; cross-level decal refs are not remapped.
                 if (sourcePo.Base.FormKey.ModKey.Name != "Starfield" &&
                     IsPackIn(sourcePo.Base.FormKey, templateMods))
                 {
@@ -121,10 +125,8 @@ public class PlacementUtil
                     var cloned = ClonePlacedObject(sourcePo, worldPos, yawSteps, targetMod);
                     if (cloned != null)
                     {
-                        if (temporary) cell.Temporary.Add(cloned);
-                        else cell.Persistent.Add(cloned);
-                        PlacedObjects.Add(cloned);
-                        count++;
+                        formKeyRemap[sourcePo.FormKey] = cloned.FormKey;
+                        clonedAtThisLevel.Add(cloned);
                     }
                 }
             }
@@ -133,12 +135,33 @@ public class PlacementUtil
                 var cloned = ClonePlacedNpc(sourceNpc, worldPos, yawSteps, targetMod);
                 if (cloned != null)
                 {
-                    if (temporary) cell.Temporary.Add(cloned);
-                    else cell.Persistent.Add(cloned);
-                    PlacedObjects.Add(cloned);
-                    count++;
+                    formKeyRemap[sourceNpc.FormKey] = cloned.FormKey;
+                    clonedAtThisLevel.Add(cloned);
                 }
             }
+        }
+
+        // Patch ProjectedDecalReferences so they point to the cloned objects, not the prefab originals.
+        foreach (var obj in clonedAtThisLevel)
+        {
+            if (obj is PlacedObject po && po.ProjectedDecalReferences != null)
+            {
+                for (int i = 0; i < po.ProjectedDecalReferences.Count; i++)
+                {
+                    var oldFk = po.ProjectedDecalReferences[i].FormKey;
+                    if (formKeyRemap.TryGetValue(oldFk, out var newFk))
+                        po.ProjectedDecalReferences[i] = newFk.ToLink<IPlacedGetter>();
+                }
+            }
+        }
+
+        // Add buffered clones to cell.
+        var targetList = temporary ? cell.Temporary : cell.Persistent;
+        foreach (var obj in clonedAtThisLevel)
+        {
+            targetList.Add(obj);
+            PlacedObjects.Add(obj);
+            count++;
         }
 
         return count;
