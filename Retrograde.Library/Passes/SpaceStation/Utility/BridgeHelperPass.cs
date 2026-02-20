@@ -382,34 +382,25 @@ namespace Retrograde.Passes.SpaceStation
 
             foreach (var utils in roomUtils)
             {
-                if (utils?.roomTemplates == null)
-                    continue;
+                if (utils == null) continue;
 
-                foreach (var entry in utils.roomTemplates)
+                // Use pre-cached EditorIDs across all tilesets — no FindPackIn calls.
+                foreach (var editorId in utils.GetAllCandidatesAllTilesets())
                 {
-                    var formList = entry.Value;
-                    if (formList?.Items == null || formList.Items.Count == 0)
+                    if (string.IsNullOrWhiteSpace(editorId))
                         continue;
 
-                    foreach (var item in formList.Items)
+                    var prefab = PrefabCache.GetPrefab(editorId);
+                    var connectors = ConnectorUtils.GetConnectors(prefab);
+                    if (connectors.Count < 2)
+                        continue;
+
+                    for (int i = 0; i < connectors.Count - 1; i++)
                     {
-                        var packIn = RoomUtils.FindPackIn(item.FormKey);
-                        var editorId = packIn?.EditorID;
-                        if (string.IsNullOrWhiteSpace(editorId))
-                            continue;
-
-                        var prefab = PrefabCache.GetPrefab(editorId);
-                        var connectors = ConnectorUtils.GetConnectors(prefab);
-                        if (connectors.Count < 2)
-                            continue;
-
-                        for (int i = 0; i < connectors.Count - 1; i++)
+                        for (int j = i + 1; j < connectors.Count; j++)
                         {
-                            for (int j = i + 1; j < connectors.Count; j++)
-                            {
-                                TryRegisterPrefabSignature(connectors[i], connectors[j], keys);
-                                TryRegisterPrefabSignature(connectors[j], connectors[i], keys);
-                            }
+                            TryRegisterPrefabSignature(connectors[i], connectors[j], keys);
+                            TryRegisterPrefabSignature(connectors[j], connectors[i], keys);
                         }
                     }
                 }

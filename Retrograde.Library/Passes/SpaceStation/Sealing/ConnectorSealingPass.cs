@@ -326,19 +326,26 @@ namespace Retrograde.Passes.SpaceStation
             return null;
         }
 
+        // Cache resolved EditorIDs per FormList so FindPackIn is only called once per unique list.
+        private static readonly Dictionary<Mutagen.Bethesda.Plugins.FormKey, List<string>> _blockerListCache
+            = new();
+
         private static string PickBlockerFromFormList(FormList list, string doorSize)
         {
             if (list?.Items == null || list.Items.Count == 0)
                 return null;
 
-            var candidates = new List<string>();
-            foreach (var item in list.Items)
+            if (!_blockerListCache.TryGetValue(list.FormKey, out var candidates))
             {
-                var packIn = RoomUtils.FindPackIn(item.FormKey);
-                if (string.IsNullOrWhiteSpace(packIn?.EditorID))
-                    continue;
-
-                candidates.Add(packIn.EditorID);
+                candidates = new List<string>();
+                foreach (var item in list.Items)
+                {
+                    var packIn = RoomUtils.FindPackIn(item.FormKey);
+                    if (string.IsNullOrWhiteSpace(packIn?.EditorID))
+                        continue;
+                    candidates.Add(packIn.EditorID);
+                }
+                _blockerListCache[list.FormKey] = candidates;
             }
 
             if (candidates.Count == 0)

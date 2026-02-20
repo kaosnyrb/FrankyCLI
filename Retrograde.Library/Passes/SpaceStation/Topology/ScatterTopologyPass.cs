@@ -284,55 +284,41 @@ namespace Retrograde.Passes.SpaceStation
             string district,
             HashSet<string> usedPrefabIds)
         {
-            var listKey = roomUtils.listName + "_" + tileset;
-            if (roomUtils.roomTemplates.TryGetValue(listKey, out var formList) &&
-                formList?.Items != null &&
-                formList.Items.Count > 0)
+            // allCandidates is pre-built and cached by RoomUtils — no FindPackIn calls here.
+            var allCandidates = roomUtils.GetAllCandidatesForDistrict(tileset, district);
+            if (allCandidates.Count == 0)
+                return roomUtils.GetRoom(tileset, district);
+
+            // Single pass: sort into four buckets matching the original fallback priority.
+            List<string> unusedNonBlockers = null; // preferred
+            List<string> unusedBlockers    = null; // fallback 1: any unused
+            List<string> usedNonBlockers   = null; // fallback 2: non-blockers (reuse allowed)
+            // usedBlockers not tracked separately — allCandidates covers fallback 3
+
+            foreach (var id in allCandidates)
             {
-                var allCandidates = new List<string>();
-
-                foreach (var item in formList.Items)
+                bool isBlocker = id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) >= 0;
+                if (usedPrefabIds.Contains(id))
                 {
-                    var packIn = RoomUtils.FindPackIn(item.FormKey);
-                    if (packIn == null || string.IsNullOrEmpty(packIn.EditorID))
-                        continue;
-
-                    if (!string.IsNullOrEmpty(district) &&
-                        !packIn.EditorID.Contains(district, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    allCandidates.Add(packIn.EditorID);
+                    if (!isBlocker) (usedNonBlockers ??= new List<string>()).Add(id);
                 }
-
-                var unusedRooms = allCandidates
-                    .Where(id => !usedPrefabIds.Contains(id) &&
-                                 id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
-                    .ToList();
-
-                if (unusedRooms.Count > 0)
-                    return unusedRooms[RandomProvider.Random.Next(unusedRooms.Count)];
-
-                var unusedAny = allCandidates
-                    .Where(id => !usedPrefabIds.Contains(id))
-                    .ToList();
-
-                if (unusedAny.Count > 0)
-                    return unusedAny[RandomProvider.Random.Next(unusedAny.Count)];
-
-                var rooms = allCandidates
-                    .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
-                    .ToList();
-
-                if (rooms.Count > 0)
-                    return rooms[RandomProvider.Random.Next(rooms.Count)];
-
-                if (allCandidates.Count > 0)
-                    return allCandidates[RandomProvider.Random.Next(allCandidates.Count)];
+                else
+                {
+                    if (!isBlocker) (unusedNonBlockers ??= new List<string>()).Add(id);
+                    else            (unusedBlockers    ??= new List<string>()).Add(id);
+                }
             }
 
-            return roomUtils.GetRoom(tileset, district);
+            if (unusedNonBlockers?.Count > 0)
+                return unusedNonBlockers[RandomProvider.Random.Next(unusedNonBlockers.Count)];
+
+            if (unusedBlockers?.Count > 0)
+                return unusedBlockers[RandomProvider.Random.Next(unusedBlockers.Count)];
+
+            if (usedNonBlockers?.Count > 0)
+                return usedNonBlockers[RandomProvider.Random.Next(usedNonBlockers.Count)];
+
+            return allCandidates[RandomProvider.Random.Next(allCandidates.Count)];
         }
 
         private static string DeriveDistrictType(string roomList, string provided, string fallback)

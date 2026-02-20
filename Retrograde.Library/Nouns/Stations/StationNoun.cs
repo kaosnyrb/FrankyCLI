@@ -202,6 +202,40 @@ namespace Retrograde.Nouns.Stations
                     formLinkDataComponent.Links[0].LinkedForm = ShipInteriorCell.ToNullableLink<IStarfieldMajorRecordGetter>();
                     formLinkDataComponent.Links[1].LinkedForm = ExteriorCell.ToNullableLink<IStarfieldMajorRecordGetter>();
                 }
+                if (typestring == "Mutagen.Bethesda.Starfield.SpaceshipAIActorComponent")
+                {
+                    SpaceshipAIActorComponent aiActorComponent = (SpaceshipAIActorComponent)component;
+                    var sourceFormKey = aiActorComponent.SpaceshipAIActor.FormKey;
+
+                    if (!sourceFormKey.IsNull)
+                    {
+                        // Check if already cloned into target mod
+                        var existingNpc = targetMod.Npcs.FirstOrDefault(n => n.FormKey == sourceFormKey);
+                        if (existingNpc != null)
+                        {
+                            aiActorComponent.SpaceshipAIActor.SetTo(existingNpc);
+                        }
+                        else
+                        {
+                            // Find source NPC in template mods (raw ID paired with each mod's ModKey)
+                            INpcGetter? sourceNpc = null;
+                            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                            {
+                                sourceNpc = tm.Npcs.FirstOrDefault(n => n.FormKey == new FormKey(tm.ModKey, sourceFormKey.ID));
+                                if (sourceNpc != null) break;
+                            }
+
+                            if (sourceNpc != null)
+                            {
+                                // Clone into target mod with a fresh FormKey, no template dependency
+                                var clonedNpc = NPCTools.CloneNPC(targetMod, sourceNpc.DeepCopy());
+                                targetMod.Npcs.Add(clonedNpc);
+                                aiActorComponent.SpaceshipAIActor.SetTo(clonedNpc);
+                            }
+                            // else: NPC is from Starfield.esm — keep reference as-is
+                        }
+                    }
+                }
             }
             targetMod.GenericBaseForms.Add(instance);
 

@@ -134,20 +134,18 @@ namespace Retrograde.Chains
             newQuest.SetQuestReferenceAlias("BountyNpc", stationNoun.dungeonState.BossPlacedNpc.FormKey);
 
             //Add any items to remove to a list if we need to. These are keys etc
-            if (stationNoun.dungeonState.ItemsToRemove.Count > 0 )
+            //Note we always do this to stop template dependainces.
+            var frmlst = new FormList(targetMod)
             {
-                var frmlst = new FormList(targetMod)
-                {
-                    EditorID = stationname + "_cleanupitems",
-                    Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
-                };
-                for(int i = 0; i < stationNoun.dungeonState.ItemsToRemove.Count; i++)
-                {
-                    frmlst.Items.Add(stationNoun.dungeonState.ItemsToRemove[i]);
-                }
-                targetMod.FormLists.Add(frmlst);
-                newQuest.SetScriptProperty("retrograde_bounty_quest", "ItemsToRemove", frmlst.ToLink());
+                EditorID = stationname + "_cleanupitems",
+                Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
+            };
+            for(int i = 0; i < stationNoun.dungeonState.ItemsToRemove.Count; i++)
+            {
+                frmlst.Items.Add(stationNoun.dungeonState.ItemsToRemove[i]);
             }
+            targetMod.FormLists.Add(frmlst);
+            newQuest.SetScriptProperty("retrograde_bounty_quest", "ItemsToRemove", frmlst.ToLink());
 
             newQuest.instance.MissionBoardDescription = GenerateMissionDescription(faction, stationDesign);
 

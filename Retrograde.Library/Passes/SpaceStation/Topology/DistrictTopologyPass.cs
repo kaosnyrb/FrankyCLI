@@ -374,45 +374,33 @@ namespace Retrograde.Passes.SpaceStation
             string district,
             HashSet<string> usedPrefabIds)
         {
-            var listKey = roomUtils.listName + "_" + tileset;
-            if (roomUtils.roomTemplates.TryGetValue(listKey, out var formList) &&
-                formList?.Items != null &&
-                formList.Items.Count > 0)
+            // allCandidates is pre-built and cached by RoomUtils — no FindPackIn calls here.
+            var allCandidates = roomUtils.GetAllCandidatesForDistrict(tileset, district);
+            if (allCandidates.Count == 0)
+                return null;
+
+            List<string> unusedNonBlockers = null;
+            List<string> unusedBlockers = null;
+
+            foreach (var id in allCandidates)
             {
-                var unusedCandidates = new List<string>();
+                if (usedPrefabIds.Contains(id)) continue;
 
-                foreach (var item in formList.Items)
-                {
-                    var packIn = RoomUtils.FindPackIn(item.FormKey);
-                    if (packIn == null || string.IsNullOrEmpty(packIn.EditorID))
-                        continue;
-
-                    if (!string.IsNullOrEmpty(district) &&
-                        !packIn.EditorID.Contains(district, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    if (usedPrefabIds.Contains(packIn.EditorID))
-                        continue;
-
-                    unusedCandidates.Add(packIn.EditorID);
-                }
-
-                var unusedRooms = unusedCandidates
-                    .Where(id => id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
-                    .ToList();
-
-                if (unusedRooms.Count > 0)
-                    return GlobalRoomTracker.IsLoaded
-                        ? GlobalRoomTracker.ChooseWeighted(unusedRooms)
-                        : unusedRooms[RandomProvider.Random.Next(unusedRooms.Count)];
-
-                if (unusedCandidates.Count > 0)
-                    return GlobalRoomTracker.IsLoaded
-                        ? GlobalRoomTracker.ChooseWeighted(unusedCandidates)
-                        : unusedCandidates[RandomProvider.Random.Next(unusedCandidates.Count)];
+                if (id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                    (unusedNonBlockers ??= new List<string>()).Add(id);
+                else
+                    (unusedBlockers ??= new List<string>()).Add(id);
             }
+
+            if (unusedNonBlockers?.Count > 0)
+                return GlobalRoomTracker.IsLoaded
+                    ? GlobalRoomTracker.ChooseWeighted(unusedNonBlockers)
+                    : unusedNonBlockers[RandomProvider.Random.Next(unusedNonBlockers.Count)];
+
+            if (unusedBlockers?.Count > 0)
+                return GlobalRoomTracker.IsLoaded
+                    ? GlobalRoomTracker.ChooseWeighted(unusedBlockers)
+                    : unusedBlockers[RandomProvider.Random.Next(unusedBlockers.Count)];
 
             return null;
         }

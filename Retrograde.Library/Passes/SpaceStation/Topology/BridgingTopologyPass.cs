@@ -519,29 +519,10 @@ namespace Retrograde.Passes.SpaceStation
 
         private static List<string> BuildPrefabCandidates(string tileset, HashSet<string> usedPrefabIds, List<RoomUtils> roomUtils, string districtFilter)
         {
+            // Use pre-cached candidates from each RoomUtils — no FindPackIn calls.
             var allCandidates = new List<string>();
-
             foreach (var utils in roomUtils)
-            {
-                var listKey = utils.listName + "_" + tileset;
-                if (!utils.roomTemplates.TryGetValue(listKey, out var formList) || formList?.Items == null || formList.Items.Count == 0)
-                    continue;
-
-                foreach (var item in formList.Items)
-                {
-                    var packIn = RoomUtils.FindPackIn(item.FormKey);
-                    if (packIn == null || string.IsNullOrEmpty(packIn.EditorID))
-                        continue;
-
-                    if (!string.IsNullOrEmpty(districtFilter) &&
-                        !packIn.EditorID.Contains(districtFilter, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    allCandidates.Add(packIn.EditorID);
-                }
-            }
+                allCandidates.AddRange(utils.GetAllCandidatesForDistrict(tileset, districtFilter));
 
             var distinct = allCandidates.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 

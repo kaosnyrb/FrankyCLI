@@ -1,11 +1,12 @@
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
 using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Retrograde.Nouns.Stations;
 using Retrograde.StationDesigns;
 using Retrograde.Utils;
-using Mutagen.Bethesda;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +83,20 @@ namespace Retrograde.Chains
             //Set the Cell so we can reset when we leave
             newQuest.SetScriptProperty("retrograde_quest", "StationCell", stationNoun.InteriorCell.ToLink<IStarfieldMajorRecordGetter>());
 
-            
+            //Add any items to remove to a list if we need to. These are keys etc
+            //Note we always do this to stop template dependainces.
+            var frmlst = new FormList(targetMod)
+            {
+                EditorID = stationname + "_cleanupitems",
+                Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
+            };
+            for (int i = 0; i < stationNoun.dungeonState.ItemsToRemove.Count; i++)
+            {
+                frmlst.Items.Add(stationNoun.dungeonState.ItemsToRemove[i]);
+            }
+            targetMod.FormLists.Add(frmlst);
+            newQuest.SetScriptProperty("retrograde_quest", "ItemsToRemove", frmlst.ToLink());
+
             //Add to POI tree
             var rg_se_poi_node = FindOrCreateNode(targetMod, "RG_SE_POI_Node");
 

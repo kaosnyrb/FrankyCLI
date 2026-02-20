@@ -529,4 +529,43 @@ var placed = new PlacedObject(RetrogradeContext.Current.TargetMod)
     XPCK = source.XPCK,
     Position = worldPos // override position/rotation as needed
 };
+
+## Inspecting Mutagen Types with ilspycmd
+
+When you need to know the properties of an unknown Mutagen type (e.g. a component referenced by the Starfield CK name like `BGSSpaceshipAIActor_Component`), use `ilspycmd` to decompile the Mutagen DLL directly. This is **much faster** than searching NuGet XML docs or exploring the codebase.
+
+### Find the Mutagen DLL
+
+```
+C:/Users/kaosn/.nuget/packages/mutagen.bethesda.starfield/<version>/lib/net8.0/Mutagen.Bethesda.Starfield.dll
+```
+
+Check the installed version with:
+```bash
+ls "C:/Users/kaosn/.nuget/packages/mutagen.bethesda.starfield/"
+```
+
+### Decompile a specific type
+
+```bash
+ilspycmd "C:/Users/kaosn/.nuget/packages/mutagen.bethesda.starfield/0.53.1/lib/net8.0/Mutagen.Bethesda.Starfield.dll" \
+  -t "Mutagen.Bethesda.Starfield.SpaceshipAIActorComponent"
+```
+
+This shows the C# class definition including all properties, types, and interfaces — exactly what you need to write code against it.
+
+### List all types matching a keyword
+
+When you don't know the exact Mutagen class name for a CK record type:
+
+```bash
+ilspycmd "C:/Users/kaosn/.nuget/packages/mutagen.bethesda.starfield/0.53.1/lib/net8.0/Mutagen.Bethesda.Starfield.dll" \
+  -l type 2>&1 | grep -i "spaceshipai"
+```
+
+This quickly maps CK names (e.g. `BGSSpaceshipAIActor_Component`) to Mutagen class names (e.g. `SpaceshipAIActorComponent`).
+
+### Naming convention
+
+CK record type `BGSFoo_Component` → Mutagen class `FooComponent`. Strip the `BGS` prefix and `_` separator.
 ```

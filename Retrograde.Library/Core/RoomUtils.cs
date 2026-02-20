@@ -39,6 +39,46 @@ public class RoomUtils
         PrebuildCandidateCache();
     }
 
+    /// <summary>
+    /// Returns the pre-cached list of all candidate EditorIDs for the given tileset and district
+    /// filter (builds and caches lazily on first access). The caller is responsible for filtering
+    /// out already-used IDs; this list never changes after construction.
+    /// </summary>
+    public List<string> GetAllCandidatesForDistrict(string tileset, string? district)
+    {
+        var listKey = listName + "_" + tileset;
+        if (!roomTemplates.TryGetValue(listKey, out var formList) || formList?.Items == null)
+            return new List<string>();
+
+        var typeKey = district ?? string.Empty;
+
+        if (!cachedCandidates.TryGetValue(listKey, out var typeMap))
+        {
+            typeMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            cachedCandidates[listKey] = typeMap;
+        }
+
+        if (!typeMap.TryGetValue(typeKey, out var candidates))
+        {
+            candidates = BuildCandidates(listKey, formList, string.IsNullOrEmpty(typeKey) ? null : typeKey);
+            typeMap[typeKey] = candidates;
+        }
+
+        return candidates;
+    }
+
+    /// <summary>
+    /// Returns all candidate EditorIDs across every tileset in this RoomUtils, with no district
+    /// filter applied. Uses the pre-built cache; no FindPackIn calls.
+    /// </summary>
+    public IEnumerable<string> GetAllCandidatesAllTilesets()
+    {
+        foreach (var typeMap in cachedCandidates.Values)
+            if (typeMap.TryGetValue(string.Empty, out var candidates))
+                foreach (var c in candidates)
+                    yield return c;
+    }
+
     public string GetRoom(string theme, string? type = null)
     {
         if (theme.Contains("DUPLICATE"))

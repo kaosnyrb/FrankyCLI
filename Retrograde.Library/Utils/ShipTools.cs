@@ -1,6 +1,7 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using System;
 using System.Collections.Generic;
 
@@ -221,7 +222,8 @@ public static class ShipTools
     }
 
     /// <summary>
-    /// Gets the gang members form list for the specified ship faction.
+    /// Gets (or creates) a gang members form list for the specified ship faction.
+    /// Creates a copy in the target mod to avoid template dependencies.
     /// </summary>
     public static IFormLink<IStarfieldMajorRecordGetter>? GetGangList(uint ShipFaction)
     {
@@ -234,19 +236,35 @@ public static class ShipTools
             _ => "duout_GangMembersList_Space_Spacer"
         };
 
-        foreach (var record in RetrogradeContext.Current.TargetMod.EnumerateMajorRecords())
-        {
-            if (record.EditorID != null && record.EditorID.Contains(ganglistEditorID))
-                return record.ToLink<IStarfieldMajorRecordGetter>();
-        }
+        var targetMod = RetrogradeContext.Current.TargetMod;
+
+        // Return already-created copy if present
+        string newEditorID = "frmlist_ganglist_" + ganglistEditorID;
+        var existing = targetMod.FormLists.FirstOrDefault(fl => fl.EditorID == newEditorID);
+        if (existing != null)
+            return existing.ToLink<IStarfieldMajorRecordGetter>();
+
+        // Find the template formlist
+        IFormListGetter? templateList = null;
         foreach (var tm in RetrogradeContext.Current.TemplateMods)
         {
-            foreach (var record in tm.EnumerateMajorRecords())
-            {
-                if (record.EditorID != null && record.EditorID.Contains(ganglistEditorID))
-                    return record.ToLink<IStarfieldMajorRecordGetter>();
-            }
+            templateList = tm.FormLists.FirstOrDefault(fl => fl.EditorID != null && fl.EditorID.Contains(ganglistEditorID));
+            if (templateList != null) break;
         }
-        return null;
+
+        if (templateList == null) return null;
+
+        // Create a new formlist in the target mod copying items from the template
+        var newList = new FormList(targetMod)
+        {
+            EditorID = newEditorID,
+            Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
+        };
+
+        foreach (var item in templateList.Items)
+            newList.Items.Add(item);
+
+        targetMod.FormLists.Add(newList);
+        return newList.ToLink<IStarfieldMajorRecordGetter>();
     }
 }

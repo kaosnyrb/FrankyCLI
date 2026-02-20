@@ -195,29 +195,18 @@ namespace Retrograde.Passes.SpaceStation
         /// </summary>
         private string ChoosePrefabId(RoomUtils roomUtils, string tileset)
         {
-            var listKey = roomUtils.listName + "_" + tileset;
-            if (roomUtils.roomTemplates.TryGetValue(listKey, out var formList) &&
-                formList?.Items != null &&
-                formList.Items.Count > 0)
+            // Use pre-cached candidates — no FindPackIn calls here.
+            var allCandidates = roomUtils.GetAllCandidatesForDistrict(tileset, null);
+
+            List<string> nonBlockers = null;
+            foreach (var id in allCandidates)
             {
-                var candidates = new List<string>();
-
-                foreach (var item in formList.Items)
-                {
-                    var packIn = RoomUtils.FindPackIn(item.FormKey);
-                    if (packIn == null || string.IsNullOrEmpty(packIn.EditorID))
-                        continue;
-
-                    // Skip blockers
-                    if (packIn.EditorID.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) >= 0)
-                        continue;
-
-                    candidates.Add(packIn.EditorID);
-                }
-
-                if (candidates.Count > 0)
-                    return candidates[RandomProvider.Random.Next(candidates.Count)];
+                if (id.IndexOf("rg_blocker", StringComparison.OrdinalIgnoreCase) < 0)
+                    (nonBlockers ??= new List<string>()).Add(id);
             }
+
+            if (nonBlockers?.Count > 0)
+                return nonBlockers[RandomProvider.Random.Next(nonBlockers.Count)];
 
             return null;
         }
