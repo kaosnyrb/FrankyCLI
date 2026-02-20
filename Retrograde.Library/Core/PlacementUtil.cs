@@ -91,15 +91,33 @@ public class PlacementUtil
         _pendingPersistentPlacements.Clear();
     }
 
+    /// <summary>
+    /// Immediately unpacks a PackIn into the given cell, bypassing the deferred queue.
+    /// Returns all placed objects paired with their source EditorID, so callers can identify
+    /// specific objects (e.g. the exit door) by name without re-reading the prefab cell.
+    /// </summary>
+    public List<(string? SourceEditorId, IPlaced Placed)> UnpackNow(
+        Cell cell, FormKey packinFormKey, P3Float worldPos, int yawSteps, bool temporary = true)
+    {
+        var targetMod = RetrogradeContext.Current.TargetMod;
+        var templateMods = RetrogradeContext.Current.TemplateMods;
+        var results = new List<(string?, IPlaced)>();
+        int count = UnpackPrefab(cell, packinFormKey, worldPos, yawSteps, targetMod, templateMods, temporary, results);
+        if (count == 0)
+            Console.WriteLine($"[PlacementUtil] WARNING: PackIn {packinFormKey} resolved to 0 objects");
+        return results;
+    }
+
     private int UnpackPrefab(Cell cell, FormKey packinFormKey, P3Float worldPos, int yawSteps,
-        StarfieldMod targetMod, IReadOnlyList<IStarfieldModGetter> templateMods, bool temporary)
+        StarfieldMod targetMod, IReadOnlyList<IStarfieldModGetter> templateMods, bool temporary,
+        List<(string? SourceEditorId, IPlaced Placed)> results = null)
     {
         var prefabCell = ResolvePrefabCell(packinFormKey, templateMods);
         if (prefabCell == null)
             return 0;
 
         // Buffer clones at this level so we can patch ProjectedDecalReferences before committing.
-        var clonedAtThisLevel = new List<IPlaced>();
+        var clonedAtThisLevel = new List<(string? SourceEditorId, IPlaced Placed)>();
         var formKeyRemap = new Dictionary<FormKey, FormKey>();
         int count = 0;
 
@@ -118,7 +136,7 @@ public class PlacementUtil
                                         + RgRotation.RotationToP3Float(yawSteps);
                     int nestedYawSteps = RotationZToYawSteps(nestedWorldRot.Z);
                     count += UnpackPrefab(cell, sourcePo.Base.FormKey, nestedWorldPos, nestedYawSteps,
-                        targetMod, templateMods, temporary);
+                        targetMod, templateMods, temporary, results);
                 }
                 else
                 {
@@ -126,7 +144,7 @@ public class PlacementUtil
                     if (cloned != null)
                     {
                         formKeyRemap[sourcePo.FormKey] = cloned.FormKey;
-                        clonedAtThisLevel.Add(cloned);
+                        clonedAtThisLevel.Add((sourcePo.EditorID, cloned));
                     }
                 }
             }
@@ -136,13 +154,13 @@ public class PlacementUtil
                 if (cloned != null)
                 {
                     formKeyRemap[sourceNpc.FormKey] = cloned.FormKey;
-                    clonedAtThisLevel.Add(cloned);
+                    clonedAtThisLevel.Add((sourceNpc.EditorID, cloned));
                 }
             }
         }
 
         // Patch ProjectedDecalReferences so they point to the cloned objects, not the prefab originals.
-        foreach (var obj in clonedAtThisLevel)
+        foreach (var (_, obj) in clonedAtThisLevel)
         {
             if (obj is PlacedObject po && po.ProjectedDecalReferences != null)
             {
@@ -157,10 +175,11 @@ public class PlacementUtil
 
         // Add buffered clones to cell.
         var targetList = temporary ? cell.Temporary : cell.Persistent;
-        foreach (var obj in clonedAtThisLevel)
+        foreach (var (srcId, obj) in clonedAtThisLevel)
         {
             targetList.Add(obj);
             PlacedObjects.Add(obj);
+            results?.Add((srcId, obj));
             count++;
         }
 
@@ -207,108 +226,108 @@ public class PlacementUtil
         var worldPos = tilePos + rotatedLocal;
         var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
-        return new PlacedObject(targetMod)
+        var placed = new PlacedObject(targetMod)
         {
             // Identity / transform
-            Base                            = baseFormKey.Value.ToNullableLink<IPlaceableObjectGetter>(),
-            Position                        = worldPos,
-            Rotation                        = worldRot,
-            Scale                           = source.Scale,
-            StarfieldMajorRecordFlags       = source.StarfieldMajorRecordFlags,
+            Base = baseFormKey.Value.ToNullableLink<IPlaceableObjectGetter>(),
+            Position = worldPos,
+            Rotation = worldRot,
+            Scale = source.Scale,
+            StarfieldMajorRecordFlags = source.StarfieldMajorRecordFlags,
 
             // Primitive / volume
-            Primitive                       = source.Primitive?.DeepCopy(),
-            VolumeData                      = source.VolumeData?.DeepCopy(),
+            Primitive = source.Primitive?.DeepCopy(),
+            VolumeData = source.VolumeData?.DeepCopy(),
             VolumeReflectionProbeOffsetIntensity = source.VolumeReflectionProbeOffsetIntensity?.DeepCopy(),
 
             // Lighting
-            Lighting                        = source.Lighting?.DeepCopy(),
-            LightBarndoorData               = source.LightBarndoorData?.DeepCopy(),
-            LightArea                       = source.LightArea?.DeepCopy(),
-            LightFlicker                    = source.LightFlicker?.DeepCopy(),
-            LightRoundedness                = source.LightRoundedness?.DeepCopy(),
-            LightColors                     = source.LightColors?.Select(lc => lc.DeepCopy()).ToExtendedList(),
-            GoboAnimatedProperties          = source.GoboAnimatedProperties?.DeepCopy(),
-            LightLayerData                  = source.LightLayerData,
-            LightStaticShadowMap            = source.LightStaticShadowMap,
-            LightVolumetricData             = source.LightVolumetricData,
-            LightRadiusFalloutExponent      = source.LightRadiusFalloutExponent,
+            Lighting = source.Lighting?.DeepCopy(),
+            LightBarndoorData = source.LightBarndoorData?.DeepCopy(),
+            LightArea = source.LightArea?.DeepCopy(),
+            LightFlicker = source.LightFlicker?.DeepCopy(),
+            LightRoundedness = source.LightRoundedness?.DeepCopy(),
+            LightColors = source.LightColors?.Select(lc => lc.DeepCopy()).ToExtendedList(),
+            GoboAnimatedProperties = source.GoboAnimatedProperties?.DeepCopy(),
+            LightLayerData = source.LightLayerData,
+            LightStaticShadowMap = source.LightStaticShadowMap,
+            LightVolumetricData = source.LightVolumetricData,
+            LightRadiusFalloutExponent = source.LightRadiusFalloutExponent,
 
             // Ownership / lock
-            Ownership                       = source.Ownership?.DeepCopy(),
-            Lock                            = source.Lock?.DeepCopy(),
-            FactionRank                     = source.FactionRank,
+            Ownership = source.Ownership?.DeepCopy(),
+            Lock = source.Lock?.DeepCopy(),
+            FactionRank = source.FactionRank,
 
             // References / links
-            EnableParent                    = source.EnableParent?.DeepCopy(),
-            LinkedReferences                = source.LinkedReferences?.Select(lr => lr.DeepCopy()).ToExtendedList(),
-            LocationRefTypes                = source.LocationRefTypes?.ToExtendedList(),
-            LayeredMaterialSwaps            = source.LayeredMaterialSwaps?.ToExtendedList(),
-            SnapLinks                       = source.SnapLinks?.Select(s => s.DeepCopy()).ToExtendedList(),
-            PowerLinks                      = source.PowerLinks?.Select(pl => pl.DeepCopy()).ToExtendedList(),
-            ProjectedDecalReferences        = source.ProjectedDecalReferences?.ToExtendedList(),
-
-            // FormLink fields
-            Emittance                       = source.Emittance.FormKey.ToNullableLink<IEmittanceGetter>(),
-            ExternalEmittance               = source.ExternalEmittance?.DeepCopy(),
-            Layer                           = source.Layer.FormKey.ToNullableLink<ILayerGetter>(),
-            EncounterZone                   = source.EncounterZone.FormKey.ToNullableLink<ILocationGetter>(),
-            PersistentLocation              = source.PersistentLocation.FormKey.ToNullableLink<ILocationGetter>(),
-            Location                        = source.Location.FormKey.ToNullableLink<ILocationGetter>(),
-            ReferenceGroup                  = FormKey.Null.ToNullableLink<IReferenceGroupGetter>(),
-            XPCK                            = FormKey.Null.ToNullableLink<IReferenceGroupGetter>(),
-            SourcePackIn                    = source.SourcePackIn.FormKey.ToNullableLink<IPackInGetter>(),
-            AttachRef                       = source.AttachRef.FormKey.ToNullableLink<IPlacedGetter>(),
-            TeleportName                    = source.TeleportName.FormKey.ToNullableLink<IMessageGetter>(),
-            TimeOfDay                       = source.TimeOfDay.FormKey.ToNullableLink<ITimeOfDayRecordGetter>(),
-            XLIB                            = source.XLIB.FormKey.ToNullableLink<ILeveledItemGetter>(),
+            EnableParent = source.EnableParent?.DeepCopy(),
+            LinkedReferences = source.LinkedReferences?.Select(lr => lr.DeepCopy()).ToExtendedList(),
+            LocationRefTypes = source.LocationRefTypes?.ToExtendedList(),
+            LayeredMaterialSwaps = source.LayeredMaterialSwaps?.ToExtendedList(),
+            SnapLinks = source.SnapLinks?.Select(s => s.DeepCopy()).ToExtendedList(),
+            PowerLinks = source.PowerLinks?.Select(pl => pl.DeepCopy()).ToExtendedList(),
+            ProjectedDecalReferences = source.ProjectedDecalReferences?.ToExtendedList(),
 
             // Complex sub-records
-            TeleportDestination             = source.TeleportDestination?.DeepCopy(),
-            NavigationDoorLink              = source.NavigationDoorLink?.DeepCopy(),
-            MapMarker                       = source.MapMarker?.DeepCopy(),
-            Patrol                          = source.Patrol?.DeepCopy(),
-            Collision                       = source.Collision?.DeepCopy(),
-            CurrentZoneCell                 = source.CurrentZoneCell?.DeepCopy(),
-            DebugText                       = source.DebugText?.DeepCopy(),
-            ProjectedDecal                  = source.ProjectedDecal?.DeepCopy(),
-            Spline                          = source.Spline?.DeepCopy(),
-            GroupedPackIn                   = source.GroupedPackIn?.DeepCopy(),
+            ExternalEmittance = source.ExternalEmittance?.DeepCopy(),
+            TeleportDestination = source.TeleportDestination?.DeepCopy(),
+            NavigationDoorLink = source.NavigationDoorLink?.DeepCopy(),
+            MapMarker = source.MapMarker?.DeepCopy(),
+            Patrol = source.Patrol?.DeepCopy(),
+            Collision = source.Collision?.DeepCopy(),
+            CurrentZoneCell = source.CurrentZoneCell?.DeepCopy(),
+            DebugText = source.DebugText?.DeepCopy(),
+            ProjectedDecal = source.ProjectedDecal?.DeepCopy(),
+            Spline = source.Spline?.DeepCopy(),
+            //GroupedPackIn = source.GroupedPackIn?.DeepCopy(),  //This is just groups and we don't need this
 
             // Properties / components / scripts
-            Properties                      = source.Properties?.Select(p => p.DeepCopy()).ToExtendedList(),
-            Components                      = source.Components?.Select(c => c.DeepCopy()).ToExtendedList(),
-            VirtualMachineAdapter           = source.VirtualMachineAdapter?.DeepCopy(),
-            RagdollData                     = source.RagdollData?.Select(r => r.DeepCopy()).ToExtendedList(),
-            Traversals                      = source.Traversals?.Select(t => t.DeepCopy()).ToExtendedList(),
-            PlacedObjectXCZRXCZA            = source.PlacedObjectXCZRXCZA?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Properties = source.Properties?.Select(p => p.DeepCopy()).ToExtendedList(),
+            Components = source.Components?.Select(c => c.DeepCopy()).ToExtendedList(),
+            VirtualMachineAdapter = source.VirtualMachineAdapter?.DeepCopy(),
+            RagdollData = source.RagdollData?.Select(r => r.DeepCopy()).ToExtendedList(),
+            Traversals = source.Traversals?.Select(t => t.DeepCopy()).ToExtendedList(),
+            PlacedObjectXCZRXCZA = source.PlacedObjectXCZRXCZA?.Select(x => x.DeepCopy()).ToExtendedList(),
 
             // Simple value fields
-            Count                           = source.Count,
-            Action                          = source.Action,
-            LevelModifier                   = source.LevelModifier,
-            Radius                          = source.Radius,
-            IsIgnoredBySandbox              = source.IsIgnoredBySandbox,
-            IsLinkedRefTransient            = source.IsLinkedRefTransient,
-            IsActivationPoint               = source.IsActivationPoint,
-            OpenByDefault                   = source.OpenByDefault,
-            BlueprintPartOrigin             = source.BlueprintPartOrigin,
-            BOLV                            = source.BOLV,
-            XTRI                            = source.XTRI,
-            XALG                            = source.XALG,
-            HeadTrackingWeight              = source.HeadTrackingWeight,
-            HealthPercent                   = source.HealthPercent,
-            GeometryDirtinessScale          = source.GeometryDirtinessScale,
-            NumTraversalFluffBytes          = source.NumTraversalFluffBytes,
-            RagdollBipedRotation            = source.RagdollBipedRotation,
-            ConstrainedDecal                = source.ConstrainedDecal,
-            Comments                        = source.Comments,
+            Count = source.Count,
+            Action = source.Action,
+            LevelModifier = source.LevelModifier,
+            Radius = source.Radius,
+            IsIgnoredBySandbox = source.IsIgnoredBySandbox,
+            IsLinkedRefTransient = source.IsLinkedRefTransient,
+            IsActivationPoint = source.IsActivationPoint,
+            OpenByDefault = source.OpenByDefault,
+            BlueprintPartOrigin = source.BlueprintPartOrigin,
+            BOLV = source.BOLV,
+            XTRI = source.XTRI,
+            XALG = source.XALG,
+            HeadTrackingWeight = source.HeadTrackingWeight,
+            HealthPercent = source.HealthPercent,
+            GeometryDirtinessScale = source.GeometryDirtinessScale,
+            NumTraversalFluffBytes = source.NumTraversalFluffBytes,
+            RagdollBipedRotation = source.RagdollBipedRotation,
+            ConstrainedDecal = source.ConstrainedDecal,
+            Comments = source.Comments,
 
             // Raw byte fields
-            XFLG                            = source.XFLG?.ToArray(),
-            XNSE                            = source.XNSE?.ToArray(),
-            XWCU                            = source.XWCU?.ToArray(),
+            XFLG = source.XFLG?.ToArray(),
+            XNSE = source.XNSE?.ToArray(),
+            XWCU = source.XWCU?.ToArray(),
         };
+
+        // FormLink fields — only set when source has a value (setter crashes on FormKey.Null)
+        if (!source.Emittance.IsNull) placed.Emittance = source.Emittance.FormKey.ToNullableLink<IEmittanceGetter>();
+        if (!source.Layer.IsNull) placed.Layer = source.Layer.FormKey.ToNullableLink<ILayerGetter>();
+        if (!source.EncounterZone.IsNull) placed.EncounterZone = source.EncounterZone.FormKey.ToNullableLink<ILocationGetter>();
+        if (!source.PersistentLocation.IsNull) placed.PersistentLocation = source.PersistentLocation.FormKey.ToNullableLink<ILocationGetter>();
+        if (!source.Location.IsNull) placed.Location = source.Location.FormKey.ToNullableLink<ILocationGetter>();
+        if (!source.SourcePackIn.IsNull) placed.SourcePackIn = source.SourcePackIn.FormKey.ToNullableLink<IPackInGetter>();
+        if (!source.AttachRef.IsNull) placed.AttachRef = source.AttachRef.FormKey.ToNullableLink<IPlacedGetter>();
+        if (!source.TeleportName.IsNull) placed.TeleportName = source.TeleportName.FormKey.ToNullableLink<IMessageGetter>();
+        if (!source.TimeOfDay.IsNull) placed.TimeOfDay = source.TimeOfDay.FormKey.ToNullableLink<ITimeOfDayRecordGetter>();
+        if (!source.XLIB.IsNull) placed.XLIB = source.XLIB.FormKey.ToNullableLink<ILeveledItemGetter>();
+
+        return placed;
     }
 
     private static PlacedNpc? ClonePlacedNpc(IPlacedNpcGetter source, P3Float tilePos, int yawSteps, StarfieldMod targetMod)
@@ -380,7 +399,6 @@ public class PlacementUtil
             ObjectBounds = source.ObjectBounds.DeepCopy(),
             DirtinessScale = source.DirtinessScale,
             XALG = source.XALG,
-            DefaultLayer = source.DefaultLayer.FormKey.ToNullableLink<ILayerGetter>(),
             Name = source.Name?.DeepCopy(),
             Time = source.Time,
             Radius = source.Radius,
@@ -404,7 +422,6 @@ public class PlacementUtil
             AdaptiveLightEv100Max = source.AdaptiveLightEv100Max,
             RadiusFalloutExponent = source.RadiusFalloutExponent,
             Gobo = source.Gobo,
-            Lens = source.Lens.FormKey.ToNullableLink<ILensFlareGetter>(),
             Barndoors = source.Barndoors.DeepCopy(),
             Roundness = source.Roundness.DeepCopy(),
             GoboData = source.GoboData.DeepCopy(),
@@ -414,6 +431,10 @@ public class PlacementUtil
             Model = source.Model?.DeepCopy(),
             SoundReference = source.SoundReference?.DeepCopy(),
         };
+
+        if (!source.Lens.IsNull) copy.Lens = source.Lens.FormKey.ToNullableLink<ILensFlareGetter>();
+        if (!source.DefaultLayer.IsNull) copy.DefaultLayer = source.Lens.FormKey.ToNullableLink<ILayerGetter>();
+
 
         targetMod.Lights.Add(copy);
         Console.WriteLine($"[PlacementUtil] Imported Light {source.EditorID} → {copy.FormKey}");
