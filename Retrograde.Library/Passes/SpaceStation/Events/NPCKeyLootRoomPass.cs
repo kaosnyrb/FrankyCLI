@@ -300,7 +300,7 @@ namespace Retrograde.Passes.SpaceStation
                 // Calculate the door object's world position
                 var rotatedDoorLocal = RgRotation.RotateYaw90(doorObjectInfo.Value.LocalPosition, yawSteps);
                 var doorObjectWorldPos = doorPos + rotatedDoorLocal;
-                var doorObjectWorldRot = doorObjectInfo.Value.LocalRotation + RgRotation.RotationToP3Float(yawSteps);
+                var doorObjectWorldRot = RgRotation.RotateYaw90(doorObjectInfo.Value.LocalRotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
                 // Create the door PlacedObject with Lock settings
                 _placedDoor = new PlacedObject(RetrogradeContext.Current.TargetMod)

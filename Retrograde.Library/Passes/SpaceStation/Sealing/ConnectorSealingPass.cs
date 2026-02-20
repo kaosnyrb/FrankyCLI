@@ -315,13 +315,18 @@ namespace Retrograde.Passes.SpaceStation
             return false;
         }
 
-        private static FormList FindBlockerFormList(string listEditorId)
+        private static IFormListGetter FindBlockerFormList(string listEditorId)
         {
             foreach (var fl in RetrogradeContext.Current.TargetMod.FormLists)
             {
                 if (string.Equals(fl.EditorID, listEditorId, StringComparison.OrdinalIgnoreCase))
                     return fl;
             }
+
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                foreach (var fl in tm.FormLists)
+                    if (string.Equals(fl.EditorID, listEditorId, StringComparison.OrdinalIgnoreCase))
+                        return fl;
 
             return null;
         }
@@ -330,7 +335,7 @@ namespace Retrograde.Passes.SpaceStation
         private static readonly Dictionary<Mutagen.Bethesda.Plugins.FormKey, List<string>> _blockerListCache
             = new();
 
-        private static string PickBlockerFromFormList(FormList list, string doorSize)
+        private static string PickBlockerFromFormList(IFormListGetter list, string doorSize)
         {
             if (list?.Items == null || list.Items.Count == 0)
                 return null;

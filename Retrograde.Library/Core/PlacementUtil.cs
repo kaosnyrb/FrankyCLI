@@ -59,7 +59,8 @@ public class PlacementUtil
         {
             if (placedObject is PlacedObject po && po.Base.FormKey.ModKey.Name != "Starfield")
             {
-                int unpacked = UnpackPrefab(cell, po, targetMod, templateMods, temporary: true);
+                int unpacked = UnpackPrefab(cell, po.Base.FormKey, po.Position,
+                    RotationZToYawSteps(po.Rotation.Z), targetMod, templateMods, temporary: true);
                 if (unpacked == 0)
                     Console.WriteLine($"[PlacementUtil] WARNING: PackIn {po.Base.FormKey} resolved to 0 objects");
             }
@@ -74,7 +75,8 @@ public class PlacementUtil
         {
             if (placedObject is PlacedObject po && po.Base.FormKey.ModKey.Name != "Starfield")
             {
-                int unpacked = UnpackPrefab(cell, po, targetMod, templateMods, temporary: false);
+                int unpacked = UnpackPrefab(cell, po.Base.FormKey, po.Position,
+                    RotationZToYawSteps(po.Rotation.Z), targetMod, templateMods, temporary: false);
                 if (unpacked == 0)
                     Console.WriteLine($"[PlacementUtil] WARNING: PackIn {po.Base.FormKey} resolved to 0 objects");
             }
@@ -89,15 +91,13 @@ public class PlacementUtil
         _pendingPersistentPlacements.Clear();
     }
 
-    private int UnpackPrefab(Cell cell, PlacedObject parent, StarfieldMod targetMod,
-        IReadOnlyList<IStarfieldModGetter> templateMods, bool temporary)
+    private int UnpackPrefab(Cell cell, FormKey packinFormKey, P3Float worldPos, int yawSteps,
+        StarfieldMod targetMod, IReadOnlyList<IStarfieldModGetter> templateMods, bool temporary)
     {
-        var prefabCell = ResolvePrefabCell(parent.Base.FormKey, templateMods);
+        var prefabCell = ResolvePrefabCell(packinFormKey, templateMods);
         if (prefabCell == null)
             return 0;
 
-        var tilePos = parent.Position;
-        int yawSteps = RotationZToYawSteps(parent.Rotation.Z);
         int count = 0;
 
         var entries = temporary ? prefabCell.Temporary : prefabCell.Persistent;
@@ -105,18 +105,32 @@ public class PlacementUtil
         {
             if (entry is IPlacedObjectGetter sourcePo)
             {
-                var cloned = ClonePlacedObject(sourcePo, tilePos, yawSteps, targetMod);
-                if (cloned != null)
+                // If this entry is itself a nested PackIn, recurse with composed transforms
+                if (sourcePo.Base.FormKey.ModKey.Name != "Starfield" &&
+                    IsPackIn(sourcePo.Base.FormKey, templateMods))
                 {
-                    if (temporary) cell.Temporary.Add(cloned);
-                    else cell.Persistent.Add(cloned);
-                    PlacedObjects.Add(cloned);
-                    count++;
+                    var nestedWorldPos = worldPos + RgRotation.RotateYaw90(sourcePo.Position, yawSteps);
+                    var nestedWorldRot = RgRotation.RotateYaw90(sourcePo.Rotation, yawSteps)
+                                        + RgRotation.RotationToP3Float(yawSteps);
+                    int nestedYawSteps = RotationZToYawSteps(nestedWorldRot.Z);
+                    count += UnpackPrefab(cell, sourcePo.Base.FormKey, nestedWorldPos, nestedYawSteps,
+                        targetMod, templateMods, temporary);
+                }
+                else
+                {
+                    var cloned = ClonePlacedObject(sourcePo, worldPos, yawSteps, targetMod);
+                    if (cloned != null)
+                    {
+                        if (temporary) cell.Temporary.Add(cloned);
+                        else cell.Persistent.Add(cloned);
+                        PlacedObjects.Add(cloned);
+                        count++;
+                    }
                 }
             }
             else if (entry is IPlacedNpcGetter sourceNpc)
             {
-                var cloned = ClonePlacedNpc(sourceNpc, tilePos, yawSteps, targetMod);
+                var cloned = ClonePlacedNpc(sourceNpc, worldPos, yawSteps, targetMod);
                 if (cloned != null)
                 {
                     if (temporary) cell.Temporary.Add(cloned);
@@ -128,6 +142,14 @@ public class PlacementUtil
         }
 
         return count;
+    }
+
+    private static bool IsPackIn(FormKey formKey, IReadOnlyList<IStarfieldModGetter> templateMods)
+    {
+        foreach (var tm in templateMods)
+            if (tm.PackIns.ContainsKey(formKey))
+                return true;
+        return false;
     }
 
     private static int RotationZToYawSteps(float radians)
@@ -160,7 +182,7 @@ public class PlacementUtil
 
         var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
         var worldPos = tilePos + rotatedLocal;
-        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+        var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
         return new PlacedObject(targetMod)
         {
@@ -272,7 +294,7 @@ public class PlacementUtil
 
         var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
         var worldPos = tilePos + rotatedLocal;
-        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+        var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
         return new PlacedNpc(targetMod)
         {

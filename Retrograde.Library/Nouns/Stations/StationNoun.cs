@@ -155,13 +155,15 @@ namespace Retrograde.Nouns.Stations
             //Set the Doors to be linked
 
             //Ship Exterior to Ship Int
+            //Station Exterior Docker to ship int Door
             ((PlacedObject)ExteriorCell.Persistent[0]).LinkedReferences[0].Reference = shipint_doorreference.ToLink<IPlacedGetter>();
 
             //Ship Int to Int
 
             //Clear  the docking door
             //This is wrong below, TODO
-            shipint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
+            //shipint_xmarker
+            //shipint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
 
             shipinttoint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
             int_doorreference.TeleportDestination.Door = shipinttoint_doorreference.ToLink<IPlacedObjectGetter>();

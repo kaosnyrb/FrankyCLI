@@ -229,7 +229,7 @@ namespace Retrograde.Passes.SpaceStation
 
             var rotatedLocal = RgRotation.RotateYaw90(source.Position, exitRoom.YawSteps);
             var worldPos = exitRoom.WorldPos + rotatedLocal;
-            var worldRot = source.Rotation + RgRotation.RotationToP3Float(exitRoom.YawSteps);
+            var worldRot = RgRotation.RotateYaw90(source.Rotation, exitRoom.YawSteps) + RgRotation.RotationToP3Float(exitRoom.YawSteps);
 
             var placed = new PlacedObject(RetrogradeContext.Current.TargetMod)
             {
