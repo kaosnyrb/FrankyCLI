@@ -1,4 +1,6 @@
-﻿using Mutagen.Bethesda.Starfield;
+﻿using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -212,7 +214,7 @@ namespace Retrograde.Utils
                                 Flags = refcell.Flags,
                                 GlobalDirtLayerMaterial = refcell.GlobalDirtLayerMaterial,
                                 Grid = refcell.Grid,
-                                ImageSpace = refcell.ImageSpace,
+                                ImageSpace = EnsureImageSpaceImported(refcell.ImageSpace),
                                 Lighting = refcell.Lighting,
                                 IsLinkedRefTransient = refcell.IsLinkedRefTransient,
                                 LightingTemplate = refcell.LightingTemplate,
@@ -238,6 +240,62 @@ namespace Retrograde.Utils
                             };
 
                 return cell;
+        }
+
+        /// <summary>
+        /// If the ImageSpace FormLink points to a template mod (not Starfield.esm),
+        /// copies the ImageSpace record into the target mod with a fresh FormKey
+        /// and returns a link to the new copy. Otherwise returns the original link.
+        /// </summary>
+        private static IFormLinkNullable<IImageSpaceGetter> EnsureImageSpaceImported(
+            IFormLinkNullable<IImageSpaceGetter> source)
+        {
+            if (source == null || source.IsNull)
+                return source;
+
+            var fk = source.FormKey;
+
+            // Starfield.esm records need no copying
+            if (fk.ModKey.Name == "Starfield")
+                return source;
+
+            var targetMod = RetrogradeContext.Current.TargetMod;
+
+            // Find the source record in template mods
+            IImageSpaceGetter? found = null;
+            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+            {
+                if (tm.ImageSpaces.TryGetValue(fk, out var tmImgs))
+                {
+                    found = tmImgs;
+                    break;
+                }
+            }
+
+            if (found == null)
+                return source; // can't locate it — leave reference as-is
+
+            // Check if we've already imported it (match by EditorID)
+            if (found.EditorID != null)
+            {
+                var existing = targetMod.ImageSpaces.FirstOrDefault(i => i.EditorID == found.EditorID);
+                if (existing != null)
+                    return existing.ToNullableLink<IImageSpaceGetter>();
+            }
+
+            // Create a new ImageSpace in the target mod and copy data across
+            var copied = new ImageSpace(targetMod)
+            {
+                EditorID = found.EditorID,
+                StarfieldMajorRecordFlags = found.StarfieldMajorRecordFlags,
+                Reflection = found.Reflection?.ToArray(),
+                ReflectionParent = found.ReflectionParent.FormKey.ToNullableLink<IWeatherSettingGetter>(),
+                ReflectionDiff = found.ReflectionDiff?.ToArray(),
+            };
+
+            targetMod.ImageSpaces.Add(copied);
+            Console.WriteLine($"[CellTools] Imported ImageSpace {found.EditorID} ({fk}) → {copied.FormKey}");
+            return copied.ToNullableLink<IImageSpaceGetter>();
         }
     }
 }
