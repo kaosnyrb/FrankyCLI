@@ -98,7 +98,7 @@ namespace Retrograde.Chains
             newQuest.SetScriptProperty("retrograde_quest", "ItemsToRemove", frmlst.ToLink());
 
             //Add to POI tree
-            var rg_se_poi_node = FindOrCreateNode(targetMod, "RG_SE_POI_Node",true);//Don't set conditions for testing
+            var rg_se_poi_node = FindOrCreateNode(targetMod, "RG_SE_POI_Node");
 
             rg_se_poi_node.Quests.Add(new StoryManagerQuest()
             {
@@ -108,7 +108,7 @@ namespace Retrograde.Chains
             return true;
         }
 
-        private static StoryManagerQuestNode FindOrCreateNode(StarfieldMod targetMod, string editorId, bool skipConditions = false)
+        private static StoryManagerQuestNode FindOrCreateNode(StarfieldMod targetMod, string editorId)
         {
             var existing = targetMod.StoryManagerQuestNodes.FirstOrDefault(r => r.EditorID == editorId);
             if (existing != null) return existing;
@@ -128,9 +128,8 @@ namespace Retrograde.Chains
                         MaxNumQuestsToRun = src.MaxNumQuestsToRun,
                         HoursUntilReset = src.HoursUntilReset,
                     };
-                    if (!skipConditions)
-                        foreach (var c in src.Conditions)
-                            node.Conditions.Add(c.DeepCopy());
+                    foreach (var c in src.Conditions)
+                        node.Conditions.Add(c.DeepCopy());
                     targetMod.StoryManagerQuestNodes.Add(node);
                     return node;
                 }

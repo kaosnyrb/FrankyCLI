@@ -97,15 +97,6 @@ switch (mode)
         return gen_coordtest.Generate(BuildArgs("gen_coordtest", args,
             modname: Get(args, 1, "RG_CoordTest")));
 
-    case "gen_rottest":
-        // gen_rottest [modname]
-        return gen_rottest.Generate(new[]
-        {
-            Get(args, 1, "RG_RotTest"),
-            "gen_rottest",
-            "dummy", "dummy", "dummy"
-        });
-
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -161,10 +152,6 @@ static void PrintHelp()
     Console.WriteLine("  gen_coordtest   [modname]");
     Console.WriteLine("                     Place coordinate test markers in a worldspace.");
     Console.WriteLine("                     Defaults: modname=RG_CoordTest");
-    Console.WriteLine();
-    Console.WriteLine("  gen_rottest     [modname]");
-    Console.WriteLine("                     Unpack rg_sts_trk_scom_001 at 0/90/180/270 degrees into an interior cell.");
-    Console.WriteLine("                     Prints all placed object rotations. Defaults: modname=RG_RotTest");
     Console.WriteLine();
     Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");

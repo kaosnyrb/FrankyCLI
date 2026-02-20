@@ -114,7 +114,8 @@ public class PlacementUtil
                     IsPackIn(sourcePo.Base.FormKey, templateMods))
                 {
                     var nestedWorldPos = worldPos + RgRotation.RotateYaw90(sourcePo.Position, yawSteps);
-                    var nestedWorldRot = sourcePo.Rotation + RgRotation.RotationToP3Float(yawSteps);
+                    var nestedWorldRot = RgRotation.RotateYaw90(sourcePo.Rotation, yawSteps)
+                                        + RgRotation.RotationToP3Float(yawSteps);
                     int nestedYawSteps = RotationZToYawSteps(nestedWorldRot.Z);
                     count += UnpackPrefab(cell, sourcePo.Base.FormKey, nestedWorldPos, nestedYawSteps,
                         targetMod, templateMods, temporary);
@@ -204,7 +205,7 @@ public class PlacementUtil
 
         var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
         var worldPos = tilePos + rotatedLocal;
-        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+        var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
         return new PlacedObject(targetMod)
         {
@@ -316,7 +317,7 @@ public class PlacementUtil
 
         var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
         var worldPos = tilePos + rotatedLocal;
-        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+        var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
         return new PlacedNpc(targetMod)
         {

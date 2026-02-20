@@ -186,7 +186,7 @@ public class TileInstantiationPass : IWorldspacePass
 
         var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
         var worldPos = tilePos + rotatedLocal;
-        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+        var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
         return new PlacedObject(targetMod)
         {
@@ -211,7 +211,7 @@ public class TileInstantiationPass : IWorldspacePass
 
         var rotatedLocal = RgRotation.RotateYaw90(source.Position, yawSteps);
         var worldPos = tilePos + rotatedLocal;
-        var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
+        var worldRot = RgRotation.RotateYaw90(source.Rotation, yawSteps) + RgRotation.RotationToP3Float(yawSteps);
 
         return new PlacedNpc(targetMod)
         {
