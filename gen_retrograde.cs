@@ -153,14 +153,33 @@ namespace FrankyCLI
                     bountyQuest.GenerateQuest(stationname, faction, size, stationDesign);
                 }
             }
+            // Build set of template mod keys (excluding Starfield.esm and the target mod)
+            var templateModKeys = new System.Collections.Generic.HashSet<ModKey>(
+                ModContextImpl.TemplateModsList
+                    .Select(m => m.ModKey)
+                    .Where(k => !k.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase)));
+
+            int templateRefCount = 0;
             foreach (var rec in myMod.EnumerateMajorRecords())
             {
-                //if (rec.EditorID != null)
-                //{
-                //    Console.WriteLine(rec.EditorID.ToString() + " : " + rec.FormKey.ToString());
-                //}
                 rec.IsCompressed = false;
+
+                // Check all FormLinks in this record for unresolved template mod references
+                foreach (var link in rec.EnumerateFormLinks())
+                {
+                    if (link.IsNull) continue;
+                    if (!templateModKeys.Contains(link.FormKey.ModKey)) continue;
+
+                    Console.WriteLine($"[TemplateRef] {rec.EditorID ?? rec.FormKey.ToString()} " +
+                                      $"({rec.GetType().Name}) → {link.FormKey}");
+                    templateRefCount++;
+                }
             }
+
+            if (templateRefCount > 0)
+                Console.WriteLine($"[TemplateRef] WARNING: {templateRefCount} unresolved template mod reference(s) found.");
+            else
+                Console.WriteLine("[TemplateRef] No unresolved template mod references.");
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             GlobalRoomTracker.Save();

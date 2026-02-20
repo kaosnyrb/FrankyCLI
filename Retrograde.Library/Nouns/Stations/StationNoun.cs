@@ -160,7 +160,8 @@ namespace Retrograde.Nouns.Stations
             //Ship Int to Int
 
             //Clear  the docking door
-            shipint_doorreference.TeleportDestination = null;
+            //This is wrong below, TODO
+            shipint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
 
             shipinttoint_doorreference.TeleportDestination.Door = int_doorreference.ToLink<IPlacedObjectGetter>();
             int_doorreference.TeleportDestination.Door = shipinttoint_doorreference.ToLink<IPlacedObjectGetter>();

@@ -292,13 +292,47 @@ foreach (var mod in RetrogradeContext.Current.TemplateMods)
 
 ### Cloning from Getter Types (Template Mods)
 
-Template mods (`IStarfieldModGetter`) return getter interfaces (`IPlacedObjectGetter`, `ICellGetter`). When cloning from getters into a mutable `PlacedObject`:
+Template mods (`IStarfieldModGetter`) return getter interfaces (`IPlacedObjectGetter`, `ICellGetter`). When cloning from getters into a mutable record:
 
-- **Simple value types** (P3Float, float?, int?, bool?, FormKey) assign directly
-- **FormLinks**: use `source.Base.FormKey.ToNullableLink<IPlaceableObjectGetter>()` to convert getter link to setter link
-- **Complex sub-objects** (Primitive, Lighting, Ownership, EnableParent, VolumeData, MapMarker): use `.DeepCopy()` on the getter
-- **Collection properties** (Components, LinkedReferences, etc.): also need `.DeepCopy()` or manual conversion — these can't be assigned directly from getter to setter
-- **Skip properties** that aren't needed rather than fighting type conversions — worldspace tiles typically only need Base, Position, Rotation, Scale, Primitive, VolumeData, Lighting
+| Source type | Conversion pattern |
+|---|---|
+| Simple value (int, float, bool, enum, P3Float) | Assign directly |
+| `IFormLinkNullableGetter<T>` | `source.Foo.FormKey.ToNullableLink<T>()` |
+| `IFormLinkGetter<T>` | `source.Foo.FormKey.ToLink<T>()` |
+| Complex sub-record (`IFooGetter`) | `source.Foo?.DeepCopy()` |
+| `IReadOnlyList<IFooGetter>` | `source.Foos?.Select(x => x.DeepCopy()).ToExtendedList()` |
+| `IReadOnlyList<IFormLinkGetter<T>>` | `source.Foos?.ToExtendedList()` (direct copy — types are compatible) |
+| `ReadOnlyMemorySlice<byte>?` | `source.Foo?.ToArray()` |
+
+### Eliminating Template Mod Dependencies for Base Records
+
+When a `PlacedObject.Base` points to a non-Starfield record (e.g. a custom `Light` in a template mod), clone that base record into the target mod with a fresh FormKey before creating the placed object. See `EnsureBaseImported` / `EnsureLightImported` in `PlacementUtil.cs`.
+
+Pattern for any new record type:
+
+```csharp
+// 1. Detect by checking the record group on each template mod
+foreach (var tm in templateMods)
+{
+    if (tm.Lights.TryGetValue(baseFormKey, out var light))
+        return EnsureLightImported(light, targetMod);
+    // add more: tm.Statics, tm.Activators, etc.
+}
+
+// 2. Clone: check EditorID dedup, then new T(targetMod) + copy all properties
+private static FormKey EnsureLightImported(ILightGetter source, StarfieldMod targetMod)
+{
+    var existing = targetMod.Lights.FirstOrDefault(l => l.EditorID == source.EditorID);
+    if (existing != null) return existing.FormKey;
+
+    var copy = new Light(targetMod) { EditorID = source.EditorID, Radius = source.Radius, /* ... */ };
+    targetMod.Lights.Add(copy); // REQUIRED — new T(targetMod) only allocates a FormKey, does NOT add to the group
+    Console.WriteLine($"[PlacementUtil] Imported Light {source.EditorID} → {copy.FormKey}");
+    return copy.FormKey;
+}
+```
+
+Same pattern applies to top-level records referenced from cells (e.g. `ImageSpace` in `CellTools.EnsureImageSpaceImported`).
 
 ### Filtering to Starfield.esm Only
 
@@ -317,8 +351,17 @@ var worldPos = tilePos + rotatedLocal;
 var worldRot = source.Rotation + RgRotation.RotationToP3Float(yawSteps);
 ```
 
+When unpacking from `PlacementUtil` (where the parent `PlacedObject` carries world rotation in radians):
+
+```csharp
+int yawSteps = (int)Math.Round(parent.Rotation.Z / (MathF.PI / 2f));
+yawSteps = ((yawSteps % 4) + 4) % 4;
+```
+
 ### Key Files
 
+- `PlacementUtil.cs` — `EnsureBaseImported` / `EnsureLightImported` / `ClonePlacedObject` (full field copy from getter)
+- `CellTools.cs` — `EnsureImageSpaceImported` (same pattern for top-level cell references)
 - `TileInstantiationPass.cs` — worldspace prefab unpacking (iterates PackIn cell contents)
 - `ShipMarkerPass.cs` — similar pattern for dungeon ship markers
 - `ExitTopologyPass.cs` — similar pattern for dungeon exit prefabs
