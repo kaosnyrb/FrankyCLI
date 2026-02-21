@@ -16,14 +16,14 @@ public class FortDesign : IWorldspaceDesign
     public float TileWorldSize => 4f;
     public string DesignName => "Fort";
 
-    public FortDesign(string templateWorldspaceEditorId = "DR001World")
+    public FortDesign(string templateWorldspaceEditorId = "DR001World", float scale = 0.25f)
     {
         _templateWorldspaceEditorId = templateWorldspaceEditorId;
         MapPasses = new List<IWorldspacePass>
         {
             new PackInLibraryPass(FortPackInIds()),
             new TerrainFlattenPass(),
-            new FortLayoutPass(),
+            new FortLayoutPass(scale),
             new TerrainRestorePass(),
         };
 

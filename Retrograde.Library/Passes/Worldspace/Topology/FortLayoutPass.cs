@@ -10,8 +10,11 @@ namespace Retrograde.Passes.Worldspace;
 /// gates, stairs, wall addons, large blocks, barracks/armory, small scatter.
 /// Ported from StarTiller FortCellGen.BuildMap().
 /// </summary>
-public class FortLayoutPass : IWorldspacePass
+/// <param name="scale">Controls the overall footprint of the fort (0.1 = tiny outpost, 1.0 = full fort).</param>
+public class FortLayoutPass(float scale = 1.0f) : IWorldspacePass
 {
+    private readonly float _scale = Math.Clamp(scale, 0.1f, 1.0f);
+
     public void RunPass(WorldspaceState state)
     {
         var rand = state.Rng;
@@ -20,10 +23,12 @@ public class FortLayoutPass : IWorldspacePass
         int centerx = 24;
         int centery = 24;
 
-        // Core cluster of 5x5 small tiles
-        for (int x = centerx - 6; x <= centerx + 6; x += 3)
+        // Core cluster: half-extent in multiples of 3 (full = 6 → 5x5, half = 3 → 3x3)
+        int coreHalf = (int)Math.Round(6.0 * _scale / 3.0) * 3;
+
+        for (int x = centerx - coreHalf; x <= centerx + coreHalf; x += 3)
         {
-            for (int y = centery - 6; y <= centery + 6; y += 3)
+            for (int y = centery - coreHalf; y <= centery + coreHalf; y += 3)
             {
                 map.placesmalltileonempty(x, y, "to_pkn_base", 0, "floor");
             }
@@ -36,12 +41,12 @@ public class FortLayoutPass : IWorldspacePass
         }
 
         // Directional rectangle petals
-        int numberofrects = 3 + rand.Next(4);
+        int numberofrects = Math.Max(1, (int)Math.Round((3 + rand.Next(4)) * _scale));
         for (int i = 0; i < numberofrects; i++)
         {
             int direction = rand.Next(4);
-            int rectx = (4 + rand.Next(2)) * 3;
-            int recty = (4 + rand.Next(2)) * 3;
+            int rectx = Math.Max(3, (int)Math.Round((4 + rand.Next(2)) * _scale) * 3);
+            int recty = Math.Max(3, (int)Math.Round((4 + rand.Next(2)) * _scale) * 3);
 
             switch (direction)
             {
@@ -130,7 +135,7 @@ public class FortLayoutPass : IWorldspacePass
         }
 
         // Place gates on walls (2-4, one per side max)
-        int gatecount = 2 + rand.Next(2);
+        int gatecount = Math.Max(1, (int)Math.Round((2 + rand.Next(2)) * _scale));
         List<int> usedRotations = new List<int>();
         for (int i = 0; i < 100 && gatecount > 0; i++)
         {
@@ -152,7 +157,7 @@ public class FortLayoutPass : IWorldspacePass
         }
 
         // Place stairs on walls (2-4, one per side max)
-        int staircount = 2 + rand.Next(2);
+        int staircount = Math.Max(1, (int)Math.Round((2 + rand.Next(2)) * _scale));
         usedRotations = new List<int>();
         for (int i = 0; i < 100 && staircount > 0; i++)
         {
@@ -194,7 +199,7 @@ public class FortLayoutPass : IWorldspacePass
         }
 
         // Place large blocks over groups of 9 base tiles
-        int largeblockcount = 2 + rand.Next(5);
+        int largeblockcount = Math.Max(0, (int)Math.Round((2 + rand.Next(5)) * _scale));
         for (int i = 0; i < largeblockcount; i++)
         {
             bool foundblock = false;
@@ -230,8 +235,8 @@ public class FortLayoutPass : IWorldspacePass
         // Convert one large block to armory
         PlaceSpecialLargeBlock(map, rand, "to_pkn_large_armory");
 
-        // Scatter 1000+ small detail blocks on base tiles
-        int blockcount = 1000 + rand.Next(10);
+        // Scatter small detail blocks on base tiles
+        int blockcount = Math.Max(50, (int)Math.Round((1000 + rand.Next(10)) * _scale));
         int attempts = 150000;
         for (int i = 0; i < blockcount; i++)
         {
