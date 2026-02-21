@@ -14,7 +14,7 @@ namespace Retrograde.Passes.Worldspace;
 /// </summary>
 public class TerrainRestorePass : IWorldspacePass
 {
-    private const int BlendVerts = 32; // ~25 overlay units of transition
+    private const int BlendVerts = 36;
 
     public void RunPass(WorldspaceState state)
     {
@@ -166,7 +166,7 @@ public class TerrainRestorePass : IWorldspacePass
         // Gap-zone vertices were never written (hard guard above), so the boundary toward
         // the uneditable edge cells is at original height and SmoothDirtyCellEdges won't
         // push a visible gradient into those cells.
-        btd.SmoothDirtyCellEdges(16);
+        btd.SmoothDirtyCellEdges(36);
 
         if (!RetrogradeContext.Quiet)
             Console.WriteLine($"[TerrainRestorePass] restored {restoredCells} cells outside fort footprint + 1-tile border (blend={BlendVerts}v)");

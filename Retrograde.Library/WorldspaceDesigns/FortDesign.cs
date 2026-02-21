@@ -35,9 +35,9 @@ public class FortDesign : IWorldspaceDesign
 
         ContentPasses = new List<IWorldspacePass>()
         {
-            new RockScatterPass(1.0f),
-            new VegetationScatterPass(1.0f),
-            new MapMarkerPass(MapMarkerPass.MarkerType.Industrial),
+            new RockScatterPass(0.5f),
+            new VegetationScatterPass(0.5f),
+            new MapMarkerPass(MapMarkerPass.MarkerType.MilitaryBase),
         };
     }
 
