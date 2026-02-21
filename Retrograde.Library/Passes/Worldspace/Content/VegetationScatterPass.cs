@@ -24,7 +24,7 @@ public class VegetationScatterPass : IWorldspacePass
     private const int   ClusterMinObjects = 2;
     private const int   ClusterMaxObjects = 5;
     /// <summary>Max allowed overlay-unit height delta across a tile's corners to qualify as flat.</summary>
-    private const float MaxHeightVariation = 3f;
+    private const float MaxHeightVariation = 2f;
     /// <summary>Max scatter offset (overlay units) from the tile centre for each cluster object.</summary>
     private const float ScatterRadius      = 1.5f;
     /// <summary>Trees are sunk this many overlay units below terrain so their roots don't float.</summary>
@@ -47,6 +47,17 @@ public class VegetationScatterPass : IWorldspacePass
 
     /// <summary>Conversion factor from overlay units to BTD-internal units (4096 BTD per 100 overlay).</summary>
     private const float OverlayToBtd = 4096f / 100f;
+
+    private readonly float _density;
+
+    /// <param name="density">
+    /// Multiplier applied to the spawn chance. 1.0 = default density.
+    /// Values below 1 thin out vegetation; values above 1 increase it (capped at 100% chance).
+    /// </param>
+    public VegetationScatterPass(float density = 1.0f)
+    {
+        _density = density;
+    }
 
     public void RunPass(WorldspaceState state)
     {
@@ -82,7 +93,7 @@ public class VegetationScatterPass : IWorldspacePass
                 if (btd != null && !IsTileFlat(btd, worldX, worldY, blocksize))
                     continue;
 
-                if (rand.NextDouble() > ClusterChance) continue;
+                if (rand.NextDouble() > ClusterChance * _density) continue;
 
                 // Route to the owning worldspace cell.
                 int cellX = (int)Math.Floor(worldX / 100f);
