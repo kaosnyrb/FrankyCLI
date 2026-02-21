@@ -83,6 +83,12 @@ public class WorldspaceState
     /// </summary>
     public FlatAreaBtdInfo? FlatAreaBtdData;
 
+    /// <summary>
+    /// World-space position for the map marker placed by <see cref="MapMarkerPass"/>.
+    /// If null, the marker is placed at the worldspace origin (0, 0) at terrain height.
+    /// </summary>
+    public P3Float? MarkerPosition;
+
     public class FlatAreaBtdInfo
     {
         /// <summary>First editable cell in each axis (absolute BTD cell coordinates).</summary>

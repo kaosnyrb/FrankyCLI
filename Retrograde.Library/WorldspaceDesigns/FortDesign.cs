@@ -33,7 +33,10 @@ public class FortDesign : IWorldspaceDesign
             new TileInstantiationPass(),
         };
 
-        ContentPasses = new List<IWorldspacePass>();
+        ContentPasses = new List<IWorldspacePass>()
+        {
+            new MapMarkerPass(MapMarkerPass.MarkerType.Industrial),
+        };
     }
 
     public string GeneratePOIName(int seed)

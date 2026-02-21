@@ -105,13 +105,17 @@ namespace FrankyCLI
                             foreach (var cell in subBlock.Cells)
                                 if (MatchesSearch(cell.EditorID, cell.FormKey, search))
                                 { DumpCell(cell); found++; }
-                    // Also search worldspace subcells
+                    // Also search worldspace subcells and TopCells
                     foreach (var ws in mod.Worldspaces)
+                    {
+                        if (ws.TopCell != null && MatchesSearch(ws.TopCell.EditorID, ws.TopCell.FormKey, search))
+                        { Console.Write($"  [Worldspace TopCell: {ws.EditorID}] "); DumpCell(ws.TopCell); found++; }
                         foreach (var wsBlock in ws.SubCells)
                             foreach (var wsSubBlock in wsBlock.Items)
                                 foreach (var cell in wsSubBlock.Items)
                                     if (MatchesSearch(cell.EditorID, cell.FormKey, search))
                                     { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell); found++; }
+                    }
                     break;
                 case "static":
                     foreach (var rec in mod.Statics)
@@ -186,11 +190,23 @@ namespace FrankyCLI
             if (cell.Persistent.Count > 0)
             {
                 Console.WriteLine("  Persistent entries:");
-                foreach (var entry in cell.Persistent.Take(40))
+                foreach (var entry in cell.Persistent.Take(200))
                 {
                     if (entry is IPlacedObjectGetter po)
                     {
                         Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position}");
+                        if (po.MapMarker != null)
+                        {
+                            var mm = po.MapMarker;
+                            Console.WriteLine($"      MapMarker:");
+                            Console.WriteLine($"        Flags:   {mm.Flags}");
+                            Console.WriteLine($"        Name:    {mm.Name}");
+                            Console.WriteLine($"        Type:    {mm.Type}");
+                            Console.WriteLine($"        Unknown: {mm.Unknown}");
+                            if (mm.UNAM != null) Console.WriteLine($"        UNAM:    {mm.UNAM}");
+                            if (mm.VNAM != null) Console.WriteLine($"        VNAM:    {mm.VNAM}");
+                            if (mm.VISI != null) Console.WriteLine($"        VISI:    {mm.VISI}");
+                        }
                         if (po.TeleportDestination != null)
                         {
                             var td = po.TeleportDestination;
@@ -213,8 +229,8 @@ namespace FrankyCLI
                     else
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
-                if (cell.Persistent.Count > 40)
-                    Console.WriteLine($"    ... and {cell.Persistent.Count - 40} more");
+                if (cell.Persistent.Count > 200)
+                    Console.WriteLine($"    ... and {cell.Persistent.Count - 200} more");
             }
 
             if (cell.Temporary.Count > 0)

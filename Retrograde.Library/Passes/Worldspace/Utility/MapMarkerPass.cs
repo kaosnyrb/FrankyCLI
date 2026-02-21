@@ -1,0 +1,100 @@
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Starfield;
+using Noggog;
+
+namespace Retrograde.Passes.Worldspace;
+
+/// <summary>
+/// Content pass that places a MapMarker_MediumLongRange [STAT:0031FB3E] in the
+/// worldspace's persistent cell, plus a linked XMarker as the fast-travel destination.
+/// Matches the setup seen in OEAF026World (TopCell 029EAD).
+///
+/// Position is taken from <see cref="WorldspaceState.MarkerPosition"/> when set,
+/// otherwise defaults to the worldspace origin (0, 0) at terrain height.
+/// </summary>
+public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.MarkerType.Settlement) : IWorldspacePass
+{
+    /// <summary>
+    /// Map marker icon type, as seen in Starfield.esm worldspace TopCells.
+    /// Values verified by surveying vanilla and mod worldspaces.
+    /// </summary>
+    public enum MarkerType : sbyte
+    {
+        City          = 2,
+        Cave          = 10,
+        Outpost       = 11,
+        SmallStructure = 12,
+        ResearchBase  = 13,
+        Landmark      = 14,
+        CrashedShip   = 19,
+        Farm          = 20,
+        Industrial    = 21,  // pipelines, processing facilities, bunkers
+        MilitaryBase  = 22,  // military compounds, observation towers
+        Settlement    = 35,  // colonies, encampments, inhabited outposts
+        Town          = 48,
+    }
+
+    /// <summary>
+    /// VNAM field on the map marker sub-record.
+    /// Only Structure (2) observed across all surveyed worldspaces.
+    /// </summary>
+    public enum MarkerVnam : ushort
+    {
+        Structure = 2,
+    }
+
+    // MapMarker_MediumLongRange [STAT:0031FB3E]
+    private static readonly uint MapMarkerStaticFormId = 0x0031FB3E;
+
+    // XMarker [STAT:00003B] — fast-travel destination linked from the map marker
+    private static readonly uint XMarkerFormId = 0x00003B;
+
+    public void RunPass(WorldspaceState state)
+    {
+        var targetMod = RetrogradeContext.Current.TargetMod;
+        var starfieldEsm = RetrogradeContext.Current.StarfieldModKey;
+
+        var position = state.MarkerPosition ?? new P3Float(0f, 0f, state.TerrainHeight);
+
+        const StarfieldMajorRecord.StarfieldMajorRecordFlag PersistentFlag =
+            (StarfieldMajorRecord.StarfieldMajorRecordFlag)PlacedObject.DefaultMajorFlag.Persistent;
+
+        // XMarker is the fast-travel spawn point, linked from the map marker
+        var travelMarker = new PlacedObject(targetMod)
+        {
+            StarfieldMajorRecordFlags = PersistentFlag,
+            Base = new FormKey(starfieldEsm, XMarkerFormId).ToNullableLink<IPlaceableObject>(),
+            Position = position,
+        };
+
+        var mapMarker = new PlacedObject(targetMod)
+        {
+            StarfieldMajorRecordFlags = PersistentFlag,
+            Base = new FormKey(starfieldEsm, MapMarkerStaticFormId).ToNullableLink<IPlaceableObject>(),
+            Position = position,
+            MapMarker = new PlacedObjectMapMarker
+            {
+                // 25 = Visible(1) | UseLocationName(8) | 0x10 — as seen in OEAF026World
+                Flags = PlacedObjectMapMarker.Flag.Visible
+                      | PlacedObjectMapMarker.Flag.UseLocationName
+                      | (PlacedObjectMapMarker.Flag)16,
+                Name = "",
+                Type = (sbyte)markerType,
+                Unknown = 0,
+                UNAM = "",
+                VNAM = (ushort)MarkerVnam.Structure,
+                VISI = 0,
+            },
+        };
+
+        mapMarker.LinkedReferences.Add(new LinkedReferences
+        {
+            KeywordOrReference = FormKey.Null.ToLink<IKeywordLinkedReferenceGetter>(),
+            Reference = travelMarker.FormKey.ToLink<IPlacedGetter>(),
+        });
+
+        state.PlacementUtil.AddToPersistent(travelMarker);
+        state.PlacementUtil.AddToPersistent(mapMarker);
+    }
+}
