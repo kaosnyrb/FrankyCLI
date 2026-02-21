@@ -35,6 +35,7 @@ public class FortDesign : IWorldspaceDesign
 
         ContentPasses = new List<IWorldspacePass>()
         {
+            new VegetationScatterPass(),
             new MapMarkerPass(MapMarkerPass.MarkerType.Industrial),
         };
     }
