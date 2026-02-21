@@ -152,6 +152,7 @@ public class RockScatterPass : IWorldspacePass
             for (int ty = 0; ty < map.ysize; ty++)
             {
                 if (map.tiles[tx][ty].prefabs.Count > 0) continue;
+                if (HasAdjacentFortContent(hasFortContent, tx, ty, map.xsize, map.ysize)) continue;
 
                 float worldX = originX + blocksize * tx;
                 float worldY = originY - blocksize * ty;
@@ -195,6 +196,23 @@ public class RockScatterPass : IWorldspacePass
 
         if (!RetrogradeContext.Quiet)
             Console.WriteLine($"[RockScatterPass] Placed {totalPlaced} rock markers on terrain tiles");
+    }
+
+    /// <summary>
+    /// Returns true if any of the 8 Chebyshev neighbours of (tx, ty) had fort content
+    /// at the start of this pass (uses the pre-rock snapshot).
+    /// </summary>
+    private static bool HasAdjacentFortContent(bool[,] hasFortContent, int tx, int ty, int xsize, int ysize)
+    {
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                if (dx == 0 && dy == 0) continue;
+                int nx = tx + dx, ny = ty + dy;
+                if (nx < 0 || nx >= xsize || ny < 0 || ny >= ysize) continue;
+                if (hasFortContent[nx, ny]) return true;
+            }
+        return false;
     }
 
     /// <summary>

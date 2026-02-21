@@ -2,6 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Retrograde.Models;
 using Retrograde.Utils;
 using System;
 
@@ -83,8 +84,9 @@ public class VegetationScatterPass : IWorldspacePass
         {
             for (int ty = 0; ty < map.ysize; ty++)
             {
-                // Only scatter on tiles with no existing fort content.
+                // Only scatter on tiles with no existing content.
                 if (map.tiles[tx][ty].prefabs.Count > 0) continue;
+                if (HasAdjacentContent(map, tx, ty)) continue;
 
                 float worldX = originX + blocksize * tx;
                 float worldY = originY - blocksize * ty;
@@ -128,6 +130,22 @@ public class VegetationScatterPass : IWorldspacePass
 
         if (!RetrogradeContext.Quiet)
             Console.WriteLine($"[VegetationScatterPass] Placed {totalPlaced} biome markers on empty terrain tiles");
+    }
+
+    /// <summary>
+    /// Returns true if any of the 8 Chebyshev neighbours of (tx, ty) has any prefab content.
+    /// </summary>
+    private static bool HasAdjacentContent(GenerationMap map, int tx, int ty)
+    {
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                if (dx == 0 && dy == 0) continue;
+                int nx = tx + dx, ny = ty + dy;
+                if (nx < 0 || nx >= map.xsize || ny < 0 || ny >= map.ysize) continue;
+                if (map.tiles[nx][ny].prefabs.Count > 0) return true;
+            }
+        return false;
     }
 
     /// <summary>
