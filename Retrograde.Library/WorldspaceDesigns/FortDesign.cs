@@ -45,6 +45,7 @@ public class FortDesign : IWorldspaceDesign
             new RockScatterPass(0.5f),
             new VegetationScatterPass(0.5f),
             new MapMarkerPass(MapMarkerPass.MarkerType.MilitaryBase),
+            new TravelMarkerPass(),
             new PlanetContentManagerPass("ps_blockbranch", "ps_blockcontent"),
             new PlanetScanPass("ps_scanbranch", "ps_scancontent"),
             new PlanetQuestPass("ps_questbranch", "ps_questcontent")

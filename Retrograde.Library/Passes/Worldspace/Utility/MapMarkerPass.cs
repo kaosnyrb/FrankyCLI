@@ -2,6 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using System;
 
 namespace Retrograde.Passes.Worldspace;
 
@@ -50,6 +51,9 @@ public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.M
     // XMarker [STAT:00003B] — fast-travel destination linked from the map marker
     private static readonly uint XMarkerFormId = 0x00003B;
 
+    // MapMarkerRefType [LCRT:0002271F]
+    private static readonly uint MapMarkerLocRefFormId = 0x0002271F;
+
     public void RunPass(WorldspaceState state)
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
@@ -96,5 +100,25 @@ public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.M
 
         state.PlacementUtil.AddToPersistent(travelMarker);
         state.PlacementUtil.AddToPersistent(mapMarker);
+
+        // Wire the map marker into the Location's MasterSpecialReferences.
+        // The Location field takes the SubCell that spatially contains the marker position.
+        int cellX = (int)MathF.Floor(position.X / 100f);
+        int cellY = (int)MathF.Floor(position.Y / 100f);
+        if (state.CellLookup.TryGetValue(new P2Int(cellX, cellY), out var markerCell))
+        {
+            state.Location.MasterSpecialReferences ??= new ExtendedList<LocationCellStaticReference>();
+            state.Location.MasterSpecialReferences.Add(new LocationCellStaticReference
+            {
+                LocationRefType = new FormKey(starfieldEsm, MapMarkerLocRefFormId).ToLink<ILocationReferenceTypeGetter>(),
+                Marker          = mapMarker.FormKey.ToLink<IPlacedGetter>(),
+                Location        = markerCell.FormKey.ToLink<IComplexLocationGetter>(),
+                Grid            = new P2Int16((short)cellX, (short)cellY),
+            });
+        }
+        else
+        {
+            Console.WriteLine($"[MapMarkerPass] WARNING: no SubCell at ({cellX},{cellY}) for map marker LocRef — skipping");
+        }
     }
 }

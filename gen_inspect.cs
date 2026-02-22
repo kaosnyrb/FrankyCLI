@@ -138,6 +138,32 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "Location"); found++; }
                     break;
+                case "location_full":
+                    foreach (var rec in mod.Locations)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpLocationFull(rec); found++; }
+                    break;
+                case "placed":
+                    // Search all cells in all worldspaces for placed objects whose Base OR own FormKey matches
+                    foreach (var ws in mod.Worldspaces)
+                    {
+                        if (ws.TopCell != null)
+                            foreach (var entry in ws.TopCell.Persistent)
+                                if (entry is IPlacedObjectGetter po && (MatchesSearch(po.Base.FormKey.ToString(), po.Base.FormKey, search) || MatchesSearch(po.EditorID, po.FormKey, search)))
+                                { Console.WriteLine($"[WS:{ws.EditorID} TopCell Persistent] {po.FormKey} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}"); found++; }
+                        foreach (var wsBlock in ws.SubCells)
+                            foreach (var wsSubBlock in wsBlock.Items)
+                                foreach (var cell in wsSubBlock.Items)
+                                {
+                                    foreach (var entry in cell.Persistent)
+                                        if (entry is IPlacedObjectGetter po && (MatchesSearch(po.Base.FormKey.ToString(), po.Base.FormKey, search) || MatchesSearch(po.EditorID, po.FormKey, search)))
+                                        { Console.WriteLine($"[WS:{ws.EditorID} Persistent ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] {po.FormKey} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}"); found++; }
+                                    foreach (var entry in cell.Temporary)
+                                        if (entry is IPlacedObjectGetter po && (MatchesSearch(po.Base.FormKey.ToString(), po.Base.FormKey, search) || MatchesSearch(po.EditorID, po.FormKey, search)))
+                                        { Console.WriteLine($"[WS:{ws.EditorID} Temporary ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] {po.FormKey} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}"); found++; }
+                                }
+                    }
+                    break;
                 case "pcmbranchnode":
                     foreach (var rec in mod.PlanetContentManagerBranchNodes)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
@@ -256,6 +282,33 @@ namespace FrankyCLI
                     else
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpLocationFull(ILocationGetter loc)
+        {
+            Console.WriteLine($"--- Location (Full) ---");
+            Console.WriteLine($"  FormKey:  {loc.FormKey}");
+            Console.WriteLine($"  EditorID: {loc.EditorID}");
+
+            if (loc.MasterSpecialReferences != null)
+            {
+                Console.WriteLine($"  MasterSpecialReferences [{loc.MasterSpecialReferences.Count}]:");
+                foreach (var r in loc.MasterSpecialReferences)
+                    Console.WriteLine($"    Marker={r.Marker.FormKey} LocRefType={r.LocationRefType.FormKey} Location={r.Location.FormKey} Grid={r.Grid}");
+            }
+            if (loc.AddedSpecialReferences != null)
+            {
+                Console.WriteLine($"  AddedSpecialReferences [{loc.AddedSpecialReferences.Count}]:");
+                foreach (var r in loc.AddedSpecialReferences)
+                    Console.WriteLine($"    Marker={r.Marker.FormKey} LocRefType={r.LocationRefType.FormKey} Location={r.Location.FormKey} Grid={r.Grid}");
+            }
+            if (loc.MasterPersistLocationReferences != null)
+            {
+                Console.WriteLine($"  MasterPersistLocationReferences [{loc.MasterPersistLocationReferences.Count}]:");
+                foreach (var r in loc.MasterPersistLocationReferences)
+                    Console.WriteLine($"    Actor={r.Actor.FormKey} Location={r.Location.FormKey} Grid={r.Grid}");
             }
             Console.WriteLine();
         }
