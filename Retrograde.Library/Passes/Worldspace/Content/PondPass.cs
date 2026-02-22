@@ -110,23 +110,20 @@ public class PondPass : IWorldspacePass
                 for (int dy = 0; dy < pondTiles; dy++)
                     map.tiles[tx + dx][ty + dy].prefabs.Add(PondTileTag);
 
-            // Retry with progressively lower water level if no tiles pass the
-            // centre + corner terrain checks (pond may need to be deeper or rim lower).
-            // For each waterZ attempt, also sweep grid offsets over the full tile period
-            // (step = WaterTileSize/4) so that a different tile alignment is tried before
-            // giving up and lowering the water surface.
+            // Two complementary tile grids ensure full pond coverage for every valid radius:
+            //   Grid A (0,0 offset)             – centre tile covers small ponds (R ≤ T/2)
+            //   Grid B (T/2, T/2 = 8,8 offset)  – four quarter tiles at cx±8,cy±8 cover
+            //                                      the full area for larger ponds (R > T/2)
+            // Together they cover the complete pond circle for R in [1, MaxPondTiles×blocksize/2].
+            // Retry with a progressively lower water level only if no tiles are placed at all
+            // (e.g. the terrain inside the bowl was not dug deep enough).
             const float waterLowerStep = 0.5f;
             const int   maxWaterRetries = 5;
-            const float gridStep = WaterTileSize / 4f; // 4 overlay units per step
-            const int   gridSteps = 4;                 // covers one full tile period
             int waterPlaced = 0;
             for (int attempt = 0; attempt <= maxWaterRetries && waterPlaced == 0; attempt++)
             {
-                for (int gx = 0; gx < gridSteps && waterPlaced == 0; gx++)
-                    for (int gy = 0; gy < gridSteps && waterPlaced == 0; gy++)
-                        waterPlaced = PlaceWaterSurface(
-                            state, pondCenterX, pondCenterY, pondRadius, waterZ,
-                            gx * gridStep, gy * gridStep);
+                waterPlaced  = PlaceWaterSurface(state, pondCenterX, pondCenterY, pondRadius, waterZ, 0f, 0f);
+                waterPlaced += PlaceWaterSurface(state, pondCenterX, pondCenterY, pondRadius, waterZ, WaterTileHalfSize, WaterTileHalfSize);
 
                 if (waterPlaced == 0 && attempt < maxWaterRetries)
                     waterZ -= waterLowerStep;
@@ -371,23 +368,13 @@ public class PondPass : IWorldspacePass
                 float wx = startX + ix * WaterTileSize;
                 float wy = startY + iy * WaterTileSize;
 
-                // Centre must be inside the depression (water visible there).
+                // Place wherever the water surface is above the terrain at the tile centre.
+                // The centre check alone is the correct inclusion test: inside the dug bowl
+                // every vertex is below waterZ by design, so a corner check would incorrectly
+                // reject all interior tiles.  EnsureRim guarantees the surrounding terrain
+                // rises above waterZ, so tile edges at the rim boundary are safely hidden.
                 float terrainZ = btd!.SampleHeightAtWorld(wx * OverlayToBtd, wy * OverlayToBtd) / 8f;
                 if (waterZ <= terrainZ) continue;
-
-                // All 4 corners must be underground (water must not be visible at tile edges).
-                // EnsureRim has already raised the rim terrain, so this primarily catches tiles
-                // that straddle the pond boundary where one corner falls on unmodified ground.
-                bool cornersOk = true;
-                for (int sx = -1; sx <= 1 && cornersOk; sx += 2)
-                    for (int sy = -1; sy <= 1 && cornersOk; sy += 2)
-                    {
-                        float tc = btd.SampleHeightAtWorld(
-                            (wx + sx * WaterTileHalfSize) * OverlayToBtd,
-                            (wy + sy * WaterTileHalfSize) * OverlayToBtd) / 8f;
-                        if (waterZ > tc) cornersOk = false;
-                    }
-                if (!cornersOk) continue;
 
                 int cellX = (int)Math.Floor(wx / 100f);
                 int cellY = (int)Math.Floor(wy / 100f);

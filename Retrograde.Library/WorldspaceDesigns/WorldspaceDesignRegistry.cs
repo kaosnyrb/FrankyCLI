@@ -11,5 +11,6 @@ public static class WorldspaceDesignRegistry
             new Dictionary<string, Func<IWorldspaceDesign>>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Fort", () => new FortDesign() },
+                { "ScienceOutpost", () => new ScienceOutpostDesign() },
             });
 }
