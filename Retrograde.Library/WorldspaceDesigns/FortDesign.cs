@@ -16,6 +16,12 @@ public class FortDesign : IWorldspaceDesign
     public float TileWorldSize => 4f;
     public string DesignName => "Fort";
 
+    /// <summary>The chosen worldspace name, e.g. "Forsaken Fort". Set by GeneratePOIName.</summary>
+    public string WorldspaceName { get; private set; } = string.Empty;
+
+    /// <summary>Editor-friendly version of WorldspaceName: lowercase, spaces removed, e.g. "forsakenfort".</summary>
+    public string WorldspaceEditorId { get; private set; } = string.Empty;
+
     public FortDesign(string templateWorldspaceEditorId = "DR001World", float scale = 0.25f)
     {
         _templateWorldspaceEditorId = templateWorldspaceEditorId;
@@ -39,13 +45,17 @@ public class FortDesign : IWorldspaceDesign
             new RockScatterPass(0.5f),
             new VegetationScatterPass(0.5f),
             new MapMarkerPass(MapMarkerPass.MarkerType.MilitaryBase),
-            new PlanetContentManagerPass("ps_Testing","ps_TestingContent","FORTNAME")
+            new PlanetContentManagerPass("ps_blockbranch", "ps_blockcontent"),
+            new PlanetScanPass("ps_scanbranch", "ps_scancontent"),
+            new PlanetQuestPass("ps_questbranch", "ps_questcontent")
         };
     }
 
     public string GeneratePOIName(int seed)
     {
-        return FortNameGenerator.GetRandomPOIName(seed);
+        WorldspaceName = FortNameGenerator.GetRandomPOIName(seed);
+        WorldspaceEditorId = WorldspaceName.ToLowerInvariant().Replace(" ", "");
+        return WorldspaceName;
     }
 
     private static Dictionary<string, string> FortPackInIds()

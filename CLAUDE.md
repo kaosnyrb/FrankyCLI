@@ -612,3 +612,67 @@ This quickly maps CK names (e.g. `BGSSpaceshipAIActor_Component`) to Mutagen cla
 
 CK record type `BGSFoo_Component` → Mutagen class `FooComponent`. Strip the `BGS` prefix and `_` separator.
 ```
+
+## Planet Content Manager (PCM) Trees
+
+The PCM system controls which worldspace POIs appear on planets and under what conditions. Three record types are involved, all in `targetMod.PlanetContentManagerBranchNodes` / `targetMod.PlanetContentManagerContentNodes`.
+
+### Tree structure
+
+```
+PlanetContentManagerBranchNode (NodeType=BranchNode)   ← parented to a Starfield.esm root
+  └─ PlanetContentManagerBranchNode (NodeType=ContentNode)  ← conditions live here; has BGSPlanetContentManagerContentProperties_Component
+       └─ PlanetContentManagerContentNode                   ← Content = Worldspace FormKey
+```
+
+Parent–child wiring is **bidirectional**:
+- Child sets `ParentNode` → parent's FormKey
+- Parent adds child to its `Nodes: ExtendedList<IFormLinkGetter<IPlanetNodeGetter>>`
+
+### Root hook nodes in Starfield.esm
+
+| PCM category | Root EditorID | FormID |
+|---|---|---|
+| Block creation (spawned POIs) | `PCM_BlockCreation_PrimaryContent` | `00225373` |
+| Planet scan (visible from space) | `PCM_ScanPlanet_General` | `0026F5DF` |
+| Quest location requests | `PCM_LocationRequest_General` | `000F35E4` |
+
+The top BranchNode's `ParentNode` must point to the appropriate root or the game ignores the entry.
+
+### BGSPlanetContentManagerContentProperties_Component
+
+Added to the ContentNode-type BranchNode. Values verified from `du_takeover_blockcontent`:
+
+```csharp
+contentBranch.Components.Add(new PlanetContentManagerContentPropertiesComponent
+{
+    ZNAM = 0, YNAM = 1, XNAM = 0, WNAM = 0, VNAM = 0, UNAM = 0,
+    NAM1 = 0f,
+    NAM3 = 0,
+    NAM4 = new byte[] { 0x00, 0xFF, 0x00, 0x00 },
+    NAM5 = 0, NAM6 = 0, NAM7 = 0, NAM8 = 0,
+    NAM9 = 1,   // ← required; missing this causes the component to not register
+});
+```
+
+`YNAM=1` and `NAM9=1` are the only non-zero values for a standard block-creation content node.
+
+### Key type facts
+
+- `Worldspace` implements `IPlanetContentTargetGetter` — use `.FormKey.ToNullableLink<IPlanetContentTargetGetter>()` for `ContentNode.Content`
+- `PlanetContentManagerBranchNode.NodeTypeOption`: `BranchNode = 1`, `ContentNode = 2`
+- `ContentNode.ParentNode` is typed `IFormLinkNullable<IPlanetContentManagerBranchNodeGetter>` (not the general `IPlanetParentNodeGetter`)
+- BranchNode's `ParentNode` is `IFormLinkNullable<IPlanetParentNodeGetter>` — both BranchNode and Starfield root nodes implement this
+- Set all FormLink properties **after** construction (Mutagen nullable FormLink rule)
+
+### Find-or-create pattern
+
+Both the BranchNode and ContentNode-type BranchNode are **shared** across worldspaces in the same mod run — search `targetMod.PlanetContentManagerBranchNodes` by EditorID before creating. Only the `PlanetContentManagerContentNode` (leaf) is always created fresh per worldspace.
+
+### Pass files
+
+- `PlanetContentManagerPass.cs` — block creation (spawned POIs), parent `00225373`
+- `PlanetScanPass.cs` — planet scan (visible from orbit), parent `0026F5DF`
+- `PlanetQuestPass.cs` — quest location requests, parent `000F35E4`
+
+All three accept `(branchNodeEditorId, contentBranchEditorId, contentNodeEditorId)` constructor parameters.

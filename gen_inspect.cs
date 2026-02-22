@@ -24,6 +24,7 @@ namespace FrankyCLI
                 Console.WriteLine("Usage: <modname> gen_inspect <dummy> <recordtype> <editorid_or_formid>");
                 Console.WriteLine();
                 Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Npc");
+                Console.WriteLine("              PcmBranchNode, PcmContentNode");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
                 Console.WriteLine("EditorID search: partial match (contains)");
@@ -137,9 +138,19 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "Location"); found++; }
                     break;
+                case "pcmbranchnode":
+                    foreach (var rec in mod.PlanetContentManagerBranchNodes)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpPcmBranchNode(rec); found++; }
+                    break;
+                case "pcmcontentnode":
+                    foreach (var rec in mod.PlanetContentManagerContentNodes)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpPcmContentNode(rec); found++; }
+                    break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Npc, Location");
+                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Npc, Location, PcmBranchNode, PcmContentNode");
                     break;
             }
             return found;
@@ -246,6 +257,61 @@ namespace FrankyCLI
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
             }
+            Console.WriteLine();
+        }
+
+        private static void DumpPcmBranchNode(IPlanetContentManagerBranchNodeGetter node)
+        {
+            Console.WriteLine($"--- PcmBranchNode ---");
+            Console.WriteLine($"  FormKey:  {node.FormKey}");
+            Console.WriteLine($"  EditorID: {node.EditorID}");
+            Console.WriteLine($"  NodeType: {node.NodeType}");
+            Console.WriteLine($"  Parent:   {node.ParentNode.FormKey}");
+            Console.WriteLine($"  Nodes [{node.Nodes.Count}]:");
+            foreach (var n in node.Nodes)
+                Console.WriteLine($"    {n.FormKey}");
+            Console.WriteLine($"  Components [{node.Components.Count}]:");
+            foreach (var c in node.Components)
+            {
+                Console.WriteLine($"    {c.GetType().Name}");
+                if (c is IPlanetContentManagerContentPropertiesComponentGetter p)
+                {
+                    if (p.ZNAM.HasValue) Console.WriteLine($"      ZNAM: {p.ZNAM}");
+                    if (p.YNAM.HasValue) Console.WriteLine($"      YNAM: {p.YNAM}");
+                    if (p.XNAM.HasValue) Console.WriteLine($"      XNAM: {p.XNAM}");
+                    if (p.WNAM.HasValue) Console.WriteLine($"      WNAM: {p.WNAM}");
+                    if (p.VNAM.HasValue) Console.WriteLine($"      VNAM: {p.VNAM}");
+                    if (p.UNAM.HasValue) Console.WriteLine($"      UNAM: {p.UNAM}");
+                    if (p.NAM1.HasValue) Console.WriteLine($"      NAM1: {p.NAM1}");
+                    if (!p.Global.IsNull)  Console.WriteLine($"      Global: {p.Global.FormKey}");
+                    if (p.NAM3.HasValue) Console.WriteLine($"      NAM3: {p.NAM3}");
+                    if (p.NAM4.HasValue) Console.WriteLine($"      NAM4: {BitConverter.ToString(p.NAM4.Value.ToArray())}");
+                    if (p.NAM5.HasValue) Console.WriteLine($"      NAM5: {p.NAM5}");
+                    if (p.NAM6.HasValue) Console.WriteLine($"      NAM6: {p.NAM6}");
+                    if (p.NAM7.HasValue) Console.WriteLine($"      NAM7: {p.NAM7}");
+                    if (p.NAM8.HasValue) Console.WriteLine($"      NAM8: {p.NAM8}");
+                    if (p.NAM9.HasValue) Console.WriteLine($"      NAM9: {p.NAM9}");
+                }
+            }
+            if (node.Conditions != null && node.Conditions.Count > 0)
+            {
+                Console.WriteLine($"  Conditions [{node.Conditions.Count}]:");
+                foreach (var cond in node.Conditions)
+                    Console.WriteLine($"    {cond}");
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpPcmContentNode(IPlanetContentManagerContentNodeGetter node)
+        {
+            Console.WriteLine($"--- PcmContentNode ---");
+            Console.WriteLine($"  FormKey:  {node.FormKey}");
+            Console.WriteLine($"  EditorID: {node.EditorID}");
+            Console.WriteLine($"  Content:  {node.Content.FormKey}");
+            Console.WriteLine($"  Parent:   {node.ParentNode.FormKey}");
+            Console.WriteLine($"  Components [{node.Components.Count}]:");
+            foreach (var c in node.Components)
+                Console.WriteLine($"    {c.GetType().Name}");
             Console.WriteLine();
         }
 
