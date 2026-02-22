@@ -296,6 +296,13 @@ public class ScienceBuildingPass : IWorldspacePass
             }
         }
 
+        // ── Step 4½: Record pod positions for downstream decorator pass ─────────
+        state.BuildingPodPositions = [];
+        for (int i = 0; i < gridW; i++)
+            for (int j = 0; j < gridH; j++)
+                if (occupied[i, j])
+                    state.BuildingPodPositions.Add(new P3Float(WorldX(i), WorldY(j), buildingZ));
+
         // ── Step 4b: Place concave corner (CorOut) pieces at inside corners ──
         // CorOut fills the re-entrant angle where two rooms meet at an L-junction.
         // It is placed at the UNOCCUPIED diagonal position (i+dX, j+dY), not at any

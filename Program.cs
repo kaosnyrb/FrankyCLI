@@ -41,6 +41,8 @@ switch (mode)
             Console.WriteLine("Usage: gen_inspect <recordtype> <editorid_or_formid>");
             Console.WriteLine();
             Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Npc");
+            Console.WriteLine("              worldspace_objects <wsEditorId> — dump all objects in a worldspace");
+            Console.WriteLine("              worldspace_smallworld <minDnam>  — list small-world worldspaces");
             Console.WriteLine("              Use 'list' as record type to see all available groups.");
             Console.WriteLine("EditorID: partial match (contains). FormID: prefix with 0x (e.g. 0x00000C36)");
             return 1;

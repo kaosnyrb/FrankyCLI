@@ -121,6 +121,7 @@ public class ScienceOutpostDesign : IWorldspaceDesign
         {
             new LodLayerPass(),
             new ScienceBuildingPass(size: size),
+            new BuildingDecoratorPass(),
             new RockScatterPass(0.3f),
             new VegetationScatterPass(0.3f),
             new MapMarkerPass(MapMarkerPass.MarkerType.ResearchBase),

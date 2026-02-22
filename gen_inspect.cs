@@ -74,6 +74,16 @@ namespace FrankyCLI
                 return 0;
             }
 
+            if (recordType.Equals("worldspace_objects", StringComparison.OrdinalIgnoreCase))
+            {
+                int found3 = 0;
+                foreach (var mod in allMods)
+                    found3 += DumpWorldspaceObjects(mod, search);
+                Console.WriteLine();
+                Console.WriteLine($"Total placed objects: {found3}");
+                return 0;
+            }
+
             int found = 0;
             foreach (var mod in allMods)
             {
@@ -377,6 +387,61 @@ namespace FrankyCLI
             foreach (var c in node.Components)
                 Console.WriteLine($"    {c.GetType().Name}");
             Console.WriteLine();
+        }
+
+        private static int DumpWorldspaceObjects(IStarfieldModGetter mod, string wsEditorId)
+        {
+            int found = 0;
+            foreach (var ws in mod.Worldspaces)
+            {
+                if (ws.EditorID == null || !ws.EditorID.Contains(wsEditorId, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                Console.WriteLine($"=== Worldspace: {ws.EditorID} ({ws.FormKey}) ===");
+
+                if (ws.TopCell != null)
+                {
+                    int n = ws.TopCell.Persistent.Count + ws.TopCell.Temporary.Count;
+                    if (n > 0)
+                    {
+                        Console.WriteLine($"  [TopCell]");
+                        foreach (var entry in ws.TopCell.Persistent.Concat(ws.TopCell.Temporary))
+                        {
+                            if (entry is IPlacedObjectGetter po)
+                                Console.WriteLine($"    PlacedObject {po.FormKey} Base={po.Base.FormKey} EdID={po.EditorID} Pos={po.Position} Rot={po.Rotation}");
+                            else if (entry is IPlacedNpcGetter npc)
+                                Console.WriteLine($"    PlacedNpc    {npc.FormKey} Base={npc.Base.FormKey} EdID={npc.EditorID} Pos={npc.Position}");
+                        }
+                    }
+                }
+
+                foreach (var wsBlock in ws.SubCells)
+                {
+                    foreach (var wsSubBlock in wsBlock.Items)
+                    {
+                        foreach (var cell in wsSubBlock.Items)
+                        {
+                            int n2 = cell.Persistent.Count + cell.Temporary.Count;
+                            if (n2 == 0) continue;
+                            Console.WriteLine($"  [SubCell grid=({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY}) cell={cell.FormKey}] persistent={cell.Persistent.Count} temporary={cell.Temporary.Count}");
+                            foreach (var entry in cell.Persistent.Concat(cell.Temporary))
+                            {
+                                if (entry is IPlacedObjectGetter po)
+                                {
+                                    Console.WriteLine($"    PlacedObject {po.FormKey} Base={po.Base.FormKey} EdID={po.EditorID} Pos={po.Position} Rot={po.Rotation}");
+                                    found++;
+                                }
+                                else if (entry is IPlacedNpcGetter npc)
+                                {
+                                    Console.WriteLine($"    PlacedNpc    {npc.FormKey} Base={npc.Base.FormKey} EdID={npc.EditorID} Pos={npc.Position}");
+                                    found++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return found;
         }
 
         private static int ListSmallWorldWorldspaces(List<IStarfieldModGetter> allMods, int minDnam)

@@ -101,6 +101,13 @@ public class WorldspaceState
     /// </summary>
     public FormKey? LodLayer;
 
+    /// <summary>
+    /// World positions of every occupied pod in the science building, populated by
+    /// <see cref="ScienceBuildingPass"/>. The Z component is the base elevation of the
+    /// pods (buildingZ after vertical offset). Null until that pass has run.
+    /// </summary>
+    public List<P3Float>? BuildingPodPositions;
+
     public class FlatAreaBtdInfo
     {
         /// <summary>First editable cell in each axis (absolute BTD cell coordinates).</summary>
