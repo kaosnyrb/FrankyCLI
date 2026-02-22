@@ -36,14 +36,13 @@ public class ScienceBuildingPass : IWorldspacePass
     // ----- Pod grid constant -----
     private const float PodSize = 6f; // one pod = 6 overlay units
 
-    // ----- Default science-building layout -----
+    // ----- Example fixed layout (pass as 'rooms' to use instead of random) -----
     // Pod-grid visual (j=0 bottom/south, j increases north):
     //   j=3:  [M][M][M][M]
     //   j=2:  [M][M][M][M][E][E]
     //   j=1:  [M][M][M][M]
     //   j=0:     [V][V]
-    // M = Main lab (room 0), E = East wing (room 1), V = Vestibule entrance (room 2)
-    private static readonly IReadOnlyList<PodRoom> DefaultLayout = new PodRoom[]
+    public static readonly IReadOnlyList<PodRoom> FixedLayout = new PodRoom[]
     {
         new(0, 1, 4, 3), // Main lab
         new(4, 2, 2, 2), // East wing
@@ -58,26 +57,30 @@ public class ScienceBuildingPass : IWorldspacePass
     private const uint ExtWallBId      = 0x1F6398; // OphExtPodSmWallB01
     private const uint ExtWallBArchId  = 0x1F6392; // OphExtPodSmWallBExArch01
     private const uint ExtWallBLgId    = 0x1F6391; // OphExtPodSmWallBExLg01
-    private const uint ExtCornerAId    = 0x1F638A; // OphExtPodSmWallACorIn01
-    private const uint ExtCornerBId    = 0x1F631D; // OphExtPodSmWallBCorIn01
+    private const uint ExtCornerAId      = 0x1F638A; // OphExtPodSmWallACorIn01
+    private const uint ExtCornerBId      = 0x1F631D; // OphExtPodSmWallBCorIn01
+    private const uint ExtCornerOutAId   = 0x1F6382; // OphExtPodSmWallACorOut01
+    private const uint ExtCornerOutBId   = 0x1F638D; // OphExtPodSmWallBCorOut01
     // Interior
-    private const uint IntMidId        = 0x1F6321; // OphIntPodSmMid01
-    private const uint IntWallAId      = 0x1F6319; // OphIntPodSmWallA01
-    private const uint IntWallAWinId   = 0x1F6364; // OphIntPodSmWallAWin01
-    private const uint IntWallBId      = 0x1F6394; // OphIntPodSmWallB01
-    private const uint IntWallBArchId  = 0x1F6350; // OphIntPodSmWallBExArch01
-    private const uint IntWallBLgId    = 0x1F6352; // OphIntPodSmWallBExLg01
-    private const uint IntCornerAId    = 0x1F6388; // OphIntPodSmWallACorIn01
-    private const uint IntCornerBId    = 0x1F539C; // OphIntPodSmWallBCorIn01
+    private const uint IntMidId          = 0x1F6321; // OphIntPodSmMid01
+    private const uint IntWallAId        = 0x1F6319; // OphIntPodSmWallA01
+    private const uint IntWallAWinId     = 0x1F6364; // OphIntPodSmWallAWin01
+    private const uint IntWallBId        = 0x1F6394; // OphIntPodSmWallB01
+    private const uint IntWallBArchId    = 0x1F6350; // OphIntPodSmWallBExArch01
+    private const uint IntWallBLgId      = 0x1F6352; // OphIntPodSmWallBExLg01
+    private const uint IntCornerAId      = 0x1F6388; // OphIntPodSmWallACorIn01
+    private const uint IntCornerBId      = 0x1F539C; // OphIntPodSmWallBCorIn01
+    private const uint IntCornerOutAId   = 0x1F6381; // OphIntPodSmWallACorOut01
+    private const uint IntCornerOutBId   = 0x1F62A8; // OphIntPodSmWallBCorOut01
 
     private const float OverlayToBtd = 4096f / 100f; // overlay units → BTD-internal units
 
-    private readonly IReadOnlyList<PodRoom> _rooms;
+    private readonly IReadOnlyList<PodRoom>? _rooms; // null = generate randomly in RunPass
     private readonly float _verticalOffset;
 
     public ScienceBuildingPass(IReadOnlyList<PodRoom>? rooms = null, float verticalOffset = 0.2f)
     {
-        _rooms = rooms ?? DefaultLayout;
+        _rooms = rooms;
         _verticalOffset = verticalOffset;
     }
 
@@ -89,9 +92,11 @@ public class ScienceBuildingPass : IWorldspacePass
         var rand      = state.Rng;
 
         // ── Step 1: Build occupancy grid ──────────────────────────────────────────
+        var rooms = _rooms ?? GenerateRandomLayout(rand);
+
         int gridMinX = int.MaxValue, gridMinY = int.MaxValue;
         int gridMaxX = int.MinValue, gridMaxY = int.MinValue;
-        foreach (var r in _rooms)
+        foreach (var r in rooms)
         {
             gridMinX = Math.Min(gridMinX, r.X0);
             gridMinY = Math.Min(gridMinY, r.Y0);
@@ -104,7 +109,7 @@ public class ScienceBuildingPass : IWorldspacePass
 
         // Southernmost occupied row (used to identify entrance face)
         int entranceMinJ = gridH; // normalised grid index
-        foreach (var r in _rooms)
+        foreach (var r in rooms)
         {
             int jMin = r.Y0 - gridMinY;
             int jMax = r.Y0 - gridMinY + r.Height;
@@ -160,6 +165,37 @@ public class ScienceBuildingPass : IWorldspacePass
         bool IsOccupied(int i, int j) =>
             i >= 0 && j >= 0 && i < gridW && j < gridH && occupied[i, j];
 
+        // CorOut directions (shared by suppression pre-pass and Step 4b placement).
+        var corOutDirs = new (int dX, int dY, float yaw)[]
+        {
+            (+1, +1,  0f),               // NE: 0°   (confirmed LC179World)
+            (+1, -1,  MathF.PI / 2f),    // SE: 90°  (confirmed in-game)
+            (-1, -1,  MathF.PI),         // SW: 180° (confirmed LC179World + in-game)
+            (-1, +1, -MathF.PI / 2f),    // NW: 270° (deduced from pattern)
+        };
+
+        // Pre-compute wall faces suppressed by CorOut pieces.
+        // Each CorOut spans ~3 pod widths: it embeds the two adjacent wall faces on
+        // the occupied pods flanking the inside corner. Those walls must NOT be placed
+        // separately or they will visually double up with the CorOut geometry.
+        //
+        // For CorOut from source pod (si, sj) in direction (dX, dY):
+        //   Suppresses: pod (si+dX, sj) face in +dY direction
+        //               pod (si, sj+dY) face in +dX direction
+        var suppressedWalls = new HashSet<(int i, int j, int dFX, int dFY)>();
+        for (int si = 0; si < gridW; si++)
+            for (int sj = 0; sj < gridH; sj++)
+            {
+                if (!occupied[si, sj]) continue;
+                foreach (var (dX, dY, _) in corOutDirs)
+                {
+                    if (!IsOccupied(si + dX, sj) || !IsOccupied(si, sj + dY) || IsOccupied(si + dX, sj + dY))
+                        continue;
+                    suppressedWalls.Add((si + dX, sj,      0,  dY)); // pod east/west of corner, face toward corner
+                    suppressedWalls.Add((si,      sj + dY, dX,  0)); // pod north/south of corner, face toward corner
+                }
+            }
+
         // ── Step 4: Place building statics ────────────────────────────────────────
         int totalPlaced = 0;
 
@@ -184,7 +220,7 @@ public class ScienceBuildingPass : IWorldspacePass
 
                 // ── Walls on exposed faces ──
                 // +Y (north): Z = 0
-                if (!IsOccupied(i, j + 1))
+                if (!IsOccupied(i, j + 1) && !suppressedWalls.Contains((i, j, 0, +1)))
                 {
                     var (extW, intW) = PickWall(rand, false, useSetA);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, 0f, cell, state);
@@ -192,7 +228,7 @@ public class ScienceBuildingPass : IWorldspacePass
                     totalPlaced += 2;
                 }
                 // -Y (south): Z = π
-                if (!IsOccupied(i, j - 1))
+                if (!IsOccupied(i, j - 1) && !suppressedWalls.Contains((i, j, 0, -1)))
                 {
                     bool entrance = (j == entranceMinJ);
                     var (extW, intW) = PickWall(rand, entrance, useSetA);
@@ -201,7 +237,7 @@ public class ScienceBuildingPass : IWorldspacePass
                     totalPlaced += 2;
                 }
                 // +X (east): Z = +π/2
-                if (!IsOccupied(i + 1, j))
+                if (!IsOccupied(i + 1, j) && !suppressedWalls.Contains((i, j, +1, 0)))
                 {
                     var (extW, intW) = PickWall(rand, false, useSetA);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
@@ -209,7 +245,7 @@ public class ScienceBuildingPass : IWorldspacePass
                     totalPlaced += 2;
                 }
                 // -X (west): Z = -π/2
-                if (!IsOccupied(i - 1, j))
+                if (!IsOccupied(i - 1, j) && !suppressedWalls.Contains((i, j, -1, 0)))
                 {
                     var (extW, intW) = PickWall(rand, false, useSetA);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
@@ -253,6 +289,45 @@ public class ScienceBuildingPass : IWorldspacePass
                     Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI / 2f, cell, state, idXpYn);
                     Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI / 2f, cell, state, idXpYn);
                     totalPlaced += 2;
+                }
+            }
+        }
+
+        // ── Step 4b: Place concave corner (CorOut) pieces at inside corners ──
+        // CorOut fills the re-entrant angle where two rooms meet at an L-junction.
+        // It is placed at the UNOCCUPIED diagonal position (i+dX, j+dY), not at any
+        // occupied pod. Exactly one source pod per inside corner triggers placement.
+        //
+        // Rotations confirmed from LC179World subcell data:
+        //   +X,+Y diagonal → 0        (confirmed: cell 254566 CorOut at (69.5,77.5))
+        //   +X,−Y diagonal → −π/2     (confirmed: cell 2545A2 CorOut at (114.3,97.8))
+        //   −X,−Y diagonal → π        (confirmed: cell 2545A3, two instances)
+        //   −X,+Y diagonal → +π/2     (deduced by symmetry)
+        {
+            for (int i = 0; i < gridW; i++)
+            {
+                for (int j = 0; j < gridH; j++)
+                {
+                    if (!occupied[i, j]) continue;
+                    foreach (var (dX, dY, yaw) in corOutDirs)
+                    {
+                        // Inside corner: both axial neighbours occupied, diagonal empty
+                        if (!IsOccupied(i + dX, j) || !IsOccupied(i, j + dY) || IsOccupied(i + dX, j + dY))
+                            continue;
+
+                        float coX = WorldX(i + dX);
+                        float coY = WorldY(j + dY);
+                        int coCellX = (int)Math.Floor(coX / 100f);
+                        int coCellY = (int)Math.Floor(coY / 100f);
+                        if (!state.CellLookup.TryGetValue(new P2Int(coCellX, coCellY), out var coCell))
+                            continue;
+
+                        var (extCo, intCo) = PickCornerOut(useSetA);
+                        string idCo = $"corout_{(dX > 0 ? "xp" : "xn")}_{(dY > 0 ? "yp" : "yn")}_{rand.Next(10000, 99999)}";
+                        Place(targetMod, sfEsm, extCo, coX, coY, buildingZ, yaw, coCell, state, idCo);
+                        Place(targetMod, sfEsm, intCo, coX, coY, buildingZ, yaw, coCell, state, idCo);
+                        totalPlaced += 2;
+                    }
                 }
             }
         }
@@ -329,9 +404,53 @@ public class ScienceBuildingPass : IWorldspacePass
                 : (ExtWallBLgId, IntWallBLgId);
     }
 
-    /// <summary>Returns the convex-corner piece pair matching the chosen wall set.</summary>
+    /// <summary>Returns the convex-corner (CorIn) piece pair matching the chosen wall set.</summary>
     private static (uint ext, uint intr) PickCorner(bool useSetA) =>
         useSetA ? (ExtCornerAId, IntCornerAId) : (ExtCornerBId, IntCornerBId);
+
+    /// <summary>Returns the concave-corner (CorOut) piece pair matching the chosen wall set.</summary>
+    private static (uint ext, uint intr) PickCornerOut(bool useSetA) =>
+        useSetA ? (ExtCornerOutAId, IntCornerOutAId) : (ExtCornerOutBId, IntCornerOutBId);
+
+    /// <summary>
+    /// Generates a random building layout each run.
+    /// Always produces: a main body (3–5 × 2–4 pods) at Y≥1,
+    /// optional east/west wings, and a vestibule at Y=0.
+    /// </summary>
+    private static IReadOnlyList<PodRoom> GenerateRandomLayout(Random rand)
+    {
+        var rooms = new List<PodRoom>();
+
+        // Main body
+        int mainW = rand.Next(3, 6); // 3–5 pods wide
+        int mainH = rand.Next(2, 5); // 2–4 pods tall
+        rooms.Add(new PodRoom(0, 1, mainW, mainH));
+
+        // Optional east wing (60%)
+        if (rand.NextDouble() < 0.6)
+        {
+            int wingW = rand.Next(1, 3);
+            int wingH = rand.Next(1, mainH);
+            int wingY = 1 + rand.Next(0, mainH - wingH + 1);
+            rooms.Add(new PodRoom(mainW, wingY, wingW, wingH));
+        }
+
+        // Optional west wing (40%)
+        if (rand.NextDouble() < 0.4)
+        {
+            int wingW = rand.Next(1, 3);
+            int wingH = rand.Next(1, mainH);
+            int wingY = 1 + rand.Next(0, mainH - wingH + 1);
+            rooms.Add(new PodRoom(-wingW, wingY, wingW, wingH));
+        }
+
+        // Vestibule at south face (1–2 pods wide, random X within main body)
+        int vestW = rand.Next(1, Math.Min(3, mainW));
+        int vestX = rand.Next(0, mainW - vestW + 1);
+        rooms.Add(new PodRoom(vestX, 0, vestW, 1));
+
+        return rooms;
+    }
 
     /// <summary>
     /// Scans the BTD on a coarse grid to find the flattest position
