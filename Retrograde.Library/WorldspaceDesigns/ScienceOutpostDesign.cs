@@ -32,7 +32,7 @@ public class ScienceOutpostDesign : IWorldspaceDesign
     public string WorldspaceName { get; private set; } = string.Empty;
     public string WorldspaceEditorId { get; private set; } = string.Empty;
 
-    public ScienceOutpostDesign(string templateWorldspaceEditorId = "DR001World")
+    public ScienceOutpostDesign(string templateWorldspaceEditorId = "DR001World", float size = 0.2f)
     {
         _templateWorldspaceEditorId = templateWorldspaceEditorId;
 
@@ -50,7 +50,7 @@ public class ScienceOutpostDesign : IWorldspaceDesign
         ContentPasses = new List<IWorldspacePass>
         {
             new LodLayerPass(),
-            new ScienceBuildingPass(),
+            new ScienceBuildingPass(size: size),
             new RockScatterPass(0.3f),
             new VegetationScatterPass(0.3f),
             new MapMarkerPass(MapMarkerPass.MarkerType.ResearchBase),

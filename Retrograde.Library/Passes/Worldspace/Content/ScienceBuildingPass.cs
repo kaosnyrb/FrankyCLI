@@ -77,11 +77,13 @@ public class ScienceBuildingPass : IWorldspacePass
 
     private readonly IReadOnlyList<PodRoom>? _rooms; // null = generate randomly in RunPass
     private readonly float _verticalOffset;
+    private readonly float _size; // 0=small, 0.5=medium (default), 1=large
 
-    public ScienceBuildingPass(IReadOnlyList<PodRoom>? rooms = null, float verticalOffset = 0.2f)
+    public ScienceBuildingPass(IReadOnlyList<PodRoom>? rooms = null, float verticalOffset = 0.2f, float size = 0.5f)
     {
         _rooms = rooms;
         _verticalOffset = verticalOffset;
+        _size = Math.Clamp(size, 0f, 1f);
     }
 
     public void RunPass(WorldspaceState state)
@@ -92,7 +94,7 @@ public class ScienceBuildingPass : IWorldspacePass
         var rand      = state.Rng;
 
         // ── Step 1: Build occupancy grid ──────────────────────────────────────────
-        var rooms = _rooms ?? GenerateRandomLayout(rand);
+        var rooms = _rooms ?? GenerateRandomLayout(rand, _size);
 
         int gridMinX = int.MaxValue, gridMinY = int.MaxValue;
         int gridMaxX = int.MinValue, gridMaxY = int.MinValue;
@@ -417,30 +419,38 @@ public class ScienceBuildingPass : IWorldspacePass
     /// Always produces: a main body (3–5 × 2–4 pods) at Y≥1,
     /// optional east/west wings, and a vestibule at Y=0.
     /// </summary>
-    private static IReadOnlyList<PodRoom> GenerateRandomLayout(Random rand)
+    private static IReadOnlyList<PodRoom> GenerateRandomLayout(Random rand, float size)
     {
+        // size=0 → small, size=0.5 → medium (matches original defaults), size=1 → large.
+        // Main body min starts at 2 wide × 1 tall and scales to 5 wide × 4 tall.
+        // A spread of 3 is added so there is always some randomness at every size.
+        int minW = 2 + (int)(size * 3);  // 0→2, 0.5→3, 1→5
+        int minH = 1 + (int)(size * 3);  // 0→1, 0.5→2, 1→4
+
         var rooms = new List<PodRoom>();
 
-        // Main body
-        int mainW = rand.Next(3, 6); // 3–5 pods wide
-        int mainH = rand.Next(2, 5); // 2–4 pods tall
+        int mainW = rand.Next(minW, minW + 3);          // spread of 3
+        int mainH = rand.Next(minH, minH + 3);
         rooms.Add(new PodRoom(0, 1, mainW, mainH));
 
-        // Optional east wing (60%)
-        if (rand.NextDouble() < 0.6)
+        // Wings — probability and max width both scale with size.
+        int wingWMax = Math.Max(1, (int)Math.Round(size * 3)); // 0→1, 0.5→2, 1→3
+
+        // Optional east wing (20%..80%)
+        if (rand.NextDouble() < 0.2 + size * 0.6)
         {
-            int wingW = rand.Next(1, 3);
-            int wingH = rand.Next(1, mainH);
-            int wingY = 1 + rand.Next(0, mainH - wingH + 1);
+            int wingW = rand.Next(1, wingWMax + 1);
+            int wingH = rand.Next(1, Math.Max(2, mainH));
+            int wingY = 1 + rand.Next(0, Math.Max(1, mainH - wingH + 1));
             rooms.Add(new PodRoom(mainW, wingY, wingW, wingH));
         }
 
-        // Optional west wing (40%)
-        if (rand.NextDouble() < 0.4)
+        // Optional west wing (10%..50%)
+        if (rand.NextDouble() < 0.1 + size * 0.4)
         {
-            int wingW = rand.Next(1, 3);
-            int wingH = rand.Next(1, mainH);
-            int wingY = 1 + rand.Next(0, mainH - wingH + 1);
+            int wingW = rand.Next(1, wingWMax + 1);
+            int wingH = rand.Next(1, Math.Max(2, mainH));
+            int wingY = 1 + rand.Next(0, Math.Max(1, mainH - wingH + 1));
             rooms.Add(new PodRoom(-wingW, wingY, wingW, wingH));
         }
 
