@@ -89,6 +89,12 @@ public class WorldspaceState
     /// </summary>
     public P3Float? MarkerPosition;
 
+    /// <summary>
+    /// The boss NPC placed in the persistent TopCell by <see cref="WorldspaceBossPass"/>.
+    /// Null until that pass has run. Use FormKey to reference in quest/bounty passes.
+    /// </summary>
+    public PlacedNpc? BossPlacedNpc;
+
     public class FlatAreaBtdInfo
     {
         /// <summary>First editable cell in each axis (absolute BTD cell coordinates).</summary>

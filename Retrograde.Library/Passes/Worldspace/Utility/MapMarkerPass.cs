@@ -59,7 +59,7 @@ public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.M
         var targetMod = RetrogradeContext.Current.TargetMod;
         var starfieldEsm = RetrogradeContext.Current.StarfieldModKey;
 
-        var position = state.MarkerPosition ?? new P3Float(0f, 0f, state.TerrainHeight);
+        var position = state.MarkerPosition ?? new P3Float(0f, 0f, state.TerrainHeight + 4.0f);
 
         const StarfieldMajorRecord.StarfieldMajorRecordFlag PersistentFlag =
             (StarfieldMajorRecord.StarfieldMajorRecordFlag)PlacedObject.DefaultMajorFlag.Persistent;

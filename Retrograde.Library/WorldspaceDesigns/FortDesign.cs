@@ -48,7 +48,8 @@ public class FortDesign : IWorldspaceDesign
             new TravelMarkerPass(),
             new PlanetContentManagerPass("ps_blockbranch", "ps_blockcontent"),
             new PlanetScanPass("ps_scanbranch", "ps_scancontent"),
-            new PlanetQuestPass("ps_questbranch", "ps_questcontent")
+            new PlanetQuestPass("ps_questbranch", "ps_questcontent"),
+            new WorldspaceBossPass()
         };
     }
 
