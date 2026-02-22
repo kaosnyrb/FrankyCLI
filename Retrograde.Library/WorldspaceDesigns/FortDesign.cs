@@ -39,6 +39,7 @@ public class FortDesign : IWorldspaceDesign
             new RockScatterPass(0.5f),
             new VegetationScatterPass(0.5f),
             new MapMarkerPass(MapMarkerPass.MarkerType.MilitaryBase),
+            new PlanetContentManagerPass("ps_Testing","ps_TestingContent","FORTNAME")
         };
     }
 
