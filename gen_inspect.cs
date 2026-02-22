@@ -63,6 +63,17 @@ namespace FrankyCLI
                 return 0;
             }
 
+            if (recordType.Equals("worldspace_smallworld", StringComparison.OrdinalIgnoreCase))
+            {
+                int minDnam = int.TryParse(search, out int m) ? m : 4;
+                Console.WriteLine($"SmallWorld worldspaces with DNAM >= {minDnam}:");
+                Console.WriteLine();
+                int found2 = ListSmallWorldWorldspaces(allMods, minDnam);
+                Console.WriteLine();
+                Console.WriteLine($"Total: {found2}");
+                return 0;
+            }
+
             int found = 0;
             foreach (var mod in allMods)
             {
@@ -366,6 +377,45 @@ namespace FrankyCLI
             foreach (var c in node.Components)
                 Console.WriteLine($"    {c.GetType().Name}");
             Console.WriteLine();
+        }
+
+        private static int ListSmallWorldWorldspaces(List<IStarfieldModGetter> allMods, int minDnam)
+        {
+            // Build a SurfaceBlock lookup by FormKey across all mods
+            var sbLookup = new Dictionary<FormKey, ISurfaceBlockGetter>();
+            foreach (var mod in allMods)
+                foreach (var sb in mod.SurfaceBlocks)
+                    if (!sbLookup.ContainsKey(sb.FormKey))
+                        sbLookup[sb.FormKey] = sb;
+
+            int found = 0;
+            foreach (var mod in allMods)
+            {
+                foreach (var ws in mod.Worldspaces)
+                {
+                    try
+                    {
+                        if (!ws.Flags.HasFlag(Worldspace.Flag.SmallWorld)) continue;
+                        if (string.IsNullOrEmpty(ws.EditorID)) continue;
+
+                        var overlayComp = ws.Components?.OfType<IWorldSpaceOverlayComponentGetter>().FirstOrDefault();
+                        if (overlayComp == null) continue;
+
+                        if (overlayComp.SurfaceBlock?.FormKey is FormKey sbKey && !sbKey.IsNull &&
+                            sbLookup.TryGetValue(sbKey, out var sb))
+                        {
+                            int dnam = (int)(sb.DNAM?.First ?? 0);
+                            if (dnam >= minDnam)
+                            {
+                                Console.WriteLine($"  \"{ws.EditorID}\",  // DNAM={dnam}x{dnam} SB={sb.EditorID} ANAM={sb.ANAM}");
+                                found++;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            return found;
         }
 
         private static void DumpRecord(object record, string typeName)

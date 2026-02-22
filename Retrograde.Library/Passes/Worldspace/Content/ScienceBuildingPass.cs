@@ -163,6 +163,7 @@ public class ScienceBuildingPass : IWorldspacePass
 
         // Pick one wall set for the whole building so pieces are visually consistent.
         bool useSetA = rand.NextDouble() < 0.5;
+        bool usedLgDoor = false; // ExtWallBLgId is a doorway — limit to one per building
 
         bool IsOccupied(int i, int j) =>
             i >= 0 && j >= 0 && i < gridW && j < gridH && occupied[i, j];
@@ -224,7 +225,7 @@ public class ScienceBuildingPass : IWorldspacePass
                 // +Y (north): Z = 0
                 if (!IsOccupied(i, j + 1) && !suppressedWalls.Contains((i, j, 0, +1)))
                 {
-                    var (extW, intW) = PickWall(rand, false, useSetA);
+                    var (extW, intW) = PickWall(rand, false, useSetA, ref usedLgDoor);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, 0f, cell, state);
                     Place(targetMod, sfEsm, intW, wx, wy, buildingZ, 0f, cell, state);
                     totalPlaced += 2;
@@ -233,7 +234,7 @@ public class ScienceBuildingPass : IWorldspacePass
                 if (!IsOccupied(i, j - 1) && !suppressedWalls.Contains((i, j, 0, -1)))
                 {
                     bool entrance = (j == entranceMinJ);
-                    var (extW, intW) = PickWall(rand, entrance, useSetA);
+                    var (extW, intW) = PickWall(rand, entrance, useSetA, ref usedLgDoor);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, MathF.PI, cell, state);
                     Place(targetMod, sfEsm, intW, wx, wy, buildingZ, MathF.PI, cell, state);
                     totalPlaced += 2;
@@ -241,7 +242,7 @@ public class ScienceBuildingPass : IWorldspacePass
                 // +X (east): Z = +π/2
                 if (!IsOccupied(i + 1, j) && !suppressedWalls.Contains((i, j, +1, 0)))
                 {
-                    var (extW, intW) = PickWall(rand, false, useSetA);
+                    var (extW, intW) = PickWall(rand, false, useSetA, ref usedLgDoor);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
                     Place(targetMod, sfEsm, intW, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
                     totalPlaced += 2;
@@ -249,7 +250,7 @@ public class ScienceBuildingPass : IWorldspacePass
                 // -X (west): Z = -π/2
                 if (!IsOccupied(i - 1, j) && !suppressedWalls.Contains((i, j, -1, 0)))
                 {
-                    var (extW, intW) = PickWall(rand, false, useSetA);
+                    var (extW, intW) = PickWall(rand, false, useSetA, ref usedLgDoor);
                     Place(targetMod, sfEsm, extW, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
                     Place(targetMod, sfEsm, intW, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
                     totalPlaced += 2;
@@ -391,7 +392,7 @@ public class ScienceBuildingPass : IWorldspacePass
     /// <paramref name="useSetA"/> is chosen once per building so all faces match.
     /// The entrance always uses the Set B arched variant regardless.
     /// </summary>
-    private static (uint ext, uint intr) PickWall(Random rand, bool isEntrance, bool useSetA)
+    private static (uint ext, uint intr) PickWall(Random rand, bool isEntrance, bool useSetA, ref bool usedLgDoor)
     {
         if (isEntrance) return (ExtWallBArchId, IntWallBArchId);
         if (useSetA)
@@ -400,10 +401,15 @@ public class ScienceBuildingPass : IWorldspacePass
                 ? (ExtWallAId,    IntWallAId)
                 : (ExtWallAWinId, IntWallAWinId);
         else
-            // Set B: plain wall or large-exterior variant
-            return rand.NextDouble() < 0.65
-                ? (ExtWallBId,   IntWallBId)
-                : (ExtWallBLgId, IntWallBLgId);
+        {
+            // Set B: large doorway at most once per building, then plain wall
+            if (!usedLgDoor && rand.NextDouble() < 0.35)
+            {
+                usedLgDoor = true;
+                return (ExtWallBLgId, IntWallBLgId);
+            }
+            return (ExtWallBId, IntWallBId);
+        }
     }
 
     /// <summary>Returns the convex-corner (CorIn) piece pair matching the chosen wall set.</summary>

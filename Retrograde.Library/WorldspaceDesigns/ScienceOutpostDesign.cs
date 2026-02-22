@@ -19,6 +19,75 @@ namespace Retrograde.WorldspaceDesigns;
 /// </summary>
 public class ScienceOutpostDesign : IWorldspaceDesign
 {
+    // SmallWorld worldspaces with DNAM >= 4 that have BTD files available in the terrain folder.
+    // Sourced from Starfield.esm via gen_inspect worldspace_smallworld.
+    private static readonly List<string> TemplateWorldspaces = new()
+    {
+        // DR* dungeon POI terrain templates
+        "DR001World",       // 4x4
+        "DR002World",       // 5x5
+        "DR009World",       // 4x4
+        "DR010World",       // 5x5
+        "DR011World",       // 4x4
+        "DR012World",       // 4x4
+        "DR015World",       // 4x4
+        "DR016World",       // 4x4
+        "DR017World",       // 4x4
+        "DR021World",       // 4x4
+        "DR022World",       // 5x5
+        "DR023World",       // 4x4
+        "DR025World",       // 5x5
+        "DR026World",       // 4x4
+        "DR027World",       // 4x4
+        // OEBB* open encounter worldspaces
+        "OEBB001World",     // 4x4
+        "OEBB003World",     // 4x4
+        "OEBB012World",     // 4x4
+        "OEBB013World",     // 4x4
+        "OEBB021World",     // 4x4
+        "OEBB022World",     // 4x4
+        "OEBB023World",     // 4x4
+        "OEBB024World",     // 4x4
+        "OEBB026World",     // 4x4
+        "OEBB027World",     // 4x4
+        "OEBB028World",     // 4x4
+        "OEBB030World",     // 4x4
+        "OEBB032World",     // 4x4
+        "OEBB034World",     // 4x4
+        // OEDB* worldspaces (varied biome terrain)
+        "OEDB002World",     // 5x5
+        "OEDB505World",     // 5x5
+        "OEDB506World",     // 5x5
+        "OEDB508World",     // 5x5
+        "OEDB509World",     // 5x5
+        "OEDB511World",     // 4x4
+        // OEJM* worldspaces
+        "OEJM006World",     // 4x4
+        "OEJM008World",     // 4x4
+        // OEJP* worldspaces
+        "OEJP029World",     // 4x4
+        "OEJP030World",     // 4x4
+        "OEJP031World",     // 4x4
+        "OEJP032World",     // 4x4
+        "OEJP033World",     // 4x4
+        // OEOB* worldspaces
+        "OEOB001World",     // 5x5
+        "OEOB006World",     // 5x5
+        "OEOB007World",     // 5x5
+        "OEOB008World",     // 5x5
+        // OESD* worldspaces
+        "OESD008World",     // 4x4
+        "OESD009World",     // 4x4
+        "OESD010World",     // 4x4
+        "OESD015World",     // 5x5
+        "OESD017World",     // 5x5
+        "OESD018World",     // 4x4
+        // OEAF* worldspaces
+        "OEAF019World",     // 4x4
+        "OEAF022World",     // 4x4
+        "OEAF026World",     // 4x4
+    };
+
     public List<IWorldspacePass> MapPasses { get; set; }
     public List<IWorldspacePass> CellBuildPasses { get; set; }
     public List<IWorldspacePass> ContentPasses { get; set; }
@@ -32,9 +101,10 @@ public class ScienceOutpostDesign : IWorldspaceDesign
     public string WorldspaceName { get; private set; } = string.Empty;
     public string WorldspaceEditorId { get; private set; } = string.Empty;
 
-    public ScienceOutpostDesign(string templateWorldspaceEditorId = "DR001World", float size = 0.2f)
+    public ScienceOutpostDesign(string? templateWorldspaceEditorId = null, float size = 0.2f)
     {
-        _templateWorldspaceEditorId = templateWorldspaceEditorId;
+        _templateWorldspaceEditorId = templateWorldspaceEditorId
+            ?? TemplateWorldspaces[Random.Shared.Next(TemplateWorldspaces.Count)];
 
         // No map passes: the science building handles its own terrain flatten.
         MapPasses = new List<IWorldspacePass>();
