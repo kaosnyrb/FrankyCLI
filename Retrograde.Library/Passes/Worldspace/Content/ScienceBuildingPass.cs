@@ -75,7 +75,7 @@ public class ScienceBuildingPass : IWorldspacePass
     private readonly IReadOnlyList<PodRoom> _rooms;
     private readonly float _verticalOffset;
 
-    public ScienceBuildingPass(IReadOnlyList<PodRoom>? rooms = null, float verticalOffset = 0.1f)
+    public ScienceBuildingPass(IReadOnlyList<PodRoom>? rooms = null, float verticalOffset = 0.2f)
     {
         _rooms = rooms ?? DefaultLayout;
         _verticalOffset = verticalOffset;
@@ -218,36 +218,40 @@ public class ScienceBuildingPass : IWorldspacePass
                 }
 
                 // ── Convex corners (CorIn): placed when both adjacent faces are exposed ──
-                // +X,+Y corner: Z = -π/2
+                // +X,+Y corner: Z = 0
                 if (!IsOccupied(i + 1, j) && !IsOccupied(i, j + 1))
                 {
                     var (extC, intC) = PickCorner(useSetA);
-                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
-                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
+                    string idXpYp = $"corner_xp_yp_{rand.Next(10000, 99999)}";
+                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, 0f, cell, state, idXpYp);
+                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, 0f, cell, state, idXpYp);
                     totalPlaced += 2;
                 }
-                // -X,+Y corner: Z = π
+                // -X,+Y corner: Z = -π/2
                 if (!IsOccupied(i - 1, j) && !IsOccupied(i, j + 1))
                 {
                     var (extC, intC) = PickCorner(useSetA);
-                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI, cell, state);
-                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI, cell, state);
+                    string idXnYp = $"corner_xn_yp_{rand.Next(10000, 99999)}";
+                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, -MathF.PI / 2f, cell, state, idXnYp);
+                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, -MathF.PI / 2f, cell, state, idXnYp);
                     totalPlaced += 2;
                 }
-                // -X,-Y corner: Z = π/2
+                // -X,-Y corner: Z = π
                 if (!IsOccupied(i - 1, j) && !IsOccupied(i, j - 1))
                 {
                     var (extC, intC) = PickCorner(useSetA);
-                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
-                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
+                    string idXnYn = $"corner_xn_yn_{rand.Next(10000, 99999)}";
+                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI, cell, state, idXnYn);
+                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI, cell, state, idXnYn);
                     totalPlaced += 2;
                 }
-                // +X,-Y corner: Z = 0
+                // +X,-Y corner: Z = +π/2
                 if (!IsOccupied(i + 1, j) && !IsOccupied(i, j - 1))
                 {
                     var (extC, intC) = PickCorner(useSetA);
-                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, 0f, cell, state);
-                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, 0f, cell, state);
+                    string idXpYn = $"corner_xp_yn_{rand.Next(10000, 99999)}";
+                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI / 2f, cell, state, idXpYn);
+                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI / 2f, cell, state, idXpYn);
                     totalPlaced += 2;
                 }
             }
@@ -291,10 +295,11 @@ public class ScienceBuildingPass : IWorldspacePass
     private static void Place(
         StarfieldMod targetMod, ModKey sfEsm,
         uint formId, float wx, float wy, float wz, float yawZ,
-        Cell cell, WorldspaceState state)
+        Cell cell, WorldspaceState state, string? editorId = null)
     {
         var placed = new PlacedObject(targetMod)
         {
+            EditorID = editorId,
             Base     = new FormKey(sfEsm, formId).ToNullableLink<IPlaceableObjectGetter>(),
             Position = new P3Float(wx, wy, wz),
             Rotation = new P3Float(0f, 0f, yawZ),
