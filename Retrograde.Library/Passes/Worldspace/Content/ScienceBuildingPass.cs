@@ -218,36 +218,36 @@ public class ScienceBuildingPass : IWorldspacePass
                 }
 
                 // ── Convex corners (CorIn): placed when both adjacent faces are exposed ──
-                // +X,+Y corner: Z = π/2
+                // +X,+Y corner: Z = -π/2
                 if (!IsOccupied(i + 1, j) && !IsOccupied(i, j + 1))
-                {
-                    var (extC, intC) = PickCorner(useSetA);
-                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
-                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
-                    totalPlaced += 2;
-                }
-                // -X,+Y corner: Z = 0
-                if (!IsOccupied(i - 1, j) && !IsOccupied(i, j + 1))
-                {
-                    var (extC, intC) = PickCorner(useSetA);
-                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, 0f, cell, state);
-                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, 0f, cell, state);
-                    totalPlaced += 2;
-                }
-                // -X,-Y corner: Z = -π/2
-                if (!IsOccupied(i - 1, j) && !IsOccupied(i, j - 1))
                 {
                     var (extC, intC) = PickCorner(useSetA);
                     Place(targetMod, sfEsm, extC, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
                     Place(targetMod, sfEsm, intC, wx, wy, buildingZ, -MathF.PI / 2f, cell, state);
                     totalPlaced += 2;
                 }
-                // +X,-Y corner: Z = π
-                if (!IsOccupied(i + 1, j) && !IsOccupied(i, j - 1))
+                // -X,+Y corner: Z = π
+                if (!IsOccupied(i - 1, j) && !IsOccupied(i, j + 1))
                 {
                     var (extC, intC) = PickCorner(useSetA);
                     Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI, cell, state);
                     Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI, cell, state);
+                    totalPlaced += 2;
+                }
+                // -X,-Y corner: Z = π/2
+                if (!IsOccupied(i - 1, j) && !IsOccupied(i, j - 1))
+                {
+                    var (extC, intC) = PickCorner(useSetA);
+                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
+                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, MathF.PI / 2f, cell, state);
+                    totalPlaced += 2;
+                }
+                // +X,-Y corner: Z = 0
+                if (!IsOccupied(i + 1, j) && !IsOccupied(i, j - 1))
+                {
+                    var (extC, intC) = PickCorner(useSetA);
+                    Place(targetMod, sfEsm, extC, wx, wy, buildingZ, 0f, cell, state);
+                    Place(targetMod, sfEsm, intC, wx, wy, buildingZ, 0f, cell, state);
                     totalPlaced += 2;
                 }
             }
@@ -299,6 +299,8 @@ public class ScienceBuildingPass : IWorldspacePass
             Position = new P3Float(wx, wy, wz),
             Rotation = new P3Float(0f, 0f, yawZ),
         };
+        if (state.LodLayer.HasValue)
+            placed.Layer = state.LodLayer.Value.ToNullableLink<ILayerGetter>();
         state.PlacementUtil.AddToTemporary(cell, placed);
     }
 

@@ -49,6 +49,7 @@ public class ScienceOutpostDesign : IWorldspaceDesign
         // state.TerrainHeight, and state.MarkerPosition for all passes that follow.
         ContentPasses = new List<IWorldspacePass>
         {
+            new LodLayerPass(),
             new ScienceBuildingPass(),
             new RockScatterPass(0.3f),
             new VegetationScatterPass(0.3f),

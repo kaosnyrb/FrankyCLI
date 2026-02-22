@@ -95,6 +95,12 @@ public class WorldspaceState
     /// </summary>
     public PlacedNpc? BossPlacedNpc;
 
+    /// <summary>
+    /// FormKey of the LOD-aggregating Layer record created by <see cref="LodLayerPass"/>.
+    /// Null until that pass has run.
+    /// </summary>
+    public FormKey? LodLayer;
+
     public class FlatAreaBtdInfo
     {
         /// <summary>First editable cell in each axis (absolute BTD cell coordinates).</summary>
