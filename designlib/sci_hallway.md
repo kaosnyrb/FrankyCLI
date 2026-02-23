@@ -79,10 +79,10 @@ XMarkerHeading statics. EditorID encodes direction and a sequence number.
 |----------|-----------|-----------------|
 | South: `(0, -6, southZ)` | `π` (faces south) | `rg_conn_s_D1_station_NNN` |
 | North: `(0, nCapY+2, northZ)` | `0` (faces north) | `rg_conn_n_D1_station_NNN` |
-| East: `(xConnX, y, z)` | `3π/2` (faces +X) | `rg_conn_e_D1_station_NNN` |
-| West: `(xConnX, y, z)` | `π/2` (faces −X) | `rg_conn_w_D1_station_NNN` |
+| East: `(xConnX, y, z)` | `π/2` (faces +X) | `rg_conn_e_D1_station_NNN` |
+| West: `(xConnX, y, z)` | `3π/2` (faces −X) | `rg_conn_w_D1_station_NNN` |
 
-E/W rotations are derived from the S/N convention (Z=0 → faces +Y; each +π/2 turns 90° CCW). Not yet independently CK-validated via a cell dump of a bridge with E/W connectors.
+E/W rotations confirmed from ne_10x6y cell dump (W connector Z = 3π/2). Note that S connectors in corner/bridge rooms use Z=0 (inward), unlike straight corridors which use Z=π (outward). See Corner tile grammar for detail.
 
 FormID: `000034:Starfield.esm` (`XMarkerHeading`).
 
@@ -302,14 +302,14 @@ The corner tile default orientation (Z=0) has arms going +Y and −X (from pivot
 
 | Rotation Z | Arms from pivot | Turn |
 |-----------|-----------------|------|
-| `0` | +Y and −X | N-to-W |
-| `π/2` | −X and −Y | **S-to-W** |
-| `π` | −Y and +X | **S-to-E** |
-| `3π/2` | +X and +Y | E-to-N |
+| `0` | −Y and +X | **S-to-E** ← confirmed ss_n08 right corner |
+| `π/2` | −X and −Y | **S-to-W** ← confirmed ne_10x6y + ss_n08 left corner |
+| `π` | +Y and −X | N-to-W (derived) |
+| `3π/2` | +X and +Y | N-to-E (derived) |
 
-Derived analytically from the arm directions confirmed in the tile internals. CK validation still pending (no raw cell dump of a placed corner tile with known rotation).
+Note: the initial analytic derivation (assumed CCW rotation) had Z=0 ↔ Z=π swapped. Starfield uses **CW rotation convention**, not CCW. The Z=π/2 S-to-W entry was coincidentally correct in both analyses.
 
-**X-arm straight tile rotation** (for tiles running along X, not Y): a Y-axis tile rotated to run along −X needs Z = +π/2; along +X needs Z = 3π/2. **Not yet CK-validated** — see Open questions.
+**X-arm straight tile rotation:** Z = π/2 for **both** ±X runs — confirmed from ne_10x6y (W-arm Way02 tiles) and ss_n08 (bridge tiles). Cap on E arm: Z = π/2 (open end faces −X toward tiles). Cap on W arm: Z = 3π/2 (open end faces +X toward tiles). Confirmed from ne_10x6y W-arm cap.
 
 ### S-bend (sn_n20_20) — chained corners
 
@@ -332,7 +332,7 @@ S(0,0)  → cap(0,2)  → corner(0,6)  → Way(-4,6) → corner(-8,6) → cap(-8
 ```
 Name encodes gap between the two south connectors: `ss_n08` = 8 units.
 
-**Bridge tile count:** `nBridge = (xGap − 4) / 4`. Requires xGap ≥ 8 and divisible by 4. Left corner: Z=π/2 (S-to-W). Right corner: Z=π (arms +X east + −Y south).
+**Bridge tile count:** `nBridge = (xGap − 4) / 4`. Requires xGap ≥ 8 and divisible by 4. Left corner: Z=π/2 (S-to-W, confirmed ss_n08). Right corner: Z=0 (S-to-E: arms −Y south, +X east toward bridge, confirmed ss_n08). Both S caps: Z=π. Both S connectors: Z=0 (inward). Bridge tiles: Z=π/2.
 
 ---
 
@@ -505,6 +505,6 @@ Y extents include the connector markers (Y = `−6` to `nCapY + 2`). Z extents a
 - **Bridge Light record types** — *Resolved.* `07BC89` = `LGT_Interior_Spot_NS_Warm_002_2k` (warm, r=8), `133B05` = `LGT_Interior_Spot_NS_Cool_001_4k` (cool, r=8). See Bridge lighting section.
 - **Bridge naming number** — the number suffix in `sn_08`, `sn_12`, `sn_20` does not straightforwardly map to connector-to-connector distance. Treat as an opaque identifier.
 - **`sn_20` lighting** — uses `AK_CeilingLight01_ON` (`1378AB:Starfield.esm`, Akila ceiling light) rather than LightUtility. This is the longest bridge (20Y); the choice may be intentional (different feel for longer spans) or incidental. Not yet resolved whether this is a design rule or just a recycled fixture.
-- **X-arm tile and cap rotations** — Not yet CK-validated. Generator uses Z=π/2 for −X tiles, Z=3π/2 for +X tiles (logical values from axis rotation). Validate by dumping a corner bridge cell (e.g. `NArg_sts_trk_shl_bend` or `rg_sts_trk_shl_ne_10x6y`) and reading the rotation of a `SciIntHallSm1Way02__SC` entry in the X arm. Same question applies to `SciIntHallSmCapScktA01__SC` cap rotation on X arm.
-- **E/W connector rotation** — Derived as Z=3π/2 (east) and Z=π/2 (west) from the S/N convention. Not yet CK-validated — no cell dump of a bridge with E/W connectors was performed.
+- **X-arm tile and cap rotations** — *Resolved.* Tiles: Z=π/2 for **both** ±X runs. E-arm cap: Z=π/2. W-arm cap: Z=3π/2. Confirmed from cell dumps of `rg_sts_trk_shl_ne_10x6y` (W arm, SciIntHallSm1Way02__SC and SciIntHallSmCapScktA01__SC) and `rg_sts_trk_shl_ss_n08` (bridge tiles).
+- **E/W connector rotation** — *Resolved.* E connector: Z=π/2. W connector: Z=3π/2. Confirmed from ne_10x6y W-connector cell dump. Also resolved: corner/bridge rooms use S connector Z=0 (inward), not Z=π as in straight corridors. Confirmed both from ne_10x6y and ss_n08.
 - **Scattered wall panel rotations** — *Resolved.* All 8 panels now have confirmed rotations in the Wall dressing table. `PanelStorage01a` and `PanelPlain04a` are E-W corridor addons only — they don't appear in any standard N-S room (`_001`–`_006`). `PanelGreeb01a` on −X wall: `(-1.5708, -1.5708, 3.1416)`; `PanelPlain01a` on +X: `(3.1416, 1.5708, 3.1416)`; `PanelPlain02b` on +X: `(-2.356, 1.5708, 2.356)`. General rule: Y component = +π/2 for +X wall, −π/2 for −X wall.

@@ -179,12 +179,13 @@ public class SciHallwayGenerator
     ///   cornerY = 6 + yStraight × 4
     ///   xConnX  = ±(6 + xStraight × 4)   (+ east, − west)
     ///
-    /// Corner tile rotation:
-    ///   exitEast → Z = π    (arms: −Y south, +X east)
+    /// Corner tile rotation (confirmed via cell dumps of ne_10x6y and ss_n08):
+    ///   exitEast → Z = 0    (arms: −Y south, +X east)
     ///   exitWest → Z = π/2  (arms: −Y south, −X west)
     ///
-    /// NOTE: X-arm tile/cap rotations use logical values and are NOT yet CK-validated.
-    /// </summary>
+    /// X-arm tiles: Z = π/2 for both ±X runs. Caps: E arm Z = π/2, W arm Z = 3π/2.
+    /// S cap: Z = π. S connector: Z = 0 (inward). E connector: Z = π/2. W connector: Z = 3π/2.
+    ///</summary>
     public FormKey GenerateCorner(string editorId, bool exitEast = true, int yStraight = 0, int xStraight = 0)
     {
         const float z = 0f;  // corner rooms are always flat
@@ -199,20 +200,22 @@ public class SciHallwayGenerator
         AddTemp(cell, IdPivot, 0f, 0f, z);
 
         // S arm: cap → [straight tiles] → corner
-        AddTemp(cell, IdCap, 0f, 2f, z);
+        // Cap faces south (Z=π) — open end toward S connector at Y=0. Confirmed ne_10x6y.
+        AddTemp(cell, IdCap, 0f, 2f, z, new P3Float(0f, 0f, MathF.PI));
         for (int i = 0; i < yStraight; i++)
             AddTemp(cell, i % 2 == 0 ? IdWay1 : IdWay2, 0f, 6f + i * 4f, z);
 
-        // Corner tile: rotation encodes which arm goes east vs west
-        float cornerRot = exitEast ? MathF.PI : MathF.PI / 2f;
+        // Corner tile: rotation encodes which arm goes east vs west.
+        // Z=0 → S-to-E (confirmed ss_n08 right corner); Z=π/2 → S-to-W (confirmed ne_10x6y + ss_n08 left corner).
+        float cornerRot = exitEast ? 0f : MathF.PI / 2f;
         AddTemp(cell, IdCorner, 0f, cornerY, z, new P3Float(0f, 0f, cornerRot));
 
         // X arm: [straight tiles] → cap
-        // Tiles need 90° Z rotation to run along X. TODO: verify in CK.
-        //   +X run: corridor Y-axis rotated to +X  → Z = −π/2 = 3π/2
-        //   −X run: corridor Y-axis rotated to −X  → Z = +π/2
-        float xTileRot = exitEast ? 3f * MathF.PI / 2f : MathF.PI / 2f;
-        float xCapRot  = xTileRot; // socket faces outward same as tile run axis
+        // Tiles: Z = π/2 for both ±X runs (confirmed ne_10x6y W-arm tiles + ss_n08 bridge tiles).
+        // Cap: open end faces toward tiles. E arm open faces −X → Z = π/2; W arm open faces +X → Z = 3π/2.
+        // Confirmed: ne_10x6y W-arm cap Z = 3π/2.
+        float xTileRot = MathF.PI / 2f;
+        float xCapRot  = exitEast ? MathF.PI / 2f : 3f * MathF.PI / 2f;
         for (int i = 0; i < xStraight; i++)
         {
             float tx = xDir * (4f + i * 4f);
@@ -222,12 +225,14 @@ public class SciHallwayGenerator
         AddTemp(cell, IdCap, xCapX, cornerY, z, new P3Float(0f, 0f, xCapRot));
 
         // ── Persistent: connectors, spawns ──────────────────────────────────
+        // S connector uses Z=0 (inward/north-facing) in corner rooms — confirmed ne_10x6y.
+        // (Straight corridors use Z=π facing outward; corner/bridge rooms use Z=0.)
         AddPersist(cell, IdConn, 0f, 0f, z,
             editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, MathF.PI));
+            rot: new P3Float(0f, 0f, 0f));
 
-        // East/west connector rotation: XMarkerHeading Z=3π/2 → faces +X, Z=π/2 → faces −X
-        float xConnRot = exitEast ? 3f * MathF.PI / 2f : MathF.PI / 2f;
+        // E connector: Z=π/2 (faces +X); W connector: Z=3π/2 (faces −X) — confirmed ne_10x6y.
+        float xConnRot = exitEast ? MathF.PI / 2f : 3f * MathF.PI / 2f;
         AddPersist(cell, IdConn, xConnX, cornerY, z,
             editorId: $"rg_conn_{(exitEast ? "e" : "w")}_D1_station_" + (_connSeq++).ToString("D3"),
             rot: new P3Float(0f, 0f, xConnRot));
@@ -280,11 +285,12 @@ public class SciHallwayGenerator
     /// Both connectors face south. xGap is the X distance between connectors.
     /// nBridge = (xGap − 4) / 4 straight tiles in the connecting run.
     ///
-    ///   Left corner:  Z = π/2   (arms: −Y south, −X west toward right corner)
-    ///   Right corner: Z = π     (arms: +X east toward left corner, −Y south)
+    ///   Left corner:  Z = π/2  (S-to-W: arms −Y south, −X west toward right corner)
+    ///   Right corner: Z = 0    (S-to-E: arms −Y south, +X east toward left corner)
     ///
-    /// NOTE: Bridge tile and cap rotations use logical values and are NOT yet CK-validated.
-    /// </summary>
+    /// All confirmed via cell dump of ss_n08:
+    ///   S caps: Z = π. S connectors: Z = 0 (inward). Bridge tiles: Z = π/2.
+    ///</summary>
     public FormKey GenerateUStub(string editorId, int xGap, int yStraight = 0)
     {
         if (xGap < 8 || xGap % 4 != 0)
@@ -300,34 +306,37 @@ public class SciHallwayGenerator
         AddTemp(cell, IdPivot, 0f, 0f, z);
 
         // Left arm (X=0): cap → [Y straight tiles] → corner
-        AddTemp(cell, IdCap, 0f, 2f, z);
+        // Cap Z=π: open end faces south toward S connector. Confirmed ss_n08.
+        AddTemp(cell, IdCap, 0f, 2f, z, new P3Float(0f, 0f, MathF.PI));
         for (int i = 0; i < yStraight; i++)
             AddTemp(cell, i % 2 == 0 ? IdWay1 : IdWay2, 0f, 6f + i * 4f, z);
         AddTemp(cell, IdCorner, 0f, cornerY, z, new P3Float(0f, 0f, MathF.PI / 2f));
 
-        // Bridge tiles running in −X direction. TODO: verify rotation in CK.
-        float bridgeRot = MathF.PI / 2f;  // −X run: Z = +π/2
+        // Bridge tiles running in −X direction. Z = π/2 for both ±X runs — confirmed ss_n08.
+        float bridgeRot = MathF.PI / 2f;
         for (int i = 0; i < nBridge; i++)
         {
             uint id = i % 2 == 0 ? IdWay2 : IdWay1;
             AddTemp(cell, id, -(4f + i * 4f), cornerY, z, new P3Float(0f, 0f, bridgeRot));
         }
 
-        // Right corner (X=−xGap): arms +X (bridge) and −Y (south)
-        AddTemp(cell, IdCorner, -xGap, cornerY, z, new P3Float(0f, 0f, MathF.PI));
+        // Right corner (X=−xGap): S-to-E (arms −Y south, +X east toward bridge). Z=0. Confirmed ss_n08.
+        AddTemp(cell, IdCorner, -xGap, cornerY, z, new P3Float(0f, 0f, 0f));
 
         // Right arm (X=−xGap): [Y straight tiles] → cap
+        // Cap Z=π: open end faces south toward S connector. Confirmed ss_n08.
         for (int i = 0; i < yStraight; i++)
             AddTemp(cell, i % 2 == 0 ? IdWay1 : IdWay2, -xGap, 6f + i * 4f, z);
-        AddTemp(cell, IdCap, -xGap, 2f, z);
+        AddTemp(cell, IdCap, -xGap, 2f, z, new P3Float(0f, 0f, MathF.PI));
 
         // ── Persistent: connectors, spawns ──────────────────────────────────
+        // S connectors use Z=0 (inward) in U-stub rooms — confirmed ss_n08.
         AddPersist(cell, IdConn, 0f, 0f, z,
             editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, MathF.PI));
+            rot: new P3Float(0f, 0f, 0f));
         AddPersist(cell, IdConn, -xGap, 0f, z,
             editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, MathF.PI));
+            rot: new P3Float(0f, 0f, 0f));
 
         AddPersist(cell, IdSpawn, 0f, 2.8f, z,
             editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
