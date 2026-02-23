@@ -27,7 +27,7 @@ namespace Retrograde.RoomPackinGeneration;
 /// </summary>
 public class SciHallwayGenerator
 {
-    // ── Starfield.esm FormKey IDs ──────────────────────────────────────────────
+    // ── Starfield.esm FormKey IDs — structure ─────────────────────────────────
     private const uint IdPivot  = 0x03F808; // PrefabPackinPivotDummy  (Static)
     private const uint IdWay1   = 0x02447F; // SciIntHallSm1Way01__SC  (PackIn)
     private const uint IdWay2   = 0x02446E; // SciIntHallSm1Way02__SC  (PackIn)
@@ -35,6 +35,18 @@ public class SciHallwayGenerator
     private const uint IdCap    = 0x024441; // SciIntHallSmCapScktA01__SC   (PackIn)
     private const uint IdConn   = 0x000034; // XMarkerHeading (Static) — connector marker
     private const uint IdSpawn  = 0x00003B; // XMarker        (Static) — enemy spawn marker
+
+    // ── Starfield.esm FormKey IDs — decorations ────────────────────────────────
+    // Lighting: self-contained PackIns (mesh + Light record bundled)
+    private const uint IdLightPanel   = 0x1A5FC0; // LGT_SciIntAddOn_LightPanel_A01 (PackIn)
+    // Wall panel addons (Statics): reverse-engineered from rg_sts_trk_shl_001
+    private const uint IdPanelDetailA = 0x0DB962; // SciIntAddOn_PanelDetail01a (right wall)
+    private const uint IdPanelDetailB = 0x0DB963; // SciIntAddOn_PanelDetail01b (left wall)
+    // Ceiling duct segments (Static)
+    private const uint IdDuct         = 0x066838; // SciIntDuct02
+    // Pipe addons (Statics, StarStation interior style — used in rg_sts_trk_shl_001)
+    private const uint IdPipe01       = 0x097F9F; // StsGenIntAddOn_Pipe01
+    private const uint IdPipe03       = 0x097FA2; // StsGenIntAddOn_Pipe03
 
     private readonly StarfieldMod _targetMod;
     private readonly ModKey _starfieldModKey;
@@ -121,6 +133,9 @@ public class SciHallwayGenerator
 
         // Enemy spawns distributed along the corridor
         PlaceSpawns(cell, flatTilesStart, stairCount, flatTilesEnd, southZ, northZ);
+
+        // Decorations: lights, wall panels, pipes, ceiling ducts
+        PlaceDecorations(cell, flatTilesStart, stairCount, flatTilesEnd, southZ, northZ, nCapY);
 
         // ── PackIn record ─────────────────────────────────────────────────────
         var packin = new PackIn(_targetMod)
@@ -251,5 +266,106 @@ public class SciHallwayGenerator
             Rotation = rot,
         };
         cell.Persistent.Add(po);
+    }
+
+    // ── Decoration placement ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// Places all decorations: lights, entry panels, south pipe cluster, upper duct run.
+    /// Pattern reverse-engineered from rg_sts_trk_shl_001 (du_outlaws_template.esm).
+    /// </summary>
+    private void PlaceDecorations(Cell cell, int flatStart, int stairCount, int flatEnd,
+                                  float southZ, float northZ, float nCapY)
+    {
+        PlaceLights(cell, flatStart, stairCount, flatEnd, southZ, northZ, nCapY);
+        PlaceEntryPanels(cell, southZ);
+        PlaceSouthPipes(cell, southZ);
+        PlaceUpperDucts(cell, flatStart, stairCount, northZ, nCapY);
+    }
+
+    /// <summary>
+    /// Places LGT_SciIntAddOn_LightPanel_A01 at each tile boundary except the
+    /// flat→stair and stair→flat transitions.
+    ///
+    /// Light Z = (floor height at boundary end) + 3.2.
+    /// For stair tiles, the "end" floor is tileBaseZ + 2.
+    /// X = +1.5 (right wall) for south+stair section, -1.5 (left wall) for north flat.
+    /// </summary>
+    private void PlaceLights(Cell cell, int flatStart, int stairCount, int flatEnd,
+                              float southZ, float northZ, float nCapY)
+    {
+        // Build an ordered list of (centerY, baseZ) for every segment including caps.
+        var segs = new List<(float y, float z)>();
+        segs.Add((-4f, southZ));                                             // south cap
+        for (int i = 0; i < flatStart; i++)
+            segs.Add((i * 4f, southZ));                                      // south flat tiles
+        for (int i = 0; i < stairCount; i++)
+            segs.Add((flatStart * 4f + i * 4f, southZ + i * 2f));           // stair tiles
+        for (int i = 0; i < flatEnd; i++)
+            segs.Add(((flatStart + stairCount) * 4f + i * 4f, northZ));     // north flat tiles
+        segs.Add((nCapY, northZ));                                           // north cap
+
+        // Boundary index at which we switch from right wall (+X) to left wall (-X).
+        // Lights on the south+stair side go right; north flat lights go left.
+        int northSwitchIdx = flatStart + stairCount + 1;
+
+        for (int i = 0; i < segs.Count - 1; i++)
+        {
+            // Skip flat→stair and stair→flat transitions when stairs are present.
+            // These are geometrically cluttered transition zones.
+            if (stairCount > 0 && (i == flatStart || i == flatStart + stairCount))
+                continue;
+
+            // For stair tiles, the floor at the boundary END is baseZ + 2 (fully risen).
+            bool isStairSeg = stairCount > 0
+                              && i >= flatStart + 1
+                              && i <= flatStart + stairCount;
+            float floorZ    = isStairSeg ? segs[i].z + 2f : segs[i].z;
+
+            float lightY = segs[i].y + 2f;      // boundary midpoint (half-tile into next)
+            float lightZ = floorZ + 3.2f;        // mid-wall height above local floor
+            float lightX = (i < northSwitchIdx) ? 1.5f : -1.5f;
+
+            AddTemp(cell, IdLightPanel, lightX, lightY, lightZ);
+        }
+    }
+
+    /// <summary>
+    /// Pair of SciInt display panel addons at the south entry — one on each wall.
+    /// From rg_sts_trk_shl_001: 01a right wall at Y≈-0.9 Z+1.8, 01b left wall at Y≈0.3 Z+2.0.
+    /// </summary>
+    private void PlaceEntryPanels(Cell cell, float southZ)
+    {
+        AddTemp(cell, IdPanelDetailA,  1.5f, -0.9f, southZ + 1.8f);   // right wall
+        AddTemp(cell, IdPanelDetailB, -1.5f,  0.3f, southZ + 2.0f);   // left wall
+    }
+
+    /// <summary>
+    /// Four pipe statics clustered on the right wall near the south entry.
+    /// From rg_sts_trk_shl_001: Pipe03/01 at X=1, Y=-2..+2, Z=southZ+3.6.
+    /// </summary>
+    private void PlaceSouthPipes(Cell cell, float southZ)
+    {
+        float pipeZ = southZ + 3.6f;
+        AddTemp(cell, IdPipe03, 1f, -2f, pipeZ);
+        AddTemp(cell, IdPipe01, 1f,  0f, pipeZ);
+        AddTemp(cell, IdPipe01, 1f,  2f, pipeZ);
+        AddTemp(cell, IdPipe03, 1f,  2f, pipeZ);
+    }
+
+    /// <summary>
+    /// Run of SciIntDuct02 segments along the upper flat section ceiling.
+    /// From rg_sts_trk_shl_001: 7× at X=1, Y=17..29 (every 2 units), Z=northZ+3.
+    /// Starts 3 units before the upper flat section to cover the stair exit zone.
+    /// </summary>
+    private void PlaceUpperDucts(Cell cell, int flatStart, int stairCount,
+                                 float northZ, float nCapY)
+    {
+        float startY = (flatStart + stairCount) * 4f - 3f;  // just before upper flat
+        float endY   = nCapY + 1f;
+        float ductZ  = northZ + 3f;
+
+        for (float y = startY; y <= endY; y += 2f)
+            AddTemp(cell, IdDuct, 1f, y, ductZ);
     }
 }
