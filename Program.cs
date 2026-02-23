@@ -99,6 +99,9 @@ switch (mode)
         return gen_coordtest.Generate(BuildArgs("gen_coordtest", args,
             modname: Get(args, 1, "RG_CoordTest")));
 
+    case "gen_roompackin":
+        return gen_roompackin.Generate(args);
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -155,7 +158,10 @@ static void PrintHelp()
     Console.WriteLine("                     Place coordinate test markers in a worldspace.");
     Console.WriteLine("                     Defaults: modname=RG_CoordTest");
     Console.WriteLine();
-    Console.WriteLine("BTD terrain tools:");
+    Console.WriteLine("  gen_roompackin");
+Console.WriteLine("                     Generate SCI hallway PackIn variants into generated_templates.esm.");
+Console.WriteLine();
+Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");
     Console.WriteLine("  gen_btd_test                        Run BTD reader/writer tests.");
     Console.WriteLine("  gen_btd_flatten                     Add cosine hill to BTD centre cell.");

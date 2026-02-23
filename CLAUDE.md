@@ -676,3 +676,93 @@ Both the BranchNode and ContentNode-type BranchNode are **shared** across worlds
 - `PlanetQuestPass.cs` — quest location requests, parent `000F35E4`
 
 All three accept `(branchNodeEditorId, contentBranchEditorId, contentNodeEditorId)` constructor parameters.
+
+## RoomPackinGeneration
+
+`Retrograde.Library/RoomPackinGeneration/` — procedurally generates new PackIn records by assembling Starfield.esm tile-kit pieces. Entry point: `gen_roompackin`.
+
+### What a PackIn cell actually contains
+
+Rooms like `rg_sts_trk_shl_*` are **nested PackIn assemblies** — every structural piece in the storage cell is itself a `PlacedObject` whose `Base` points to another Starfield.esm PackIn, not a Static. The game recursively unpacks these at runtime.
+
+### SciIntHallSm tile kit (`Architecture\ScienceKit\Interiors\HallSmall\`)
+
+| FormID | EditorID | Role |
+|--------|----------|------|
+| `02447F` | `SciIntHallSm1Way01__SC` | Straight segment v1 |
+| `02446E` | `SciIntHallSm1Way02__SC` | Straight segment v2 |
+| `024466` | `SciIntHallSm1WayStairs01__SC` | Staircase — rises **2 units Z per tile** |
+| `024441` | `SciIntHallSmCapScktA01__SC` | End cap with socket |
+| `0185DE` | `SciIntHallSm3Way01__SC` | T-junction (3-way) |
+| `012CE8` | `SciIntHallSm1WayScktA01__SC` | Straight with socket A |
+
+Each tile is **4 units** along the corridor axis, symmetric about its placement point (bounds ±2).
+
+### Special markers (Starfield.esm Statics)
+
+| FormID | EditorID | Role |
+|--------|----------|------|
+| `000034` | `XMarkerHeading` | Connector marker — carries facing rotation |
+| `00003B` | `XMarker` | Enemy spawn marker |
+| `03F808` | `PrefabPackinPivotDummy` | Root pivot — always at (0,0,0) in every PackIn |
+
+### Straight corridor tile grammar (N-S, Y axis)
+
+```
+[S connector Y=-6, Z=southZ]
+[S end cap   Y=-4, Z=southZ]         ← SciIntHallSmCapScktA01__SC
+[flat segs   Y=0,4,…  Z=southZ]      ← alternating Way1/Way2
+[stair segs  Y=…  Z=southZ+i*2]      ← SciIntHallSm1WayStairs01__SC, each +2Z
+[flat segs   Y=…  Z=northZ]          ← alternating Way2/Way1 (reversed)
+[N end cap   Y=nCapY, Z=northZ]      ← SciIntHallSmCapScktA01__SC
+[N connector Y=nCapY+2, Z=northZ]
+```
+
+- `northZ = stairCount * 2`
+- `nCapY = (flatStart + stairCount + flatEnd) * 4`
+- Connectors: 2 units past the end cap edge (cap occupies [capY−2, capY+2])
+- S connector rotation `(0,0,π)`, N connector rotation `(0,0,0)`
+
+### Creating a PackIn from scratch
+
+```csharp
+// 1. Create interior Cell with proper block/subblock routing
+int blockNum    = (int)(cell.FormKey.ID % 10);
+int subBlockNum = (int)((cell.FormKey.ID / 10) % 10);
+// find-or-create CellBlock / CellSubBlock and add cell
+
+// 2. Add structural tiles to cell.Temporary
+cell.Temporary.Add(new PlacedObject(targetMod)
+{
+    Base     = new FormKey(sfModKey, 0x02447F).ToLink<IPlaceableObjectGetter>(),
+    Position = new P3Float(0, y, z),
+    Rotation = new P3Float(0, 0, 0),
+});
+
+// 3. Add connectors/spawns to cell.Persistent
+cell.Persistent.Add(new PlacedObject(targetMod)
+{
+    EditorID = "rg_conn_n_D1_station_001",
+    Base     = new FormKey(sfModKey, 0x000034).ToLink<IPlaceableObjectGetter>(),
+    Position = new P3Float(0, nCapY + 2f, northZ),
+    Rotation = new P3Float(0, 0, 0),
+});
+
+// 4. Create PackIn pointing at the cell (FormLink set after construction)
+var packin = new PackIn(targetMod)
+{
+    EditorID          = "rg_gen_...",
+    MajorRecordFlagsRaw = 512, // Prefab flag
+    ObjectBounds      = new ObjectBounds { First = ..., Second = ... },
+};
+packin.Cell = cell.ToNullableLink<ICellGetter>(); // after construction
+targetMod.PackIns.Add(packin);
+```
+
+**Required using:** `using Mutagen.Bethesda;` — provides `ToLink<T>()` and `ToNullableLink<T>()` extension methods.
+
+### Key files
+
+- `Retrograde.Library/RoomPackinGeneration/SciHallwayGenerator.cs` — parametric hallway generator
+- `gen_roompackin.cs` — standalone entry point, writes `generated_templates.esm`
+- Script: `scripts/gen_roompackin.sh`
