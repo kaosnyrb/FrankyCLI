@@ -2,6 +2,19 @@
 
 Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 
+## Form Library
+
+`formlib/` — detailed reference docs for individual Starfield/Mutagen record types. Read the relevant file before working with an unfamiliar form type.
+
+| File | Covers |
+|------|--------|
+| `formlib/packin.md` | PackIn structure, tile nesting, SciIntHallSm kit, creating from scratch, gotchas |
+| `formlib/placed_object.md` | PlacedObject fields, copying, PlacedPrimitive, VolumeData, world transforms, cloning from getters |
+| `formlib/surface_block.md` | SurfaceBlock (SFBK) record + BTD binary format, terrain height, texture painting, coordinate systems |
+| `formlib/worldspace.md` | Overlay coordinate system, cell grid, tile-to-cell assignment, cross-cell routing |
+| `formlib/pcm.md` | Planet Content Manager tree — BranchNode, ContentNode, root hooks, creating entries |
+| `formlib/mutagen_api.md` | ToLink/ToNullableLink patterns, cloning from getters, ilspycmd, namespace hazards |
+
 ## PlacedPrimitives
 
 PlacedPrimitives are invisible volume boxes/shapes used for trigger areas in Starfield. They're attached to `PlacedObject` records.
