@@ -35,7 +35,14 @@
       "Bash(dotnet list:*)",
       "Bash(dotnet add reference:*)",
       "Bash(python:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/*.sh:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/build.sh:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/gi.sh:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/dump_ws.sh:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/lookup_fk.sh:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/find_family.sh:*)",
+      "Bash(python3 c:/Git/FrankyCLI/scripts/proximity_filter.py:*)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"

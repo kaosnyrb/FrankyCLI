@@ -25,10 +25,13 @@ Default radius: `3.0` overlay units.
 
 ## Workflow
 
+All commands use scripts from `c:/Git/FrankyCLI/scripts/` — already pre-approved in
+`settings.local.json`. Temp files go to `C:/tmp/`.
+
 ### Step 1 — Find the PackIn and its cell contents
 
 ```bash
-cd /c/Git/FrankyCLI && dotnet run -- gen_inspect PackIn $ARGUMENTS
+bash scripts/gi.sh PackIn $ARGUMENTS
 ```
 
 From the output, record:
@@ -39,7 +42,7 @@ From the output, record:
 Then dump the PackIn's cell to confirm its internal contents:
 
 ```bash
-dotnet run -- gen_inspect Cell 0x<CellFormKeyId>
+bash scripts/gi.sh Cell 0x<CellFormKeyId>
 ```
 
 Note the Z height of visible objects inside the cell — this is the counter surface height
@@ -52,7 +55,7 @@ Repeat for all close variants (e.g. `01a`).
 Search for placed objects whose `Base` matches the PackIn FormKey:
 
 ```bash
-dotnet run -- gen_inspect placed 0x<PackInFormKeyId>
+bash scripts/gi.sh placed 0x<PackInFormKeyId>
 ```
 
 Identify the worldspace with the **most instances** — that's the best source of decoration data.
@@ -60,69 +63,42 @@ Record all instance positions (X, Y, Z) from that worldspace.
 
 ### Step 3 — Dump the worldspace and filter by proximity
 
-Dump all placed objects in the chosen worldspace:
+```bash
+bash scripts/dump_ws.sh <WorldspaceEditorId>
+# Output: C:/tmp/ws_<WorldspaceEditorId>.txt
+```
+
+Then filter by proximity — pass each PackIn instance position as a `x,y,z` argument:
 
 ```bash
-dotnet run -- gen_inspect worldspace_objects <WorldspaceEditorId> 2>&1 > /tmp/ws_objects.txt
+python3 scripts/proximity_filter.py C:/tmp/ws_<WorldspaceEditorId>.txt <radius> <x1,y1,z1> [<x2,y2,z2> ...]
 ```
 
-Then use Python to find objects near each PackIn instance position within the given radius:
-
-```python
-import re, sys
-
-ws_file = '/tmp/ws_objects.txt'
-radius = 3.0   # replace with $1 if provided
-
-# Positions of the PackIn instances in this worldspace (from Step 2)
-packin_positions = [
-    # (x, y, z),  # fill from Step 2 output
-]
-
-with open(ws_file) as f:
-    lines = f.readlines()
-
-pat = re.compile(r'PlacedObject (\S+) Base=(\S+) EdID=(\S*) Pos=([\-\d.Ee+]+), ([\-\d.Ee+]+), ([\-\d.Ee+]+)')
-nearby = {}
-
-for line in lines:
-    m = pat.search(line)
-    if not m:
-        continue
-    fk, base, edid, x, y, z = m.groups()
-    x, y, z = float(x), float(y), float(z)
-
-    for (cx, cy, cz) in packin_positions:
-        dist = ((x-cx)**2 + (y-cy)**2)**0.5   # XY distance only
-        if dist < radius:
-            dz = z - cz   # height above the PackIn base
-            if base not in nearby:
-                nearby[base] = {'edid': edid, 'dz': dz, 'count': 0}
-            nearby[base]['count'] += 1
-            break
-
-# Sort by count desc then dz
-for base, info in sorted(nearby.items(), key=lambda kv: -kv[1]['count']):
-    print(f"  count={info['count']}  dz={info['dz']:+.2f}  Base={base}  EdID={info['edid']}")
+Example:
+```bash
+python3 scripts/proximity_filter.py C:/tmp/ws_OESF003World.txt 3.0 16.1,113.7,26.4 23.7,143.1,32.8
 ```
+
+Output is sorted by hit count descending. `dz` = item Z minus anchor Z (positive = above anchor).
 
 ### Step 4 — Identify unknown FormKeys
 
-For each `Base` FormKey found in Step 3 that lacks an EditorID, look it up:
+For any `Base` FormKey with an empty `EdID=` field:
 
 ```bash
-dotnet run -- gen_inspect Static 0x<FormId>
-dotnet run -- gen_inspect PackIn 0x<FormId>
-dotnet run -- gen_inspect Activator 0x<FormId>
+bash scripts/lookup_fk.sh <formId>
+# Example: bash scripts/lookup_fk.sh 075B8D
 ```
 
-Run these in parallel. Note the `EditorID` for each.
+This tries Static → PackIn → Activator in sequence and prints the first match's EditorID and
+mesh path. If nothing matches, the record is likely a MiscItem, Container, or NPC form (not
+placeable as a Static) — document it with a `// MiscItem` comment.
 
 Skip pivot/dummy markers: `StaticCollectionPivotDummy` (035812) and `PrefabPackinPivotDummy` (03F808).
 
 ### Step 5 — Categorise by Z offset
 
-Group items by their dz (height above PackIn base Z):
+Group items by their `dz` (height above PackIn base Z):
 
 | Z range | Category | Meaning |
 |---|---|---|
@@ -131,18 +107,26 @@ Group items by their dz (height above PackIn base Z):
 | dz ≥ 1.5 | **Overhead/wall** | Ceiling lights, mounted screens, etc. |
 
 Items at the PackIn base itself (dz ≈ 0) that are *not* the PackIn are floor items.
-Items at dz ≈ 0.8–1.0 are typically the counter surface props.
+Items at dz ≈ 0.8–1.0 are typically counter surface props.
+Items with very large |dz| (> 5) are usually architectural room pieces — skip them.
 
-### Step 6 — Look up any relevant DesktopClutter or named PackIns
+### Step 6 — Look up any related PackIn families or DesktopClutter kits
 
-Search for dedicated clutter PackIns designed for this surface type:
+Find dedicated clutter PackIns designed for this surface type:
 
 ```bash
-dotnet run -- gen_inspect PackIn DesktopClutter_
-dotnet run -- gen_inspect PackIn ClutterPI_
+bash scripts/find_family.sh DesktopClutter_
+bash scripts/find_family.sh ClutterPI_
 ```
 
-These pre-built clutter kits (e.g. `DesktopClutter_Science_A01`) are the highest-quality
+For SC_LD_ family items (loading dock crates/barrels etc.), find all variants:
+
+```bash
+bash scripts/find_family.sh SC_LD_CratesMedium
+bash scripts/find_family.sh SC_LD_BarrelsOnPallets
+```
+
+Pre-built clutter kits (e.g. `DesktopClutter_Science_A01`) are the highest-quality
 option when available — they contain multiple internally-positioned props in a single drop.
 
 ### Step 7 — Output summary and C# stubs
@@ -185,11 +169,11 @@ re-run or extended later.
 
 ## Notes
 
-- `gen_inspect worldspace_objects` outputs large results — use a temp file and Python filter
+- `dump_ws.sh` outputs large results — the Python filter handles files of any size
 - The `placed` search checks ALL loaded mods (Starfield.esm + ShatteredSpace.esm etc.)
   so filter to `Starfield.esm` sources only for vanilla patterns
-- Non-Static/Activator items (vials, misc items, loot) won't resolve via gen_inspect —
+- Non-Static/Activator items (vials, misc items, loot) won't resolve via `lookup_fk.sh` —
   document their FormKeys with a `// MiscItem — pickup-able` comment
 - Prefer the worldspace with the most PackIn instances for richer co-placement data
-- The `gen_inspect` binary format: `dotnet run -- gen_inspect <RecordType> <search>`
-  (NOT the legacy `dummy gen_inspect dummy` format)
+- Most "nearby" results in interior worldspaces will be architectural room pieces (catwalks,
+  walls, railings) — focus on items at dz ≈ 0 to +1.5 for genuine decoration candidates
