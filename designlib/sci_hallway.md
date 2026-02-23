@@ -97,7 +97,11 @@ XMarker statics (`00003B:Starfield.esm`). Always 2 minimum; a third mid-corridor
 
 ## Lighting
 
-**Use `LGT_SciIntAddOn_LightPanel_A01` (`1A5FC0:Starfield.esm`)** — a self-contained PackIn bundling the `SciIntAddOn_LightPanel_A01_On` mesh and a Light record. Do **not** use the raw `LightUtility_A01On` Static (`2ACD6C`) — that requires a companion Light record from the template mod.
+**Use `LightUtility_A01On` Static (`2ACD6C:Starfield.esm`) + companion Light record (`1B29D1:Starfield.esm`)**, both placed directly in the room PackIn's cell Temporary list.
+
+Do **not** use `LGT_*` PackIns here. When a `LGT_*` PackIn is placed inside a room PackIn's cell, it is one nesting level deeper — its bundled Light record is **not rendered** when the outer room prefab is previewed in CK. Only objects placed directly in the cell (Statics, Light records) are rendered during prefab preview.
+
+The `LGT_*` PackIns are correct for direct worldspace placement, where no outer PackIn wraps them.
 
 ### Placement rule
 
@@ -156,6 +160,31 @@ All values confirmed against `du_outlaws_template.esm`.
 Also available for wall-mount spots: `LGT_LightUtility_A02` (`1A6092`), `B01` (`1A6020`), `C01` (`1A6008`) and others.
 
 ---
+
+## Tile internal structure
+
+Each SciIntHallSm tile PackIn contains its own interior cell with the structural mesh pieces. Knowing these helps diagnose why tiles look wrong and explains the wall face positions.
+
+**SciIntHallSm1Way01__SC** (`02447F`) internal cell `005AFC`:
+
+| FormID | EditorID | Position | Role |
+|--------|----------|----------|------|
+| `050AFD` | `SciIntSegSmMidCeiling01` | `(0, 0, 4)` | Ceiling mesh (at Z+4) |
+| `050AFE` | `SciIntSegSmMidFloor01` | `(0, 0, 0)` | Floor mesh |
+| `23AD80` | `SciIntAddOn_PanelSmallFlat01` | `(±2, 0, 0)` | Outer wall panels (at X=±2, not ±1.5) |
+| `050B1B` | `SciIntSegSmWallMid01` | `(0, 0, 0)` ×2 | Wall segment geometry |
+| `03F808` | `PrefabPackinPivotDummy` | `(0, 0, 0)` | Root pivot |
+
+Key dimensions extracted from internals:
+- **Ceiling at Z + 4** above tile base Z (consistent across all tile types)
+- **Outer wall face at X = ±2**, inner wall face at X = ±1.5 (where addons attach)
+- **Panel addons placed with rotation (0,0,0)** — Bethesda's own `PanelSmallFlat01` uses no rotation at X=±2; addon placement at X=±1.5 follows same convention
+
+## AI markers
+
+The example rooms (`rg_sts_trk_shl_001`) place `ShipMarker_CombatTargetChainMarker` (`18E8C2:Starfield.esm`) as Persistent objects at floor level. Two per room: one near the south entry, one near the north entry.
+
+These are AI combat target chain markers — they wire NPC patrol/combat target sequences. The generator currently does not place them (not a blocker for structural correctness; relevant if AI behaviour needs tuning).
 
 ## Wall dressing
 

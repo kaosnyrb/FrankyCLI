@@ -42,6 +42,7 @@
       "Bash(bash c:/Git/FrankyCLI/scripts/dump_ws.sh:*)",
       "Bash(bash c:/Git/FrankyCLI/scripts/lookup_fk.sh:*)",
       "Bash(bash c:/Git/FrankyCLI/scripts/find_family.sh:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/lookup_fks.sh:*)",
       "Bash(python3 c:/Git/FrankyCLI/scripts/proximity_filter.py:*)",
       "Bash(for id in 1B29C5 2A40E2)",
       "Bash(do)",

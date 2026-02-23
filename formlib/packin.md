@@ -170,6 +170,57 @@ Parsed by `RgConnectorParser.Parse()` in `DataModels.cs`. Direction and door siz
 - **Template-mod-referenced objects in cells** (e.g. `Base=000E8F:du_outlaws_template.esm`) are filtered out by `TileInstantiationPass` when unpacking — generated PackIns should only reference Starfield.esm objects to avoid master dependencies
 - **FNAM** can be omitted in generated PackIns (leave null) — it's CK filter/metadata
 
+## LGT_ lighting PackIns vs Static + Light
+
+Starfield provides two approaches for placing lights in a PackIn cell. **Which to use depends on render context:**
+
+### When placing in a room PackIn's cell directly (generators, rg_sts_trk_shl_ pattern)
+
+Use **Static mesh + companion Light record** placed as separate Temporary objects in the cell:
+
+```
+LightUtility_A01On  (2ACD6C:Starfield.esm)  — wall-mounted utility light mesh (Static)
+<Light record>                               — provides actual illumination
+```
+
+Both sit directly in the room PackIn's Temporary list → both render when the prefab is previewed or placed. This is what the example rooms (`rg_sts_trk_shl_001`) do.
+
+**Do NOT use `LGT_*` PackIns here.** An `LGT_*` PackIn placed inside a room PackIn is a sub-PackIn. Its internal Light record is one extra nesting level deep and is **not rendered** when the outer room prefab is previewed.
+
+### When placing directly in a worldspace cell (not inside another PackIn)
+
+`LGT_*` PackIns work correctly — the bundled mesh + Light record render in full.
+
+### LGT_ PackIn catalogue (for direct worldspace use)
+
+**SciInt ceiling/wall light panels:**
+
+| FormID | EditorID |
+|--------|----------|
+| `1A5FC0` | `LGT_SciIntAddOn_LightPanel_A01` |
+| `1A5FBD` | `LGT_SciIntAddOn_LightPanel_A02` |
+| `1A5FB9` | `LGT_SciIntAddOn_LightPanel_A03` |
+| `1A5FB6` | `LGT_SciIntAddOn_LightPanel_B01` |
+| `1A5FAD` | `LGT_SciIntAddOn_LightPanel_B02` |
+| `1A5FB0` | `LGT_SciIntAddOn_LightPanel_C01` |
+| `1A5FB3` | `LGT_SciIntAddOn_LightPanel_C02` |
+| `1A5F9F` | `LGT_SciIntAddOn_LightPanel_D02` |
+
+Internal cell of `LGT_SciIntAddOn_LightPanel_A01` (`1A6134`): contains `SciIntAddOn_LightPanel_A01_On` mesh (`2A40E2`) + one Light record (`1B29C5`).
+
+**General utility wall lights:**
+
+| FormID | EditorID |
+|--------|----------|
+| `1A6092` | `LGT_LightUtility_A02` |
+| `1A6096` | `LGT_LightUtility_A03` |
+| `1A6083` | `LGT_LightUtility_A06b` |
+| `1A608F` | `LGT_LightUtility_A06On` |
+| `1A6020` | `LGT_LightUtility_B01` |
+| `1A6017` | `LGT_LightUtility_B02` |
+| `1A600E` | `LGT_LightUtility_B03` |
+| `1A6008` | `LGT_LightUtility_C01` |
+
 ## Generator
 
 `Retrograde.Library/RoomPackinGeneration/SciHallwayGenerator.cs` — parametric straight-corridor generator using the SciIntHallSm kit.

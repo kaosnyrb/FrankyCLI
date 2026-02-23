@@ -37,8 +37,11 @@ public class SciHallwayGenerator
     private const uint IdSpawn  = 0x00003B; // XMarker        (Static) — enemy spawn marker
 
     // ── Starfield.esm FormKey IDs — decorations ────────────────────────────────
-    // Lighting: self-contained PackIns (mesh + Light record bundled)
-    private const uint IdLightPanel   = 0x1A5FC0; // LGT_SciIntAddOn_LightPanel_A01 (PackIn)
+    // Lighting: Static mesh + companion Light record placed directly in the cell.
+    // Do NOT use LGT_* PackIns here — lights inside sub-PackIns are not rendered
+    // when the outer room prefab is previewed in CK.
+    private const uint IdLightMesh    = 0x2ACD6C; // LightUtility_A01On (Static)
+    private const uint IdLightRecord  = 0x1B29D1; // Starfield.esm Light record (used in LGT_LightUtility_A03/A06On)
     // Wall panel addons (Statics): reverse-engineered from rg_sts_trk_shl_001
     private const uint IdPanelDetailA = 0x0DB962; // SciIntAddOn_PanelDetail01a (right wall)
     private const uint IdPanelDetailB = 0x0DB963; // SciIntAddOn_PanelDetail01b (left wall)
@@ -284,8 +287,12 @@ public class SciHallwayGenerator
     }
 
     /// <summary>
-    /// Places LGT_SciIntAddOn_LightPanel_A01 at each tile boundary except the
-    /// flat→stair and stair→flat transitions.
+    /// Places a LightUtility_A01On Static mesh + companion Light record at each tile
+    /// boundary except the flat→stair and stair→flat transitions.
+    ///
+    /// Both objects are placed at the same position — this is equivalent to what the
+    /// LGT_LightUtility_* PackIns do internally, but placed directly in the cell so
+    /// the light is visible when the room prefab is previewed in CK.
     ///
     /// Light Z = (floor height at boundary end) + 3.2.
     /// For stair tiles, the "end" floor is tileBaseZ + 2.
@@ -326,7 +333,8 @@ public class SciHallwayGenerator
             float lightZ = floorZ + 3.2f;        // mid-wall height above local floor
             float lightX = (i < northSwitchIdx) ? 1.5f : -1.5f;
 
-            AddTemp(cell, IdLightPanel, lightX, lightY, lightZ);
+            AddTemp(cell, IdLightMesh,   lightX, lightY, lightZ);
+            AddTemp(cell, IdLightRecord, lightX, lightY, lightZ);
         }
     }
 
