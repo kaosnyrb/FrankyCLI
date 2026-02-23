@@ -23,7 +23,7 @@ namespace FrankyCLI
             {
                 Console.WriteLine("Usage: <modname> gen_inspect <dummy> <recordtype> <editorid_or_formid>");
                 Console.WriteLine();
-                Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Npc");
+                Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc");
                 Console.WriteLine("              PcmBranchNode, PcmContentNode");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
@@ -149,6 +149,11 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "Activator"); found++; }
                     break;
+                case "light":
+                    foreach (var rec in mod.Lights)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpLight(rec); found++; }
+                    break;
                 case "npc":
                     foreach (var rec in mod.Npcs)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
@@ -197,7 +202,7 @@ namespace FrankyCLI
                     break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Npc, Location, PcmBranchNode, PcmContentNode");
+                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, PcmBranchNode, PcmContentNode");
                     break;
             }
             return found;
@@ -252,7 +257,7 @@ namespace FrankyCLI
                 {
                     if (entry is IPlacedObjectGetter po)
                     {
-                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position}");
+                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}");
                         if (po.MapMarker != null)
                         {
                             var mm = po.MapMarker;
@@ -283,7 +288,7 @@ namespace FrankyCLI
                         }
                     }
                     else if (entry is IPlacedNpcGetter npc)
-                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position}");
+                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
                     else
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
@@ -297,9 +302,9 @@ namespace FrankyCLI
                 foreach (var entry in cell.Temporary)
                 {
                     if (entry is IPlacedObjectGetter po)
-                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position}");
+                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}");
                     else if (entry is IPlacedNpcGetter npc)
-                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position}");
+                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
                     else
                         Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
                 }
@@ -483,6 +488,22 @@ namespace FrankyCLI
             return found;
         }
 
+        private static void DumpLight(ILightGetter light)
+        {
+            Console.WriteLine($"--- Light ---");
+            Console.WriteLine($"  FormKey:  {light.FormKey}");
+            Console.WriteLine($"  EditorID: {light.EditorID}");
+            Console.WriteLine($"  Radius:   {light.Radius}");
+            Console.WriteLine($"  Color:    {light.Color}");
+            Console.WriteLine($"  Flags:    {light.Flags}");
+            Console.WriteLine($"  FOV:      {light.FOV}");
+            Console.WriteLine($"  NearClip: {light.NearClip}");
+            Console.WriteLine($"  FalloffExponent: {light.FalloffExponent}");
+            if (!string.IsNullOrEmpty(light.Model?.File))
+                Console.WriteLine($"  Model:    {light.Model.File}");
+            Console.WriteLine();
+        }
+
         private static void DumpRecord(object record, string typeName)
         {
             Console.WriteLine($"--- {typeName} ---");
@@ -577,6 +598,7 @@ namespace FrankyCLI
             {
                 ("Activator", mod.Activators.Count),
                 ("Cell", mod.Cells.Sum(b => b.SubBlocks.Sum(sb => sb.Cells.Count))),
+                ("Light", mod.Lights.Count),
                 ("Location", mod.Locations.Count),
                 ("Npc", mod.Npcs.Count),
                 ("PackIn", mod.PackIns.Count),

@@ -32,16 +32,20 @@ public class SciHallwayGenerator
     private const uint IdWay1   = 0x02447F; // SciIntHallSm1Way01__SC  (PackIn)
     private const uint IdWay2   = 0x02446E; // SciIntHallSm1Way02__SC  (PackIn)
     private const uint IdStairs = 0x024466; // SciIntHallSm1WayStairs01__SC (PackIn)
-    private const uint IdCap    = 0x024441; // SciIntHallSmCapScktA01__SC   (PackIn)
+    private const uint IdCap    = 0x024441; // SciIntHallSmCapScktA01__SC   (PackIn) — with socket
     private const uint IdConn   = 0x000034; // XMarkerHeading (Static) — connector marker
     private const uint IdSpawn  = 0x00003B; // XMarker        (Static) — enemy spawn marker
+    private const uint IdCorner = 0x01803B; // SciIntHallSm2Way02__SC (PackIn) — 90° corner tile
 
     // ── Starfield.esm FormKey IDs — decorations ────────────────────────────────
-    // Lighting: Static mesh + companion Light record placed directly in the cell.
+    // Straight corridor lighting: Static mesh + companion Light placed directly in the cell.
     // Do NOT use LGT_* PackIns here — lights inside sub-PackIns are not rendered
     // when the outer room prefab is previewed in CK.
-    private const uint IdLightMesh    = 0x2ACD6C; // LightUtility_A01On (Static)
-    private const uint IdLightRecord  = 0x1B29D1; // Starfield.esm Light record (used in LGT_LightUtility_A03/A06On)
+    private const uint IdLightMesh    = 0x2ACD6C; // LightUtility_A01On  (Static) — wall-mount strip
+    private const uint IdLightRecord  = 0x1B29D1; // LGT_LightUtility06_Spot_S_2K (Light, radius 4)
+    // Corner lighting: ceiling-hung cluster, one per bend junction (radius 8, warm).
+    private const uint IdCornerLightMesh   = 0x2ACD6B; // LightUtility_A07On (Static) — overhead pendant
+    private const uint IdCornerLightRecord = 0x07BC89; // LGT_Interior_Spot_NS_Warm_002_2k (Light, radius 8)
     // Wall panel addons (Statics): reverse-engineered from rg_sts_trk_shl_001
     private const uint IdPanelDetailA = 0x0DB962; // SciIntAddOn_PanelDetail01a (right wall)
     private const uint IdPanelDetailB = 0x0DB963; // SciIntAddOn_PanelDetail01b (left wall)
@@ -159,6 +163,205 @@ public class SciHallwayGenerator
                           $"flatStart={flatTilesStart} stairs={stairCount} flatEnd={flatTilesEnd} " +
                           $"rise={northZ} totalY={nCapY + 8f}");
 
+        return packin.FormKey;
+    }
+
+    /// <summary>
+    /// Generates an L-shaped corner room: S-entry arm along Y then a 90° turn east or west.
+    ///
+    /// Layout (exitEast, yStraight=0, xStraight=0 — minimum bend):
+    ///   S: connector(0,0) → cap(0,2) → corner(0,6) → cap(4,6) → connector(6,6):E
+    ///
+    /// Layout (exitWest, yStraight=0, xStraight=1 — one extra leg):
+    ///   S: connector(0,0) → cap(0,2) → corner(0,6) → Way(-4,6) → cap(-8,6) → connector(-10,6):W
+    ///
+    /// Formulae:
+    ///   cornerY = 6 + yStraight × 4
+    ///   xConnX  = ±(6 + xStraight × 4)   (+ east, − west)
+    ///
+    /// Corner tile rotation:
+    ///   exitEast → Z = π    (arms: −Y south, +X east)
+    ///   exitWest → Z = π/2  (arms: −Y south, −X west)
+    ///
+    /// NOTE: X-arm tile/cap rotations use logical values and are NOT yet CK-validated.
+    /// </summary>
+    public FormKey GenerateCorner(string editorId, bool exitEast = true, int yStraight = 0, int xStraight = 0)
+    {
+        const float z = 0f;  // corner rooms are always flat
+        float cornerY = 6f + yStraight * 4f;
+        int   xDir    = exitEast ? 1 : -1;
+        float xCapX   = xDir * (4f + xStraight * 4f);
+        float xConnX  = xDir * (6f + xStraight * 4f);
+
+        var cell = CreateCell(editorId + "StorageCell");
+
+        // ── Temporary: structure ─────────────────────────────────────────────
+        AddTemp(cell, IdPivot, 0f, 0f, z);
+
+        // S arm: cap → [straight tiles] → corner
+        AddTemp(cell, IdCap, 0f, 2f, z);
+        for (int i = 0; i < yStraight; i++)
+            AddTemp(cell, i % 2 == 0 ? IdWay1 : IdWay2, 0f, 6f + i * 4f, z);
+
+        // Corner tile: rotation encodes which arm goes east vs west
+        float cornerRot = exitEast ? MathF.PI : MathF.PI / 2f;
+        AddTemp(cell, IdCorner, 0f, cornerY, z, new P3Float(0f, 0f, cornerRot));
+
+        // X arm: [straight tiles] → cap
+        // Tiles need 90° Z rotation to run along X. TODO: verify in CK.
+        //   +X run: corridor Y-axis rotated to +X  → Z = −π/2 = 3π/2
+        //   −X run: corridor Y-axis rotated to −X  → Z = +π/2
+        float xTileRot = exitEast ? 3f * MathF.PI / 2f : MathF.PI / 2f;
+        float xCapRot  = xTileRot; // socket faces outward same as tile run axis
+        for (int i = 0; i < xStraight; i++)
+        {
+            float tx = xDir * (4f + i * 4f);
+            uint  id = i % 2 == 0 ? IdWay2 : IdWay1;
+            AddTemp(cell, id, tx, cornerY, z, new P3Float(0f, 0f, xTileRot));
+        }
+        AddTemp(cell, IdCap, xCapX, cornerY, z, new P3Float(0f, 0f, xCapRot));
+
+        // ── Persistent: connectors, spawns ──────────────────────────────────
+        AddPersist(cell, IdConn, 0f, 0f, z,
+            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, MathF.PI));
+
+        // East/west connector rotation: XMarkerHeading Z=3π/2 → faces +X, Z=π/2 → faces −X
+        float xConnRot = exitEast ? 3f * MathF.PI / 2f : MathF.PI / 2f;
+        AddPersist(cell, IdConn, xConnX, cornerY, z,
+            editorId: $"rg_conn_{(exitEast ? "e" : "w")}_D1_station_" + (_connSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, xConnRot));
+
+        AddPersist(cell, IdSpawn, 0f, 2.8f, z,
+            editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, 0f));
+        AddPersist(cell, IdSpawn, xConnX * 0.5f, cornerY, z,
+            editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, 0f));
+
+        // ── Decorations ──────────────────────────────────────────────────────
+        PlaceEntryPanels(cell, z);
+
+        // Corner junction light: ceiling-hung on the outer (concave) wall face.
+        // Outer corner is on +X side for S-to-E, −X side for S-to-W.
+        float lightX = exitEast ? -2f : 2f;
+        AddTemp(cell, IdCornerLightMesh,   lightX, cornerY + 1f, 3.125f);
+        AddTemp(cell, IdCornerLightRecord, lightX, cornerY + 1f, 3.125f);
+
+        // ── PackIn record ─────────────────────────────────────────────────────
+        float bMinX = exitEast ? -2f : xConnX - 2f;
+        float bMaxX = exitEast ? xConnX + 2f : 2f;
+        var packin = new PackIn(_targetMod)
+        {
+            EditorID            = editorId,
+            MajorRecordFlagsRaw = 512,
+            ObjectBounds = new ObjectBounds
+            {
+                First  = new P3Float(bMinX,  -2f,          -0.2f),
+                Second = new P3Float(bMaxX, cornerY + 2f,   5.8f),
+            },
+        };
+        packin.Cell = cell.ToNullableLink<ICellGetter>();
+        _targetMod.PackIns.Add(packin);
+
+        Console.WriteLine($"[SciHallwayGenerator] {editorId}: corner " +
+                          $"exit{(exitEast ? "East" : "West")} yArm={yStraight} xArm={xStraight}");
+        return packin.FormKey;
+    }
+
+    /// <summary>
+    /// Generates a U-stub room: two south-facing connectors joined by a U-turn.
+    ///
+    /// Layout (xGap=8, yStraight=0):
+    ///   Left:   S(0,0) → cap(0,2) → corner(0,6)
+    ///   Bridge: → Way(−4,6) →
+    ///   Right:  corner(−8,6) → cap(−8,2) → S(−8,0)
+    ///
+    /// Both connectors face south. xGap is the X distance between connectors.
+    /// nBridge = (xGap − 4) / 4 straight tiles in the connecting run.
+    ///
+    ///   Left corner:  Z = π/2   (arms: −Y south, −X west toward right corner)
+    ///   Right corner: Z = π     (arms: +X east toward left corner, −Y south)
+    ///
+    /// NOTE: Bridge tile and cap rotations use logical values and are NOT yet CK-validated.
+    /// </summary>
+    public FormKey GenerateUStub(string editorId, int xGap, int yStraight = 0)
+    {
+        if (xGap < 8 || xGap % 4 != 0)
+            throw new ArgumentException($"xGap must be a multiple of 4 ≥ 8, got {xGap}");
+
+        const float z = 0f;
+        float cornerY = 6f + yStraight * 4f;
+        int   nBridge = (xGap - 4) / 4;  // straight tiles bridging the two corners
+
+        var cell = CreateCell(editorId + "StorageCell");
+
+        // ── Temporary: structure ─────────────────────────────────────────────
+        AddTemp(cell, IdPivot, 0f, 0f, z);
+
+        // Left arm (X=0): cap → [Y straight tiles] → corner
+        AddTemp(cell, IdCap, 0f, 2f, z);
+        for (int i = 0; i < yStraight; i++)
+            AddTemp(cell, i % 2 == 0 ? IdWay1 : IdWay2, 0f, 6f + i * 4f, z);
+        AddTemp(cell, IdCorner, 0f, cornerY, z, new P3Float(0f, 0f, MathF.PI / 2f));
+
+        // Bridge tiles running in −X direction. TODO: verify rotation in CK.
+        float bridgeRot = MathF.PI / 2f;  // −X run: Z = +π/2
+        for (int i = 0; i < nBridge; i++)
+        {
+            uint id = i % 2 == 0 ? IdWay2 : IdWay1;
+            AddTemp(cell, id, -(4f + i * 4f), cornerY, z, new P3Float(0f, 0f, bridgeRot));
+        }
+
+        // Right corner (X=−xGap): arms +X (bridge) and −Y (south)
+        AddTemp(cell, IdCorner, -xGap, cornerY, z, new P3Float(0f, 0f, MathF.PI));
+
+        // Right arm (X=−xGap): [Y straight tiles] → cap
+        for (int i = 0; i < yStraight; i++)
+            AddTemp(cell, i % 2 == 0 ? IdWay1 : IdWay2, -xGap, 6f + i * 4f, z);
+        AddTemp(cell, IdCap, -xGap, 2f, z);
+
+        // ── Persistent: connectors, spawns ──────────────────────────────────
+        AddPersist(cell, IdConn, 0f, 0f, z,
+            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, MathF.PI));
+        AddPersist(cell, IdConn, -xGap, 0f, z,
+            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, MathF.PI));
+
+        AddPersist(cell, IdSpawn, 0f, 2.8f, z,
+            editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, 0f));
+        AddPersist(cell, IdSpawn, -xGap * 0.5f, cornerY, z,
+            editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
+            rot: new P3Float(0f, 0f, 0f));
+
+        // ── Decorations ──────────────────────────────────────────────────────
+        PlaceEntryPanels(cell, z);
+
+        // Corner junction lights — outer (concave) wall face of each bend.
+        // Left corner (S-to-W): outer face is +X side.
+        AddTemp(cell, IdCornerLightMesh,   2f, cornerY + 1f, 3.125f);
+        AddTemp(cell, IdCornerLightRecord, 2f, cornerY + 1f, 3.125f);
+        // Right corner (back-to-S): outer face is −X side of that corner.
+        AddTemp(cell, IdCornerLightMesh,   -xGap - 2f, cornerY + 1f, 3.125f);
+        AddTemp(cell, IdCornerLightRecord, -xGap - 2f, cornerY + 1f, 3.125f);
+
+        // ── PackIn record ─────────────────────────────────────────────────────
+        var packin = new PackIn(_targetMod)
+        {
+            EditorID            = editorId,
+            MajorRecordFlagsRaw = 512,
+            ObjectBounds = new ObjectBounds
+            {
+                First  = new P3Float(-xGap - 2f, -2f,          -0.2f),
+                Second = new P3Float(         2f, cornerY + 2f,  5.8f),
+            },
+        };
+        packin.Cell = cell.ToNullableLink<ICellGetter>();
+        _targetMod.PackIns.Add(packin);
+
+        Console.WriteLine($"[SciHallwayGenerator] {editorId}: U-stub xGap={xGap} yArm={yStraight} bridge={nBridge}");
         return packin.FormKey;
     }
 
@@ -297,6 +500,11 @@ public class SciHallwayGenerator
     /// Light Z = (floor height at boundary end) + 3.2.
     /// For stair tiles, the "end" floor is tileBaseZ + 2.
     /// X = +1.5 (right wall) for south+stair section, -1.5 (left wall) for north flat.
+    ///
+    /// Rotation: LightUtility_A01On is wall-mounted; Z component only (pure yaw).
+    ///   +X wall (right): (0, 0, π/2)
+    ///   −X wall (left):  (0, 0, 3π/2)
+    /// Companion Light record uses the same rotation.
     /// </summary>
     private void PlaceLights(Cell cell, int flatStart, int stairCount, int flatEnd,
                               float southZ, float northZ, float nCapY)
@@ -333,19 +541,27 @@ public class SciHallwayGenerator
             float lightZ = floorZ + 3.2f;        // mid-wall height above local floor
             float lightX = (i < northSwitchIdx) ? 1.5f : -1.5f;
 
-            AddTemp(cell, IdLightMesh,   lightX, lightY, lightZ);
-            AddTemp(cell, IdLightRecord, lightX, lightY, lightZ);
+            // Wall-facing rotation: Z-only yaw; +X wall → π/2, −X wall → 3π/2
+            var lightRot = new P3Float(0f, 0f, lightX > 0f ? MathF.PI / 2f : 3f * MathF.PI / 2f);
+
+            AddTemp(cell, IdLightMesh,   lightX, lightY, lightZ, lightRot);
+            AddTemp(cell, IdLightRecord, lightX, lightY, lightZ, lightRot);
         }
     }
 
     /// <summary>
     /// Pair of SciInt display panel addons at the south entry — one on each wall.
     /// From rg_sts_trk_shl_001: 01a right wall at Y≈-0.9 Z+1.8, 01b left wall at Y≈0.3 Z+2.0.
+    /// Rotations confirmed from room_001 cell dump — multi-axis tilted, not just yaw.
     /// </summary>
     private void PlaceEntryPanels(Cell cell, float southZ)
     {
-        AddTemp(cell, IdPanelDetailA,  1.5f, -0.9f, southZ + 1.8f);   // right wall
-        AddTemp(cell, IdPanelDetailB, -1.5f,  0.3f, southZ + 2.0f);   // left wall
+        // PanelDetail01a — right (+X) wall: tilted panel, confirmed rotation (1.222, 1.5708, 4.364)
+        AddTemp(cell, IdPanelDetailA,  1.5f, -0.9f, southZ + 1.8f,
+            new P3Float(1.222f, 1.5708f, 4.364f));
+        // PanelDetail01b — left (−X) wall: tilted panel, confirmed rotation (-1.107, -1.5708, 1.107)
+        AddTemp(cell, IdPanelDetailB, -1.5f,  0.3f, southZ + 2.0f,
+            new P3Float(-1.107f, -1.5708f, 1.107f));
     }
 
     /// <summary>

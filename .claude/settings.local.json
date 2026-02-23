@@ -46,7 +46,8 @@
       "Bash(python3 c:/Git/FrankyCLI/scripts/proximity_filter.py:*)",
       "Bash(for id in 1B29C5 2A40E2)",
       "Bash(do)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Read(//tmp/**)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"

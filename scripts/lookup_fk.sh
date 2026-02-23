@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Identify a Starfield FormKey by trying Static, PackIn, and Activator in sequence.
+# Identify a Starfield FormKey by trying Static, PackIn, Activator, Light in sequence.
 # Usage: lookup_fk.sh <formId>   (without 0x prefix)
 # Example: lookup_fk.sh 075B8D
 FORMID="0x$1"
 mkdir -p "C:/tmp"
 cd /c/Git/FrankyCLI
-for TYPE in Static PackIn Activator; do
+for TYPE in Static PackIn Activator Light; do
     OUT="C:/tmp/_lookup_${TYPE}_${1}.txt"
     dotnet run -- gen_inspect "$TYPE" "$FORMID" > "$OUT" 2>&1
     COUNT=$(grep "Total records found:" "$OUT" | sed 's/.*Total records found: //')
     if [ "$COUNT" != "0" ] && [ -n "$COUNT" ]; then
         echo "[$TYPE] $FORMID"
-        grep -E "EditorID:|FormKey:|File:" "$OUT" | head -4
+        grep -E "EditorID:|FormKey:|Radius:|Color:|Flags:|File:" "$OUT" | head -6
         rm -f "$OUT"
         exit 0
     fi
     rm -f "$OUT"
 done
-echo "$FORMID — not found in Static/PackIn/Activator. Likely MiscItem, Container, or NPC form."
+echo "$FORMID — not found in Static/PackIn/Activator/Light. Likely MiscItem, Container, or NPC form."
