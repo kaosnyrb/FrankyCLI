@@ -221,13 +221,62 @@ Internal cell of `LGT_SciIntAddOn_LightPanel_A01` (`1A6134`): contains `SciIntAd
 | `1A600E` | `LGT_LightUtility_B03` |
 | `1A6008` | `LGT_LightUtility_C01` |
 
-## Generator
+## SciIntRmSm room tile kit
 
-`Retrograde.Library/RoomPackinGeneration/SciHallwayGenerator.cs` — parametric straight-corridor generator using the SciIntHallSm kit.
+**IMPORTANT: These are Statics, not PackIns.** Unlike the HallSm kit (which nests PackIns inside PackIns), room-sized enclosures place Static meshes directly into the room PackIn's Temporary list. There is no recursive unpacking.
+
+All Statics from `Architecture\ScienceKit\Interiors\RoomSmall\`:
+
+### Perimeter wall Statics
+
+| FormID | EditorID | Role |
+|--------|----------|------|
+| `024C99` | `SciIntRmSmMidFull01` | Full mid wall (dominant — used 9–21× per room) |
+| `024CA3` | `SciIntRmSmWallMid01` | Wall mid v1 |
+| `042C1F` | `SciIntRmSmWallMid02` | Wall mid v2 |
+| `024CA7` | `SciIntRmSmWallMid_ScktA01` | Wall mid + socket A |
+| `024CA9` | `SciIntRmSmWallMid_ScktB01` | Wall mid + socket B |
+| `024CAA` | `SciIntRmSmWallMid_ScktC01` | Wall mid + socket C |
+| `024CA6` | `SciIntRmSmWallTransLg_ScktA01` | Large transition + socket A |
+| `024CA8` | `SciIntRmSmWallTransLg_ScktB01` | Large transition + socket B |
+| `024C9A` | `SciIntRmSmWallCorIn01` | Inside corner |
+| `024C9B` | `SciIntRmSmWallCorIn_ScktA_Dbl01` | Inside corner + double socket A |
+| `024C9C` | `SciIntRmSmWallCorIn_ScktA_L01` | Inside corner + socket A (left) |
+| `024C9D` | `SciIntRmSmWallCorIn_ScktA_R01` | Inside corner + socket A (right) |
+| `024C9E` | `SciIntRmSmWallCorOut01` | Outside corner |
+
+### Partition wall Statics (internal dividers)
+
+All from `Architecture\ScienceKit\Interiors\PartitionSmall\`:
+
+| FormID | EditorID | Role |
+|--------|----------|------|
+| `0563A5` | `SciIntParSmWallA_MidFull01` | Partition mid full |
+| `0563A6` | `SciIntParSmWallA_MidMed01` | Partition mid medium |
+| `0563A7` | `SciIntParSmWallA_MidSm01` | Partition mid small |
+| `0563A3` | `SciIntParSmWallA_MidFull_ExSm01` | Partition mid full extra-small |
+| `0563A4` | `SciIntParSmWallA_MidFull_Win01` | Partition mid full with window |
+| `0563A2` | `SciIntParSmWallA_CorInSm_R01` | Partition inside corner small (R) |
+
+Design patterns and room catalog: see `designlib/sci_room.md`.
+
+---
+
+## Generators
+
+`Retrograde.Library/RoomPackinGeneration/SciHallwayGenerator.cs` — parametric straight-corridor generator using the SciIntHallSm PackIn kit.
 
 ```csharp
 var gen = new SciHallwayGenerator(targetMod, sfModKey);
 gen.Generate("my_hallway", flatTilesStart: 2, stairCount: 3, flatTilesEnd: 2);
+// → PackIn + Cell written to targetMod
+```
+
+`Retrograde.Library/RoomPackinGeneration/SciRoomGenerator.cs` — parametric 20×20 room generator using the SciIntRmSm Static kit. Statics placed directly in cell (no sub-PackIn nesting).
+
+```csharp
+var room = new SciRoomGenerator(targetMod, sfModKey);
+room.Generate("my_room", exitSouth: true, exitNorth: true, exitEast: false, exitWest: false);
 // → PackIn + Cell written to targetMod
 ```
 

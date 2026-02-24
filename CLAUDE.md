@@ -774,8 +774,13 @@ targetMod.PackIns.Add(packin);
 
 **Required using:** `using Mutagen.Bethesda;` — provides `ToLink<T>()` and `ToNullableLink<T>()` extension methods.
 
+### SciIntRmSm room tile kit
+
+Room tiles (`rg_sts_trk_big_001`–`006`) use **Statics**, not nested PackIns. Key wall pieces: `SciIntRmSmMidFull01` (`024C99:Starfield.esm`, dominant), corner pieces (`024C9A`–`024C9E`), partition walls (`0563A5`–`0563A7`). Design rules: `designlib/sci_room.md`. Full FormID table: `formlib/packin.md`.
+
 ### Key files
 
 - `Retrograde.Library/RoomPackinGeneration/SciHallwayGenerator.cs` — parametric hallway generator
+- `Retrograde.Library/RoomPackinGeneration/SciRoomGenerator.cs` — parametric room generator (SciIntRmSm Statics)
 - `gen_roompackin.cs` — standalone entry point, writes `generated_templates.esm`
 - Script: `scripts/gen_roompackin.sh`

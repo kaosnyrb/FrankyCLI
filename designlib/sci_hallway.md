@@ -4,6 +4,8 @@ Science-kit interior straight corridor. Generator: `Retrograde.Library/RoomPacki
 
 Source rooms reverse-engineered: `rg_sts_trk_shl_001`–`006` from `du_outlaws_template.esm`.
 
+See also: [sci_room.md](sci_room.md) for the SciIntRmSm room tile kit and large room design patterns (`rg_sts_trk_big_001`–`006`).
+
 ---
 
 ## Coordinate system
@@ -501,7 +503,8 @@ Y extents include the connector markers (Y = `−6` to `nCapY + 2`). Z extents a
 - **`LGT_SciIntAddOn_LightPanel` orientation** — *Resolved for LightUtility_A01On.* Wall-mounted, Z-rotation only (π/2 / 3π/2). The `LGT_*` PackIn variants are not placed inside room cells at all (double-nesting suppresses the bundled Light); they are only valid for direct worldspace placement. No further rotation question for room usage.
 - **Corner tile internal structure** — *Resolved.* Cell `0110A3` fully dumped; pivot confirmed at inside corner. Inner corner: `SciIntSegSmWallCorIn01` (`050B11`). Outer corner: `SciIntSegSmWallCorOut01` (`050B15`, Rot π). Two perpendicular wall mid segments. See Tile internal structure section.
 - **North entry panels** — room_001 only has south-side wall panels. Some rooms may want a symmetric north entry panel set.
-- **Floor mats** — `FloorMatMedium01/02` (`25B053`, `25B04E`) and `FloorMatOffice_02/03` (`2FCD12`, `2FCD13`) appear in rooms 003/006 but not in the baseline room_001. Not yet implemented.
+- **Floor mats** — `FloorMatMedium01/02` (`25B053`, `25B04E`) and `FloorMatOffice_02/03` (`2FCD12`, `2FCD13`) appear in rooms 003/006 but not in the baseline room_001. Not yet implemented. `FloorMatOffice_02` (`2FCD12`) and `FloorMatOffice_01` (`2FCD11`) confirmed in `rg_sts_trk_big_004` (open warehouse floor, used as zone markers).
+- **Cross-kit composability** — `SciIntHallSm1WayStairs01__SC` (`024466`, 4×), `SciIntHallSmCapScktA01__SC` (`024441`, 3×), and `SciIntHallSm1WayScktA01__SC` (`012CE8`, 3×) appear inside `rg_sts_trk_big_006`'s room cell as an interior staircase connecting the ground floor to an upper level at Z=8. Hallway tiles are composable into room cells — not restricted to hallway PackIns.
 - **Bridge Light record types** — *Resolved.* `07BC89` = `LGT_Interior_Spot_NS_Warm_002_2k` (warm, r=8), `133B05` = `LGT_Interior_Spot_NS_Cool_001_4k` (cool, r=8). See Bridge lighting section.
 - **Bridge naming number** — the number suffix in `sn_08`, `sn_12`, `sn_20` does not straightforwardly map to connector-to-connector distance. Treat as an opaque identifier.
 - **`sn_20` lighting** — uses `AK_CeilingLight01_ON` (`1378AB:Starfield.esm`, Akila ceiling light) rather than LightUtility. This is the longest bridge (20Y); the choice may be intentional (different feel for longer spans) or incidental. Not yet resolved whether this is a design rule or just a recycled fixture.

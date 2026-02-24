@@ -36,6 +36,15 @@ namespace FrankyCLI;
 ///     rg_gen_sts_trk_shl_sw_sht      — short legs (1 extra tile each arm)
 ///     rg_gen_sts_trk_shl_sw_lngy     — long Y arm (2 extra Y tiles, 0 extra X)
 ///     rg_gen_sts_trk_shl_sw_lngx     — long X arm (0 extra Y, 2 extra X tiles)
+///   Rooms (20×20, SciIntRmSm kit):
+///     rg_gen_sts_trk_big_s           — S exit only (dead-end/cap room)
+///     rg_gen_sts_trk_big_sn          — S+N (through room, N-S axis)
+///     rg_gen_sts_trk_big_se          — S+E (corner room)
+///     rg_gen_sts_trk_big_sw          — S+W (corner room)
+///     rg_gen_sts_trk_big_sne         — S+N+E (T-junction)
+///     rg_gen_sts_trk_big_snw         — S+N+W (T-junction)
+///     rg_gen_sts_trk_big_sew         — S+E+W (T-junction)
+///     rg_gen_sts_trk_big_snew        — S+N+E+W (4-way junction, matches big_001/002)
 /// </summary>
 public class gen_roompackin
 {
@@ -91,6 +100,39 @@ public class gen_roompackin
         gen.GenerateCorner("rg_gen_sts_trk_shl_sw_sht",  exitEast: false, yStraight: 1, xStraight: 1);
         gen.GenerateCorner("rg_gen_sts_trk_shl_sw_lngy", exitEast: false, yStraight: 2, xStraight: 0);
         gen.GenerateCorner("rg_gen_sts_trk_shl_sw_lngx", exitEast: false, yStraight: 0, xStraight: 2);
+
+        // ── Science Rooms (SciIntRmSm kit) ───────────────────────────────────
+        // Reverse-engineered from rg_sts_trk_big_001–006 (du_outlaws_template.esm).
+        // All tiles are Starfield.esm Statics placed directly in the cell — no nested PackIns.
+        // Connectors centred on each face. S connector uses ConnRotNorth (Z=0, inward).
+        Console.WriteLine();
+        Console.WriteLine("--- Science Rooms ---");
+
+        var room = new SciRoomGenerator(outputMod, sfModKey);
+
+        // 1-exit rooms: dead-end cap (S only)
+        room.Generate("rg_gen_sts_trk_big_s",
+            exitSouth: true, exitNorth: false, exitEast: false, exitWest: false);
+
+        // 2-exit rooms: through / corner
+        room.Generate("rg_gen_sts_trk_big_sn",
+            exitSouth: true, exitNorth: true,  exitEast: false, exitWest: false);
+        room.Generate("rg_gen_sts_trk_big_se",
+            exitSouth: true, exitNorth: false, exitEast: true,  exitWest: false);
+        room.Generate("rg_gen_sts_trk_big_sw",
+            exitSouth: true, exitNorth: false, exitEast: false, exitWest: true);
+
+        // 3-exit rooms: T-junctions
+        room.Generate("rg_gen_sts_trk_big_sne",
+            exitSouth: true, exitNorth: true,  exitEast: true,  exitWest: false);
+        room.Generate("rg_gen_sts_trk_big_snw",
+            exitSouth: true, exitNorth: true,  exitEast: false, exitWest: true);
+        room.Generate("rg_gen_sts_trk_big_sew",
+            exitSouth: true, exitNorth: false, exitEast: true,  exitWest: true);
+
+        // 4-exit room: full junction (matches big_001 / big_002 layout)
+        room.Generate("rg_gen_sts_trk_big_snew",
+            exitSouth: true, exitNorth: true,  exitEast: true,  exitWest: true);
 
         // Write to Starfield Data folder
         string outputPath = Path.Combine(env.DataFolderPath, OutputModName + ".esm");
