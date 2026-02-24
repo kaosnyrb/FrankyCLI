@@ -20,11 +20,22 @@ namespace FrankyCLI;
 /// base objects — no dependency on any template mod.
 ///
 /// Generated variants:
-///   rg_gen_sts_trk_shl_flat_short — 8-tile flat corridor (no stairs)
-///   rg_gen_sts_trk_shl_flat_med   — 10-tile flat corridor
-///   rg_gen_sts_trk_shl_stair_low  — rising corridor, 2 stairs (+4 Z)
-///   rg_gen_sts_trk_shl_stair_med  — rising corridor, 3 stairs (+6 Z, matches rg_sts_trk_shl_001)
-///   rg_gen_sts_trk_shl_stair_tall — rising corridor, 4 stairs (+8 Z)
+///   Straight (S↔N):
+///     rg_gen_sts_trk_shl_flat_short  — 8-tile flat corridor (no stairs)
+///     rg_gen_sts_trk_shl_flat_med    — 10-tile flat corridor
+///     rg_gen_sts_trk_shl_stair_low   — rising corridor, 2 stairs (+4 Z)
+///     rg_gen_sts_trk_shl_stair_med   — rising corridor, 3 stairs (+6 Z, matches rg_sts_trk_shl_001)
+///     rg_gen_sts_trk_shl_stair_tall  — rising corridor, 4 stairs (+8 Z)
+///   SE corners (S↔E):
+///     rg_gen_sts_trk_shl_se_min      — minimum bend (0 extra tiles each arm)
+///     rg_gen_sts_trk_shl_se_sht      — short legs (1 extra tile each arm, ~ne_10x6y)
+///     rg_gen_sts_trk_shl_se_lngy     — long Y arm (2 extra Y tiles, 0 extra X)
+///     rg_gen_sts_trk_shl_se_lngx     — long X arm (0 extra Y, 2 extra X tiles)
+///   SW corners (S↔W):
+///     rg_gen_sts_trk_shl_sw_min      — minimum bend (0 extra tiles each arm)
+///     rg_gen_sts_trk_shl_sw_sht      — short legs (1 extra tile each arm)
+///     rg_gen_sts_trk_shl_sw_lngy     — long Y arm (2 extra Y tiles, 0 extra X)
+///     rg_gen_sts_trk_shl_sw_lngx     — long X arm (0 extra Y, 2 extra X tiles)
 /// </summary>
 public class gen_roompackin
 {
@@ -68,6 +79,18 @@ public class gen_roompackin
 
         // Rising corridor — 4 stairs, +8 units rise
         gen.Generate("rg_gen_sts_trk_shl_stair_tall", flatTilesStart: 3, stairCount: 4, flatTilesEnd: 3);
+
+        // SE corners — S entry, E exit
+        gen.GenerateCorner("rg_gen_sts_trk_shl_se_min",  exitEast: true,  yStraight: 0, xStraight: 0);
+        gen.GenerateCorner("rg_gen_sts_trk_shl_se_sht",  exitEast: true,  yStraight: 1, xStraight: 1);
+        gen.GenerateCorner("rg_gen_sts_trk_shl_se_lngy", exitEast: true,  yStraight: 2, xStraight: 0);
+        gen.GenerateCorner("rg_gen_sts_trk_shl_se_lngx", exitEast: true,  yStraight: 0, xStraight: 2);
+
+        // SW corners — S entry, W exit
+        gen.GenerateCorner("rg_gen_sts_trk_shl_sw_min",  exitEast: false, yStraight: 0, xStraight: 0);
+        gen.GenerateCorner("rg_gen_sts_trk_shl_sw_sht",  exitEast: false, yStraight: 1, xStraight: 1);
+        gen.GenerateCorner("rg_gen_sts_trk_shl_sw_lngy", exitEast: false, yStraight: 2, xStraight: 0);
+        gen.GenerateCorner("rg_gen_sts_trk_shl_sw_lngx", exitEast: false, yStraight: 0, xStraight: 2);
 
         // Write to Starfield Data folder
         string outputPath = Path.Combine(env.DataFolderPath, OutputModName + ".esm");

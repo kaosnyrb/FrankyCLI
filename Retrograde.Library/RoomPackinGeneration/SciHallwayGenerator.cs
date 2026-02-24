@@ -55,6 +55,15 @@ public class SciHallwayGenerator
     private const uint IdPipe01       = 0x097F9F; // StsGenIntAddOn_Pipe01
     private const uint IdPipe03       = 0x097FA2; // StsGenIntAddOn_Pipe03
 
+    // ── Standard connector rotations (outward-facing) ──────────────────────────
+    // Use these constants with PlaceConnector. Note: the S connector in corner and
+    // U-stub rooms uses ConnRotNorth (Z=0, inward) — Bethesda convention confirmed from
+    // ne_10x6y and ss_n08. The dirCode ("s") still encodes the exit direction for the router.
+    public const float ConnRotNorth = 0f;
+    public const float ConnRotSouth = MathF.PI;
+    public const float ConnRotEast  = MathF.PI / 2f;
+    public const float ConnRotWest  = 3f * MathF.PI / 2f;
+
     private readonly StarfieldMod _targetMod;
     private readonly ModKey _starfieldModKey;
     private int _connSeq = 1;
@@ -64,6 +73,27 @@ public class SciHallwayGenerator
     {
         _targetMod = targetMod;
         _starfieldModKey = starfieldModKey;
+    }
+
+    /// <summary>
+    /// Places an XMarkerHeading connector in <paramref name="cell"/>.
+    ///
+    /// <paramref name="dirCode"/> is the single-letter direction that appears in the EditorID
+    /// ("n", "s", "e", "w") and is parsed by the dungeon router to identify which direction
+    /// this connector exits. It does NOT have to match the physical rotation — for example,
+    /// S connectors in corner/U-stub rooms use dirCode="s" but rotationZ=ConnRotNorth (Z=0),
+    /// per the confirmed Bethesda convention for bridge-type rooms.
+    ///
+    /// The EditorID sequence counter is shared across all connector placements in this generator
+    /// instance so IDs stay unique when mixing multiple room pieces into one PackIn.
+    /// </summary>
+    /// <param name="dirCode">"n", "s", "e", or "w" — sets the router-visible direction token.</param>
+    /// <param name="rotationZ">Yaw rotation of the marker in radians. Use the ConnRot* constants.</param>
+    public void PlaceConnector(Cell cell, string dirCode, float x, float y, float z, float rotationZ)
+    {
+        AddPersist(cell, IdConn, x, y, z,
+            editorId: $"rg_conn_{dirCode}_D1_station_{(_connSeq++):D3}",
+            rot: new P3Float(0f, 0f, rotationZ));
     }
 
     /// <summary>
@@ -128,15 +158,11 @@ public class SciHallwayGenerator
 
         // ── Persistent objects (game logic) ───────────────────────────────────
 
-        // North connector — XMarkerHeading, faces north (rotation Z = 0)
-        AddPersist(cell, IdConn, 0f, nCapY + 2f, northZ,
-            editorId: "rg_conn_n_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, 0f));
+        // North connector — faces north (rotation Z = 0)
+        PlaceConnector(cell, "n", 0f, nCapY + 2f, northZ, ConnRotNorth);
 
-        // South connector — XMarkerHeading, faces south (rotation Z = π)
-        AddPersist(cell, IdConn, 0f, -6f, southZ,
-            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, MathF.PI));
+        // South connector — faces south (rotation Z = π)
+        PlaceConnector(cell, "s", 0f, -6f, southZ, ConnRotSouth);
 
         // Enemy spawns distributed along the corridor
         PlaceSpawns(cell, flatTilesStart, stairCount, flatTilesEnd, southZ, northZ);
@@ -225,17 +251,13 @@ public class SciHallwayGenerator
         AddTemp(cell, IdCap, xCapX, cornerY, z, new P3Float(0f, 0f, xCapRot));
 
         // ── Persistent: connectors, spawns ──────────────────────────────────
-        // S connector uses Z=0 (inward/north-facing) in corner rooms — confirmed ne_10x6y.
-        // (Straight corridors use Z=π facing outward; corner/bridge rooms use Z=0.)
-        AddPersist(cell, IdConn, 0f, 0f, z,
-            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, 0f));
+        // S connector uses ConnRotNorth (Z=0, inward) in corner rooms — confirmed ne_10x6y.
+        // dirCode stays "s" so the router treats this as a South exit; rotation differs from straight rooms.
+        PlaceConnector(cell, "s", 0f, 0f, z, ConnRotNorth);
 
-        // E connector: Z=π/2 (faces +X); W connector: Z=3π/2 (faces −X) — confirmed ne_10x6y.
-        float xConnRot = exitEast ? MathF.PI / 2f : 3f * MathF.PI / 2f;
-        AddPersist(cell, IdConn, xConnX, cornerY, z,
-            editorId: $"rg_conn_{(exitEast ? "e" : "w")}_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, xConnRot));
+        // E/W connector — faces outward along X axis. Confirmed ne_10x6y.
+        PlaceConnector(cell, exitEast ? "e" : "w", xConnX, cornerY, z,
+            exitEast ? ConnRotEast : ConnRotWest);
 
         AddPersist(cell, IdSpawn, 0f, 2.8f, z,
             editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
@@ -330,13 +352,9 @@ public class SciHallwayGenerator
         AddTemp(cell, IdCap, -xGap, 2f, z, new P3Float(0f, 0f, MathF.PI));
 
         // ── Persistent: connectors, spawns ──────────────────────────────────
-        // S connectors use Z=0 (inward) in U-stub rooms — confirmed ss_n08.
-        AddPersist(cell, IdConn, 0f, 0f, z,
-            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, 0f));
-        AddPersist(cell, IdConn, -xGap, 0f, z,
-            editorId: "rg_conn_s_D1_station_" + (_connSeq++).ToString("D3"),
-            rot: new P3Float(0f, 0f, 0f));
+        // S connectors use ConnRotNorth (Z=0, inward) in U-stub rooms — confirmed ss_n08.
+        PlaceConnector(cell, "s",    0f, 0f, z, ConnRotNorth);
+        PlaceConnector(cell, "s", -xGap, 0f, z, ConnRotNorth);
 
         AddPersist(cell, IdSpawn, 0f, 2.8f, z,
             editorId: "rg_enemy_spawn_" + (_spawnSeq++).ToString("D3"),
