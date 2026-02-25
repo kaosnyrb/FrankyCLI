@@ -40,11 +40,17 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
     private readonly float _scale = Math.Clamp(trackScale, 0.4f, 1.0f);
 
     private const int    WaypointCount  = 10;
-    private const int    CandidateCount = 100;
-    private const float  TrackHalfWidth = 16f;       // overlay units
+    private const int    CandidateCount = 50000;
+    private const float  TrackHalfWidth = 8f;        // overlay units (half the track width)
     private const int    SplineSamples  = 600;       // resolution for terrain editing
     private const int    ScoreSamples   = 200;       // resolution for candidate scoring
     private const ushort TrackTexture   = 0x4000;
+
+    // Edge-noise parameters
+    /// <summary>Noise grid cell size in BTD vertices (~12.5 overlay units per cell).</summary>
+    private const int   NoiseGridVerts = 16;
+    /// <summary>Maximum blend perturbation applied at the outer edge of the track.</summary>
+    private const float NoiseAmplitude = 0.40f;
 
     /// <summary>Overlay units per BTD vertex (100 / 128 ≈ 0.78125).</summary>
     private const float OvVtx    = 100f / BtdFile.CellResolution;
@@ -101,10 +107,20 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
         var ssx = new float[ScoreSamples];
         var ssy = new float[ScoreSamples];
 
-        float[] bestWx    = null;
-        float[] bestWy    = null;
-        float   bestScore = float.MinValue;
-        int     bestAttempt = -1;
+        // Initialise bestWx/bestWy to the fallback circle so they are never null.
+        var bestWx = new float[WaypointCount];
+        var bestWy = new float[WaypointCount];
+        {
+            float r      = Math.Min(halfExtX, halfExtY) * 0.6f;
+            float sector = MathF.PI * 2f / WaypointCount;
+            for (int i = 0; i < WaypointCount; i++)
+            {
+                bestWx[i] = ovCX + r * MathF.Cos(i * sector);
+                bestWy[i] = ovCY + r * MathF.Sin(i * sector);
+            }
+        }
+        float bestScore   = float.MinValue;
+        int   bestAttempt = -1;
 
         for (int attempt = 0; attempt < CandidateCount; attempt++)
         {
@@ -120,38 +136,27 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
             {
                 bestScore   = score;
                 bestAttempt = attempt;
-                if (bestWx == null)
-                {
-                    bestWx = new float[WaypointCount];
-                    bestWy = new float[WaypointCount];
-                }
                 Array.Copy(wx, bestWx, WaypointCount);
                 Array.Copy(wy, bestWy, WaypointCount);
             }
         }
+
+        if (bestAttempt < 0 && !RetrogradeContext.Quiet)
+            Console.WriteLine("[RacetrackTerrainPass] WARNING: all candidates rejected — using fallback circle.");
 
         if (!RetrogradeContext.Quiet)
             Console.WriteLine(
                 $"[RacetrackTerrainPass] Best score={bestScore:F4} " +
                 $"(attempt {bestAttempt + 1}/{CandidateCount})");
 
-        // Fallback: if every candidate was rejected (out of bounds), use a plain
-        // circle centred in the editable area.
-        if (bestWx == null)
-        {
-            if (!RetrogradeContext.Quiet)
-                Console.WriteLine("[RacetrackTerrainPass] WARNING: all candidates rejected — using fallback circle.");
-
-            bestWx = new float[WaypointCount];
-            bestWy = new float[WaypointCount];
-            float r      = Math.Min(halfExtX, halfExtY) * 0.6f;
-            float sector = MathF.PI * 2f / WaypointCount;
-            for (int i = 0; i < WaypointCount; i++)
-            {
-                bestWx[i] = ovCX + r * MathF.Cos(i * sector);
-                bestWy[i] = ovCY + r * MathF.Sin(i * sector);
-            }
-        }
+        // ------------------------------------------------------------------
+        // 1b. Smooth the winning waypoints to remove tight kinks before the
+        //     spline is evaluated for terrain editing and content placement.
+        //     Laplacian smoothing: each waypoint moves toward the average of
+        //     its two neighbours (closed-loop aware).  Multiple passes
+        //     progressively flatten sharp bends without collapsing the circuit.
+        // ------------------------------------------------------------------
+        SmoothWaypoints(bestWx, bestWy, WaypointCount, 8);
 
         // ------------------------------------------------------------------
         // 2a. Place an XMarker at each waypoint and collect them in a FormList.
@@ -189,11 +194,12 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
         }
 
         // State used by other passes (boss, marker, tile grid origin).
-        // Use (0, 0) — the worldspace origin — which is within the editable area
-        // for all supported BTD sizes.
-        state.FlatAreaWorldX = 0f;
-        state.FlatAreaWorldY = 0f;
-        state.TerrainHeight  = btd.SampleHeightAtWorld(0f, 0f) / 8f;
+        // Anchor the tile grid at the centre of the editable BTD area so that
+        // the tile map covers the usable terrain for any BTD grid size.
+        // For 4×4 BTDs ovCX/ovCY are both 0; for 5×5 BTDs they are (50, 50).
+        state.FlatAreaWorldX = ovCX;
+        state.FlatAreaWorldY = ovCY;
+        state.TerrainHeight  = btd.SampleHeightAtWorld(ovCX * BtdScale, ovCY * BtdScale) / 8f;
 
         // ------------------------------------------------------------------
         // 2.  Sample the winning spline at full editing resolution.
@@ -213,12 +219,54 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
             totalW, totalH, ovXMin, ovYMin, effectiveHalfWidth, blend);
 
         // ------------------------------------------------------------------
-        // 4.  Read original heights, apply blur, write back within the band.
+        // 3a. Apply edge noise — perturbs the outer ~40 % of the blend band
+        //     with bilinear value noise so the track boundary looks organic
+        //     rather than a perfect geometric curve.
         // ------------------------------------------------------------------
-        var origHeights = new ushort[totalW * totalH];
+        ApplyEdgeNoise(blend, totalW, totalH, state.Seed);
+
+        // ------------------------------------------------------------------
+        // 3b. Mark every tile map tile that overlaps the track band so that
+        //     RockScatterPass and VegetationScatterPass will skip them.
+        //     Uses the same origin formula as those passes.
+        // ------------------------------------------------------------------
+        {
+            int mapSize  = state.Map.xsize;
+            int blkSize  = (int)state.TileWorldSize;
+            float tileOX = (state.FlatAreaWorldX ?? 0f) - blkSize * (mapSize / 2f);
+            float tileOY = (state.FlatAreaWorldY ?? 0f) + blkSize * (mapSize / 2f);
+
+            for (int tx = 0; tx < mapSize; tx++)
+            {
+                for (int ty = 0; ty < mapSize; ty++)
+                {
+                    float tileWx = tileOX + blkSize * tx;
+                    float tileWy = tileOY - blkSize * ty;
+
+                    int gx = (int)Math.Floor((tileWx - ovXMin) / OvVtx);
+                    int gy = (int)Math.Floor((tileWy - ovYMin) / OvVtx);
+
+                    if (gx < 0 || gx >= totalW || gy < 0 || gy >= totalH) continue;
+                    if (blend[gy * totalW + gx] > 0f)
+                        state.Map.tiles[tx][ty].prefabs.Add("track");
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // 4.  Read original heights, build the flat track target, write back.
+        // ------------------------------------------------------------------
+        var origHeights  = new ushort[totalW * totalH];
         ReadEditableHeights(btd, editMinX, editMinY, editMaxX, editMaxY, totalW, origHeights);
 
-        ApplyTerrain(btd, origHeights, blend, totalW, totalH,
+        // Per-vertex target height: distance-weighted average of spline
+        // centerline heights within the track band.  Lerping toward this
+        // instead of blurred terrain makes the track surface genuinely flat
+        // cross-section while still following the natural along-track grade.
+        var trackHeights = BuildTrackHeights(btd, spx, spy, SplineSamples,
+            totalW, totalH, ovXMin, ovYMin, effectiveHalfWidth);
+
+        ApplyTerrain(btd, origHeights, trackHeights, blend, totalW, totalH,
             editMinX, editMinY, editMaxX, editMaxY);
 
         btd.SmoothDirtyCellEdges(24);
@@ -270,6 +318,29 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
 
             wx[i] = cx + cos * radius;
             wy[i] = cy + sin * radius;
+        }
+    }
+
+    /// <summary>
+    /// Laplacian smoothing on a closed loop of waypoints.
+    /// Each pass moves every waypoint to the average of itself and its two
+    /// neighbours, ironing out tight kinks while preserving the overall shape.
+    /// </summary>
+    private static void SmoothWaypoints(float[] wx, float[] wy, int n, int passes)
+    {
+        var tx = new float[n];
+        var ty = new float[n];
+        for (int p = 0; p < passes; p++)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                int prev = (i - 1 + n) % n;
+                int next = (i + 1) % n;
+                tx[i] = (wx[prev] + wx[i] + wx[next]) / 3f;
+                ty[i] = (wy[prev] + wy[i] + wy[next]) / 3f;
+            }
+            Array.Copy(tx, wx, n);
+            Array.Copy(ty, wy, n);
         }
     }
 
@@ -339,6 +410,39 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
                 spy[s] < ovYMin + margin || spy[s] > ovYMax - margin)
                 return -1f;
         }
+
+        // -- Cliff rejection + track length -----------------------------
+        // Accumulate both along-track slope (for cliff rejection) and total
+        // spline length in the same loop — dist is needed for both.
+        const float CliffHardLimit = 1.5f; // tan(~56°) — hard reject
+        float maxAlongSlope = 0f;
+        float totalLength   = 0f;
+        {
+            float prevH = btd.SampleHeightAtWorld(
+                spx[ScoreSamples - 1] * BtdScale,
+                spy[ScoreSamples - 1] * BtdScale) / 8f;
+            for (int s = 0; s < ScoreSamples; s++)
+            {
+                float curH = btd.SampleHeightAtWorld(spx[s] * BtdScale, spy[s] * BtdScale) / 8f;
+                int   prv  = (s - 1 + ScoreSamples) % ScoreSamples;
+                float ddx  = spx[s] - spx[prv];
+                float ddy  = spy[s] - spy[prv];
+                float dist = MathF.Sqrt(ddx * ddx + ddy * ddy);
+                totalLength += dist;
+                if (dist > 1e-4f)
+                    maxAlongSlope = Math.Max(maxAlongSlope, MathF.Abs(curH - prevH) / dist);
+                prevH = curH;
+            }
+        }
+        if (maxAlongSlope > CliffHardLimit) return -1f;
+        float cliffScore = MathF.Exp(-maxAlongSlope);
+
+        // -- Length score -----------------------------------------------
+        // Normalise against the circumference of a circle inscribed in the
+        // editable area (~55 % of that gives the expected "good" track length).
+        // Scores linearly from 0 → 1 as the track approaches that length.
+        float refLength   = MathF.PI * Math.Min(ovXMax - ovXMin, ovYMax - ovYMin) * 0.55f;
+        float lengthScore = Math.Clamp(totalLength / refLength, 0f, 1f);
 
         // -- Terrain cross-slope (60 % weight) -------------------------
         // For each spline sample, measure the height difference across the
@@ -421,7 +525,7 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
             ? 1f
             : MathF.Exp(-closePairs * 0.1f);
 
-        return (terrainScore * 0.6f + spreadScore * 0.4f) * intersectionScore;
+        return (terrainScore * 0.4f + spreadScore * 0.3f + lengthScore * 0.5f) * intersectionScore * cliffScore;
     }
 
     // ==================================================================
@@ -470,19 +574,68 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
     }
 
     // ==================================================================
-    // Terrain application — blur and lerp within the band
+    // Terrain application — flatten to spline height within the band
     // ==================================================================
+
+    /// <summary>
+    /// For every vertex inside the track band, computes the distance-weighted
+    /// average of nearby spline centerline heights.  This becomes the lerp
+    /// target in <see cref="ApplyTerrain"/>, making each track cross-section
+    /// flat while still following the natural along-track grade.
+    /// </summary>
+    private static ushort[] BuildTrackHeights(
+        BtdFile btd,
+        float[] spx, float[] spy, int samples,
+        int totalW, int totalH,
+        float ovXMin, float ovYMin, float halfWidth)
+    {
+        var weightSum = new float[totalW * totalH];
+        var heightSum = new float[totalW * totalH];
+
+        for (int s = 0; s < samples; s++)
+        {
+            float h = btd.SampleHeightAtWorld(spx[s] * BtdScale, spy[s] * BtdScale);
+
+            int gxMin = Math.Max(0,        (int)MathF.Floor  ((spx[s] - ovXMin - halfWidth) / OvVtx));
+            int gxMax = Math.Min(totalW-1, (int)MathF.Ceiling((spx[s] - ovXMin + halfWidth) / OvVtx));
+            int gyMin = Math.Max(0,        (int)MathF.Floor  ((spy[s] - ovYMin - halfWidth) / OvVtx));
+            int gyMax = Math.Min(totalH-1, (int)MathF.Ceiling((spy[s] - ovYMin + halfWidth) / OvVtx));
+
+            for (int gy = gyMin; gy <= gyMax; gy++)
+            {
+                float ovY = ovYMin + gy * OvVtx;
+                float dy  = ovY - spy[s];
+                for (int gx = gxMin; gx <= gxMax; gx++)
+                {
+                    float ovX = ovXMin + gx * OvVtx;
+                    float dx  = ovX - spx[s];
+                    float dist = MathF.Sqrt(dx * dx + dy * dy);
+                    if (dist >= halfWidth) continue;
+                    float w = 1f - dist / halfWidth;
+                    int idx = gy * totalW + gx;
+                    weightSum[idx] += w;
+                    heightSum[idx] += w * h;
+                }
+            }
+        }
+
+        var result = new ushort[totalW * totalH];
+        for (int i = 0; i < result.Length; i++)
+            if (weightSum[i] > 1e-6f)
+                result[i] = btd.HeightToRaw(heightSum[i] / weightSum[i]);
+        return result;
+    }
+
     private static void ApplyTerrain(
-        BtdFile btd, ushort[] origHeights, float[] blend,
+        BtdFile btd, ushort[] origHeights, ushort[] trackHeights, float[] blend,
         int totalW, int totalH,
         int editMinX, int editMinY, int editMaxX, int editMaxY)
     {
-        // Box-blur the full editable height buffer (4 passes, radius 3 vertices).
-        // Blurring the entire buffer — not just the band — ensures the Lerp
-        // transition at track edges uses genuine terrain neighbours, not zeros.
-        var smoothed = (ushort[])origHeights.Clone();
+        // Box-blur the originals so the ramp from track edge to natural
+        // terrain uses smoothed values, preventing jagged transitions.
+        var smoothedOrig = (ushort[])origHeights.Clone();
         for (int p = 0; p < 4; p++)
-            BoxBlurPass(smoothed, totalW, totalH, 3);
+            BoxBlurPass(smoothedOrig, totalW, totalH, 3);
 
         var hBuf = new ushort[BtdFile.CellResolution * BtdFile.CellResolution];
 
@@ -507,7 +660,7 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
 
                         int idx  = vy * BtdFile.CellResolution + vx;
                         int gIdx = gy * totalW + gx;
-                        hBuf[idx] = Lerp(origHeights[gIdx], smoothed[gIdx], b);
+                        hBuf[idx] = Lerp(smoothedOrig[gIdx], trackHeights[gIdx], b);
                         modified  = true;
                     }
                 }
@@ -637,4 +790,66 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
 
     private static ushort Lerp(ushort a, ushort b, float t)
         => (ushort)Math.Clamp((int)Math.Round(a + (b - a) * t), 0, 65535);
+
+    // ==================================================================
+    // Edge noise — bilinear value noise applied to the blend buffer
+    // ==================================================================
+
+    /// <summary>
+    /// Perturbs the outer band of the blend buffer with bilinear value noise.
+    /// The perturbation strength is proportional to (1 − blend), so the centre
+    /// of the track is unaffected and only the edges vary.
+    /// </summary>
+    private static void ApplyEdgeNoise(float[] blend, int totalW, int totalH, int seed)
+    {
+        for (int gy = 0; gy < totalH; gy++)
+        {
+            for (int gx = 0; gx < totalW; gx++)
+            {
+                float b = blend[gy * totalW + gx];
+                if (b <= 0f) continue;
+
+                float n          = NoiseSample(gx, gy, seed);           // −1 … +1
+                float edgeFactor = 1f - b;                               // 0 at centre, 1 at edge
+                blend[gy * totalW + gx] = Math.Clamp(
+                    b + n * NoiseAmplitude * edgeFactor, 0f, 1f);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bilinear-interpolated value noise in [−1, 1].
+    /// Grid cells are <see cref="NoiseGridVerts"/> vertices wide, giving
+    /// feature sizes of roughly 12–13 overlay units at default resolution.
+    /// </summary>
+    private static float NoiseSample(int gx, int gy, int seed)
+    {
+        float fx = (float)gx / NoiseGridVerts;
+        float fy = (float)gy / NoiseGridVerts;
+        int   cx = (int)MathF.Floor(fx);
+        int   cy = (int)MathF.Floor(fy);
+        float u  = fx - cx;
+        float v  = fy - cy;
+        // Smooth step (Hermite) for a smoother interpolation curve.
+        u = u * u * (3f - 2f * u);
+        v = v * v * (3f - 2f * v);
+
+        float v00 = NoiseHash(cx,     cy,     seed);
+        float v10 = NoiseHash(cx + 1, cy,     seed);
+        float v01 = NoiseHash(cx,     cy + 1, seed);
+        float v11 = NoiseHash(cx + 1, cy + 1, seed);
+
+        float row0 = v00 + u * (v10 - v00);
+        float row1 = v01 + u * (v11 - v01);
+        return row0 + v * (row1 - row0);
+    }
+
+    /// <summary>Returns a pseudo-random value in [−1, 1] for integer grid point (x, y).</summary>
+    private static float NoiseHash(int x, int y, int seed)
+    {
+        int n = x * 127 + y * 311 + seed;
+        n ^= n << 13;
+        int m = n * (n * n * 15731 + 789221) + 1376312589;
+        return (m & 0x7fffffff) / (float)0x3fffffff - 1f;
+    }
 }

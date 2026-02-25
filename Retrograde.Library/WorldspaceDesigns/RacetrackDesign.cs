@@ -25,19 +25,7 @@ public class RacetrackDesign : IWorldspaceDesign
     // These give a large-enough editable cell region for the oval to fit.
     private static readonly List<string> TemplateWorldspaces = new()
     {
-        "DR001World",    // 4x4
-        "DR009World",    // 4x4
-        "DR011World",    // 4x4
-        "DR012World",    // 4x4
-        "OEBB001World",  // 4x4
-        "OEBB003World",  // 4x4
-        "OEBB012World",  // 4x4
-        "OEBB013World",  // 4x4
-        "OEDB508World",  // 5x5
-        "OEDB509World",  // 5x5
-        "OEOB008World",  // 5x5
-        "OESD008World",  // 4x4
-        "OESD009World",  // 4x4
+        "tterrmesa01",
     };
 
     public List<IWorldspacePass> MapPasses { get; set; }

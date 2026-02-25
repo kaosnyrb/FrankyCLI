@@ -21,7 +21,16 @@ public class WorldspaceDungeonGenerator
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        var state = new WorldspaceState(worldspace, location, _design.MapSize)
+        // Derive map size from the editable BTD cell count when available so the
+        // tile grid exactly covers the usable worldspace area regardless of BTD grid size.
+        // editableCells = (CellMax - CellMin - 1) strips one edge cell on each side.
+        // For a 4×4 BTD (editableCells=2): 2 × 100 / 4 = 50  (same as the old hardcoded default).
+        // For a 5×5 BTD (editableCells=3): 3 × 100 / 4 = 75.
+        int mapSize = btd != null
+            ? (int)Math.Round((btd.CellMaxX - btd.CellMinX - 1) * 100f / _design.TileWorldSize)
+            : _design.MapSize;
+
+        var state = new WorldspaceState(worldspace, location, mapSize)
         {
             Seed = seed,
             Rng = new Random(seed),
