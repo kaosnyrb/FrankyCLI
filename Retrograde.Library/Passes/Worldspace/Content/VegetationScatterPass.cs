@@ -77,15 +77,36 @@ public class VegetationScatterPass : IWorldspacePass
             ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
             : 94f;
 
+        // Extend the iteration bounds to cover every active cell in CellLookup.
+        // The tile map (map.xsize × map.ysize) may be smaller than the actual
+        // editable area (e.g. 5×5 BTDs have 3×3 = 9 editable cells but the tile
+        // grid only covers the centre 2×2). Positions outside the tile map are
+        // treated as content-free (no fort tiles exist there).
+        int gxMin = 0, gxMax = map.xsize - 1;
+        int gyMin = 0, gyMax = map.ysize - 1;
+        foreach (var pt in state.CellLookup.Keys)
+        {
+            int txMin = (int)Math.Floor(( pt.X      * 100f - originX) / blocksize);
+            int txMax = (int)Math.Ceiling(((pt.X + 1) * 100f - originX) / blocksize) - 1;
+            int tyMin = (int)Math.Floor((originY - (pt.Y + 1) * 100f) / blocksize);
+            int tyMax = (int)Math.Ceiling((originY -  pt.Y      * 100f) / blocksize) - 1;
+            if (txMin < gxMin) gxMin = txMin;
+            if (txMax > gxMax) gxMax = txMax;
+            if (tyMin < gyMin) gyMin = tyMin;
+            if (tyMax > gyMax) gyMax = tyMax;
+        }
+
         int totalPlaced = 0;
 
         // Stage 1: Walk every empty tile and optionally plant a vegetation cluster.
-        for (int tx = 0; tx < map.xsize; tx++)
+        for (int tx = gxMin; tx <= gxMax; tx++)
         {
-            for (int ty = 0; ty < map.ysize; ty++)
+            for (int ty = gyMin; ty <= gyMax; ty++)
             {
                 // Only scatter on tiles with no existing content.
-                if (map.tiles[tx][ty].prefabs.Count > 0) continue;
+                // Positions outside the tile map have no fort content — treat as empty.
+                bool inMap = tx >= 0 && tx < map.xsize && ty >= 0 && ty < map.ysize;
+                if (inMap && map.tiles[tx][ty].prefabs.Count > 0) continue;
                 if (HasAdjacentContent(map, tx, ty)) continue;
 
                 float worldX = originX + blocksize * tx;
