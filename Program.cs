@@ -102,6 +102,10 @@ switch (mode)
     case "gen_roompackin":
         return gen_roompackin.Generate(args);
 
+    case "gen_harvester":
+        // gen_harvester <baseForm> [radius] [maxVariants] [outputMod]
+        return gen_harvester.Generate(args);
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -159,7 +163,14 @@ static void PrintHelp()
     Console.WriteLine("                     Defaults: modname=RG_CoordTest");
     Console.WriteLine();
     Console.WriteLine("  gen_roompackin");
-Console.WriteLine("                     Generate SCI hallway PackIn variants into generated_templates.esm.");
+    Console.WriteLine("                     Generate SCI hallway PackIn variants into generated_templates.esm.");
+    Console.WriteLine();
+    Console.WriteLine("  gen_harvester   <baseForm> [radius] [maxVariants] [outputMod]");
+    Console.WriteLine("                     Scan Starfield interior cells for instances of a base form");
+    Console.WriteLine("                     (furniture, static, etc.) and emit PackIn prefabs of each");
+    Console.WriteLine("                     found cluster — anchor at (0,0,0) + nearby Starfield objects.");
+    Console.WriteLine("                     baseForm: EditorID partial match or 0xFormID");
+    Console.WriteLine("                     Defaults: radius=150, maxVariants=50, outputMod=harvested_prefabs");
 Console.WriteLine();
 Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");
