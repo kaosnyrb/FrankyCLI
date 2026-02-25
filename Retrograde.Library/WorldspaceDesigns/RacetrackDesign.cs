@@ -5,21 +5,19 @@ using System.Collections.Generic;
 namespace Retrograde.WorldspaceDesigns;
 
 /// <summary>
-/// Worldspace design for a racetrack POI: a closed oval loop course laid out
-/// around a central elevated terrain mound.
+/// Worldspace design for a racetrack POI: a closed oval loop course shaped
+/// directly into the planet terrain.
 ///
-/// Layout (handled by RacetrackLayoutPass):
-///  - Outer ellipse defines the outer edge of the driveable track ring.
-///  - Inner island (inside the inner ellipse) is left as natural terrain so the
-///    existing rock and vegetation scatter passes can populate it.
-///  - Pit-lane start/finish structures sit on the southern straight.
-///  - Barrier addon tiles line the inner track edge.
-///
-/// PackIn tile keys use fort-kit prefabs as stand-ins; swap search strings in
-/// RacetrackPackInIds() once dedicated racetrack PackIn assets exist:
-///  rt_surface → "to_pkn_landing_"   flat landing-pad panels as track surface
-///  rt_box     → "to_pkn_single"     pit box / start-finish structures
-///  rt_barrier → "to_pkn_wall_"      inner-edge barrier addons
+/// Layout (handled by RacetrackTerrainPass):
+///  - The oval is oriented to the dominant terrain slope so the straights run
+///    up/down-hill and the corners sweep across the grade.
+///  - Vertex noise inside the track ring is reduced by a box-blur, preserving
+///    the natural elevation contour.
+///  - The track ring is painted with a distinct terrain texture (0x4000) to
+///    mark the driveable surface; land-texture palettes are normalised across
+///    all cells to prevent quadrant-split artefacts.
+///  - The central island and surroundings are left as natural terrain for
+///    rock and vegetation scatter passes.
 /// </summary>
 public class RacetrackDesign : IWorldspaceDesign
 {
@@ -69,13 +67,9 @@ public class RacetrackDesign : IWorldspaceDesign
         _templateWorldspaceEditorId = templateWorldspaceEditorId
             ?? TemplateWorldspaces[Random.Shared.Next(TemplateWorldspaces.Count)];
 
-        // No terrain flatten: the oval sits on the natural terrain so the
-        // central mound is preserved. TerrainFlattenPass and TerrainRestorePass
-        // can be added here once a ring-shaped flatten is implemented.
         MapPasses = new List<IWorldspacePass>
         {
-            new PackInLibraryPass(RacetrackPackInIds()),
-            new RacetrackLayoutPass(trackScale),
+            new RacetrackTerrainPass(trackScale),
         };
 
         CellBuildPasses = new List<IWorldspacePass>
@@ -106,16 +100,6 @@ public class RacetrackDesign : IWorldspaceDesign
         return WorldspaceName;
     }
 
-    /// <summary>
-    /// Maps internal tile keys to PackIn EditorID search strings.
-    /// PackInLibraryPass will find all PackIns whose EditorID contains the search string.
-    /// </summary>
-    internal static Dictionary<string, string> RacetrackPackInIds() => new()
-    {
-        { "rt_surface", "to_pkn_landing_" },  // flat panels as track surface
-        { "rt_box",     "to_pkn_single" },    // pit box / start-finish structures
-        { "rt_barrier", "to_pkn_wall_" },     // inner-edge barrier (addon)
-    };
 }
 
 /// <summary>
