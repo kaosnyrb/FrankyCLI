@@ -63,6 +63,41 @@ var packin = new PackIn(targetMod)
 };
 ```
 
+## Cloning an entire record from starfieldMod (IStarfieldModGetter)
+
+`starfieldMod` (the literal `Starfield.esm` reference) is an `IStarfieldModGetter`. Every property it exposes returns a getter interface (e.g. `ICellGetter`), not a mutable type. Attempting to copy fields directly causes **CS0266** (cannot convert `IFooGetter` to `Foo`).
+
+**Fix: call `.DeepCopy()` on the entire record first**, then copy fields from the fully mutable result:
+
+```csharp
+// Find the source getter
+ICellGetter? sourceGetter = null;
+foreach (var block in starfieldMod.Cells)
+    foreach (var sub in block.SubBlocks)
+        foreach (var c in sub.Cells)
+            if (c.FormKey.ID == 0x00138C3E) { sourceGetter = c; break; }
+
+// DeepCopy() → fully mutable Cell; safe to read all fields
+Cell srcCell = sourceGetter.DeepCopy();
+
+// Now copy into new record (struct copies are safe in initializer)
+var newCell = new Cell(targetMod)
+{
+    Music     = srcCell.Music,      // direct struct copy — ok
+    Lighting  = srcCell.Lighting,   // complex sub-record already mutable via DeepCopy
+};
+```
+
+Same pattern for `PlacedObject` entries inside a cell's Persistent/Temporary lists:
+
+```csharp
+foreach (var poRef in srcCell.Persistent)
+{
+    var src = poRef.DeepCopy(); // mutable PlacedObject
+    var po  = new PlacedObject(targetMod) { Position = src.Position, ... };
+}
+```
+
 ## Cloning from getter types (template mods)
 
 Template mods are `IStarfieldModGetter` and return getter interfaces. Conversion table when copying into a mutable record:

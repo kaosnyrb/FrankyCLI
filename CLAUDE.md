@@ -15,6 +15,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `formlib/pcm.md` | Planet Content Manager tree — BranchNode, ContentNode, root hooks, creating entries |
 | `formlib/mutagen_api.md` | ToLink/ToNullableLink patterns, cloning from getters, ilspycmd, namespace hazards |
 | `formlib/book_audio.md` | Audio data-slate (BOOK) chain — Scene, DialogTopic, DialogResponses, WEM audio |
+| `formlib/space_cell.md` | Space Cell (CELL SpaceCell) + LeveledSpaceCell — structure, key FormIDs, content type rules, cloning pattern |
 
 ## Design Library
 

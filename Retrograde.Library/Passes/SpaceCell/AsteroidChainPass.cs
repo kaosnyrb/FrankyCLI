@@ -8,9 +8,11 @@ using System;
 namespace Retrograde.Passes.SpaceCell;
 
 /// <summary>
-/// Places a long chain of asteroids in a random direction from the Origin Point.
+/// Places a long chain of asteroids that passes through the Origin Point
+/// (se_CenterMarker01 — where the player's ship spawns).
 ///
-/// The chain extends in a straight direction with perpendicular scatter,
+/// The chain is centred on the origin so asteroids appear on both sides of
+/// the player. It extends in a random direction with perpendicular scatter,
 /// covering approximately twice the area of the vanilla source cell
 /// (achieved via the Scale factor in SpaceCellState).
 /// </summary>
@@ -20,10 +22,10 @@ public class AsteroidChainPass : ISpaceCellPass
     private const int AsteroidCount = 150;
 
     // Scatter as a fraction of the vanilla radius — asteroids spread sideways.
-    private const float ScatterFraction = 0.5f;
+    private const float ScatterFraction = 0.25f;
 
     // Per-asteroid scale variation: base ± half this value.
-    private const float ScaleVariation = 0.6f;
+    private const float ScaleVariation = 2f;
 
     public void RunPass(SpaceCellState state)
     {
@@ -49,7 +51,7 @@ public class AsteroidChainPass : ISpaceCellPass
         float qy = dz * px - dx * pz;
         float qz = dx * py - dy * px;
 
-        float chainLength  = state.VanillaRadius * state.Scale * 2.0f;
+        float chainLength  = state.VanillaRadius * state.Scale;
         float scatterRange = state.VanillaRadius * ScatterFraction;
 
         Console.WriteLine($"[AsteroidChainPass] dir=({dx:F2},{dy:F2},{dz:F2}) " +
@@ -58,8 +60,9 @@ public class AsteroidChainPass : ISpaceCellPass
 
         for (int i = 0; i < AsteroidCount; i++)
         {
-            // Position along the chain.
-            float t      = (float)i / (AsteroidCount - 1);
+            // Centre the chain on the origin so it passes through the player spawn point.
+            // t runs -0.5 → +0.5, dist runs -chainLength/2 → +chainLength/2.
+            float t      = (float)i / (AsteroidCount - 1) - 0.5f;
             float dist   = chainLength * t;
 
             // Perpendicular scatter.

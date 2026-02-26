@@ -36,7 +36,7 @@ public class SpaceCellGenerator
             AsteroidPalette = asteroidPalette,
             MarkerTemplates = markerTemplates,
             VanillaRadius   = vanillaRadius,
-            Scale           = MathF.Sqrt(2f),  // 2× area ≈ √2 linear scale
+            Scale           = MathF.Sqrt(2f) * 0.5f,  // ~0.7× vanilla radius
         };
 
         foreach (var pass in _passes)
