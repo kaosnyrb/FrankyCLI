@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace Retrograde.Utils;
@@ -65,10 +66,12 @@ public static class SpeechTools
             SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
         };
         info.Speaker.SetTo(new FormKey(targetMod.ModKey, speakerId));
+        var textHash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text))[..4];
         info.Responses.Add(new DialogResponse
         {
             ResponseText = text,
-            // WEMFile = 0 until Wwise media ID is known after audio conversion
+            WEMFile   = (uint)Random.Shared.Next(500),
+            TextHash  = textHash,
         });
         topic.Responses.Add(info);
         // Populate the TPIC cross-reference list so the CK can locate the INFO without
@@ -113,9 +116,25 @@ public static class SpeechTools
         book.DataSlateType = Book.DataSlateTypeEnum.Audio;
         book.Scene.SetTo(scene.FormKey);
 
-        string vtDir = string.IsNullOrEmpty(voiceTypeEditorId) ? "<npc_voicetype>" : voiceTypeEditorId;
         Console.WriteLine($"[SpeechTools] AddVoice: {scene.EditorID} → {audioQuest.EditorID} / {book.EditorID}");
-        Console.WriteLine($"[SpeechTools]   Voice file (WEMFile pending): Sound\\Voice\\<plugin>\\{vtDir}\\speech_topic_{suffix}_speech_info_{suffix}_0.wem");
+        GenerateWavs(info.Responses[0].WEMFile, voiceTypeEditorId, targetMod.ModKey);
+    }
+
+    /// <summary>
+    /// Writes the expected WAV file paths to console for a given INFO record.
+    /// Starfield looks for voice files under both .esp and .esm plugin name variants.
+    /// Path format: Data\Sound\Voice\{plugin}\{voiceType}\{wemFile:X8}.wav
+    /// </summary>
+    public static void GenerateWavs(uint wemFile, string voiceTypeEditorId, ModKey modKey)
+    {
+        const string base_path = @"C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\Sound\Voice";
+        string stem    = Path.GetFileNameWithoutExtension(modKey.FileName);
+        string wavName = wemFile.ToString("X8");
+        string vtDir   = string.IsNullOrEmpty(voiceTypeEditorId) ? "<npc_voicetype>" : voiceTypeEditorId;
+
+        Console.WriteLine($"[SpeechTools] WAV paths for WEM {wavName}:");
+        Console.WriteLine($"  {base_path}\\{stem}.esp\\{vtDir}\\{wavName}.wav");
+        Console.WriteLine($"  {base_path}\\{stem}.esm\\{vtDir}\\{wavName}.wav");
     }
 
     /// <summary>
