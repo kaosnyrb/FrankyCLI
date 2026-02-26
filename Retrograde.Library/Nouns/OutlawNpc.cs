@@ -33,6 +33,7 @@ namespace Retrograde.Nouns
         public FormKey deathItems;
 
         public FormKey Logfile;
+        public string LogText = string.Empty;
 
 
 
@@ -289,6 +290,7 @@ namespace Retrograde.Nouns
         public void GenerateLog()
         {
             var log = GenerateLogfile();
+            LogText = log;
             IBookGetter? bookSrc = myMod.Books.FirstOrDefault(r => r.FormKey == new FormKey(myMod.ModKey, 0x000800));
             if (bookSrc == null)
                 foreach (var tm in RetrogradeContext.Current.TemplateMods)

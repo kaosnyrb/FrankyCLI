@@ -47,7 +47,9 @@
       "Bash(for id in 1B29C5 2A40E2)",
       "Bash(do)",
       "Bash(echo:*)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Read(//c/temp/**)",
+      "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/memory/**)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"

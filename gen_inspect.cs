@@ -204,6 +204,34 @@ namespace FrankyCLI
                         }
                     }
                     break;
+                case "quest":
+                    foreach (var rec in mod.Quests)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpQuest(rec); found++; }
+                    break;
+                case "dialogbranch":
+                    foreach (var quest in mod.Quests)
+                    {
+                        foreach (var branch in quest.DialogBranches)
+                        {
+                            if (MatchesSearch(branch.EditorID, branch.FormKey, search))
+                            {
+                                Console.WriteLine($"[Quest: {quest.FormKey} {quest.EditorID}]");
+                                DumpDialogBranch(branch);
+                                found++;
+                            }
+                        }
+                    }
+                    break;
+                case "audiolog":
+                    // Full dump: Quest + all its DialogBranches + Topics + Responses
+                    foreach (var quest in mod.Quests)
+                    {
+                        if (!MatchesSearch(quest.EditorID, quest.FormKey, search)) continue;
+                        DumpQuestFull(quest);
+                        found++;
+                    }
+                    break;
                 case "placed":
                     // Search all cells in all worldspaces for placed objects whose Base OR own FormKey matches
                     foreach (var ws in mod.Worldspaces)
@@ -238,6 +266,7 @@ namespace FrankyCLI
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
                     Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, PcmBranchNode, PcmContentNode, Book, Scene");
+                    Console.WriteLine("           Quest, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)");
                     break;
             }
             return found;
@@ -539,6 +568,126 @@ namespace FrankyCLI
                 Console.WriteLine($"  Phases [{scene.Phases.Count}]:");
                 foreach (var p in scene.Phases)
                     Console.WriteLine($"    Name={p.Name} Flags={p.Flags} StartConds={p.StartConditions.Count} CompletionConds={p.CompletionConditions.Count}");
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpQuest(IQuestGetter quest)
+        {
+            Console.WriteLine($"--- Quest ---");
+            Console.WriteLine($"  FormKey:      {quest.FormKey}");
+            Console.WriteLine($"  EditorID:     {quest.EditorID}");
+            Console.WriteLine($"  Name:         {quest.Name}");
+            Console.WriteLine($"  Priority:     {quest.Data?.Priority}");
+            Console.WriteLine($"  Type:         {quest.Data?.Type}");
+            Console.WriteLine($"  Flags:        {quest.Data?.Flags}");
+            Console.WriteLine($"  DialogBranches[{quest.DialogBranches.Count}]:");
+            foreach (var b in quest.DialogBranches)
+                Console.WriteLine($"    {b.FormKey} {b.EditorID} Category={b.Category} Flags={b.Flags} StartingTopic={b.StartingTopic.FormKey}");
+            Console.WriteLine($"  DialogTopics  [{quest.DialogTopics.Count}]:");
+            foreach (var t in quest.DialogTopics)
+                Console.WriteLine($"    {t.FormKey} {t.EditorID} Branch={t.Branch.FormKey} Category={t.Category} Subtype={t.Subtype}");
+            Console.WriteLine();
+        }
+
+        private static void DumpDialogBranch(IDialogBranchGetter branch)
+        {
+            Console.WriteLine($"--- DialogBranch ---");
+            Console.WriteLine($"  FormKey:       {branch.FormKey}");
+            Console.WriteLine($"  EditorID:      {branch.EditorID}");
+            Console.WriteLine($"  Quest:         {branch.Quest.FormKey}");
+            Console.WriteLine($"  Category:      {branch.Category}");
+            Console.WriteLine($"  Flags:         {branch.Flags}");
+            Console.WriteLine($"  StartingTopic: {(branch.StartingTopic.IsNull ? "null" : branch.StartingTopic.FormKey.ToString())}");
+            Console.WriteLine();
+        }
+
+        private static void DumpQuestFull(IQuestGetter quest)
+        {
+            Console.WriteLine($"=== Quest (FULL) ===");
+            Console.WriteLine($"  FormKey:  {quest.FormKey}");
+            Console.WriteLine($"  EditorID: {quest.EditorID}");
+            Console.WriteLine($"  Name:     {quest.Name}");
+            Console.WriteLine($"  Type:     {quest.Data?.Type}");
+            Console.WriteLine($"  Flags:    {quest.Data?.Flags}");
+            Console.WriteLine();
+
+            Console.WriteLine($"  DialogBranches [{quest.DialogBranches.Count}]:");
+            foreach (var branch in quest.DialogBranches)
+            {
+                Console.WriteLine($"    [{branch.FormKey}] EditorID={branch.EditorID}");
+                Console.WriteLine($"      Category:      {branch.Category}");
+                Console.WriteLine($"      Flags:         {branch.Flags}");
+                Console.WriteLine($"      StartingTopic: {(branch.StartingTopic.IsNull ? "null" : branch.StartingTopic.FormKey.ToString())}");
+            }
+            Console.WriteLine();
+
+            Console.WriteLine($"  DialogTopics [{quest.DialogTopics.Count}]:");
+            foreach (var topic in quest.DialogTopics)
+            {
+                Console.WriteLine($"    [{topic.FormKey}] EditorID={topic.EditorID}");
+                Console.WriteLine($"      Name:     {topic.Name}");
+                Console.WriteLine($"      Branch:   {(topic.Branch.IsNull ? "null" : topic.Branch.FormKey.ToString())}");
+                Console.WriteLine($"      Category: {topic.Category}");
+                Console.WriteLine($"      Subtype:  {topic.Subtype}");
+                Console.WriteLine($"      Responses [{topic.Responses?.Count ?? 0}]:");
+                if (topic.Responses != null)
+                {
+                    foreach (var resp in topic.Responses)
+                    {
+                        Console.WriteLine($"        [INFO {resp.FormKey}] EditorID={resp.EditorID}");
+                        Console.WriteLine($"          MajorFlags:       {resp.MajorFlags}");
+                        Console.WriteLine($"          Flags:            {resp.Flags?.Flags}");
+                        Console.WriteLine($"          ResetHours:       {resp.Flags?.ResetHours}");
+                        Console.WriteLine($"          Speaker:          {(!resp.Speaker.IsNull ? resp.Speaker.FormKey.ToString() : "null")}");
+                        Console.WriteLine($"          Prompt:           {resp.Prompt}");
+                        Console.WriteLine($"          SharedDialog:     {(!resp.SharedDialog.IsNull ? resp.SharedDialog.FormKey.ToString() : "null")}");
+                        Console.WriteLine($"          StartScene:       {(!resp.StartScene.IsNull ? resp.StartScene.FormKey.ToString() : "null")}");
+                        Console.WriteLine($"          ResetGlobal:      {(!resp.ResetGlobal.IsNull ? resp.ResetGlobal.FormKey.ToString() : "null")}");
+                        Console.WriteLine($"          SubtitlePriority: {resp.SubtitlePriority}");
+                        if (resp.WED0 != null)
+                        {
+                            Console.WriteLine($"          WED0 (sound):");
+                            Console.WriteLine($"            Start:        {resp.WED0.Start}");
+                            Console.WriteLine($"            Stop:         {resp.WED0.Stop}");
+                            Console.WriteLine($"            Condition:    {(resp.WED0.Condition.IsNull ? "null" : resp.WED0.Condition.FormKey.ToString())}");
+                            Console.WriteLine($"            EventMapping: {(resp.WED0.EventMapping.IsNull ? "null" : resp.WED0.EventMapping.FormKey.ToString())}");
+                        }
+                        else
+                            Console.WriteLine($"          WED0 (sound):     null");
+                        Console.WriteLine($"          TPIC:             {(resp.TPIC.HasValue ? BitConverter.ToString(resp.TPIC.Value.ToArray()) : "null")}");
+                        if (resp.Conditions != null && resp.Conditions.Count > 0)
+                            Console.WriteLine($"          Conditions:       [{resp.Conditions.Count}]");
+                        Console.WriteLine($"          ResponseLines [{resp.Responses.Count}]:");
+                        for (int i = 0; i < resp.Responses.Count; i++)
+                        {
+                            var r = resp.Responses[i];
+                            Console.WriteLine($"            [Line {i}]");
+                            Console.WriteLine($"              ResponseText: {r.ResponseText}");
+                            Console.WriteLine($"              WEMFile:      {r.WEMFile} (0x{r.WEMFile:X8})");
+                            Console.WriteLine($"              Emotion:      {(r.Emotion.IsNull ? "null" : r.Emotion.FormKey.ToString())}");
+                            Console.WriteLine($"              EmotionOut:   {r.EmotionOut}");
+                            Console.WriteLine($"              ScriptNotes:  {r.ScriptNotes}");
+                            Console.WriteLine($"              Edits:        {r.Edits}");
+                            Console.WriteLine($"              AlternateLip: {r.AlternateLipText}");
+                            Console.WriteLine($"              TextHash:     {r.TextHash}");
+                            if (r.RVSH != null)
+                            {
+                                Console.WriteLine($"              RVSH:");
+                                Console.WriteLine($"                Start:        {r.RVSH.Start}");
+                                Console.WriteLine($"                Stop:         {r.RVSH.Stop}");
+                                Console.WriteLine($"                Condition:    {(r.RVSH.Condition.IsNull ? "null" : r.RVSH.Condition.FormKey.ToString())}");
+                                Console.WriteLine($"                EventMapping: {(r.RVSH.EventMapping.IsNull ? "null" : r.RVSH.EventMapping.FormKey.ToString())}");
+                            }
+                            if (r.TROTs != null && r.TROTs.Count > 0)
+                            {
+                                Console.WriteLine($"              TROTs [{r.TROTs.Count}]:");
+                                foreach (var trot in r.TROTs)
+                                    Console.WriteLine($"                VoiceType={trot.VoiceType.FormKey} EmotionOut={trot.EmotionOut}");
+                            }
+                        }
+                    }
+                }
             }
             Console.WriteLine();
         }

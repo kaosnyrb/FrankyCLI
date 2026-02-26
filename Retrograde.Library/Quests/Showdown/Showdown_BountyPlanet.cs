@@ -6,7 +6,6 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
-using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,8 +66,6 @@ namespace Retrograde.Quests
             }
 
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
-
-
             //Set the interfaces
             questform = newQuest.instance;
             logMessage = logmessage;

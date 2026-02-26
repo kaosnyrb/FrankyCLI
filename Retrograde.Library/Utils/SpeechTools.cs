@@ -10,16 +10,26 @@ namespace Retrograde.Utils;
 public static class SpeechTools
 {
     /// <summary>
+    /// EditorID of the shared audio-log quest created once per mod run.
+    /// Mirrors Bethesda's AudioLogsQuest_KT pattern: one dedicated quest hosts
+    /// all Scenes and DialogTopics so they are never mixed into gameplay quests.
+    /// </summary>
+    private const string AudioLogQuestEditorId = "rg_audiolog_quest";
+
+    /// <summary>
     /// Creates the record skeleton for an audio data-slate and wires it to an existing Book.
     ///
     /// Record chain: BOOK.Scene → SCEN → RadioSceneAction → DIAL → INFO (with ResponseText).
-    /// Both Scene and DialogTopic are added as inline sub-records of the supplied Quest.
-    /// No WEM audio file is generated; the chain is a skeleton ready for future voice synthesis.
+    /// The Scene and DialogTopic are added to a dedicated shared audio-log Quest
+    /// (created once per mod run, EditorID = "rg_audiolog_quest"), NOT to the gameplay quest.
+    ///
+    /// WEMFile is left at 0 — it must be set after WAV→WEM conversion using the Wwise media ID
+    /// produced by the authoring tool. The expected voice file path is logged to console.
     /// </summary>
     /// <param name="logfileId">Raw FormKey ID of the Book (logfile) to attach voice to.</param>
-    /// <param name="questId">Raw FormKey ID of the Quest that will own the Scene and DialogTopic.</param>
+    /// <param name="speakerId">Raw FormKey ID of the NPC speaking the log (sets INFO.Speaker).</param>
     /// <param name="text">Transcript text placed in the DialogResponse.</param>
-    public static void AddVoice(uint logfileId, uint questId, string text)
+    public static void AddVoice(uint logfileId, uint speakerId, string text)
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -28,32 +38,35 @@ public static class SpeechTools
         var book = targetMod.Books.FirstOrDefault(b => b.FormKey == bookKey)
             ?? throw new KeyNotFoundException($"SpeechTools.AddVoice: Book 0x{logfileId:X6} not found in target mod.");
 
-        // 2. Locate Quest
-        var questKey = new FormKey(targetMod.ModKey, questId);
-        var quest = targetMod.Quests.FirstOrDefault(q => q.FormKey == questKey)
-            ?? throw new KeyNotFoundException($"SpeechTools.AddVoice: Quest 0x{questId:X6} not found in target mod.");
+        // 2. Find-or-create the shared audio log quest
+        var audioQuest = GetOrCreateAudioLogQuest(targetMod);
 
         string suffix = book.EditorID ?? logfileId.ToString("X6");
 
-        // 3. Create DialogTopic (inline sub-record of Quest.DialogTopics)
-        //    Category=Scene, Subtype=Custom matches Bethesda's radio-audio-log pattern.
+        // 3. Create DialogTopic (inline sub-record of audioQuest.DialogTopics)
+        //    Category=Scene, Subtype=CustomScene confirmed from AudioLogsQuest_KT in Starfield.esm.
         var topic = new DialogTopic(targetMod)
         {
             EditorID = "speech_topic_" + suffix,
             Category = DialogTopic.CategoryEnum.Scene,
-            Subtype = DialogTopic.SubtypeEnum.Custom,
+            Subtype  = DialogTopic.SubtypeEnum.CustomScene,
         };
-        topic.Quest.SetTo(quest.FormKey);
-        quest.DialogTopics.Add(topic);
+        topic.Quest.SetTo(audioQuest.FormKey);
+        audioQuest.DialogTopics.Add(topic);
 
         // 4. Create DialogResponses (inline sub-record of DialogTopic.Responses)
+        //    Speaker and SubtitlePriority=Low confirmed from AudioLogsQuest_KT in Starfield.esm.
+        //    WEMFile: Wwise media ID — NOT a filename hash. Must be set after WAV→WEM conversion.
         var info = new DialogResponses(targetMod)
         {
             EditorID = "speech_info_" + suffix,
+            SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
         };
+        info.Speaker.SetTo(new FormKey(targetMod.ModKey, speakerId));
         info.Responses.Add(new DialogResponse
         {
             ResponseText = text,
+            // WEMFile = 0 until Wwise media ID is known after audio conversion
         });
         topic.Responses.Add(info);
 
@@ -70,21 +83,41 @@ public static class SpeechTools
         };
         action.Topic.SetTo(topic.FormKey);
 
-        // 6. Create Scene (inline sub-record of Quest.Scenes)
+        // 6. Create Scene (inline sub-record of audioQuest.Scenes)
         var scene = new Scene(targetMod)
         {
             EditorID = "speech_scene_" + suffix,
             Flags = Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd,
         };
-        scene.Quest.SetTo(quest.FormKey);
+        scene.Quest.SetTo(audioQuest.FormKey);
         scene.Phases.Add(phase);
         scene.Actions = new ExtendedList<ASceneAction> { action };
-        quest.Scenes.Add(scene);
+        audioQuest.Scenes.Add(scene);
 
         // 7. Wire the Book: mark as audio data-slate and point its Scene link at the new scene.
         book.DataSlateType = Book.DataSlateTypeEnum.Audio;
         book.Scene.SetTo(scene.FormKey);
 
-        Console.WriteLine($"[SpeechTools] AddVoice: {scene.EditorID} → {quest.EditorID} / {book.EditorID}");
+        Console.WriteLine($"[SpeechTools] AddVoice: {scene.EditorID} → {audioQuest.EditorID} / {book.EditorID}");
+        Console.WriteLine($"[SpeechTools]   Voice file (WEMFile pending): Sound\\Voice\\<plugin>\\<npc_voicetype>\\speech_topic_{suffix}_speech_info_{suffix}_0.wem");
+    }
+
+    /// <summary>
+    /// Returns the shared audio-log quest, creating it if it doesn't exist yet in the target mod.
+    /// </summary>
+    private static Quest GetOrCreateAudioLogQuest(StarfieldMod targetMod)
+    {
+        var existing = targetMod.Quests.FirstOrDefault(q => q.EditorID == AudioLogQuestEditorId);
+        if (existing != null)
+            return existing;
+
+        var quest = new Quest(targetMod)
+        {
+            EditorID = AudioLogQuestEditorId,
+            Name = "Audio Logs",
+        };
+        targetMod.Quests.Add(quest);
+        Console.WriteLine($"[SpeechTools] Created audio log quest: {AudioLogQuestEditorId} ({quest.FormKey})");
+        return quest;
     }
 }
