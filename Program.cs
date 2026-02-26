@@ -77,6 +77,10 @@ switch (mode)
             quiet:         Get(args, 5, ""),
             exportAi:      Get(args, 6, "")));
 
+    case "gen_elevenlabs_test":
+        // gen_elevenlabs_test [outputPath] [voiceId] [text]
+        return gen_elevenlabs_test.Generate(args);
+
     case "gen_btd_info":
         // gen_btd_info [btdpath] [--all]
         return gen_btd_info.Generate(new[]
@@ -157,6 +161,10 @@ static void PrintHelp()
     Console.WriteLine("  gen_coordtest   [modname]");
     Console.WriteLine("                     Place coordinate test markers in a worldspace.");
     Console.WriteLine("                     Defaults: modname=RG_CoordTest");
+    Console.WriteLine();
+    Console.WriteLine("  gen_elevenlabs_test [outputPath] [voiceId] [text]");
+    Console.WriteLine("                     Test the ElevenLabs TTS API. Writes a WAV to outputPath.");
+    Console.WriteLine("                     Requires ELEVENLABS_API_KEY env var.");
     Console.WriteLine();
     Console.WriteLine("  gen_roompackin");
 Console.WriteLine("                     Generate SCI hallway PackIn variants into generated_templates.esm.");

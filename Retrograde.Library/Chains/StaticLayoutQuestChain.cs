@@ -225,7 +225,7 @@ namespace Retrograde.Chains
             Console.WriteLine("Generating Final Bounty Log...");
             outlawNpc.GenerateLog();            
             //Generate Voice for the log
-            SpeechTools.AddVoice(outlawNpc.Logfile.ID, outlawNpc.instance.FormKey.ID, outlawNpc.LogText, outlawNpc.VoiceEditorId);
+            SpeechTools.AddVoice(outlawNpc.Logfile.ID, outlawNpc.instance.FormKey.ID, outlawNpc.LogText, outlawNpc.VoiceEditorId, outlawNpc.ElevenLabsVoiceId);
             
             return true;
         }

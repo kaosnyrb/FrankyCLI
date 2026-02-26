@@ -2,7 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
-using System;
+using Retrograde.AI;
 using System.IO;
 using System.Linq;
 
@@ -31,7 +31,7 @@ public static class SpeechTools
     /// <param name="speakerId">Raw FormKey ID of the NPC speaking the log (sets INFO.Speaker).</param>
     /// <param name="text">Transcript text placed in the DialogResponse.</param>
     /// <param name="voiceTypeEditorId">EditorID of the NPC's VoiceType — used only to log the expected WEM file path.</param>
-    public static void AddVoice(uint logfileId, uint speakerId, string text, string voiceTypeEditorId = "")
+    public static void AddVoice(uint logfileId, uint speakerId, string text, string voiceTypeEditorId = "", string elevenLabsVoiceId = "")
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -117,24 +117,43 @@ public static class SpeechTools
         book.Scene.SetTo(scene.FormKey);
 
         Console.WriteLine($"[SpeechTools] AddVoice: {scene.EditorID} → {audioQuest.EditorID} / {book.EditorID}");
-        GenerateWavs(info.Responses[0].WEMFile, voiceTypeEditorId, targetMod.ModKey);
+        GenerateWavs(info.Responses[0].WEMFile, voiceTypeEditorId, targetMod.ModKey, text, elevenLabsVoiceId);
     }
 
     /// <summary>
-    /// Writes the expected WAV file paths to console for a given INFO record.
+    /// Logs the expected WAV file paths and, when an ElevenLabs voice ID is supplied,
+    /// calls the TTS API to generate the WAV file and writes it to both plugin variants.
     /// Starfield looks for voice files under both .esp and .esm plugin name variants.
     /// Path format: Data\Sound\Voice\{plugin}\{voiceType}\{wemFile:X8}.wav
     /// </summary>
-    public static void GenerateWavs(uint wemFile, string voiceTypeEditorId, ModKey modKey)
+    public static void GenerateWavs(uint wemFile, string voiceTypeEditorId, ModKey modKey,
+        string text = "", string elevenLabsVoiceId = "")
     {
         const string base_path = @"C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\Sound\Voice";
         string stem    = Path.GetFileNameWithoutExtension(modKey.FileName);
         string wavName = wemFile.ToString("X8");
         string vtDir   = string.IsNullOrEmpty(voiceTypeEditorId) ? "<npc_voicetype>" : voiceTypeEditorId;
 
+        string espPath = $@"{base_path}\{stem}.esp\{vtDir}\{wavName}.wav";
+        string esmPath = $@"{base_path}\{stem}.esm\{vtDir}\{wavName}.wav";
+
         Console.WriteLine($"[SpeechTools] WAV paths for WEM {wavName}:");
-        Console.WriteLine($"  {base_path}\\{stem}.esp\\{vtDir}\\{wavName}.wav");
-        Console.WriteLine($"  {base_path}\\{stem}.esm\\{vtDir}\\{wavName}.wav");
+        Console.WriteLine($"  {espPath}");
+        Console.WriteLine($"  {esmPath}");
+
+        if (string.IsNullOrEmpty(elevenLabsVoiceId) || string.IsNullOrEmpty(text) || string.IsNullOrEmpty(voiceTypeEditorId))
+            return;
+
+        try
+        {
+            ElevenLabsAPI.GenerateSpeech(text, elevenLabsVoiceId, espPath);
+            File.Copy(espPath, esmPath, overwrite: true);
+            Console.WriteLine($"[SpeechTools] WAV written: {wavName}.wav");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
+        }
     }
 
     /// <summary>

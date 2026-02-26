@@ -56,6 +56,12 @@ namespace Retrograde.Nouns
             }
 
             spacesuit = hasspacesuit;
+
+            var femaleVoices = new[] { "hpp4J3VqNfWAUOO0d1Us", "EXAVITQu4vr4xnSDxMaL" };
+            var maleVoices   = new[] { "CwhRBWXzGAHq8TQ4Fs17", "IKne3meq5aSn9XLyUdCD" };
+            var voicePool = female ? femaleVoices : maleVoices;
+            ElevenLabsVoiceId = voicePool[RandomProvider.Random.Next(voicePool.Length)];
+
             Haircolor = NPCTools.GetHairColour();
             Eyecolor = NPCTools.GetEyeColour();
 
@@ -217,12 +223,38 @@ namespace Retrograde.Nouns
         public string GenerateLogfile()
         {
             var sb = new StringBuilder();
-            DateTime dateTime = new DateTime(2330, 5, 6);
 
-            sb.AppendLine("You are writing a series of personal diary/log entries from the perspective of a bounty target.");
-            sb.AppendLine("These entries should cover their plans, their fears, and the reasons they fled to their current location.");
+            string upbringing = GetUpbringing();
+            string fear       = GetFears();
+            string goal       = GetGoals();
+            string flaw       = Getflaws();
+
+            sb.AppendLine("You are writing a personal audio log recorded by " + name + ", a " + gender + " fugitive who has a bounty on their head.");
+            sb.AppendLine("This is a spoken monologue recorded alone into a data-slate — write it for voice performance, not for reading.");
             sb.AppendLine();
-            sb.AppendLine("Keep the total length reasonably concise (aim for under 300 words).");
+            sb.AppendLine("Character context:");
+            sb.AppendLine("- Background: " + upbringing);
+            sb.AppendLine("- Core fear: " + fear);
+            sb.AppendLine("- Motivation: " + goal);
+            sb.AppendLine("- Personality flaw: " + flaw);
+            if (!string.IsNullOrEmpty(BountyFaction))
+                sb.AppendLine("- Currently hunted by: " + BountyFaction);
+            sb.AppendLine();
+            sb.AppendLine("Tone: this character is exhausted, paranoid, and afraid. They are not coping. There is no dark humour, no bravado, no uplift.");
+            sb.AppendLine();
+            sb.AppendLine("Voice delivery rules — follow these exactly:");
+            sb.AppendLine("- You may use these audio tags sparingly, only where they add genuine stress or fear: [sighs], [whispers], [exhales sharply].");
+            sb.AppendLine("- Do NOT use [laughs] or any tag suggesting levity or relief.");
+            sb.AppendLine("- Use ellipses (...) for hesitation, a thought that collapses, or words they can't finish.");
+            sb.AppendLine("- Use an em dash (—) for an abrupt self-correction or a thought cut short by nerves.");
+            sb.AppendLine("- CAPITALIZE a single word only when fear or desperation forces it out louder than the rest.");
+            sb.AppendLine("- Write as natural stressed speech: stumbles, fragments, and restarts are right for this character.");
+            sb.AppendLine("- No headers, bullet points, or any formatting — this is pure spoken audio.");
+            sb.AppendLine();
+            sb.AppendLine("Content:");
+            sb.AppendLine("- Cover why they fled, where they're hiding, and how scared they are.");
+            sb.AppendLine("- The emotional register is: cornered, tired, and running out of options.");
+            sb.AppendLine("- Total length: under 140 words. Every word will be read aloud, so make each one count.");
 
             Console.WriteLine("Generating Outlaw Log...");
 
@@ -232,6 +264,7 @@ namespace Retrograde.Nouns
 
 
         public string VoiceEditorId = string.Empty;
+        public string ElevenLabsVoiceId = string.Empty;
 
         public Npc GenerateNPC()
         {

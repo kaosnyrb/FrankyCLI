@@ -144,7 +144,7 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = false;
+                AITools.AIMODE = true;
 
                 var outlawQuest = new StaticLayoutQuestChain(myMod);
                 outlawQuest.InvestigationTemplate = "Space Destroy - unguarded";
