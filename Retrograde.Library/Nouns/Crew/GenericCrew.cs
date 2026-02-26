@@ -133,7 +133,7 @@ namespace Retrograde.Nouns.Crew
                         "Return only the lore excerpt.";
 
                     string BookContents = AITools.RunPrompt(BookPrompt);
-                    BookNoun bountybook = new BookNoun(0x000905, Crewname.ToString() + " Log", Guid.NewGuid().ToString().Substring(0, 8), BookContents);
+                    BookNoun bountybook = new BookNoun("duout_lore_book", Crewname.ToString() + " Log", BookContents);
 
                     npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = targetMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });
                 }

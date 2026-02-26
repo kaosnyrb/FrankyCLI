@@ -129,7 +129,7 @@ namespace Retrograde.Nouns.Gangs
                         "Return only the diary entry.";
 
                     string BookContents = AITools.RunPrompt(BookPrompt);
-                    BookNoun bountybook = new BookNoun(0x000905, gangName + " Log", Guid.NewGuid().ToString().Substring(0, 8), BookContents);
+                    BookNoun bountybook = new BookNoun("duout_lore_book", gangName + " Log", BookContents);
                     npc.Items.Add(new ContainerEntry() { Item = new ContainerItem() { Item = myMod.Books[bountybook.instance.FormKey].ToLink(), Count = 1 } });
                 }
 

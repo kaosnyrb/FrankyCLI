@@ -48,7 +48,7 @@ namespace Retrograde.Quests
                 "LogMessage: " + nextQuest.LogMessage,
             });
 
-            var bountybook = new BookNoun(0x000800, bookname, "Data Slate #" + questID, bookcontents);
+            var bountybook = new BookNoun("duout_book_test", bookname, bookcontents);
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
             //We have a condictional so that the dataslate only drops until you complete the next quest.

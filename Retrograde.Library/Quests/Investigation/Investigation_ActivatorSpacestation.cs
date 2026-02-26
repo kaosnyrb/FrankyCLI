@@ -99,7 +99,7 @@ namespace Retrograde.Quests
                 "Spacestation containing the Objective: " + stationname + "\r\n",
                 "Faction this station belongs to: " + missionTemplate.parameters["Faction"].ToString() + "\r\n"
             });
-            var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
+            var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
             var frmlst = new FormList(myMod)
             {

@@ -89,7 +89,7 @@ namespace Retrograde.Quests
                 "Spaceship holding the information: " + shipname + "\r\n",
             });
 
-            var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
+            var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
             var frmlst = new FormList(myMod)
             {

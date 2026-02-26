@@ -146,7 +146,7 @@ namespace Retrograde.Quests
                 "Current Location:" + missionTemplate.Location + "\r\n",
             });
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            var bountybook = new BookNoun(0x0008C1, datasource, "Data Slate #" + questID, booklogmessage);
+            var bountybook = new BookNoun("duout_book_completeandstart", datasource, booklogmessage);
             bountybook.SetScriptProperty("duout_queststartandend", "questtoend", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             bountybook.SetScriptProperty("duout_queststartandend", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 

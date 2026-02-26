@@ -49,7 +49,7 @@ namespace Retrograde.Chains
                 {
                     new AllTemplateManager(new AI_TemplateEngine()),
                     new FrontierTemplateManager(new AI_TemplateEngine()),
-                    new NoPOITemplateManager(new AI_TemplateEngine()),
+                    //new NoPOITemplateManager(new AI_TemplateEngine()),
                     new CombatTemplateManager(new AI_TemplateEngine()),
                     new RandomTemplateManager()
                 };

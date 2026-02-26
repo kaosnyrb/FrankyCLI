@@ -12,26 +12,27 @@ namespace Retrograde.Nouns
     public class BookNoun
     {
         public Book instance;
-        public BookNoun(uint Formid, string Name, string Header, string Content) {
+        public BookNoun(string editorId, string Name, string Content) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            IBookGetter? bookSource = targetMod.Books.FirstOrDefault(r => r.FormKey == new FormKey(targetMod.ModKey, Formid));
+            IBookGetter? bookSource = targetMod.Books.FirstOrDefault(r => r.EditorID == editorId);
             if (bookSource == null)
             {
                 foreach (var tm in RetrogradeContext.Current.TemplateMods)
                 {
-                    bookSource = tm.Books.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, Formid));
+                    bookSource = tm.Books.FirstOrDefault(r => r.EditorID == editorId);
                     if (bookSource != null) break;
                 }
             }
             if (bookSource == null)
-                throw new KeyNotFoundException($"BookNoun: no Book with raw ID 0x{Formid:X6} found in target mod or any template mod.");
+                throw new KeyNotFoundException($"BookNoun: no Book with EditorID '{editorId}' found in target mod or any template mod.");
             var Book = bookSource.DeepCopy();
             instance = new Book(targetMod)
             {
                 Components = Book.Components,
-                Description = Content,
+                Text = Content,
+                Description = "",
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + questID,
                 Keywords = Book.Keywords,
@@ -44,6 +45,7 @@ namespace Retrograde.Nouns
                 Weight = Book.Weight,
                 VirtualMachineAdapter = Book.VirtualMachineAdapter,
                 Transforms = Book.Transforms,
+                DataSlateType = Book.DataSlateType                
             };
             targetMod.Books.Add(instance);
         }

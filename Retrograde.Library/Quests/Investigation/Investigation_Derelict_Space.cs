@@ -100,7 +100,7 @@ namespace Retrograde.Quests
                 "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
                 "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
             });
-            var bountybook = new BookNoun(0x000800, datasource, "Data Slate #" + questID, booklogmessage);
+            var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
             var frmlst = new FormList(myMod)
             {

@@ -300,5 +300,13 @@ namespace Retrograde.Nouns
             return false;
         }
 
+        public bool SetQuestLevelledSpaceCellAlias(int AliasId, IFormLinkNullable<ILeveledSpaceCellGetter> Value)
+        {
+            var collection = (QuestCollectionAlias)instance.Aliases[AliasId];
+            collection.Collection[0].ReferenceAlias.CreateReferenceToObject.Object = Value;
+            return true;
+        }
+
+
     }
 }
