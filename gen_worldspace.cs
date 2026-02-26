@@ -44,6 +44,10 @@ namespace FrankyCLI
                 datapath = env.DataFolderPath;
                 _StarfieldMod = env.LoadOrder[0].Mod;
 
+                // Populate MasterFlagsCache unconditionally so BuildWriteParams() works
+                // whether or not the output mod already exists in the load order.
+                gen_quest_main.BuildReadParams(env.LoadOrder);
+
                 // Load or create the mod
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);

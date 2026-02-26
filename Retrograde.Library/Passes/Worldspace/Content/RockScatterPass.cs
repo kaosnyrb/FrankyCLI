@@ -91,6 +91,22 @@ public class RockScatterPass : IWorldspacePass
             ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
             : 94f;
 
+        // Extend the iteration bounds to cover every active cell in CellLookup.
+        // Positions outside the tile map have no fort content — treated as empty.
+        int gxMin = 0, gxMax = map.xsize - 1;
+        int gyMin = 0, gyMax = map.ysize - 1;
+        foreach (var pt in state.CellLookup.Keys)
+        {
+            int txMin = (int)Math.Floor(( pt.X      * 100f - originX) / blocksize);
+            int txMax = (int)Math.Ceiling(((pt.X + 1) * 100f - originX) / blocksize) - 1;
+            int tyMin = (int)Math.Floor((originY - (pt.Y + 1) * 100f) / blocksize);
+            int tyMax = (int)Math.Ceiling((originY -  pt.Y      * 100f) / blocksize) - 1;
+            if (txMin < gxMin) gxMin = txMin;
+            if (txMax > gxMax) gxMax = txMax;
+            if (tyMin < gyMin) gyMin = tyMin;
+            if (tyMax > gyMax) gyMax = tyMax;
+        }
+
         // Snapshot which tiles have fort content before this pass modifies the map.
         // Used to enforce the clearance buffer around large rocks.
         bool[,] hasFortContent = BuildFortMask(map);
@@ -98,17 +114,21 @@ public class RockScatterPass : IWorldspacePass
         int totalPlaced = 0;
 
         // Stage 1: Large rocks — stride-2 scan of non-overlapping 2×2 blocks.
-        for (int tx = 0; tx < map.xsize - 1; tx += 2)
+        for (int tx = gxMin; tx <= gxMax - 1; tx += 2)
         {
-            for (int ty = 0; ty < map.ysize - 1; ty += 2)
+            for (int ty = gyMin; ty <= gyMax - 1; ty += 2)
             {
                 if (!IsLargeRockAreaValid(map, hasFortContent, tx, ty)) continue;
                 if (rand.NextDouble() > LargeClusterChance * _density) continue;
 
-                // Tag all 4 tiles occupied so later stages and VegetationScatterPass skip them.
+                // Tag the 4 tiles occupied (only within tile map bounds).
                 for (int dx = 0; dx <= 1; dx++)
                     for (int dy = 0; dy <= 1; dy++)
-                        map.tiles[tx + dx][ty + dy].prefabs.Add(RockTileTag);
+                    {
+                        int bx = tx + dx, by = ty + dy;
+                        if (bx >= 0 && bx < map.xsize && by >= 0 && by < map.ysize)
+                            map.tiles[bx][by].prefabs.Add(RockTileTag);
+                    }
 
                 // Centre of the 2×2 block in overlay world space.
                 float centerX = originX + blocksize * tx + blocksize * 0.5f;
@@ -147,11 +167,12 @@ public class RockScatterPass : IWorldspacePass
         }
 
         // Stage 2: Small/medium rocks — per-tile scatter on remaining empty tiles.
-        for (int tx = 0; tx < map.xsize; tx++)
+        for (int tx = gxMin; tx <= gxMax; tx++)
         {
-            for (int ty = 0; ty < map.ysize; ty++)
+            for (int ty = gyMin; ty <= gyMax; ty++)
             {
-                if (map.tiles[tx][ty].prefabs.Count > 0) continue;
+                bool inMap = tx >= 0 && tx < map.xsize && ty >= 0 && ty < map.ysize;
+                if (inMap && map.tiles[tx][ty].prefabs.Count > 0) continue;
                 if (HasAdjacentFortContent(hasFortContent, tx, ty, map.xsize, map.ysize)) continue;
 
                 float worldX = originX + blocksize * tx;
@@ -163,7 +184,7 @@ public class RockScatterPass : IWorldspacePass
                 float chance  = (isSteep ? SlopeClusterChance : FlatClusterChance) * _density;
                 if (rand.NextDouble() > chance) continue;
 
-                map.tiles[tx][ty].prefabs.Add(RockTileTag);
+                if (inMap) map.tiles[tx][ty].prefabs.Add(RockTileTag);
 
                 int cellX = (int)Math.Floor(worldX / 100f);
                 int cellY = (int)Math.Floor(worldY / 100f);
@@ -232,21 +253,26 @@ public class RockScatterPass : IWorldspacePass
     /// <summary>
     /// Returns true if the 2×2 block anchored at (tx, ty) is valid for a large rock:
     /// all 4 tiles are empty AND a 1-tile Chebyshev border around the block has no fort content.
+    /// Tile indices outside the tile map are treated as empty (no fort content).
     /// </summary>
     private static bool IsLargeRockAreaValid(GenerationMap map, bool[,] hasFortContent, int tx, int ty)
     {
-        // All 4 interior tiles must be completely free.
+        // All 4 interior tiles must be empty (OOB counts as empty).
         for (int dx = 0; dx <= 1; dx++)
             for (int dy = 0; dy <= 1; dy++)
-                if (map.tiles[tx + dx][ty + dy].prefabs.Count > 0) return false;
+            {
+                int bx = tx + dx, by = ty + dy;
+                if (bx < 0 || bx >= map.xsize || by < 0 || by >= map.ysize) continue;
+                if (map.tiles[bx][by].prefabs.Count > 0) return false;
+            }
 
-        // 1-tile Chebyshev border must have no fort content.
+        // 1-tile Chebyshev border must have no fort content (OOB = no fort content).
         for (int bx = tx - 1; bx <= tx + 2; bx++)
         {
             for (int by = ty - 1; by <= ty + 2; by++)
             {
                 if (bx >= tx && bx <= tx + 1 && by >= ty && by <= ty + 1) continue; // inner 2×2
-                if (bx < 0 || bx >= map.xsize || by < 0 || by >= map.ysize)  continue; // out of bounds
+                if (bx < 0 || bx >= map.xsize || by < 0 || by >= map.ysize)  continue; // OOB = safe
                 if (hasFortContent[bx, by]) return false;
             }
         }
