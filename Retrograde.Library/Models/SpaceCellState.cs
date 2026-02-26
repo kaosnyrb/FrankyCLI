@@ -20,6 +20,12 @@ public class SpaceCellState
     public List<FormKey> AsteroidPalette;
 
     /// <summary>
+    /// Non-Static PlacedObjects from the vanilla source cell's Temporary list
+    /// (markers, triggers, etc.). SpaceMarkersPass clones these into the new cell.
+    /// </summary>
+    public List<PlacedObject> MarkerTemplates;
+
+    /// <summary>
     /// Maximum distance (in game units) from origin to the furthest asteroid in the
     /// vanilla source cell. Used as a reference radius for procedural scaling.
     /// </summary>

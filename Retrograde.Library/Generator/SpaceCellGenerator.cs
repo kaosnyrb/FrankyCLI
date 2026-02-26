@@ -19,20 +19,24 @@ public class SpaceCellGenerator
     {
         _passes = new List<ISpaceCellPass>
         {
+            new SpaceMarkersPass(),
             new AsteroidChainPass(),
         };
     }
 
     public SpaceCellState Generate(Cell cell, Location location,
-                                   List<FormKey> asteroidPalette, float vanillaRadius)
+                                   List<FormKey> asteroidPalette,
+                                   List<PlacedObject> markerTemplates,
+                                   float vanillaRadius)
     {
         var state = new SpaceCellState
         {
-            Cell             = cell,
-            Location         = location,
-            AsteroidPalette  = asteroidPalette,
-            VanillaRadius    = vanillaRadius,
-            Scale            = MathF.Sqrt(2f),  // 2× area ≈ √2 linear scale
+            Cell            = cell,
+            Location        = location,
+            AsteroidPalette = asteroidPalette,
+            MarkerTemplates = markerTemplates,
+            VanillaRadius   = vanillaRadius,
+            Scale           = MathF.Sqrt(2f),  // 2× area ≈ √2 linear scale
         };
 
         foreach (var pass in _passes)

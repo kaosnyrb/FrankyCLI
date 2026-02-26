@@ -53,21 +53,34 @@ public class SpaceCellNoun
         // DeepCopy() → fully mutable Cell; avoids IXxxGetter type mismatches throughout.
         Cell srcCell = sourceGetter.DeepCopy();
 
-        // ── 2. Extract asteroid palette + vanilla radius ─────────────────────────
-        var palette       = new List<FormKey>();
+        // ── 2. Split Temporary into asteroid palette + marker templates ──────────
+        // Statics  → asteroid palette (AsteroidChainPass draws from these).
+        // Everything else → marker templates (SpaceMarkersPass clones these verbatim).
+        // The AreaTrigger is dropped entirely — it's tied to the vanilla encounter zone.
+        var palette         = new List<FormKey>();
+        var markerTemplates = new List<PlacedObject>();
         float vanillaRadius = 1000f;
 
         foreach (var item in srcCell.Temporary)
         {
             if (item is not PlacedObject po) continue;
             if (po.Base.IsNull) continue;
+            if (po.Base.FormKey.ID == AreaTriggerFormId) continue;
 
-            if (!palette.Contains(po.Base.FormKey))
-                palette.Add(po.Base.FormKey);
+            // Asteroids are MoveableStatics; markers are Statics (or other types).
+            if (starfieldMod.MoveableStatics.ContainsKey(po.Base.FormKey))
+            {
+                if (!palette.Contains(po.Base.FormKey))
+                    palette.Add(po.Base.FormKey);
 
-            var p    = po.Position;
-            float d  = MathF.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
-            if (d > vanillaRadius) vanillaRadius = d;
+                var p = po.Position;
+                float d = MathF.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
+                if (d > vanillaRadius) vanillaRadius = d;
+            }
+            else
+            {
+                markerTemplates.Add(po);
+            }
         }
 
         Console.WriteLine($"[SpaceCellNoun] Palette: {palette.Count} types, " +
@@ -91,10 +104,6 @@ public class SpaceCellNoun
         foreach (var item in srcCell.Persistent)
         {
             if (item is not PlacedObject srcPO) continue;
-
-            // Skip the vanilla area trigger — it's tied to the source cell's encounter zone
-            // and has no meaning in a generated cell.
-            if (srcPO.Base.FormKey.ID == AreaTriggerFormId) continue;
 
             // New PlacedObject gets a fresh FormKey; copy all fields from mutable srcPO.
             var po = new PlacedObject(targetMod)
@@ -251,7 +260,7 @@ public class SpaceCellNoun
 
         // ── 8. Run content passes ────────────────────────────────────────────────
         var generator = new SpaceCellGenerator();
-        State = generator.Generate(Cell, Location, palette, vanillaRadius);
+        State = generator.Generate(Cell, Location, palette, markerTemplates, vanillaRadius);
 
         Console.WriteLine($"[SpaceCellNoun] Done — {Cell.Temporary.Count} asteroids.");
     }
