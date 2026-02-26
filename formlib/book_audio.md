@@ -61,11 +61,13 @@ DialogResponses (INFO) are likewise inline in `DialogTopic.Responses`.
 
 ```csharp
 // DialogTopic — inline in quest.DialogTopics; Branch=null (no DialogBranch needed)
+// SubtypeName (SNAM) is a SEPARATE field from Subtype (ENAM) — must set both
 var topic = new DialogTopic(targetMod)
 {
-    EditorID = "speech_topic_" + suffix,
-    Category = DialogTopic.CategoryEnum.Scene,
-    Subtype  = DialogTopic.SubtypeEnum.CustomScene,  // NOT Custom — confirmed from KT quest
+    EditorID    = "speech_topic_" + suffix,
+    Category    = DialogTopic.CategoryEnum.Scene,
+    Subtype     = DialogTopic.SubtypeEnum.CustomScene,
+    SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,  // SNAM — independent of Subtype
 };
 topic.Quest.SetTo(quest.FormKey);
 quest.DialogTopics.Add(topic);
@@ -77,14 +79,20 @@ var info = new DialogResponses(targetMod)
     SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
 };
 info.Speaker.SetTo(npcFormKey);  // required — set after construction
+var textHash = System.Security.Cryptography.SHA256.HashData(
+    System.Text.Encoding.UTF8.GetBytes(text))[..4];  // NAM9, 4 bytes
 info.Responses.Add(new DialogResponse
 {
     ResponseText = text,
-    // WEMFile = 0 until Wwise media ID is known after audio conversion
+    WEMFile  = placeholderWemId,   // random uint until Wwise conversion; see WAV path section
+    TextHash = textHash,
 });
 topic.Responses.Add(info);
+// TPIC cross-reference — missing causes CK crash on click
+topic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+    { info.FormKey.ToLink<IDialogResponsesGetter>() };
 
-// RadioSceneAction — not a StarfieldMajorRecord, just new RadioSceneAction { ... }
+// RadioSceneAction
 var action = new RadioSceneAction
 {
     Name = "AudioAction", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0,
@@ -92,13 +100,23 @@ var action = new RadioSceneAction
 action.Topic.SetTo(topic.FormKey);
 
 // Scene — inline in quest.Scenes
+// Flags=0x80: undocumented bit on ALL vanilla AudioLog scenes (not BeginOnQuestStart/StopOnQuestEnd)
+// VNAM: 5×uint32(3) — present verbatim on all vanilla AudioLog scenes
+// Actors: one entry with ID=0xFFFFFFFC (-4) and NoCommandState — confirmed from KT and AN quests
 var scene = new Scene(targetMod)
 {
     EditorID = "speech_scene_" + suffix,
-    Flags = Scene.Flag.BeginOnQuestStart | Scene.Flag.StopOnQuestEnd,
+    Flags    = (Scene.Flag)0x80,
+    VNAM     = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 },
 };
 scene.Quest.SetTo(quest.FormKey);
-scene.Phases.Add(new ScenePhase { Name = "AudioPhase" });
+scene.Actors.Add(new SceneActor
+{
+    ID            = unchecked((uint)-4),  // 0xFFFFFFFC — "no actor" sentinel
+    Flags         = SceneActor.Flag.NoCommandState,
+    BehaviorFlags = 0,
+});
+scene.Phases.Add(new ScenePhase { Name = "AudioPhase", EditorWidth = 500 });
 scene.Actions = new ExtendedList<ASceneAction> { action };  // nullable — must initialise
 quest.Scenes.Add(scene);
 
@@ -123,6 +141,7 @@ book.Scene.SetTo(scene.FormKey);
 | Field | Type | Notes |
 |---|---|---|
 | `WEMFile` | `uint` | Wwise media ID — non-zero when audio exists |
+| `TextHash` | `byte[]?` | NAM9 subrecord, 4 bytes — SHA256[..4] of ResponseText UTF-8 bytes is a reasonable placeholder |
 | `ResponseText` | `ITranslatedString` | Subtitle shown during playback |
 | `EmotionOut` | `float` | Facial animation intensity (0.0 = none; 7.4, 4.8 seen in KT) |
 | `RVSH` | `ISoundReferenceGetter?` | Optional Wwise event GUID (start/stop); present on 6/149 KT lines |
@@ -133,6 +152,49 @@ book.Scene.SetTo(scene.FormKey);
 `Custom` — player choice topics
 `CustomScene` — **scene-driven audio** (use this for audio log DIALs)
 `SharedInfo` — shared info group header
+
+**SubtypeName (SNAM) is a separate field.** Setting `Subtype = CustomScene` does NOT auto-populate `SubtypeName`. Always set both:
+```csharp
+Subtype     = DialogTopic.SubtypeEnum.CustomScene,
+SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+```
+
+## Audio Quest Flags (confirmed from all 12 vanilla AudioLog quests)
+
+```
+Flags = StartGameEnabled | StartsEnabled | RunOnce | 0x100000 (undocumented)
+Type  = None   ← NOT Misc (Misc causes a player-visible journal entry)
+Name  = absent ← no FULL subrecord (a Name also causes a journal entry)
+```
+
+In Mutagen:
+```csharp
+var data = new QuestData
+{
+    Flags = Quest.Flag.StartGameEnabled | Quest.Flag.StartsEnabled | Quest.Flag.RunOnce,
+    Type  = Quest.TypeEnum.None,
+};
+data.Flags = (Quest.Flag)((uint)data.Flags | 0x100000u);
+```
+
+`StartsEnabled` is **critical** — without it the quest is dormant and scenes never fire.
+
+## NPC VoiceType
+
+Set via `npc.Voice.SetTo(formKey)` after construction (property name is `Voice`, not `VoiceType`).
+
+## WAV File Path Convention
+
+Starfield looks for voice WAVs (pre-conversion) and WEMs under both `.esp` and `.esm` plugin name variants:
+
+```
+Data\Sound\Voice\{plugin.esp}\{VoiceTypeEditorId}\{WEMFile:X8}.wav
+Data\Sound\Voice\{plugin.esm}\{VoiceTypeEditorId}\{WEMFile:X8}.wav
+```
+
+- Filename is the **WEMFile uint formatted as 8 uppercase hex digits** (e.g. `00B0DB68.wav`)
+- Plugin stem is the mod filename without extension; output both `.esp` and `.esm` variants
+- `SpeechTools.GenerateWavs(wemFile, voiceTypeEditorId, modKey)` prints these paths
 
 ## Reference Records (Starfield.esm)
 
@@ -146,6 +208,7 @@ book.Scene.SetTo(scene.FormKey);
 ## Open Questions
 
 - How does the game resolve `WEMFile` (Wwise media ID) to a `.wem` on disk — via SoundBank, or
-  can a loose WEM be referenced if named by a specific convention? (not yet tested in-game)
+  can a loose WEM be referenced if named by the `{WEMFile:X8}.wem` convention? (not yet tested in-game)
+- `TextHash` exact algorithm unconfirmed — SHA256[..4] is a placeholder. Real value may be CRC32 or similar.
 - Single-phase/single-action scenes (as generated by SpeechTools) have not been tested in-game.
   The vanilla KT quest uses 7 phases / 7 actions (one per audio segment).
