@@ -231,12 +231,25 @@ namespace Retrograde.Nouns
         }
 
 
+        public string VoiceEditorId = string.Empty;
+
         public Npc GenerateNPC()
         {
             var NPC = NPCTools.FindTemplateNpc(female);
             Npc npc = NPCTools.CloneNPC(myMod, NPC);
             npc.Name = name;
             npc.EditorID = "npc_" + (name.ToLower()).Replace(" ","");
+
+            // Set voice type after construction (Mutagen nullable FormLink rule).
+            // BountyFaction may not be set in all chains; GetVoice defaults to GenericMale/Female.
+            var voice = NPCTools.GetVoice(BountyFaction ?? "", female);
+            if (!voice.IsNull)
+            {
+                npc.Voice.SetTo(voice.FormKey);
+                var sfMod = RetrogradeContext.Current.StarfieldMod;
+                var vtRec = sfMod.VoiceTypes.FirstOrDefault(v => v.FormKey == voice.FormKey);
+                VoiceEditorId = vtRec?.EditorID ?? voice.FormKey.ID.ToString("X6");
+            }
 
             Random wrand = RandomProvider.Random;
             foreach (var facemorph in npc.FaceMorphs)

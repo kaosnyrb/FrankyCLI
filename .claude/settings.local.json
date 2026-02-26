@@ -49,7 +49,8 @@
       "Bash(echo:*)",
       "Read(//tmp/**)",
       "Read(//c/temp/**)",
-      "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/memory/**)"
+      "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/memory/**)",
+      "Read(//c/Program Files \\(x86\\)/Steam/steamapps/common/Starfield/Data/**)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"
