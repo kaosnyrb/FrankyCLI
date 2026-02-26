@@ -1,4 +1,5 @@
 using Retrograde.AI;
+using Retrograde.AI.Utils;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
@@ -224,21 +225,34 @@ namespace Retrograde.Nouns
         {
             var sb = new StringBuilder();
 
-            string upbringing = GetUpbringing();
-            string fear       = GetFears();
-            string goal       = GetGoals();
-            string flaw       = Getflaws();
-
-            sb.AppendLine("You are writing a personal audio log recorded by " + name + ", a " + gender + " fugitive who has a bounty on their head.");
+            sb.AppendLine("Write a personal audio log recorded by " + name + ", a " + gender + " fugitive who has a bounty on their head.");
             sb.AppendLine("This is a spoken monologue recorded alone into a data-slate — write it for voice performance, not for reading.");
             sb.AppendLine();
-            sb.AppendLine("Character context:");
-            sb.AppendLine("- Background: " + upbringing);
-            sb.AppendLine("- Core fear: " + fear);
-            sb.AppendLine("- Motivation: " + goal);
-            sb.AppendLine("- Personality flaw: " + flaw);
-            if (!string.IsNullOrEmpty(BountyFaction))
-                sb.AppendLine("- Currently hunted by: " + BountyFaction);
+
+            // Use the quest's LoreContext if available (it's always set before GenerateLog is called in the chain).
+            // Fall back to random seeds only if running standalone.
+            if (!string.IsNullOrEmpty(PromptManager.LoreContext))
+            {
+                sb.AppendLine("Character context — treat this as the source of truth for who this person is and why they're running:");
+                sb.AppendLine("<LoreContext>");
+                sb.AppendLine(PromptManager.LoreContext);
+                sb.AppendLine("</LoreContext>");
+            }
+            else
+            {
+                string upbringing = GetUpbringing();
+                string fear       = GetFears();
+                string goal       = GetGoals();
+                string flaw       = Getflaws();
+
+                sb.AppendLine("Character context:");
+                sb.AppendLine("- Background: " + upbringing);
+                sb.AppendLine("- Core fear: " + fear);
+                sb.AppendLine("- Motivation: " + goal);
+                sb.AppendLine("- Personality flaw: " + flaw);
+                if (!string.IsNullOrEmpty(BountyFaction))
+                    sb.AppendLine("- Currently hunted by: " + BountyFaction);
+            }
             sb.AppendLine();
             sb.AppendLine("Tone: this character is exhausted, paranoid, and afraid. They are not coping. There is no dark humour, no bravado, no uplift.");
             sb.AppendLine();

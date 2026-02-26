@@ -17,6 +17,7 @@ namespace Retrograde.Quests
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
             //-------------------------------  INVESTIGATION ------------------------------------------
+            /*
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "City Activator - Akila City Farms",
@@ -154,7 +155,7 @@ namespace Retrograde.Quests
                     "planetside",
                     "kill_target"
                 }
-            });
+            });*/
         }
     }
 }

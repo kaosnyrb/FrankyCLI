@@ -146,11 +146,11 @@ namespace FrankyCLI
 
                 AITools.AIMODE = true;
 
-                var outlawQuest = new StaticLayoutQuestChain(myMod);
-                outlawQuest.InvestigationTemplate = "Space Destroy - unguarded";
-                outlawQuest.DeepTempalte = "Space Destroy - unguarded";
-                outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
-                /*
+                //var outlawQuest = new StaticLayoutQuestChain(myMod);
+                //outlawQuest.InvestigationTemplate = "Space Destroy - unguarded";
+                //outlawQuest.DeepTempalte = "Space Destroy - unguarded";
+                //outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
+                
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {
                    new LoopingLayoutQuestChain(myMod),
@@ -158,7 +158,7 @@ namespace FrankyCLI
                 };
 
                 var outlawQuest = questchains[random.Next(questchains.Count)];
-                */
+                
                 outlawQuest.GenerateQuest();
             }
             foreach (var rec in myMod.EnumerateMajorRecords())

@@ -35,7 +35,7 @@ namespace Retrograde.Quests
                     "planetside",
                 }
             });
-
+/*
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Branching Node - city/space",
@@ -71,7 +71,7 @@ namespace Retrograde.Quests
                 }
 
             });
-
+*/
         }
     }
 }

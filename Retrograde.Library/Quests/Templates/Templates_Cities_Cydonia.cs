@@ -16,7 +16,7 @@ namespace Retrograde.Quests
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
-
+/*
             //-------------------------------  INVESTIGATION ------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -87,7 +87,7 @@ namespace Retrograde.Quests
                     "planetside",
                     "kill_target"
                 }
-            });
+            });*/
 
         }
     }

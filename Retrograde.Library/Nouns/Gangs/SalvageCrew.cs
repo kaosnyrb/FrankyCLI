@@ -93,9 +93,7 @@ namespace Retrograde.Nouns.Gangs
             {
                 bool isFemale = random.Next(100) > 50;
 
-                var templateKey = new FormKey(myMod.ModKey, NPCTools.GetTemplateNPC(isFemale));
-                var templateNpc = myMod.Npcs[templateKey].DeepCopy();
-                Npc npc = NPCTools.CloneNPC(myMod, templateNpc);
+                Npc npc = NPCTools.CloneNPC(myMod, NPCTools.FindTemplateNpc(isFemale));
 
                 npc.Name = gangName + " " + GetCrewJobRole();
 

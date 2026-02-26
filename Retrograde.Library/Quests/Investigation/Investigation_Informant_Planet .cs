@@ -91,14 +91,14 @@ namespace Retrograde.Quests
                 isfemale = true;
             }
 
-            Npc NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateNPC(isfemale))].DeepCopy();
+            Npc NPC = NPCTools.FindTemplateNpc(isfemale);
             if (missionTemplate.parameters != null)
             {
                 if (missionTemplate.parameters.ContainsKey("IsTargetDead"))
                 {
                     if ((bool)missionTemplate.parameters["IsTargetDead"])
                     {
-                        NPC = myMod.Npcs[new FormKey(myMod.ModKey, NPCTools.GetTemplateDeadNPC(isfemale))].DeepCopy();
+                        NPC = NPCTools.FindTemplateDeadNpc(isfemale);
                     }
                 }
             }

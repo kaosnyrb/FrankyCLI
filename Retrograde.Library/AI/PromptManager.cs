@@ -19,6 +19,83 @@ namespace Retrograde.AI.Utils
     public class PromptManager
     {
         public static string LoreContext;
+
+        // Seed pools — rolled in C# so the AI isn't left to pick its own "random" archetype
+        private static readonly List<string> SeedOccupations = new List<string>
+        {
+            "cargo loader", "medical technician", "shuttle pilot", "crop farmer",
+            "port customs inspector", "ship mechanic", "water reclamation tech",
+            "mine surveyor", "freight coordinator", "food vendor",
+            "colony maintenance worker", "transit scheduler", "fuel depot operator",
+            "lab assistant", "livestock handler", "dockmaster clerk",
+            "waste processing operator", "colony supply runner", "security guard",
+            "planetary soil tester"
+        };
+
+        private static readonly List<string> SeedCrimes = new List<string>
+        {
+            "embezzled employer funds over several months",
+            "assaulted a co-worker and fled before authorities arrived",
+            "stole equipment from their worksite and sold it on",
+            "ran a low-level protection racket on local traders",
+            "forged shipping manifests to cover missing cargo",
+            "sold stolen medical supplies on the black market",
+            "blackmailed a supervisor using personal information",
+            "skimmed credits from payroll records",
+            "fenced stolen colony equipment through a third party",
+            "defrauded settlers with a fake land-claim scheme",
+            "destroyed company property to hide a costly mistake",
+            "sold access credentials to an outside buyer",
+            "extorted a business competitor",
+            "tampered with inventory records for personal gain",
+            "impersonated a licensed contractor to pocket payment"
+        };
+
+        private static readonly List<string> SeedMotives = new List<string>
+        {
+            "debt they could not repay",
+            "desperation to cover a family member's medical costs",
+            "anger over unpaid wages and broken promises",
+            "a failed attempt to buy passage off-planet",
+            "covering up an earlier smaller mistake that spiralled",
+            "paying off a local gang that threatened their family",
+            "a gambling habit that got out of control",
+            "deep resentment toward a specific person who wronged them",
+            "fear of losing their colony housing",
+            "misplaced loyalty to someone who exploited them",
+            "revenge for being passed over for a promotion they deserved",
+            "getting caught in someone else's scheme and panicking"
+        };
+
+        private static readonly List<string> SeedPersonalityTraits = new List<string>
+        {
+            "cautious, but panics when cornered",
+            "overconfident and dismissive of consequences",
+            "loyal to people they trust, ruthless to everyone else",
+            "methodical — leaves few traces but hates improvising",
+            "reckless — banks on luck holding out",
+            "paranoid, convinced they are constantly being watched",
+            "meek in person, calculating in planning",
+            "charming on the surface, self-serving underneath",
+            "genuinely convinced what they did was justified",
+            "deeply ashamed but committed to seeing it through"
+        };
+
+        // Who is writing the first-person account found in the world
+        private static readonly List<string> SpeakerTypes = new List<string>
+        {
+            "a co-worker who noticed the target acting strangely before they disappeared",
+            "someone who was directly defrauded or harmed by the target",
+            "a neighbour or local who witnessed something they couldn't explain",
+            "a supervisor who discovered something was missing after the target left",
+            "someone who unknowingly helped the target cover their tracks",
+            "a local trader or contact who was pressured or threatened by the target",
+            "a person who was owed money by the target and never got paid",
+            "a friend or associate who is now avoiding questions about the target",
+            "someone who shared a workspace with the target and noticed too late",
+            "a person who found something the target left behind when they fled"
+        };
+
         public static string LoadRandomLoreFile()
         {
             string loreDir = @".\questgen_quests\Lorefiles";
@@ -40,54 +117,47 @@ namespace Retrograde.AI.Utils
 
         public static string GenerateLoreFile()
         {
+            var rng = RandomProvider.Random;
+            string occupation = SeedOccupations[rng.Next(SeedOccupations.Count)];
+            string crime      = SeedCrimes[rng.Next(SeedCrimes.Count)];
+            string motive     = SeedMotives[rng.Next(SeedMotives.Count)];
+            string personality = SeedPersonalityTraits[rng.Next(SeedPersonalityTraits.Count)];
+
+            string seed = $"The outlaw was a {occupation} who {crime}, driven by {motive}. Personality: {personality}.";
+
             var sb = new StringBuilder();
 
-            sb.AppendLine("You are generating a new LoreFile for a procedurally driven Starfield-style bounty hunting mission system.");
+            sb.AppendLine("Generate a LoreFile for a Starfield-style bounty hunting mission system.");
             sb.AppendLine();
-            sb.AppendLine("Your task is to create a COMPLETE lore entry following the exact structure below.");
+            sb.AppendLine("Use this story seed exactly — do not replace or reinterpret it:");
+            sb.AppendLine(seed);
             sb.AppendLine();
-            sb.AppendLine("The LoreFile must be self-contained, reusable, and open-ended enough to generate many different quests from it.");
+            sb.AppendLine("SCALE: This is a small, personal crime story. Local stakes only.");
+            sb.AppendLine("The outlaw is not a mastermind or a warlord. No cults, no conspiracies, no galaxy-threatening plots.");
+            sb.AppendLine("Think: a desperate person who made a bad choice and is now running from the consequences.");
             sb.AppendLine();
-            sb.AppendLine("----------------------------------------------------------------------");
-            sb.AppendLine("STRUCTURE (output MUST follow this format exactly):");
+            sb.AppendLine("OUTPUT (use this format exactly):");
             sb.AppendLine();
             sb.AppendLine("< LoreFile >");
             sb.AppendLine();
             sb.AppendLine("    < Summary >");
-            sb.AppendLine("        A short overview (3–5 sentences) describing the fugitive, the core narrative theme, ");
-            sb.AppendLine("        and the tone of the story.");
+            sb.AppendLine("        2-3 sentences. Who the outlaw is, what they did, and what kind of trouble they are in now.");
             sb.AppendLine("    </ Summary >");
             sb.AppendLine();
-            sb.AppendLine("    < StorySeed >");
-            sb.AppendLine("        Describe the narrative direction YOU have chosen for this LoreFile.");
-            sb.AppendLine("        Randomly select or invent an outlaw archetype from a broad conceptual pool.");            
-            sb.AppendLine("        Explain why this archetype creates strong story hooks.");
-            sb.AppendLine("    </ StorySeed >");
-            sb.AppendLine();
             sb.AppendLine("    < TargetProfile >");
-            sb.AppendLine("        Flesh out the fugitive’s identity:");
-            sb.AppendLine("        - Former occupation, affiliations, skills");
-            sb.AppendLine("        - Psychological traits");
-            sb.AppendLine("        - Behaviors or tells");
-            sb.AppendLine("        - What pushed them onto the outlaw path");
+            sb.AppendLine("        - Former occupation and any skills or connections it gave them");
+            sb.AppendLine("        - Psychological traits and how they behave under pressure");
+            sb.AppendLine("        - Habits, tells, or patterns a hunter could exploit");
+            sb.AppendLine("        - What tipped them over into crime");
             sb.AppendLine("    </ TargetProfile >");
             sb.AppendLine();
             sb.AppendLine("    < Motives >");
-            sb.AppendLine("        Describe their deeper goals, fears, obsessions, unresolved guilt,");
-            sb.AppendLine("        or long-term plans. Give 2–4 key drivers that explain their actions.");
+            sb.AppendLine("        2-3 key drivers: what they want now, what they fear, what they refuse to give up.");
             sb.AppendLine("    </ Motives >");
             sb.AppendLine();
             sb.AppendLine("</ LoreFile >");
             sb.AppendLine();
-            sb.AppendLine("----------------------------------------------------------------------");
-            sb.AppendLine("GENERATION RULES:");
-            sb.AppendLine();
-            sb.AppendLine("- Produce ONLY the LoreFile in the structure above.");
-            sb.AppendLine("- Pick the story direction yourself (do NOT ask the user).");
-            sb.AppendLine("- The tone should support procedural bounty/mission generation.");
-            sb.AppendLine("- Avoid length bloat—each section should be concise but rich.");
-            sb.AppendLine("- The lore must feel expandable into dozens of missions.");
-            sb.AppendLine("- No copyrighted text; fully original content.");
+            sb.AppendLine("Output the LoreFile only. Be concise.");
 
             var prompt = sb.ToString();
 
@@ -208,18 +278,11 @@ namespace Retrograde.AI.Utils
         public static string GetDestroyMessage(List<string> Addons)
         {
             var pickuppromt =
-                "Generate a short flavour-text story explaining how destroying this contraband reveals the next step of the quest.\r\n" +
-                "Use newline characters.\r\n" +
-                "One paragraph, under 50 words.\r\n" +
-                "Clarity:\r\n" +
-                "- State what was destroyed, what it revealed, and the immediate next lead in plain language.\r\n" +
-                "- Avoid mood adjectives, riddles, or teasing lines.\r\n" +
-                "- Use only concrete details present in <LoreContext>; do not invent new names.\r\n\r\n" +
-
-                "Use the Lore Context to influence atmosphere, mystery, faction tension, stakes, and the sense of uncovering a deeper plot.\r\n" +
-                "Do NOT quote the lore directly-blend it subtly.\r\n\r\n" +
-
-                "You may draw on any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
+                "Write a short in-game notification (under 40 words, one paragraph) for when the player destroys a piece of contraband.\r\n" +
+                "State three things plainly: what was destroyed, what that destruction revealed, and where to go or what to do next.\r\n" +
+                "Style: field intel note — direct, factual, no metaphor, no atmospheric writing, no mood adjectives.\r\n" +
+                "Use Lore Context only for concrete facts: names, places, roles. Do not derive atmosphere or mystery from it.\r\n" +
+                "Do not invent names or locations beyond those in <LoreContext> and Additional Information.\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
@@ -245,18 +308,11 @@ namespace Retrograde.AI.Utils
         public static string GetPickupMessage(List<string> Addons)
         {
             var pickuppromt =
-                "Generate a short flavour-text story explaining how this clue reveals the next stage of the quest.\r\n" +
-                "Use newline characters.\r\n" +
-                "One paragraph, under 30 words.\r\n" +
-                "Clarity:\r\n" +
-                "- State what was found and how it points to the next step.\r\n" +
-                "- Avoid mood adjectives, riddles, or vague teasing.\r\n" +
-                "- Use only concrete details present in <LoreContext>; do not invent new names.\r\n\r\n" +
-
-                "Use the Lore Context to shape tone, mystery, symbolism, faction behaviour, and how this clue fits into the wider conflict or hunt.\r\n" +
-                "Do NOT quote lore-use it indirectly.\r\n\r\n" +
-
-                "You may draw on any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
+                "Write a short in-game notification (under 30 words, one sentence or two short ones) for when the player picks up a clue.\r\n" +
+                "State two things plainly: what was found, and how it points to the next step.\r\n" +
+                "Style: field intel note — direct, factual, no metaphor, no atmospheric writing, no mood adjectives.\r\n" +
+                "Use Lore Context only for concrete facts: names, places, roles. Do not derive atmosphere or mystery from it.\r\n" +
+                "Do not invent names or locations beyond those in <LoreContext> and Additional Information.\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
@@ -279,25 +335,13 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         public static string GetLogMessage(List<string> Addons)
         {
-            
+
             var logprompt =
-                "Generate a short, declarative briefing explaining why the objective must be completed at this location.\r\n" +
-                "Avoid naming the objective directly. Instead, imply its purpose through context.\r\n" +
-                "Write 50 words.\r\n" +
-                "First justify why this objective must be completed here.\r\n" +
-                "Explicitly mention the bounty target by name exactly as given in <LoreContext>; weave it naturally into the paragraph.\r\n" +
-                "Do NOT introduce item names, quest titles, or proper nouns unless they appear in the lore context.\r\n" +
-                "Style Guidelines:\r\n" +
-                "- Plain, direct language; no metaphor, riddles, or ominous hints.\r\n" +
-                "- Describe the situation as if briefing an experienced operative.\r\n" +
-                "- Use one or two concrete details from <LoreContext>; if absent, leave them out rather than inventing.\r\n" +
-                "Draw inspiration from any relevant sections of the Lore Context:\r\n" +
-                "- Factions and their agendas\r\n" +
-                "- Characters or targets\r\n" +
-                "- Rumors, leads, or mysteries\r\n" +
-                "- The location's atmosphere and history\r\n" +
-                "- Motives, risks, and stakes\r\n" +
-                "- Threats tied to the area\r\n\r\n" +
+                "Write a 40-word objective log entry for a bounty hunter.\r\n" +
+                "State clearly: what the objective is, where it must be done, and why (the concrete reason tied to the target or situation).\r\n" +
+                "Name the bounty target exactly as they appear in <LoreContext>.\r\n" +
+                "Style: field intel note — plain declarative sentences, no metaphor, no ominous hints, no atmospheric writing.\r\n" +
+                "Use Lore Context for concrete facts only: target name, faction, motive, location. Do not invent new names.\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
@@ -307,8 +351,6 @@ namespace Retrograde.AI.Utils
 
             foreach (var item in Addons)
                 logprompt += item;
-
-            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
 
             var results = AITools.RunPrompt(logprompt);
             for(int i = 0; i < 10 && results.Length < 100; i++)
@@ -324,53 +366,29 @@ namespace Retrograde.AI.Utils
         public static string GetFirstPersonAccount(List<string> Addons)
         {
             DateTime dateTime = new DateTime(2330, 5, 6);
+            string speaker = SpeakerTypes[RandomProvider.Random.Next(SpeakerTypes.Count)];
+
             var logprompt =
-                "Generate a first-person log entry from someone directly affected by the events described in the Lore Context.\r\n" +
-                "Use the Lore Context to guide tone, personality, emotion, and perspective-especially mystery, fear, resentment, greed, or ambition.\r\n" +
-                "Do NOT quote lore directly; reflect it through lived experience.\r\n" +
-                "Style and Clarity:\r\n" +
-                "- Under 100 words; tight, precise language.\r\n" +
-                "- Plain speech; avoid metaphor, riddles, or vague dread.\r\n" +
-                "- Describe one moment or observation; do not recap the whole context.\r\n" +
-                "- Mention one or two concrete details (place, action, consequence) from <LoreContext> only; do not invent names.\r\n" +
-                "- Maintain first-person perspective throughout.\r\n\r\n" +
+                "Write a short personal dataslate entry — a first-person account from " + speaker + ".\r\n" +
+                "The entry relates to the events in <LoreContext>. The speaker is not the outlaw; they know only their piece of the story.\r\n\r\n" +
 
-                "Date Instructions:\r\n" +
-                "- You may reference a date naturally within the narrative, but it is not required.\r\n" +
-                "- If a date is used, it must fall within the three years leading up to " + dateTime.ToString("yyyy-MM-dd") + ".\r\n" +
-                "- Valid dates may fall anywhere between " +
-                    dateTime.AddYears(-3).ToString("yyyy-MM-dd") +
-                    " and " +
-                    dateTime.ToString("yyyy-MM-dd") +
-                    " inclusive.\r\n" +
-                "- Any date mentioned should feel incidental or diegetic—woven into memory, record-keeping, or spoken context rather than formatted as a header.\r\n\r\n" +
+                "Rules:\r\n" +
+                "- Under 80 words. Every sentence must add new information; cut anything that restates or pads.\r\n" +
+                "- Write one specific moment or discovery the speaker witnessed or experienced themselves.\r\n" +
+                "- Use concrete details from <LoreContext> — a name, a place, an action. Do not invent names.\r\n" +
+                "- Plain, personal speech. This person is writing for themselves, not performing.\r\n" +
+                "- The speaker does not know the full story — they know their part of it.\r\n\r\n" +
 
-
-                "Length and Style Requirements:\r\n" +
-                "- The entire log entry must stay under 100 words; do not exceed this limit.\r\n" + 
-                "- Favor tight, precise language over filler-every sentence should reveal character, world, or stakes.\r\n" +
-                "- Avoid repeating the same idea in different words; once something is established, build on it instead of restating it.\r\n" +
-                "- Do not spend words summarizing the LoreContext; assume it exists off-page and focus on what the speaker feels, remembers, or is living through right now.\r\n" +
-                "- Prefer concrete details, specific memories, and sharp impressions over vague generalities or broad statements.\r\n" +
-                "- If in doubt, cut adjectives, hedging, or restated thoughts before cutting sensory or emotional beats.\r\n\r\n" +
-                "- The entry should read like a personal, intimate account-raw, unpolished, and emotionally grounded.\r\n" +
-                "- Prioritize sensory impressions, half-understood implications, and the speaker's internal conflict.\r\n" +
-                "- Do NOT summarize; immerse the reader in the moment as the speaker lived it.\r\n" +
-                "- Avoid melodrama, but allow quiet dread, tension, or determination to emerge from the speaker's voice.\r\n" +
-                "- The log should feel like a real spacers' or settlers' journal entry, not a formal report.\r\n" +
-                "- Ensure subtle continuity with the investigative history without repeating events verbatim.\r\n\r\n" + 
-
-                "You may draw on any relevant sections (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
+                "Date: optional. If used, it must fall between " +
+                    dateTime.AddYears(-3).ToString("yyyy-MM-dd") + " and " + dateTime.ToString("yyyy-MM-dd") +
+                    " and feel like a natural part of the entry, not a header.\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
-
             foreach (var item in Addons)
                 logprompt += item;
-
-            logprompt = PromptFlavourTools.AddFlavourToLogMessage(logprompt);
 
             var results = AITools.RunPrompt(logprompt);
 
@@ -387,17 +405,15 @@ namespace Retrograde.AI.Utils
         public static string GetMissionBriefingDataslate(List<string> Addons)
         {
             var logprompt =
-                "Write a mission briefing dataslate for the player.\r\n" +
-                "- Length: ~200 words (aim for 180-220).\r\n" +
-                "- Tone: concise field report written for a professional hunter.\r\n" +
-                "- Purpose: give the first breadcrumb to track the bounty target at the initial location.\r\n" +
-                "- Explicitly name the target exactly as it appears in <LoreContext> and summarize who they are and why we're hunting them.\r\n" +
-                "- Identify the first destination from provided context and explain why the target is likely there and what to do upon arrival.\r\n" +
-                "- Include one or two concrete details from <LoreContext> (faction, habit, method, recent sighting) to ground the lead.\r\n" +
-                "- No riddles, no mystery tone; clear actionable intelligence.\r\n" +
-                "- Do NOT invent new names, factions, or locations beyond <LoreContext> and the provided add-ons.\r\n\r\n" +
+                "Write a mission briefing dataslate for a bounty hunter. Length: 180-220 words.\r\n" +
+                "Style: field intel note — plain declarative sentences, no atmosphere, no tone-setting prose, no metaphor.\r\n" +
+                "Use <LoreContext> for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
 
-                "Use any relevant sections (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
+                "Cover these four things in order:\r\n" +
+                "1. TARGET: Name the target exactly as they appear in <LoreContext>. State what they did and what they are wanted for.\r\n" +
+                "2. BACKGROUND: One or two sentences on who they are — former occupation, what pushed them to crime — so the hunter understands who they're dealing with.\r\n" +
+                "3. LEAD: Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
+                "4. ACTION: Tell the hunter exactly what to do at that location.\r\n\r\n" +
 
                 "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 

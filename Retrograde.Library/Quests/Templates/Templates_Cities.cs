@@ -16,7 +16,7 @@ namespace Retrograde.Quests
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
-
+/*
             //-------------------------------  INVESTIGATION ------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -160,7 +160,7 @@ namespace Retrograde.Quests
                 },
                 parameters= new Dictionary<string, object>()
                 {
-                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runners’ survival and the extreme danger posed by the local Red Mile Mauler predators." }
+                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runnersï¿½ survival and the extreme danger posed by the local Red Mile Mauler predators." }
                 }
                 
             });
@@ -368,7 +368,7 @@ namespace Retrograde.Quests
                 },
                 parameters = new Dictionary<string, object>()
                 {
-                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runners’ survival and the extreme danger posed by the local Red Mile Mauler predators." }
+                    {"ExtraLore","The Red Mile Run is a dangerous wilderness survival challenge and blood sport held at the Red Mile outpost on Porrima III, where contestants must sprint through a predator-infested valley to activate a distant beacon and return alive. Overseen by proprietor Mei Devine, the event has become a notorious attraction, known for the high-stakes bets spectators place on its runnersï¿½ survival and the extreme danger posed by the local Red Mile Mauler predators." }
                 }
             });
 
@@ -392,7 +392,7 @@ namespace Retrograde.Quests
                 {
                     {"ExtraLore","Paradiso is a luxury beach resort located on the planet Porrima II in the Porrima system. It is run by the Paradiso Group; A cutthroat, cheapskate corporate board and operates outside the jurisdiction of the United Colonies and the Freestar Collective." }
                 }
-            });
+            });*/
         }
     }
 }

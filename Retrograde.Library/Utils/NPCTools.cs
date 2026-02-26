@@ -68,18 +68,20 @@ public static class NPCTools
 
     private static INpcGetter FindNpcById(uint id)
     {
-        var targetMod = RetrogradeContext.Current.TargetMod;
+        var ctx = RetrogradeContext.Current;
+        var targetMod = ctx.TargetMod;
         INpcGetter? npc = targetMod.Npcs.FirstOrDefault(r => r.FormKey == new FormKey(targetMod.ModKey, id));
         if (npc == null)
         {
-            foreach (var tm in RetrogradeContext.Current.TemplateMods)
+            foreach (var tm in ctx.TemplateMods)
             {
                 npc = tm.Npcs.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, id));
                 if (npc != null) break;
             }
         }
+        npc ??= ctx.StarfieldMod.Npcs.FirstOrDefault(r => r.FormKey == new FormKey(ctx.StarfieldModKey, id));
         if (npc == null)
-            throw new KeyNotFoundException($"NPCTools: no Npc with raw ID 0x{id:X6} found in target mod or any template mod.");
+            throw new KeyNotFoundException($"NPCTools: no Npc with raw ID 0x{id:X6} found in target mod, template mods, or Starfield.esm.");
         return npc;
     }
 
