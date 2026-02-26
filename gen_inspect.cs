@@ -24,7 +24,7 @@ namespace FrankyCLI
                 Console.WriteLine("Usage: <modname> gen_inspect <dummy> <recordtype> <editorid_or_formid>");
                 Console.WriteLine();
                 Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc");
-                Console.WriteLine("              PcmBranchNode, PcmContentNode");
+                Console.WriteLine("              PcmBranchNode, PcmContentNode, Book, Scene");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
                 Console.WriteLine("EditorID search: partial match (contains)");
@@ -87,7 +87,7 @@ namespace FrankyCLI
             int found = 0;
             foreach (var mod in allMods)
             {
-                found += InspectRecordType(mod, recordType, search);
+                found += InspectRecordType(mod, recordType, search, allMods);
             }
 
             if (found == 0)
@@ -101,7 +101,7 @@ namespace FrankyCLI
             return 0;
         }
 
-        private static int InspectRecordType(IStarfieldModGetter mod, string recordType, string search)
+        private static int InspectRecordType(IStarfieldModGetter mod, string recordType, string search, List<IStarfieldModGetter>? allMods = null)
         {
             int found = 0;
             switch (recordType.ToLowerInvariant())
@@ -169,6 +169,41 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpLocationFull(rec); found++; }
                     break;
+                case "book":
+                    foreach (var rec in mod.Books)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpBook(rec, allMods ?? new List<IStarfieldModGetter> { mod }); found++; }
+                    break;
+                case "scene":
+                    // Scenes are SCEN sub-records inside Quest records
+                    foreach (var quest in mod.Quests)
+                    {
+                        if (quest.Scenes == null) continue;
+                        foreach (var scene in quest.Scenes)
+                        {
+                            if (MatchesSearch(scene.EditorID, scene.FormKey, search))
+                            {
+                                Console.WriteLine($"[Quest: {quest.FormKey} {quest.EditorID}]");
+                                DumpScene(scene);
+                                found++;
+                            }
+                        }
+                    }
+                    break;
+                case "dialogtopic":
+                    // DialogTopics are sub-records of Quests (or top-level DIAL group)
+                    foreach (var quest in mod.Quests)
+                    {
+                        foreach (var topic in quest.DialogTopics)
+                        {
+                            if (MatchesSearch(topic.EditorID, topic.FormKey, search))
+                            {
+                                DumpDialogTopic(topic);
+                                found++;
+                            }
+                        }
+                    }
+                    break;
                 case "placed":
                     // Search all cells in all worldspaces for placed objects whose Base OR own FormKey matches
                     foreach (var ws in mod.Worldspaces)
@@ -202,7 +237,7 @@ namespace FrankyCLI
                     break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, PcmBranchNode, PcmContentNode");
+                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, PcmBranchNode, PcmContentNode, Book, Scene");
                     break;
             }
             return found;
@@ -391,6 +426,151 @@ namespace FrankyCLI
             Console.WriteLine($"  Components [{node.Components.Count}]:");
             foreach (var c in node.Components)
                 Console.WriteLine($"    {c.GetType().Name}");
+            Console.WriteLine();
+        }
+
+        private static void DumpBook(IBookGetter book, List<IStarfieldModGetter> allMods)
+        {
+            Console.WriteLine($"--- Book ---");
+            Console.WriteLine($"  FormKey:             {book.FormKey}");
+            Console.WriteLine($"  EditorID:            {book.EditorID}");
+            Console.WriteLine($"  Name:                {book.Name}");
+            Console.WriteLine($"  Text:                {(book.Text?.String?.Length > 120 ? book.Text.String.Substring(0, 120) + "..." : book.Text?.String)}");
+            Console.WriteLine($"  Description:         {book.Description}");
+            Console.WriteLine($"  DataSlateType:       {book.DataSlateType}");
+            Console.WriteLine($"  DataSlateHeaderLeft: {book.DataSlateHeaderLeft}");
+            Console.WriteLine($"  DataSlateHeaderRight:{book.DataSlateHeaderRight}");
+            Console.WriteLine($"  Flags:               {book.Flags}");
+            Console.WriteLine($"  Value:               {book.Value}");
+            Console.WriteLine($"  Weight:              {book.Weight}");
+            Console.WriteLine($"  TextOffsetX:         {book.TextOffsetX}");
+            Console.WriteLine($"  TextOffsetY:         {book.TextOffsetY}");
+            Console.WriteLine($"  InventoryArt:        {(book.InventoryArt.IsNull ? "null" : book.InventoryArt.FormKey.ToString())}");
+            Console.WriteLine($"  Scene:               {(book.Scene.IsNull ? "null" : book.Scene.FormKey.ToString())}");
+            Console.WriteLine($"  FeaturedItemMessage: {(book.FeaturedItemMessage.IsNull ? "null" : book.FeaturedItemMessage.FormKey.ToString())}");
+            if (book.Keywords != null && book.Keywords.Count > 0)
+            {
+                Console.WriteLine($"  Keywords [{book.Keywords.Count}]:");
+                foreach (var kw in book.Keywords)
+                    Console.WriteLine($"    {kw.FormKey}");
+            }
+            if (book.PickupSound != null)
+                Console.WriteLine($"  PickupSound:         {book.PickupSound}");
+            if (book.DropdownSound != null)
+                Console.WriteLine($"  DropdownSound:       {book.DropdownSound}");
+            if (book.Teaches != null)
+                Console.WriteLine($"  Teaches:             {book.Teaches}");
+            if (book.Model != null)
+                Console.WriteLine($"  Model:               {book.Model.File}");
+            if (book.VirtualMachineAdapter != null)
+            {
+                Console.WriteLine($"  Scripts [{book.VirtualMachineAdapter.Scripts.Count}]:");
+                foreach (var s in book.VirtualMachineAdapter.Scripts)
+                    Console.WriteLine($"    {s.Name}");
+            }
+            // If Scene is set, look it up inside Quest sub-records (SCEN are embedded in QUST)
+            if (!book.Scene.IsNull)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"  === Linked Scene: {book.Scene.FormKey} ===");
+                ISceneGetter? linkedScene = null;
+                IQuestGetter? ownerQuest = null;
+                foreach (var mod in allMods)
+                {
+                    foreach (var quest in mod.Quests)
+                    {
+                        if (quest.Scenes == null) continue;
+                        foreach (var s in quest.Scenes)
+                            if (s.FormKey == book.Scene.FormKey)
+                            { linkedScene = s; ownerQuest = quest; break; }
+                        if (linkedScene != null) break;
+                    }
+                    if (linkedScene != null) break;
+                }
+                if (linkedScene != null)
+                {
+                    Console.WriteLine($"  Owner Quest: {ownerQuest!.FormKey} ({ownerQuest.EditorID})");
+                    DumpScene(linkedScene);
+                }
+                else
+                    Console.WriteLine($"  (Scene {book.Scene.FormKey} not found in any Quest's Scenes list)");
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpScene(ISceneGetter scene)
+        {
+            Console.WriteLine($"--- Scene ---");
+            Console.WriteLine($"  FormKey:  {scene.FormKey}");
+            Console.WriteLine($"  EditorID: {scene.EditorID}");
+            Console.WriteLine($"  Quest:    {(scene.Quest.IsNull ? "null" : scene.Quest.FormKey.ToString())}");
+            Console.WriteLine($"  Flags:    {scene.Flags}");
+            Console.WriteLine($"  VNAM:     {(scene.VNAM.HasValue ? BitConverter.ToString(scene.VNAM.Value.ToArray()) : "null")}");
+            Console.WriteLine($"  Notes:    {scene.Notes}");
+            if (scene.Actors != null && scene.Actors.Count > 0)
+            {
+                Console.WriteLine($"  Actors [{scene.Actors.Count}]:");
+                foreach (var a in scene.Actors)
+                    Console.WriteLine($"    ID={a.ID} BehaviorFlags={a.BehaviorFlags} Flags={a.Flags}");
+            }
+            if (scene.Actions != null && scene.Actions.Count > 0)
+            {
+                Console.WriteLine($"  Actions [{scene.Actions.Count}]:");
+                foreach (var a in scene.Actions)
+                {
+                    Console.WriteLine($"    [{a.Index}] {a.GetType().Name} Name={a.Name} AliasID={a.AliasID} StartPhase={a.StartPhase} EndPhase={a.EndPhase} Flags={a.Flags}");
+                    if (a is IDialogueSceneActionGetter da)
+                    {
+                        Console.WriteLine($"      Topic:           {(da.Topic.IsNull ? "null" : da.Topic.FormKey.ToString())}");
+                        Console.WriteLine($"      DialogueSubtype: {(da.DialogueSubtype.IsNull ? "null" : da.DialogueSubtype.FormKey.ToString())}");
+                        if (da.WED0 != null) Console.WriteLine($"      WED0 (sound):    {da.WED0}");
+                    }
+                    else if (a is IRadioSceneActionGetter ra)
+                    {
+                        Console.WriteLine($"      Topic:           {(ra.Topic.IsNull ? "null" : ra.Topic.FormKey.ToString())}");
+                        Console.WriteLine($"      DialogueSubtype: {(ra.DialogueSubtype.IsNull ? "null" : ra.DialogueSubtype.FormKey.ToString())}");
+                        if (ra.WED0 != null) Console.WriteLine($"      WED0 (sound):    {ra.WED0}");
+                        if (ra.WED1 != null) Console.WriteLine($"      WED1 (sound):    {ra.WED1}");
+                    }
+                }
+            }
+            if (scene.Phases != null && scene.Phases.Count > 0)
+            {
+                Console.WriteLine($"  Phases [{scene.Phases.Count}]:");
+                foreach (var p in scene.Phases)
+                    Console.WriteLine($"    Name={p.Name} Flags={p.Flags} StartConds={p.StartConditions.Count} CompletionConds={p.CompletionConditions.Count}");
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpDialogTopic(IDialogTopicGetter topic)
+        {
+            Console.WriteLine($"--- DialogTopic ---");
+            Console.WriteLine($"  FormKey:  {topic.FormKey}");
+            Console.WriteLine($"  EditorID: {topic.EditorID}");
+            Console.WriteLine($"  Name:     {topic.Name}");
+            Console.WriteLine($"  Quest:    {topic.Quest.FormKey}");
+            Console.WriteLine($"  Branch:   {(topic.Branch.IsNull ? "null" : topic.Branch.FormKey.ToString())}");
+            if (topic.Responses != null && topic.Responses.Count > 0)
+            {
+                Console.WriteLine($"  Responses [{topic.Responses.Count}]:");
+                foreach (var resp in topic.Responses)
+                {
+                    Console.WriteLine($"    --- DialogResponses {resp.FormKey} ({resp.EditorID}) ---");
+                    Console.WriteLine($"      MajorFlags: {resp.MajorFlags}");
+                    if (resp.Speaker != null && !resp.Speaker.IsNull)
+                        Console.WriteLine($"      Speaker:    {resp.Speaker.FormKey}");
+                    foreach (var r in resp.Responses)
+                    {
+                        Console.WriteLine($"      Response:");
+                        Console.WriteLine($"        ResponseText: {r.ResponseText}");
+                        Console.WriteLine($"        WEMFile:      {r.WEMFile} (0x{r.WEMFile:X8})");
+                        Console.WriteLine($"        Emotion:      {r.Emotion.FormKey}");
+                        Console.WriteLine($"        ScriptNotes:  {r.ScriptNotes}");
+                        if (r.RVSH != null) Console.WriteLine($"        RVSH:         {r.RVSH}");
+                    }
+                }
+            }
             Console.WriteLine();
         }
 

@@ -77,7 +77,6 @@ namespace Retrograde.Quests
                     "planetside",
                 }
             });
-
             //-------------------------------  SHOWDOWN ------------------------------------------            
 
         }

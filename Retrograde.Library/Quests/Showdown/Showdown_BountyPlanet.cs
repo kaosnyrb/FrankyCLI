@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Retrograde.Utils;
 
 namespace Retrograde.Quests
 {
@@ -67,8 +68,7 @@ namespace Retrograde.Quests
 
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", outlawNpc.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            //Generate Voice for the log
-            //SpeechTools.AddVoice(outlawNpc.Logfile.ID, newQuest.FormKey.ID, "THIS IS A TEST");
+
             //Set the interfaces
             questform = newQuest.instance;
             logMessage = logmessage;

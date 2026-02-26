@@ -5,6 +5,7 @@ using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Retrograde.Quests;
 using Retrograde.Quests.TemplateEngines;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -222,8 +223,10 @@ namespace Retrograde.Chains
 
             //We have now generated all the stages. Do any final linking steps
             Console.WriteLine("Generating Final Bounty Log...");
-            outlawNpc.GenerateLog();
-
+            outlawNpc.GenerateLog();            
+            //Generate Voice for the log
+            SpeechTools.AddVoice(outlawNpc.Logfile.ID, Quest.FormKey.ID, "THIS IS A TEST");
+            
             return true;
         }
     }

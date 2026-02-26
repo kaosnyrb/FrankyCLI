@@ -6,11 +6,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Retrograde.Quests
 {
@@ -57,10 +53,34 @@ namespace Retrograde.Quests
 
             //We have a condictional so that the dataslate only drops until you complete the next quest.
             //This means you more likely to find missions you haven't done.
-            var condition = myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries[0].Conditions[0].DeepCopy();
-            ((GetQuestCompletedConditionData)condition.Data).FirstParameter = new FormLinkOrIndex<IQuestGetter>(condition.Data, nextQuest.questform.FormKey);
 
-            myMod.LeveledItems[new FormKey(myMod.ModKey, 0x000843)].Entries.Add(new LeveledItemEntry()
+            var questBooksLL = myMod.LeveledItems.FirstOrDefault(li => li.EditorID == "duout_LL_QuestBooks");
+            if (questBooksLL == null)
+            {
+                questBooksLL = new LeveledItem(myMod) { EditorID = "duout_LL_QuestBooks" };
+                myMod.LeveledItems.Add(questBooksLL);
+            }
+
+            Condition condition;
+            if (questBooksLL.Entries?.Count > 0 && questBooksLL.Entries[0].Conditions?.Count > 0)
+            {
+                condition = questBooksLL.Entries[0].Conditions[0].DeepCopy();
+                ((GetQuestCompletedConditionData)condition.Data).FirstParameter = new FormLinkOrIndex<IQuestGetter>(condition.Data, nextQuest.questform.FormKey);
+            }
+            else
+            {
+                var condData = new GetQuestCompletedConditionData();
+                condData.FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, nextQuest.questform.FormKey);
+                condition = new ConditionFloat()
+                {
+                    CompareOperator = CompareOperator.EqualTo,
+                    ComparisonValue = 0f,
+                    Data = condData
+                };
+            }
+
+            questBooksLL.Entries ??= new ExtendedList<LeveledItemEntry>();
+            questBooksLL.Entries.Add(new LeveledItemEntry()
             {
                 Count = 1,
                 Reference = bountybook.instance.ToLink<IItemGetter>(),

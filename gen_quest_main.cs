@@ -123,6 +123,22 @@ namespace FrankyCLI
                     }
                 }
 
+                // Discover template mods from load order (any mod with "template" in filename + Starfield.esm)
+                ModContextImpl.TemplateModsList = new System.Collections.Generic.List<IStarfieldModGetter>();
+                for (int i = 0; i < env.LoadOrder.Count; i++)
+                {
+                    var listing = env.LoadOrder[i];
+                    var fileName = listing.FileName.ToString();
+                    if (listing.Mod != null &&
+                        (fileName.Contains("template", StringComparison.OrdinalIgnoreCase)
+                         || fileName.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase))
+                        && fileName.EndsWith(".esm", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModContextImpl.TemplateModsList.Add(listing.Mod);
+                        Console.WriteLine($"Template mod found: {listing.FileName}");
+                    }
+                }
+
                 // Initialize the Retrograde context for library access
                 RetrogradeContext.Current = new ModContextImpl();
 
@@ -130,10 +146,11 @@ namespace FrankyCLI
 
                 AITools.AIMODE = false;
 
-                //var outlawQuest = new StaticLayoutQuestChain(myMod);
-                //outlawQuest.InvestigationTemplate = "Space Station Activator - spacer Medium light guard";
-                //outlawQuest.DeepTempalte = "Space Destroy - unguarded";
-                //outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
+                var outlawQuest = new StaticLayoutQuestChain(myMod);
+                outlawQuest.InvestigationTemplate = "Space Destroy - unguarded";
+                outlawQuest.DeepTempalte = "Space Destroy - unguarded";
+                outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
+                /*
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {
                    new LoopingLayoutQuestChain(myMod),
@@ -141,6 +158,7 @@ namespace FrankyCLI
                 };
 
                 var outlawQuest = questchains[random.Next(questchains.Count)];
+                */
                 outlawQuest.GenerateQuest();
             }
             foreach (var rec in myMod.EnumerateMajorRecords())

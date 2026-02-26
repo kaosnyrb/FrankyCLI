@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "gen_retrograde cleanslate Spacer \"Hab Station\" poi false"
+      "commandLineArgs": "gen_quest outlaws02"
     }
   }
 }
