@@ -93,7 +93,7 @@ public class AsteroidChainPass : ISpaceCellPass
             float rz = (float)(rng.NextDouble() * Math.PI * 2.0);
 
             // ±15% noise around the mesh's natural size — size class set by the EditorID.
-            float scale = AsteroidPaletteHelper.SizeNoise(rng);
+            float scale = AsteroidPaletteHelper.SizeNoise(rng, state.AsteroidScale);
 
             // Pick a random asteroid from the palette (any size — chain uses a mix).
             var baseKey = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];

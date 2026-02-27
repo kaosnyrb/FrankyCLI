@@ -31,7 +31,8 @@ public class SpaceCellGenerator
     public SpaceCellState Generate(Cell cell, Location location,
                                    List<FormKey> asteroidPalette,
                                    List<PlacedObject> markerTemplates,
-                                   float vanillaRadius)
+                                   float vanillaRadius,
+                                   float asteroidScale = 1.0f)
     {
         var state = new SpaceCellState
         {
@@ -41,6 +42,7 @@ public class SpaceCellGenerator
             MarkerTemplates = markerTemplates,
             VanillaRadius   = vanillaRadius,
             Scale           = MathF.Sqrt(2f) * 0.5f,  // ~0.7× vanilla radius
+            AsteroidScale   = asteroidScale,
         };
 
         foreach (var pass in _passes)

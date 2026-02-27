@@ -17,6 +17,7 @@ public static class SpeechTools
     /// </summary>
     private const string AudioLogQuestEditorId = "rg_audiolog_quest";
 
+    public static bool generateWavs = false;
     /// <summary>
     /// Creates the record skeleton for an audio data-slate and wires it to an existing Book.
     ///
@@ -144,15 +145,18 @@ public static class SpeechTools
         if (string.IsNullOrEmpty(elevenLabsVoiceId) || string.IsNullOrEmpty(text) || string.IsNullOrEmpty(voiceTypeEditorId))
             return;
 
-        try
+        if (generateWavs)
         {
-            ElevenLabsAPI.GenerateSpeech(text, elevenLabsVoiceId, espPath);
-            File.Copy(espPath, esmPath, overwrite: true);
-            Console.WriteLine($"[SpeechTools] WAV written: {wavName}.wav");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
+            try
+            {
+                ElevenLabsAPI.GenerateSpeech(text, elevenLabsVoiceId, espPath);
+                File.Copy(espPath, esmPath, overwrite: true);
+                Console.WriteLine($"[SpeechTools] WAV written: {wavName}.wav");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
+            }            
         }
     }
 

@@ -36,4 +36,10 @@ public class SpaceCellState
     /// Default sqrt(2) ≈ 1.414 gives approximately twice the vanilla cell area.
     /// </summary>
     public float Scale;
+
+    /// <summary>
+    /// Base scale multiplier for all asteroid mesh placements, sourced from the palette.
+    /// Applied on top of per-asteroid ±15% SizeNoise.
+    /// </summary>
+    public float AsteroidScale;
 }

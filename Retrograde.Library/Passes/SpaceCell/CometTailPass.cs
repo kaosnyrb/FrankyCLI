@@ -14,11 +14,12 @@ namespace Retrograde.Passes.SpaceCell;
 ///   - A dense "coma" cluster of XLarge asteroids at the head
 ///   - A long streaming tail that fans out and shrinks away from the head
 ///
-/// The tail is modelled as a parabolic arc — it bends as it streams away,
-/// as if deflected by a nearby stellar wind. Asteroid size tapers from
-/// Large at the coma end to Small at the tip, selected from the palette by
-/// AsteroidPaletteHelper.SizeFromT. Perpendicular scatter grows from tight
-/// (HeadScatter) to diffuse (TailScatter), giving the tail a natural conical spread.
+/// The tail is modelled as a sinusoidally-wandering parabolic arc. A slow wave
+/// in the p–q plane makes the tail axis gently drift side-to-side so it reads as
+/// a natural stream rather than a ruler-straight tube. On top of that, a parabolic
+/// bend curves the whole stream as if deflected by a stellar wind. Perpendicular
+/// scatter grows from tight (HeadScatter) to diffuse (TailScatter), giving the
+/// tail a natural conical spread.
 ///
 /// TJitter offsets each asteroid from its evenly-spaced t-slot so density
 /// varies along the tail (clumps and gaps) rather than being perfectly uniform.
@@ -54,6 +55,15 @@ public class CometTailPass : ISpaceCellPass
     // Max random offset added to each asteroid's evenly-spaced t-slot (0–1 range).
     // Each slot is ~0.013 wide, so ±0.02 is about 1.5 slots of wiggle.
     private const float TJitter = 0.02f;
+
+    // Sinusoidal wander of the tail axis — makes the stream drift side-to-side
+    // rather than running in a perfectly straight line.
+    // WaveAmplitude: max lateral offset of the axis centre (units).
+    // WaveFrequency: full oscillations over the tail length (p and q use coprime
+    //                frequencies so the 3D path never forms a flat figure-8).
+    private const float WaveAmplitude  = 160f;
+    private const float WaveFrequencyP = 1.5f;   // oscillations in p over full tail
+    private const float WaveFrequencyQ = 1.1f;   // oscillations in q over full tail
 
     public void RunPass(SpaceCellState state)
     {
@@ -109,6 +119,7 @@ public class CometTailPass : ISpaceCellPass
 
         // ── Tail: t = 0 at head, t = 1 at tail tip ────────────────────────────
         // Main axis:  -d  (tail streams backward from travel direction)
+        // Wave:       sinusoidal drift of the axis in the p–q plane
         // Bend:       parabolic offset along p (grows as t²)
         // Scatter:    fans out in the p–q plane, width grows linearly with t
         for (int i = 0; i < TailCount; i++)
@@ -118,13 +129,17 @@ public class CometTailPass : ISpaceCellPass
             float dist = tailLength * t;
             float bend = curvature * t * t;
 
+            // Slowly-varying sinusoidal wander of the axis centre.
+            float waveP = WaveAmplitude * MathF.Sin(t * WaveFrequencyP * MathF.PI);
+            float waveQ = WaveAmplitude * 0.55f * MathF.Cos(t * WaveFrequencyQ * MathF.PI);
+
             float scatterW = HeadScatter + (TailScatter - HeadScatter) * t;
             float sA = (float)(rng.NextDouble() * 2.0 - 1.0) * scatterW;
             float sB = (float)(rng.NextDouble() * 2.0 - 1.0) * scatterW;
 
-            float x = hx - dx * dist + px * (bend + sA) + qx * sB;
-            float y = hy - dy * dist + py * (bend + sA) + qy * sB;
-            float z = hz - dz * dist + pz * (bend + sA) + qz * sB;
+            float x = hx - dx * dist + px * (bend + waveP + sA) + qx * (waveQ + sB);
+            float y = hy - dy * dist + py * (bend + waveP + sA) + qy * (waveQ + sB);
+            float z = hz - dz * dist + pz * (bend + waveP + sA) + qz * (waveQ + sB);
 
             bool tooClose = false;
             foreach (var pp in placedPositions)
@@ -139,7 +154,7 @@ public class CometTailPass : ISpaceCellPass
             var baseKey = AsteroidPaletteHelper.Pick(groups, size, rng);
             if (baseKey == FormKey.Null) continue;
 
-            Place(targetMod, state.Cell, baseKey, x, y, z, rng);
+            Place(targetMod, state.Cell, baseKey, x, y, z, rng, state.AsteroidScale);
             placedPositions.Add(new P3Float(x, y, z));
             placedCount++;
         }
@@ -166,7 +181,7 @@ public class CometTailPass : ISpaceCellPass
             var baseKey = AsteroidPaletteHelper.Pick(groups, AsteroidSize.XLarge, rng);
             if (baseKey == FormKey.Null) continue;
 
-            Place(targetMod, state.Cell, baseKey, x, y, z, rng);
+            Place(targetMod, state.Cell, baseKey, x, y, z, rng, state.AsteroidScale);
             placedPositions.Add(new P3Float(x, y, z));
             placedCount++;
         }
@@ -177,7 +192,7 @@ public class CometTailPass : ISpaceCellPass
     }
 
     private static void Place(StarfieldMod targetMod, Cell cell, FormKey baseKey,
-                               float x, float y, float z, Random rng)
+                               float x, float y, float z, Random rng, float asteroidScale)
     {
         float rx = (float)(rng.NextDouble() * Math.PI * 2.0);
         float ry = (float)(rng.NextDouble() * Math.PI * 2.0);
@@ -186,7 +201,7 @@ public class CometTailPass : ISpaceCellPass
         {
             Position = new P3Float(x, y, z),
             Rotation = new P3Float(rx, ry, rz),
-            Scale    = AsteroidPaletteHelper.SizeNoise(rng),
+            Scale    = AsteroidPaletteHelper.SizeNoise(rng, asteroidScale),
         };
         placed.XALG = 8uL;
         placed.Base.SetTo(baseKey);

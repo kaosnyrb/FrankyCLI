@@ -31,7 +31,7 @@ public class SpaceCellNoun
     public LeveledSpaceCell LeveledSpaceCell { get; }
     public SpaceCellState State { get; }
 
-    public SpaceCellNoun(string name)
+    public SpaceCellNoun(string name, SpaceCellPalette palette = SpaceCellPalette.Rocky)
     {
         var targetMod    = RetrogradeContext.Current.TargetMod;
         var starfieldMod = RetrogradeContext.Current.StarfieldMod;
@@ -53,11 +53,10 @@ public class SpaceCellNoun
         // DeepCopy() → fully mutable Cell; avoids IXxxGetter type mismatches throughout.
         Cell srcCell = sourceGetter.DeepCopy();
 
-        // ── 2. Split Temporary into asteroid palette + marker templates ──────────
-        // Statics  → asteroid palette (AsteroidChainPass draws from these).
+        // ── 2. Scan Temporary for marker templates and vanilla radius ─────────────
+        // Asteroids  → update vanillaRadius only (palette is hardcoded below).
         // Everything else → marker templates (SpaceMarkersPass clones these verbatim).
         // The AreaTrigger is dropped entirely — it's tied to the vanilla encounter zone.
-        var palette         = new List<FormKey>();
         var markerTemplates = new List<PlacedObject>();
         float vanillaRadius = 1000f;
 
@@ -67,12 +66,8 @@ public class SpaceCellNoun
             if (po.Base.IsNull) continue;
             if (po.Base.FormKey.ID == AreaTriggerFormId) continue;
 
-            // Asteroids are MoveableStatics; markers are Statics (or other types).
             if (starfieldMod.MoveableStatics.ContainsKey(po.Base.FormKey))
             {
-                if (!palette.Contains(po.Base.FormKey))
-                    palette.Add(po.Base.FormKey);
-
                 var p = po.Position;
                 float d = MathF.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
                 if (d > vanillaRadius) vanillaRadius = d;
@@ -83,7 +78,11 @@ public class SpaceCellNoun
             }
         }
 
-        Console.WriteLine($"[SpaceCellNoun] Palette: {palette.Count} types, " +
+        // ── Build asteroid palette from hardcoded FormIDs ─────────────────────────
+        var asteroidPalette = SpaceCellPaletteData.GetFormKeys(
+            palette, RetrogradeContext.Current.StarfieldModKey);
+
+        Console.WriteLine($"[SpaceCellNoun] Palette: {palette} ({asteroidPalette.Count} types), " +
                           $"vanilla radius: {vanillaRadius:F0}");
 
         // ── 3. Create Location ───────────────────────────────────────────────────
@@ -260,7 +259,8 @@ public class SpaceCellNoun
 
         // ── 8. Run content passes ────────────────────────────────────────────────
         var generator = new SpaceCellGenerator();
-        State = generator.Generate(Cell, Location, palette, markerTemplates, vanillaRadius);
+        State = generator.Generate(Cell, Location, asteroidPalette, markerTemplates, vanillaRadius,
+            SpaceCellPaletteData.GetScale(palette));
 
         Console.WriteLine($"[SpaceCellNoun] Done — {Cell.Temporary.Count} asteroids.");
     }

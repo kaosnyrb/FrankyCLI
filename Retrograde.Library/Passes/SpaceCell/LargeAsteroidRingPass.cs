@@ -75,7 +75,7 @@ public class LargeAsteroidRingPass : ISpaceCellPass
 
         var heroKey = AsteroidPaletteHelper.Pick(groups, AsteroidSize.XXLarge, rng);
         if (heroKey != FormKey.Null)
-            PlaceAsteroid(targetMod, state.Cell, heroKey, ax, ay, az, rng);
+            PlaceAsteroid(targetMod, state.Cell, heroKey, ax, ay, az, rng, state.AsteroidScale);
 
         // ── Build ring disk ───────────────────────────────────────────────────────
         // Pick a random disk normal (the plane the ring lies in).
@@ -105,7 +105,7 @@ public class LargeAsteroidRingPass : ISpaceCellPass
 
             var ringKey = AsteroidPaletteHelper.Pick(groups, AsteroidSize.Small, rng);
             if (ringKey != FormKey.Null)
-                PlaceAsteroid(targetMod, state.Cell, ringKey, rx, ry, rz, rng);
+                PlaceAsteroid(targetMod, state.Cell, ringKey, rx, ry, rz, rng, state.AsteroidScale);
         }
 
         Console.WriteLine(
@@ -114,7 +114,7 @@ public class LargeAsteroidRingPass : ISpaceCellPass
     }
 
     private static void PlaceAsteroid(StarfieldMod targetMod, Cell cell, FormKey baseKey,
-                                      float x, float y, float z, Random rng)
+                                      float x, float y, float z, Random rng, float asteroidScale)
     {
         float rx = (float)(rng.NextDouble() * Math.PI * 2.0);
         float ry = (float)(rng.NextDouble() * Math.PI * 2.0);
@@ -124,7 +124,7 @@ public class LargeAsteroidRingPass : ISpaceCellPass
         {
             Position = new P3Float(x, y, z),
             Rotation = new P3Float(rx, ry, rz),
-            Scale    = AsteroidPaletteHelper.SizeNoise(rng),
+            Scale    = AsteroidPaletteHelper.SizeNoise(rng, asteroidScale),
         };
         placed.XALG = 8uL;
         placed.Base.SetTo(baseKey);

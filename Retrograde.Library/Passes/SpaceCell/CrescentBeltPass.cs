@@ -20,7 +20,9 @@ namespace Retrograde.Passes.SpaceCell;
 /// the mechanical regularity of the spacing. SizeNoise adds a ±15% scale
 /// multiplier on top so adjacent asteroids vary naturally in size.
 ///
-/// A small amount of radial scatter gives the belt physical depth.
+/// RadialScatter gives the belt depth along the sphere surface.
+/// PlaneScatter adds out-of-plane scatter perpendicular to the arc disk,
+/// turning the flat arc into a volumetric 3D cloud.
 /// A BufferRadius prevents adjacent asteroids from overlapping.
 /// </summary>
 public class CrescentBeltPass : ISpaceCellPass
@@ -34,15 +36,19 @@ public class CrescentBeltPass : ISpaceCellPass
     // Number of asteroids distributed along the arc.
     private const int AsteroidCount = 50;
 
-    // Max radial offset from the edge sphere — gives the belt physical depth.
-    private const float RadialScatter = 200f;
+    // Max radial offset from the edge sphere — gives the belt depth along the sphere.
+    private const float RadialScatter = 400f;
+
+    // Max scatter perpendicular to the arc plane — lifts the belt into a 3D cloud
+    // rather than a flat arc lying in a single disk.
+    private const float PlaneScatter = 350f;
 
     // Minimum distance between any two placed belt asteroids.
     private const float BufferRadius = 60f;
 
-    // Max random angular offset from each evenly-spaced arc slot (radians, ~4.6°).
-    // Breaks the mechanical regularity of asteroid spacing along the arc.
-    private const float AngularJitter = 0.08f;
+    // Max random angular offset from each evenly-spaced arc slot (radians, ~8.6°).
+    // Higher value creates natural density clumping rather than even bead-on-string spacing.
+    private const float AngularJitter = 0.15f;
 
     public void RunPass(SpaceCellState state)
     {
@@ -89,6 +95,13 @@ public class CrescentBeltPass : ISpaceCellPass
         float uy   = MathF.Cos(roll) * py + MathF.Sin(roll) * qy;
         float uz   = MathF.Cos(roll) * pz + MathF.Sin(roll) * qz;
 
+        // Normal to the arc plane (d × u). Scatter along this axis lifts the
+        // belt out of its plane so it reads as a volumetric cloud rather than
+        // a drawn arc. Derived analytically: d × u = cos(roll)*q - sin(roll)*p.
+        float wx = MathF.Cos(roll) * qx - MathF.Sin(roll) * px;
+        float wy = MathF.Cos(roll) * qy - MathF.Sin(roll) * py;
+        float wz = MathF.Cos(roll) * qz - MathF.Sin(roll) * pz;
+
         float edgeDist  = state.VanillaRadius * state.Scale;
         float bufferSq  = BufferRadius * BufferRadius;
         float halfArc   = ArcAngle * 0.5f;
@@ -101,12 +114,13 @@ public class CrescentBeltPass : ISpaceCellPass
             // Distribute evenly from -halfArc to +halfArc, then jitter.
             float a       = -halfArc + ArcAngle * i / (AsteroidCount - 1)
                             + (float)(rng.NextDouble() * 2.0 - 1.0) * AngularJitter;
-            float scatter = (float)(rng.NextDouble() * 2.0 - 1.0) * RadialScatter;
-            float r       = edgeDist + scatter;
+            float scatter    = (float)(rng.NextDouble() * 2.0 - 1.0) * RadialScatter;
+            float planeScat  = (float)(rng.NextDouble() * 2.0 - 1.0) * PlaneScatter;
+            float r          = edgeDist + scatter;
 
-            float x = r * (MathF.Cos(a) * dx + MathF.Sin(a) * ux);
-            float y = r * (MathF.Cos(a) * dy + MathF.Sin(a) * uy);
-            float z = r * (MathF.Cos(a) * dz + MathF.Sin(a) * uz);
+            float x = r * (MathF.Cos(a) * dx + MathF.Sin(a) * ux) + wx * planeScat;
+            float y = r * (MathF.Cos(a) * dy + MathF.Sin(a) * uy) + wy * planeScat;
+            float z = r * (MathF.Cos(a) * dz + MathF.Sin(a) * uz) + wz * planeScat;
 
             // Skip if within BufferRadius of any already-placed belt asteroid.
             bool tooClose = false;
@@ -133,7 +147,7 @@ public class CrescentBeltPass : ISpaceCellPass
             {
                 Position = new P3Float(x, y, z),
                 Rotation = new P3Float(rx, ry, rz),
-                Scale    = AsteroidPaletteHelper.SizeNoise(rng),
+                Scale    = AsteroidPaletteHelper.SizeNoise(rng, state.AsteroidScale),
             };
             placed.XALG = 8uL;
             placed.Base.SetTo(baseKey);

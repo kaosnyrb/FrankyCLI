@@ -19,16 +19,21 @@ public enum AsteroidSize { Small, Medium, Large, XLarge, XXLarge }
 public static class AsteroidPaletteHelper
 {
     /// <summary>
-    /// Parses the size class from a MoveableStatic EditorID.
+    /// Parses the size class from a record EditorID (MoveableStatic or Static).
     /// Returns null if no recognised size token is found.
-    /// "Boulder" is treated as Medium (it sits between Small and Medium visually).
-    /// Longest tokens are checked first to avoid XLarge matching inside XXLarge.
+    /// Longest / most-specific tokens are checked first to avoid partial matches
+    /// (e.g. XLarge inside XXLarge, Large inside XLarge).
+    /// "Huge"   → XXLarge (IceShardHuge*)
+    /// "Berg"   → XLarge  (IceBerg*)
+    /// "Boulder"→ Medium  (sits between Small and Medium visually)
     /// </summary>
     public static AsteroidSize? ParseSize(string? editorId)
     {
         if (editorId == null) return null;
         if (editorId.Contains("XXLarge", StringComparison.OrdinalIgnoreCase)) return AsteroidSize.XXLarge;
+        if (editorId.Contains("Huge",    StringComparison.OrdinalIgnoreCase)) return AsteroidSize.XXLarge;
         if (editorId.Contains("XLarge",  StringComparison.OrdinalIgnoreCase)) return AsteroidSize.XLarge;
+        if (editorId.Contains("Berg",    StringComparison.OrdinalIgnoreCase)) return AsteroidSize.XLarge;
         if (editorId.Contains("Large",   StringComparison.OrdinalIgnoreCase)) return AsteroidSize.Large;
         if (editorId.Contains("Boulder", StringComparison.OrdinalIgnoreCase)) return AsteroidSize.Medium;
         if (editorId.Contains("Medium",  StringComparison.OrdinalIgnoreCase)) return AsteroidSize.Medium;
@@ -38,6 +43,7 @@ public static class AsteroidPaletteHelper
 
     /// <summary>
     /// Groups palette FormKeys by the size class in their EditorID.
+    /// Checks MoveableStatics first, then falls back to Statics (for IceShards palette).
     /// FormKeys whose EditorID has no recognised size token default to Medium.
     /// </summary>
     public static Dictionary<AsteroidSize, List<FormKey>> GroupBySize(
@@ -49,10 +55,13 @@ public static class AsteroidPaletteHelper
 
         foreach (var fk in palette)
         {
-            IMoveableStaticGetter? rec = starfieldMod.MoveableStatics.ContainsKey(fk)
-                ? starfieldMod.MoveableStatics[fk]
-                : null;
-            var size = ParseSize(rec?.EditorID) ?? AsteroidSize.Medium;
+            string? editorId = null;
+            if (starfieldMod.MoveableStatics.ContainsKey(fk))
+                editorId = starfieldMod.MoveableStatics[fk].EditorID;
+            else if (starfieldMod.Statics.ContainsKey(fk))
+                editorId = starfieldMod.Statics[fk].EditorID;
+
+            var size = ParseSize(editorId) ?? AsteroidSize.Medium;
             groups[size].Add(fk);
         }
         return groups;
@@ -87,12 +96,12 @@ public static class AsteroidPaletteHelper
     }
 
     /// <summary>
-    /// ±15% scale noise around 1.0.
-    /// Use this instead of large programmatic scale — the mesh already encodes visual size
-    /// via its size class. Small variation keeps the field from looking uniform.
+    /// Base scale × ±15% noise. The base scale comes from the palette (SpaceCellPaletteData.GetScale)
+    /// and is stored on SpaceCellState.AsteroidScale. Small ±15% variation keeps the field from
+    /// looking uniform.
     /// </summary>
-    public static float SizeNoise(Random rng)
-        => 0.85f + (float)rng.NextDouble() * 0.30f;
+    public static float SizeNoise(Random rng, float baseScale = 1.0f)
+        => baseScale * (0.85f + (float)rng.NextDouble() * 0.30f);
 
     /// <summary>
     /// True for size classes large enough to warrant physics suppression (XALG = 8uL).
