@@ -66,8 +66,16 @@ foreach (var po in srcCell.Temporary)
 
 ```
 SpaceCellGenerator
-  ├── SpaceMarkersPass   — clones marker templates with fresh FormKeys
-  └── AsteroidChainPass  — places N asteroids along a random chain direction
+  ├── SpaceMarkersPass      — clones marker templates with fresh FormKeys
+  ├── AsteroidChainPass     — asteroids along a random chain direction
+  ├── CometTailPass         — parabolic tail + dense coma (45% chance)
+  ├── ShipWreckPass         — derelict ship hulk + debris field
+  ├── LargeAsteroidRingPass — oversized hero asteroid + orbiting ring (40% chance)
+  └── CrescentBeltPass      — 150° arc belt, cosine-tapered scale (always fires — chance > 1.0)
 ```
 
 State object: `SpaceCellState` — holds `Cell`, `Location`, `AsteroidPalette` (FormKey list), `MarkerTemplates` (PlacedObject list), `VanillaRadius`, `Scale` (default `sqrt(2)` = 2× area).
+
+## Physics on large asteroids
+
+Set `placed.XALG = 8uL` on any MoveableStatic that should be fixed in position (ship parts, hero asteroids). Vanilla floating asteroids have `XALG = null` (physics enabled). See `placed_object.md` Gotchas for the `DontHavokSettle` vs XALG distinction.

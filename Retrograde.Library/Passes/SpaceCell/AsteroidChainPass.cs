@@ -24,9 +24,6 @@ public class AsteroidChainPass : ISpaceCellPass
     // Scatter as a fraction of the vanilla radius — asteroids spread sideways.
     private const float ScatterFraction = 0.1f;
 
-    // Per-asteroid scale variation: base ± half this value.
-    private const float ScaleVariation = 2f;
-
     // Minimum distance between any two placed asteroids. Candidates closer than
     // this to an already-placed asteroid are skipped.
     private const float BufferRadius = 30f;
@@ -95,10 +92,10 @@ public class AsteroidChainPass : ISpaceCellPass
             float ry = (float)(rng.NextDouble() * Math.PI * 2.0);
             float rz = (float)(rng.NextDouble() * Math.PI * 2.0);
 
-            // Random scale.
-            float scale = 1.0f + (float)(rng.NextDouble() - 0.5) * ScaleVariation;
+            // ±15% noise around the mesh's natural size — size class set by the EditorID.
+            float scale = AsteroidPaletteHelper.SizeNoise(rng);
 
-            // Pick a random asteroid from the palette.
+            // Pick a random asteroid from the palette (any size — chain uses a mix).
             var baseKey = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];
 
             var placed = new PlacedObject(targetMod)
@@ -107,6 +104,7 @@ public class AsteroidChainPass : ISpaceCellPass
                 Rotation = new P3Float(rx, ry, rz),
                 Scale    = scale,
             };
+            placed.XALG = 8uL;
             placed.Base.SetTo(baseKey);
 
             state.Cell.Temporary.Add(placed);

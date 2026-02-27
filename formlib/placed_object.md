@@ -17,6 +17,7 @@ A PlacedObject is an **instance** of a base record placed in a Cell (or worldspa
 | `LinkedReferences` | `ExtendedList<LinkedReference>?` | Named reference links (e.g. teleport targets) |
 | `TeleportDestination` | `TeleportDestination?` | For doors: destination cell + position |
 | `StarfieldMajorRecordFlags` | flags | Various CK flags |
+| `XALG` | `ulong?` | **Physics simulation control.** `8uL` = Disable Physics Sim (fixed in place); `null` = physics enabled (default for floating asteroids) |
 
 ## Copying a PlacedObject
 
@@ -224,3 +225,4 @@ yawSteps = ((yawSteps % 4) + 4) % 4;
 - **Filter template-mod base records**: `if (source.Base.FormKey.ModKey.Name != "Starfield") return null;`
   — or use `EnsureBaseImported` to clone the foreign record into the target mod
 - **`new T(targetMod)` only allocates a FormKey** — you must call `targetMod.RecordGroup.Add(record)` separately
+- **`DontHavokSettle` is NOT "Disable Physics Sim"** — `PlacedObject.MoveableStaticMajorFlag.DontHavokSettle` (0x20000000 in MajorRecordFlagsRaw) is a separate flag used on Activators. For MoveableStatic physics suppression use `placed.XALG = 8uL`. Confirmed: DR019Int01 has 108 ship-part REFRs with XALG=8; vanilla floating asteroids have XALG=null.

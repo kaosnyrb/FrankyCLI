@@ -139,6 +139,82 @@ namespace FrankyCLI
                                     { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell); found++; }
                     }
                     break;
+                case "refr":
+                {
+                    // Search all cells for a specific placed object FormKey and dump its flags.
+                    void SearchCell(ICellGetter cell)
+                    {
+                        foreach (var entry in cell.Persistent.Concat(cell.Temporary))
+                        {
+                            if (entry is IPlacedObjectGetter po && MatchesSearch(po.EditorID, po.FormKey, search))
+                            {
+                                Console.WriteLine($"--- PlacedObject (REFR) ---");
+                                Console.WriteLine($"  FormKey:              {po.FormKey}");
+                                Console.WriteLine($"  EditorID:             {po.EditorID ?? "(none)"}");
+                                Console.WriteLine($"  MajorRecordFlagsRaw:  {po.MajorRecordFlagsRaw} (0x{po.MajorRecordFlagsRaw:X8})");
+                                Console.WriteLine($"  StarfieldFlags:       {po.StarfieldMajorRecordFlags}");
+                                Console.WriteLine($"  XFLG:                 {(po.XFLG.HasValue ? BitConverter.ToString(po.XFLG.Value.ToArray()) : "(null)")}");
+                                Console.WriteLine($"  XNSE:                 {(po.XNSE.HasValue ? BitConverter.ToString(po.XNSE.Value.ToArray()) : "(null)")}");
+                                Console.WriteLine($"  XALG:                 {(po.XALG.HasValue ? $"0x{po.XALG.Value:X16}" : "(null)")}");
+                                Console.WriteLine($"  Base:                 {po.Base.FormKey}");
+                                Console.WriteLine($"  Position:             {po.Position}");
+                                Console.WriteLine($"  Scale:                {po.Scale}");
+                                Console.WriteLine($"  Cell:                 {cell.FormKey} {cell.EditorID}");
+                                found++;
+                            }
+                        }
+                    }
+                    foreach (var block in mod.Cells)
+                        foreach (var subBlock in block.SubBlocks)
+                            foreach (var cell in subBlock.Cells)
+                                SearchCell(cell);
+                    foreach (var ws in mod.Worldspaces)
+                    {
+                        if (ws.TopCell != null) SearchCell(ws.TopCell);
+                        foreach (var wsBlock in ws.SubCells)
+                            foreach (var wsSubBlock in wsBlock.Items)
+                                foreach (var cell in wsSubBlock.Items)
+                                    SearchCell(cell);
+                    }
+                    break;
+                }
+                case "refr_xflg":
+                {
+                    // Scan a cell (search = EditorID or FormKey) and list all placed objects
+                    // that have a non-null XFLG sub-record. Used to identify what XFLG bytes
+                    // correspond to specific CK flags.
+                    void ScanCell(ICellGetter cell)
+                    {
+                        if (!MatchesSearch(cell.EditorID, cell.FormKey, search)) return;
+                        Console.WriteLine($"--- Cell {cell.FormKey} {cell.EditorID} ---");
+                        int count = 0;
+                        foreach (var entry in cell.Persistent.Concat(cell.Temporary))
+                        {
+                            if (entry is IPlacedObjectGetter po && po.XFLG.HasValue)
+                            {
+                                Console.WriteLine($"  REFR:{po.FormKey}  Base={po.Base.FormKey}  " +
+                                                  $"XFLG={BitConverter.ToString(po.XFLG.Value.ToArray())}  " +
+                                                  $"HdrFlags=0x{po.MajorRecordFlagsRaw:X8}");
+                                count++;
+                            }
+                        }
+                        Console.WriteLine($"  ({count} with XFLG)");
+                        found++;
+                    }
+                    foreach (var block in mod.Cells)
+                        foreach (var subBlock in block.SubBlocks)
+                            foreach (var cell in subBlock.Cells)
+                                ScanCell(cell);
+                    foreach (var ws in mod.Worldspaces)
+                    {
+                        if (ws.TopCell != null) ScanCell(ws.TopCell);
+                        foreach (var wsBlock in ws.SubCells)
+                            foreach (var wsSubBlock in wsBlock.Items)
+                                foreach (var cell in wsSubBlock.Items)
+                                    ScanCell(cell);
+                    }
+                    break;
+                }
                 case "static":
                     foreach (var rec in mod.Statics)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))

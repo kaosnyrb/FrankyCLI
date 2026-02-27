@@ -125,6 +125,8 @@ public class ShipWreckPass : ISpaceCellPass
             Rotation = new P3Float(rx, ry, rz),
             Scale    = 2.0f,
         };
+        // Ship parts should always be fixed — disable physics simulation.
+        placed.XALG = 8uL;
         placed.Base.SetTo(baseKey);
 
         cell.Temporary.Add(placed);

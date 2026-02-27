@@ -11,18 +11,18 @@ namespace Retrograde.Passes.SpaceCell;
 /// Randomly places a comet-tail streamer through the cell.
 ///
 /// The comet consists of:
-///   - A dense "coma" cluster of large asteroids at the head
+///   - A dense "coma" cluster of XLarge asteroids at the head
 ///   - A long streaming tail that fans out and shrinks away from the head
 ///
 /// The tail is modelled as a parabolic arc — it bends as it streams away,
-/// as if deflected by a nearby stellar wind. Scale tapers linearly from
-/// HeadScale at the coma to TailScale at the tip. Perpendicular scatter
-/// grows from tight (HeadScatter) to diffuse (TailScatter), giving the
-/// tail a natural conical spread.
+/// as if deflected by a nearby stellar wind. Asteroid size tapers from
+/// Large at the coma end to Small at the tip, selected from the palette by
+/// AsteroidPaletteHelper.SizeFromT. Perpendicular scatter grows from tight
+/// (HeadScatter) to diffuse (TailScatter), giving the tail a natural conical spread.
 ///
 /// TJitter offsets each asteroid from its evenly-spaced t-slot so density
 /// varies along the tail (clumps and gaps) rather than being perfectly uniform.
-/// ScaleNoise adds a random multiplier on top of the smooth taper.
+/// SizeNoise adds ±15% variation within each size class.
 /// </summary>
 public class CometTailPass : ISpaceCellPass
 {
@@ -48,25 +48,12 @@ public class CometTailPass : ISpaceCellPass
     // Perpendicular scatter width at the tail tip (wide, diffuse).
     private const float TailScatter = 350f;
 
-    // Asteroid scale at the head (largest).
-    private const float HeadScale = 2.5f;
-
-    // Asteroid scale at the tail tip (smallest — dust-fine).
-    private const float TailScale = 0.15f;
-
-    // Scale range for the dense coma asteroids.
-    private const float ComaScaleMin = 2.0f;
-    private const float ComaScaleMax = 3.5f;
-
     // Minimum distance between any two placed asteroids.
     private const float BufferRadius = 25f;
 
     // Max random offset added to each asteroid's evenly-spaced t-slot (0–1 range).
     // Each slot is ~0.013 wide, so ±0.02 is about 1.5 slots of wiggle.
     private const float TJitter = 0.02f;
-
-    // Random scale multiplier applied on top of the linear taper: ±this fraction.
-    private const float ScaleNoise = 0.35f;
 
     public void RunPass(SpaceCellState state)
     {
@@ -85,6 +72,8 @@ public class CometTailPass : ISpaceCellPass
         }
 
         var targetMod = RetrogradeContext.Current.TargetMod;
+        var groups    = AsteroidPaletteHelper.GroupBySize(
+            state.AsteroidPalette, RetrogradeContext.Current.StarfieldMod);
 
         // ── Comet travel direction (tail streams in the -d direction) ──────────
         // Uniform sphere distribution — comet can travel in any direction.
@@ -145,17 +134,17 @@ public class CometTailPass : ISpaceCellPass
             }
             if (tooClose) continue;
 
-            // Scale tapers linearly from head to tail, with random noise on top.
-            float scale = HeadScale + (TailScale - HeadScale) * t;
-            scale      *= 1f + (float)(rng.NextDouble() * 2.0 - 1.0) * ScaleNoise;
-            scale       = MathF.Max(scale, TailScale * 0.5f);
-            var baseKey = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];
-            Place(targetMod, state.Cell, baseKey, x, y, z, scale, rng);
+            // Size tapers from Large at head to Small at tip.
+            AsteroidSize size = AsteroidPaletteHelper.SizeFromT(t);
+            var baseKey = AsteroidPaletteHelper.Pick(groups, size, rng);
+            if (baseKey == FormKey.Null) continue;
+
+            Place(targetMod, state.Cell, baseKey, x, y, z, rng);
             placedPositions.Add(new P3Float(x, y, z));
             placedCount++;
         }
 
-        // ── Coma: dense cluster of large asteroids packed at the head ──────────
+        // ── Coma: dense cluster of XLarge asteroids packed at the head ─────────
         for (int i = 0; i < HeadCount; i++)
         {
             float sA = (float)(rng.NextDouble() * 2.0 - 1.0) * HeadScatter;
@@ -174,9 +163,10 @@ public class CometTailPass : ISpaceCellPass
             }
             if (tooClose) continue;
 
-            float scale = ComaScaleMin + (float)rng.NextDouble() * (ComaScaleMax - ComaScaleMin);
-            var baseKey = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];
-            Place(targetMod, state.Cell, baseKey, x, y, z, scale, rng);
+            var baseKey = AsteroidPaletteHelper.Pick(groups, AsteroidSize.XLarge, rng);
+            if (baseKey == FormKey.Null) continue;
+
+            Place(targetMod, state.Cell, baseKey, x, y, z, rng);
             placedPositions.Add(new P3Float(x, y, z));
             placedCount++;
         }
@@ -187,7 +177,7 @@ public class CometTailPass : ISpaceCellPass
     }
 
     private static void Place(StarfieldMod targetMod, Cell cell, FormKey baseKey,
-                               float x, float y, float z, float scale, Random rng)
+                               float x, float y, float z, Random rng)
     {
         float rx = (float)(rng.NextDouble() * Math.PI * 2.0);
         float ry = (float)(rng.NextDouble() * Math.PI * 2.0);
@@ -196,8 +186,9 @@ public class CometTailPass : ISpaceCellPass
         {
             Position = new P3Float(x, y, z),
             Rotation = new P3Float(rx, ry, rz),
-            Scale    = scale,
+            Scale    = AsteroidPaletteHelper.SizeNoise(rng),
         };
+        placed.XALG = 8uL;
         placed.Base.SetTo(baseKey);
         cell.Temporary.Add(placed);
     }

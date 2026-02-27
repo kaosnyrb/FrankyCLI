@@ -11,14 +11,14 @@ namespace Retrograde.Passes.SpaceCell;
 /// Randomly places a crescent-shaped asteroid belt along the outer edge of the cell.
 ///
 /// The crescent is a circular arc spanning ArcAngle degrees on the surface of
-/// a sphere of radius VanillaRadius * Scale. Asteroids are largest at the
-/// midpoint and taper to their smallest size at both tips, driven by a
-/// half-cosine scale curve.
+/// a sphere of radius VanillaRadius * Scale. Asteroid size is largest at the
+/// midpoint and tapers to the smallest at both tips, driven by
+/// AsteroidPaletteHelper.SizeFromT — selecting Large at centre, Medium in the
+/// mid-sections, and Small at the tips.
 ///
 /// AngularJitter offsets each asteroid from its evenly-spaced slot, breaking
-/// the mechanical regularity of the spacing. ScaleNoise adds a random
-/// multiplier on top of the smooth cosine taper so adjacent asteroids
-/// vary in size rather than sitting on a perfect gradient.
+/// the mechanical regularity of the spacing. SizeNoise adds a ±15% scale
+/// multiplier on top so adjacent asteroids vary naturally in size.
 ///
 /// A small amount of radial scatter gives the belt physical depth.
 /// A BufferRadius prevents adjacent asteroids from overlapping.
@@ -34,12 +34,6 @@ public class CrescentBeltPass : ISpaceCellPass
     // Number of asteroids distributed along the arc.
     private const int AsteroidCount = 50;
 
-    // Scale at the crescent midpoint (largest asteroids).
-    private const float MaxScale = 3.0f;
-
-    // Scale at the crescent tips (smallest asteroids).
-    private const float MinScale = 0.4f;
-
     // Max radial offset from the edge sphere — gives the belt physical depth.
     private const float RadialScatter = 200f;
 
@@ -49,10 +43,6 @@ public class CrescentBeltPass : ISpaceCellPass
     // Max random angular offset from each evenly-spaced arc slot (radians, ~4.6°).
     // Breaks the mechanical regularity of asteroid spacing along the arc.
     private const float AngularJitter = 0.08f;
-
-    // Random scale multiplier applied on top of the cosine taper: ±this fraction.
-    // Gives adjacent asteroids unpredictable size variation rather than a smooth gradient.
-    private const float ScaleNoise = 0.4f;
 
     public void RunPass(SpaceCellState state)
     {
@@ -71,6 +61,8 @@ public class CrescentBeltPass : ISpaceCellPass
         }
 
         var targetMod = RetrogradeContext.Current.TargetMod;
+        var groups    = AsteroidPaletteHelper.GroupBySize(
+            state.AsteroidPalette, RetrogradeContext.Current.StarfieldMod);
 
         // ── Define the arc ────────────────────────────────────────────────────────
         // d   = midpoint direction of the crescent (random, biased equatorial)
@@ -125,24 +117,25 @@ public class CrescentBeltPass : ISpaceCellPass
             }
             if (tooClose) continue;
 
-            // Half-cosine scale curve: MaxScale at centre (a=0), MinScale at tips.
+            // Size taper: Large at centre (|t|=0), Small at tips (|t|=1).
             // Clamp t in case jitter pushed a outside the arc bounds.
-            float t     = Math.Clamp(a / halfArc, -1f, 1f);   // -1 → +1 across the arc
-            float scale = MinScale + (MaxScale - MinScale) * MathF.Cos(t * MathF.PI * 0.5f);
-            scale      *= 1f + (float)(rng.NextDouble() * 2.0 - 1.0) * ScaleNoise;
-            scale       = MathF.Max(scale, MinScale * 0.5f);   // prevent degenerate tiny values
+            float t           = Math.Clamp(a / halfArc, -1f, 1f);
+            AsteroidSize size = AsteroidPaletteHelper.SizeFromT(MathF.Abs(t));
+
+            var baseKey = AsteroidPaletteHelper.Pick(groups, size, rng);
+            if (baseKey == FormKey.Null) continue;
 
             float rx = (float)(rng.NextDouble() * Math.PI * 2.0);
             float ry = (float)(rng.NextDouble() * Math.PI * 2.0);
             float rz = (float)(rng.NextDouble() * Math.PI * 2.0);
 
-            var baseKey = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];
-            var placed  = new PlacedObject(targetMod)
+            var placed = new PlacedObject(targetMod)
             {
                 Position = new P3Float(x, y, z),
                 Rotation = new P3Float(rx, ry, rz),
-                Scale    = scale,
+                Scale    = AsteroidPaletteHelper.SizeNoise(rng),
             };
+            placed.XALG = 8uL;
             placed.Base.SetTo(baseKey);
 
             state.Cell.Temporary.Add(placed);
@@ -152,8 +145,7 @@ public class CrescentBeltPass : ISpaceCellPass
 
         Console.WriteLine(
             $"[CrescentBeltPass] Placed {placedCount}/{AsteroidCount} asteroids " +
-            $"arc={ArcAngle * 180f / MathF.PI:F0}° edge={edgeDist:F0} " +
-            $"scale={MinScale:F1}→{MaxScale:F1}.");
+            $"arc={ArcAngle * 180f / MathF.PI:F0}° edge={edgeDist:F0}.");
     }
 
     private static (float, float, float) Perp(float dx, float dy, float dz)

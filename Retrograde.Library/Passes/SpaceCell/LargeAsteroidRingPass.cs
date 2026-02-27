@@ -11,22 +11,21 @@ namespace Retrograde.Passes.SpaceCell;
 /// Randomly places a single oversized asteroid on the outer edge of the cell,
 /// biased toward the equatorial plane so it's visible from the player spawn point.
 ///
-/// The large asteroid (scale 5) is surrounded by a tilted disk of smaller
-/// orbiting asteroids. Each ring asteroid is slightly displaced off the disk
-/// plane (the "wobble"), giving the ring a natural three-dimensional look.
+/// The hero asteroid is chosen from the XXLarge size bucket so its mass is
+/// apparent from the model itself — no scale inflation needed.
+/// It is surrounded by a tilted disk of Small ring asteroids. Each ring asteroid
+/// is slightly displaced off the disk plane (the "wobble"), giving the ring a
+/// natural three-dimensional look.
 /// </summary>
 public class LargeAsteroidRingPass : ISpaceCellPass
 {
     // Probability this pass fires for any given space cell.
     private const float RingChance = 0.4f;
 
-    // Scale applied to the central hero asteroid.
-    private const float LargeAsteroidScale = 5.0f;
-
     // Number of asteroids in the orbiting ring.
     private const int RingCount = 30;
 
-    // Distance from the large asteroid centre to the ring asteroids.
+    // Distance from the hero asteroid centre to the ring asteroids.
     private const float RingRadius = 400f;
 
     // Max displacement of each ring asteroid perpendicular to the disk plane.
@@ -35,12 +34,8 @@ public class LargeAsteroidRingPass : ISpaceCellPass
     // Max additional radial scatter per ring asteroid (thickens the ring slightly).
     private const float RadialScatter = 50f;
 
-    // Scale range for ring asteroids: [BaseRingScale, BaseRingScale + RingScaleRange).
-    private const float BaseRingScale  = 0.5f;
-    private const float RingScaleRange = 1.0f;
-
     // Minimum distance from the hero asteroid centre to any ring asteroid.
-    // Prevents ring asteroids from visually intersecting the oversized hero.
+    // Prevents ring asteroids from visually intersecting the hero.
     private const float BufferRadius = 200f;
 
     public void RunPass(SpaceCellState state)
@@ -60,6 +55,8 @@ public class LargeAsteroidRingPass : ISpaceCellPass
         }
 
         var targetMod = RetrogradeContext.Current.TargetMod;
+        var groups    = AsteroidPaletteHelper.GroupBySize(
+            state.AsteroidPalette, RetrogradeContext.Current.StarfieldMod);
 
         // ── Pick direction biased toward the equatorial plane ─────────────────────
         // phi ranges 60°–120° from zenith so the asteroid sits in front of the
@@ -70,16 +67,15 @@ public class LargeAsteroidRingPass : ISpaceCellPass
         float dy    = MathF.Sin(phi) * MathF.Sin(theta);
         float dz    = MathF.Cos(phi);
 
-        // ── Place large asteroid at the outer edge ────────────────────────────────
-        // VanillaRadius * Scale is the full chain length; the asteroid chain only
-        // reaches half that distance from origin, so this is clearly beyond the field.
+        // ── Place hero asteroid at the outer edge ─────────────────────────────────
         float edgeDist = state.VanillaRadius * state.Scale;
         float ax = dx * edgeDist;
         float ay = dy * edgeDist;
         float az = dz * edgeDist;
 
-        var heroKey = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];
-        PlaceAsteroid(targetMod, state.Cell, heroKey, ax, ay, az, LargeAsteroidScale, rng);
+        var heroKey = AsteroidPaletteHelper.Pick(groups, AsteroidSize.XXLarge, rng);
+        if (heroKey != FormKey.Null)
+            PlaceAsteroid(targetMod, state.Cell, heroKey, ax, ay, az, rng);
 
         // ── Build ring disk ───────────────────────────────────────────────────────
         // Pick a random disk normal (the plane the ring lies in).
@@ -107,9 +103,9 @@ public class LargeAsteroidRingPass : ISpaceCellPass
             float ry = ay + ringR * (cos * uy + sin * vy) + wobble * ny;
             float rz = az + ringR * (cos * uz + sin * vz) + wobble * nz;
 
-            float scale  = BaseRingScale + (float)rng.NextDouble() * RingScaleRange;
-            var ringKey  = state.AsteroidPalette[rng.Next(state.AsteroidPalette.Count)];
-            PlaceAsteroid(targetMod, state.Cell, ringKey, rx, ry, rz, scale, rng);
+            var ringKey = AsteroidPaletteHelper.Pick(groups, AsteroidSize.Small, rng);
+            if (ringKey != FormKey.Null)
+                PlaceAsteroid(targetMod, state.Cell, ringKey, rx, ry, rz, rng);
         }
 
         Console.WriteLine(
@@ -118,7 +114,7 @@ public class LargeAsteroidRingPass : ISpaceCellPass
     }
 
     private static void PlaceAsteroid(StarfieldMod targetMod, Cell cell, FormKey baseKey,
-                                      float x, float y, float z, float scale, Random rng)
+                                      float x, float y, float z, Random rng)
     {
         float rx = (float)(rng.NextDouble() * Math.PI * 2.0);
         float ry = (float)(rng.NextDouble() * Math.PI * 2.0);
@@ -128,8 +124,9 @@ public class LargeAsteroidRingPass : ISpaceCellPass
         {
             Position = new P3Float(x, y, z),
             Rotation = new P3Float(rx, ry, rz),
-            Scale    = scale,
+            Scale    = AsteroidPaletteHelper.SizeNoise(rng),
         };
+        placed.XALG = 8uL;
         placed.Base.SetTo(baseKey);
 
         cell.Temporary.Add(placed);
