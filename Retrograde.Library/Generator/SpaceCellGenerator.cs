@@ -21,6 +21,10 @@ public class SpaceCellGenerator
         {
             new SpaceMarkersPass(),
             new AsteroidChainPass(),
+            new CometTailPass(),
+            new ShipWreckPass(),
+            new LargeAsteroidRingPass(),
+            new CrescentBeltPass(),
         };
     }
 

@@ -49,6 +49,7 @@ namespace Retrograde.Quests
             });
 
             var bountybook = new BookNoun("duout_book_test", bookname, bookcontents);
+            Console.WriteLine($"[Discovery_Dataslate] Book FormKey: {bountybook.instance.FormKey}");
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
             //We have a condictional so that the dataslate only drops until you complete the next quest.

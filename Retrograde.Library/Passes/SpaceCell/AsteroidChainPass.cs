@@ -22,10 +22,14 @@ public class AsteroidChainPass : ISpaceCellPass
     private const int AsteroidCount = 150;
 
     // Scatter as a fraction of the vanilla radius — asteroids spread sideways.
-    private const float ScatterFraction = 0.25f;
+    private const float ScatterFraction = 0.1f;
 
     // Per-asteroid scale variation: base ± half this value.
     private const float ScaleVariation = 2f;
+
+    // Minimum distance between any two placed asteroids. Candidates closer than
+    // this to an already-placed asteroid are skipped.
+    private const float BufferRadius = 30f;
 
     public void RunPass(SpaceCellState state)
     {
@@ -58,6 +62,10 @@ public class AsteroidChainPass : ISpaceCellPass
                           $"chainLength={chainLength:F0} scatter={scatterRange:F0} " +
                           $"count={AsteroidCount} palette={state.AsteroidPalette.Count}");
 
+        float bufferSq = BufferRadius * BufferRadius;
+        var placedPositions = new List<P3Float>(AsteroidCount);
+        int placedCount = 0;
+
         for (int i = 0; i < AsteroidCount; i++)
         {
             // Centre the chain on the origin so it passes through the player spawn point.
@@ -72,6 +80,15 @@ public class AsteroidChainPass : ISpaceCellPass
             float x = dx * dist + px * sA + qx * sB;
             float y = dy * dist + py * sA + qy * sB;
             float z = dz * dist + pz * sA + qz * sB;
+
+            // Skip if within BufferRadius of any already-placed asteroid.
+            bool tooClose = false;
+            foreach (var pp in placedPositions)
+            {
+                float ex = x - pp.X, ey = y - pp.Y, ez = z - pp.Z;
+                if (ex * ex + ey * ey + ez * ez < bufferSq) { tooClose = true; break; }
+            }
+            if (tooClose) continue;
 
             // Random rotation (full 360° on each axis, in radians).
             float rx = (float)(rng.NextDouble() * Math.PI * 2.0);
@@ -93,9 +110,12 @@ public class AsteroidChainPass : ISpaceCellPass
             placed.Base.SetTo(baseKey);
 
             state.Cell.Temporary.Add(placed);
+            placedPositions.Add(new P3Float(x, y, z));
+            placedCount++;
         }
 
-        Console.WriteLine($"[AsteroidChainPass] Placed {AsteroidCount} asteroids.");
+        Console.WriteLine($"[AsteroidChainPass] Placed {placedCount}/{AsteroidCount} asteroids " +
+                          $"(buffer={BufferRadius}).");
     }
 
     // Returns a unit vector perpendicular to (dx, dy, dz).

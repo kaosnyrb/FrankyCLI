@@ -144,6 +144,12 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "Static"); found++; }
                     break;
+                case "moveablestatic":
+                case "moveablestatics":
+                    foreach (var rec in mod.MoveableStatics)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpRecord(rec, "MoveableStatic"); found++; }
+                    break;
                 case "activator":
                     foreach (var rec in mod.Activators)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
