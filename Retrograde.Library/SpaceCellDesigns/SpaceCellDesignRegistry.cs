@@ -10,6 +10,8 @@ public enum SpaceCellDesignType
     Icy,
     IceShards,
     IceCrystals,
+    RockShards,
+    Wisp,
 }
 
 public static class SpaceCellDesignRegistry
@@ -22,5 +24,7 @@ public static class SpaceCellDesignRegistry
                 { SpaceCellDesignType.Icy,       () => new IcyAsteroidDesign()   },
                 { SpaceCellDesignType.IceShards,   () => new IceShardsDesign()    },
                 { SpaceCellDesignType.IceCrystals, () => new IceCrystalsDesign() },
+                { SpaceCellDesignType.RockShards,  () => new RockShardsDesign()  },
+                { SpaceCellDesignType.Wisp,        () => new WispDesign()        },
             });
 }

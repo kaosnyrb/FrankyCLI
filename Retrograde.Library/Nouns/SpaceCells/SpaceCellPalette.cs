@@ -16,11 +16,17 @@ public enum SpaceCellPalette
 
     /// <summary>Glacial shard field — IceShardHuge* (XXLarge) and IceBerg* (XLarge) Statics.</summary>
     IceShards,
+
+    /// <summary>Rocky shard field — RockShardHuge* (XXLarge) Statics.</summary>
+    RockShards,
+
+    /// <summary>Wisp field — CorallineWispLarge* (Large) Statics.</summary>
+    Wisp,
 }
 
 /// <summary>
 /// Hardcoded FormID tables for each SpaceCellPalette.
-/// Rocky and Icy records are MoveableStatics; IceShards records are Statics.
+/// Rocky and Icy records are MoveableStatics; IceShards and RockShards records are Statics.
 /// </summary>
 public static class SpaceCellPaletteData
 {
@@ -112,9 +118,30 @@ public static class SpaceCellPaletteData
         0x030483u, // IceBerg03
     };
 
+    // ── RockShards — RockShardHuge* ────────────────────────────────────────────────
+
+    private static readonly uint[] RockShardsIds =
+    {
+        // XXLarge — RockShardHuge*
+        0x0EA12Fu, // RockShardHuge01
+        0x0EA12Eu, // RockShardHuge02
+        0x0EA12Du, // RockShardHuge03
+    };
+
+    // ── Wisp — CorallineWispLarge* ─────────────────────────────────────────────────
+
+    private static readonly uint[] WispIds =
+    {
+        0x25423Cu, // CorallineWispLarge01
+        0x25423Bu, // CorallineWispLarge02
+        0x25423Au, // CorallineWispLarge03
+        0x254239u, // CorallineWispLarge04
+        0x254238u, // CorallineWispLarge05
+    };
+
     // Per-palette base scale applied to all placements.
     // Adjust if a palette's meshes are systematically larger or smaller than expected.
-    private static readonly float[] Scales = { 1.0f, 1.0f, 20.0f }; // Rocky, Icy, IceShards
+    private static readonly float[] Scales = { 1.0f, 1.0f, 20.0f, 20.0f, 100.0f }; // Rocky, Icy, IceShards, RockShards, Wisp
 
     /// <summary>
     /// Returns the base scale multiplier for the given palette.
@@ -130,9 +157,11 @@ public static class SpaceCellPaletteData
     {
         uint[] ids = palette switch
         {
-            SpaceCellPalette.Icy       => IcyIds,
-            SpaceCellPalette.IceShards => IceShardsIds,
-            _                          => RockyIds,
+            SpaceCellPalette.Icy        => IcyIds,
+            SpaceCellPalette.IceShards  => IceShardsIds,
+            SpaceCellPalette.RockShards => RockShardsIds,
+            SpaceCellPalette.Wisp       => WispIds,
+            _                           => RockyIds,
         };
         var result = new List<FormKey>(ids.Length);
         foreach (var id in ids)
