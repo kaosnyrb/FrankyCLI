@@ -24,16 +24,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target at the Outskirts of Cydonia",
                 Location = "Outskirts of Cydonia",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00015FF7,
-                needSpacesuit = true,
-                parameter1 = "cydoniaoutskirts",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaoutskirts"}, {"FormId", 0x00015FF7} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -41,16 +39,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target at the Cydonia Central Hub",
                 Location = "Cydonia Central Hub",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00015FF7,
-                needSpacesuit = true,
-                parameter1 = "cydoniacentralhub",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniacentralhub"}, {"FormId", 0x00015FF7} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -58,16 +54,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target at the Cydonia Residential Level",
                 Location = "Cydonia Residential Level",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00015FF7,
-                needSpacesuit = true,
-                parameter1 = "cydoniaresidential",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaresidential"}, {"FormId", 0x00015FF7} }
             });
 
             //-------------------------------  SHOWDOWN ------------------------------------------            
@@ -77,16 +71,14 @@ namespace Retrograde.Quests
                 Description = "Kill the target at Outskirts of Cydonia",
                 Location = "Outskirts of Cydonia",
                 formid = FormKeyLookup.GetFormKey("duout_show_city_kill_cydonia"),
-                needSpacesuit = true,
-                parameter1 = "cydoniaoutskirts",
-                parameterformid = 0x00015FF7,
                 outlawQuest = new Showdown_BountyCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "kill_target"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaoutskirts"}, {"FormId", 0x00015FF7} }
             });
 
         }

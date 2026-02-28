@@ -41,7 +41,7 @@ namespace Retrograde.Quests
             Console.WriteLine("Generating Informant Space Quest...");
             questloc = missionTemplate.Location;
 
-            var factionID = ShipTools.GetFactionID(missionTemplate.parameter1);
+            var factionID = ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]);
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -50,9 +50,9 @@ namespace Retrograde.Quests
             });
             Console.WriteLine("datasource: " + datasource);
 
-            string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
+            string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             Console.WriteLine("shipname: " + shipname);
-            var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, factionID);
+            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
             var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {

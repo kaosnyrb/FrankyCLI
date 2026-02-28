@@ -127,7 +127,7 @@ namespace Retrograde.Quests
             {
                 if (record.EditorID != null)
                 {
-                    if (record.EditorID.Contains("doout_wantedposter_" + missionTemplate.parameter1))
+                    if (record.EditorID.Contains("doout_wantedposter_" + (string)missionTemplate.parameters["Label"]))
                     {
                         rec.Add(record);
                     }

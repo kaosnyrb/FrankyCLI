@@ -23,7 +23,6 @@ namespace Retrograde.Quests
                 Description = "Find info about the target from a clue in a space station",
                 Location = "A clue hidden on a lightly defended small space station taken over by a Spacer Gang",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_station"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpacestation(),
                 MissionTags = new List<string>()
                 {
@@ -38,7 +37,8 @@ namespace Retrograde.Quests
                     {"Faction","Spacer" },
                     {"StationSize","Small" },
                     {"DefendingShipCountMin", 0 },
-                    {"DefendingShipCountMax", 2 }
+                    {"DefendingShipCountMax", 2 },
+                    {"NeedSpacesuit", true}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -47,7 +47,6 @@ namespace Retrograde.Quests
                 Description = "Find info about the target from a clue in a space station",
                 Location = "A clue hidden on a lightly defended medium sized space station taken over by a Spacer Gang",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_station"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorSpacestation(),
                 MissionTags = new List<string>()
                 {
@@ -62,7 +61,8 @@ namespace Retrograde.Quests
                     {"Faction","Spacer" },
                     {"StationSize","Medium" },
                     {"DefendingShipCountMin", 0 },
-                    {"DefendingShipCountMax", 2 }
+                    {"DefendingShipCountMax", 2 },
+                    {"NeedSpacesuit", true}
                 }
             });
 

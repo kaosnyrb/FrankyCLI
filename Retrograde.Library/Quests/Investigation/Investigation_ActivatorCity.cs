@@ -72,10 +72,10 @@ namespace Retrograde.Quests
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            var markerused = RandomProvider.GetRandomMarker("doout_city_activator_marker_" + missionTemplate.parameter1 + "_");
+            var markerused = RandomProvider.GetRandomMarker("doout_city_activator_marker_" + (string)missionTemplate.parameters["Label"] + "_");
             newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
 
-            var locaform = RetrogradeContext.Current.StarfieldMod.Locations[new FormKey(RetrogradeContext.Current.StarfieldModKey, missionTemplate.parameterformid)];
+            var locaform = RetrogradeContext.Current.StarfieldMod.Locations[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))];
             newQuest.SetQuestLocationAlias("DungeonLocation", locaform.ToNullableLink<ILocationGetter>());
             //Log Entry
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)

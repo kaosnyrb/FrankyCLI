@@ -24,16 +24,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City Farms",
                 Location = "Akila City Farms",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilafarms",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilafarms"}, {"FormId", 0x00010DFB} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -41,16 +39,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City Wall",
                 Location = "Akila City Walls",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilawalls",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilawalls"}, {"FormId", 0x00010DFB} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -58,16 +54,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City, Coe Plaza",
                 Location = "Akila City Coe Plaza",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilacoeplaza",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilacoeplaza"}, {"FormId", 0x00010DFB} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -75,16 +69,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City, The Stretch",
                 Location = "Akila City The Stretch",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilathestretch",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilathestretch"}, {"FormId", 0x00010DFB} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -92,16 +84,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City, The Core",
                 Location = "Akila City The Core",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilathecore",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilathecore"}, {"FormId", 0x00010DFB} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -109,16 +99,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City, Midtown",
                 Location = "Akila City Midtown",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilamidtown",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilamidtown"}, {"FormId", 0x00010DFB} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -126,16 +114,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target in Akila City, Spaceport",
                 Location = "Akila City Spaceport",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_activator_neon"),
-                parameterformid = 0x00010DFB,
-                needSpacesuit = false,
-                parameter1 = "akilaspaceport",
                 outlawQuest = new Investigation_ActivatorCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "follow_clue"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilaspaceport"}, {"FormId", 0x00010DFB} }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
 
@@ -145,16 +131,14 @@ namespace Retrograde.Quests
                 Description = "Kill the target at Akila City Farms",
                 Location = "Akila City Farms",
                 formid = FormKeyLookup.GetFormKey("duout_show_city_kill_neon"),
-                needSpacesuit = false,
-                parameter1 = "akilafarms",
-                parameterformid = 0x00010DFB,
                 outlawQuest = new Showdown_BountyCity(),
                 MissionTags = new List<string>()
                 {
                     "city",
                     "planetside",
                     "kill_target"
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilafarms"}, {"FormId", 0x00010DFB} }
             });
         }
     }

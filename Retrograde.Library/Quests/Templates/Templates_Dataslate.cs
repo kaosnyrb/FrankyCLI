@@ -25,13 +25,13 @@ namespace Retrograde.Quests
                     Description = "The player finds a dataslate containing a lead to the target.",
                     Location = "A remote location",
                     formid = new Mutagen.Bethesda.Plugins.FormKey(),
-                    needSpacesuit = true,
                     outlawQuest = new Discovery_Dataslate(),
                     MissionTags = new List<string>()
                     {
                         "discovery",
 
-                    }
+                    },
+                    parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
                 });
             /*
             DiscoveryTemplates.Add(
@@ -41,8 +41,8 @@ namespace Retrograde.Quests
                     Description = "The player finds a wanted poster hanging in a bar.",
                     Location = "A bar",
                     formid = 0,
-                    needSpacesuit = true,
-                    outlawQuest = new Discovery_WantedPoster()
+                    outlawQuest = new Discovery_WantedPoster(),
+                    parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
                 });
             */
         }

@@ -27,7 +27,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -43,7 +42,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -53,7 +51,8 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -62,7 +61,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -72,7 +70,8 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -81,7 +80,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -91,7 +89,8 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -100,7 +99,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -110,7 +108,8 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -119,7 +118,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -129,7 +127,8 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -138,7 +137,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue.",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace(),
                 MissionTags = new List<string>()
                 {
@@ -148,7 +146,8 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true}
                 }
             });
 
@@ -159,9 +158,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -178,9 +174,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -191,7 +184,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -200,9 +196,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -213,7 +206,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -222,9 +218,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -235,7 +228,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -244,9 +240,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -257,7 +250,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -266,9 +262,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -279,7 +272,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -288,9 +284,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Crimson Fleet ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -301,7 +294,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -310,9 +306,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -329,9 +322,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -342,7 +332,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -351,9 +344,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -364,7 +354,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -373,9 +366,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -386,7 +376,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -395,9 +388,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -408,7 +398,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -417,9 +410,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -430,7 +420,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -439,9 +432,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Crimson Fleet ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -452,7 +442,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -461,9 +454,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -480,9 +470,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -493,7 +480,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -502,9 +492,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -515,7 +502,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -524,9 +514,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -537,7 +524,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -546,9 +536,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -559,7 +546,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -568,9 +558,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -581,7 +568,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -590,9 +580,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Crimson Fleet ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Crimson Fleet",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -603,7 +590,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
 
@@ -614,9 +604,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -633,9 +620,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -646,7 +630,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -655,9 +642,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -668,7 +652,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -677,9 +664,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -690,7 +674,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -699,9 +686,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -712,7 +696,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -721,9 +708,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -734,7 +718,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -743,9 +730,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Spacer ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -756,7 +740,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -765,9 +752,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -784,9 +768,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -797,7 +778,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -806,9 +790,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -819,7 +800,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -828,9 +812,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -841,7 +822,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -850,9 +834,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -863,7 +844,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -872,9 +856,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -885,7 +866,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -894,9 +878,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Spacer ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -907,7 +888,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -916,9 +900,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -935,9 +916,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -948,7 +926,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -957,9 +938,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -970,7 +948,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -979,9 +960,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -992,7 +970,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1001,9 +982,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1014,7 +992,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1023,9 +1004,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1036,7 +1014,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1045,9 +1026,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Spacer ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Spacer",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1058,7 +1036,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
 
@@ -1069,9 +1050,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1088,9 +1066,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1101,7 +1076,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1110,9 +1088,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1123,7 +1098,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1132,9 +1110,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1145,7 +1120,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1154,9 +1132,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1167,7 +1142,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1176,9 +1154,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1189,7 +1164,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1198,9 +1176,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Small Ecliptic ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetAClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1211,7 +1186,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1220,9 +1198,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1239,9 +1214,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1252,7 +1224,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1261,9 +1236,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1274,7 +1246,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1283,9 +1258,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1296,7 +1268,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1305,9 +1280,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1318,7 +1290,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1327,9 +1302,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1340,7 +1312,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1349,9 +1324,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Large Ecliptic ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetBClassShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1362,7 +1334,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1371,9 +1346,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in orbit around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1390,9 +1362,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in a rocky asteroid field around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1403,7 +1372,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Rocky}
+                    {"SpaceCell", SpaceCellDesignType.Rocky},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1412,9 +1384,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in a field of icy asteroids around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1425,7 +1394,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Icy}
+                    {"SpaceCell", SpaceCellDesignType.Icy},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1434,9 +1406,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in a field of ice shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1447,7 +1416,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceShards}
+                    {"SpaceCell", SpaceCellDesignType.IceShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1456,9 +1428,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in a field of Ice Crystals around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1469,7 +1438,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.IceCrystals}
+                    {"SpaceCell", SpaceCellDesignType.IceCrystals},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1478,9 +1450,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in a field of rock shards around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1491,7 +1460,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.RockShards}
+                    {"SpaceCell", SpaceCellDesignType.RockShards},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
             InvestigationTemplates.Add(new MissionTemplate()
@@ -1500,9 +1472,6 @@ namespace Retrograde.Quests
                 Description = "Destroy the target in orbit around a planet. It's being used by the target and will give you a clue. Guarded by a Cargo Ecliptic ship",
                 Location = "A clue hidden in a field of coralline wisps around a planet",
                 formid = FormKeyLookup.GetFormKey("duout_info_space_destroy_guarded"),
-                parameter1 = "Ecliptic",
-                parameterformid = ShipTools.GetCargoShip(),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySpace_Guard(),
                 MissionTags = new List<string>()
                 {
@@ -1513,7 +1482,10 @@ namespace Retrograde.Quests
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
                 {
-                    {"SpaceCell", SpaceCellDesignType.Wisp}
+                    {"SpaceCell", SpaceCellDesignType.Wisp},
+                    {"NeedSpacesuit", true},
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
                 }
             });
 

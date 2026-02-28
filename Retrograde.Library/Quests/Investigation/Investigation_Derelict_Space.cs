@@ -41,10 +41,10 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Informant Space Quest...");
 
-            var factionID = ShipTools.GetFactionID(missionTemplate.parameter1);
-            string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
+            var factionID = ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]);
+            string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             Console.WriteLine("shipname: " + shipname);
-            var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, factionID);
+            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
@@ -70,7 +70,7 @@ namespace Retrograde.Quests
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Board the " + shipname + " and find the " + datasource + "\r\n",
                 "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
-                "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
+                "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
             });
             Console.WriteLine("logmessage: " + logmessage);
 
@@ -88,7 +88,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_space_derelict_quest", "ItemSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             
-            newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", CrewManager.GetCrew(missionTemplate.parameter1, shipname));
+            newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", CrewManager.GetCrew((string)missionTemplate.parameters["Label"], shipname));
 
             newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipTools.GetGangList(factionID));
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
@@ -100,7 +100,7 @@ namespace Retrograde.Quests
                 "Current Location:" + missionTemplate.Location + "\r\n",
                 "Objective: Board the " + shipname + " and find the " + datasource + "\r\n",
                 "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
-                "Faction this ship belongs to: " + missionTemplate.parameter1 + "\r\n"
+                "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
             });
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 

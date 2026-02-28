@@ -115,7 +115,7 @@ namespace Retrograde.Chains
                 "<QuestStage>Showdown</QuestStage>",
                 "<QuestProgress>90%</QuestProgress>"
             });
-            outlawNpc.spacesuit = ShowdownMissionTemplate.needSpacesuit;
+            outlawNpc.spacesuit = ShowdownMissionTemplate.parameters.ContainsKey("NeedSpacesuit") && (bool)ShowdownMissionTemplate.parameters["NeedSpacesuit"];
             outlawNpc.GenerateNPC();
 
 

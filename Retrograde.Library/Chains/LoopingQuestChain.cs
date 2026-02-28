@@ -120,7 +120,7 @@ namespace Retrograde.Chains
 
             var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("", showdownAddons);
 
-            outlawNpc.spacesuit = ShowdownMissionTemplate.needSpacesuit;
+            outlawNpc.spacesuit = ShowdownMissionTemplate.parameters.ContainsKey("NeedSpacesuit") && (bool)ShowdownMissionTemplate.parameters["NeedSpacesuit"];
             outlawNpc.GenerateNPC();
 
             Console.WriteLine("---------------------------------------------------------------------------------");

@@ -145,22 +145,29 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = false;
-
-                var outlawQuest = new StaticLayoutQuestChain(myMod);
-                outlawQuest.InvestigationTemplate = "Space Destroy - unguarded IceCrystals";
-                outlawQuest.DeepTempalte = "Space Destroy - unguarded";
-                outlawQuest.ShowdownTemplate = "City Bounty - Paradiso";
-                
-                List<IQuestchain> questchains = new List<IQuestchain>
+                AITools.AIMODE = true;
+                bool setmissions = false;
+                if (setmissions)
                 {
-                   new LoopingLayoutQuestChain(myMod),
-                   new StaticLayoutQuestChain(myMod),
-                };
-
-                //var outlawQuest = questchains[random.Next(questchains.Count)];
+                    var outlawQuest = new StaticLayoutQuestChain(myMod)
+                    {
+                        InvestigationTemplate = "Space Destroy - unguarded IceCrystals",
+                        DeepTempalte = "Space Destroy - unguarded",
+                        ShowdownTemplate = "City Bounty - Paradiso"
+                    };
+                    outlawQuest.GenerateQuest();                    
+                }
+                else
+                {
+                    List<IQuestchain> questchains = new List<IQuestchain>
+                    {
+                        new LoopingLayoutQuestChain(myMod),
+                        new StaticLayoutQuestChain(myMod),
+                    };
+                    var outlawQuest = questchains[random.Next(questchains.Count)];
+                    outlawQuest.GenerateQuest();
+                }
                 
-                outlawQuest.GenerateQuest();
             }
             foreach (var rec in myMod.EnumerateMajorRecords())
             {

@@ -56,7 +56,7 @@ public static class ShipTools
             0x00322BE9, 0x00322BEB, 0x00322BED, // EncShip_CrimsonFleet_B
             0x00322BFF, 0x00322C03, 0x00322C07, // EncShip_Ecliptic_B
             0x002E7530, 0x002E7611, 0x0002C201, 0x0018D3DD, // EncShip_FreestarCitizen_B
-            0x00388977, 0x00388985, // EncShip_FreestarSecurity_B
+            0x00388977, //0x00388985, // EncShip_FreestarSecurity_B
             0x0030ED45, // EncShip_Galbank_B
             0x00323454, // EncShip_HouseVaruun_B
             0x00322C19, 0x00322C1B, 0x00322C1D, // EncShip_Spacer_B

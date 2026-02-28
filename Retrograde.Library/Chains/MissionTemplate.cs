@@ -14,19 +14,13 @@ namespace Retrograde.Chains
         public string Description;
         public string Location;
 
-
         //Used to configure the differences in missions
+        // Keys: "NeedSpacesuit" (bool), "Label" (string), "FormId" (uint), "Faction", "StationSize", "SpaceCell", etc.
         public Dictionary<string, object> parameters;
 
-
-        //Old Params
-        public bool needSpacesuit;
         public ITemplateManager Lib1;
         public ITemplateManager Lib2;
-        public string parameter1;
-        public uint parameterformid;
         public FormKey formid;
-
 
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
         public List<string> MissionTags;

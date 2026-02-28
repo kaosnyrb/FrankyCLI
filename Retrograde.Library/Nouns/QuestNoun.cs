@@ -1,3 +1,4 @@
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -59,6 +60,52 @@ namespace Retrograde.Nouns
                 Event = Quest.Event                
             };
             targetMod.Quests.Add(instance);
+            EnsureGangMembersFormList();
+        }
+
+        private void EnsureGangMembersFormList()
+        {
+            var targetMod = RetrogradeContext.Current.TargetMod;
+            if (instance.VirtualMachineAdapter == null) return;
+
+            foreach (var script in instance.VirtualMachineAdapter.Scripts)
+            {
+                for (int i = 0; i < script.Properties.Count; i++)
+                {
+                    if (script.Properties[i].Name != "GangMembers") continue;
+                    if (script.Properties[i] is not ScriptObjectProperty objProp) continue;
+
+                    var fk = objProp.Object.FormKey;
+                    if (fk.IsNull) return;
+
+                    // Find the source FormList to get its EditorID
+                    IFormListGetter? source = null;
+                    source = targetMod.FormLists.FirstOrDefault(r => r.FormKey == fk);
+                    if (source == null)
+                    {
+                        foreach (var tm in RetrogradeContext.Current.TemplateMods)
+                        {
+                            source = tm.FormLists.FirstOrDefault(r => r.FormKey == fk);
+                            if (source != null) break;
+                        }
+                    }
+                    if (source == null) return;
+
+                    // If targetMod already has a FormList with the same EditorID, point to it
+                    var existing = targetMod.FormLists.FirstOrDefault(r => r.EditorID == source.EditorID);
+                    if (existing != null)
+                    {
+                        objProp.Object = existing.ToLink<IStarfieldMajorRecordGetter>();
+                        return;
+                    }
+
+                    // Otherwise copy it into targetMod and update the property
+                    var copied = source.DeepCopy();
+                    targetMod.FormLists.Add(copied);
+                    objProp.Object = copied.ToLink<IStarfieldMajorRecordGetter>();
+                    return;
+                }
+            }
         }
 
         public bool SetLogMessage(int StageIndex,int LogEntry, string Content)

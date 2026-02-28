@@ -39,11 +39,11 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Activator Guarded Space Quest...");
 
-            string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
+            string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
 
             Console.WriteLine("shipname: " + shipname);
 
-            var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, ShipTools.GetFactionID(missionTemplate.parameter1));
+            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
 
             var questActivator = ActivatorTools.GetRandomSpaceType();
 

@@ -26,14 +26,14 @@ namespace Retrograde.Quests
                 Description = "Destroy a dangerous object a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_small"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_DestroySmallBase(),
                 MissionTags = new List<string>()
                 {
                     "destroy",
                     "planetside",
-                }
+                },
 
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------            
 

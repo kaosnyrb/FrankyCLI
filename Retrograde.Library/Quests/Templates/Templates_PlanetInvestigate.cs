@@ -26,14 +26,14 @@ namespace Retrograde.Quests
                 Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_small"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
                 {
                     "follow_clue",
                     "planetside",
-                }
+                },
 
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -41,13 +41,13 @@ namespace Retrograde.Quests
                 Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_captive"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
                 {
                     "follow_clue",
                     "planetside",
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -55,13 +55,13 @@ namespace Retrograde.Quests
                 Description = "Find info about the target on a nearby planet at a small facility",
                 Location = "A remote location",
                 formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_large"),
-                needSpacesuit = true,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
                 {
                     "follow_clue",
                     "planetside",
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -69,13 +69,13 @@ namespace Retrograde.Quests
                 Description = "Find info about the target on a nearby planet at a small facility with a breathable atmosphere",
                 Location = "A remote location",
                 formid = FormKeyLookup.GetFormKey("duout_info_planet_activator_important"),
-                needSpacesuit = false,
                 outlawQuest = new Investigation_ActivatorPlanet(),
                 MissionTags = new List<string>()
                 {
                     "follow_clue",
                     "planetside",
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false} }
             });
             //-------------------------------  SHOWDOWN ------------------------------------------            
 

@@ -25,7 +25,6 @@ namespace Retrograde.Quests
                 Location = "",
                 Description = "",
                 formid = FormKeyLookup.GetFormKey("duout_info_branch"),
-                needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new PlanetTemplateManager(new AI_TemplateEngine()),
                 Lib2 = new SpaceTemplateManager(new AI_TemplateEngine()),
@@ -33,7 +32,8 @@ namespace Retrograde.Quests
                 {
                     "space",
                     "planetside",
-                }
+                },
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
 /*
             InvestigationTemplates.Add(new MissionTemplate()
@@ -42,7 +42,6 @@ namespace Retrograde.Quests
                 Location = "",
                 Description = "",
                 formid = FormKeyLookup.GetFormKey("duout_info_branch"),
-                needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new CityTemplateManager(new AI_TemplateEngine()),
                 Lib2 = new SpaceTemplateManager(new AI_TemplateEngine()),
@@ -50,8 +49,9 @@ namespace Retrograde.Quests
                 {
                     "space",
                     "city",
-                }
+                },
 
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -60,7 +60,6 @@ namespace Retrograde.Quests
                 Location = "",
                 Description = "",
                 formid = FormKeyLookup.GetFormKey("duout_info_branch"),
-                needSpacesuit = true,
                 outlawQuest = new Meta_Fork_Exclusive(),
                 Lib1 = new CityTemplateManager(new AI_TemplateEngine()),
                 Lib2 = new PlanetTemplateManager(new AI_TemplateEngine()),
@@ -68,8 +67,9 @@ namespace Retrograde.Quests
                 {
                     "city",
                     "planetside",
-                }
+                },
 
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
 */
         }

@@ -40,8 +40,8 @@ namespace Retrograde.Quests
             Console.WriteLine("Generating Destroy Space Quest...");
             
             var questActivator = ActivatorTools.GetRandomSpaceType();
-            string shipname = ShipTools.GetFactionShipName(missionTemplate.parameter1);
-            var ship = new SpaceShipNoun(shipname, missionTemplate.parameterformid, ShipTools.GetFactionID(missionTemplate.parameter1));
+            string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
+            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
 
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
