@@ -233,10 +233,7 @@ namespace Retrograde.Nouns
             // Fall back to random seeds only if running standalone.
             if (!string.IsNullOrEmpty(PromptManager.LoreContext))
             {
-                sb.AppendLine("Character context — treat this as the source of truth for who this person is and why they're running:");
-                sb.AppendLine("<LoreContext>");
-                sb.AppendLine(PromptManager.LoreContext);
-                sb.AppendLine("</LoreContext>");
+                sb.AppendLine("Character context — use the LoreContext established earlier in this conversation. It is the source of truth for who this person is and why they're running.");
             }
             else
             {
@@ -322,8 +319,6 @@ namespace Retrograde.Nouns
             lev.LevelMult = 0.25f + (float)wrand.NextDouble();
             npc.Level = lev;
 
-            var legendary = new LegendaryArmourNoun(name);
-
             npc.Items = new ExtendedList<ContainerEntry>
             {
                 new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } },
@@ -335,7 +330,6 @@ namespace Retrograde.Nouns
                 Items = new ExtendedList<IFormLinkGetter<IStarfieldMajorRecordGetter>>(),
             };
 
-            frmlst.Items.Add(legendary.LeveledItemGetter);
             deathItems = frmlst.FormKey;
 
             myMod.FormLists.Add(frmlst);
@@ -344,6 +338,14 @@ namespace Retrograde.Nouns
             instance = npc;
 
             return npc;
+        }
+
+        // Called after all stage narratives are generated so the AI can draw on the full quest story.
+        public void GenerateLegendaryItem()
+        {
+            Console.WriteLine("Generating Legendary Item...");
+            var legendary = new LegendaryArmourNoun(name);
+            myMod.FormLists[deathItems].Items.Add(legendary.LeveledItemGetter);
         }
 
         //We do this last as we've built all the infomation to use in it.

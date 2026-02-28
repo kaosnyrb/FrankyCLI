@@ -180,17 +180,15 @@ namespace Retrograde.AI.Utils
                 "Constraints:\r\n" +
                 "- 2-4 clear words in everyday language.\r\n" +
                 "- Only output the quest name (no punctuation or explanation).\r\n" +
-                "- Reflect one concrete element from <LoreContext> (faction, place, action); avoid vague mood words.\r\n" +
-                "- Do not invent new names or factions beyond <LoreContext>.\r\n" +
+                "- Reflect one concrete element from the LoreContext (faction, place, action); avoid vague mood words.\r\n" +
+                "- Do not invent new names or factions beyond the LoreContext.\r\n" +
                 "- Style: plain, declarative; no metaphor, riddles, or mysterious phrasing.\r\n" +
-                "- Flavor: prefer a strong action verb or specific noun from <LoreContext> to add punch (e.g., \"Seize\", \"Amber Smelter\", \"Dock Raid\").\r\n" +
+                "- Flavor: prefer a strong action verb or specific noun from the LoreContext to add punch (e.g., \"Seize\", \"Amber Smelter\", \"Dock Raid\").\r\n" +
                 "- If using an adjective, make it concrete (e.g., \"Rust\", \"Frozen\", \"Broken\") not abstract (no \"Eternal\", \"Mysterious\").\r\n\r\n" +
 
-                "Use the Lore Context model below for tone, theme and narrative flavor.\r\n" +
+                "Use the LoreContext established earlier in this conversation for tone, theme and narrative flavor.\r\n" +
                 "You may draw on any relevant parts (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n" +
                 "Do NOT quote the lore; derive meaning and style from it.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -214,16 +212,14 @@ namespace Retrograde.AI.Utils
         {
             var datasourceprompt =
                 "Generate a three-word-or-less object name that contains a clue to a character's location, intentions, or next move.\r\n" +
-                "Use tone, themes, symbols, and motifs from the Lore Context.\r\n" +
+                "Use tone, themes, symbols, and motifs from the LoreContext established earlier in this conversation.\r\n" +
                 "Do NOT quote lore; infer from it.\r\n" +
                 "Only output the object name.\r\n" +
-                "- Use literal descriptors pulled from <LoreContext> (e.g., 'Dockmaster Ledger', 'Sealed Cargo Case').\r\n" +
-                "- No cryptic phrases or invented names beyond <LoreContext>.\r\n" +
+                "- Use literal descriptors pulled from the LoreContext (e.g., 'Dockmaster Ledger', 'Sealed Cargo Case').\r\n" +
+                "- No cryptic phrases or invented names beyond the LoreContext.\r\n" +
                 "- Style: plain and concrete.\r\n\r\n" +
 
-                "You may use any relevant elements in the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "You may use any relevant elements in the LoreContext (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -246,16 +242,14 @@ namespace Retrograde.AI.Utils
         {
             var datasourceprompt =
                 "Generate a three-word-or-less contraband item name.\r\n" +
-                "It should thematically match the Lore Context and feel appropriate for the kind of conflict, intrigue, and stakes described there.\r\n" +
+                "It should thematically match the LoreContext established earlier in this conversation and feel appropriate for the conflict, intrigue, and stakes described there.\r\n" +
                 "Think in terms of illicit items, forbidden data, compromised artifacts, or black-market goods that could drive the story forward.\r\n" +
                 "Only output the contraband name.\r\n" +
-                "- Use literal descriptors tied to <LoreContext>; avoid cryptic wording.\r\n" +
-                "- No invented proper nouns beyond <LoreContext>.\r\n" +
+                "- Use literal descriptors tied to the LoreContext; avoid cryptic wording.\r\n" +
+                "- No invented proper nouns beyond the LoreContext.\r\n" +
                 "- Style: plain and direct.\r\n\r\n" +
 
-                "Use any relevant parts of the Lore Context model (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements) for tone and flavor.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "Use any relevant parts of the LoreContext (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements) for tone and flavor.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -281,10 +275,8 @@ namespace Retrograde.AI.Utils
                 "Write a short in-game notification (under 40 words, one paragraph) for when the player destroys a piece of contraband.\r\n" +
                 "State three things plainly: what was destroyed, what that destruction revealed, and where to go or what to do next.\r\n" +
                 "Style: field intel note — direct, factual, no metaphor, no atmospheric writing, no mood adjectives.\r\n" +
-                "Use Lore Context only for concrete facts: names, places, roles. Do not derive atmosphere or mystery from it.\r\n" +
-                "Do not invent names or locations beyond those in <LoreContext> and Additional Information.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "Use the LoreContext established earlier in this conversation for concrete facts only: names, places, roles. Do not derive atmosphere or mystery from it.\r\n" +
+                "Do not invent names or locations beyond those in the LoreContext and Additional Information.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -311,10 +303,8 @@ namespace Retrograde.AI.Utils
                 "Write a short in-game notification (under 30 words, one sentence or two short ones) for when the player picks up a clue.\r\n" +
                 "State two things plainly: what was found, and how it points to the next step.\r\n" +
                 "Style: field intel note — direct, factual, no metaphor, no atmospheric writing, no mood adjectives.\r\n" +
-                "Use Lore Context only for concrete facts: names, places, roles. Do not derive atmosphere or mystery from it.\r\n" +
-                "Do not invent names or locations beyond those in <LoreContext> and Additional Information.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "Use the LoreContext established earlier in this conversation for concrete facts only: names, places, roles. Do not derive atmosphere or mystery from it.\r\n" +
+                "Do not invent names or locations beyond those in the LoreContext and Additional Information.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -339,11 +329,9 @@ namespace Retrograde.AI.Utils
             var logprompt =
                 "Write a 40-word objective log entry for a bounty hunter.\r\n" +
                 "State clearly: what the objective is, where it must be done, and why (the concrete reason tied to the target or situation).\r\n" +
-                "Name the bounty target exactly as they appear in <LoreContext>.\r\n" +
+                "Name the bounty target exactly as established in the LoreContext.\r\n" +
                 "Style: field intel note — plain declarative sentences, no metaphor, no ominous hints, no atmospheric writing.\r\n" +
-                "Use Lore Context for concrete facts only: target name, faction, motive, location. Do not invent new names.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "Use the LoreContext established earlier in this conversation for concrete facts only: target name, faction, motive, location. Do not invent new names.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -370,20 +358,18 @@ namespace Retrograde.AI.Utils
 
             var logprompt =
                 "Write a short personal dataslate entry — a first-person account from " + speaker + ".\r\n" +
-                "The entry relates to the events in <LoreContext>. The speaker is not the outlaw; they know only their piece of the story.\r\n\r\n" +
+                "The entry relates to the events described in the LoreContext established earlier in this conversation. The speaker is not the outlaw; they know only their piece of the story.\r\n\r\n" +
 
                 "Rules:\r\n" +
                 "- Under 80 words. Every sentence must add new information; cut anything that restates or pads.\r\n" +
                 "- Write one specific moment or discovery the speaker witnessed or experienced themselves.\r\n" +
-                "- Use concrete details from <LoreContext> — a name, a place, an action. Do not invent names.\r\n" +
+                "- Use concrete details from the LoreContext — a name, a place, an action. Do not invent names.\r\n" +
                 "- Plain, personal speech. This person is writing for themselves, not performing.\r\n" +
                 "- The speaker does not know the full story — they know their part of it.\r\n\r\n" +
 
                 "Date: optional. If used, it must fall between " +
                     dateTime.AddYears(-3).ToString("yyyy-MM-dd") + " and " + dateTime.ToString("yyyy-MM-dd") +
                     " and feel like a natural part of the entry, not a header.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -407,15 +393,13 @@ namespace Retrograde.AI.Utils
             var logprompt =
                 "Write a mission briefing dataslate for a bounty hunter. Length: 180-220 words.\r\n" +
                 "Style: field intel note — plain declarative sentences, no atmosphere, no tone-setting prose, no metaphor.\r\n" +
-                "Use <LoreContext> for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
+                "Use the LoreContext established earlier in this conversation for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
 
                 "Cover these four things in order:\r\n" +
-                "1. TARGET: Name the target exactly as they appear in <LoreContext>. State what they did and what they are wanted for.\r\n" +
+                "1. TARGET: Name the target exactly as established in the LoreContext. State what they did and what they are wanted for.\r\n" +
                 "2. BACKGROUND: One or two sentences on who they are — former occupation, what pushed them to crime — so the hunter understands who they're dealing with.\r\n" +
                 "3. LEAD: Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
                 "4. ACTION: Tell the hunter exactly what to do at that location.\r\n\r\n" +
-
-                "<LoreContext>\r\n" + LoreContext + "\r\n</LoreContext>\r\n\r\n" +
 
                 "Additional Information:\r\n";
 

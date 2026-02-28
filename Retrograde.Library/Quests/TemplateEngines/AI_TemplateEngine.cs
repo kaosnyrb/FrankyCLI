@@ -100,10 +100,7 @@ namespace Retrograde.Quests.TemplateEngines
                     sb.AppendLine($"- {um}");
                 sb.AppendLine();
 
-                sb.AppendLine("LoreContext:");
-                sb.AppendLine("<LoreContext>");
-                sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
-                sb.AppendLine("</LoreContext>");
+                sb.AppendLine("The character's LoreContext has been established earlier in this conversation — use it to guide your selection.");
                 sb.AppendLine();
 
                 sb.AppendLine("Additional quest state information (may include <QuestStage>, <QuestProgress>, <QuestStageLocation>, etc.):");
@@ -222,10 +219,7 @@ namespace Retrograde.Quests.TemplateEngines
                 sb.AppendLine("- Prefer missions that build on or complicate that trail, rather than ignoring it.");
                 sb.AppendLine();
 
-                sb.AppendLine("LoreContext:");
-                sb.AppendLine("<LoreContext>");
-                sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
-                sb.AppendLine("</LoreContext>");
+                sb.AppendLine("The character's LoreContext has been established earlier in this conversation — use it to guide your selection.");
                 sb.AppendLine();
 
                 sb.AppendLine("Additional quest state information (may include <QuestStage>, <QuestProgress>, <QuestStageLocation>, etc.):");
@@ -242,7 +236,7 @@ namespace Retrograde.Quests.TemplateEngines
                 sb.AppendLine();
 
                 
-                int count = 10 + random.Next(25);
+                int count = 12;
                 
                 List<MissionTemplate> selected = AvailableTemplateLib.InvestigationTemplates
                     .OrderBy(x => random.Next())
@@ -339,10 +333,7 @@ namespace Retrograde.Quests.TemplateEngines
                 sb.AppendLine("- Treat them as context for where the player has been, but this mission should still feel like an entry into the main thread of the bounty.");
                 sb.AppendLine();
 
-                sb.AppendLine("LoreContext:");
-                sb.AppendLine("<LoreContext>");
-                sb.AppendLine(PromptManager.LoreContext ?? string.Empty);
-                sb.AppendLine("</LoreContext>");
+                sb.AppendLine("The character's LoreContext has been established earlier in this conversation — use it to guide your selection.");
                 sb.AppendLine();
 
                 sb.AppendLine("Additional quest state information (may include <QuestStage>, <QuestProgress>, <QuestStageLocation>, etc.):");

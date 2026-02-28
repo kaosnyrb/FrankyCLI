@@ -62,8 +62,7 @@ namespace Retrograde.Quests
                 "- Each paragraph should make that lead feel distinct in tone, risk, and potential payoff.\r\n" +
                 "- Put a single blank line between the two paragraphs.\r\n\r\n" +
 
-                "Use the Lore Context to shape factions, stakes, and atmosphere:\r\n" +
-                "<LoreContext>\r\n" + PromptManager.LoreContext + "\r\n</LoreContext>\r\n\r\n" +
+                "Use the LoreContext established earlier in this conversation to shape factions, stakes, and atmosphere.\r\n\r\n" +
 
                 "Base the two leads on these briefing blurbs:\r\n" +
                 "Lead 1:\r\n" + Quest1.outlawQuest.LogMessage + "\r\n\r\n" +
