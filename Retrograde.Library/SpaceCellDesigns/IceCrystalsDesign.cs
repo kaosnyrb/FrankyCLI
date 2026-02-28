@@ -16,5 +16,6 @@ public class IceCrystalsDesign : ISpaceCellDesign
     public List<ISpaceCellPass> Passes { get; } = new()
     {
         new SpaceMarkersPass(),
+        new IceCrystalsPass(yawOffsetDegrees: 90f),
     };
 }

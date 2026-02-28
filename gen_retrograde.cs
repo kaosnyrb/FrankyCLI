@@ -45,6 +45,7 @@ namespace FrankyCLI
             string item = args[3];
             string form = args[4];
 
+            using var _ = PluginsActivator.ActivateTemplates();
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {

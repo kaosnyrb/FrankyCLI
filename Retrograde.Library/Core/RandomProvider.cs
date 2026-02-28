@@ -40,22 +40,28 @@ public static class RandomProvider
     }
 
     /// <summary>
-    /// Gets a random marker record from the target mod matching the specified name prefix.
+    /// Gets a random marker record matching the specified name, searching TargetMod then TemplateMods.
     /// </summary>
-    public static IMajorRecord GetRandomMarker(string name)
+    public static IMajorRecordGetter GetRandomMarker(string name)
     {
-        var targetMod = RetrogradeContext.Current.TargetMod;
-        List<IMajorRecord> rec = new List<IMajorRecord>();
-        foreach (var record in targetMod.EnumerateMajorRecords())
+        var ctx = RetrogradeContext.Current;
+        var rec = new List<IMajorRecordGetter>();
+
+        foreach (var record in ctx.TargetMod.EnumerateMajorRecords())
+            if (record.EditorID?.Contains(name) == true)
+                rec.Add(record);
+
+        if (rec.Count == 0)
         {
-            if (record.EditorID != null)
-            {
-                if (record.EditorID.Contains(name))
-                {
-                    rec.Add(record);
-                }
-            }
+            foreach (var mod in ctx.TemplateMods)
+                foreach (var record in mod.EnumerateMajorRecords())
+                    if (record.EditorID?.Contains(name) == true)
+                        rec.Add(record);
         }
+
+        if (rec.Count == 0)
+            throw new InvalidOperationException($"GetRandomMarker: no records found matching '{name}'");
+
         return rec[Random.Next(rec.Count)];
     }
 

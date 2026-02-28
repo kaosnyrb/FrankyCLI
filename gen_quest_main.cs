@@ -95,6 +95,7 @@ namespace FrankyCLI
             string item = args[3];
             string form = args[4];
 
+            using var _ = PluginsActivator.ActivateTemplates();
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
@@ -149,7 +150,7 @@ namespace FrankyCLI
                 var outlawQuest = new StaticLayoutQuestChain(myMod);
                 outlawQuest.InvestigationTemplate = "Space Destroy - unguarded";
                 outlawQuest.DeepTempalte = "Space Destroy - unguarded";
-                outlawQuest.ShowdownTemplate = "Planet side Bounty - breathable atmosphere";
+                outlawQuest.ShowdownTemplate = "City Bounty - Paradiso";
                 
                 List<IQuestchain> questchains = new List<IQuestchain>
                 {

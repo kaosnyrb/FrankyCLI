@@ -16,7 +16,7 @@ namespace Retrograde.Quests
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
-/*
+
             //-------------------------------  INVESTIGATION ------------------------------------------
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -392,7 +392,7 @@ namespace Retrograde.Quests
                 {
                     {"ExtraLore","Paradiso is a luxury beach resort located on the planet Porrima II in the Porrima system. It is run by the Paradiso Group; A cutthroat, cheapskate corporate board and operates outside the jurisdiction of the United Colonies and the Freestar Collective." }
                 }
-            });*/
+            });
         }
     }
 }
