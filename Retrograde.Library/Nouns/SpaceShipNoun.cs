@@ -34,10 +34,18 @@ namespace Retrograde.Nouns
             {
                 EditorID = "encship_" + Guid.NewGuid().ToString().Substring(0, 8),
                 ObjectBounds = ship.ObjectBounds,
+                DirtinessScale = ship.DirtinessScale,
+                ObjectPaletteDefaults = ship.ObjectPaletteDefaults,
                 Components = ship.Components,
+                Filter = ship.Filter,
+                ObjectTemplateInstanceData = ship.ObjectTemplateInstanceData,
                 ObjectTemplates = ship.ObjectTemplates,
-                Template = ship.Template,
+                VirtualMachineAdapter = ship.VirtualMachineAdapter,
+                NavmeshGeometry = ship.NavmeshGeometry,
             };
+            // Template is IFormLinkNullable — must be set after construction (CLAUDE.md rule)
+            if (!ship.Template.IsNull)
+                instance.Template.SetTo(ship.Template.FormKey);
 
             bool setFaction = false;
             foreach (var component in instance.Components)
