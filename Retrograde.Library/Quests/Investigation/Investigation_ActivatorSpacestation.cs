@@ -72,7 +72,7 @@ namespace Retrograde.Quests
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
+                "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
                 "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
                 "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
             });
@@ -97,8 +97,8 @@ namespace Retrograde.Quests
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Board the " + stationname + " and find the " + datasource + "\r\n",
-                "Spacestation containing the Objective: " + stationname + "\r\n",
+                "Board the " + stationname + " and find the " + datasource + "\r\n",
+                "Spacestation: " + stationname + "\r\n",
                 "Faction this station belongs to: " + missionTemplate.parameters["Faction"].ToString() + "\r\n"
             });
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);

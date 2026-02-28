@@ -68,7 +68,7 @@ namespace Retrograde.Quests
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
+                "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
                 "Spaceship guarding the information: " + shipname + "\r\n"
             });
             Console.WriteLine("logmessage: " + logmessage);

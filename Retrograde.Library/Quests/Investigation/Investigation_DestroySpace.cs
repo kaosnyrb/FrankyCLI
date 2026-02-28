@@ -62,7 +62,7 @@ namespace Retrograde.Quests
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Destroy the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
+                "Destroy the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
             });
             Console.WriteLine("logmessage: " + logmessage);
 

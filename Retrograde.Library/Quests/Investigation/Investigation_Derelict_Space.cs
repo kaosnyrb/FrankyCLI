@@ -68,8 +68,8 @@ namespace Retrograde.Quests
             var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Board the " + shipname + " and find the " + datasource + "\r\n",
-                "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
+                "Board the " + shipname + " and find the " + datasource + "\r\n",
+                "Derelict Spaceship: " + shipname + "\r\n",
                 "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
             });
             Console.WriteLine("logmessage: " + logmessage);
@@ -98,8 +98,8 @@ namespace Retrograde.Quests
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",
-                "Objective: Board the " + shipname + " and find the " + datasource + "\r\n",
-                "Derelict Spaceship containing the Objective: " + shipname + "\r\n",
+                "Board the " + shipname + " and find the " + datasource + "\r\n",
+                "Derelict Spaceship: " + shipname + "\r\n",
                 "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
             });
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
