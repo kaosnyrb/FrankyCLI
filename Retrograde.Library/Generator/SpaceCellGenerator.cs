@@ -1,6 +1,7 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Retrograde.Passes.SpaceCell;
+using Retrograde.SpaceCellDesigns;
 using System;
 using System.Collections.Generic;
 
@@ -15,17 +16,9 @@ public class SpaceCellGenerator
 {
     private readonly List<ISpaceCellPass> _passes;
 
-    public SpaceCellGenerator()
+    public SpaceCellGenerator(ISpaceCellDesign design)
     {
-        _passes = new List<ISpaceCellPass>
-        {
-            new SpaceMarkersPass(),
-            new AsteroidChainPass(),
-            new CometTailPass(),
-            new ShipWreckPass(),
-            new LargeAsteroidRingPass(),
-            new CrescentBeltPass(),
-        };
+        _passes = design.Passes;
     }
 
     public SpaceCellState Generate(Cell cell, Location location,

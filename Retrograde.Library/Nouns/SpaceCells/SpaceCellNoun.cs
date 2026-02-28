@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Generator;
+using Retrograde.SpaceCellDesigns;
 using System;
 using System.Collections.Generic;
 
@@ -31,7 +32,7 @@ public class SpaceCellNoun
     public LeveledSpaceCell LeveledSpaceCell { get; }
     public SpaceCellState State { get; }
 
-    public SpaceCellNoun(string name, SpaceCellPalette palette = SpaceCellPalette.Rocky)
+    public SpaceCellNoun(string name, ISpaceCellDesign design)
     {
         var targetMod    = RetrogradeContext.Current.TargetMod;
         var starfieldMod = RetrogradeContext.Current.StarfieldMod;
@@ -80,9 +81,9 @@ public class SpaceCellNoun
 
         // ── Build asteroid palette from hardcoded FormIDs ─────────────────────────
         var asteroidPalette = SpaceCellPaletteData.GetFormKeys(
-            palette, RetrogradeContext.Current.StarfieldModKey);
+            design.Palette, RetrogradeContext.Current.StarfieldModKey);
 
-        Console.WriteLine($"[SpaceCellNoun] Palette: {palette} ({asteroidPalette.Count} types), " +
+        Console.WriteLine($"[SpaceCellNoun] Palette: {design.Palette} ({asteroidPalette.Count} types), " +
                           $"vanilla radius: {vanillaRadius:F0}");
 
         // ── 3. Create Location ───────────────────────────────────────────────────
@@ -258,9 +259,9 @@ public class SpaceCellNoun
         Console.WriteLine($"[SpaceCellNoun] LVSC: {LeveledSpaceCell.EditorID}");
 
         // ── 8. Run content passes ────────────────────────────────────────────────
-        var generator = new SpaceCellGenerator();
+        var generator = new SpaceCellGenerator(design);
         State = generator.Generate(Cell, Location, asteroidPalette, markerTemplates, vanillaRadius,
-            SpaceCellPaletteData.GetScale(palette));
+            SpaceCellPaletteData.GetScale(design.Palette));
 
         Console.WriteLine($"[SpaceCellNoun] Done — {Cell.Temporary.Count} asteroids.");
     }
