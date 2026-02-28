@@ -94,8 +94,12 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create the space cell
-            var noun = new SpaceCellNoun(questname.ToLower(), SpaceCellDesignRegistry.Designs[SpaceCellDesignType.Wisp]());
-            newQuest.SetQuestLevelledSpaceCellAlias(1, noun.LeveledSpaceCell.ToNullableLink());
+            if (missionTemplate.parameters.ContainsKey("SpaceCell"))
+            {
+                SpaceCellDesignType celldesign = (SpaceCellDesignType) missionTemplate.parameters["SpaceCell"];
+                var noun = new SpaceCellNoun(questname.ToLower(), SpaceCellDesignRegistry.Designs[celldesign]());
+                newQuest.SetQuestLevelledSpaceCellAlias(1, noun.LeveledSpaceCell.ToNullableLink());                
+            }
             //Set the interfaces
             questform = newQuest.instance;
             logMessage = logmessage;

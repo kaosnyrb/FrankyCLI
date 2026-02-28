@@ -141,7 +141,7 @@ public static class SpaceCellPaletteData
 
     // Per-palette base scale applied to all placements.
     // Adjust if a palette's meshes are systematically larger or smaller than expected.
-    private static readonly float[] Scales = { 1.0f, 1.0f, 20.0f, 20.0f, 100.0f }; // Rocky, Icy, IceShards, RockShards, Wisp
+    private static readonly float[] Scales = { 1.0f, 1.0f, 20.0f, 20.0f, 500.0f }; // Rocky, Icy, IceShards, RockShards, Wisp
 
     /// <summary>
     /// Returns the base scale multiplier for the given palette.

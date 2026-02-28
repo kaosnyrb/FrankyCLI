@@ -148,7 +148,7 @@ namespace FrankyCLI
                 AITools.AIMODE = false;
 
                 var outlawQuest = new StaticLayoutQuestChain(myMod);
-                outlawQuest.InvestigationTemplate = "Space Destroy - unguarded";
+                outlawQuest.InvestigationTemplate = "Space Destroy - unguarded IceCrystals";
                 outlawQuest.DeepTempalte = "Space Destroy - unguarded";
                 outlawQuest.ShowdownTemplate = "City Bounty - Paradiso";
                 

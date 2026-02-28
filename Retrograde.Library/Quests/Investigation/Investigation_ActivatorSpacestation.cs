@@ -16,6 +16,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.SpaceCellDesigns;
+using Retrograde.Nouns.SpaceCells;
 
 namespace Retrograde.Quests
 {
@@ -127,7 +129,13 @@ namespace Retrograde.Quests
             StationNoun stationNoun = new StationNoun(stationname, missionTemplate.parameters["Faction"].ToString(), missionTemplate.parameters["StationSize"].ToString(), stationDesign);
             
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", stationNoun.instance.ToLink<IStarfieldMajorRecordGetter>());
-
+            //Create the space cell
+            if (missionTemplate.parameters.ContainsKey("SpaceCell"))
+            {
+                SpaceCellDesignType celldesign = (SpaceCellDesignType) missionTemplate.parameters["SpaceCell"];
+                var noun = new SpaceCellNoun(questname.ToLower(), SpaceCellDesignRegistry.Designs[celldesign]());
+                newQuest.SetQuestLevelledSpaceCellAlias(1, noun.LeveledSpaceCell.ToNullableLink());                
+            }
             //Set the interfaces
             questform = newQuest.instance;
             logMessage = logmessage;

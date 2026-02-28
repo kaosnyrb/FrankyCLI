@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.SpaceCellDesigns;
+using Retrograde.Nouns.SpaceCells;
 
 namespace Retrograde.Quests
 {
@@ -92,7 +94,13 @@ namespace Retrograde.Quests
             newActivator.SetScriptProperty("duout_activator_spacetrap", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(missionTemplate.parameter1)));
 
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
-
+            //Create the space cell
+            if (missionTemplate.parameters.ContainsKey("SpaceCell"))
+            {
+                SpaceCellDesignType celldesign = (SpaceCellDesignType) missionTemplate.parameters["SpaceCell"];
+                var noun = new SpaceCellNoun(questname.ToLower(), SpaceCellDesignRegistry.Designs[celldesign]());
+                newQuest.SetQuestLevelledSpaceCellAlias(1, noun.LeveledSpaceCell.ToNullableLink());                
+            }
             //Set the interfaces
             questform = newQuest.instance;
             logMessage = logmessage;
