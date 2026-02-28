@@ -145,7 +145,7 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = true;
+                AITools.AIMODE = false;
                 bool setmissions = false;
                 if (setmissions)
                 {
