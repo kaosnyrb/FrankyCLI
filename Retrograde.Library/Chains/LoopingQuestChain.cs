@@ -5,6 +5,7 @@ using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Retrograde.Quests;
 using Retrograde.Quests.TemplateEngines;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -293,7 +294,8 @@ namespace Retrograde.Chains
             outlawNpc.GenerateLegendaryItem();
             Console.WriteLine("Generating Final Bounty Log...");
             outlawNpc.GenerateLog();
-
+            SpeechTools.AddVoice(outlawNpc.Logfile.ID, outlawNpc.instance.FormKey.ID, outlawNpc.LogText, outlawNpc.VoiceEditorId, outlawNpc.ElevenLabsVoiceId);
+            
             return true;
         }
 

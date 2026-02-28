@@ -17,7 +17,7 @@ public static class SpeechTools
     /// </summary>
     private const string AudioLogQuestEditorId = "rg_audiolog_quest";
 
-    public static bool generateWavs = false;
+    public static bool generateWavs = true;
     /// <summary>
     /// Creates the record skeleton for an audio data-slate and wires it to an existing Book.
     ///
@@ -25,8 +25,8 @@ public static class SpeechTools
     /// The Scene and DialogTopic are added to a dedicated shared audio-log Quest
     /// (created once per mod run, EditorID = "rg_audiolog_quest"), NOT to the gameplay quest.
     ///
-    /// WEMFile is left at 0 — it must be set after WAV→WEM conversion using the Wwise media ID
-    /// produced by the authoring tool. The expected voice file path is logged to console.
+    /// WEMFile is set to the DialogTopic FormKey ID — Starfield uses {topicId:X8}.wem as the filename.
+    /// The matching WAV path is logged to console so it can be handed to the Wwise authoring tool.
     /// </summary>
     /// <param name="logfileId">Raw FormKey ID of the Book (logfile) to attach voice to.</param>
     /// <param name="speakerId">Raw FormKey ID of the NPC speaking the log (sets INFO.Speaker).</param>
@@ -68,12 +68,15 @@ public static class SpeechTools
         };
         info.Speaker.SetTo(new FormKey(targetMod.ModKey, speakerId));
         var textHash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text))[..4];
-        info.Responses.Add(new DialogResponse
+        var response = new DialogResponse
         {
             ResponseText = text,
-            WEMFile   = (uint)Random.Shared.Next(500),
-            TextHash  = textHash,
-        });
+            WEMFile      = topic.FormKey.ID,
+            TextHash     = textHash,
+            EmotionOut   = 7.466667f,
+        };
+        response.Emotion.SetTo(FormKey.Null);  // None [FFFFFFFF]
+        info.Responses.Add(response);
         topic.Responses.Add(info);
         // Populate the TPIC cross-reference list so the CK can locate the INFO without
         // traversing the full DIAL GRUP. Missing TPIC causes a CK crash on click.

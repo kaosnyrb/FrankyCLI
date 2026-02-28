@@ -18,7 +18,7 @@ namespace Retrograde.AI
         public static bool AIMODE = true;
 
         // When true, ExportConversation() writes the AI history to a file. Off by default.
-        public static bool EXPORT_CONVERSATION = true;
+        public static bool EXPORT_CONVERSATION = false;
 
         static AITools()
         {
