@@ -51,7 +51,8 @@
       "Read(//c/temp/**)",
       "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/memory/**)",
       "Read(//c/Program Files \\(x86\\)/Steam/steamapps/common/Starfield/Data/**)",
-      "WebFetch(domain:elevenlabs.io)"
+      "WebFetch(domain:elevenlabs.io)",
+      "Bash(\"c:/Git/FrankyCLI/bin/Debug/net8.0/FrankyCLI.exe\" gen_shipcompare)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"

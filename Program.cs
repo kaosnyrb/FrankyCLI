@@ -99,6 +99,12 @@ switch (mode)
     case "gen_btd_flatcircle":
         return gen_btd_flatcircle.Generate(Pad("gen_btd_flatcircle", args));
 
+    case "gen_shipcompare":
+        return gen_shipcompare.Run();
+
+    case "gen_shiptest":
+        return gen_shiptest.Run();
+
     case "gen_coordtest":
         return gen_coordtest.Generate(BuildArgs("gen_coordtest", args,
             modname: Get(args, 1, "RG_CoordTest")));
