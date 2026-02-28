@@ -43,7 +43,8 @@ namespace Retrograde.Quests
 
             Console.WriteLine("shipname: " + shipname);
 
-            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
+            //SpaceShipNoun isn't working.
+            //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
 
             var questActivator = ActivatorTools.GetRandomSpaceType();
 
@@ -82,8 +83,11 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Set the guard ship
-            newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
+//            newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("GuardShip", RetrogradeContext.Current.StarfieldMod.GenericBaseForms[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToLink<IStarfieldMajorRecordGetter>());
 
+
+//Convert.ToUInt32(missionTemplate.parameters["FormId"])
             //Create the activation message
             var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)
             {

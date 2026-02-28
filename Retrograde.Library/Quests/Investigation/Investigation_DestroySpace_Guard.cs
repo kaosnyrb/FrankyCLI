@@ -41,7 +41,7 @@ namespace Retrograde.Quests
             
             var questActivator = ActivatorTools.GetRandomSpaceType();
             string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
-            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
+            //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
 
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
@@ -77,7 +77,9 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             newQuest.SetQuestReferenceSpaceLocationAlias("PatrolMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             //Set the guard ship
-            newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetQuestReferenceCreateAlias("GuardShip", RetrogradeContext.Current.StarfieldMod.GenericBaseForms[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToLink<IStarfieldMajorRecordGetter>());
+
+            //newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create the activation message
             var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)

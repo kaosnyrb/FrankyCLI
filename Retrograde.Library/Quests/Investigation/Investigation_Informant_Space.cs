@@ -52,7 +52,7 @@ namespace Retrograde.Quests
 
             string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             Console.WriteLine("shipname: " + shipname);
-            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
+            //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
             var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
             {
@@ -79,7 +79,10 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             newQuest.SetScriptProperty("duout_space_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("duout_space_bounty_quest", "GangMembers", ShipTools.GetGangList(factionID));
-            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", RetrogradeContext.Current.StarfieldMod.GenericBaseForms[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToLink<IStarfieldMajorRecordGetter>());
+
+            //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Log Entry
             var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)

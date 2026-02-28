@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Retrograde.Nouns
 {
+    // Note: This class doesn't seem to be working currently.
+    // Ships created don't seem to be boardable.
+    // Root cause is unknown.
     public class SpaceShipNoun
     {
         public string Name { get; set; }

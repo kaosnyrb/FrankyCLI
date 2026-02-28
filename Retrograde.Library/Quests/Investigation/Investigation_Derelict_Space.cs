@@ -44,7 +44,7 @@ namespace Retrograde.Quests
             var factionID = ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]);
             string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             Console.WriteLine("shipname: " + shipname);
-            var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
+            //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
             var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
@@ -91,7 +91,10 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", CrewManager.GetCrew((string)missionTemplate.parameters["Label"], shipname));
 
             newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipTools.GetGangList(factionID));
-            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+            newQuest.SetQuestReferenceCreateAlias("PrimaryRef", RetrogradeContext.Current.StarfieldMod.GenericBaseForms[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToLink<IStarfieldMajorRecordGetter>());
+
+            //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 
             var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
