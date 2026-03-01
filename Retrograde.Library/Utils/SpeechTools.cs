@@ -5,6 +5,8 @@ using Noggog;
 using Retrograde.AI;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Retrograde.Utils;
 
@@ -16,21 +18,21 @@ public static class SpeechTools
     /// all Scenes and DialogTopics so they are never mixed into gameplay quests.
     /// </summary>
     private const string AudioLogQuestEditorId = "rg_audiolog_quest";
+    private const int MaxResponseLength = 250;
 
     public static bool generateWavs = true;
     /// <summary>
     /// Creates the record skeleton for an audio data-slate and wires it to an existing Book.
     ///
-    /// Record chain: BOOK.Scene → SCEN → RadioSceneAction → DIAL → INFO (with ResponseText).
-    /// The Scene and DialogTopic are added to a dedicated shared audio-log Quest
-    /// (created once per mod run, EditorID = "rg_audiolog_quest"), NOT to the gameplay quest.
+    /// Long text is split on sentence boundaries into ≤250-character chunks.
+    /// Each chunk produces its own ScenePhase, RadioSceneAction, DialogTopic, and DialogResponses
+    /// — matching the vanilla KT quest pattern of one phase/action per audio segment.
     ///
-    /// WEMFile is set to the DialogTopic FormKey ID — Starfield uses {topicId:X8}.wem as the filename.
-    /// The matching WAV path is logged to console so it can be handed to the Wwise authoring tool.
+    /// WEMFile is set to each DialogTopic's FormKey ID — Starfield uses {topicId:X8}.wem as the filename.
     /// </summary>
     /// <param name="logfileId">Raw FormKey ID of the Book (logfile) to attach voice to.</param>
     /// <param name="speakerId">Raw FormKey ID of the NPC speaking the log (sets INFO.Speaker).</param>
-    /// <param name="text">Transcript text placed in the DialogResponse.</param>
+    /// <param name="text">Transcript text placed in the DialogResponse(s).</param>
     /// <param name="voiceTypeEditorId">EditorID of the NPC's VoiceType — used only to log the expected WEM file path.</param>
     public static void AddVoice(uint logfileId, uint speakerId, string text, string voiceTypeEditorId = "", string elevenLabsVoiceId = "")
     {
@@ -45,60 +47,12 @@ public static class SpeechTools
         var audioQuest = GetOrCreateAudioLogQuest(targetMod);
 
         string suffix = book.EditorID ?? logfileId.ToString("X6");
+        var chunks = SplitText(text);
 
-        // 3. Create DialogTopic (inline sub-record of audioQuest.DialogTopics)
-        //    Category=Scene, Subtype=CustomScene confirmed from AudioLogsQuest_KT in Starfield.esm.
-        var topic = new DialogTopic(targetMod)
-        {
-            EditorID     = "speech_topic_" + suffix,
-            Category     = DialogTopic.CategoryEnum.Scene,
-            Subtype      = DialogTopic.SubtypeEnum.CustomScene,
-            SubtypeName  = DialogTopic.SubtypeNameEnum.CustomScene,
-        };
-        topic.Quest.SetTo(audioQuest.FormKey);
-        audioQuest.DialogTopics.Add(topic);
-
-        // 4. Create DialogResponses (inline sub-record of DialogTopic.Responses)
-        //    Speaker and SubtitlePriority=Low confirmed from AudioLogsQuest_KT in Starfield.esm.
-        //    WEMFile: Wwise media ID — NOT a filename hash. Must be set after WAV→WEM conversion.
-        var info = new DialogResponses(targetMod)
-        {
-            EditorID = "speech_info_" + suffix,
-            SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
-        };
-        info.Speaker.SetTo(new FormKey(targetMod.ModKey, speakerId));
-        var textHash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text))[..4];
-        var response = new DialogResponse
-        {
-            ResponseText = text,
-            WEMFile      = topic.FormKey.ID,
-            TextHash     = textHash,
-            EmotionOut   = 7.466667f,
-        };
-        response.Emotion.SetTo(FormKey.Null);  // None [FFFFFFFF]
-        info.Responses.Add(response);
-        topic.Responses.Add(info);
-        // Populate the TPIC cross-reference list so the CK can locate the INFO without
-        // traversing the full DIAL GRUP. Missing TPIC causes a CK crash on click.
-        topic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.FormKey.ToLink<IDialogResponsesGetter>() };
-
-        // 5. Create one ScenePhase and a RadioSceneAction pointing at the topic.
-        //    AliasID = -4 is the Bethesda sentinel for "no actor alias" (radio/ambient playback).
-        var phase = new ScenePhase { Name = "AudioPhase", EditorWidth = 500 };
-        var action = new RadioSceneAction
-        {
-            Name = "AudioAction",
-            AliasID = -4,
-            Index = 0,
-            StartPhase = 0,
-            EndPhase = 0,
-        };
-        action.Topic.SetTo(topic.FormKey);
-
-        // 6. Create Scene (inline sub-record of audioQuest.Scenes)
-        //    Flags=0x80: undocumented flag present on all vanilla AudioLog scenes (not BeginOnQuestStart/StopOnQuestEnd).
+        // 3. Create Scene skeleton
+        //    Flags=0x80: undocumented flag present on all vanilla AudioLog scenes.
         //    VNAM: 5×uint32(3) — present on all vanilla AudioLog scenes verbatim.
-        //    Actors: one entry with ID=-4 (no-actor sentinel), NoCommandState — required by vanilla AudioLog scenes.
+        //    Actors: one entry with ID=-4 (no-actor sentinel), NoCommandState — required.
         var scene = new Scene(targetMod)
         {
             EditorID = "speech_scene_" + suffix,
@@ -112,16 +66,169 @@ public static class SpeechTools
             Flags         = SceneActor.Flag.NoCommandState,
             BehaviorFlags = 0,
         });
-        scene.Phases.Add(phase);
-        scene.Actions = new ExtendedList<ASceneAction> { action };
+        scene.Actions = new ExtendedList<ASceneAction>();
+
+        // 4. One phase + topic + info + action per chunk (vanilla KT pattern: 7 phases / 7 actions)
+        for (int i = 0; i < chunks.Count; i++)
+        {
+            string chunk = chunks[i];
+            string chunkSuffix = $"{suffix}_{i}";
+
+            // Phase
+            scene.Phases.Add(new ScenePhase { Name = $"AudioPhase{i}", EditorWidth = 500 });
+
+            // DialogTopic (inline sub-record of audioQuest.DialogTopics)
+            //   Category=Scene, Subtype=CustomScene confirmed from AudioLogsQuest_KT in Starfield.esm.
+            var topic = new DialogTopic(targetMod)
+            {
+                EditorID     = "speech_topic_" + chunkSuffix,
+                Category     = DialogTopic.CategoryEnum.Scene,
+                Subtype      = DialogTopic.SubtypeEnum.CustomScene,
+                SubtypeName  = DialogTopic.SubtypeNameEnum.CustomScene,
+            };
+            topic.Quest.SetTo(audioQuest.FormKey);
+            audioQuest.DialogTopics.Add(topic);
+
+            // DialogResponses (inline sub-record of DialogTopic.Responses)
+            //   Speaker and SubtitlePriority=Low confirmed from AudioLogsQuest_KT in Starfield.esm.
+            //   WEMFile = topic.FormKey.ID: Starfield resolves {topicId:X8}.wem at runtime.
+            var info = new DialogResponses(targetMod)
+            {
+                EditorID = "speech_info_" + chunkSuffix,
+                SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
+            };
+            info.Speaker.SetTo(new FormKey(targetMod.ModKey, speakerId));
+            var textHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(chunk))[..4];
+            var response = new DialogResponse
+            {
+                ResponseText = chunk,
+                WEMFile      = topic.FormKey.ID,
+                TextHash     = textHash,
+                EmotionOut   = 7.466667f,
+            };
+            response.Emotion.SetTo(FormKey.Null);  // None [FFFFFFFF]
+            info.Responses.Add(response);
+            topic.Responses.Add(info);
+            // TPIC cross-reference — missing causes CK crash on click
+            topic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+                { info.FormKey.ToLink<IDialogResponsesGetter>() };
+
+            // RadioSceneAction — AliasID=-4 is the Bethesda sentinel for "no actor alias" (radio/ambient).
+            //   StartPhase/EndPhase = i so this action fires in phase i only.
+            var action = new RadioSceneAction
+            {
+                Name       = "AudioAction",
+                AliasID    = -4,
+                Index      = (uint)i,
+                StartPhase = (uint)i,
+                EndPhase   = (uint)i,
+            };
+            action.Topic.SetTo(topic.FormKey);
+            scene.Actions.Add(action);
+
+            GenerateWavs(topic.FormKey.ID, voiceTypeEditorId, targetMod.ModKey, chunk, elevenLabsVoiceId);
+        }
+
         audioQuest.Scenes.Add(scene);
 
-        // 7. Wire the Book: mark as audio data-slate and point its Scene link at the new scene.
+        // 5. Wire the Book: mark as audio data-slate and point its Scene link at the new scene.
         book.DataSlateType = Book.DataSlateTypeEnum.Audio;
         book.Scene.SetTo(scene.FormKey);
 
-        Console.WriteLine($"[SpeechTools] AddVoice: {scene.EditorID} → {audioQuest.EditorID} / {book.EditorID}");
-        GenerateWavs(info.Responses[0].WEMFile, voiceTypeEditorId, targetMod.ModKey, text, elevenLabsVoiceId);
+        Console.WriteLine($"[SpeechTools] AddVoice: {scene.EditorID} → {audioQuest.EditorID} / {book.EditorID} ({chunks.Count} segment(s))");
+    }
+
+    /// <summary>
+    /// Splits text into chunks of at most <paramref name="maxLen"/> characters,
+    /// breaking on sentence endings (.!?) first to minimise the number of chunks,
+    /// then on clause boundaries (,;) or word boundaries for any sentence that is
+    /// itself too long.
+    /// </summary>
+    private static List<string> SplitText(string text, int maxLen = MaxResponseLength)
+    {
+        if (text.Length <= maxLen)
+            return new List<string> { text };
+
+        // Tokenise into sentences at sentence-ending punctuation followed by whitespace
+        var sentences = Regex.Split(text.Trim(), @"(?<=[.!?])\s+");
+        var chunks = new List<string>();
+        var buf = new StringBuilder();
+
+        foreach (var sentence in sentences)
+        {
+            if (sentence.Length == 0) continue;
+
+            int needed = buf.Length == 0 ? sentence.Length : buf.Length + 1 + sentence.Length;
+            if (needed <= maxLen)
+            {
+                if (buf.Length > 0) buf.Append(' ');
+                buf.Append(sentence);
+            }
+            else
+            {
+                if (buf.Length > 0) { chunks.Add(buf.ToString()); buf.Clear(); }
+
+                if (sentence.Length <= maxLen)
+                {
+                    buf.Append(sentence);
+                }
+                else
+                {
+                    // Single sentence exceeds maxLen — split on clauses then words
+                    foreach (var part in SplitLong(sentence, maxLen))
+                    {
+                        int pNeeded = buf.Length == 0 ? part.Length : buf.Length + 1 + part.Length;
+                        if (pNeeded <= maxLen)
+                        {
+                            if (buf.Length > 0) buf.Append(' ');
+                            buf.Append(part);
+                        }
+                        else
+                        {
+                            if (buf.Length > 0) { chunks.Add(buf.ToString()); buf.Clear(); }
+                            buf.Append(part);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (buf.Length > 0) chunks.Add(buf.ToString());
+        return chunks;
+    }
+
+    /// <summary>
+    /// Splits a single oversized string: first tries comma/semicolon clause boundaries,
+    /// then falls back to word-wrapping at <paramref name="maxLen"/>.
+    /// </summary>
+    private static IEnumerable<string> SplitLong(string text, int maxLen)
+    {
+        // Try clause split — if all parts fit, use them
+        var clauses = Regex.Split(text, @"(?<=[,;])\s+");
+        if (clauses.All(c => c.Length <= maxLen))
+            return clauses;
+
+        // Word-wrap fallback
+        var result = new List<string>();
+        var buf = new StringBuilder();
+        foreach (var word in text.Split(' '))
+        {
+            if (word.Length == 0) continue;
+            int needed = buf.Length == 0 ? word.Length : buf.Length + 1 + word.Length;
+            if (needed <= maxLen)
+            {
+                if (buf.Length > 0) buf.Append(' ');
+                buf.Append(word);
+            }
+            else
+            {
+                if (buf.Length > 0) { result.Add(buf.ToString()); buf.Clear(); }
+                // Single word longer than maxLen — hard truncate as last resort
+                buf.Append(word.Length <= maxLen ? word : word[..maxLen]);
+            }
+        }
+        if (buf.Length > 0) result.Add(buf.ToString());
+        return result;
     }
 
     /// <summary>
@@ -159,7 +266,7 @@ public static class SpeechTools
             catch (Exception ex)
             {
                 Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
-            }            
+            }
         }
     }
 
