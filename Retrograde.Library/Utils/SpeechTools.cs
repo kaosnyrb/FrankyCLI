@@ -3,10 +3,12 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.AI;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Retrograde.Utils;
 
@@ -20,7 +22,23 @@ public static class SpeechTools
     private const string AudioLogQuestEditorId = "rg_audiolog_quest";
     private const int MaxResponseLength = 250;
 
+    // ── Configurable paths ────────────────────────────────────────────────────
+    /// <summary>Staging directory for WAV files and Wwise WEM output.</summary>
+    public static string AudioStagingDir    = @"C:\StarfieldAudio\PC";
+    /// <summary>Full path to WwiseConsole.exe.</summary>
+    public static string WwiseConsolePath   = @"C:\Audiokinetic\Wwise2021.1.14.8108\Authoring\x64\Release\bin\WwiseConsole.exe";
+    /// <summary>Wwise Conversion Settings ShareSet name applied to all external sources.</summary>
+    public static string WwiseConversionPreset = "Voice Conversion";
+    /// <summary>Wwise project file (.wproj) used for conversion.</summary>
+    public static string WwiseProjectPath   = @"C:\StarfieldAudio\wwise\Starfield\Starfield.wproj";
+    /// <summary>Starfield game voice directory where WEMs are deployed.</summary>
+    public static string GameVoiceDir       = @"C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\Sound\Voice";
+
     public static bool generateWavs = true;
+
+    // Pending conversions: (staged WAV path, game WEM destination path)
+    private static readonly List<(string WavPath, string GameWemPath)> _pending = new();
+
     /// <summary>
     /// Creates the record skeleton for an audio data-slate and wires it to an existing Book.
     ///
@@ -33,7 +51,7 @@ public static class SpeechTools
     /// <param name="logfileId">Raw FormKey ID of the Book (logfile) to attach voice to.</param>
     /// <param name="speakerId">Raw FormKey ID of the NPC speaking the log (sets INFO.Speaker).</param>
     /// <param name="text">Transcript text placed in the DialogResponse(s).</param>
-    /// <param name="voiceTypeEditorId">EditorID of the NPC's VoiceType — used only to log the expected WEM file path.</param>
+    /// <param name="voiceTypeEditorId">EditorID of the NPC's VoiceType — used to build WAV file paths.</param>
     public static void AddVoice(uint logfileId, uint speakerId, string text, string voiceTypeEditorId = "", string elevenLabsVoiceId = "")
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
@@ -139,6 +157,159 @@ public static class SpeechTools
     }
 
     /// <summary>
+    /// Generates WAV file(s) for one audio segment and records them for later Wwise conversion.
+    ///
+    /// WAVs are written to <see cref="AudioStagingDir"/>/{plugin.esp|esm}/{voiceType}/{wemFile:X8}.wav.
+    /// Both the .esp and .esm plugin-name variants are written (Starfield requires both).
+    /// Call <see cref="ConvertAndDeploy"/> once at the end of the generation run to convert
+    /// all pending WAVs to WEM and copy them into the Starfield game directory.
+    /// </summary>
+    public static void GenerateWavs(uint wemFile, string voiceTypeEditorId, ModKey modKey,
+        string text = "", string elevenLabsVoiceId = "")
+    {
+        string stem    = Path.GetFileNameWithoutExtension(modKey.FileName);
+        string wavName = wemFile.ToString("X8");
+        string vtDir   = string.IsNullOrEmpty(voiceTypeEditorId) ? "<npc_voicetype>" : voiceTypeEditorId;
+
+        // WAV staging paths (both plugin variants)
+        string espWav = Path.Combine(AudioStagingDir, $"{stem}.esp", vtDir, $"{wavName}.wav");
+        string esmWav = Path.Combine(AudioStagingDir, $"{stem}.esm", vtDir, $"{wavName}.wav");
+
+        // Game WEM destination paths (same folder structure, .wem extension, under game voice dir)
+        string espWem = Path.Combine(GameVoiceDir, $"{stem}.esp", vtDir, $"{wavName}.wem");
+        string esmWem = Path.Combine(GameVoiceDir, $"{stem}.esm", vtDir, $"{wavName}.wem");
+
+        Console.WriteLine($"[SpeechTools] Staging WAVs for WEM {wavName}:");
+        Console.WriteLine($"  {espWav}");
+        Console.WriteLine($"  {esmWav}");
+
+        if (string.IsNullOrEmpty(elevenLabsVoiceId) || string.IsNullOrEmpty(text) || string.IsNullOrEmpty(voiceTypeEditorId))
+            return;
+
+        if (!generateWavs)
+            return;
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(espWav)!);
+            ElevenLabsAPI.GenerateSpeech(text, elevenLabsVoiceId, espWav);
+            Directory.CreateDirectory(Path.GetDirectoryName(esmWav)!);
+            File.Copy(espWav, esmWav, overwrite: true);
+            Console.WriteLine($"[SpeechTools] WAV written: {wavName}.wav");
+
+            // Queue both variants for Wwise conversion → game deploy
+            _pending.Add((espWav, espWem));
+            _pending.Add((esmWav, esmWem));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Converts all staged WAV files to WEM using WwiseConsole, then deploys the WEMs
+    /// into the Starfield game voice directory.
+    ///
+    /// Call this once at the end of the mod generation run, after all <c>AddVoice</c> calls.
+    /// Does nothing if no WAVs were staged.
+    /// </summary>
+    public static void ConvertAndDeploy()
+    {
+        if (_pending.Count == 0)
+        {
+            Console.WriteLine("[SpeechTools] ConvertAndDeploy: nothing to convert.");
+            return;
+        }
+
+        Console.WriteLine($"[SpeechTools] Converting {_pending.Count} WAV(s) via WwiseConsole...");
+
+        // Write WSOURCES XML — Wwise requires an ExternalSourcesList XML, not a plain text list
+        string tmpFile = Path.ChangeExtension(Path.GetTempFileName(), ".wsources");
+        WriteWSourcesXml(tmpFile, _pending.Select(p => p.WavPath));
+        Console.WriteLine($"[SpeechTools] Source list: {tmpFile}");
+
+        try
+        {
+            string args = $"convert-external-source \"{WwiseProjectPath}\" " +
+                          $"--platform \"Windows\" " +
+                          $"--source-by-platform \"Windows\" \"{tmpFile}\" " +
+                          $"--output \"Windows\" \"{AudioStagingDir}\" " +
+                          $"--verbose";
+
+            var psi = new ProcessStartInfo(WwiseConsolePath, args)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true,
+                UseShellExecute        = false,
+            };
+
+            using var proc = Process.Start(psi)
+                ?? throw new InvalidOperationException("Failed to start WwiseConsole.exe");
+
+            // Read stdout/stderr asynchronously to avoid deadlock if buffers fill
+            var stdoutTask = proc.StandardOutput.ReadToEndAsync();
+            var stderrTask = proc.StandardError.ReadToEndAsync();
+            proc.WaitForExit();
+            Console.Write(stdoutTask.Result);
+
+            if (proc.ExitCode != 0)
+            {
+                Console.WriteLine($"[SpeechTools] WwiseConsole exited with code {proc.ExitCode}");
+                Console.Error.Write(stderrTask.Result);
+                return;
+            }
+
+            // Deploy WEMs to game directory
+            int deployed = 0;
+            foreach (var (wavPath, gameWemPath) in _pending)
+            {
+                string wemPath = Path.ChangeExtension(wavPath, ".wem");
+                if (!File.Exists(wemPath))
+                {
+                    Console.WriteLine($"[SpeechTools] WEM not found after conversion: {wemPath}");
+                    continue;
+                }
+                Directory.CreateDirectory(Path.GetDirectoryName(gameWemPath)!);
+                File.Copy(wemPath, gameWemPath, overwrite: true);
+                Console.WriteLine($"[SpeechTools] Deployed: {gameWemPath}");
+                deployed++;
+            }
+
+            Console.WriteLine($"[SpeechTools] ConvertAndDeploy complete: {deployed}/{_pending.Count} WEM(s) deployed.");
+        }
+        finally
+        {
+            File.Delete(tmpFile);
+            _pending.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Writes a Wwise WSOURCES XML file listing WAV files for conversion.
+    /// Paths are stored relative to <see cref="AudioStagingDir"/> (the Root attribute),
+    /// so Wwise replicates the same directory structure in the output.
+    /// </summary>
+    private static void WriteWSourcesXml(string path, IEnumerable<string> wavPaths)
+    {
+        var settings = new XmlWriterSettings { Indent = true, Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false) };
+        using var writer = XmlWriter.Create(path, settings);
+        writer.WriteStartDocument();
+        writer.WriteStartElement("ExternalSourcesList");
+        writer.WriteAttributeString("SchemaVersion", "1");
+        writer.WriteAttributeString("Root", AudioStagingDir);
+        foreach (var wavPath in wavPaths)
+        {
+            writer.WriteStartElement("Source");
+            writer.WriteAttributeString("Path", Path.GetRelativePath(AudioStagingDir, wavPath));
+            writer.WriteAttributeString("Conversion", WwiseConversionPreset);
+            writer.WriteEndElement();
+        }
+        writer.WriteEndElement();
+        writer.WriteEndDocument();
+    }
+
+    /// <summary>
     /// Splits text into chunks of at most <paramref name="maxLen"/> characters,
     /// breaking on sentence endings (.!?) first to minimise the number of chunks,
     /// then on clause boundaries (,;) or word boundaries for any sentence that is
@@ -229,45 +400,6 @@ public static class SpeechTools
         }
         if (buf.Length > 0) result.Add(buf.ToString());
         return result;
-    }
-
-    /// <summary>
-    /// Logs the expected WAV file paths and, when an ElevenLabs voice ID is supplied,
-    /// calls the TTS API to generate the WAV file and writes it to both plugin variants.
-    /// Starfield looks for voice files under both .esp and .esm plugin name variants.
-    /// Path format: Data\Sound\Voice\{plugin}\{voiceType}\{wemFile:X8}.wav
-    /// </summary>
-    public static void GenerateWavs(uint wemFile, string voiceTypeEditorId, ModKey modKey,
-        string text = "", string elevenLabsVoiceId = "")
-    {
-        const string base_path = @"C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\Sound\Voice";
-        string stem    = Path.GetFileNameWithoutExtension(modKey.FileName);
-        string wavName = wemFile.ToString("X8");
-        string vtDir   = string.IsNullOrEmpty(voiceTypeEditorId) ? "<npc_voicetype>" : voiceTypeEditorId;
-
-        string espPath = $@"{base_path}\{stem}.esp\{vtDir}\{wavName}.wav";
-        string esmPath = $@"{base_path}\{stem}.esm\{vtDir}\{wavName}.wav";
-
-        Console.WriteLine($"[SpeechTools] WAV paths for WEM {wavName}:");
-        Console.WriteLine($"  {espPath}");
-        Console.WriteLine($"  {esmPath}");
-
-        if (string.IsNullOrEmpty(elevenLabsVoiceId) || string.IsNullOrEmpty(text) || string.IsNullOrEmpty(voiceTypeEditorId))
-            return;
-
-        if (generateWavs)
-        {
-            try
-            {
-                ElevenLabsAPI.GenerateSpeech(text, elevenLabsVoiceId, espPath);
-                File.Copy(espPath, esmPath, overwrite: true);
-                Console.WriteLine($"[SpeechTools] WAV written: {wavName}.wav");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
-            }
-        }
     }
 
     /// <summary>
