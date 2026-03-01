@@ -58,8 +58,8 @@ namespace Retrograde.Nouns
 
             spacesuit = hasspacesuit;
 
-            var femaleVoices = new[] { "hpp4J3VqNfWAUOO0d1Us", "EXAVITQu4vr4xnSDxMaL" };
-            var maleVoices   = new[] { "CwhRBWXzGAHq8TQ4Fs17", "IKne3meq5aSn9XLyUdCD" };
+            var femaleVoices = new[] { "ClKfJnuqp0hQ7Ax41F4w","E393dkE75hqtz1LO2aEJ","hpp4J3VqNfWAUOO0d1Us", "EXAVITQu4vr4xnSDxMaL","DbwWo4rVEd5NrejHYUnm","odyUrTN5HMVKujvVAgWW"};
+            var maleVoices   = new[] { "inKOuEy40NdNVHxcqekZ","omRordDZNt4Gy45cetUa","CjIKi1zuI666pVsFrtyU","zcIk2xc7SGwlywr4TzZu","7QTeMqXOsYj1AQaKLcrf","CsbTapRVtZdcBs3vBbQe", "N2lVS1w4EtoT3dr4eOWO", "CwhRBWXzGAHq8TQ4Fs17", "IKne3meq5aSn9XLyUdCD" };
             var voicePool = female ? femaleVoices : maleVoices;
             ElevenLabsVoiceId = voicePool[RandomProvider.Random.Next(voicePool.Length)];
 
@@ -100,7 +100,11 @@ namespace Retrograde.Nouns
                     sb.AppendLine("- Currently hunted by: " + BountyFaction);
             }
             sb.AppendLine();
-            sb.AppendLine("Tone: this character is exhausted, paranoid, and afraid. They are not coping. There is no dark humour, no bravado, no uplift.");
+            var rng = RandomProvider.Random;
+            string tone  = SeedManager.LogTones[rng.Next(SeedManager.LogTones.Count)];
+            string focus = SeedManager.LogFocusPoints[rng.Next(SeedManager.LogFocusPoints.Count)];
+
+            sb.AppendLine("Tone: " + tone + ".");
             sb.AppendLine();
             sb.AppendLine("Voice delivery rules — follow these exactly:");
             sb.AppendLine("- You may use these audio tags sparingly, only where they add genuine stress or fear: [sighs], [whispers], [exhales sharply].");
@@ -113,8 +117,7 @@ namespace Retrograde.Nouns
             sb.AppendLine("- Do NOT open with any recording preamble — no 'Recording...', no stating their name, no date stamp. Go straight into the content.");
             sb.AppendLine();
             sb.AppendLine("Content:");
-            sb.AppendLine("- Cover why they fled, where they're hiding, and how scared they are.");
-            sb.AppendLine("- The emotional register is: cornered, tired, and running out of options.");
+            sb.AppendLine("- The emotional core of this log is: " + focus + ".");
             sb.AppendLine("- Total length: under 140 words. Every word will be read aloud, so make each one count.");
 
             Console.WriteLine("Generating Outlaw Log...");

@@ -10,6 +10,7 @@ using Retrograde;
 using Retrograde.AI;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Utils;
 using System;
 using System.IO;
 using System.Linq;
@@ -146,6 +147,8 @@ namespace FrankyCLI
                 //We have different styles of quest chains, so randomly choose one.
 
                 AITools.AIMODE = true;
+                SpeechTools.generateWavs = true;
+                
                 bool setmissions = false;
                 if (setmissions)
                 {

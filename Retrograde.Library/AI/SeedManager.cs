@@ -225,6 +225,30 @@ namespace Retrograde.AI.Utils
             "carefully maintains small routines that mask deeper unease"
         };
 
+        // Emotional tone for outlaw audio log — picked randomly so each log feels distinct
+        public static readonly List<string> LogTones = new List<string>
+        {
+            "exhausted, paranoid, and afraid — they are not coping; there is no dark humour, no bravado, no uplift",
+            "defiant and angry — they don't believe they did anything wrong and want the record to reflect that",
+            "hollow and resigned — they've stopped expecting to get out of this; they're marking time, not planning",
+            "desperately bargaining with themselves — listing reasons they'll get away with it, convincing no one including themselves",
+            "bitter and accusatory — the entire log is an indictment of a specific person they hold responsible for everything",
+            "methodical and suppressed — trying hard to stay calm and practical, but fear seeps through every sentence",
+        };
+
+        // What the log is emotionally about — the subject the character keeps returning to
+        public static readonly List<string> LogFocusPoints = new List<string>
+        {
+            "their escape route — what worked, what fell through, and what they're attempting next",
+            "a person they had to cut off or leave behind to stay alive",
+            "the moment they knew they were finished — a specific decision or event that sealed their fate",
+            "the act itself — what they did or took, and why it felt necessary at the time",
+            "who they blame, and the case they're building in their own head for why that person is worse than they are",
+            "what they plan to do if they somehow get clear of all this",
+            "what they believe will happen to them if they're caught",
+            "a small routine or habit they've clung to as everything else has fallen apart",
+        };
+
         // Who is writing the first-person account found in the world
         public static readonly List<string> SpeakerTypes = new List<string>
         {
