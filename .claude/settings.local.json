@@ -52,7 +52,8 @@
       "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/memory/**)",
       "Read(//c/Program Files \\(x86\\)/Steam/steamapps/common/Starfield/Data/**)",
       "WebFetch(domain:elevenlabs.io)",
-      "Bash(\"c:/Git/FrankyCLI/bin/Debug/net8.0/FrankyCLI.exe\" gen_shipcompare)"
+      "Bash(\"c:/Git/FrankyCLI/bin/Debug/net8.0/FrankyCLI.exe\" gen_shipcompare)",
+      "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/5bf65c30-f4d8-4213-ab80-164f138e33ab/tool-results/**)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"
