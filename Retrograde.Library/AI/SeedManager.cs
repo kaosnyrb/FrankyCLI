@@ -22,6 +22,14 @@ namespace Retrograde.AI.Utils
             "Bo", "Chen", "Fang", "Hao", "Jun", "Lei", "Ming", "Peng", "Wei",
             // Russian
             "Alexei", "Dmitri", "Igor", "Mikhail", "Pavel", "Sergei", "Vadim",
+            // Korean
+            "Daehyun", "Jaemin", "Minjun", "Seunghyun", "Woojin",
+            // Indian
+            "Arjun", "Dev", "Kiran", "Rohan", "Vikram",
+            // Nigerian / West African
+            "Adebayo", "Emeka", "Femi", "Kalu", "Tunde",
+            // More American / British
+            "Brent", "Colt", "Finn", "Knox", "Ryker",
         };
 
         private static readonly List<string> FemaleFirstNames = new List<string>
@@ -41,6 +49,14 @@ namespace Retrograde.AI.Utils
             "Fen", "Jia", "Lin", "Mei", "Ning", "Rui", "Xia", "Yan",
             // Russian
             "Anya", "Dasha", "Irina", "Katya", "Mila", "Nadia", "Sonya", "Tasha",
+            // Korean
+            "Chaeyeon", "Jisoo", "Minji", "Seulgi", "Soyeon",
+            // Indian
+            "Ananya", "Divya", "Kavya", "Priya", "Shreya",
+            // Nigerian / West African
+            "Adaeze", "Chioma", "Ngozi", "Nneka", "Temi",
+            // More American / British
+            "Aria", "Brynn", "Juniper", "Lyra", "Piper",
         };
 
         private static readonly List<string> Surnames = new List<string>
@@ -61,6 +77,14 @@ namespace Retrograde.AI.Utils
             "Bai", "Cao", "Gao", "Hu", "Liang", "Liu", "Sun", "Tang", "Wu", "Xiao", "Zhang",
             // Russian
             "Bokov", "Dragunov", "Kozlov", "Lebedev", "Morozov", "Petrov", "Sokolov", "Volkov",
+            // Korean
+            "Cho", "Han", "Jeon", "Jung", "Kwon", "Oh", "Shin", "Yoon",
+            // Indian
+            "Nair", "Rao", "Sharma", "Singh", "Choudhary",
+            // Nigerian / West African
+            "Adeyemi", "Eze", "Nwosu", "Obi", "Okeke",
+            // More British / American
+            "Greer", "Harlow", "McKenna", "Whitmore", "Draper",
         };
 
         public static string GenerateName(bool female)
@@ -82,7 +106,14 @@ namespace Retrograde.AI.Utils
             "colony maintenance worker", "transit scheduler", "fuel depot operator",
             "lab assistant", "livestock handler", "dockmaster clerk",
             "waste processing operator", "colony supply runner", "security guard",
-            "planetary soil tester"
+            "planetary soil tester",
+            "salvage crew hand", "prospector on low-yield claims", "cold storage clerk",
+            "data relay operator", "radiation safety monitor", "field medic",
+            "habitat construction worker", "power cell recycler", "seed vault technician",
+            "repair bay welder", "colony census recorder", "ship parts inspector",
+            "outpost perimeter guard", "hazmat disposal worker", "communications relay operator",
+            "terraforming support tech", "settlement cook", "water purification technician",
+            "transit dock hand", "livestock geneticist"
         };
 
         public static readonly List<string> Crimes = new List<string>
@@ -101,7 +132,27 @@ namespace Retrograde.AI.Utils
             "sold access credentials to an outside buyer",
             "extorted a business competitor",
             "tampered with inventory records for personal gain",
-            "impersonated a licensed contractor to pocket payment"
+            "impersonated a licensed contractor to pocket payment",
+            "falsified safety inspection reports in exchange for a bribe",
+            "diverted emergency supplies to sell privately",
+            "smuggled contraband aboard a colony transport",
+            "ran an unlicensed gambling operation from their workplace",
+            "staged a theft to collect the insurance payout",
+            "sold classified colony survey data to a rival faction",
+            "laundered credits through a shell business",
+            "sabotaged a competitor's equipment to win a contract",
+            "coerced a junior worker into covering for their mistakes",
+            "collected a dead colleague's wages using their stolen identity",
+            "skimmed fuel quotas over a prolonged period",
+            "leaked proprietary data to an outside buyer",
+            "filed fraudulent expense claims over several years",
+            "planted false evidence to frame a colleague for their own crime",
+            "threatened a witness into staying silent",
+            "misappropriated relief funds sent for disaster victims",
+            "operated a grey-market parts depot out of their workplace",
+            "bribed a port official to clear irregular cargo",
+            "stole personal effects from a deceased settler's quarters",
+            "poisoned a rival's supply cache to drive them out of business"
         };
 
         public static readonly List<string> Motives = new List<string>
@@ -117,7 +168,27 @@ namespace Retrograde.AI.Utils
             "fear of losing their colony housing",
             "misplaced loyalty to someone who exploited them",
             "revenge for being passed over for a promotion they deserved",
-            "getting caught in someone else's scheme and panicking"
+            "getting caught in someone else's scheme and panicking",
+            "trying to escape an abusive situation with no other options",
+            "funding an off-world relocation for their children",
+            "blackmailed by someone who knew about a past mistake",
+            "too proud to admit failure and kept digging deeper",
+            "acting on orders from someone they were afraid to refuse",
+            "protecting a secret that would have ended their career",
+            "trying to reclaim something they believed was stolen from them",
+            "caught between two criminal groups with no safe exit",
+            "a slow slide from bending rules to breaking them outright",
+            "manipulated by someone they trusted completely",
+            "grief that made them stop caring about consequences",
+            "simply convinced they wouldn't get caught",
+            "an addiction that consumed their savings and then their ethics",
+            "a bitter rivalry that escalated beyond what they intended",
+            "making a split-second decision they couldn't take back",
+            "believing the corporation owed them for years of exploitation",
+            "covering for a family member who made the first mistake",
+            "convinced the target of their crime deserved everything they got",
+            "chasing a rumour of easy credits that turned far more complicated",
+            "believing they were helping someone who was actually using them"
         };
 
         public static readonly List<string> PersonalityTraits = new List<string>
@@ -131,7 +202,27 @@ namespace Retrograde.AI.Utils
             "meek in person, calculating in planning",
             "charming on the surface, self-serving underneath",
             "genuinely convinced what they did was justified",
-            "deeply ashamed but committed to seeing it through"
+            "deeply ashamed but committed to seeing it through",
+            "quick to deflect blame onto anyone nearby",
+            "quietly desperate but maintains a calm facade",
+            "genuinely remorseful but unwilling to hand themselves in",
+            "prone to over-explaining to fill nervous silences",
+            "fiercely protective of anyone they consider family",
+            "bitter and fatalistic — expects to get caught eventually",
+            "obsessively careful about small details, blind to bigger risks",
+            "easily led by stronger personalities",
+            "tends to underestimate others and talk too much",
+            "keeps their own counsel — shares nothing they don't have to",
+            "cold and transactional, rarely shows emotion",
+            "superstitious — believes fate is actively working against them",
+            "uses humour to deflect serious questions",
+            "highly adaptive — reads people quickly and adjusts accordingly",
+            "stubborn — refuses to admit a plan is failing even when it is",
+            "prone to impulsive decisions followed by elaborate rationalisations",
+            "compassionate toward strangers but ruthless toward institutions",
+            "nostalgic — often references how things used to be before all this",
+            "speaks in half-truths — never quite lying, never quite honest",
+            "carefully maintains small routines that mask deeper unease"
         };
 
         // Who is writing the first-person account found in the world
@@ -146,7 +237,27 @@ namespace Retrograde.AI.Utils
             "a person who was owed money by the target and never got paid",
             "a friend or associate who is now avoiding questions about the target",
             "someone who shared a workspace with the target and noticed too late",
-            "a person who found something the target left behind when they fled"
+            "a person who found something the target left behind when they fled",
+            "a security contractor brought in after the target disappeared",
+            "a former business partner now worried about their own exposure",
+            "a child or younger relative who noticed things adults missed",
+            "a medic who treated the target for injuries they couldn't explain",
+            "someone who received a strange message from the target just before they vanished",
+            "a rival who quietly benefited from the target's troubles and feels uneasy about it",
+            "a courier who made regular deliveries and noticed things changing",
+            "a salvager who found materials at a site that shouldn't have been there",
+            "a bartender who overheard conversations they didn't understand at the time",
+            "a port official who processed an irregular shipment now linked to the target",
+            "a former roommate who noticed unexplained cash and goods appearing",
+            "a repair technician who spotted unexplained modifications on the target's equipment",
+            "a community leader trying to make sense of what the target did to their settlement",
+            "someone the target tried to recruit, who refused and doesn't know what to do with that",
+            "a retired law enforcement contact with an old grudge and new evidence",
+            "a family member torn between loyalty and the harm the target caused",
+            "a bureaucrat who signed off on documents they now deeply regret",
+            "an eyewitness who left the area and has been reluctant to speak until now",
+            "an automated system log that captured anomalies no one thought to check",
+            "a journalist or information broker who has been quietly pulling threads"
         };
     }
 }

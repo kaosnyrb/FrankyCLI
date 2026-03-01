@@ -167,6 +167,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetAClassShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -315,6 +319,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetBClassShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -463,6 +471,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Crimson Fleet"},
+                    {"FormId", ShipTools.GetCargoShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -613,6 +625,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetAClassShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -761,6 +777,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetBClassShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -909,6 +929,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Spacer"},
+                    {"FormId", ShipTools.GetCargoShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -1059,6 +1083,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetAClassShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -1207,6 +1235,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetBClassShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -1355,6 +1387,10 @@ namespace Retrograde.Quests
                 },
                 Addons = new List<string>(),
                 parameters = new Dictionary<string, object>()
+                {
+                    {"Label", "Ecliptic"},
+                    {"FormId", ShipTools.GetCargoShip()}
+                }
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {

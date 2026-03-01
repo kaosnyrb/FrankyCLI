@@ -217,7 +217,7 @@ namespace Retrograde.Nouns
             Book logbook = new Book(myMod)
             {
                 Components = Book.Components,
-                Description = log,
+                Text = log,
                 DropdownSound = Book.DropdownSound,
                 EditorID = "book_" + (name.ToLower()).Replace(" ", ""),
                 Keywords = Book.Keywords,
