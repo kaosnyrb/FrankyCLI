@@ -13,5 +13,6 @@ public static class WorldspaceDesignRegistry
                 { "Fort", () => new FortDesign() },
                 { "ScienceOutpost", () => new ScienceOutpostDesign() },
                 { "Racetrack", () => new RacetrackDesign() },
+                { "SmallIndustryBase", () => new SmallIndustryBaseDesign() },
             });
 }
