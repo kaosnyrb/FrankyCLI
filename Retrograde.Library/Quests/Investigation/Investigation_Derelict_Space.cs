@@ -88,7 +88,8 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_space_derelict_quest", "ItemSpawnMarkers", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             
-            newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", CrewManager.GetCrew((string)missionTemplate.parameters["Label"], shipname));
+            var (corpses, crewSpeaker, crewIsFemale) = CrewManager.GetCrew((string)missionTemplate.parameters["Label"], shipname);
+            newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", corpses);
 
             newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipTools.GetGangList(factionID));
 
@@ -97,15 +98,28 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 
-            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            var booklogmessage = PromptManager.GetTransmission(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",
-                "Board the " + shipname + " and find the " + datasource + "\r\n",
                 "Derelict Spaceship: " + shipname + "\r\n",
                 "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
             });
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
+
+            // Voice the data-slate as a transmission left on the derelict ship.
+            // Speaker is the last crew NPC (the one that carries the log entry).
+            var txVoicePool = crewIsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
+            var crewVoice = NPCTools.GetVoice((string)missionTemplate.parameters["Label"], crewIsFemale);
+            string crewVoiceEditorId = string.Empty;
+            if (!crewVoice.IsNull)
+            {
+                crewSpeaker.Voice.SetTo(crewVoice.FormKey);
+                var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == crewVoice.FormKey);
+                crewVoiceEditorId = vtRec?.EditorID ?? crewVoice.FormKey.ID.ToString("X6");
+            }
+            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, crewSpeaker.FormKey, booklogmessage, crewVoiceEditorId, txVoice.Id);
 
             var frmlst = new FormList(myMod)
             {

@@ -43,8 +43,11 @@ namespace Retrograde.Quests.TemplateEngines
 
             if (!string.IsNullOrEmpty(mission))
             {
-                var template = AvailableTemplateLib.ShowdownTemplates.Single(x => x.Name == mission);
-                return ApplyAddons(template, addons);
+                var template = AvailableTemplateLib.ShowdownTemplates.FirstOrDefault(x => x.Name == mission);
+                if (template == null)
+                    Console.WriteLine($"AI_TemplateEngine: No showdown template named '{mission}' found, falling back to random.");
+                else
+                    return ApplyAddons(template, addons);
             }
 
             if (AITools.AIMODE)
@@ -163,8 +166,11 @@ namespace Retrograde.Quests.TemplateEngines
 
                 if (!string.IsNullOrEmpty(mission))
                 {
-                    var template = AvailableTemplateLib.ShowdownTemplates.Single(x => x.Name == mission);
-                    return ApplyAddons(template, addons);
+                    var template = AvailableTemplateLib.ShowdownTemplates.FirstOrDefault(x => x.Name == mission);
+                    if (template == null)
+                        Console.WriteLine($"AI_TemplateEngine: No showdown template named '{mission}' found, falling back to random.");
+                    else
+                        return ApplyAddons(template, addons);
                 }
 
                 var randomTemplate = AvailableTemplateLib.ShowdownTemplates[random.Next(AvailableTemplateLib.ShowdownTemplates.Count)];
@@ -179,11 +185,14 @@ namespace Retrograde.Quests.TemplateEngines
 
             if (!string.IsNullOrEmpty(mission))
             {
-                var template = AvailableTemplateLib.InvestigationTemplates.Single(x => x.Name == mission);
-                return ApplyAddons(template, addons);
+                var template = AvailableTemplateLib.InvestigationTemplates.FirstOrDefault(x => x.Name == mission);
+                if (template == null)
+                    Console.WriteLine($"AI_TemplateEngine: No investigation template named '{mission}' found, falling back to random.");
+                else
+                    return ApplyAddons(template, addons);
             }
 
-            
+
 
             if (AITools.AIMODE)
             {
@@ -288,16 +297,18 @@ namespace Retrograde.Quests.TemplateEngines
             // Non-AI mode
             if (!string.IsNullOrEmpty(mission))
             {
-                var template = AvailableTemplateLib.InvestigationTemplates.Single(x => x.Name == mission);
-                return ApplyAddons(template, addons);
+                var template = AvailableTemplateLib.InvestigationTemplates.FirstOrDefault(x => x.Name == mission);
+                if (template == null)
+                    Console.WriteLine($"AI_TemplateEngine: No investigation template named '{mission}' found, falling back to random.");
+                else
+                    return ApplyAddons(template, addons);
             }
-            else
-            {
-                int selectedIndex = random.Next(AvailableTemplateLib.InvestigationTemplates.Count);
-                var template = AvailableTemplateLib.InvestigationTemplates[selectedIndex];
-                AvailableTemplateLib.InvestigationTemplates.RemoveAt(selectedIndex);
-                return ApplyAddons(template, addons);
-            }
+
+            // Fallback: random selection
+            int selectedIndex = random.Next(AvailableTemplateLib.InvestigationTemplates.Count);
+            var selectedTemplate = AvailableTemplateLib.InvestigationTemplates[selectedIndex];
+            AvailableTemplateLib.InvestigationTemplates.RemoveAt(selectedIndex);
+            return ApplyAddons(selectedTemplate, addons);
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate(string missionname, List<string> addons = null)

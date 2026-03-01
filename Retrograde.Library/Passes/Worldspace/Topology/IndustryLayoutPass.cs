@@ -9,37 +9,39 @@ namespace Retrograde.Passes.Worldspace;
 /// Places 3–6 GPPIPCMManMade_ PackIn buildings in a compact cluster
 /// around the map centre (24, 24) using a fixed slot grid.
 ///
-/// Inner ring: up to 5 buildings on 4 diagonal slots at step ±13 from centre.
-/// Outer ring: 1–2 solar/misc prefabs on 4 cardinal slots at step ±20 from centre.
+/// Inner ring: up to 5 buildings on 4 diagonal slots at step ±10 from centre.
+/// Outer ring: 1–2 solar/misc prefabs on 4 cardinal slots at step ±14 from centre.
 /// No walls, gates, connectors, or scatter tiles.
 ///
 /// Slot spacing verified against actual PackIn ObjectBounds (TileWorldSize=4):
-///   - Inner step 13 → 52 overlay units. Worst pair (FluidStorageXLarge+XLarge): gap 7.8.
+///   - Inner step 10 → 40 overlay units. Worst pair (FluidStorageXLarge+XLarge): gap 36.
 ///   - Diagonal-only inner ring avoids same-axis conflicts with the cardinal outer ring.
-///   - Inner diagonal (37,37) to outer cardinal (44,24): ≈59 units, gap 21.3.
+///   - Inner diagonal (34,34) to outer cardinal (38,24): ≈43 overlay units, gap 5.1.
 /// All gaps ≥ 5 overlay units for the largest variants in each category.
+/// Everything sits ≥ 10 tiles from the map edge (was 3–4 tiles for the outer ring).
 /// </summary>
 /// <param name="scale">Controls cluster density (0.1 = 3 buildings, 1.0 = 6 buildings).</param>
 public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
 {
     private readonly float _scale = Math.Clamp(scale, 0.1f, 1.0f);
 
-    // Inner ring: 4 diagonal slots at step ±13 from centre (24, 24).
+    // Inner ring: 4 diagonal slots at step ±10 from centre (24, 24).
     // Diagonal-only so there is no same-axis conflict with the cardinal outer ring slots.
-    // Step 13 × TileWorldSize 4 = 52 overlay units between centres.
-    // Worst-case pair (two FluidStorageXLargeB — ±22 on Y): gap = 52 - 22 - 22 = 8 units ✓
+    // Step 10 × TileWorldSize 4 = 40 overlay units from centre.
+    // Worst-case inner pair (same axis, 20 tiles apart): gap = 80 - 22 - 22 = 36 units ✓
     private static readonly (int x, int y)[] InnerSlots =
     {
-        (37, 37), (37, 11),
-        (11, 37), (11, 11),
+        (34, 34), (34, 14),
+        (14, 34), (14, 14),
     };
 
-    // Outer ring: 4 cardinal slots at step ±20 from centre.
-    // Step 20 × 4 = 80 overlay units from centre.
-    // Nearest inner building is the diagonal at ≈59 overlay units from (44,24) → gap 21 ✓
+    // Outer ring: 4 cardinal slots at step ±14 from centre.
+    // Step 14 × 4 = 56 overlay units from centre.
+    // Nearest inner building is the diagonal at ≈43 overlay units from (38,24) → gap 5.1 ✓
+    // All positions ≥ 10 tiles from the map edge (was 3–4 tiles at step ±20).
     private static readonly (int x, int y)[] OuterSlots =
     {
-        (44, 24), (4, 24), (24, 44), (24, 4),
+        (38, 24), (10, 24), (24, 38), (24, 10),
     };
 
     // Additional inner categories after the centre (AbandonedIndustrial)

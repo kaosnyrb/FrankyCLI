@@ -12,7 +12,7 @@ namespace Retrograde.Nouns
 {
     public class CrewManager
     {
-        public static IFormLink<IStarfieldMajorRecordGetter> GetCrew(string Faction, string ShipName)
+        public static (IFormLink<IStarfieldMajorRecordGetter> crewList, Npc speaker, bool isFemale) GetCrew(string Faction, string ShipName)
         {
             Random rand = RandomProvider.Random;
             List<ICrew> crews = new List<ICrew>()

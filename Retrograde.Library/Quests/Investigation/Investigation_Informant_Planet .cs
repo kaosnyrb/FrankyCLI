@@ -133,6 +133,16 @@ namespace Retrograde.Quests
             {
                 new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } }
             };
+            // Set voice type after construction (Mutagen nullable FormLink rule).
+            var npcVoice = NPCTools.GetVoice("", isfemale);
+            string npcVoiceEditorId = string.Empty;
+            if (!npcVoice.IsNull)
+            {
+                npc.Voice.SetTo(npcVoice.FormKey);
+                var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == npcVoice.FormKey);
+                npcVoiceEditorId = vtRec?.EditorID ?? npcVoice.FormKey.ID.ToString("X6");
+            }
+
             myMod.Npcs.Add(npc);
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetObjective(0, "Read the " + datasource + " from " + npc.Name);
@@ -149,6 +159,12 @@ namespace Retrograde.Quests
             var bountybook = new BookNoun("duout_book_completeandstart", datasource, booklogmessage);
             bountybook.SetScriptProperty("duout_queststartandend", "questtoend", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             bountybook.SetScriptProperty("duout_queststartandend", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
+
+            // Voice the data-slate as a transmission left by the informant.
+            // ExtraLore is already folded into booklogmessage via missionTemplate.Addons.
+            var txVoicePool = isfemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
+            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, npc.FormKey, booklogmessage, npcVoiceEditorId, txVoice.Id);
 
             var frmlst = new FormList(myMod)
             {

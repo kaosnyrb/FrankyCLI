@@ -310,6 +310,36 @@ namespace Retrograde.AI.Utils
         }
 
         // ------------------------------
+        // Derelict Ship Transmission
+        // ------------------------------
+        public static string GetTransmission(List<string> Addons)
+        {
+            string transmissionType = SeedManager.TransmissionTypes[RandomProvider.Random.Next(SeedManager.TransmissionTypes.Count)];
+
+            var prompt =
+                "Write " + transmissionType + " that the player finds aboard a derelict ship in deep space.\r\n" +
+                "This is a short audio recording played back through a data-slate — write it for voice performance, not for reading.\r\n\r\n" +
+
+                "Rules:\r\n" +
+                "- Under 100 words. Every word will be spoken aloud — make each one count.\r\n" +
+                "- Pure spoken audio — no headers, bullet points, or labels.\r\n" +
+                "- Do NOT open with a recording preamble — no 'Recording...', no date stamp, no name announcement. Go straight into the content.\r\n" +
+                "- The recording must reference or hint at the next destination — where the trail leads from here.\r\n" +
+                "- Use the LoreContext for concrete names, faction, and location. Do not invent new names.\r\n" +
+                "- Match the tone to the type of transmission: urgency for a distress signal, cold precision for a coded dead drop, fear for a last warning.\r\n\r\n" +
+
+                "Additional Information:\r\n";
+
+            foreach (var item in Addons)
+                prompt += item;
+
+            var result = AITools.RunPrompt(prompt);
+            for (int i = 0; i < 10 && result.Length < 50; i++)
+                result = AITools.RunPrompt(prompt);
+            return result;
+        }
+
+        // ------------------------------
         // Mission Briefing Dataslate
         // ------------------------------
         public static string GetMissionBriefingDataslate(List<string> Addons)

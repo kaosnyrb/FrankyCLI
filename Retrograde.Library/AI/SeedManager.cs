@@ -16,7 +16,12 @@ namespace Retrograde.AI.Utils
             new("Emily", "odyUrTN5HMVKujvVAgWW"),
             new("Isla", "h8eW5xfRUGVJrZhAFxqK"),
             new("Lauren", "l4Coq6695JDX9xtLqXDE"),
-            new("Caty", "54Cze5LrTSyLgbO6Fhlc"),            
+            new("Caty", "54Cze5LrTSyLgbO6Fhlc"),         
+            new("Serafina", "4tRn1lSkEn13EVTuqb0g"),
+            new("Xiaoxi", "rk9BD4xwuG39syvDIBQy"),
+            new("Sara", "BXeZVLBk6Y5kMHj9cDEY"),
+
+            
         };
 
         public static readonly List<ElevenLabsVoice> MaleVoices = new()
@@ -28,6 +33,9 @@ namespace Retrograde.AI.Utils
             new("Julian Aus", "7QTeMqXOsYj1AQaKLcrf"),
             new("Tristan", "CsbTapRVtZdcBs3vBbQe"),
             new("Hector", "dgkKQcJqyy5AP0dqleUU"),
+            new("JonJebus ", "wsHauqjSkdBeAvdbUFmR"),
+
+            
         };
 
 
@@ -273,6 +281,23 @@ namespace Retrograde.AI.Utils
             "what they plan to do if they somehow get clear of all this",
             "what they believe will happen to them if they're caught",
             "a small routine or habit they've clung to as everything else has fallen apart",
+        };
+
+        // The type of transmission found on the derelict ship — shapes the AI prompt and tone
+        public static readonly List<string> TransmissionTypes = new List<string>
+        {
+            "a distress beacon set to loop automatically after the crew stopped responding",
+            "a personal audio log recorded by a crew member in their final hours aboard the ship",
+            "a coded message intended for a contact outside the ship that was never transmitted",
+            "a scheduled status report that was recorded but never sent before things went wrong",
+            "a warning left by whoever survived longest, hoping someone would eventually board",
+            "an emergency broadcast triggered automatically when the ship's crew stopped responding",
+            "a private message from a crew member to someone they were trying to protect",
+            "a data burst sent to a dead drop that was intercepted and stored to local memory",
+            "a fragmented recording recovered from a damaged data slate found near the airlock",
+            "a cryptic voice note left as insurance, meant to be found only by the right person",
+            "a transmission from a contact trying to reach the crew — saved to the local log because no one answered",
+            "a last-resort message recorded by someone who knew they were not getting off the ship",
         };
 
         // Who is writing the first-person account found in the world

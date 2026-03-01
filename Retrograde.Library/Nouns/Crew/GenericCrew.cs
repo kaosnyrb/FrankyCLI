@@ -59,7 +59,7 @@ namespace Retrograde.Nouns.Crew
 
 
 
-        public IFormLink<IStarfieldMajorRecordGetter> GetCrewFormList(string Faction,string ShipName)
+        public (IFormLink<IStarfieldMajorRecordGetter> crewList, Npc speaker, bool isFemale) GetCrewFormList(string Faction,string ShipName)
         {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -78,6 +78,8 @@ namespace Retrograde.Nouns.Crew
 
             bool generatebook = false;
             int crewcount = 5;
+            Npc lastNpc = null;
+            bool lastIsFemale = false;
 
             for (int i = 0; i < crewcount; i++)
             {
@@ -142,10 +144,12 @@ namespace Retrograde.Nouns.Crew
                 //Add it to the list
                 list.Add(npc);
                 frmlst.Items.Add(npc);
+                lastNpc = npc;
+                lastIsFemale = isfemale;
             }
 
             targetMod.FormLists.Add(frmlst);
-            return targetMod.FormLists[frmlst.FormKey].ToLink<IStarfieldMajorRecordGetter>();
+            return (targetMod.FormLists[frmlst.FormKey].ToLink<IStarfieldMajorRecordGetter>(), lastNpc, lastIsFemale);
         }
     }
 }

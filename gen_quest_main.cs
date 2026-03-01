@@ -149,13 +149,13 @@ namespace FrankyCLI
                 AITools.AIMODE = true;
                 SpeechTools.generateWavs = true;
                 
-                bool setmissions = false;
+                bool setmissions = true;
                 if (setmissions)
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "Space Destroy - unguarded IceCrystals",
-                        DeepTempalte = "Space Destroy - unguarded",
+                        InvestigationTemplate = "Space Derelict - UC Navy Cargo Rocky Asteroids",
+                        DeepTempalte = "Planetside Smallbase Informant - Trade Authority Brokerd",
                         ShowdownTemplate = "City Bounty - Paradiso"
                     };
                     outlawQuest.GenerateQuest();                    

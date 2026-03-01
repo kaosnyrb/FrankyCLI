@@ -78,17 +78,17 @@ namespace Retrograde.Quests.TemplateEngines
         {
             Random random = RandomProvider.Random;
 
-            MissionTemplate template = null;
-            if (mission.Length > 0)
-            {
-                template = MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
-            }
-
             if (MergedLib.ShowdownTemplates.Count == 0) return null;
 
+            MissionTemplate template;
             if (mission != "")
             {
-                template = MergedLib.ShowdownTemplates.Where(x => x.Name == mission).Single();
+                template = MergedLib.ShowdownTemplates.FirstOrDefault(x => x.Name == mission);
+                if (template == null)
+                {
+                    Console.WriteLine($"RandomTemplateManager: No showdown template named '{mission}' found, falling back to random.");
+                    template = MergedLib.ShowdownTemplates[random.Next(MergedLib.ShowdownTemplates.Count)];
+                }
             }
             else
             {
@@ -107,7 +107,11 @@ namespace Retrograde.Quests.TemplateEngines
             if (mission != "")
             {
                 //Don't really care about deleting as this is for testing
-                return MergedLib.InvestigationTemplates.Where(x => x.Name == mission).Single();
+                var named = MergedLib.InvestigationTemplates.FirstOrDefault(x => x.Name == mission);
+                if (named == null)
+                    Console.WriteLine($"RandomTemplateManager: No investigation template named '{mission}' found, falling back to random.");
+                else
+                    return named;
             }
             else
             {

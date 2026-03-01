@@ -40,6 +40,13 @@ public static class SpeechTools
     private static readonly List<(string WavPath, string GameWemPath)> _pending = new();
 
     /// <summary>
+    /// Overload that accepts a raw NPC ID from the target mod.
+    /// Speaker FormKey is built from <c>targetMod.ModKey + speakerId</c>.
+    /// </summary>
+    public static void AddVoice(uint logfileId, uint speakerId, string text, string voiceTypeEditorId = "", string elevenLabsVoiceId = "")
+        => AddVoice(logfileId, new FormKey(RetrogradeContext.Current.TargetMod.ModKey, speakerId), text, voiceTypeEditorId, elevenLabsVoiceId);
+
+    /// <summary>
     /// Creates the record skeleton for an audio data-slate and wires it to an existing Book.
     ///
     /// Long text is split on sentence boundaries into ≤250-character chunks.
@@ -49,10 +56,10 @@ public static class SpeechTools
     /// WEMFile is set to each DialogTopic's FormKey ID — Starfield uses {topicId:X8}.wem as the filename.
     /// </summary>
     /// <param name="logfileId">Raw FormKey ID of the Book (logfile) to attach voice to.</param>
-    /// <param name="speakerId">Raw FormKey ID of the NPC speaking the log (sets INFO.Speaker).</param>
+    /// <param name="speakerFormKey">Full FormKey of the NPC speaking the log (may be from any mod, including Starfield.esm).</param>
     /// <param name="text">Transcript text placed in the DialogResponse(s).</param>
     /// <param name="voiceTypeEditorId">EditorID of the NPC's VoiceType — used to build WAV file paths.</param>
-    public static void AddVoice(uint logfileId, uint speakerId, string text, string voiceTypeEditorId = "", string elevenLabsVoiceId = "")
+    public static void AddVoice(uint logfileId, FormKey speakerFormKey, string text, string voiceTypeEditorId = "", string elevenLabsVoiceId = "")
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -115,7 +122,7 @@ public static class SpeechTools
                 EditorID = "speech_info_" + chunkSuffix,
                 SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
             };
-            info.Speaker.SetTo(new FormKey(targetMod.ModKey, speakerId));
+            info.Speaker.SetTo(speakerFormKey);
             var textHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(chunk))[..4];
             var response = new DialogResponse
             {
