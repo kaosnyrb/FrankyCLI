@@ -1,5 +1,7 @@
 using NAudio.Wave;
 using RestSharp;
+using Retrograde.AI.Utils;
+using System.Text.Json.Serialization;
 
 namespace Retrograde.AI
 {
@@ -73,5 +75,64 @@ namespace Retrograde.AI
             string outputWavPath,
             string modelId = DefaultModel)
             => GenerateSpeechAsync(text, voiceId, outputWavPath, modelId).GetAwaiter().GetResult();
+
+        // ── Voice listing ────────────────────────────────────────────────────
+
+        private record VoiceDto(
+            [property: JsonPropertyName("voice_id")] string VoiceId,
+            [property: JsonPropertyName("name")]     string Name);
+
+        private record VoiceListResponse(
+            [property: JsonPropertyName("voices")]           List<VoiceDto> Voices,
+            [property: JsonPropertyName("has_more")]         bool HasMore,
+            [property: JsonPropertyName("next_page_token")] string? NextPageToken);
+
+        /// <summary>
+        /// Returns all voices of the given type from your ElevenLabs account,
+        /// paging automatically. Default is "personal" (your own voices).
+        /// Pass "default" for ElevenLabs stock voices, or omit for all.
+        /// </summary>
+        public static async Task<List<ElevenLabsVoice>> ListVoicesAsync(string voiceType = "personal")
+        {
+            var all = new List<ElevenLabsVoice>();
+            string? nextToken = null;
+
+            do
+            {
+                var req = new RestRequest("/v2/voices", Method.Get);
+                req.AddHeader("xi-api-key", _apiKey);
+                req.AddQueryParameter("voice_type", voiceType);
+                req.AddQueryParameter("page_size", "100");
+                if (nextToken != null)
+                    req.AddQueryParameter("next_page_token", nextToken);
+
+                var resp = await _client.ExecuteAsync<VoiceListResponse>(req);
+                if (!resp.IsSuccessful || resp.Data is null)
+                    throw new InvalidOperationException(
+                        $"ElevenLabs voices error {(int)resp.StatusCode}: {resp.Content}");
+
+                foreach (var v in resp.Data.Voices)
+                    all.Add(new ElevenLabsVoice(v.Name, v.VoiceId));
+
+                nextToken = resp.Data.HasMore ? resp.Data.NextPageToken : null;
+            }
+            while (nextToken != null);
+
+            return all;
+        }
+
+        /// <summary>Synchronous wrapper around <see cref="ListVoicesAsync"/>.</summary>
+        public static List<ElevenLabsVoice> ListVoices(string voiceType = "personal")
+            => ListVoicesAsync(voiceType).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Prints ready-to-paste SeedManager entries for all voices of the given type.
+        /// Example output:  new("Rachel", "21m00Tcm4TlvDq8ikWAM"),
+        /// </summary>
+        public static void PrintVoices(string voiceType = "personal")
+        {
+            foreach (var v in ListVoices(voiceType))
+                Console.WriteLine($"  new(\"{v.Name}\", \"{v.Id}\"),");
+        }
     }
 }

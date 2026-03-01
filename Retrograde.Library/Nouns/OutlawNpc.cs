@@ -58,10 +58,10 @@ namespace Retrograde.Nouns
 
             spacesuit = hasspacesuit;
 
-            var femaleVoices = new[] { "ClKfJnuqp0hQ7Ax41F4w","E393dkE75hqtz1LO2aEJ","hpp4J3VqNfWAUOO0d1Us", "EXAVITQu4vr4xnSDxMaL","DbwWo4rVEd5NrejHYUnm","odyUrTN5HMVKujvVAgWW"};
-            var maleVoices   = new[] { "inKOuEy40NdNVHxcqekZ","omRordDZNt4Gy45cetUa","CjIKi1zuI666pVsFrtyU","zcIk2xc7SGwlywr4TzZu","7QTeMqXOsYj1AQaKLcrf","CsbTapRVtZdcBs3vBbQe", "N2lVS1w4EtoT3dr4eOWO", "CwhRBWXzGAHq8TQ4Fs17", "IKne3meq5aSn9XLyUdCD" };
-            var voicePool = female ? femaleVoices : maleVoices;
-            ElevenLabsVoiceId = voicePool[RandomProvider.Random.Next(voicePool.Length)];
+            var voicePool = female ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var voice = voicePool[RandomProvider.Random.Next(voicePool.Count)];
+            ElevenLabsVoiceId   = voice.Id;
+            ElevenLabsVoiceName = voice.Name;
 
             Haircolor = NPCTools.GetHairColour();
             Eyecolor = NPCTools.GetEyeColour();
@@ -129,6 +129,7 @@ namespace Retrograde.Nouns
 
         public string VoiceEditorId = string.Empty;
         public string ElevenLabsVoiceId = string.Empty;
+        public string ElevenLabsVoiceName = string.Empty;
 
         public Npc GenerateNPC()
         {
