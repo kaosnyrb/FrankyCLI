@@ -72,7 +72,7 @@ namespace Retrograde.Quests
             newQuest.SetLogMessage(0, 0, logmessage);
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_space_activator_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create the activation message
             var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)

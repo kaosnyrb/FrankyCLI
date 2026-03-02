@@ -212,6 +212,50 @@ public static class RandomProvider
         return placed;
     }
 
+    /// <summary>
+    /// Returns the worldspace from the mod that originally created it (FormKey.ModKey).
+    /// Avoids using a template override as the DeepCopy base.
+    /// </summary>
+    private static IWorldspaceGetter FindOriginalWorldspace(FormKey fk)
+    {
+        var ctx = RetrogradeContext.Current;
+        IStarfieldModGetter? owner = fk.ModKey == ctx.StarfieldModKey
+            ? ctx.StarfieldMod
+            : ctx.TemplateMods.FirstOrDefault(m => m.ModKey == fk.ModKey);
+        return owner?.Worldspaces.FirstOrDefault(w => w.FormKey == fk)
+            ?? throw new InvalidOperationException($"GetRandomMarker: worldspace {fk} not found in owning mod {fk.ModKey}");
+    }
+
+    /// <summary>
+    /// Returns the cell from the mod that originally created it (FormKey.ModKey).
+    /// Searches interior cell blocks then worldspace cells.
+    /// </summary>
+    private static ICellGetter FindOriginalCell(FormKey fk)
+    {
+        var ctx = RetrogradeContext.Current;
+        IStarfieldModGetter? owner = fk.ModKey == ctx.StarfieldModKey
+            ? ctx.StarfieldMod
+            : ctx.TemplateMods.FirstOrDefault(m => m.ModKey == fk.ModKey);
+        if (owner == null)
+            throw new InvalidOperationException($"GetRandomMarker: cell {fk} owning mod {fk.ModKey} not loaded");
+
+        foreach (var block in owner.Cells)
+            foreach (var subBlock in block.SubBlocks)
+                foreach (var cell in subBlock.Cells)
+                    if (cell.FormKey == fk) return cell;
+
+        foreach (var ws in owner.Worldspaces)
+        {
+            if (ws.TopCell?.FormKey == fk) return ws.TopCell;
+            foreach (var wsBlock in ws.SubCells)
+                foreach (var wsSubBlock in wsBlock.Items)
+                    foreach (var cell in wsSubBlock.Items)
+                        if (cell.FormKey == fk) return cell;
+        }
+
+        throw new InvalidOperationException($"GetRandomMarker: cell {fk} not found in owning mod {fk.ModKey}");
+    }
+
     private static bool CellContains(ICellGetter cell, FormKey fk)
     {
         foreach (var p in cell.Persistent)
@@ -237,7 +281,7 @@ public static class RandomProvider
                         return poNew;
                     }
 
-        var cellOverride = cell.DeepCopy();
+        var cellOverride = FindOriginalCell(cell.FormKey).DeepCopy();
         cellOverride.Persistent.Clear();
         cellOverride.Persistent.Add(poNew);
         cellOverride.Temporary.Clear();
@@ -279,7 +323,7 @@ public static class RandomProvider
             if (ws.FormKey == sourceWs.FormKey) { wsOverride = ws; break; }
         if (wsOverride == null)
         {
-            wsOverride = sourceWs.DeepCopy();
+            wsOverride = FindOriginalWorldspace(sourceWs.FormKey).DeepCopy();
             wsOverride.SubCells.Clear();
             if (wsOverride.TopCell != null)
             {
@@ -311,7 +355,7 @@ public static class RandomProvider
             if (ws.FormKey == sourceWs.FormKey) { wsOverride = ws; break; }
         if (wsOverride == null)
         {
-            wsOverride = sourceWs.DeepCopy();
+            wsOverride = FindOriginalWorldspace(sourceWs.FormKey).DeepCopy();
             wsOverride.SubCells.Clear();
             targetMod.Worldspaces.Add(wsOverride);
         }
@@ -346,7 +390,7 @@ public static class RandomProvider
                 return poNew;
             }
 
-        var cellOverride = cell.DeepCopy();
+        var cellOverride = FindOriginalCell(cell.FormKey).DeepCopy();
         cellOverride.Persistent.Clear();
         cellOverride.Persistent.Add(poNew);
         cellOverride.Temporary.Clear();

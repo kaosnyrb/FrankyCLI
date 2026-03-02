@@ -1,6 +1,7 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,7 +90,88 @@ public static class NPCTools
     public static Npc FindTemplateDeadNpc(bool female) => FindNpcById(GetTemplateDeadNPC(female)).DeepCopy();
 
     /// <summary>
-    /// Creates a deep copy of an NPC in the specified mod.
+    /// Imports a non-vanilla faction into targetMod (new FormKey, all fields copied).
+    /// Deduplicates by EditorID so the same faction is only created once per run.
+    /// Returns the new FormKey to use in the NPC's Factions list.
+    /// </summary>
+    private static FormKey ImportFaction(IFactionGetter source, StarfieldMod targetMod)
+    {
+        // Deduplicate: if already imported this run, return its FormKey
+        if (source.EditorID != null)
+        {
+            var existing = targetMod.Factions.FirstOrDefault(f => f.EditorID == source.EditorID);
+            if (existing != null) return existing.FormKey;
+        }
+
+        var faction = new Faction(targetMod)
+        {
+            EditorID                  = source.EditorID,
+            Name                      = source.Name?.DeepCopy(),
+            Flags                     = source.Flags,
+            StarfieldMajorRecordFlags = source.StarfieldMajorRecordFlags,
+            Relations                 = source.Relations.Select(x => x.DeepCopy()).ToExtendedList(),
+            Components                = source.Components.Select(x => x.DeepCopy()).ToExtendedList(),
+            CrimeValues               = source.CrimeValues?.DeepCopy(),
+            Prisons                   = source.Prisons?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Ranks                     = source.Ranks.Select(x => x.DeepCopy()).ToExtendedList(),
+            VendorValues              = source.VendorValues?.DeepCopy(),
+            VendorLocation            = source.VendorLocation?.DeepCopy(),
+            Conditions                = source.Conditions?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Herd                      = source.Herd?.DeepCopy(),
+            FormationRadius           = source.FormationRadius,
+        };
+        // FormLinkNullable fields must be set after construction
+        if (!source.Keyword.IsNull)              faction.Keyword              = source.Keyword.FormKey.ToNullableLink<IKeywordGetter>();
+        if (!source.SharedCrimeFactionList.IsNull) faction.SharedCrimeFactionList = source.SharedCrimeFactionList.FormKey.ToNullableLink<IFormListGetter>();
+        if (!source.VendorBuySellList.IsNull)    faction.VendorBuySellList    = source.VendorBuySellList.FormKey.ToNullableLink<IFormListGetter>();
+        if (!source.MerchantContainer.IsNull)    faction.MerchantContainer    = source.MerchantContainer.FormKey.ToNullableLink<IPlacedObjectGetter>();
+        if (!source.VoiceType.IsNull)            faction.VoiceType            = source.VoiceType.FormKey.ToNullableLink<IVoiceTypeOrListGetter>();
+
+        targetMod.Factions.Add(faction);
+        return faction.FormKey;
+    }
+
+    /// <summary>
+    /// For each non-vanilla faction on the NPC, imports it into targetMod and updates
+    /// the NPC's Factions list to reference the new FormKey.
+    /// </summary>
+    private static void EnsureFactionsInMod(Npc npc, StarfieldMod targetMod)
+    {
+        if (npc.Factions == null || npc.Factions.Count == 0) return;
+        if (!RetrogradeContext.IsInitialized) return;
+
+        var ctx = RetrogradeContext.Current;
+        var starfieldModKey = ctx.StarfieldModKey;
+
+        for (int i = 0; i < npc.Factions.Count; i++)
+        {
+            var rp = npc.Factions[i];
+            var fk = rp.Faction.FormKey;
+            if (fk.IsNull) continue;
+            if (fk.ModKey == starfieldModKey) continue;  // vanilla — always reachable
+            if (fk.ModKey == targetMod.ModKey) continue; // already in target mod
+
+            IFactionGetter? source = null;
+            foreach (var tm in ctx.TemplateMods)
+            {
+                source = tm.Factions.FirstOrDefault(f => f.FormKey == fk);
+                if (source != null) break;
+            }
+
+            if (source == null)
+            {
+                Console.WriteLine($"[NPCTools] Warning: faction {fk} not found in any template mod — skipping import.");
+                continue;
+            }
+
+            var newFk = ImportFaction(source, targetMod);
+            npc.Factions[i] = new RankPlacement { Faction = newFk.ToLink<IFactionGetter>(), Rank = rp.Rank };
+        }
+    }
+
+    /// <summary>
+    /// Creates a deep copy of an NPC in the specified mod. Also imports any non-vanilla
+    /// factions referenced by the NPC into targetMod if they are not already present.
     /// </summary>
     public static Npc CloneNPC(StarfieldMod myMod, Npc NPC, bool respawn = false)
     {
@@ -98,7 +180,7 @@ public static class NPCTools
         {
             flags |= Npc.Flag.Respawn;
         }
-        return new Npc(myMod)
+        var npc = new Npc(myMod)
         {
             EditorID = "npc_" + Guid.NewGuid().ToString().Substring(0, 8),
             ObjectBounds = NPC.ObjectBounds,
@@ -172,6 +254,8 @@ public static class NPCTools
             Packages = NPC.Packages,
             XALG = NPC.XALG
         };
+        EnsureFactionsInMod(npc, myMod);
+        return npc;
     }
 
     /// <summary>

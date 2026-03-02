@@ -112,6 +112,10 @@ switch (mode)
     case "gen_roompackin":
         return gen_roompackin.Generate(args);
 
+    case "gen_deprefscan":
+        // gen_deprefscan [modname]
+        return gen_deprefscan.Run(Get(args, 1, "outlaws02"));
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -174,6 +178,11 @@ static void PrintHelp()
     Console.WriteLine();
     Console.WriteLine("  gen_roompackin");
 Console.WriteLine("                     Generate SCI hallway PackIn variants into generated_templates.esm.");
+Console.WriteLine();
+Console.WriteLine("  gen_deprefscan  [modname]");
+Console.WriteLine("                     Scan a built mod for FormLink references into template mods.");
+Console.WriteLine("                     Reports which records hold the dependency and their target FormKeys.");
+Console.WriteLine("                     Defaults: modname=outlaws02");
 Console.WriteLine();
 Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");

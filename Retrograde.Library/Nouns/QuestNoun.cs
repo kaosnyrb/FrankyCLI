@@ -1,5 +1,6 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Noggog.StructuredStrings;
@@ -61,6 +62,8 @@ namespace Retrograde.Nouns
             };
             targetMod.Quests.Add(instance);
             EnsureGangMembersFormList();
+            EnsureTextDisplayGlobals();
+            EnsureAliasConditionGlobals();
         }
 
         private void EnsureGangMembersFormList()
@@ -112,6 +115,101 @@ namespace Retrograde.Nouns
                     return;
                 }
             }
+        }
+
+        private void EnsureTextDisplayGlobals()
+        {
+            var targetMod = RetrogradeContext.Current.TargetMod;
+            if (instance.TextDisplayGlobals == null || instance.TextDisplayGlobals.Count == 0) return;
+
+            var templateMods = RetrogradeContext.Current.TemplateMods;
+
+            for (int i = 0; i < instance.TextDisplayGlobals.Count; i++)
+            {
+                var fk = instance.TextDisplayGlobals[i].FormKey;
+                if (fk.IsNull) continue;
+
+                bool isTemplateMod = templateMods.Any(tm => tm.ModKey == fk.ModKey);
+                if (!isTemplateMod) continue;
+
+                var local = GetOrCreateLocalGlobal(fk, templateMods, targetMod);
+                if (local != null)
+                    instance.TextDisplayGlobals[i] = local.ToLink<IGlobalGetter>();
+            }
+        }
+
+        private void EnsureAliasConditionGlobals()
+        {
+            if (instance.Aliases == null) return;
+
+            var targetMod = RetrogradeContext.Current.TargetMod;
+            var templateMods = RetrogradeContext.Current.TemplateMods;
+
+            foreach (var alias in instance.Aliases)
+            {
+                // Reference aliases
+                if (alias is IQuestReferenceAlias refAlias && refAlias.Conditions != null)
+                    FixConditionGlobals(refAlias.Conditions, templateMods, targetMod);
+
+                // Location aliases (hold the distance global in their conditions)
+                if (alias is QuestLocationAlias locAlias && locAlias.Conditions != null)
+                    FixConditionGlobals(locAlias.Conditions, templateMods, targetMod);
+            }
+        }
+
+        private void FixConditionGlobals(IList<Condition> conditions,
+            IReadOnlyList<IStarfieldModGetter> templateMods, StarfieldMod targetMod)
+        {
+            for (int i = 0; i < conditions.Count; i++)
+            {
+                // ConditionFloat: global referenced as FirstParameter of a function (e.g. GetGlobalValue)
+                if (conditions[i] is ConditionFloat cf && cf.Data is GetGlobalValueConditionData gvData)
+                {
+                    var fk = gvData.FirstParameter.Link.FormKey;
+                    if (!fk.IsNull && templateMods.Any(tm => tm.ModKey == fk.ModKey))
+                    {
+                        var local = GetOrCreateLocalGlobal(fk, templateMods, targetMod);
+                        if (local != null)
+                            gvData.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(gvData, local.FormKey);
+                    }
+                }
+
+                // ConditionGlobal: global is the comparison value (e.g. GetDistanceGalacticParsec < distanceGlobal)
+                if (conditions[i] is ConditionGlobal cg)
+                {
+                    var fk = cg.ComparisonValue.FormKey;
+                    if (!fk.IsNull && templateMods.Any(tm => tm.ModKey == fk.ModKey))
+                    {
+                        var local = GetOrCreateLocalGlobal(fk, templateMods, targetMod);
+                        if (local != null)
+                            cg.ComparisonValue.SetTo(local.FormKey);
+                    }
+                }
+            }
+        }
+
+        private Global? GetOrCreateLocalGlobal(FormKey templateGlobalKey,
+            IReadOnlyList<IStarfieldModGetter> templateMods, StarfieldMod targetMod)
+        {
+            IGlobalGetter? source = null;
+            foreach (var tm in templateMods)
+            {
+                source = tm.Globals.FirstOrDefault(r => r.FormKey == templateGlobalKey);
+                if (source != null) break;
+            }
+            if (source == null) return null;
+
+            var existing = targetMod.Globals.FirstOrDefault(r => r.EditorID == source.EditorID);
+            if (existing is Global g) return g;
+
+            var newGlobal = new Global(targetMod)
+            {
+                EditorID = source.EditorID,
+                Data = (source as Global)?.Data ?? 0f
+            };
+            targetMod.Globals.Add(newGlobal);
+            Console.WriteLine($"  [QuestNoun] Copied template global '{newGlobal.EditorID}' into target mod.");
+            return newGlobal;
         }
 
         public bool SetLogMessage(int StageIndex,int LogEntry, string Content)

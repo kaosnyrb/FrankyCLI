@@ -5,10 +5,11 @@ Cross-cutting patterns for reading and writing Starfield records with Mutagen.Be
 ## Required usings
 
 ```csharp
-using Mutagen.Bethesda;           // ToLink<T>(), ToNullableLink<T>() extension methods
-using Mutagen.Bethesda.Plugins;   // FormKey, ModKey
-using Mutagen.Bethesda.Starfield; // All Starfield record types
-using Noggog;                     // ExtendedList<T>, P2Int, P3Float, etc.
+using Mutagen.Bethesda;                  // ToLink<T>(), ToNullableLink<T>() extension methods
+using Mutagen.Bethesda.Plugins;          // FormKey, ModKey
+using Mutagen.Bethesda.Plugins.Records;  // IFormLinkContainerGetter (for EnumerateFormLinks)
+using Mutagen.Bethesda.Starfield;        // All Starfield record types
+using Noggog;                            // ExtendedList<T>, P2Int, P3Float, etc.
 ```
 
 `using Mutagen.Bethesda;` is the most commonly forgotten. Without it, `ToLink<T>()` and `ToNullableLink<T>()` are not found — even if `Mutagen.Bethesda.Plugins` is present.
@@ -172,6 +173,47 @@ CK record types follow the pattern `BGSFoo_Component` → Mutagen class `FooComp
 ```bash
 ilspycmd "...Mutagen.Bethesda.Starfield.dll" -l type 2>&1 | grep -i "spaceshipai"
 ```
+
+## Scanning all FormLinks in a record (dependency detection)
+
+`IFormLinkContainerGetter` + `EnumerateFormLinks()` — Mutagen 0.53.1 API. Requires `using Mutagen.Bethesda.Plugins.Records;`.
+
+```csharp
+foreach (var rec in mod.EnumerateMajorRecords())
+{
+    if (rec is not IFormLinkContainerGetter container) continue;
+    foreach (var link in container.EnumerateFormLinks())
+    {
+        if (link.FormKey.IsNull) continue;
+        if (templateModKeys.Contains(link.FormKey.ModKey))
+            // found a template dependency
+    }
+}
+```
+
+**Old name `ContainedFormLinks` no longer exists in 0.53.1** — use `EnumerateFormLinks()`.
+
+## Quest Conditions — ConditionGlobal vs ConditionFloat
+
+When a quest condition compares against a global (e.g. `GetDistanceGalacticParsec < distanceGlobal`), the condition type is **`ConditionGlobal`**, not `ConditionFloat`. The global FormKey sits on **`ComparisonValue`**, not inside `Data`:
+
+```csharp
+// ConditionGlobal — global is the RHS comparison value
+if (cond is ConditionGlobal cg)
+{
+    var fk = cg.ComparisonValue.FormKey;   // property: ComparisonValue
+    cg.ComparisonValue.SetTo(localFormKey); // SetTo() mutates in-place ✓
+}
+
+// ConditionFloat — global is a function argument (e.g. GetGlobalValue)
+if (cond is ConditionFloat cf && cf.Data is GetGlobalValueConditionData gvData)
+{
+    var fk = gvData.FirstParameter.Link.FormKey;
+    gvData.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(gvData, localFormKey);
+}
+```
+
+Both appear in `QuestLocationAlias.Conditions` as well as `IQuestReferenceAlias.Conditions` — check both when deep-copying quests from template mods.
 
 ## Namespace / folder naming hazard
 
