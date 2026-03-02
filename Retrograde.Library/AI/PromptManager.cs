@@ -341,15 +341,15 @@ namespace Retrograde.AI.Utils
         public static string GetMissionBriefingDataslate(List<string> Addons)
         {
             var logprompt =
-                "Write a mission briefing dataslate for a bounty hunter. Length: 180-220 words.\r\n" +
+                "Write a mission briefing dataslate for a bounty hunter. Length: 120-150 words.\r\n" +
                 "Style: field intel note — plain declarative sentences, no atmosphere, no tone-setting prose, no metaphor.\r\n" +
                 "Use the LoreContext established earlier in this conversation for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
 
-                "Cover these four things in order:\r\n" +
-                "1. TARGET: Name the target exactly as established in the LoreContext. State what they did and what they are wanted for.\r\n" +
-                "2. BACKGROUND: One or two sentences on who they are — former occupation, what pushed them to crime — so the hunter understands who they're dealing with.\r\n" +
-                "3. LEAD: Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
-                "4. ACTION: Tell the hunter exactly what to do at that location.\r\n\r\n" +
+                "Cover these four things in order, with no headers or labels:\r\n" +
+                "- Name the target exactly as established in the LoreContext. State what they did and what they are wanted for.\r\n" +
+                "- One sentence on who they are — former occupation, what pushed them to crime.\r\n" +
+                "- Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
+                "- Tell the hunter exactly what to do at that location.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
@@ -359,7 +359,7 @@ namespace Retrograde.AI.Utils
             var results = AITools.RunPrompt(logprompt);
 
             // retry if the model undershoots the length significantly
-            for (int i = 0; i < 5 && results.Length < 800; i++)
+            for (int i = 0; i < 5 && results.Length < 500; i++)
             {
                 results = AITools.RunPrompt(logprompt);
             }

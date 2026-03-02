@@ -1,5 +1,6 @@
 using Retrograde.AI.Utils;
 using Retrograde.Nouns;
+using Retrograde.Utils;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
 using Mutagen.Bethesda;
@@ -34,26 +35,38 @@ namespace Retrograde.Quests
             Console.WriteLine("Discovery Quest - Dataslate.");
             questloc = missionTemplate.Location;
 
-            var questID = Guid.NewGuid().ToString().Substring(0, 8);
-
-            //Merge the background and log message.
-
             string bookcontents = PromptManager.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons) {
-                //"Background: " + outlawNpc.background,
-                "LogMessage: " + nextQuest.LogMessage,                
+                "LogMessage: " + nextQuest.LogMessage,
             });
 
             var bookname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons) {
-                //"Background: " + outlawNpc.background,
                 "LogMessage: " + nextQuest.LogMessage,
             });
 
             var bountybook = new BookNoun("duout_book_test", bookname, bookcontents);
-            Console.WriteLine($"[Discovery_Dataslate] Book FormKey: {bountybook.instance.FormKey}");
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
 
-            //We have a condictional so that the dataslate only drops until you complete the next quest.
-            //This means you more likely to find missions you haven't done.
+            // Voice the dataslate: a witness NPC who wrote or recorded this briefing.
+            bool speakerIsFemale = RandomProvider.Random.Next(100) > 50;
+            var speakerTemplate = NPCTools.FindTemplateDeadNpc(speakerIsFemale);
+            Npc speakerNpc = NPCTools.CloneNPC(myMod, speakerTemplate);
+            speakerNpc.Name = SeedManager.GenerateName(speakerIsFemale);
+            speakerNpc.EditorID = "npc_disc_" + bountybook.instance.FormKey.ID.ToString("X6");
+            var speakerVoice = NPCTools.GetVoice("", speakerIsFemale);
+            string speakerVoiceEditorId = string.Empty;
+            if (!speakerVoice.IsNull)
+            {
+                speakerNpc.Voice.SetTo(speakerVoice.FormKey);
+                var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == speakerVoice.FormKey);
+                speakerVoiceEditorId = vtRec?.EditorID ?? speakerVoice.FormKey.ID.ToString("X6");
+            }
+            myMod.Npcs.Add(speakerNpc);
+
+            var txVoicePool = speakerIsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
+            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, speakerNpc.FormKey, bookcontents, speakerVoiceEditorId, txVoice.Id);
+
+            // Conditional entry: dataslate only drops until the next quest is completed.
 
             var questBooksLL = myMod.LeveledItems.FirstOrDefault(li => li.EditorID == "duout_LL_QuestBooks");
             if (questBooksLL == null)
