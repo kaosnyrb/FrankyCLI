@@ -7,8 +7,14 @@ namespace Retrograde.Passes.Worldspace;
 
 /// <summary>
 /// First map pass for SmallIndustryBase POIs.
-/// Scans Starfield.esm PackIns by GPPIPCMManMade_ EditorID prefix to populate
-/// state.PackInLibrary with variant lists for each industry category.
+/// Scans Starfield.esm PackIns by GPPIPCMManMade_ EditorID prefix and populates
+/// state.PackInLibrary with one variant list per category.
+/// All 13 categories form a single flat pool used by IndustryLayoutPass.
+///
+/// Pattern safety notes:
+///   "FluidStorageLarge"  is NOT a substring of "FluidStorageXLarge" (X breaks it) — safe.
+///   "GenericMechanicalLarge" is NOT a substring of "GenericMechanicalMedium" — safe.
+///   "StorageBay" does not appear in any other category prefix — safe.
 /// </summary>
 public class IndustryPackInLibraryPass : IWorldspacePass
 {
@@ -16,16 +22,19 @@ public class IndustryPackInLibraryPass : IWorldspacePass
     {
         var sf = RetrogradeContext.Current.StarfieldMod;
 
-        // Inner ring — one category per building slot
-        state.PackInLibrary["industry_centre"]     = FindByPattern(sf, "GPPIPCMManMade_AbandondedIndustrial");
-        state.PackInLibrary["industry_large"]      = FindByPattern(sf, "GPPIPCMManMade_IndustrialLarge");
-        state.PackInLibrary["industry_comms"]      = FindByPattern(sf, "GPPIPCMManMade_Communications");
-        state.PackInLibrary["industry_mech_large"] = FindByPattern(sf, "GPPIPCMManMade_GenericMechanicalLarge");
-        state.PackInLibrary["industry_fluid_xl"]   = FindByPattern(sf, "GPPIPCMManMade_FluidStorageXLarge");
-
-        // Outer ring — solar panels placed at 0° rotation, misc pool at random rotation
-        state.PackInLibrary["industry_solar"] = FindByPattern(sf, "GPPIPCMManMade_SolarPanels");
-        state.PackInLibrary["industry_outer"] = BuildOuterMiscPool(sf);
+        state.PackInLibrary["industry_abandoned"]     = FindByPattern(sf, "GPPIPCMManMade_AbandondedIndustrial");
+        state.PackInLibrary["industry_large"]         = FindByPattern(sf, "GPPIPCMManMade_IndustrialLarge");
+        state.PackInLibrary["industry_comms"]         = FindByPattern(sf, "GPPIPCMManMade_Communications");
+        state.PackInLibrary["industry_mech_large"]    = FindByPattern(sf, "GPPIPCMManMade_GenericMechanicalLarge");
+        state.PackInLibrary["industry_mech_medium"]   = FindByPattern(sf, "GPPIPCMManMade_GenericMechanicalMedium");
+        state.PackInLibrary["industry_fluid_xl"]      = FindByPattern(sf, "GPPIPCMManMade_FluidStorageXLarge");
+        state.PackInLibrary["industry_fluid_large"]   = FindByPattern(sf, "GPPIPCMManMade_FluidStorageLarge");
+        state.PackInLibrary["industry_fluid_medium"]  = FindByPattern(sf, "GPPIPCMManMade_FluidStorageMedium");
+        state.PackInLibrary["industry_solar"]         = FindByPattern(sf, "GPPIPCMManMade_SolarPanels");
+        state.PackInLibrary["industry_reactor"]       = FindByPattern(sf, "GPPIPCMManMade_Reactor");
+        state.PackInLibrary["industry_storage"]       = FindByPattern(sf, "GPPIPCMManMade_StorageBay");
+        state.PackInLibrary["industry_foundations"]   = FindByPattern(sf, "GPPIPCMManMade_ConcreteFoundations");
+        state.PackInLibrary["industry_clutter"]       = FindByPattern(sf, "GPPIPCMManMade_ClutterPile");
     }
 
     private static List<FormKey> FindByPattern(IStarfieldModGetter mod, string pattern)
@@ -33,23 +42,4 @@ public class IndustryPackInLibraryPass : IWorldspacePass
             .Where(p => p.EditorID != null && p.EditorID.Contains(pattern))
             .Select(p => p.FormKey)
             .ToList();
-
-    private static List<FormKey> BuildOuterMiscPool(IStarfieldModGetter mod)
-    {
-        // "FluidStorageLarge" does not match "FluidStorageXLarge" — safe without exclusion filter.
-        var patterns = new[]
-        {
-            "GPPIPCMManMade_Reactor",
-            "GPPIPCMManMade_StorageBay",
-            "GPPIPCMManMade_FluidStorageMedium",
-            "GPPIPCMManMade_FluidStorageLarge",
-            "GPPIPCMManMade_GenericMechanicalMedium",
-            "GPPIPCMManMade_ConcreteFoundations",
-            "GPPIPCMManMade_ClutterPile",
-        };
-        return mod.PackIns
-            .Where(p => p.EditorID != null && patterns.Any(pt => p.EditorID.Contains(pt)))
-            .Select(p => p.FormKey)
-            .ToList();
-    }
 }

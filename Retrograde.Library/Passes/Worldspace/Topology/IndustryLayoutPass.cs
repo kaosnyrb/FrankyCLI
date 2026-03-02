@@ -1,104 +1,322 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Retrograde.Models;
+using Retrograde.Utils;
 
 namespace Retrograde.Passes.Worldspace;
 
 /// <summary>
 /// Map layout pass for SmallIndustryBase POIs.
-/// Places 3–6 GPPIPCMManMade_ PackIn buildings in a compact cluster
-/// around the map centre (24, 24) using a fixed slot grid.
+/// Places 3–6 GPPIPCMManMade_ buildings in a compact cluster selected by candidate sampling.
 ///
-/// Inner ring: up to 5 buildings on 4 diagonal slots at step ±10 from centre.
-/// Outer ring: 1–2 solar/misc prefabs on 4 cardinal slots at step ±14 from centre.
-/// No walls, gates, connectors, or scatter tiles.
+/// 300 random configurations are scored on four components:
+///   Flatness   0.40 — prefer already-flat terrain (low BTD height variance under footprints)
+///   Clustering 0.30 — prefer tight clusters (low mean pairwise anchor distance)
+///   LOS        0.20 — prefer clear sightlines (low ridge penalty between building pairs)
+///   Variation  0.10 — prefer distinct categories and diverse rotations
 ///
-/// Slot spacing verified against actual PackIn ObjectBounds (TileWorldSize=4):
-///   - Inner step 10 → 40 overlay units. Worst pair (FluidStorageXLarge+XLarge): gap 36.
-///   - Diagonal-only inner ring avoids same-axis conflicts with the cardinal outer ring.
-///   - Inner diagonal (34,34) to outer cardinal (38,24): ≈43 overlay units, gap 5.1.
-/// All gaps ≥ 5 overlay units for the largest variants in each category.
-/// Everything sits ≥ 10 tiles from the map edge (was 3–4 tiles for the outer ring).
+/// Dead zone: no anchor within 4 tiles of any map edge.
+/// Spread:    each building placed 5–7 tiles from the anchor (tight cluster, no tile overlap).
+/// Fallback:  if fewer than 5 valid candidates are found, a compact centre grid is used.
 /// </summary>
-/// <param name="scale">Controls cluster density (0.1 = 3 buildings, 1.0 = 6 buildings).</param>
+/// <param name="scale">Controls building count (0.1 = 3, 1.0 = 6).</param>
 public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
 {
     private readonly float _scale = Math.Clamp(scale, 0.1f, 1.0f);
 
-    // Inner ring: 4 diagonal slots at step ±10 from centre (24, 24).
-    // Diagonal-only so there is no same-axis conflict with the cardinal outer ring slots.
-    // Step 10 × TileWorldSize 4 = 40 overlay units from centre.
-    // Worst-case inner pair (same axis, 20 tiles apart): gap = 80 - 22 - 22 = 36 units ✓
-    private static readonly (int x, int y)[] InnerSlots =
-    {
-        (34, 34), (34, 14),
-        (14, 34), (14, 14),
-    };
-
-    // Outer ring: 4 cardinal slots at step ±14 from centre.
-    // Step 14 × 4 = 56 overlay units from centre.
-    // Nearest inner building is the diagonal at ≈43 overlay units from (38,24) → gap 5.1 ✓
-    // All positions ≥ 10 tiles from the map edge (was 3–4 tiles at step ±20).
-    private static readonly (int x, int y)[] OuterSlots =
-    {
-        (38, 24), (10, 24), (24, 38), (24, 10),
-    };
-
-    // Additional inner categories after the centre (AbandonedIndustrial)
-    private static readonly string[] AdditionalKeys =
-    {
+    private static readonly string[] CategoryKeys =
+    [
+        "industry_abandoned",
         "industry_large",
         "industry_comms",
         "industry_mech_large",
+        "industry_mech_medium",
         "industry_fluid_xl",
-    };
+        "industry_fluid_large",
+        "industry_fluid_medium",
+        "industry_solar",
+        "industry_reactor",
+        "industry_storage",
+        "industry_foundations",
+        "industry_clutter",
+    ];
+
+    private const int CandidateCount    = 300;
+    private const int PlacementTries    = 20;
+    private const int SpreadMin         = 5;   // 20 overlay units — minimum inter-anchor distance from anchor
+    private const int SpreadMax         = 7;   // 28 overlay units — keeps cluster compact
+    private const int OccupiedRadius    = 2;   // enforces 2*2+1 = 5 map unit minimum clearance
+    private const int DeadZone          = 4;
+    private const int FallbackThreshold = 5;
+
+    // ── entry point ──────────────────────────────────────────────────────────
 
     public void RunPass(WorldspaceState state)
     {
-        var rand = state.Rng;
-        var map  = state.Map;
+        var rand  = state.Rng;
+        var map   = state.Map;
+        int count = GetBuildingCount(_scale, map.xsize);
 
-        // --- How many additional inner buildings beyond the centre ---
-        // scale < 0.35 → 2 additional (3 total)
-        // scale 0.35–0.70 → 2 or 3 additional (3–4 total)
-        // scale > 0.70 → 4 additional (5 total, all categories)
-        int additionalCount = _scale < 0.35f ? 2
-                            : _scale > 0.70f ? 4
-                            : (rand.Next(2) + 2);   // 2 or 3
-
-        // --- Centre building: always AbandonedIndustrial ---
-        map.placesmalltile(24, 24, "industry_centre", rand.Next(4) * 90, "floor");
-
-        // --- Shuffle category list and take additionalCount keys ---
-        var keys = AdditionalKeys.ToList();
-        Shuffle(keys, rand);
-        keys = keys.Take(additionalCount).ToList();
-
-        // --- Shuffle inner slots and assign one per category ---
-        var slots = InnerSlots.ToList();
-        Shuffle(slots, rand);
-
-        for (int i = 0; i < keys.Count; i++)
+        var candidates = new List<Candidate>(CandidateCount);
+        for (int i = 0; i < CandidateCount; i++)
         {
+            var c = TryGenerateCandidate(map, rand, count);
+            if (c != null) candidates.Add(c);
+        }
+
+        if (candidates.Count < FallbackThreshold)
+        {
+            Console.Error.WriteLine(
+                $"[IndustryLayoutPass] WARNING: only {candidates.Count} valid candidates " +
+                $"(threshold {FallbackThreshold}). Using grid fallback.");
+            PlaceFallbackGrid(map, rand, count);
+            return;
+        }
+
+        ScoreCandidates(candidates, state);
+        var best = candidates.OrderByDescending(c => c.Score).First();
+
+        foreach (var b in best.Buildings)
+            map.placesmalltile(b.X, b.Y, b.Key, b.Rotation, "floor");
+    }
+
+    // ── candidate generation ─────────────────────────────────────────────────
+
+    private static Candidate? TryGenerateCandidate(GenerationMap map, Random rand, int count)
+    {
+        int validMin  = DeadZone;
+        int validMaxX = map.xsize - DeadZone - 1;
+        int validMaxY = map.ysize - DeadZone - 1;
+        if (validMin >= validMaxX || validMin >= validMaxY) return null;
+
+        int anchorX = rand.Next(validMin, validMaxX + 1);
+        int anchorY = rand.Next(validMin, validMaxY + 1);
+
+        var keys      = SelectKeys(rand, count);
+        var occupied  = new HashSet<(int, int)>();
+        var buildings = new List<Building>(count)
+        {
+            new(anchorX, anchorY, keys[0], rand.Next(4) * 90),
+        };
+        MarkOccupied(occupied, anchorX, anchorY);
+
+        for (int b = 1; b < count; b++)
+        {
+            bool placed = false;
+            for (int t = 0; t < PlacementTries; t++)
+            {
+                double angle = rand.NextDouble() * Math.PI * 2.0;
+                int    dist  = rand.Next(SpreadMin, SpreadMax + 1);
+                int    x     = anchorX + (int)Math.Round(Math.Cos(angle) * dist);
+                int    y     = anchorY + (int)Math.Round(Math.Sin(angle) * dist);
+
+                if (x < validMin || x > validMaxX || y < validMin || y > validMaxY) continue;
+                if (!CanPlaceOnOccupied(occupied, x, y)) continue;
+
+                buildings.Add(new Building(x, y, keys[b], rand.Next(4) * 90));
+                MarkOccupied(occupied, x, y);
+                placed = true;
+                break;
+            }
+            if (!placed) return null;
+        }
+
+        return new Candidate(buildings);
+    }
+
+    private static List<string> SelectKeys(Random rand, int count)
+    {
+        var shuffled = CategoryKeys.ToList();
+        Shuffle(shuffled, rand);
+        var keys = new List<string>(count);
+        for (int i = 0; i < count; i++)
+            keys.Add(shuffled[i % shuffled.Count]);
+        return keys;
+    }
+
+    // Mark a (2*OccupiedRadius+1)² zone around the anchor so CanPlaceOnOccupied
+    // enforces a minimum inter-anchor distance of 2*OccupiedRadius+1 = 5 map units
+    // (20 overlay units), preventing physical overlap for all but the very largest PackIns.
+    private static void MarkOccupied(HashSet<(int, int)> occupied, int x, int y)
+    {
+        for (int dx = -OccupiedRadius; dx <= OccupiedRadius; dx++)
+        for (int dy = -OccupiedRadius; dy <= OccupiedRadius; dy++)
+            occupied.Add((x + dx, y + dy));
+    }
+
+    // Candidate simulation runs on an empty map, so we check the scratch HashSet,
+    // not GenerationMap.canPlace (which would always pass on an unwritten map).
+    private static bool CanPlaceOnOccupied(HashSet<(int, int)> occupied, int x, int y)
+    {
+        for (int dx = -OccupiedRadius; dx <= OccupiedRadius; dx++)
+        for (int dy = -OccupiedRadius; dy <= OccupiedRadius; dy++)
+            if (occupied.Contains((x + dx, y + dy))) return false;
+        return true;
+    }
+
+    // ── scoring ──────────────────────────────────────────────────────────────
+
+    private static void ScoreCandidates(List<Candidate> candidates, WorldspaceState state)
+    {
+        int n = candidates.Count;
+        var flatness   = new float[n];
+        var clustering = new float[n];
+        var los        = new float[n];
+        var variation  = new float[n];
+
+        float mapCentre = state.Map.xsize / 2f;
+        float tws       = state.TileWorldSize;
+        var   btd       = state.BtdFile;
+
+        for (int i = 0; i < n; i++)
+        {
+            var c = candidates[i];
+            if (btd != null)
+            {
+                flatness[i] = ComputeFlatnessVariance(c.Buildings, mapCentre, tws, btd);
+                los[i]      = ComputeLosPenalty(c.Buildings, mapCentre, tws, btd);
+            }
+            clustering[i] = ComputeMeanPairwiseDist(c.Buildings);
+            variation[i]  = ComputeVariation(c.Buildings);
+        }
+
+        // Normalise each array to [0,1] across the candidate set.
+        // When all values are equal (range ≈ 0), Normalise sets all to 1.0 — no penalty for a tie.
+        Normalise(flatness);
+        Normalise(clustering);
+        Normalise(los);
+        Normalise(variation);
+
+        for (int i = 0; i < n; i++)
+        {
+            candidates[i].Score =
+                  0.40f * (1f - flatness[i])    // lower variance = better
+                + 0.30f * (1f - clustering[i])  // closer = better
+                + 0.20f * (1f - los[i])         // fewer ridges = better
+                + 0.10f * variation[i];          // more variety = better
+        }
+    }
+
+    // Convert a map coordinate to BTD world space.
+    // Map → overlay: (mapCoord - mapCentre) * TileWorldSize
+    // Overlay → BTD world: overlayCoord * (4096f / 100f)
+    private static float ToBtd(float mapCoord, float mapCentre, float tws)
+        => (mapCoord - mapCentre) * tws * (4096f / 100f);
+
+    private static float ComputeFlatnessVariance(
+        List<Building> buildings, float mapCentre, float tws, BtdFile btd)
+    {
+        var heights = new List<float>(buildings.Count * 4);
+        foreach (var b in buildings)
+        {
+            // Four corners of the 3×3 tile footprint
+            foreach (int dx in new[] { -1, 1 })
+            foreach (int dy in new[] { -1, 1 })
+                heights.Add(btd.SampleHeightAtWorld(
+                    ToBtd(b.X + dx, mapCentre, tws),
+                    ToBtd(b.Y + dy, mapCentre, tws)));
+        }
+        return Variance(heights);
+    }
+
+    private static float ComputeMeanPairwiseDist(List<Building> buildings)
+    {
+        if (buildings.Count < 2) return 0f;
+        float sum = 0f;
+        int   cnt = 0;
+        for (int i = 0; i < buildings.Count - 1; i++)
+        for (int j = i + 1; j < buildings.Count; j++)
+        {
+            float dx = buildings[i].X - buildings[j].X;
+            float dy = buildings[i].Y - buildings[j].Y;
+            sum += MathF.Sqrt(dx * dx + dy * dy);
+            cnt++;
+        }
+        return sum / cnt;
+    }
+
+    private static float ComputeLosPenalty(
+        List<Building> buildings, float mapCentre, float tws, BtdFile btd)
+    {
+        const int Samples = 8;
+        float total = 0f;
+        for (int i = 0; i < buildings.Count - 1; i++)
+        for (int j = i + 1; j < buildings.Count; j++)
+        {
+            float ax = ToBtd(buildings[i].X, mapCentre, tws);
+            float ay = ToBtd(buildings[i].Y, mapCentre, tws);
+            float bx = ToBtd(buildings[j].X, mapCentre, tws);
+            float by = ToBtd(buildings[j].Y, mapCentre, tws);
+            float ha = btd.SampleHeightAtWorld(ax, ay);
+            float hb = btd.SampleHeightAtWorld(bx, by);
+
+            for (int k = 1; k <= Samples; k++)
+            {
+                float t      = k / (float)(Samples + 1);
+                float hp     = btd.SampleHeightAtWorld(ax + (bx - ax) * t, ay + (by - ay) * t);
+                float excess = hp - (ha + (hb - ha) * t);
+                if (excess > 0f) total += excess;
+            }
+        }
+        return total;
+    }
+
+    private static float ComputeVariation(List<Building> buildings)
+    {
+        int n = buildings.Count;
+        if (n == 0) return 0f;
+        float catVariety = (float)buildings.Select(b => b.Key).Distinct().Count() / n;
+        float rotVariety = (float)buildings.Select(b => b.Rotation).Distinct().Count()
+                         / Math.Min(4, n);
+        return (catVariety + rotVariety) / 2f;
+    }
+
+    private static void Normalise(float[] values)
+    {
+        float min   = values.Min();
+        float max   = values.Max();
+        float range = max - min;
+        if (range < 1e-6f) { Array.Fill(values, 1f); return; }
+        for (int i = 0; i < values.Length; i++)
+            values[i] = (values[i] - min) / range;
+    }
+
+    private static float Variance(List<float> values)
+    {
+        if (values.Count == 0) return 0f;
+        float mean = values.Average();
+        return values.Average(v => (v - mean) * (v - mean));
+    }
+
+    // ── fallback ─────────────────────────────────────────────────────────────
+
+    private static void PlaceFallbackGrid(GenerationMap map, Random rand, int count)
+    {
+        var keys = SelectKeys(rand, count);
+        int cx = map.xsize / 2;
+        int cy = map.ysize / 2;
+        (int x, int y)[] slots =
+        [
+            (cx,     cy),
+            (cx + 6, cy),
+            (cx - 6, cy),
+            (cx,     cy + 6),
+            (cx + 6, cy + 6),
+            (cx - 6, cy - 6),
+        ];
+        for (int i = 0; i < count && i < slots.Length; i++)
             map.placesmalltile(slots[i].x, slots[i].y, keys[i], rand.Next(4) * 90, "floor");
-        }
+    }
 
-        // --- Outer ring ---
-        // scale < 0.5 → 1 outer slot (solar only)
-        // scale >= 0.5 → 2 outer slots (solar + misc)
-        int outerCount = _scale < 0.5f ? 1 : 2;
+    // ── helpers ──────────────────────────────────────────────────────────────
 
-        var outerSlots = OuterSlots.ToList();
-        Shuffle(outerSlots, rand);
-
-        // First outer slot: solar panel at 0° rotation
-        map.placesmalltile(outerSlots[0].x, outerSlots[0].y, "industry_solar", 0, "floor");
-
-        // Second outer slot (when scale >= 0.5): misc from combined outer pool, random rotation
-        if (outerCount == 2)
-        {
-            map.placesmalltile(outerSlots[1].x, outerSlots[1].y, "industry_outer", rand.Next(4) * 90, "floor");
-        }
+    // Scale building count linearly with map size, using mapSize=50 (4×4 BTD) as the baseline.
+    // scale then acts as a fraction of that maximum, clamped to a minimum of 3.
+    private static int GetBuildingCount(float scale, int mapSize)
+    {
+        int max = Math.Max(3, (int)Math.Round(6f * mapSize / 50f));
+        return Math.Clamp((int)Math.Round(max * scale), 3, max);
     }
 
     private static void Shuffle<T>(List<T> list, Random rand)
@@ -108,5 +326,21 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
             int j = rand.Next(i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
+    }
+
+    // ── data types ───────────────────────────────────────────────────────────
+
+    private sealed class Building(int x, int y, string key, int rotation)
+    {
+        public readonly int    X        = x;
+        public readonly int    Y        = y;
+        public readonly string Key      = key;
+        public readonly int    Rotation = rotation;
+    }
+
+    private sealed class Candidate(List<Building> buildings)
+    {
+        public readonly List<Building> Buildings = buildings;
+        public float Score;
     }
 }

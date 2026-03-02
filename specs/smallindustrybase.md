@@ -18,9 +18,9 @@ MapPass → CellBuildPass pipeline.
 
 ```
 MapPasses:
-  PackInLibraryPass(IndustryPackInIds())   // register building prefab IDs
-  TerrainFlattenPass()                     // flatten tiles occupied by buildings
+  IndustryPackInLibraryPass()              // register building prefab IDs — needs rewrite (see below)
   IndustryLayoutPass(scale)                // place 3–6 building tiles on map
+  TerrainFlattenPass()                     // flatten tiles chosen by layout pass
   TerrainRestorePass()                     // restore terrain outside footprint
 
 CellBuildPasses:
@@ -41,64 +41,90 @@ ContentPasses:
 
 No `BuildingDecoratorPass` — the PackIn prefabs already contain interior detail.
 
+**`IndustryPackInLibraryPass` must be rewritten** alongside `IndustryLayoutPass`. The
+existing version builds 7 string keys structured around the old inner/outer ring
+(`industry_centre`, `industry_solar`, `industry_outer`, etc.). The new version should
+build **one key per category** matching the flat pool in Selected Prefabs (e.g.
+`industry_abandoned`, `industry_large`, `industry_comms`, …). `IndustryLayoutPass`
+uses these keys when writing tiles to the map; `TileInstantiationPass` resolves each
+key to a random `FormKey` from the list at instantiation time.
+
 ---
 
 ## IndustryLayoutPass
 
 ### Goal
 
-Place 3–6 industrial building tiles in a compact cluster near the map centre.
+Place 3–6 industrial building tiles in a compact cluster that fits the natural terrain.
 No walls, gates, or gap-fillers. Each building is a single PackIn tile on the map.
+The cluster is found by **candidate sampling with scored evaluation** rather than a
+fixed grid, so each generation produces a layout shaped by the actual landscape.
 
-### Layout algorithm
+### Dead zone
 
-The cluster uses a **fixed slot grid** rather than random offsets, so the result is
-always roughly square. Buildings are drawn from the Selected Prefabs pool (see below);
-solar panels are always placed on the outer ring.
+No building anchor may be placed within **4 map units of any map edge**. This prevents
+PackIns from intersecting the terrain-merge band at the worldspace boundary.
 
-**Inner ring — 8 candidate slots** at step ±3 from centre (24, 24):
+### Candidate sampling
 
-```
-( 21, 27 )  ( 24, 27 )  ( 27, 27 )
-( 21, 24 )  [ centre ]  ( 27, 24 )
-( 21, 21 )  ( 24, 21 )  ( 27, 21 )
-```
+Generate **300 candidate configurations**. For each:
 
-Procedure:
-1. Place the first selected building at (24, 24).
-2. Shuffle the 8 inner slots and the remaining selected buildings (both) with the RNG.
-3. Fill slots in order until all selected buildings are placed.
-   Each building gets a random 0/90/180/270° rotation.
-4. **Outer ring:** 4 candidate slots at step ±6 from centre on the cardinal axes:
-   (24,30), (24,18), (18,24), (30,24). Shuffle, pick 1–2. Each slot draws one random
-   variant from the combined outer pool (solar panels, reactors, storage bays, fluid
-   storage, mechanical medium, concrete foundations, clutter piles). Solar panel
-   variants use 0° rotation; all others get a random 0/90/180/270° rotation.
-5. Buildings are standalone — they must not touch each other. No shared doorways,
-   connectors, or corridors. No wall pass. No gate/stair pass. No small scatter on
-   base tiles.
+1. Pick a random anchor point within the valid zone (map bounds inset by 16 on all sides).
+2. Determine building count from `scale` (see below). Select that many building types
+   by shuffling the category list and dealing one variant per category in order, cycling
+   back to the start of the shuffled list if more buildings are needed than categories.
+   Pick a random variant from within each selected category.
+3. Place the first building at the anchor.
+4. For each remaining building, attempt up to **20 tries**:
+   - Pick a random angle and a random radial distance in [**3**, 6] map units from the
+     **anchor** (fixed throughout the candidate — not a rolling centroid).
+   - Accept the slot if it is within the valid zone and passes `GenerationMap.canPlace`
+     (checks that the slot and its ±1 tile neighbourhood are all empty — the real
+     footprint of `placesmalltile` is 3×3, so two anchors need at least 2 map units
+     of clearance; distance ≥ 3 guarantees this).
+   - If no valid slot is found in 20 tries, discard this candidate and move on.
+5. Assign a random 0 / 90 / 180 / 270 ° rotation to each building independently.
 
-The inner ring produces a ≤3×3 footprint of 3-unit tiles = ~9×9 map units
-(~36×36 overlay units). Outer solar slots add another 3 units of clearance on
-whichever cardinal side they land.
+After all 300 candidates are generated (or attempted), score each and select the best.
+
+### Fallback
+
+If fewer than **5 valid candidates** are produced (e.g. extreme terrain, very small
+valid zone), fall back to placing buildings in a compact grid centred on the map centre,
+using the same building selection and rotation logic. Log a warning so the result can
+be reviewed.
+
+### Scoring
+
+Each candidate receives a **weighted score** (higher = better). Each component is
+normalised to [0, 1] across the valid candidate set before weighting. If all candidates
+score identically on a component (range = 0), treat every candidate's normalised value
+for that component as **1.0** (no penalty for a tie).
+
+| Component | Weight | Definition |
+|-----------|--------|------------|
+| **Flatness** | 0.40 | `1 - normalise(mean height variance)` — for each occupied tile, convert the four corner map coordinates to BTD world coords: `btdX = (mapX - mapCentre) * TileWorldSize * (4096f / 100f)`, then call `BtdFile.SampleHeightAtWorld(btdX, btdY)` (result is already in overlay Z — no further divide needed). Compute variance across all corner samples for all buildings. Lower variance = flatter ground = higher score. |
+| **Clustering** | 0.30 | `1 - normalise(mean pairwise distance)` — mean Euclidean distance between every pair of building anchors in map coordinates. Tighter cluster = higher score. |
+| **Line-of-sight** | 0.20 | `1 - normalise(total ridge penalty)` — for each pair of buildings, sample 8 evenly-spaced points along the connecting line. Convert each point to BTD world coords using the same formula as Flatness. Call `SampleHeightAtWorld` at each point. For each sample, compute the excess above the linear interpolation between the two endpoint heights; sum all positive excesses across all pairs. Less intervening terrain = higher score. |
+| **Variation** | 0.10 | `(categoryVariety + rotationVariety) / 2` — `categoryVariety` = unique building categories ÷ total buildings; `rotationVariety` = unique rotation values ÷ `min(4, buildingCount)` (so a 3-building candidate with 3 unique rotations scores 1.0). |
 
 ### Scale parameter
 
-`scale` clamps to [0.1, 1.0] and controls how many buildings from the pool are placed:
-- `scale < 0.35` → first 2 buildings from pool (+ centre = 3 total)
-- `scale 0.35–0.7` → first 3–4 buildings
-- `scale > 0.7` → all buildings in the pool
+`scale` clamps to [0.1, 1.0] and controls building count:
 
-Solar panel count (1 or 2) is also scaled: `scale < 0.5` → 1 panel, else 2.
+- `scale < 0.35` → 3 buildings
+- `scale ≥ 0.35 and < 0.525` → 4 buildings
+- `scale ≥ 0.525 and ≤ 0.7` → 5 buildings
+- `scale > 0.7` → 6 buildings
 
 ---
 
 ## Terrain Flattening
 
 `TerrainFlattenPass` already handles this: it flattens BTD under any tile slot that
-has a prefab. Because the cluster is small (3–6 tiles at grid step 3), the flattened
-footprint stays within a ~18×18 map-unit square (~72×72 overlay units), well inside
-a 4×4 BTD.
+has a prefab. With candidate sampling, buildings are placed within 6 map units of the
+anchor, so the flattened footprint is at most ~12×12 map units (~48×48 overlay units),
+well inside a 4×4 BTD.
 
 No custom flatten logic is needed — the existing pass is sufficient.
 
@@ -107,9 +133,9 @@ No custom flatten logic is needed — the existing pass is sufficient.
 ## Prefab Reference — GPPIPCMManMade PackIns
 
 All records are from `Starfield.esm`. Prefix: `GPPIPCMManMade_`.
-**★** = category used by this design (see Selected Prefabs table).
+All categories below are in the active pool (see Selected Prefabs).
 
-### Abandoned Industrial ★ (large, derelict shells)
+### Abandoned Industrial (large, derelict shells)
 
 | EditorID suffix | FormKey |
 |-----------------|---------|
@@ -117,7 +143,7 @@ All records are from `Starfield.esm`. Prefix: `GPPIPCMManMade_`.
 | AbandondedIndustrialLarge02 | 006AAD4 |
 | AbandondedIndustrialLarge03 | 070C7B |
 
-### Industrial Large ★ (active / intact variants)
+### Industrial Large (active / intact variants)
 
 | EditorID suffix | FormKey |
 |-----------------|---------|
@@ -160,7 +186,7 @@ All records are from `Starfield.esm`. Prefix: `GPPIPCMManMade_`.
 | StorageBayDilap04 | 301DCD |
 | StorageBayDilap05 | 301F99 |
 
-### Fluid Storage (tanks / silos) — XLarge variants ★
+### Fluid Storage (tanks / silos)
 
 | EditorID suffix | FormKey |
 |-----------------|---------|
@@ -183,7 +209,7 @@ All records are from `Starfield.esm`. Prefix: `GPPIPCMManMade_`.
 | FluidStorageXLargeC01 | 2F6B44 |
 | FluidStorageXLargeC02 | 2F6B45 |
 
-### Generic Mechanical ★ (machinery / equipment clusters)
+### Generic Mechanical (machinery / equipment clusters)
 
 | EditorID suffix | FormKey |
 |-----------------|---------|
@@ -219,7 +245,7 @@ All records are from `Starfield.esm`. Prefix: `GPPIPCMManMade_`.
 | ClutterPileMedium03 | 070C5A |
 | ClutterPileMedium04 | 070C70 |
 
-### Communications ★ (antennae / relays)
+### Communications (antennae / relays)
 
 | EditorID suffix | FormKey |
 |-----------------|---------|
@@ -250,37 +276,27 @@ All records are from `Starfield.esm`. Prefix: `GPPIPCMManMade_`.
 
 ## Selected Prefabs for This Design
 
-Each inner ring slot picks a random variant from within its assigned category each
-generation. The first slot (centre) always draws from the AbandonedIndustrial category.
-The remaining slots draw from the other categories in shuffled order.
+All categories form a single flat pool. Each building slot picks a random variant from
+a randomly selected category, with the sampler biased toward distinct categories (see
+Variation score). There is no fixed centre building or outer ring.
 
-**Inner ring buildings — one random variant per category per generation:**
-
-| Category | Variants in pool | FormKeys |
-|----------|-----------------|----------|
+| Category | Variants | FormKeys |
+|----------|----------|----------|
 | AbandonedIndustrial | Large01, Large02, Large03 | 0004AC39, 006AAD4, 070C7B |
 | IndustrialLarge | A01, A02, A03, B01, B02, B03 | 302A6D, 302B2E, 302CB1, 30332E, 3033C7, 3037DA |
 | Communications | A01, C01, C02, C03, C04, D01, D02, E01 | 250739, 25073E, 278B9C, 2872A5, 287DAD, 289522, 2DD558, 2DD5EF |
 | GenericMechanicalLarge | A01, B01, B02, C01, C02 | 0658F9, 0658FB, 06D8BE, 076544, 076546 |
+| GenericMechanicalMedium | A01–A08 | 076548, 07654A, 07654C, 07654E, 076550, 078F4F, 078F54, 0658F6 |
 | FluidStorageXLarge | B01, B02, C01, C02 | 2F6B41, 2F6B42, 2F6B44, 2F6B45 |
-
-Scale controls how many categories participate (see Scale parameter above). The
-AbandonedIndustrial category (centre slot) is always included.
-
-**Outer ring** (pick 1–2 slots from the combined pool below):
-
-| Category | EditorID suffixes | FormKeys |
-|----------|-------------------|----------|
+| FluidStorageLarge | A01–A03, B01–B02 | 2F6B1D, 2F6B1E, 2F6B24, 2F6B25, 2F6B26 |
+| FluidStorageMedium | A01–A03, B01–B04, D01–D02 | 304355, 3044DE, 304A87, 2F4173, 2F4179, 2F4180, 2F4186, 30420D, 3042D3 |
 | SolarPanels | A01, A02, A03, B01, B02, B03, C01, C02, C03 | 256995, 257CE6, 257CE8, 259CBE, 280967, 28A882, 2F7FC2, 2F866F, 2F87A5 |
 | Reactor | Reactor01, Reactor02 | 00304C3E, 3051BA |
 | StorageBay | B01–B05, C01–C05, D01–D05, Dilap01–Dilap05 | 2FCEC3, 2FD45E, 2FDE57, 2FE325, 2FEB98, 2FEF80, 2FF7D3, 2FF8BA, 2FFCA5, 3004A1, 3004A4, 30069B, 30073D, 3008A5, 300CFF, 300E82, 3018A5, 301D33, 301DCD, 301F99 |
-| FluidStorageMedium | A01–A03, B01–B04, D01–D02 | 304355, 3044DE, 304A87, 2F4173, 2F4179, 2F4180, 2F4186, 30420D, 3042D3 |
-| FluidStorageLarge | A01–A03, B01–B02 | 2F6B1D, 2F6B1E, 2F6B24, 2F6B25, 2F6B26 |
-| GenericMechanicalMedium | A01–A08 | 076548, 07654A, 07654C, 07654E, 076550, 078F4F, 078F54, 0658F6 |
 | ConcreteFoundations | Large01–Large04 | 070C78, 13DE13, 147238, 14FF23 |
 | ClutterPiles | Medium01–Medium04 | 06EA2A, 070C0A, 070C5A, 070C70 |
 
-Each outer slot picks one random variant from the entire combined pool. Solar panel slots use 0° rotation; all other categories use a random 0/90/180/270° rotation.
+All buildings use a random 0 / 90 / 180 / 270 ° rotation independently.
 
 ---
 
@@ -317,17 +333,18 @@ Noun pool (industrial facilities):
 - `VegetationScatterPass` at 0.2f (rather than the fort's 0.5f) keeps plant density
   low around the site — industrial operations suppress local vegetation.
 - No landing pad placed inside the cluster. The travel marker appears at the edge.
+- **Flavor alignment (advisory):** AbandonedIndustrial and StorageBayDilap buildings
+  read as neglected/derelict; IndustrialLarge, Reactor, and SolarPanels read as active.
+  The name generator is independent of building selection, so the two may diverge (e.g.
+  "Operational Refinery" with all-derelict prefabs). This is acceptable for now; a
+  future pass could weight the adjective pool based on the dominant category.
 
 ---
 
 ## Open Questions
 
-1. ~~**MapMarkerPass.MarkerType** — resolved: use `MarkerType.Industrial` (value 21).~~
-2. ~~**Rotation of large PackIns** — resolved: 90° increments are fine for man-made
-   building PackIns. `TileInstantiationPass` applies rotation as-is.~~
-3. ~~**Connector/door alignment** — resolved: buildings do **not** connect. Each PackIn
-   is standalone with open space between it and its neighbours. No doorway or corridor
-   alignment is required. If playtesting shows buildings touching, increase the inner
-   ring slot step from ±3 to ±4.~~
-4. ~~**Landing pad** — resolved: no landing pad. Industrial sites are not player
-   landing destinations.~~
+1. **Candidate count tuning** — 300 candidates is a starting point. If generation is
+   slow in practice, drop to 150. If layouts feel repetitive, raise to 500.
+2. **Radial spread** — currently [3, 6] map units from anchor. Lower bound 3 enforces
+   `canPlace` clearance (3×3 footprint). If buildings cluster too tightly, raise the
+   upper bound to 8.

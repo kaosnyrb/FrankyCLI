@@ -26,8 +26,8 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
         MapPasses = new List<IWorldspacePass>
         {
             new IndustryPackInLibraryPass(),
-            new TerrainFlattenPass(),
             new IndustryLayoutPass(scale),
+            new TerrainFlattenPass(),
             new TerrainRestorePass(),
         };
 
