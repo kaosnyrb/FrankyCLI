@@ -691,7 +691,30 @@ namespace FrankyCLI
             Console.WriteLine($"  EditorID: {quest.EditorID}");
             Console.WriteLine($"  Name:     {quest.Name}");
             Console.WriteLine($"  Type:     {quest.Data?.Type}");
-            Console.WriteLine($"  Flags:    {quest.Data?.Flags}");
+            Console.WriteLine($"  Flags:    {quest.Data?.Flags}  (raw: 0x{(uint)(quest.Data?.Flags ?? 0):X8})");
+            Console.WriteLine();
+
+            Console.WriteLine($"  Stages [{quest.Stages.Count}]:");
+            foreach (var stage in quest.Stages)
+                Console.WriteLine($"    Index={stage.Index}  Flags={stage.Flags}");
+            Console.WriteLine();
+
+            Console.WriteLine($"  Aliases [{quest.Aliases.Count}]:");
+            foreach (var alias in quest.Aliases)
+            {
+                if (alias is IQuestReferenceAliasGetter refAlias)
+                {
+                    Console.WriteLine($"    [RefAlias] ID={refAlias.ID} Name={refAlias.Name}");
+                    Console.WriteLine($"      Flags:          {refAlias.Flags}");
+                    Console.WriteLine($"      UniqueActor:    {(refAlias.UniqueActor.IsNull   ? "null" : refAlias.UniqueActor.FormKey.ToString())}");
+                    Console.WriteLine($"      ForcedRef:      {(refAlias.ForcedReference.IsNull ? "null" : refAlias.ForcedReference.FormKey.ToString())}");
+                    Console.WriteLine($"      UniqueBase:     {(refAlias.UniqueBaseForm.IsNull  ? "null" : refAlias.UniqueBaseForm.FormKey.ToString())}");
+                }
+                else
+                {
+                    Console.WriteLine($"    [Alias type={alias.GetType().Name}] {alias}");
+                }
+            }
             Console.WriteLine();
 
             Console.WriteLine($"  DialogBranches [{quest.DialogBranches.Count}]:");
@@ -738,8 +761,26 @@ namespace FrankyCLI
                         else
                             Console.WriteLine($"          WED0 (sound):     null");
                         Console.WriteLine($"          TPIC:             {(resp.TPIC.HasValue ? BitConverter.ToString(resp.TPIC.Value.ToArray()) : "null")}");
+                        if (resp.SetParentQuestStage != null)
+                            Console.WriteLine($"          SetParentQuestStage: OnBegin={resp.SetParentQuestStage.OnBegin} OnEnd={resp.SetParentQuestStage.OnEnd}");
                         if (resp.Conditions != null && resp.Conditions.Count > 0)
-                            Console.WriteLine($"          Conditions:       [{resp.Conditions.Count}]");
+                        {
+                            Console.WriteLine($"          Conditions [{resp.Conditions.Count}]:");
+                            foreach (var cond in resp.Conditions)
+                            {
+                                string op  = cond.CompareOperator.ToString();
+                                string val = cond is IConditionFloatGetter cf ? cf.ComparisonValue.ToString("F0") : "?";
+                                string fn  = cond.Data?.GetType().Name ?? "?";
+                                string p1  = "";
+                                if (cond.Data is IGetStageConditionDataGetter gs)
+                                    p1 = $" quest={gs.FirstParameter.Link.FormKey} stage={gs.SecondParameter}";
+                                else if (cond.Data is IGetStageDoneConditionDataGetter gsd)
+                                    p1 = $" quest={gsd.FirstParameter.Link.FormKey} stage={gsd.SecondParameter}";
+                                else if (cond.Data is IConditionParameters cp)
+                                    p1 = $" fn={fn}";
+                                Console.WriteLine($"            {fn}{p1} {op} {val}");
+                            }
+                        }
                         Console.WriteLine($"          ResponseLines [{resp.Responses.Count}]:");
                         for (int i = 0; i < resp.Responses.Count; i++)
                         {

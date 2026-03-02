@@ -74,9 +74,9 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
                 $"[IndustryLayoutPass] WARNING: only {candidates.Count} valid candidates " +
                 $"(threshold {FallbackThreshold}). Using grid fallback.");
             PlaceFallbackGrid(map, rand, count);
-            // Fallback centres on the map origin.
-            state.PoiCenterX = 0f;
-            state.PoiCenterY = 0f;
+            // Fallback centres on the flat area origin.
+            state.PoiCenterX = state.FlatAreaWorldX ?? 0f;
+            state.PoiCenterY = state.FlatAreaWorldY ?? 0f;
             return;
         }
 
@@ -86,13 +86,17 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
         foreach (var b in best.Buildings)
             map.placesmalltile(b.X, b.Y, b.Key, b.Rotation, "floor");
 
-        // Publish the centroid of the placed cluster in overlay world space so
-        // downstream passes (terrain flatten, scatter, map marker, etc.) can
-        // orient themselves around the actual base location.
+        // Publish the anchor building position in overlay world space so
+        // downstream passes (scatter, map marker, boss, etc.) can orient
+        // themselves around the actual base location.
+        // Mirrors TileInstantiationPass: worldX = FlatAreaWorldX + bs*(x - xsize/2)
+        //                                worldY = FlatAreaWorldY - bs*(y - ysize/2)
+        // TerrainFlattenPass must run before this pass so FlatAreaWorldX/Y are set.
         float mapCentre = map.xsize / 2f;
         float tileSize  = state.TileWorldSize;
-        state.PoiCenterX = (best.Buildings.Average(b => (float)b.X) - mapCentre) * tileSize;
-        state.PoiCenterY = (best.Buildings.Average(b => (float)b.Y) - mapCentre) * tileSize;
+        var anchor = best.Buildings[0];
+        state.PoiCenterX = (state.FlatAreaWorldX ?? 0f) + (anchor.X - mapCentre) * tileSize;
+        state.PoiCenterY = (state.FlatAreaWorldY ?? 0f) - (anchor.Y - mapCentre) * tileSize;
     }
 
     // ── candidate generation ─────────────────────────────────────────────────

@@ -26,8 +26,8 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
         MapPasses = new List<IWorldspacePass>
         {
             new IndustryPackInLibraryPass(),
-            new IndustryLayoutPass(scale),
             new TerrainFlattenPass(),
+            new IndustryLayoutPass(scale),
             new TerrainRestorePass(),
         };
 
@@ -48,6 +48,7 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
             new PlanetScanPass("ps_scanbranch", "ps_scancontent"),
             new PlanetQuestPass("ps_questbranch", "ps_questcontent"),
             new WorldspaceBossPass(),
+            new LvlHumanHostilePass(10,50),
         };
     }
 
