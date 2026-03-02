@@ -116,6 +116,10 @@ switch (mode)
         // gen_deprefscan [modname]
         return gen_deprefscan.Run(Get(args, 1, "outlaws02"));
 
+    case "gen_aspcpatch":
+        // gen_aspcpatch — patches du_retrograde: copies ASPC + expands primitive to cell bounds
+        return gen_aspcpatch.Run();
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -183,6 +187,11 @@ Console.WriteLine("  gen_deprefscan  [modname]");
 Console.WriteLine("                     Scan a built mod for FormLink references into template mods.");
 Console.WriteLine("                     Reports which records hold the dependency and their target FormKeys.");
 Console.WriteLine("                     Defaults: modname=outlaws02");
+Console.WriteLine();
+Console.WriteLine("  gen_aspcpatch");
+Console.WriteLine("                     Patch du_retrograde: copies Int_Space_Ship_UC_Small_NoAlarm as");
+Console.WriteLine("                     DU_Station_ASPC and expands all placed ASPC primitives to cover");
+Console.WriteLine("                     each station cell's full bounding box.");
 Console.WriteLine();
 Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");
