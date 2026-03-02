@@ -163,6 +163,7 @@ namespace Retrograde.Nouns
                 EditorID = "leg_" + legID,
                 LegendaryMods = DefaultLegendaryArmor.LegendaryMods,
                 IncludeFilters = DefaultLegendaryArmor.IncludeFilters,
+                BaseObjectList = baseleveled.ToNullableLink()
             };
 
             targetMod.LegendaryItems.Add(newleg);

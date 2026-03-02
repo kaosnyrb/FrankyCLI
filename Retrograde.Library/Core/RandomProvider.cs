@@ -84,14 +84,14 @@ public static class RandomProvider
                 targetMod.Activators.Add(aClone);
                 return aClone;
             case IPlacedObjectGetter po:
-                return ClonePlacedObjectAsOverride(po, targetMod);
+                return ClonePlacedObjectAsNew(po, targetMod);
             default:
                 throw new InvalidOperationException(
                     $"GetRandomMarker: cannot clone record type {source.GetType().Name} — add a case to CloneIntoMod");
         }
     }
 
-    private static PlacedObject ClonePlacedObjectAsOverride(IPlacedObjectGetter source, StarfieldMod targetMod)
+    private static PlacedObject ClonePlacedObjectAsNew(IPlacedObjectGetter source, StarfieldMod targetMod)
     {
         var ctx = RetrogradeContext.Current;
 
@@ -105,7 +105,7 @@ public static class RandomProvider
                 foreach (var subBlock in block.SubBlocks)
                     foreach (var cell in subBlock.Cells)
                     {
-                        var po = TryCloneIntoInteriorCell(source, cell, targetMod);
+                        var po = TryCreateNewInInteriorCell(source, cell, targetMod);
                         if (po != null) return po;
                     }
 
@@ -115,7 +115,7 @@ public static class RandomProvider
                 // Top cell (persistent world-children group) — city markers live here
                 if (ws.TopCell != null)
                 {
-                    var po = TryCloneIntoWorldspaceTopCell(source, ws.TopCell, ws, targetMod);
+                    var po = TryCreateNewInWorldspaceTopCell(source, ws.TopCell, ws, targetMod);
                     if (po != null) return po;
                 }
 
@@ -123,7 +123,7 @@ public static class RandomProvider
                     foreach (var wsSubBlock in wsBlock.Items)
                         foreach (var cell in wsSubBlock.Items)
                         {
-                            var po = TryCloneIntoWorldspaceCell(source, cell, wsBlock, wsSubBlock, ws, targetMod);
+                            var po = TryCreateNewInWorldspaceCell(source, cell, wsBlock, wsSubBlock, ws, targetMod);
                             if (po != null) return po;
                         }
             }
@@ -131,6 +131,85 @@ public static class RandomProvider
 
         throw new InvalidOperationException(
             $"GetRandomMarker: cannot find parent cell for PlacedObject {source.EditorID} ({source.FormKey})");
+    }
+
+    /// <summary>
+    /// Creates a brand-new PlacedObject in TargetMod with a fresh FormKey, copying all fields
+    /// from the source getter. Never uses DeepCopy() so the result is independent of the template.
+    /// FormLinkNullable fields are set after construction per Mutagen rules.
+    /// </summary>
+    private static PlacedObject CreateNewPlacedObject(IPlacedObjectGetter source, StarfieldMod targetMod)
+    {
+        var placed = new PlacedObject(targetMod)
+        {
+            Collision              = source.Collision?.DeepCopy(),
+            Comments               = source.Comments,
+            Components             = source.Components?.Select(x => x.DeepCopy()).ToExtendedList(),
+            ConstrainedDecal       = source.ConstrainedDecal,                   // P3Float value type
+            Count                  = source.Count,
+            DebugText              = source.DebugText?.DeepCopy(),
+            EditorID               = source.EditorID,
+            EnableParent           = source.EnableParent?.DeepCopy(),
+            // EncounterZone is FormLinkNullable — set after construction
+            ExternalEmittance      = source.ExternalEmittance?.DeepCopy(),       // complex sub-record
+            FactionRank            = source.FactionRank,
+            GeometryDirtinessScale = source.GeometryDirtinessScale,
+            HeadTrackingWeight     = source.HeadTrackingWeight,
+            HealthPercent          = source.HealthPercent,
+            IsActivationPoint      = source.IsActivationPoint,
+            IsIgnoredBySandbox     = source.IsIgnoredBySandbox,
+            IsLinkedRefTransient   = source.IsLinkedRefTransient,
+            LayeredMaterialSwaps   = source.LayeredMaterialSwaps?.ToExtendedList(),
+            LevelModifier          = source.LevelModifier,
+            LightArea              = source.LightArea?.DeepCopy(),
+            LightBarndoorData      = source.LightBarndoorData?.DeepCopy(),
+            LightColors            = source.LightColors?.Select(x => x.DeepCopy()).ToExtendedList(),
+            LightFlicker           = source.LightFlicker?.DeepCopy(),
+            Lighting               = source.Lighting?.DeepCopy(),
+            LightLayerData         = source.LightLayerData,                      // bool value type
+            LightRoundedness       = source.LightRoundedness?.DeepCopy(),
+            LightStaticShadowMap   = source.LightStaticShadowMap,                // bool value type
+            LightVolumetricData    = source.LightVolumetricData,                 // float value type
+            LinkedReferences       = source.LinkedReferences?.Select(x => x.DeepCopy()).ToExtendedList(),
+            LocationRefTypes       = source.LocationRefTypes?.ToExtendedList(),
+            Lock                   = source.Lock?.DeepCopy(),
+            MapMarker              = source.MapMarker?.DeepCopy(),
+            NavigationDoorLink     = source.NavigationDoorLink?.DeepCopy(),
+            NumTraversalFluffBytes = source.NumTraversalFluffBytes,
+            OpenByDefault          = source.OpenByDefault,
+            Ownership              = source.Ownership?.DeepCopy(),
+            Patrol                 = source.Patrol?.DeepCopy(),
+            Position               = source.Position,
+            PowerLinks             = source.PowerLinks?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Primitive              = source.Primitive?.DeepCopy(),
+            ProjectedDecal         = source.ProjectedDecal?.DeepCopy(),
+            ProjectedDecalReferences = source.ProjectedDecalReferences?.ToExtendedList(),
+            Properties             = source.Properties?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Radius                 = source.Radius,
+            RagdollBipedRotation   = source.RagdollBipedRotation,                // P3Float value type
+            RagdollData            = source.RagdollData?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Rotation               = source.Rotation,
+            Scale                  = source.Scale,
+            ShipArrival            = source.ShipArrival?.DeepCopy(),
+            SnapLinks              = source.SnapLinks?.Select(x => x.DeepCopy()).ToExtendedList(),
+            Spline                 = source.Spline?.DeepCopy(),
+            StarfieldMajorRecordFlags = source.StarfieldMajorRecordFlags,
+            TeleportDestination    = source.TeleportDestination?.DeepCopy(),
+            Traversals             = source.Traversals?.Select(x => x.DeepCopy()).ToExtendedList(),
+            VirtualMachineAdapter  = source.VirtualMachineAdapter?.DeepCopy(),
+            VolumeData             = source.VolumeData?.DeepCopy(),
+            XALG                   = source.XALG,
+            XNSE                   = source.XNSE?.ToArray(),                     // ReadOnlyMemorySlice → byte[]
+        };
+        // FormLinkNullable fields must be set after construction (Mutagen rule)
+        if (!source.Base.IsNull)               placed.Base               = source.Base.FormKey.ToNullableLink<IPlaceableObjectGetter>();
+        if (!source.Emittance.IsNull)          placed.Emittance          = source.Emittance.FormKey.ToNullableLink<IEmittanceGetter>();
+        if (!source.EncounterZone.IsNull)      placed.EncounterZone      = source.EncounterZone.FormKey.ToNullableLink<ILocationGetter>();
+        if (!source.Layer.IsNull)              placed.Layer              = source.Layer.FormKey.ToNullableLink<ILayerGetter>();
+        if (!source.PersistentLocation.IsNull) placed.PersistentLocation = source.PersistentLocation.FormKey.ToNullableLink<ILocationGetter>();
+        if (!source.TeleportName.IsNull)       placed.TeleportName       = source.TeleportName.FormKey.ToNullableLink<IMessageGetter>();
+        if (!source.TimeOfDay.IsNull)          placed.TimeOfDay          = source.TimeOfDay.FormKey.ToNullableLink<ITimeOfDayRecordGetter>();
+        return placed;
     }
 
     private static bool CellContains(ICellGetter cell, FormKey fk)
@@ -142,28 +221,25 @@ public static class RandomProvider
         return false;
     }
 
-    private static PlacedObject? TryCloneIntoInteriorCell(IPlacedObjectGetter source, ICellGetter cell, StarfieldMod targetMod)
+    private static PlacedObject? TryCreateNewInInteriorCell(IPlacedObjectGetter source, ICellGetter cell, StarfieldMod targetMod)
     {
         if (!CellContains(cell, source.FormKey)) return null;
 
-        // Check for existing cell override
+        var poNew = CreateNewPlacedObject(source, targetMod);
+
+        // Add to existing cell override if present, otherwise create one
         foreach (var block in targetMod.Cells)
             foreach (var subBlock in block.SubBlocks)
                 foreach (var existingCell in subBlock.Cells)
                     if (existingCell.FormKey == cell.FormKey)
                     {
-                        foreach (var placed in existingCell.Persistent)
-                            if (placed.FormKey == source.FormKey) return (PlacedObject)placed;
-                        var dup = source.DeepCopy();
-                        existingCell.Persistent.Add(dup);
-                        return dup;
+                        existingCell.Persistent.Add(poNew);
+                        return poNew;
                     }
 
-        // Create new interior cell override (DeepCopy preserves FormKey)
-        var poOverride = source.DeepCopy();
         var cellOverride = cell.DeepCopy();
         cellOverride.Persistent.Clear();
-        cellOverride.Persistent.Add(poOverride);
+        cellOverride.Persistent.Add(poNew);
         cellOverride.Temporary.Clear();
 
         int blockNum    = (int)(cell.FormKey.ID % 10);
@@ -188,10 +264,10 @@ public static class RandomProvider
         }
 
         targetSubBlock.Cells.Add(cellOverride);
-        return poOverride;
+        return poNew;
     }
 
-    private static PlacedObject? TryCloneIntoWorldspaceTopCell(
+    private static PlacedObject? TryCreateNewInWorldspaceTopCell(
         IPlacedObjectGetter source, ICellGetter topCell,
         IWorldspaceGetter sourceWs, StarfieldMod targetMod)
     {
@@ -205,7 +281,6 @@ public static class RandomProvider
         {
             wsOverride = sourceWs.DeepCopy();
             wsOverride.SubCells.Clear();
-            // Clear the top cell's contents so only our placed object ends up there
             if (wsOverride.TopCell != null)
             {
                 wsOverride.TopCell.Persistent.Clear();
@@ -218,16 +293,12 @@ public static class RandomProvider
             throw new InvalidOperationException(
                 $"GetRandomMarker: worldspace override {sourceWs.EditorID} has no TopCell after DeepCopy");
 
-        // Check if already added
-        foreach (var placed in wsOverride.TopCell.Persistent)
-            if (placed.FormKey == source.FormKey) return (PlacedObject)placed;
-
-        var poOverride = source.DeepCopy();
-        wsOverride.TopCell.Persistent.Add(poOverride);
-        return poOverride;
+        var poNew = CreateNewPlacedObject(source, targetMod);
+        wsOverride.TopCell.Persistent.Add(poNew);
+        return poNew;
     }
 
-    private static PlacedObject? TryCloneIntoWorldspaceCell(
+    private static PlacedObject? TryCreateNewInWorldspaceCell(
         IPlacedObjectGetter source, ICellGetter cell,
         IWorldspaceBlockGetter wsBlock, IWorldspaceSubBlockGetter wsSubBlock,
         IWorldspaceGetter sourceWs, StarfieldMod targetMod)
@@ -265,25 +336,22 @@ public static class RandomProvider
             targetBlock.Items.Add(targetSubBlock);
         }
 
-        // Check for existing cell override
+        var poNew = CreateNewPlacedObject(source, targetMod);
+
+        // Add to existing cell override if present, otherwise create one
         foreach (var existingCell in targetSubBlock.Items)
             if (existingCell.FormKey == cell.FormKey)
             {
-                foreach (var placed in existingCell.Persistent)
-                    if (placed.FormKey == source.FormKey) return (PlacedObject)placed;
-                var dup = source.DeepCopy();
-                existingCell.Persistent.Add(dup);
-                return dup;
+                existingCell.Persistent.Add(poNew);
+                return poNew;
             }
 
-        // Create new exterior cell override (DeepCopy preserves FormKey)
-        var poOverride = source.DeepCopy();
         var cellOverride = cell.DeepCopy();
         cellOverride.Persistent.Clear();
-        cellOverride.Persistent.Add(poOverride);
+        cellOverride.Persistent.Add(poNew);
         cellOverride.Temporary.Clear();
         targetSubBlock.Items.Add(cellOverride);
-        return poOverride;
+        return poNew;
     }
 
     /// <summary>

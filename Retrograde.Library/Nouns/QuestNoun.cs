@@ -99,10 +99,16 @@ namespace Retrograde.Nouns
                         return;
                     }
 
-                    // Otherwise copy it into targetMod and update the property
-                    var copied = source.DeepCopy();
-                    targetMod.FormLists.Add(copied);
-                    objProp.Object = copied.ToLink<IStarfieldMajorRecordGetter>();
+                    // Otherwise create a new FormList in targetMod (fresh FormKey, same contents)
+                    var newList = new FormList(targetMod)
+                    {
+                        EditorID = source.EditorID,
+                    };
+                    if (source.Items != null)
+                        foreach (var item in source.Items)
+                            newList.Items.Add(item.FormKey.ToLink<IStarfieldMajorRecordGetter>());
+                    targetMod.FormLists.Add(newList);
+                    objProp.Object = newList.ToLink<IStarfieldMajorRecordGetter>();
                     return;
                 }
             }

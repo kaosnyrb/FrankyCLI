@@ -154,9 +154,9 @@ namespace FrankyCLI
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "Space Informant - Crimson Fleet - cargo Icy Asteroids",
-                        DeepTempalte = "Planetside Smallbase Informant - Trade Authority Broker",
-                        ShowdownTemplate = "City Bounty - Paradiso"
+                        InvestigationTemplate = "Space Activator - unguarded IceCrystals",
+                        DeepTempalte = "Planetside Smallbase Informant - Freestar Ranger Environmental Scout",
+                        ShowdownTemplate = "City Bounty - Outskirts of Cydonia"
                     };
                     outlawQuest.GenerateQuest();                    
                 }
