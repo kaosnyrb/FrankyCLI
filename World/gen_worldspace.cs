@@ -111,7 +111,7 @@ namespace FrankyCLI
                 Console.WriteLine($"Generating worldspace with seed {seed}, faction {faction}, design {design.DesignName}");
 
                 // Generate the worldspace
-                var worldspaceNoun = new WorldspaceNoun(design, faction, seed, datapath);
+                var worldspaceNoun = new WorldspaceNoun(design, faction, seed, datapath,"testinglocation");
 
                 Console.WriteLine($"Worldspace generated: {worldspaceNoun.Worldspace.EditorID}");
             }

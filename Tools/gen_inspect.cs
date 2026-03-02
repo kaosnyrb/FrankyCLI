@@ -23,7 +23,7 @@ namespace FrankyCLI
             {
                 Console.WriteLine("Usage: <modname> gen_inspect <dummy> <recordtype> <editorid_or_formid>");
                 Console.WriteLine();
-                Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc");
+                Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Keyword");
                 Console.WriteLine("              PcmBranchNode, PcmContentNode, Book, Scene");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
@@ -345,9 +345,14 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpPcmContentNode(rec); found++; }
                     break;
+                case "keyword":
+                    foreach (var rec in mod.Keywords)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpRecord(rec, "Keyword"); found++; }
+                    break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, PcmBranchNode, PcmContentNode, Book, Scene");
+                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
                     Console.WriteLine("           Quest, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)");
                     break;
             }

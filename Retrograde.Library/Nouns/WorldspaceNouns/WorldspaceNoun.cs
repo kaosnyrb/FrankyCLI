@@ -25,7 +25,7 @@ public class WorldspaceNoun
     public Location Location;
     public WorldspaceState State;
 
-    public WorldspaceNoun(IWorldspaceDesign design, string faction, int seed, string dataFolderPath = null)
+    public WorldspaceNoun(IWorldspaceDesign design, string faction, int seed, string dataFolderPath = null, string? locationKeyword = null)
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
         var starfieldEsm = RetrogradeContext.Current.StarfieldModKey;
@@ -48,14 +48,17 @@ public class WorldspaceNoun
         IFormLinkNullable<IKeywordGetter> LocTypeDungeon = new FormKey(starfieldEsm, 0x000254BC).ToNullableLink<IKeywordGetter>();
         IFormLinkNullable<IKeywordGetter> LocTypeClearable = new FormKey(starfieldEsm, 0x00064EDE).ToNullableLink<IKeywordGetter>();
         IFormLinkNullable<IKeywordGetter> LocTypeOE_Keyword = new FormKey(starfieldEsm, 0x001A5468).ToNullableLink<IKeywordGetter>();
-        IFormLinkNullable<IKeywordGetter> LocEncSpacers_Exclusive = new FormKey(starfieldEsm, 0x00283585).ToNullableLink<IKeywordGetter>();
+        IFormLinkNullable<IKeywordGetter> LocEncSpacers_Exclusive      = new FormKey(starfieldEsm, 0x00283585).ToNullableLink<IKeywordGetter>();
+        IFormLinkNullable<IKeywordGetter> LocEncCrimsonFleet_Exclusive = new FormKey(starfieldEsm, 0x00023305).ToNullableLink<IKeywordGetter>();
+        IFormLinkNullable<IKeywordGetter> LocEncEcliptic_Exclusive     = new FormKey(starfieldEsm, 0x00283581).ToNullableLink<IKeywordGetter>();
+        IFormLinkNullable<IKeywordGetter> LocEncHouseVaruun_Exclusive  = new FormKey(starfieldEsm, 0x00283580).ToNullableLink<IKeywordGetter>();
         IFormLinkNullable<IKeywordGetter> LocTypeOverlay = new FormKey(starfieldEsm, 0x002CA99D).ToNullableLink<IKeywordGetter>();
 
         Location = new Location(targetMod)
         {
             EditorID = prefix + "loc" + shortname,
             Name = poiName,
-            Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>(),
+            Keywords = [],
             WorldLocationRadius = 0,
             ActorFadeMult = 1,
         };
@@ -63,7 +66,49 @@ public class WorldspaceNoun
         Location.Keywords.Add(LocTypeDungeon);
         Location.Keywords.Add(LocTypeClearable);
         Location.Keywords.Add(LocTypeOE_Keyword);
-        Location.Keywords.Add(LocEncSpacers_Exclusive);
+
+        switch (faction.ToLowerInvariant())
+        {
+            case "crimsonfleet": Location.Keywords.Add(LocEncCrimsonFleet_Exclusive); break;
+            case "ecliptic":     Location.Keywords.Add(LocEncEcliptic_Exclusive);     break;
+            case "housevaruun":  Location.Keywords.Add(LocEncHouseVaruun_Exclusive);  break;
+            case "spacer":       Location.Keywords.Add(LocEncSpacers_Exclusive);      break;
+            default:
+                Location.Keywords.Add(LocEncSpacers_Exclusive);
+                Location.Keywords.Add(LocEncCrimsonFleet_Exclusive);
+                Location.Keywords.Add(LocEncEcliptic_Exclusive);
+                Location.Keywords.Add(LocEncHouseVaruun_Exclusive);
+                break;
+        }
+
+        if (!string.IsNullOrEmpty(locationKeyword))
+        {
+            string kwEditorId = "LocTypeOE_" + locationKeyword;
+
+            // 1. Already created in this run (targetMod)
+            var existing = targetMod.Keywords.FirstOrDefault(k => k.EditorID == kwEditorId);
+            if (existing != null)
+            {
+                Location.Keywords.Add(existing.ToNullableLink<IKeywordGetter>());
+            }
+            else
+            {
+                // 2. Exists in a template mod
+                var inTemplate = FindInTemplateMods(RetrogradeContext.Current.TemplateMods, m => m.Keywords, kwEditorId);
+                if (inTemplate != null)
+                {
+                    Location.Keywords.Add(inTemplate.FormKey.ToNullableLink<IKeywordGetter>());
+                }
+                else
+                {
+                    // 3. Create new
+                    var kw = new Keyword(targetMod) { EditorID = kwEditorId };
+                    targetMod.Keywords.Add(kw);
+                    Location.Keywords.Add(kw.ToNullableLink<IKeywordGetter>());
+                }
+            }
+        }
+
         Location.Keywords.Add(LocTypeOverlay);
         targetMod.Locations.Add(Location);
 
