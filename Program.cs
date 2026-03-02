@@ -120,6 +120,10 @@ switch (mode)
         // gen_aspcpatch — patches du_retrograde: copies ASPC + expands primitive to cell bounds
         return gen_aspcpatch.Run();
 
+    case "gen_dlgtest":
+        // gen_dlgtest [modname]  — structural test for NPCDialogueNoun (no AI, no audio)
+        return gen_dlgtest.Run(Get(args, 1, "dlgtest"));
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -192,6 +196,11 @@ Console.WriteLine("  gen_aspcpatch");
 Console.WriteLine("                     Patch du_retrograde: copies Int_Space_Ship_UC_Small_NoAlarm as");
 Console.WriteLine("                     DU_Station_ASPC and expands all placed ASPC primitives to cover");
 Console.WriteLine("                     each station cell's full bounding box.");
+Console.WriteLine();
+Console.WriteLine("  gen_dlgtest     [modname]");
+Console.WriteLine("                     Structural test for NPCDialogueNoun — builds a 2-stage dialogue");
+Console.WriteLine("                     quest, prints a record-chain diagnostic, and writes the .esm.");
+Console.WriteLine("                     No AI or audio. Load output in xEdit to verify. Defaults: modname=dlgtest");
 Console.WriteLine();
 Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");
