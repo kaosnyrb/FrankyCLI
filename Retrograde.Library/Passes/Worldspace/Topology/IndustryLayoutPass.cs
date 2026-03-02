@@ -17,7 +17,8 @@ namespace Retrograde.Passes.Worldspace;
 ///   Variation  0.10 — prefer distinct categories and diverse rotations
 ///
 /// Dead zone: no anchor within 4 tiles of any map edge.
-/// Spread:    each building placed 5–7 tiles from the anchor (tight cluster, no tile overlap).
+/// Spread:    each building placed 5–10 tiles from the anchor; per-building ObjectBounds
+///            radius prevents physical overlap between all category combinations.
 /// Fallback:  if fewer than 5 valid candidates are found, a compact centre grid is used.
 /// </summary>
 /// <param name="scale">Controls building count (0.1 = 3, 1.0 = 6).</param>
@@ -44,10 +45,10 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
 
     private const int CandidateCount    = 300;
     private const int PlacementTries    = 20;
-    private const int SpreadMin         = 5;   // 20 overlay units — minimum inter-anchor distance from anchor
-    private const int SpreadMax         = 7;   // 28 overlay units — keeps cluster compact
-    private const int OccupiedRadius    = 2;   // enforces 2*2+1 = 5 map unit minimum clearance
-    private const int DeadZone          = 4;
+    private const int   SpreadMin       = 5;    // map tiles — minimum distance from anchor to try
+    private const int   SpreadMax       = 10;   // map tiles — maximum cluster radius from anchor
+    private const float FallbackRadius  = 4f;   // overlay units — used when ObjectBounds data is absent
+    private const int   DeadZone        = 4;
     private const int FallbackThreshold = 5;
 
     // ── entry point ──────────────────────────────────────────────────────────
@@ -58,10 +59,12 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
         var map   = state.Map;
         int count = GetBuildingCount(_scale, map.xsize);
 
+        var radii      = state.PackInRadii;
+        var tws        = state.TileWorldSize;
         var candidates = new List<Candidate>(CandidateCount);
         for (int i = 0; i < CandidateCount; i++)
         {
-            var c = TryGenerateCandidate(map, rand, count);
+            var c = TryGenerateCandidate(map, rand, count, radii, tws);
             if (c != null) candidates.Add(c);
         }
 
@@ -83,7 +86,9 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
 
     // ── candidate generation ─────────────────────────────────────────────────
 
-    private static Candidate? TryGenerateCandidate(GenerationMap map, Random rand, int count)
+    private static Candidate? TryGenerateCandidate(
+        GenerationMap map, Random rand, int count,
+        Dictionary<string, float> radii, float tileWorldSize)
     {
         int validMin  = DeadZone;
         int validMaxX = map.xsize - DeadZone - 1;
@@ -94,12 +99,10 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
         int anchorY = rand.Next(validMin, validMaxY + 1);
 
         var keys      = SelectKeys(rand, count);
-        var occupied  = new HashSet<(int, int)>();
         var buildings = new List<Building>(count)
         {
             new(anchorX, anchorY, keys[0], rand.Next(4) * 90),
         };
-        MarkOccupied(occupied, anchorX, anchorY);
 
         for (int b = 1; b < count; b++)
         {
@@ -112,10 +115,9 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
                 int    y     = anchorY + (int)Math.Round(Math.Sin(angle) * dist);
 
                 if (x < validMin || x > validMaxX || y < validMin || y > validMaxY) continue;
-                if (!CanPlaceOnOccupied(occupied, x, y)) continue;
+                if (!CanPlaceOnBuildings(buildings, x, y, keys[b], radii, tileWorldSize)) continue;
 
                 buildings.Add(new Building(x, y, keys[b], rand.Next(4) * 90));
-                MarkOccupied(occupied, x, y);
                 placed = true;
                 break;
             }
@@ -135,25 +137,26 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
         return keys;
     }
 
-    // Mark a (2*OccupiedRadius+1)² zone around the anchor so CanPlaceOnOccupied
-    // enforces a minimum inter-anchor distance of 2*OccupiedRadius+1 = 5 map units
-    // (20 overlay units), preventing physical overlap for all but the very largest PackIns.
-    private static void MarkOccupied(HashSet<(int, int)> occupied, int x, int y)
+    // Returns true if (x, y) with category newKey does not physically overlap any
+    // already-placed building. Minimum separation = sum of the two buildings' overlay
+    // radii (from ObjectBounds), converted to map tiles.
+    private static bool CanPlaceOnBuildings(
+        List<Building> buildings, int x, int y, string newKey,
+        Dictionary<string, float> radii, float tileWorldSize)
     {
-        for (int dx = -OccupiedRadius; dx <= OccupiedRadius; dx++)
-        for (int dy = -OccupiedRadius; dy <= OccupiedRadius; dy++)
-            occupied.Add((x + dx, y + dy));
-    }
-
-    // Candidate simulation runs on an empty map, so we check the scratch HashSet,
-    // not GenerationMap.canPlace (which would always pass on an unwritten map).
-    private static bool CanPlaceOnOccupied(HashSet<(int, int)> occupied, int x, int y)
-    {
-        for (int dx = -OccupiedRadius; dx <= OccupiedRadius; dx++)
-        for (int dy = -OccupiedRadius; dy <= OccupiedRadius; dy++)
-            if (occupied.Contains((x + dx, y + dy))) return false;
+        float newR = GetMapRadius(newKey, radii, tileWorldSize);
+        foreach (var b in buildings)
+        {
+            float minDist = newR + GetMapRadius(b.Key, radii, tileWorldSize);
+            float dx = x - b.X;
+            float dy = y - b.Y;
+            if (dx * dx + dy * dy < minDist * minDist) return false;
+        }
         return true;
     }
+
+    private static float GetMapRadius(string key, Dictionary<string, float> radii, float tileWorldSize)
+        => radii.TryGetValue(key, out float ov) ? ov / tileWorldSize : FallbackRadius;
 
     // ── scoring ──────────────────────────────────────────────────────────────
 

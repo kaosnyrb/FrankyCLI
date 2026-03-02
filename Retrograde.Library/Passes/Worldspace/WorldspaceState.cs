@@ -25,6 +25,13 @@ public class WorldspaceState
     public Location Location;
     public GenerationMap Map;
     public Dictionary<string, List<FormKey>> PackInLibrary;
+
+    /// <summary>
+    /// Per-category XY radius in overlay units, derived from PackIn ObjectBounds.
+    /// Populated by IndustryPackInLibraryPass. Used by IndustryLayoutPass to
+    /// prevent physical overlap between buildings of different sizes.
+    /// </summary>
+    public Dictionary<string, float> PackInRadii = new();
     public WorldspacePlacementUtil PlacementUtil;
 
     /// <summary>

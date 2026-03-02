@@ -1,5 +1,6 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,8 +9,9 @@ namespace Retrograde.Passes.Worldspace;
 /// <summary>
 /// First map pass for SmallIndustryBase POIs.
 /// Scans Starfield.esm PackIns by GPPIPCMManMade_ EditorID prefix and populates
-/// state.PackInLibrary with one variant list per category.
-/// All 13 categories form a single flat pool used by IndustryLayoutPass.
+/// state.PackInLibrary with one variant list per category, and state.PackInRadii
+/// with the max XY half-extent (in overlay units) across all variants in that category.
+/// IndustryLayoutPass uses the radii for per-pair overlap prevention.
 ///
 /// Pattern safety notes:
 ///   "FluidStorageLarge"  is NOT a substring of "FluidStorageXLarge" (X breaks it) — safe.
@@ -18,6 +20,9 @@ namespace Retrograde.Passes.Worldspace;
 /// </summary>
 public class IndustryPackInLibraryPass : IWorldspacePass
 {
+    // Minimum radius assigned when ObjectBounds data is absent or suspiciously small.
+    private const float MinFallbackRadius = 4f; // overlay units ≈ 1 map tile
+
     public void RunPass(WorldspaceState state)
     {
         var sf = RetrogradeContext.Current.StarfieldMod;
@@ -35,6 +40,22 @@ public class IndustryPackInLibraryPass : IWorldspacePass
         state.PackInLibrary["industry_storage"]       = FindByPattern(sf, "GPPIPCMManMade_StorageBay");
         state.PackInLibrary["industry_foundations"]   = FindByPattern(sf, "GPPIPCMManMade_ConcreteFoundations");
         state.PackInLibrary["industry_clutter"]       = FindByPattern(sf, "GPPIPCMManMade_ClutterPile");
+
+        // Compute the max XY half-extent across all variants in each category.
+        // ObjectBounds for exterior PackIns is in overlay units (1 cell = 100 units).
+        foreach (var (key, formKeys) in state.PackInLibrary)
+        {
+            float maxRadius = 0f;
+            foreach (var fk in formKeys)
+            {
+                var packin = sf.PackIns.FirstOrDefault(p => p.FormKey == fk);
+                if (packin?.ObjectBounds == null) continue;
+                float ex = MathF.Abs(packin.ObjectBounds.Second.X - packin.ObjectBounds.First.X) / 2f;
+                float ey = MathF.Abs(packin.ObjectBounds.Second.Y - packin.ObjectBounds.First.Y) / 2f;
+                maxRadius = MathF.Max(maxRadius, MathF.Max(ex, ey));
+            }
+            state.PackInRadii[key] = MathF.Max(maxRadius, MinFallbackRadius);
+        }
     }
 
     private static List<FormKey> FindByPattern(IStarfieldModGetter mod, string pattern)
