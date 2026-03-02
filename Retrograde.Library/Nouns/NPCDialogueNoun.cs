@@ -31,7 +31,10 @@ public class NPCDialogueNoun
         };
         var quest = new Quest(targetMod) { EditorID = "dlg_quest_" + suffix, Data = data };
 
-        for (int i = 0; i < script.StageCount; i++)
+        // Stage i*100 for each dialogue stage, plus a terminal stage at StageCount*100.
+        // The terminal stage is referenced by last-stage explore conditions (GetStageDone==0)
+        // so xEdit doesn't warn about a missing stage index.
+        for (int i = 0; i <= script.StageCount; i++)
             quest.Stages.Add(new QuestStage { Index = (ushort)(i * 100) });
 
         quest.Aliases = new ExtendedList<AQuestAlias>();
@@ -84,13 +87,15 @@ public class NPCDialogueNoun
                 greetInfo.Conditions.Add(BuildStageDoneCondition(quest, stageValue, equalTo: 1));
 
             var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(script.Stages[i].NpcLine))[..4];
-            greetInfo.Responses.Add(new DialogResponse
+            var greetResponse = new DialogResponse
             {
                 ResponseText = script.Stages[i].NpcLine,
                 WEMFile      = greetInfo.FormKey.ID,
                 TextHash     = textHash,
                 EmotionOut   = 7.466667f,
-            });
+            };
+            greetResponse.Emotion.SetTo(FormKey.Null);
+            greetInfo.Responses.Add(greetResponse);
 
             greetTopic.Responses.Add(greetInfo);
             greetInfoLinks.Add(greetInfo.FormKey.ToLink<IDialogResponsesGetter>());
@@ -146,13 +151,15 @@ public class NPCDialogueNoun
                 exInfo.Conditions.Add(hideAfterAdvance);
 
                 var exHash = SHA256.HashData(Encoding.UTF8.GetBytes(ex.NpcReply))[..4];
-                exInfo.Responses.Add(new DialogResponse
+                var exResponse = new DialogResponse
                 {
                     ResponseText = ex.NpcReply,
                     WEMFile      = exInfo.FormKey.ID,
                     TextHash     = exHash,
                     EmotionOut   = 7.466667f,
-                });
+                };
+                exResponse.Emotion.SetTo(FormKey.Null);
+                exInfo.Responses.Add(exResponse);
                 exTopic.Responses.Add(exInfo);
                 exTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                     { exInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -181,13 +188,15 @@ public class NPCDialogueNoun
         };
         goodbyeInfo.Speaker.SetTo(npcFormKey);
         var byeHash = SHA256.HashData(Encoding.UTF8.GetBytes(script.Goodbye))[..4];
-        goodbyeInfo.Responses.Add(new DialogResponse
+        var byeResponse = new DialogResponse
         {
             ResponseText = script.Goodbye,
             WEMFile      = goodbyeInfo.FormKey.ID,
             TextHash     = byeHash,
             EmotionOut   = 7.466667f,
-        });
+        };
+        byeResponse.Emotion.SetTo(FormKey.Null);
+        goodbyeInfo.Responses.Add(byeResponse);
         goodbyeTopic.Responses.Add(goodbyeInfo);
         goodbyeTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
             { goodbyeInfo.FormKey.ToLink<IDialogResponsesGetter>() };

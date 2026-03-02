@@ -167,7 +167,7 @@ public static DialogueScript GetDialogueScript(
 ```
 Quest  (per-NPC, StartGameEnabled | StartsEnabled | RunOnce | 0x10000, Type=None)
   │
-  ├─ QuestStages:  [0, 100, 200, ...]
+  ├─ QuestStages:  [0, 100, …, StageCount*100]   ← includes a terminal stage beyond the last dialogue stage
   │
   ├─ Alias[0]:  QuestReferenceAlias (ID=0, Flags=AllowDisabled, UniqueActor → NPC base form)
   │
@@ -235,6 +235,18 @@ Raw: `0x00010111`.
 
 ## Mutagen Construction — `NPCDialogueNoun`
 
+> **Verified by `gen_dlgtest` + xEdit** — record chain is clean. Gotchas below are confirmed
+> runtime fixes required beyond what the vanilla reference suggested.
+
+### Construction gotchas
+
+| Gotcha | Correct pattern |
+|--------|----------------|
+| `Quest.Aliases` is **null** on a fresh record | `quest.Aliases = new ExtendedList<AQuestAlias>()` before `.Add()` |
+| `condData.FirstParameter.SetTo(...)` fails type inference (CS0411) | `condData.FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, quest.FormKey)` |
+| `DialogResponse.Emotion` must be explicit null | `response.Emotion.SetTo(FormKey.Null)` — omitting it causes xEdit TRDA warning |
+| Last-stage explore conditions reference a non-existent stage | Add terminal stage at `StageCount * 100` so `GetStageDone(quest, terminal) == 0` is valid |
+
 ```csharp
 // Retrograde.Library/Nouns/NPCDialogueNoun.cs
 
@@ -260,9 +272,13 @@ public class NPCDialogueNoun
         };
         var quest = new Quest(targetMod) { EditorID = "dlg_quest_" + suffix, Data = data };
 
-        for (int i = 0; i < script.StageCount; i++)
+        // i <= StageCount: includes a terminal stage at StageCount*100 so last-stage
+        // explore conditions (GetStageDone == 0) reference a valid stage index.
+        for (int i = 0; i <= script.StageCount; i++)
             quest.Stages.Add(new QuestStage { Index = (ushort)(i * 100) });
 
+        // Quest.Aliases is null on fresh construction — must initialize before .Add().
+        quest.Aliases = new ExtendedList<AQuestAlias>();
         targetMod.Quests.Add(quest);
 
         // ── Alias ──────────────────────────────────────────────────────────────
@@ -312,13 +328,15 @@ public class NPCDialogueNoun
                 greetInfo.Conditions.Add(BuildStageDoneCondition(quest, stageValue, equalTo: 1));
 
             var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(script.Stages[i].NpcLine))[..4];
-            greetInfo.Responses.Add(new DialogResponse
+            var greetResponse = new DialogResponse
             {
                 ResponseText = script.Stages[i].NpcLine,
                 WEMFile      = greetInfo.FormKey.ID,   // ⚠ convention unverified in-game
                 TextHash     = textHash,
                 EmotionOut   = 7.466667f,
-            });
+            };
+            greetResponse.Emotion.SetTo(FormKey.Null); // required — omitting causes xEdit TRDA warning
+            greetInfo.Responses.Add(greetResponse);
 
             greetTopic.Responses.Add(greetInfo);
             greetInfoLinks.Add(greetInfo.FormKey.ToLink<IDialogResponsesGetter>());
@@ -374,13 +392,15 @@ public class NPCDialogueNoun
                 exInfo.Conditions.Add(hideAfterAdvance);
 
                 var exHash = SHA256.HashData(Encoding.UTF8.GetBytes(ex.NpcReply))[..4];
-                exInfo.Responses.Add(new DialogResponse
+                var exResponse = new DialogResponse
                 {
                     ResponseText = ex.NpcReply,
                     WEMFile      = exInfo.FormKey.ID,
                     TextHash     = exHash,
                     EmotionOut   = 7.466667f,
-                });
+                };
+                exResponse.Emotion.SetTo(FormKey.Null);
+                exInfo.Responses.Add(exResponse);
                 exTopic.Responses.Add(exInfo);
                 exTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                     { exInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -409,13 +429,15 @@ public class NPCDialogueNoun
         };
         goodbyeInfo.Speaker.SetTo(npcFormKey);
         var byeHash = SHA256.HashData(Encoding.UTF8.GetBytes(script.Goodbye))[..4];
-        goodbyeInfo.Responses.Add(new DialogResponse
+        var byeResponse = new DialogResponse
         {
             ResponseText = script.Goodbye,
             WEMFile      = goodbyeInfo.FormKey.ID,
             TextHash     = byeHash,
             EmotionOut   = 7.466667f,
-        });
+        };
+        byeResponse.Emotion.SetTo(FormKey.Null);
+        goodbyeInfo.Responses.Add(byeResponse);
         goodbyeTopic.Responses.Add(goodbyeInfo);
         goodbyeTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
             { goodbyeInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -447,11 +469,13 @@ public class NPCDialogueNoun
     /// equalTo=1 → "stage N has been reached" (used on Greeting INFOs to select the right stage).
     /// equalTo=0 → "stage N has NOT been reached" (used on Progress+Explore to hide after advance).
     /// Verified in CREW_EliteCrew_OtherPlayer and UC02.
+    ///
+    /// NOTE: FirstParameter uses direct assignment with FormLinkOrIndex — .SetTo() fails CS0411.
     /// </summary>
     private static ConditionFloat BuildStageDoneCondition(Quest quest, int stageValue, int equalTo)
     {
         var condData = new GetStageDoneConditionData { SecondParameter = stageValue };
-        condData.FirstParameter.SetTo(quest.FormKey.ToLink<IQuestGetter>());
+        condData.FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, quest.FormKey);
 
         return new ConditionFloat
         {
@@ -499,7 +523,28 @@ var dialogue = new NPCDialogueNoun(
 
 ---
 
-## Open Questions
+## Phase 2 — Confirmed by `gen_dlgtest` + xEdit
+
+xEdit loaded `outlaws02.esm` clean after the construction fixes. Record chain verified:
+
+| Check | Result |
+|-------|--------|
+| Quest flags `0x00010111` | ✅ |
+| Alias `UniqueActor` → NPC_ base form | ✅ (use cloned NPC from target mod, not raw Starfield.esm ID) |
+| DialogBranch `Category=Player`, `Flags=TopLevel` | ✅ |
+| `branch.StartingTopic` → Greeting topic | ✅ |
+| `topic.Branch` property exists on DialogTopic | ✅ |
+| `quest.DialogBranches` property exists on Quest | ✅ |
+| Greeting INFOs ordered latest-stage first | ✅ |
+| Stage 0 INFO has no condition (fallback) | ✅ |
+| Progress `SetParentQuestStage.OnEnd=100, OnBegin=-1` | ✅ |
+| Explore `ResponseText` + `WEMFile=info.FormKey.ID` | ✅ |
+| `Emotion.SetTo(FormKey.Null)` silences TRDA warning | ✅ |
+| Terminal stage eliminates "stage not found" warning | ✅ |
+
+---
+
+## Open Questions — Require In-Game Testing
 
 1. **WEMFile for Player-category INFOs** — `info.FormKey.ID` is our convention. Vanilla uses
    Wwise-assigned IDs with no FormKey correlation. Whether Starfield resolves

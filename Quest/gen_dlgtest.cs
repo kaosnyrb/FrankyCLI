@@ -5,6 +5,7 @@ using Mutagen.Bethesda.Starfield;
 using Retrograde;
 using Retrograde.Models;
 using Retrograde.Nouns;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,6 @@ namespace FrankyCLI
     /// </summary>
     public static class gen_dlgtest
     {
-        // Male template NPC from Starfield.esm (0x000826)
-        private const uint TestNpcId = 0x000826;
 
         public static int Run(string modname = "dlgtest")
         {
@@ -56,7 +55,12 @@ namespace FrankyCLI
                 gen_quest_main.BuildReadParams(env.LoadOrder);
                 RetrogradeContext.Current = new ModContextImpl();
 
-                var npcFormKey = new FormKey(gen_quest_main.StarfieldModKey, TestNpcId);
+                // Clone a template NPC into the target mod so the FormKey is a proper NPC_
+                var templateNpc = NPCTools.FindTemplateNpc(female: false);
+                var testNpc = NPCTools.CloneNPC(gen_quest_main.myMod, templateNpc);
+                testNpc.EditorID = "dlgtest_npc";
+                gen_quest_main.myMod.Npcs.Add(testNpc);
+                var npcFormKey = testNpc.FormKey;
 
                 // ── Hardcoded 2-stage DialogueScript (no AI) ─────────────────────
                 var script = new DialogueScript
