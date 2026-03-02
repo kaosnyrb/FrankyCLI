@@ -74,6 +74,9 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
                 $"[IndustryLayoutPass] WARNING: only {candidates.Count} valid candidates " +
                 $"(threshold {FallbackThreshold}). Using grid fallback.");
             PlaceFallbackGrid(map, rand, count);
+            // Fallback centres on the map origin.
+            state.PoiCenterX = 0f;
+            state.PoiCenterY = 0f;
             return;
         }
 
@@ -82,6 +85,14 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
 
         foreach (var b in best.Buildings)
             map.placesmalltile(b.X, b.Y, b.Key, b.Rotation, "floor");
+
+        // Publish the centroid of the placed cluster in overlay world space so
+        // downstream passes (terrain flatten, scatter, map marker, etc.) can
+        // orient themselves around the actual base location.
+        float mapCentre = map.xsize / 2f;
+        float tileSize  = state.TileWorldSize;
+        state.PoiCenterX = (best.Buildings.Average(b => (float)b.X) - mapCentre) * tileSize;
+        state.PoiCenterY = (best.Buildings.Average(b => (float)b.Y) - mapCentre) * tileSize;
     }
 
     // ── candidate generation ─────────────────────────────────────────────────

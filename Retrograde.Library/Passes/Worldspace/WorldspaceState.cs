@@ -66,6 +66,16 @@ public class WorldspaceState
     public Dictionary<P2Int, Cell> CellLookup = new();
 
     /// <summary>
+    /// Overlay world-space centroid of the placed POI buildings (X, Y in overlay units).
+    /// Set by the topology pass (e.g. IndustryLayoutPass) immediately after it writes
+    /// buildings to the map. Downstream passes use this to centre scatter, terrain
+    /// flattening, and markers on the actual base location.
+    /// Null until the topology pass has run.
+    /// </summary>
+    public float? PoiCenterX;
+    public float? PoiCenterY;
+
+    /// <summary>
     /// World-space centre of the flat base area chosen by TerrainFlattenPass.
     /// Null until TerrainFlattenPass has run. TileInstantiationPass uses this
     /// to centre the tile grid on the flat area instead of the worldspace origin.

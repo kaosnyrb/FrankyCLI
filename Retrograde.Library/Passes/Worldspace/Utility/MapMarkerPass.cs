@@ -11,8 +11,10 @@ namespace Retrograde.Passes.Worldspace;
 /// worldspace's persistent cell, plus a linked XMarker as the fast-travel destination.
 /// Matches the setup seen in OEAF026World (TopCell 029EAD).
 ///
-/// Position is taken from <see cref="WorldspaceState.MarkerPosition"/> when set,
-/// otherwise defaults to the worldspace origin (0, 0) at terrain height.
+/// Position priority:
+///   1. <see cref="WorldspaceState.MarkerPosition"/> — explicit override
+///   2. <see cref="WorldspaceState.PoiCenterX"/>/<see cref="WorldspaceState.PoiCenterY"/> — set by topology pass
+///   3. Worldspace origin (0, 0) — final fallback
 /// </summary>
 public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.MarkerType.Settlement) : IWorldspacePass
 {
@@ -59,7 +61,11 @@ public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.M
         var targetMod = RetrogradeContext.Current.TargetMod;
         var starfieldEsm = RetrogradeContext.Current.StarfieldModKey;
 
-        var position = state.MarkerPosition ?? new P3Float(0f, 0f, state.TerrainHeight + 4.0f);
+        float z = state.TerrainHeight + 4.0f;
+        var position = state.MarkerPosition
+            ?? (state.PoiCenterX.HasValue && state.PoiCenterY.HasValue
+                ? new P3Float(state.PoiCenterX.Value, state.PoiCenterY.Value, z)
+                : new P3Float(0f, 0f, z));
 
         const StarfieldMajorRecord.StarfieldMajorRecordFlag PersistentFlag =
             (StarfieldMajorRecord.StarfieldMajorRecordFlag)PlacedObject.DefaultMajorFlag.Persistent;
