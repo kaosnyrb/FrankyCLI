@@ -72,6 +72,9 @@ public static class SpeechTools
         var audioQuest = GetOrCreateAudioLogQuest(targetMod);
 
         string suffix = book.EditorID ?? logfileId.ToString("X6");
+        // Collapse all newline variants and excess whitespace into single spaces so
+        // DialogResponse records and the ElevenLabs API receive clean prose.
+        text = Regex.Replace(text.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " "), @"\s{2,}", " ").Trim();
         var chunks = SplitText(text);
 
         // 3. Create Scene skeleton

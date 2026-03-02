@@ -277,7 +277,6 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         public static string GetFirstPersonAccount(List<string> Addons)
         {
-            DateTime dateTime = new DateTime(2330, 5, 6);
             string speaker = SeedManager.SpeakerTypes[RandomProvider.Random.Next(SeedManager.SpeakerTypes.Count)];
 
             var logprompt =
@@ -289,11 +288,8 @@ namespace Retrograde.AI.Utils
                 "- Write one specific moment or discovery the speaker witnessed or experienced themselves.\r\n" +
                 "- Use concrete details from the LoreContext — a name, a place, an action. Do not invent names.\r\n" +
                 "- Plain, personal speech. This person is writing for themselves, not performing.\r\n" +
-                "- The speaker does not know the full story — they know their part of it.\r\n\r\n" +
-
-                "Date: optional. If used, it must fall between " +
-                    dateTime.AddYears(-3).ToString("yyyy-MM-dd") + " and " + dateTime.ToString("yyyy-MM-dd") +
-                    " and feel like a natural part of the entry, not a header.\r\n\r\n" +
+                "- The speaker does not know the full story — they know their part of it.\r\n" +
+                "- Do NOT include a date, timestamp, or header of any kind.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 

@@ -95,6 +95,26 @@ namespace Retrograde.Quests
 
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
+            // Create a crew member NPC as the dataslate author / voice speaker.
+            bool speakerIsFemale = RandomProvider.Random.Next(100) > 50;
+            var speakerTemplate = NPCTools.FindTemplateDeadNpc(speakerIsFemale);
+            Npc speakerNpc = NPCTools.CloneNPC(myMod, speakerTemplate);
+            speakerNpc.Name = SeedManager.GenerateName(speakerIsFemale);
+            speakerNpc.EditorID = "npc_crewlog_" + questID;
+            var speakerVoice = NPCTools.GetVoice((string)missionTemplate.parameters["Label"], speakerIsFemale);
+            string speakerVoiceEditorId = string.Empty;
+            if (!speakerVoice.IsNull)
+            {
+                speakerNpc.Voice.SetTo(speakerVoice.FormKey);
+                var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == speakerVoice.FormKey);
+                speakerVoiceEditorId = vtRec?.EditorID ?? speakerVoice.FormKey.ID.ToString("X6");
+            }
+            myMod.Npcs.Add(speakerNpc);
+
+            var txVoicePool = speakerIsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
+            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, speakerNpc.FormKey, booklogmessage, speakerVoiceEditorId, txVoice.Id);
+
             var frmlst = new FormList(myMod)
             {
                 EditorID = questID + "_deathitems",

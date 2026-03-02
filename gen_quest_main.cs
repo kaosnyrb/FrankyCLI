@@ -154,7 +154,7 @@ namespace FrankyCLI
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "Space Derelict - UC Navy Cargo Rocky Asteroids",
+                        InvestigationTemplate = "Space Informant - Crimson Fleet - cargo Icy Asteroids",
                         DeepTempalte = "Planetside Smallbase Informant - Trade Authority Brokerd",
                         ShowdownTemplate = "City Bounty - Paradiso"
                     };
