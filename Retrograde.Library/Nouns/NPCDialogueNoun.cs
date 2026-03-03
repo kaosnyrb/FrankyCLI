@@ -13,9 +13,20 @@ namespace Retrograde.Nouns;
 /// Builds a per-NPC dialogue quest using the scene-based pattern from atbb_mq01.
 ///
 /// Architecture:
-///   Quest → one Scene (greeting + PlayerDialogue choice menu)
-///   All topics: Category=Scene, Subtype=CustomScene
-///   Player choices and NPC replies live in PlayerDialogueSceneAction.DialogueList items.
+///   Quest → Greeting Scene (0x1834) + N Topic Scenes (one per exchange)
+///
+///   Greeting Scene (plays once on NPC activation):
+///     Phase 0 "Greeting": NPC speaks opening line (DialogueSceneAction AliasID=0)
+///
+///   Completion Topic (Exchange[0], flags=0x2810 — Top Level visible, no TopLevelTopicsOnEnd):
+///     Phase 0 "": Player line shown as menu option (DialogueSceneAction AliasID=-2)
+///     Phase 1 "": NPC reply (DialogueSceneAction AliasID=0)
+///     Ends the conversation — does NOT loop back to topic menu.
+///
+///   Regular Topic Scenes (Exchange[1..N-1], flags=0x2814 — Top Level visible + TopLevelTopicsOnEnd):
+///     Phase 0 "": Player line shown as menu option (DialogueSceneAction AliasID=-2)
+///     Phase 1 "": NPC reply (DialogueSceneAction AliasID=0)
+///     Loops back to show topic menu after NPC replies.
 ///
 /// Source of truth: atbb_mq01 [QUST:0008F6] in avontechblacksiteblueprints.esm.
 /// </summary>
@@ -57,7 +68,7 @@ public class NPCDialogueNoun
         alias.UniqueActor.SetTo(npcFormKey);
         quest.Aliases.Add(alias);
 
-        // ── NPC greeting topic (Scene Phase 0) ────────────────────────────────
+        // ── NPC greeting topic (Greeting Scene Phase 0) ───────────────────────
         var greetTopic = BuildSceneTopic(targetMod, quest);
         var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
         greetTopic.Responses.Add(greetInfo);
@@ -67,11 +78,38 @@ public class NPCDialogueNoun
         SpeechTools.GenerateWavs(greetInfo.FormKey.ID, voiceTypeEditorId,
             targetMod.ModKey, script.NpcGreeting, elevenLabsVoiceId);
 
-        // ── PlayerChoice + NpcResponse topic pairs (Scene Phase 1) ────────────
-        var dialogueItems = new ExtendedList<PlayerDialogueSceneActionItem>();
-        foreach (var ex in script.Exchanges)
+        // ── Greeting Scene (flags=0x1834) — plays once on NPC activation ──────
+        var greetScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_greeting" };
+        greetScene.Quest.SetTo(quest.FormKey);
+        greetScene.Flags = (Scene.Flag)0x00001834;
+        greetScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
+        greetScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+        greetScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
+        greetScene.Actors.Add(new SceneActor { ID = 0,                   BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+        greetScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+        greetScene.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
+        var greetAction = new DialogueSceneAction { Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0 };
+        greetAction.Topic.SetTo(greetTopic.FormKey);
+        greetScene.Actions = new ExtendedList<ASceneAction> { greetAction };
+        quest.Scenes.Add(greetScene);
+
+        // ── Topic Scenes — one per exchange ───────────────────────────────────
+        // Exchange[0] = completion topic (flags=0x2810 — Top Level visible, no TopLevelTopicsOnEnd)
+        // Exchange[1..N-1] = regular topics (flags=0x2814 — Top Level visible + 0x0004 TopLevelTopicsOnEnd)
+        //
+        // Flag breakdown (confirmed from City_NewAtlantis_Z_PartingGift_TL_HaddieQuest SCEN:000D53FB):
+        //   0x2000 = Top Level (scene appears as selectable menu option) — both types
+        //   0x0800 = DisableDialogueCamera — both types
+        //   0x0010 = Interruptable — both types
+        //   0x0004 = TopLevelTopicsOnEnd (menu reappears after scene ends) — regular only
+        //
+        // Each scene:
+        //   Phase 0: player line shown as menu option  (DialogueSceneAction AliasID=-2, Index=3)
+        //   Phase 1: NPC reply                         (DialogueSceneAction AliasID=0,  Index=4)
+        for (int i = 0; i < script.Exchanges.Count; i++)
         {
-            // Player question topic (voiced by player — no SpeechTools call)
+            var ex = script.Exchanges[i];
+
             var playerTopic = BuildSceneTopic(targetMod, quest);
             var playerInfo  = BuildInfo(targetMod, ex.PlayerPrompt);
             playerTopic.Responses.Add(playerInfo);
@@ -79,7 +117,6 @@ public class NPCDialogueNoun
                 { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
             quest.DialogTopics.Add(playerTopic);
 
-            // NPC reply topic
             var npcTopic = BuildSceneTopic(targetMod, quest);
             var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
             npcTopic.Responses.Add(npcInfo);
@@ -89,50 +126,25 @@ public class NPCDialogueNoun
             SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
                 targetMod.ModKey, ex.NpcReply, elevenLabsVoiceId);
 
-            var item = new PlayerDialogueSceneActionItem();
-            item.PlayerChoice.SetTo(playerTopic.FormKey);
-            item.NpcResponse.SetTo(npcTopic.FormKey);
-            dialogueItems.Add(item);
+            // Exchange[0] ends the conversation (no 0x0004 TopLevelTopicsOnEnd); the rest loop back
+            uint topicFlags = i == 0 ? 0x00002810u : 0x00002814u;
+            var topicScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_topic_" + i };
+            topicScene.Quest.SetTo(quest.FormKey);
+            topicScene.Flags = (Scene.Flag)topicFlags;
+            topicScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
+            topicScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+            topicScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
+            topicScene.Actors.Add(new SceneActor { ID = 0,                   BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+            topicScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+            topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+            topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+            var playerAction = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
+            playerAction.Topic.SetTo(playerTopic.FormKey);
+            var npcAction = new DialogueSceneAction { Index = 4, AliasID = 0, StartPhase = 1, EndPhase = 1 };
+            npcAction.Topic.SetTo(npcTopic.FormKey);
+            topicScene.Actions = new ExtendedList<ASceneAction> { playerAction, npcAction };
+            quest.Scenes.Add(topicScene);
         }
-
-        // ── Scene ──────────────────────────────────────────────────────────────
-        var scene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix };
-        scene.Quest.SetTo(quest.FormKey);
-        scene.Flags = (Scene.Flag)0x00001834;
-        scene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
-
-        // Conditions required to suppress CK "no conditions" warning and gate scene activation.
-        // Pattern confirmed from atbb_mq01: every interactive scene has exactly these two.
-        scene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
-        scene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
-
-        scene.Actors.Add(new SceneActor
-        {
-            ID            = 0,
-            BehaviorFlags = (SceneActor.BehaviorFlag)266,
-            Flags         = SceneActor.Flag.NoCommandState,
-        });
-        scene.Actors.Add(new SceneActor
-        {
-            ID            = unchecked((uint)-2),  // player
-            BehaviorFlags = (SceneActor.BehaviorFlag)266,
-            Flags         = SceneActor.Flag.NoCommandState,
-        });
-
-        scene.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
-        scene.Phases.Add(new ScenePhase { Name = "",          EditorWidth = 350 });
-
-        // Action[1]: NPC greeting in Phase 0
-        var greetAction = new DialogueSceneAction { Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0 };
-        greetAction.Topic.SetTo(greetTopic.FormKey);
-
-        // Action[3]: PlayerDialogue choice menu in Phase 1
-        var playerAction = new PlayerDialogueSceneAction { Index = 3, AliasID = 0, StartPhase = 1, EndPhase = 1 };
-        foreach (var item in dialogueItems)
-            playerAction.DialogueList.Add(item);
-
-        scene.Actions = new ExtendedList<ASceneAction> { greetAction, playerAction };
-        quest.Scenes.Add(scene);
 
         QuestRecord = quest;
     }

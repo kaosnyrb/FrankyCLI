@@ -158,40 +158,36 @@ namespace FrankyCLI
                 Console.WriteLine($"    Alias[0] UniqueActor: {ra.UniqueActor.FormKey}");
             Console.WriteLine();
 
-            // Scenes
-            Console.WriteLine($"Scenes: {quest.Scenes.Count}  (expected 1)");
-            if (quest.Scenes.Count > 0)
+            // Scenes: 1 greeting (0x1834) + N topic scenes (0x2810 completion + 0x2814 regular)
+            int expectedSceneCount = 1 + script.Exchanges.Count;
+            Console.WriteLine($"Scenes: {quest.Scenes.Count}  (expected {expectedSceneCount})");
+            for (int s = 0; s < quest.Scenes.Count; s++)
             {
-                var scene = quest.Scenes[0];
+                bool isGreeting    = s == 0;
+                bool isCompletion  = s == 1;
+                uint expectedFlag  = isGreeting ? 0x00001834u : (isCompletion ? 0x00002810u : 0x00002814u);
+                int  expPhaseCount = isGreeting ? 1 : 2;
+                int  expActionCount = isGreeting ? 1 : 2;
+                string label       = isGreeting ? "Greeting" : (isCompletion ? "Completion" : $"Topic[{s-1}]");
+
+                var scene = quest.Scenes[s];
                 uint sceneFlags = (uint)(scene.Flags ?? 0);
-                string sceneFlagOk = sceneFlags == 0x00001834 ? "OK" : $"MISMATCH (expected 0x00001834)";
-                Console.WriteLine($"  [{scene.FormKey}] EditorID={scene.EditorID}");
-                Console.WriteLine($"  Flags:   0x{sceneFlags:X8}  [{sceneFlagOk}]");
-                Console.WriteLine($"  Actors:  {scene.Actors.Count}  (expected 2)");
-                foreach (var a in scene.Actors)
-                    Console.WriteLine($"    ID={(int)a.ID} BehaviorFlags={(uint)a.BehaviorFlags} Flags={a.Flags}");
-                Console.WriteLine($"  Phases:  {scene.Phases.Count}  (expected 2)");
+                string sceneFlagOk = sceneFlags == expectedFlag ? "OK" : $"MISMATCH (expected 0x{expectedFlag:X8})";
+                Console.WriteLine($"  [{label}] [{scene.FormKey}] EditorID={scene.EditorID}");
+                Console.WriteLine($"    Flags:   0x{sceneFlags:X8}  [{sceneFlagOk}]");
+                Console.WriteLine($"    Conditions: {scene.Conditions.Count}  (expected 2)");
+                Console.WriteLine($"    Actors:  {scene.Actors.Count}  (expected 2)");
+                Console.WriteLine($"    Phases:  {scene.Phases.Count}  (expected {expPhaseCount})");
                 foreach (var p in scene.Phases)
-                    Console.WriteLine($"    Name=\"{p.Name}\" EditorWidth={p.EditorWidth}");
-                Console.WriteLine($"  Actions: {scene.Actions?.Count ?? 0}  (expected 2)");
+                    Console.WriteLine($"      Name=\"{p.Name}\" EditorWidth={p.EditorWidth}");
+                Console.WriteLine($"    Actions: {scene.Actions?.Count ?? 0}  (expected {expActionCount})");
                 if (scene.Actions != null)
                 {
                     foreach (var a in scene.Actions)
                     {
-                        Console.WriteLine($"    [{a.Index}] {a.GetType().Name} AliasID={a.AliasID} Phase {a.StartPhase}→{a.EndPhase}");
+                        Console.WriteLine($"      [{a.Index}] {a.GetType().Name} AliasID={a.AliasID} Phase {a.StartPhase}→{a.EndPhase}");
                         if (a is IDialogueSceneActionGetter da)
-                            Console.WriteLine($"      Topic: {da.Topic.FormKey}");
-                        else if (a is IPlayerDialogueSceneActionGetter pda)
-                        {
-                            Console.WriteLine($"      DialogueList [{pda.DialogueList.Count}]  (expected {script.Exchanges.Count})");
-                            for (int i = 0; i < pda.DialogueList.Count; i++)
-                            {
-                                var item = pda.DialogueList[i];
-                                string pc = item.PlayerChoice.IsNull ? "NULL!" : item.PlayerChoice.FormKey.ToString();
-                                string nr = item.NpcResponse.IsNull  ? "NULL!" : item.NpcResponse.FormKey.ToString();
-                                Console.WriteLine($"        [{i}] PlayerChoice={pc}  NpcResponse={nr}");
-                            }
-                        }
+                            Console.WriteLine($"        Topic: {da.Topic.FormKey}");
                     }
                 }
             }
