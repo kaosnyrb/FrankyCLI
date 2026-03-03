@@ -2,7 +2,7 @@
   "profiles": {
     "FrankyCLI": {
       "commandName": "Project",
-      "commandLineArgs": "gen_quest outlaws02"
+      "commandLineArgs": "gen_dlgtest outlaws02"
     }
   }
 }

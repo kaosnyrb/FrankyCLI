@@ -52,32 +52,33 @@ public class DialogueExchange
 ```
 Quest  (per-NPC, Flags=0x00010111, Type=None)
   │
-  ├─ QuestStages:  [0]   (single startup stage only)
+  ├─ QuestStages:  [0, 100]
   │
-  ├─ Alias[0]:  QuestReferenceAlias (ID=0, Name=NPC, ForcedReference → placed NPC ref)
+  ├─ Alias[0]:  QuestReferenceAlias (ID=0, Name=NPC, UniqueActor → NPC base-form)
   │
   └─ Scene "greeting"  (per-NPC)
        │  Flags=0x00001834, VNAM=standard-20-bytes
+       │  Conditions: GetIsID(npc)==1, GetStage(quest)==0
        │  Actors: [ID=0 NPC] [ID=-2 Player]
        │  Phases: [0 "Greeting"/298] [1 ""/350]
        │
-       ├─ Action[0]: DialogueSceneAction  AliasID=0  Phase 0→0
-       │    Topic → "npc_greeting" DialogTopic
-       │      INFO: ResponseText=NpcGreeting, WEMFile=info.FormKey.ID
+       ├─ Action[1]: DialogueSceneAction  AliasID=0  Phase 0→0
+       │    Topic → greeting DialogTopic
+       │      INFO: Speaker=npcFormKey, ResponseText=NpcGreeting, WEMFile=info.FormKey.ID
        │
-       └─ Action[1]: PlayerDialogueSceneAction  AliasID=0  Phase 1→1
+       └─ Action[3]: PlayerDialogueSceneAction  AliasID=0  Phase 1→1
             DialogueList[N]:
               Item[i]:
-                PlayerChoice → "player_i" DialogTopic
-                  INFO: ResponseText=exchange.PlayerPrompt, WEMFile=info.FormKey.ID
-                NpcResponse  → "npc_i" DialogTopic
-                  INFO: ResponseText=exchange.NpcReply, WEMFile=info.FormKey.ID
+                PlayerChoice → player_i DialogTopic
+                  INFO: Speaker=null, ResponseText=exchange.PlayerPrompt, WEMFile=info.FormKey.ID
+                NpcResponse  → npc_i DialogTopic
+                  INFO: Speaker=npcFormKey, ResponseText=exchange.NpcReply, WEMFile=info.FormKey.ID
                 StartScene=null
 ```
 
 ---
 
-## Field Values — confirmed from atbb_mq01
+## Field Values — confirmed from atbb_mq01 + in-game testing
 
 ### Quest
 
@@ -85,14 +86,10 @@ Quest  (per-NPC, Flags=0x00010111, Type=None)
 |-------|-------|
 | `Flags` raw | `0x00010111` |
 | `Type` | `None` |
-| Stage 0 `Flags` | `64` (0x40, StartUpStage) |
+| Stage 0 `Flags` | `0` |
 | Stage 100 `Flags` | `0` (completion stage — keeps quest running) |
 | Alias `Flags` | `0` |
-| Alias `UniqueActor` | null — use **ForcedReference** to the placed NPC ref instead |
-
-> **Important:** atbb uses `ForcedReference` (alias ID=0 `AvontechSci` points to a
-> specific placed ref, not a base-form). For procedurally placed NPCs, use
-> `ForcedReference` to the placed REFR in the cell.
+| Alias `UniqueActor` | NPC base-form FormKey |
 
 ### Scene
 
@@ -118,41 +115,21 @@ Quest  (per-NPC, Flags=0x00010111, Type=None)
 
 Omitting these triggers the CK warning "Current Greeting or Top Level scene has no conditions."
 
-```csharp
-scene.Conditions.Add(new ConditionFloat
-{
-    ComparisonValue = 1,
-    CompareOperator = CompareOperator.EqualTo,
-    Data = new GetIsIDConditionData
-    {
-        FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(condData, npcFormKey)
-    }
-});
-scene.Conditions.Add(new ConditionFloat
-{
-    ComparisonValue = 0,
-    CompareOperator = CompareOperator.EqualTo,
-    Data = new GetStageConditionData
-    {
-        FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, quest.FormKey)
-    }
-});
-```
-
-### DialogueSceneAction (NPC greeting, Action[0])
+### DialogueSceneAction (NPC greeting, Action[1])
 
 | Field | Value |
 |-------|-------|
+| `Index` | `1` |
 | `AliasID` | `0` |
 | `StartPhase` | `0` |
 | `EndPhase` | `0` |
 | `Flags` | `0` |
-| `DialogueSubtype` | null |
 
-### PlayerDialogueSceneAction (choice menu, Action[1])
+### PlayerDialogueSceneAction (choice menu, Action[3])
 
 | Field | Value |
 |-------|-------|
+| `Index` | `3` |
 | `AliasID` | `0` |
 | `StartPhase` | `1` |
 | `EndPhase` | `1` |
@@ -172,167 +149,158 @@ scene.Conditions.Add(new ConditionFloat
 | `EditorID` | `""` (blank) |
 | `Name` | `""` (blank) |
 | `Branch` | null |
-| `TPIC` | null |
+| `TPIC` | populated (missing causes CK crash on click) |
 
 ### DialogResponses (INFO)
 
-| Field | Value |
-|-------|-------|
-| `Speaker` | null (actor inferred from scene AliasID at runtime) |
-| `SubtitlePriority` | `Low` |
-| `Prompt` | null |
-| `StartScene` | null |
-| `SetParentQuestStage` | null |
-| Conditions | none |
-| `WEMFile` | `info.FormKey.ID` ⚠ — see Open Questions |
-| `EmotionOut` | `7.466667` |
-| `Emotion` | `SetTo(FormKey.Null)` |
-| `TextHash` | SHA256[..4] of ResponseText UTF-8 bytes |
+| Field | NPC lines | Player lines |
+|-------|-----------|--------------|
+| `Speaker` | `npcFormKey` | null (inferred at runtime) |
+| `SubtitlePriority` | `Low` | `Low` |
+| `Prompt` | null | null |
+| `StartScene` | null | null |
+| `SetParentQuestStage` | null | null |
+| Conditions | none | none |
+| `WEMFile` | `info.FormKey.ID` ⚠ — see Open Questions | `info.FormKey.ID` |
+| `EmotionOut` | `7.466667` | `7.466667` |
+| `Emotion` | `FormKey.None` → `FFFFFFFF` | `FormKey.None` → `FFFFFFFF` |
+| `TextHash` | SHA256[..4] of ResponseText UTF-8 bytes | SHA256[..4] |
+
+> **Mutagen gotcha — `FormKey.None` vs `FormKey.Null`:**
+> `FormKey.Null` (ID=0) serializes as `0x00000000`.
+> `FormKey.None` (ID=0xFFFFFF, ModKey.Null) serializes as `0xFFFFFFFF`.
+> Bethesda's "None Reference" sentinel is `0xFFFFFFFF`. Always use `FormKey.None` for
+> fields that should show "None Reference [FFFFFFFF]" in xEdit.
 
 ---
 
 ## Mutagen Construction — `NPCDialogueNoun`
 
 ```csharp
-public class NPCDialogueNoun
+public NPCDialogueNoun(
+    FormKey        npcFormKey,        // base-form FormKey of the NPC (UniqueActor alias)
+    string         voiceTypeEditorId,
+    DialogueScript script,
+    string         suffix,
+    string         elevenLabsVoiceId = "")
 {
-    public Quest QuestRecord { get; }
+    var targetMod = RetrogradeContext.Current.TargetMod;
 
-    public NPCDialogueNoun(
-        FormKey        npcRefFormKey,      // placed REFR in cell (ForcedReference)
-        string         voiceTypeEditorId,
-        DialogueScript script,
-        string         suffix,
-        string         elevenLabsVoiceId = "")
+    // ── Quest ──────────────────────────────────────────────────────────────
+    var quest = new Quest(targetMod)
     {
-        var targetMod = RetrogradeContext.Current.TargetMod;
-
-        // ── Quest ──────────────────────────────────────────────────────────────
-        var quest = new Quest(targetMod)
+        EditorID = "dlg_quest_" + suffix,
+        Data = new QuestData
         {
-            EditorID = "dlg_quest_" + suffix,
-            Data = new QuestData
-            {
-                Flags = Quest.Flag.StartGameEnabled | Quest.Flag.StartsEnabled
-                      | Quest.Flag.RunOnce | (Quest.Flag)0x10000,
-                Type  = Quest.TypeEnum.None,
-            },
-        };
-        quest.Stages.Add(new QuestStage { Index = 0, Flags = QuestStage.Flag.StartUpStage });
-        quest.Aliases = new ExtendedList<AQuestAlias>();
-        targetMod.Quests.Add(quest);
+            Flags = Quest.Flag.StartGameEnabled | Quest.Flag.StartsEnabled
+                  | Quest.Flag.RunOnce | (Quest.Flag)0x10000,
+            Type  = Quest.TypeEnum.None,
+        },
+    };
+    quest.Stages.Add(new QuestStage { Index = 0 });
+    quest.Stages.Add(new QuestStage { Index = 100 });
+    quest.Aliases = new ExtendedList<AQuestAlias>();
+    targetMod.Quests.Add(quest);
 
-        // ── Alias (ForcedReference → placed NPC REFR) ─────────────────────────
-        var alias = new QuestReferenceAlias { ID = 0, Name = "NPC", Flags = 0 };
-        alias.ForcedReference.SetTo(npcRefFormKey);
-        quest.Aliases.Add(alias);
+    // ── Alias ──────────────────────────────────────────────────────────────
+    var alias = new QuestReferenceAlias { ID = 0, Name = "NPC" };
+    alias.UniqueActor.SetTo(npcFormKey);
+    quest.Aliases.Add(alias);
 
-        // ── Greeting topic (NPC's opening line) ───────────────────────────────
-        var greetTopic = BuildSceneTopic(targetMod, quest);
-        var greetInfo  = BuildInfo(targetMod, script.NpcGreeting);
-        greetTopic.Responses.Add(greetInfo);
-        greetTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-            { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-        quest.DialogTopics.Add(greetTopic);
-        SpeechTools.GenerateWavs(greetInfo.FormKey.ID, voiceTypeEditorId,
-            targetMod.ModKey, script.NpcGreeting, elevenLabsVoiceId);
+    // ── Greeting topic (NPC's opening line) ───────────────────────────────
+    var greetTopic = BuildSceneTopic(targetMod, quest);
+    var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
+    greetTopic.Responses.Add(greetInfo);
+    greetTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+        { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+    quest.DialogTopics.Add(greetTopic);
+    SpeechTools.GenerateWavs(greetInfo.FormKey.ID, voiceTypeEditorId,
+        targetMod.ModKey, script.NpcGreeting, elevenLabsVoiceId);
 
-        // ── PlayerChoice + NpcResponse topic pairs ────────────────────────────
-        var dialogueItems = new ExtendedList<PlayerDialogueSceneActionItem>();
-        foreach (var ex in script.Exchanges)
-        {
-            var playerTopic = BuildSceneTopic(targetMod, quest);
-            var playerInfo  = BuildInfo(targetMod, ex.PlayerPrompt);
-            playerTopic.Responses.Add(playerInfo);
-            playerTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-                { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-            quest.DialogTopics.Add(playerTopic);
-            // player lines: no SpeechTools (player voice not generated)
+    // ── PlayerChoice + NpcResponse topic pairs ────────────────────────────
+    var dialogueItems = new ExtendedList<PlayerDialogueSceneActionItem>();
+    foreach (var ex in script.Exchanges)
+    {
+        // Player prompts: no Speaker, no SpeechTools
+        var playerTopic = BuildSceneTopic(targetMod, quest);
+        var playerInfo  = BuildInfo(targetMod, ex.PlayerPrompt);
+        playerTopic.Responses.Add(playerInfo);
+        playerTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+            { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+        quest.DialogTopics.Add(playerTopic);
 
-            var npcTopic = BuildSceneTopic(targetMod, quest);
-            var npcInfo  = BuildInfo(targetMod, ex.NpcReply);
-            npcTopic.Responses.Add(npcInfo);
-            npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-                { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-            quest.DialogTopics.Add(npcTopic);
-            SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
-                targetMod.ModKey, ex.NpcReply, elevenLabsVoiceId);
+        // NPC replies: Speaker=npcFormKey
+        var npcTopic = BuildSceneTopic(targetMod, quest);
+        var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
+        npcTopic.Responses.Add(npcInfo);
+        npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+            { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+        quest.DialogTopics.Add(npcTopic);
+        SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
+            targetMod.ModKey, ex.NpcReply, elevenLabsVoiceId);
 
-            var item = new PlayerDialogueSceneActionItem();
-            item.PlayerChoice.SetTo(playerTopic.FormKey);
-            item.NpcResponse.SetTo(npcTopic.FormKey);
-            // StartScene, PPST, PNST remain null/default
-            dialogueItems.Add(item);
-        }
-
-        // ── Scene ──────────────────────────────────────────────────────────────
-        var scene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix };
-        scene.Quest.SetTo(quest.FormKey);
-        scene.Flags = (Scene.Flag)0x00001834;
-        scene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
-
-        scene.Actors = new ExtendedList<SceneActor>
-        {
-            new SceneActor { ID = 0,              BehaviorFlags = 266, Flags = SceneActor.Flag.NoCommandState },
-            new SceneActor { ID = unchecked((int)-2), BehaviorFlags = 266, Flags = SceneActor.Flag.NoCommandState },
-        };
-
-        scene.Phases = new ExtendedList<ScenePhase>
-        {
-            new ScenePhase { Name = "Greeting", EditorWidth = 298 },
-            new ScenePhase { Name = "",          EditorWidth = 350 },
-        };
-
-        var greetAction = new DialogueSceneAction
-        {
-            Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0, Flags = 0,
-        };
-        greetAction.Topic.SetTo(greetTopic.FormKey);
-
-        var playerAction = new PlayerDialogueSceneAction
-        {
-            Index = 3, AliasID = 0, StartPhase = 1, EndPhase = 1, Flags = 0,
-            DialogueList = dialogueItems,
-        };
-
-        scene.Actions = new ExtendedList<ASceneAction> { greetAction, playerAction };
-        quest.Scenes  = new ExtendedList<Scene> { scene };
-
-        QuestRecord = quest;
+        var item = new PlayerDialogueSceneActionItem();
+        item.PlayerChoice.SetTo(playerTopic.FormKey);
+        item.NpcResponse.SetTo(npcTopic.FormKey);
+        dialogueItems.Add(item);
     }
 
-    private static DialogTopic BuildSceneTopic(StarfieldMod targetMod, Quest quest)
-    {
-        var topic = new DialogTopic(targetMod)
-        {
-            EditorID    = "",
-            Category    = DialogTopic.CategoryEnum.Scene,
-            Subtype     = DialogTopic.SubtypeEnum.CustomScene,
-            SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
-        };
-        topic.Quest.SetTo(quest.FormKey);
-        return topic;
-    }
+    // ── Scene ──────────────────────────────────────────────────────────────
+    var scene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix };
+    scene.Quest.SetTo(quest.FormKey);
+    scene.Flags = (Scene.Flag)0x00001834;
+    scene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
 
-    private static DialogResponses BuildInfo(StarfieldMod targetMod, string text)
+    scene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+    scene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
+
+    scene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+    scene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+
+    scene.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
+    scene.Phases.Add(new ScenePhase { Name = "",          EditorWidth = 350 });
+
+    var greetAction = new DialogueSceneAction { Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0 };
+    greetAction.Topic.SetTo(greetTopic.FormKey);
+
+    var playerAction = new PlayerDialogueSceneAction { Index = 3, AliasID = 0, StartPhase = 1, EndPhase = 1 };
+    foreach (var item in dialogueItems)
+        playerAction.DialogueList.Add(item);
+
+    scene.Actions = new ExtendedList<ASceneAction> { greetAction, playerAction };
+    quest.Scenes.Add(scene);
+
+    QuestRecord = quest;
+}
+
+private static DialogTopic BuildSceneTopic(StarfieldMod targetMod, Quest quest)
+{
+    var topic = new DialogTopic(targetMod)
     {
-        var info = new DialogResponses(targetMod)
-        {
-            EditorID         = "",
-            SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
-        };
-        var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4];
-        var response = new DialogResponse
-        {
-            ResponseText = text,
-            WEMFile      = info.FormKey.ID,
-            TextHash     = textHash,
-            EmotionOut   = 7.466667f,
-        };
-        response.Emotion.SetTo(FormKey.Null);
-        info.Responses.Add(response);
-        return info;
-    }
+        Category    = DialogTopic.CategoryEnum.Scene,
+        Subtype     = DialogTopic.SubtypeEnum.CustomScene,
+        SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+    };
+    topic.Quest.SetTo(quest.FormKey);
+    return topic;
+}
+
+private static DialogResponses BuildInfo(StarfieldMod targetMod, string text, FormKey speakerFormKey = default)
+{
+    var info = new DialogResponses(targetMod) { SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+    if (speakerFormKey != default)
+        info.Speaker.SetTo(speakerFormKey);
+    var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4];
+    var response = new DialogResponse
+    {
+        ResponseText = text,
+        WEMFile      = info.FormKey.ID,
+        TextHash     = textHash,
+        EmotionOut   = 7.466667f,
+    };
+    response.Emotion.SetTo(FormKey.None);  // FFFFFFFF — "None Reference"
+    info.Responses.Add(response);
+    return info;
 }
 ```
 
@@ -362,18 +330,6 @@ public static DialogueScript GetDialogueScript(
    Whether Starfield resolves `{infoId:X8}.wem` from the voice directory for Scene topics
    needs in-game verification.
 
-2. **`Quest.Scenes` vs inline in Quest** — Mutagen may represent scenes as a top-level
-   list or as inline sub-records. Verify `quest.Scenes` is the correct property before
-   building.
-
-3. **`PlayerDialogueSceneActionItem` construction** — `item.PlayerChoice` and
-   `item.NpcResponse` are `IFormLinkNullable<IDialogTopicGetter>`. Confirm they are
-   set via `.SetTo()` after construction (not in initializer) per the nullable FormLink rule.
-
-4. **ForcedReference vs UniqueActor** — atbb uses `ForcedReference` (placed REFR).
-   If the dialogue quest is created before the NPC is placed, use `UniqueActor` pointing
-   to the NPC base form, then verify at runtime. Needs testing.
-
-5. **Player voice** — Player-side topics (`PlayerChoice`) in atbb have WEMFiles set,
+2. **Player voice** — Player-side topics (`PlayerChoice`) in atbb have WEMFiles set,
    implying player lines are voiced. Whether Starfield expects a WEM for the player side
    or silently ignores it for a silent player character needs verification.

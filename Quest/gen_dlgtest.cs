@@ -54,7 +54,7 @@ namespace FrankyCLI
                 gen_quest_main.BuildReadParams(env.LoadOrder);
                 RetrogradeContext.Current = new ModContextImpl();
 
-                var testNpc = CreateTestNpc();
+                var (testNpc, voiceTypeEditorId) = CreateTestNpc();
 
                 // ── Hardcoded DialogueScript (no AI) ──────────────────────────
                 var script = new DialogueScript
@@ -86,13 +86,14 @@ namespace FrankyCLI
 
                 var noun = new NPCDialogueNoun(
                     npcFormKey:        testNpc.FormKey,
-                    voiceTypeEditorId: "testvoice",
+                    voiceTypeEditorId: voiceTypeEditorId,
                     script:            script,
                     suffix:            "test",
-                    elevenLabsVoiceId: "");
+                    elevenLabsVoiceId: "ClKfJnuqp0hQ7Ax41F4w");  // Ada (female)
 
                 Console.WriteLine();
                 PrintDiagnostic(noun.QuestRecord, script);
+                SpeechTools.ConvertAndDeploy();
             }
 
             foreach (var rec in gen_quest_main.myMod.EnumerateMajorRecords())
@@ -111,8 +112,9 @@ namespace FrankyCLI
         /// <summary>
         /// Clones MQ101_MinerFemale03 "Miner" [NPC_:00010BE7] from Starfield.esm into the
         /// target mod and applies GagarinFaction [FACT:0015CF54] at rank 0.
+        /// Returns the NPC and the EditorID of its VoiceType for use in SpeechTools.
         /// </summary>
-        private static Npc CreateTestNpc()
+        private static (Npc npc, string voiceTypeEditorId) CreateTestNpc()
         {
             var sfKey = gen_quest_main.StarfieldModKey;
             var sfMod = gen_quest_main._StarfieldMod;
@@ -129,7 +131,12 @@ namespace FrankyCLI
             npc.Factions.Clear();
             npc.Factions.Add(new RankPlacement { Faction = gagarinFk.ToLink<IFactionGetter>(), Rank = 0 });
 
-            return npc;
+            var genericFemale01Fk = new FormKey(sfKey, 0x002BCA30);  // GenericFemale01 [VTYP:002BCA30]
+            npc.Voice.SetTo(genericFemale01Fk);
+            string voiceTypeEditorId = "GenericFemale01";
+            Console.WriteLine($"[gen_dlgtest] NPC voice type: {voiceTypeEditorId}");
+
+            return (npc, voiceTypeEditorId);
         }
 
         // ── Diagnostic printer ─────────────────────────────────────────────────

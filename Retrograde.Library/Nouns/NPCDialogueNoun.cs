@@ -59,7 +59,7 @@ public class NPCDialogueNoun
 
         // ── NPC greeting topic (Scene Phase 0) ────────────────────────────────
         var greetTopic = BuildSceneTopic(targetMod, quest);
-        var greetInfo  = BuildInfo(targetMod, script.NpcGreeting);
+        var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
         greetTopic.Responses.Add(greetInfo);
         greetTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
             { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -81,7 +81,7 @@ public class NPCDialogueNoun
 
             // NPC reply topic
             var npcTopic = BuildSceneTopic(targetMod, quest);
-            var npcInfo  = BuildInfo(targetMod, ex.NpcReply);
+            var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
             npcTopic.Responses.Add(npcInfo);
             npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                 { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -151,12 +151,14 @@ public class NPCDialogueNoun
         return topic;
     }
 
-    private static DialogResponses BuildInfo(StarfieldMod targetMod, string text)
+    private static DialogResponses BuildInfo(StarfieldMod targetMod, string text, FormKey speakerFormKey = default)
     {
         var info = new DialogResponses(targetMod)
         {
             SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
         };
+        if (speakerFormKey != default)
+            info.Speaker.SetTo(speakerFormKey);
         var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4];
         var response = new DialogResponse
         {
@@ -165,7 +167,7 @@ public class NPCDialogueNoun
             TextHash     = textHash,
             EmotionOut   = 7.466667f,
         };
-        response.Emotion.SetTo(FormKey.Null);
+        response.Emotion.SetTo(FormKey.None);  // FFFFFFFF — "None Reference"
         info.Responses.Add(response);
         return info;
     }

@@ -134,7 +134,7 @@ public static class SpeechTools
                 TextHash     = textHash,
                 EmotionOut   = 7.466667f,
             };
-            response.Emotion.SetTo(FormKey.Null);  // None [FFFFFFFF]
+            response.Emotion.SetTo(FormKey.None);  // FFFFFFFF — "None Reference"
             info.Responses.Add(response);
             topic.Responses.Add(info);
             // TPIC cross-reference — missing causes CK crash on click
