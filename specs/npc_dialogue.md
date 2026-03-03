@@ -86,6 +86,7 @@ Quest  (per-NPC, Flags=0x00010111, Type=None)
 | `Flags` raw | `0x00010111` |
 | `Type` | `None` |
 | Stage 0 `Flags` | `64` (0x40, StartUpStage) |
+| Stage 100 `Flags` | `0` (completion stage — keeps quest running) |
 | Alias `Flags` | `0` |
 | Alias `UniqueActor` | null — use **ForcedReference** to the placed NPC ref instead |
 
@@ -107,6 +108,36 @@ Quest  (per-NPC, Flags=0x00010111, Type=None)
 | Phase[0] EditorWidth | `298` |
 | Phase[1] Name | `""` |
 | Phase[1] EditorWidth | `350` |
+
+**Scene Conditions (required — every interactive atbb_mq01 scene has exactly these two):**
+
+| # | Function | Parameter | Operator | Value |
+|---|----------|-----------|----------|-------|
+| 0 | `GetIsID` | `npcFormKey` | `EqualTo` | `1` |
+| 1 | `GetStage` | `quest` | `EqualTo` | `0` |
+
+Omitting these triggers the CK warning "Current Greeting or Top Level scene has no conditions."
+
+```csharp
+scene.Conditions.Add(new ConditionFloat
+{
+    ComparisonValue = 1,
+    CompareOperator = CompareOperator.EqualTo,
+    Data = new GetIsIDConditionData
+    {
+        FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(condData, npcFormKey)
+    }
+});
+scene.Conditions.Add(new ConditionFloat
+{
+    ComparisonValue = 0,
+    CompareOperator = CompareOperator.EqualTo,
+    Data = new GetStageConditionData
+    {
+        FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, quest.FormKey)
+    }
+});
+```
 
 ### DialogueSceneAction (NPC greeting, Action[0])
 

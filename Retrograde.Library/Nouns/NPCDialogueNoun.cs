@@ -48,6 +48,7 @@ public class NPCDialogueNoun
             },
         };
         quest.Stages.Add(new QuestStage { Index = 0 });
+        quest.Stages.Add(new QuestStage { Index = 100 });
         quest.Aliases = new ExtendedList<AQuestAlias>();
         targetMod.Quests.Add(quest);
 
@@ -99,6 +100,11 @@ public class NPCDialogueNoun
         scene.Quest.SetTo(quest.FormKey);
         scene.Flags = (Scene.Flag)0x00001834;
         scene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
+
+        // Conditions required to suppress CK "no conditions" warning and gate scene activation.
+        // Pattern confirmed from atbb_mq01: every interactive scene has exactly these two.
+        scene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+        scene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
 
         scene.Actors.Add(new SceneActor
         {
@@ -162,5 +168,37 @@ public class NPCDialogueNoun
         response.Emotion.SetTo(FormKey.Null);
         info.Responses.Add(response);
         return info;
+    }
+
+    /// <summary>
+    /// GetIsID(npcFormKey) EqualTo 1 — identifies the NPC that should activate this scene.
+    /// Confirmed present on every interactive atbb_mq01 scene.
+    /// </summary>
+    private static ConditionFloat BuildGetIsIDCondition(FormKey npcFormKey)
+    {
+        var condData = new GetIsIDConditionData();
+        condData.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(condData, npcFormKey);
+        return new ConditionFloat
+        {
+            ComparisonValue = 1,
+            CompareOperator = CompareOperator.EqualTo,
+            Data            = condData,
+        };
+    }
+
+    /// <summary>
+    /// GetStage(quest) [op] comparisonValue — gates the scene to a specific quest stage.
+    /// SecondParameter is always 0 (unused) in atbb_mq01.
+    /// </summary>
+    private static ConditionFloat BuildGetStageCondition(Quest quest, int comparisonValue, CompareOperator op)
+    {
+        var condData = new GetStageConditionData();
+        condData.FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, quest.FormKey);
+        return new ConditionFloat
+        {
+            ComparisonValue = comparisonValue,
+            CompareOperator = op,
+            Data            = condData,
+        };
     }
 }

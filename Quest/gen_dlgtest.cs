@@ -145,7 +145,7 @@ namespace FrankyCLI
             Console.WriteLine($"Quest:  {quest.EditorID}  ({quest.FormKey})");
             Console.WriteLine($"  Flags:   0x{flags:X8}  [{flagOk}]");
             Console.WriteLine($"  Type:    {quest.Data?.Type}  [expected None]");
-            Console.WriteLine($"  Stages:  [{string.Join(", ", quest.Stages.Select(s => s.Index))}]  (expected [0])");
+            Console.WriteLine($"  Stages:  [{string.Join(", ", quest.Stages.Select(s => s.Index))}]  (expected [0, 100])");
             Console.WriteLine($"  Aliases: {quest.Aliases?.Count ?? 0}  (expected 1)");
             if (quest.Aliases?.Count > 0 && quest.Aliases[0] is QuestReferenceAlias ra)
                 Console.WriteLine($"    Alias[0] UniqueActor: {ra.UniqueActor.FormKey}");
