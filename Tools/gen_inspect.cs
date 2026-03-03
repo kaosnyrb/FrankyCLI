@@ -732,6 +732,107 @@ namespace FrankyCLI
             }
             Console.WriteLine();
 
+            Console.WriteLine($"  Scenes [{quest.Scenes?.Count ?? 0}]:");
+            if (quest.Scenes != null)
+            {
+                foreach (var scene in quest.Scenes)
+                {
+                    Console.WriteLine($"    [{scene.FormKey}] EditorID={scene.EditorID}");
+                    Console.WriteLine($"      Quest:    {(scene.Quest.IsNull ? "null" : scene.Quest.FormKey.ToString())}");
+                    Console.WriteLine($"      Flags:    0x{(uint)scene.Flags:X8} ({scene.Flags})");
+                    Console.WriteLine($"      VNAM:     {(scene.VNAM.HasValue ? BitConverter.ToString(scene.VNAM.Value.ToArray()) : "null")}");
+                    if (scene.Conditions != null && scene.Conditions.Count > 0)
+                    {
+                        Console.WriteLine($"      Conditions [{scene.Conditions.Count}]:");
+                        foreach (var cond in scene.Conditions)
+                        {
+                            string op  = cond.CompareOperator.ToString();
+                            string val = cond is IConditionFloatGetter cf ? cf.ComparisonValue.ToString("F0") : "?";
+                            string fn  = cond.Data?.GetType().Name ?? "?";
+                            string p1  = "";
+                            if (cond.Data is IGetStageConditionDataGetter gs)
+                                p1 = $" quest={gs.FirstParameter.Link.FormKey} stage={gs.SecondParameter}";
+                            else if (cond.Data is IGetStageDoneConditionDataGetter gsd)
+                                p1 = $" quest={gsd.FirstParameter.Link.FormKey} stage={gsd.SecondParameter}";
+                            Console.WriteLine($"        {fn}{p1} {op} {val}  flags=0x{(byte)cond.Flags:X2}");
+                        }
+                    }
+                    else
+                        Console.WriteLine($"      Conditions: none");
+                    if (scene.Actors != null && scene.Actors.Count > 0)
+                    {
+                        Console.WriteLine($"      Actors [{scene.Actors.Count}]:");
+                        foreach (var a in scene.Actors)
+                            Console.WriteLine($"        ID={a.ID} BehaviorFlags={a.BehaviorFlags} Flags={a.Flags}");
+                    }
+                    if (scene.Phases != null && scene.Phases.Count > 0)
+                    {
+                        Console.WriteLine($"      Phases [{scene.Phases.Count}]:");
+                        foreach (var p in scene.Phases)
+                        {
+                            Console.WriteLine($"        Name={p.Name} EditorWidth={p.EditorWidth} Flags={p.Flags}");
+                            if (p.StartConditions.Count > 0)
+                            {
+                                Console.WriteLine($"          StartConditions [{p.StartConditions.Count}]:");
+                                foreach (var cond in p.StartConditions)
+                                {
+                                    string op  = cond.CompareOperator.ToString();
+                                    string val = cond is IConditionFloatGetter cf2 ? cf2.ComparisonValue.ToString("F0") : "?";
+                                    string fn  = cond.Data?.GetType().Name ?? "?";
+                                    string p1  = "";
+                                    if (cond.Data is IGetStageConditionDataGetter gs2)
+                                        p1 = $" quest={gs2.FirstParameter.Link.FormKey} stage={gs2.SecondParameter}";
+                                    else if (cond.Data is IGetStageDoneConditionDataGetter gsd2)
+                                        p1 = $" quest={gsd2.FirstParameter.Link.FormKey} stage={gsd2.SecondParameter}";
+                                    Console.WriteLine($"            {fn}{p1} {op} {val}");
+                                }
+                            }
+                            if (p.CompletionConditions.Count > 0)
+                            {
+                                Console.WriteLine($"          CompletionConditions [{p.CompletionConditions.Count}]:");
+                                foreach (var cond in p.CompletionConditions)
+                                {
+                                    string op  = cond.CompareOperator.ToString();
+                                    string val = cond is IConditionFloatGetter cf3 ? cf3.ComparisonValue.ToString("F0") : "?";
+                                    string fn  = cond.Data?.GetType().Name ?? "?";
+                                    Console.WriteLine($"            {fn} {op} {val}");
+                                }
+                            }
+                        }
+                    }
+                    if (scene.Actions != null && scene.Actions.Count > 0)
+                    {
+                        Console.WriteLine($"      Actions [{scene.Actions.Count}]:");
+                        foreach (var a in scene.Actions)
+                        {
+                            Console.WriteLine($"        [{a.Index}] {a.GetType().Name} Name={a.Name} AliasID={a.AliasID} StartPhase={a.StartPhase} EndPhase={a.EndPhase} Flags={a.Flags}");
+                            if (a is IDialogueSceneActionGetter da)
+                            {
+                                Console.WriteLine($"          Topic:           {(da.Topic.IsNull ? "null" : da.Topic.FormKey.ToString())}");
+                                Console.WriteLine($"          DialogueSubtype: {(da.DialogueSubtype.IsNull ? "null" : da.DialogueSubtype.FormKey.ToString())}");
+                            }
+                            else if (a is IRadioSceneActionGetter ra2)
+                            {
+                                Console.WriteLine($"          Topic:           {(ra2.Topic.IsNull ? "null" : ra2.Topic.FormKey.ToString())}");
+                            }
+                            else if (a is IPlayerDialogueSceneActionGetter pda)
+                            {
+                                Console.WriteLine($"          DialogueList [{pda.DialogueList.Count}]:");
+                                foreach (var item in pda.DialogueList)
+                                {
+                                    string pc = item.PlayerChoice.IsNull ? "null" : item.PlayerChoice.FormKey.ToString();
+                                    string ss = item.StartScene.IsNull  ? "null" : item.StartScene.FormKey.ToString();
+                                    string nr = item.NpcResponse.IsNull  ? "null" : item.NpcResponse.FormKey.ToString();
+                                    Console.WriteLine($"            PlayerChoice={pc}  StartScene={ss}  NpcResponse={nr}  PhaseIndex={item.PhaseIndex}  PAPN={item.PAPN}");
+                                }
+                            }
+                        }
+                    }
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine();
+
             Console.WriteLine($"  DialogTopics [{quest.DialogTopics.Count}]:");
             foreach (var topic in quest.DialogTopics)
             {
@@ -747,24 +848,10 @@ namespace FrankyCLI
                     {
                         Console.WriteLine($"        [INFO {resp.FormKey}] EditorID={resp.EditorID}");
                         Console.WriteLine($"          MajorFlags:       {resp.MajorFlags}");
-                        Console.WriteLine($"          Flags:            {resp.Flags?.Flags}");
-                        Console.WriteLine($"          ResetHours:       {resp.Flags?.ResetHours}");
                         Console.WriteLine($"          Speaker:          {(!resp.Speaker.IsNull ? resp.Speaker.FormKey.ToString() : "null")}");
                         Console.WriteLine($"          Prompt:           {resp.Prompt}");
-                        Console.WriteLine($"          SharedDialog:     {(!resp.SharedDialog.IsNull ? resp.SharedDialog.FormKey.ToString() : "null")}");
                         Console.WriteLine($"          StartScene:       {(!resp.StartScene.IsNull ? resp.StartScene.FormKey.ToString() : "null")}");
-                        Console.WriteLine($"          ResetGlobal:      {(!resp.ResetGlobal.IsNull ? resp.ResetGlobal.FormKey.ToString() : "null")}");
                         Console.WriteLine($"          SubtitlePriority: {resp.SubtitlePriority}");
-                        if (resp.WED0 != null)
-                        {
-                            Console.WriteLine($"          WED0 (sound):");
-                            Console.WriteLine($"            Start:        {resp.WED0.Start}");
-                            Console.WriteLine($"            Stop:         {resp.WED0.Stop}");
-                            Console.WriteLine($"            Condition:    {(resp.WED0.Condition.IsNull ? "null" : resp.WED0.Condition.FormKey.ToString())}");
-                            Console.WriteLine($"            EventMapping: {(resp.WED0.EventMapping.IsNull ? "null" : resp.WED0.EventMapping.FormKey.ToString())}");
-                        }
-                        else
-                            Console.WriteLine($"          WED0 (sound):     null");
                         Console.WriteLine($"          TPIC:             {(resp.TPIC.HasValue ? BitConverter.ToString(resp.TPIC.Value.ToArray()) : "null")}");
                         if (resp.SetParentQuestStage != null)
                             Console.WriteLine($"          SetParentQuestStage: OnBegin={resp.SetParentQuestStage.OnBegin} OnEnd={resp.SetParentQuestStage.OnEnd}");
@@ -781,8 +868,8 @@ namespace FrankyCLI
                                     p1 = $" quest={gs.FirstParameter.Link.FormKey} stage={gs.SecondParameter}";
                                 else if (cond.Data is IGetStageDoneConditionDataGetter gsd)
                                     p1 = $" quest={gsd.FirstParameter.Link.FormKey} stage={gsd.SecondParameter}";
-                                else if (cond.Data is IConditionParameters cp)
-                                    p1 = $" fn={fn}";
+                                else if (cond.Data is IGetIsAliasRefConditionDataGetter gia)
+                                    p1 = $" alias={gia.FirstParameter}";
                                 Console.WriteLine($"            {fn}{p1} {op} {val}");
                             }
                         }
@@ -790,29 +877,12 @@ namespace FrankyCLI
                         for (int i = 0; i < resp.Responses.Count; i++)
                         {
                             var r = resp.Responses[i];
-                            Console.WriteLine($"            [Line {i}]");
+                            Console.WriteLine($"            [Line {i}] WEMFile=0x{r.WEMFile:X8} Emotion={r.Emotion.FormKey} EmotionOut={r.EmotionOut}");
                             Console.WriteLine($"              ResponseText: {r.ResponseText}");
-                            Console.WriteLine($"              WEMFile:      {r.WEMFile} (0x{r.WEMFile:X8})");
-                            Console.WriteLine($"              Emotion:      {(r.Emotion.IsNull ? "null" : r.Emotion.FormKey.ToString())}");
-                            Console.WriteLine($"              EmotionOut:   {r.EmotionOut}");
-                            Console.WriteLine($"              ScriptNotes:  {r.ScriptNotes}");
-                            Console.WriteLine($"              Edits:        {r.Edits}");
-                            Console.WriteLine($"              AlternateLip: {r.AlternateLipText}");
-                            Console.WriteLine($"              TextHash:     {r.TextHash}");
-                            if (r.RVSH != null)
-                            {
-                                Console.WriteLine($"              RVSH:");
-                                Console.WriteLine($"                Start:        {r.RVSH.Start}");
-                                Console.WriteLine($"                Stop:         {r.RVSH.Stop}");
-                                Console.WriteLine($"                Condition:    {(r.RVSH.Condition.IsNull ? "null" : r.RVSH.Condition.FormKey.ToString())}");
-                                Console.WriteLine($"                EventMapping: {(r.RVSH.EventMapping.IsNull ? "null" : r.RVSH.EventMapping.FormKey.ToString())}");
-                            }
+                            Console.WriteLine($"              TextHash:     {(r.TextHash.HasValue ? BitConverter.ToString(r.TextHash.Value.ToArray()) : "null")}");
                             if (r.TROTs != null && r.TROTs.Count > 0)
-                            {
-                                Console.WriteLine($"              TROTs [{r.TROTs.Count}]:");
                                 foreach (var trot in r.TROTs)
-                                    Console.WriteLine($"                VoiceType={trot.VoiceType.FormKey} EmotionOut={trot.EmotionOut}");
-                            }
+                                    Console.WriteLine($"              TROT: VoiceType={trot.VoiceType.FormKey} EmotionOut={trot.EmotionOut}");
                         }
                     }
                 }

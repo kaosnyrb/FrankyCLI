@@ -1,162 +1,47 @@
-# Spec: NPC Conversational Dialogue
+# Spec: NPC Conversational Dialogue (Scene-Based)
+
+> **Source of truth:** `atbb_mq01` "Avontech Blacksite" [QUST:0008F6] in
+> `avontechblacksiteblueprints.esm`. All field values below are extracted from that quest.
+> The previous spec (DialogBranch + Player-category topics) is **superseded and incorrect**.
+
+---
 
 ## Overview
 
-A generic system for generating voiced NPC dialogue — the player activates an NPC and gets a
-dialogue menu with voiced responses. Reusable across any generated content.
-
-**Per-NPC quests** — each generated NPC gets its own dedicated dialogue quest.
-
-Distinct from the **audio data-slate** system (`SpeechTools.AddVoice`) which plays a one-sided
-radio log with no player interaction.
-
----
-
-## Architecture
-
-Player choices come from a **DialogBranch** menu (player picks PROGRESS / EXPLORE / GOODBYE).
-NPC voiced responses are delivered via **`ResponseText` directly on the INFO record** — the same
-pattern used by `UC02_PerrysMeatsSupportQuest` (2B180A:Starfield.esm), a vanilla story quest
-with a DialogBranch. No separate Scene records are needed for voice delivery in interactive
-dialogue menus.
-
-`StartScene` is used in Starfield for cutscene/animation sequences, not for voiced NPC responses
-in player-menu dialogue. Audio slates (`SpeechTools.AddVoice`) use Scenes because the Book
-record triggers playback through `book.Scene`; that mechanism does not apply here.
+Each generated NPC gets a dedicated quest containing one interactive greeting scene. When the
+player activates the NPC, the scene starts: the NPC speaks a greeting, then the player is
+presented with a voiced choice menu. Each choice plays the player's question, then the NPC's
+voiced response. No DialogBranch, no Player-category topics.
 
 ```
 Player activates NPC
-    → Greeting INFO fires (stage-gated condition, ResponseText = NPC's intro line)
-    → Player sees dialogue menu:
-        [PROGRESS] pick to advance stage  (no NPC voice, stage advance only)
-        [EXPLORE]  pick to hear a reply   (ResponseText = NPC's reply)
-        [GOODBYE]  farewell               (ResponseText = farewell line)
+  → Greeting scene starts
+      Phase 0: NPC speaks greeting line
+      Phase 1: Player sees choice menu (N items)
+                ├─ [Choice 0]  player asks question → NPC answers
+                ├─ [Choice 1]  player asks question → NPC answers
+                └─ [Choice N]  player asks question → NPC answers
 ```
 
 ---
 
-## Vanilla Reference
-
-| Quest | Key facts |
-|-------|-----------|
-| `UC02_PerrysMeatsSupportQuest` (2B180A) | Flags `0x00010111`, DialogBranch (Player/TopLevel), Player-category topics with `ResponseText` directly on INFOs, `StartScene: null` throughout |
-| `CREW_EliteCrew_OtherPlayer` (187431) | `GetStageDoneConditionData`, `SetParentQuestStage: OnBegin=-1, OnEnd=N`, Greeting INFOs with stage conditions |
-| `UC02` (2B1808) | `StartScene` + `ResponseText` + `SetParentQuestStage` can all coexist on one INFO; double-condition pattern `GetStageDone(A)==1 AND GetStageDone(B)==0` confirmed |
-| `FFNeonZ11` (2E8298) | Scene-only quest (no DialogBranch) — **not** the pattern for interactive dialogue menus |
-
----
-
-## Dialogue Pattern — Staged Conversation
-
-```
-Stage 0 (intro)
-  NPC: "You shouldn't be here. Move along."
-  ├─ [PROGRESS]  "What's going on at this facility?"   → advances to Stage 100 (no NPC voice)
-  ├─ [EXPLORE]   "Who are you?"                        → NPC: "Name's Rook. Guard duty."
-  └─ [EXPLORE]   "Is it safe here?"                    → NPC: "Safe enough. Move along."
-
-Stage 100 (topic: reactor incident)
-  NPC: "Reactor went offline three days ago. Running on backup power."
-  ├─ [PROGRESS]  "What happened to the workers?"       → advances to Stage 200 (no NPC voice)
-  ├─ [EXPLORE]   "How bad is the damage?"              → NPC: "Bad. Very bad."
-  └─ [EXPLORE]   "Did you report this?"                → NPC: "To who? Everyone's gone."
-
-Stage 200 (last — no progress choice)
-  NPC: "The workers didn't leave. They were taken. All twelve of them."
-  ├─ [EXPLORE]   "Who took them?"                      → NPC: "I don't know. I saw lights."
-  └─ [EXPLORE]   "Did anyone escape?"                  → NPC: "One. She's hiding."
-
-[Goodbye]  "Watch yourself out there."  (always available, no stage condition)
-```
-
-`StageCount` = `topics.Count + 1`. Stage values: 0, 100, 200, … (100-increment).
-
----
-
-## Data Model — `DialogueScript`
+## Data Model
 
 ```csharp
 // Retrograde.Library/Models/DialogueScript.cs
-namespace Retrograde.Models;
-
 public class DialogueScript
 {
-    public int StageCount => Stages.Count;
-    public List<DialogueStage> Stages { get; set; } = new();
-    public string Goodbye { get; set; } = "";
-}
-
-public class DialogueStage
-{
-    /// <summary>NPC's spoken greeting at this stage (ResponseText on the Greeting INFO).</summary>
-    public string NpcLine { get; set; } = "";
-
-    /// <summary>Player menu text for the advance choice. Null on the last stage.</summary>
-    public string? ProgressPrompt { get; set; }
-
-    public List<DialogueExchange> Explores { get; set; } = new();
+    public string NpcGreeting { get; set; } = "";
+    public List<DialogueExchange> Exchanges { get; set; } = new();
 }
 
 public class DialogueExchange
 {
-    /// <summary>Player's menu text (≤60 chars).</summary>
+    /// <summary>Player's voiced question (≤60 chars, shown in choice menu).</summary>
     public string PlayerPrompt { get; set; } = "";
 
-    /// <summary>NPC's voiced reply (≤200 chars) in ResponseText.</summary>
+    /// <summary>NPC's voiced reply (≤200 chars).</summary>
     public string NpcReply { get; set; } = "";
-}
-```
-
----
-
-## AI Generation — `PromptManager.GetDialogueScript`
-
-Single LLM call. Draws on the running LoreContext (same session as quest/NPC generation).
-
-```csharp
-public static DialogueScript GetDialogueScript(
-    string       npcDescription,
-    List<string> topics,
-    List<string> addons)
-{
-    var sb = new StringBuilder();
-    sb.AppendLine("Generate a staged NPC conversation for a Starfield-style bounty hunting game.");
-    sb.AppendLine();
-    sb.AppendLine("NPC: " + npcDescription);
-    sb.AppendLine("Conversation topics (in order): " + string.Join(", ", topics));
-    sb.AppendLine();
-    sb.AppendLine("Use the LoreContext established earlier in this conversation for tone, setting, and names.");
-    sb.AppendLine("Do NOT invent new names or factions beyond the LoreContext.");
-    sb.AppendLine();
-    sb.AppendLine("Rules:");
-    sb.AppendLine("- One intro stage, then one stage per topic listed.");
-    sb.AppendLine("- Each stage: NpcLine (under 200 chars), ProgressPrompt (under 60 chars, omit on last stage),");
-    sb.AppendLine("  exactly 2 Explores (PlayerPrompt under 60 chars, NpcReply under 200 chars).");
-    sb.AppendLine("- Goodbye: 1 sentence, under 100 chars. Tone: guarded and grounded.");
-    sb.AppendLine("- No stage directions or quotes.");
-    sb.AppendLine();
-    sb.AppendLine("Additional Information:");
-    foreach (var a in addons) sb.AppendLine(a);
-    sb.AppendLine();
-    int stageCount = topics.Count + 1;
-    sb.AppendLine("< Dialogue >");
-    for (int i = 0; i < stageCount; i++)
-    {
-        sb.AppendLine("    < Stage >");
-        sb.AppendLine("        < NpcLine >TEXT</ NpcLine >");
-        if (i < stageCount - 1) sb.AppendLine("        < ProgressPrompt >TEXT</ ProgressPrompt >");
-        sb.AppendLine("        < Explore >< PlayerPrompt >TEXT</ PlayerPrompt >< NpcReply >TEXT</ NpcReply ></ Explore >");
-        sb.AppendLine("        < Explore >< PlayerPrompt >TEXT</ PlayerPrompt >< NpcReply >TEXT</ NpcReply ></ Explore >");
-        sb.AppendLine("    </ Stage >");
-    }
-    sb.AppendLine("    < Goodbye >TEXT</ Goodbye >");
-    sb.AppendLine("</ Dialogue >");
-
-    string raw = AITools.RunPrompt(sb.ToString());
-    for (int i = 0; i < 5 && !raw.Contains("<NpcLine>", StringComparison.OrdinalIgnoreCase); i++)
-        raw = AITools.RunPrompt(sb.ToString());
-
-    return ParseDialogueScript(raw);
 }
 ```
 
@@ -165,353 +50,286 @@ public static DialogueScript GetDialogueScript(
 ## Record Chain
 
 ```
-Quest  (per-NPC, StartGameEnabled | StartsEnabled | RunOnce | 0x10000, Type=None)
+Quest  (per-NPC, Flags=0x00010111, Type=None)
   │
-  ├─ QuestStages:  [0, 100, 200, ...]
+  ├─ QuestStages:  [0, 100]
   │
-  ├─ Alias[0]:  QuestReferenceAlias (ID=0, Flags=AllowDisabled, UniqueActor → NPC base form)
+  ├─ Alias[0]:  QuestReferenceAlias (ID=0, Name=NPC, UniqueActor → NPC base-form)
   │
-  ├─ DialogBranch  (inline, Category=Player, Flags=TopLevel)
-  │    └─ StartingTopic → Greeting topic
-  │
-  ├─ DialogTopic "Greeting"  (Category=Player, Subtype=Greeting)
-  │    INFOs ordered latest-stage first (engine picks first whose conditions pass):
-  │    ├─ INFO[last]  cond: GetStageDone(quest,200)==1   ResponseText=stages[2].NpcLine
-  │    ├─ INFO[mid]   cond: GetStageDone(quest,100)==1   ResponseText=stages[1].NpcLine
-  │    └─ INFO[0]     (no condition)                     ResponseText=stages[0].NpcLine
-  │         each INFO: Speaker=npcFormKey, SubtitlePriority=Low, WEMFile=info.FormKey.ID
-  │
-  ├─ DialogTopic "Progress_N"  (Category=Player, Subtype=Custom, Name=progressPrompt)
-  │    └─ INFO  cond: GetStageDone(quest,N+1)==0
-  │         SetParentQuestStage: OnBegin=-1, OnEnd=N+1
-  │         ResponseText="" / no WEM  (stage advance only, no NPC voice)
-  │
-  ├─ DialogTopic "Explore_N_J"  (Category=Player, Subtype=Custom, Name=playerPrompt)
-  │    └─ INFO  cond: GetStageDone(quest,N+1)==0
-  │         Speaker=npcFormKey, SubtitlePriority=Low
-  │         Prompt=playerPrompt, ResponseText=NpcReply, WEMFile=info.FormKey.ID
-  │
-  └─ DialogTopic "Goodbye"  (Category=Player, Subtype=Goodbye)
-       └─ INFO  (no condition)
-            Speaker=npcFormKey, SubtitlePriority=Low
-            ResponseText=script.Goodbye, WEMFile=info.FormKey.ID
+  └─ Scene "greeting"  (per-NPC)
+       │  Flags=0x00001834, VNAM=standard-20-bytes
+       │  Conditions: GetIsID(npc)==1, GetStage(quest)==0
+       │  Actors: [ID=0 NPC] [ID=-2 Player]
+       │  Phases: [0 "Greeting"/298] [1 ""/350]
+       │
+       ├─ Action[1]: DialogueSceneAction  AliasID=0  Phase 0→0
+       │    Topic → greeting DialogTopic
+       │      INFO: Speaker=npcFormKey, ResponseText=NpcGreeting, WEMFile=info.FormKey.ID
+       │
+       └─ Action[3]: PlayerDialogueSceneAction  AliasID=0  Phase 1→1
+            DialogueList[N]:
+              Item[i]:
+                PlayerChoice → player_i DialogTopic
+                  INFO: Speaker=null, ResponseText=exchange.PlayerPrompt, WEMFile=info.FormKey.ID
+                NpcResponse  → npc_i DialogTopic
+                  INFO: Speaker=npcFormKey, ResponseText=exchange.NpcReply, WEMFile=info.FormKey.ID
+                StartScene=null
 ```
-
-**Stage gating** — progress and explore INFOs:
-```
-GetStageDoneConditionData(quest, nextStage) == 0   [hide once stage has advanced past N]
-```
-
-Greeting INFOs ordered **latest-stage first**; intro INFO has no condition (fires as fallback).
-
-**Stage advance** — Progress INFOs only (no NPC voice):
-```
-SetParentQuestStage.OnBegin = -1
-SetParentQuestStage.OnEnd   = nextStage
-```
-
-**WEMFile** — `info.FormKey.ID` (unique per INFO). WAV staged at
-`{plugin}/{voiceType}/{infoId:X8}.wav`, matching how `GenerateWavs` resolves files.
-⚠ WEMFile resolution for Player-category INFOs is unverified in-game — vanilla uses
-Wwise-assigned IDs with no FormKey correlation. This convention needs testing.
 
 ---
 
-## Quest Flags
+## Field Values — confirmed from atbb_mq01 + in-game testing
 
-Confirmed in `UC02_PerrysMeatsSupportQuest` (2B180A) — a story sub-quest with DialogBranch:
+### Quest
 
-| Flag | Value | Notes |
-|------|-------|-------|
-| `StartGameEnabled` | `0x0001` | Quest active at game start |
-| `StartsEnabled` | `0x0010` | Fires immediately |
-| `RunOnce` | `0x0100` | Stage progression permanent |
-| *(unknown)* | `0x10000` | On every vanilla quest with aliases |
-| ~~`HasDialogueData`~~ | ~~`0x8000`~~ | **Not used** — absent from all vanilla dialogue quests |
+| Field | Value |
+|-------|-------|
+| `Flags` raw | `0x00010111` |
+| `Type` | `None` |
+| Stage 0 `Flags` | `0` |
+| Stage 100 `Flags` | `0` (completion stage — keeps quest running) |
+| Alias `Flags` | `0` |
+| Alias `UniqueActor` | NPC base-form FormKey |
 
-Raw: `0x00010111`.
+### Scene
+
+| Field | Value |
+|-------|-------|
+| `Flags` raw | `0x00001834` |
+| `VNAM` | `03 00 00 00 03 00 00 00 03 00 00 00 03 00 00 00 03 00 00 00` (20 bytes) |
+| Actor ID=0 `BehaviorFlags` | `266` |
+| Actor ID=0 `Flags` | `NoCommandState` |
+| Actor ID=-2 `BehaviorFlags` | `266` |
+| Actor ID=-2 `Flags` | `NoCommandState` |
+| Phase[0] Name | `"Greeting"` |
+| Phase[0] EditorWidth | `298` |
+| Phase[1] Name | `""` |
+| Phase[1] EditorWidth | `350` |
+
+**Scene Conditions (required — every interactive atbb_mq01 scene has exactly these two):**
+
+| # | Function | Parameter | Operator | Value |
+|---|----------|-----------|----------|-------|
+| 0 | `GetIsID` | `npcFormKey` | `EqualTo` | `1` |
+| 1 | `GetStage` | `quest` | `EqualTo` | `0` |
+
+Omitting these triggers the CK warning "Current Greeting or Top Level scene has no conditions."
+
+### DialogueSceneAction (NPC greeting, Action[1])
+
+| Field | Value |
+|-------|-------|
+| `Index` | `1` |
+| `AliasID` | `0` |
+| `StartPhase` | `0` |
+| `EndPhase` | `0` |
+| `Flags` | `0` |
+
+### PlayerDialogueSceneAction (choice menu, Action[3])
+
+| Field | Value |
+|-------|-------|
+| `Index` | `3` |
+| `AliasID` | `0` |
+| `StartPhase` | `1` |
+| `EndPhase` | `1` |
+| `Flags` | `0` |
+| Item `StartScene` | null |
+| Item `PhaseIndex` | null |
+| Item `PAPN` | `""` |
+| Item `PPST` / `PNST` | null |
+
+### DialogTopic (all topics in this quest)
+
+| Field | Value |
+|-------|-------|
+| `Category` | `Scene` |
+| `Subtype` | `CustomScene` |
+| `SubtypeName` | `CustomScene` |
+| `EditorID` | `""` (blank) |
+| `Name` | `""` (blank) |
+| `Branch` | null |
+| `TPIC` | populated (missing causes CK crash on click) |
+
+### DialogResponses (INFO)
+
+| Field | NPC lines | Player lines |
+|-------|-----------|--------------|
+| `Speaker` | `npcFormKey` | null (inferred at runtime) |
+| `SubtitlePriority` | `Low` | `Low` |
+| `Prompt` | null | null |
+| `StartScene` | null | null |
+| `SetParentQuestStage` | null | null |
+| Conditions | none | none |
+| `WEMFile` | `info.FormKey.ID` ⚠ — see Open Questions | `0` (player is silent) |
+| `EmotionOut` | `7.466667` | `7.466667` |
+| `Emotion` | `FormKey.None` → `FFFFFFFF` | `FormKey.None` → `FFFFFFFF` |
+| `TextHash` | SHA256[..4] of ResponseText UTF-8 bytes | SHA256[..4] |
+
+> **Mutagen gotcha — `FormKey.None` vs `FormKey.Null`:**
+> `FormKey.Null` (ID=0) serializes as `0x00000000`.
+> `FormKey.None` (ID=0xFFFFFF, ModKey.Null) serializes as `0xFFFFFFFF`.
+> Bethesda's "None Reference" sentinel is `0xFFFFFFFF`. Always use `FormKey.None` for
+> fields that should show "None Reference [FFFFFFFF]" in xEdit.
 
 ---
 
 ## Mutagen Construction — `NPCDialogueNoun`
 
 ```csharp
-// Retrograde.Library/Nouns/NPCDialogueNoun.cs
-
-public class NPCDialogueNoun
+public NPCDialogueNoun(
+    FormKey        npcFormKey,        // base-form FormKey of the NPC (UniqueActor alias)
+    string         voiceTypeEditorId,
+    DialogueScript script,
+    string         suffix,
+    string         elevenLabsVoiceId = "")
 {
-    public Quest QuestRecord { get; }
+    var targetMod = RetrogradeContext.Current.TargetMod;
 
-    public NPCDialogueNoun(
-        FormKey        npcFormKey,
-        string         voiceTypeEditorId,
-        DialogueScript script,
-        string         suffix,
-        string         elevenLabsVoiceId = "")
+    // ── Quest ──────────────────────────────────────────────────────────────
+    var quest = new Quest(targetMod)
     {
-        var targetMod = RetrogradeContext.Current.TargetMod;
-
-        // ── Quest ──────────────────────────────────────────────────────────────
-        var data = new QuestData
+        EditorID = "dlg_quest_" + suffix,
+        Data = new QuestData
         {
             Flags = Quest.Flag.StartGameEnabled | Quest.Flag.StartsEnabled
                   | Quest.Flag.RunOnce | (Quest.Flag)0x10000,
             Type  = Quest.TypeEnum.None,
-        };
-        var quest = new Quest(targetMod) { EditorID = "dlg_quest_" + suffix, Data = data };
+        },
+    };
+    quest.Stages.Add(new QuestStage { Index = 0 });
+    quest.Stages.Add(new QuestStage { Index = 100 });
+    quest.Aliases = new ExtendedList<AQuestAlias>();
+    targetMod.Quests.Add(quest);
 
-        for (int i = 0; i < script.StageCount; i++)
-            quest.Stages.Add(new QuestStage { Index = (ushort)(i * 100) });
+    // ── Alias ──────────────────────────────────────────────────────────────
+    var alias = new QuestReferenceAlias { ID = 0, Name = "NPC" };
+    alias.UniqueActor.SetTo(npcFormKey);
+    quest.Aliases.Add(alias);
 
-        targetMod.Quests.Add(quest);
+    // ── Greeting topic (NPC's opening line) ───────────────────────────────
+    var greetTopic = BuildSceneTopic(targetMod, quest);
+    var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
+    greetTopic.Responses.Add(greetInfo);
+    greetTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+        { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+    quest.DialogTopics.Add(greetTopic);
+    SpeechTools.GenerateWavs(greetInfo.FormKey.ID, voiceTypeEditorId,
+        targetMod.ModKey, script.NpcGreeting, elevenLabsVoiceId);
 
-        // ── Alias ──────────────────────────────────────────────────────────────
-        var alias = new QuestReferenceAlias
-            { ID = 0, Name = "DialogNPC", Flags = AQuestAlias.Flag.AllowDisabled };
-        alias.UniqueActor.SetTo(npcFormKey);
-        quest.Aliases.Add(alias);
-
-        // ── DialogBranch ───────────────────────────────────────────────────────
-        var branch = new DialogBranch(targetMod)
-        {
-            EditorID = "dlg_branch_" + suffix,
-            Category = DialogBranch.CategoryType.Player,
-            Flags    = DialogBranch.Flag.TopLevel,
-        };
-        branch.Quest.SetTo(quest.FormKey);
-        quest.DialogBranches.Add(branch);
-
-        // ── Greeting topic (INFOs ordered latest-stage first) ──────────────────
-        var greetTopic = new DialogTopic(targetMod)
-        {
-            EditorID    = "dlg_greeting_" + suffix,
-            Category    = DialogTopic.CategoryEnum.Player,
-            Subtype     = DialogTopic.SubtypeEnum.Greeting,
-            SubtypeName = DialogTopic.SubtypeNameEnum.Greeting,
-        };
-        greetTopic.Quest.SetTo(quest.FormKey);
-        greetTopic.Branch.SetTo(branch.FormKey);
-        quest.DialogTopics.Add(greetTopic);
-        branch.StartingTopic.SetTo(greetTopic.FormKey);
-
-        var greetInfoLinks = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>();
-
-        for (int i = script.StageCount - 1; i >= 0; i--)
-        {
-            int stageValue = i * 100;
-
-            var greetInfo = new DialogResponses(targetMod)
-            {
-                EditorID         = $"dlgi_greet_{suffix}_{i}",
-                SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
-            };
-            greetInfo.Speaker.SetTo(npcFormKey);
-
-            // Stage 0: no condition — fires as fallback on first visit
-            if (i > 0)
-                greetInfo.Conditions.Add(BuildStageDoneCondition(quest, stageValue, equalTo: 1));
-
-            var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(script.Stages[i].NpcLine))[..4];
-            greetInfo.Responses.Add(new DialogResponse
-            {
-                ResponseText = script.Stages[i].NpcLine,
-                WEMFile      = greetInfo.FormKey.ID,   // ⚠ convention unverified in-game
-                TextHash     = textHash,
-                EmotionOut   = 7.466667f,
-            });
-
-            greetTopic.Responses.Add(greetInfo);
-            greetInfoLinks.Add(greetInfo.FormKey.ToLink<IDialogResponsesGetter>());
-
-            SpeechTools.GenerateWavs(greetInfo.FormKey.ID, voiceTypeEditorId,
-                targetMod.ModKey, script.Stages[i].NpcLine, elevenLabsVoiceId);
-        }
-        greetTopic.TopicInfoList = greetInfoLinks;
-
-        // ── Per-stage progress + explore topics ────────────────────────────────
-        for (int i = 0; i < script.StageCount; i++)
-        {
-            var stage      = script.Stages[i];
-            int nextStage  = (i + 1) * 100;
-            var hideAfterAdvance = BuildStageDoneCondition(quest, nextStage, equalTo: 0);
-
-            // Progress topic — stage advance only, no NPC voice
-            if (stage.ProgressPrompt != null)
-            {
-                var progTopic = BuildMenuTopic(targetMod, quest,
-                    $"dlg_progress_{suffix}_{i}", stage.ProgressPrompt);
-
-                var progInfo = new DialogResponses(targetMod)
-                {
-                    EditorID            = $"dlgi_progress_{suffix}_{i}",
-                    SubtitlePriority    = DialogResponses.SubtitlePriorityLevel.Low,
-                    Prompt              = stage.ProgressPrompt,
-                    SetParentQuestStage = new DialogSetParentQuestStage
-                        { OnBegin = -1, OnEnd = (short)nextStage },
-                };
-                progInfo.Speaker.SetTo(npcFormKey);
-                progInfo.Conditions.Add(hideAfterAdvance);
-                progTopic.Responses.Add(progInfo);
-                progTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-                    { progInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-                quest.DialogTopics.Add(progTopic);
-            }
-
-            // Explore topics — NPC reply in ResponseText
-            for (int j = 0; j < stage.Explores.Count; j++)
-            {
-                var ex      = stage.Explores[j];
-                var exTopic = BuildMenuTopic(targetMod, quest,
-                    $"dlg_explore_{suffix}_{i}_{j}", ex.PlayerPrompt);
-
-                var exInfo = new DialogResponses(targetMod)
-                {
-                    EditorID         = $"dlgi_explore_{suffix}_{i}_{j}",
-                    SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
-                    Prompt           = ex.PlayerPrompt,
-                };
-                exInfo.Speaker.SetTo(npcFormKey);
-                exInfo.Conditions.Add(hideAfterAdvance);
-
-                var exHash = SHA256.HashData(Encoding.UTF8.GetBytes(ex.NpcReply))[..4];
-                exInfo.Responses.Add(new DialogResponse
-                {
-                    ResponseText = ex.NpcReply,
-                    WEMFile      = exInfo.FormKey.ID,
-                    TextHash     = exHash,
-                    EmotionOut   = 7.466667f,
-                });
-                exTopic.Responses.Add(exInfo);
-                exTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-                    { exInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-                quest.DialogTopics.Add(exTopic);
-
-                SpeechTools.GenerateWavs(exInfo.FormKey.ID, voiceTypeEditorId,
-                    targetMod.ModKey, ex.NpcReply, elevenLabsVoiceId);
-            }
-        }
-
-        // ── Goodbye ────────────────────────────────────────────────────────────
-        var goodbyeTopic = new DialogTopic(targetMod)
-        {
-            EditorID    = "dlg_goodbye_" + suffix,
-            Category    = DialogTopic.CategoryEnum.Player,
-            Subtype     = DialogTopic.SubtypeEnum.Goodbye,
-            SubtypeName = DialogTopic.SubtypeNameEnum.Goodbye,
-        };
-        goodbyeTopic.Quest.SetTo(quest.FormKey);
-        quest.DialogTopics.Add(goodbyeTopic);
-
-        var goodbyeInfo = new DialogResponses(targetMod)
-        {
-            EditorID         = "dlgi_goodbye_" + suffix,
-            SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
-        };
-        goodbyeInfo.Speaker.SetTo(npcFormKey);
-        var byeHash = SHA256.HashData(Encoding.UTF8.GetBytes(script.Goodbye))[..4];
-        goodbyeInfo.Responses.Add(new DialogResponse
-        {
-            ResponseText = script.Goodbye,
-            WEMFile      = goodbyeInfo.FormKey.ID,
-            TextHash     = byeHash,
-            EmotionOut   = 7.466667f,
-        });
-        goodbyeTopic.Responses.Add(goodbyeInfo);
-        goodbyeTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-            { goodbyeInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-        SpeechTools.GenerateWavs(goodbyeInfo.FormKey.ID, voiceTypeEditorId,
-            targetMod.ModKey, script.Goodbye, elevenLabsVoiceId);
-
-        QuestRecord = quest;
-    }
-
-    // ── Private helpers ────────────────────────────────────────────────────────
-
-    private static DialogTopic BuildMenuTopic(
-        StarfieldMod targetMod, Quest quest, string editorId, string playerText)
+    // ── PlayerChoice + NpcResponse topic pairs ────────────────────────────
+    var dialogueItems = new ExtendedList<PlayerDialogueSceneActionItem>();
+    foreach (var ex in script.Exchanges)
     {
-        var topic = new DialogTopic(targetMod)
-        {
-            EditorID    = editorId,
-            Name        = playerText,
-            Category    = DialogTopic.CategoryEnum.Player,
-            Subtype     = DialogTopic.SubtypeEnum.Custom,
-            SubtypeName = DialogTopic.SubtypeNameEnum.Custom,
-        };
-        topic.Quest.SetTo(quest.FormKey);
-        return topic;
+        // Player prompts: no Speaker, no SpeechTools
+        var playerTopic = BuildSceneTopic(targetMod, quest);
+        var playerInfo  = BuildInfo(targetMod, ex.PlayerPrompt);
+        playerTopic.Responses.Add(playerInfo);
+        playerTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+            { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+        quest.DialogTopics.Add(playerTopic);
+
+        // NPC replies: Speaker=npcFormKey
+        var npcTopic = BuildSceneTopic(targetMod, quest);
+        var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
+        npcTopic.Responses.Add(npcInfo);
+        npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+            { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+        quest.DialogTopics.Add(npcTopic);
+        SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
+            targetMod.ModKey, ex.NpcReply, elevenLabsVoiceId);
+
+        var item = new PlayerDialogueSceneActionItem();
+        item.PlayerChoice.SetTo(playerTopic.FormKey);
+        item.NpcResponse.SetTo(npcTopic.FormKey);
+        dialogueItems.Add(item);
     }
 
-    /// <summary>
-    /// GetStageDoneConditionData(quest, stageValue) EqualTo [0 or 1].
-    /// equalTo=1 → "stage N has been reached" (used on Greeting INFOs to select the right stage).
-    /// equalTo=0 → "stage N has NOT been reached" (used on Progress+Explore to hide after advance).
-    /// Verified in CREW_EliteCrew_OtherPlayer and UC02.
-    /// </summary>
-    private static ConditionFloat BuildStageDoneCondition(Quest quest, int stageValue, int equalTo)
+    // ── Scene ──────────────────────────────────────────────────────────────
+    var scene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix };
+    scene.Quest.SetTo(quest.FormKey);
+    scene.Flags = (Scene.Flag)0x00001834;
+    scene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
+
+    scene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+    scene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
+
+    scene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+    scene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+
+    scene.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
+    scene.Phases.Add(new ScenePhase { Name = "",          EditorWidth = 350 });
+
+    var greetAction = new DialogueSceneAction { Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0 };
+    greetAction.Topic.SetTo(greetTopic.FormKey);
+
+    var playerAction = new PlayerDialogueSceneAction { Index = 3, AliasID = 0, StartPhase = 1, EndPhase = 1 };
+    foreach (var item in dialogueItems)
+        playerAction.DialogueList.Add(item);
+
+    scene.Actions = new ExtendedList<ASceneAction> { greetAction, playerAction };
+    quest.Scenes.Add(scene);
+
+    QuestRecord = quest;
+}
+
+private static DialogTopic BuildSceneTopic(StarfieldMod targetMod, Quest quest)
+{
+    var topic = new DialogTopic(targetMod)
     {
-        var condData = new GetStageDoneConditionData { SecondParameter = stageValue };
-        condData.FirstParameter.SetTo(quest.FormKey.ToLink<IQuestGetter>());
+        Category    = DialogTopic.CategoryEnum.Scene,
+        Subtype     = DialogTopic.SubtypeEnum.CustomScene,
+        SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+    };
+    topic.Quest.SetTo(quest.FormKey);
+    return topic;
+}
 
-        return new ConditionFloat
-        {
-            ComparisonValue = equalTo,
-            CompareOperator = CompareOperator.EqualTo,
-            Data            = condData,
-        };
-    }
+private static DialogResponses BuildInfo(StarfieldMod targetMod, string text, FormKey speakerFormKey = default)
+{
+    var info = new DialogResponses(targetMod) { SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+    if (speakerFormKey != default)
+        info.Speaker.SetTo(speakerFormKey);
+    var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4];
+    var response = new DialogResponse
+    {
+        ResponseText = text,
+        // Player lines are silent — WEMFile=0. NPC lines use info.FormKey.ID.
+        WEMFile      = speakerFormKey != default ? info.FormKey.ID : 0u,
+        TextHash     = textHash,
+        EmotionOut   = 7.466667f,
+    };
+    response.Emotion.SetTo(FormKey.None);  // FFFFFFFF — "None Reference"
+    info.Responses.Add(response);
+    return info;
 }
 ```
 
 ---
 
-## Call Site Example
+## AI Generation — `PromptManager.GetDialogueScript`
 
 ```csharp
-var script = PromptManager.GetDialogueScript(
-    npcDescription: $"{npc.Name}, facility manager, frightened and guarded",
-    topics: new List<string> { "the reactor failure", "the missing workers" },
-    addons: new List<string> { "Location: " + missionTemplate.Location + "\n" });
-
-var dialogue = new NPCDialogueNoun(
-    npc.FormKey, npcVoiceEditorId, script,
-    suffix: npc.EditorID ?? questID,
-    elevenLabsVoiceId: txVoice.Id);
-
-// SpeechTools.ConvertAndDeploy() at end of run
+public static DialogueScript GetDialogueScript(
+    string       npcDescription,
+    List<string> topics,
+    List<string> addons)
+{
+    // Build prompt: N exchanges, one per topic.
+    // Each exchange: PlayerPrompt (≤60 chars) + NpcReply (≤200 chars).
+    // NpcGreeting: 1 sentence under 150 chars, guarded and contextual.
+    // Output as XML with <Greeting>, <Exchange><PlayerPrompt><NpcReply> tags.
+}
 ```
 
 ---
 
-## Comparison: AudioLog vs Dialogue Quest
+## Open Questions — Require In-Game Testing
 
-| | AudioLog Quest | Dialogue Quest |
-|---|---|---|
-| Flags | `StartGameEnabled \| StartsEnabled \| RunOnce \| 0x100000` | `StartGameEnabled \| StartsEnabled \| RunOnce \| 0x10000` |
-| `DialogBranch` | none | required |
-| Player topics | none | Greeting / Custom / Goodbye |
-| NPC voice delivery | RadioSceneAction → CustomScene topic | **`ResponseText` directly on INFO** |
-| `INFO.StartScene` | null | null (no scene for voice) |
-| `INFO.WEMFile` | `topic.FormKey.ID` | `info.FormKey.ID` ⚠ unverified |
-| Stage conditions | none | `GetStageDoneConditionData` |
-| `SetParentQuestStage` | none | `OnBegin=-1, OnEnd=N` on Progress INFOs |
-| Scene records in quest | yes (audio playback) | none needed |
+1. **WEMFile for Scene-category INFOs** — Using `info.FormKey.ID` as the WEM identifier.
+   In `atbb_mq01`, WEMFiles are large Wwise-assigned IDs with no FormKey correlation.
+   Whether Starfield resolves `{infoId:X8}.wem` from the voice directory for Scene topics
+   needs in-game verification.
 
----
-
-## Open Questions
-
-1. **WEMFile for Player-category INFOs** — `info.FormKey.ID` is our convention. Vanilla uses
-   Wwise-assigned IDs with no FormKey correlation. Whether Starfield resolves
-   `{infoId:X8}.wem` from the voice directory when playing an INFO's ResponseText needs
-   in-game verification. If not, the audio falls back to silent subtitles only.
-
-2. **Greeting re-activation** — After stage advances (player picks PROGRESS), the next
-   Greeting INFO fires on the next NPC activation. Whether the engine automatically re-greets
-   on the same activation (without the player needing to walk away and back) needs testing.
-
-3. **Custom topic visibility** — Topics with `GetStageDone(quest,N)==0` appear in the menu.
-   Whether the engine correctly shows/hides Custom topics based solely on their INFO conditions
-   needs verification. May also require the topic to have a `Branch` link (currently omitted
-   on Custom/Goodbye topics, matching vanilla UC02_PerrysMeatsSupportQuest where some topics
-   have `Branch: 26FFAB` and others don't).
+2. ~~**Player voice**~~ — **Confirmed:** Starfield player lines are always silent. No WEM
+   is generated or expected for `PlayerChoice` topics. `WEMFile = 0` for player INFOs.
