@@ -161,7 +161,7 @@ Omitting these triggers the CK warning "Current Greeting or Top Level scene has 
 | `StartScene` | null | null |
 | `SetParentQuestStage` | null | null |
 | Conditions | none | none |
-| `WEMFile` | `info.FormKey.ID` ⚠ — see Open Questions | `info.FormKey.ID` |
+| `WEMFile` | `info.FormKey.ID` ⚠ — see Open Questions | `0` (player is silent) |
 | `EmotionOut` | `7.466667` | `7.466667` |
 | `Emotion` | `FormKey.None` → `FFFFFFFF` | `FormKey.None` → `FFFFFFFF` |
 | `TextHash` | SHA256[..4] of ResponseText UTF-8 bytes | SHA256[..4] |
@@ -294,7 +294,8 @@ private static DialogResponses BuildInfo(StarfieldMod targetMod, string text, Fo
     var response = new DialogResponse
     {
         ResponseText = text,
-        WEMFile      = info.FormKey.ID,
+        // Player lines are silent — WEMFile=0. NPC lines use info.FormKey.ID.
+        WEMFile      = speakerFormKey != default ? info.FormKey.ID : 0u,
         TextHash     = textHash,
         EmotionOut   = 7.466667f,
     };
@@ -330,6 +331,5 @@ public static DialogueScript GetDialogueScript(
    Whether Starfield resolves `{infoId:X8}.wem` from the voice directory for Scene topics
    needs in-game verification.
 
-2. **Player voice** — Player-side topics (`PlayerChoice`) in atbb have WEMFiles set,
-   implying player lines are voiced. Whether Starfield expects a WEM for the player side
-   or silently ignores it for a silent player character needs verification.
+2. ~~**Player voice**~~ — **Confirmed:** Starfield player lines are always silent. No WEM
+   is generated or expected for `PlayerChoice` topics. `WEMFile = 0` for player INFOs.

@@ -151,6 +151,7 @@ public class NPCDialogueNoun
         return topic;
     }
 
+    // speakerFormKey: pass npcFormKey for NPC lines, omit for player lines (silent).
     private static DialogResponses BuildInfo(StarfieldMod targetMod, string text, FormKey speakerFormKey = default)
     {
         var info = new DialogResponses(targetMod)
@@ -163,7 +164,8 @@ public class NPCDialogueNoun
         var response = new DialogResponse
         {
             ResponseText = text,
-            WEMFile      = info.FormKey.ID,  // ⚠ convention — see spec open questions
+            // Player lines are silent in Starfield — WEMFile=0. NPC lines use info.FormKey.ID.
+            WEMFile      = speakerFormKey != default ? info.FormKey.ID : 0u,
             TextHash     = textHash,
             EmotionOut   = 7.466667f,
         };
