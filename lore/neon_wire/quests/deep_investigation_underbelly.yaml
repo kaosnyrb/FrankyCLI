@@ -1,0 +1,17 @@
+id: deep_investigation_underbelly
+template: "City Activator - Neon Underbelly"
+
+name: "What She Knew"
+log_entry: >
+  The meetings Leva Drax ran through Ebbside were building something. The broker who
+  arranged them — Cael — is somewhere in the Underbelly. Syntec already paid him to stay
+  quiet. He knows where she went.
+
+npcs:
+  boss: leva_drax
+  informant: cael
+
+addons:
+  - "Cael is Ebbside — paranoid, careful, has already taken Syntec's money once"
+  - "He knows what she had on them. He knows what it means if that data gets out."
+  - "She told him she wasn't going to run forever. He didn't know what that meant until recently."

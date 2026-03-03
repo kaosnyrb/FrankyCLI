@@ -1,0 +1,23 @@
+id: discovery_incident_report
+template: "Dataslate in levelled item"
+
+book_title: "Incident Report: Serpent's Coil — Crew Fatalities"
+book_contents: >
+  [CRIMSON FLEET INTERNAL — RESTRICTED]
+  Date: 2330.087
+  Vessel: Serpent's Coil, cargo runner
+  Incident: Mass crew fatality event. 12 confirmed dead, 3 critical.
+  Cause: Toxic reaction to stimulant batch designated "Relay".
+  Supplier: Independent chemist, identity withheld pending contract resolution.
+  Status: Contract issued for recovery of supplier. Dead preferred. Alive acceptable
+  if synthesis records can be retrieved.
+  Note: Fleet leadership suspects a second batch from the same precursor source
+  may be in circulation. Recovery of the chemist is priority one.
+
+npcs: {}
+
+addons:
+  - "Senna Vok — former Ryujin pharmaceutical researcher, now freelance chemist"
+  - "The drug was called Relay, a stimulant for long EVA shifts"
+  - "Twelve Crimson Fleet crew dead on a ship called the Serpent's Coil"
+  - "The Fleet wants her found — dead or alive with her synthesis records"

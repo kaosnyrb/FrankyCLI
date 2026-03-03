@@ -1,0 +1,303 @@
+id: moss_informant_scene
+npc: moss
+start: greeting
+
+nodes:
+
+  # ── Entry ──────────────────────────────────────────────────────────────────
+
+  greeting:
+    type: npc_line
+    text: "Whatever you're selling, I'm not buying. And whatever you're looking for, I don't know anything."
+    next: opening_choices
+
+  opening_choices:
+    type: player_choices
+    choices:
+      - text: "I'm looking for Senna Vok."
+        next: senna_name_reply
+      - text: "Twelve people died on the Serpent's Coil."
+        next: deaths_reply
+      - text: "The Crimson Fleet has a contract out."
+        next: fleet_contract_reply
+
+  # ── Opening branches ───────────────────────────────────────────────────────
+
+  senna_name_reply:
+    type: npc_line
+    text: "Never heard of her."
+    next: senna_name_followup
+
+  senna_name_followup:
+    type: player_choices
+    choices:
+      - text: "You introduced her to the Fleet contact. Three months ago."
+        next: caught_out_reply
+      - text: "She's in serious trouble."
+        next: serious_trouble_reply
+
+  caught_out_reply:
+    type: npc_line
+    text: "I don't— how did you— look. Keep your voice down."
+    set_conversation_stage: 5
+    next: moss_opens_up_prompt
+
+  serious_trouble_reply:
+    type: npc_line
+    text: "I know she's in trouble. I know exactly what kind. That's why I don't want any part of this conversation."
+    set_conversation_stage: 5
+    next: moss_opens_up_prompt
+
+  deaths_reply:
+    type: npc_line
+    text: "I heard. Everyone in Ebbside heard. Twelve people."
+    next: deaths_followup
+
+  deaths_followup:
+    type: npc_line
+    text: "I also heard the contract's active. So if you're here about that, I want nothing to do with it."
+    set_conversation_stage: 5
+    next: moss_opens_up_prompt
+
+  fleet_contract_reply:
+    type: npc_line
+    text: "Then you should be talking to the Fleet, not me."
+    next: fleet_followup
+
+  fleet_followup:
+    type: npc_line
+    text: "Unless you're working the contract yourself. In which case I really, really don't want this conversation."
+    set_conversation_stage: 5
+    next: moss_opens_up_prompt
+
+  # ── Moss reluctantly engages ───────────────────────────────────────────────
+
+  moss_opens_up_prompt:
+    type: player_choices
+    choices:
+      - text: "I just want to find her. Not for the Fleet."
+        next: not_for_fleet
+      - text: "Tell me what you know about the batch."
+        next: about_batch
+        requires_stage: 5
+      - text: "You introduced her to the Fleet. That makes this partly yours."
+        next: your_fault
+        requires_stage: 5
+
+  not_for_fleet:
+    type: npc_line
+    text: "Not for the Fleet. Right. Then who?"
+    next: not_for_fleet_followup
+
+  not_for_fleet_followup:
+    type: player_choices
+    choices:
+      - text: "That doesn't matter. What do you know?"
+        next: about_batch
+      - text: "Someone needs to find her before the Fleet does."
+        next: someone_needs_to
+      - text: "The second batch. You know about it."
+        next: second_batch_cold
+        requires_stage: 15
+
+  someone_needs_to:
+    type: npc_line
+    text: "Yeah. Yeah, they do."
+    next: about_batch
+
+  # ── The batch: what went wrong ─────────────────────────────────────────────
+
+  about_batch:
+    type: npc_line
+    text: "She flagged the precursor supplier as unreliable. Told the Fleet the batch needed two more weeks to verify the chemistry."
+    set_conversation_stage: 10
+    next: about_batch_2
+
+  about_batch_2:
+    type: npc_line
+    text: "They told her to deliver in four days or they'd come find her. So she delivered."
+    next: about_batch_3
+
+  about_batch_3:
+    type: npc_line
+    text: "She knew there was a risk. She told me that. She said — these were her words — 'I am handing them a loaded gun and hoping it doesn't go off.' It went off."
+    next: batch_aftermath_prompt
+
+  your_fault:
+    type: npc_line
+    text: "You think I don't know that?"
+    next: your_fault_2
+
+  your_fault_2:
+    type: npc_line
+    text: "I made the introduction. I thought it was a good job. Steady client, good credits. I didn't know they'd put a deadline on it that made the work dangerous."
+    set_conversation_stage: 10
+    next: your_fault_3
+
+  your_fault_3:
+    type: npc_line
+    text: "I've been living with that. So yes. Partly mine. That's why I'm still talking to you instead of walking away."
+    next: batch_aftermath_prompt
+
+  batch_aftermath_prompt:
+    type: player_choices
+    choices:
+      - text: "Where did she go after the deaths?"
+        next: where_she_went
+      - text: "The precursor supplier — who was it?"
+        next: supplier_who
+        requires_stage: 10
+      - text: "You said you knew about the second batch."
+        next: second_batch_prompt
+        requires_stage: 10
+
+  where_she_went:
+    type: npc_line
+    text: "She ran. Grabbed everything from her lab in Ebbside and disappeared within six hours of the Serpent's Coil going quiet."
+    next: where_she_went_2
+
+  where_she_went_2:
+    type: npc_line
+    text: "She left me a message. One line: 'I'm going to fix it.' I didn't know what that meant for about a month."
+    next: batch_aftermath_prompt
+
+  supplier_who:
+    type: npc_line
+    text: "A broker out of Akila. I don't know his name — I only ever dealt with Senna's side of it."
+    next: supplier_who_2
+
+  supplier_who_2:
+    type: npc_line
+    text: "But that same broker sold the same batch of precursor chemicals to at least one other client. Senna figured that out before she ran."
+    set_conversation_stage: 15
+    next: batch_aftermath_prompt
+
+  # ── The twist: second batch ────────────────────────────────────────────────
+
+  second_batch_prompt:
+    type: npc_line
+    text: "Same contaminated precursor. Different client. A Spacer distributor operating out of Neon Core — they bought it for their own stimulant line."
+    next: second_batch_2
+
+  second_batch_2:
+    type: npc_line
+    text: "That batch is already made. Already moving. Senna knows exactly what it's going to do when it hits people — because she saw what it did on the Serpent's Coil."
+    next: second_batch_3
+
+  second_batch_3:
+    type: npc_line
+    text: "She's been working on a counteragent. Three months alone on some rock with a bad atmosphere. She reached out to me two weeks ago."
+    set_conversation_stage: 20
+    next: second_batch_reveal_prompt
+
+  second_batch_cold:
+    type: npc_line
+    text: "How do you know about that?"
+    next: second_batch_cold_2
+
+  second_batch_cold_2:
+    type: npc_line
+    text: "...Okay. Yeah. I know. Same supplier, different client. And before you ask — yes, she's been trying to stop it."
+    set_conversation_stage: 20
+    next: second_batch_reveal_prompt
+
+  second_batch_reveal_prompt:
+    type: player_choices
+    choices:
+      - text: "What did she want from you?"
+        next: what_she_wanted
+      - text: "Why didn't she come to Neon herself?"
+        next: why_not_neon
+        requires_stage: 20
+      - text: "The Fleet's contract doesn't mention a second batch."
+        next: fleet_doesnt_know
+        requires_stage: 20
+
+  what_she_wanted:
+    type: npc_line
+    text: "She wanted me to get a message to the Spacer distributor in Core. Tell them what's in their product. Warn them before it ships."
+    next: what_she_wanted_2
+
+  what_she_wanted_2:
+    type: npc_line
+    text: "I didn't. I was too scared. Fleet contract, people watching — I convinced myself it wasn't my problem."
+    next: what_she_wanted_3
+
+  what_she_wanted_3:
+    type: npc_line
+    text: "If that batch goes out and people die, it will be. Again."
+    next: second_batch_reveal_prompt
+
+  why_not_neon:
+    type: npc_line
+    text: "Because the Fleet has people in every docking bay watching for her. She makes it to Neon, she's dead before she reaches the starport."
+    next: why_not_neon_2
+
+  why_not_neon_2:
+    type: npc_line
+    text: "She can't deliver the counteragent herself. Someone else has to."
+    next: second_batch_reveal_prompt
+
+  fleet_doesnt_know:
+    type: npc_line
+    text: "The Fleet doesn't care about the second batch. They care about the embarrassment of twelve dead crew and a chemist who walked away."
+    next: fleet_doesnt_know_2
+
+  fleet_doesnt_know_2:
+    type: npc_line
+    text: "If you find her and bring her in dead, the second batch kills however many people it kills, and the Fleet calls it a coincidence."
+    next: fleet_doesnt_know_3
+
+  fleet_doesnt_know_3:
+    type: npc_line
+    text: "That's what you're walking into. I figured you should know."
+    next: final_prompt
+
+  # ── Final ─────────────────────────────────────────────────────────────────
+
+  final_prompt:
+    type: player_choices
+    choices:
+      - text: "Where is she now?"
+        next: where_now
+        requires_stage: 15
+      - text: "I'll deal with the second batch."
+        next: deal_with_it
+        requires_stage: 20
+      - text: "That's not my problem."
+        next: not_my_problem
+      - text: "I've heard enough."
+        next: heard_enough
+
+  where_now:
+    type: npc_line
+    text: "Frontier system. She sent coordinates with her message. I can give them to you."
+    next: where_now_2
+
+  where_now_2:
+    type: npc_line
+    text: "Whatever you decide to do when you find her — I just ask that you actually listen to her first."
+    next: final_prompt
+
+  deal_with_it:
+    type: npc_line
+    text: "Good. Then she might actually have a chance."
+    next: deal_with_it_2
+
+  deal_with_it_2:
+    type: npc_line
+    text: "The Spacer distributor in Core goes by Threader. Works out of a storage unit off the main market. That's all I know."
+    next: final_prompt
+
+  not_my_problem:
+    type: npc_line
+    text: "That's what I told myself. Still telling myself. Hasn't helped yet."
+    next: final_prompt
+
+  heard_enough:
+    type: npc_line
+    text: "Yeah. Most people do, once they get to that part."
+    next: end_conversation
+
+  end_conversation:
+    type: end

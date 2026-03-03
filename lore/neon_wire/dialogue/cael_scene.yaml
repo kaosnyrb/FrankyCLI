@@ -1,0 +1,324 @@
+id: cael_scene
+npc: cael
+start: greeting
+
+nodes:
+
+  # ── Entry ──────────────────────────────────────────────────────────────────
+
+  greeting:
+    type: npc_line
+    text: "That stool's taken."
+    next: greeting_2
+
+  greeting_2:
+    type: npc_line
+    text: "Unless you're buying. Then it's yours."
+    next: opening_choices
+
+  opening_choices:
+    type: player_choices
+    choices:
+      - text: "I'm looking for someone."
+        next: looking_for_someone
+      - text: "Syntec Security sent me."
+        next: syntec_sent
+      - text: "Wrong bar."
+        next: wrong_bar
+
+  # ── Opening branches ───────────────────────────────────────────────────────
+
+  looking_for_someone:
+    type: npc_line
+    text: "Most people in this city are. What kind of someone?"
+    next: looking_followup
+
+  looking_followup:
+    type: player_choices
+    choices:
+      - text: "Leva Drax."
+        next: named_leva
+      - text: "A woman. Goes by a corporate name."
+        next: vague_reply
+
+  vague_reply:
+    type: npc_line
+    text: "Half the women in Neon go by corporate names. Half of those aren't using their own. Try again."
+    next: looking_followup
+
+  named_leva:
+    type: npc_line
+    text: "..."
+    next: named_leva_2
+
+  named_leva_2:
+    type: npc_line
+    text: "Where'd you hear that name?"
+    next: named_leva_followup
+
+  named_leva_followup:
+    type: player_choices
+    choices:
+      - text: "Syntec put out a notice. I tracked it here."
+        next: syntec_notice_reply
+      - text: "She's in trouble. I'm trying to help."
+        next: help_reply
+      - text: "Does it matter?"
+        next: does_it_matter
+
+  syntec_notice_reply:
+    type: npc_line
+    text: "Recovery notice. Not a police report. I noticed that too."
+    set_conversation_stage: 5
+    next: opens_up_prompt
+
+  help_reply:
+    type: npc_line
+    text: "She doesn't need help. She needs someone who'll listen."
+    set_conversation_stage: 5
+    next: opens_up_prompt
+
+  does_it_matter:
+    type: npc_line
+    text: "Usually. In this case — less than I expected."
+    set_conversation_stage: 5
+    next: opens_up_prompt
+
+  syntec_sent:
+    type: npc_line
+    text: "I don't do corporate recovery work. That's not a political statement. That's just not what I do."
+    next: syntec_followup
+
+  syntec_followup:
+    type: player_choices
+    choices:
+      - text: "It pays well."
+        next: pays_well
+      - text: "I'm not actually here for Syntec."
+        next: not_syntec
+
+  pays_well:
+    type: npc_line
+    text: "Everything pays well until it doesn't. Try the next bar."
+    next: end_conversation
+
+  not_syntec:
+    type: npc_line
+    text: "Then why'd you say you were?"
+    next: not_syntec_followup
+
+  not_syntec_followup:
+    type: player_choices
+    choices:
+      - text: "I was testing you."
+        next: testing_you
+      - text: "I'm looking for Leva Drax. Not for them."
+        next: not_for_them
+
+  testing_you:
+    type: npc_line
+    text: "You passed. I don't work for them. Now what do you actually want?"
+    set_conversation_stage: 5
+    next: opens_up_prompt
+
+  not_for_them:
+    type: npc_line
+    text: "That's a different conversation."
+    set_conversation_stage: 5
+    next: opens_up_prompt
+
+  wrong_bar:
+    type: npc_line
+    text: "Probably. Most people figure that out before they sit down."
+    next: end_conversation
+
+  # ── Cael opens up ─────────────────────────────────────────────────────────
+
+  opens_up_prompt:
+    type: player_choices
+    choices:
+      - text: "What did she do?"
+        next: what_she_did
+      - text: "What are you afraid of?"
+        next: what_afraid_of
+        requires_stage: 5
+      - text: "She stole from them."
+        next: stolen_correction
+        requires_stage: 5
+
+  what_she_did:
+    type: npc_line
+    text: "She found something. In the compliance records. Something Syntec needed to stay buried."
+    next: what_she_did_2
+
+  what_she_did_2:
+    type: npc_line
+    text: "She came to Ebbside to build a case. Three months of meetings. Lab tech, logistics clerk, data archivist. All Syntec employees. All with something to say."
+    set_conversation_stage: 10
+    next: testimony_prompt
+
+  what_afraid_of:
+    type: npc_line
+    text: "Nothing I haven't already done. I took their money. I want you to know that. I'm not going to pretend I didn't."
+    next: what_afraid_of_2
+
+  what_afraid_of_2:
+    type: npc_line
+    text: "They paid me to forget I brokered her meetings. I took the credits and told myself I didn't know what the meetings were about."
+    next: what_afraid_of_3
+
+  what_afraid_of_3:
+    type: npc_line
+    text: "I'm talking to you anyway. So maybe 'afraid' isn't the right word."
+    set_conversation_stage: 10
+    next: testimony_prompt
+
+  stolen_correction:
+    type: npc_line
+    text: "She copied it. Didn't take anything they'd miss. That's the part they hate."
+    next: stolen_correction_2
+
+  stolen_correction_2:
+    type: npc_line
+    text: "You can't recover information. You can only try to bury the person who has it."
+    set_conversation_stage: 10
+    next: testimony_prompt
+
+  # ── What she found ─────────────────────────────────────────────────────────
+
+  testimony_prompt:
+    type: player_choices
+    choices:
+      - text: "What was in the records?"
+        next: what_in_records
+      - text: "Who were her sources?"
+        next: who_sources
+        requires_stage: 10
+      - text: "You took Syntec's money. Why tell me?"
+        next: why_tell_you
+        requires_stage: 10
+
+  what_in_records:
+    type: npc_line
+    text: "Clinical trial data for Aura. You know Aura? Stimulant. Popular in Ebbside. Popular everywhere, by now."
+    next: what_in_records_2
+
+  what_in_records_2:
+    type: npc_line
+    text: "Published fatality rate is negligible. Approved for sale. Approved for distribution. Sold to half of Neon."
+    next: what_in_records_3
+
+  what_in_records_3:
+    type: npc_line
+    text: "The real number is fourteen times higher. She has the raw data. Syntec's internal data — not the version they published."
+    next: testimony_prompt
+
+  who_sources:
+    type: npc_line
+    text: "A lab tech who worked the trial. A Ryujin logistics clerk who moved the product. A data archivist who processed the original numbers."
+    next: who_sources_2
+
+  who_sources_2:
+    type: npc_line
+    text: "All still in Neon. All nervous. All wondering if Syntec has noticed they talked."
+    next: testimony_prompt
+
+  why_tell_you:
+    type: npc_line
+    text: "Because she was trying to protect people who live two blocks from here. And I took money to forget that."
+    next: why_tell_you_2
+
+  why_tell_you_2:
+    type: npc_line
+    text: "That's the kind of thing that doesn't stay quiet. Not in your head. It takes a while to figure out what to do about it."
+    next: location_prompt
+
+  # ── Where is she ──────────────────────────────────────────────────────────
+
+  location_prompt:
+    type: player_choices
+    choices:
+      - text: "Where is she now?"
+        next: where_is_she
+        requires_stage: 10
+      - text: "Why didn't you go to the authorities?"
+        next: why_not_authorities
+        requires_stage: 10
+      - text: "What happens to her?"
+        next: what_happens
+        requires_stage: 10
+
+  where_is_she:
+    type: npc_line
+    text: "Rooftops. She's been up there three days. I don't know how she stands the rain."
+    set_conversation_stage: 15
+    next: where_is_she_2
+
+  where_is_she_2:
+    type: npc_line
+    text: "She set up a dead man's switch before she came back to Neon. If she doesn't check in every day, copies of everything go to three different journalists."
+    next: where_is_she_3
+
+  where_is_she_3:
+    type: npc_line
+    text: "She already won. She's just waiting for someone to know that."
+    next: final_prompt
+
+  why_not_authorities:
+    type: npc_line
+    text: "Syntec has a compliance contract with MAST. Their legal team is embedded in the regulatory body that would investigate them."
+    next: why_not_authorities_2
+
+  why_not_authorities_2:
+    type: npc_line
+    text: "You'd need someone outside that system. Someone who couldn't be pressured to lose the case."
+    next: location_prompt
+
+  what_happens:
+    type: npc_line
+    text: "That depends on you."
+    next: location_prompt
+
+  # ── Final ─────────────────────────────────────────────────────────────────
+
+  final_prompt:
+    type: player_choices
+    choices:
+      - text: "I'm not delivering her to Syntec."
+        next: not_syntec_delivery
+        requires_stage: 15
+      - text: "The contract's good credits."
+        next: good_credits
+        requires_stage: 15
+      - text: "This isn't my fight."
+        next: not_my_fight
+      - text: "I've heard enough."
+        next: heard_enough
+
+  not_syntec_delivery:
+    type: npc_line
+    text: "Good. Then go listen to what she has to say."
+    next: end_conversation
+
+  good_credits:
+    type: npc_line
+    text: "They always are."
+    next: good_credits_2
+
+  good_credits_2:
+    type: npc_line
+    text: "I'm not going to tell you what to do. I told you what I know. What you do with it is yours."
+    next: end_conversation
+
+  not_my_fight:
+    type: npc_line
+    text: "Wasn't hers either. Turned out it was."
+    next: end_conversation
+
+  heard_enough:
+    type: npc_line
+    text: "Rain's getting heavier. She's up there somewhere."
+    next: end_conversation
+
+  end_conversation:
+    type: end

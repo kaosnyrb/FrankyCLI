@@ -1,0 +1,21 @@
+id: deep_investigation_fleet_cargo
+template: "Space Informant - Crimson Fleet - cargo Wisps"
+
+name: "The Serpent's Coil"
+log_entry: >
+  The ship that carried the bad batch is still out there — drifting in a wisp
+  field, quarantined and forgotten. The Fleet cleared the survivors and walked
+  away from it. Whatever logs survived will say where Senna Vok was last seen,
+  and what she was trying to do before she ran.
+objective: "Recover Senna Vok's delivery logs from the Serpent's Coil"
+
+npcs:
+  boss: senna_vok
+
+# Label (Crimson Fleet), FormId (cargo ship), SpaceCell (Wisps), NeedSpacesuit — all from template
+
+addons:
+  - "The Serpent's Coil — quarantined Crimson Fleet cargo runner, twelve dead"
+  - "Senna flagged the precursor as contaminated before delivery — the Fleet overruled her"
+  - "Ship logs show she transmitted a partial counteragent formula three days before the deaths"
+  - "Last known heading in the nav system: a frontier system with poor atmospheric conditions"

@@ -1,0 +1,34 @@
+id: discovery_missing_persons
+template: "Dataslate in levelled item"
+
+book_title: "Syntec Internal Notice — Personnel Recovery"
+book_contents: >
+  [SYNTEC PHARMACEUTICALS — SECURITY DIVISION — INTERNAL]
+
+  RE: Personnel Recovery — L. Drax, Compliance (former)
+
+  Effective [DATE REDACTED], Leva Drax has been separated from Syntec Pharmaceuticals.
+  Standard exit clearance was not completed. Drax retains access credentials to certain
+  internal compliance archives. Recovery of these credentials and any associated material
+  is a Security Division priority.
+
+  Drax was last confirmed in the Neon metropolitan area. Anyone with information regarding
+  her current location or associates should contact Syntec Security directly at the channel
+  noted below. Discretion is requested.
+
+  A finder's assistance credit of 4,500 will be issued upon verified contact with Security
+  Division. Additional compensation available for material recovery.
+
+  DO NOT approach Drax directly.
+  DO NOT involve local law enforcement.
+  Contact Security Division only.
+
+  Syntec Security Division, Neon Operations
+
+npcs: {}
+
+addons:
+  - "Recovery notice, not a police report — Syntec kept law enforcement out of this deliberately"
+  - "The finder's fee is too large for a simple personnel matter"
+  - "DO NOT approach Drax directly — suggests she's considered dangerous, or dangerous to approach"
+  - "The 'compliance archives' is the tell — they're not looking for an employee. They're looking for data."

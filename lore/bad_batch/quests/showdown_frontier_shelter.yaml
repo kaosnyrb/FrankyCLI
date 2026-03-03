@@ -1,0 +1,23 @@
+id: showdown_frontier_shelter
+template: "Planet side Bounty - poor atmosphere"
+
+name: "The Antidote"
+log_entry: >
+  Senna Vok is alive. She's been on a frontier planet with a toxic atmosphere
+  for three months, working alone in a survival shelter. Not hiding — working.
+  The same contaminated precursor that killed twelve people on the Serpent's Coil
+  is in a second batch, already distributed. She says she has the counteragent.
+  The contract says bring her in dead or alive.
+  The contract doesn't know about the second batch.
+
+npcs:
+  boss: senna_vok
+
+# NeedSpacesuit: true — comes from template (poor atmosphere planet)
+
+addons:
+  - "Senna Vok — has been synthesizing a counteragent for three months"
+  - "There is a second batch of the contaminated Relay drug in circulation in Neon Core"
+  - "She is not armed. She has been waiting for someone to find her."
+  - "Her synthesis records and the counteragent formula are in the shelter"
+  - "Killing her ends the contract. It also ends any chance of stopping the second batch."

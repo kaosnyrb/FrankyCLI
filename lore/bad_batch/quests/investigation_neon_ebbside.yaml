@@ -1,0 +1,18 @@
+id: investigation_neon_ebbside
+template: "City Activator - Neon Ebbside"
+
+name: "Supply Chain"
+log_entry: >
+  Senna Vok's distribution network ran through Neon's Ebbside. Someone down
+  there brokered the deal between her and the Fleet. Finding that connection
+  means finding out where she went after the Serpent's Coil.
+
+# objective: not supported by Investigation_ActivatorCity
+
+npcs:
+  boss: senna_vok
+
+addons:
+  - "Senna Vok distributed through a fixer in Neon Ebbside known only as Moss"
+  - "Neon Ebbside — the underbelly, where the real business happens off the books"
+  - "The Fleet contract would make anyone in her network nervous enough to talk"

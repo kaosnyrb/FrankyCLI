@@ -1,0 +1,20 @@
+id: showdown_rooftops
+template: "City Bounty - Neon Rooftops"
+
+name: "The Wire"
+log_entry: >
+  Leva Drax is on the rooftops. She's been there three days. She's not hiding — she's
+  waiting. The contract says bring her in. She says she has something to say first.
+  The dead man's switch means the data goes out either way. She already won.
+  She just wants someone to know that.
+
+npcs:
+  boss: leva_drax
+
+addons:
+  - "Leva Drax — not armed. Has been waiting three days. She chose to be found."
+  - "Dead man's switch active: if she misses a daily check-in, the complete Syntec clinical trial record transmits to three journalists"
+  - "Aura fatality rate: 14x the published figure. Syntec's own internal data."
+  - "Her sources — the Syntec employees who testified — are still in Neon. They need the data to come out as much as she does."
+  - "Bringing her in dead or alive ends the contract. The data gets out either way. She set it up that way."
+  - "She already won. She is waiting for someone to understand that."

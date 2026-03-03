@@ -1,0 +1,16 @@
+id: investigation_ebbside_contacts
+template: "City Activator - Neon Ebbside"
+
+name: "Recovery Notice"
+log_entry: >
+  The Syntec notice is a recovery order, not a missing persons report. No police. No public
+  filing. Leva Drax was last seen in Neon Ebbside, and Syntec wants her found quietly.
+  Whatever she took from them, they need it back before it goes anywhere.
+
+npcs:
+  boss: leva_drax
+
+addons:
+  - "Leva Drax spent months in Ebbside meeting people off the books — lab tech, logistics clerk, data archivist"
+  - "An information broker called Cael arranged those meetings. He's still in Ebbside."
+  - "Syntec's recovery notice went out the same day she disappeared. They knew immediately — which means they were watching."

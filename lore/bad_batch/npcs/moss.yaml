@@ -1,0 +1,24 @@
+id: moss
+name: Moss
+faction: outlaws
+gender: male
+voice_type: MaleOutlaw
+role: informant
+notes: >
+  Mid-tier distributor in Neon Ebbside. Handles logistics for several independent
+  chemists — never touches the product, just moves it. Not violent. Not brave.
+  Has been quietly terrified since the Serpent's Coil deaths because he was the
+  one who introduced Senna to the Crimson Fleet contact.
+
+  Didn't know the Fleet would pressure her. Didn't know about the bad precursor.
+  Has been carrying that guilt for three months. Will talk if pushed — not because
+  he's brave but because keeping this in is killing him.
+
+  Key information he holds:
+  - The Fleet pressured Senna to rush the batch despite her objections
+  - The same contaminated precursor supplier shipped a second batch to a Spacer
+    distributor operating out of Neon Core
+  - Senna contacted him two weeks ago trying to get a message to the Spacer
+    distributor — she has the counteragent formula but no way to reach anyone
+
+ambient_dialogue: moss_informant_scene

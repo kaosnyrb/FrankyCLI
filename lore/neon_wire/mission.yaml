@@ -1,0 +1,18 @@
+id: neon_wire
+name: "Neon Wire"
+faction: outlaws
+
+constants:
+  target_name: "Leva Drax"
+  corp_name: "Syntec Pharmaceuticals"
+  drug_name: "Aura"
+
+npcs:
+  - npcs/leva_drax.yaml
+  - npcs/cael.yaml
+
+chain:
+  - quests/discovery_missing_persons.yaml
+  - quests/investigation_ebbside_contacts.yaml
+  - quests/deep_investigation_underbelly.yaml
+  - quests/showdown_rooftops.yaml

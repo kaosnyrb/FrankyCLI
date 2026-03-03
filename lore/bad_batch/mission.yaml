@@ -1,0 +1,13 @@
+id: bad_batch
+name: "Bad Batch"
+faction: outlaws
+
+npcs:
+  - npcs/senna_vok.yaml
+  - npcs/moss.yaml
+
+chain:
+  - quests/discovery_incident_report.yaml
+  - quests/investigation_neon_ebbside.yaml
+  - quests/deep_investigation_fleet_cargo.yaml
+  - quests/showdown_frontier_shelter.yaml
