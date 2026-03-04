@@ -139,45 +139,6 @@ namespace FrankyCLI
                                     { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell); found++; }
                     }
                     break;
-                case "refr":
-                {
-                    // Search all cells for a specific placed object FormKey and dump its flags.
-                    void SearchCell(ICellGetter cell)
-                    {
-                        foreach (var entry in cell.Persistent.Concat(cell.Temporary))
-                        {
-                            if (entry is IPlacedObjectGetter po && MatchesSearch(po.EditorID, po.FormKey, search))
-                            {
-                                Console.WriteLine($"--- PlacedObject (REFR) ---");
-                                Console.WriteLine($"  FormKey:              {po.FormKey}");
-                                Console.WriteLine($"  EditorID:             {po.EditorID ?? "(none)"}");
-                                Console.WriteLine($"  MajorRecordFlagsRaw:  {po.MajorRecordFlagsRaw} (0x{po.MajorRecordFlagsRaw:X8})");
-                                Console.WriteLine($"  StarfieldFlags:       {po.StarfieldMajorRecordFlags}");
-                                Console.WriteLine($"  XFLG:                 {(po.XFLG.HasValue ? BitConverter.ToString(po.XFLG.Value.ToArray()) : "(null)")}");
-                                Console.WriteLine($"  XNSE:                 {(po.XNSE.HasValue ? BitConverter.ToString(po.XNSE.Value.ToArray()) : "(null)")}");
-                                Console.WriteLine($"  XALG:                 {(po.XALG.HasValue ? $"0x{po.XALG.Value:X16}" : "(null)")}");
-                                Console.WriteLine($"  Base:                 {po.Base.FormKey}");
-                                Console.WriteLine($"  Position:             {po.Position}");
-                                Console.WriteLine($"  Scale:                {po.Scale}");
-                                Console.WriteLine($"  Cell:                 {cell.FormKey} {cell.EditorID}");
-                                found++;
-                            }
-                        }
-                    }
-                    foreach (var block in mod.Cells)
-                        foreach (var subBlock in block.SubBlocks)
-                            foreach (var cell in subBlock.Cells)
-                                SearchCell(cell);
-                    foreach (var ws in mod.Worldspaces)
-                    {
-                        if (ws.TopCell != null) SearchCell(ws.TopCell);
-                        foreach (var wsBlock in ws.SubCells)
-                            foreach (var wsSubBlock in wsBlock.Items)
-                                foreach (var cell in wsSubBlock.Items)
-                                    SearchCell(cell);
-                    }
-                    break;
-                }
                 case "refr_xflg":
                 {
                     // Scan a cell (search = EditorID or FormKey) and list all placed objects
@@ -314,6 +275,79 @@ namespace FrankyCLI
                         found++;
                     }
                     break;
+                case "placedobject":
+                case "refr":
+                {
+                    // Search all cells for a specific placed object FormKey and dump its flags.
+                    void SearchCellRefr(ICellGetter cell)
+                    {
+                        foreach (var entry in cell.Persistent.Concat(cell.Temporary))
+                        {
+                            if (entry is IPlacedObjectGetter po && MatchesSearch(po.EditorID, po.FormKey, search))
+                            {
+                                Console.WriteLine($"--- PlacedObject (REFR) ---");
+                                Console.WriteLine($"  FormKey:              {po.FormKey}");
+                                Console.WriteLine($"  EditorID:             {po.EditorID ?? "(none)"}");
+                                Console.WriteLine($"  MajorRecordFlagsRaw:  {po.MajorRecordFlagsRaw} (0x{po.MajorRecordFlagsRaw:X8})");
+                                Console.WriteLine($"  StarfieldFlags:       {po.StarfieldMajorRecordFlags}");
+                                Console.WriteLine($"  XFLG:                 {(po.XFLG.HasValue ? BitConverter.ToString(po.XFLG.Value.ToArray()) : "(null)")}");
+                                Console.WriteLine($"  XNSE:                 {(po.XNSE.HasValue ? BitConverter.ToString(po.XNSE.Value.ToArray()) : "(null)")}");
+                                Console.WriteLine($"  XALG:                 {(po.XALG.HasValue ? $"0x{po.XALG.Value:X16}" : "(null)")}");
+                                Console.WriteLine($"  Base:                 {po.Base.FormKey}");
+                                Console.WriteLine($"  Position:             {po.Position}");
+                                Console.WriteLine($"  Rotation:             {po.Rotation}");
+                                Console.WriteLine($"  Scale:                {po.Scale}");
+                                Console.WriteLine($"  Cell:                 {cell.FormKey} {cell.EditorID}");
+                                found++;
+                            }
+                        }
+                    }
+                    foreach (var block in mod.Cells)
+                        foreach (var subBlock in block.SubBlocks)
+                            foreach (var cell in subBlock.Cells)
+                                SearchCellRefr(cell);
+                    foreach (var ws in mod.Worldspaces)
+                    {
+                        if (ws.TopCell != null) SearchCellRefr(ws.TopCell);
+                        foreach (var wsBlock in ws.SubCells)
+                            foreach (var wsSubBlock in wsBlock.Items)
+                                foreach (var cell in wsSubBlock.Items)
+                                    SearchCellRefr(cell);
+                    }
+                    break;
+                }
+                case "worldspace_structure":
+                case "worldspacestructure":
+                {
+                    // Dump structural summary of a worldspace override — useful for comparing
+                    // a CK-generated template mod vs a Mutagen-generated mod to find differences.
+                    foreach (var ws in mod.Worldspaces)
+                    {
+                        if (!MatchesSearch(ws.EditorID, ws.FormKey, search)) continue;
+                        Console.WriteLine($"--- Worldspace structure [{mod.ModKey}] ---");
+                        Console.WriteLine($"  FormKey:        {ws.FormKey}");
+                        Console.WriteLine($"  EditorID:       {ws.EditorID}");
+                        Console.WriteLine($"  OffsetData:     {(ws.OffsetData.HasValue ? $"{ws.OffsetData.Value.Length} bytes" : "(null)")}");
+                        Console.WriteLine($"  Flags:          {ws.Flags}");
+                        Console.WriteLine($"  SubCells:       {ws.SubCells.Count} block(s)");
+                        int totalCells = 0;
+                        foreach (var b in ws.SubCells)
+                            foreach (var sb in b.Items)
+                                totalCells += sb.Items.Count;
+                        Console.WriteLine($"    → {totalCells} total exterior cell(s)");
+                        if (ws.TopCell != null)
+                        {
+                            Console.WriteLine($"  TopCell:        {ws.TopCell.FormKey}");
+                            Console.WriteLine($"    Persistent:   {ws.TopCell.Persistent.Count}");
+                            Console.WriteLine($"    Temporary:    {ws.TopCell.Temporary.Count}");
+                        }
+                        else
+                            Console.WriteLine($"  TopCell:        (null)");
+                        Console.WriteLine();
+                        found++;
+                    }
+                    break;
+                }
                 case "placed":
                     // Search all cells in all worldspaces for placed objects whose Base OR own FormKey matches
                     foreach (var ws in mod.Worldspaces)
@@ -352,8 +386,9 @@ namespace FrankyCLI
                     break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
+                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
                     Console.WriteLine("           Quest, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)");
+                    Console.WriteLine("           PlacedObject (alias: refr) — search for placed objects by EditorID or FormID (0x...)");
                     break;
             }
             return found;

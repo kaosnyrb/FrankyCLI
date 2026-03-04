@@ -205,7 +205,7 @@ namespace Retrograde.Nouns
             var newGlobal = new Global(targetMod)
             {
                 EditorID = source.EditorID,
-                Data = (source as Global)?.Data ?? 0f
+                Data = source.Data ?? 0f
             };
             targetMod.Globals.Add(newGlobal);
             Console.WriteLine($"  [QuestNoun] Copied template global '{newGlobal.EditorID}' into target mod.");

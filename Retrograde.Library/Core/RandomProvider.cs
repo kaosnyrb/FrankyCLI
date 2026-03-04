@@ -324,6 +324,7 @@ public static class RandomProvider
         if (wsOverride == null)
         {
             wsOverride = FindOriginalWorldspace(sourceWs.FormKey).DeepCopy();
+            wsOverride.OffsetData = null;   // do NOT copy nav-mesh offset blob into override
             wsOverride.SubCells.Clear();
             if (wsOverride.TopCell != null)
             {
@@ -356,6 +357,7 @@ public static class RandomProvider
         if (wsOverride == null)
         {
             wsOverride = FindOriginalWorldspace(sourceWs.FormKey).DeepCopy();
+            wsOverride.OffsetData = null;   // do NOT copy nav-mesh offset blob into override
             wsOverride.SubCells.Clear();
             targetMod.Worldspaces.Add(wsOverride);
         }
