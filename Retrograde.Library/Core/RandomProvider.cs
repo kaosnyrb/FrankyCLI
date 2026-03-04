@@ -180,7 +180,7 @@ public static class RandomProvider
             Ownership              = source.Ownership?.DeepCopy(),
             Patrol                 = source.Patrol?.DeepCopy(),
             Position               = source.Position,
-            PowerLinks             = source.PowerLinks?.Select(x => x.DeepCopy()).ToExtendedList(),
+            PowerLinks             = source.PowerLinks?.Select(x => x.DeepCopy()).ToExtendedList()!,
             Primitive              = source.Primitive?.DeepCopy(),
             ProjectedDecal         = source.ProjectedDecal?.DeepCopy(),
             ProjectedDecalReferences = source.ProjectedDecalReferences?.ToExtendedList(),

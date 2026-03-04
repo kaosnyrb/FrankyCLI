@@ -154,7 +154,7 @@ namespace FrankyCLI
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "Space Activator - unguarded IceCrystals",
+                        InvestigationTemplate = "City Activator - Neon Underbelly",
                         DeepTempalte = "Planetside Smallbase Informant - Freestar Ranger Environmental Scout",
                         ShowdownTemplate = "City Bounty - Outskirts of Cydonia"
                     };

@@ -31,7 +31,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilafarms"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilafarms"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -46,7 +48,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilawalls"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilawalls"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -61,7 +65,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilacoeplaza"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilacoeplaza"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -76,7 +82,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilathestretch"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilathestretch"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -91,7 +99,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilathecore"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilathecore"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -106,7 +116,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilamidtown"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilamidtown"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -121,7 +133,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilaspaceport"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilaspaceport"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
             //-------------------------------  SHOWDOWN ------------------------------------------
 
@@ -138,7 +152,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "kill_target"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilafarms"}, {"FormId", 0x00010DFB} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "akilafarms"}, {"FormId", 0x00010DFB} },
+                                Addons = new List<string>(),
+
             });
         }
     }

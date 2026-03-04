@@ -31,7 +31,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neoncore"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neoncore"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -47,7 +48,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonryujin"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonryujin"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -63,7 +65,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonebbside"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonebbside"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -79,7 +82,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonrooftops"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonrooftops"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -95,7 +99,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonunderbelly"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonunderbelly"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -111,7 +116,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonstarport"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonstarport"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
 
             InvestigationTemplates.Add(new MissionTemplate()
@@ -127,7 +133,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonastrallounge"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonastrallounge"}, {"FormId", 0x00015FFE} },
+                Addons = new List<string>(),
             });
             //-------------------------------  SHOWDOWN ------------------------------------------            
             ShowdownTemplates.Add(new MissionTemplate()
@@ -143,7 +150,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "kill_target"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonstarport"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonstarport"}, {"FormId", 0x00015FFE} },
+                                Addons = new List<string>(),
+
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -159,7 +168,9 @@ namespace Retrograde.Quests
                     "kill_target"
                 },
 
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonunderbelly"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonunderbelly"}, {"FormId", 0x00015FFE} },
+                                Addons = new List<string>(),
+
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -175,7 +186,9 @@ namespace Retrograde.Quests
                     "kill_target"
                 },
 
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonebbside"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonebbside"}, {"FormId", 0x00015FFE} },
+                                Addons = new List<string>(),
+
             });
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -191,7 +204,9 @@ namespace Retrograde.Quests
                     "kill_target"
                 },
 
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonrooftops"}, {"FormId", 0x00015FFE} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonrooftops"}, {"FormId", 0x00015FFE} },
+                                Addons = new List<string>(),
+
             });
         }
     }

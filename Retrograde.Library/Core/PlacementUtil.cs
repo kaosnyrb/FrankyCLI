@@ -246,7 +246,7 @@ public class PlacementUtil
             LightArea = source.LightArea?.DeepCopy(),
             LightFlicker = source.LightFlicker?.DeepCopy(),
             LightRoundedness = source.LightRoundedness?.DeepCopy(),
-            LightColors = source.LightColors?.Select(lc => lc.DeepCopy()).ToExtendedList(),
+            LightColors = source.LightColors?.Select(lc => lc.DeepCopy()).ToExtendedList()!,
             GoboAnimatedProperties = source.GoboAnimatedProperties?.DeepCopy(),
             LightLayerData = source.LightLayerData,
             LightStaticShadowMap = source.LightStaticShadowMap,
@@ -260,11 +260,11 @@ public class PlacementUtil
 
             // References / links
             EnableParent = source.EnableParent?.DeepCopy(),
-            LinkedReferences = source.LinkedReferences?.Select(lr => lr.DeepCopy()).ToExtendedList(),
+            LinkedReferences = source.LinkedReferences?.Select(lr => lr.DeepCopy()).ToExtendedList()!,
             LocationRefTypes = source.LocationRefTypes?.ToExtendedList(),
             LayeredMaterialSwaps = source.LayeredMaterialSwaps?.ToExtendedList(),
-            SnapLinks = source.SnapLinks?.Select(s => s.DeepCopy()).ToExtendedList(),
-            PowerLinks = source.PowerLinks?.Select(pl => pl.DeepCopy()).ToExtendedList(),
+            SnapLinks = source.SnapLinks?.Select(s => s.DeepCopy()).ToExtendedList()!,
+            PowerLinks = source.PowerLinks?.Select(pl => pl.DeepCopy()).ToExtendedList()!,
             ProjectedDecalReferences = source.ProjectedDecalReferences?.ToExtendedList(),
 
             // Complex sub-records
@@ -282,11 +282,11 @@ public class PlacementUtil
 
             // Properties / components / scripts
             Properties = source.Properties?.Select(p => p.DeepCopy()).ToExtendedList(),
-            Components = source.Components?.Select(c => c.DeepCopy()).ToExtendedList(),
+            Components = source.Components?.Select(c => c.DeepCopy()).ToExtendedList()!,
             VirtualMachineAdapter = source.VirtualMachineAdapter?.DeepCopy(),
             RagdollData = source.RagdollData?.Select(r => r.DeepCopy()).ToExtendedList(),
             Traversals = source.Traversals?.Select(t => t.DeepCopy()).ToExtendedList(),
-            PlacedObjectXCZRXCZA = source.PlacedObjectXCZRXCZA?.Select(x => x.DeepCopy()).ToExtendedList(),
+            PlacedObjectXCZRXCZA = source.PlacedObjectXCZRXCZA?.Select(x => x.DeepCopy()).ToExtendedList()!,
 
             // Simple value fields
             Count = source.Count,

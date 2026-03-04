@@ -31,7 +31,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaoutskirts"}, {"FormId", 0x00015FF7} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaoutskirts"}, {"FormId", 0x00015FF7} },
+                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -46,7 +48,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniacentralhub"}, {"FormId", 0x00015FF7} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniacentralhub"}, {"FormId", 0x00015FF7} },
+                Addons = new List<string>(),
+
             });
             InvestigationTemplates.Add(new MissionTemplate()
             {
@@ -61,7 +65,9 @@ namespace Retrograde.Quests
                     "planetside",
                     "follow_clue"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaresidential"}, {"FormId", 0x00015FF7} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaresidential"}, {"FormId", 0x00015FF7} },
+                Addons = new List<string>(),
+
             });
 
             //-------------------------------  SHOWDOWN ------------------------------------------            
@@ -78,7 +84,8 @@ namespace Retrograde.Quests
                     "planetside",
                     "kill_target"
                 },
-                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaoutskirts"}, {"FormId", 0x00015FF7} }
+                parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true}, {"Label", "cydoniaoutskirts"}, {"FormId", 0x00015FF7} },
+                Addons = new List<string>(),
             });
 
         }
