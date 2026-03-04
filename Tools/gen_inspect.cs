@@ -54,7 +54,7 @@ namespace FrankyCLI
             for (int i = 0; i < env.LoadOrder.Count; i++)
             {
                 if (env.LoadOrder[i].Mod != null)
-                    allMods.Add(env.LoadOrder[i].Mod);
+                    allMods.Add(env.LoadOrder[i].Mod!);
             }
 
             if (recordType.Equals("list", StringComparison.OrdinalIgnoreCase))
@@ -704,7 +704,7 @@ namespace FrankyCLI
                 Console.WriteLine($"    Index={stage.Index}  Flags={stage.Flags}");
             Console.WriteLine();
 
-            Console.WriteLine($"  Aliases [{quest.Aliases.Count}]:");
+            Console.WriteLine($"  Aliases [{quest.Aliases!.Count}]:");
             foreach (var alias in quest.Aliases)
             {
                 if (alias is IQuestReferenceAliasGetter refAlias)
@@ -739,7 +739,7 @@ namespace FrankyCLI
                 {
                     Console.WriteLine($"    [{scene.FormKey}] EditorID={scene.EditorID}");
                     Console.WriteLine($"      Quest:    {(scene.Quest.IsNull ? "null" : scene.Quest.FormKey.ToString())}");
-                    Console.WriteLine($"      Flags:    0x{(uint)scene.Flags:X8} ({scene.Flags})");
+                    Console.WriteLine($"      Flags:    0x{(uint)scene.Flags.GetValueOrDefault():X8} ({scene.Flags})");
                     Console.WriteLine($"      VNAM:     {(scene.VNAM.HasValue ? BitConverter.ToString(scene.VNAM.Value.ToArray()) : "null")}");
                     if (scene.Conditions != null && scene.Conditions.Count > 0)
                     {

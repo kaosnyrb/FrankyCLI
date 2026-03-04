@@ -20,14 +20,14 @@ namespace FrankyCLI
     public class gen_quest_main
     {
         public static ModKey StarfieldModKey;
-        public static IStarfieldModGetter _StarfieldMod;
-        public static StarfieldMod myMod;
+        public static IStarfieldModGetter _StarfieldMod = null!;
+        public static StarfieldMod myMod = null!;
 
         /// <summary>
         /// Cached master flags lookup, built once from the load order.
         /// Uses lightweight snapshots so it survives GameEnvironment disposal.
         /// </summary>
-        public static Cache<IModMasterStyledGetter, ModKey> MasterFlagsCache;
+        public static Cache<IModMasterStyledGetter, ModKey> MasterFlagsCache = null!;
 
         /// <summary>
         /// Lightweight snapshot of a mod's master style, so we don't hold
@@ -103,7 +103,7 @@ namespace FrankyCLI
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
                 datapath = env.DataFolderPath;
-                _StarfieldMod = env.LoadOrder[0].Mod;
+                _StarfieldMod = env.LoadOrder[0].Mod!;
                 //Find the modkey 
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);

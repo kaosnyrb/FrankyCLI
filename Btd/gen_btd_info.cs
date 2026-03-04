@@ -19,7 +19,7 @@ namespace FrankyCLI
 
             // Also check if it's a file in a directory — scan all if --all flag
             if (args.Length >= 7 && args[6] == "--all" && System.IO.File.Exists(btdPath))
-                return ScanAllBtdFiles(System.IO.Path.GetDirectoryName(btdPath));
+                return ScanAllBtdFiles(System.IO.Path.GetDirectoryName(btdPath)!);
 
             Console.WriteLine($"=== BTD Info Dump ===");
             Console.WriteLine($"File: {btdPath}");
@@ -201,7 +201,7 @@ namespace FrankyCLI
                 if (compSize == 0) continue;
 
                 long absOff = blockDataOffs + dataOff;
-                byte[] decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
+                byte[]? decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
                 if (decompressed == null) continue;
 
                 int cellX = i % reader.CellCountX + reader.CellMinX;
@@ -213,7 +213,7 @@ namespace FrankyCLI
                 AnalyzeUint16Region(decompressed, 0, 128 * 128, "Height (0..32767)", reader);
 
                 // Texture portion: next 128*128*2 = 32768 bytes
-                AnalyzeUint16Region(decompressed, 32768, 128 * 128, "Texture (32768..65535)", null);
+                AnalyzeUint16Region(decompressed, 32768, 128 * 128, "Texture (32768..65535)", null!);
 
                 break; // just the first one
             }
@@ -231,14 +231,14 @@ namespace FrankyCLI
                 if (compSize > 0)
                 {
                     long absOff = blockDataOffs + dataOff;
-                    byte[] decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
+                    byte[]? decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
                     if (decompressed != null)
                     {
                         int cellX = cx + reader.CellMinX;
                         int cellY = cy + reader.CellMinY;
                         Console.WriteLine($"  Center cell ({cellX},{cellY}), compressed {compSize:N0} -> {decompressed.Length:N0} bytes");
                         AnalyzeUint16Region(decompressed, 0, 128 * 128, "Height", reader);
-                        AnalyzeUint16Region(decompressed, 32768, 128 * 128, "Texture", null);
+                        AnalyzeUint16Region(decompressed, 32768, 128 * 128, "Texture", null!);
                     }
                 }
             }
@@ -330,7 +330,7 @@ namespace FrankyCLI
                 if (compSize > 0)
                 {
                     long absOff = blockDataOffs + dataOff;
-                    byte[] decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
+                    byte[]? decompressed = DecompressZlib(fileBytes, absOff, compSize, 65536);
                     if (decompressed != null)
                     {
                         var texVals = new ushort[128 * 128];
@@ -495,7 +495,7 @@ namespace FrankyCLI
                                 if (ccompSize == 0) continue;
 
                                 long cabsOff = blockDataOffs + cdataOff;
-                                byte[] cdecomp = DecompressZlib(fileBytes, cabsOff, ccompSize, 65536);
+                                byte[]? cdecomp = DecompressZlib(fileBytes, cabsOff, ccompSize, 65536);
                                 if (cdecomp == null) continue;
 
                                 var hiFreq = new Dictionary<byte, int>();
@@ -705,7 +705,7 @@ namespace FrankyCLI
                 if (centerCompSize > 0)
                 {
                     long absOff = blockDataOffs + centerDataOff;
-                    byte[] decompressed = DecompressZlib(fileBytes, absOff, centerCompSize, 65536);
+                    byte[]? decompressed = DecompressZlib(fileBytes, absOff, centerCompSize, 65536);
                     if (decompressed != null)
                     {
                         // Texture value distribution from center cell
@@ -813,7 +813,7 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
-        private static byte[] DecompressZlib(byte[] data, long offset, uint compressedSize, int expectedSize)
+        private static byte[]? DecompressZlib(byte[] data, long offset, uint compressedSize, int expectedSize)
         {
             try
             {

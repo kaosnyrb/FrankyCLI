@@ -155,7 +155,7 @@ namespace FrankyCLI
                 var subBlockNumber = int.Parse(stringkey.Substring(stringkey.Length - 2, 1));
 
                 //Try and use existing cellblocks and subblocks first.
-                CellBlock cellblock = null;
+                CellBlock? cellblock = null;
                 bool newCellBlock = false;
                 for( int i = 0; i < myMod.Cells.Count; i++ )
                 {
@@ -338,7 +338,6 @@ namespace FrankyCLI
 
                 //Constructable object -------------------------
                 Console.WriteLine("Building Record : " + prefix + "_co_" + item);
-                byte tnamearry = 00;
                 IFormLinkNullable<IKeywordGetter> WorkbenchShipBuildingKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x0029C480).ToNullableLink<IKeywordGetter>();
                 IFormLinkNullable<IKeywordGetter> Category_ShipMod_Structure = new FormKey(env.LoadOrder[0].ModKey, 0x0029C473).ToNullableLink<IKeywordGetter>();
 

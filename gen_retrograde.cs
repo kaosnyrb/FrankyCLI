@@ -16,8 +16,8 @@ namespace FrankyCLI
     public class gen_retrograde
     {
         public static ModKey StarfieldModKey;
-        public static IStarfieldModGetter _StarfieldMod;
-        public static StarfieldMod myMod;
+        public static IStarfieldModGetter _StarfieldMod = null!;
+        public static StarfieldMod myMod = null!;
 
         public static int Generate(string[] args)
         {
@@ -52,7 +52,7 @@ namespace FrankyCLI
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
                 datapath = env.DataFolderPath;
-                _StarfieldMod = env.LoadOrder[0].Mod;
+                _StarfieldMod = env.LoadOrder[0].Mod!;
                 //Find the modkey 
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);
@@ -107,11 +107,11 @@ namespace FrankyCLI
                 AITools.AIMODE = false;
 
                 // Parse optional parameters: faction, station design, type (poi/bounty), quiet
-                string faction = args.Length > 5 ? args[5] : null;
-                string stationDesignName = args.Length > 6 ? args[6] : null;
-                string questType = args.Length > 7 ? args[7] : null; // "poi" or "bounty"
-                string quietFlag = args.Length > 8 ? args[8] : null; // "quiet" to suppress scores
-                string exportAiFlag = args.Length > 9 ? args[9] : null; // "exportai" to dump AI conversation
+                string? faction = args.Length > 5 ? args[5] : null;
+                string? stationDesignName = args.Length > 6 ? args[6] : null;
+                string? questType = args.Length > 7 ? args[7] : null; // "poi" or "bounty"
+                string? quietFlag = args.Length > 8 ? args[8] : null; // "quiet" to suppress scores
+                string? exportAiFlag = args.Length > 9 ? args[9] : null; // "exportai" to dump AI conversation
 
                 RetrogradeContext.Quiet = string.Equals(quietFlag, "quiet", StringComparison.OrdinalIgnoreCase);
                 AITools.EXPORT_CONVERSATION = string.Equals(exportAiFlag, "exportai", StringComparison.OrdinalIgnoreCase);

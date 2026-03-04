@@ -36,7 +36,7 @@ namespace FrankyCLI
             {
                 gen_quest_main.StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 datapath = env.DataFolderPath;
-                gen_quest_main._StarfieldMod = env.LoadOrder[0].Mod;
+                gen_quest_main._StarfieldMod = env.LoadOrder[0].Mod!;
 
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 gen_quest_main.myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);

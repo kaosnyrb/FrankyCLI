@@ -13,6 +13,7 @@ using DynamicData;
 namespace FrankyCLI
 {
 
+#pragma warning disable CS8981
     class shipyfortyfiverotates
     {
 
@@ -489,7 +490,7 @@ namespace FrankyCLI
                 // Generates all the flips of a single moveable static
 
                 //Steps:
-                MoveableStatic target = null;
+                MoveableStatic? target = null;
                 foreach(var ms in myMod.MoveableStatics)
                 {
                     if (ms.EditorID == item)
@@ -502,7 +503,7 @@ namespace FrankyCLI
                 //Make Formlist of all the flips and add to it while building
                 FormList FlipsList = new FormList(myMod)
                 {
-                    EditorID = prefix + "_" + target.EditorID + "_" + "franky",
+                    EditorID = prefix + "_" + target!.EditorID + "_" + "franky",
                 };
 
                 List<directions> flips = new List<directions>() { 
@@ -527,7 +528,7 @@ namespace FrankyCLI
                     };
 
                     //2: make a new snap template with the snappoints swapped
-                    SnapTemplate oldsnap = null;
+                    SnapTemplate? oldsnap = null;
                     foreach (var st in myMod.SnapTemplates)
                     {
                         if (st.FormKey == target.SnapTemplate.FormKey)
@@ -537,8 +538,8 @@ namespace FrankyCLI
                     }
                     if (oldsnap == null)
                     {
-                        //vanilla?                        
-                        foreach (var st in env.LoadOrder[0].Mod.SnapTemplates)
+                        //vanilla?
+                        foreach (var st in env.LoadOrder[0].Mod!.SnapTemplates)
                         {
                             if (st.FormKey == target.SnapTemplate.FormKey)
                             {
@@ -550,13 +551,13 @@ namespace FrankyCLI
                     SnapTemplate snapTemplate = new SnapTemplate(myMod)
                     {
                         EditorID = prefix + "_sn_" + target.EditorID + direction.ToString(),
-                        NextNodeID = oldsnap.NextNodeID,
-                        STPT = oldsnap.STPT,
+                        NextNodeID = oldsnap!.NextNodeID,
+                        STPT = oldsnap!.STPT,
                     };
 
 
                     //Flip logic
-                    var nodes = CalculateNodes(direction, oldsnap.Nodes,env);
+                    var nodes = CalculateNodes(direction, oldsnap!.Nodes,env);
                     foreach (var node in nodes)
                     {
                         snapTemplate.Nodes.Add(node);
@@ -626,7 +627,7 @@ namespace FrankyCLI
                     var subBlockNumber = int.Parse(stringkey.Substring(stringkey.Length - 2, 1));
 
                     //Try and use existing cellblocks and subblocks first.
-                    CellBlock cellblock = null;
+                    CellBlock? cellblock = null;
                     bool newCellBlock = false;
                     for( int i = 0; i < myMod.Cells.Count; i++ )
                     {
@@ -842,7 +843,6 @@ namespace FrankyCLI
 
                 //7: Constructable
                 Console.WriteLine("Building Record : " + prefix + "_co_" + item);
-                byte tnamearry = 00;
                 IFormLinkNullable<IKeywordGetter> WorkbenchShipBuildingKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x0029C480).ToNullableLink<IKeywordGetter>();
                 IFormLinkNullable<IKeywordGetter> Category_ShipMod_Structure = new FormKey(env.LoadOrder[0].ModKey, 0x0029C473).ToNullableLink<IKeywordGetter>();
 

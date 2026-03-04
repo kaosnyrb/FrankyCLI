@@ -47,7 +47,7 @@ namespace FrankyCLI
             {
                 gen_quest_main.StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 datapath = env.DataFolderPath;
-                gen_quest_main._StarfieldMod = env.LoadOrder[0].Mod;
+                gen_quest_main._StarfieldMod = env.LoadOrder[0].Mod!;
 
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 gen_quest_main.myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);
@@ -68,7 +68,7 @@ namespace FrankyCLI
 
                 // Sync statics required by WorldspaceNoun / downstream code
                 gen_quest_main.StarfieldModKey = new ModKey("Starfield", ModType.Master);
-                gen_quest_main._StarfieldMod = env.LoadOrder[0].Mod;
+                gen_quest_main._StarfieldMod = env.LoadOrder[0].Mod!;
 
                 // Populate MasterFlagsCache so BuildWriteParams() works.
                 // Must happen inside the using block while the load order is alive.

@@ -61,7 +61,7 @@ namespace FrankyCLI
                 Quest quest1 = new Quest(myMod); 
                 foreach(var modlo in env.LoadOrder)
                 {                    
-                    foreach (var quests in modlo.Value.Mod.Quests)
+                    foreach (var quests in modlo.Value.Mod!.Quests)
                     {
                         if (quests.EditorID != null)
                         {

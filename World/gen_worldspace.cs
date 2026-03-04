@@ -14,8 +14,8 @@ namespace FrankyCLI
     public class gen_worldspace
     {
         public static ModKey StarfieldModKey;
-        public static IStarfieldModGetter _StarfieldMod;
-        public static StarfieldMod myMod;
+        public static IStarfieldModGetter _StarfieldMod = null!;
+        public static StarfieldMod myMod = null!;
 
         public static int Generate(string[] args)
         {
@@ -43,7 +43,7 @@ namespace FrankyCLI
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
                 var immutableLoadOrderLinkCache = env.LoadOrder.ToImmutableLinkCache();
                 datapath = env.DataFolderPath;
-                _StarfieldMod = env.LoadOrder[0].Mod;
+                _StarfieldMod = env.LoadOrder[0].Mod!;
 
                 // Populate MasterFlagsCache unconditionally so BuildWriteParams() works
                 // whether or not the output mod already exists in the load order.
@@ -93,7 +93,7 @@ namespace FrankyCLI
                 int seed = args.Length > 5 ? int.Parse(args[5]) : new Random().Next();
                 string faction = args.Length > 6 ? args[6] : "Spacer";
                 string designName = args.Length > 7 ? args[7] : "Fort";
-                string quietFlag = args.Length > 8 ? args[8] : null;
+                string? quietFlag = args.Length > 8 ? args[8] : null;
 
                 RetrogradeContext.Quiet = string.Equals(quietFlag, "quiet", StringComparison.OrdinalIgnoreCase);
 

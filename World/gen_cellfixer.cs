@@ -108,7 +108,7 @@ namespace FrankyCLI
                 var subBlockNumber = int.Parse(stringkey.Substring(stringkey.Length - 2, 1));
 
                 //Try and use existing cellblocks and subblocks first.
-                CellBlock cellblock = null;
+                CellBlock? cellblock = null;
                 bool newCellBlock = false;
                 for( int i = 0; i < myMod.Cells.Count; i++ )
                 {

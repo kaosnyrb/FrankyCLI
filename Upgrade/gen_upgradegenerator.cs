@@ -37,9 +37,9 @@ namespace FrankyCLI
         public static Dictionary<string, StatSet> StatLib = new Dictionary<string, StatSet>();
 
         //Where the weapon is
-        public static IStarfieldModGetter SourceESM;
+        public static IStarfieldModGetter SourceESM = null!;
         //The base starfield ESM (for workbench, resources etc)
-        public static IStarfieldModGetter StarfieldESM;
+        public static IStarfieldModGetter StarfieldESM = null!;
         
         public static ModKey StarfieldModKey;
         public static ModKey BlackSiteModKey;
@@ -51,14 +51,14 @@ namespace FrankyCLI
         public static Dictionary<string, LeveledItem> LevelledBooks = new Dictionary<string, LeveledItem>();
 
         //The full list of things we create
-        public static string csvoutput;
+        public static string csvoutput = null!;
 
         //This function creates a single upgrade
         public static bool CreateUpgrade(StarfieldMod myMod, BaseUpgrade upgrade, StatSet stats, string LevelledListContains, int level, int step, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
         {
 
             //Find the weapon mod and recipe to copy
-            WeaponModification originalmod = null;             
+            WeaponModification? originalmod = null;
             try
             {
                 //Try and use the cache first as it's quicker.
@@ -87,7 +87,7 @@ namespace FrankyCLI
                     return false;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Failed to file: " + upgrade.BaseConstructableEditorId);
                 return false;
@@ -265,7 +265,7 @@ namespace FrankyCLI
             {
                 foreach (var lvl in myMod.LeveledItems)
                 {
-                    if (lvl.EditorID.Contains(LevelledListContains))
+                    if (lvl.EditorID!.Contains(LevelledListContains))
                     {
                         LevelledBooks.Add(LevelledListContains, lvl);
                         break;
@@ -288,7 +288,7 @@ namespace FrankyCLI
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 0
             });
-            LevelledBooks[LevelledListContains].Entries.Add(bookentry);     
+            LevelledBooks[LevelledListContains].Entries!.Add(bookentry);     
 
             // Only allow the stats that are visable on the item card to be looted.
             if (IsLootable)
@@ -315,16 +315,16 @@ namespace FrankyCLI
                             {
                                 bool add = true;
                                 // high level mods in group 01
-                                if (safelevel > 75 && myMod.ObjectModifications[modkey].EditorID.ToLower().Contains("01"))
+                                if (safelevel > 75 && myMod.ObjectModifications[modkey].EditorID!.ToLower().Contains("01"))
                                 {
                                     add = false;
                                 }
-                                if (safelevel > 120 && myMod.ObjectModifications[modkey].EditorID.ToLower().Contains("02"))
+                                if (safelevel > 120 && myMod.ObjectModifications[modkey].EditorID!.ToLower().Contains("02"))
                                 {
                                     add = false;
                                 }
                                 // Take 80% of the upgrades for modgroup 03
-                                if (random.Next(100) > 90 && myMod.ObjectModifications[modkey].EditorID.ToLower().Contains("03"))
+                                if (random.Next(100) > 90 && myMod.ObjectModifications[modkey].EditorID!.ToLower().Contains("03"))
                                 {
                                     add = false;
                                 }
@@ -479,7 +479,7 @@ namespace FrankyCLI
                 {
                     if (env.LoadOrder[i].FileName == request.WeaponESM)
                     {
-                        SourceESM = env.LoadOrder[i].Mod;
+                        SourceESM = env.LoadOrder[i].Mod!;
                     }
                 }
                 // Huh, couldn't find it. Shatter space does this
@@ -491,7 +491,7 @@ namespace FrankyCLI
 
                 //SourceESM = env.LoadOrder[0].Mod;
                 StarfieldModKey = new ModKey("Starfield", ModType.Master);
-                StarfieldESM = env.LoadOrder[0].Mod;
+                StarfieldESM = env.LoadOrder[0].Mod!;
                 BlackSiteModKey = new ModKey("AvontechBlacksiteBlueprints", ModType.Master);
 
                 //DEBUG SECTION
@@ -554,22 +554,22 @@ namespace FrankyCLI
                         string coid = "co_gun_" + objmod.EditorID;
                         if (!ModCOMAPPER.ContainsKey(coid))
                         {
-                            ModCOMAPPER.Add(coid, objmod.EditorID);
+                            ModCOMAPPER.Add(coid, objmod.EditorID!);
                         }
 
                         if (comap.ContainsKey(coid))
                         {
                             coid = comap[coid];
                         }
-                        if (objmod.EditorID.ToLower().Contains(weapon.ToLower()))
+                        if (objmod.EditorID!.ToLower().Contains(weapon.ToLower()))
                         {
                             if (!gen_upgradegenerator_utils.IsBanned(coid))
                             {
                                 bool foundblueprint = false;
-                                IConditionGetter researchCheck = null;
+                                IConditionGetter? researchCheck = null;
                                 foreach (var allco in SourceESM.ConstructibleObjects)
                                 {
-                                    if (allco.EditorID.ToLower() == coid.ToLower())
+                                    if (allco.EditorID!.ToLower() == coid.ToLower())
                                     {
                                         if (allco.Conditions.Count >0)
                                         {
@@ -808,9 +808,9 @@ namespace FrankyCLI
                             {
                                 if (newlist.EditorID == levelledlist)
                                 {
-                                    if (newlist.Entries.Count > 0)
+                                    if (newlist.Entries!.Count > 0)
                                     {
-                                        lvl.Entries.Add(new LeveledItemEntry()
+                                        lvl.Entries!.Add(new LeveledItemEntry()
                                         {
                                             Reference = newlist.ToLink<IItemGetter>(),
                                             Level = 1,
@@ -835,7 +835,7 @@ namespace FrankyCLI
                             {
                                 if(weaplvl.EditorID == "atbb_" + weap)
                                 {
-                                    lvl.Entries.Add(new LeveledItemEntry()
+                                    lvl.Entries!.Add(new LeveledItemEntry()
                                     {
                                         Reference = weaplvl.ToLink<IItemGetter>(),
                                         Level = 1,

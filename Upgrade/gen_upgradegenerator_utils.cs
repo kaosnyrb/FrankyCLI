@@ -19,34 +19,34 @@ namespace FrankyCLI
     public class UpdateSetRequest
     {
         public int DamageMode;          //0 Energy, 1 EM, 2 Phys (Used to filter percentage damage etc)
-        public List<string> StatLibFile;//Upgrades to use
-        public string ScalingStats;     //The folder containing the raw stats
-        public string ThemeFile;        //The upgrade theme, switched to roman numerals so this is a little redundnat atm
-        public List<string> Weapons;    //The weapon ids that we are processing
+        public List<string> StatLibFile = null!;//Upgrades to use
+        public string ScalingStats = null!;     //The folder containing the raw stats
+        public string ThemeFile = null!;        //The upgrade theme, switched to roman numerals so this is a little redundnat atm
+        public List<string> Weapons = null!;    //The weapon ids that we are processing
         public string WeaponESM = "Starfield.esm";//The ESM the weapons are in.
     }
 
     public class ThemeFile
     {
-        public Dictionary<string, PartTheme> PartThemes;
+        public Dictionary<string, PartTheme> PartThemes = null!;
     }
 
     public class PartTheme
     {
-        public Dictionary<int, string> LevelTheme;
+        public Dictionary<int, string> LevelTheme = null!;
     }
 
     public class BaseUpgrade
     {
-        public string WeaponName;
-        public string FixedWeaponName;
+        public string WeaponName = null!;
+        public string FixedWeaponName = null!;
 
-        public string BaseWeaponModID;
-        public string BaseConstructableEditorId;
-        public string AttachPoint;
-        public string OriginalAttachPoint;
+        public string BaseWeaponModID = null!;
+        public string BaseConstructableEditorId = null!;
+        public string AttachPoint = null!;
+        public string OriginalAttachPoint = null!;
 
-        public Condition ResearchReq;
+        public Condition ResearchReq = null!;
 
         public FormKey formKey;
         public FormKey coFormKey;
@@ -61,10 +61,10 @@ namespace FrankyCLI
 
     public class StatSet
     {
-        public string Name;
-        public string Description;
+        public string Name = null!;
+        public string Description = null!;
 
-        public string LevelStyle;
+        public string LevelStyle = null!;
         public int DamageMode = -1;//-1 all
 
         public string Theme = "Miltec";
@@ -72,27 +72,27 @@ namespace FrankyCLI
         public string RequiredPerk = "";
         public uint RequiredPerkLevel = 0;
 
-        public List<string> stats;
-        public List<string> AllowedAttachPoints;
+        public List<string> stats = null!;
+        public List<string> AllowedAttachPoints = null!;
     }
 
     public class BonusStats
     {
-        public string Type;
+        public string Type = null!;
         public bool Percentage;
         public Weapon.Property property;
         public ObjectModProperty.FloatFunctionType floatFunctionType;
         public UInt32 Keyword;
-        public string StatName;
-        public string ShortName;
-        public string EnchantModName;
+        public string StatName = null!;
+        public string ShortName = null!;
+        public string EnchantModName = null!;
 
         public decimal Default;
         public decimal Step;
 
         public bool Lootable = true;
 
-        public List<string> OtherStats;
+        public List<string> OtherStats = null!;
     }
 
     public static class gen_upgradegenerator_utils
@@ -336,7 +336,6 @@ namespace FrankyCLI
             });
             //3 Enchant set
             //More enhant focused where having 10 is a bit wierd as the spells don't scale.
-            int EnchantStep = 3;
             levelStyles.Add("Enchant_Common", new LevelStyle
             {
                 startLevel = 20,
@@ -580,7 +579,7 @@ namespace FrankyCLI
             return banned;
         }
 
-        public static Condition GetPartResearchReq(ModKey Starfield, int level, string part)
+        public static Condition? GetPartResearchReq(ModKey Starfield, int level, string part)
         {
 
             //Current plan, can't make research things, boo

@@ -53,11 +53,13 @@ namespace FrankyCLI
 
                 // Cell contents -------------------------------
                 //LvlCrimsonFleet_Assault [NPC_:00054327]
+#pragma warning disable CS0618
                 var spawner = immutableLoadOrderLinkCache.Resolve("dv_nt_spawnmarker");
+#pragma warning restore CS0618
                 //var spacespawner = immutableLoadOrderLinkCache.Resolve("du_ct_spacespawnmarker");
 
                 Console.WriteLine("Placing Pirates");
-                foreach (var cell in env.LoadOrder[0].Mod.EnumerateMajorRecordContexts<ICell, ICellGetter>(env.LinkCache))
+                foreach (var cell in env.LoadOrder[0].Mod!.EnumerateMajorRecordContexts<ICell, ICellGetter>(env.LinkCache))
                 {
                     //cell.TryGetParent<IWorldspaceGetter>(out var _) || 
                     if (cell.Record.EditorID != null)

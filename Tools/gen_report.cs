@@ -33,7 +33,7 @@ namespace FrankyCLI
                 }
 
                 // Load existing mod from disk
-                StarfieldMod mod = null;
+                StarfieldMod? mod = null;
                 for (int i = 0; i < env.LoadOrder.Count; i++)
                 {
                     if (env.LoadOrder[i].FileName == modname + ".esm")
@@ -298,7 +298,7 @@ namespace FrankyCLI
 
             // Check the prefab cell for connector markers
             var cellFormKey = packIn.Cell.FormKey;
-            Cell prefabCell = FindCellByFormKey(mod, cellFormKey);
+            Cell? prefabCell = FindCellByFormKey(mod, cellFormKey);
             if (prefabCell == null)
                 return "Prefab cell not found (PackIn references missing cell)";
 
@@ -382,7 +382,7 @@ namespace FrankyCLI
             return $"Not selected during generation (random selection or collision). [{connectorSummary}], {connectors.Count} connector(s), {slotCount} slot(s).{collisionNote}";
         }
 
-        private static Cell FindCellByFormKey(StarfieldMod mod, FormKey formKey)
+        private static Cell? FindCellByFormKey(StarfieldMod mod, FormKey formKey)
         {
             for (int i = 0; i < mod.Cells.Count; i++)
             {

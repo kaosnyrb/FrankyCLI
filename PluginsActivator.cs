@@ -63,7 +63,7 @@ public sealed class PluginsActivator : IDisposable
 
         foreach (var tmpl in templateFiles)
         {
-            if (alreadyStarred.Contains(tmpl))
+            if (alreadyStarred.Contains(tmpl!))
                 continue; // already active — leave it alone
 
             Console.WriteLine($"[PluginsActivator] Activating: {tmpl}");
@@ -93,7 +93,7 @@ public sealed class PluginsActivator : IDisposable
                 while (insertAt > 0 && string.IsNullOrWhiteSpace(lines[insertAt - 1]))
                     insertAt--;
                 lines.Insert(insertAt, '*' + tmpl);
-                _newlyAdded.Add(tmpl);
+                _newlyAdded.Add(tmpl!);
                 modified = true;
             }
         }
