@@ -42,7 +42,7 @@ namespace Retrograde.Chains
                 new FrontierTemplateManager(new AI_TemplateEngine()),
                 //new NoPOITemplateManager(new AI_TemplateEngine()),
                 new CombatTemplateManager(new AI_TemplateEngine()),
-                new RandomTemplateManager()
+                new AllTemplateManager(new RandomTemplateEngine())
             };
             var templateManager = templates[random.Next(templates.Count)];
 
