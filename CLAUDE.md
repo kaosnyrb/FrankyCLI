@@ -4,30 +4,30 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 
 ## Form Library
 
-`formlib/` — detailed reference docs. Read the relevant file before working with an unfamiliar record type.
+`docs/formlib/` — detailed reference docs. Read the relevant file before working with an unfamiliar record type.
 
 | File | Covers |
 |------|--------|
-| `formlib/packin.md` | PackIn record, tile nesting, SciIntHallSm kit, SciIntRmSm kit, LGT_ lights, creating from scratch |
-| `formlib/placed_object.md` | PlacedObject fields, full copy field list, PlacedPrimitive, VolumeData, world transforms, cloning from getters |
-| `formlib/surface_block.md` | SurfaceBlock (SFBK) record + BTD binary format, terrain height, texture painting, coordinate systems |
-| `formlib/worldspace.md` | Overlay coordinate system, cell grid, tile-to-cell assignment, cross-cell routing |
-| `formlib/pcm.md` | Planet Content Manager tree — BranchNode, ContentNode, root hooks, creating entries |
-| `formlib/mutagen_api.md` | ToLink/ToNullableLink patterns, cloning from getters, ilspycmd, namespace hazards |
-| `formlib/book_audio.md` | Audio data-slate (BOOK) chain — Scene, DialogTopic, DialogResponses, WEM audio |
-| `formlib/space_cell.md` | Space Cell (CELL SpaceCell) + LeveledSpaceCell — structure, key FormIDs, content type rules, cloning pattern |
-| `formlib/ship.md` | GenericBaseForm (GBFM) encounter ship — safe clone fields, ObjectTemplateInstanceData gotcha, ExternalDataSource faction sources, LeveledBaseForm faction FormIDs |
-| `formlib/quest_from_scratch.md` | Quest built entirely in C# — VMA version values, alias ID families (space/planet), script inventory, fragment script, proposed QuestFromScratch class |
+| `docs/formlib/packin.md` | PackIn record, tile nesting, SciIntHallSm kit, SciIntRmSm kit, LGT_ lights, creating from scratch |
+| `docs/formlib/placed_object.md` | PlacedObject fields, full copy field list, PlacedPrimitive, VolumeData, world transforms, cloning from getters |
+| `docs/formlib/surface_block.md` | SurfaceBlock (SFBK) record + BTD binary format, terrain height, texture painting, coordinate systems |
+| `docs/formlib/worldspace.md` | Overlay coordinate system, cell grid, tile-to-cell assignment, cross-cell routing |
+| `docs/formlib/pcm.md` | Planet Content Manager tree — BranchNode, ContentNode, root hooks, creating entries |
+| `docs/formlib/mutagen_api.md` | ToLink/ToNullableLink patterns, cloning from getters, ilspycmd, namespace hazards |
+| `docs/formlib/book_audio.md` | Audio data-slate (BOOK) chain — Scene, DialogTopic, DialogResponses, WEM audio |
+| `docs/formlib/space_cell.md` | Space Cell (CELL SpaceCell) + LeveledSpaceCell — structure, key FormIDs, content type rules, cloning pattern |
+| `docs/formlib/ship.md` | GenericBaseForm (GBFM) encounter ship — safe clone fields, ObjectTemplateInstanceData gotcha, ExternalDataSource faction sources, LeveledBaseForm faction FormIDs |
+| `docs/formlib/quest_from_scratch.md` | Quest built entirely in C# — VMA version values, alias ID families (space/planet), script inventory, fragment script, proposed QuestFromScratch class |
 
 ## Design Library
 
-`designlib/` — Bethesda design patterns reverse-engineered from vanilla content.
+`docs/designlib/` — Bethesda design patterns reverse-engineered from vanilla content.
 
 | File | Covers |
 |------|--------|
-| `designlib/principles.md` | Philosophy: extract intent not measurements |
-| `designlib/sci_hallway.md` | SciIntHallSm corridor layout, lighting, decoration |
-| `designlib/sci_room.md` | SciIntRmSm room variants, connectors, archetypes |
+| `docs/designlib/principles.md` | Philosophy: extract intent not measurements |
+| `docs/designlib/sci_hallway.md` | SciIntHallSm corridor layout, lighting, decoration |
+| `docs/designlib/sci_room.md` | SciIntRmSm room variants, connectors, archetypes |
 
 ## Critical Rules
 
