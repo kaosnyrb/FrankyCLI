@@ -1,0 +1,19 @@
+id: discovery_after_action
+template: "Dataslate in levelled item"
+
+book_title: "Ranger After-Action Report: FR-4409"
+book_contents: >
+  [FREESTAR RANGERS — INTERNAL — RESTRICTED]
+  Incident Ref: FR-4409 / Classification: Rogue Element
+  Status: Active warrant. Subject: Ranger First Class Jorah Keane.
+  Charges: Two counts unlawful killing of peace officers in execution of duty.
+  Note: Subject armed and experienced. Extreme caution advised.
+  Note: Prior service record sealed pending command review.
+  Note: Do not reference service record details in the field.
+
+npcs: {}
+
+addons:
+  - "Jorah Keane — Freestar Ranger deserter, wanted for killing two officers"
+  - "The report is a single paragraph. The service record was sealed the same week."
+  - "Four-year-old warrant. Still open. Someone wants him found."

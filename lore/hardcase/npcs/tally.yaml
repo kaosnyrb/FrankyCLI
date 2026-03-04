@@ -1,0 +1,23 @@
+id: tally
+name: Tally
+faction: freestar_deserters
+gender: male
+voice_type: MaleOutlaw
+role: informant
+notes: >
+  Quartermaster-sergeant at the Freestar garrison that issued the raid order.
+  Was not present at the homestead but processed all the paperwork — including
+  the original version of the after-action report before it was amended, and
+  Keane's own incident report before it was buried.
+
+  Retired when the discrepancy between what happened and what the record said
+  became too loud to ignore. Moved to a frontier planet with no Ranger post
+  within a day's travel. Told himself that made silence easier to justify.
+
+  Has been watching the warrant on Jorah Keane stay active for four years and
+  done nothing. Not because he doesn't know the truth — because he couldn't
+  figure out who was worth telling it to. Will talk if someone asks directly.
+  Not brave. Just old enough that staying quiet has started to feel like a
+  decision he keeps remaking on purpose.
+
+ambient_dialogue: tally_scene

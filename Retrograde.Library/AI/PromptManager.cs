@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Starfield;
 using Retrograde;
+using Retrograde.Lore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,12 @@ namespace Retrograde.AI.Utils
     public class PromptManager
     {
         public static string LoreContext;
+
+        /// <summary>
+        /// When set, GetQuestName and GetLogMessage return lore values instead of calling AI.
+        /// Set via MissionTemplate.Lore before calling IOutlawQuest.Setup(); cleared after.
+        /// </summary>
+        public static QuestLore? ActiveLore = null;
 
         public static string LoadRandomLoreFile()
         {
@@ -99,6 +106,9 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         public static string GetQuestName(List<string> Addons)
         {
+            if (ActiveLore?.Name is { Length: > 0 } loreName)
+                return loreName;
+
             var questnameprompt =
                 "Generate a quest name grounded in the lore and themes provided.\r\n" +
                 "Constraints:\r\n" +
@@ -249,6 +259,8 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         public static string GetLogMessage(List<string> Addons)
         {
+            if (ActiveLore?.LogEntry is { Length: > 0 } loreEntry)
+                return loreEntry;
 
             var logprompt =
                 "Write a 40-word objective log entry for a bounty hunter.\r\n" +

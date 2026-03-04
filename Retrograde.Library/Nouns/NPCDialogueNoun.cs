@@ -4,8 +4,6 @@ using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Models;
 using Retrograde.Utils;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Retrograde.Nouns;
 
@@ -69,8 +67,8 @@ public class NPCDialogueNoun
         quest.Aliases.Add(alias);
 
         // ── NPC greeting topic (Greeting Scene Phase 0) ───────────────────────
-        var greetTopic = BuildSceneTopic(targetMod, quest);
-        var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
+        var greetTopic = DialogueHelpers.BuildSceneTopic(targetMod, quest);
+        var greetInfo  = DialogueHelpers.BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
         greetTopic.Responses.Add(greetInfo);
         greetTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
             { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -83,8 +81,8 @@ public class NPCDialogueNoun
         greetScene.Quest.SetTo(quest.FormKey);
         greetScene.Flags = (Scene.Flag)0x00001834;
         greetScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
-        greetScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
-        greetScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
+        greetScene.Conditions.Add(DialogueHelpers.BuildGetIsIDCondition(npcFormKey));
+        greetScene.Conditions.Add(DialogueHelpers.BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
         greetScene.Actors.Add(new SceneActor { ID = 0,                   BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
         greetScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
         greetScene.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
@@ -110,15 +108,15 @@ public class NPCDialogueNoun
         {
             var ex = script.Exchanges[i];
 
-            var playerTopic = BuildSceneTopic(targetMod, quest);
-            var playerInfo  = BuildInfo(targetMod, ex.PlayerPrompt);
+            var playerTopic = DialogueHelpers.BuildSceneTopic(targetMod, quest);
+            var playerInfo  = DialogueHelpers.BuildInfo(targetMod, ex.PlayerPrompt);
             playerTopic.Responses.Add(playerInfo);
             playerTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                 { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
             quest.DialogTopics.Add(playerTopic);
 
-            var npcTopic = BuildSceneTopic(targetMod, quest);
-            var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
+            var npcTopic = DialogueHelpers.BuildSceneTopic(targetMod, quest);
+            var npcInfo  = DialogueHelpers.BuildInfo(targetMod, ex.NpcReply, npcFormKey);
             npcTopic.Responses.Add(npcInfo);
             npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                 { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -132,8 +130,8 @@ public class NPCDialogueNoun
             topicScene.Quest.SetTo(quest.FormKey);
             topicScene.Flags = (Scene.Flag)topicFlags;
             topicScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
-            topicScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
-            topicScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
+            topicScene.Conditions.Add(DialogueHelpers.BuildGetIsIDCondition(npcFormKey));
+            topicScene.Conditions.Add(DialogueHelpers.BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
             topicScene.Actors.Add(new SceneActor { ID = 0,                   BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
             topicScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
             topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
@@ -147,74 +145,5 @@ public class NPCDialogueNoun
         }
 
         QuestRecord = quest;
-    }
-
-    // ── Private helpers ────────────────────────────────────────────────────────
-
-    private static DialogTopic BuildSceneTopic(StarfieldMod targetMod, Quest quest)
-    {
-        var topic = new DialogTopic(targetMod)
-        {
-            Category    = DialogTopic.CategoryEnum.Scene,
-            Subtype     = DialogTopic.SubtypeEnum.CustomScene,
-            SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
-        };
-        topic.Quest.SetTo(quest.FormKey);
-        return topic;
-    }
-
-    // speakerFormKey: pass npcFormKey for NPC lines, omit for player lines (silent).
-    private static DialogResponses BuildInfo(StarfieldMod targetMod, string text, FormKey speakerFormKey = default)
-    {
-        var info = new DialogResponses(targetMod)
-        {
-            SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
-        };
-        if (speakerFormKey != default)
-            info.Speaker.SetTo(speakerFormKey);
-        var textHash = SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4];
-        var response = new DialogResponse
-        {
-            ResponseText = text,
-            // Player lines are silent in Starfield — WEMFile=0. NPC lines use info.FormKey.ID.
-            WEMFile      = speakerFormKey != default ? info.FormKey.ID : 0u,
-            TextHash     = textHash,
-            EmotionOut   = 7.466667f,
-        };
-        response.Emotion.SetTo(FormKey.None);  // FFFFFFFF — "None Reference"
-        info.Responses.Add(response);
-        return info;
-    }
-
-    /// <summary>
-    /// GetIsID(npcFormKey) EqualTo 1 — identifies the NPC that should activate this scene.
-    /// Confirmed present on every interactive atbb_mq01 scene.
-    /// </summary>
-    private static ConditionFloat BuildGetIsIDCondition(FormKey npcFormKey)
-    {
-        var condData = new GetIsIDConditionData();
-        condData.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(condData, npcFormKey);
-        return new ConditionFloat
-        {
-            ComparisonValue = 1,
-            CompareOperator = CompareOperator.EqualTo,
-            Data            = condData,
-        };
-    }
-
-    /// <summary>
-    /// GetStage(quest) [op] comparisonValue — gates the scene to a specific quest stage.
-    /// SecondParameter is always 0 (unused) in atbb_mq01.
-    /// </summary>
-    private static ConditionFloat BuildGetStageCondition(Quest quest, int comparisonValue, CompareOperator op)
-    {
-        var condData = new GetStageConditionData();
-        condData.FirstParameter = new FormLinkOrIndex<IQuestGetter>(condData, quest.FormKey);
-        return new ConditionFloat
-        {
-            ComparisonValue = comparisonValue,
-            CompareOperator = op,
-            Data            = condData,
-        };
     }
 }

@@ -1,0 +1,19 @@
+id: investigation_old_tracker
+template: "Planetside Smallbase Informant - Freestar Ranger Deserter Tracker"
+
+name: "The Other Account"
+log_entry: >
+  The warrant on Keane is four years old and the service record that would
+  explain it was sealed the same morning the warrant was filed. That is not
+  standard procedure. A retired Freestar garrison quartermaster is living
+  off-grid on a frontier planet. He processed the original paperwork.
+  He knows what it said before the amendment.
+
+npcs:
+  boss: tally
+
+addons:
+  - "Keane's service record was classified the same morning the warrant was issued"
+  - "The homestead raid order — what the verbal command actually said versus the written record"
+  - "The retired quartermaster saw both versions of the paperwork and said nothing for four years"
+  - "Keane filed his own incident report first. It named a ranking officer. It was never actioned."

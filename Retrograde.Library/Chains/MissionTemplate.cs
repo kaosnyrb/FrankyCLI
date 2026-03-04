@@ -1,4 +1,6 @@
+using Retrograde.AI.Utils;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Lore;
 using Mutagen.Bethesda.Plugins;
 using System;
 using System.Collections.Generic;
@@ -25,5 +27,17 @@ namespace Retrograde.Chains
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
         public List<string> MissionTags;
         public List<string> Addons;
+
+        /// <summary>
+        /// When set, PromptManager bypasses AI calls for quest name and log entry,
+        /// returning the lore-authored values instead.
+        /// Set before calling IOutlawQuest.Setup(); clear PromptManager.ActiveLore after Setup() returns.
+        /// </summary>
+        public QuestLore? Lore
+        {
+            get => _lore;
+            set { _lore = value; PromptManager.ActiveLore = value; }
+        }
+        private QuestLore? _lore;
     }
 }

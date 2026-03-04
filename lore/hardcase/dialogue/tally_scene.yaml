@@ -1,0 +1,264 @@
+id: tally_scene
+npc: tally
+start: greeting
+
+nodes:
+
+  # ── Entry ──────────────────────────────────────────────────────────────────
+
+  greeting:
+    type: npc_line
+    text: "Not many people come out this far on purpose. Fewer that look like they're working. What do you want?"
+    next: opening_choices
+
+  opening_choices:
+    type: player_choices
+    choices:
+      - text: "I'm looking for a Freestar deserter. Jorah Keane."
+        next: keane_direct
+      - text: "There's a four-year-old warrant still active. I'm trying to understand why."
+        next: warrant_reply
+      - text: "You were a quartermaster at the garrison in thirty-four."
+        next: garrison_reply
+
+  # ── Opening branches ───────────────────────────────────────────────────────
+
+  keane_direct:
+    type: npc_line
+    text: "Keane. I figured someone would come asking eventually."
+    next: keane_direct_2
+
+  keane_direct_2:
+    type: npc_line
+    text: "You working the warrant, or working something else?"
+    next: working_what_prompt
+
+  warrant_reply:
+    type: npc_line
+    text: "Four years. I watched it go active from about thirty meters away."
+    set_conversation_stage: 5
+    next: warrant_reply_2
+
+  warrant_reply_2:
+    type: npc_line
+    text: "Watched the service record get sealed the same morning. Thought about saying something. Kept thinking that."
+    next: tally_opens_up_prompt
+
+  garrison_reply:
+    type: npc_line
+    text: "I was the quartermaster. Didn't do any of the shooting, if that's what you're building up to."
+    next: garrison_reply_2
+
+  garrison_reply_2:
+    type: npc_line
+    text: "Just processed the paperwork. All of it. Including the parts that got changed."
+    set_conversation_stage: 5
+    next: tally_opens_up_prompt
+
+  working_what_prompt:
+    type: player_choices
+    choices:
+      - text: "The warrant. I'm here to collect it."
+        next: warrant_hunter
+      - text: "The service record was sealed the same week. That's not standard."
+        next: sealed_record
+      - text: "I want to know what actually happened at that homestead."
+        next: what_happened
+
+  warrant_hunter:
+    type: npc_line
+    text: "Then you want the location and you'll move on. I can give you that."
+    next: warrant_hunter_2
+
+  warrant_hunter_2:
+    type: npc_line
+    text: "I'd ask you to hear me out first. Won't take long. Then you can do whatever you were going to do."
+    set_conversation_stage: 5
+    next: tally_opens_up_prompt
+
+  sealed_record:
+    type: npc_line
+    text: "No, it's not. A record gets sealed when someone needs the context to disappear."
+    set_conversation_stage: 5
+    next: tally_opens_up_prompt
+
+  what_happened:
+    type: npc_line
+    text: "Most people don't ask that. Usually they just want the location."
+    set_conversation_stage: 5
+    next: what_happened_2
+
+  what_happened_2:
+    type: npc_line
+    text: "Sit down. Or don't. But I'm going to tell you either way."
+    next: tally_opens_up_prompt
+
+  # ── Tally opens up ─────────────────────────────────────────────────────────
+
+  tally_opens_up_prompt:
+    type: player_choices
+    choices:
+      - text: "Tell me about the raid order."
+        next: the_order
+        requires_stage: 5
+      - text: "Why was his service record sealed?"
+        next: why_sealed
+        requires_stage: 5
+      - text: "What did Keane actually do out there?"
+        next: what_keane_did
+
+  the_order:
+    type: npc_line
+    text: "The homestead was flagged as a possible Spacer shelter. Bad intelligence — a land dispute that got dressed up as a security concern."
+    set_conversation_stage: 10
+    next: the_order_2
+
+  the_order_2:
+    type: npc_line
+    text: "The written order said 'secure and search.' Standard language. The verbal order given on the ground said 'clear.' Those are different words."
+    next: the_order_3
+
+  the_order_3:
+    type: npc_line
+    text: "'Clear' means you don't verify first. You don't check faces against a list. You clear the structure and you leave."
+    next: tally_reveals_prompt
+
+  why_sealed:
+    type: npc_line
+    text: "Because Keane filed his incident report before the garrison filed theirs. He got his version in first."
+    set_conversation_stage: 10
+    next: why_sealed_2
+
+  why_sealed_2:
+    type: npc_line
+    text: "His report named the officer who gave the verbal clear order. Named him by rank and posting. Specific chain of command."
+    next: why_sealed_3
+
+  why_sealed_3:
+    type: npc_line
+    text: "That officer is a colonel now. The record was sealed three hours after Keane's report landed. Warrant came the next morning."
+    next: tally_reveals_prompt
+
+  what_keane_did:
+    type: npc_line
+    text: "He stopped it. Two Rangers moved to execute the clear order. He put them down. Then he walked back and filed paperwork."
+    set_conversation_stage: 10
+    next: what_keane_did_2
+
+  what_keane_did_2:
+    type: npc_line
+    text: "He didn't run. He submitted an incident report, requested a formal inquiry. Waited three days."
+    next: what_keane_did_3
+
+  what_keane_did_3:
+    type: npc_line
+    text: "On the fourth day the warrant came through and he was gone. I can't say I blame him."
+    next: tally_reveals_prompt
+
+  # ── What Tally knows ───────────────────────────────────────────────────────
+
+  tally_reveals_prompt:
+    type: player_choices
+    choices:
+      - text: "You saw all this and said nothing."
+        next: tally_guilt
+        requires_stage: 5
+      - text: "There were families at that homestead."
+        next: the_families
+        requires_stage: 10
+      - text: "Where is Keane now?"
+        next: where_keane
+        requires_stage: 10
+
+  tally_guilt:
+    type: npc_line
+    text: "I was a quartermaster. I processed paperwork. I told myself that was the limit of my responsibility."
+    next: tally_guilt_2
+
+  tally_guilt_2:
+    type: npc_line
+    text: "I've had four years to decide whether I believe that. Still working on it."
+    set_conversation_stage: 15
+    next: tally_reveals_prompt
+
+  the_families:
+    type: npc_line
+    text: "Eleven people. Three of them children. None of them Spacers."
+    next: the_families_2
+
+  the_families_2:
+    type: npc_line
+    text: "They were still there when Keane left. Alive. The warrant doesn't mention that part."
+    set_conversation_stage: 15
+    next: tally_reveals_prompt
+
+  where_keane:
+    type: npc_line
+    text: "Frontier system. He took a crew with him — Rangers who knew what happened and didn't want any part of what it had become."
+    next: where_keane_2
+
+  where_keane_2:
+    type: npc_line
+    text: "They've been hitting Freestar supply convoys. Military hardware. Never civilians. I hear things, even out here."
+    next: where_keane_3
+
+  where_keane_3:
+    type: npc_line
+    text: "Old military installation, planet with no official name. I can give you the system. What you do with it is your decision."
+    set_conversation_stage: 20
+    next: final_prompt
+
+  # ── Final ──────────────────────────────────────────────────────────────────
+
+  final_prompt:
+    type: player_choices
+    choices:
+      - text: "Why are you telling me this now?"
+        next: why_now
+        requires_stage: 15
+      - text: "The warrant isn't going away."
+        next: warrant_stays
+        requires_stage: 20
+      - text: "I'll find him."
+        next: ill_find_him
+        requires_stage: 20
+      - text: "I've heard enough."
+        next: heard_enough
+
+  why_now:
+    type: npc_line
+    text: "Because you asked. Because it's been four years and nobody asked. Because I'm tired of silence feeling like something I'm choosing not to end."
+    next: why_now_2
+
+  why_now_2:
+    type: npc_line
+    text: "Won't fix anything. But it's out now."
+    next: final_prompt
+
+  warrant_stays:
+    type: npc_line
+    text: "I know. The colonel is still a colonel. Nobody's reopening that inquiry."
+    next: warrant_stays_2
+
+  warrant_stays_2:
+    type: npc_line
+    text: "Keane knows it too. I think that's why he hasn't moved. Not hiding — just decided where he stands."
+    next: final_prompt
+
+  ill_find_him:
+    type: npc_line
+    text: "He won't make it easy. His crew won't either. They know what happened and they stayed anyway."
+    next: ill_find_him_2
+
+  ill_find_him_2:
+    type: npc_line
+    text: "His copy of the original incident report is in that installation somewhere. Worth reading before you make up your mind."
+    next: final_prompt
+
+  heard_enough:
+    type: npc_line
+    text: "Most people say that around now."
+    next: end_conversation
+
+  end_conversation:
+    type: end

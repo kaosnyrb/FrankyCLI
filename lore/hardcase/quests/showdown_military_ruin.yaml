@@ -1,0 +1,18 @@
+id: showdown_military_ruin
+template: "Planet side Bounty - Military Dungeon"
+
+name: "Hardcase"
+log_entry: >
+  Jorah Keane has held the same position in an abandoned military installation
+  for four years. His crew raids Freestar supply convoys. Never settlements,
+  never civilians. The warrant calls him a murderer. The quartermaster calls
+  him something else. Getting to Keane means getting through both.
+
+npcs:
+  boss: jorah_keane
+
+addons:
+  - "Keane has not moved in four years — he is not hiding, he chose a position and stopped"
+  - "His crew knows what happened at the homestead and stayed with him anyway"
+  - "A copy of Keane's original incident report is somewhere in that installation"
+  - "He will not surrender to a Freestar badge. He might talk to someone who already knows the story."

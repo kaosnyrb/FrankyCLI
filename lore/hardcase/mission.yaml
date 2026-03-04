@@ -1,0 +1,12 @@
+id: hardcase
+name: "Hardcase"
+faction: freestar_deserters
+
+npcs:
+  - npcs/jorah_keane.yaml
+  - npcs/tally.yaml
+
+chain:
+  - quests/discovery_after_action.yaml
+  - quests/investigation_old_tracker.yaml
+  - quests/showdown_military_ruin.yaml

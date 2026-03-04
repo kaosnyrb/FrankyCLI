@@ -77,6 +77,13 @@ switch (mode)
             quiet:         Get(args, 5, ""),
             exportAi:      Get(args, 6, "")));
 
+    case "gen_lore":
+        // gen_lore <missionFolder> [modname]
+        // Example: gen_lore lore/bad_batch Lore_Test
+        return gen_lore_main.Run(
+            Get(args, 1, "lore/bad_batch"),
+            Get(args, 2, "Lore_Generated"));
+
     case "gen_elevenlabs_test":
         // gen_elevenlabs_test [outputPath] [voiceId] [text]
         return gen_elevenlabs_test.Generate(args);
