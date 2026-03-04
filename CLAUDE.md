@@ -17,6 +17,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `formlib/book_audio.md` | Audio data-slate (BOOK) chain — Scene, DialogTopic, DialogResponses, WEM audio |
 | `formlib/space_cell.md` | Space Cell (CELL SpaceCell) + LeveledSpaceCell — structure, key FormIDs, content type rules, cloning pattern |
 | `formlib/ship.md` | GenericBaseForm (GBFM) encounter ship — safe clone fields, ObjectTemplateInstanceData gotcha, ExternalDataSource faction sources, LeveledBaseForm faction FormIDs |
+| `formlib/quest_from_scratch.md` | Quest built entirely in C# — VMA version values, alias ID families (space/planet), script inventory, fragment script, proposed QuestFromScratch class |
 
 ## Design Library
 

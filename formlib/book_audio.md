@@ -84,7 +84,7 @@ var textHash = System.Security.Cryptography.SHA256.HashData(
 info.Responses.Add(new DialogResponse
 {
     ResponseText = text,
-    WEMFile  = placeholderWemId,   // random uint until Wwise conversion; see WAV path section
+    WEMFile  = topic.FormKey.ID,   // Starfield resolves {topicId:X8}.wem at runtime (confirmed in-game)
     TextHash = textHash,
 });
 topic.Responses.Add(info);
@@ -208,7 +208,8 @@ Data\Sound\Voice\{plugin.esm}\{VoiceTypeEditorId}\{WEMFile:X8}.wav
 ## Multi-segment audio (text > 250 chars)
 
 Split text across multiple segments; each segment gets its own Phase + RadioSceneAction + DialogTopic + DialogResponses.
-`WEMFile = topic.FormKey.ID` still holds — each segment's topic has a unique FormKey.
+`WEMFile = topic.FormKey.ID` for each segment — each DialogTopic has a unique FormKey, so each segment
+gets a unique WEM filename (`{topicId:X8}.wem`). Confirmed working in-game.
 EditorID convention: `speech_topic_{suffix}_{i}`, `speech_info_{suffix}_{i}`, etc.
 This matches the vanilla KT pattern (7 phases / 7 actions, one per audio segment).
 
@@ -234,6 +235,10 @@ After conversion, WEMs are copied from `StarfieldAudio\PC\` to `Starfield\Data\S
 
 ## Open Questions
 
-- How does the game resolve `WEMFile` (Wwise media ID) to a `.wem` on disk — via SoundBank, or
-  can a loose WEM be referenced if named by the `{WEMFile:X8}.wem` convention? (not yet tested in-game)
 - `TextHash` exact algorithm unconfirmed — SHA256[..4] is a placeholder. Real value may be CRC32 or similar.
+
+## Confirmed
+
+- **WEMFile resolution**: `WEMFile = topic.FormKey.ID` and Starfield resolves it as a loose `.wem`
+  file named `{topicId:X8}.wem` under `Data\Sound\Voice\{plugin}\{voiceType}\`. Confirmed working
+  in-game with multi-phase audio logs. Do NOT use a random placeholder.
