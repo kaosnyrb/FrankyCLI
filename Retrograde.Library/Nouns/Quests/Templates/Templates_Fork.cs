@@ -35,7 +35,6 @@ namespace Retrograde.Quests
                 },
                 parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
-/*
             InvestigationTemplates.Add(new MissionTemplate()
             {
                 Name = "Branching Node - city/space",
@@ -71,7 +70,6 @@ namespace Retrograde.Quests
 
                 parameters = new Dictionary<string, object>() { {"NeedSpacesuit", true} }
             });
-*/
         }
     }
 }
