@@ -146,10 +146,10 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = false;
+                AITools.AIMODE = true;
                 SpeechTools.generateWavs = false;
                 
-                bool setmissions = true;
+                bool setmissions = false;
                 if (setmissions)
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
