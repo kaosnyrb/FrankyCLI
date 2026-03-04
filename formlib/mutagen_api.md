@@ -174,6 +174,35 @@ CK record types follow the pattern `BGSFoo_Component` → Mutagen class `FooComp
 ilspycmd "...Mutagen.Bethesda.Starfield.dll" -l type 2>&1 | grep -i "spaceshipai"
 ```
 
+## Quest VirtualMachineAdapter (QuestAdapter) — confirmed values
+
+Verified across all `duout_info_*` template quests via `gen_inspect quest_vmad`:
+
+| Field | Value |
+|---|---|
+| `VMA.Version` | `6` |
+| `VMA.ObjectFormat` | `2` |
+| `VMA.ExtraBindDataVersion` | `3` |
+| `QuestFragmentAlias.Version` | `6` |
+| `QuestFragmentAlias.ObjectFormat` | `2` |
+| Script entry `Flags` | `0x0000` |
+| Property `Flags` (Auto Const Mandatory) | `0x0001` |
+
+**VMA.Aliases** = only aliases with their OWN scripts. Template quests have 1 entry
+(`SpaceMapMarker` → `DefaultAliasMapMarkerScript`). Most alias slots have no VMA entry.
+
+**ScriptObjectProperty for alias properties**: `Object` = **quest's own FormKey** (not the alias).
+Papyrus resolves alias by name at runtime.
+
+**Quest.Alias ID scheme** — two families, both non-zero-indexed:
+- *Space quests*: `ID=10` TargetPlanetLocation, `ID=11` SpaceCellRefs(Col), `ID=12` SpawnMarker01, `ID=13` PatrolMarker01, `ID=14` PrimaryRef, `ID=16` SpaceMapMarker(VMA), `ID=18` GuardShip; station/derelict add `ID=7` EnemyShipInteriorLocation, `ID=8/20` collection aliases.
+- *Planet/dungeon/city quests*: `ID=0` DungeonLocation, `ID=1` BountyTargetMarker, `ID=2` BountyTarget, `ID=3` targetPlanet, `ID=5` dungeonMapMarker(VMA). ID=4 is absent (CK gap).
+See `formlib/quest_from_scratch.md` for full tables.
+
+**Fragment Script**: vestigial vanilla reference (`QF_SQ_TreasureMap_Surface_Lo_00045F48`).
+Safe to copy as-is from template VMA. Actual quest logic is in the attached Papyrus script,
+not in stage fragments. See `formlib/quest_from_scratch.md` for full spec.
+
 ## Scanning all FormLinks in a record (dependency detection)
 
 `IFormLinkContainerGetter` + `EnumerateFormLinks()` — Mutagen 0.53.1 API. Requires `using Mutagen.Bethesda.Plugins.Records;`.

@@ -25,6 +25,7 @@ namespace FrankyCLI
                 Console.WriteLine();
                 Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Keyword");
                 Console.WriteLine("              PcmBranchNode, PcmContentNode, Book, Scene");
+                Console.WriteLine("              Quest, Quest_VMAD (full VirtualMachineAdapter + alias dump)");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
                 Console.WriteLine("EditorID search: partial match (contains)");
@@ -251,6 +252,12 @@ namespace FrankyCLI
                     foreach (var rec in mod.Quests)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpQuest(rec); found++; }
+                    break;
+                case "quest_vmad":
+                case "questvmad":
+                    foreach (var rec in mod.Quests)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpQuestVMAD(rec); found++; }
                     break;
                 case "dialogbranch":
                     foreach (var quest in mod.Quests)
@@ -710,6 +717,208 @@ namespace FrankyCLI
             foreach (var t in quest.DialogTopics)
                 Console.WriteLine($"    {t.FormKey} {t.EditorID} Branch={t.Branch.FormKey} Category={t.Category} Subtype={t.Subtype}");
             Console.WriteLine();
+        }
+
+        private static void DumpQuestVMAD(IQuestGetter quest)
+        {
+            Console.WriteLine($"--- Quest VMAD ---");
+            Console.WriteLine($"  FormKey:  {quest.FormKey}");
+            Console.WriteLine($"  EditorID: {quest.EditorID}");
+            Console.WriteLine($"  Name:     {quest.Name}");
+            Console.WriteLine($"  Flags:    0x{(uint)(quest.Data?.Flags ?? 0):X8}");
+            Console.WriteLine();
+
+            var vma = quest.VirtualMachineAdapter;
+            if (vma == null)
+            {
+                Console.WriteLine("  VirtualMachineAdapter: NULL");
+                Console.WriteLine();
+                return;
+            }
+
+            Console.WriteLine($"  VirtualMachineAdapter:");
+            Console.WriteLine($"    Version:              {vma.Version}");
+            Console.WriteLine($"    ObjectFormat:         {vma.ObjectFormat}");
+            Console.WriteLine($"    ExtraBindDataVersion: {vma.ExtraBindDataVersion}");
+            Console.WriteLine();
+
+            // Fragment script (auto-generated __QF_ script)
+            if (vma.Script != null)
+            {
+                Console.WriteLine($"    Fragment Script (vma.Script):");
+                Console.WriteLine($"      Name:  {vma.Script.Name}");
+                Console.WriteLine($"      Flags: 0x{(ushort)vma.Script.Flags:X4}");
+                if (vma.Script.Properties.Count > 0)
+                {
+                    Console.WriteLine($"      Properties [{vma.Script.Properties.Count}]:");
+                    foreach (var prop in vma.Script.Properties)
+                        DumpScriptProperty(prop, "        ");
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.WriteLine($"    Fragment Script (vma.Script): null");
+                Console.WriteLine();
+            }
+
+            // Stage/objective fragments
+            Console.WriteLine($"    Fragments [{vma.Fragments?.Count ?? 0}]:");
+            if (vma.Fragments != null)
+                foreach (var frag in vma.Fragments)
+                    Console.WriteLine($"      Stage={frag.Stage} StageIndex={frag.StageIndex} Unknown={frag.Unknown} ScriptName={frag.ScriptName} FragmentName={frag.FragmentName}");
+            Console.WriteLine();
+
+            // Quest-level scripts
+            Console.WriteLine($"    Scripts [{vma.Scripts.Count}]:");
+            for (int si = 0; si < vma.Scripts.Count; si++)
+            {
+                var script = vma.Scripts[si];
+                Console.WriteLine($"      [{si}] Name={script.Name}  Flags=0x{(ushort)script.Flags:X4}");
+                Console.WriteLine($"           Properties [{script.Properties.Count}]:");
+                foreach (var prop in script.Properties)
+                    DumpScriptProperty(prop, "             ");
+            }
+            Console.WriteLine();
+
+            // VMA-side alias bindings (QuestFragmentAlias)
+            Console.WriteLine($"    VMA.Aliases [{vma.Aliases?.Count ?? 0}]:");
+            if (vma.Aliases != null)
+            {
+                for (int ai = 0; ai < vma.Aliases.Count; ai++)
+                {
+                    var fa = vma.Aliases[ai];
+                    Console.WriteLine($"      [{ai}] Version={fa.Version}  ObjectFormat={fa.ObjectFormat}");
+                    Console.WriteLine($"           Property.Name={fa.Property.Name}  Property.Flags=0x{(ushort)fa.Property.Flags:X4}  Property.Object={fa.Property.Object.FormKey}");
+                    Console.WriteLine($"           Scripts [{fa.Scripts.Count}]:");
+                    foreach (var s in fa.Scripts)
+                    {
+                        Console.WriteLine($"             Script: Name={s.Name}  Flags=0x{(ushort)s.Flags:X4}");
+                        foreach (var prop in s.Properties)
+                            DumpScriptProperty(prop, "               ");
+                    }
+                }
+            }
+            Console.WriteLine();
+
+            // Quest.Aliases (gameplay side)
+            Console.WriteLine($"  Quest.Aliases [{quest.Aliases?.Count ?? 0}]:");
+            if (quest.Aliases != null)
+            {
+                foreach (var alias in quest.Aliases)
+                {
+                    if (alias is IQuestReferenceAliasGetter refAlias)
+                    {
+                        Console.WriteLine($"    [RefAlias] ID={refAlias.ID}  Name={refAlias.Name}  Flags=0x{(uint)refAlias.Flags:X8}");
+                        Console.WriteLine($"      UniqueActor:    {(refAlias.UniqueActor.IsNull    ? "null" : refAlias.UniqueActor.FormKey.ToString())}");
+                        Console.WriteLine($"      ForcedRef:      {(refAlias.ForcedReference.IsNull ? "null" : refAlias.ForcedReference.FormKey.ToString())}");
+                        Console.WriteLine($"      UniqueBase:     {(refAlias.UniqueBaseForm.IsNull   ? "null" : refAlias.UniqueBaseForm.FormKey.ToString())}");
+                        if (refAlias.CreateReferenceToObject != null)
+                            Console.WriteLine($"      CreateRefTo:    {refAlias.CreateReferenceToObject.Object.FormKey}");
+                        if (refAlias.Conditions != null && refAlias.Conditions.Count > 0)
+                        {
+                            Console.WriteLine($"      Conditions [{refAlias.Conditions.Count}]:");
+                            foreach (var cond in refAlias.Conditions)
+                                DumpConditionBrief(cond, "        ");
+                        }
+                    }
+                    else if (alias is IQuestLocationAliasGetter locAlias)
+                    {
+                        Console.WriteLine($"    [LocAlias]  ID={locAlias.ID}  Name={locAlias.Name}  Flags=0x{(uint)locAlias.Flags:X8}");
+                        Console.WriteLine($"      SpecificLocation: {(locAlias.SpecificLocation.IsNull ? "null" : locAlias.SpecificLocation.FormKey.ToString())}");
+                        if (locAlias.ALPS != null)
+                            Console.WriteLine($"      ALPS.PcmTypeKeyword: {(locAlias.ALPS.PcmTypeKeyword.IsNull ? "null" : locAlias.ALPS.PcmTypeKeyword.FormKey.ToString())}");
+                        if (locAlias.Conditions != null && locAlias.Conditions.Count > 0)
+                        {
+                            Console.WriteLine($"      Conditions [{locAlias.Conditions.Count}]:");
+                            foreach (var cond in locAlias.Conditions)
+                                DumpConditionBrief(cond, "        ");
+                        }
+                    }
+                    else if (alias is IQuestCollectionAliasGetter colAlias)
+                    {
+                        // ID/Name are not on the getter interface — try reflection
+                        var t = alias.GetType();
+                        var idProp   = t.GetProperty("ID",   System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                        var nameProp = t.GetProperty("Name", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                        var idVal   = idProp   != null ? idProp.GetValue(alias)   : "?";
+                        var nameVal = nameProp != null ? nameProp.GetValue(alias) : "?";
+                        Console.WriteLine($"    [ColAlias]  ID={idVal}  Name={nameVal}  Collection=[{colAlias.Collection.Count}]");
+                        foreach (var ca in colAlias.Collection)
+                        {
+                            Console.WriteLine($"      CollectionEntry ID={ca.ID}  MaxFill={ca.MaxInitialFillCount}  ALAM={ca.ALAM}");
+                            if (ca.ReferenceAlias != null)
+                            {
+                                var ra = ca.ReferenceAlias;
+                                var raIdProp   = ra.GetType().GetProperty("ID",   System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                                var raNamProp  = ra.GetType().GetProperty("Name", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                                var raFlagProp = ra.GetType().GetProperty("Flags",System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                                Console.WriteLine($"        RefAlias ID={raIdProp?.GetValue(ra)}  Name={raNamProp?.GetValue(ra)}  Flags={raFlagProp?.GetValue(ra)}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    [Unknown alias type={alias.GetType().Name}]");
+                    }
+                }
+            }
+            Console.WriteLine();
+
+            // Objectives
+            Console.WriteLine($"  Objectives [{quest.Objectives.Count}]:");
+            foreach (var obj in quest.Objectives)
+                Console.WriteLine($"    [{obj.Index}] Flags={obj.Flags}  Text={obj.DisplayText}");
+            Console.WriteLine();
+
+            // Stages
+            Console.WriteLine($"  Stages [{quest.Stages.Count}]:");
+            foreach (var stage in quest.Stages)
+            {
+                Console.Write($"    Index={stage.Index}  Flags={stage.Flags}");
+                if (stage.LogEntries.Count > 0)
+                    Console.Write($"  LogEntries=[{string.Join(", ", stage.LogEntries.Select(e => $"\"{e.Entry}\""))}]");
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpScriptProperty(IScriptPropertyGetter prop, string indent)
+        {
+            switch (prop)
+            {
+                case IScriptObjectPropertyGetter obj:
+                    Console.WriteLine($"{indent}[Obj]    Name={prop.Name}  Flags=0x{(ushort)prop.Flags:X4}  Object={obj.Object.FormKey}");
+                    break;
+                case IScriptIntPropertyGetter i:
+                    Console.WriteLine($"{indent}[Int]    Name={prop.Name}  Flags=0x{(ushort)prop.Flags:X4}  Value={i.Data}");
+                    break;
+                case IScriptBoolPropertyGetter b:
+                    Console.WriteLine($"{indent}[Bool]   Name={prop.Name}  Flags=0x{(ushort)prop.Flags:X4}  Value={b.Data}");
+                    break;
+                case IScriptFloatPropertyGetter f:
+                    Console.WriteLine($"{indent}[Float]  Name={prop.Name}  Flags=0x{(ushort)prop.Flags:X4}  Value={f.Data}");
+                    break;
+                case IScriptStringPropertyGetter s:
+                    Console.WriteLine($"{indent}[String] Name={prop.Name}  Flags=0x{(ushort)prop.Flags:X4}  Value={s.Data}");
+                    break;
+                default:
+                    Console.WriteLine($"{indent}[{prop.GetType().Name}] Name={prop.Name}  Flags=0x{(ushort)prop.Flags:X4}");
+                    break;
+            }
+        }
+
+        private static void DumpConditionBrief(IConditionGetter cond, string indent)
+        {
+            string op  = cond.CompareOperator.ToString();
+            string val = cond is IConditionFloatGetter cf ? cf.ComparisonValue.ToString("F2") : "?";
+            string fn  = cond.Data?.GetType().Name ?? "?";
+            string extra = "";
+            if (cond.Data is IGetGlobalValueConditionDataGetter ggv)
+                extra = $" global={ggv.FirstParameter.Link.FormKey}";
+            else if (cond.Data is IGetStageConditionDataGetter gs)
+                extra = $" quest={gs.FirstParameter.Link.FormKey} stage={gs.SecondParameter}";
+            Console.WriteLine($"{indent}{fn}{extra} {op} {val}  flags=0x{(byte)cond.Flags:X2}");
         }
 
         private static void DumpDialogBranch(IDialogBranchGetter branch)
