@@ -112,7 +112,8 @@ namespace Retrograde.Nouns
 
             Console.WriteLine("Generating Outlaw Log...");
 
-            string background = AITools.RunPrompt(sb.ToString());
+            string prompt = FlavourSeedData.AddFlavourToTargetBook(sb.ToString());
+            string background = AITools.RunPrompt(prompt);
             return background;
         }
 

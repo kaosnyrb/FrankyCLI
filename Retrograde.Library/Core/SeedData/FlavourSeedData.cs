@@ -804,5 +804,33 @@ namespace Retrograde.AI.Utils
 
             return BookPrompt;
         }
+        public static string GetConversationIntrigueDetail()
+        {
+            List<string> details = new()
+            {
+                "They drop a name in passing — someone they clearly expect you to recognise, but don't explain.",
+                "They stop mid-sentence, glance at something behind you, then pretend they didn't.",
+                "They answer a question you didn't ask — which means they already knew what you were going to say.",
+                "They're very specific about one detail and deliberately vague about everything around it.",
+                "They mention a place or date that doesn't quite match what you've been told.",
+                "They offer something useful a little too quickly, as if they'd prepared it in advance.",
+                "They laugh at the wrong moment — then recover so smoothly it almost reads as natural.",
+                "They refer to someone in the past tense, then immediately correct themselves.",
+                "They ask a question that only makes sense if they already know the answer.",
+                "They clock the exits before they sit down.",
+                "They repeat your phrasing back to you slightly changed — testing what you meant.",
+                "They're calm about everything except one thing, which they won't look at directly.",
+                "They've clearly been in this conversation before, with someone else.",
+                "They know who you work for before you mention it.",
+                "They give you exactly what you asked for — nothing more, nothing less — like they rehearsed the limit.",
+                "They flinch at a name no one in the room should recognise.",
+                "There's a gap in their story they don't try to fill — they just wait to see if you notice.",
+                "They're friendly, but they never say anything they couldn't walk back.",
+                "They know the other person in the room, but they act like they don't.",
+                "They end the conversation before it reaches the thing they came to say.",
+            };
+
+            return details[RandomProvider.Random.Next(details.Count)];
+        }
     }
 }
