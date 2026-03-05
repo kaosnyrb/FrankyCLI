@@ -3,7 +3,6 @@ using Retrograde.AI;
 using Retrograde.AI.Utils;
 using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
-using Retrograde.Quests;
 using Retrograde.Quests.TemplateEngines;
 using Retrograde.Utils;
 using System;
@@ -33,23 +32,8 @@ namespace Retrograde.Chains
         public bool GenerateQuest()
         {
             // Story Setup --------------------------------
-            Random random = RandomProvider.Random;
             Console.WriteLine("LoopingLayoutQuestChain");
-
-            List<ITemplateManager> templates = new List<ITemplateManager>()
-            {
-                new AllTemplateManager(new AI_TemplateEngine()),
-                //new FrontierTemplateManager(new AI_TemplateEngine()),
-                //new NoPOITemplateManager(new AI_TemplateEngine()),
-                //new CombatTemplateManager(new AI_TemplateEngine()),
-                new AllTemplateManager(new RandomTemplateEngine())
-            };
-            var templateManager = templates[random.Next(templates.Count)];
-
-            Console.WriteLine(templateManager.GetType());
-
-            //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
-            //var Lorefile = LorePrompts.LoadRandomLoreFile();
+            var templateManager = new AllTemplateManager(new AI_TemplateEngine());
             // NPC Target (base setup) --------------------------------
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
@@ -79,20 +63,19 @@ namespace Retrograde.Chains
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Outlaw Name: " + outlawNpc.name);
 
-            // Decide how many investigation missions we want between discovery and showdown
-            int count = 2 + random.Next(4); // 2–5 investigations
+            // PlannedInvestigations is in story order (earliest first, closest to showdown last).
+            // We build investigationStages in reverse (closest to showdown at index 0) to match
+            // the existing generation order (showdown → deepest → ... → earliest → discovery).
+            var plannedList = LorePrompts.PlannedInvestigations;
+            int count = plannedList.Count;
 
-            // We will collect investigation templates first, then run them from the end backwards
             var investigationStages = new List<(string Stage, MissionTemplate Template)>();
 
-            // Generate investigation templates (from near-showdown backwards)
             for (int i = 0; i < count; i++)
             {
                 Console.WriteLine("---------------------------------------------------------------------------------");
 
-                // Map position in chain to an investigation stage and quest completion
-                // i = 0  -> closest to showdown (deep)
-                // i > 0  -> progressively earlier (initial-style)
+                // i=0 → closest to showdown (last in story order), i=count-1 → earliest
                 string stageName = (i == 0) ? "DeepInvestigation" : "InitialInvestigation";
 
                 double t = (count == 1) ? 0.0 : (double)i / (count - 1);
@@ -105,31 +88,10 @@ namespace Retrograde.Chains
                     $"<QuestProgress>{progressValue}%</QuestProgress>"
                 };
 
-                // Base investigation template — use planned name only for the deepest stage (i==0)
-                var template = templateManager.GetInvestigationMissionTemplate(
-                    i == 0 ? LorePrompts.PlannedInvestigation : "",
-                    investigationAddons);
+                // plannedList is story order → reverse index to map to generation order
+                string plannedName = plannedList[count - 1 - i];
 
-                // Optional fork substitution (kept from original logic)
-                // Don't run on the first and last.
-                if (i != 0 && i != count - 1)
-                {
-                    // Run on odd indices; avoids fork at very start or multiple in a row
-                    if (i % 2 != 0 && random.Next(100) > 0)
-                    {
-                        var forktemplates = new Templates_Fork();
-                        var forkTemplate = forktemplates.InvestigationTemplates[random.Next(forktemplates.InvestigationTemplates.Count)];
-
-                        forkTemplate.Addons = new List<string>()
-                        {
-                            "<QuestStage>Investigation</QuestStage>",
-                            $"<QuestProgress>{progressValue}%</QuestProgress>"
-                        };
-
-                        template = forkTemplate;
-                        stageName = "Investigation";
-                    }
-                }
+                var template = templateManager.GetInvestigationMissionTemplate(plannedName, investigationAddons);
 
                 Console.WriteLine("Investigation Template: " + template.Name);
                 investigationStages.Add((stageName, template));
@@ -145,9 +107,7 @@ namespace Retrograde.Chains
             };
 
 
-            var DiscoveryTemplateManager = new AllTemplateManager(new AI_TemplateEngine());
-            //var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", discoveryAddons); // We currently don't handle the fact that not all template libs have discovery missions.
-            var DiscoveryMissionTemplate = DiscoveryTemplateManager.GetDiscoveryMissionTemplate(LorePrompts.PlannedDiscovery, discoveryAddons);
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate(LorePrompts.PlannedDiscovery, discoveryAddons);
 
             // Now we build a story-ordered list for stage location history:
             // Discovery -> earliest investigation -> ... -> closest investigation -> Showdown

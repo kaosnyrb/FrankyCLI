@@ -91,7 +91,7 @@ namespace Retrograde.Chains
             
             //Quest Steps
             var DeepInvestigationMissionTemplate = templateManager.GetInvestigationMissionTemplate(
-                string.IsNullOrEmpty(DeepTempalte) ? LorePrompts.PlannedInvestigation : DeepTempalte,
+                string.IsNullOrEmpty(DeepTempalte) ? (LorePrompts.PlannedInvestigations.Count > 0 ? LorePrompts.PlannedInvestigations[^1] : "") : DeepTempalte,
                 new List<string>() { "<QuestStage>DeepInvestigation</QuestStage>", "<QuestProgress>70%</QuestProgress>" });
             if (fork)
             {

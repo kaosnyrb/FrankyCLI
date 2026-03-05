@@ -16,7 +16,7 @@ namespace Retrograde.AI.Utils
 
         // Template names extracted from <PlannedArc> — passed directly to AI_TemplateEngine
         public static string PlannedDiscovery = "";
-        public static string PlannedInvestigation = "";
+        public static List<string> PlannedInvestigations = new();
         public static string PlannedShowdown = "";
 
         public static string LoadRandomLoreFile()
@@ -83,7 +83,7 @@ namespace Retrograde.AI.Utils
             // ── Phase 2: Select arc templates (stateless — does NOT enter history) ──────
             var sb2 = new StringBuilder();
 
-            sb2.AppendLine($"The lore context for {outlawNpc.name} has just been generated. Using that context, select one template from each stage below to form a coherent quest arc.");
+            sb2.AppendLine($"The lore context for {outlawNpc.name} has just been generated. Using that context, design a full quest arc by selecting templates from the lists below.");
             sb2.AppendLine("Copy each template Name exactly as written — no paraphrasing.");
             sb2.AppendLine();
             AppendTemplateMenu(sb2, "DISCOVERY", templateLib.DiscoveryTemplates);
@@ -97,8 +97,12 @@ namespace Retrograde.AI.Utils
             sb2.AppendLine("        <Template>exact Name from the DISCOVERY list above</Template>");
             sb2.AppendLine("    </Discovery>");
             sb2.AppendLine("    <Investigation>");
-            sb2.AppendLine("        <Theme>1 sentence: what the investigation should uncover and how it escalates.</Theme>");
-            sb2.AppendLine("        <Template>exact Name from the INVESTIGATION list above</Template>");
+            sb2.AppendLine("        <!-- Choose between 2 and 5 Stage entries in story order (earliest lead first, closest to showdown last) -->");
+            sb2.AppendLine("        <Stage>");
+            sb2.AppendLine("            <Theme>1 sentence: what this step uncovers and how it escalates toward the next.</Theme>");
+            sb2.AppendLine("            <Template>exact Name from the INVESTIGATION list above</Template>");
+            sb2.AppendLine("        </Stage>");
+            sb2.AppendLine("        <!-- repeat <Stage> for each additional investigation step -->");
             sb2.AppendLine("    </Investigation>");
             sb2.AppendLine("    <Showdown>");
             sb2.AppendLine("        <Theme>1 sentence: what makes this climax feel like the logical end of this specific story.</Theme>");
@@ -109,18 +113,48 @@ namespace Retrograde.AI.Utils
             sb2.AppendLine("Rules:");
             sb2.AppendLine("- Each template Name MUST be copied exactly from the lists above.");
             sb2.AppendLine("- Pick templates whose location, description, and tags match the outlaw's background, factions, and crimes.");
-            sb2.AppendLine("- The three templates must form a coherent escalating arc.");
-            sb2.AppendLine("- Prefer variety of environment across the three stages (e.g. avoid three space missions in a row).");
+            sb2.AppendLine("- The arc must feel like a coherent escalation from first lead to final confrontation.");
+            sb2.AppendLine("- Use between 2 and 5 investigation stages — choose however many best serve this specific story.");
+            sb2.AppendLine("- Prefer variety of environment across stages (e.g. avoid all-space or all-planet runs).");
+            sb2.AppendLine("- Each investigation stage must use a different template.");
 
             string arcResponse = AITools.RunStatelessPrompt(sb2.ToString());
 
-            PlannedDiscovery    = ExtractPlannedTemplate(arcResponse, "Discovery");
-            PlannedInvestigation = ExtractPlannedTemplate(arcResponse, "Investigation");
-            PlannedShowdown     = ExtractPlannedTemplate(arcResponse, "Showdown");
+            PlannedDiscovery      = ExtractPlannedTemplate(arcResponse, "Discovery");
+            PlannedInvestigations = ExtractPlannedInvestigations(arcResponse);
+            PlannedShowdown       = ExtractPlannedTemplate(arcResponse, "Showdown");
 
             Console.WriteLine($"PlannedArc — Discovery: {PlannedDiscovery}");
-            Console.WriteLine($"PlannedArc — Investigation: {PlannedInvestigation}");
+            for (int i = 0; i < PlannedInvestigations.Count; i++)
+                Console.WriteLine($"PlannedArc — Investigation[{i}]: {PlannedInvestigations[i]}");
             Console.WriteLine($"PlannedArc — Showdown: {PlannedShowdown}");
+        }
+
+        private static List<string> ExtractPlannedInvestigations(string context)
+        {
+            var results = new List<string>();
+
+            var investigationMatch = Regex.Match(context, @"<Investigation>([\s\S]*?)</Investigation>", RegexOptions.IgnoreCase);
+            if (!investigationMatch.Success) return results;
+
+            var stagesBlock = investigationMatch.Groups[1].Value;
+            var stageMatches = Regex.Matches(stagesBlock, @"<Stage>([\s\S]*?)</Stage>", RegexOptions.IgnoreCase);
+
+            foreach (Match stageMatch in stageMatches)
+            {
+                var templateMatch = Regex.Match(stageMatch.Groups[1].Value, @"<Template>([\s\S]*?)</Template>", RegexOptions.IgnoreCase);
+                if (!templateMatch.Success) continue;
+
+                var raw = templateMatch.Groups[1].Value.Trim();
+                var pipeIdx = raw.IndexOf('|');
+                results.Add(pipeIdx >= 0 ? raw.Substring(0, pipeIdx).Trim() : raw);
+            }
+
+            // Clamp to valid range
+            if (results.Count < 2) Console.WriteLine("PlannedArc WARNING: fewer than 2 investigation stages returned; chain will be short.");
+            if (results.Count > 5) results = results.GetRange(0, 5);
+
+            return results;
         }
 
         private static string ExtractPlannedTemplate(string context, string stage)
