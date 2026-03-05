@@ -282,6 +282,8 @@ public static class SpeechTools
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(gameWemPath)!);
                 File.Copy(wemPath, gameWemPath, overwrite: true);
+                string gameWavPath = Path.ChangeExtension(gameWemPath, ".wav");
+                File.Copy(wavPath, gameWavPath, overwrite: true);
                 Console.WriteLine($"[SpeechTools] Deployed: {gameWemPath}");
                 deployed++;
             }

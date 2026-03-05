@@ -209,11 +209,14 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("Output EXACTLY this format, one line per label, no extra text before or after:");
             sb.AppendLine("GREETING: <NPC opening line, max 100 chars>");
             sb.AppendLine("PLAYER1: <optional player question about the situation, max 50 chars>");
-            sb.AppendLine("NPC1: <NPC answer to optional question 1, max 150 chars>");
+            sb.AppendLine("NPC1a: <NPC first line for question 1, max 150 chars>");
+            sb.AppendLine("NPC1b: <NPC second line for question 1, max 150 chars — omit if one line suffices>");
             sb.AppendLine("PLAYER2: <optional player question about the target, max 50 chars>");
-            sb.AppendLine("NPC2: <NPC answer to optional question 2, max 150 chars>");
+            sb.AppendLine("NPC2a: <NPC first line for question 2, max 150 chars>");
+            sb.AppendLine("NPC2b: <NPC second line for question 2, max 150 chars — omit if one line suffices>");
             sb.AppendLine("PLAYER3: <player line that asks where the target is — the closing question, max 50 chars>");
-            sb.AppendLine("NPC3: <NPC gives the target's location and wraps up, max 150 chars>");
+            sb.AppendLine("NPC3a: <NPC first line — location reveal, max 150 chars>");
+            sb.AppendLine("NPC3b: <NPC second line — wrap-up, max 150 chars — omit if one line suffices>");
             sb.AppendLine();
             sb.AppendLine("Rules:");
             sb.AppendLine("- All lines must fit within their character limits.");
@@ -251,25 +254,37 @@ namespace Retrograde.AI.Utils
                 return "";
             }
 
+            // Extracts NPCXa and NPCXb sub-labels (e.g. "NPC1") into a non-empty list.
+            List<string> ExtractNpcLines(string prefix)
+            {
+                var lines = new List<string>();
+                var a = TruncateAtSentence(Extract(prefix + "a"), 150);
+                var b = TruncateAtSentence(Extract(prefix + "b"), 150);
+                if (!string.IsNullOrWhiteSpace(a)) lines.Add(a);
+                if (!string.IsNullOrWhiteSpace(b)) lines.Add(b);
+                if (lines.Count == 0) lines.Add("");
+                return lines;
+            }
+
             script.NpcGreeting = TruncateAtSentence(Extract("GREETING"), 100);
 
-            // Exchange[0] = completion (ends quest) — PLAYER3/NPC3
-            // Exchange[1] = optional topic 1       — PLAYER1/NPC1
-            // Exchange[2] = optional topic 2       — PLAYER2/NPC2
+            // Exchange[0] = completion (ends quest) — PLAYER3/NPC3a/NPC3b
+            // Exchange[1] = optional topic 1       — PLAYER1/NPC1a/NPC1b
+            // Exchange[2] = optional topic 2       — PLAYER2/NPC2a/NPC2b
             script.Exchanges.Add(new DialogueExchange
             {
                 PlayerPrompt = TruncateAtSentence(Extract("PLAYER3"), 50),
-                NpcReply     = TruncateAtSentence(Extract("NPC3"), 150),
+                NpcReply     = ExtractNpcLines("NPC3"),
             });
             script.Exchanges.Add(new DialogueExchange
             {
                 PlayerPrompt = TruncateAtSentence(Extract("PLAYER1"), 50),
-                NpcReply     = TruncateAtSentence(Extract("NPC1"), 150),
+                NpcReply     = ExtractNpcLines("NPC1"),
             });
             script.Exchanges.Add(new DialogueExchange
             {
                 PlayerPrompt = TruncateAtSentence(Extract("PLAYER2"), 50),
-                NpcReply     = TruncateAtSentence(Extract("NPC2"), 150),
+                NpcReply     = ExtractNpcLines("NPC2"),
             });
 
             return script;

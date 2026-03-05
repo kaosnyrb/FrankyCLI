@@ -14,6 +14,6 @@ public class DialogueExchange
     /// <summary>Player's voiced question shown in the choice menu (≤60 chars).</summary>
     public string PlayerPrompt { get; set; } = "";
 
-    /// <summary>NPC's voiced reply (≤200 chars).</summary>
-    public string NpcReply { get; set; } = "";
+    /// <summary>NPC's voiced reply — up to 2 lines, each ≤150 chars.</summary>
+    public List<string> NpcReply { get; set; } = [];
 }

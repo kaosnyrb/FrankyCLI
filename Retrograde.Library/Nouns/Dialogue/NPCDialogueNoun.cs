@@ -137,8 +137,8 @@ public class NPCDialogueNoun
         //   0x0004 = TopLevelTopicsOnEnd (menu reappears after scene ends) — regular only
         //
         // Each scene:
-        //   Phase 0: player line shown as menu option  (DialogueSceneAction AliasID=-2, Index=3)
-        //   Phase 1: NPC reply                         (DialogueSceneAction AliasID=0,  Index=4)
+        //   Phase 0:   player line shown as menu option  (DialogueSceneAction AliasID=-2, Index=3)
+        //   Phase 1..N: NPC reply lines                  (DialogueSceneAction AliasID=npcAliasId, Index=4+j)
         for (int i = 0; i < script.Exchanges.Count; i++)
         {
             var ex = script.Exchanges[i];
@@ -150,16 +150,24 @@ public class NPCDialogueNoun
                 { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
             quest.DialogTopics.Add(playerTopic);
 
-            var npcTopic = BuildSceneTopic(targetMod, quest);
-            var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
-            if (i == 0 && completionStage > 0)
-                npcInfo.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)completionStage };
-            npcTopic.Responses.Add(npcInfo);
-            npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
-                { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
-            quest.DialogTopics.Add(npcTopic);
-            SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
-                targetMod.ModKey, ex.NpcReply, elevenLabsVoiceId);
+            // One topic+info per NPC reply line — each gets its own FormKey for audio.
+            var npcEntries = new List<(DialogTopic topic, DialogResponses info)>();
+            foreach (var line in ex.NpcReply)
+            {
+                var npcTopic = BuildSceneTopic(targetMod, quest);
+                var npcInfo  = BuildInfo(targetMod, line, npcFormKey);
+                npcTopic.Responses.Add(npcInfo);
+                npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+                    { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+                quest.DialogTopics.Add(npcTopic);
+                SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
+                    targetMod.ModKey, line, elevenLabsVoiceId);
+                npcEntries.Add((npcTopic, npcInfo));
+            }
+
+            // SetParentQuestStage on the last NPC line so the quest advances after all lines play.
+            if (i == 0 && completionStage > 0 && npcEntries.Count > 0)
+                npcEntries[^1].info.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)completionStage };
 
             // Exchange[0] ends the conversation (no 0x0004 TopLevelTopicsOnEnd); the rest loop back
             uint topicFlags = i == 0 ? 0x00002810u : 0x00002814u;
@@ -171,13 +179,23 @@ public class NPCDialogueNoun
             topicScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
             topicScene.Actors.Add(new SceneActor { ID = npcAliasId,            BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
             topicScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+
+            // Phase 0 = player; one phase per NPC reply line.
             topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
-            topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+            for (int j = 0; j < npcEntries.Count; j++)
+                topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+
+            var actions = new ExtendedList<ASceneAction>();
             var playerAction = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
             playerAction.Topic.SetTo(playerTopic.FormKey);
-            var npcAction = new DialogueSceneAction { Index = 4, AliasID = (int)npcAliasId, StartPhase = 1, EndPhase = 1 };
-            npcAction.Topic.SetTo(npcTopic.FormKey);
-            topicScene.Actions = new ExtendedList<ASceneAction> { playerAction, npcAction };
+            actions.Add(playerAction);
+            for (int j = 0; j < npcEntries.Count; j++)
+            {
+                var npcAction = new DialogueSceneAction { Index = (uint?)(4 + j), AliasID = (int)npcAliasId, StartPhase = (uint)(j + 1), EndPhase = (uint)(j + 1) };
+                npcAction.Topic.SetTo(npcEntries[j].topic.FormKey);
+                actions.Add(npcAction);
+            }
+            topicScene.Actions = actions;
             quest.Scenes.Add(topicScene);
         }
 

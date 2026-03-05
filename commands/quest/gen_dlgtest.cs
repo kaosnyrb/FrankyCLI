@@ -65,17 +65,17 @@ namespace FrankyCLI
                         new DialogueExchange
                         {
                             PlayerPrompt = "Who are you?",
-                            NpcReply     = "Name's Rook. Facility security.",
+                            NpcReply     = ["Name's Rook. Facility security."],
                         },
                         new DialogueExchange
                         {
                             PlayerPrompt = "What happened here?",
-                            NpcReply     = "Research team went dark three days ago. No distress call, nothing.",
+                            NpcReply     = ["Research team went dark three days ago.", "No distress call, nothing."],
                         },
                         new DialogueExchange
                         {
                             PlayerPrompt = "Is it safe here?",
-                            NpcReply     = "Safe enough if you mind your business.",
+                            NpcReply     = ["Safe enough if you mind your business."],
                         },
                     },
                 };
