@@ -41,14 +41,14 @@ namespace Retrograde.Quests
             
             var questActivator = ActivatorTools.GetRandomSpaceType();
 
-            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -59,7 +59,7 @@ namespace Retrograde.Quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
@@ -75,7 +75,7 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
 
             //Create the activation message
-            var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)
+            var pickupmessage = MessagePrompts.GetPickupMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Vital clue to there location: " + datasource + "\r\n"

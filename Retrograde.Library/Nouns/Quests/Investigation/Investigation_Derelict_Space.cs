@@ -46,7 +46,7 @@ namespace Retrograde.Quests
             Console.WriteLine("shipname: " + shipname);
             //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
-            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Type: Data tablet \r\n",
@@ -54,7 +54,7 @@ namespace Retrograde.Quests
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -65,7 +65,7 @@ namespace Retrograde.Quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Board the " + shipname + " and find the " + datasource + "\r\n",
@@ -98,7 +98,7 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 
-            var booklogmessage = PromptManager.GetTransmission(new List<string>(missionTemplate.Addons)
+            var booklogmessage = NarrativePrompts.GetTransmission(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",

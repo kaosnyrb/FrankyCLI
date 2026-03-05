@@ -49,9 +49,9 @@ namespace Retrograde.Chains
             Console.WriteLine(templateManager.GetType());
 
             //            var Lorefile = File.ReadAllText(".\\questgen_quests\\Lorefiles\\LostMarine.md");
-            //var Lorefile = PromptManager.LoadRandomLoreFile();
+            //var Lorefile = LorePrompts.LoadRandomLoreFile();
             Console.WriteLine("Generating Lore File...");
-            var Lorefile = PromptManager.GenerateLoreFile();
+            var Lorefile = LorePrompts.GenerateLoreFile();
 
             // NPC Target (base setup) --------------------------------
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
@@ -59,7 +59,7 @@ namespace Retrograde.Chains
             // Build LoreContext from Lorefile and NPC
             Console.WriteLine("Building Lore Context...");
 
-            PromptManager.LoreContext = AITools.RunPrompt(
+            LorePrompts.LoreContext = AITools.RunPrompt(
                 "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
                 "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +
                 "You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.\r\n\r\n" +

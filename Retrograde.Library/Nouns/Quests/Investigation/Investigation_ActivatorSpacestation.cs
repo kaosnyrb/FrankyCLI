@@ -44,7 +44,7 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Activator Space Station Quest...");
 
-            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
@@ -52,7 +52,7 @@ namespace Retrograde.Quests
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -69,7 +69,7 @@ namespace Retrograde.Quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
@@ -93,7 +93,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_space_station_quest", "MinGangMembers", (int)missionTemplate.parameters["DefendingShipCountMin"]);
             newQuest.SetScriptProperty("duout_space_station_quest", "MaxGangMembers", (int)missionTemplate.parameters["DefendingShipCountMax"]);
 
-            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            var booklogmessage = NarrativePrompts.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",

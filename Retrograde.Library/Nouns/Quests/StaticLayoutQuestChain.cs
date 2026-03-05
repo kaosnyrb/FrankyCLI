@@ -63,7 +63,7 @@ namespace Retrograde.Chains
 
             Console.WriteLine(templateManager.GetType());
 
-            var Lorefile = PromptManager.GenerateLoreFile();
+            var Lorefile = LorePrompts.GenerateLoreFile();
 
 
             bool fork = false;            
@@ -76,7 +76,7 @@ namespace Retrograde.Chains
             // NPC Target                
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
-            PromptManager.LoreContext = AITools.RunPrompt(
+            LorePrompts.LoreContext = AITools.RunPrompt(
                 "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
                 "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +
                 "You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.\r\n\r\n" +

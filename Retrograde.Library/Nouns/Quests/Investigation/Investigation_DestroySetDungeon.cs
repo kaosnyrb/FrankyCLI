@@ -43,7 +43,7 @@ namespace Retrograde.Quests
             var questActivator = ActivatorTools.GetRandomLargeGroundType();
 
 
-            var destroytarget = PromptManager.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
+            var destroytarget = ItemPrompts.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -51,7 +51,7 @@ namespace Retrograde.Quests
             Console.WriteLine("destroytarget: " + destroytarget);
 
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Item we must destroy: " + destroytarget + "\r\n"
@@ -60,7 +60,7 @@ namespace Retrograde.Quests
 
             IGang outlawGang = GangManager.GetGang();
 
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Destroy the " + destroytarget + " to lead you to " + outlawNpc.name + "\r\n",
@@ -75,7 +75,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetQuestPCMTypeKeyword("DungeonLocation", myMod.Keywords[new FormKey(myMod.ModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToNullableLink<IKeywordGetter>());
 
-            var pickupmessage = PromptManager.GetDestroyMessage(new List<string>(missionTemplate.Addons)
+            var pickupmessage = MessagePrompts.GetDestroyMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Item we must destroy: " + destroytarget + "\r\n"

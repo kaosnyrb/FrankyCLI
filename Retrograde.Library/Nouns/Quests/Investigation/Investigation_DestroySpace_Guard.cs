@@ -43,14 +43,14 @@ namespace Retrograde.Quests
             string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]));
 
-            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Activator Base Type:" + questActivator.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Space object that must be destroyed:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -61,7 +61,7 @@ namespace Retrograde.Quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Destroy the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
@@ -82,7 +82,7 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("GuardShip", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create the activation message
-            var pickupmessage = PromptManager.GetPickupMessage(new List<string>(missionTemplate.Addons)
+            var pickupmessage = MessagePrompts.GetPickupMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + nextQuest.QuestLocation + "\r\n",
                 "Object we just destroyed: " + datasource + "\r\n"

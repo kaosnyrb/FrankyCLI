@@ -48,14 +48,14 @@ namespace Retrograde.Quests
                 factionId: FormKeyLookup.GetFormKey("PlayerAllyFaction"));
             var npc = npcResult.Npc;
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Targets name:" + npc.Name,
                 "Location:" + missionTemplate.Location + "\r\n",
             });
 
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Speack to " + npc.Name + " to lead you to " + outlawNpc.name + "\r\n"
@@ -75,7 +75,7 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
             
             //Add conversation, ending the quest on stage 500
-            var dialogueScript = PromptManager.GetDialogueScript(new List<string>(missionTemplate.Addons)
+            var dialogueScript = DialoguePrompts.GetDialogueScript(new List<string>(missionTemplate.Addons)
             {
                 "NPC name: " + npc.Name,
                 "Bounty target name: " + outlawNpc.name,

@@ -42,7 +42,7 @@ namespace Retrograde.Quests
             questloc = missionTemplate.Location;
 
             var factionID = ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]);
-            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Type: Data tablet \r\n",
@@ -54,7 +54,7 @@ namespace Retrograde.Quests
             Console.WriteLine("shipname: " + shipname);
             //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Spaceship holding the information: " + shipname + "\r\n"
@@ -63,7 +63,7 @@ namespace Retrograde.Quests
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Recover the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
@@ -85,7 +85,7 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Log Entry
-            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            var booklogmessage = NarrativePrompts.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Current Location:" + missionTemplate.Location + "\r\n",

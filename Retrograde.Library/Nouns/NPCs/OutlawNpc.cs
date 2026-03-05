@@ -80,7 +80,7 @@ namespace Retrograde.Nouns
 
             // Use the quest's LoreContext if available (it's always set before GenerateLog is called in the chain).
             // Fall back to random seeds only if running standalone.
-            if (!string.IsNullOrEmpty(PromptManager.LoreContext))
+            if (!string.IsNullOrEmpty(LorePrompts.LoreContext))
             {
                 sb.AppendLine("Character context — use the LoreContext established earlier in this conversation. It is the source of truth for who this person is and why they're running.");
             }

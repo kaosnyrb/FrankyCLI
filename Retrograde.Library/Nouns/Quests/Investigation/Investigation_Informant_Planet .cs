@@ -52,7 +52,7 @@ namespace Retrograde.Quests
 
             var questActivator = ActivatorTools.GetRandomLargeGroundType();
 
-            var datasource = PromptManager.GetActivatorName(new List<string>(missionTemplate.Addons)
+            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Type: Data tablet \r\n",
@@ -60,7 +60,7 @@ namespace Retrograde.Quests
             });
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = PromptManager.GetQuestName(new List<string>(missionTemplate.Addons)
+            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Vital clue to their location:" + datasource,
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -70,7 +70,7 @@ namespace Retrograde.Quests
             IGang outlawGang = GangManager.GetGang();
             
             //Log Entry
-            var logmessage = PromptManager.GetLogMessage(new List<string>(missionTemplate.Addons)
+            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
                 "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
@@ -97,7 +97,7 @@ namespace Retrograde.Quests
 
             //Book
 
-            var booklogmessage = PromptManager.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
+            var booklogmessage = NarrativePrompts.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
             {
                 "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
                 "Log Entry should mention how this character has located the next clue on the target.\r\n",
