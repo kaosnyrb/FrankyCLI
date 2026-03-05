@@ -207,13 +207,13 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("Do NOT invent new names or places beyond the LoreContext and Additional Information.");
             sb.AppendLine();
             sb.AppendLine("Output EXACTLY this format, one line per label, no extra text before or after:");
-            sb.AppendLine("GREETING: <NPC opening line, max 140 chars>");
-            sb.AppendLine("PLAYER1: <optional player question about the situation, max 55 chars>");
-            sb.AppendLine("NPC1: <NPC answer to optional question 1, max 190 chars>");
-            sb.AppendLine("PLAYER2: <optional player question about the target, max 55 chars>");
-            sb.AppendLine("NPC2: <NPC answer to optional question 2, max 190 chars>");
-            sb.AppendLine("PLAYER3: <player line that asks where the target is — the closing question, max 55 chars>");
-            sb.AppendLine("NPC3: <NPC gives the target's location and wraps up, max 190 chars>");
+            sb.AppendLine("GREETING: <NPC opening line, max 100 chars>");
+            sb.AppendLine("PLAYER1: <optional player question about the situation, max 50 chars>");
+            sb.AppendLine("NPC1: <NPC answer to optional question 1, max 150 chars>");
+            sb.AppendLine("PLAYER2: <optional player question about the target, max 50 chars>");
+            sb.AppendLine("NPC2: <NPC answer to optional question 2, max 150 chars>");
+            sb.AppendLine("PLAYER3: <player line that asks where the target is — the closing question, max 50 chars>");
+            sb.AppendLine("NPC3: <NPC gives the target's location and wraps up, max 150 chars>");
             sb.AppendLine();
             sb.AppendLine("Rules:");
             sb.AppendLine("- All lines must fit within their character limits.");
@@ -251,32 +251,50 @@ namespace Retrograde.AI.Utils
                 return "";
             }
 
-            script.NpcGreeting = Truncate(Extract("GREETING"), 140);
+            script.NpcGreeting = TruncateAtSentence(Extract("GREETING"), 100);
 
             // Exchange[0] = completion (ends quest) — PLAYER3/NPC3
             // Exchange[1] = optional topic 1       — PLAYER1/NPC1
             // Exchange[2] = optional topic 2       — PLAYER2/NPC2
             script.Exchanges.Add(new DialogueExchange
             {
-                PlayerPrompt = Truncate(Extract("PLAYER3"), 55),
-                NpcReply     = Truncate(Extract("NPC3"), 190),
+                PlayerPrompt = TruncateAtSentence(Extract("PLAYER3"), 50),
+                NpcReply     = TruncateAtSentence(Extract("NPC3"), 150),
             });
             script.Exchanges.Add(new DialogueExchange
             {
-                PlayerPrompt = Truncate(Extract("PLAYER1"), 55),
-                NpcReply     = Truncate(Extract("NPC1"), 190),
+                PlayerPrompt = TruncateAtSentence(Extract("PLAYER1"), 50),
+                NpcReply     = TruncateAtSentence(Extract("NPC1"), 150),
             });
             script.Exchanges.Add(new DialogueExchange
             {
-                PlayerPrompt = Truncate(Extract("PLAYER2"), 55),
-                NpcReply     = Truncate(Extract("NPC2"), 190),
+                PlayerPrompt = TruncateAtSentence(Extract("PLAYER2"), 50),
+                NpcReply     = TruncateAtSentence(Extract("NPC2"), 150),
             });
 
             return script;
         }
 
-        private static string Truncate(string s, int maxLen) =>
-            s.Length <= maxLen ? s : s.Substring(0, maxLen);
+        /// <summary>
+        /// Cuts at the last sentence-ending punctuation (. ? !) at or before maxLen.
+        /// Falls back to a hard word-boundary cut, then a hard char cut if no boundary is found.
+        /// </summary>
+        private static string TruncateAtSentence(string s, int maxLen)
+        {
+            if (s.Length <= maxLen) return s;
+
+            // Last sentence end before the limit
+            for (int i = maxLen - 1; i >= 0; i--)
+                if (s[i] == '.' || s[i] == '?' || s[i] == '!')
+                    return s.Substring(0, i + 1).Trim();
+
+            // No sentence end found — cut at last space
+            for (int i = maxLen - 1; i >= 0; i--)
+                if (s[i] == ' ')
+                    return s.Substring(0, i).Trim();
+
+            return s.Substring(0, maxLen);
+        }
 
         // ------------------------------
         // Destroy Message
