@@ -40,7 +40,7 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Activator " + (string)missionTemplate.parameters["Label"] + " Trapped Space Quest...");
 
-            var questActivator = ActivatorTools.GetRandomSpaceType();
+            var questActivator = ActivatorSeedData.GetRandomSpaceType();
 
             var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
@@ -91,7 +91,7 @@ namespace Retrograde.Quests
             newActivator.SetScriptProperty("duout_activator_spacetrap", "messagetext", message.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_spacetrap", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newActivator.SetScriptProperty("duout_activator_spacetrap", "nextquest", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());
-            newActivator.SetScriptProperty("duout_activator_spacetrap", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID((string)missionTemplate.parameters["Label"])));
+            newActivator.SetScriptProperty("duout_activator_spacetrap", "GangMembers", ShipSeedData.GetGangList(ShipSeedData.GetFactionID((string)missionTemplate.parameters["Label"])));
 
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", newActivator.instance.ToLink<IStarfieldMajorRecordGetter>());
             //Create the space cell

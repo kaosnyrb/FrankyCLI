@@ -6,7 +6,7 @@ namespace Retrograde.Utils;
 /// <summary>
 /// Provides random activator type selections for space objects and ground items.
 /// </summary>
-public static class ActivatorTools
+public static class ActivatorSeedData
 {
     public static string GetWallModel()
     {

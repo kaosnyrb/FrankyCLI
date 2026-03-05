@@ -50,7 +50,7 @@ namespace Retrograde.Quests
                 }
             }
 
-            var questActivator = ActivatorTools.GetRandomLargeGroundType();
+            var questActivator = ActivatorSeedData.GetRandomLargeGroundType();
 
             var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
@@ -110,7 +110,7 @@ namespace Retrograde.Quests
 
             // Voice the data-slate as a transmission left by the informant.
             // ExtraLore is already folded into booklogmessage via missionTemplate.Addons.
-            var txVoicePool = isfemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoicePool = isfemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
             SpeechTools.AddVoice(bountybook.instance.FormKey.ID, npc.FormKey, booklogmessage, npcVoiceEditorId, txVoice.Id);
 

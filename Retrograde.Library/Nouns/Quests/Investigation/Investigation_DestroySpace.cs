@@ -39,7 +39,7 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Destroy Space Quest...");
             
-            var questActivator = ActivatorTools.GetRandomSpaceType();
+            var questActivator = ActivatorSeedData.GetRandomSpaceType();
 
             var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {

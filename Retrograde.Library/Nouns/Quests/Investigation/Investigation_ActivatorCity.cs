@@ -51,7 +51,7 @@ namespace Retrograde.Quests
                 }
             }
 
-            var questActivator = ActivatorTools.GetRandomGroundType();
+            var questActivator = ActivatorSeedData.GetRandomGroundType();
 
             var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {

@@ -10,7 +10,7 @@ namespace Retrograde.Utils;
 /// <summary>
 /// Provides ship FormIDs and name generation for Starfield factions.
 /// </summary>
-public static class ShipTools
+public static class ShipSeedData
 {
     public static uint GetCargoShip()
     {

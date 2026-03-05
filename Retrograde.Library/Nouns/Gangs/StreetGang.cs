@@ -1,3 +1,4 @@
+using Retrograde.AI.Utils;
 using Retrograde.Interfaces;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -34,48 +35,14 @@ namespace Retrograde.Nouns.Gangs
         public static string GetGangName()
         {
             Random random = RandomProvider.Random;
-
-            List<string> gangPrefixes = new List<string>
-            {
-                // Neon / Ebbside cyber-noir prefixes
-                "Neon", "Chrome", "Glow", "Pulse", "Glass", "Flux", "Neonwave", "Slip",
-                "Shimmer", "Ghost", "Wire", "Ion", "Synth", "Drift", "Blueglass", "Ebb",
-                "Shard", "Spire", "Circuit", "Pulse", "Silent", "Neonblack", "Heat",
-                "Voltage", "Ether", "Silk", "Static", "Phase", "Neonline", "Deep",
-                "Slick", "Glowdust", "Coldlight", "Redline", "Spark", "Vapor",
-                "Grime", "Backline", "Razor", "Grid", "Shadow", "Chromatic",
-            };
-
-            List<string> gangSuffixes = new List<string>
-            {
-                // Two-word crew names, Neon street style
-                "Runners", "Crew", "Fangs", "Slicks", "Sisters", "Boys", "Girls", "Collective",
-                "Knives", "Serpents", "Cutters", "Rats", "Jackals", "Drifters", "Breakers",
-                "Skulls", "Specters", "Wolves", "Pack", "Slicers", "Phantoms", "Synths",
-                "Gunners", "Dealers", "Hackers", "Signals", "Ghosts", "Wreckers", "Lot",
-                "Sparks", "Rogues", "Runners", "Crew", "Kings", "Line", "Circuit",
-                "Vipers", "Strays", "Lowborn", "Ridge", "Slickline", "Loopers",
-            };
-
-            return gangPrefixes[random.Next(gangPrefixes.Count)] + " " +
-                   gangSuffixes[random.Next(gangSuffixes.Count)];
+            return GangSeedData.StreetGangPrefixes[random.Next(GangSeedData.StreetGangPrefixes.Count)] + " " +
+                   GangSeedData.StreetGangSuffixes[random.Next(GangSeedData.StreetGangSuffixes.Count)];
         }
 
         public static string GetGangJobRole()
         {
             Random r = RandomProvider.Random;
-
-            var roles = new List<string>
-            {
-                "Lookout", "Runner", "Enforcer", "Breaker", "Trigger", "Scout",
-                "Slicer", "Hacker", "Skimmer", "Ghost", "Fixer", "Broker",
-                "Cook", "Mule", "Mixer", "Keeper", "Cracker", "Shiv",
-                "Handler", "Watcher", "Ripper", "Gunner", "Pusher",
-                "Smuggler", "Reaper", "Dealer", "Sentry", "Scout",
-                "Breaker", "Patcher", "Drifter", "Sniper"
-            };
-
-            return roles[r.Next(roles.Count)];
+            return GangSeedData.StreetGangRoles[r.Next(GangSeedData.StreetGangRoles.Count)];
         }
 
 

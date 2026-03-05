@@ -41,8 +41,8 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Informant Space Quest...");
 
-            var factionID = ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]);
-            string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
+            var factionID = ShipSeedData.GetFactionID((string)missionTemplate.parameters["Label"]);
+            string shipname = ShipSeedData.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             Console.WriteLine("shipname: " + shipname);
             //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
@@ -91,7 +91,7 @@ namespace Retrograde.Quests
             var (corpses, crewSpeaker, crewIsFemale) = CrewManager.GetCrew((string)missionTemplate.parameters["Label"], shipname);
             newQuest.SetScriptProperty("duout_space_derelict_quest", "Corpses", corpses);
 
-            newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipTools.GetGangList(factionID));
+            newQuest.SetScriptProperty("duout_space_derelict_quest", "GangMembers", ShipSeedData.GetGangList(factionID));
 
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", RetrogradeContext.Current.StarfieldMod.GenericBaseForms[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToLink<IStarfieldMajorRecordGetter>());
 
@@ -109,7 +109,7 @@ namespace Retrograde.Quests
 
             // Voice the data-slate as a transmission left on the derelict ship.
             // Speaker is the last crew NPC (the one that carries the log entry).
-            var txVoicePool = crewIsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoicePool = crewIsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
             var crewVoice = NPCTools.GetVoice((string)missionTemplate.parameters["Label"], crewIsFemale);
             string crewVoiceEditorId = string.Empty;

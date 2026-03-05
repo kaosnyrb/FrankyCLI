@@ -10,7 +10,7 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         public static string GetFirstPersonAccount(List<string> Addons)
         {
-            string speaker = SeedManager.SpeakerTypes[RandomProvider.Random.Next(SeedManager.SpeakerTypes.Count)];
+            string speaker = NarrativeSeedData.SpeakerTypes[RandomProvider.Random.Next(NarrativeSeedData.SpeakerTypes.Count)];
 
             var logprompt =
                 "Write a short personal dataslate entry — a first-person account from " + speaker + ".\r\n" +
@@ -43,7 +43,7 @@ namespace Retrograde.AI.Utils
         // ------------------------------
         public static string GetTransmission(List<string> Addons)
         {
-            string transmissionType = SeedManager.TransmissionTypes[RandomProvider.Random.Next(SeedManager.TransmissionTypes.Count)];
+            string transmissionType = NarrativeSeedData.TransmissionTypes[RandomProvider.Random.Next(NarrativeSeedData.TransmissionTypes.Count)];
 
             var prompt =
                 "Write " + transmissionType + " that the player finds aboard a derelict ship in deep space.\r\n" +

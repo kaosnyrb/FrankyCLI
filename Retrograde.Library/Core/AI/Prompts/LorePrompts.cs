@@ -29,10 +29,10 @@ namespace Retrograde.AI.Utils
         public static string GenerateLoreFile()
         {
             var rng = RandomProvider.Random;
-            string occupation  = SeedManager.Occupations[rng.Next(SeedManager.Occupations.Count)];
-            string crime       = SeedManager.Crimes[rng.Next(SeedManager.Crimes.Count)];
-            string motive      = SeedManager.Motives[rng.Next(SeedManager.Motives.Count)];
-            string personality = SeedManager.PersonalityTraits[rng.Next(SeedManager.PersonalityTraits.Count)];
+            string occupation  = StorySeedData.Occupations[rng.Next(StorySeedData.Occupations.Count)];
+            string crime       = StorySeedData.Crimes[rng.Next(StorySeedData.Crimes.Count)];
+            string motive      = StorySeedData.Motives[rng.Next(StorySeedData.Motives.Count)];
+            string personality = StorySeedData.PersonalityTraits[rng.Next(StorySeedData.PersonalityTraits.Count)];
 
             string seed = $"The outlaw was a {occupation} who {crime}, driven by {motive}. Personality: {personality}.";
 

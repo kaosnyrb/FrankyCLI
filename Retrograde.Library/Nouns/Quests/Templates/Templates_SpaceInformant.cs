@@ -27,15 +27,15 @@ namespace Retrograde.Quests
             // (factionLabel, factionTag, shipDesc, nameSuffix, getShip)
             var groups = new (string FactionLabel, string FactionTag, string ShipDesc, string NameSuffix, Func<uint> GetShip)[]
             {
-                ("Crimson Fleet", "crimson_fleet", "A cargo ship",              "Crimson Fleet - cargo",   ShipTools.GetCargoShip),
-                ("Crimson Fleet", "crimson_fleet", "A small ship",              "Crimson Fleet - Class A", ShipTools.GetAClassShip),
-                ("Crimson Fleet", "crimson_fleet", "A strong medium sized ship","Crimson Fleet - Class B", ShipTools.GetBClassShip),
-                ("Spacer",        "spacer",        "A cargo ship",              "Spacer  - cargo",         ShipTools.GetCargoShip),
-                ("Spacer",        "spacer",        "A small ship",              "Spacer  - Class A",       ShipTools.GetAClassShip),
-                ("Spacer",        "spacer",        "A strong medium sized ship","Spacer  - Class B",       ShipTools.GetBClassShip),
-                ("Ecliptic",      "ecliptic",      "A cargo ship",              "Ecliptic - cargo",        ShipTools.GetCargoShip),
-                ("Ecliptic",      "ecliptic",      "A small ship",              "Ecliptic - Class A",      ShipTools.GetAClassShip),
-                ("Ecliptic",      "ecliptic",      "A strong medium sized ship","Ecliptic - Class B",      ShipTools.GetBClassShip),
+                ("Crimson Fleet", "crimson_fleet", "A cargo ship",              "Crimson Fleet - cargo",   ShipSeedData.GetCargoShip),
+                ("Crimson Fleet", "crimson_fleet", "A small ship",              "Crimson Fleet - Class A", ShipSeedData.GetAClassShip),
+                ("Crimson Fleet", "crimson_fleet", "A strong medium sized ship","Crimson Fleet - Class B", ShipSeedData.GetBClassShip),
+                ("Spacer",        "spacer",        "A cargo ship",              "Spacer  - cargo",         ShipSeedData.GetCargoShip),
+                ("Spacer",        "spacer",        "A small ship",              "Spacer  - Class A",       ShipSeedData.GetAClassShip),
+                ("Spacer",        "spacer",        "A strong medium sized ship","Spacer  - Class B",       ShipSeedData.GetBClassShip),
+                ("Ecliptic",      "ecliptic",      "A cargo ship",              "Ecliptic - cargo",        ShipSeedData.GetCargoShip),
+                ("Ecliptic",      "ecliptic",      "A small ship",              "Ecliptic - Class A",      ShipSeedData.GetAClassShip),
+                ("Ecliptic",      "ecliptic",      "A strong medium sized ship","Ecliptic - Class B",      ShipSeedData.GetBClassShip),
             };
 
             foreach (var (factionLabel, factionTag, shipDesc, nameSuffix, getShip) in groups)

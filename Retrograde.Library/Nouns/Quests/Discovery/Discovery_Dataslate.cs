@@ -50,7 +50,7 @@ namespace Retrograde.Quests
             bool speakerIsFemale = RandomProvider.Random.Next(100) > 50;
             var speakerTemplate = NPCTools.FindTemplateDeadNpc(speakerIsFemale);
             Npc speakerNpc = NPCTools.CloneNPC(myMod, speakerTemplate);
-            speakerNpc.Name = SeedManager.GenerateName(speakerIsFemale);
+            speakerNpc.Name = NameSeedData.GenerateName(speakerIsFemale);
             speakerNpc.EditorID = "npc_disc_" + bountybook.instance.FormKey.ID.ToString("X6");
             var speakerVoice = NPCTools.GetVoice("", speakerIsFemale);
             string speakerVoiceEditorId = string.Empty;
@@ -62,7 +62,7 @@ namespace Retrograde.Quests
             }
             myMod.Npcs.Add(speakerNpc);
 
-            var txVoicePool = speakerIsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoicePool = speakerIsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
             SpeechTools.AddVoice(bountybook.instance.FormKey.ID, speakerNpc.FormKey, bookcontents, speakerVoiceEditorId, txVoice.Id);
 

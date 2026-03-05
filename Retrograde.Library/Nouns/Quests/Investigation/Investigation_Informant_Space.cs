@@ -41,7 +41,7 @@ namespace Retrograde.Quests
             Console.WriteLine("Generating Informant Space Quest...");
             questloc = missionTemplate.Location;
 
-            var factionID = ShipTools.GetFactionID((string)missionTemplate.parameters["Label"]);
+            var factionID = ShipSeedData.GetFactionID((string)missionTemplate.parameters["Label"]);
             var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {
                 "Location:" + missionTemplate.Location + "\r\n",
@@ -50,7 +50,7 @@ namespace Retrograde.Quests
             });
             Console.WriteLine("datasource: " + datasource);
 
-            string shipname = ShipTools.GetFactionShipName((string)missionTemplate.parameters["Label"]);
+            string shipname = ShipSeedData.GetFactionShipName((string)missionTemplate.parameters["Label"]);
             Console.WriteLine("shipname: " + shipname);
             //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
@@ -78,7 +78,7 @@ namespace Retrograde.Quests
 
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
             newQuest.SetScriptProperty("duout_space_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_space_bounty_quest", "GangMembers", ShipTools.GetGangList(factionID));
+            newQuest.SetScriptProperty("duout_space_bounty_quest", "GangMembers", ShipSeedData.GetGangList(factionID));
 
             newQuest.SetQuestReferenceCreateAlias("PrimaryRef", RetrogradeContext.Current.StarfieldMod.GenericBaseForms[new FormKey(RetrogradeContext.Current.StarfieldModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToLink<IStarfieldMajorRecordGetter>());
 
@@ -99,7 +99,7 @@ namespace Retrograde.Quests
             bool speakerIsFemale = RandomProvider.Random.Next(100) > 50;
             var speakerTemplate = NPCTools.FindTemplateDeadNpc(speakerIsFemale);
             Npc speakerNpc = NPCTools.CloneNPC(myMod, speakerTemplate);
-            speakerNpc.Name = SeedManager.GenerateName(speakerIsFemale);
+            speakerNpc.Name = NameSeedData.GenerateName(speakerIsFemale);
             speakerNpc.EditorID = "npc_crewlog_" + questID;
             var speakerVoice = NPCTools.GetVoice((string)missionTemplate.parameters["Label"], speakerIsFemale);
             string speakerVoiceEditorId = string.Empty;
@@ -111,7 +111,7 @@ namespace Retrograde.Quests
             }
             myMod.Npcs.Add(speakerNpc);
 
-            var txVoicePool = speakerIsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var txVoicePool = speakerIsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
             SpeechTools.AddVoice(bountybook.instance.FormKey.ID, speakerNpc.FormKey, booklogmessage, speakerVoiceEditorId, txVoice.Id);
 

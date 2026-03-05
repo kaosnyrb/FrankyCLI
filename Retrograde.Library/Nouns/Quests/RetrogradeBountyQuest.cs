@@ -86,7 +86,7 @@ namespace Retrograde.Chains
             newQuest.SetScriptProperty("retrograde_bounty_quest", "TargetPlanetLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetScriptProperty("retrograde_bounty_quest", "TargetSystemLocation", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
-            newQuest.SetScriptProperty("retrograde_bounty_quest", "GangMembers", ShipTools.GetGangList(ShipTools.GetFactionID(faction)));
+            newQuest.SetScriptProperty("retrograde_bounty_quest", "GangMembers", ShipSeedData.GetGangList(ShipSeedData.GetFactionID(faction)));
 
             //Debugging
             newQuest.SetScriptProperty("retrograde_bounty_quest", "MinGangMembers", 1);

@@ -150,9 +150,9 @@ namespace Retrograde.Passes.SpaceStation
         {
             // Get a random base armor from Starfield.esm (helmet, pack, or spacesuit)
             int armorType = RandomProvider.Random.Next(100);
-            uint armorId = armorType < 33 ? ArmourTools.GetRandomHelmet()
-                         : armorType < 66 ? ArmourTools.GetRandomPack()
-                         : ArmourTools.GetRandomSpacesuit();
+            uint armorId = armorType < 33 ? ArmourSeedData.GetRandomHelmet()
+                         : armorType < 66 ? ArmourSeedData.GetRandomPack()
+                         : ArmourSeedData.GetRandomSpacesuit();
             var baseArmor = RetrogradeContext.Current.StarfieldMod.Armors[new FormKey(RetrogradeContext.Current.StarfieldModKey, armorId)].DeepCopy();
 
             if (baseArmor == null)

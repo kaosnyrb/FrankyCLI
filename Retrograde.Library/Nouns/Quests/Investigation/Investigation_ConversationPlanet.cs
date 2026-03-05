@@ -82,7 +82,7 @@ namespace Retrograde.Quests
                 "Location: " + missionTemplate.Location,
             });
 
-            var voicePool    = npcResult.IsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var voicePool    = npcResult.IsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var elevenLabsId = voicePool[RandomProvider.Random.Next(voicePool.Count)].Id;
 
             var npcSuffix = newQuest.instance.FormKey.ID.ToString("X8");

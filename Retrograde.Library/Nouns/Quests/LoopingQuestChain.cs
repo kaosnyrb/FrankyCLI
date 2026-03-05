@@ -69,7 +69,10 @@ namespace Retrograde.Chains
 
                 "Here is the outlaw NPC this Lore must be aligned with:\r\n" +
                 "- Name: " + outlawNpc.name + "\r\n" +
-                //"- Background: " + outlawNpc.background + "\r\n\r\n" +
+                "- Background: " + outlawNpc.Upbringing + "\r\n" +
+                "- Core fear: " + outlawNpc.Fear + "\r\n" +
+                "- Motivation: " + outlawNpc.Goal + "\r\n" +
+                "- Personality flaw: " + outlawNpc.Flaw + "\r\n" +
 
                 "Your task: generate a full lore instance by completing every section that contains instructions.\r\n\r\n" +
                 "Rules:\r\n" +

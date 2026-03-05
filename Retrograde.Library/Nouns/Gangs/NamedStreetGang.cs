@@ -1,4 +1,5 @@
 using Retrograde.AI;
+using Retrograde.AI.Utils;
 using Retrograde.Interfaces;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -36,53 +37,8 @@ namespace Retrograde.Nouns.Gangs
         public static string GetGangName()
         {
             Random random = RandomProvider.Random;
-            List<string> gangPrefixes = new List<string>
-            {
-                "Red", "Black", "Iron", "Steel", "Rust", "Grim", "Dead", "Broken", "Shadow",
-                "Blood", "Night", "Grave", "Ash", "Gutter", "Backstreet", "Lowtown", "Hollow",
-                "Cross", "Eastside", "Westside", "Southend", "Northblock", "Dust", "Mud",
-                "Scrap", "Brick", "Stone", "Razor", "Chain", "Wire", "Block", "Wasteland",
-                "Chrome", "Slag", "Smoke", "Sewer", "Under", "Bleak", "Ridge", "Ironbound",
-                "Drift", "Lockjaw", "Blacktop", "Cracked", "Scar", "Vandal", "Pitch",
-                "Copper", "Tin", "Lead", "Rot", "Slick", "Grime", "Blight", "Rivet",
-                "Forge", "Rusted", "Cold", "Frost", "Burnt", "Charred", "Smolder",
-                "Ember", "Thunder", "Storm", "Wild", "Feral", "Nomad", "Stray", "Lone",
-                "Bone", "Skull", "Hate", "Vice", "Sorrow", "Dread", "Void", "Wraith",
-                "Rumble", "Ruckus", "Scrapper", "Chainlink", "Barbed", "Hellbound", "Crimson",
-                "Pale", "Ivory", "Coal", "Shiv", "Needle", "Soot", "Gloom", "Tangle",
-                "Vermin", "Slickline", "Ironcore", "Blackwire", "Gravel", "Murk", "Roughcut",
-                // Military phonetic alphabet & tactical designators
-                "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Gamma", "Hotel",
-                "Kilo", "Lima", "Omega", "Sierra", "Tango", "Uniform", "Victor", "Zulu",
-                "Squad", "Unit", "Division", "Sector", "Zone", "Company", "Battalion",
-                "Tier-One", "Strike", "Recon", "Forward", "Tactical", "Rapid", "Command",
-                "Vector", "Grid", "Perimeter", "Outpost", "Protocol", "Cipher", "Directive",
-
-                // Paramilitary / PMC-flavored
-                "Blacksite", "Shadowcell", "Darkwatch", "Ironfront", "Redline", "Nightwatch",
-                "Warpath", "Overwatch", "Sentinel", "Bulwark", "Vanguard", "Helix", "Crucible",
-                "Legion", "Taskforce", "Cerberus", "Executioner", "Skirmish", "Breach",
-            };
-            List<string> gangSuffixes = new List<string>
-            {
-                "Reapers", "Rats", "Jackals", "Vipers", "Saints", "Devils", "Serpents", "Breakers", "Wolves",
-                "Talons", "Mongrels", "Phantoms", "Specters", "Ghouls", "Grinders", "Cutthroats", "Rogues",
-                "Drifters", "Raiders", "Bruisers", "Stalkers", "Outcasts", "Ironclaws", "Deadlights", "Bonecrushers",
-                "Shadows", "Hollows", "Nightfolk", "Eclipsers", "Backlot Boys", "Dustwalkers", "Ridge Runners",
-                "Streetburners", "Ashborn", "Pack", "Crimson Lot", "Black Fangs", "Gravepack", "Scrapwolves",
-                "Rubble Rats", "Steel Vipers", "Gutter Kings", "Wastelanders", "Faultliners", "Lowborn",
-                "Blackjacks", "Chain Runners", "Shivmasters", "Lockjaw Crew", "Thunder Dogs", "Pit Wolves",
-                "Slick Syndicate", "Rust Syndicate", "Dripline Crew", "Backbreaker Union", "Molten Skulls",
-                "Needle Boys", "Ironbloods", "Edgewalkers", "Night Wreckers", "Frosthands", "Grime Pact",
-                "Razorbacks", "Slagborn", "Grim Company", "Gravel Kings", "Mirefolk", "Dust Devils", "Hellpack",
-                "Red Lanterns", "Chrome Fangs", "Wreckrats", "Basement Lords", "Block Runners", "Gutterline",
-                "Ash Syndicate", "Crackstone Crew", "Chainlink Mob", "Rustmarks", "Night Chain", "Hollow Sons",
-                "Deadwater Crew", "Blight Riders", "Iron Syndicate", "Ravagers", "Hellchain", "Spinebreakers",
-                "Rotfangs", "Blackwater Pact", "Rage Unit", "Broken Crown", "Silk Knives", "Rubble Born",
-                "Wire Rats", "Torchline", "Gutter Serpents", "Blood Signal", "Shadow Union", "Vermin Pact"
-            };
-
-            return gangPrefixes[random.Next(gangPrefixes.Count)] + " " + gangSuffixes[random.Next(gangSuffixes.Count)];
+            return GangSeedData.NamedGangPrefixes[random.Next(GangSeedData.NamedGangPrefixes.Count)] + " " +
+                   GangSeedData.NamedGangSuffixes[random.Next(GangSeedData.NamedGangSuffixes.Count)];
         }
 
         public Mutagen.Bethesda.Starfield.FormList GenerateGang()

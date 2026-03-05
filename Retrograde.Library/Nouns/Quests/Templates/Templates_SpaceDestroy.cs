@@ -36,15 +36,15 @@ namespace Retrograde.Quests
             // --- Guarded: faction × ship class ---
             var guards = new (string FactionLabel, string FactionTag, string NameSuffix, string DescSize, Func<uint> GetShip)[]
             {
-                ("Crimson Fleet", "crimson_fleet", "A Class", "Small", ShipTools.GetAClassShip),
-                ("Crimson Fleet", "crimson_fleet", "B Class", "Large", ShipTools.GetBClassShip),
-                ("Crimson Fleet", "crimson_fleet", "Cargo",   "Cargo", ShipTools.GetCargoShip),
-                ("Spacer",        "spacer",        "Small",   "Small", ShipTools.GetAClassShip),
-                ("Spacer",        "spacer",        "Large",   "Large", ShipTools.GetBClassShip),
-                ("Spacer",        "spacer",        "Cargo",   "Cargo", ShipTools.GetCargoShip),
-                ("Ecliptic",      "ecliptic",      "Small",   "Small", ShipTools.GetAClassShip),
-                ("Ecliptic",      "ecliptic",      "Large",   "Large", ShipTools.GetBClassShip),
-                ("Ecliptic",      "ecliptic",      "Cargo",   "Cargo", ShipTools.GetCargoShip),
+                ("Crimson Fleet", "crimson_fleet", "A Class", "Small", ShipSeedData.GetAClassShip),
+                ("Crimson Fleet", "crimson_fleet", "B Class", "Large", ShipSeedData.GetBClassShip),
+                ("Crimson Fleet", "crimson_fleet", "Cargo",   "Cargo", ShipSeedData.GetCargoShip),
+                ("Spacer",        "spacer",        "Small",   "Small", ShipSeedData.GetAClassShip),
+                ("Spacer",        "spacer",        "Large",   "Large", ShipSeedData.GetBClassShip),
+                ("Spacer",        "spacer",        "Cargo",   "Cargo", ShipSeedData.GetCargoShip),
+                ("Ecliptic",      "ecliptic",      "Small",   "Small", ShipSeedData.GetAClassShip),
+                ("Ecliptic",      "ecliptic",      "Large",   "Large", ShipSeedData.GetBClassShip),
+                ("Ecliptic",      "ecliptic",      "Cargo",   "Cargo", ShipSeedData.GetCargoShip),
             };
 
             foreach (var (factionLabel, factionTag, nameSuffix, descSize, getShip) in guards)

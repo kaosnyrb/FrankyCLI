@@ -41,7 +41,7 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Activator Planet Quest...");
 
-            var questActivator = ActivatorTools.GetRandomLargeGroundType();
+            var questActivator = ActivatorSeedData.GetRandomLargeGroundType();
 
             var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
             {

@@ -1,0 +1,135 @@
+using System.Collections.Generic;
+
+namespace Retrograde.AI.Utils
+{
+    public static class StorySeedData
+    {
+        // Seed pools — rolled in C# so the AI isn't left to pick its own "random" archetype
+        public static readonly List<string> Occupations = new List<string>
+        {
+            "cargo loader", "medical technician", "shuttle pilot", "crop farmer",
+            "port customs inspector", "ship mechanic", "water reclamation tech",
+            "mine surveyor", "freight coordinator", "food vendor",
+            "colony maintenance worker", "transit scheduler", "fuel depot operator",
+            "lab assistant", "livestock handler", "dockmaster clerk",
+            "waste processing operator", "colony supply runner", "security guard",
+            "planetary soil tester",
+            "salvage crew hand", "prospector on low-yield claims", "cold storage clerk",
+            "data relay operator", "radiation safety monitor", "field medic",
+            "habitat construction worker", "power cell recycler", "seed vault technician",
+            "repair bay welder", "colony census recorder", "ship parts inspector",
+            "outpost perimeter guard", "hazmat disposal worker", "communications relay operator",
+            "terraforming support tech", "settlement cook", "water purification technician",
+            "transit dock hand", "livestock geneticist"
+        };
+
+        public static readonly List<string> Crimes = new List<string>
+        {
+            "embezzled employer funds over several months",
+            "assaulted a co-worker and fled before authorities arrived",
+            "stole equipment from their worksite and sold it on",
+            "ran a low-level protection racket on local traders",
+            "forged shipping manifests to cover missing cargo",
+            "sold stolen medical supplies on the black market",
+            "blackmailed a supervisor using personal information",
+            "skimmed credits from payroll records",
+            "fenced stolen colony equipment through a third party",
+            "defrauded settlers with a fake land-claim scheme",
+            "destroyed company property to hide a costly mistake",
+            "sold access credentials to an outside buyer",
+            "extorted a business competitor",
+            "tampered with inventory records for personal gain",
+            "impersonated a licensed contractor to pocket payment",
+            "falsified safety inspection reports in exchange for a bribe",
+            "diverted emergency supplies to sell privately",
+            "smuggled contraband aboard a colony transport",
+            "ran an unlicensed gambling operation from their workplace",
+            "staged a theft to collect the insurance payout",
+            "sold classified colony survey data to a rival faction",
+            "laundered credits through a shell business",
+            "sabotaged a competitor's equipment to win a contract",
+            "coerced a junior worker into covering for their mistakes",
+            "collected a dead colleague's wages using their stolen identity",
+            "skimmed fuel quotas over a prolonged period",
+            "leaked proprietary data to an outside buyer",
+            "filed fraudulent expense claims over several years",
+            "planted false evidence to frame a colleague for their own crime",
+            "threatened a witness into staying silent",
+            "misappropriated relief funds sent for disaster victims",
+            "operated a grey-market parts depot out of their workplace",
+            "bribed a port official to clear irregular cargo",
+            "stole personal effects from a deceased settler's quarters",
+            "poisoned a rival's supply cache to drive them out of business"
+        };
+
+        public static readonly List<string> Motives = new List<string>
+        {
+            "debt they could not repay",
+            "desperation to cover a family member's medical costs",
+            "anger over unpaid wages and broken promises",
+            "a failed attempt to buy passage off-planet",
+            "covering up an earlier smaller mistake that spiralled",
+            "paying off a local gang that threatened their family",
+            "a gambling habit that got out of control",
+            "deep resentment toward a specific person who wronged them",
+            "fear of losing their colony housing",
+            "misplaced loyalty to someone who exploited them",
+            "revenge for being passed over for a promotion they deserved",
+            "getting caught in someone else's scheme and panicking",
+            "trying to escape an abusive situation with no other options",
+            "funding an off-world relocation for their children",
+            "blackmailed by someone who knew about a past mistake",
+            "too proud to admit failure and kept digging deeper",
+            "acting on orders from someone they were afraid to refuse",
+            "protecting a secret that would have ended their career",
+            "trying to reclaim something they believed was stolen from them",
+            "caught between two criminal groups with no safe exit",
+            "a slow slide from bending rules to breaking them outright",
+            "manipulated by someone they trusted completely",
+            "grief that made them stop caring about consequences",
+            "simply convinced they wouldn't get caught",
+            "an addiction that consumed their savings and then their ethics",
+            "a bitter rivalry that escalated beyond what they intended",
+            "making a split-second decision they couldn't take back",
+            "believing the corporation owed them for years of exploitation",
+            "covering for a family member who made the first mistake",
+            "convinced the target of their crime deserved everything they got",
+            "chasing a rumour of easy credits that turned far more complicated",
+            "believing they were helping someone who was actually using them"
+        };
+
+        public static readonly List<string> PersonalityTraits = new List<string>
+        {
+            "cautious, but panics when cornered",
+            "overconfident and dismissive of consequences",
+            "loyal to people they trust, ruthless to everyone else",
+            "methodical — leaves few traces but hates improvising",
+            "reckless — banks on luck holding out",
+            "paranoid, convinced they are constantly being watched",
+            "meek in person, calculating in planning",
+            "charming on the surface, self-serving underneath",
+            "genuinely convinced what they did was justified",
+            "deeply ashamed but committed to seeing it through",
+            "quick to deflect blame onto anyone nearby",
+            "quietly desperate but maintains a calm facade",
+            "genuinely remorseful but unwilling to hand themselves in",
+            "prone to over-explaining to fill nervous silences",
+            "fiercely protective of anyone they consider family",
+            "bitter and fatalistic — expects to get caught eventually",
+            "obsessively careful about small details, blind to bigger risks",
+            "easily led by stronger personalities",
+            "tends to underestimate others and talk too much",
+            "keeps their own counsel — shares nothing they don't have to",
+            "cold and transactional, rarely shows emotion",
+            "superstitious — believes fate is actively working against them",
+            "uses humour to deflect serious questions",
+            "highly adaptive — reads people quickly and adjusts accordingly",
+            "stubborn — refuses to admit a plan is failing even when it is",
+            "prone to impulsive decisions followed by elaborate rationalisations",
+            "compassionate toward strangers but ruthless toward institutions",
+            "nostalgic — often references how things used to be before all this",
+            "speaks in half-truths — never quite lying, never quite honest",
+            "carefully maintains small routines that mask deeper unease"
+        };
+    }
+}

@@ -31,17 +31,17 @@ namespace Retrograde.Nouns
             string Type = "";
             if (type < 33)
             {
-                armourid = ArmourTools.GetRandomHelmet();
+                armourid = ArmourSeedData.GetRandomHelmet();
                 Type = "Spacesuit Helmet";
             }
             else if  (type >= 33 && type <= 66)
             {
-                armourid = ArmourTools.GetRandomPack();
+                armourid = ArmourSeedData.GetRandomPack();
                 Type = "Spacesuit Pack";
             }
             else
             {
-                armourid = ArmourTools.GetRandomSpacesuit();
+                armourid = ArmourSeedData.GetRandomSpacesuit();
                 Type = "Spacesuit";
             }
 

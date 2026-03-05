@@ -6,7 +6,7 @@ namespace Retrograde.Utils;
 /// <summary>
 /// Provides random faction name selection for Starfield universe.
 /// </summary>
-public static class FactionTools
+public static class FactionSeedData
 {
     public static string GetFaction()
     {

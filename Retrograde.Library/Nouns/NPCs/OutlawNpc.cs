@@ -36,6 +36,11 @@ namespace Retrograde.Nouns
         public FormKey Logfile;
         public string LogText = string.Empty;
 
+        public string Upbringing = string.Empty;
+        public string Fear       = string.Empty;
+        public string Goal       = string.Empty;
+        public string Flaw       = string.Empty;
+
 
 
 
@@ -58,7 +63,7 @@ namespace Retrograde.Nouns
 
             spacesuit = hasspacesuit;
 
-            var voicePool = female ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var voicePool = female ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var voice = voicePool[RandomProvider.Random.Next(voicePool.Count)];
             ElevenLabsVoiceId   = voice.Id;
             ElevenLabsVoiceName = voice.Name;
@@ -67,7 +72,12 @@ namespace Retrograde.Nouns
             Eyecolor = NPCTools.GetEyeColour();
 
             Console.WriteLine("Building Outlaw NPC...");
-            name = SeedManager.GenerateName(female);
+            name = NameSeedData.GenerateName(female);
+
+            Upbringing = NpcSeedData.GetUpbringing();
+            Fear       = NpcSeedData.GetFears();
+            Goal       = NpcSeedData.GetGoals();
+            Flaw       = NpcSeedData.GetFlaws();
         }
 
         public string GenerateLogfile()
@@ -78,31 +88,11 @@ namespace Retrograde.Nouns
             sb.AppendLine("This is a spoken monologue recorded alone into a data-slate — write it for voice performance, not for reading.");
             sb.AppendLine();
 
-            // Use the quest's LoreContext if available (it's always set before GenerateLog is called in the chain).
-            // Fall back to random seeds only if running standalone.
-            if (!string.IsNullOrEmpty(LorePrompts.LoreContext))
-            {
-                sb.AppendLine("Character context — use the LoreContext established earlier in this conversation. It is the source of truth for who this person is and why they're running.");
-            }
-            else
-            {
-                string upbringing = GetUpbringing();
-                string fear       = GetFears();
-                string goal       = GetGoals();
-                string flaw       = Getflaws();
-
-                sb.AppendLine("Character context:");
-                sb.AppendLine("- Background: " + upbringing);
-                sb.AppendLine("- Core fear: " + fear);
-                sb.AppendLine("- Motivation: " + goal);
-                sb.AppendLine("- Personality flaw: " + flaw);
-                if (!string.IsNullOrEmpty(BountyFaction))
-                    sb.AppendLine("- Currently hunted by: " + BountyFaction);
-            }
+            sb.AppendLine("Character context — use the LoreContext established earlier in this conversation. It is the source of truth for who this person is and why they're running.");
             sb.AppendLine();
             var rng = RandomProvider.Random;
-            string tone  = SeedManager.LogTones[rng.Next(SeedManager.LogTones.Count)];
-            string focus = SeedManager.LogFocusPoints[rng.Next(SeedManager.LogFocusPoints.Count)];
+            string tone  = NarrativeSeedData.LogTones[rng.Next(NarrativeSeedData.LogTones.Count)];
+            string focus = NarrativeSeedData.LogFocusPoints[rng.Next(NarrativeSeedData.LogFocusPoints.Count)];
 
             sb.AppendLine("Tone: " + tone + ".");
             sb.AppendLine();
@@ -245,118 +235,10 @@ namespace Retrograde.Nouns
 
 
 
-        public string GetUpbringing()
-        {
-            Random random = RandomProvider.Random;
-
-            List<string> upbringinglist = new List<string>()
-            {
-                "Grew up in the city of New Atlantis, their parents worked in MAST admin.",
-                "Grew up in the city of New Atlantis, their parents worked in the UC Navy.",
-                "Grew up in the city of Neon, as a streetrat on the Ebbside.",
-                "Grew up in the city of Akila, as an orphan on The Stretch.",
-                "Grew up drifting system to system as a spacer kid aboard a family owned hauler.",
-            };
-
-            return upbringinglist[random.Next(upbringinglist.Count)];
-        }
-
-        public string Getflaws()
-        {
-            Random random = RandomProvider.Random;
-            List<string> personalityFlaws = new List<string>()
-            {
-                "Impulsive",
-                "Overly stubborn",
-                "Easily angered",
-                "Overconfident",
-                "Pessimistic",
-            };
-
-            return personalityFlaws[random.Next(personalityFlaws.Count)];
-        }
-
-        public string GetTrait()
-        {
-            Random random = RandomProvider.Random;
-
-            List<string> traitlist = new List<string>()
-            {
-                "Short temper",
-                "Good hearing",
-                "Night owl",
-                "Tech savvy",
-                "Fearless",
-            };
-
-            return traitlist[random.Next(traitlist.Count)];
-        }
-
-        public string GetHabit()
-        {
-            List<string> habitsAndBehaviors = new List<string>()
-            {
-                "Always cleans their gear",
-                "Talks with their hands",
-                "Constantly taps their foot",
-                "Writes everything down",
-                "Double-checks all locks",
-            };
-
-            Random random = RandomProvider.Random;
-
-            return habitsAndBehaviors[random.Next(habitsAndBehaviors.Count)];
-        }
-
-        public string GetFears()
-        {
-            Random random = RandomProvider.Random;
-            List<string> fearsAndPhobias = new List<string>()
-            {
-                "Fear of heights",
-                "Fear of deep water",
-                "Fear of small spaces",
-                "Fear of the dark",
-                "Fear of being alone",
-            };
-
-            return fearsAndPhobias[random.Next(fearsAndPhobias.Count)];
-        }
-
-        public string GetGoals()
-        {
-            Random random = RandomProvider.Random;
-            List<string> motivationsAndGoals = new List<string>()
-            {
-                "Seeking wealth",
-                "Seeking fame",
-                "Seeking revenge",
-                "Searching for lost family",
-                "Trying to escape their past",
-            };
-
-            return motivationsAndGoals[random.Next(motivationsAndGoals.Count)];
-        }
-
         public static string GetNationality()
         {
-            Random random = RandomProvider.Random;
-
-            List<string> nationalityList = new List<string>()
-            {
-                "American",
-                "British",
-                "Canadian",
-                "Mexican",
-                "Brazilian",
-                "French",
-                "German",
-                "Japanese",
-                "Chinese",
-                "Russian",
-            };
-
-            return nationalityList[random.Next(nationalityList.Count)];
+            var r = RandomProvider.Random;
+            return NpcSeedData.Nationalities[r.Next(NpcSeedData.Nationalities.Count)];
         }
 
     }

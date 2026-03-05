@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Retrograde.Utils;
 
-public static class ArmourTools
+public static class ArmourSeedData
 {
     public static uint GetRandomHelmet()
     {
