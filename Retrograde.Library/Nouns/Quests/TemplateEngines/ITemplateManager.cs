@@ -8,6 +8,7 @@ namespace Retrograde.Chains.Interfaces
 {
     public interface ITemplateManager
     {
+        public TemplateLib AvailableLib { get; }
         public MissionTemplate GetShowdownMissionTemplate(string missionName, List<string> addons = null);
         public MissionTemplate GetInvestigationMissionTemplate(string missionName, List<string> addons = null);
         public MissionTemplate GetDiscoveryMissionTemplate(string missionName, List<string> addons = null);

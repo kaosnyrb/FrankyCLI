@@ -7,6 +7,8 @@ namespace Retrograde.Quests.TemplateEngines
     {
         private readonly ITemplateEngine _engine;
 
+        public TemplateLib AvailableLib => _engine.AvailableTemplateLib;
+
         protected BaseTemplateManager(ITemplateEngine engine)
         {
             _engine = engine;
