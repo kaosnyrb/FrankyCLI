@@ -126,9 +126,6 @@ namespace Retrograde.AI
             // 4. Do your existing cleanup
             textres = textres.Replace(" — ", " "); // No EM-dashes with spaces
             textres = textres.Replace("—", " ");    // No EM-dashes
-            textres = textres.Replace("“", "\"");  // Weird quotes
-            textres = textres.Replace("”", "\"");
-            textres = textres.Replace("’", "'");
 
             // 5. Add assistant reply back into history so context is preserved
             _history.Add(new AssistantChatMessage(textres));
@@ -140,40 +137,40 @@ namespace Retrograde.AI
 
         public static string GetBackgroundPrompt()
         {
-            string result = “”;
-            result += “You are a Starfield quest writer crafting an in-game mission narrative.\r\n\r\n”;
+            string result = "";
+            result += "You are a Starfield quest writer crafting an in-game mission narrative.\r\n\r\n";
 
-            result += “Include newline characters in your response if there are multiple sentences.\r\n”;
-            result += “Don’t use the following characters: —\r\n”;
+            result += "Include newline characters in your response if there are multiple sentences.\r\n";
+            result += "Don’t use the following characters: —\r\n";
 
-            result += “The following is background information about the Starfield universe. Do not quote it directly.\r\n\r\n”;
+            result += "The following is background information about the Starfield universe. Do not quote it directly.\r\n\r\n";
 
             // Factions
-            result += “The United Colonies (UC) is the largest human government — a centralized republic with its capital at New Atlantis on Jemison. The UC military includes the Navy, Vanguard (privateer arm), Marines, and UC SysDef (anti-piracy).\r\n”;
-            result += “The Freestar Collective is a libertarian confederation of three systems (Cheyenne, Volii, Narion) with its capital at Akila City. Its law enforcement arms are Freestar Security and the elite Freestar Rangers, headquartered at The Rock in Akila City.\r\n”;
-            result += “The UC and Freestar fought the Colony War (ended 2311 with the Armistice); an uneasy peace holds in 2330.\r\n”;
-            result += “The Crimson Fleet is a loose coalition of space pirates, expanded far beyond their Kryx system origin by 2330 and now a recognized threat across the Settled Systems.\r\n”;
-            result += “House Va’ruun is a fanatical theocracy worshipping the Great Serpent; Va’ruun Zealots remain hostile across the Settled Systems after House Va’ruun withdrew into isolation.\r\n”;
-            result += “Ecliptic Mercenaries are guns-for-hire widely used for dirty work by all factions. Spacers are unaffiliated scavengers and criminals with no central leadership.\r\n”;
-            result += “The Trackers Alliance posts bounties and runs clearance services across the Settled Systems.\r\n”;
+            result += "The United Colonies (UC) is the largest human government — a centralized republic with its capital at New Atlantis on Jemison. The UC military includes the Navy, Vanguard (privateer arm), Marines, and UC SysDef (anti-piracy).\r\n";
+            result += "The Freestar Collective is a libertarian confederation of three systems (Cheyenne, Volii, Narion) with its capital at Akila City. Its law enforcement arms are Freestar Security and the elite Freestar Rangers, headquartered at The Rock in Akila City.\r\n";
+            result += "The UC and Freestar fought the Colony War (ended 2311 with the Armistice); an uneasy peace holds in 2330.\r\n";
+            result += "The Crimson Fleet is a loose coalition of space pirates, expanded far beyond their Kryx system origin by 2330 and now a recognized threat across the Settled Systems.\r\n";
+            result += "House Va’ruun is a fanatical theocracy worshipping the Great Serpent; Va’ruun Zealots remain hostile across the Settled Systems after House Va’ruun withdrew into isolation.\r\n";
+            result += "Ecliptic Mercenaries are guns-for-hire widely used for dirty work by all factions. Spacers are unaffiliated scavengers and criminals with no central leadership.\r\n";
+            result += "The Trackers Alliance posts bounties and runs clearance services across the Settled Systems.\r\n";
 
             // Key locations (name + role only)
-            result += “Key locations: New Atlantis (UC capital, Jemison) — districts: MAST, Residential, Commercial, The Well, Spaceport. Neon (pleasure city on Volii Alpha, Freestar) — districts: Neon Core, Ebbside, Underbelly, Rooftops, Starport; controlled by Xenofresh Fisheries, home of Ryujin Industries. Akila City (Freestar capital, Akila) — districts: The Core, Midtown, Coe Plaza, The Stretch, Spaceport, City Walls, Farms. Gagarin Landing (industrial settlement, planet Gagarin) — recovering post-Armistice economy. Cydonia (UC mining hub, Mars). The Den (neutral space station). The Clinic (Freestar medical station). Paradiso (luxury resort, Porrima II). Red Mile (dangerous blood sport outpost, Porrima III). HopeTown (HopeTech shipyard, Polvo). New Homestead (historic settlement, Titan). Waggoner Farm (small farm, Montara Luna).\r\n”;
+            result += "Key locations: New Atlantis (UC capital, Jemison) — districts: MAST, Residential, Commercial, The Well, Spaceport. Neon (pleasure city on Volii Alpha, Freestar) — districts: Neon Core, Ebbside, Underbelly, Rooftops, Starport; controlled by Xenofresh Fisheries, home of Ryujin Industries. Akila City (Freestar capital, Akila) — districts: The Core, Midtown, Coe Plaza, The Stretch, Spaceport, City Walls, Farms. Gagarin Landing (industrial settlement, planet Gagarin) — recovering post-Armistice economy. Cydonia (UC mining hub, Mars). The Den (neutral space station). The Clinic (Freestar medical station). Paradiso (luxury resort, Porrima II). Red Mile (dangerous blood sport outpost, Porrima III). HopeTown (HopeTech shipyard, Polvo). New Homestead (historic settlement, Titan). Waggoner Farm (small farm, Montara Luna).\r\n";
 
             // Key corporations (name + role only)
-            result += “Key corporations: GalBank (finance, ATMs everywhere), Trade Authority (gray-market traders who buy contraband), Reliant Medical (largest medical provider), Argos Extractors (mining), Ryujin Industries (megacorp, Neon), Xenofresh Fisheries (owns Neon, produces Aurora drug), HopeTech (cargo ships, HopeTown), Red Harvest (grain products), Centauri Mills (food manufacturing), LIST (settler support org for fringe worlds).\r\n”;
+            result += "Key corporations: GalBank (finance, ATMs everywhere), Trade Authority (gray-market traders who buy contraband), Reliant Medical (largest medical provider), Argos Extractors (mining), Ryujin Industries (megacorp, Neon), Xenofresh Fisheries (owns Neon, produces Aurora drug), HopeTech (cargo ships, HopeTown), Red Harvest (grain products), Centauri Mills (food manufacturing), LIST (settler support org for fringe worlds).\r\n";
 
-            result += “The game starts on May 7th 2330. Use this to figure out any dates needed.\r\n\r\n”;
+            result += "The game starts on May 7th 2330. Use this to figure out any dates needed.\r\n\r\n";
 
-            result += “This marks the end of the background information section. Following this is more detail on the prompt to carry out.\r\n\r\n”;
+            result += "This marks the end of the background information section. Following this is more detail on the prompt to carry out.\r\n\r\n";
 
-            result += “Quest generation structure — follow these rules for all story content you generate:\r\n”;
-            result += “- Story stages are generated from the final encounter backwards: showdown first, then investigations, then discovery.\r\n”;
-            result += “- Each earlier stage must reveal progressively less about the target.\r\n”;
-            result += “- Use details from each previously generated stage to inform the next.\r\n”;
-            result += “- New <Lore> entries will appear during generation; use them to enrich each scene.\r\n”;
-            result += “- At least one concrete lore detail (faction, tech, location, rumor) must ground each scene.\r\n”;
-            result += “- Ensure all stages link together logically across the full chain.\r\n\r\n”;
+            result += "Quest generation structure — follow these rules for all story content you generate:\r\n";
+            result += "- Story stages are generated from the final encounter backwards: showdown first, then investigations, then discovery.\r\n";
+            result += "- Each earlier stage must reveal progressively less about the target.\r\n";
+            result += "- Use details from each previously generated stage to inform the next.\r\n";
+            result += "- New <Lore> entries will appear during generation; use them to enrich each scene.\r\n";
+            result += "- At least one concrete lore detail (faction, tech, location, rumor) must ground each scene.\r\n";
+            result += "- Ensure all stages link together logically across the full chain.\r\n\r\n";
 
             return result;
         }

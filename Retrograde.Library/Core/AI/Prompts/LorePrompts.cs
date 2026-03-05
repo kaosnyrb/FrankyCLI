@@ -37,6 +37,7 @@ namespace Retrograde.AI.Utils
 
         public static void GenerateLoreContext(OutlawNpc outlawNpc, string lorefile, TemplateLib templateLib)
         {
+            // ── Phase 1: Generate lore only (added to history) ──────────────────────────
             var sb = new StringBuilder();
 
             sb.AppendLine("You are completing a partially written Lore Context File for a Starfield-style outlaw.");
@@ -68,52 +69,54 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("- For each section that contains instructions (such as <Faction>, <TreasureLegend>, <HistoricalContext>, etc.), replace the instructional text with a fully written lore entry.");
             sb.AppendLine("- Do NOT generate separate entries for each faction; produce a single consolidated lore section per tag, even if multiple factions are mentioned or implied.");
             sb.AppendLine("- Do NOT add new tags or remove existing ones.");
-            sb.AppendLine("- Each generated lore section must be no more than 3\u20136 sentences.");
+            sb.AppendLine("- Each generated lore section must be no more than 2\u20133 sentences.");
             sb.AppendLine("- Preserve the order and hierarchy of the Lore Context File.");
             sb.AppendLine($"- The Lore Context File is based on the outlaw NPC we just generated: {outlawNpc.name}.");
             sb.AppendLine("- Use the character's background to interpret and color the existing Lore Context, but do NOT discard or ignore the original lore.");
             sb.AppendLine("- Update the <Summary> and <StorySummary> to fit the outlaw we've generated, by merging the existing lore with the character background.");
             sb.AppendLine("- When updating <Summary> and <StorySummary>, preserve core themes, key events, and factions from the original Lore Context File.");
             sb.AppendLine("- Expand only sections that contain generation instructions.");
-            sb.AppendLine("- Do NOT output explanations. Output ONLY the completed lore instance followed by the <PlannedArc> section described below.");
-            sb.AppendLine();
-            sb.AppendLine("After completing the lore instance, append a <PlannedArc> section that plans the full quest arc.");
-            sb.AppendLine("Choose one template from each stage below. Copy the Name exactly as written — no paraphrasing.");
-            sb.AppendLine();
-            AppendTemplateMenu(sb, "DISCOVERY", templateLib.DiscoveryTemplates);
-            AppendTemplateMenu(sb, "INVESTIGATION", templateLib.InvestigationTemplates);
-            AppendTemplateMenu(sb, "SHOWDOWN", templateLib.ShowdownTemplates);
-            sb.AppendLine("Append this section after the completed lore instance:");
-            sb.AppendLine();
-            sb.AppendLine("<PlannedArc>");
-            sb.AppendLine("    <Discovery>");
-            sb.AppendLine("        <Theme>2\u20133 sentences: what kind of opening hook fits this outlaw's story.</Theme>");
-            sb.AppendLine("        <Template>exact Name from the DISCOVERY list above</Template>");
-            sb.AppendLine("    </Discovery>");
-            sb.AppendLine("    <Investigation>");
-            sb.AppendLine("        <Theme>2\u20133 sentences: what the investigation should uncover and how it escalates.</Theme>");
-            sb.AppendLine("        <Template>exact Name from the INVESTIGATION list above</Template>");
-            sb.AppendLine("    </Investigation>");
-            sb.AppendLine("    <Showdown>");
-            sb.AppendLine("        <Theme>2\u20133 sentences: what makes this climax feel like the logical end of this specific story.</Theme>");
-            sb.AppendLine("        <Template>exact Name from the SHOWDOWN list above</Template>");
-            sb.AppendLine("    </Showdown>");
-            sb.AppendLine("</PlannedArc>");
-            sb.AppendLine();
-            sb.AppendLine("Rules for <PlannedArc>:");
-            sb.AppendLine("- Each template Name MUST be copied exactly from the lists above.");
-            sb.AppendLine("- Pick templates whose location, description, and tags match the outlaw's background, factions, and crimes.");
-            sb.AppendLine("- The three templates must form a coherent escalating arc.");
-            sb.AppendLine("- Prefer variety of environment across the three stages (e.g. avoid three space missions in a row).");
-            sb.AppendLine("- The <PlannedArc> is appended AFTER all other sections — do not merge it into the lore.");
-            sb.AppendLine();
-            sb.AppendLine("Generate the completed lore instance now, then append the <PlannedArc>.");
+            sb.AppendLine("- Do NOT output explanations. Output ONLY the completed lore instance.");
 
             LoreContext = AITools.RunPrompt(sb.ToString());
 
-            PlannedDiscovery    = ExtractPlannedTemplate(LoreContext, "Discovery");
-            PlannedInvestigation = ExtractPlannedTemplate(LoreContext, "Investigation");
-            PlannedShowdown     = ExtractPlannedTemplate(LoreContext, "Showdown");
+            // ── Phase 2: Select arc templates (stateless — does NOT enter history) ──────
+            var sb2 = new StringBuilder();
+
+            sb2.AppendLine($"The lore context for {outlawNpc.name} has just been generated. Using that context, select one template from each stage below to form a coherent quest arc.");
+            sb2.AppendLine("Copy each template Name exactly as written — no paraphrasing.");
+            sb2.AppendLine();
+            AppendTemplateMenu(sb2, "DISCOVERY", templateLib.DiscoveryTemplates);
+            AppendTemplateMenu(sb2, "INVESTIGATION", templateLib.InvestigationTemplates);
+            AppendTemplateMenu(sb2, "SHOWDOWN", templateLib.ShowdownTemplates);
+            sb2.AppendLine("Output only the following XML block:");
+            sb2.AppendLine();
+            sb2.AppendLine("<PlannedArc>");
+            sb2.AppendLine("    <Discovery>");
+            sb2.AppendLine("        <Theme>1 sentence: what kind of opening hook fits this outlaw's story.</Theme>");
+            sb2.AppendLine("        <Template>exact Name from the DISCOVERY list above</Template>");
+            sb2.AppendLine("    </Discovery>");
+            sb2.AppendLine("    <Investigation>");
+            sb2.AppendLine("        <Theme>1 sentence: what the investigation should uncover and how it escalates.</Theme>");
+            sb2.AppendLine("        <Template>exact Name from the INVESTIGATION list above</Template>");
+            sb2.AppendLine("    </Investigation>");
+            sb2.AppendLine("    <Showdown>");
+            sb2.AppendLine("        <Theme>1 sentence: what makes this climax feel like the logical end of this specific story.</Theme>");
+            sb2.AppendLine("        <Template>exact Name from the SHOWDOWN list above</Template>");
+            sb2.AppendLine("    </Showdown>");
+            sb2.AppendLine("</PlannedArc>");
+            sb2.AppendLine();
+            sb2.AppendLine("Rules:");
+            sb2.AppendLine("- Each template Name MUST be copied exactly from the lists above.");
+            sb2.AppendLine("- Pick templates whose location, description, and tags match the outlaw's background, factions, and crimes.");
+            sb2.AppendLine("- The three templates must form a coherent escalating arc.");
+            sb2.AppendLine("- Prefer variety of environment across the three stages (e.g. avoid three space missions in a row).");
+
+            string arcResponse = AITools.RunStatelessPrompt(sb2.ToString());
+
+            PlannedDiscovery    = ExtractPlannedTemplate(arcResponse, "Discovery");
+            PlannedInvestigation = ExtractPlannedTemplate(arcResponse, "Investigation");
+            PlannedShowdown     = ExtractPlannedTemplate(arcResponse, "Showdown");
 
             Console.WriteLine($"PlannedArc — Discovery: {PlannedDiscovery}");
             Console.WriteLine($"PlannedArc — Investigation: {PlannedInvestigation}");
