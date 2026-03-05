@@ -67,7 +67,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptAlias(0, newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             newQuest.SetScriptProperty("duout_onstagenext_quest", "currentquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
-            newQuest.SetScriptProperty("duout_onstagenext_quest", "nextquest", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
+            newQuest.SetScriptProperty("duout_onstagenext_quest", "nextquest", nextQuest.questform.ToLink());
             newQuest.SetScriptProperty("duout_onstagenext_quest", "CompleteStage", 500);
             
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
@@ -75,6 +75,18 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
             
             //Add conversation, ending the quest on stage 500
+            var dialogueScript = PromptManager.GetDialogueScript(new List<string>(missionTemplate.Addons)
+            {
+                "NPC name: " + npc.Name,
+                "Bounty target name: " + outlawNpc.name,
+                "Location: " + missionTemplate.Location,
+            });
+
+            var voicePool    = npcResult.IsFemale ? SeedManager.FemaleVoices : SeedManager.MaleVoices;
+            var elevenLabsId = voicePool[RandomProvider.Random.Next(voicePool.Count)].Id;
+
+            var npcSuffix = newQuest.instance.FormKey.ID.ToString("X8");
+            NPCDialogueNoun Dialogue = new NPCDialogueNoun(npc.FormKey, npcResult.VoiceEditorId, dialogueScript, npcSuffix, elevenLabsId, existingQuest: newQuest.instance, completionStage: 500, aliasName: "BountyTarget");
 
             //Set the interfaces
             questform = newQuest.instance;

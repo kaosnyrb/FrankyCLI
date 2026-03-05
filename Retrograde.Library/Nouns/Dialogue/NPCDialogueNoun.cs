@@ -4,6 +4,7 @@ using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Models;
 using Retrograde.Utils;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -43,30 +44,62 @@ public class NPCDialogueNoun
         string         voiceTypeEditorId,
         DialogueScript script,
         string         suffix,
-        string         elevenLabsVoiceId = "")
+        string         elevenLabsVoiceId = "",
+        Quest?         existingQuest = null,
+        int            completionStage = 0,
+        string?        aliasName = null)
     {
         var targetMod = RetrogradeContext.Current.TargetMod;
 
-        // ── Quest ──────────────────────────────────────────────────────────────
-        var quest = new Quest(targetMod)
+        Quest quest;
+        uint npcAliasId;
+
+        if (existingQuest != null)
         {
-            EditorID = "dlg_quest_" + suffix,
-            Data = new QuestData
+            quest = existingQuest;
+
+            // If a name was provided, reuse the existing alias rather than creating a new one.
+            var existingAlias = aliasName != null
+                ? quest.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.Name == aliasName)
+                : null;
+
+            if (existingAlias != null)
             {
-                Flags = Quest.Flag.StartGameEnabled | Quest.Flag.StartsEnabled
-                      | Quest.Flag.RunOnce | (Quest.Flag)0x10000,
-                Type  = Quest.TypeEnum.None,
-            },
-        };
-        quest.Stages.Add(new QuestStage { Index = 0 });
-        quest.Stages.Add(new QuestStage { Index = 100 });
-        quest.Aliases = new ExtendedList<AQuestAlias>();
-        targetMod.Quests.Add(quest);
+                npcAliasId = existingAlias.ID;
+                goto aliasReady;
+            }
+
+            npcAliasId = (uint)(quest.Aliases?.Count ?? 0);
+        }
+        else
+        {
+            // ── Quest ──────────────────────────────────────────────────────────────
+            quest = new Quest(targetMod)
+            {
+                EditorID = "dlg_quest_" + suffix,
+                Data = new QuestData
+                {
+                    Flags = Quest.Flag.StartGameEnabled | Quest.Flag.StartsEnabled
+                          | Quest.Flag.RunOnce | (Quest.Flag)0x10000,
+                    Type  = Quest.TypeEnum.None,
+                },
+            };
+            quest.Stages.Add(new QuestStage { Index = 0 });
+            quest.Stages.Add(new QuestStage { Index = 100 });
+            quest.Aliases = new ExtendedList<AQuestAlias>();
+            targetMod.Quests.Add(quest);
+            npcAliasId = 0;
+        }
 
         // ── Alias ──────────────────────────────────────────────────────────────
-        var alias = new QuestReferenceAlias { ID = 0, Name = "NPC" };
-        alias.UniqueActor.SetTo(npcFormKey);
-        quest.Aliases.Add(alias);
+        {
+            var alias = new QuestReferenceAlias { ID = npcAliasId, Name = aliasName ?? "NPC" };
+            alias.UniqueActor.SetTo(npcFormKey);
+            quest.Aliases ??= new ExtendedList<AQuestAlias>();
+            quest.Aliases.Add(alias);
+        }
+
+        aliasReady:
 
         // ── NPC greeting topic (Greeting Scene Phase 0) ───────────────────────
         var greetTopic = BuildSceneTopic(targetMod, quest);
@@ -85,10 +118,10 @@ public class NPCDialogueNoun
         greetScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
         greetScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
         greetScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
-        greetScene.Actors.Add(new SceneActor { ID = 0,                   BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+        greetScene.Actors.Add(new SceneActor { ID = npcAliasId,            BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
         greetScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
         greetScene.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
-        var greetAction = new DialogueSceneAction { Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0 };
+        var greetAction = new DialogueSceneAction { Index = 1, AliasID = (int)npcAliasId, StartPhase = 0, EndPhase = 0 };
         greetAction.Topic.SetTo(greetTopic.FormKey);
         greetScene.Actions = new ExtendedList<ASceneAction> { greetAction };
         quest.Scenes.Add(greetScene);
@@ -119,6 +152,8 @@ public class NPCDialogueNoun
 
             var npcTopic = BuildSceneTopic(targetMod, quest);
             var npcInfo  = BuildInfo(targetMod, ex.NpcReply, npcFormKey);
+            if (i == 0 && completionStage > 0)
+                npcInfo.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)completionStage };
             npcTopic.Responses.Add(npcInfo);
             npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                 { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -134,13 +169,13 @@ public class NPCDialogueNoun
             topicScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
             topicScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
             topicScene.Conditions.Add(BuildGetStageCondition(quest, 0, CompareOperator.EqualTo));
-            topicScene.Actors.Add(new SceneActor { ID = 0,                   BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+            topicScene.Actors.Add(new SceneActor { ID = npcAliasId,            BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
             topicScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
             topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
             topicScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
             var playerAction = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
             playerAction.Topic.SetTo(playerTopic.FormKey);
-            var npcAction = new DialogueSceneAction { Index = 4, AliasID = 0, StartPhase = 1, EndPhase = 1 };
+            var npcAction = new DialogueSceneAction { Index = 4, AliasID = (int)npcAliasId, StartPhase = 1, EndPhase = 1 };
             npcAction.Topic.SetTo(npcTopic.FormKey);
             topicScene.Actions = new ExtendedList<ASceneAction> { playerAction, npcAction };
             quest.Scenes.Add(topicScene);

@@ -1,6 +1,7 @@
 ﻿using Mutagen.Bethesda.Archives;
 using Mutagen.Bethesda.Starfield;
 using Retrograde;
+using Retrograde.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -189,6 +190,93 @@ namespace Retrograde.AI.Utils
             return results;
 
         }
+
+        // ------------------------------
+        // Dialogue Script
+        // ------------------------------
+        /// <summary>
+        /// Generates a DialogueScript for an NPC who knows the target's location.
+        /// Produces 1 greeting + 2 optional topic exchanges + 1 completion exchange (in that order).
+        /// Completion exchange (index 0) ends the quest; optional exchanges (index 1-2) loop back.
+        /// </summary>
+        public static DialogueScript GetDialogueScript(List<string> addons)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Write a short Starfield NPC conversation. The NPC is a friendly contact who knows where the bounty target is.");
+            sb.AppendLine("Use the LoreContext established earlier in this conversation for names, factions, and locations.");
+            sb.AppendLine("Do NOT invent new names or places beyond the LoreContext and Additional Information.");
+            sb.AppendLine();
+            sb.AppendLine("Output EXACTLY this format, one line per label, no extra text before or after:");
+            sb.AppendLine("GREETING: <NPC opening line, max 140 chars>");
+            sb.AppendLine("PLAYER1: <optional player question about the situation, max 55 chars>");
+            sb.AppendLine("NPC1: <NPC answer to optional question 1, max 190 chars>");
+            sb.AppendLine("PLAYER2: <optional player question about the target, max 55 chars>");
+            sb.AppendLine("NPC2: <NPC answer to optional question 2, max 190 chars>");
+            sb.AppendLine("PLAYER3: <player line that asks where the target is — the closing question, max 55 chars>");
+            sb.AppendLine("NPC3: <NPC gives the target's location and wraps up, max 190 chars>");
+            sb.AppendLine();
+            sb.AppendLine("Rules:");
+            sb.AppendLine("- All lines must fit within their character limits.");
+            sb.AppendLine("- No quotation marks around the text.");
+            sb.AppendLine("- No stage directions, no asterisks, no line breaks within a line.");
+            sb.AppendLine("- Tone: grounded, Starfield-style — terse, believable, not dramatic.");
+            sb.AppendLine();
+            sb.AppendLine("Additional Information:");
+            foreach (var item in addons)
+                sb.AppendLine(item);
+
+            string raw = "";
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                raw = AITools.RunPrompt(sb.ToString());
+                if (raw.Contains("GREETING:") && raw.Contains("PLAYER3:") && raw.Contains("NPC3:"))
+                    break;
+            }
+
+            return ParseDialogueScript(raw);
+        }
+
+        private static DialogueScript ParseDialogueScript(string raw)
+        {
+            var script = new DialogueScript();
+            string Extract(string label)
+            {
+                var prefix = label + ":";
+                foreach (var line in raw.Split('\n'))
+                {
+                    var trimmed = line.Trim();
+                    if (trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        return trimmed.Substring(prefix.Length).Trim();
+                }
+                return "";
+            }
+
+            script.NpcGreeting = Truncate(Extract("GREETING"), 140);
+
+            // Exchange[0] = completion (ends quest) — PLAYER3/NPC3
+            // Exchange[1] = optional topic 1       — PLAYER1/NPC1
+            // Exchange[2] = optional topic 2       — PLAYER2/NPC2
+            script.Exchanges.Add(new DialogueExchange
+            {
+                PlayerPrompt = Truncate(Extract("PLAYER3"), 55),
+                NpcReply     = Truncate(Extract("NPC3"), 190),
+            });
+            script.Exchanges.Add(new DialogueExchange
+            {
+                PlayerPrompt = Truncate(Extract("PLAYER1"), 55),
+                NpcReply     = Truncate(Extract("NPC1"), 190),
+            });
+            script.Exchanges.Add(new DialogueExchange
+            {
+                PlayerPrompt = Truncate(Extract("PLAYER2"), 55),
+                NpcReply     = Truncate(Extract("NPC2"), 190),
+            });
+
+            return script;
+        }
+
+        private static string Truncate(string s, int maxLen) =>
+            s.Length <= maxLen ? s : s.Substring(0, maxLen);
 
         // ------------------------------
         // Destroy Message

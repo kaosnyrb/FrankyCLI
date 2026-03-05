@@ -38,7 +38,12 @@ namespace Retrograde.Quests
                 {
                     "NeedSpacesuit", true}                 
                 },
-                Addons = new List<string>(){},
+                Addons = new List<string>()
+                {
+                    "Target was a friend of this character, they are shocked at what they've done.",
+                    "This character talks about the good old days",
+                    
+                },
                 
             });
             
