@@ -26,15 +26,9 @@ namespace Retrograde.AI.Utils
             return File.ReadAllText(randomFile);
         }
 
-        public static string GenerateLoreFile()
+        public static string GenerateLoreFile(string goal, string flaw, string occupation, string crime)
         {
-            var rng = RandomProvider.Random;
-            string occupation  = StorySeedData.Occupations[rng.Next(StorySeedData.Occupations.Count)];
-            string crime       = StorySeedData.Crimes[rng.Next(StorySeedData.Crimes.Count)];
-            string motive      = StorySeedData.Motives[rng.Next(StorySeedData.Motives.Count)];
-            string personality = StorySeedData.PersonalityTraits[rng.Next(StorySeedData.PersonalityTraits.Count)];
-
-            string seed = $"The outlaw was a {occupation} who {crime}, driven by {motive}. Personality: {personality}.";
+            string seed = $"The outlaw was a {occupation} who {crime}, driven by {goal}. Personality: {flaw}.";
 
             var sb = new StringBuilder();
 

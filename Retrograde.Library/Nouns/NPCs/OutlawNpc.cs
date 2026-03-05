@@ -36,10 +36,15 @@ namespace Retrograde.Nouns
         public FormKey Logfile;
         public string LogText = string.Empty;
 
-        public string Upbringing = string.Empty;
-        public string Fear       = string.Empty;
-        public string Goal       = string.Empty;
-        public string Flaw       = string.Empty;
+        public string Upbringing           = string.Empty;
+        public string Fear                 = string.Empty;
+        public string Goal                 = string.Empty;
+        public string Flaw                 = string.Empty;
+        public string Quirk                = string.Empty;
+        public string Occupation           = string.Empty;
+        public string Crime                = string.Empty;
+        public string HuntingFaction       = string.Empty;
+        public string CurrentPreoccupation = string.Empty;
 
 
 
@@ -74,10 +79,15 @@ namespace Retrograde.Nouns
             Console.WriteLine("Building Outlaw NPC...");
             name = NameSeedData.GenerateName(female);
 
-            Upbringing = NpcSeedData.GetUpbringing();
-            Fear       = NpcSeedData.GetFears();
-            Goal       = NpcSeedData.GetGoals();
-            Flaw       = NpcSeedData.GetFlaws();
+            Upbringing           = NpcSeedData.GetUpbringing();
+            Fear                 = NpcSeedData.GetFears();
+            Goal                 = NpcSeedData.GetGoals();
+            Flaw                 = NpcSeedData.GetFlaws();
+            Quirk                = NpcSeedData.GetQuirk();
+            Occupation           = StorySeedData.Occupations[RandomProvider.Random.Next(StorySeedData.Occupations.Count)];
+            Crime                = StorySeedData.Crimes[RandomProvider.Random.Next(StorySeedData.Crimes.Count)];
+            HuntingFaction       = FactionSeedData.GetFaction();
+            CurrentPreoccupation = NarrativeSeedData.LogFocusPoints[RandomProvider.Random.Next(NarrativeSeedData.LogFocusPoints.Count)];
         }
 
         public string GenerateLogfile()
@@ -92,7 +102,7 @@ namespace Retrograde.Nouns
             sb.AppendLine();
             var rng = RandomProvider.Random;
             string tone  = NarrativeSeedData.LogTones[rng.Next(NarrativeSeedData.LogTones.Count)];
-            string focus = NarrativeSeedData.LogFocusPoints[rng.Next(NarrativeSeedData.LogFocusPoints.Count)];
+            string focus = CurrentPreoccupation;
 
             sb.AppendLine("Tone: " + tone + ".");
             sb.AppendLine();

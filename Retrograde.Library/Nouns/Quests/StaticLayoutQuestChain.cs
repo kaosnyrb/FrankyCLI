@@ -63,18 +63,17 @@ namespace Retrograde.Chains
 
             Console.WriteLine(templateManager.GetType());
 
-            var Lorefile = LorePrompts.GenerateLoreFile();
-
-
-            bool fork = false;            
+            bool fork = false;
             if (random.Next(100) > 175)
             {
                 fork = true;
             }
             MissionTemplate ForkInvestigationMissionTemplate = new MissionTemplate();
 
-            // NPC Target                
+            // NPC Target
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
+
+            var Lorefile = LorePrompts.GenerateLoreFile(outlawNpc.Goal, outlawNpc.Flaw, outlawNpc.Occupation, outlawNpc.Crime);
 
             LorePrompts.LoreContext = AITools.RunPrompt(
                 "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
@@ -86,10 +85,13 @@ namespace Retrograde.Chains
 
                 "Here is the outlaw NPC this Lore must be aligned with:\r\n" +
                 "- Name: " + outlawNpc.name + "\r\n" +
+                "- Gender: " + outlawNpc.gender + "\r\n" +
                 "- Background: " + outlawNpc.Upbringing + "\r\n" +
                 "- Core fear: " + outlawNpc.Fear + "\r\n" +
-                "- Motivation: " + outlawNpc.Goal + "\r\n" +
-                "- Personality flaw: " + outlawNpc.Flaw + "\r\n\r\n" +
+                "- Behavioural quirk: " + outlawNpc.Quirk + "\r\n" +
+                "- Currently preoccupied with: " + outlawNpc.CurrentPreoccupation + "\r\n" +
+                "- Being hunted by: " + outlawNpc.HuntingFaction + "\r\n" +
+                "- Quest theme: " + FlavourSeedData.GetQuestTheme() + "\r\n\r\n" +
 
                 "Your task: generate a full lore instance by completing every section that contains instructions.\r\n\r\n" +
                 "Rules:\r\n" +
