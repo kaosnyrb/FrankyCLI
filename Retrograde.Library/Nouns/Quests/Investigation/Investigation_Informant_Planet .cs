@@ -84,66 +84,14 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "GangMembers", outlawGang.gangList.ToLink<IStarfieldMajorRecordGetter>());
 
             //Create Boss NPC
-            var outfit = NPCTools.GetRandomOutfit(true);
-            bool isfemale = false;
-            if (RandomProvider.Random.Next(100) > 50)
-            {
-                isfemale = true;
-            }
-
-            Npc NPC = NPCTools.FindTemplateNpc(isfemale);
-            if (missionTemplate.parameters != null)
-            {
-                if (missionTemplate.parameters.ContainsKey("IsTargetDead"))
-                {
-                    if ((bool)missionTemplate.parameters["IsTargetDead"])
-                    {
-                        NPC = NPCTools.FindTemplateDeadNpc(isfemale);
-                    }
-                }
-            }
-            Npc npc = NPCTools.CloneNPC(myMod, NPC);
-            string Gender = "Male";
-            if (isfemale) Gender = "Female";
-
-            npc.Name = AITools.RunPrompt(
-                "Generate a unique full name (first and last) for a " + Gender +
-                "The name should feel appropriate for someone living and operating within a criminal gang culture—gritty, believable, and grounded.\r\n" +
-                "Do NOT reuse or repeat any names that have appeared previously in this session.\r\n" +
-                "Do NOT include titles, ranks, nicknames, or extra commentary.\r\n" +
-                "Return only the name."
-            );
-            npc.EditorID = "npc_" + (npc.Name.ToString().ToLower()).Replace(" ", "");
-            Random wrand = RandomProvider.Random;
-            npc.Weight = new NpcWeight()
-            {
-                Fat = (float)wrand.NextDouble(),
-                Muscular = (float)wrand.NextDouble(),
-                Thin = (float)wrand.NextDouble()
-            };
-            var lev = new PcLevelMult();
-            lev.LevelMult = 0.25f + (float)RandomProvider.Random.NextDouble();
-            npc.Level = lev;
-            npc.SpaceOutfit = outfit;
-            npc.EyeColor = NPCTools.GetEyeColour();
-            npc.HairColor = NPCTools.GetHairColour();
-            npc.SkinToneIndex = (byte)wrand.Next(8);
-            npc.HeadParts.Add(NPCTools.GetHaircut(isfemale));
-            npc.Items = new ExtendedList<ContainerEntry>
-            {
-                new ContainerEntry() { Item = new ContainerItem() { Item = NPCTools.GetRandomGear(), Count = 1 } }
-            };
-            // Set voice type after construction (Mutagen nullable FormLink rule).
-            var npcVoice = NPCTools.GetVoice("", isfemale);
-            string npcVoiceEditorId = string.Empty;
-            if (!npcVoice.IsNull)
-            {
-                npc.Voice.SetTo(npcVoice.FormKey);
-                var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == npcVoice.FormKey);
-                npcVoiceEditorId = vtRec?.EditorID ?? npcVoice.FormKey.ID.ToString("X6");
-            }
-
-            myMod.Npcs.Add(npc);
+            bool isDead = missionTemplate.parameters != null
+                && missionTemplate.parameters.ContainsKey("IsTargetDead")
+                && (bool)missionTemplate.parameters["IsTargetDead"];
+            var npcResult = NPCTools.CreateRandomNpc(myMod, isDead,
+                "The name should feel appropriate for someone living and operating within a criminal gang culture—gritty, believable, and grounded.");
+            var npc = npcResult.Npc;
+            var isfemale = npcResult.IsFemale;
+            var npcVoiceEditorId = npcResult.VoiceEditorId;
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetObjective(0, "Read the " + datasource + " from " + npc.Name);
 

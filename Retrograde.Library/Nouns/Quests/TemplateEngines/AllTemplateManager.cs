@@ -13,6 +13,7 @@ namespace Retrograde.Quests.TemplateEngines
             lib.ImportTemplates(new Templates_PlanetCombat());
             lib.ImportTemplates(new Templates_PlanetSmallBaseDestroy());
             lib.ImportTemplates(new Templates_PlanetSmallBaseInformant());
+            lib.ImportTemplates(new Templates_PlanetConversation());
             lib.ImportTemplates(new Templates_SpecificDungeons());
             lib.ImportTemplates(new Templates_SpaceActivator());
             lib.ImportTemplates(new Templates_SpaceInformant());

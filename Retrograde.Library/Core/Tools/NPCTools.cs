@@ -2,11 +2,19 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Retrograde.AI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Retrograde.Utils;
+
+public struct CreatedNpcResult
+{
+    public Npc Npc;
+    public string VoiceEditorId;
+    public bool IsFemale;
+}
 
 /// <summary>
 /// Provides NPC template FormIDs and utility methods for Starfield NPCs.
@@ -88,6 +96,7 @@ public static class NPCTools
 
     public static Npc FindTemplateNpc(bool female) => FindNpcById(GetTemplateNPC(female)).DeepCopy();
     public static Npc FindTemplateDeadNpc(bool female) => FindNpcById(GetTemplateDeadNPC(female)).DeepCopy();
+    public static Npc FindTemplateFriendlyNpc(bool female) => FindNpcById(GetTemplateNPC(female)).DeepCopy();
 
     /// <summary>
     /// Imports a non-vanilla faction into targetMod (new FormKey, all fields copied).
@@ -531,6 +540,77 @@ public static class NPCTools
                     Rank = 0
                 };
         }
+    }
+
+    /// <summary>
+    /// Creates a fully randomised NPC, adds it to the mod, and returns the result.
+    /// </summary>
+    /// <param name="myMod">Target mod to add the NPC to.</param>
+    /// <param name="isDead">Use a dead-pose template instead of a living one.</param>
+    /// <param name="nameContext">Injected into the AI name prompt (e.g. "criminal gang culture").</param>
+    /// <param name="isFriendly">Use a friendly (talkable) template and set non-hostile AI settings.</param>
+    public static CreatedNpcResult CreateRandomNpc(StarfieldMod myMod, bool isDead, string nameContext, bool isFriendly = false, FormKey? factionId = null)
+    {
+        bool isfemale = RandomProvider.Random.Next(100) > 50;
+        string gender = isfemale ? "Female" : "Male";
+
+        Npc template = isDead ? FindTemplateDeadNpc(isfemale)
+                     : isFriendly ? FindTemplateFriendlyNpc(isfemale)
+                     : FindTemplateNpc(isfemale);
+        Npc npc = CloneNPC(myMod, template);
+
+        if (isFriendly)
+        {
+            npc.Aggression = Npc.AggressionType.Unaggressive;
+            npc.Confidence = Npc.ConfidenceType.Average;
+        }
+
+        npc.Name = AITools.RunPrompt(
+            "Generate a unique full name (first and last) for a " + gender + ". " +
+            nameContext + "\r\n" +
+            "Do NOT reuse or repeat any names that have appeared previously in this session.\r\n" +
+            "Do NOT include titles, ranks, nicknames, or extra commentary.\r\n" +
+            "Return only the name."
+        );
+        npc.EditorID = "npc_" + npc.Name.ToString().ToLower().Replace(" ", "");
+
+        Random wrand = RandomProvider.Random;
+        npc.Weight = new NpcWeight()
+        {
+            Fat = (float)wrand.NextDouble(),
+            Muscular = (float)wrand.NextDouble(),
+            Thin = (float)wrand.NextDouble()
+        };
+        var lev = new PcLevelMult();
+        lev.LevelMult = 0.25f + (float)RandomProvider.Random.NextDouble();
+        npc.Level = lev;
+        npc.SpaceOutfit = GetRandomOutfit(true);
+        npc.EyeColor = GetEyeColour();
+        npc.HairColor = GetHairColour();
+        npc.SkinToneIndex = (byte)wrand.Next(8);
+        npc.HeadParts.Add(GetHaircut(isfemale));
+        npc.Items = new ExtendedList<ContainerEntry>
+        {
+            new ContainerEntry() { Item = new ContainerItem() { Item = GetRandomGear(), Count = 1 } }
+        };
+
+        var npcVoice = GetVoice("", isfemale);
+        string voiceEditorId = string.Empty;
+        if (!npcVoice.IsNull)
+        {
+            npc.Voice.SetTo(npcVoice.FormKey);
+            var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == npcVoice.FormKey);
+            voiceEditorId = vtRec?.EditorID ?? npcVoice.FormKey.ID.ToString("X6");
+        }
+
+        if (factionId.HasValue)
+        {
+            npc.Factions.Clear();
+            npc.Factions.Add(new RankPlacement { Faction = factionId.Value.ToLink<IFactionGetter>(), Rank = 0 });
+        }
+
+        myMod.Npcs.Add(npc);
+        return new CreatedNpcResult { Npc = npc, VoiceEditorId = voiceEditorId, IsFemale = isfemale };
     }
 
     /// <summary>

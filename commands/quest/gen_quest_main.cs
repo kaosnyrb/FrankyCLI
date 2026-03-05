@@ -146,15 +146,15 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = true;
+                AITools.AIMODE = false;
                 SpeechTools.generateWavs = false;
                 
-                bool setmissions = false;
+                bool setmissions = true;
                 if (setmissions)
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "City Activator - Neon Underbelly",
+                        InvestigationTemplate = "Planet side Conversation - UC Vanguard",
                         DeepTempalte = "Planetside Smallbase Informant - Freestar Ranger Environmental Scout",
                         ShowdownTemplate = "City Bounty - Outskirts of Cydonia"
                     };
