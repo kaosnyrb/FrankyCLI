@@ -149,7 +149,7 @@ namespace FrankyCLI
                 AITools.AIMODE = true;
                 SpeechTools.generateWavs = true;
                 
-                bool setmissions = true;
+                bool setmissions = false;
                 if (setmissions)
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
@@ -164,7 +164,7 @@ namespace FrankyCLI
                 {
                     List<IQuestchain> questchains = new List<IQuestchain>
                     {
-                        new LoopingLayoutQuestChain(myMod),
+                        //new LoopingLayoutQuestChain(myMod),
                         new StaticLayoutQuestChain(myMod),
                     };
                     var outlawQuest = questchains[random.Next(questchains.Count)];

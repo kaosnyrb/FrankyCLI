@@ -59,43 +59,7 @@ namespace Retrograde.Chains
             // Build LoreContext from Lorefile and NPC
             Console.WriteLine("Building Lore Context...");
 
-            LorePrompts.LoreContext = AITools.RunPrompt(
-                "You are completing a partially written Lore Context File for a Starfield-style outlaw.\r\n" +
-                "The Lore Context File is the primary source of truth and MUST be treated as canonical.\r\n" +
-                "You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.\r\n\r\n" +
-
-                "Here is the Lore Context File you MUST build from and respect:\r\n\r\n" +
-                Lorefile + "\r\n\r\n" +
-
-                "Here is the outlaw NPC this Lore must be aligned with:\r\n" +
-                "- Name: " + outlawNpc.name + "\r\n" +
-                "- Gender: " + outlawNpc.gender + "\r\n" +
-                "- Background: " + outlawNpc.Upbringing + "\r\n" +
-                "- Core fear: " + outlawNpc.Fear + "\r\n" +
-                "- Behavioural quirk: " + outlawNpc.Quirk + "\r\n" +
-                "- Currently preoccupied with: " + outlawNpc.CurrentPreoccupation + "\r\n" +
-                "- Being hunted by: " + outlawNpc.HuntingFaction + "\r\n" +
-                "- Quest theme: " + FlavourSeedData.GetQuestTheme() + "\r\n" +
-
-                "Your task: generate a full lore instance by completing every section that contains instructions.\r\n\r\n" +
-                "Rules:\r\n" +
-                "- Treat the existing Lore Context File as canon. Do NOT contradict it.\r\n" +
-                "- Reuse and expand on existing names, locations, factions, motifs, and events already in the Lore Context File whenever possible.\r\n" +
-                "- Only introduce new factions, locations, or concepts when a section explicitly calls for it or when absolutely necessary.\r\n" +
-                "- Follow the structure and tags exactly as provided.\r\n" +
-                "- For each section that contains instructions (such as <Faction>, <TreasureLegend>, <HistoricalContext>, etc.), replace the instructional text with a fully written lore entry.\r\n" +
-                "- Do NOT generate separate entries for each faction; produce a single consolidated lore section per tag, even if multiple factions are mentioned or implied.\r\n" +
-                "- Do NOT add new tags or remove existing ones.\r\n" +
-                "- Each generated lore section must be no more than 3–6 sentences.\r\n" +
-                "- Preserve the order and hierarchy of the Lore Context File.\r\n" +
-                "- The Lore Context File is based on the outlaw NPC we just generated: " + outlawNpc.name + ".\r\n" +
-                "- Use the character's background to interpret and color the existing Lore Context, but do NOT discard or ignore the original lore.\r\n" +
-                "- Update the <Summary> and <StorySummary> to fit the outlaw we’ve generated, by merging the existing lore with the character background.\r\n" +
-                "- When updating <Summary> and <StorySummary>, preserve core themes, key events, and factions from the original Lore Context File.\r\n" +
-                "- Expand only sections that contain generation instructions.\r\n" +
-                "- Do NOT output explanations. Output ONLY the completed lore instance.\r\n\r\n" +
-                "Generate the completed lore instance now."
-            );
+            LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib);
 
 
             // Template Choices --------------------------------
@@ -107,7 +71,7 @@ namespace Retrograde.Chains
                 "<QuestProgress>90%</QuestProgress>"
             };
 
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("", showdownAddons);
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(LorePrompts.PlannedShowdown, showdownAddons);
 
             outlawNpc.spacesuit = ShowdownMissionTemplate.parameters.ContainsKey("NeedSpacesuit") && (bool)ShowdownMissionTemplate.parameters["NeedSpacesuit"];
             outlawNpc.GenerateNPC();
@@ -141,8 +105,10 @@ namespace Retrograde.Chains
                     $"<QuestProgress>{progressValue}%</QuestProgress>"
                 };
 
-                // Base investigation template from the manager
-                var template = templateManager.GetInvestigationMissionTemplate("", investigationAddons);
+                // Base investigation template — use planned name only for the deepest stage (i==0)
+                var template = templateManager.GetInvestigationMissionTemplate(
+                    i == 0 ? LorePrompts.PlannedInvestigation : "",
+                    investigationAddons);
 
                 // Optional fork substitution (kept from original logic)
                 // Don't run on the first and last.
@@ -181,7 +147,7 @@ namespace Retrograde.Chains
 
             var DiscoveryTemplateManager = new AllTemplateManager(new AI_TemplateEngine());
             //var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", discoveryAddons); // We currently don't handle the fact that not all template libs have discovery missions.
-            var DiscoveryMissionTemplate = DiscoveryTemplateManager.GetDiscoveryMissionTemplate("", discoveryAddons);
+            var DiscoveryMissionTemplate = DiscoveryTemplateManager.GetDiscoveryMissionTemplate(LorePrompts.PlannedDiscovery, discoveryAddons);
 
             // Now we build a story-ordered list for stage location history:
             // Discovery -> earliest investigation -> ... -> closest investigation -> Showdown
@@ -240,9 +206,9 @@ namespace Retrograde.Chains
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             AITools.RunPrompt(
-                "Generate the Showdown mission now. This is the player's final confrontation with " + outlawNpc.name + ".\r\n" +
-                "Draw on the lore and use the location and mission type from the summary above.\r\n" +
-                "This is the narrative climax — make it feel earned."
+                "Briefly set the scene for the Showdown — the player's final confrontation with " + outlawNpc.name + ".\r\n" +
+                "Use the location and mission type from the summary above. Ground it in the lore.\r\n" +
+                "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
             );
             var showdownQuest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate, null);
 
@@ -264,16 +230,16 @@ namespace Retrograde.Chains
                 if (i == 0)
                 {
                     AITools.RunPrompt(
-                        "Generate the Deep Investigation mission now. This is the closest lead before the showdown.\r\n" +
+                        "Briefly set the scene for the Deep Investigation — the closest lead before the showdown.\r\n" +
                         "The player is closing in on " + outlawNpc.name + " but does not yet know the final location.\r\n" +
-                        "Use lore details to ground the scene and plant a clear but indirect clue toward the showdown."
+                        "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
                     );
                 }
                 else
                 {
                     AITools.RunPrompt(
-                        "Generate the " + stageName + " mission now. The player has only a weak lead at this stage — they know very little about " + outlawNpc.name + ".\r\n" +
-                        "Use lore details to ground the scene. This should feel like a step in the trail, with each new clue pointing further toward the showdown."
+                        "Briefly set the scene for the " + stageName + " — a step in the trail, building toward the showdown.\r\n" +
+                        "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
                     );
                 }
                 Quest formmission = template.outlawQuest.Setup(myMod, outlawNpc, template, lastOutlawQuest);
@@ -284,9 +250,8 @@ namespace Retrograde.Chains
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Discovery: " + DiscoveryMissionTemplate.Name);
             AITools.RunPrompt(
-                "Generate the Discovery mission now. This is the player's very first encounter with this quest — the moment " + outlawNpc.name + "'s existence becomes known.\r\n" +
-                "The player knows nothing yet. Use lore details to establish atmosphere and intrigue.\r\n" +
-                "Plant the seeds that will eventually lead toward the final confrontation without revealing anything explicit."
+                "Briefly set the scene for the Discovery — the moment " + outlawNpc.name + "'s existence first surfaces.\r\n" +
+                "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
             );
 
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(
