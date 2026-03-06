@@ -29,6 +29,23 @@ namespace Retrograde.Chains
             );
         }
 
+        // Generates 1-2 sentences of prose describing what the player finds at fromTemplate
+        // that sends them toward toTemplate. Adds to history AND to fromTemplate.Addons.
+        private void GenerateStageBridge(MissionTemplate fromTemplate, MissionTemplate toTemplate)
+        {
+            var bridge = AITools.RunPrompt(
+                $"In 1-2 sentences, describe the specific clue or contact the player uncovers at " +
+                $"{fromTemplate.Location} (the \"{fromTemplate.Name}\" stage) that points them toward " +
+                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
+                "Be concrete — name a data file, an informant, a physical trail, or an overheard conversation. " +
+                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
+            );
+
+            if (fromTemplate.Addons == null)
+                fromTemplate.Addons = new List<string>();
+            fromTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
+        }
+
         public bool GenerateQuest()
         {
             // Story Setup --------------------------------
@@ -38,7 +55,7 @@ namespace Retrograde.Chains
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
             Console.WriteLine("Generating Lore File...");
-            var Lorefile = LorePrompts.GenerateLoreFile(outlawNpc.Goal, outlawNpc.Flaw, outlawNpc.Occupation, outlawNpc.Crime);
+            var Lorefile = LorePrompts.GenerateLoreFile(outlawNpc.Traits);
 
             // Build LoreContext from Lorefile and NPC
             Console.WriteLine("Building Lore Context...");
@@ -143,36 +160,16 @@ namespace Retrograde.Chains
 
             // Now we actually generate the quests from the end backwards
 
-            // Prime the AI with a summary of all stages in story order before generating
-            Console.WriteLine("Feeding the stages into the AI...");
-            var stageSummary = new System.Text.StringBuilder();
-            stageSummary.AppendLine("The following is a summary of all missions in this quest chain, in story order from earliest to final encounter.");
-            stageSummary.AppendLine("Study each stage's location and type carefully.");
-            stageSummary.AppendLine("Use this overview to:");
-            stageSummary.AppendLine("- Plan how information about the outlaw is revealed gradually across stages.");
-            stageSummary.AppendLine("- Ensure each stage's narrative connects logically to the next.");
-            stageSummary.AppendLine("- Avoid introducing contradictions between locations or plot points.");
-            stageSummary.AppendLine();
-            foreach (var (stageName, template) in storyStages)
-            {
-                stageSummary.AppendLine($"<{stageName} Summary> {template.Description} Location: {template.Location}");
-            }
-            stageSummary.AppendLine();
-            stageSummary.AppendLine("Summary complete. The stages will be generated next, starting from the final encounter and working backwards.");
-            stageSummary.AppendLine("Each stage should feel like a natural step in the player's journey toward that final confrontation.");
-            stageSummary.AppendLine("Do not generate any content yet — this is context only.");
-            AITools.RunPrompt(stageSummary.ToString());
-
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             AITools.RunPrompt(
                 "Briefly set the scene for the Showdown — the player's final confrontation with " + outlawNpc.name + ".\r\n" +
-                "Use the location and mission type from the summary above. Ground it in the lore.\r\n" +
-                "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
+                "Location: " + ShowdownMissionTemplate.Location + ". Mission type: " + ShowdownMissionTemplate.Name + ".\r\n" +
+                "Ground it in the lore. Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
             );
             var showdownQuest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate, null);
 
-            AITools.RunPrompt(
+            AITools.InjectContextIntoHistory(
                 "Important: from this point on the player does not know where the final showdown takes place. " +
                 "Do not state the showdown location explicitly in any investigation or discovery mission. You may plant indirect clues that point toward it."
             );
@@ -197,6 +194,8 @@ namespace Retrograde.Chains
                 }
                 else
                 {
+                    // Bridge: this stage leads the player to the previous (closer-to-showdown) stage
+                    GenerateStageBridge(template, investigationStages[i - 1].Template);
                     AITools.RunPrompt(
                         "Briefly set the scene for the " + stageName + " — a step in the trail, building toward the showdown.\r\n" +
                         "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
@@ -209,6 +208,9 @@ namespace Retrograde.Chains
             // Finally build the discovery step, linked to the earliest investigation
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Discovery: " + DiscoveryMissionTemplate.Name);
+            // Bridge: Discovery leads the player into the earliest investigation stage
+            if (investigationStages.Count > 0)
+                GenerateStageBridge(DiscoveryMissionTemplate, investigationStages[^1].Template);
             AITools.RunPrompt(
                 "Briefly set the scene for the Discovery — the moment " + outlawNpc.name + "'s existence first surfaces.\r\n" +
                 "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."

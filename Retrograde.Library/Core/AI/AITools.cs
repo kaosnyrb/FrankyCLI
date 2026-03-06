@@ -84,6 +84,13 @@ namespace Retrograde.AI
             return true;
         }
 
+        // Injects text into history as a system context message without making an API call.
+        // Use to surface previously-computed artefacts (e.g. PlannedArc XML) as silent context.
+        public static void InjectContextIntoHistory(string content)
+        {
+            _history.Add(new SystemChatMessage(content));
+        }
+
         // Makes an API call using current history as read-only context, but does NOT add messages to history.
         // Use for one-off selections (e.g. PlannedArc template picking) that should not pollute ongoing context.
         public static string RunStatelessPrompt(string prompt)

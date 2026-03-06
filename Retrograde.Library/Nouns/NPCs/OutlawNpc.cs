@@ -8,7 +8,6 @@ using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Retrograde.Nouns
@@ -36,15 +35,7 @@ namespace Retrograde.Nouns
         public FormKey Logfile;
         public string LogText = string.Empty;
 
-        public string Upbringing           = string.Empty;
-        public string Fear                 = string.Empty;
-        public string Goal                 = string.Empty;
-        public string Flaw                 = string.Empty;
-        public string Quirk                = string.Empty;
-        public string Occupation           = string.Empty;
-        public string Crime                = string.Empty;
-        public string HuntingFaction       = string.Empty;
-        public string CurrentPreoccupation = string.Empty;
+        public OutlawTraits Traits = new OutlawTraits();
 
 
 
@@ -79,54 +70,8 @@ namespace Retrograde.Nouns
             Console.WriteLine("Building Outlaw NPC...");
             name = NameSeedData.GenerateName(female);
 
-            Upbringing           = NpcSeedData.GetUpbringing();
-            Fear                 = NpcSeedData.GetFears();
-            Goal                 = NpcSeedData.GetGoals();
-            Flaw                 = NpcSeedData.GetFlaws();
-            Quirk                = NpcSeedData.GetQuirk();
-            Occupation           = StorySeedData.Occupations[RandomProvider.Random.Next(StorySeedData.Occupations.Count)];
-            Crime                = StorySeedData.Crimes[RandomProvider.Random.Next(StorySeedData.Crimes.Count)];
-            HuntingFaction       = FactionSeedData.GetFaction();
-            CurrentPreoccupation = NarrativeSeedData.LogFocusPoints[RandomProvider.Random.Next(NarrativeSeedData.LogFocusPoints.Count)];
+            Traits = OutlawTraits.Generate();
         }
-
-        public string GenerateLogfile()
-        {
-            var sb = new StringBuilder();
-
-            sb.AppendLine("Write a personal audio log recorded by " + name + ", a " + gender + " fugitive who has a bounty on their head.");
-            sb.AppendLine("This is a spoken monologue recorded alone into a data-slate — write it for voice performance, not for reading.");
-            sb.AppendLine();
-
-            sb.AppendLine("Character context — use the LoreContext established earlier in this conversation. It is the source of truth for who this person is and why they're running.");
-            sb.AppendLine();
-            var rng = RandomProvider.Random;
-            string tone  = NarrativeSeedData.LogTones[rng.Next(NarrativeSeedData.LogTones.Count)];
-            string focus = CurrentPreoccupation;
-
-            sb.AppendLine("Tone: " + tone + ".");
-            sb.AppendLine();
-            sb.AppendLine("Voice delivery rules — follow these exactly:");
-            sb.AppendLine("- You may use these audio tags sparingly, only where they add genuine stress or fear: [sighs], [whispers], [exhales sharply].");
-            sb.AppendLine("- Do NOT use [laughs] or any tag suggesting levity or relief.");
-            sb.AppendLine("- Use ellipses (...) for hesitation, a thought that collapses, or words they can't finish.");
-            sb.AppendLine("- Use an em dash (—) for an abrupt self-correction or a thought cut short by nerves.");
-            sb.AppendLine("- CAPITALIZE a single word only when fear or desperation forces it out louder than the rest.");
-            sb.AppendLine("- Write as natural stressed speech: stumbles, fragments, and restarts are right for this character.");
-            sb.AppendLine("- No headers, bullet points, or any formatting — this is pure spoken audio.");
-            sb.AppendLine("- Do NOT open with any recording preamble — no 'Recording...', no stating their name, no date stamp. Go straight into the content.");
-            sb.AppendLine();
-            sb.AppendLine("Content:");
-            sb.AppendLine("- The emotional core of this log is: " + focus + ".");
-            sb.AppendLine("- Total length: under 140 words. Every word will be read aloud, so make each one count.");
-
-            Console.WriteLine("Generating Outlaw Log...");
-
-            string prompt = FlavourSeedData.AddFlavourToTargetBook(sb.ToString());
-            string background = AITools.RunPrompt(prompt);
-            return background;
-        }
-
 
         public string VoiceEditorId = string.Empty;
         public string ElevenLabsVoiceId = string.Empty;
@@ -206,7 +151,7 @@ namespace Retrograde.Nouns
         //We do this last as we've built all the infomation to use in it.
         public void GenerateLog()
         {
-            var log = GenerateLogfile();
+            var log = NarrativePrompts.GetOutlawLogfile(name, gender, Traits);
             LogText = log;
             IBookGetter? bookSrc = myMod.Books.FirstOrDefault(r => r.FormKey == new FormKey(myMod.ModKey, 0x000800));
             if (bookSrc == null)

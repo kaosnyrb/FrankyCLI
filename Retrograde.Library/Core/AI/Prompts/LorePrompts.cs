@@ -52,11 +52,7 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("Here is the outlaw NPC this Lore must be aligned with:");
             sb.AppendLine($"- Name: {outlawNpc.name}");
             sb.AppendLine($"- Gender: {outlawNpc.gender}");
-            sb.AppendLine($"- Background: {outlawNpc.Upbringing}");
-            sb.AppendLine($"- Core fear: {outlawNpc.Fear}");
-            sb.AppendLine($"- Behavioural quirk: {outlawNpc.Quirk}");
-            sb.AppendLine($"- Currently preoccupied with: {outlawNpc.CurrentPreoccupation}");
-            sb.AppendLine($"- Being hunted by: {outlawNpc.HuntingFaction}");
+            outlawNpc.Traits.AppendToPrompt(sb);
             sb.AppendLine($"- Quest theme: {FlavourSeedData.GetQuestTheme()}");
             sb.AppendLine();
             sb.AppendLine("Your task: generate a full lore instance by completing every section that contains instructions.");
@@ -124,6 +120,14 @@ namespace Retrograde.AI.Utils
             PlannedInvestigations = ExtractPlannedInvestigations(arcResponse);
             PlannedShowdown       = ExtractPlannedTemplate(arcResponse, "Showdown");
 
+            // Inject the full arc (including Theme rationale) as silent context so all
+            // subsequent stage prompts know why each template was chosen.
+            AITools.InjectContextIntoHistory(
+                "The following planned arc has been selected for this quest. " +
+                "The <Theme> elements describe the intended narrative role of each stage — " +
+                "use them to guide tone and content when generating each stage:\r\n\r\n" +
+                arcResponse);
+
             Console.WriteLine($"PlannedArc — Discovery: {PlannedDiscovery}");
             for (int i = 0; i < PlannedInvestigations.Count; i++)
                 Console.WriteLine($"PlannedArc — Investigation[{i}]: {PlannedInvestigations[i]}");
@@ -185,9 +189,9 @@ namespace Retrograde.AI.Utils
             sb.AppendLine();
         }
 
-        public static string GenerateLoreFile(string goal, string flaw, string occupation, string crime)
+        public static string GenerateLoreFile(OutlawTraits traits)
         {
-            string seed = $"The outlaw was a {occupation} who {crime}, driven by {goal}. Personality: {flaw}.";
+            string seed = $"The outlaw was a {traits.Occupation} who {traits.Crime}, driven by {traits.Goal}. Personality: {traits.Flaw}.";
 
             var sb = new StringBuilder();
 

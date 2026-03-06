@@ -1,5 +1,6 @@
-using Retrograde;
+using Retrograde.Nouns;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Retrograde.AI.Utils
 {
@@ -69,6 +70,45 @@ namespace Retrograde.AI.Utils
         }
 
         // ------------------------------
+        // Outlaw Personal Log
+        // ------------------------------
+        public static string GetOutlawLogfile(string name, string gender, OutlawTraits traits)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("Write the final personal audio log of " + name + ", a " + gender + " fugitive now dead — the player has just killed them and found this recording on their body.");
+            sb.AppendLine("This is the epilogue of the hunt. It should give the player a moment of understanding: who this person really was, what they were carrying, and why it ended the way it did.");
+            sb.AppendLine("This is a spoken monologue recorded alone into a data-slate — write it for voice performance, not for reading.");
+            sb.AppendLine();
+
+            sb.AppendLine("Character context — use the LoreContext established earlier in this conversation. It is the source of truth for who this person is and why they were running.");
+            sb.AppendLine();
+            string tone = NarrativeSeedData.LogTones[RandomProvider.Random.Next(NarrativeSeedData.LogTones.Count)];
+
+            sb.AppendLine("Tone: " + tone + ". Underneath it, there should be a sense that they knew how this might end.");
+            sb.AppendLine();
+            sb.AppendLine("Voice delivery rules — follow these exactly:");
+            sb.AppendLine("- You may use these audio tags sparingly, only where they add genuine stress or fear: [sighs], [whispers], [exhales sharply].");
+            sb.AppendLine("- Do NOT use [laughs] or any tag suggesting levity or relief.");
+            sb.AppendLine("- Use ellipses (...) for hesitation, a thought that collapses, or words they can't finish.");
+            sb.AppendLine("- Use an em dash (—) for an abrupt self-correction or a thought cut short by nerves.");
+            sb.AppendLine("- CAPITALIZE a single word only when fear or desperation forces it out louder than the rest.");
+            sb.AppendLine("- Write as natural stressed speech: stumbles, fragments, and restarts are right for this character.");
+            sb.AppendLine("- No headers, bullet points, or any formatting — this is pure spoken audio.");
+            sb.AppendLine("- Do NOT open with any recording preamble — no 'Recording...', no stating their name, no date stamp. Go straight into the content.");
+            sb.AppendLine();
+            sb.AppendLine("Content:");
+            sb.AppendLine("- The emotional core of this log is: " + traits.CurrentPreoccupation + ".");
+            sb.AppendLine("- It should feel like a closing chapter — something resolved, accepted, or finally said out loud.");
+            sb.AppendLine("- Total length: under 140 words. Every word will be read aloud, so make each one count.");
+
+            Console.WriteLine("Generating Outlaw Log...");
+
+            string prompt = FlavourSeedData.AddFlavourToTargetBook(sb.ToString());
+            return AITools.RunPrompt(prompt);
+        }
+
+        // ------------------------------
         // Mission Briefing Dataslate
         // ------------------------------
         public static string GetMissionBriefingDataslate(List<string> Addons)
@@ -79,10 +119,10 @@ namespace Retrograde.AI.Utils
                 "Use the LoreContext established earlier in this conversation for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
 
                 "Cover these four things in order, with no headers or labels:\r\n" +
-                "- Name the target exactly as established in the LoreContext. State what they did and what they are wanted for.\r\n" +
-                "- One sentence on who they are — former occupation, what pushed them to crime.\r\n" +
+                "- Name the target exactly as established in the LoreContext. State what they did, what they are wanted for, and in one sentence who they are — former occupation, what they did that crossed the line.\r\n" +
                 "- Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
-                "- Tell the hunter exactly what to do at that location.\r\n\r\n" +
+                "- Tell the hunter exactly what to do at that location.\r\n" +
+                "If a <StageBridge> is provided in the Additional Information, frame it as what the hunter hopes to learn or find — not as a known fact. Weave it naturally into the final point as an investigative angle (e.g. 'may reveal', 'could confirm', 'worth checking') — do not add it as a separate sentence.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 

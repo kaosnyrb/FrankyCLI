@@ -28,12 +28,27 @@ namespace Retrograde.Chains
         private void AddStageLocation(MissionTemplate template, string stage, string location)
         {
             if (template.Addons == null)
-            {
                 template.Addons = new List<string>();
-            }
             template.Addons.Add(
                 $"<QuestStageLocation stage=\"{stage}\">{location}</QuestStageLocation>"
             );
+        }
+
+        // Generates 1-2 sentences of prose describing what the player finds at fromTemplate
+        // that sends them toward toTemplate. Adds to history AND to fromTemplate.Addons.
+        private void GenerateStageBridge(MissionTemplate fromTemplate, MissionTemplate toTemplate)
+        {
+            var bridge = AITools.RunPrompt(
+                $"In 1-2 sentences, describe the specific clue or contact the player uncovers at " +
+                $"{fromTemplate.Location} (the \"{fromTemplate.Name}\" stage) that points them toward " +
+                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
+                "Be concrete — name a data file, an informant, a physical trail, or an overheard conversation. " +
+                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
+            );
+
+            if (fromTemplate.Addons == null)
+                fromTemplate.Addons = new List<string>();
+            fromTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
         }
 
 
@@ -73,7 +88,7 @@ namespace Retrograde.Chains
             // NPC Target
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
-            var Lorefile = LorePrompts.GenerateLoreFile(outlawNpc.Goal, outlawNpc.Flaw, outlawNpc.Occupation, outlawNpc.Crime);
+            var Lorefile = LorePrompts.GenerateLoreFile(outlawNpc.Traits);
 
             LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib);
 
@@ -128,31 +143,16 @@ namespace Retrograde.Chains
             }
 
 
-            var stageSummary = new System.Text.StringBuilder();
-            stageSummary.AppendLine("<Showdown Summary>" + ShowdownMissionTemplate.Description + " Location: " + ShowdownMissionTemplate.Location);
-            stageSummary.AppendLine("<DeepInvestigation Summary>" + DeepInvestigationMissionTemplate.Description + " Location: " + DeepInvestigationMissionTemplate.Location);
-            if (fork)
-            {
-                stageSummary.AppendLine("<ForkInvestigation Summary>" + ForkInvestigationMissionTemplate.Description + " Location: " + ForkInvestigationMissionTemplate.Location);
-            }
-            stageSummary.AppendLine("<InitialInvestigation Summary>" + InvestigationMissionTemplate.Description + " Location: " + InvestigationMissionTemplate.Location);
-            stageSummary.AppendLine("<Discovery Summary>" + DiscoveryMissionTemplate.Description + " Location: " + DiscoveryMissionTemplate.Location);
-            stageSummary.AppendLine();
-            stageSummary.AppendLine("Summary complete. The stages will be generated next, starting from the final encounter and working backwards.");
-            stageSummary.AppendLine("Each stage should feel like a natural step in the player's journey toward that final confrontation.");
-            stageSummary.AppendLine("Do not generate any content yet — this is context only.");
-            AITools.RunPrompt(stageSummary.ToString());
-
             AITools.RunPrompt(
                 "Briefly set the scene for the Showdown — the player's final confrontation with " + outlawNpc.name + ".\r\n" +
-                "Use the location and mission type from the summary above. Ground it in the lore.\r\n" +
-                "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
+                "Location: " + ShowdownMissionTemplate.Location + ". Mission type: " + ShowdownMissionTemplate.Name + ".\r\n" +
+                "Ground it in the lore. Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
             );
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
             var Quest = ShowdownMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ShowdownMissionTemplate,null);
 
-            AITools.RunPrompt(
+            AITools.InjectContextIntoHistory(
                 "Important: from this point on the player does not know where the final showdown takes place. " +
                 "Do not state the showdown location explicitly in any investigation or discovery mission. You may plant indirect clues that point toward it."
             );
@@ -170,6 +170,7 @@ namespace Retrograde.Chains
             {
                 //ForkInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
+                GenerateStageBridge(ForkInvestigationMissionTemplate, DeepInvestigationMissionTemplate);
                 AITools.RunPrompt(
                     "Briefly set the scene for the Fork Investigation — a side lead that diverges before converging back on the main trail.\r\n" +
                     "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
@@ -179,6 +180,7 @@ namespace Retrograde.Chains
 
                 //InitialInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
+                GenerateStageBridge(InvestigationMissionTemplate, ForkInvestigationMissionTemplate);
                 AITools.RunPrompt(
                     "Briefly set the scene for the Initial Investigation — a weak early lead, the beginning of the trail.\r\n" +
                     "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
@@ -190,6 +192,7 @@ namespace Retrograde.Chains
             {
                 //InitialInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
+                GenerateStageBridge(InvestigationMissionTemplate, DeepInvestigationMissionTemplate);
                 AITools.RunPrompt(
                     "Briefly set the scene for the Initial Investigation — a weak early lead, the beginning of the trail.\r\n" +
                     "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
@@ -200,6 +203,7 @@ namespace Retrograde.Chains
 
             // Finally build the discovery step
             Console.WriteLine("---------------------------------------------------------------------------------");
+            GenerateStageBridge(DiscoveryMissionTemplate, InvestigationMissionTemplate);
             AITools.RunPrompt(
                 "Briefly set the scene for the Discovery — the moment " + outlawNpc.name + "'s existence first surfaces.\r\n" +
                 "Write 2-3 sentences of plain prose only. No bullet points, no section headings, no alternate outcomes."
