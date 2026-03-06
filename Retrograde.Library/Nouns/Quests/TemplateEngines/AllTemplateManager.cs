@@ -8,7 +8,7 @@ namespace Retrograde.Quests.TemplateEngines
 
         protected override void BuildLibraries(TemplateLib lib)
         {
-            lib.ImportTemplates(new Templates_Dataslate());
+            //lib.ImportTemplates(new Templates_Dataslate());
             lib.ImportTemplates(new Templates_PlanetInvestigate());
             lib.ImportTemplates(new Templates_PlanetCombat());
             lib.ImportTemplates(new Templates_PlanetSmallBaseDestroy());
@@ -24,6 +24,7 @@ namespace Retrograde.Quests.TemplateEngines
             lib.ImportTemplates(new Templates_Cities_Neon());
             lib.ImportTemplates(new Templates_Cities_Cydonia());
             lib.ImportTemplates(new Templates_Cities_Akila());
+            lib.ImportTemplates(new Templates_Discovery_Cities());
         }
     }
 }
