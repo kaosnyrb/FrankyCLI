@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Retrograde.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,17 +21,7 @@ namespace Retrograde.Nouns
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            IActivatorGetter? activatorSource = targetMod.Activators.FirstOrDefault(r => r.FormKey == new FormKey(targetMod.ModKey, FormID));
-            if (activatorSource == null)
-            {
-                foreach (var tm in RetrogradeContext.Current.TemplateMods)
-                {
-                    activatorSource = tm.Activators.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, FormID));
-                    if (activatorSource != null) break;
-                }
-            }
-            if (activatorSource == null)
-                throw new KeyNotFoundException($"ActivatorNoun: no Activator with raw ID 0x{FormID:X6} found in target mod or any template mod.");
+            var activatorSource = RecordLookup.Find<IActivatorGetter>(FormID, m => m.Activators);
             var ActivatorClone = activatorSource.DeepCopy();
             instance = new Mutagen.Bethesda.Starfield.Activator(targetMod)
             {

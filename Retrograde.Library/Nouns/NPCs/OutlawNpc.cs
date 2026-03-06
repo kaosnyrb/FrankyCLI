@@ -153,15 +153,7 @@ namespace Retrograde.Nouns
         {
             var log = NarrativePrompts.GetOutlawLogfile(name, gender, Traits);
             LogText = log;
-            IBookGetter? bookSrc = myMod.Books.FirstOrDefault(r => r.FormKey == new FormKey(myMod.ModKey, 0x000800));
-            if (bookSrc == null)
-                foreach (var tm in RetrogradeContext.Current.TemplateMods)
-                {
-                    bookSrc = tm.Books.FirstOrDefault(r => r.FormKey == new FormKey(tm.ModKey, 0x000800));
-                    if (bookSrc != null) break;
-                }
-            if (bookSrc == null)
-                throw new KeyNotFoundException("OutlawNpc: no Book with raw ID 0x000800 found in target mod or any template mod.");
+            var bookSrc = RecordLookup.Find<IBookGetter>(0x000800u, m => m.Books);
             var Book = bookSrc.DeepCopy();
             string logSynonym = RandomProvider.GetLogSynonym();
             Book logbook = new Book(myMod)

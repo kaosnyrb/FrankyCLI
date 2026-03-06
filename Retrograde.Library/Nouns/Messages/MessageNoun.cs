@@ -1,6 +1,7 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,26 +16,7 @@ namespace Retrograde.Nouns
         public MessageNoun(uint Formid, string Message) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
-            IMessageGetter? source = null;
-            var targetKey = new FormKey(targetMod.ModKey, Formid);
-            source = targetMod.Messages.FirstOrDefault(r => r.FormKey == targetKey);
-
-            if (source == null)
-            {
-                foreach (var tm in RetrogradeContext.Current.TemplateMods)
-                {
-                    var tmKey = new FormKey(tm.ModKey, Formid);
-                    var tmMsg = tm.Messages.FirstOrDefault(r => r.FormKey == tmKey);
-                    if (tmMsg != null)
-                    {
-                        source = tmMsg;
-                        break;
-                    }
-                }
-            }
-
-            if (source == null)
-                throw new KeyNotFoundException($"MessageNoun: no Message with raw ID 0x{Formid:X6} found in target mod or any template mod.");
+            var source = RecordLookup.Find<IMessageGetter>(Formid, m => m.Messages);
 
             var messageClone = source.DeepCopy();
             var questID = Guid.NewGuid().ToString().Substring(0, 8);

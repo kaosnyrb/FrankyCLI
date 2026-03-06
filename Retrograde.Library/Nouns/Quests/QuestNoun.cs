@@ -4,6 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Noggog.StructuredStrings;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,20 +23,7 @@ namespace Retrograde.Nouns
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            IQuestGetter? source = null;
-            var targetKey = new FormKey(targetMod.ModKey, Basequest);
-            source = targetMod.Quests.FirstOrDefault(r => r.FormKey == targetKey);
-            if (source == null)
-            {
-                foreach (var tm in RetrogradeContext.Current.TemplateMods)
-                {
-                    var tmKey = new FormKey(tm.ModKey, Basequest);
-                    source = tm.Quests.FirstOrDefault(r => r.FormKey == tmKey);
-                    if (source != null) break;
-                }
-            }
-            if (source == null)
-                throw new KeyNotFoundException($"QuestNoun: no Quest with raw ID 0x{Basequest:X6} found in target mod or any template mod.");
+            var source = RecordLookup.Find<IQuestGetter>(Basequest, m => m.Quests);
 
             var Quest = source.DeepCopy();
             instance = new Quest(targetMod)

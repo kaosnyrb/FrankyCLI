@@ -1,5 +1,6 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Retrograde.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,17 +17,7 @@ namespace Retrograde.Nouns
             var targetMod = RetrogradeContext.Current.TargetMod;
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
-            IBookGetter? bookSource = targetMod.Books.FirstOrDefault(r => r.EditorID == editorId);
-            if (bookSource == null)
-            {
-                foreach (var tm in RetrogradeContext.Current.TemplateMods)
-                {
-                    bookSource = tm.Books.FirstOrDefault(r => r.EditorID == editorId);
-                    if (bookSource != null) break;
-                }
-            }
-            if (bookSource == null)
-                throw new KeyNotFoundException($"BookNoun: no Book with EditorID '{editorId}' found in target mod or any template mod.");
+            var bookSource = RecordLookup.Find<IBookGetter>(editorId, m => m.Books);
             var Book = bookSource.DeepCopy();
             instance = new Book(targetMod)
             {
