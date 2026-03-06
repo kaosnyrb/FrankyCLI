@@ -157,9 +157,6 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = true;
-                SpeechTools.generateWavs = true;
-                
                 bool setmissions = false;
                 if (setmissions)
                 {

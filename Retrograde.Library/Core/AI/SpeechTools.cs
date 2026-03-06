@@ -2,6 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Retrograde;
 using Retrograde.AI;
 using System.Diagnostics;
 using System.IO;
@@ -34,7 +35,11 @@ public static class SpeechTools
     /// <summary>Starfield game voice directory where WEMs are deployed.</summary>
     public static string GameVoiceDir       = @"C:\Program Files (x86)\Steam\steamapps\common\Starfield\Data\Sound\Voice";
 
-    public static bool generateWavs = true;
+    public static bool generateWavs
+    {
+        get => RetrogradeContext.GenerateWavs;
+        set => RetrogradeContext.GenerateWavs = value;
+    }
 
     // Pending conversions: (staged WAV path, game WEM destination path)
     private static readonly List<(string WavPath, string GameWemPath)> _pending = new();

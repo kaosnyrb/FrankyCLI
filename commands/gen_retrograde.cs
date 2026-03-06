@@ -104,8 +104,6 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                AITools.AIMODE = false;
-
                 // Parse optional parameters: faction, station design, type (poi/bounty), quiet
                 string? faction = args.Length > 5 ? args[5] : null;
                 string? stationDesignName = args.Length > 6 ? args[6] : null;

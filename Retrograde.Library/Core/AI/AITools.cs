@@ -15,7 +15,11 @@ namespace Retrograde.AI
         private static readonly List<ChatMessage> _history = new();
 
         // We can turn off the chatgpt calls for fast generation.
-        public static bool AIMODE = true;
+        public static bool AIMODE
+        {
+            get => RetrogradeContext.AIMode;
+            set => RetrogradeContext.AIMode = value;
+        }
 
         // When true, ExportConversation() writes the AI history to a file. Off by default.
         public static bool EXPORT_CONVERSATION = true;

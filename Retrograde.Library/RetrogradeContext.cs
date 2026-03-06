@@ -33,6 +33,16 @@ public static class RetrogradeContext
     public static bool Quiet { get; set; } = false;
 
     /// <summary>
+    /// When false, AI calls are skipped for fast generation.
+    /// </summary>
+    public static bool AIMode { get; set; } = false;
+
+    /// <summary>
+    /// When false, WAV/WEM generation is skipped.
+    /// </summary>
+    public static bool GenerateWavs { get; set; } = false;
+
+    /// <summary>
     /// All Nouns registered during this generation run, in creation order.
     /// Each Noun appends itself here on construction.
     /// </summary>
@@ -54,5 +64,7 @@ public static class RetrogradeContext
     {
         _current = null;
         NounRegistry.Clear();
+        AIMode = false;
+        GenerateWavs = false;
     }
 }
