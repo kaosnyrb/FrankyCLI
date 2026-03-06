@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Retrograde.Nouns
 {
-    public class OutlawNpc
+    public class OutlawNpc : INoun<INpcGetter>
     {
         public StarfieldMod myMod;
 
@@ -29,6 +29,9 @@ namespace Retrograde.Nouns
         public bool female;
 
         public Npc instance;
+        public INpcGetter Result => instance;
+        string? INoun.EditorID => instance?.EditorID;
+        FormKey INoun.FormKey => instance?.FormKey ?? FormKey.Null;
 
         public FormKey deathItems;
 
@@ -136,7 +139,7 @@ namespace Retrograde.Nouns
 
             myMod.Npcs.Add(npc);
             instance = npc;
-
+            RetrogradeContext.NounRegistry.Add(this);
             return npc;
         }
 

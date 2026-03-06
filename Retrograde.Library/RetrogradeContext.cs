@@ -1,4 +1,6 @@
 using Retrograde.Abstractions;
+using Retrograde.Nouns;
+using System.Collections.Generic;
 
 namespace Retrograde;
 
@@ -31,6 +33,12 @@ public static class RetrogradeContext
     public static bool Quiet { get; set; } = false;
 
     /// <summary>
+    /// All Nouns registered during this generation run, in creation order.
+    /// Each Noun appends itself here on construction.
+    /// </summary>
+    public static List<INoun> NounRegistry { get; } = new();
+
+    /// <summary>
     /// Initializes the Retrograde context with the provided mod context.
     /// Should be called once at startup before any Retrograde operations.
     /// </summary>
@@ -45,5 +53,6 @@ public static class RetrogradeContext
     public static void Reset()
     {
         _current = null;
+        NounRegistry.Clear();
     }
 }

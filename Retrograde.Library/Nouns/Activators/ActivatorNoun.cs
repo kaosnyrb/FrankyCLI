@@ -13,9 +13,12 @@ using System.Threading.Tasks;
 
 namespace Retrograde.Nouns
 {
-    public class ActivatorNoun
+    public class ActivatorNoun : INoun<IActivatorGetter>
     {
         public Mutagen.Bethesda.Starfield.Activator instance;
+        public IActivatorGetter Result => instance;
+        string? INoun.EditorID => instance.EditorID;
+        FormKey INoun.FormKey => instance.FormKey;
         public ActivatorNoun(uint FormID, string Name, string model) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -44,6 +47,7 @@ namespace Retrograde.Nouns
             instance.Model.File = model;
 
             targetMod.Activators.Add(instance);
+            RetrogradeContext.NounRegistry.Add(this);
         }
 
         public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter> Value)

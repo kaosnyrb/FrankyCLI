@@ -195,6 +195,7 @@ namespace FrankyCLI
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             GlobalRoomTracker.Save();
             AITools.ExportConversation();
+            gen_quest_main.PrintNounRegistry();
             Console.WriteLine("Finished");
             return 0;
         }

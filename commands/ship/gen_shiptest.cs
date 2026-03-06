@@ -204,6 +204,7 @@ namespace FrankyCLI
                 passed++;
             }
 
+            gen_quest_main.PrintNounRegistry();
             RetrogradeContext.Reset();
             Console.WriteLine();
             Console.WriteLine(new string('=', 60));

@@ -122,6 +122,7 @@ namespace FrankyCLI
                 rec.IsCompressed = false;
             }
 
+            gen_quest_main.PrintNounRegistry();
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Export complete!");
             return 0;

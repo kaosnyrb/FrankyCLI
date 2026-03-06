@@ -87,6 +87,7 @@ namespace FrankyCLI
             foreach (var rec in gen_quest_main.myMod.EnumerateMajorRecords())
                 rec.IsCompressed = false;
 
+            gen_quest_main.PrintNounRegistry();
             gen_quest_main.myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Export complete!");
             return 0;

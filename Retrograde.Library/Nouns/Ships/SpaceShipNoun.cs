@@ -14,13 +14,16 @@ namespace Retrograde.Nouns
     // Note: This class doesn't seem to be working currently.
     // Ships created don't seem to be boardable.
     // Root cause is unknown.
-    public class SpaceShipNoun
+    public class SpaceShipNoun : INoun<IGenericBaseFormGetter>
     {
         public string Name { get; set; }
         public uint FactionID { get; set; }
         public uint ShipID { get; set; }
 
         public GenericBaseForm instance { get; set; }
+        public IGenericBaseFormGetter Result => instance;
+        string? INoun.EditorID => instance.EditorID;
+        FormKey INoun.FormKey => instance.FormKey;
 
         public SpaceShipNoun(string ShipName, uint ShipFormID, uint ShipFaction)
         {
@@ -100,6 +103,7 @@ namespace Retrograde.Nouns
 
 
             targetMod.GenericBaseForms.Add(instance);
+            RetrogradeContext.NounRegistry.Add(this);
         }
 
     }

@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 
 namespace Retrograde.Nouns
 {
-    public class MessageNoun
+    public class MessageNoun : INoun<IMessageGetter>
     {
         public Message instance;
+        public IMessageGetter Result => instance;
+        string? INoun.EditorID => instance.EditorID;
+        FormKey INoun.FormKey => instance.FormKey;
         public MessageNoun(uint Formid, string Message) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -31,6 +34,7 @@ namespace Retrograde.Nouns
                 MenuButtons = messageClone.MenuButtons,
             };
             targetMod.Messages.Add(instance);
+            RetrogradeContext.NounRegistry.Add(this);
         }
 
         public bool SetChoice(int ChoiceID, string ChoiceText)

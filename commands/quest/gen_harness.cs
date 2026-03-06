@@ -77,6 +77,7 @@ namespace FrankyCLI
                 Console.WriteLine($"\nBest average score: {best.AverageScore:0.00}");
             }
 
+            gen_quest_main.PrintNounRegistry();
             return 0;
         }
     }

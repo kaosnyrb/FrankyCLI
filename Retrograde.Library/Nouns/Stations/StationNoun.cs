@@ -1,5 +1,6 @@
 using Retrograde;
 using Retrograde.Generator;
+using Retrograde.Nouns;
 using Retrograde.StationDesigns;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
@@ -16,9 +17,12 @@ using Retrograde.Passes.SpaceStation;
 
 namespace Retrograde.Nouns.Stations
 {
-    public class StationNoun
+    public class StationNoun : INoun<IGenericBaseFormGetter>
     {
         public GenericBaseForm instance;
+        public IGenericBaseFormGetter Result => instance;
+        string? INoun.EditorID => instance.EditorID;
+        FormKey INoun.FormKey => instance.FormKey;
 
         public Cell ExteriorCell;
         public Cell ShipInteriorCell;
@@ -251,6 +255,7 @@ namespace Retrograde.Nouns.Stations
             StationDungeonGenerator dungeonGenerator = new StationDungeonGenerator(stationDesign);
 
             dungeonState = dungeonGenerator.GenerateDungeon(InteriorCell, InteriorCellLocation, faction, size, shipinttoint_doorreference);
+            RetrogradeContext.NounRegistry.Add(this);
         }
 
         private static void AddCellToMod(StarfieldMod targetMod, Cell cell)

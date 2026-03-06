@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Generator;
+using Retrograde.Nouns;
 using Retrograde.SpaceCellDesigns;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Retrograde.Nouns.SpaceCells;
 ///   - Extracts asteroid Static palette from Temporary items
 ///   - Starts Temporary empty — content passes populate it
 /// </summary>
-public class SpaceCellNoun
+public class SpaceCellNoun : INoun<ICellGetter>
 {
     // scGenRocky04 "Rocky Asteroids" — CELL:00138C3E in Starfield.esm
     private const uint SourceCellFormId = 0x00138C3E;
@@ -31,6 +32,9 @@ public class SpaceCellNoun
     public Location Location { get; }
     public LeveledSpaceCell LeveledSpaceCell { get; }
     public SpaceCellState State { get; }
+    public ICellGetter Result => Cell;
+    string? INoun.EditorID => Cell.EditorID;
+    FormKey INoun.FormKey => Cell.FormKey;
 
     public SpaceCellNoun(string name, ISpaceCellDesign design)
     {
@@ -264,6 +268,7 @@ public class SpaceCellNoun
             SpaceCellPaletteData.GetScale(design.Palette));
 
         Console.WriteLine($"[SpaceCellNoun] Done — {Cell.Temporary.Count} asteroids.");
+        RetrogradeContext.NounRegistry.Add(this);
     }
 
     private static void AddCellToMod(StarfieldMod targetMod, Cell cell)

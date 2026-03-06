@@ -86,6 +86,17 @@ namespace FrankyCLI
             mod.ModHeader.Stats.NextFormID = max;
         }
 
+        public static void PrintNounRegistry()
+        {
+            var registry = RetrogradeContext.NounRegistry;
+            if (registry.Count == 0) return;
+            Console.WriteLine();
+            Console.WriteLine("=== Noun Registry ===");
+            foreach (var g in registry.GroupBy(n => n.GetType().Name).OrderBy(g => g.Key))
+                Console.WriteLine($"  {g.Key,-24} × {g.Count()}");
+            Console.WriteLine($"  Total: {registry.Count}");
+        }
+
         public static int Generate(string[] args)
         {
             Random random = RandomProvider.Random;
@@ -183,6 +194,7 @@ namespace FrankyCLI
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             AITools.ExportConversation();
+            PrintNounRegistry();
             Console.WriteLine("Finished");
             return 0;
         }

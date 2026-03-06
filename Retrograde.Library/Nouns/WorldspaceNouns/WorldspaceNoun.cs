@@ -4,6 +4,7 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.Generator;
+using Retrograde.Nouns;
 using Retrograde.Passes.Worldspace;
 using Retrograde.Utils;
 using Retrograde.WorldspaceDesigns;
@@ -19,11 +20,14 @@ namespace Retrograde.Nouns.WorldspaceNouns;
 /// and runs the worldspace dungeon generator.
 /// Ported from StarTiller POIBuilder.Generate().
 /// </summary>
-public class WorldspaceNoun
+public class WorldspaceNoun : INoun<IWorldspaceGetter>
 {
     public Worldspace Worldspace;
     public Location Location;
     public WorldspaceState State;
+    public IWorldspaceGetter Result => Worldspace;
+    string? INoun.EditorID => Worldspace.EditorID;
+    FormKey INoun.FormKey => Worldspace.FormKey;
 
     public WorldspaceNoun(IWorldspaceDesign design, string faction, int seed, string dataFolderPath = null, string? locationKeyword = null)
     {
@@ -318,6 +322,7 @@ public class WorldspaceNoun
         // Save terrain edits made by any terrain passes
         if (State.BtdFile != null && State.BtdPath != null)
             State.BtdFile.Save(State.BtdPath, updateMinMax: false);
+        RetrogradeContext.NounRegistry.Add(this);
     }
 
     /// <summary>

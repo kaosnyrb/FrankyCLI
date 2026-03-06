@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 
 namespace Retrograde.Nouns
 {
-    public class BookNoun
+    public class BookNoun : INoun<IBookGetter>
     {
         public Book instance;
+        public IBookGetter Result => instance;
+        string? INoun.EditorID => instance.EditorID;
+        FormKey INoun.FormKey => instance.FormKey;
         public BookNoun(string editorId, string Name, string Content) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -39,6 +42,7 @@ namespace Retrograde.Nouns
                 DataSlateType = Book.DataSlateType                
             };
             targetMod.Books.Add(instance);
+            RetrogradeContext.NounRegistry.Add(this);
         }
         public bool SetScriptProperty(String Scriptname, String Name, IFormLink<IStarfieldMajorRecordGetter> Value)
         {

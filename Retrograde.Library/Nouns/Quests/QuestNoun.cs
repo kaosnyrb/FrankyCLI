@@ -15,9 +15,12 @@ using System.Xml.Linq;
 
 namespace Retrograde.Nouns
 {
-    public class QuestNoun
+    public class QuestNoun : INoun<IQuestGetter>
     {
         public Quest instance;
+        public IQuestGetter Result => instance;
+        string? INoun.EditorID => instance.EditorID;
+        FormKey INoun.FormKey => instance.FormKey;
         public QuestNoun(uint Basequest, string Questname, string? editorId = null) {
             var targetMod = RetrogradeContext.Current.TargetMod;
 
@@ -52,6 +55,7 @@ namespace Retrograde.Nouns
             EnsureGangMembersFormList();
             EnsureTextDisplayGlobals();
             EnsureAliasConditionGlobals();
+            RetrogradeContext.NounRegistry.Add(this);
         }
 
         private void EnsureGangMembersFormList()
