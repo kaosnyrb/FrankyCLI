@@ -58,7 +58,7 @@ public static class MathUtil
 
     public static float Length(P3Float v)
     {
-        return (float)System.Math.Sqrt(Dot(v, v));
+        return MathF.Sqrt(Dot(v, v));
     }
 
     public static float Clamp01(float v)

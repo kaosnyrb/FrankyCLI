@@ -125,6 +125,17 @@ public class WorldspaceState
     /// </summary>
     public List<P3Float>? BuildingPodPositions;
 
+    /// <summary>
+    /// Returns the overlay-space (originX, originY) used by TileInstantiationPass,
+    /// IndustryGroundFlattenPass, IndustryPropScatterPass, and RockScatterPass to
+    /// map tile grid indices to world positions.
+    /// </summary>
+    public (float originX, float originY) GetTileOrigin(int blocksize) =>
+    (
+        FlatAreaWorldX.HasValue ? FlatAreaWorldX.Value - blocksize * (Map.xsize / 2f) : -94f,
+        FlatAreaWorldY.HasValue ? FlatAreaWorldY.Value + blocksize * (Map.ysize / 2f) :  94f
+    );
+
     public class FlatAreaBtdInfo
     {
         /// <summary>First editable cell in each axis (absolute BTD cell coordinates).</summary>

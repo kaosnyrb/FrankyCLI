@@ -98,13 +98,7 @@ public class IndustryPropScatterPass : IWorldspacePass
             return;
         }
 
-        // Mirror TileInstantiationPass / RockScatterPass origin logic.
-        float originX = state.FlatAreaWorldX.HasValue
-            ? state.FlatAreaWorldX.Value - blocksize * (map.xsize / 2f)
-            : -94f;
-        float originY = state.FlatAreaWorldY.HasValue
-            ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
-            : 94f;
+        var (originX, originY) = state.GetTileOrigin(blocksize);
 
         var allMods = RetrogradeContext.AllMods;
 
