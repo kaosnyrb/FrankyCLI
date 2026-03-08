@@ -1,6 +1,6 @@
 using Retrograde.Passes.Worldspace;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Retrograde.WorldspaceDesigns;
 
@@ -10,8 +10,13 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     public List<IWorldspacePass> CellBuildPasses { get; set; }
     public List<IWorldspacePass> ContentPasses { get; set; }
 
-    private readonly string _templateWorldspaceEditorId;
-    public string TemplateWorldspaceEditorId => _templateWorldspaceEditorId;
+    private readonly string? _templateWorldspaceEditorId;
+    public string TemplateWorldspaceEditorId => _templateWorldspaceEditorId
+        ?? RetrogradeContext.Current.TemplateMods
+            .SelectMany(m => m.Worldspaces)
+            .FirstOrDefault(w => w.EditorID?.StartsWith("tpl", StringComparison.OrdinalIgnoreCase) == true)
+            ?.EditorID
+        ?? "DR001World";
     public int MapSize => 50;
     public float TileWorldSize => 4f;
     public string DesignName => "SmallIndustryBase";
@@ -19,7 +24,7 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     public string WorldspaceName { get; private set; } = string.Empty;
     public string WorldspaceEditorId { get; private set; } = string.Empty;
 
-    public SmallIndustryBaseDesign(string templateWorldspaceEditorId = "DR001World", float scale = 0.5f)
+    public SmallIndustryBaseDesign(string? templateWorldspaceEditorId = null, float scale = 0.5f)
     {
         _templateWorldspaceEditorId = templateWorldspaceEditorId;
 

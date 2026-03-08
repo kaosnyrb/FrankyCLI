@@ -118,10 +118,13 @@ public class WorldspaceNoun : INoun<IWorldspaceGetter>
 
         // Resolve the template worldspace's SurfaceBlock — it provides the source BTD path,
         // FNAM (required binary field), and NAM5 (parent standalone SurfaceBlock link).
+        var templateEditorId = design.TemplateWorldspaceEditorId;
+        if (!RetrogradeContext.Quiet)
+            Console.WriteLine($"Template worldspace: {templateEditorId}");
         var templateWorldspace = FindInTemplateMods(
             RetrogradeContext.Current.TemplateMods,
             m => m.Worldspaces,
-            design.TemplateWorldspaceEditorId);
+            templateEditorId);
 
         ISurfaceBlockGetter? templateSurfaceBlock = null;
         if (templateWorldspace != null)
@@ -139,7 +142,7 @@ public class WorldspaceNoun : INoun<IWorldspaceGetter>
         }
 
         if (templateSurfaceBlock == null && !RetrogradeContext.Quiet)
-            Console.WriteLine($"Warning: could not resolve SurfaceBlock for template worldspace '{design.TemplateWorldspaceEditorId}'");
+            Console.WriteLine($"Warning: could not resolve SurfaceBlock for template worldspace '{templateEditorId}'");
 
         // Derive cell grid size from the template SurfaceBlock's DNAM (cols x rows).
         // Falls back to 4 if the template couldn't be resolved.

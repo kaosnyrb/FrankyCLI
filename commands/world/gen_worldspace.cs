@@ -91,11 +91,14 @@ namespace FrankyCLI
 
                 // Parse optional parameters
                 int seed = args.Length > 5 ? int.Parse(args[5]) : new Random().Next();
+
+                if (seed == -1) seed =new Random().Next();
                 string faction = args.Length > 6 ? args[6] : "Spacer";
                 string designName = args.Length > 7 ? args[7] : "Fort";
                 string? quietFlag = args.Length > 8 ? args[8] : null;
 
                 RetrogradeContext.Quiet = string.Equals(quietFlag, "quiet", StringComparison.OrdinalIgnoreCase);
+
 
                 // Resolve worldspace design
                 IWorldspaceDesign design;
