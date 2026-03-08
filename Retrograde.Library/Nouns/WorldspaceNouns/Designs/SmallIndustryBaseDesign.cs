@@ -45,6 +45,7 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
 
         ContentPasses = new List<IWorldspacePass>
         {
+            new IndustryPropScatterPass(),
             new LodLayerPass(),
             new RockScatterPass(0.4f),
             new VegetationScatterPass(0.2f),
