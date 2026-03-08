@@ -69,10 +69,7 @@ public class IndustryGroundFlattenPass : IWorldspacePass
                     foreach (var fk in variants)
                     {
                         var pk = allMods.SelectMany(m => m.PackIns).FirstOrDefault(p => p.FormKey == fk);
-                        if (pk?.ObjectBounds == null) continue;
-                        float ex = MathF.Abs(pk.ObjectBounds.Second.X - pk.ObjectBounds.First.X) / 2f;
-                        float ey = MathF.Abs(pk.ObjectBounds.Second.Y - pk.ObjectBounds.First.Y) / 2f;
-                        overlayRadius = MathF.Max(overlayRadius, MathF.Max(ex, ey));
+                        overlayRadius = MathF.Max(overlayRadius, MathUtil.BoundsRadius(pk?.ObjectBounds, 0f));
                     }
                     radiusCache[key] = overlayRadius;
                 }

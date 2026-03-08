@@ -61,10 +61,7 @@ public class IndustryPackInLibraryPass : IWorldspacePass
             foreach (var fk in formKeys)
             {
                 var packin = allMods.SelectMany(m => m.PackIns).FirstOrDefault(p => p.FormKey == fk);
-                if (packin?.ObjectBounds == null) continue;
-                float ex = MathF.Abs(packin.ObjectBounds.Second.X - packin.ObjectBounds.First.X) / 2f;
-                float ey = MathF.Abs(packin.ObjectBounds.Second.Y - packin.ObjectBounds.First.Y) / 2f;
-                maxRadius = MathF.Max(maxRadius, MathF.Max(ex, ey));
+                maxRadius = MathF.Max(maxRadius, MathUtil.BoundsRadius(packin?.ObjectBounds, 0f));
             }
             state.PackInRadii[key] = MathF.Max(maxRadius, MinFallbackRadius);
         }

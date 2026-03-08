@@ -209,14 +209,7 @@ public class IndustryPropScatterPass : IWorldspacePass
             foreach (var fk in variants)
             {
                 var pk = allMods.SelectMany(m => m.PackIns).FirstOrDefault(p => p.FormKey == fk);
-                float radius = FallbackPropRadius;
-                if (pk?.ObjectBounds != null)
-                {
-                    float ex = MathF.Abs(pk.ObjectBounds.Second.X - pk.ObjectBounds.First.X) / 2f;
-                    float ey = MathF.Abs(pk.ObjectBounds.Second.Y - pk.ObjectBounds.First.Y) / 2f;
-                    radius = MathF.Max(MathF.Max(ex, ey), FallbackPropRadius);
-                }
-                result.Add(new PropEntry(fk, radius));
+                result.Add(new PropEntry(fk, MathUtil.BoundsRadius(pk?.ObjectBounds, FallbackPropRadius)));
             }
         }
         return result;
@@ -245,11 +238,9 @@ public class IndustryPropScatterPass : IWorldspacePass
                 foreach (var fk in variants)
                 {
                     var pk = allMods.SelectMany(m => m.PackIns).FirstOrDefault(p => p.FormKey == fk);
-                    if (pk?.ObjectBounds == null) continue;
-                    float ex = MathF.Abs(pk.ObjectBounds.Second.X - pk.ObjectBounds.First.X) / 2f;
-                    float ey = MathF.Abs(pk.ObjectBounds.Second.Y - pk.ObjectBounds.First.Y) / 2f;
-                    maxHX = MathF.Max(maxHX, ex);
-                    maxHY = MathF.Max(maxHY, ey);
+                    var (hx, hy) = MathUtil.BoundsHalfExtents(pk?.ObjectBounds, 0f);
+                    maxHX = MathF.Max(maxHX, hx);
+                    maxHY = MathF.Max(maxHY, hy);
                 }
                 bounds = (maxHX, maxHY);
                 boundsCache[key] = bounds;
