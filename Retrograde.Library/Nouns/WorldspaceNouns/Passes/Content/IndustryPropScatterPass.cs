@@ -91,7 +91,9 @@ public class IndustryPropScatterPass : IWorldspacePass
         var btd       = state.BtdFile;
         int blocksize = (int)state.TileWorldSize;
 
-        var props = CollectPropEntries(state.PackInLibrary);
+        var allMods = RetrogradeContext.AllMods;
+
+        var props = CollectPropEntries(state.PackInLibrary, allMods);
         if (props.Count == 0)
         {
             Console.Error.WriteLine("[IndustryPropScatterPass] WARNING: no prop FormKeys in PackInLibrary — pass skipped.");
@@ -99,8 +101,6 @@ public class IndustryPropScatterPass : IWorldspacePass
         }
 
         var (originX, originY) = state.GetTileOrigin(blocksize);
-
-        var allMods = RetrogradeContext.AllMods;
 
         var buildings = CollectBuildings(map, state.PackInLibrary, allMods, originX, originY, blocksize);
         if (buildings.Count == 0) return;
@@ -187,10 +187,10 @@ public class IndustryPropScatterPass : IWorldspacePass
     /// ObjectBounds radius looked up from RetrogradeContext.  Falls back to
     /// <see cref="FallbackPropRadius"/> when bounds data is absent.
     /// </summary>
-    private static List<PropEntry> CollectPropEntries(Dictionary<string, List<FormKey>> library)
+    private static List<PropEntry> CollectPropEntries(
+        Dictionary<string, List<FormKey>> library,
+        IReadOnlyList<IStarfieldModGetter> allMods)
     {
-        var allMods = RetrogradeContext.AllMods;
-
         var result = new List<PropEntry>();
         foreach (var key in PropCategoryKeys)
         {

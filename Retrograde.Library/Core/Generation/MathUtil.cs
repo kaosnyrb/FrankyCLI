@@ -12,10 +12,8 @@ public static class MathUtil
     /// </summary>
     public static float BoundsRadius(IObjectBoundsGetter? bounds, float fallback)
     {
-        if (bounds == null) return fallback;
-        float hx = MathF.Abs(bounds.Second.X - bounds.First.X) / 2f;
-        float hy = MathF.Abs(bounds.Second.Y - bounds.First.Y) / 2f;
-        return MathF.Max(MathF.Max(hx, hy), fallback);
+        var (hx, hy) = BoundsHalfExtents(bounds, fallback);
+        return MathF.Max(hx, hy);
     }
 
     /// <summary>
@@ -41,9 +39,9 @@ public static class MathUtil
 
     public static bool PositionsClose(P3Float a, P3Float b, float tolerance)
     {
-        return System.Math.Abs(a.X - b.X) <= tolerance &&
-               System.Math.Abs(a.Y - b.Y) <= tolerance &&
-               System.Math.Abs(a.Z - b.Z) <= tolerance;
+        return MathF.Abs(a.X - b.X) <= tolerance &&
+               MathF.Abs(a.Y - b.Y) <= tolerance &&
+               MathF.Abs(a.Z - b.Z) <= tolerance;
     }
 
     public static P3Float Subtract(P3Float a, P3Float b)

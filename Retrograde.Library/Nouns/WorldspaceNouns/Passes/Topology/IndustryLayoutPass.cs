@@ -75,8 +75,7 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
                 $"(threshold {FallbackThreshold}). Using grid fallback.");
             PlaceFallbackGrid(map, rand, count);
             // Fallback centres on the flat area origin.
-            state.PoiCenterX = state.FlatAreaWorldX ?? 0f;
-            state.PoiCenterY = state.FlatAreaWorldY ?? 0f;
+            state.PoiCenter = (state.FlatAreaWorldX ?? 0f, state.FlatAreaWorldY ?? 0f);
             return;
         }
 
@@ -95,8 +94,9 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
         float mapCentre = map.xsize / 2f;
         float tileSize  = state.TileWorldSize;
         var anchor = best.Buildings[0];
-        state.PoiCenterX = (state.FlatAreaWorldX ?? 0f) + (anchor.X - mapCentre) * tileSize;
-        state.PoiCenterY = (state.FlatAreaWorldY ?? 0f) - (anchor.Y - mapCentre) * tileSize;
+        state.PoiCenter = (
+            (state.FlatAreaWorldX ?? 0f) + (anchor.X - mapCentre) * tileSize,
+            (state.FlatAreaWorldY ?? 0f) - (anchor.Y - mapCentre) * tileSize);
     }
 
     // ── candidate generation ─────────────────────────────────────────────────

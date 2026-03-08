@@ -72,8 +72,7 @@ public class WorldspaceState
     /// flattening, and markers on the actual base location.
     /// Null until the topology pass has run.
     /// </summary>
-    public float? PoiCenterX;
-    public float? PoiCenterY;
+    public (float X, float Y)? PoiCenter;
 
     /// <summary>
     /// World-space centre of the flat base area chosen by TerrainFlattenPass.

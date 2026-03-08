@@ -11,7 +11,7 @@ namespace Retrograde.Passes.Worldspace;
 /// worldspace's persistent TopCell, wired into the Location's
 /// MasterSpecialReferences as LocDungeonBossLocRef [LCRT:00003956].
 ///
-/// Position: <see cref="WorldspaceState.PoiCenterX"/>/<see cref="WorldspaceState.PoiCenterY"/>
+/// Position: <see cref="WorldspaceState.PoiCenter"/>
 /// when set by the topology pass; otherwise the worldspace origin (0, 0).
 ///
 /// The placed NPC is stored on <see cref="WorldspaceState.BossPlacedNpc"/>
@@ -30,8 +30,7 @@ public class WorldspaceBossPass : IWorldspacePass
         var targetMod = RetrogradeContext.Current.TargetMod;
         var starfieldEsm = RetrogradeContext.Current.StarfieldModKey;
 
-        float posX = state.PoiCenterX ?? 0f;
-        float posY = state.PoiCenterY ?? 0f;
+        var (posX, posY) = state.PoiCenter ?? (0f, 0f);
 
         float worldZ = state.TerrainHeight;
         if (state.BtdFile != null)

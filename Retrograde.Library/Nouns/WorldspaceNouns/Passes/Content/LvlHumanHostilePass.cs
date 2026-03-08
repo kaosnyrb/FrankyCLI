@@ -8,7 +8,7 @@ namespace Retrograde.Passes.Worldspace;
 
 /// <summary>
 /// Content pass that clusters a number of levelled human hostile NPCs
-/// around the POI centre (<see cref="WorldspaceState.PoiCenterX"/>/<see cref="WorldspaceState.PoiCenterY"/>),
+/// around the POI centre (<see cref="WorldspaceState.PoiCenter"/>),
 /// falling back to (0, 0) if the topology pass has not yet run.
 ///
 /// Each NPC is placed into the sub-cell that owns its XY position and is
@@ -57,8 +57,7 @@ public class LvlHumanHostilePass : IWorldspacePass
         var sfEsm      = RetrogradeContext.Current.StarfieldModKey;
         var rand       = state.Rng;
 
-        float centerX = state.PoiCenterX ?? 0f;
-        float centerY = state.PoiCenterY ?? 0f;
+        var (centerX, centerY) = state.PoiCenter ?? (0f, 0f);
 
         const StarfieldMajorRecord.StarfieldMajorRecordFlag PersistentFlag =
             (StarfieldMajorRecord.StarfieldMajorRecordFlag)PlacedObject.DefaultMajorFlag.Persistent;

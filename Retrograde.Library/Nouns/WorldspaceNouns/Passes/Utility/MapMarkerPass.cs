@@ -13,7 +13,7 @@ namespace Retrograde.Passes.Worldspace;
 ///
 /// Position priority:
 ///   1. <see cref="WorldspaceState.MarkerPosition"/> — explicit override
-///   2. <see cref="WorldspaceState.PoiCenterX"/>/<see cref="WorldspaceState.PoiCenterY"/> — set by topology pass
+///   2. <see cref="WorldspaceState.PoiCenter"/> — set by topology pass
 ///   3. Worldspace origin (0, 0) — final fallback
 /// </summary>
 public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.MarkerType.Settlement) : IWorldspacePass
@@ -63,8 +63,8 @@ public class MapMarkerPass(MapMarkerPass.MarkerType markerType = MapMarkerPass.M
 
         float z = state.TerrainHeight + 4.0f;
         var position = state.MarkerPosition
-            ?? (state.PoiCenterX.HasValue && state.PoiCenterY.HasValue
-                ? new P3Float(state.PoiCenterX.Value, state.PoiCenterY.Value, z)
+            ?? (state.PoiCenter is var (cx, cy)
+                ? new P3Float(cx, cy, z)
                 : new P3Float(0f, 0f, z));
 
         const StarfieldMajorRecord.StarfieldMajorRecordFlag PersistentFlag =

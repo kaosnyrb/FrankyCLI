@@ -46,8 +46,7 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     public List<IWorldspacePass> ContentPasses { get; set; }
 
     private readonly SmallIndustryBaseConfig _config;
-    private readonly string _templateWorldspaceEditorId;
-    public string TemplateWorldspaceEditorId => _templateWorldspaceEditorId;
+    public string TemplateWorldspaceEditorId { get; }
     public int MapSize => 50;
     public float TileWorldSize => 4f;
     public string DesignName => "SmallIndustryBase";
@@ -59,21 +58,7 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     {
         _config = config;
 
-        if (config.TemplateWorldspaceEditorId != null)
-        {
-            _templateWorldspaceEditorId = config.TemplateWorldspaceEditorId;
-        }
-        else
-        {
-            var candidates = RetrogradeContext.Current.TemplateMods
-                .SelectMany(m => m.Worldspaces)
-                .Where(w => w.EditorID?.StartsWith("tpl", StringComparison.OrdinalIgnoreCase) == true)
-                .Select(w => w.EditorID!)
-                .ToList();
-            _templateWorldspaceEditorId = candidates.Count > 0
-                ? candidates[RandomProvider.Random.Next(candidates.Count)]
-                : "DR001World";
-        }
+        TemplateWorldspaceEditorId = config.TemplateWorldspaceEditorId ?? PickRandomTemplate();
 
         MapPasses = new List<IWorldspacePass>
         {
@@ -110,6 +95,18 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
             contentPasses.Add(new LvlHumanHostilePass(config.EnemyCount, 50));
 
         ContentPasses = contentPasses;
+    }
+
+    private static string PickRandomTemplate()
+    {
+        var candidates = RetrogradeContext.Current.TemplateMods
+            .SelectMany(m => m.Worldspaces)
+            .Where(w => w.EditorID?.StartsWith("tpl", StringComparison.OrdinalIgnoreCase) == true)
+            .Select(w => w.EditorID!)
+            .ToList();
+        return candidates.Count > 0
+            ? candidates[RandomProvider.Random.Next(candidates.Count)]
+            : "DR001World";
     }
 
     public string GeneratePOIName(int seed)
