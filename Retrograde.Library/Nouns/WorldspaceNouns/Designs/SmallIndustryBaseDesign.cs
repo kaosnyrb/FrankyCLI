@@ -61,32 +61,34 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
 
     public string GeneratePOIName(int seed)
     {
-        WorldspaceName = IndustryNameGenerator.GetRandomPOIName(seed);
-        WorldspaceEditorId = WorldspaceName.ToLowerInvariant().Replace(" ", "");
+        WorldspaceName = IndustryNameGenerator.GetRandomPOIName();
+        WorldspaceEditorId = WorldspaceName.ToLowerInvariant().Replace(" ", "").Replace("-", "");
         return WorldspaceName;
     }
 }
 
 internal static class IndustryNameGenerator
 {
-    private static readonly List<string> Adjectives = new()
-    {
-        "Derelict", "Abandoned", "Remote", "Stripped", "Overhauled",
-        "Operational", "Defunct", "Active", "Neglected", "Converted",
-        "Salvaged", "Repurposed", "Isolated", "Contested", "Seized",
-    };
+    private static readonly List<string> FacilityTypes =
+    [
+        "Refinery", "Processing Plant", "Fabrication Bay", "Assembly Depot",
+        "Storage Facility", "Extraction Site", "Production Complex", "Fuel Depot",
+        "Cargo Hub", "Smelting Works", "Chemical Plant", "Distribution Centre",
+        "Mineral Works", "Operations Hub", "Foundry", "Forge",
+    ];
 
-    private static readonly List<string> Nouns = new()
-    {
-        "Processing Plant", "Refinery", "Industrial Site", "Fabrication Bay",
-        "Assembly Depot", "Storage Facility", "Extraction Site", "Production Complex",
-        "Fuel Depot", "Cargo Hub", "Manufacturing Post", "Smelting Works",
-        "Chemical Plant", "Distribution Centre", "Mineral Processing Site", "Operations Hub",
-    };
+    private static readonly List<string> CallLetters =
+    [
+        "AL","CP","DK","EM","FS","GV","HT","JC","KN","LP",
+        "MQ","NW","OY","PR","QS","RU","SV","TY","WX","ZA",
+    ];
 
-    public static string GetRandomPOIName(int seed)
+    public static string GetRandomPOIName()
     {
-        var rand = new Random(seed);
-        return Adjectives[rand.Next(Adjectives.Count)] + " " + Nouns[rand.Next(Nouns.Count)];
+        var rand       = RandomProvider.Random;
+        string type    = FacilityTypes[rand.Next(FacilityTypes.Count)];
+        string letters = CallLetters[rand.Next(CallLetters.Count)];
+        string number  = rand.Next(10, 1000).ToString("D3");
+        return $"{type} {letters}-{number}";
     }
 }

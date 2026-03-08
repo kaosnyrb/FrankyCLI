@@ -38,7 +38,7 @@ public class WorldspaceNoun : INoun<IWorldspaceGetter>
         string poiName = design.GeneratePOIName(seed);
         string vowels = "aeiouy ";
         string shortname = poiName.ToLower();
-        shortname = new string(shortname.Where(c => !vowels.Contains(c)).ToArray());
+        shortname = new string(shortname.Where(c => char.IsLetterOrDigit(c) && !vowels.Contains(c)).ToArray());
         string prefix = targetMod.Worldspaces.Count().ToString("000");
         string editorId = prefix + "wld" + shortname;
 

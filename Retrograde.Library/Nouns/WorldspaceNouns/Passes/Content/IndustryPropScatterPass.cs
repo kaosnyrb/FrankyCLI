@@ -16,10 +16,12 @@ namespace Retrograde.Passes.Worldspace;
 /// or away from the building) with a small yaw jitter for a natural look.
 ///
 /// Collision is checked against all building exclusion zones and already-placed props
-/// so nothing overlaps.  Height is sampled from the BTD terrain.
+/// so nothing overlaps.  Building footprints are treated as oriented bounding boxes
+/// (using tile.rotation and per-axis ObjectBounds half-extents) so elongated structures
+/// are handled correctly.  Height is sampled from the BTD terrain.
 ///
 /// Must run in ContentPasses (after CellBuildPasses have populated state.CellLookup).
-/// Requires state.PackInRadii (populated by IndustryPackInLibraryPass).
+/// Requires state.PackInLibrary (populated by IndustryPackInLibraryPass).
 /// </summary>
 public class IndustryPropScatterPass : IWorldspacePass
 {
@@ -39,9 +41,6 @@ public class IndustryPropScatterPass : IWorldspacePass
 
     /// <summary>Width of the annular scatter zone beyond PropClearance, in overlay units.</summary>
     private const float ScatterWidth = 6f;
-
-    /// <summary>Minimum centre-to-centre distance between two props, in overlay units.</summary>
-    private const float PropExclusion = 3f;
 
     /// <summary>
     /// Random yaw jitter on top of the radial alignment, in radians (±value).
@@ -107,35 +106,39 @@ public class IndustryPropScatterPass : IWorldspacePass
             ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
             : 94f;
 
-        var buildings = CollectBuildings(map, state.PackInRadii, originX, originY, blocksize);
+        var ctx      = RetrogradeContext.Current;
+        List<IStarfieldModGetter> allMods = [..ctx.TemplateMods, ctx.StarfieldMod];
+
+        var buildings = CollectBuildings(map, state.PackInLibrary, allMods, originX, originY, blocksize);
         if (buildings.Count == 0) return;
 
-        // Track placed prop centres for mutual exclusion across all buildings.
-        var placed = new List<(float x, float y)>(buildings.Count * PropsMax);
+        // Track placed prop centres (with radii) for mutual exclusion across all buildings.
+        var placed = new List<(float x, float y, float radius)>(buildings.Count * PropsMax);
         int total  = 0;
 
         foreach (var b in buildings)
         {
-            float innerR = b.Radius + PropClearance;
-            float outerR = innerR + ScatterWidth;
-
             int count = 0;
             for (int attempt = 0; attempt < AttemptsPerBuilding && count < PropsMax; attempt++)
             {
+                // Pick the entry first so its radius informs the scatter ring and collision checks.
+                var entry = props[rand.Next(props.Count)];
+
+                float innerR = b.Radius + entry.Radius + PropClearance;
+                float outerR = innerR + ScatterWidth;
+
                 double angle = rand.NextDouble() * Math.PI * 2.0;
                 float  dist  = innerR + (float)(rand.NextDouble() * (outerR - innerR));
 
                 float pX = b.X + MathF.Cos((float)angle) * dist;
                 float pY = b.Y + MathF.Sin((float)angle) * dist;
 
-                if (OverlapsBuilding(buildings, pX, pY)) continue;
-                if (OverlapsProp(placed, pX, pY))        continue;
+                if (OverlapsBuilding(buildings, pX, pY, entry.Radius)) continue;
+                if (OverlapsProp(placed, pX, pY, entry.Radius))        continue;
 
                 int cellX = (int)Math.Floor(pX / 100f);
                 int cellY = (int)Math.Floor(pY / 100f);
                 if (!state.CellLookup.TryGetValue(new P2Int(cellX, cellY), out var cell)) continue;
-
-                var entry = props[rand.Next(props.Count)];
 
                 // Flatten terrain under this prop and use the sampled height as Z.
                 float z;
@@ -164,7 +167,7 @@ public class IndustryPropScatterPass : IWorldspacePass
                 obj.Base = entry.FormKey.ToNullableLink<IPlaceableObjectGetter>();
 
                 state.PlacementUtil.AddToTemporary(cell, obj);
-                placed.Add((pX, pY));
+                placed.Add((pX, pY, entry.Radius));
 
                 // Mark the tile occupied so later passes skip it.
                 int tileTX = (int)Math.Floor((pX - originX) / blocksize);
@@ -222,44 +225,76 @@ public class IndustryPropScatterPass : IWorldspacePass
     }
 
     private static List<Building> CollectBuildings(
-        GenerationMap map, Dictionary<string, float> radii,
+        GenerationMap map, Dictionary<string, List<FormKey>> library,
+        List<IStarfieldModGetter> allMods,
         float originX, float originY, int blocksize)
     {
-        var result = new List<Building>();
+        var result      = new List<Building>();
+        var boundsCache = new Dictionary<string, (float hx, float hy)>();
+
         for (int tx = 0; tx < map.xsize; tx++)
         for (int ty = 0; ty < map.ysize; ty++)
         {
             var tile = map.tiles[tx][ty];
             if (tile.prefabs.Count == 0) continue;
-            if (!radii.TryGetValue(tile.prefabs[0], out float radius)) continue; // skip fill tiles
 
+            string key = tile.prefabs[0];
+            if (!library.TryGetValue(key, out var variants)) continue; // skip fill tiles
+
+            if (!boundsCache.TryGetValue(key, out var bounds))
+            {
+                float maxHX = FallbackPropRadius, maxHY = FallbackPropRadius;
+                foreach (var fk in variants)
+                {
+                    var pk = allMods.SelectMany(m => m.PackIns).FirstOrDefault(p => p.FormKey == fk);
+                    if (pk?.ObjectBounds == null) continue;
+                    float ex = MathF.Abs(pk.ObjectBounds.Second.X - pk.ObjectBounds.First.X) / 2f;
+                    float ey = MathF.Abs(pk.ObjectBounds.Second.Y - pk.ObjectBounds.First.Y) / 2f;
+                    maxHX = MathF.Max(maxHX, ex);
+                    maxHY = MathF.Max(maxHY, ey);
+                }
+                bounds = (maxHX, maxHY);
+                boundsCache[key] = bounds;
+            }
+
+            float rotRad = tile.rotation * MathF.PI / 180f;
             result.Add(new Building(
                 originX + blocksize * tx,
                 originY - blocksize * ty,
-                radius));
+                bounds.hx, bounds.hy, rotRad));
         }
         return result;
     }
 
-    private static bool OverlapsBuilding(List<Building> buildings, float pX, float pY)
+    /// <summary>
+    /// OBB point-in-rectangle test.  Transforms the candidate point into the building's
+    /// local frame (accounting for its yaw rotation) then checks against the per-axis
+    /// half-extents padded by the prop's own radius plus <see cref="PropClearance"/>.
+    /// </summary>
+    private static bool OverlapsBuilding(List<Building> buildings, float pX, float pY, float propRadius)
     {
         foreach (var b in buildings)
         {
-            float dx  = pX - b.X;
-            float dy  = pY - b.Y;
-            float min = b.Radius + PropExclusion;
-            if (dx * dx + dy * dy < min * min) return true;
+            float dx      = pX - b.X;
+            float dy      = pY - b.Y;
+            float cos     = MathF.Cos(-b.RotRad);
+            float sin     = MathF.Sin(-b.RotRad);
+            float lx      = cos * dx - sin * dy;
+            float ly      = sin * dx + cos * dy;
+            float padX    = b.HalfX + propRadius + PropClearance;
+            float padY    = b.HalfY + propRadius + PropClearance;
+            if (MathF.Abs(lx) < padX && MathF.Abs(ly) < padY) return true;
         }
         return false;
     }
 
-    private static bool OverlapsProp(List<(float x, float y)> placed, float pX, float pY)
+    private static bool OverlapsProp(List<(float x, float y, float radius)> placed, float pX, float pY, float propRadius)
     {
-        float minSq = PropExclusion * PropExclusion;
-        foreach (var (ox, oy) in placed)
+        foreach (var (ox, oy, or_) in placed)
         {
-            float dx = pX - ox, dy = pY - oy;
-            if (dx * dx + dy * dy < minSq) return true;
+            float dx      = pX - ox, dy = pY - oy;
+            float minDist = propRadius + or_;
+            if (dx * dx + dy * dy < minDist * minDist) return true;
         }
         return false;
     }
@@ -272,10 +307,14 @@ public class IndustryPropScatterPass : IWorldspacePass
         public readonly float   Radius  = radius;
     }
 
-    private readonly struct Building(float x, float y, float radius)
+    private readonly struct Building
     {
-        public readonly float X      = x;
-        public readonly float Y      = y;
-        public readonly float Radius = radius;
+        public readonly float X, Y, HalfX, HalfY, RotRad, Radius;
+
+        public Building(float x, float y, float halfX, float halfY, float rotRad)
+        {
+            X = x; Y = y; HalfX = halfX; HalfY = halfY; RotRad = rotRad;
+            Radius = MathF.Max(halfX, halfY);
+        }
     }
 }
