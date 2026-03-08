@@ -1,3 +1,4 @@
+using Mutagen.Bethesda.Starfield;
 using Retrograde.Abstractions;
 using Retrograde.Nouns;
 using System.Collections.Generic;
@@ -41,6 +42,13 @@ public static class RetrogradeContext
     /// When false, WAV/WEM generation is skipped.
     /// </summary>
     public static bool GenerateWavs { get; set; } = false;
+
+    /// <summary>
+    /// All template mods plus Starfield.esm in search order.
+    /// Use this instead of building the list ad-hoc in each pass.
+    /// </summary>
+    public static IReadOnlyList<IStarfieldModGetter> AllMods
+        => [..Current.TemplateMods, Current.StarfieldMod];
 
     /// <summary>
     /// All Nouns registered during this generation run, in creation order.

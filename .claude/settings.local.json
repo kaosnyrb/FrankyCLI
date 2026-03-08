@@ -54,7 +54,8 @@
       "WebFetch(domain:elevenlabs.io)",
       "Bash(\"c:/Git/FrankyCLI/bin/Debug/net8.0/FrankyCLI.exe\" gen_shipcompare)",
       "Read(//c/Users/kaosn/.claude/projects/c--Git-FrankyCLI/5bf65c30-f4d8-4213-ab80-164f138e33ab/tool-results/**)",
-      "Read(//c/Users/kaosn/.nuget/**)"
+      "Read(//c/Users/kaosn/.nuget/**)",
+      "Bash(git -C c:/Git/FrankyCLI log --oneline --since=\"7 days ago\" --name-only)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"

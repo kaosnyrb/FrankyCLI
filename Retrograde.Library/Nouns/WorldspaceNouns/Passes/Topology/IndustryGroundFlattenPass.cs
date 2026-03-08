@@ -33,8 +33,7 @@ public class IndustryGroundFlattenPass : IWorldspacePass
         var btd = state.BtdFile;
         if (btd == null) return;
 
-        var ctx     = RetrogradeContext.Current;
-        List<IStarfieldModGetter> allMods = [..ctx.TemplateMods, ctx.StarfieldMod];
+        var allMods = RetrogradeContext.AllMods;
 
         var map       = state.Map;
         int blocksize = (int)state.TileWorldSize;

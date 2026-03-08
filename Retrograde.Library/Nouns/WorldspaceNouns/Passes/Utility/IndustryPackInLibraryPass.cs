@@ -25,9 +25,7 @@ public class IndustryPackInLibraryPass : IWorldspacePass
 
     public void RunPass(WorldspaceState state)
     {
-        var ctx     = RetrogradeContext.Current;
-        var sf      = ctx.StarfieldMod;
-        List<IStarfieldModGetter> allMods = [..ctx.TemplateMods, sf];
+        var allMods = RetrogradeContext.AllMods;
 
         state.PackInLibrary["industry_abandoned"]     = FindByPattern(allMods, "GPPIPCMManMade_AbandondedIndustrial");
         state.PackInLibrary["industry_large"]         = FindByPattern(allMods, "GPPIPCMManMade_IndustrialLarge");

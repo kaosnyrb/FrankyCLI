@@ -106,8 +106,7 @@ public class IndustryPropScatterPass : IWorldspacePass
             ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
             : 94f;
 
-        var ctx      = RetrogradeContext.Current;
-        List<IStarfieldModGetter> allMods = [..ctx.TemplateMods, ctx.StarfieldMod];
+        var allMods = RetrogradeContext.AllMods;
 
         var buildings = CollectBuildings(map, state.PackInLibrary, allMods, originX, originY, blocksize);
         if (buildings.Count == 0) return;
@@ -196,8 +195,7 @@ public class IndustryPropScatterPass : IWorldspacePass
     /// </summary>
     private static List<PropEntry> CollectPropEntries(Dictionary<string, List<FormKey>> library)
     {
-        var ctx     = RetrogradeContext.Current;
-        List<IStarfieldModGetter> allMods = [..ctx.TemplateMods, ctx.StarfieldMod];
+        var allMods = RetrogradeContext.AllMods;
 
         var result = new List<PropEntry>();
         foreach (var key in PropCategoryKeys)
@@ -226,7 +224,7 @@ public class IndustryPropScatterPass : IWorldspacePass
 
     private static List<Building> CollectBuildings(
         GenerationMap map, Dictionary<string, List<FormKey>> library,
-        List<IStarfieldModGetter> allMods,
+        IReadOnlyList<IStarfieldModGetter> allMods,
         float originX, float originY, int blocksize)
     {
         var result      = new List<Building>();

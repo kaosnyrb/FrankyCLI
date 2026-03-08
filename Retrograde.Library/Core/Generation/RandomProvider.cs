@@ -93,10 +93,8 @@ public static class RandomProvider
 
     private static PlacedObject ClonePlacedObjectAsNew(IPlacedObjectGetter source, StarfieldMod targetMod)
     {
-        var ctx = RetrogradeContext.Current;
-
         // The parent cell may be in a different mod from the marker — search all available mods.
-        var allMods = new List<IStarfieldModGetter>(ctx.TemplateMods) { ctx.StarfieldMod };
+        var allMods = RetrogradeContext.AllMods;
 
         foreach (var mod in allMods)
         {

@@ -116,3 +116,13 @@ var surfaceBlockFormKey = overlayComp.SurfaceBlock.FormKey;
 - **PlacedObject X/Y are absolute**, not relative to cell origin — `ResolveCell()` routes to the right cell for streaming but the coordinate is always world-absolute
 - **BTD `SampleHeightAtWorld` takes BTD-internal coords** (4096-unit scale), not overlay coords — always divide result by 8 for PlacedObject Z
 - **Starfield BTDs are always centred at 0** — `btd.WorldCenterX = 0`, no offset correction needed
+- **`TileInstantiationPass` uses `tile.zoverride` for per-tile Z**, not `state.TerrainHeight` alone. For terrain-flattened buildings, compute after `FlattenCircle`:
+  ```csharp
+  float btdHeight = btd.FlattenCircle(btdX, btdY, btdRadius, btdBlend);
+  tile.zoverride  = btdHeight / 8f - state.TerrainHeight;
+  ```
+  Skipping this leaves buildings floating or buried at the global terrain height.
+- **WorldspaceNoun EditorID strips vowels but not special characters** — dashes in POI names survive into the EditorID. The vowel filter in `WorldspaceNoun.cs` must use `char.IsLetterOrDigit(c)` not just a vowel-set check:
+  ```csharp
+  shortname = new string(shortname.Where(c => char.IsLetterOrDigit(c) && !vowels.Contains(c)).ToArray());
+  ```
