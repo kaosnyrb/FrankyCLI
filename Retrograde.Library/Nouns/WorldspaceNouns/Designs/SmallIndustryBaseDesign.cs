@@ -1,8 +1,43 @@
 using Retrograde.Passes.Worldspace;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Retrograde.WorldspaceDesigns;
+
+public readonly struct SmallIndustryBaseConfig
+{
+    /// <summary>Default configuration matching the original SmallIndustryBaseDesign settings.</summary>
+    public static SmallIndustryBaseConfig Default => new()
+    {
+        HasPlanetContentManager = true,
+        HasPlanetScan           = true,
+        HasPlanetQuest          = true,
+        EnemyCount              = 10,
+        HasBoss                 = true,
+    };
+
+    /// <summary>Specific template worldspace to clone terrain from. When null, picks a random tpl* worldspace.</summary>
+    public string? TemplateWorldspaceEditorId { get; init; }
+
+    /// <summary>When set, overrides the randomly generated POI name.</summary>
+    public string? NameOverride { get; init; }
+
+    /// <summary>Whether to include a PlanetContentManagerPass.</summary>
+    public bool HasPlanetContentManager { get; init; }
+
+    /// <summary>Whether to include a PlanetScanPass.</summary>
+    public bool HasPlanetScan { get; init; }
+
+    /// <summary>Whether to include a PlanetQuestPass.</summary>
+    public bool HasPlanetQuest { get; init; }
+
+    /// <summary>Number of hostile NPCs to scatter around the POI. Pass 0 to skip.</summary>
+    public int EnemyCount { get; init; }
+
+    /// <summary>Whether to include a WorldspaceBossPass.</summary>
+    public bool HasBoss { get; init; }
+}
 
 public class SmallIndustryBaseDesign : IWorldspaceDesign
 {
@@ -10,13 +45,9 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     public List<IWorldspacePass> CellBuildPasses { get; set; }
     public List<IWorldspacePass> ContentPasses { get; set; }
 
-    private readonly string? _templateWorldspaceEditorId;
-    public string TemplateWorldspaceEditorId => _templateWorldspaceEditorId
-        ?? RetrogradeContext.Current.TemplateMods
-            .SelectMany(m => m.Worldspaces)
-            .FirstOrDefault(w => w.EditorID?.StartsWith("tpl", StringComparison.OrdinalIgnoreCase) == true)
-            ?.EditorID
-        ?? "DR001World";
+    private readonly SmallIndustryBaseConfig _config;
+    private readonly string _templateWorldspaceEditorId;
+    public string TemplateWorldspaceEditorId => _templateWorldspaceEditorId;
     public int MapSize => 50;
     public float TileWorldSize => 4f;
     public string DesignName => "SmallIndustryBase";
@@ -24,17 +55,31 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     public string WorldspaceName { get; private set; } = string.Empty;
     public string WorldspaceEditorId { get; private set; } = string.Empty;
 
-    public SmallIndustryBaseDesign(string? templateWorldspaceEditorId = null, float scale = 1.0f)
+    public SmallIndustryBaseDesign(SmallIndustryBaseConfig config, float scale = 1.0f)
     {
-        _templateWorldspaceEditorId = templateWorldspaceEditorId;
+        _config = config;
+
+        if (config.TemplateWorldspaceEditorId != null)
+        {
+            _templateWorldspaceEditorId = config.TemplateWorldspaceEditorId;
+        }
+        else
+        {
+            var candidates = RetrogradeContext.Current.TemplateMods
+                .SelectMany(m => m.Worldspaces)
+                .Where(w => w.EditorID?.StartsWith("tpl", StringComparison.OrdinalIgnoreCase) == true)
+                .Select(w => w.EditorID!)
+                .ToList();
+            _templateWorldspaceEditorId = candidates.Count > 0
+                ? candidates[RandomProvider.Random.Next(candidates.Count)]
+                : "DR001World";
+        }
 
         MapPasses = new List<IWorldspacePass>
         {
             new IndustryPackInLibraryPass(),
-            //new TerrainFlattenPass(),
             new IndustryLayoutPass(scale),
             new IndustryGroundFlattenPass(),
-            //new TerrainRestorePass(),
         };
 
         CellBuildPasses = new List<IWorldspacePass>
@@ -43,7 +88,7 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
             new TileInstantiationPass(),
         };
 
-        ContentPasses = new List<IWorldspacePass>
+        var contentPasses = new List<IWorldspacePass>
         {
             new IndustryPropScatterPass(),
             new LodLayerPass(),
@@ -51,17 +96,25 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
             new VegetationScatterPass(0.2f),
             new MapMarkerPass(MapMarkerPass.MarkerType.Industrial),
             new TravelMarkerPass(),
-            new PlanetContentManagerPass("ps_blockbranch", "ps_blockcontent"),
-            new PlanetScanPass("ps_scanbranch", "ps_scancontent"),
-            new PlanetQuestPass("ps_questbranch", "ps_questcontent"),
-            new WorldspaceBossPass(),
-            new LvlHumanHostilePass(10,50),
         };
+
+        if (config.HasPlanetContentManager)
+            contentPasses.Add(new PlanetContentManagerPass("ps_blockbranch", "ps_blockcontent"));
+        if (config.HasPlanetScan)
+            contentPasses.Add(new PlanetScanPass("ps_scanbranch", "ps_scancontent"));
+        if (config.HasPlanetQuest)
+            contentPasses.Add(new PlanetQuestPass("ps_questbranch", "ps_questcontent"));
+        if (config.HasBoss)
+            contentPasses.Add(new WorldspaceBossPass());
+        if (config.EnemyCount > 0)
+            contentPasses.Add(new LvlHumanHostilePass(config.EnemyCount, 50));
+
+        ContentPasses = contentPasses;
     }
 
     public string GeneratePOIName(int seed)
     {
-        WorldspaceName = IndustryNameGenerator.GetRandomPOIName();
+        WorldspaceName = _config.NameOverride ?? IndustryNameGenerator.GetRandomPOIName();
         WorldspaceEditorId = WorldspaceName.ToLowerInvariant().Replace(" ", "").Replace("-", "");
         return WorldspaceName;
     }
