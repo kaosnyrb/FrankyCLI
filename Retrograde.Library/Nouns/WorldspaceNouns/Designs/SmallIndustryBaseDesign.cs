@@ -24,16 +24,17 @@ public class SmallIndustryBaseDesign : IWorldspaceDesign
     public string WorldspaceName { get; private set; } = string.Empty;
     public string WorldspaceEditorId { get; private set; } = string.Empty;
 
-    public SmallIndustryBaseDesign(string? templateWorldspaceEditorId = null, float scale = 0.5f)
+    public SmallIndustryBaseDesign(string? templateWorldspaceEditorId = null, float scale = 1.0f)
     {
         _templateWorldspaceEditorId = templateWorldspaceEditorId;
 
         MapPasses = new List<IWorldspacePass>
         {
             new IndustryPackInLibraryPass(),
-            new TerrainFlattenPass(),
+            //new TerrainFlattenPass(),
             new IndustryLayoutPass(scale),
-            new TerrainRestorePass(),
+            new IndustryGroundFlattenPass(),
+            //new TerrainRestorePass(),
         };
 
         CellBuildPasses = new List<IWorldspacePass>

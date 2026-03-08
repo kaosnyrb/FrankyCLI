@@ -48,7 +48,7 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
     private const int   SpreadMin       = 5;    // map tiles — minimum distance from anchor to try
     private const int   SpreadMax       = 10;   // map tiles — maximum cluster radius from anchor
     private const float FallbackRadius  = 4f;   // overlay units — used when ObjectBounds data is absent
-    private const int   DeadZone        = 4;
+    private const int   DeadZone        = 6;
     private const int FallbackThreshold = 5;
 
     // ── entry point ──────────────────────────────────────────────────────────
