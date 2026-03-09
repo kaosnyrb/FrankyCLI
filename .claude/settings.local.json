@@ -59,7 +59,8 @@
       "Bash(git -C c:/Git/FrankyCLI status)",
       "Bash(git -C c:/Git/FrankyCLI diff)",
       "Bash(git -C c:/Git/FrankyCLI add Retrograde.Library/Core/Generation/MathUtil.cs Retrograde.Library/Nouns/WorldspaceNouns/Designs/WorldspaceDesignRegistry.cs Retrograde.Library/Nouns/WorldspaceNouns/Passes/Content/IndustryPropScatterPass.cs Retrograde.Library/Nouns/WorldspaceNouns/Passes/Topology/IndustryGroundFlattenPass.cs Retrograde.Library/Nouns/WorldspaceNouns/Passes/WorldspaceState.cs)",
-      "Bash(git -C:*)"
+      "Bash(git -C:*)",
+      "Bash(bash c:/Git/FrankyCLI/scripts/random_cs.sh c:/Git/FrankyCLI/Retrograde.Library)"
     ],
     "additionalDirectories": [
       "c:\\Git\\FrankyCLI"
