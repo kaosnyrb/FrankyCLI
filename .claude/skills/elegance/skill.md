@@ -64,6 +64,7 @@ Think carefully and select exactly **5 suggestions**. Prioritise suggestions tha
 3. Improve something you can see in the changed code — not hypothetical future problems
 4. Are consistent with how the rest of the codebase is written
 5. Each targets a different file or concern (avoid 5 suggestions about the same file)
+6. **No axis may appear more than twice.** If you find 3+ issues in one axis, pick the 2 most impactful and leave the rest.
 
 For each suggestion, classify it under one of the six axes:
 
@@ -89,6 +90,7 @@ Present them in this exact format:
 **What:** One sentence describing the current code.
 **Why:** One sentence explaining the problem.
 **How:** Concrete change — ideally a short before/after snippet.
+**Confidence:** High/Medium/Low — [one clause explaining the confidence level].
 
 ### 2. ...
 ### 3. ...
@@ -108,3 +110,4 @@ Present them in this exact format:
 - **Work with the grain of the codebase.** If the rest of the codebase uses a certain pattern, suggestions should align with that pattern, not replace it with something foreign.
 - **No hypotheticals.** Only suggest improvements visible in the actual changed code. Do not preemptively fix things that are not yet a problem.
 - **Ask before applying.** This skill is advisory only. Do not make any edits unless the user explicitly asks.
+- **Confidence levels:** High = issue is definitely present and fix is clearly correct. Medium = issue is real but fix may need adjustment. Low = speculative; depends on context not visible in the reviewed files. Prefer dropping Low-confidence suggestions in favour of High-confidence ones from a different axis.

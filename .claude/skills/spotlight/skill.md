@@ -34,9 +34,9 @@ It excludes `obj/`, `bin/`, and auto-generated files, then returns one path chos
 ## Step 2 — Read the target file
 
 Read the chosen file in full. While reading, note:
-- What is its responsibility?
+- What is its responsibility? (Capture a one-sentence role description for the output header.)
 - What patterns or abstractions does it use?
-- What namespace/folder does it live in?
+- What namespace/folder does it live in? (Capture the folder name as the Layer.)
 - Any unused methods, fields, or parameters
 - Any commented-out blocks that were never cleaned up
 - Any comments that merely restate the code, are incorrect, or are stale TODOs
@@ -65,6 +65,7 @@ Think carefully and select exactly **5 suggestions**. Prioritise suggestions tha
 3. Improve something visible in the actual code — not hypothetical future problems
 4. Are consistent with how the rest of the codebase is written
 5. Span different concerns — avoid 5 suggestions about the same issue
+6. **No axis may appear more than twice.** If you find 3+ issues in one axis, pick the 2 most impactful and leave the rest.
 
 For each suggestion, classify it under one of the six axes:
 
@@ -85,11 +86,13 @@ Present them in this exact format:
 
 ```
 ## Spotlight review — [FileName.cs]
+**File:** [FileName.cs] — [one sentence role description]. **Layer:** [folder name].
 
 ### 1. [Axis] — [File:line or method name]
 **What:** One sentence describing the current code.
 **Why:** One sentence explaining the problem.
 **How:** Concrete change — ideally a short before/after snippet.
+**Confidence:** High/Medium/Low — [one clause explaining the confidence level].
 
 ### 2. ...
 ### 3. ...
@@ -110,3 +113,4 @@ Present them in this exact format:
 - **No hypotheticals.** Only suggest improvements visible in the actual code. Do not preemptively fix things that are not yet a problem.
 - **Ask before applying.** This skill is advisory only. Do not make any edits unless the user explicitly asks.
 - **Complement with /elegance.** Spotlight reviews a random undervisited file; `/elegance` reviews recent git changes. Use both for broad coverage.
+- **Confidence levels:** High = issue is definitely present and fix is clearly correct. Medium = issue is real but fix may need adjustment. Low = speculative; depends on context not visible in the reviewed files. Prefer dropping Low-confidence suggestions in favour of High-confidence ones from a different axis.
