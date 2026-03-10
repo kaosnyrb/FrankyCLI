@@ -25,6 +25,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `docs/formlib/aliases.md` | Quest aliases — QuestReferenceAlias (ForcedReference/UniqueActor/CreateReferenceToObject fill strategies, Flags), QuestLocationAlias (SpecificLocation/ALPS), QuestCollectionAlias, VMA.Aliases vs Quest.Aliases split, Property.Object self-reference gotcha, template alias ID families |
 | `docs/formlib/locations.md` | Location (LCTN) record — key fields, parent→child hierarchy, creating from scratch, cell→location linkage, confirmed keyword FormIDs (LocTypeDungeon/Clearable/Overlay/LocEnc*), vanilla lookup by FormID, SpecificLocation vs PCM keyword fill |
 | `docs/formlib/placed_npc.md` | PlacedNpc (ACHR) — required fields, Persistent flag, Base/PersistentLocation/Location post-construction pattern, PlacementUtil routing (Temporary/Persistent), LvlHumanHostile_ NPC pool FormIDs, boss wiring (LocDungeonBossLocRef + MasterSpecialReferences), terrain Z sampling |
+| `docs/formlib/formlist.md` | FormList (FLST) — Items list type, construction pattern, crew/gang pool, waypoint marker collection, slot-to-content mapping, template copy pattern (no master dependency), lookup by EditorID/FormKey, XMarker FormID (0x3B), gang list EditorIDs |
 
 ## Design Library
 
