@@ -43,117 +43,88 @@ public class TileInstantiationPass : IWorldspacePass
                 // Determine which cell this tile belongs to from its world position
                 float worldX = originX + (blocksize * x);
                 float worldY = originY - (blocksize * y);
-                int tileCellX = (int)Math.Floor(worldX / 4096f);
-                int tileCellY = (int)Math.Floor(worldY / 4096f);
+                int tileCellX = (int)Math.Floor(worldX / 100f);
+                int tileCellY = (int)Math.Floor(worldY / 100f);
                 if (tileCellX != state.CurrentCellPos.X || tileCellY != state.CurrentCellPos.Y)
                     continue;
-                if (map.tiles[x][y].prefabs.Count > 0)
+
+                foreach (var pfb in map.tiles[x][y].prefabs)
                 {
-                    foreach (var pfb in map.tiles[x][y].prefabs)
+                    if (!state.PackInLibrary.TryGetValue(pfb, out var variants))
+                        continue;
+                    if (variants.Count == 0) continue;
+
+                    int prefabid = rand.Next(variants.Count);
+                    var prefab = variants[prefabid];
+
+                    // Remove non-reusable, non-addon variants after use
+                    var packIn = templateMods
+                        .SelectMany(m => m.PackIns)
+                        .FirstOrDefault(p => p.FormKey == prefab);
+                    if (packIn != null &&
+                        packIn.EditorID != null &&
+                        !packIn.EditorID.Contains("reuse") &&
+                        !packIn.EditorID.Contains("addon"))
                     {
-                        if (state.PackInLibrary.ContainsKey(pfb))
-                        {
-                            var variants = state.PackInLibrary[pfb];
-                            if (variants.Count == 0) continue;
-
-                            int prefabid = rand.Next(variants.Count);
-                            var prefab = variants[prefabid];
-
-                            // Remove non-reusable, non-addon variants after use
-                            var packIn = templateMods
-                                .SelectMany(m => m.PackIns)
-                                .FirstOrDefault(p => p.FormKey == prefab);
-                            if (packIn != null &&
-                                packIn.EditorID != null &&
-                                !packIn.EditorID.Contains("reuse") &&
-                                !packIn.EditorID.Contains("addon"))
-                            {
-                                if (variants.Count > 1)
-                                {
-                                    variants.RemoveAt(prefabid);
-                                }
-                            }
-
-                            float z = state.TerrainHeight;
-                            if (map.tiles[x][y].zoverride != 0)
-                            {
-                                z = state.TerrainHeight + map.tiles[x][y].zoverride;
-                            }
-                            P3Float tilePos = new P3Float(originX + (blocksize * x), originY - (blocksize * y), z);
-                            int yawSteps = map.tiles[x][y].rotation / 90;
-
-                            // Resolve the PackIn's cell to unpack its contents
-                            var prefabCell = ResolvePrefabCell(prefab, templateMods);
-                            if (prefabCell == null)
-                            {
-                                Console.WriteLine($"[TileInstantiation] WARNING: Could not resolve cell for PackIn {prefab}, skipping");
-                                continue;
-                            }
-
-                            // Unpack all placed entries from the prefab cell
-                            foreach (var entry in prefabCell.Temporary)
-                            {
-                                if (entry is IPlacedObjectGetter po)
-                                {
-                                    var placed = ClonePlacedObject(po, tilePos, yawSteps, targetMod);
-                                    if (placed != null)
-                                    {
-                                        var targetCell = ResolveCell(state, placed.Position);
-                                        state.PlacementUtil.AddToTemporary(targetCell, placed);
-                                        totalPlaced++;
-                                    }
-                                }
-                                else if (entry is IPlacedNpcGetter npc)
-                                {
-                                    var placed = ClonePlacedNpc(npc, tilePos, yawSteps, targetMod);
-                                    if (placed != null)
-                                    {
-                                        var targetCell = ResolveCell(state, placed.Position);
-                                        state.PlacementUtil.AddToTemporary(targetCell, placed);
-                                        totalPlaced++;
-                                    }
-                                }
-                            }
-
-                            foreach (var entry in prefabCell.Persistent)
-                            {
-                                if (entry is IPlacedObjectGetter po)
-                                {
-                                    var placed = ClonePlacedObject(po, tilePos, yawSteps, targetMod);
-                                    if (placed != null)
-                                    {
-                                        state.PlacementUtil.AddToPersistent(placed);
-                                        totalPlaced++;
-                                    }
-                                }
-                                else if (entry is IPlacedNpcGetter npc)
-                                {
-                                    var placed = ClonePlacedNpc(npc, tilePos, yawSteps, targetMod);
-                                    if (placed != null)
-                                    {
-                                        state.PlacementUtil.AddToPersistent(placed);
-                                        totalPlaced++;
-                                    }
-                                }
-                            }
-                        }
+                        if (variants.Count > 1)
+                            variants.RemoveAt(prefabid);
                     }
+
+                    float z = state.TerrainHeight;
+                    if (map.tiles[x][y].zoverride != 0)
+                        z = state.TerrainHeight + map.tiles[x][y].zoverride;
+                    P3Float tilePos = new P3Float(originX + (blocksize * x), originY - (blocksize * y), z);
+                    int yawSteps = map.tiles[x][y].rotation / 90;
+
+                    // Resolve the PackIn's cell to unpack its contents
+                    var prefabCell = ResolvePrefabCell(prefab, templateMods);
+                    if (prefabCell == null)
+                    {
+                        Console.WriteLine($"[TileInstantiation] WARNING: Could not resolve cell for PackIn {prefab}, skipping");
+                        continue;
+                    }
+
+                    PlaceEntries(prefabCell.Temporary,  tilePos, yawSteps, persistent: false);
+                    PlaceEntries(prefabCell.Persistent, tilePos, yawSteps, persistent: true);
                 }
             }
         }
 
         Console.WriteLine($"[TileInstantiation] Unpacked {totalPlaced} objects from prefabs");
+
+        void PlaceEntries<T>(IEnumerable<T> entries, P3Float tilePos, int yawSteps, bool persistent)
+        {
+            foreach (var entry in entries)
+            {
+                if (entry is IPlacedObjectGetter po)
+                {
+                    var placed = ClonePlacedObject(po, tilePos, yawSteps, targetMod);
+                    if (placed == null) continue;
+                    if (persistent) state.PlacementUtil.AddToPersistent(placed);
+                    else state.PlacementUtil.AddToTemporary(ResolveCell(state, placed.Position), placed);
+                    totalPlaced++;
+                }
+                else if (entry is IPlacedNpcGetter npc)
+                {
+                    var placed = ClonePlacedNpc(npc, tilePos, yawSteps, targetMod);
+                    if (placed == null) continue;
+                    if (persistent) state.PlacementUtil.AddToPersistent(placed);
+                    else state.PlacementUtil.AddToTemporary(ResolveCell(state, placed.Position), placed);
+                    totalPlaced++;
+                }
+            }
+        }
     }
 
     /// <summary>
     /// Determines which cell a world position belongs to and returns it.
     /// Falls back to state.CurrentCell if the computed cell isn't in the lookup.
-    /// Each cell is 4096 world units.
+    /// Each cell is 100 overlay world units.
     /// </summary>
     private static Cell ResolveCell(WorldspaceState state, P3Float worldPos)
     {
-        int cellX = (int)Math.Floor(worldPos.X / 4096f);
-        int cellY = (int)Math.Floor(worldPos.Y / 4096f);
+        int cellX = (int)Math.Floor(worldPos.X / 100f);
+        int cellY = (int)Math.Floor(worldPos.Y / 100f);
         var cellPoint = new P2Int(cellX, cellY);
 
         if (state.CellLookup.TryGetValue(cellPoint, out var cell))
@@ -167,7 +138,7 @@ public class TileInstantiationPass : IWorldspacePass
         foreach (var mod in templateMods)
         {
             var packin = mod.PackIns.FirstOrDefault(p => p.FormKey == packinFormKey);
-            if (packin?.Cell.FormKey != null)
+            if (packin != null && !packin.Cell.IsNull)
             {
                 foreach (var block in mod.Cells)
                     foreach (var subBlock in block.SubBlocks)
