@@ -197,8 +197,7 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
         // Anchor the tile grid at the centre of the editable BTD area so that
         // the tile map covers the usable terrain for any BTD grid size.
         // For 4×4 BTDs ovCX/ovCY are both 0; for 5×5 BTDs they are (50, 50).
-        state.FlatAreaWorldX = ovCX;
-        state.FlatAreaWorldY = ovCY;
+        state.FlatAreaCenter = (ovCX, ovCY);
         state.TerrainHeight  = btd.SampleHeightAtWorld(ovCX * BtdScale, ovCY * BtdScale) / 8f;
 
         // ------------------------------------------------------------------
@@ -228,13 +227,11 @@ public class RacetrackTerrainPass(float trackScale = 1.0f) : IWorldspacePass
         // ------------------------------------------------------------------
         // 3b. Mark every tile map tile that overlaps the track band so that
         //     RockScatterPass and VegetationScatterPass will skip them.
-        //     Uses the same origin formula as those passes.
         // ------------------------------------------------------------------
         {
             int mapSize  = state.Map.xsize;
             int blkSize  = (int)state.TileWorldSize;
-            float tileOX = (state.FlatAreaWorldX ?? 0f) - blkSize * (mapSize / 2f);
-            float tileOY = (state.FlatAreaWorldY ?? 0f) + blkSize * (mapSize / 2f);
+            var (tileOX, tileOY) = state.GetTileOrigin(blkSize);
 
             for (int tx = 0; tx < mapSize; tx++)
             {

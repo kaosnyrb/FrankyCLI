@@ -13,7 +13,7 @@ namespace Retrograde.Passes.Worldspace;
 /// the edges of the editable region.
 ///
 /// Updates state.TerrainHeight (PlacedObject coordinate space, already / 8) and
-/// state.FlatAreaWorldX/Y to the centre of the chosen area.
+/// state.FlatAreaCenter to the centre of the chosen area.
 ///
 /// Must run before tile placement. Requires state.BtdFile and state.Rng.
 /// </summary>
@@ -173,13 +173,14 @@ public class TerrainFlattenPass : IWorldspacePass
 
         // Convert flat area centre from BTD-internal vertex space to overlay worldspace coordinates.
         const float overlayVertSpacingConst = overlayCellSize / BtdFile.CellResolution; // ≈ 0.78125
-        state.FlatAreaWorldX = editMinX * overlayCellSize + (bestX0 + areaVerts * 0.5f) * overlayVertSpacingConst
-                               - btd.WorldCenterX * (overlayCellSize / 4096f);
-        state.FlatAreaWorldY = editMinY * overlayCellSize + (bestY0 + areaVerts * 0.5f) * overlayVertSpacingConst
-                               - btd.WorldCenterY * (overlayCellSize / 4096f);
+        float flatX = editMinX * overlayCellSize + (bestX0 + areaVerts * 0.5f) * overlayVertSpacingConst
+                      - btd.WorldCenterX * (overlayCellSize / 4096f);
+        float flatY = editMinY * overlayCellSize + (bestY0 + areaVerts * 0.5f) * overlayVertSpacingConst
+                      - btd.WorldCenterY * (overlayCellSize / 4096f);
+        state.FlatAreaCenter = (flatX, flatY);
 
         if (!RetrogradeContext.Quiet)
-            Console.WriteLine($"[TerrainFlattenPass] origin=({bestX0},{bestY0}) areaVerts={areaVerts}  FlatArea=({state.FlatAreaWorldX:F2},{state.FlatAreaWorldY:F2})");
+            Console.WriteLine($"[TerrainFlattenPass] origin=({bestX0},{bestY0}) areaVerts={areaVerts}  FlatArea=({flatX:F2},{flatY:F2})");
     }
 
     // Returns height (8×-scaled) at global vertex (gx, gy) within the editable region.

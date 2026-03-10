@@ -18,6 +18,9 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `docs/formlib/space_cell.md` | Space Cell (CELL SpaceCell) + LeveledSpaceCell — structure, key FormIDs, content type rules, cloning pattern |
 | `docs/formlib/ship.md` | GenericBaseForm (GBFM) encounter ship — safe clone fields, ObjectTemplateInstanceData gotcha, ExternalDataSource faction sources, LeveledBaseForm faction FormIDs |
 | `docs/formlib/quest_from_scratch.md` | Quest built entirely in C# — VMA version values, alias ID families (space/planet), script inventory, fragment script, proposed QuestFromScratch class |
+| `docs/formlib/scripts.md` | Vanilla Default* script catalogue — alias events, counter system, TopicInfo scripts, map markers, C# wiring pattern with ScriptProperty subtypes |
+| `docs/formlib/conditions.md` | Condition record — ConditionFloat vs ConditionGlobal, RunOnType, FormLinkOrIndex assignment gotcha, confirmed types (GetStageDone, GetStage, GetIsID, HasKeyword, GetGlobalValue, GetInFaction), IsInLocation missing from Mutagen, clone-and-patch pattern |
+| `docs/formlib/objectives.md` | Quest stages (QuestStage, QuestLogEntry, CompleteQuest flag) + objectives (QuestObjective, QuestObjectiveTarget, compass targets, Alias token syntax, Papyrus SetObjectiveDisplayed pattern) |
 
 ## Design Library
 

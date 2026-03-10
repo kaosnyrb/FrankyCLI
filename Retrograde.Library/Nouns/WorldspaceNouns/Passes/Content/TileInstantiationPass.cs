@@ -27,14 +27,7 @@ public class TileInstantiationPass : IWorldspacePass
 
         int totalPlaced = 0;
 
-        // If TerrainFlattenPass ran, centre the tile grid on the flat area.
-        // Otherwise fall back to the legacy hardcoded origin.
-        float originX = state.FlatAreaWorldX.HasValue
-            ? state.FlatAreaWorldX.Value - blocksize * (map.xsize / 2f)
-            : -94f;
-        float originY = state.FlatAreaWorldY.HasValue
-            ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
-            : 94f;
+        var (originX, originY) = state.GetTileOrigin(blocksize);
 
         for (int x = 0; x < map.xsize; x++)
         {

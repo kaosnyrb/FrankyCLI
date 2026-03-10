@@ -129,10 +129,10 @@ public class ScienceBuildingPass : IWorldspacePass
         {
             FindFlatArea(btd, footprintOverlay, out flatX, out flatY, out buildingZ);
         }
-        else if (state.FlatAreaWorldX.HasValue)
+        else if (state.FlatAreaCenter.HasValue)
         {
-            flatX = state.FlatAreaWorldX.Value;
-            flatY = state.FlatAreaWorldY!.Value;
+            flatX = state.FlatAreaCenter.Value.X;
+            flatY = state.FlatAreaCenter.Value.Y;
             buildingZ = state.TerrainHeight;
         }
         else
@@ -147,8 +147,7 @@ public class ScienceBuildingPass : IWorldspacePass
 
         // Expose building location to subsequent passes (marker, boss, scatter).
         state.TerrainHeight   = buildingZ;
-        state.FlatAreaWorldX  = flatX;
-        state.FlatAreaWorldY  = flatY;
+        state.FlatAreaCenter  = (flatX, flatY);
         state.MarkerPosition  = new P3Float(flatX, flatY, buildingZ + 1f);
 
         // Apply vertical offset so pieces sit cleanly above the flattened terrain.

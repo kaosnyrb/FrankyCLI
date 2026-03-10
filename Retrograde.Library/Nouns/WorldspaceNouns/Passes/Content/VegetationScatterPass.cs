@@ -69,13 +69,7 @@ public class VegetationScatterPass : IWorldspacePass
         var map       = state.Map;
         int blocksize = (int)state.TileWorldSize;
 
-        // Mirror TileInstantiationPass origin: centre the tile grid on the flat area.
-        float originX = state.FlatAreaWorldX.HasValue
-            ? state.FlatAreaWorldX.Value - blocksize * (map.xsize / 2f)
-            : -94f;
-        float originY = state.FlatAreaWorldY.HasValue
-            ? state.FlatAreaWorldY.Value + blocksize * (map.ysize / 2f)
-            : 94f;
+        var (originX, originY) = state.GetTileOrigin(blocksize);
 
         // Extend the iteration bounds to cover every active cell in CellLookup.
         // The tile map (map.xsize × map.ysize) may be smaller than the actual

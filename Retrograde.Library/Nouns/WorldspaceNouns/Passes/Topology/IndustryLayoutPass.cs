@@ -75,7 +75,7 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
                 $"(threshold {FallbackThreshold}). Using grid fallback.");
             PlaceFallbackGrid(map, rand, count);
             // Fallback centres on the flat area origin.
-            state.PoiCenter = (state.FlatAreaWorldX ?? 0f, state.FlatAreaWorldY ?? 0f);
+            state.PoiCenter = state.FlatAreaCenter ?? (0f, 0f);
             return;
         }
 
@@ -88,15 +88,16 @@ public class IndustryLayoutPass(float scale = 0.5f) : IWorldspacePass
         // Publish the anchor building position in overlay world space so
         // downstream passes (scatter, map marker, boss, etc.) can orient
         // themselves around the actual base location.
-        // Mirrors TileInstantiationPass: worldX = FlatAreaWorldX + bs*(x - xsize/2)
-        //                                worldY = FlatAreaWorldY - bs*(y - ysize/2)
-        // TerrainFlattenPass must run before this pass so FlatAreaWorldX/Y are set.
+        // Mirrors TileInstantiationPass: worldX = FlatAreaCenter.X + bs*(x - xsize/2)
+        //                                worldY = FlatAreaCenter.Y - bs*(y - ysize/2)
+        // TerrainFlattenPass must run before this pass so FlatAreaCenter is set.
         float mapCentre = map.xsize / 2f;
         float tileSize  = state.TileWorldSize;
         var anchor = best.Buildings[0];
+        var flatCenter = state.FlatAreaCenter ?? (0f, 0f);
         state.PoiCenter = (
-            (state.FlatAreaWorldX ?? 0f) + (anchor.X - mapCentre) * tileSize,
-            (state.FlatAreaWorldY ?? 0f) - (anchor.Y - mapCentre) * tileSize);
+            flatCenter.X + (anchor.X - mapCentre) * tileSize,
+            flatCenter.Y - (anchor.Y - mapCentre) * tileSize);
     }
 
     // ── candidate generation ─────────────────────────────────────────────────

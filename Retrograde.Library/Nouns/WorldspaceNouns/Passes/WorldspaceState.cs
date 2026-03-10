@@ -75,12 +75,11 @@ public class WorldspaceState
     public (float X, float Y)? PoiCenter;
 
     /// <summary>
-    /// World-space centre of the flat base area chosen by TerrainFlattenPass.
-    /// Null until TerrainFlattenPass has run. TileInstantiationPass uses this
-    /// to centre the tile grid on the flat area instead of the worldspace origin.
+    /// Overlay world-space centre of the flat base area chosen by TerrainFlattenPass,
+    /// ScienceBuildingPass, or RacetrackTerrainPass. Null until one of those passes runs.
+    /// Scatter and tile passes use this to centre the tile grid on the flat area.
     /// </summary>
-    public float? FlatAreaWorldX;
-    public float? FlatAreaWorldY;
+    public (float X, float Y)? FlatAreaCenter;
 
     /// <summary>
     /// The BTD terrain file for this worldspace, available to terrain passes.
@@ -124,15 +123,20 @@ public class WorldspaceState
     /// </summary>
     public List<P3Float>? BuildingPodPositions;
 
+    // Legacy fallback origin: centred on the default 4×4 BTD at worldspace (0,0) before
+    // TerrainFlattenPass was introduced. Safe to keep as a fallback for harness runs.
+    private const float LegacyOriginX = -94f;
+    private const float LegacyOriginY =  94f;
+
     /// <summary>
-    /// Returns the overlay-space (originX, originY) used by TileInstantiationPass,
-    /// IndustryGroundFlattenPass, IndustryPropScatterPass, and RockScatterPass to
-    /// map tile grid indices to world positions.
+    /// Overlay-space top-left corner of the tile grid. Centres on
+    /// <see cref="FlatAreaCenter"/> when set; falls back to the legacy
+    /// origin (-94, 94) for the default 4×4 BTD layout.
     /// </summary>
     public (float originX, float originY) GetTileOrigin(int blocksize) =>
     (
-        FlatAreaWorldX.HasValue ? FlatAreaWorldX.Value - blocksize * (Map.xsize / 2f) : -94f,
-        FlatAreaWorldY.HasValue ? FlatAreaWorldY.Value + blocksize * (Map.ysize / 2f) :  94f
+        FlatAreaCenter.HasValue ? FlatAreaCenter.Value.X - blocksize * (Map.xsize / 2f) : LegacyOriginX,
+        FlatAreaCenter.HasValue ? FlatAreaCenter.Value.Y + blocksize * (Map.ysize / 2f) : LegacyOriginY
     );
 
     public class FlatAreaBtdInfo

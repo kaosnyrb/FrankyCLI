@@ -10,7 +10,7 @@ namespace Retrograde.WorldspaceDesigns;
 /// Unlike <see cref="FortDesign"/>, this design places the building directly from
 /// <see cref="ScienceBuildingPass"/> rather than using prefab tile instantiation.
 /// The building pass handles its own terrain flattening and exposes the building
-/// position to subsequent passes via <c>state.FlatAreaWorldX/Y</c> and
+/// position to subsequent passes via <c>state.FlatAreaCenter</c> and
 /// <c>state.MarkerPosition</c>.
 ///
 /// Pass order in ContentPasses is significant:
@@ -115,7 +115,7 @@ public class ScienceOutpostDesign : IWorldspaceDesign
             new NavmeshSeedPass(),
         };
 
-        // ScienceBuildingPass must come first — it sets state.FlatAreaWorldX/Y,
+        // ScienceBuildingPass must come first — it sets state.FlatAreaCenter,
         // state.TerrainHeight, and state.MarkerPosition for all passes that follow.
         ContentPasses = new List<IWorldspacePass>
         {

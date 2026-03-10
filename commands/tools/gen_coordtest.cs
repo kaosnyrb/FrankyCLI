@@ -145,8 +145,7 @@ namespace FrankyCLI
             Console.WriteLine($"    Overlay worldspace: 100 units/cell, ~0.78 units/vertex");
             Console.WriteLine($"    Z (height)      : BTD 8x-scaled, divide by 8 for PlacedObject");
             Console.WriteLine($"  TerrainHeight (overlay Z, /8 applied): {h:F4}");
-            Console.WriteLine($"  FlatAreaWorldX (overlay units): {state.FlatAreaWorldX?.ToString("F2") ?? "null"}");
-            Console.WriteLine($"  FlatAreaWorldY (overlay units): {state.FlatAreaWorldY?.ToString("F2") ?? "null"}");
+            Console.WriteLine($"  FlatAreaCenter (overlay units): {(state.FlatAreaCenter.HasValue ? $"({state.FlatAreaCenter.Value.X:F2}, {state.FlatAreaCenter.Value.Y:F2})" : "null")}");
             Console.WriteLine();
             Console.WriteLine("  Expected: ct_flat_center inside the visual plateau (near origin for flat BTD).");
             Console.WriteLine("  Cell size = 100 overlay units. World spans [-200, +200] for a 4x4 BTD.");
@@ -173,13 +172,7 @@ namespace FrankyCLI
             }
 
             // ── 2. Tile grid corner / centre markers ───────────────────────────
-            // Mirrors the origin calculation in TileInstantiationPass exactly.
-            float originX = state.FlatAreaWorldX.HasValue
-                ? state.FlatAreaWorldX.Value - blocksize * (state.Map.xsize / 2f)
-                : -94f;
-            float originY = state.FlatAreaWorldY.HasValue
-                ? state.FlatAreaWorldY.Value + blocksize * (state.Map.ysize / 2f)
-                : 94f;
+            var (originX, originY) = state.GetTileOrigin(blocksize);
 
             Console.WriteLine();
             Console.WriteLine($"  Tile grid origin (tile[0,0] position): ({originX:F1}, {originY:F1})");
@@ -204,15 +197,15 @@ namespace FrankyCLI
             }
 
             // ── 3. Flat area centre ────────────────────────────────────────────
-            if (state.FlatAreaWorldX.HasValue && state.FlatAreaWorldY.HasValue)
+            if (state.FlatAreaCenter.HasValue)
             {
-                float fx = state.FlatAreaWorldX.Value;
-                float fy = state.FlatAreaWorldY.Value;
+                float fx = state.FlatAreaCenter.Value.X;
+                float fy = state.FlatAreaCenter.Value.Y;
                 Place(targetMod, marker, state, new P3Float(fx, fy, h), "ct_flat_center");
                 Console.WriteLine();
                 Console.WriteLine($"  ct_flat_center (TerrainFlattenPass result): ({fx:F1}, {fy:F1}, {h:F2})");
                 Console.WriteLine("  ► In CK: verify this marker is inside the visually-flattened plateau.");
-                Console.WriteLine("  ► If it is in the WRONG quadrant, FlatAreaWorldY is Y-inverted.");
+                Console.WriteLine("  ► If it is in the WRONG quadrant, FlatAreaCenter.Y is Y-inverted.");
             }
 
             Console.WriteLine("=== End CoordMarkerPass ===");
