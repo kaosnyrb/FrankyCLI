@@ -206,6 +206,87 @@ quest.Aliases ??= new ExtendedList<AQuestAlias>();
 quest.Aliases.Add(alias);
 ```
 
+---
+
+## QuestPhase — composable alias groups
+
+`QuestPhase` (`Retrograde.Nouns.Quests.Phases`) lets you append a self-contained group of related aliases to a quest in one call. Each phase has a **prefix** (`string`) that is prepended to every alias name, so multiple phases on the same quest don't collide and quest text can reference them as `<Alias=Assault01_BountyTarget>`.
+
+### Alias IDs
+
+IDs are auto-incremented from `(current max alias ID + 1)`. Never rely on fixed IDs for phase-created aliases; always access them via the returned `PhaseAliasGroup`.
+
+### Standard factory methods
+
+| Factory | Aliases created |
+|---|---|
+| `QuestPhase.PlanetDungeon(prefix)` | Location + BountyMarker (ForcedRef) + BountyTarget (CreateRef, 0x104) + MapMarker |
+| `QuestPhase.SpaceStation(prefix)` | SpawnMarker + Station (CreateRef, 0x100) + MapMarker |
+| `QuestPhase.NPCEncounter(prefix)` | Location + TargetNpc (ForcedRef) + MapMarker |
+| `QuestPhase.SimpleTarget(prefix)` | Target (ForcedRef only) |
+
+### Fluent builder methods
+
+```csharp
+new QuestPhase("Phase2")
+    .WithLocation("Loc", flags: 0x00000109)
+    .WithForcedRef("Boss")
+    .WithCreateRef("Ship", flags: 0x00080100)
+    .WithMapMarker("Marker", category: 7)
+    .ApplyTo(quest);
+```
+
+### `PhaseAliasGroup` — wiring handles
+
+`ApplyTo(quest)` returns a `PhaseAliasGroup` with named properties for common roles:
+
+| Property | Returns |
+|---|---|
+| `.Location` | First location alias name |
+| `.MapMarker` | First map-marker alias name |
+| `.SpawnMarker` | First spawn-marker alias name |
+| `.ForcedRef` | First forced-ref alias name |
+| `.CreateRef` | First create-ref alias name |
+| `.AliasName(suffix)` | `"{Prefix}_{suffix}"` (generic lookup) |
+| `.AllOfRole(role)` | All names for that role (multi-alias phases) |
+
+### Usage example — two-location quest
+
+```csharp
+var quest = new QuestNoun(templateId, "My Quest", "myquest");
+quest.SetScriptAlias(0, quest.instance.ToLink<IStarfieldMajorRecordGetter>());
+
+var phase1 = QuestPhase.PlanetDungeon("Assault01").ApplyTo(quest);
+var phase2 = QuestPhase.PlanetDungeon("Assault02").ApplyTo(quest);
+
+// Wire phase 1
+quest.SetQuestLocationAlias(phase1.Location!, loc1.ToNullableLink<ILocationGetter>());
+quest.SetQuestReferenceAlias(phase1.ForcedRef!, boss1PlacedNpc.FormKey);
+quest.SetQuestReferenceCreateAlias(phase1.CreateRef!, activator1.ToLink<IStarfieldMajorRecordGetter>());
+
+// Wire phase 2
+quest.SetQuestLocationAlias(phase2.Location!, loc2.ToNullableLink<ILocationGetter>());
+quest.SetQuestReferenceAlias(phase2.ForcedRef!, boss2PlacedNpc.FormKey);
+quest.SetQuestReferenceCreateAlias(phase2.CreateRef!, activator2.ToLink<IStarfieldMajorRecordGetter>());
+
+// MapMarker VMA self-references are wired automatically inside ApplyTo.
+// Only call SetScriptAlias for the original template alias (index 0):
+quest.SetScriptAlias(0, quest.instance.ToLink<IStarfieldMajorRecordGetter>());
+```
+
+### MapMarker VMA wiring
+
+When a `WithMapMarker` spec is included, `ApplyTo` automatically:
+1. Creates the `QuestReferenceAlias` with flags `0x00004080`
+2. Appends a `QuestFragmentAlias` to `VMA.Aliases` with `DefaultAliasMapMarkerScript`
+3. Sets `Property.Object` to the quest self-link immediately
+
+The VMA alias index is `VMA.Aliases.Count - 1` after the call. No manual `SetScriptAlias` call is needed for phase-created map markers.
+
+### CreateRef aliases
+
+`CreateReferenceToObject` is null by default on a fresh `QuestReferenceAlias`. `QuestPhase` initializes it automatically for `WithCreateRef` specs. The caller then wires the Object via `quest.SetQuestReferenceCreateAlias(group.CreateRef!, link)`.
+
 ### Reading alias by name
 
 ```csharp
