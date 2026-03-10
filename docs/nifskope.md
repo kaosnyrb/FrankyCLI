@@ -334,6 +334,129 @@ When creating a custom weapon NIF:
 
 ---
 
+## Starfield Geometry Bridge (StarfieldMeshConverter)
+
+**Repo:** `C:\Git\StarfieldMeshConverter-master`
+**Nexus:** nexusmods.com/starfield/mods/4360
+**Blender:** 3.5–3.6 only (incompatible with 4.0+)
+
+This is the answer to both open questions: **.mesh file creation** and **meshlet format**. It is a Blender plugin + C++ DLL pipeline that exports Blender meshes directly to Starfield `.mesh` and `.nif` files.
+
+### Architecture
+
+```
+Blender mesh (Python plugin)
+    → utils_primitive.Primitive.to_mesh_numpy_dict()   ← gather verts/normals/UVs/weights
+    → MeshConverter.ExportMeshFromNumpy(numpy_dict, path)  ← C++ DLL call
+        → DirectXMesh library  ← meshlet generation, vertex cache opt
+        → Eigen / Miniball     ← transforms, bounding sphere
+        → writes binary .mesh
+    → NifIO C++ library  ← writes .nif
+```
+
+The C++ DLL wraps DirectXMesh (Microsoft), Eigen (linear algebra), and Miniball (bounding sphere). The Python side is Blender glue only.
+
+### .mesh export pipeline
+
+`MeshIO.py → ExportMesh() → MeshToJson() → MeshConverter.ExportMeshFromNumpy()`
+
+Key steps:
+1. Duplicate + triangulate mesh (`Triangulate` modifier via `get_obj_proxy`)
+2. `Primitive.gather()` — collect positions, UVs, normals, vertex colors, weights from Blender loops
+3. `to_mesh_numpy_dict()` — pack into numpy arrays
+4. `ExportMeshFromNumpy(dict, path)` — C++ DLL writes binary `.mesh`
+
+The DLL handles: vertex compression (SNorm16 positions, float16 UVs, UDecVector4 normals/tangents), meshlet generation, cull data, LOD indices.
+
+### Meshlet cull data format — CONFIRMED
+
+`CULLDATA_VERSION = 2` (as of current source). Each cull data entry is **6 floats = 24 bytes**:
+
+```
+float[3]  min_bounds   ← AABB minimum XYZ
+float[3]  max_bounds   ← AABB maximum XYZ
+```
+
+This is a per-meshlet axis-aligned bounding box. Not a cone (that was version 1). Our Retrograde marker had 48 trailing bytes = **2 meshlets × 24 bytes**.
+
+### ConnectPoint struct — CONFIRMED
+
+`BSConnectPointParents::ConnectPoint` binary layout (40 bytes fixed + 2 length-prefixed strings):
+
+```cpp
+std::string parent_name;    // e.g. "Beowulf" (the NiNode name of the receiver mesh)
+std::string child_name;     // e.g. "P-Barrel" (the socket name)
+float rot_quat[4];          // quaternion [x, y, z, w]  — identity = {0,0,0,1}
+float translation[3];       // position of socket in local space
+float scale;                // usually 1.0
+```
+
+Total size per entry: `parent_name.length() + child_name.length() + 40`
+
+### ConnectPoint workflow in Blender
+
+The plugin uses a naming convention on Blender empty objects:
+
+```
+Objects named "CPA:<child_name>" → become ConnectPoint entries
+    child_obj.name[4:]          → child_name  (e.g. "P-Barrel")
+    parent mesh object.name     → parent_name (e.g. "Beowulf")
+    child_obj.location          → translation
+    child_obj.rotation_quaternion → rot_quat
+    child_obj.scale[0]          → scale
+```
+
+So in Blender: add an Empty object, name it `CPA:P-Barrel`, position it at the barrel socket location on the receiver mesh, and parent it to the receiver object. The plugin picks it up automatically on export.
+
+### NIF template system
+
+Three C++ template classes (in `include/NifIO.h`) drive NIF construction:
+
+| Template | Use |
+|----------|-----|
+| `NiArmatureTemplate` | Skeleton/node hierarchy + ConnectPoints + Havok physics |
+| `NiSimpleGeometryTemplate` | Static geometry: mesh LOD paths, material path, bounding box |
+| `NiSkinInstanceTemplate` | Skinned geometry: adds bone names, bone transforms |
+
+The template is populated from JSON (from Blender), then `ToNif()` writes the NIF binary.
+
+**Weapon NIF detection**: if root node is named `"WEAPON"` → `SubTemplate::Weapon` → `bsx_flags = 74`.
+
+### Blender → Weapon NIF workflow
+
+1. Model weapon parts in Blender (Blender 3.5–3.6)
+2. Name the root armature/mesh `"WEAPON"` for the receiver
+3. Add `CPA:P-*` empty objects as children of the receiver mesh, positioned at socket locations
+4. Rig moving parts (trigger, slide, mag) to the weapon skeleton bones
+5. In the SGB panel: disable Weights if static, enable if skinned
+6. Hit "Export .mesh" — writes `.mesh` to geometries folder
+7. NIF export also available — writes full `.nif` with BSGeometry, ConnectPoints, BSXFlags, material paths
+8. Assets folder must point to loose-file extracted BA2s (only `meshes01.ba2` + `meshes02.ba2` needed for geometry lookup)
+
+### Weapon skeleton bone names (from NifIO.h)
+
+Key bones relevant to weapons:
+```
+WEAPON, WeaponLeft       ← weapon attachment bones on character
+Root, COM, C_Spine*      ← character spine chain
+R_Arm / L_Arm            ← hand/arm bones for grip IK
+R_AnimObject1/2/3        ← generic attachment objects
+L_AnimObject1/2/3
+```
+
+Moving weapon parts (trigger, slide, bolt) would be skinned to custom bones added as children of `WEAPON` in the weapon's own skeleton.
+
+### Dependencies (C++ DLL)
+
+| Lib | Use |
+|-----|-----|
+| DirectXMesh | Meshlet generation, vertex cache optimization |
+| Eigen | Linear algebra (matrix decomposition, transforms) |
+| Miniball | Minimum bounding sphere computation |
+| nlohmann/json | JSON serialization between Python ↔ C++ |
+
+---
+
 ## Notable Third-Party Libs
 
 | Lib | Use |
