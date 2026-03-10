@@ -5,8 +5,6 @@ using Noggog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace Retrograde.Nouns
@@ -56,31 +54,18 @@ namespace Retrograde.Nouns
             bool setFaction = false;
             foreach (var component in instance.Components)
             {
-                var typestring = component.GetType().ToString();
-                //Console.WriteLine(component.GetType().ToString());
-                if (typestring == "Mutagen.Bethesda.Starfield.ExternalDataSourceComponent")
+                if (component is ExternalDataSourceComponent externalDataSourceComponent)
                 {
                     var formkey = new FormKey(starfieldModKey, ShipFaction);
                     var ShipTemplate = starfieldMod.LeveledBaseForms[formkey];
 
-                    ExternalDataSourceComponent externalDataSourceComponent = (ExternalDataSourceComponent)component;
                     foreach (var source in externalDataSourceComponent.Sources)
                     {
-                        //Console.WriteLine(source.Name);
-                        if (source.Name == "FACTIONS")
+                        if (source.Name is "FACTIONS" or "AIDATA" or "TRAITS")
                         {
                             source.Source = ShipTemplate.ToLink<IExternalBaseTemplateGetter>();
-                            setFaction = true;
+                            if (source.Name == "FACTIONS") setFaction = true;
                         }
-                        if (source.Name == "AIDATA")
-                        {
-                            source.Source = ShipTemplate.ToLink<IExternalBaseTemplateGetter>();
-                        }
-                        if (source.Name == "TRAITS")
-                        {
-                            source.Source = ShipTemplate.ToLink<IExternalBaseTemplateGetter>();
-                        }
-
                     }
                     if (!setFaction)
                     {
@@ -90,12 +75,9 @@ namespace Retrograde.Nouns
                             Source = ShipTemplate.ToLink<IExternalBaseTemplateGetter>()
                         });
                     }
-
                 }
-                if (typestring == "Mutagen.Bethesda.Starfield.FullNameComponent")
+                if (component is FullNameComponent fullName)
                 {
-                    FullNameComponent fullName = (FullNameComponent)component;
-                    //Console.WriteLine(fullName.Name);
                     fullName.Name = ShipName;
                 }
             }

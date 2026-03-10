@@ -69,10 +69,22 @@ If a pre-commit hook fails:
 
 ---
 
-## Step 5 — Confirm
+## Step 5 — Push
 
-After a successful commit, show the user:
+```bash
+git -C c:/Git/FrankyCLI push
+```
+
+If the push fails because the branch has no upstream, set it:
+
+```bash
+git -C c:/Git/FrankyCLI push -u origin HEAD
+```
+
+---
+
+## Step 6 — Confirm
+
+After a successful push, show the user:
 - The commit hash and message (`git log -1 --oneline`)
 - A one-line summary of what was staged
-
-Do **not** push unless the user explicitly asks.
