@@ -21,6 +21,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `docs/formlib/scripts.md` | Vanilla Default* script catalogue — alias events, counter system, TopicInfo scripts, map markers, C# wiring pattern with ScriptProperty subtypes |
 | `docs/formlib/conditions.md` | Condition record — ConditionFloat vs ConditionGlobal, RunOnType, FormLinkOrIndex assignment gotcha, confirmed types (GetStageDone, GetStage, GetIsID, HasKeyword, GetGlobalValue, GetInFaction), IsInLocation missing from Mutagen, clone-and-patch pattern |
 | `docs/formlib/objectives.md` | Quest stages (QuestStage, QuestLogEntry, CompleteQuest flag) + objectives (QuestObjective, QuestObjectiveTarget, compass targets, Alias token syntax, Papyrus SetObjectiveDisplayed pattern) |
+| `docs/formlib/messages.md` | Message (MESG) record — Description/Name fields, MessageBox flag, BNAM must clone, MenuButtons, MessageNoun pattern, two template FormIDs (0x000844 notification, 0x0008BA 2-button dialog) |
 
 ## Design Library
 

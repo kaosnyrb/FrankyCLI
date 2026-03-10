@@ -26,6 +26,7 @@ namespace FrankyCLI
                 Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Keyword");
                 Console.WriteLine("              PcmBranchNode, PcmContentNode, Book, Scene");
                 Console.WriteLine("              Quest, Quest_VMAD (full VirtualMachineAdapter + alias dump)");
+                Console.WriteLine("              Message (alias: mesg), Faction, Global, FormList");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
                 Console.WriteLine("EditorID search: partial match (contains)");
@@ -391,10 +392,32 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "Keyword"); found++; }
                     break;
+                case "message":
+                case "mesg":
+                    foreach (var rec in mod.Messages)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpMessage(rec); found++; }
+                    break;
+                case "faction":
+                    foreach (var rec in mod.Factions)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpRecord(rec, "Faction"); found++; }
+                    break;
+                case "global":
+                    foreach (var rec in mod.Globals)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { Console.WriteLine($"--- Global ---"); Console.WriteLine($"  FormKey:  {rec.FormKey}"); Console.WriteLine($"  EditorID: {rec.EditorID}"); Console.WriteLine($"  Data:     {rec.Data}"); Console.WriteLine(); found++; }
+                    break;
+                case "formlist":
+                    foreach (var rec in mod.FormLists)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpRecord(rec, "FormList"); found++; }
+                    break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
                     Console.WriteLine("Supported: SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
                     Console.WriteLine("           Quest, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)");
+                    Console.WriteLine("           Message (alias: mesg), Faction, Global, FormList");
                     Console.WriteLine("           PlacedObject (alias: refr) — search for placed objects by EditorID or FormID (0x...)");
                     break;
             }
@@ -431,6 +454,26 @@ namespace FrankyCLI
 
             // Dump all public properties via reflection
             DumpPropertiesReflection(block, "  ", maxDepth: 2);
+        }
+
+        private static void DumpMessage(IMessageGetter msg)
+        {
+            Console.WriteLine($"--- Message (MESG) ---");
+            Console.WriteLine($"  FormKey:     {msg.FormKey}");
+            Console.WriteLine($"  EditorID:    {msg.EditorID}");
+            Console.WriteLine($"  Name:        {msg.Name}");
+            Console.WriteLine($"  Description: {msg.Description}");
+            Console.WriteLine($"  Flags:       {msg.Flags}");
+            Console.WriteLine($"  DisplayTime: {msg.DisplayTime}");
+            Console.WriteLine($"  BNAM:        {(msg.BNAM.HasValue ? msg.BNAM.Value.ToString() : "(null)")}");
+            Console.WriteLine($"  OwnerQuest:  {(msg.OwnerQuest.IsNull ? "(null)" : msg.OwnerQuest.FormKey.ToString())}");
+            if (msg.MenuButtons != null && msg.MenuButtons.Count > 0)
+            {
+                Console.WriteLine($"  MenuButtons ({msg.MenuButtons.Count}):");
+                for (int i = 0; i < msg.MenuButtons.Count; i++)
+                    Console.WriteLine($"    [{i}] {msg.MenuButtons[i].Text}  (conditions: {msg.MenuButtons[i].Conditions?.Count ?? 0})");
+            }
+            Console.WriteLine();
         }
 
         private static void DumpCell(ICellGetter cell)
