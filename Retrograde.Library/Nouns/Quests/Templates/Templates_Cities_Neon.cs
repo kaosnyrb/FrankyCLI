@@ -139,9 +139,9 @@ namespace Retrograde.Quests
             //Conversations
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "City Conversation - Neon Informant",
-                Description = "Speak to a  Informant in Neon about the target",
-                Location = "Neon",
+                Name = "City Conversation - Neon Starport Informant",
+                Description = "Speak to a Mechanic at the Neon Starport about the target",
+                Location = "Neon Starport",
                 formid = FormKeyLookup.GetFormKey("duout_info_city_conversation_neon"),
                 outlawQuest = new Investigation_ConversationCity(),
                 MissionTags = new List<string>()
@@ -153,13 +153,13 @@ namespace Retrograde.Quests
                 },
 
                 parameters = new Dictionary<string, object>() { 
-                {
-                    "NeedSpacesuit", false}                 
+                    {"NeedSpacesuit", false},
+                    {"Label", "neonstarport"}
                 },
                 Addons = new List<string>()
                 {
-                    "Target was a friend of this character, they are shocked at what they've done.",
-                    "This character talks about the good old days",
+                    "Target worked on a ship the target was on and overheard something key.",
+                    "This character isn't really interested in the target and just wants the player to leave them alone",
                     
                 },
                 

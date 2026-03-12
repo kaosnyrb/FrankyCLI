@@ -73,6 +73,10 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetObjective(0, "Speack to " + npc.Name);
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
+
+            //Place the NPC on a random city marker
+            var markerused = RandomProvider.GetRandomMarker("doout_city_activator_marker_" + (string)missionTemplate.parameters["Label"] + "_");
+            newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
             
             //Add conversation, ending the quest on stage 500
             var dialogueScript = DialoguePrompts.GetDialogueScript(new List<string>(missionTemplate.Addons)

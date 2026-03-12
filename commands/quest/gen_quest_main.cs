@@ -162,7 +162,7 @@ namespace FrankyCLI
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "City Conversation - Neon Informant",
+                        InvestigationTemplate = "City Conversation - Neon Starport Informant",
                         DeepTempalte = "Planetside Smallbase Informant - Freestar Ranger Environmental Scout",
                         ShowdownTemplate = "City Bounty - Outskirts of Cydonia"
                     };
