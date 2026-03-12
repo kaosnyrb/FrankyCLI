@@ -19,15 +19,24 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("Use the LoreContext established earlier in this conversation for names, factions, and locations.");
             sb.AppendLine("Do NOT invent new names or places beyond the LoreContext and Additional Information.");
             sb.AppendLine();
+            sb.AppendLine("GREETING constraint: Do NOT open with the NPC stating they know why the player is here, predicting what they will ask, or naming the bounty target first. Open with a specific action, observation, or mundane detail that roots the NPC in their world. Foreknowledge should emerge from what they reveal, not be announced upfront.");
+            sb.AppendLine();
+            sb.AppendLine("PLAYER voice: The player is a bounty hunter on a paying contract. Questions are operational, not conversational — specific and closed. Good examples: \"When did she leave?\" / \"What name was on the manifest?\" / \"Who processed her entry?\" Bad examples: \"What can you tell me?\" / \"How did you know that?\" PLAYER3 must be the most direct, closed question in the exchange.");
+            sb.AppendLine();
+            sb.AppendLine("Information beat rules — each exchange reveals ONE specific thing and nothing else:");
+            sb.AppendLine("- Beat 1 (NPC1): What the NPC personally observed about the target — behavior or appearance only. Do NOT reveal destination or ship details here.");
+            sb.AppendLine("- Beat 2 (NPC2): The specific logistics detail — which freighter, what route, what alias they used. Do NOT repeat behavioral observations from Beat 1.");
+            sb.AppendLine("- Beat 3 (NPC3): Where they are now and one actionable next step. Nothing else.");
+            sb.AppendLine();
             sb.AppendLine("Output EXACTLY this format, one line per label, no extra text before or after:");
             sb.AppendLine("GREETING: <NPC opening line, max 100 chars>");
-            sb.AppendLine("PLAYER1: <optional player question about the situation, max 50 chars>");
+            sb.AppendLine("PLAYER1: <operational bounty hunter question, max 50 chars>");
             sb.AppendLine("NPC1a: <NPC first line for question 1, max 150 chars>");
             sb.AppendLine("NPC1b: <NPC second line for question 1, max 150 chars — omit if one line suffices>");
-            sb.AppendLine("PLAYER2: <optional player question about the target, max 50 chars>");
+            sb.AppendLine("PLAYER2: <operational bounty hunter question, max 50 chars>");
             sb.AppendLine("NPC2a: <NPC first line for question 2, max 150 chars>");
             sb.AppendLine("NPC2b: <NPC second line for question 2, max 150 chars — omit if one line suffices>");
-            sb.AppendLine("PLAYER3: <player line that asks where the target is — the closing question, max 50 chars>");
+            sb.AppendLine("PLAYER3: <direct operational closing question about location, max 50 chars>");
             sb.AppendLine("NPC3a: <NPC first line — location reveal, max 150 chars>");
             sb.AppendLine("NPC3b: <NPC second line — wrap-up, max 150 chars — omit if one line suffices>");
             sb.AppendLine();
@@ -36,6 +45,7 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("- No quotation marks around the text.");
             sb.AppendLine("- No stage directions, no asterisks, no line breaks within a line.");
             sb.AppendLine("- Tone: grounded, Starfield-style — terse, believable, not dramatic.");
+            sb.AppendLine("- Intrigue constraint: implement the Intrigue detail from Additional Information as follows — in exactly ONE NPC line (not GREETING, not NPC3a) let a concrete unasked-for detail land without comment. Do NOT have the NPC announce or reference their foreknowledge.");
             sb.AppendLine();
             sb.AppendLine("Additional Information:");
             foreach (var item in addons)
