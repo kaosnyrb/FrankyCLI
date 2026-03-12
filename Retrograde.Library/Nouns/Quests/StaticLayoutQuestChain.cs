@@ -92,6 +92,21 @@ namespace Retrograde.Chains
 
             LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib);
 
+            //debug mode
+            if (ShowdownTemplate != "")
+            {
+                LorePrompts.PlannedShowdown = ShowdownTemplate;
+            }
+            if (DiscoveryTemplate != "")
+            {
+                LorePrompts.PlannedDiscovery = DiscoveryTemplate;
+
+            }
+            if (InvestigationTemplate != "")
+            {
+                LorePrompts.PlannedInvestigations = new List<string>() { InvestigationTemplate, DeepTempalte };
+            }
+
             // Template Choices --------------------------------
             var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(
                 string.IsNullOrEmpty(ShowdownTemplate) ? LorePrompts.PlannedShowdown : ShowdownTemplate,

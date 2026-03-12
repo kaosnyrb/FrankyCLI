@@ -36,12 +36,12 @@ public static class RetrogradeContext
     /// <summary>
     /// When false, AI calls are skipped for fast generation.
     /// </summary>
-    public static bool AIMode { get; set; } = false;
+    public static bool AIMode { get; set; } = true;
 
     /// <summary>
     /// When false, WAV/WEM generation is skipped.
     /// </summary>
-    public static bool GenerateWavs { get; set; } = false;
+    public static bool GenerateWavs { get; set; } = true;
 
     /// <summary>
     /// All template mods plus Starfield.esm in search order.

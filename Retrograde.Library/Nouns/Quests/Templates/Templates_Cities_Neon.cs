@@ -136,6 +136,35 @@ namespace Retrograde.Quests
                 parameters = new Dictionary<string, object>() { {"NeedSpacesuit", false}, {"Label", "neonastrallounge"}, {"FormId", 0x00015FFE} },
                 Addons = new List<string>(),
             });
+            //Conversations
+            InvestigationTemplates.Add(new MissionTemplate()
+            {
+                Name = "City Conversation - Neon Informant",
+                Description = "Speak to a  Informant in Neon about the target",
+                Location = "Neon",
+                formid = FormKeyLookup.GetFormKey("duout_info_city_conversation_neon"),
+                outlawQuest = new Investigation_ConversationCity(),
+                MissionTags = new List<string>()
+                {
+                    "follow_clue",
+                    "conversation",                    
+                    "planetside",
+                    "city",
+                },
+
+                parameters = new Dictionary<string, object>() { 
+                {
+                    "NeedSpacesuit", false}                 
+                },
+                Addons = new List<string>()
+                {
+                    "Target was a friend of this character, they are shocked at what they've done.",
+                    "This character talks about the good old days",
+                    
+                },
+                
+            });
+
             //-------------------------------  SHOWDOWN ------------------------------------------            
             ShowdownTemplates.Add(new MissionTemplate()
             {
@@ -208,6 +237,8 @@ namespace Retrograde.Quests
                                 Addons = new List<string>(),
 
             });
+
+
         }
     }
 }
