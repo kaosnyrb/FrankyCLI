@@ -54,14 +54,16 @@ namespace Retrograde.AI
         {
             var loc = Guid.NewGuid().ToString().Substring(0, 8) + ".txt";
             var sb = new StringBuilder();
-            sb.AppendLine("SYSTEM:" + _systemPrompt);
+            sb.AppendLine("[system]");
+            sb.AppendLine(_systemPrompt);
             sb.AppendLine();
 
             foreach (var msg in _messages)
             {
-                string role = msg.Role == RoleType.User ? "USER" : "AI";
+                string role = msg.Role == RoleType.User ? "[user]" : "[assistant]";
                 string text = string.Concat(msg.Content.OfType<TextContent>().Select(c => c.Text));
-                sb.AppendLine(role + ":" + text);
+                sb.AppendLine(role);
+                sb.AppendLine(text);
                 sb.AppendLine();
             }
 

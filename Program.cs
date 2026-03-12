@@ -124,6 +124,18 @@ switch (mode)
         // gen_dlgtest [modname]  — structural test for NPCDialogueNoun (no AI, no audio)
         return gen_dlgtest.Run(Get(args, 1, "dlgtest"));
 
+    case "gen_promptlab":
+        // gen_promptlab <conversationfile>
+        if (args.Length < 2)
+        {
+            Console.WriteLine("Usage: gen_promptlab <conversationfile>");
+            Console.WriteLine("  Runs the next AI response against a conversation file.");
+            Console.WriteLine("  File format: [system] / [user] / [assistant] blocks.");
+            Console.WriteLine("  The last block must be [user].");
+            return 1;
+        }
+        return gen_promptlab.Run(args[1]);
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -201,6 +213,11 @@ Console.WriteLine("  gen_dlgtest     [modname]");
 Console.WriteLine("                     Structural test for NPCDialogueNoun — builds a 2-stage dialogue");
 Console.WriteLine("                     quest, prints a record-chain diagnostic, and writes the .esm.");
 Console.WriteLine("                     No AI or audio. Load output in xEdit to verify. Defaults: modname=dlgtest");
+Console.WriteLine();
+Console.WriteLine("  gen_promptlab   <conversationfile>");
+Console.WriteLine("                     Run the next AI response against a conversation file.");
+Console.WriteLine("                     File format: [system] / [user] / [assistant] blocks.");
+Console.WriteLine("                     The last block must be [user]. Uses claude-sonnet-4-6.");
 Console.WriteLine();
 Console.WriteLine("BTD terrain tools:");
     Console.WriteLine("  gen_btd_info    [btdpath] [--all]   Dump BTD file structure.");

@@ -115,13 +115,13 @@ namespace Retrograde.AI.Utils
         {
             var logprompt =
                 "Write a mission briefing dataslate for a bounty hunter. Length: 120-150 words.\r\n" +
-                "Style: field intel note — plain declarative sentences, no atmosphere, no tone-setting prose, no metaphor.\r\n" +
+                "Style: write as if a fixer dropped the hunter a terse field note mid-route — short bursts, functional shorthand, no fluff. Allow one hedged construction per piece (e.g. 'believed to be', 'last reported moving through', 'confirmed using aliases'). No atmosphere, no metaphor. No headers or labels of any kind.\r\n" +
                 "Use the LoreContext established earlier in this conversation for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
 
-                "Cover these four things in order, with no headers or labels:\r\n" +
-                "- Name the target exactly as established in the LoreContext. State what they did, what they are wanted for, and in one sentence who they are — former occupation, what they did that crossed the line.\r\n" +
+                "Cover these three things in order:\r\n" +
+                "- Name the target exactly as established in the LoreContext. State what they did, what they are wanted for, and who they are — former occupation, what they did that crossed the line.\r\n" +
                 "- Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
-                "- Tell the hunter exactly what to do at that location.\r\n" +
+                "- Tell the hunter exactly what to do at that location. Close with a concrete urgency hook — a named rival also working the bounty, a contact who moves on quickly, or a window that closes soon.\r\n" +
                 "If a <StageBridge> is provided in the Additional Information, frame it as what the hunter hopes to learn or find — not as a known fact. Weave it naturally into the final point as an investigative angle (e.g. 'may reveal', 'could confirm', 'worth checking') — do not add it as a separate sentence.\r\n\r\n" +
 
                 "Additional Information:\r\n";

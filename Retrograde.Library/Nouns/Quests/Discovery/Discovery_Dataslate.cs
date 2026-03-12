@@ -35,9 +35,7 @@ namespace Retrograde.Quests
             Console.WriteLine("Discovery Quest - Dataslate.");
             questloc = missionTemplate.Location;
 
-            string bookcontents = NarrativePrompts.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons) {
-                "LogMessage: " + nextQuest.LogMessage,
-            });
+            string bookcontents = NarrativePrompts.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons));
 
             var bookname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons) {
                 "LogMessage: " + nextQuest.LogMessage,
