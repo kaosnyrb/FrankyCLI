@@ -1,43 +1,42 @@
 using Retrograde.Utils;
+using Retrograde.AI.Utils;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
-using Mutagen.Bethesda.Plugins;
-using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Retrograde.AI.Utils;
 
 namespace Retrograde.Quests
 {
-    public class Templates_PlanetConversation : TemplateLib
+    public class Templates_Cities_Conversation_Neon : TemplateLib
     {
-        public Templates_PlanetConversation()
+        public Templates_Cities_Conversation_Neon()
         {
             DiscoveryTemplates = new List<MissionTemplate>();
             InvestigationTemplates = new List<MissionTemplate>();
             ShowdownTemplates = new List<MissionTemplate>();
-            //-------------------------------  INVESTIGATION ------------------------------------------
+
+            //-------------------------------  INVESTIGATION ------------------------------------------            
             InvestigationTemplates.Add(new MissionTemplate()
             {
-                Name = "Planet side Conversation - UC Vanguard",
-                Description = "Speak to a UC Vanguard member about the target on a nearby planet at a small facility",
-                Location = "A remote location",
-                formid = FormKeyLookup.GetFormKey("duout_info_planet_conversation_small"),
-                outlawQuest = new Investigation_ConversationPlanet(),
+                Name = "City Conversation - Neon Starport Informant",
+                Description = "Speak to a Mechanic at the Neon Starport about the target",
+                Location = "Neon Starport",
+                formid = FormKeyLookup.GetFormKey("duout_info_city_conversation_neon"),
+                outlawQuest = new Investigation_ConversationCity(),
                 MissionTags = new List<string>()
                 {
                     "follow_clue",
                     "conversation",                    
                     "planetside",
+                    "city",
                 },
 
                 parameters = new Dictionary<string, object>() { 
-                {
-                    "NeedSpacesuit", true}                 
+                    {"NeedSpacesuit", false},
+                    {"Label", "neonstarport"}
                 },
                 Addons = new List<string>()
                 {
@@ -46,11 +45,7 @@ namespace Retrograde.Quests
                 },
                 
             });
-            
-            //-------------------------------  SHOWDOWN ------------------------------------------            
-
         }
-
     }
 }
 
