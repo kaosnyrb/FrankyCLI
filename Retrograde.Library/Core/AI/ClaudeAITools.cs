@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Retrograde.AI
 {
-    public class ClaudeAITools : IAITools
+    public partial class ClaudeAITools : IAITools
     {
         private const string Model = "claude-haiku-4-5-20251001";
         private const int MaxTokens = 8096;
@@ -52,7 +53,10 @@ namespace Retrograde.AI
 
         public bool ExportConversation()
         {
-            var loc = Guid.NewGuid().ToString().Substring(0, 8) + ".txt";
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmm");
+            var name = ExtractOutlawName();
+            var slug = string.IsNullOrEmpty(name) ? Guid.NewGuid().ToString("N").Substring(0, 8) : name;
+            var loc = $"{timestamp}_{slug}.txt";
             var sb = new StringBuilder();
             sb.AppendLine("[system]");
             sb.AppendLine(_systemPrompt);
@@ -108,6 +112,23 @@ namespace Retrograde.AI
             // Final attempt — let exception propagate
             var finalResponse = _client.Messages.GetClaudeMessageAsync(parameters).GetAwaiter().GetResult();
             return CleanText(((TextContent)finalResponse.Content[0]).Text);
+        }
+
+        [GeneratedRegex(@"<\s*Summary\s*>\s*(\w+\s+\w+)")]
+        private static partial Regex SummaryNameRegex();
+
+        private string ExtractOutlawName()
+        {
+            foreach (var msg in _messages)
+            {
+                if (msg.Role != RoleType.Assistant) continue;
+                var text = string.Concat(msg.Content.OfType<TextContent>().Select(c => c.Text));
+                var match = SummaryNameRegex().Match(text);
+                if (match.Success)
+                    return match.Groups[1].Value.Replace(" ", "_");
+                break;
+            }
+            return "";
         }
 
         private static string CleanText(string text) => text

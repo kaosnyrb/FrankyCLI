@@ -52,6 +52,15 @@ The Intrigue detail seed from FlavourSeedData is injected as a thematic hint. Th
 
 Fix: Add a structural rule to the prompt: implement the Intrigue detail in exactly ONE NPC line (not GREETING, not NPC3a) as a concrete unasked-for detail that lands without comment. The NPC must not announce or reference their foreknowledge.
 
+### GetLogMessage — "Objective:" prefix and location hallucination
+The word "objective" in "Write a 50-word **objective** log entry" causes the model to label its output with "Objective:". Separately, "use LoreContext for ... **location**" causes it to blend the explicit Location from Additional Information with planet names from LoreContext (e.g. "at a remote location on Montara Luna").
+
+Fix (mutation_6_log_prefix.txt — applied to QuestPrompts.GetLogMessage):
+- Change "objective log entry" to "log entry"
+- Remove "location" from the LoreContext fact list
+- Add: "Location: use ONLY the location provided in Additional Information exactly as written. Do not add planet names, system names, or any location detail from the LoreContext."
+- Add: "Output only the log text. Do NOT prefix with 'Objective:', 'Log:', or any other label or header."
+
 ## Mutation file format
 
 ```

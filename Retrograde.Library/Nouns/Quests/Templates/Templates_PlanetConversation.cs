@@ -43,6 +43,7 @@ namespace Retrograde.Quests
                 {
                     FlavourSeedData.GetNpcRelationshipToTarget(),
                     FlavourSeedData.GetNpcConversationTone(),
+                    "The Informatant works as a member of the UC Vanguard."
                 },
                 
             });
