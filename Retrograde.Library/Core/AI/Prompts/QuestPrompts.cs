@@ -45,7 +45,8 @@ namespace Retrograde.AI.Utils
                 "Style: field intel note — plain declarative sentences, no metaphor, no ominous hints, no atmospheric writing.\r\n" +
                 "Use the LoreContext established earlier in this conversation for concrete facts only: target name, faction, motive. Do not invent new names.\r\n" +
                 "Location: use ONLY the location provided in Additional Information exactly as written. Do not add planet names, system names, or any location detail from the LoreContext.\r\n" +
-                "Output only the log text. Do NOT prefix with \"Objective:\", \"Log:\", or any other label or header.\r\n\r\n" +
+                "Output only the log text. Do NOT begin with any label, name prefix, or header — not \"Objective:\", \"Log:\", \"Target:\", \"Name:\", \"Subject:\", or any similar word followed by a colon. Start directly with the action or fact.\r\n" +
+                "Stage-locked knowledge: The log must reflect ONLY what the player could know at the current quest stage. At QuestProgress 0–10%, use only the target's name, their basic crime, and the current objective location or contact. Do NOT reference faction investigations, security assessments, or any reason for the hunt beyond the surface crime. At QuestProgress 50–80%, you may include faction involvement. At QuestProgress 90%+, the full picture is available.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 

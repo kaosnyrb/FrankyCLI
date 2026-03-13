@@ -194,9 +194,7 @@ public static class SpeechTools
         string espWem = Path.Combine(GameVoiceDir, $"{stem}.esp", vtDir, $"{wavName}.wem");
         string esmWem = Path.Combine(GameVoiceDir, $"{stem}.esm", vtDir, $"{wavName}.wem");
 
-        Console.WriteLine($"[SpeechTools] Staging WAVs for WEM {wavName}:");
-        Console.WriteLine($"  {espWav}");
-        Console.WriteLine($"  {esmWav}");
+
 
         if (string.IsNullOrEmpty(elevenLabsVoiceId) || string.IsNullOrEmpty(text) || string.IsNullOrEmpty(voiceTypeEditorId))
             return;
@@ -204,6 +202,10 @@ public static class SpeechTools
         if (!generateWavs)
             return;
 
+        Console.WriteLine($"[SpeechTools] Staging WAVs for WEM {wavName}:");
+        Console.WriteLine($"  {espWav}");
+        Console.WriteLine($"  {esmWav}");
+        
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(espWav)!);

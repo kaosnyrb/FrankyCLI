@@ -46,6 +46,8 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("- No stage directions, no asterisks, no line breaks within a line.");
             sb.AppendLine("- Tone: grounded, Starfield-style — terse, believable, not dramatic.");
             sb.AppendLine("- Intrigue constraint: implement the Intrigue detail from Additional Information as follows — in exactly ONE NPC line (not GREETING, not NPC3a) let a concrete unasked-for detail land without comment. Do NOT have the NPC announce or reference their foreknowledge.");
+            sb.AppendLine("- NPC knowledge constraint: This NPC knows only what someone in their job and location would personally witness or overhear. They do NOT have access to Vanguard investigation reports, security assessments, or classified faction files. If they mention the Vanguard, it must be from something they personally saw or heard — not a summary of why the Vanguard is interested.");
+            sb.AppendLine("- Beat 3 NPC3b scope: if used, name only a direction, location, or person to approach next. Do NOT explain why it matters or reveal what the player will discover there.");
             sb.AppendLine();
             sb.AppendLine("Additional Information:");
             foreach (var item in addons)

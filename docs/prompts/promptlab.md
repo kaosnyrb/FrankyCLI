@@ -61,6 +61,22 @@ Fix (mutation_6_log_prefix.txt — applied to QuestPrompts.GetLogMessage):
 - Add: "Location: use ONLY the location provided in Additional Information exactly as written. Do not add planet names, system names, or any location detail from the LoreContext."
 - Add: "Output only the log text. Do NOT prefix with 'Objective:', 'Log:', or any other label or header."
 
+### GetLogMessage — "Target:" prefix and stage leakage
+The banned-prefix list ("Objective:", "Log:") missed "Target:", which the model uses consistently. More critically, the log draws on the full LoreContext (including Faction section with Vanguard security details) regardless of QuestProgress — so Discovery and InitialInvestigation logs reveal DeepInvestigation-level faction intel. The StageBridge also bleeds Vanguard details when treated as current knowledge.
+
+Fix (mutations 7+8 — applied to QuestPrompts.GetLogMessage):
+- Expand banned prefix to: "Objective:", "Log:", "Target:", "Name:", "Subject:", or any similar word followed by a colon. Start directly with the action or fact.
+- Add stage-locked knowledge rule: At QuestProgress 0–10%, use only target name, basic crime, and current objective. Do NOT reference faction investigations or security assessments. At 50–80%, faction involvement is allowed. At 90%+, full picture available.
+
+### Dialogue NPC — stage leakage via full LoreContext and StageBridge
+At InitialInvestigation (10%), NPCs reveal the Vanguard security-breach angle in NPC3b because they have access to the full LoreContext Faction section and the StageBridge text ("Vanguard knows far more than embezzlement"). A dock worker would not know the content of classified security briefs.
+
+Fix (mutation 11 — applied to DialoguePrompts.GetDialogueScript):
+- Add NPC knowledge constraint: the NPC knows only what someone in their job would personally witness or overhear. If they mention the Vanguard, it must be from something they personally saw — not a summary of the investigation.
+- Add Beat 3 NPC3b scope rule: name only a direction, location, or person to approach — do NOT explain why it matters or reveal what the player will discover there.
+
+Source conversation: 20260313_2135_Jisoo_Yamamoto.txt
+
 ## Mutation file format
 
 ```

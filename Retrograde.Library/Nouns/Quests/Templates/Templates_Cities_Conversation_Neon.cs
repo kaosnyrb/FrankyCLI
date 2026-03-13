@@ -42,7 +42,7 @@ namespace Retrograde.Quests
                 {
                     FlavourSeedData.GetNpcRelationshipToTarget(),
                     FlavourSeedData.GetNpcConversationTone(),
-                    "The Informant works in the Neon Starport as a Mechanic."
+                    "The NPC works in the Neon Starport as a Mechanic."
                 },
                 
             });
