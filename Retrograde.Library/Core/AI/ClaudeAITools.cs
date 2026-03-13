@@ -20,6 +20,7 @@ namespace Retrograde.AI
 
         private readonly AnthropicClient _client;
         private readonly List<Message> _messages = new();
+        private readonly List<(string Prompt, string Response)> _statelessLog = new();
         private string _systemPrompt;
 
         public ClaudeAITools()
@@ -42,7 +43,9 @@ namespace Retrograde.AI
         public string RunStatelessPrompt(string prompt)
         {
             var messages = new List<Message>(_messages) { new Message(RoleType.User, prompt) };
-            return CallApi(messages);
+            string response = CallApi(messages);
+            _statelessLog.Add((prompt, response));
+            return response;
         }
 
         // Appends to the system prompt rather than the message list — matches how Claude's API separates system from conversation turns.
@@ -71,6 +74,21 @@ namespace Retrograde.AI
                 sb.AppendLine();
             }
 
+            if (_statelessLog.Count > 0)
+            {
+                sb.AppendLine("--- stateless ---");
+                sb.AppendLine();
+                foreach (var (prompt, response) in _statelessLog)
+                {
+                    sb.AppendLine("[user]");
+                    sb.AppendLine(prompt);
+                    sb.AppendLine();
+                    sb.AppendLine("[assistant]");
+                    sb.AppendLine(response);
+                    sb.AppendLine();
+                }
+            }
+
             try
             {
                 File.WriteAllText(loc, sb.ToString());
@@ -90,7 +108,10 @@ namespace Retrograde.AI
             {
                 Model = Model,
                 MaxTokens = MaxTokens,
-                SystemMessage = _systemPrompt,
+                System = new List<SystemMessage>
+                {
+                    new SystemMessage(_systemPrompt, new CacheControl { Type = CacheControlType.ephemeral })
+                },
                 Messages = messages
             };
 

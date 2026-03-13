@@ -30,11 +30,11 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 logprompt += item;
 
-            var results = AITools.RunPrompt(logprompt);
+            var results = AITools.RunStatelessPrompt(logprompt);
 
             for (int i = 0; i < 10 && results.Length < 100; i++)
             {
-                results = AITools.RunPrompt(logprompt);
+                results = AITools.RunStatelessPrompt(logprompt);
             }
             return results;
         }
@@ -63,9 +63,9 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 prompt += item;
 
-            var result = AITools.RunPrompt(prompt);
+            var result = AITools.RunStatelessPrompt(prompt);
             for (int i = 0; i < 10 && result.Length < 50; i++)
-                result = AITools.RunPrompt(prompt);
+                result = AITools.RunStatelessPrompt(prompt);
             return result;
         }
 
@@ -105,7 +105,7 @@ namespace Retrograde.AI.Utils
             Console.WriteLine("Generating Outlaw Log...");
 
             string prompt = FlavourSeedData.AddFlavourToTargetBook(sb.ToString());
-            return AITools.RunPrompt(prompt);
+            return AITools.RunStatelessPrompt(prompt);
         }
 
         // ------------------------------
@@ -129,11 +129,11 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 logprompt += item;
 
-            var results = AITools.RunPrompt(logprompt);
+            var results = AITools.RunStatelessPrompt(logprompt);
 
             for (int i = 0; i < 5 && results.Length < 500; i++)
             {
-                results = AITools.RunPrompt(logprompt);
+                results = AITools.RunStatelessPrompt(logprompt);
             }
             return results;
         }

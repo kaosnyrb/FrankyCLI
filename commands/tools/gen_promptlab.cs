@@ -62,7 +62,7 @@ namespace FrankyCLI
             {
                 Model = Model,
                 MaxTokens = MaxTokens,
-                SystemMessage = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt,
+                System = string.IsNullOrWhiteSpace(systemPrompt) ? null : new List<SystemMessage> { new SystemMessage(systemPrompt) },
                 Messages = messages
             };
 

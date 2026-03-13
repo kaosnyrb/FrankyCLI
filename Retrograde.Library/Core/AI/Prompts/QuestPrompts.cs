@@ -27,10 +27,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 questnameprompt += item;
 
-            var results = AITools.RunPrompt(questnameprompt);
+            var results = AITools.RunStatelessPrompt(questnameprompt);
             for (int i = 0; i < 10 && results.Length > 200; i++)
             {
-                results = AITools.RunPrompt(questnameprompt);
+                results = AITools.RunStatelessPrompt(questnameprompt);
             }
             return results;
         }
@@ -52,10 +52,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 logprompt += item;
 
-            var results = AITools.RunPrompt(logprompt);
+            var results = AITools.RunStatelessPrompt(logprompt);
             for (int i = 0; i < 10 && results.Length < 150; i++)
             {
-                results = AITools.RunPrompt(logprompt);
+                results = AITools.RunStatelessPrompt(logprompt);
             }
             return results;
         }

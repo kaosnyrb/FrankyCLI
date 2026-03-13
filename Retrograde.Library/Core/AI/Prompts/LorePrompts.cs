@@ -265,11 +265,11 @@ namespace Retrograde.AI.Utils
 
             var prompt = sb.ToString();
 
-            var results = AITools.RunPrompt(prompt);
+            var results = AITools.RunStatelessPrompt(prompt);
 
             for (int i = 0; i < 10 && results.Length < 200; i++)
             {
-                results = AITools.RunPrompt(prompt);
+                results = AITools.RunStatelessPrompt(prompt);
             }
             return results;
         }

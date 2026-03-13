@@ -41,7 +41,7 @@ public static class RetrogradeContext
     /// <summary>
     /// When false, WAV/WEM generation is skipped.
     /// </summary>
-    public static bool GenerateWavs { get; set; } = true;
+    public static bool GenerateWavs { get; set; } = false;
 
     /// <summary>
     /// All template mods plus Starfield.esm in search order.
