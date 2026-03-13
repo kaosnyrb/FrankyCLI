@@ -22,6 +22,7 @@ namespace Retrograde.Quests.TemplateEngines
             lib.ImportTemplates(new Templates_Derelicts());
             lib.ImportTemplates(new Templates_Cities());
             lib.ImportTemplates(new Templates_Cities_Neon());
+            lib.ImportTemplates(new Templates_Cities_Conversation_Neon());
             lib.ImportTemplates(new Templates_Cities_Cydonia());
             lib.ImportTemplates(new Templates_Cities_Akila());
         }

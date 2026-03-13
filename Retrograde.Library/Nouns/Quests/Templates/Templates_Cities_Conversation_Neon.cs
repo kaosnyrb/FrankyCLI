@@ -34,9 +34,10 @@ namespace Retrograde.Quests
                     "city",
                 },
 
-                parameters = new Dictionary<string, object>() { 
+                parameters = new Dictionary<string, object>() {
                     {"NeedSpacesuit", false},
-                    {"Label", "neonstarport"}
+                    {"Label", "neonstarport"},
+                    {"NpcNameHint", "appropriate for a mechanic working in a busy commercial starport"},
                 },
                 Addons = new List<string>()
                 {

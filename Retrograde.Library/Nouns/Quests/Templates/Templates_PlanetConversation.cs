@@ -35,9 +35,9 @@ namespace Retrograde.Quests
                     "planetside",
                 },
 
-                parameters = new Dictionary<string, object>() { 
-                {
-                    "NeedSpacesuit", true}                 
+                parameters = new Dictionary<string, object>() {
+                    {"NeedSpacesuit", true},
+                    {"NpcNameHint", "appropriate for a UC Vanguard military officer"},
                 },
                 Addons = new List<string>()
                 {

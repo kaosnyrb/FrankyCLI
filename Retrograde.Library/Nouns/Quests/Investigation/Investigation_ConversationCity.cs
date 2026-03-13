@@ -41,9 +41,12 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Conversation City Quest...");
 
+            string npcNameHint = missionTemplate.parameters != null && missionTemplate.parameters.TryGetValue("NpcNameHint", out var hint)
+                ? (string)hint
+                : "appropriate for someone living in a city";
             var npcResult = NPCTools.CreateRandomNpc(myMod,
                 false,
-                "The name should feel appropriate for someone living in a city",
+                "The name should feel " + npcNameHint,
                 isFriendly: true,
                 factionId: FormKeyLookup.GetFormKey("PlayerAllyFaction"));
             var npc = npcResult.Npc;

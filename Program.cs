@@ -125,16 +125,16 @@ switch (mode)
         return gen_dlgtest.Run(Get(args, 1, "dlgtest"));
 
     case "gen_promptlab":
-        // gen_promptlab <conversationfile>
+        // gen_promptlab <conversationfile> [<N> | --list]
         if (args.Length < 2)
         {
-            Console.WriteLine("Usage: gen_promptlab <conversationfile>");
-            Console.WriteLine("  Runs the next AI response against a conversation file.");
-            Console.WriteLine("  File format: [system] / [user] / [assistant] blocks.");
-            Console.WriteLine("  The last block must be [user].");
+            Console.WriteLine("Usage: gen_promptlab <conversationfile> [<N> | --list]");
+            Console.WriteLine("  Replays a [user] block against the preceding conversation history.");
+            Console.WriteLine("  <N>      replay the Nth [user] block (1-based); default = last");
+            Console.WriteLine("  --list   list all [user] blocks with previews");
             return 1;
         }
-        return gen_promptlab.Run(args[1]);
+        return gen_promptlab.Run(args[1], args.Length > 2 ? args[2] : null);
 
     // Legacy ship generators (keep original arg layout)
     case "struct":

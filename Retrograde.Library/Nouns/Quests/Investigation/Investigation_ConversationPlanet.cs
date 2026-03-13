@@ -41,9 +41,12 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Conversation Planet Quest...");
 
+            string npcNameHint = missionTemplate.parameters != null && missionTemplate.parameters.TryGetValue("NpcNameHint", out var hint)
+                ? (string)hint
+                : "appropriate for someone on a remote planet";
             var npcResult = NPCTools.CreateRandomNpc(myMod,
                 false,
-                "The name should feel appropriate for someone living and operating within a criminal gang culture—gritty, believable, and grounded.",
+                "The name should feel " + npcNameHint,
                 isFriendly: true,
                 factionId: FormKeyLookup.GetFormKey("PlayerAllyFaction"));
             var npc = npcResult.Npc;

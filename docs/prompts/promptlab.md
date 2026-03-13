@@ -1,6 +1,6 @@
 You are a quest writer designing the best prompts to improve the writing quality in my prompts.
 
-Using gen_promptlab and the complete generated prompt history to run 5 prompt mutations trying to improve the output.
+Using gen_promptlab and the complete generated prompt history to run 10 prompt mutations trying to improve the output.
 
 We want to improve the following:
 
@@ -9,15 +9,14 @@ Contextual Coherence
 Uniqueness / Repetition Avoidance
 Player Motivation Clarity
 Dialogue Naturalness
-
-The prompt we wish to improve is in:
-
-docs\prompts\The Derelict Records.txt
+Order that information is revealed
 
 The code that generates this prompt is in:
 
-Retrograde.Library\Core\AI\Prompts\DialoguePrompts.cs
+Retrograde.Library\Core\AI\Prompts\
 
+
+Complete run outputs can be found in docs\prompts
 ## Workflow
 
 1. Read the conversation file to understand what the current prompt generates across multiple runs — look for repetition patterns, structural weaknesses, and tonal problems.
@@ -75,9 +74,26 @@ Fix (mutation 11 — applied to DialoguePrompts.GetDialogueScript):
 - Add NPC knowledge constraint: the NPC knows only what someone in their job would personally witness or overhear. If they mention the Vanguard, it must be from something they personally saw — not a summary of the investigation.
 - Add Beat 3 NPC3b scope rule: name only a direction, location, or person to approach — do NOT explain why it matters or reveal what the player will discover there.
 
-Source conversation: 20260313_2135_Jisoo_Yamamoto.txt
+Source conversation: 20260313_2159_Riko_Reyes.txt
+
+## Running gen_promptlab
+
+Full quest run files in `docs\prompts\` end with `[assistant]` — gen_promptlab drops the trailing block automatically and replays the last `[user]` prompt against the full conversation history.
+
+```
+# List all user blocks with previews
+dotnet run --no-build --project "c:/Git/FrankyCLI/FrankyCLI.csproj" -- gen_promptlab "docs/prompts/20260313_2159_Riko_Reyes.txt" --list
+
+# Replay a specific block by number
+dotnet run --no-build --project "c:/Git/FrankyCLI/FrankyCLI.csproj" -- gen_promptlab "docs/prompts/20260313_2159_Riko_Reyes.txt" <N>
+
+# Replay the last block (default)
+dotnet run --no-build --project "c:/Git/FrankyCLI/FrankyCLI.csproj" -- gen_promptlab "docs/prompts/20260313_2159_Riko_Reyes.txt"
+```
 
 ## Mutation file format
+
+Mutation files are self-contained and must end with `[user]`:
 
 ```
 [system]
@@ -94,7 +110,7 @@ LoreContext confirmed. <one-line summary>. Ready.
 <mutated prompt>
 ```
 
-Last block must be [user]. Run with:
+Run a mutation:
 ```
 dotnet run --no-build --project "c:/Git/FrankyCLI/FrankyCLI.csproj" -- gen_promptlab "docs/prompts/mutations/mutation_N_name.txt"
 ```
