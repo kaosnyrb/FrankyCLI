@@ -35,7 +35,8 @@ namespace Retrograde.AI.Utils
             return File.ReadAllText(randomFile);
         }
 
-        public static void GenerateLoreContext(OutlawNpc outlawNpc, string lorefile, TemplateLib templateLib)
+        public static void GenerateLoreContext(OutlawNpc outlawNpc, string lorefile, TemplateLib templateLib,
+            string? pinnedDiscovery = null, string? pinnedShowdown = null, List<string>? pinnedInvestigations = null)
         {
             // ── Phase 1: Generate lore only (added to history) ──────────────────────────
             var sb = new StringBuilder();
@@ -79,40 +80,75 @@ namespace Retrograde.AI.Utils
             // ── Phase 2: Select arc templates (stateless — does NOT enter history) ──────
             var sb2 = new StringBuilder();
 
-            sb2.AppendLine($"The lore context for {outlawNpc.name} has just been generated. Using that context, design a full quest arc by selecting templates from the lists below.");
-            sb2.AppendLine("Copy each template Name exactly as written — no paraphrasing.");
+            sb2.AppendLine($"The lore context for {outlawNpc.name} has just been generated. Using that context, design a full quest arc.");
+            sb2.AppendLine("Some slots are already decided (marked PINNED). For pinned slots, copy the template name exactly and write only the Theme.");
+            sb2.AppendLine("For free slots, choose from the lists below — copy each Name exactly as written, no paraphrasing.");
             sb2.AppendLine();
-            AppendTemplateMenu(sb2, "DISCOVERY", templateLib.DiscoveryTemplates);
-            AppendTemplateMenu(sb2, "INVESTIGATION", templateLib.InvestigationTemplates);
-            AppendTemplateMenu(sb2, "SHOWDOWN", templateLib.ShowdownTemplates);
+
+            bool freeDiscovery     = string.IsNullOrEmpty(pinnedDiscovery);
+            bool freeShowdown      = string.IsNullOrEmpty(pinnedShowdown);
+            bool freeInvestigation = pinnedInvestigations == null || pinnedInvestigations.Count == 0;
+
+            if (freeDiscovery)     AppendTemplateMenu(sb2, "DISCOVERY", templateLib.DiscoveryTemplates);
+            if (freeInvestigation) AppendTemplateMenu(sb2, "INVESTIGATION", templateLib.InvestigationTemplates);
+            if (freeShowdown)      AppendTemplateMenu(sb2, "SHOWDOWN", templateLib.ShowdownTemplates);
+
             sb2.AppendLine("Output only the following XML block:");
             sb2.AppendLine();
             sb2.AppendLine("<PlannedArc>");
+
+            // Discovery
             sb2.AppendLine("    <Discovery>");
             sb2.AppendLine("        <Theme>1 sentence: what kind of opening hook fits this outlaw's story.</Theme>");
-            sb2.AppendLine("        <Template>exact Name from the DISCOVERY list above</Template>");
+            sb2.AppendLine(freeDiscovery
+                ? "        <Template>exact Name from the DISCOVERY list above</Template>"
+                : $"        <Template>{pinnedDiscovery}</Template>");
             sb2.AppendLine("    </Discovery>");
+
+            // Investigation
             sb2.AppendLine("    <Investigation>");
-            sb2.AppendLine("        <!-- Choose between 2 and 5 Stage entries in story order (earliest lead first, closest to showdown last) -->");
-            sb2.AppendLine("        <Stage>");
-            sb2.AppendLine("            <Theme>1 sentence: what this step uncovers and how it escalates toward the next.</Theme>");
-            sb2.AppendLine("            <Template>exact Name from the INVESTIGATION list above</Template>");
-            sb2.AppendLine("        </Stage>");
-            sb2.AppendLine("        <!-- repeat <Stage> for each additional investigation step -->");
+            if (freeInvestigation)
+            {
+                sb2.AppendLine("        <!-- Choose between 2 and 5 Stage entries in story order (earliest lead first, closest to showdown last) -->");
+                sb2.AppendLine("        <Stage>");
+                sb2.AppendLine("            <Theme>1 sentence: what this step uncovers and how it escalates toward the next.</Theme>");
+                sb2.AppendLine("            <Template>exact Name from the INVESTIGATION list above</Template>");
+                sb2.AppendLine("        </Stage>");
+                sb2.AppendLine("        <!-- repeat <Stage> for each additional investigation step -->");
+            }
+            else
+            {
+                foreach (var t in pinnedInvestigations!)
+                {
+                    sb2.AppendLine("        <Stage>");
+                    sb2.AppendLine("            <Theme>1 sentence: what this step uncovers and how it escalates toward the next.</Theme>");
+                    sb2.AppendLine($"            <Template>{t}</Template>");
+                    sb2.AppendLine("        </Stage>");
+                }
+            }
             sb2.AppendLine("    </Investigation>");
+
+            // Showdown
             sb2.AppendLine("    <Showdown>");
             sb2.AppendLine("        <Theme>1 sentence: what makes this climax feel like the logical end of this specific story.</Theme>");
-            sb2.AppendLine("        <Template>exact Name from the SHOWDOWN list above</Template>");
+            sb2.AppendLine(freeShowdown
+                ? "        <Template>exact Name from the SHOWDOWN list above</Template>"
+                : $"        <Template>{pinnedShowdown}</Template>");
             sb2.AppendLine("    </Showdown>");
+
             sb2.AppendLine("</PlannedArc>");
             sb2.AppendLine();
             sb2.AppendLine("Rules:");
-            sb2.AppendLine("- Each template Name MUST be copied exactly from the lists above.");
-            sb2.AppendLine("- Pick templates whose location, description, and tags match the outlaw's background, factions, and crimes.");
+            if (freeDiscovery || freeInvestigation || freeShowdown)
+                sb2.AppendLine("- For free slots, each template Name MUST be copied exactly from the lists above.");
+            sb2.AppendLine("- Pinned slots are already decided — copy the template name as-is and only write the Theme.");
             sb2.AppendLine("- The arc must feel like a coherent escalation from first lead to final confrontation.");
-            sb2.AppendLine("- Use between 2 and 5 investigation stages — choose however many best serve this specific story.");
-            sb2.AppendLine("- Prefer variety of environment across stages (e.g. avoid all-space or all-planet runs).");
-            sb2.AppendLine("- Each investigation stage must use a different template.");
+            if (freeInvestigation)
+            {
+                sb2.AppendLine("- Use between 2 and 5 investigation stages — choose however many best serve this specific story.");
+                sb2.AppendLine("- Prefer variety of environment across stages (e.g. avoid all-space or all-planet runs).");
+                sb2.AppendLine("- Each investigation stage must use a different template.");
+            }
 
             string arcResponse = AITools.RunStatelessPrompt(sb2.ToString());
 

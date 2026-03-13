@@ -14,6 +14,10 @@ namespace Retrograde.Chains
     {
         public StarfieldMod myMod;
 
+        public string ShowdownTemplate = "";
+        public string InvestigationTemplate = "";
+        public string DiscoveryTemplate = "";
+
         public LoopingLayoutQuestChain(StarfieldMod myModparam)
         {
             myMod = myModparam;
@@ -60,7 +64,14 @@ namespace Retrograde.Chains
             // Build LoreContext from Lorefile and NPC
             Console.WriteLine("Building Lore Context...");
 
-            LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib);
+            var pinnedInvestigations = InvestigationTemplate != ""
+                ? new List<string>() { InvestigationTemplate }.Where(s => s != "").ToList()
+                : null;
+
+            LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib,
+                pinnedDiscovery:      DiscoveryTemplate     != "" ? DiscoveryTemplate     : null,
+                pinnedShowdown:       ShowdownTemplate      != "" ? ShowdownTemplate      : null,
+                pinnedInvestigations: pinnedInvestigations);
 
 
             // Template Choices --------------------------------

@@ -90,22 +90,14 @@ namespace Retrograde.Chains
 
             var Lorefile = LorePrompts.GenerateLoreFile(outlawNpc.Traits);
 
-            LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib);
+            var pinnedInvestigations = InvestigationTemplate != ""
+                ? new List<string>() { InvestigationTemplate, DeepTempalte }.Where(s => s != "").ToList()
+                : null;
 
-            //debug mode
-            if (ShowdownTemplate != "")
-            {
-                LorePrompts.PlannedShowdown = ShowdownTemplate;
-            }
-            if (DiscoveryTemplate != "")
-            {
-                LorePrompts.PlannedDiscovery = DiscoveryTemplate;
-
-            }
-            if (InvestigationTemplate != "")
-            {
-                LorePrompts.PlannedInvestigations = new List<string>() { InvestigationTemplate, DeepTempalte };
-            }
+            LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib,
+                pinnedDiscovery:     DiscoveryTemplate     != "" ? DiscoveryTemplate     : null,
+                pinnedShowdown:      ShowdownTemplate      != "" ? ShowdownTemplate      : null,
+                pinnedInvestigations: pinnedInvestigations);
 
             // Template Choices --------------------------------
             var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(
