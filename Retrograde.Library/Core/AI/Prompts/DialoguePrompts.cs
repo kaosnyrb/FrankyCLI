@@ -57,11 +57,105 @@ namespace Retrograde.AI.Utils
             for (int attempt = 0; attempt < 5; attempt++)
             {
                 raw = AITools.RunPrompt(sb.ToString());
-                if (raw.Contains("GREETING:") && raw.Contains("PLAYER3:") && raw.Contains("NPC3:"))
+                if (raw.Contains("GREETING:") && raw.Contains("PLAYER3:") && raw.Contains("NPC3a:"))
                     break;
             }
 
-            return ParseDialogueScript(raw);
+            var script = ParseDialogueScript(raw);
+            script.Exchanges[1].SideOptions = GetSideOptions(script, addons);
+            return script;
+        }
+
+        private static DialogueSideOptions GetSideOptions(DialogueScript baseScript, List<string> addons)
+        {
+            var beat2Lines = baseScript.Exchanges[1].NpcReply;
+            var beat2Text  = string.Join(" / ", beat2Lines.Where(l => !string.IsNullOrWhiteSpace(l)));
+
+            var sb = new StringBuilder();
+            sb.AppendLine("You are writing two optional side dialogue choices for a Starfield NPC conversation.");
+            sb.AppendLine("The player is a bounty hunter. They are mid-conversation with an NPC contact who has just told them something.");
+            sb.AppendLine("Use the LoreContext established earlier in this conversation. Do NOT invent new names or places.");
+            sb.AppendLine();
+            sb.AppendLine("NPC BEAT 2 REPLY (what was just said):");
+            sb.AppendLine(beat2Text);
+            sb.AppendLine();
+            sb.AppendLine("These two side choices appear alongside the main follow-up question. Selecting one does NOT advance the conversation — it is pure color. The NPC answers and the player can still ask the main question afterward.");
+            sb.AppendLine();
+            sb.AppendLine("PLAYER voice: Operational, direct, brief. Bounty hunter on a paying contract.");
+            sb.AppendLine();
+            sb.AppendLine("Choice 1 — EXTRA INFO: Player wants one more concrete detail from what the NPC just said. A short, specific follow-up that probes exactly one thing from the reply above. Do NOT repeat what the NPC already said — push past it.");
+            sb.AppendLine("Choice 2 — JOKE: Player makes a wry, dry-humored aside about the situation or the NPC's answer. Starfield tone — understated, not quippy. The NPC reacts briefly: mild amusement, mild irritation, or a dry brush-off. Keep it grounded.");
+            sb.AppendLine();
+            sb.AppendLine("Output EXACTLY this format, one line per label, no extra text before or after:");
+            sb.AppendLine("EXTRA_PLAYER: <player's extra-info question, max 50 chars>");
+            sb.AppendLine("EXTRA_NPC1a: <NPC first line, max 150 chars>");
+            sb.AppendLine("EXTRA_NPC1b: <NPC second line, max 150 chars — omit if one line suffices>");
+            sb.AppendLine("JOKE_PLAYER: <player's wry aside or comment, max 50 chars>");
+            sb.AppendLine("JOKE_NPC1a: <NPC first line reacting to the joke, max 150 chars>");
+            sb.AppendLine("JOKE_NPC1b: <NPC second line, max 150 chars — omit if one line suffices>");
+            sb.AppendLine();
+            sb.AppendLine("Rules:");
+            sb.AppendLine("- All lines must fit within their character limits.");
+            sb.AppendLine("- No quotation marks around the text.");
+            sb.AppendLine("- No stage directions, no asterisks, no line breaks within a line.");
+            sb.AppendLine("- Tone: grounded, Starfield-style — terse, believable, not dramatic.");
+            sb.AppendLine("- EXTRA_NPC must follow directly from the beat 2 content — one specific, unembellished detail.");
+            sb.AppendLine("- JOKE_NPC must feel natural from someone used to dealing with bounty hunters — not shocked, not gushing.");
+            sb.AppendLine("- NPC knowledge constraint: same as main conversation — only what this person would personally witness or overhear.");
+            sb.AppendLine();
+            sb.AppendLine("Additional Information:");
+            foreach (var item in addons)
+                sb.AppendLine(item);
+
+            string raw = "";
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                raw = AITools.RunPrompt(sb.ToString());
+                if (raw.Contains("EXTRA_PLAYER:") && raw.Contains("JOKE_PLAYER:"))
+                    break;
+            }
+
+            return ParseSideOptions(raw);
+        }
+
+        private static DialogueSideOptions ParseSideOptions(string raw)
+        {
+            string Extract(string label)
+            {
+                var prefix = label + ":";
+                foreach (var line in raw.Split('\n'))
+                {
+                    var trimmed = line.Trim();
+                    if (trimmed.StartsWith(prefix, System.StringComparison.OrdinalIgnoreCase))
+                        return trimmed.Substring(prefix.Length).Trim();
+                }
+                return "";
+            }
+
+            List<string> ExtractNpcLines(string prefix)
+            {
+                var lines = new List<string>();
+                var a = TruncateAtSentence(Extract(prefix + "a"), 150);
+                var b = TruncateAtSentence(Extract(prefix + "b"), 150);
+                if (!string.IsNullOrWhiteSpace(a)) lines.Add(a);
+                if (!string.IsNullOrWhiteSpace(b)) lines.Add(b);
+                if (lines.Count == 0) lines.Add("");
+                return lines;
+            }
+
+            return new DialogueSideOptions
+            {
+                ExtraInfo = new SideOption
+                {
+                    PlayerPrompt = TruncateAtSentence(Extract("EXTRA_PLAYER"), 50),
+                    NpcReply     = ExtractNpcLines("EXTRA_NPC1"),
+                },
+                Joke = new SideOption
+                {
+                    PlayerPrompt = TruncateAtSentence(Extract("JOKE_PLAYER"), 50),
+                    NpcReply     = ExtractNpcLines("JOKE_NPC1"),
+                },
+            };
         }
 
         private static DialogueScript ParseDialogueScript(string raw)

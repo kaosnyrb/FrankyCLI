@@ -207,6 +207,64 @@ public class NPCDialogueNoun
             quest.Scenes.Add(topicScene);
         }
 
+        // ── Side color topics (Exchange[1], stage 100) ───────────────────────────
+        // Two optional scenes that appear alongside the main beat-2 topic. Neither advances
+        // the stage — the conversation re-evaluates and all three options remain visible.
+        var sides = script.Exchanges[1].SideOptions;
+        if (sides != null)
+        {
+            foreach (var (tag, side) in new[] { ("extra", sides.ExtraInfo), ("joke", sides.Joke) })
+            {
+                var playerTopic = BuildSceneTopic(targetMod, quest);
+                var playerInfo  = BuildInfo(targetMod, side.PlayerPrompt);
+                playerTopic.Responses.Add(playerInfo);
+                playerTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+                    { playerInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+                quest.DialogTopics.Add(playerTopic);
+
+                var npcEntries = new List<(DialogTopic topic, DialogResponses info)>();
+                foreach (var line in side.NpcReply)
+                {
+                    var npcTopic = BuildSceneTopic(targetMod, quest);
+                    var npcInfo  = BuildInfo(targetMod, line, npcFormKey);
+                    npcTopic.Responses.Add(npcInfo);
+                    npcTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+                        { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+                    quest.DialogTopics.Add(npcTopic);
+                    SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
+                        targetMod.ModKey, line, elevenLabsVoiceId);
+                    npcEntries.Add((npcTopic, npcInfo));
+                }
+
+                // No SetParentQuestStage — stage stays at 100 so all options reappear.
+                var sideScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_topic_1_" + tag };
+                sideScene.Quest.SetTo(quest.FormKey);
+                sideScene.Flags = (Scene.Flag)0x00002814u;
+                sideScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
+                sideScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+                sideScene.Conditions.Add(BuildGetStageCondition(quest, 100, CompareOperator.EqualTo));
+                sideScene.Actors.Add(new SceneActor { ID = npcAliasId,            BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+                sideScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+
+                sideScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                for (int j = 0; j < npcEntries.Count; j++)
+                    sideScene.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+
+                var actions = new ExtendedList<ASceneAction>();
+                var playerAction = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
+                playerAction.Topic.SetTo(playerTopic.FormKey);
+                actions.Add(playerAction);
+                for (int j = 0; j < npcEntries.Count; j++)
+                {
+                    var npcAction = new DialogueSceneAction { Index = (uint?)(4 + j), AliasID = (int)npcAliasId, StartPhase = (uint)(j + 1), EndPhase = (uint)(j + 1) };
+                    npcAction.Topic.SetTo(npcEntries[j].topic.FormKey);
+                    actions.Add(npcAction);
+                }
+                sideScene.Actions = actions;
+                quest.Scenes.Add(sideScene);
+            }
+        }
+
         QuestRecord = quest;
     }
 
