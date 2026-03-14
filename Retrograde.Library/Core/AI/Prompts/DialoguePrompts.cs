@@ -92,14 +92,9 @@ namespace Retrograde.AI.Utils
 
             script.NpcGreeting = TruncateAtSentence(Extract("GREETING"), 100);
 
-            // Exchange[0] = completion (ends quest) — PLAYER3/NPC3a/NPC3b
-            // Exchange[1] = optional topic 1       — PLAYER1/NPC1a/NPC1b
-            // Exchange[2] = optional topic 2       — PLAYER2/NPC2a/NPC2b
-            script.Exchanges.Add(new DialogueExchange
-            {
-                PlayerPrompt = TruncateAtSentence(Extract("PLAYER3"), 50),
-                NpcReply     = ExtractNpcLines("NPC3"),
-            });
+            // Exchange[0] = beat 1       — PLAYER1/NPC1a/NPC1b (shows at stage 0, advances to 100)
+            // Exchange[1] = beat 2       — PLAYER2/NPC2a/NPC2b (shows at stage 100, advances to 200)
+            // Exchange[2] = completion   — PLAYER3/NPC3a/NPC3b (shows at stage 200, advances to completionStage)
             script.Exchanges.Add(new DialogueExchange
             {
                 PlayerPrompt = TruncateAtSentence(Extract("PLAYER1"), 50),
@@ -109,6 +104,11 @@ namespace Retrograde.AI.Utils
             {
                 PlayerPrompt = TruncateAtSentence(Extract("PLAYER2"), 50),
                 NpcReply     = ExtractNpcLines("NPC2"),
+            });
+            script.Exchanges.Add(new DialogueExchange
+            {
+                PlayerPrompt = TruncateAtSentence(Extract("PLAYER3"), 50),
+                NpcReply     = ExtractNpcLines("NPC3"),
             });
 
             return script;
