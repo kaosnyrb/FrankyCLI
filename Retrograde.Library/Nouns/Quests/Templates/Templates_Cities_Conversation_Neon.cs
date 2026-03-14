@@ -36,6 +36,7 @@ namespace Retrograde.Quests
 
                 parameters = new Dictionary<string, object>() {
                     {"NeedSpacesuit", false},
+                    {"Outfit", FormKeyLookup.GetFormKey("Outfit_UtilityOveralls_SSO")},
                     {"Label", "neonstarport"},
                     {"NpcNameHint", "appropriate for a mechanic working in a busy commercial starport"},
                 },

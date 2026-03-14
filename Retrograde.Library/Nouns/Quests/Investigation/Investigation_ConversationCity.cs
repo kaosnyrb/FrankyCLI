@@ -51,6 +51,9 @@ namespace Retrograde.Quests
                 factionId: FormKeyLookup.GetFormKey("PlayerAllyFaction"));
             var npc = npcResult.Npc;
 
+            if (missionTemplate.parameters != null && missionTemplate.parameters.TryGetValue("Outfit", out var outfitParam))
+                npc.SpaceOutfit = ((FormKey)outfitParam).ToNullableLink<IOutfitGetter>();
+
             var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
                 "Targets name:" + npc.Name,
@@ -78,7 +81,10 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceCreateAlias("BountyTarget", npc.ToLink<IStarfieldMajorRecordGetter>());
 
             //Place the NPC on a random city marker
-            var markerused = RandomProvider.GetRandomMarker("doout_city_activator_marker_" + (string)missionTemplate.parameters["Label"] + "_");
+            string label = missionTemplate.parameters != null && missionTemplate.parameters.TryGetValue("Label", out var labelParam)
+                ? (string)labelParam
+                : "";
+            var markerused = RandomProvider.GetRandomMarker("doout_city_activator_marker_" + label + "_");
             newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
             
             //Add conversation, ending the quest on stage 500

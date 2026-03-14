@@ -3,7 +3,6 @@ using Retrograde.AI.Utils;
 using Retrograde.Interfaces;
 using Retrograde.Utils;
 using Mutagen.Bethesda;
-using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
@@ -50,6 +49,9 @@ namespace Retrograde.Quests
                 isFriendly: true,
                 factionId: FormKeyLookup.GetFormKey("PlayerAllyFaction"));
             var npc = npcResult.Npc;
+
+            if (missionTemplate.parameters != null && missionTemplate.parameters.TryGetValue("Outfit", out var outfitParam))
+                npc.SpaceOutfit = ((FormKey)outfitParam).ToNullableLink<IOutfitGetter>();
 
             var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
             {
