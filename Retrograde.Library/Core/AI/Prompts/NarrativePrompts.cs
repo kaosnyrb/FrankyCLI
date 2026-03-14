@@ -104,8 +104,30 @@ namespace Retrograde.AI.Utils
 
             Console.WriteLine("Generating Outlaw Log...");
 
-            string prompt = FlavourSeedData.AddFlavourToTargetBook(sb.ToString());
-            return AITools.RunPrompt(prompt);
+            string basePrompt = sb.ToString();
+            string prompt = FlavourSeedData.AddFlavourToTargetBook(basePrompt);
+            string result = AITools.RunPrompt(prompt);
+
+            // If the flavoured prompt triggered a refusal, retry with the base prompt only
+            if (IsRefusal(result))
+            {
+                Console.WriteLine("Outlaw Log: flavour prompt refused — retrying without flavour.");
+                result = AITools.RunPrompt(basePrompt);
+            }
+
+            return result;
+        }
+
+        private static bool IsRefusal(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response)) return true;
+            var head = response.TrimStart().ToLowerInvariant();
+            return head.StartsWith("i don't think i can")
+                || head.StartsWith("i can't write")
+                || head.StartsWith("i cannot write")
+                || head.StartsWith("i'm not able to write")
+                || head.StartsWith("i won't write")
+                || head.StartsWith("i'd rather not write");
         }
 
         // ------------------------------

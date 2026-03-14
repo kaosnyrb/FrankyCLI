@@ -19,7 +19,7 @@ namespace Retrograde.AI.Utils
             sb.AppendLine("Use the LoreContext established earlier in this conversation for names, factions, and locations.");
             sb.AppendLine("Do NOT invent new names or places beyond the LoreContext and Additional Information.");
             sb.AppendLine();
-            sb.AppendLine("GREETING constraint: Do NOT open with the NPC stating they know why the player is here, predicting what they will ask, or naming the bounty target first. Open with a specific action, observation, or mundane detail that roots the NPC in their world. Foreknowledge should emerge from what they reveal, not be announced upfront.");
+            sb.AppendLine("GREETING constraint: Do NOT open with the NPC stating they know why the player is here, predicting what they will ask, or naming the bounty target first. The greeting must be pure speech — something the NPC says out loud that roots them in their world. Do NOT describe what they are doing, their physical state, or their surroundings. Foreknowledge should emerge from what they reveal, not be announced upfront.");
             sb.AppendLine();
             sb.AppendLine("PLAYER voice: The player is a bounty hunter on a paying contract. Questions are operational, not conversational — specific and closed. Good examples: \"When did she leave?\" / \"What name was on the manifest?\" / \"Who processed her entry?\" Bad examples: \"What can you tell me?\" / \"How did you know that?\" PLAYER3 must be the most direct, closed question in the exchange.");
             sb.AppendLine();
