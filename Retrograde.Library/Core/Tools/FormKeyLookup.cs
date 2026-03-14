@@ -182,7 +182,7 @@ namespace Retrograde.Utils
                 {
                     writer.WriteStartArray();
                     writer.WriteStringValue(editorId);
-                    writer.WriteStringValue(fk.ModKey.FileName);
+                    writer.WriteStringValue(fk.ModKey.Name);
                     writer.WriteNumberValue((int)fk.ModKey.Type);
                     writer.WriteNumberValue(fk.ID);
                     writer.WriteEndArray();
