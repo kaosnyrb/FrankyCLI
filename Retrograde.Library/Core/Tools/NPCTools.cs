@@ -95,9 +95,42 @@ public static class NPCTools
         return npc;
     }
 
+    /// <summary>
+    /// Gets a random friendly (unaggressive, talkable) template NPC FormID for the specified gender.
+    /// </summary>
+    public static uint GetTemplateFriendlyNPC(bool female)
+    {
+        var random = RandomProvider.Random;
+
+        if (female)
+        {
+            List<uint> npclist = new List<uint>()
+            {
+                0x19AD39, // UC_NA_MASTWorkerFemale01
+                0x19AD38, // UC_NA_MASTWorkerFemale02
+                0x064EEF, // UC_NA_MASTWorkerFemale03_Lobby
+                0x19AD35, // UC_NA_MASTWorkerFemale04
+                0x19AD34, // UC_NA_MASTWorkerFemale05
+            };
+            return npclist[random.Next(npclist.Count)];
+        }
+        else
+        {
+            List<uint> npclist = new List<uint>()
+            {
+                0x19AD3E, // UC_NA_MASTWorkerMale01
+                0x19AD3D, // UC_NA_MASTWorkerMale02
+                0x19AD3C, // UC_NA_MASTWorkerMale03
+                0x19AD3B, // UC_NA_MASTWorkerMale04
+                0x19AD3A, // UC_NA_MASTWorkerMale05
+            };
+            return npclist[random.Next(npclist.Count)];
+        }
+    }
+
     public static Npc FindTemplateNpc(bool female) => FindNpcById(GetTemplateNPC(female)).DeepCopy();
     public static Npc FindTemplateDeadNpc(bool female) => FindNpcById(GetTemplateDeadNPC(female)).DeepCopy();
-    public static Npc FindTemplateFriendlyNpc(bool female) => FindNpcById(GetTemplateNPC(female)).DeepCopy();
+    public static Npc FindTemplateFriendlyNpc(bool female) => FindNpcById(GetTemplateFriendlyNPC(female)).DeepCopy();
 
     /// <summary>
     /// Imports a non-vanilla faction into targetMod (new FormKey, all fields copied).
