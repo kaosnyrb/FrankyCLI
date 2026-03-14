@@ -150,7 +150,7 @@ namespace Retrograde.AI.Utils
                 sb2.AppendLine("- Each investigation stage must use a different template.");
             }
 
-            string arcResponse = AITools.RunStatelessPrompt(sb2.ToString());
+            string arcResponse = AITools.RunPrompt(sb2.ToString());
 
             PlannedDiscovery      = ExtractPlannedTemplate(arcResponse, "Discovery");
             PlannedInvestigations = ExtractPlannedInvestigations(arcResponse);
@@ -265,11 +265,11 @@ namespace Retrograde.AI.Utils
 
             var prompt = sb.ToString();
 
-            var results = AITools.RunStatelessPrompt(prompt);
+            var results = AITools.RunPrompt(prompt);
 
             for (int i = 0; i < 10 && results.Length < 200; i++)
             {
-                results = AITools.RunStatelessPrompt(prompt);
+                results = AITools.RunPrompt(prompt);
             }
             return results;
         }

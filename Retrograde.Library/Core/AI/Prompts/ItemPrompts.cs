@@ -26,10 +26,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 datasourceprompt += item;
 
-            var results = AITools.RunStatelessPrompt(datasourceprompt);
+            var results = AITools.RunPrompt(datasourceprompt);
             for (int i = 0; i < 10 && results.Length > 200; i++)
             {
-                results = AITools.RunStatelessPrompt(datasourceprompt);
+                results = AITools.RunPrompt(datasourceprompt);
             }
             return results;
         }
@@ -55,10 +55,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 datasourceprompt += item;
 
-            var results = AITools.RunStatelessPrompt(datasourceprompt);
+            var results = AITools.RunPrompt(datasourceprompt);
             for (int i = 0; i < 10 && results.Length > 200; i++)
             {
-                results = AITools.RunStatelessPrompt(datasourceprompt);
+                results = AITools.RunPrompt(datasourceprompt);
             }
             return results;
         }

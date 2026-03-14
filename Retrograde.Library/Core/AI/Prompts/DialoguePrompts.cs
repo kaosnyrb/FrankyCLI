@@ -56,7 +56,7 @@ namespace Retrograde.AI.Utils
             string raw = "";
             for (int attempt = 0; attempt < 5; attempt++)
             {
-                raw = AITools.RunStatelessPrompt(sb.ToString());
+                raw = AITools.RunPrompt(sb.ToString());
                 if (raw.Contains("GREETING:") && raw.Contains("PLAYER3:") && raw.Contains("NPC3:"))
                     break;
             }

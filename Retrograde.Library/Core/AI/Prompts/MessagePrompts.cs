@@ -22,10 +22,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 pickuppromt += item;
 
-            var results = AITools.RunStatelessPrompt(pickuppromt);
+            var results = AITools.RunPrompt(pickuppromt);
             for (int i = 0; i < 10 && results.Length < 100; i++)
             {
-                results = AITools.RunStatelessPrompt(pickuppromt);
+                results = AITools.RunPrompt(pickuppromt);
             }
             return results;
         }
@@ -47,10 +47,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 pickuppromt += item;
 
-            var results = AITools.RunStatelessPrompt(pickuppromt);
+            var results = AITools.RunPrompt(pickuppromt);
             for (int i = 0; i < 10 && results.Length < 100; i++)
             {
-                results = AITools.RunStatelessPrompt(pickuppromt);
+                results = AITools.RunPrompt(pickuppromt);
             }
             return results;
         }

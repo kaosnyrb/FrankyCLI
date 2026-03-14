@@ -53,10 +53,10 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 logprompt += item;
 
-            var results = AITools.RunStatelessPrompt(logprompt);
+            var results = AITools.RunPrompt(logprompt);
             for (int i = 0; i < 10 && results.Length < 150; i++)
             {
-                results = AITools.RunStatelessPrompt(logprompt);
+                results = AITools.RunPrompt(logprompt);
             }
             return results;
         }
