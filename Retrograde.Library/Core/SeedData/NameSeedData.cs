@@ -8,83 +8,168 @@ namespace Retrograde.AI.Utils
         private static readonly List<string> MaleFirstNames = new List<string>
         {
             // American / British / Canadian
-            "Aaron", "Blake", "Cole", "Dale", "Evan", "Grant", "Hayes", "Ivan", "Joel", "Kane",
-            "Lance", "Miles", "Nash", "Owen", "Reed", "Scott", "Troy", "Wade", "Zane",
-            // Mexican / Brazilian
-            "Carlos", "Diego", "Emilio", "Felipe", "Hector", "Javier", "Luis", "Marco", "Rafael", "Victor",
+            "Aaron", "Adam", "Alec", "Austin", "Blake", "Brent", "Calvin", "Chase", "Cole", "Colt",
+            "Connor", "Dale", "Dawson", "Dean", "Drake", "Ethan", "Evan", "Finn", "Fletcher", "Gavin",
+            "Graham", "Grant", "Griffin", "Hayes", "Hudson", "Hunter", "Ivan", "Joel", "Julian", "Kane",
+            "Knox", "Lance", "Liam", "Logan", "Mason", "Miles", "Nash", "Nolan", "Owen", "Parker",
+            "Reed", "Reid", "Ryker", "Scott", "Seth", "Spencer", "Travis", "Troy", "Tyler", "Wade",
+            "Warren", "Wesley", "Wyatt", "Zane",
+            // Hispanic / Latin American
+            "Abel", "Alejandro", "Andres", "Antonio", "Bruno", "Carlos", "Cesar", "Diego", "Eduardo",
+            "Emilio", "Esteban", "Felipe", "Gabriel", "Gonzalo", "Hector", "Javier", "Joaquin", "Jorge",
+            "Juan", "Luis", "Marco", "Mateo", "Miguel", "Nicolas", "Pablo", "Rafael", "Ricardo",
+            "Roberto", "Ruben", "Santiago", "Victor",
             // French
-            "Bastien", "Cedric", "Etienne", "Florian", "Mathis", "Remi", "Theo",
+            "Adrien", "Antoine", "Arthur", "Baptiste", "Bastien", "Cedric", "Charles", "Clement",
+            "Damien", "Etienne", "Florian", "Gael", "Guillaume", "Henri", "Hugo", "Julien",
+            "Laurent", "Leon", "Louis", "Luc", "Mathis", "Maxime", "Noel", "Olivier",
+            "Philippe", "Pierre", "Remi", "Simon", "Theo", "Thomas", "Tristan", "Xavier",
             // German
-            "Fabian", "Henrik", "Jonas", "Kai", "Lars", "Nils", "Stefan",
+            "Christoph", "Dominik", "Emil", "Fabian", "Felix", "Franz", "Hans", "Henrik",
+            "Jonas", "Kai", "Klaus", "Konrad", "Lars", "Lukas", "Markus", "Moritz",
+            "Nils", "Otto", "Roland", "Stefan", "Tobias", "Werner",
             // Japanese
-            "Daichi", "Haruki", "Kenji", "Naoto", "Riku", "Takeshi", "Yuki",
+            "Akira", "Atsushi", "Daichi", "Haruki", "Hayato", "Hiroshi", "Isamu", "Kazuki",
+            "Kenji", "Makoto", "Masaru", "Naoto", "Noboru", "Ren", "Riku", "Ryota",
+            "Satoshi", "Shingo", "Takeshi", "Tatsuya", "Wataru", "Yamato", "Yuki", "Yuto",
             // Chinese
-            "Bo", "Chen", "Fang", "Hao", "Jun", "Lei", "Ming", "Peng", "Wei",
+            "Anming", "Bo", "Chen", "Cheng", "Fang", "Haoran", "Hao", "Jiaming", "Jun",
+            "Lei", "Ming", "Peng", "Tao", "Wei", "Xinyu", "Yifan", "Yuchen", "Zhen",
             // Russian
-            "Alexei", "Dmitri", "Igor", "Mikhail", "Pavel", "Sergei", "Vadim",
+            "Alexander", "Alexei", "Andrei", "Boris", "Dmitri", "Evgeny", "Gleb", "Igor",
+            "Ilya", "Kirill", "Maxim", "Mikhail", "Nikolai", "Oleg", "Pavel", "Roman",
+            "Sergei", "Vadim", "Viktor", "Vladimir", "Yuri",
             // Korean
-            "Daehyun", "Jaemin", "Minjun", "Seunghyun", "Woojin",
+            "Daehyun", "Hyunjin", "Jaemin", "Jihoon", "Junho", "Minho", "Minjun",
+            "Seojun", "Seunghyun", "Sungjin", "Taehyun", "Woojin", "Youngjun",
             // Indian
-            "Arjun", "Dev", "Kiran", "Rohan", "Vikram",
+            "Aakash", "Ajay", "Amit", "Arjun", "Dev", "Dhruv", "Gaurav", "Karthik",
+            "Kiran", "Naveen", "Nikhil", "Pranav", "Rahul", "Rohan", "Sachin", "Vijay", "Vikram",
             // Nigerian / West African
-            "Adebayo", "Emeka", "Femi", "Kalu", "Tunde",
-            // More American / British
-            "Brent", "Colt", "Finn", "Knox", "Ryker",
+            "Ade", "Adebayo", "Babatunde", "Chidi", "Dele", "Ebuka", "Emeka", "Femi",
+            "Ifeanyi", "Ikenna", "Kalu", "Kofi", "Lanre", "Obinna", "Seun", "Tunde",
         };
 
         private static readonly List<string> FemaleFirstNames = new List<string>
         {
             // American / British / Canadian
-            "Ava", "Blair", "Casey", "Dana", "Elise", "Faye", "Harper", "Iris", "Jana", "Kira",
-            "Leah", "Morgan", "Nova", "Quinn", "Rena", "Sloane", "Tara", "Vera", "Wren",
-            // Mexican / Brazilian
-            "Camila", "Elena", "Fernanda", "Isadora", "Lucia", "Marisol", "Renata", "Sofia", "Valentina",
+            "Abby", "Alexis", "Allison", "Amber", "Aria", "Audrey", "Ava", "Blair", "Brooke",
+            "Brynn", "Casey", "Claire", "Cora", "Dana", "Elise", "Ellie", "Ember", "Faith",
+            "Faye", "Gemma", "Grace", "Haley", "Hannah", "Harper", "Holly", "Iris", "Jana",
+            "Julia", "Juniper", "Kira", "Lauren", "Leah", "Lily", "Lyra", "Mia", "Morgan",
+            "Naomi", "Natalie", "Nicole", "Nova", "Paige", "Peyton", "Piper", "Quinn",
+            "Reese", "Rena", "Riley", "Ruby", "Sara", "Savannah", "Sloane", "Stella",
+            "Summer", "Sydney", "Tara", "Taylor", "Tessa", "Vera", "Wren",
+            // Hispanic / Latin American
+            "Adriana", "Alicia", "Andrea", "Camila", "Carmen", "Catalina", "Claudia", "Daniela",
+            "Diana", "Elena", "Fernanda", "Gabriela", "Isabel", "Isadora", "Laura", "Lorena",
+            "Lucia", "Marisol", "Monica", "Natalia", "Paloma", "Paula", "Renata", "Sofia",
+            "Valentina", "Veronica",
             // French
-            "Amelie", "Chloe", "Eloise", "Juliette", "Laure", "Noemie", "Solene",
+            "Agnes", "Alice", "Amelie", "Aurelie", "Camille", "Charlotte", "Chloe", "Colette",
+            "Delphine", "Eloise", "Estelle", "Genevieve", "Josephine", "Juliette", "Laure",
+            "Lucie", "Manon", "Margot", "Marie", "Mathilde", "Noemie", "Nathalie",
+            "Pauline", "Solene", "Sophie", "Valerie", "Vivienne",
             // German
-            "Britta", "Hanna", "Ida", "Lena", "Maren", "Petra", "Sylva",
+            "Annelise", "Birgit", "Britta", "Christine", "Clara", "Dorothea", "Erika",
+            "Franziska", "Greta", "Hanna", "Ida", "Johanna", "Katharina", "Kristin",
+            "Lena", "Maren", "Marlene", "Monika", "Petra", "Sabine", "Sigrid", "Sylva",
             // Japanese
-            "Aiko", "Hana", "Keiko", "Maki", "Nami", "Riko", "Saya", "Yuna",
+            "Aiko", "Akane", "Asuka", "Ayaka", "Chiaki", "Chihiro", "Eri", "Hana",
+            "Haruka", "Hikaru", "Honoka", "Kaori", "Keiko", "Koharu", "Kyoko", "Maki",
+            "Mayumi", "Megumi", "Miho", "Misaki", "Momoko", "Nami", "Natsuki", "Nozomi",
+            "Riko", "Rina", "Risa", "Sakura", "Saya", "Shiori", "Yukiko", "Yuna", "Yuriko",
             // Chinese
-            "Fen", "Jia", "Lin", "Mei", "Ning", "Rui", "Xia", "Yan",
+            "Danhua", "Fen", "Hanyu", "Jia", "Jiaying", "Jingyi", "Lihua", "Lin", "Mei",
+            "Meiling", "Ning", "Qing", "Rui", "Shanshan", "Siyu", "Tingting", "Wanying",
+            "Wenjing", "Xia", "Xinyi", "Yan", "Yulan",
             // Russian
-            "Anya", "Dasha", "Irina", "Katya", "Mila", "Nadia", "Sonya", "Tasha",
+            "Alina", "Anastasia", "Anya", "Darya", "Dasha", "Ekaterina", "Elena", "Inna",
+            "Irina", "Katya", "Kseniya", "Lara", "Larisa", "Lena", "Marina", "Mila",
+            "Nadia", "Oksana", "Olga", "Polina", "Sonya", "Svetlana", "Tamara", "Tasha",
+            "Valentina", "Yulia",
             // Korean
-            "Chaeyeon", "Jisoo", "Minji", "Seulgi", "Soyeon",
+            "Boyeon", "Chaeyeon", "Dahyun", "Dawon", "Eunji", "Haewon", "Hyuna", "Jieun",
+            "Jisoo", "Jiyeon", "Joohyun", "Minji", "Nayeon", "Seulgi", "Sohee", "Somin",
+            "Soyeon", "Sujeong", "Yerin", "Yoona",
             // Indian
-            "Ananya", "Divya", "Kavya", "Priya", "Shreya",
+            "Aarti", "Amrita", "Ananya", "Bindu", "Chitra", "Deepa", "Divya", "Hema",
+            "Indira", "Kamala", "Kavya", "Lakshmi", "Madhuri", "Meera", "Nisha", "Pooja",
+            "Parvathi", "Priya", "Radha", "Rekha", "Sandhya", "Savitha", "Shreya",
+            "Swathi", "Tanvi", "Usha", "Vidya",
             // Nigerian / West African
-            "Adaeze", "Chioma", "Ngozi", "Nneka", "Temi",
-            // More American / British
-            "Aria", "Brynn", "Juniper", "Lyra", "Piper",
+            "Adaeze", "Aisha", "Ama", "Amara", "Bisi", "Bukola", "Chiamaka", "Chioma",
+            "Chinwe", "Damilola", "Folake", "Ifeoma", "Kemi", "Nkechi", "Ngozi", "Nneka",
+            "Temi", "Tope", "Wunmi", "Yewande", "Zainab",
         };
 
         private static readonly List<string> Surnames = new List<string>
         {
             // American / British / Canadian
-            "Ashby", "Beckett", "Crane", "Decker", "Ellison", "Frost", "Garrett", "Hale", "Ingram",
-            "Keane", "Lawson", "Mercer", "Novak", "Paxton", "Quill", "Reeves", "Slater", "Thorne",
-            "Vance", "Weston", "York",
-            // Mexican / Brazilian
-            "Aguilar", "Castillo", "Ferreira", "Gomes", "Herrera", "Leal", "Medina", "Reyes", "Santos",
+            "Abbott", "Ashby", "Baldwin", "Barker", "Beckett", "Brady", "Burke", "Calloway",
+            "Chapman", "Collins", "Cooper", "Crane", "Crawford", "Decker", "Doyle", "Draper",
+            "Dunbar", "Duncan", "Ellis", "Ellison", "Ferguson", "Fielding", "Fleming",
+            "Frost", "Fuller", "Garrett", "Gibson", "Gordon", "Grayson", "Greer",
+            "Hale", "Hardy", "Harlow", "Harrison", "Hawkins", "Henderson", "Holt",
+            "Ingram", "Jennings", "Keane", "Kirby", "Knight", "Langley", "Lawson",
+            "Manning", "McKenna", "Mercer", "Morris", "Murdoch", "Murray", "Nelson",
+            "Novak", "Palmer", "Paxton", "Porter", "Quill", "Reeves", "Reynolds",
+            "Rogers", "Ryan", "Shaw", "Slater", "Sullivan", "Thorne", "Vance",
+            "Walsh", "Weston", "Whitmore", "York",
+            // Hispanic / Latin American
+            "Acosta", "Aguilar", "Alvarado", "Castillo", "Cruz", "Delgado", "Dominguez",
+            "Escobar", "Ferreira", "Flores", "Fuentes", "Garcia", "Gomes", "Gutierrez",
+            "Herrera", "Leal", "Lopez", "Luna", "Medina", "Montoya", "Morales",
+            "Munoz", "Navarro", "Ortega", "Perez", "Ramirez", "Reyes", "Rivera",
+            "Rojas", "Romero", "Ruiz", "Santos", "Vargas",
             // French
-            "Aubert", "Blanchard", "Carnot", "Dufour", "Faure", "Girard", "Morel", "Renard",
+            "Aubert", "Beaumont", "Bernard", "Blanchard", "Carnot", "Chevalier",
+            "Dufour", "Dupont", "Durand", "Faure", "Fontaine", "Girard", "Leblanc",
+            "Leclerc", "Lefevre", "Leroux", "Marchand", "Martin", "Moreau", "Morel",
+            "Pelletier", "Petit", "Renard", "Richard", "Roux",
             // German
-            "Bauer", "Brandt", "Fuchs", "Gruber", "Haas", "Kohler", "Meier", "Richter", "Vogel",
+            "Bauer", "Becker", "Bergmann", "Brandt", "Braun", "Dietrich", "Fischer",
+            "Fuchs", "Gruber", "Haas", "Hartmann", "Hoffmann", "Huber", "Kaiser",
+            "Klein", "Koch", "Kohler", "Krause", "Meier", "Muller", "Richter",
+            "Schmidt", "Schneider", "Schultz", "Schwarz", "Vogel",
             // Japanese
-            "Fujita", "Hayashi", "Inoue", "Kimura", "Matsuda", "Nishida", "Ohara", "Saito", "Tanaka", "Yamamoto",
+            "Aoki", "Endo", "Fujita", "Goto", "Hashimoto", "Hayashi", "Inoue",
+            "Ishii", "Ito", "Iwata", "Kato", "Kawamoto", "Kimura", "Kobayashi",
+            "Maeda", "Matsuda", "Matsumoto", "Miyamoto", "Mori", "Murata",
+            "Nakagawa", "Nakamura", "Nishida", "Nishimura", "Ogawa", "Ohara",
+            "Saito", "Sato", "Shimizu", "Suzuki", "Takahashi", "Tanaka", "Uchida",
+            "Watanabe", "Yamada", "Yamamoto", "Yamashita", "Yoshida",
             // Chinese
-            "Bai", "Cao", "Gao", "Hu", "Liang", "Liu", "Sun", "Tang", "Wu", "Xiao", "Zhang",
+            "Bai", "Cai", "Cao", "Chen", "Cui", "Deng", "Ding", "Dong", "Fan",
+            "Fang", "Fu", "Gao", "Gong", "Gu", "Han", "He", "Hong", "Hou",
+            "Hu", "Huang", "Jiang", "Jin", "Kong", "Li", "Liang", "Lin",
+            "Liu", "Lu", "Luo", "Ma", "Mao", "Meng", "Mo", "Ni", "Pan",
+            "Qian", "Qi", "Ran", "Shao", "Shen", "Shi", "Song", "Sun",
+            "Tang", "Tian", "Wan", "Wang", "Wu", "Xiao", "Xu", "Yan",
+            "Yang", "Yao", "Ye", "Yi", "Yu", "Yuan", "Yue", "Zhao",
+            "Zheng", "Zhong", "Zhou", "Zhu", "Zhang",
             // Russian
-            "Bokov", "Dragunov", "Kozlov", "Lebedev", "Morozov", "Petrov", "Sokolov", "Volkov",
+            "Belov", "Bokov", "Chernov", "Dragunov", "Fedorov", "Frolov",
+            "Ivanov", "Karpov", "Kovalev", "Kozlov", "Kuznetsov", "Lebedev",
+            "Makarov", "Morozov", "Nikitin", "Orlov", "Petrov", "Romanov",
+            "Ryabov", "Sidorov", "Smirnov", "Sokolov", "Stepanov", "Titov",
+            "Vasiliev", "Volkov", "Zhukov",
             // Korean
-            "Cho", "Han", "Jeon", "Jung", "Kwon", "Oh", "Shin", "Yoon",
+            "Bae", "Baek", "Chae", "Cho", "Choi", "Chun", "Eom", "Ha",
+            "Han", "Hwang", "Im", "Jang", "Jeon", "Jung", "Kang", "Kim",
+            "Kwon", "Lee", "Lim", "Moon", "Nam", "Oh", "Pak", "Ryu",
+            "Seo", "Seong", "Shin", "Song", "Woo", "Yang", "Yoo", "Yoon",
             // Indian
-            "Nair", "Rao", "Sharma", "Singh", "Choudhary",
+            "Ahuja", "Bajaj", "Banerjee", "Bose", "Chakraborty", "Chauhan",
+            "Choudhary", "Das", "Desai", "Dey", "Ghosh", "Gupta", "Iyer",
+            "Joshi", "Kumar", "Mehta", "Menon", "Mishra", "Mukherjee",
+            "Nair", "Patel", "Pillai", "Rao", "Reddy", "Saxena", "Shah",
+            "Sharma", "Singh", "Trivedi", "Verma", "Yadav",
             // Nigerian / West African
-            "Adeyemi", "Eze", "Nwosu", "Obi", "Okeke",
-            // More British / American
-            "Greer", "Harlow", "McKenna", "Whitmore", "Draper",
+            "Adeyemi", "Afolabi", "Ajayi", "Akindele", "Alabi", "Ayodele",
+            "Balogun", "Bankole", "Diallo", "Dike", "Eze", "Mensah",
+            "Nkrumah", "Nwosu", "Obi", "Okeke", "Okafor", "Osei",
+            "Owusu", "Oyedele",
         };
 
         public static string GenerateName(bool female)

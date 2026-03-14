@@ -33,15 +33,15 @@ namespace Retrograde.Chains
             );
         }
 
-        // Generates 1-2 sentences of prose describing what a recovered data slate reveals
-        // about the next step. Does not reference where it was found — that's unknown at generation time.
+        // Generates 1-2 sentences of intel that points the player toward the first investigation.
+        // No reference to how or where the player obtained it — the discovery mechanic is meta, not lore.
         private void GenerateDiscoveryBridge(MissionTemplate discoveryTemplate, MissionTemplate toTemplate)
         {
             var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe what a recovered data slate reveals that points the player toward " +
+                $"In 1-2 sentences, describe a piece of intel that points toward " +
                 $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                "Focus only on the contents of the slate and what lead it provides — do not mention where or how the player found it. " +
-                "Be concrete — name a data file reference, a contact, a location fragment, or a coded instruction. " +
+                "Do not mention where or how this intel was obtained. " +
+                "Be concrete — name a data file reference, a contact by role only, a location fragment, or a coded instruction. " +
                 "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
             );
 

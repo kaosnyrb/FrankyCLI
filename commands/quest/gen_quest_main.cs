@@ -10,6 +10,7 @@ using Retrograde;
 using Retrograde.AI;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Quests;
 using Retrograde.Utils;
 using System;
 using System.IO;
@@ -149,9 +150,9 @@ namespace FrankyCLI
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
                     {
-                        InvestigationTemplate = "City Conversation - Neon Starport Informant",
-                        DeepTempalte = "Planet side Conversation - UC Vanguard",
-                        ShowdownTemplate = "City Bounty - Outskirts of Cydonia"
+                        InvestigationTemplate = new Templates_Cities_Conversation_Neon().InvestigationTemplates[random.Next(new Templates_Cities_Conversation_Neon().InvestigationTemplates.Count)].Name,
+                        DeepTempalte = new Templates_Cities_Conversation_Neon().InvestigationTemplates[random.Next(new Templates_Cities_Conversation_Neon().InvestigationTemplates.Count)].Name,
+                        ShowdownTemplate = "City Bounty - Neon Rooftops"
                     };
                     outlawQuest.GenerateQuest();                    
                 }

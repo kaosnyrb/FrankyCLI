@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using Retrograde.AI;
+using Retrograde.AI.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -622,13 +623,7 @@ public static class NPCTools
             npc.Confidence = Npc.ConfidenceType.Average;
         }
 
-        npc.Name = AITools.RunPrompt(
-            "Generate a unique full name (first and last) for a " + gender + ". " +
-            nameContext + "\r\n" +
-            "Do NOT reuse or repeat any names that have appeared previously in this session.\r\n" +
-            "Do NOT include titles, ranks, nicknames, or extra commentary.\r\n" +
-            "Return only the name."
-        );
+        npc.Name = NameSeedData.GenerateName(isfemale);
         npc.EditorID = "npc_" + npc.Name.ToString().ToLower().Replace(" ", "");
 
         Random wrand = RandomProvider.Random;
