@@ -17,6 +17,7 @@ namespace Retrograde.AI
         private const int MaxTokens = 8096;
         private const int MaxRetries = 4;
         private const int RetryBaseDelayMs = 15_000; // 15s — rate limit window is per-minute
+        private const int CompressionThresholdChars = 4_000;
 
         private readonly AnthropicClient _client;
         private readonly List<Message> _messages = new();
@@ -35,6 +36,7 @@ namespace Retrograde.AI
         public string RunPrompt(string prompt)
         {
             _messages.Add(new Message(RoleType.User, prompt));
+            MaybeCompressHistory();
             string textres = CallApi(_messages);
             _messages.Add(new Message(RoleType.Assistant, textres));
             return textres;
@@ -102,8 +104,68 @@ namespace Retrograde.AI
             return true;
         }
 
+        private void MaybeCompressHistory()
+        {
+            int assistantChars = _messages
+                .Where(m => m.Role == RoleType.Assistant)
+                .Sum(m => string.Concat(m.Content.OfType<TextContent>().Select(c => c.Text)).Length);
+
+            if (assistantChars < CompressionThresholdChars) return;
+
+            Console.WriteLine($"[AITools] Compressing history ({assistantChars} assistant chars)...");
+
+            var historyText = new StringBuilder();
+            foreach (var msg in _messages)
+            {
+                string role = msg.Role == RoleType.User ? "[user]" : "[assistant]";
+                string text = string.Concat(msg.Content.OfType<TextContent>().Select(c => c.Text));
+                historyText.AppendLine(role);
+                historyText.AppendLine(text);
+                historyText.AppendLine();
+            }
+
+            string summary = CallApi(new List<Message> { new Message(RoleType.User, BuildCompressionPrompt(historyText.ToString())) });
+
+            var currentPrompt = _messages[^1];
+            _messages.Clear();
+            _messages.Add(new Message(RoleType.User, "[context compressed]"));
+            _messages.Add(new Message(RoleType.Assistant, summary));
+            _messages.Add(currentPrompt);
+
+            Console.WriteLine($"[AITools] Compression complete ({summary.Length} chars).");
+        }
+
+        private static string BuildCompressionPrompt(string historyText) =>
+            "You are a narrative context compressor. The following is a conversation generating a Starfield bounty hunting quest. " +
+            "Distill all factual and narrative content into a single compact summary.\n\n" +
+            "You MUST preserve:\n" +
+            "- The outlaw's full name on the very first line, wrapped exactly as: <Summary>First Last</Summary>\n" +
+            "- Faction, role, crime, personality, and motives\n" +
+            "- Arc type and theme (exact template names)\n" +
+            "- Per-stage details already generated: location, objective, named characters, clue items\n" +
+            "- Any StageBridge clues linking stages\n\n" +
+            "Output a single prose block of no more than 400 words. No headers or bullet points. " +
+            "The very first line must be <Summary>First Last</Summary> with the outlaw's exact full name.\n\n" +
+            "[CONVERSATION]\n" + historyText;
+
+        private static List<Message> TrimUserHistory(List<Message> messages)
+        {
+            if (messages.Count <= 1) return messages;
+            var trimmed = new List<Message>(messages.Count);
+            for (int i = 0; i < messages.Count - 1; i++)
+            {
+                var msg = messages[i];
+                trimmed.Add(msg.Role == RoleType.User
+                    ? new Message(RoleType.User, "[omitted]")
+                    : msg);
+            }
+            trimmed.Add(messages[^1]); // last message (current prompt) sent in full
+            return trimmed;
+        }
+
         private string CallApi(List<Message> messages)
         {
+            messages = TrimUserHistory(messages);
             var parameters = new MessageParameters
             {
                 Model = Model,
