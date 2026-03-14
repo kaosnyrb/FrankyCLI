@@ -44,6 +44,9 @@ public static class SpeechTools
     // Pending conversions: (staged WAV path, game WEM destination path)
     private static readonly List<(string WavPath, string GameWemPath)> _pending = new();
 
+    // Set to true after the first ElevenLabs failure — skips the API for all subsequent calls.
+    private static bool _useSapiFallback = false;
+
     /// <summary>
     /// Overload that accepts a raw NPC ID from the target mod.
     /// Speaker FormKey is built from <c>targetMod.ModKey + speakerId</c>.
@@ -206,6 +209,12 @@ public static class SpeechTools
         Console.WriteLine($"  {espWav}");
         Console.WriteLine($"  {esmWav}");
         
+        if (_useSapiFallback)
+        {
+            GenerateWavSapi(text, espWav, esmWav, espWem, esmWem, wavName);
+            return;
+        }
+
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(espWav)!);
@@ -220,7 +229,26 @@ public static class SpeechTools
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SpeechTools] WAV generation failed: {ex.Message}");
+            Console.WriteLine($"[SpeechTools] ElevenLabs failed ({ex.Message}), switching to Windows SAPI for this and all remaining WAVs...");
+            _useSapiFallback = true;
+            GenerateWavSapi(text, espWav, esmWav, espWem, esmWem, wavName);
+        }
+    }
+
+    private static void GenerateWavSapi(string text, string espWav, string esmWav, string espWem, string esmWem, string wavName)
+    {
+        try
+        {
+            WindowsSpeechFallback.GenerateWav(text, espWav);
+            Directory.CreateDirectory(Path.GetDirectoryName(esmWav)!);
+            File.Copy(espWav, esmWav, overwrite: true);
+            Console.WriteLine($"[SpeechTools] WAV written (SAPI fallback): {wavName}.wav");
+            _pending.Add((espWav, espWem));
+            _pending.Add((esmWav, esmWem));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SpeechTools] SAPI fallback also failed: {ex.Message}");
         }
     }
 
