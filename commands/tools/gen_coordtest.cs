@@ -52,19 +52,7 @@ namespace FrankyCLI
                 ModKey newMod = new ModKey(modname, ModType.Master);
                 gen_quest_main.myMod = new StarfieldMod(newMod, StarfieldRelease.Starfield);
 
-                ModContextImpl.TemplateModsList = new List<IStarfieldModGetter>();
-                for (int i = 0; i < env.LoadOrder.Count; i++)
-                {
-                    var listing = env.LoadOrder[i];
-                    var fileName = listing.FileName.ToString();
-                    if (listing.Mod != null &&
-                        (fileName.Contains("template", StringComparison.OrdinalIgnoreCase)
-                         || fileName.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase))
-                        && fileName.EndsWith(".esm", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ModContextImpl.TemplateModsList.Add(listing.Mod);
-                    }
-                }
+                ModContextImpl.DiscoverTemplateMods(env.LoadOrder, datapath);
 
                 // Sync statics required by WorldspaceNoun / downstream code
                 gen_quest_main.StarfieldModKey = new ModKey("Starfield", ModType.Master);

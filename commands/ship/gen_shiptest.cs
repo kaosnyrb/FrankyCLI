@@ -155,16 +155,7 @@ namespace FrankyCLI
             var testModKey = new ModKey("shiptest", ModType.Master);
             gen_quest_main.myMod = new StarfieldMod(testModKey, StarfieldRelease.Starfield);
 
-            ModContextImpl.TemplateModsList = new List<IStarfieldModGetter>();
-            foreach (var listing in env.LoadOrder.ListedOrder)
-            {
-                var fn = listing.FileName.ToString();
-                if (listing.Mod != null &&
-                    (fn.Contains("template", StringComparison.OrdinalIgnoreCase)
-                     || fn.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase))
-                    && fn.EndsWith(".esm", StringComparison.OrdinalIgnoreCase))
-                    ModContextImpl.TemplateModsList.Add(listing.Mod);
-            }
+            ModContextImpl.DiscoverTemplateMods(env.LoadOrder, env.DataFolderPath);
 
             RetrogradeContext.Current = new ModContextImpl();
 
