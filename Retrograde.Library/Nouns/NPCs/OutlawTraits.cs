@@ -27,7 +27,7 @@ namespace Retrograde.Nouns
                 Quirk                = NpcSeedData.GetQuirk(),
                 Occupation           = StorySeedData.Occupations[RandomProvider.Random.Next(StorySeedData.Occupations.Count)],
                 Crime                = StorySeedData.Crimes[RandomProvider.Random.Next(StorySeedData.Crimes.Count)],
-                HuntingFaction       = FactionSeedData.GetFaction(),
+                HuntingFaction       = FactionSeedData.GetCombatFaction(),
                 CurrentPreoccupation = NarrativeSeedData.LogFocusPoints[RandomProvider.Random.Next(NarrativeSeedData.LogFocusPoints.Count)],
             };
         }

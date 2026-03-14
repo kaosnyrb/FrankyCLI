@@ -8,7 +8,7 @@ namespace Retrograde.Utils;
 /// </summary>
 public static class FactionSeedData
 {
-    public static string GetFaction()
+    public static string GetCombatFaction()
     {
         var random = RandomProvider.Random;
 
@@ -21,12 +21,23 @@ public static class FactionSeedData
             "UC Vanguard",
             "Freestar Security",
             "UC SysDef",
-            "Trade Authority",
-            "Galbank",
             "Trackers Alliance",
             "House Va'ruun",
             "United Colonies",
             "Freestar Collective",
+        };
+
+        return factions[random.Next(factions.Count)];
+    }
+
+    public static string GetTradeFaction()
+    {
+        var random = RandomProvider.Random;
+
+        List<string> factions = new List<string>()
+        {
+            "Trade Authority",
+            "Galbank",
             "Deimos Staryards Inc",
             "HopeTech",
             "Ryujin Industries",
@@ -52,7 +63,7 @@ public static class FactionSeedData
             "TerraBrew Coffee",
             "Tranquilitea",
             "Trident Luxury Lines",
-            "Xenofresh Fisheries"
+            "Xenofresh Fisheries",
         };
 
         return factions[random.Next(factions.Count)];
