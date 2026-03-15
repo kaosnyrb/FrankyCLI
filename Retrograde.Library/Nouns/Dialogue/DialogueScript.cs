@@ -7,6 +7,19 @@ public class DialogueScript
 
     /// <summary>Player choice + NPC reply pairs presented in the choice menu.</summary>
     public List<DialogueExchange> Exchanges { get; set; } = new();
+
+    /// <summary>
+    /// Optional short description of who this NPC is — job, personality, what they would and
+    /// wouldn't know. Injected into generation and refinement prompts to shape voice and diction.
+    /// Example: "dock manifest clerk, seen too much, says little"
+    /// </summary>
+    public string NpcBackground { get; set; } = "";
+
+    /// <summary>
+    /// Single NPC line played when the player re-activates this NPC after the dialogue quest
+    /// is complete. Voiced and staged as a greeting-style scene gated on completionStage.
+    /// </summary>
+    public string CompletionDismissal { get; set; } = "";
 }
 
 public class DialogueExchange
@@ -26,7 +39,7 @@ public class DialogueExchange
 
 public class SideOption
 {
-    /// <summary>Player's voiced question shown in the choice menu (≤50 chars).</summary>
+    /// <summary>Player's voiced question shown in the choice menu (≤45 chars).</summary>
     public string PlayerPrompt { get; set; } = "";
 
     /// <summary>NPC's voiced reply — up to 2 lines, each ≤150 chars.</summary>

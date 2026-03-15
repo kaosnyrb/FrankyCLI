@@ -13,7 +13,8 @@ namespace Retrograde.AI
 {
     public partial class ClaudeAITools : IAITools
     {
-        private const string Model = "claude-haiku-4-5-20251001";
+        private const string Model            = "claude-haiku-4-5-20251001";
+        private const string HighQualityModel = "claude-sonnet-4-6";
         private const int MaxTokens = 8096;
         private const int MaxRetries = 4;
         private const int RetryBaseDelayMs = 15_000; // 15s — rate limit window is per-minute
@@ -38,6 +39,15 @@ namespace Retrograde.AI
             _messages.Add(new Message(RoleType.User, prompt));
             MaybeCompressHistory();
             string textres = CallApi(_messages);
+            _messages.Add(new Message(RoleType.Assistant, textres));
+            return textres;
+        }
+
+        public string RunPromptHighQuality(string prompt)
+        {
+            _messages.Add(new Message(RoleType.User, prompt));
+            MaybeCompressHistory();
+            string textres = CallApi(_messages, HighQualityModel);
             _messages.Add(new Message(RoleType.Assistant, textres));
             return textres;
         }
@@ -163,12 +173,12 @@ namespace Retrograde.AI
             return trimmed;
         }
 
-        private string CallApi(List<Message> messages)
+        private string CallApi(List<Message> messages, string model = Model)
         {
             messages = TrimUserHistory(messages);
             var parameters = new MessageParameters
             {
-                Model = Model,
+                Model = model,
                 MaxTokens = MaxTokens,
                 System = new List<SystemMessage>
                 {

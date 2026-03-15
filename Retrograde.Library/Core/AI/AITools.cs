@@ -31,6 +31,12 @@ namespace Retrograde.AI
             return Provider.RunPrompt(prompt);
         }
 
+        public static string RunPromptHighQuality(string prompt)
+        {
+            if (!AIMODE) return Guid.NewGuid().ToString()[..8];
+            return Provider.RunPromptHighQuality(prompt);
+        }
+
         public static string RunStatelessPrompt(string prompt)
         {
             if (!AIMODE) return Guid.NewGuid().ToString()[..8];

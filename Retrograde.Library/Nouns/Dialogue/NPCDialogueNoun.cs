@@ -98,6 +98,9 @@ public class NPCDialogueNoun
 
         aliasReady:
 
+        // ── Voice delivery settings — derived from NPC personality ───────────
+        var voiceSettings = VoiceSettings.FromBackground(script.NpcBackground);
+
         // ── NPC greeting topic (Greeting Scene Phase 0) ───────────────────────
         var greetTopic = BuildSceneTopic(targetMod, quest);
         var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
@@ -106,7 +109,7 @@ public class NPCDialogueNoun
             { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
         quest.DialogTopics.Add(greetTopic);
         SpeechTools.GenerateWavs(greetInfo.FormKey.ID, voiceTypeEditorId,
-            targetMod.ModKey, script.NpcGreeting, elevenLabsVoiceId);
+            targetMod.ModKey, script.NpcGreeting, elevenLabsVoiceId, voiceSettings);
 
         // ── Greeting Scene (flags=0x1834) — plays once on NPC activation ──────
         var greetScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_greeting" };
@@ -162,7 +165,7 @@ public class NPCDialogueNoun
                     { npcInfo.FormKey.ToLink<IDialogResponsesGetter>() };
                 quest.DialogTopics.Add(npcTopic);
                 SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
-                    targetMod.ModKey, line, elevenLabsVoiceId);
+                    targetMod.ModKey, line, elevenLabsVoiceId, voiceSettings);
                 npcEntries.Add((npcTopic, npcInfo));
             }
 
@@ -209,13 +212,16 @@ public class NPCDialogueNoun
             quest.Scenes.Add(topicScene);
         }
 
-        // ── Side color topics (Exchange[1], stage 100) ───────────────────────────
-        // Two optional scenes that appear alongside the main beat-2 topic. Neither advances
-        // the stage — the conversation re-evaluates and all three options remain visible.
-        var sides = script.Exchanges[1].SideOptions;
-        if (sides != null)
+        // ── Side color topics — one pair per exchange that has SideOptions ─────────
+        // Two optional scenes per exchange. Neither advances the stage — the conversation
+        // re-evaluates and all options at that stage remain visible.
+        int sideIndexBase = script.Exchanges.Count * 10;
+        for (int si = 0; si < script.Exchanges.Count; si++)
         {
-            int sideIndexBase = script.Exchanges.Count * 10;
+            var sides = script.Exchanges[si].SideOptions;
+            if (sides == null) continue;
+
+            int sideStage = 100 * si;
             foreach (var (tag, side, sideOffset) in new[] { ("extra", sides.ExtraInfo, 0), ("joke", sides.Joke, 10) })
             {
                 var playerTopic = BuildSceneTopic(targetMod, quest);
@@ -239,15 +245,15 @@ public class NPCDialogueNoun
                     npcEntries.Add((npcTopic, npcInfo));
                 }
 
-                // No SetParentQuestStage — stage stays at 100 so all options reappear.
-                var sideScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_topic_1_" + tag };
+                // No SetParentQuestStage — stage stays at sideStage so all options reappear.
+                var sideScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_topic_" + si + "_" + tag };
                 sideScene.Index = (uint)(sideIndexBase + sideOffset);
                 sideScene.SCPI  = BitConverter.GetBytes((ushort)0);
                 sideScene.Quest.SetTo(quest.FormKey);
                 sideScene.Flags = (Scene.Flag)0x00002814u;
                 sideScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
                 sideScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
-                sideScene.Conditions.Add(BuildGetStageCondition(quest, 100, CompareOperator.EqualTo));
+                sideScene.Conditions.Add(BuildGetStageCondition(quest, sideStage, CompareOperator.EqualTo));
                 sideScene.Actors.Add(new SceneActor { ID = npcAliasId,            BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
                 sideScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
 
@@ -268,6 +274,35 @@ public class NPCDialogueNoun
                 sideScene.Actions = actions;
                 quest.Scenes.Add(sideScene);
             }
+        }
+
+        // ── Completion dismissal scene ────────────────────────────────────────────
+        // Plays as a greeting-style scene once the quest is at completionStage.
+        // Condition: GetStage >= completionStage, so the main greeting (stage == 0) never conflicts.
+        if (completionStage > 0 && !string.IsNullOrWhiteSpace(script.CompletionDismissal))
+        {
+            var dismissTopic = BuildSceneTopic(targetMod, quest);
+            var dismissInfo  = BuildInfo(targetMod, script.CompletionDismissal, npcFormKey);
+            dismissTopic.Responses.Add(dismissInfo);
+            dismissTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
+                { dismissInfo.FormKey.ToLink<IDialogResponsesGetter>() };
+            quest.DialogTopics.Add(dismissTopic);
+            SpeechTools.GenerateWavs(dismissInfo.FormKey.ID, voiceTypeEditorId,
+                targetMod.ModKey, script.CompletionDismissal, elevenLabsVoiceId, voiceSettings);
+
+            var dismissScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_dismiss" };
+            dismissScene.Quest.SetTo(quest.FormKey);
+            dismissScene.Flags = (Scene.Flag)0x00001834;
+            dismissScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
+            dismissScene.Conditions.Add(BuildGetIsIDCondition(npcFormKey));
+            dismissScene.Conditions.Add(BuildGetStageCondition(quest, completionStage, CompareOperator.GreaterThanOrEqualTo));
+            dismissScene.Actors.Add(new SceneActor { ID = npcAliasId,            BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+            dismissScene.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+            dismissScene.Phases.Add(new ScenePhase { Name = "Dismiss", EditorWidth = 298 });
+            var dismissAction = new DialogueSceneAction { Index = 1, AliasID = (int)npcAliasId, StartPhase = 0, EndPhase = 0 };
+            dismissAction.Topic.SetTo(dismissTopic.FormKey);
+            dismissScene.Actions = new ExtendedList<ASceneAction> { dismissAction };
+            quest.Scenes.Add(dismissScene);
         }
 
         QuestRecord = quest;

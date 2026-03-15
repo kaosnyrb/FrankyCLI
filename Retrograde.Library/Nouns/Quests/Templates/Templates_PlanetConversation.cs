@@ -46,6 +46,7 @@ namespace Retrograde.Quests
                     FlavourSeedData.GetNpcConversationTone(),
                     "The NPC works as a member of the UC Vanguard."
                 },
+                NpcBackground = "UC Vanguard officer at a remote planet facility — military bearing, gives information as facts not feelings, says nothing beyond operational necessity",
                 
             });
             

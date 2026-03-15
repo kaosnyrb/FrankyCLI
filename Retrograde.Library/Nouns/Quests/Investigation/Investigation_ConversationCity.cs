@@ -88,13 +88,17 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceAlias("BountyTargetMarker", markerused.FormKey);
             
             //Add conversation, ending the quest on stage 500
+            string npcBackground = string.IsNullOrEmpty(missionTemplate.NpcBackground)
+                ? ""
+                : $"{npc.Name} — {missionTemplate.NpcBackground}";
+
             var dialogueScript = DialoguePrompts.GetDialogueScript(new List<string>(missionTemplate.Addons)
             {
                 "NPC name: " + npc.Name,
                 "Bounty target name: " + outlawNpc.name,
                 "Location: " + missionTemplate.Location,
                 "Intrigue detail: " + FlavourSeedData.GetConversationIntrigueDetail(),
-            });
+            }, npcBackground: npcBackground);
 
             var voicePool    = npcResult.IsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var elevenLabsId = voicePool[RandomProvider.Random.Next(voicePool.Count)].Id;

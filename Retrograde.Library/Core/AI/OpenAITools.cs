@@ -32,6 +32,9 @@ namespace Retrograde.AI
             return textres;
         }
 
+        // OpenAI provider uses a single model — delegate to RunPrompt.
+        public string RunPromptHighQuality(string prompt) => RunPrompt(prompt);
+
         public string RunStatelessPrompt(string prompt)
         {
             var messages = new List<ChatMessage>(_history) { new UserChatMessage(prompt) };

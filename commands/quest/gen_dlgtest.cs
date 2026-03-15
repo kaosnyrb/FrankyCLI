@@ -85,6 +85,7 @@ namespace FrankyCLI
 
                 Console.WriteLine();
                 PrintDiagnostic(noun.QuestRecord, script);
+                SpeechTools.GenerateAllWavs();
                 SpeechTools.ConvertAndDeploy();
             }
 

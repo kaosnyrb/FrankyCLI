@@ -1,6 +1,7 @@
 using NAudio.Wave;
 using RestSharp;
 using Retrograde.AI.Utils;
+using Retrograde.Utils;
 using System.Text.Json.Serialization;
 
 namespace Retrograde.AI
@@ -29,15 +30,24 @@ namespace Retrograde.AI
             string text,
             string voiceId,
             string outputWavPath,
-            string modelId = DefaultModel)
+            string modelId = DefaultModel,
+            VoiceSettings? voiceSettings = null)
         {
+            var settings = voiceSettings ?? VoiceSettings.Default;
             var request = new RestRequest($"/v1/text-to-speech/{voiceId}", Method.Post);
             request.AddQueryParameter("output_format", DefaultOutputFormat);
             request.AddHeader("xi-api-key", _apiKey);
             request.AddJsonBody(new
             {
                 text,
-                model_id = modelId
+                model_id = modelId,
+                voice_settings = new
+                {
+                    stability        = settings.Stability,
+                    similarity_boost = settings.SimilarityBoost,
+                    style            = settings.Style,
+                    speed            = settings.Speed,
+                }
             });
 
             var response = await _client.ExecuteAsync(request);
@@ -73,8 +83,9 @@ namespace Retrograde.AI
             string text,
             string voiceId,
             string outputWavPath,
-            string modelId = DefaultModel)
-            => GenerateSpeechAsync(text, voiceId, outputWavPath, modelId).GetAwaiter().GetResult();
+            string modelId = DefaultModel,
+            VoiceSettings? voiceSettings = null)
+            => GenerateSpeechAsync(text, voiceId, outputWavPath, modelId, voiceSettings).GetAwaiter().GetResult();
 
         // ── Voice listing ────────────────────────────────────────────────────
 

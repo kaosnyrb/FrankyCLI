@@ -25,5 +25,12 @@ namespace Retrograde.Chains
         public IOutlawQuest outlawQuest;  //This is an interface that wraps the actual quest template implementation
         public List<string> MissionTags;
         public List<string> Addons;
+
+        /// <summary>
+        /// Short description of the NPC's role, personality, and knowledge limits.
+        /// Injected into dialogue generation and refinement prompts to shape voice and diction.
+        /// Example: "dock manifest clerk, seen too much, says little"
+        /// </summary>
+        public string NpcBackground = "";
     }
 }

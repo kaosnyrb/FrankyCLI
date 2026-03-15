@@ -41,7 +41,13 @@ public static class SpeechTools
         set => RetrogradeContext.GenerateWavs = value;
     }
 
-    // Pending conversions: (staged WAV path, game WEM destination path)
+    // Pending WAV generation requests — drained by GenerateAllWavs().
+    private record PendingWavRequest(
+        string EspWav, string EsmWav, string EspWem, string EsmWem,
+        string Text, string ElevenLabsVoiceId, VoiceSettings? VoiceSettings, string WavName);
+    private static readonly List<PendingWavRequest> _pendingWavRequests = new();
+
+    // Pending Wwise conversions: (staged WAV path, game WEM destination path)
     private static readonly List<(string WavPath, string GameWemPath)> _pending = new();
 
     // Set to true after the first ElevenLabs failure — skips the API for all subsequent calls.
@@ -175,64 +181,76 @@ public static class SpeechTools
     }
 
     /// <summary>
-    /// Generates WAV file(s) for one audio segment and records them for later Wwise conversion.
-    ///
-    /// WAVs are written to <see cref="AudioStagingDir"/>/{plugin.esp|esm}/{voiceType}/{wemFile:X8}.wav.
-    /// Both the .esp and .esm plugin-name variants are written (Starfield requires both).
-    /// Call <see cref="ConvertAndDeploy"/> once at the end of the generation run to convert
-    /// all pending WAVs to WEM and copy them into the Starfield game directory.
+    /// Queues one audio segment for WAV generation. Does NOT call ElevenLabs immediately.
+    /// Call <see cref="GenerateAllWavs"/> to generate all queued WAVs, then
+    /// <see cref="ConvertAndDeploy"/> to convert them to WEM and deploy to the game directory.
     /// </summary>
     public static void GenerateWavs(uint wemFile, string voiceTypeEditorId, ModKey modKey,
-        string text = "", string elevenLabsVoiceId = "")
+        string text = "", string elevenLabsVoiceId = "", VoiceSettings? voiceSettings = null)
     {
-        string stem    = Path.GetFileNameWithoutExtension(modKey.FileName);
-        string wavName = wemFile.ToString("X8");
-        string vtDir   = string.IsNullOrEmpty(voiceTypeEditorId) ? "<npc_voicetype>" : voiceTypeEditorId;
-
-        // WAV staging paths (both plugin variants)
-        string espWav = Path.Combine(AudioStagingDir, $"{stem}.esp", vtDir, $"{wavName}.wav");
-        string esmWav = Path.Combine(AudioStagingDir, $"{stem}.esm", vtDir, $"{wavName}.wav");
-
-        // Game WEM destination paths (same folder structure, .wem extension, under game voice dir)
-        string espWem = Path.Combine(GameVoiceDir, $"{stem}.esp", vtDir, $"{wavName}.wem");
-        string esmWem = Path.Combine(GameVoiceDir, $"{stem}.esm", vtDir, $"{wavName}.wem");
-
-
-
         if (string.IsNullOrEmpty(elevenLabsVoiceId) || string.IsNullOrEmpty(text) || string.IsNullOrEmpty(voiceTypeEditorId))
             return;
 
         if (!generateWavs)
             return;
 
-        Console.WriteLine($"[SpeechTools] Staging WAVs for WEM {wavName}:");
-        Console.WriteLine($"  {espWav}");
-        Console.WriteLine($"  {esmWav}");
-        
-        if (_useSapiFallback)
+        string stem    = Path.GetFileNameWithoutExtension(modKey.FileName);
+        string wavName = wemFile.ToString("X8");
+        string vtDir   = voiceTypeEditorId;
+
+        string espWav = Path.Combine(AudioStagingDir, $"{stem}.esp", vtDir, $"{wavName}.wav");
+        string esmWav = Path.Combine(AudioStagingDir, $"{stem}.esm", vtDir, $"{wavName}.wav");
+        string espWem = Path.Combine(GameVoiceDir, $"{stem}.esp", vtDir, $"{wavName}.wem");
+        string esmWem = Path.Combine(GameVoiceDir, $"{stem}.esm", vtDir, $"{wavName}.wem");
+
+        _pendingWavRequests.Add(new PendingWavRequest(espWav, esmWav, espWem, esmWem, text, elevenLabsVoiceId, voiceSettings, wavName));
+    }
+
+    /// <summary>
+    /// Generates all queued WAV files by calling ElevenLabs (or SAPI fallback).
+    /// Call this once after mod records are built and reviewed, before <see cref="ConvertAndDeploy"/>.
+    /// </summary>
+    public static void GenerateAllWavs()
+    {
+        if (_pendingWavRequests.Count == 0)
         {
-            GenerateWavSapi(text, espWav, esmWav, espWem, esmWem, wavName);
+            Console.WriteLine("[SpeechTools] GenerateAllWavs: nothing queued.");
             return;
         }
 
-        try
+        Console.WriteLine($"[SpeechTools] Generating {_pendingWavRequests.Count} WAV(s)...");
+        foreach (var req in _pendingWavRequests)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(espWav)!);
-            ElevenLabsAPI.GenerateSpeech(text, elevenLabsVoiceId, espWav);
-            Directory.CreateDirectory(Path.GetDirectoryName(esmWav)!);
-            File.Copy(espWav, esmWav, overwrite: true);
-            Console.WriteLine($"[SpeechTools] WAV written: {wavName}.wav");
+            Console.WriteLine($"[SpeechTools] Staging WAVs for WEM {req.WavName}:");
+            Console.WriteLine($"  {req.EspWav}");
+            Console.WriteLine($"  {req.EsmWav}");
 
-            // Queue both variants for Wwise conversion → game deploy
-            _pending.Add((espWav, espWem));
-            _pending.Add((esmWav, esmWem));
+            if (_useSapiFallback)
+            {
+                GenerateWavSapi(req.Text, req.EspWav, req.EsmWav, req.EspWem, req.EsmWem, req.WavName);
+                continue;
+            }
+
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(req.EspWav)!);
+                ElevenLabsAPI.GenerateSpeech(req.Text, req.ElevenLabsVoiceId, req.EspWav, voiceSettings: req.VoiceSettings);
+                Directory.CreateDirectory(Path.GetDirectoryName(req.EsmWav)!);
+                File.Copy(req.EspWav, req.EsmWav, overwrite: true);
+                Console.WriteLine($"[SpeechTools] WAV written: {req.WavName}.wav");
+                _pending.Add((req.EspWav, req.EspWem));
+                _pending.Add((req.EsmWav, req.EsmWem));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SpeechTools] ElevenLabs failed ({ex.Message}), switching to Windows SAPI for this and all remaining WAVs...");
+                _useSapiFallback = true;
+                GenerateWavSapi(req.Text, req.EspWav, req.EsmWav, req.EspWem, req.EsmWem, req.WavName);
+            }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SpeechTools] ElevenLabs failed ({ex.Message}), switching to Windows SAPI for this and all remaining WAVs...");
-            _useSapiFallback = true;
-            GenerateWavSapi(text, espWav, esmWav, espWem, esmWem, wavName);
-        }
+
+        _pendingWavRequests.Clear();
+        Console.WriteLine("[SpeechTools] GenerateAllWavs complete.");
     }
 
     private static void GenerateWavSapi(string text, string espWav, string esmWav, string espWem, string esmWem, string wavName)
