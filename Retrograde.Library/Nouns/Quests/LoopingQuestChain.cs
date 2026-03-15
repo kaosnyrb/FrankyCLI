@@ -5,6 +5,7 @@ using Retrograde.Chains.Interfaces;
 using Retrograde.Nouns;
 using Retrograde.Quests.TemplateEngines;
 using Retrograde.Utils;
+using Retrograde.Writing;
 using System;
 using System.Collections.Generic;
 
@@ -249,6 +250,38 @@ namespace Retrograde.Chains
             outlawNpc.GenerateLegendaryItem();
             Console.WriteLine("Generating Final Bounty Log...");
             outlawNpc.GenerateLog();
+
+            // ── Writing polish pass ───────────────────────────────────────────
+            // Runs BEFORE audio staging so improved text drives WAV generation.
+            // storyStages is already in narrative order: Discovery → investigations → Showdown
+            var polishables = new List<IPolishable>();
+            int invCount = storyStages.Count - 2; // subtract Discovery and Showdown
+            int invIndex = 0;
+            foreach (var (stageName, tmpl) in storyStages)
+            {
+                string stageLabel;
+                if (stageName == "Discovery")
+                    stageLabel = "Act 1: Discovery";
+                else if (stageName == "Showdown")
+                    stageLabel = "Act 3: Showdown (Climax)";
+                else
+                {
+                    invIndex++;
+                    stageLabel = $"Act 2: Investigation {invIndex} of {invCount}";
+                }
+                foreach (var p in tmpl.outlawQuest.GetPolishables())
+                    polishables.Add(new StageAnnotatedPolishable(p, stageLabel));
+            }
+            foreach (var p in outlawNpc.GetPolishables())
+                polishables.Add(new StageAnnotatedPolishable(p, "Found Document (Outlaw Log)"));
+            WritingPolishPass.Run(polishables);
+
+            // ── Stage audio (uses current text, post-polish) ─────────────────
+            ShowdownMissionTemplate.outlawQuest.StageAudio();
+            foreach (var (_, tmpl) in investigationStages)
+                tmpl.outlawQuest.StageAudio();
+            DiscoveryMissionTemplate.outlawQuest.StageAudio();
+
             SpeechTools.AddVoice(outlawNpc.Logfile.ID, outlawNpc.instance.FormKey.ID, outlawNpc.LogText, outlawNpc.VoiceEditorId, outlawNpc.ElevenLabsVoiceId);
             SpeechTools.GenerateAllWavs();
             SpeechTools.ConvertAndDeploy();

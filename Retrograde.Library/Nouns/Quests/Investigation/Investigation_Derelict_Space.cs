@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Writing;
 using Retrograde.SpaceCellDesigns;
 using Retrograde.Nouns.SpaceCells;
 
@@ -21,6 +22,10 @@ namespace Retrograde.Quests
     public class Investigation_Derelict_Space : IOutlawQuest
     {
         private Quest questform;
+        private Book?    _book;
+        private FormKey  _speakerFormKey;
+        private string   _speakerVoiceEditorId = "";
+        private string   _elevenLabsId = "";
 
         public string logMessage { get; set; }
 
@@ -119,7 +124,10 @@ namespace Retrograde.Quests
                 var vtRec = RetrogradeContext.Current.StarfieldMod.VoiceTypes.FirstOrDefault(v => v.FormKey == crewVoice.FormKey);
                 crewVoiceEditorId = vtRec?.EditorID ?? crewVoice.FormKey.ID.ToString("X6");
             }
-            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, crewSpeaker.FormKey, booklogmessage, crewVoiceEditorId, txVoice.Id);
+            _book                 = bountybook.instance;
+            _speakerFormKey       = crewSpeaker.FormKey;
+            _speakerVoiceEditorId = crewVoiceEditorId;
+            _elevenLabsId         = txVoice.Id;
 
             var frmlst = new FormList(myMod)
             {
@@ -144,6 +152,20 @@ namespace Retrograde.Quests
             questloc = missionTemplate.Location;
 
             return newQuest.instance;
+        }
+
+        public void StageAudio()
+        {
+            if (_book != null)
+                SpeechTools.AddVoice(_book.FormKey.ID, _speakerFormKey, _book.Text?.String ?? "", _speakerVoiceEditorId, _elevenLabsId);
+        }
+
+        public IEnumerable<IPolishable> GetPolishables()
+        {
+            if (questform != null)
+                yield return new QuestLogPolishable(questform);
+            if (_book != null)
+                yield return new BookPolishable(_book);
         }
 
     }

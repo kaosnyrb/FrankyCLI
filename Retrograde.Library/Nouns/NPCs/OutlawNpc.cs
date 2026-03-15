@@ -1,6 +1,7 @@
 using Retrograde.AI;
 using Retrograde.AI.Utils;
 using Retrograde.Utils;
+using Retrograde.Writing;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -37,6 +38,7 @@ namespace Retrograde.Nouns
 
         public FormKey Logfile;
         public string LogText = string.Empty;
+        public Book?   LogBook { get; private set; }
 
         public OutlawTraits Traits = new OutlawTraits();
 
@@ -179,12 +181,44 @@ namespace Retrograde.Nouns
             myMod.Books.Add(logbook);
 
             //Add logbook to death items
-            Logfile = logbook.FormKey;
+            Logfile  = logbook.FormKey;
+            LogBook  = logbook;
 
             myMod.FormLists[deathItems].Items.Add(logbook);
         }
 
 
+
+        /// <summary>
+        /// Returns polishables for the outlaw's log text.
+        /// Call after GenerateLog() and before SpeechTools.AddVoice() so the
+        /// polish pass can improve the text while audio staging is still pending.
+        /// </summary>
+        public IEnumerable<IPolishable> GetPolishables()
+        {
+            if (LogBook != null)
+                yield return new OutlawLogPolishable(this);
+        }
+
+        private sealed class OutlawLogPolishable : IPolishable
+        {
+            private readonly OutlawNpc _npc;
+
+            public OutlawLogPolishable(OutlawNpc npc) => _npc = npc;
+
+            public string Label       => "BOOK:outlaw_log_" + (_npc.name?.Replace(" ", "_") ?? "unknown");
+            public int    MaxChars    => 0;
+            public string ContentType => "book";
+
+            public string GetText()   => _npc.LogText;
+
+            public void SetText(string improved)
+            {
+                _npc.LogText      = improved;
+                if (_npc.LogBook != null)
+                    _npc.LogBook.Text = improved;
+            }
+        }
 
         public static string GetNationality()
         {

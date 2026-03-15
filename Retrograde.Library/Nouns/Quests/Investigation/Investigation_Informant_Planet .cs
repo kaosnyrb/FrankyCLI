@@ -15,12 +15,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Writing;
 
 namespace Retrograde.Quests
 {
     public class Investigation_Informant_Planet : IOutlawQuest
     {
         private Quest questform;
+        private Book?    _book;
+        private FormKey  _speakerFormKey;
+        private string   _speakerVoiceEditorId = "";
+        private string   _elevenLabsId = "";
 
         public string logMessage { get; set; }
 
@@ -112,7 +117,10 @@ namespace Retrograde.Quests
             // ExtraLore is already folded into booklogmessage via missionTemplate.Addons.
             var txVoicePool = isfemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
-            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, npc.FormKey, booklogmessage, npcVoiceEditorId, txVoice.Id);
+            _book                 = bountybook.instance;
+            _speakerFormKey       = npc.FormKey;
+            _speakerVoiceEditorId = npcVoiceEditorId;
+            _elevenLabsId         = txVoice.Id;
 
             var frmlst = new FormList(myMod)
             {
@@ -130,6 +138,20 @@ namespace Retrograde.Quests
             questloc = missionTemplate.Location;
 
             return newQuest.instance;
+        }
+
+        public void StageAudio()
+        {
+            if (_book != null)
+                SpeechTools.AddVoice(_book.FormKey.ID, _speakerFormKey, _book.Text?.String ?? "", _speakerVoiceEditorId, _elevenLabsId);
+        }
+
+        public IEnumerable<IPolishable> GetPolishables()
+        {
+            if (questform != null)
+                yield return new QuestLogPolishable(questform);
+            if (_book != null)
+                yield return new BookPolishable(_book);
         }
 
     }

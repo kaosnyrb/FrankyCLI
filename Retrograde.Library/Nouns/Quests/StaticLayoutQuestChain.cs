@@ -6,6 +6,7 @@ using Retrograde.Nouns;
 using Retrograde.Quests;
 using Retrograde.Quests.TemplateEngines;
 using Retrograde.Utils;
+using Retrograde.Writing;
 using System;
 using System.Collections.Generic;
 
@@ -227,8 +228,35 @@ namespace Retrograde.Chains
             //We have now generated all the stages. Do any final linking steps
             outlawNpc.GenerateLegendaryItem();
             Console.WriteLine("Generating Final Bounty Log...");
-            outlawNpc.GenerateLog();            
-            //Generate Voice for the log
+            outlawNpc.GenerateLog();
+
+            // ── Writing polish pass ───────────────────────────────────────────
+            // Runs BEFORE audio staging so improved text drives WAV generation.
+            // Narrative order: Discovery → Initial Investigation → (Fork) → Deep Investigation → Showdown
+            var polishables = new List<IPolishable>();
+            foreach (var p in DiscoveryMissionTemplate.outlawQuest.GetPolishables())
+                polishables.Add(new StageAnnotatedPolishable(p, "Act 1: Discovery"));
+            foreach (var p in InvestigationMissionTemplate.outlawQuest.GetPolishables())
+                polishables.Add(new StageAnnotatedPolishable(p, "Act 2: Initial Investigation"));
+            if (fork)
+                foreach (var p in ForkInvestigationMissionTemplate.outlawQuest.GetPolishables())
+                    polishables.Add(new StageAnnotatedPolishable(p, "Act 2: Fork Investigation"));
+            foreach (var p in DeepInvestigationMissionTemplate.outlawQuest.GetPolishables())
+                polishables.Add(new StageAnnotatedPolishable(p, "Act 2: Deep Investigation"));
+            foreach (var p in ShowdownMissionTemplate.outlawQuest.GetPolishables())
+                polishables.Add(new StageAnnotatedPolishable(p, "Act 3: Showdown (Climax)"));
+            foreach (var p in outlawNpc.GetPolishables())
+                polishables.Add(new StageAnnotatedPolishable(p, "Found Document (Outlaw Log)"));
+            WritingPolishPass.Run(polishables);
+
+            // ── Stage audio (uses current text, post-polish) ─────────────────
+            ShowdownMissionTemplate.outlawQuest.StageAudio();
+            DeepInvestigationMissionTemplate.outlawQuest.StageAudio();
+            if (fork)
+                ForkInvestigationMissionTemplate.outlawQuest.StageAudio();
+            InvestigationMissionTemplate.outlawQuest.StageAudio();
+            DiscoveryMissionTemplate.outlawQuest.StageAudio();
+
             SpeechTools.AddVoice(outlawNpc.Logfile.ID, outlawNpc.instance.FormKey.ID, outlawNpc.LogText, outlawNpc.VoiceEditorId, outlawNpc.ElevenLabsVoiceId);
             SpeechTools.GenerateAllWavs();
             SpeechTools.ConvertAndDeploy();

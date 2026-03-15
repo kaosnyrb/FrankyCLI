@@ -7,7 +7,12 @@ namespace Retrograde.AI.Utils
     {
         public static string GetQuestName(List<string> Addons)
         {
+            var loreBlock = string.IsNullOrWhiteSpace(LorePrompts.LoreContext)
+                ? ""
+                : "LoreContext:\r\n" + LorePrompts.LoreContext + "\r\n\r\n";
+
             var questnameprompt =
+                loreBlock +
                 "Generate a quest name grounded in the lore and themes provided.\r\n" +
                 "Constraints:\r\n" +
                 "- 2-4 clear words in everyday language.\r\n" +
@@ -18,8 +23,7 @@ namespace Retrograde.AI.Utils
                 "- Flavor: prefer a strong action verb or specific noun from the LoreContext to add punch (e.g., \"Seize\", \"Amber Smelter\", \"Dock Raid\").\r\n" +
                 "- If using an adjective, make it concrete (e.g., \"Rust\", \"Frozen\", \"Broken\") not abstract (no \"Eternal\", \"Mysterious\").\r\n\r\n" +
 
-                "Use the LoreContext established earlier in this conversation for tone, theme and narrative flavor.\r\n" +
-                "You may draw on any relevant parts (Summary, TargetProfile, Rumors, Leads, Locations, Motives, Threats, MysteryElements).\r\n" +
+                "Use the LoreContext above for tone, theme and narrative flavor.\r\n" +
                 "Do NOT quote the lore; derive meaning and style from it.\r\n\r\n" +
 
                 "Additional Information:\r\n";

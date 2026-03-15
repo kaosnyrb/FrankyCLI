@@ -14,12 +14,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Writing;
 
 namespace Retrograde.Quests
 {
     public class Investigation_ConversationCity : IOutlawQuest
     {
         private Quest questform;
+        private NPCDialogueNoun? _dialogueNoun;
 
         public string logMessage { get; set; }
 
@@ -104,7 +106,7 @@ namespace Retrograde.Quests
             var elevenLabsId = voicePool[RandomProvider.Random.Next(voicePool.Count)].Id;
 
             var npcSuffix = newQuest.instance.FormKey.ID.ToString("X8");
-            NPCDialogueNoun Dialogue = new NPCDialogueNoun(npc.FormKey, npcResult.VoiceEditorId, dialogueScript, npcSuffix, elevenLabsId, existingQuest: newQuest.instance, completionStage: 500, aliasName: "BountyTarget");
+            _dialogueNoun = new NPCDialogueNoun(npc.FormKey, npcResult.VoiceEditorId, dialogueScript, npcSuffix, elevenLabsId, existingQuest: newQuest.instance, completionStage: 500, aliasName: "BountyTarget");
 
             //Set the interfaces
             questform = newQuest.instance;
@@ -112,6 +114,14 @@ namespace Retrograde.Quests
             questloc = missionTemplate.Location;
 
             return newQuest.instance;
+        }
+
+        public IEnumerable<IPolishable> GetPolishables()
+        {
+            if (questform != null)
+                yield return new QuestLogPolishable(questform);
+            if (_dialogueNoun != null)
+                yield return new DialogueScriptPolishable(_dialogueNoun);
         }
 
     }

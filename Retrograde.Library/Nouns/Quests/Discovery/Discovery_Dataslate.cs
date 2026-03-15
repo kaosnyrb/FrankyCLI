@@ -3,6 +3,7 @@ using Retrograde.Nouns;
 using Retrograde.Utils;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Writing;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -14,6 +15,10 @@ namespace Retrograde.Quests
     public class Discovery_Dataslate : IOutlawQuest
     {
         private Quest questform;
+        private Book?    _book;
+        private FormKey  _speakerFormKey;
+        private string   _speakerVoiceEditorId = "";
+        private string   _elevenLabsId = "";
 
         public string logMessage { get; set; }
 
@@ -62,7 +67,10 @@ namespace Retrograde.Quests
 
             var txVoicePool = speakerIsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
-            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, speakerNpc.FormKey, bookcontents, speakerVoiceEditorId, txVoice.Id);
+            _book                 = bountybook.instance;
+            _speakerFormKey       = speakerNpc.FormKey;
+            _speakerVoiceEditorId = speakerVoiceEditorId;
+            _elevenLabsId         = txVoice.Id;
 
             // Conditional entry: dataslate only drops until the next quest is completed.
 
@@ -103,5 +111,18 @@ namespace Retrograde.Quests
             
             return null;
         }
+
+        public void StageAudio()
+        {
+            if (_book != null)
+                SpeechTools.AddVoice(_book.FormKey.ID, _speakerFormKey, _book.Text?.String ?? "", _speakerVoiceEditorId, _elevenLabsId);
+        }
+
+        public IEnumerable<IPolishable> GetPolishables()
+        {
+            if (_book != null)
+                yield return new BookPolishable(_book);
+        }
+
     }
 }

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
+using Retrograde.Writing;
 using Retrograde.SpaceCellDesigns;
 using Retrograde.Nouns.SpaceCells;
 
@@ -20,6 +21,10 @@ namespace Retrograde.Quests
     public class Investigation_Informant_Space : IOutlawQuest
     {
         private Quest questform;
+        private Book?    _book;
+        private FormKey  _speakerFormKey;
+        private string   _speakerVoiceEditorId = "";
+        private string   _elevenLabsId = "";
 
         public string logMessage { get; set; }
 
@@ -113,7 +118,10 @@ namespace Retrograde.Quests
 
             var txVoicePool = speakerIsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var txVoice = txVoicePool[RandomProvider.Random.Next(txVoicePool.Count)];
-            SpeechTools.AddVoice(bountybook.instance.FormKey.ID, speakerNpc.FormKey, booklogmessage, speakerVoiceEditorId, txVoice.Id);
+            _book                 = bountybook.instance;
+            _speakerFormKey       = speakerNpc.FormKey;
+            _speakerVoiceEditorId = speakerVoiceEditorId;
+            _elevenLabsId         = txVoice.Id;
 
             var frmlst = new FormList(myMod)
             {
@@ -138,6 +146,20 @@ namespace Retrograde.Quests
             questloc = missionTemplate.Location;
 
             return newQuest.instance;
+        }
+
+        public void StageAudio()
+        {
+            if (_book != null)
+                SpeechTools.AddVoice(_book.FormKey.ID, _speakerFormKey, _book.Text?.String ?? "", _speakerVoiceEditorId, _elevenLabsId);
+        }
+
+        public IEnumerable<IPolishable> GetPolishables()
+        {
+            if (questform != null)
+                yield return new QuestLogPolishable(questform);
+            if (_book != null)
+                yield return new BookPolishable(_book);
         }
 
     }

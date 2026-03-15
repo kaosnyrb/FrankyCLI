@@ -29,9 +29,20 @@ namespace Retrograde.Nouns;
 ///
 /// Source of truth: atbb_mq01 [QUST:0008F6] in avontechblacksiteblueprints.esm.
 /// </summary>
-public class NPCDialogueNoun
+public class NPCDialogueNoun : INoun
 {
     public Quest QuestRecord { get; }
+
+    public string? EditorID => QuestRecord.EditorID;
+    public FormKey FormKey  => QuestRecord.FormKey;
+
+    /// <summary>The DialogueScript as last generated or rewritten.</summary>
+    public DialogueScript Script { get; private set; }
+
+    // ── Records stored for Rewrite() ──────────────────────────────────────────
+    private DialogResponses?             _greetRecord;
+    private readonly List<List<DialogResponses>> _exchangeNpcRecords = new();
+    private DialogResponses?             _dismissRecord;
 
     /// <param name="npcFormKey">
     /// Base-form FormKey of the NPC (used for UniqueActor alias).
@@ -104,6 +115,7 @@ public class NPCDialogueNoun
         // ── NPC greeting topic (Greeting Scene Phase 0) ───────────────────────
         var greetTopic = BuildSceneTopic(targetMod, quest);
         var greetInfo  = BuildInfo(targetMod, script.NpcGreeting, npcFormKey);
+        _greetRecord   = greetInfo;
         greetTopic.Responses.Add(greetInfo);
         greetTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
             { greetInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -155,7 +167,8 @@ public class NPCDialogueNoun
             quest.DialogTopics.Add(playerTopic);
 
             // One topic+info per NPC reply line — each gets its own FormKey for audio.
-            var npcEntries = new List<(DialogTopic topic, DialogResponses info)>();
+            var npcEntries      = new List<(DialogTopic topic, DialogResponses info)>();
+            var npcReplyRecords = new List<DialogResponses>();
             foreach (var line in ex.NpcReply)
             {
                 var npcTopic = BuildSceneTopic(targetMod, quest);
@@ -167,7 +180,9 @@ public class NPCDialogueNoun
                 SpeechTools.GenerateWavs(npcInfo.FormKey.ID, voiceTypeEditorId,
                     targetMod.ModKey, line, elevenLabsVoiceId, voiceSettings);
                 npcEntries.Add((npcTopic, npcInfo));
+                npcReplyRecords.Add(npcInfo);
             }
+            _exchangeNpcRecords.Add(npcReplyRecords);
 
             // Advance to next stage after the last NPC line.
             int currentStage = 100 * i;
@@ -283,6 +298,7 @@ public class NPCDialogueNoun
         {
             var dismissTopic = BuildSceneTopic(targetMod, quest);
             var dismissInfo  = BuildInfo(targetMod, script.CompletionDismissal, npcFormKey);
+            _dismissRecord   = dismissInfo;
             dismissTopic.Responses.Add(dismissInfo);
             dismissTopic.TopicInfoList = new ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>
                 { dismissInfo.FormKey.ToLink<IDialogResponsesGetter>() };
@@ -306,6 +322,44 @@ public class NPCDialogueNoun
         }
 
         QuestRecord = quest;
+        Script      = script;
+        RetrogradeContext.NounRegistry.Add(this);
+    }
+
+    /// <summary>
+    /// Updates all NPC DialogResponses.ResponseText values and re-queues WAV staging
+    /// so that GenerateAllWavs() will produce audio matching the improved text.
+    /// Player lines and side options are not touched (no audio changes needed).
+    /// </summary>
+    public void Rewrite(DialogueScript updated)
+    {
+        // Greeting
+        if (_greetRecord?.Responses.Count > 0)
+        {
+            _greetRecord.Responses[0].ResponseText = updated.NpcGreeting;
+            SpeechTools.UpdateWavText(_greetRecord.FormKey.ID, updated.NpcGreeting);
+        }
+
+        // Exchanges
+        for (int i = 0; i < Math.Min(_exchangeNpcRecords.Count, updated.Exchanges.Count); i++)
+        {
+            var records = _exchangeNpcRecords[i];
+            var newEx   = updated.Exchanges[i];
+            for (int j = 0; j < Math.Min(records.Count, newEx.NpcReply.Count); j++)
+            {
+                records[j].Responses[0].ResponseText = newEx.NpcReply[j];
+                SpeechTools.UpdateWavText(records[j].FormKey.ID, newEx.NpcReply[j]);
+            }
+        }
+
+        // Dismissal
+        if (_dismissRecord?.Responses.Count > 0 && !string.IsNullOrWhiteSpace(updated.CompletionDismissal))
+        {
+            _dismissRecord.Responses[0].ResponseText = updated.CompletionDismissal;
+            SpeechTools.UpdateWavText(_dismissRecord.FormKey.ID, updated.CompletionDismissal);
+        }
+
+        Script = updated;
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
