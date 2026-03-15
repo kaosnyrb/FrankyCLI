@@ -244,6 +244,27 @@ if (cond is ConditionFloat cf && cf.Data is GetGlobalValueConditionData gvData)
 
 Both appear in `QuestLocationAlias.Conditions` as well as `IQuestReferenceAlias.Conditions` — check both when deep-copying quests from template mods.
 
+## Scene.Index and Scene.SCPI — top-level topic ordering
+
+For interactive dialogue scenes (flag `0x2000` Top Level), Starfield orders menu options by `Scene.Index` and `Scene.SCPI`. Both must be set.
+
+| Field | Mutagen type | Notes |
+|---|---|---|
+| `Scene.Index` | `uint?` | Menu sort order — lower = higher in menu |
+| `Scene.SCPI` | `MemorySlice<byte>?` | **2 bytes (ushort) only** — runtime error if 4 bytes written |
+
+**Priority convention (confirmed in NPCDialogueNoun):**
+- Mainline progression scenes: `SCPI = BitConverter.GetBytes((ushort)100)` — shown first
+- Color/side scenes: `SCPI = BitConverter.GetBytes((ushort)0)` — shown after
+
+**Index convention:** assign in increments of 10 starting at 0 across all topic scenes in the quest:
+```csharp
+topicScene.Index = (uint)(i * 10);
+topicScene.SCPI  = BitConverter.GetBytes((ushort)100);
+```
+
+Scenes without `Scene.Index` set may sort unpredictably.
+
 ## Namespace / folder naming hazard
 
 Avoid naming namespaces or folders the same as Mutagen Starfield record types (e.g. `Worldspace`, `Cell`, `Location`). This causes `CS0118: 'X' is a namespace but is used like a type`.
