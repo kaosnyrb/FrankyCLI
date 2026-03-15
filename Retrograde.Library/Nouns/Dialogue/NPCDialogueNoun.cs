@@ -180,6 +180,8 @@ public class NPCDialogueNoun
             // The final exchange uses 0x2810 (no TopLevelTopicsOnEnd) to close the conversation.
             bool isLast = i == script.Exchanges.Count - 1;
             var topicScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_topic_" + i };
+            topicScene.Index = (uint)(i * 10);
+            topicScene.SCPI  = BitConverter.GetBytes((ushort)100);
             topicScene.Quest.SetTo(quest.FormKey);
             topicScene.Flags = (Scene.Flag)(isLast ? 0x00002810u : 0x00002814u);
             topicScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
@@ -213,7 +215,8 @@ public class NPCDialogueNoun
         var sides = script.Exchanges[1].SideOptions;
         if (sides != null)
         {
-            foreach (var (tag, side) in new[] { ("extra", sides.ExtraInfo), ("joke", sides.Joke) })
+            int sideIndexBase = script.Exchanges.Count * 10;
+            foreach (var (tag, side, sideOffset) in new[] { ("extra", sides.ExtraInfo, 0), ("joke", sides.Joke, 10) })
             {
                 var playerTopic = BuildSceneTopic(targetMod, quest);
                 var playerInfo  = BuildInfo(targetMod, side.PlayerPrompt);
@@ -238,6 +241,8 @@ public class NPCDialogueNoun
 
                 // No SetParentQuestStage — stage stays at 100 so all options reappear.
                 var sideScene = new Scene(targetMod) { EditorID = "dlg_scene_" + suffix + "_topic_1_" + tag };
+                sideScene.Index = (uint)(sideIndexBase + sideOffset);
+                sideScene.SCPI  = BitConverter.GetBytes((ushort)0);
                 sideScene.Quest.SetTo(quest.FormKey);
                 sideScene.Flags = (Scene.Flag)0x00002814u;
                 sideScene.VNAM  = new byte[] { 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0, 3,0,0,0 };
