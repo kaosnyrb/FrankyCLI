@@ -95,7 +95,13 @@ namespace Retrograde.AI.Utils
             "covering for a family member who made the first mistake",
             "convinced the target of their crime deserved everything they got",
             "chasing a rumour of easy credits that turned far more complicated",
-            "believing they were helping someone who was actually using them"
+            "believing they were helping someone who was actually using them",
+            "wanted more credits and saw an easy opportunity",
+            "bored with routine work and looking for excitement",
+            "saw everyone else skimming and figured they might as well too",
+            "needed quick cash for a purchase and planned to pay it back",
+            "got offered a deal and took it without thinking it through",
+            "pure opportunism — the chance was there and they grabbed it"
         };
 
         public static readonly List<string> PersonalityTraits = new List<string>
@@ -129,7 +135,13 @@ namespace Retrograde.AI.Utils
             "compassionate toward strangers but ruthless toward institutions",
             "nostalgic — often references how things used to be before all this",
             "speaks in half-truths — never quite lying, never quite honest",
-            "carefully maintains small routines that mask deeper unease"
+            "carefully maintains small routines that mask deeper unease",
+            "direct and reliable — says what they mean, does what they say",
+            "quiet but competent — gets the job done without commentary",
+            "easygoing — doesn't overthink things, rolls with whatever comes",
+            "practical and no-nonsense — focused on results, not feelings",
+            "steady — not exciting, not troubled, just consistent",
+            "straightforward — no hidden depths, no second meaning, what you see is what you get"
         };
     }
 }

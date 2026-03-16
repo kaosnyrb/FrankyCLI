@@ -43,13 +43,12 @@ namespace Retrograde.AI.Utils
 
             sb.AppendLine($"Writing quality pass {passNumber}. Identify the {targetCount} weakest piece(s) from the list below.");
             sb.AppendLine("Evaluate each piece for:");
-            sb.AppendLine("  • Bethesda-style voice: grounded, terse, specific to the setting");
-            sb.AppendLine("  • Concrete specificity: names, places, roles — not vague summaries");
-            sb.AppendLine("  • Coherence: consistent with the full quest chain narrative");
-            sb.AppendLine("  • Narrative flow: each piece earns its place in the arc — Discovery plants hooks,");
-            sb.AppendLine("    Investigation stages build tension and advance the trail, Showdown pays it off.");
-            sb.AppendLine("    Dialogue and logs should feel like they belong at their specific story moment.");
-            sb.AppendLine("  • Absence of generic phrasing or AI-sounding filler");
+            sb.AppendLine("  • Factual correctness: every sentence states a concrete fact (name, location, action, object)");
+            sb.AppendLine("  • No invented details: all names, locations, and factions must come from the LoreContext");
+            sb.AppendLine("  • Terse and direct: field intel style — no metaphors, similes, or atmospheric filler");
+            sb.AppendLine("  • No adjectives that aren't physical descriptions (no 'mysterious', 'ominous', 'desperate')");
+            sb.AppendLine("  • Vocabulary consistency: names, locations, and factions match exact spelling from LoreContext");
+            sb.AppendLine("  • Coherence: consistent with the full quest chain — no contradictions between stages");
             sb.AppendLine();
             sb.AppendLine("For each piece you rewrite:");
             sb.AppendLine("  • Log entries: preserve approximate length and all factual content");

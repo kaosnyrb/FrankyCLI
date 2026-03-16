@@ -7,6 +7,7 @@ using Retrograde.Nouns;
 using Retrograde.Quests.TemplateEngines;
 using Retrograde.Utils;
 using Retrograde.Writing;
+using System.Text;
 
 namespace Retrograde.Story
 {
@@ -14,9 +15,10 @@ namespace Retrograde.Story
     /// Data-driven quest chain orchestrator. Reads a StorySchema and produces
     /// the same output as LoopingLayoutQuestChain when given the bounty_hunt schema.
     ///
-    /// Phase 1: delegates to existing LorePrompts, ITemplateManager, and IOutlawQuest
-    /// implementations via the adapter pattern. The schema controls the structure;
-    /// existing code handles the content.
+    /// Phase 1.5: uses air-gapped contexts for all beat content generation.
+    /// The shared conversation (lore, arc selection, fact planning) runs first,
+    /// then each beat generates content via RunIsolatedPrompt with a sealed
+    /// ContextEnvelope. No beat can see another beat's generated content.
     /// </summary>
     public class SchemaRunner : IQuestchain
     {
@@ -44,42 +46,14 @@ namespace Retrograde.Story
             );
         }
 
-        private void GenerateDiscoveryBridge(MissionTemplate discoveryTemplate, MissionTemplate toTemplate)
-        {
-            var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe a piece of intel that points toward " +
-                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                "Do not mention where or how this intel was obtained. " +
-                "Be concrete — name a data file reference, a contact by role only, a location fragment, or a coded instruction. " +
-                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
-            );
-
-            if (discoveryTemplate.Addons == null)
-                discoveryTemplate.Addons = new List<string>();
-            discoveryTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
-        }
-
-        private void GenerateStageBridge(MissionTemplate fromTemplate, MissionTemplate toTemplate)
-        {
-            var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe the specific clue or contact the player uncovers at " +
-                $"{fromTemplate.Location} (the \"{fromTemplate.Name}\" stage) that points them toward " +
-                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                $"The source contact or clue is located at {fromTemplate.Location} — use this exactly; do not substitute any other location from the lore context. " +
-                "Be concrete — name a data file, a physical trail, or an overheard conversation. " +
-                "If a contact provides the lead, describe them by role only (e.g. 'a dock worker', 'a UC officer') — do not invent a name for them. " +
-                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
-            );
-
-            if (fromTemplate.Addons == null)
-                fromTemplate.Addons = new List<string>();
-            fromTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
-        }
-
         public bool GenerateQuest()
         {
             Console.WriteLine($"SchemaRunner [{Schema.DisplayName}]");
             var templateManager = new AllTemplateManager(new AI_TemplateEngine());
+
+            // ══════════════════════════════════════════════════════════════════
+            //  SHARED PHASE — one AI conversation, outputs frozen, then discarded
+            // ══════════════════════════════════════════════════════════════════
 
             // ── Cast setup ──────────────────────────────────────────────────
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
@@ -111,9 +85,9 @@ namespace Retrograde.Story
 
             outlawNpc.spacesuit = ShowdownMissionTemplate.parameters.ContainsKey("NeedSpacesuit") && (bool)ShowdownMissionTemplate.parameters["NeedSpacesuit"];
             outlawNpc.GenerateNPC();
-            // Update cast with finalized NPC name
             cast.GetRole("target").Name = outlawNpc.name;
 
+            // Still inject into shared history for the fact planning pass
             AITools.InjectContextIntoHistory(
                 $"The outlaw target's name is '{outlawNpc.name}'. " +
                 "Use this name in log entries, clues, and any in-world references to the target."
@@ -135,7 +109,6 @@ namespace Retrograde.Story
 
                 string stageName = (i == 0) ? "DeepInvestigation" : "InitialInvestigation";
 
-                // Replicate the exact progress calculation from LoopingLayoutQuestChain
                 int progressHigh = investigationBeat?.ProgressMax ?? 70;
                 int progressLow  = investigationBeat?.ProgressMin ?? 20;
                 double t = (count == 1) ? 0.0 : (double)i / (count - 1);
@@ -149,7 +122,6 @@ namespace Retrograde.Story
                 };
 
                 string plannedName = plannedList[count - 1 - i];
-
                 var template = templateManager.GetInvestigationMissionTemplate(plannedName, investigationAddons);
 
                 Console.WriteLine("Investigation Template: " + template.Name);
@@ -188,19 +160,46 @@ namespace Retrograde.Story
                 }
             }
 
-            // ── Generate quests (reverse narrative order) ───────────────────
+            // ── Fact Planning Pass ──────────────────────────────────────────
+            // Build the beat list in generation order (showdown first, discovery last)
+            Console.WriteLine("---------------------------------------------------------------------------------");
+            Console.WriteLine("Running Fact Planning Pass...");
+
+            var beatList = new List<(string BeatId, string TemplateName, string Location, string StageName)>();
+            beatList.Add(("showdown", ShowdownMissionTemplate.Name, ShowdownMissionTemplate.Location, "Showdown"));
+            for (int i = 0; i < investigationStages.Count; i++)
+            {
+                var (stage, tmpl) = investigationStages[i];
+                beatList.Add(($"investigation_{i}", tmpl.Name, tmpl.Location, stage));
+            }
+            beatList.Add(("discovery", DiscoveryMissionTemplate.Name, DiscoveryMissionTemplate.Location, "Discovery"));
+
+            var (allFacts, playerKnowledgeTimeline) = FactPlanningPass.Plan(
+                LorePrompts.LoreContext, outlawNpc.name, beatList);
+
+            // Build frozen context for envelopes
+            string loreSummary = FactPlanningPass.BuildLoreSummary(LorePrompts.LoreContext, outlawNpc.name, cast);
+            var castSheetSb = new StringBuilder();
+            cast.AppendToPrompt(castSheetSb);
+            string castSheet = castSheetSb.ToString();
+            string contentRules = $"You are writing for a {Schema.Stakes.PlayerRole}. " +
+                "Style: terse field notes. Every sentence states a concrete fact. " +
+                "No metaphors, no atmospheric filler.";
+
+            // ══════════════════════════════════════════════════════════════════
+            //  BEAT PHASE — each beat in isolation, back-to-front
+            // ══════════════════════════════════════════════════════════════════
+
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Showdown: " + ShowdownMissionTemplate.Name);
+
+            // Showdown — no bridge (final beat)
+            SetEnvelopeForBeat("showdown", allFacts, loreSummary, castSheet, contentRules,
+                outlawNpc.name, playerKnowledgeTimeline, storyStages.Count - 1, storyStages.Count);
+
             var showdownBeatAdapter = WrapBeat(ShowdownMissionTemplate.outlawQuest);
             showdownBeatAdapter.Setup(myMod, cast, MakeBeatContext(ShowdownMissionTemplate, "Showdown", showdownBeat?.ProgressMin ?? 90), null);
-
-            if (!string.IsNullOrEmpty(showdownBeatAdapter.LogMessage))
-                AITools.InjectContextIntoHistory($"[Stage '{ShowdownMissionTemplate.Name}' log entry]: {showdownBeatAdapter.LogMessage}");
-
-            AITools.InjectContextIntoHistory(
-                "Important: from this point on the player does not know where the final showdown takes place. " +
-                "Do not state the showdown location explicitly in any investigation or discovery mission. You may plant indirect clues that point toward it."
-            );
+            ClearEnvelope();
 
             IStoryBeat lastBeat = showdownBeatAdapter;
 
@@ -208,40 +207,75 @@ namespace Retrograde.Story
             {
                 Console.WriteLine("---------------------------------------------------------------------------------");
                 var (stageName, template) = investigationStages[i];
-
                 Console.WriteLine(stageName + ": " + template.Name);
 
+                string beatId = $"investigation_{i}";
+
+                // Generate bridge to successor (isolated, location-pair only)
                 if (Schema.Arc.Bridges)
                 {
-                    if (i > 0)
-                        GenerateStageBridge(template, investigationStages[i - 1].Template);
-                    else
-                        GenerateStageBridge(template, ShowdownMissionTemplate);
+                    var successorTemplate = (i == 0) ? ShowdownMissionTemplate : investigationStages[i - 1].Template;
+                    string bridgeText = ValidatedPrompt.RunBridge(template.Location, successorTemplate.Location);
+
+                    Console.WriteLine($"[Bridge] {template.Location} → {successorTemplate.Location}");
+                    if (allFacts.TryGetValue(beatId, out var facts))
+                        facts.BridgeText = bridgeText;
+
+                    if (template.Addons == null)
+                        template.Addons = new List<string>();
+                    template.Addons.Add($"<StageBridge>{bridgeText}</StageBridge>");
                 }
+
+                // Determine story-order index for PlayerKnowledge slicing
+                // storyStages is [Discovery, ...investigations(reversed), Showdown]
+                // This investigation's position in storyStages:
+                int storyIndex = storyStages.FindIndex(s => s.Template == template);
+
+                SetEnvelopeForBeat(beatId, allFacts, loreSummary, castSheet, contentRules,
+                    outlawNpc.name, playerKnowledgeTimeline, storyIndex, storyStages.Count);
 
                 var beat = WrapBeat(template.outlawQuest);
                 int progressHigh = investigationBeat?.ProgressMax ?? 70;
                 int progressLow  = investigationBeat?.ProgressMin ?? 20;
-                double t = (count == 1) ? 0.0 : (double)i / (count - 1);
-                int progressValue = progressHigh - (int)((progressHigh - progressLow) * t);
+                double t2 = (count == 1) ? 0.0 : (double)i / (count - 1);
+                int progressValue = progressHigh - (int)((progressHigh - progressLow) * t2);
                 if (progressValue < 10) progressValue = 10;
 
                 beat.Setup(myMod, cast, MakeBeatContext(template, stageName, progressValue), lastBeat);
-                if (!string.IsNullOrEmpty(beat.LogMessage))
-                    AITools.InjectContextIntoHistory($"[Stage '{template.Name}' log entry]: {beat.LogMessage}");
+                ClearEnvelope();
                 lastBeat = beat;
             }
 
             // Discovery
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Discovery: " + DiscoveryMissionTemplate.Name);
+
             if (Schema.Arc.Bridges && investigationStages.Count > 0)
-                GenerateDiscoveryBridge(DiscoveryMissionTemplate, investigationStages[^1].Template);
+            {
+                var firstInvTemplate = investigationStages[^1].Template;
+                string bridgeText = ValidatedPrompt.RunBridge(DiscoveryMissionTemplate.Location, firstInvTemplate.Location);
+
+                Console.WriteLine($"[Bridge] {DiscoveryMissionTemplate.Location} → {firstInvTemplate.Location}");
+                if (allFacts.TryGetValue("discovery", out var discFacts))
+                    discFacts.BridgeText = bridgeText;
+
+                if (DiscoveryMissionTemplate.Addons == null)
+                    DiscoveryMissionTemplate.Addons = new List<string>();
+                DiscoveryMissionTemplate.Addons.Add($"<StageBridge>{bridgeText}</StageBridge>");
+            }
+
+            // Discovery is first in story order → PlayerKnowledge is EMPTY
+            SetEnvelopeForBeat("discovery", allFacts, loreSummary, castSheet, contentRules,
+                outlawNpc.name, playerKnowledgeTimeline, 0, storyStages.Count);
 
             var discoveryBeatAdapter = WrapBeat(DiscoveryMissionTemplate.outlawQuest);
             discoveryBeatAdapter.Setup(myMod, cast, MakeBeatContext(DiscoveryMissionTemplate, "Discovery", discoveryBeat?.ProgressMin ?? 0), lastBeat);
+            ClearEnvelope();
 
-            // ── Post-generation ─────────────────────────────────────────────
+            // ══════════════════════════════════════════════════════════════════
+            //  POST-GENERATION
+            // ══════════════════════════════════════════════════════════════════
+
             outlawNpc.GenerateLegendaryItem();
             Console.WriteLine("Generating Final Bounty Log...");
             outlawNpc.GenerateLog();
@@ -279,6 +313,53 @@ namespace Retrograde.Story
             SpeechTools.GenerateAllWavs();
             SpeechTools.ConvertAndDeploy();
             return true;
+        }
+
+        /// <summary>
+        /// Set the ambient PromptContext for a beat's Setup() call.
+        /// storyIndex is this beat's position in story order (0 = discovery, last = showdown).
+        /// PlayerKnowledge is sliced to include only entries UP TO (not including) this beat.
+        /// </summary>
+        private void SetEnvelopeForBeat(
+            string beatId,
+            Dictionary<string, BeatFacts> allFacts,
+            string loreSummary,
+            string castSheet,
+            string contentRules,
+            string targetName,
+            List<string> playerKnowledgeTimeline,
+            int storyIndex,
+            int totalBeats)
+        {
+            var facts = allFacts.TryGetValue(beatId, out var f) ? f : new BeatFacts { BeatId = beatId };
+
+            // PlayerKnowledge: story-order entries up to (not including) this beat
+            var knowledge = new List<string>();
+            for (int i = 0; i < Math.Min(storyIndex, playerKnowledgeTimeline.Count); i++)
+                knowledge.Add(playerKnowledgeTimeline[i]);
+
+            var envelope = new ContextEnvelope
+            {
+                LoreSummary = loreSummary,
+                CastSheet = castSheet,
+                Facts = facts,
+                PlayerKnowledge = knowledge,
+                ContentRules = contentRules,
+                TargetName = targetName,
+            };
+
+            PromptContext.CurrentEnvelope = envelope;
+            PromptContext.CurrentFacts = facts;
+            PromptContext.TargetName = targetName;
+
+            Console.WriteLine($"[Envelope] Beat '{beatId}': {facts.Location}, {knowledge.Count} knowledge entries, {facts.AllowedNpcRoles.Count} NPCs, {facts.AllowedObjects.Count} objects");
+        }
+
+        private void ClearEnvelope()
+        {
+            PromptContext.CurrentEnvelope = null;
+            PromptContext.CurrentFacts = null;
+            PromptContext.TargetName = "";
         }
 
         private OutlawQuestAdapter WrapBeat(IOutlawQuest quest) => new OutlawQuestAdapter(quest);

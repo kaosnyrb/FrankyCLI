@@ -57,6 +57,13 @@ namespace Retrograde.AI.Utils
             "Grew up in a remote UC colony that met with faction conflict — the rubble shaped them.",
             "Grew up in a Neon corporate training program from age six — obedient until the day they stopped being.",
             "Grew up in an old Earth colony remnant settlement — they still kept the old customs alive, barely.",
+            "Grew up in New Atlantis, unremarkable middle-class upbringing in the residential district.",
+            "Grew up on a working freighter, learned the trade from family, nothing unusual.",
+            "Grew up in Akila City's merchant quarter — steady work, stable home, ordinary childhood.",
+            "Grew up in Cydonia with two working parents — schooling, chores, not much to complain about.",
+            "Grew up in a Freestar farming community — hard work but never hungry, never in danger.",
+            "Grew up in Neon Core — parents ran a small legitimate business, kept their heads down.",
+            "Grew up in Gagarin Landing — quiet settlement, good neighbors, learned a trade early.",
         };
 
         public static readonly List<string> FearsAndPhobias = new List<string>
@@ -107,6 +114,12 @@ namespace Retrograde.AI.Utils
             "Fear of identity theft or being replaced — paranoia about authenticity runs deep.",
             "Fear of crowds thinning suddenly — when people leave a space fast, something is always wrong.",
             "Fear of lightning and electrical storms — a near-miss during a hull-walk still interrupts sleep.",
+            "Doesn't like tight spaces.",
+            "Uncomfortable around large animals.",
+            "Hates zero-g — gets nauseous every time.",
+            "Doesn't trust automated systems.",
+            "Dislikes eating food they didn't prepare themselves.",
+            "Nervous around loud machinery.",
         };
 
         public static readonly List<string> Quirks = new List<string>
@@ -161,6 +174,13 @@ namespace Retrograde.AI.Utils
             "Maintains a friendly, neutral expression that never quite reaches their eyes.",
             "Keeps their back to walls not from paranoia but habit — they stopped noticing years ago.",
             "Has a specific word or phrase that means 'everything is wrong, do not react' — for a partner they no longer have.",
+            "Drums fingers on surfaces when thinking.",
+            "Always early to meetings — can't stand being the last one in.",
+            "Keeps a tidy workspace — everything in its place, no exceptions.",
+            "Hums tunelessly when focused on a task.",
+            "Prefers to stand rather than sit during conversations.",
+            "Always carries a specific tool even when they don't need it.",
+            "Eats the same meal every day — doesn't see the point in variety.",
         };
 
         public static readonly List<string> Nationalities = new List<string>

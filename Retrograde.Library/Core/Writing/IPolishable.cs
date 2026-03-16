@@ -27,9 +27,16 @@ namespace Retrograde.Writing
 
         /// <summary>
         /// Narrative position in the quest chain (e.g. "Act 1: Discovery", "Act 2: Investigation 1 of 3").
-        /// Empty string means unknown. Used by the polish prompt to enforce narrative flow.
+        /// Empty string means unknown.
         /// </summary>
         string StoryStage => "";
+
+        /// <summary>
+        /// Maximum number of polish passes this piece should participate in.
+        /// 0 means use the global WritingPolishPass.Iterations value.
+        /// Short-form content (logs, dialogue) should cap at 2 to prevent iterative drift.
+        /// </summary>
+        int MaxPolishPasses => 0;
 
         string GetText();
         void SetText(string improved);
@@ -51,10 +58,11 @@ namespace Retrograde.Writing
             StoryStage = storyStage;
         }
 
-        public string Label       => _inner.Label;
-        public int    MaxChars    => _inner.MaxChars;
-        public string ContentType => _inner.ContentType;
-        public string StoryStage  { get; }
+        public string Label           => _inner.Label;
+        public int    MaxChars        => _inner.MaxChars;
+        public string ContentType     => _inner.ContentType;
+        public string StoryStage      { get; }
+        public int    MaxPolishPasses => _inner.MaxPolishPasses;
 
         public string GetText()              => _inner.GetText();
         public void   SetText(string improved) => _inner.SetText(improved);
@@ -72,6 +80,7 @@ namespace Retrograde.Writing
         public string Label       => "QUEST_LOG:" + (_quest.EditorID ?? _quest.FormKey.ID.ToString("X6"));
         public int    MaxChars    => 0;
         public string ContentType => "log";
+        public int    MaxPolishPasses => 2;
 
         public string GetText()
         {
@@ -129,6 +138,7 @@ namespace Retrograde.Writing
         public string Label       => "DIALOGUE:" + (_noun.QuestRecord.EditorID ?? _noun.QuestRecord.FormKey.ID.ToString("X6"));
         public int    MaxChars    => 0;
         public string ContentType => "dialogue";
+        public int    MaxPolishPasses => 2;
 
         public string GetText()
         {

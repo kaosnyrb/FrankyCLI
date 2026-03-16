@@ -60,6 +60,14 @@ namespace Retrograde.AI
             return response;
         }
 
+        public string RunIsolatedPrompt(string systemContext, string prompt)
+        {
+            var messages = new List<Message> { new Message(RoleType.User, prompt) };
+            string response = CallApiWithSystem(messages, systemContext);
+            _statelessLog.Add(($"[isolated] {prompt}", response));
+            return response;
+        }
+
         // Appends to the system prompt rather than the message list — matches how Claude's API separates system from conversation turns.
         public void InjectContextIntoHistory(string content)
         {
@@ -146,15 +154,19 @@ namespace Retrograde.AI
         }
 
         private static string BuildCompressionPrompt(string historyText) =>
-            "You are a narrative context compressor. The following is a conversation generating a Starfield bounty hunting quest. " +
-            "Distill all factual and narrative content into a single compact summary.\n\n" +
-            "You MUST preserve:\n" +
+            "You are a factual context compressor. The following is a conversation generating a Starfield quest. " +
+            "Extract all concrete facts into a structured summary. Do NOT paraphrase or add interpretation.\n\n" +
+            "You MUST preserve exactly:\n" +
             "- The outlaw's full name on the very first line, wrapped exactly as: <Summary>First Last</Summary>\n" +
-            "- Faction, role, crime, personality, and motives\n" +
-            "- Arc type and theme (exact template names)\n" +
-            "- Per-stage details already generated: location, objective, named characters, clue items\n" +
-            "- Any StageBridge clues linking stages\n\n" +
-            "Output a single prose block of no more than 400 words. No headers or bullet points. " +
+            "- All proper nouns: character names, location names, faction names, item names (exact spelling)\n" +
+            "- Arc type and template names (exact strings)\n" +
+            "- Per-stage details: location, objective, named NPCs, clue items, quest stage indices\n" +
+            "- StageBridge clues linking stages\n" +
+            "- Any generated dialogue, log text, or book text (verbatim if short, summarized if long)\n" +
+            "- Faction, role, crime, personality, and motives\n\n" +
+            "Output format: structured list of facts, not prose. Use short labeled entries like:\n" +
+            "  OUTLAW: First Last\n  FACTION: ...\n  STAGE 0: location=..., objective=..., npc=...\n\n" +
+            "Maximum 600 words. Prefer exact quotes over paraphrase. " +
             "The very first line must be <Summary>First Last</Summary> with the outlaw's exact full name.\n\n" +
             "[CONVERSATION]\n" + historyText;
 
@@ -171,6 +183,38 @@ namespace Retrograde.AI
             }
             trimmed.Add(messages[^1]); // last message (current prompt) sent in full
             return trimmed;
+        }
+
+        private string CallApiWithSystem(List<Message> messages, string systemPrompt, string model = Model)
+        {
+            var parameters = new MessageParameters
+            {
+                Model = model,
+                MaxTokens = MaxTokens,
+                System = new List<SystemMessage>
+                {
+                    new SystemMessage(systemPrompt)
+                },
+                Messages = messages
+            };
+
+            for (int attempt = 0; attempt <= MaxRetries; attempt++)
+            {
+                try
+                {
+                    var response = _client.Messages.GetClaudeMessageAsync(parameters).GetAwaiter().GetResult();
+                    return CleanText(((TextContent)response.Content[0]).Text);
+                }
+                catch (Exception ex) when (attempt < MaxRetries && ex.Message.Contains("rate_limit"))
+                {
+                    int delayMs = RetryBaseDelayMs * (1 << attempt);
+                    Console.WriteLine($"[AITools] Rate limit hit, retrying in {delayMs / 1000}s (attempt {attempt + 1}/{MaxRetries})...");
+                    Thread.Sleep(delayMs);
+                }
+            }
+
+            var finalResponse = _client.Messages.GetClaudeMessageAsync(parameters).GetAwaiter().GetResult();
+            return CleanText(((TextContent)finalResponse.Content[0]).Text);
         }
 
         private string CallApi(List<Message> messages, string model = Model)

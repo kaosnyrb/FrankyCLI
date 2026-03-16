@@ -99,7 +99,6 @@ namespace Retrograde.Quests
                 "NPC name: " + npc.Name,
                 "Bounty target name: " + outlawNpc.name,
                 "Location: " + missionTemplate.Location,
-                "Intrigue detail: " + FlavourSeedData.GetConversationIntrigueDetail(),
             }, npcBackground: npcBackground);
 
             var voicePool    = npcResult.IsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
