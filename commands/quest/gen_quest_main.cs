@@ -11,6 +11,7 @@ using Retrograde.AI;
 using Retrograde.Chains;
 using Retrograde.Chains.Interfaces;
 using Retrograde.Quests;
+using Retrograde.Story;
 using Retrograde.Utils;
 using System;
 using System.IO;
@@ -145,7 +146,7 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                bool setmissions = true;
+                bool setmissions = false;
                 if (setmissions)
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)
@@ -158,13 +159,11 @@ namespace FrankyCLI
                 }
                 else
                 {
-                    List<IQuestchain> questchains = new List<IQuestchain>
-                    {
-                        new LoopingLayoutQuestChain(myMod),
-                        //new StaticLayoutQuestChain(myMod),
-                    };
-                    var outlawQuest = questchains[random.Next(questchains.Count)];
-                    outlawQuest.GenerateQuest();
+                    // Schema-driven runner (Phase 1: bounty_hunt schema produces
+                    // identical output to LoopingLayoutQuestChain)
+                    var schema = StorySchema.LoadByName("bounty_hunt");
+                    var runner = new SchemaRunner(myMod, schema);
+                    runner.GenerateQuest();
                 }
                 
             }

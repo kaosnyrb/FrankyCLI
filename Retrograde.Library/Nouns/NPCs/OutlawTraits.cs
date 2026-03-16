@@ -1,20 +1,24 @@
 using Retrograde.AI.Utils;
+using Retrograde.Story;
 using Retrograde.Utils;
 using System.Text;
 
 namespace Retrograde.Nouns
 {
-    public class OutlawTraits
+    public class OutlawTraits : CharacterTraits
     {
-        public string Upbringing           = string.Empty;
-        public string Fear                 = string.Empty;
-        public string Goal                 = string.Empty;
-        public string Flaw                 = string.Empty;
-        public string Quirk                = string.Empty;
-        public string Occupation           = string.Empty;
-        public string Crime                = string.Empty;
-        public string HuntingFaction       = string.Empty;
-        public string CurrentPreoccupation = string.Empty;
+        // Backward-compatible aliases — delegate to base class fields
+        public string Crime
+        {
+            get => DefiningEvent;
+            set => DefiningEvent = value;
+        }
+
+        public string HuntingFaction
+        {
+            get => AssociatedFaction;
+            set => AssociatedFaction = value;
+        }
 
         public static OutlawTraits Generate()
         {
@@ -32,7 +36,7 @@ namespace Retrograde.Nouns
             };
         }
 
-        public void AppendToPrompt(StringBuilder sb)
+        public override void AppendToPrompt(StringBuilder sb)
         {
             sb.AppendLine($"- Background: {Upbringing}");
             sb.AppendLine($"- Core fear: {Fear}");

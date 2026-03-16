@@ -1,0 +1,50 @@
+{
+  "schema": "bounty_hunt",
+  "displayName": "Bounty Hunt",
+  "description": "Track and eliminate a wanted target",
+
+  "roles": {
+    "target": {
+      "type": "hostile_npc",
+      "required": true,
+      "traitPool": "outlaw"
+    }
+  },
+
+  "stakes": {
+    "playerMotivation": "Payment for completing the contract",
+    "failureConsequence": "Target escapes to cause more harm",
+    "playerRole": "bounty hunter"
+  },
+
+  "beats": [
+    {
+      "id": "discovery",
+      "function": "introduce_problem",
+      "category": "discovery",
+      "count": [1, 1],
+      "progressRange": [0, 0]
+    },
+    {
+      "id": "investigation",
+      "function": "gather_evidence",
+      "category": "investigation",
+      "count": [2, 5],
+      "progressRange": [20, 70]
+    },
+    {
+      "id": "showdown",
+      "function": "climax",
+      "category": "showdown",
+      "count": [1, 1],
+      "progressRange": [90, 90]
+    }
+  ],
+
+  "arc": {
+    "order": ["discovery", "investigation", "showdown"],
+    "bridges": true
+  },
+
+  "loreTemplate": "outlaw_bounty"
+}
