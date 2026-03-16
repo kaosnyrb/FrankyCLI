@@ -43,6 +43,12 @@ namespace Retrograde.AI
             return Provider.RunStatelessPrompt(prompt);
         }
 
+        public static string RunIsolatedPrompt(string systemContext, string prompt)
+        {
+            if (!AIMODE) return Guid.NewGuid().ToString()[..8];
+            return Provider.RunIsolatedPrompt(systemContext, prompt);
+        }
+
         public static void InjectContextIntoHistory(string content)
         {
             if (!AIMODE) return;

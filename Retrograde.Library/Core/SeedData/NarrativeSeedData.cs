@@ -33,6 +33,12 @@ namespace Retrograde.AI.Utils
             "manic and frenetic — speaking too fast, thoughts tumbling over each other, energy that is clearly unsustainable",
             "hollow optimism — insisting things will work out with a conviction that sounds more rehearsed than believed",
             "resigned to consequences but still angry — they know how this ends; they just want someone to hear their side first",
+            "matter-of-fact — listing what happened, what they did, and what comes next; no self-pity, no drama",
+            "terse and practical — focused on logistics: where they've been, what they have left, what the plan is",
+            "blunt — no justification, no excuses; just the situation as they see it, stated plainly",
+            "dry and efficient — sounds like a status report; emotions are implied by what they don't say",
+            "straightforward and tired — not dramatic about it, just worn down; speaks in short plain sentences",
+            "clipped and businesslike — treating their own situation like a problem to solve, not a tragedy to narrate",
         };
 
         // What the log is emotionally about — the subject the character keeps returning to
@@ -66,6 +72,13 @@ namespace Retrograde.AI.Utils
             "religion or superstition — whether they still believe in anything, and what they'd ask for if they did",
             "the next twenty-four hours — not further than that, just surviving what's immediately ahead",
             "silence — the absence of the life they had, and how loud that absence is",
+            "current supply status — what they have left, what they need, where to get it",
+            "the job itself — what went right, what went wrong, what they'd do differently",
+            "next steps — the immediate plan, the fallback, and what happens if neither works",
+            "inventory — listing what they're carrying, what's useful, what's dead weight",
+            "the route — where they came from, where they're headed, what's between",
+            "a contact they need to reach and what they'll say when they do",
+            "the timeline — how long they've been running, how long they can keep going",
         };
 
         // The type of transmission found on the derelict ship — shapes the AI prompt and tone
@@ -103,6 +116,12 @@ namespace Retrograde.AI.Utils
             "a short prayer or personal ritual recorded by someone who had stopped expecting rescue",
             "an automated insurance report triggered by hull damage — the only record of what happened on the ship's final day",
             "a children's rhyme hummed quietly by someone who sounds like they are trying to remember what normal felt like",
+            "a routine shift log recorded by a crew member covering standard operations",
+            "a maintenance report flagging equipment wear and requesting replacement parts",
+            "a cargo manifest annotation with a note about an irregular shipment",
+            "a brief handoff note from one shift to the next — practical, no drama",
+            "a supply request transmitted to a depot, listing quantities and urgency levels",
+            "a systems diagnostic recorded by the ship's engineer during a routine check",
         };
 
         // Who is writing the first-person account found in the world

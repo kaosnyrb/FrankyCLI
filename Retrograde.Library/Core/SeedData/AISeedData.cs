@@ -7,10 +7,15 @@ namespace Retrograde.AI.Utils
         public static string GetBackgroundPrompt()
         {
             string result = "";
-            result += "You are a Starfield quest writer crafting an in-game mission narrative.\r\n\r\n";
+            result += "You are a Starfield quest designer writing in-game content (logs, dialogue, objectives).\r\n\r\n";
 
-            result += "Include newline characters in your response if there are multiple sentences.\r\n";
-            result += "Don't use the following characters: —\r\n";
+            result += "Writing rules — apply to ALL generated text:\r\n";
+            result += "- Write like field intel: terse, factual, concrete. State who did what, where, and why.\r\n";
+            result += "- No metaphors, similes, or atmospheric filler. No adjectives unless they are physical descriptions.\r\n";
+            result += "- Never use: 'mysterious', 'ominous', 'desperate', 'shadows', 'whispers', 'echoes', 'lurking', 'haunting'.\r\n";
+            result += "- Every sentence must contain at least one proper noun (name, location, faction, or item).\r\n";
+            result += "- Include newline characters in your response if there are multiple sentences.\r\n";
+            result += "- Don't use the following characters: —\r\n";
 
             result += "The following is background information about the Starfield universe. Do not quote it directly.\r\n\r\n";
 
@@ -37,7 +42,7 @@ namespace Retrograde.AI.Utils
             result += "- Story stages are generated from the final encounter backwards: showdown first, then investigations, then discovery.\r\n";
             result += "- Each earlier stage must reveal progressively less about the target.\r\n";
             result += "- Use details from each previously generated stage to inform the next.\r\n";
-            result += "- New <Lore> entries will appear during generation; use them to enrich each scene.\r\n";
+            result += "- New <Lore> entries will appear during generation; use them to ground each scene in concrete, specific details. Prefer facts over atmosphere. State what happened, who was involved, and where.\r\n";
             result += "- At least one concrete lore detail (faction, tech, location, rumor) must ground each scene.\r\n";
             result += "- Ensure all stages link together logically across the full chain.\r\n\r\n";
 
@@ -48,60 +53,60 @@ namespace Retrograde.AI.Utils
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine("These entries represent Starfield's basic and widely circulated weapons. Each is given a five-word lore descriptor to help prompts model combat identity, faction usage, frontier trade patterns, and narrative flavor around weapon provenance and battlefield presence.");
+            sb.AppendLine("Starfield weapons reference. Use for trade, combat, and faction context.");
 
             // Ballistic Pistols
-            sb.AppendLine("Equinox - Stable energy pistol favored by explorers");
-            sb.AppendLine("Eon - Compact sidearm built for reliability");
-            sb.AppendLine("Magshot - Magnetic revolver delivering brutal impact");
-            sb.AppendLine("Sidestar - Lightweight civilian sidearm turned lethal");
-            sb.AppendLine("Urban Eagle - Heavy pistol symbolizing frontier authority");
+            sb.AppendLine("Equinox - energy pistol, standard settler sidearm");
+            sb.AppendLine("Eon - compact ballistic pistol, mass-produced");
+            sb.AppendLine("Magshot - magnetic revolver, heavy caliber");
+            sb.AppendLine("Sidestar - lightweight civilian pistol, common");
+            sb.AppendLine("Urban Eagle - large-frame pistol, law enforcement issue");
 
             // Ballistic Rifles
-            sb.AppendLine("Beowulf - Precision rifle engineered for versatility");
-            sb.AppendLine("Coachman - Double-barrel shotgun firing devastating bursts");
-            sb.AppendLine("Grendel - Standard-issue rifle trusted by militias");
-            sb.AppendLine("Old Earth Assault Rifle - Classic firearm preserved across centuries");
-            sb.AppendLine("Old Earth Hunting Rifle - Heritage rifle used for long-range strikes");
+            sb.AppendLine("Beowulf - semi-auto rifle, modular platform");
+            sb.AppendLine("Coachman - double-barrel shotgun, short range");
+            sb.AppendLine("Grendel - standard-issue rifle, militia and UC");
+            sb.AppendLine("Old Earth Assault Rifle - pre-settlement automatic rifle");
+            sb.AppendLine("Old Earth Hunting Rifle - pre-settlement bolt-action");
 
             // Ballistic & Heavy Variants
-            sb.AppendLine("Bridger - Grenade launcher offering controlled destruction");
-            sb.AppendLine("Drum Beat - Rapid-fire rifle dominating close quarters");
-            sb.AppendLine("Lawgiver - Frontier rifle valued for rugged performance");
+            sb.AppendLine("Bridger - single-shot grenade launcher");
+            sb.AppendLine("Drum Beat - high-rate-of-fire automatic rifle");
+            sb.AppendLine("Lawgiver - lever-action rifle, frontier standard");
 
             // Laser Weapons
-            sb.AppendLine("Solstice - Reliable laser pistol common among settlers");
-            sb.AppendLine("Equinox Rifle - Mid-range laser weapon balancing accuracy");
+            sb.AppendLine("Solstice - laser pistol, common civilian model");
+            sb.AppendLine("Equinox Rifle - laser rifle, mid-range");
 
             // Particle Beam Weapons
-            sb.AppendLine("Orion - Particle beam rifle with surgical lethality");
-            sb.AppendLine("Va'ruun Inflictor - Cult-forged weapon channeling focused devastation");
-            sb.AppendLine("Va'ruun Starshard - Exotic emitter harming both flesh and faith");
-            sb.AppendLine("Novalight - Precision beam pistol cutting molecular bonds");
+            sb.AppendLine("Orion - particle beam rifle, high accuracy");
+            sb.AppendLine("Va'ruun Inflictor - particle weapon, Va'ruun manufacture");
+            sb.AppendLine("Va'ruun Starshard - particle emitter, Va'ruun manufacture");
+            sb.AppendLine("Novalight - particle beam pistol, precision model");
 
             // Mag Weapons
-            sb.AppendLine("Magpulse - Electromagnetic rifle firing kinetic bolts");
-            sb.AppendLine("Magstorm - Heavy SMG unleashing suppressive magnetic fire");
-            sb.AppendLine("Magshot - Magnetic revolver delivering high-velocity rounds");
+            sb.AppendLine("Magpulse - electromagnetic rifle, kinetic rounds");
+            sb.AppendLine("Magstorm - magnetic SMG, high volume of fire");
+            sb.AppendLine("Magshot - magnetic revolver, heavy rounds");
 
             // Shotguns
-            sb.AppendLine("Breach - Tactical shotgun shattering armored defenses");
-            sb.AppendLine("Coachman - Classic double-barrel delivering overwhelming force");
+            sb.AppendLine("Breach - pump-action shotgun, tactical model");
+            sb.AppendLine("Coachman - double-barrel shotgun, close quarters");
 
             // Explosives
-            sb.AppendLine("Negotiator - Tube-launched warhead resolving disputes explosively");
-            sb.AppendLine("Frag Grenade - Fragmentation charge unfolding lethal shrapnel");
-            sb.AppendLine("Pulse Grenade - EMP device crippling electronic systems");
-            sb.AppendLine("Thermite Grenade - Intense incendiary melting through defenses");
+            sb.AppendLine("Negotiator - shoulder-fired rocket launcher");
+            sb.AppendLine("Frag Grenade - standard fragmentation grenade");
+            sb.AppendLine("Pulse Grenade - EMP grenade, disables electronics");
+            sb.AppendLine("Thermite Grenade - incendiary grenade, burns hot");
 
             // Melee Weapons
-            sb.AppendLine("Barrow Knife - Rugged survival blade forged for frontier");
-            sb.AppendLine("Combat Knife - Standard military blade ending skirmishes");
-            sb.AppendLine("Osmium Dagger - Dense alloy blade piercing armor");
-            sb.AppendLine("Crucible Blade - Ceremonial sword retaining deadly purpose");
-            sb.AppendLine("Ripshank - Improvised shiv wielded by desperate outlaws");
+            sb.AppendLine("Barrow Knife - utility knife, frontier issue");
+            sb.AppendLine("Combat Knife - military knife, standard issue");
+            sb.AppendLine("Osmium Dagger - heavy alloy blade, armor-piercing");
+            sb.AppendLine("Crucible Blade - ceremonial sword, still functional");
+            sb.AppendLine("Ripshank - improvised blade, common among spacers");
 
-            sb.AppendLine("Digipick - Precision cryptographic tool used to bypass digital locks and defeat security systems.");
+            sb.AppendLine("Digipick - lockpicking tool, bypasses digital locks");
 
             return sb.ToString();
         }
@@ -109,74 +114,74 @@ namespace Retrograde.AI.Utils
         public static string GetStarfieldResourceLoreList()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("The following entries represent Starfield's known crafting and trade resources, each described in five words to establish tone and function; the prompt may use them as worldbuilding anchors for economy, faction trade routes, scarcity themes, smuggling hooks, environmental storytelling, or any lore-driven interpretation of resource value and usage.");
+            sb.AppendLine("Starfield crafting and trade resources. Use for economy, trade routes, and scarcity context.");
 
-            sb.AppendLine("Amino Acids - Fundamental compounds sustaining alien life");
-            sb.AppendLine("Aqueous Hematite - Mineral-rich fluid from oxidized worlds");
-            sb.AppendLine("Chlorine - Sharp reactive gas for purification");
-            sb.AppendLine("Contaminated Water - Polluted runoff from compromised systems");
-            sb.AppendLine("Fiber - Tough strands harvested from vegetation");
-            sb.AppendLine("Fluorine - Corrosive element prized for reactions");
-            sb.AppendLine("Iron - Common metal shaping industrial foundations");
-            sb.AppendLine("Membrane - Flexible biofilm from hardy organisms");
-            sb.AppendLine("Nutrient - Compressed sustenance from cultivated biomass");
-            sb.AppendLine("Polymer - Synthetic chains forming durable structures");
-            sb.AppendLine("Toxin - Potent biological agent requiring caution");
-            sb.AppendLine("Water - Essential liquid threaded through ecosystems");
+            sb.AppendLine("Amino Acids - organic compound, biological applications");
+            sb.AppendLine("Aqueous Hematite - iron-bearing mineral, extracted from water");
+            sb.AppendLine("Chlorine - reactive gas, water purification");
+            sb.AppendLine("Contaminated Water - polluted water, requires processing");
+            sb.AppendLine("Fiber - plant-derived material, textile and composite use");
+            sb.AppendLine("Fluorine - reactive element, industrial chemical");
+            sb.AppendLine("Iron - common metal, structural and industrial");
+            sb.AppendLine("Membrane - biological film, filtration applications");
+            sb.AppendLine("Nutrient - processed food compound, colony supply");
+            sb.AppendLine("Polymer - synthetic material, manufacturing base");
+            sb.AppendLine("Toxin - biological agent, hazardous, restricted");
+            sb.AppendLine("Water - essential resource, colony critical");
 
-            sb.AppendLine("Aluminum - Lightweight metal used in alloys");
-            sb.AppendLine("Antimony - Brittle metalloid enhancing exotic compounds");
-            sb.AppendLine("Beryllium - Rare metal powering advanced reactors");
-            sb.AppendLine("Caesium - Volatile alkali metal enabling sensors");
-            sb.AppendLine("Cobalt - Magnetic metal strengthening refined materials");
-            sb.AppendLine("Copper - Conductive metal vital for circuitry");
-            sb.AppendLine("Europium - Luminous rare earth for systems");
-            sb.AppendLine("Gold - Noble metal stabilizing precision electronics");
-            sb.AppendLine("Iridium - Dense metal resisting extreme conditions");
-            sb.AppendLine("Lead - Heavy metal shielding hazardous emissions");
-            sb.AppendLine("Lithium - Reactive metal fueling energy storage");
-            sb.AppendLine("Mercury - Liquid metal enabling specialized instrumentation");
-            sb.AppendLine("Neodymium - Strong magnetic element powering drives");
-            sb.AppendLine("Nickel - Durable alloy metal for mechanisms");
-            sb.AppendLine("Palladium - Rare catalyst essential for refinement");
-            sb.AppendLine("Platinum - High-value metal resisting corrosion");
-            sb.AppendLine("Plutonium - Radioactive fuel for deep operations");
-            sb.AppendLine("Ruthenium - Catalytic rare metal enhancing reactions");
-            sb.AppendLine("Silver - Purified conductor improving sensitive electronics");
-            sb.AppendLine("Tantalum - Heat-resistant metal for advanced fabrication");
-            sb.AppendLine("Tin - Soft metal binding industrial alloys");
-            sb.AppendLine("Titanium - Strong lightweight metal for construction");
-            sb.AppendLine("Tungsten - Ultra-dense metal surviving extreme heat");
-            sb.AppendLine("Vanadium - Alloying element boosting structural integrity");
+            sb.AppendLine("Aluminum - lightweight structural metal");
+            sb.AppendLine("Antimony - metalloid, compound manufacturing");
+            sb.AppendLine("Beryllium - reactor component metal, scarce");
+            sb.AppendLine("Caesium - alkali metal, sensor manufacturing");
+            sb.AppendLine("Cobalt - magnetic metal, alloy component");
+            sb.AppendLine("Copper - conductive metal, wiring and circuitry");
+            sb.AppendLine("Europium - rare earth, display and sensor tech");
+            sb.AppendLine("Gold - conductor, precision electronics");
+            sb.AppendLine("Iridium - dense metal, high-stress applications");
+            sb.AppendLine("Lead - heavy metal, radiation shielding");
+            sb.AppendLine("Lithium - battery and energy storage metal");
+            sb.AppendLine("Mercury - liquid metal, instrument manufacturing");
+            sb.AppendLine("Neodymium - magnetic element, drive components");
+            sb.AppendLine("Nickel - alloy metal, mechanical parts");
+            sb.AppendLine("Palladium - catalyst metal, refining processes");
+            sb.AppendLine("Platinum - corrosion-resistant, high-value trade");
+            sb.AppendLine("Plutonium - radioactive fuel, restricted");
+            sb.AppendLine("Ruthenium - catalyst metal, chemical processing");
+            sb.AppendLine("Silver - conductor, electronics component");
+            sb.AppendLine("Tantalum - heat-resistant metal, advanced fabrication");
+            sb.AppendLine("Tin - soft metal, alloy component");
+            sb.AppendLine("Titanium - lightweight structural metal, construction");
+            sb.AppendLine("Tungsten - dense metal, high-heat applications");
+            sb.AppendLine("Vanadium - alloy additive, structural reinforcement");
 
-            sb.AppendLine("Helium-3 - Fusion-reactive isotope sustaining reactors");
-            sb.AppendLine("Hydrogen - Basic element fueling stellar technology");
-            sb.AppendLine("Neon - Inert gas used in illumination");
-            sb.AppendLine("Argon - Stable gas protecting sensitive reactions");
-            sb.AppendLine("Xenon - Heavy inert gas for propulsion");
+            sb.AppendLine("Helium-3 - fusion fuel isotope, reactor grade");
+            sb.AppendLine("Hydrogen - basic fuel element, widespread");
+            sb.AppendLine("Neon - inert gas, lighting and signage");
+            sb.AppendLine("Argon - inert gas, welding and manufacturing");
+            sb.AppendLine("Xenon - heavy inert gas, ion propulsion");
 
-            sb.AppendLine("Adhesive - Bonding compound for versatile assembly");
-            sb.AppendLine("Aldumite - Rare crystalline material strengthening components");
-            sb.AppendLine("Aneutronic Fusion Cell - High-output cell driving compact reactors");
-            sb.AppendLine("Aromatic - Organic compounds forming specialized solutions");
-            sb.AppendLine("Biosuppressant - Agent neutralizing biological contamination threats");
-            sb.AppendLine("Caelumite - Unknown crystalline energy-bearing shard");
-            sb.AppendLine("Cosmetic - Nonessential compounds refining surface appearance");
-            sb.AppendLine("Drilling Rig - Compact system for material extraction");
-            sb.AppendLine("Hijacker Chip - Signal override chip defeating locks");
-            sb.AppendLine("Immunostimulant - Enhancer boosting resilience under stress");
-            sb.AppendLine("Isocentered Magnet - Precision magnet stabilizing delicate machinery");
-            sb.AppendLine("Lubricant - Fluid reducing mechanical friction");
-            sb.AppendLine("Microcell - Miniature power module for devices");
-            sb.AppendLine("Neuroamp - Neural amplifier enhancing signal flow");
-            sb.AppendLine("Ornamental - Decorative element showcasing refined craftsmanship");
-            sb.AppendLine("Pigment - Colorants extracted for diverse applications");
-            sb.AppendLine("Reactive Gauge - Sensor tracking environmental fluctuations");
-            sb.AppendLine("Sealant - Protective layer preventing material degradation");
-            sb.AppendLine("Solvent - Reactive liquid dissolving complex compounds");
-            sb.AppendLine("Sterile Nanotubes - Clean microstructures enabling advanced fabrication");
-            sb.AppendLine("Structural - Reinforcement material improving system durability");
-            sb.AppendLine("Zero Wire - Conductor carrying ultra-stable signals");
+            sb.AppendLine("Adhesive - bonding compound, general assembly");
+            sb.AppendLine("Aldumite - rare crystal, component hardening");
+            sb.AppendLine("Aneutronic Fusion Cell - compact reactor power cell");
+            sb.AppendLine("Aromatic - organic compound, chemical synthesis");
+            sb.AppendLine("Biosuppressant - biological containment agent");
+            sb.AppendLine("Caelumite - unknown crystal, energy properties");
+            sb.AppendLine("Cosmetic - surface treatment compound");
+            sb.AppendLine("Drilling Rig - portable extraction equipment");
+            sb.AppendLine("Hijacker Chip - signal override device, restricted");
+            sb.AppendLine("Immunostimulant - immune system booster, medical");
+            sb.AppendLine("Isocentered Magnet - precision magnet, calibration use");
+            sb.AppendLine("Lubricant - mechanical friction reducer");
+            sb.AppendLine("Microcell - miniature power module");
+            sb.AppendLine("Neuroamp - neural signal amplifier, medical");
+            sb.AppendLine("Ornamental - decorative material, non-functional");
+            sb.AppendLine("Pigment - coloring agent, industrial");
+            sb.AppendLine("Reactive Gauge - environmental sensor component");
+            sb.AppendLine("Sealant - protective coating, hull and pipe repair");
+            sb.AppendLine("Solvent - chemical dissolver, industrial");
+            sb.AppendLine("Sterile Nanotubes - medical-grade microstructures");
+            sb.AppendLine("Structural - reinforcement material, construction");
+            sb.AppendLine("Zero Wire - ultra-stable signal conductor");
 
             return sb.ToString();
         }
@@ -185,49 +190,49 @@ namespace Retrograde.AI.Utils
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine("These entries represent Starfield's medical, pharmaceutical, and illicit chem items, each described in five words to help prompts model trade value, scarcity, black-market demand, faction smuggling routes, medical usage, and environmental storytelling within the Settled Systems.");
+            sb.AppendLine("Starfield medical and pharmaceutical items. Use for trade, medical supply, and contraband context.");
 
-            sb.AppendLine("Med Pack - Standard emergency kit restoring vitality");
-            sb.AppendLine("Trauma Pack - Advanced stabilizer for severe injuries");
-            sb.AppendLine("Emergency Kit - Comprehensive field treatment supplies");
-            sb.AppendLine("Healing Salve - Organic compound accelerating natural recovery");
+            sb.AppendLine("Med Pack - standard first aid kit");
+            sb.AppendLine("Trauma Pack - field stabilizer, severe injuries");
+            sb.AppendLine("Emergency Kit - comprehensive medical supplies");
+            sb.AppendLine("Healing Salve - topical wound treatment");
 
-            sb.AppendLine("Med-X - Potent analgesic boosting pain resistance");
-            sb.AppendLine("BattleUp - Stimulant increasing short-term physical performance");
-            sb.AppendLine("Pick-Me-Up - Mild stimulant restoring combat readiness");
-            sb.AppendLine("Red Trench - Illicit chem heightening sensory response");
-            sb.AppendLine("Penicillin-X - Broad-spectrum antibiotic neutralizing infections");
-            sb.AppendLine("Paramed-X - Quick-acting medical enhancer boosting resilience");
+            sb.AppendLine("Med-X - painkiller, prescription strength");
+            sb.AppendLine("BattleUp - combat stimulant, short-duration");
+            sb.AppendLine("Pick-Me-Up - mild stimulant, over-the-counter");
+            sb.AppendLine("Red Trench - illegal stimulant, controlled substance");
+            sb.AppendLine("Penicillin-X - broad-spectrum antibiotic");
+            sb.AppendLine("Paramed-X - emergency medical booster");
 
-            sb.AppendLine("Addictol - Chemical suppressant reducing dependency symptoms");
-            sb.AppendLine("Antibiotic - Standard medication eliminating harmful pathogens");
-            sb.AppendLine("Antimicrobial - Compound targeting resistant biological contaminants");
-            sb.AppendLine("Antiseptic - Disinfectant preventing infection during injuries");
+            sb.AppendLine("Addictol - addiction treatment medication");
+            sb.AppendLine("Antibiotic - standard anti-infection medication");
+            sb.AppendLine("Antimicrobial - resistant-strain treatment");
+            sb.AppendLine("Antiseptic - wound disinfectant");
 
-            sb.AppendLine("Boosted Shot - Combat stim enhancing reflexive responsiveness");
-            sb.AppendLine("Frostwolf - Illegal chem inducing controlled hypothermic calm");
-            sb.AppendLine("Mind Control - Cognitive agent altering perception patterns");
-            sb.AppendLine("Snake Oil - Dubious remedy promising miraculous recovery");
+            sb.AppendLine("Boosted Shot - combat performance stimulant");
+            sb.AppendLine("Frostwolf - illegal sedative, controlled substance");
+            sb.AppendLine("Mind Control - cognitive-altering chem, restricted");
+            sb.AppendLine("Snake Oil - unregulated remedy, dubious efficacy");
 
-            sb.AppendLine("Infused Bandage - Treated wrap accelerating wound closure");
-            sb.AppendLine("Regulator - Drug stabilizing erratic physiological responses");
-            sb.AppendLine("Stimulant - Broad enhancer increasing alertness and drive");
-            sb.AppendLine("Depressant - Chemical agent suppressing neural activity");
+            sb.AppendLine("Infused Bandage - treated wound dressing");
+            sb.AppendLine("Regulator - metabolic stabilizer");
+            sb.AppendLine("Stimulant - general alertness booster");
+            sb.AppendLine("Depressant - neural suppressant, prescription");
 
-            sb.AppendLine("Sedative - Calming compound reducing panic symptoms");
-            sb.AppendLine("Amp - Compact injector providing rapid stimulation");
-            sb.AppendLine("Expired Meds - Unstable pharmaceuticals with unreliable effects");
-            sb.AppendLine("Steroid Pack - Muscle-boosting compound enhancing temporary strength");
+            sb.AppendLine("Sedative - calming agent, medical use");
+            sb.AppendLine("Amp - rapid-delivery stimulant injector");
+            sb.AppendLine("Expired Meds - degraded pharmaceuticals, unreliable");
+            sb.AppendLine("Steroid Pack - muscle-performance booster, short-term");
 
-            sb.AppendLine("Heart+ - Cardiovascular booster supporting sustained exertion");
-            sb.AppendLine("Lung+ - Pulmonary enhancer improving oxygen efficiency");
-            sb.AppendLine("Neuro+ - Neural booster sharpening cognitive processing");
-            sb.AppendLine("Mind+ - Focus enhancer suppressing environmental distractions");
+            sb.AppendLine("Heart+ - cardiovascular performance supplement");
+            sb.AppendLine("Lung+ - respiratory efficiency supplement");
+            sb.AppendLine("Neuro+ - cognitive performance supplement");
+            sb.AppendLine("Mind+ - focus and concentration supplement");
 
-            sb.AppendLine("Snakebite - Street chem causing dangerous adrenaline surges");
-            sb.AppendLine("Aurora - Euphoric Neon-exclusive narcotic enhancing perception");
-            sb.AppendLine("Universal Solvent - Harsh chemical with medical-adjacent applications");
-            sb.AppendLine("Digipack Meds - Compact med-case supporting field operatives");
+            sb.AppendLine("Snakebite - street stimulant, dangerous, unregulated");
+            sb.AppendLine("Aurora - synthetic narcotic, Neon-exclusive, controlled");
+            sb.AppendLine("Universal Solvent - industrial chemical, medical-adjacent");
+            sb.AppendLine("Digipack Meds - compact field medical kit");
 
             return sb.ToString();
         }

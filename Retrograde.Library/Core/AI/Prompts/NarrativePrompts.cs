@@ -1,4 +1,5 @@
 using Retrograde.Nouns;
+using Retrograde.Story;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,7 +21,7 @@ namespace Retrograde.AI.Utils
                 "Rules:\r\n" +
                 "- Under 80 words. Every sentence must add new information; cut anything that restates or pads.\r\n" +
                 "- Write one specific moment or discovery the speaker witnessed or experienced themselves.\r\n" +
-                "- Use concrete details from the LoreContext — a name, a place, an action. Do not invent names.\r\n" +
+                "- Use concrete details from the context — a name, a place, an action. Do not invent names.\r\n" +
                 "- Plain, personal speech. This person is writing for themselves, not performing.\r\n" +
                 "- The speaker does not know the full story — they know their part of it.\r\n" +
                 "- Do NOT include a date, timestamp, or header of any kind.\r\n\r\n" +
@@ -30,8 +31,15 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 logprompt += item;
 
-            var results = AITools.RunPrompt(logprompt);
+            var accountEnvelope = PromptContext.CurrentEnvelope;
+            if (accountEnvelope != null)
+            {
+                var validator = new CompositeValidator(new StyleValidator(), new ProperNounValidator());
+                return ValidatedPrompt.Run(accountEnvelope, logprompt, validator,
+                    PromptContext.CurrentFacts, PromptContext.TargetName);
+            }
 
+            var results = AITools.RunPrompt(logprompt);
             for (int i = 0; i < 10 && results.Length < 100; i++)
             {
                 results = AITools.RunPrompt(logprompt);
@@ -55,13 +63,21 @@ namespace Retrograde.AI.Utils
                 "- Pure spoken audio — no headers, bullet points, or labels.\r\n" +
                 "- Do NOT open with a recording preamble — no 'Recording...', no date stamp, no name announcement. Go straight into the content.\r\n" +
                 "- The recording must reference or hint at the next destination — where the trail leads from here.\r\n" +
-                "- Use the LoreContext for concrete names, faction, and location. Do not invent new names.\r\n" +
+                "- Use the context for concrete names, faction, and location. Do not invent new names.\r\n" +
                 "- Match the tone to the type of transmission: urgency for a distress signal, cold precision for a coded dead drop, fear for a last warning.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
             foreach (var item in Addons)
                 prompt += item;
+
+            var txEnvelope = PromptContext.CurrentEnvelope;
+            if (txEnvelope != null)
+            {
+                var validator = new CompositeValidator(new StyleValidator(), new ProperNounValidator());
+                return ValidatedPrompt.Run(txEnvelope, prompt, validator,
+                    PromptContext.CurrentFacts, PromptContext.TargetName);
+            }
 
             var result = AITools.RunPrompt(prompt);
             for (int i = 0; i < 10 && result.Length < 50; i++)
@@ -104,30 +120,10 @@ namespace Retrograde.AI.Utils
 
             Console.WriteLine("Generating Outlaw Log...");
 
-            string basePrompt = sb.ToString();
-            string prompt = FlavourSeedData.AddFlavourToTargetBook(basePrompt);
+            string prompt = sb.ToString();
             string result = AITools.RunPrompt(prompt);
 
-            // If the flavoured prompt triggered a refusal, retry with the base prompt only
-            if (IsRefusal(result))
-            {
-                Console.WriteLine("Outlaw Log: flavour prompt refused — retrying without flavour.");
-                result = AITools.RunPrompt(basePrompt);
-            }
-
             return result;
-        }
-
-        private static bool IsRefusal(string response)
-        {
-            if (string.IsNullOrWhiteSpace(response)) return true;
-            var head = response.TrimStart().ToLowerInvariant();
-            return head.StartsWith("i don't think i can")
-                || head.StartsWith("i can't write")
-                || head.StartsWith("i cannot write")
-                || head.StartsWith("i'm not able to write")
-                || head.StartsWith("i won't write")
-                || head.StartsWith("i'd rather not write");
         }
 
         // ------------------------------
@@ -138,7 +134,7 @@ namespace Retrograde.AI.Utils
             var logprompt =
                 "Write a mission briefing dataslate for a bounty hunter. Length: 120-150 words.\r\n" +
                 "Style: write as if a fixer dropped the hunter a terse field note mid-route — short bursts, functional shorthand, no fluff. Allow one hedged construction per piece (e.g. 'believed to be', 'last reported moving through', 'confirmed using aliases'). No atmosphere, no metaphor. No headers or labels of any kind.\r\n" +
-                "Use the LoreContext established earlier in this conversation for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
+                "Use the context for concrete facts only: target name, occupation, crime, motive. Do not invent names or factions.\r\n\r\n" +
 
                 "Cover these three things in order:\r\n" +
                 "- Name the target exactly as established in the LoreContext. State what they did, what they are wanted for, and who they are — former occupation, what they did that crossed the line.\r\n" +
@@ -151,8 +147,15 @@ namespace Retrograde.AI.Utils
             foreach (var item in Addons)
                 logprompt += item;
 
-            var results = AITools.RunPrompt(logprompt);
+            var briefingEnvelope = PromptContext.CurrentEnvelope;
+            if (briefingEnvelope != null)
+            {
+                var validator = new CompositeValidator(new StyleValidator(), new ProperNounValidator());
+                return ValidatedPrompt.Run(briefingEnvelope, logprompt, validator,
+                    PromptContext.CurrentFacts, PromptContext.TargetName);
+            }
 
+            var results = AITools.RunPrompt(logprompt);
             for (int i = 0; i < 5 && results.Length < 500; i++)
             {
                 results = AITools.RunPrompt(logprompt);

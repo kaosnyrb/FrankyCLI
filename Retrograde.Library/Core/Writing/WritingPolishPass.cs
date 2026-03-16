@@ -25,7 +25,7 @@ namespace Retrograde.Writing
         /// Number of polish iterations. 0 = disabled (zero extra API calls).
         /// Increase for higher quality: 1-2 for testing, 5+ for final build.
         /// </summary>
-        public static int Iterations = 15;
+        public static int Iterations = 0;
 
         public static void Run(List<IPolishable> polishables)
         {
@@ -43,8 +43,18 @@ namespace Retrograde.Writing
 
             for (int i = 0; i < Iterations; i++)
             {
-                Console.WriteLine($"[Polish] Pass {i + 1}/{Iterations}...");
-                string prompt   = PolishPrompts.Build(nonEmpty, i + 1);
+                // Filter out items that have hit their per-item cap
+                var eligible = nonEmpty.Where(p =>
+                    p.MaxPolishPasses <= 0 || i < p.MaxPolishPasses).ToList();
+
+                if (eligible.Count == 0)
+                {
+                    Console.WriteLine($"[Polish] Pass {i + 1}: all items have reached their cap, stopping early.");
+                    break;
+                }
+
+                Console.WriteLine($"[Polish] Pass {i + 1}/{Iterations} ({eligible.Count} eligible)...");
+                string prompt   = PolishPrompts.Build(eligible, i + 1);
                 string response = AITools.RunStatelessPrompt(prompt);
 
                 var updates = PolishPrompts.Parse(response);
@@ -52,7 +62,7 @@ namespace Retrograde.Writing
 
                 foreach (var (label, text) in updates)
                 {
-                    var item = nonEmpty.FirstOrDefault(p =>
+                    var item = eligible.FirstOrDefault(p =>
                         p.Label.Equals(label, StringComparison.OrdinalIgnoreCase));
                     if (item == null)
                         continue;
@@ -62,7 +72,7 @@ namespace Retrograde.Writing
                     Console.WriteLine($"[Polish]   ✓ {label}");
                 }
 
-                Console.WriteLine($"[Polish] Pass {i + 1} complete: {count}/{nonEmpty.Count} piece(s) improved.");
+                Console.WriteLine($"[Polish] Pass {i + 1} complete: {count}/{eligible.Count} piece(s) improved.");
 
                 if (count > 0)
                 {

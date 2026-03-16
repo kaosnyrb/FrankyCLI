@@ -42,6 +42,17 @@ namespace Retrograde.AI
             return CleanText(res.Value.Content[0].Text);
         }
 
+        public string RunIsolatedPrompt(string systemContext, string prompt)
+        {
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemContext),
+                new UserChatMessage(prompt)
+            };
+            var res = _chatClient.CompleteChat(messages);
+            return CleanText(res.Value.Content[0].Text);
+        }
+
         public void InjectContextIntoHistory(string content)
         {
             _history.Add(new SystemChatMessage(content));

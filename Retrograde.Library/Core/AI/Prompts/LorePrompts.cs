@@ -43,7 +43,7 @@ namespace Retrograde.AI.Utils
 
             sb.AppendLine("You are completing a partially written Lore Context File for a Starfield-style outlaw.");
             sb.AppendLine("The Lore Context File is the primary source of truth and MUST be treated as canonical.");
-            sb.AppendLine("You will use the outlaw NPC's background ONLY to adapt and enrich this existing lore, not replace it.");
+            sb.AppendLine("You will use the outlaw NPC's background ONLY to adapt and ground this existing lore, not replace it.");
             sb.AppendLine();
             sb.AppendLine("Here is the Lore Context File you MUST build from and respect:");
             sb.AppendLine();
@@ -54,7 +54,6 @@ namespace Retrograde.AI.Utils
             sb.AppendLine($"- Name: {outlawNpc.name}");
             sb.AppendLine($"- Gender: {outlawNpc.gender}");
             outlawNpc.Traits.AppendToPrompt(sb);
-            sb.AppendLine($"- Quest theme: {FlavourSeedData.GetQuestTheme()}");
             sb.AppendLine();
             sb.AppendLine("Your task: generate a full lore instance by completing every section that contains instructions.");
             sb.AppendLine();
