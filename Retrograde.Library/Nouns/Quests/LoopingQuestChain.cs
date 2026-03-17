@@ -57,13 +57,7 @@ namespace Retrograde.Chains
                 pinnedShowdown:       ShowdownTemplate      != "" ? ShowdownTemplate      : null,
                 pinnedInvestigations: pinnedInvestigations, selectArc : false);
 
-
             // Template Choices --------------------------------
-
-            // When selectArc is false, PlannedXxx fields are empty — pick randomly via templateManager.
-            bool useAiArc = LorePrompts.PlannedInvestigations.Count > 0
-                         || !string.IsNullOrEmpty(LorePrompts.PlannedShowdown)
-                         || !string.IsNullOrEmpty(LorePrompts.PlannedDiscovery);
 
             // Showdown (final encounter, high completion)
             var showdownAddons = new List<string>()
@@ -72,8 +66,7 @@ namespace Retrograde.Chains
                 "<QuestProgress>90%</QuestProgress>"
             };
 
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(
-                useAiArc ? LorePrompts.PlannedShowdown : "", showdownAddons);
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate("", showdownAddons);
 
             outlawNpc.spacesuit = ShowdownMissionTemplate.parameters.ContainsKey("NeedSpacesuit") && (bool)ShowdownMissionTemplate.parameters["NeedSpacesuit"];
             outlawNpc.GenerateNPC();
@@ -88,9 +81,7 @@ namespace Retrograde.Chains
             // PlannedInvestigations is in story order (earliest first, closest to showdown last).
             // We build investigationStages in reverse (closest to showdown at index 0) to match
             // the existing generation order (showdown → deepest → ... → earliest → discovery).
-            int count = useAiArc
-                ? LorePrompts.PlannedInvestigations.Count
-                : RandomProvider.Random.Next(2, 6); // 2-5 stages when picking randomly
+            int count = RandomProvider.Random.Next(2, 6); // 2-5 stages
 
             var investigationStages = new List<(string Stage, MissionTemplate Template)>();
 
@@ -111,12 +102,7 @@ namespace Retrograde.Chains
                     $"<QuestProgress>{progressValue}%</QuestProgress>"
                 };
 
-                // plannedList is story order → reverse index to map to generation order
-                string plannedName = useAiArc
-                    ? LorePrompts.PlannedInvestigations[count - 1 - i]
-                    : "";
-
-                var template = templateManager.GetInvestigationMissionTemplate(plannedName, investigationAddons);
+                var template = templateManager.GetInvestigationMissionTemplate("", investigationAddons);
 
                 Console.WriteLine("Investigation Template: " + template.Name);
                 investigationStages.Add((stageName, template));
@@ -131,8 +117,7 @@ namespace Retrograde.Chains
                 "<QuestProgress>0%</QuestProgress>"
             };
 
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate(
-                useAiArc ? LorePrompts.PlannedDiscovery : "", discoveryAddons);
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate("", discoveryAddons);
 
             // Now we build a story-ordered list for stage location history:
             // Discovery -> earliest investigation -> ... -> closest investigation -> Showdown
