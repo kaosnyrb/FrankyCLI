@@ -9,22 +9,22 @@ namespace Retrograde.Quests.TemplateEngines
 
         public MissionTemplate GetShowdownMissionTemplate(string mission, List<string> addons = null)
         {
-            if (AvailableTemplateLib.ShowdownTemplates.Count == 0) return null;
+            if (!AvailableTemplateLib.HasTemplates(AvailableTemplateLib.ShowdownGroups)) return null;
             Random random = RandomProvider.Random;
 
             MissionTemplate template;
             if (mission != "")
             {
-                template = AvailableTemplateLib.ShowdownTemplates.FirstOrDefault(x => x.Name == mission);
+                template = AvailableTemplateLib.FindByName(AvailableTemplateLib.ShowdownGroups, mission);
                 if (template == null)
                 {
                     Console.WriteLine($"RandomTemplateEngine: No showdown template named '{mission}' found, falling back to random.");
-                    template = AvailableTemplateLib.ShowdownTemplates[random.Next(AvailableTemplateLib.ShowdownTemplates.Count)];
+                    template = AvailableTemplateLib.PickRandom(AvailableTemplateLib.ShowdownGroups, random);
                 }
             }
             else
             {
-                template = AvailableTemplateLib.ShowdownTemplates[random.Next(AvailableTemplateLib.ShowdownTemplates.Count)];
+                template = AvailableTemplateLib.PickRandom(AvailableTemplateLib.ShowdownGroups, random);
             }
             template.Addons = addons;
             return template;
@@ -32,33 +32,29 @@ namespace Retrograde.Quests.TemplateEngines
 
         public MissionTemplate GetInvestigationMissionTemplate(string mission, List<string> addons = null)
         {
-            if (AvailableTemplateLib.InvestigationTemplates.Count == 0) return null;
+            if (!AvailableTemplateLib.HasTemplates(AvailableTemplateLib.InvestigationGroups)) return null;
             Random random = RandomProvider.Random;
 
             if (mission != "")
             {
-                var named = AvailableTemplateLib.InvestigationTemplates.FirstOrDefault(x => x.Name == mission);
+                var named = AvailableTemplateLib.FindByName(AvailableTemplateLib.InvestigationGroups, mission);
                 if (named == null)
                     Console.WriteLine($"RandomTemplateEngine: No investigation template named '{mission}' found, falling back to random.");
                 else
                     return named;
             }
 
-            int selected = random.Next(AvailableTemplateLib.InvestigationTemplates.Count);
-            var template = AvailableTemplateLib.InvestigationTemplates[selected];
-            AvailableTemplateLib.InvestigationTemplates.RemoveAt(selected);
+            var template = AvailableTemplateLib.PickAndRemove(AvailableTemplateLib.InvestigationGroups, random);
             template.Addons = addons;
             return template;
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate(string mission, List<string> addons = null)
         {
-            if (AvailableTemplateLib.DiscoveryTemplates.Count == 0) return null;
+            if (!AvailableTemplateLib.HasTemplates(AvailableTemplateLib.DiscoveryGroups)) return null;
             Random random = RandomProvider.Random;
 
-            int selected = random.Next(AvailableTemplateLib.DiscoveryTemplates.Count);
-            var template = AvailableTemplateLib.DiscoveryTemplates[selected];
-            AvailableTemplateLib.DiscoveryTemplates.RemoveAt(selected);
+            var template = AvailableTemplateLib.PickAndRemove(AvailableTemplateLib.DiscoveryGroups, random);
             template.Addons = addons;
             return template;
         }

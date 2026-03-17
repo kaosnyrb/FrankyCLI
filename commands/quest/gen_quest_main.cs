@@ -145,7 +145,7 @@ namespace FrankyCLI
 
                 //We have different styles of quest chains, so randomly choose one.
 
-                bool setmissions = true;
+                bool setmissions = false;
                 if (setmissions)
                 {
                     var outlawQuest = new StaticLayoutQuestChain(myMod)

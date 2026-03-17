@@ -15,64 +15,55 @@ namespace Retrograde.Quests.TemplateEngines
             return template;
         }
 
-        // Remove a random entry from the pool and return it
-        private static MissionTemplate RemovePick(List<MissionTemplate> pool)
-        {
-            int i = RandomProvider.Random.Next(pool.Count);
-            var t = pool[i];
-            pool.RemoveAt(i);
-            return t;
-        }
-
         public MissionTemplate GetShowdownMissionTemplate(string mission, List<string> addons = null)
         {
-            if (AvailableTemplateLib.ShowdownTemplates.Count == 0) return null;
+            if (!AvailableTemplateLib.HasTemplates(AvailableTemplateLib.ShowdownGroups)) return null;
 
             if (!string.IsNullOrEmpty(mission))
             {
-                var named = AvailableTemplateLib.ShowdownTemplates.FirstOrDefault(x => x.Name == mission);
+                var named = AvailableTemplateLib.FindByName(AvailableTemplateLib.ShowdownGroups, mission);
                 if (named == null)
                     Console.WriteLine($"AI_TemplateEngine: No showdown template named '{mission}' found, falling back to random.");
                 else
                     return ApplyAddons(named, addons);
             }
 
-            return ApplyAddons(RemovePick(AvailableTemplateLib.ShowdownTemplates), addons);
+            return ApplyAddons(AvailableTemplateLib.PickAndRemove(AvailableTemplateLib.ShowdownGroups, RandomProvider.Random), addons);
         }
 
         public MissionTemplate GetInvestigationMissionTemplate(string mission, List<string> addons = null)
         {
-            if (AvailableTemplateLib.InvestigationTemplates.Count == 0) return null;
+            if (!AvailableTemplateLib.HasTemplates(AvailableTemplateLib.InvestigationGroups)) return null;
 
             if (!string.IsNullOrEmpty(mission))
             {
-                var named = AvailableTemplateLib.InvestigationTemplates.FirstOrDefault(x => x.Name == mission);
+                var named = AvailableTemplateLib.FindByName(AvailableTemplateLib.InvestigationGroups, mission);
                 if (named == null)
                     Console.WriteLine($"AI_TemplateEngine: No investigation template named '{mission}' found, falling back to random.");
                 else
                     return ApplyAddons(named, addons);
             }
 
-            var picked = RemovePick(AvailableTemplateLib.InvestigationTemplates);
+            var picked = AvailableTemplateLib.PickAndRemove(AvailableTemplateLib.InvestigationGroups, RandomProvider.Random);
             string prefix = picked.Name.Split("-")[0];
-            AvailableTemplateLib.InvestigationTemplates.RemoveAll(t => t.Name.Contains(prefix));
+            AvailableTemplateLib.RemoveAll(AvailableTemplateLib.InvestigationGroups, t => t.Name.Contains(prefix));
             return ApplyAddons(picked, addons);
         }
 
         public MissionTemplate GetDiscoveryMissionTemplate(string mission, List<string> addons = null)
         {
-            if (AvailableTemplateLib.DiscoveryTemplates.Count == 0) return null;
+            if (!AvailableTemplateLib.HasTemplates(AvailableTemplateLib.DiscoveryGroups)) return null;
 
             if (!string.IsNullOrEmpty(mission))
             {
-                var named = AvailableTemplateLib.DiscoveryTemplates.FirstOrDefault(x => x.Name == mission);
+                var named = AvailableTemplateLib.FindByName(AvailableTemplateLib.DiscoveryGroups, mission);
                 if (named == null)
                     Console.WriteLine($"AI_TemplateEngine: No discovery template named '{mission}' found, falling back to random.");
                 else
                     return ApplyAddons(named, addons);
             }
 
-            return ApplyAddons(RemovePick(AvailableTemplateLib.DiscoveryTemplates), addons);
+            return ApplyAddons(AvailableTemplateLib.PickAndRemove(AvailableTemplateLib.DiscoveryGroups, RandomProvider.Random), addons);
         }
     }
 }

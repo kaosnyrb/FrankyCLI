@@ -25,7 +25,7 @@ namespace Retrograde.Writing
         /// Number of polish iterations. 0 = disabled (zero extra API calls).
         /// Increase for higher quality: 1-2 for testing, 5+ for final build.
         /// </summary>
-        public static int Iterations = 15;
+        public static int Iterations = 0;
 
         public static void Run(List<IPolishable> polishables)
         {

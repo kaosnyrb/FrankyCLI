@@ -36,7 +36,8 @@ namespace Retrograde.AI.Utils
         }
 
         public static void GenerateLoreContext(OutlawNpc outlawNpc, string lorefile, TemplateLib templateLib,
-            string? pinnedDiscovery = null, string? pinnedShowdown = null, List<string>? pinnedInvestigations = null)
+            string? pinnedDiscovery = null, string? pinnedShowdown = null, List<string>? pinnedInvestigations = null,
+            bool selectArc = true)
         {
             // ── Phase 1: Generate lore only (added to history) ──────────────────────────
             var sb = new StringBuilder();
@@ -78,6 +79,8 @@ namespace Retrograde.AI.Utils
             LoreContext = AITools.RunPrompt(sb.ToString());
 
             // ── Phase 2: Select arc templates (stateless — does NOT enter history) ──────
+            if (!selectArc) return;
+
             var sb2 = new StringBuilder();
 
             sb2.AppendLine($"The lore context for {outlawNpc.name} has just been generated. Using that context, design a full quest arc.");
@@ -147,7 +150,7 @@ namespace Retrograde.AI.Utils
             {
                 sb2.AppendLine("- Use between 2 and 5 investigation stages — choose however many best serve this specific story.");
                 sb2.AppendLine("- Prefer variety of environment across stages (e.g. avoid all-space or all-planet runs).");
-                sb2.AppendLine("- Each investigation stage must use a different template.");
+                sb2.AppendLine("- Each investigation stage must use a different mission TYPE (the part before the dash). For example, you may NOT pick 'Planetside Smallbase Informant - Trade Authority Broker' AND 'Planetside Smallbase Informant - Crimson Fleet Smuggling Liaison' because both are the same type 'Planetside Smallbase Informant'. Pick at most ONE variant of each type.");
             }
 
             string arcResponse = AITools.RunPrompt(sb2.ToString());
@@ -189,6 +192,20 @@ namespace Retrograde.AI.Utils
                 var pipeIdx = raw.IndexOf('|');
                 results.Add(pipeIdx >= 0 ? raw.Substring(0, pipeIdx).Trim() : raw);
             }
+
+            // Deduplicate by mission type (prefix before first " - ")
+            var seenTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var deduped = new List<string>();
+            foreach (var name in results)
+            {
+                var dashIdx = name.IndexOf(" - ");
+                var missionType = dashIdx >= 0 ? name.Substring(0, dashIdx).Trim() : name.Trim();
+                if (seenTypes.Add(missionType))
+                    deduped.Add(name);
+                else
+                    Console.WriteLine($"PlannedArc: Dropped duplicate mission type '{missionType}' (template: {name})");
+            }
+            results = deduped;
 
             // Clamp to valid range
             if (results.Count < 2) Console.WriteLine("PlannedArc WARNING: fewer than 2 investigation stages returned; chain will be short.");

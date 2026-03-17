@@ -74,7 +74,7 @@ namespace Retrograde.Chains
         {
             // Story Setup --------------------------------
             Console.WriteLine("LoopingLayoutQuestChain");
-            var templateManager = new AllTemplateManager(new AI_TemplateEngine());
+            var templateManager = new AllTemplateManager(new RandomTemplateEngine());
             // NPC Target (base setup) --------------------------------
             OutlawNpc outlawNpc = new OutlawNpc(myMod, true);
 
@@ -91,10 +91,15 @@ namespace Retrograde.Chains
             LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib,
                 pinnedDiscovery:      DiscoveryTemplate     != "" ? DiscoveryTemplate     : null,
                 pinnedShowdown:       ShowdownTemplate      != "" ? ShowdownTemplate      : null,
-                pinnedInvestigations: pinnedInvestigations);
+                pinnedInvestigations: pinnedInvestigations, selectArc : false);
 
 
             // Template Choices --------------------------------
+
+            // When selectArc is false, PlannedXxx fields are empty — pick randomly via templateManager.
+            bool useAiArc = LorePrompts.PlannedInvestigations.Count > 0
+                         || !string.IsNullOrEmpty(LorePrompts.PlannedShowdown)
+                         || !string.IsNullOrEmpty(LorePrompts.PlannedDiscovery);
 
             // Showdown (final encounter, high completion)
             var showdownAddons = new List<string>()
@@ -103,7 +108,8 @@ namespace Retrograde.Chains
                 "<QuestProgress>90%</QuestProgress>"
             };
 
-            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(LorePrompts.PlannedShowdown, showdownAddons);
+            var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(
+                useAiArc ? LorePrompts.PlannedShowdown : "", showdownAddons);
 
             outlawNpc.spacesuit = ShowdownMissionTemplate.parameters.ContainsKey("NeedSpacesuit") && (bool)ShowdownMissionTemplate.parameters["NeedSpacesuit"];
             outlawNpc.GenerateNPC();
@@ -118,8 +124,9 @@ namespace Retrograde.Chains
             // PlannedInvestigations is in story order (earliest first, closest to showdown last).
             // We build investigationStages in reverse (closest to showdown at index 0) to match
             // the existing generation order (showdown → deepest → ... → earliest → discovery).
-            var plannedList = LorePrompts.PlannedInvestigations;
-            int count = plannedList.Count;
+            int count = useAiArc
+                ? LorePrompts.PlannedInvestigations.Count
+                : RandomProvider.Random.Next(2, 6); // 2-5 stages when picking randomly
 
             var investigationStages = new List<(string Stage, MissionTemplate Template)>();
 
@@ -141,7 +148,9 @@ namespace Retrograde.Chains
                 };
 
                 // plannedList is story order → reverse index to map to generation order
-                string plannedName = plannedList[count - 1 - i];
+                string plannedName = useAiArc
+                    ? LorePrompts.PlannedInvestigations[count - 1 - i]
+                    : "";
 
                 var template = templateManager.GetInvestigationMissionTemplate(plannedName, investigationAddons);
 
@@ -158,8 +167,8 @@ namespace Retrograde.Chains
                 "<QuestProgress>0%</QuestProgress>"
             };
 
-
-            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate(LorePrompts.PlannedDiscovery, discoveryAddons);
+            var DiscoveryMissionTemplate = templateManager.GetDiscoveryMissionTemplate(
+                useAiArc ? LorePrompts.PlannedDiscovery : "", discoveryAddons);
 
             // Now we build a story-ordered list for stage location history:
             // Discovery -> earliest investigation -> ... -> closest investigation -> Showdown

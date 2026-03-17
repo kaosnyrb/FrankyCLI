@@ -8,23 +8,23 @@ namespace Retrograde.Quests.TemplateEngines
 
         protected override void BuildLibraries(TemplateLib lib)
         {
-            lib.ImportTemplates(new Templates_Dataslate());
-            lib.ImportTemplates(new Templates_PlanetInvestigate());
-            lib.ImportTemplates(new Templates_PlanetCombat());
-            lib.ImportTemplates(new Templates_PlanetSmallBaseDestroy());
-            lib.ImportTemplates(new Templates_PlanetSmallBaseInformant());
-            lib.ImportTemplates(new Templates_PlanetConversation());
-            lib.ImportTemplates(new Templates_SpecificDungeons());
-            lib.ImportTemplates(new Templates_SpaceActivator());
-            lib.ImportTemplates(new Templates_SpaceInformant());
-            lib.ImportTemplates(new Templates_SpaceDestroy());
-            lib.ImportTemplates(new Templates_Spacestation());
-            lib.ImportTemplates(new Templates_Derelicts());
-            lib.ImportTemplates(new Templates_Cities());
-            lib.ImportTemplates(new Templates_Cities_Neon());
-            lib.ImportTemplates(new Templates_Cities_Conversation_Neon());
-            lib.ImportTemplates(new Templates_Cities_Cydonia());
-            lib.ImportTemplates(new Templates_Cities_Akila());
+            lib.ImportTemplates(new Templates_Dataslate(),                    weight: 1.0f);
+            lib.ImportTemplates(new Templates_PlanetInvestigate(),            weight: 1.0f);
+            lib.ImportTemplates(new Templates_PlanetCombat(),                 weight: 1.0f);
+            lib.ImportTemplates(new Templates_PlanetSmallBaseDestroy(),       weight: 1.0f);
+            lib.ImportTemplates(new Templates_PlanetSmallBaseInformant(),     weight: 1.0f);
+            lib.ImportTemplates(new Templates_PlanetConversation(),           weight: 1.0f);
+            lib.ImportTemplates(new Templates_SpecificDungeons(),             weight: 1.0f);
+            lib.ImportTemplates(new Templates_SpaceActivator(),               weight: 1.0f);
+            lib.ImportTemplates(new Templates_SpaceInformant(),               weight: 1.0f);
+            lib.ImportTemplates(new Templates_SpaceDestroy(),                 weight: 1.0f);
+            lib.ImportTemplates(new Templates_Spacestation(),                 weight: 1.0f);
+            lib.ImportTemplates(new Templates_Derelicts(),                    weight: 1.0f);
+            lib.ImportTemplates(new Templates_Cities(),                       weight: 1.0f);
+            lib.ImportTemplates(new Templates_Cities_Neon(),                  weight: 1.0f);
+            lib.ImportTemplates(new Templates_Cities_Conversation_Neon(),     weight: 1.0f);
+            lib.ImportTemplates(new Templates_Cities_Cydonia(),               weight: 1.0f);
+            lib.ImportTemplates(new Templates_Cities_Akila(),                 weight: 1.0f);
         }
     }
 }
