@@ -35,44 +35,6 @@ namespace Retrograde.Chains
             );
         }
 
-        // Generates 1-2 sentences of prose describing what a recovered data slate reveals
-        // about the next step. Does not reference where it was found — that's unknown at generation time.
-        private void GenerateDiscoveryBridge(MissionTemplate discoveryTemplate, MissionTemplate toTemplate)
-        {
-            var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe what a recovered data slate reveals that points the player toward " +
-                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                "Focus only on the contents of the slate and what lead it provides — do not mention where or how the player found it. " +
-                "Be concrete — name a data file reference, a contact, a location fragment, or a coded instruction. " +
-                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
-            );
-
-            if (discoveryTemplate.Addons == null)
-                discoveryTemplate.Addons = new List<string>();
-            discoveryTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
-        }
-
-        // Generates 1-2 sentences of prose describing what the player finds at fromTemplate
-        // that sends them toward toTemplate. Adds to history AND to fromTemplate.Addons.
-        private void GenerateStageBridge(MissionTemplate fromTemplate, MissionTemplate toTemplate)
-        {
-            var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe the specific clue or contact the player uncovers at " +
-                $"{fromTemplate.Location} (the \"{fromTemplate.Name}\" stage) that points them toward " +
-                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                $"The source contact or clue is located at {fromTemplate.Location} — use this exactly; do not substitute any other location from the lore context. " +
-                "Be concrete — name a data file, a physical trail, or an overheard conversation. " +
-                "If a contact provides the lead, describe them by role only (e.g. 'a dock worker', 'a UC officer') — do not invent a name for them. " +
-                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
-            );
-
-            if (fromTemplate.Addons == null)
-                fromTemplate.Addons = new List<string>();
-            fromTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
-        }
-
-
-
         public bool GenerateQuest()
         {
 
@@ -82,11 +44,7 @@ namespace Retrograde.Chains
             Console.WriteLine("StaticLayoutQuestChain");
             List<ITemplateManager> templates = new List<ITemplateManager>()
                 {
-                    new AllTemplateManager(new AI_TemplateEngine()),
-                    //new FrontierTemplateManager(new AI_TemplateEngine()),
-                    //new NoPOITemplateManager(new AI_TemplateEngine()),
-                    //new CombatTemplateManager(new AI_TemplateEngine()),
-                    //new AllTemplateManager(new RandomTemplateEngine())
+                    new AllTemplateManager(new RandomTemplateEngine())
                 };
 
 
@@ -117,7 +75,7 @@ namespace Retrograde.Chains
             LorePrompts.GenerateLoreContext(outlawNpc, Lorefile, templateManager.AvailableLib,
                 pinnedDiscovery:     DiscoveryTemplate     != "" ? DiscoveryTemplate     : null,
                 pinnedShowdown:      ShowdownTemplate      != "" ? ShowdownTemplate      : null,
-                pinnedInvestigations: pinnedInvestigations);
+                pinnedInvestigations: pinnedInvestigations, selectArc : false);
 
             // Template Choices --------------------------------
             var ShowdownMissionTemplate = templateManager.GetShowdownMissionTemplate(
@@ -184,7 +142,6 @@ namespace Retrograde.Chains
             );
 
             Console.WriteLine("---------------------------------------------------------------------------------");
-            GenerateStageBridge(DeepInvestigationMissionTemplate, ShowdownMissionTemplate);
             Console.WriteLine("Investigation: " + DeepInvestigationMissionTemplate.Name);
             var InvestigationMission = DeepInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DeepInvestigationMissionTemplate, ShowdownMissionTemplate.outlawQuest);
             if (!string.IsNullOrEmpty(DeepInvestigationMissionTemplate.outlawQuest.LogMessage))
@@ -194,7 +151,6 @@ namespace Retrograde.Chains
             {
                 //ForkInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                GenerateStageBridge(ForkInvestigationMissionTemplate, DeepInvestigationMissionTemplate);
                 Console.WriteLine("ForkInvestigation: " + ForkInvestigationMissionTemplate.Name);
                 Quest formmission = ForkInvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, ForkInvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
                 if (!string.IsNullOrEmpty(ForkInvestigationMissionTemplate.outlawQuest.LogMessage))
@@ -202,7 +158,6 @@ namespace Retrograde.Chains
 
                 //InitialInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                GenerateStageBridge(InvestigationMissionTemplate, ForkInvestigationMissionTemplate);
                 Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
                 Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, ForkInvestigationMissionTemplate.outlawQuest);
                 if (!string.IsNullOrEmpty(InvestigationMissionTemplate.outlawQuest.LogMessage))
@@ -212,7 +167,6 @@ namespace Retrograde.Chains
             {
                 //InitialInvestigation
                 Console.WriteLine("---------------------------------------------------------------------------------");
-                GenerateStageBridge(InvestigationMissionTemplate, DeepInvestigationMissionTemplate);
                 Console.WriteLine("Investigation: " + InvestigationMissionTemplate.Name);
                 Quest investmission2 = InvestigationMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, InvestigationMissionTemplate, DeepInvestigationMissionTemplate.outlawQuest);
                 if (!string.IsNullOrEmpty(InvestigationMissionTemplate.outlawQuest.LogMessage))
@@ -221,8 +175,6 @@ namespace Retrograde.Chains
 
             // Finally build the discovery step
             Console.WriteLine("---------------------------------------------------------------------------------");
-            GenerateDiscoveryBridge(DiscoveryMissionTemplate, InvestigationMissionTemplate);
-
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(myMod, outlawNpc, DiscoveryMissionTemplate, InvestigationMissionTemplate.outlawQuest);
 
             //We have now generated all the stages. Do any final linking steps

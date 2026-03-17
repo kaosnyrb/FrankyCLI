@@ -34,42 +34,6 @@ namespace Retrograde.Chains
             );
         }
 
-        // Generates 1-2 sentences of intel that points the player toward the first investigation.
-        // No reference to how or where the player obtained it — the discovery mechanic is meta, not lore.
-        private void GenerateDiscoveryBridge(MissionTemplate discoveryTemplate, MissionTemplate toTemplate)
-        {
-            var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe a piece of intel that points toward " +
-                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                "Do not mention where or how this intel was obtained. " +
-                "Be concrete — name a data file reference, a contact by role only, a location fragment, or a coded instruction. " +
-                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
-            );
-
-            if (discoveryTemplate.Addons == null)
-                discoveryTemplate.Addons = new List<string>();
-            discoveryTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
-        }
-
-        // Generates 1-2 sentences of prose describing what the player finds at fromTemplate
-        // that sends them toward toTemplate. Adds to history AND to fromTemplate.Addons.
-        private void GenerateStageBridge(MissionTemplate fromTemplate, MissionTemplate toTemplate)
-        {
-            var bridge = AITools.RunPrompt(
-                $"In 1-2 sentences, describe the specific clue or contact the player uncovers at " +
-                $"{fromTemplate.Location} (the \"{fromTemplate.Name}\" stage) that points them toward " +
-                $"the \"{toTemplate.Name}\" stage at {toTemplate.Location}.\n" +
-                $"The source contact or clue is located at {fromTemplate.Location} — use this exactly; do not substitute any other location from the lore context. " +
-                "Be concrete — name a data file, a physical trail, or an overheard conversation. " +
-                "If a contact provides the lead, describe them by role only (e.g. 'a dock worker', 'a UC officer') — do not invent a name for them. " +
-                "Ground it in the established lore. Output only the 1-2 sentences, no headers or labels."
-            );
-
-            if (fromTemplate.Addons == null)
-                fromTemplate.Addons = new List<string>();
-            fromTemplate.Addons.Add($"<StageBridge>{bridge}</StageBridge>");
-        }
-
         public bool GenerateQuest()
         {
             // Story Setup --------------------------------
@@ -225,16 +189,6 @@ namespace Retrograde.Chains
                 var (stageName, template) = investigationStages[i];
 
                 Console.WriteLine(stageName + ": " + template.Name);
-                if (i > 0)
-                {
-                    // Bridge: this stage leads the player to the previous (closer-to-showdown) stage
-                    GenerateStageBridge(template, investigationStages[i - 1].Template);
-                }
-                else
-                {
-                    // Bridge: closest investigation leads the player toward the showdown
-                    GenerateStageBridge(template, ShowdownMissionTemplate);
-                }
                 Quest formmission = template.outlawQuest.Setup(myMod, outlawNpc, template, lastOutlawQuest);
                 if (!string.IsNullOrEmpty(template.outlawQuest.LogMessage))
                     AITools.InjectContextIntoHistory($"[Stage '{template.Name}' log entry]: {template.outlawQuest.LogMessage}");
@@ -244,10 +198,6 @@ namespace Retrograde.Chains
             // Finally build the discovery step, linked to the earliest investigation
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("Discovery: " + DiscoveryMissionTemplate.Name);
-            // Bridge: Discovery leads the player into the earliest investigation stage
-            if (investigationStages.Count > 0)
-                GenerateDiscoveryBridge(DiscoveryMissionTemplate, investigationStages[^1].Template);
-
             var DiscoveryMission = DiscoveryMissionTemplate.outlawQuest.Setup(
                 myMod,
                 outlawNpc,

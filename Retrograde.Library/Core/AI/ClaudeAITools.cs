@@ -153,7 +153,6 @@ namespace Retrograde.AI
             "- Faction, role, crime, personality, and motives\n" +
             "- Arc type and theme (exact template names)\n" +
             "- Per-stage details already generated: location, objective, named characters, clue items\n" +
-            "- Any StageBridge clues linking stages\n\n" +
             "Output a single prose block of no more than 400 words. No headers or bullet points. " +
             "The very first line must be <Summary>First Last</Summary> with the outlaw's exact full name.\n\n" +
             "[CONVERSATION]\n" + historyText;

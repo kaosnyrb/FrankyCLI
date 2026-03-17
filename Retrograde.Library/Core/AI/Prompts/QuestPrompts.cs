@@ -44,7 +44,6 @@ namespace Retrograde.AI.Utils
             var logprompt =
                 "Write a 50-word log entry for a bounty hunter.\r\n" +
                 "State clearly: what the objective is, where it must be done, and why (the concrete reason tied to the target or situation).\r\n" +
-                "If a <StageBridge> is provided in the Additional Information, frame it as what the bounty hunter hopes to learn or find — not as a known fact. Weave it naturally into the body of the entry as an investigative angle (e.g. 'may reveal', 'could confirm', 'worth checking') — do not add it as a separate final sentence.\r\n" +
                 "Name the bounty target exactly as established in the LoreContext.\r\n" +
                 "Style: field intel note — plain declarative sentences, no metaphor, no ominous hints, no atmospheric writing.\r\n" +
                 "Use the LoreContext established earlier in this conversation for concrete facts only: target name, faction, motive. Do not invent new names.\r\n" +

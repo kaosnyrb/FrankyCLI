@@ -144,7 +144,6 @@ namespace Retrograde.AI.Utils
                 "- Name the target exactly as established in the LoreContext. State what they did, what they are wanted for, and who they are — former occupation, what they did that crossed the line.\r\n" +
                 "- Identify the first location from the provided context. State plainly why the target is likely there.\r\n" +
                 "- Tell the hunter exactly what to do at that location. Close with a concrete urgency hook — a named rival also working the bounty, a contact who moves on quickly, or a window that closes soon.\r\n" +
-                "If a <StageBridge> is provided in the Additional Information, frame it as what the hunter hopes to learn or find — not as a known fact. Weave it naturally into the final point as an investigative angle (e.g. 'may reveal', 'could confirm', 'worth checking') — do not add it as a separate sentence.\r\n\r\n" +
 
                 "Additional Information:\r\n";
 
