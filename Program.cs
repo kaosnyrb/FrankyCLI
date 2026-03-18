@@ -105,6 +105,9 @@ switch (mode)
     case "gen_shiptest":
         return gen_shiptest.Run();
 
+    case "gen_shipmodulestats":
+        return gen_shipmodulestats.Run();
+
     case "gen_coordtest":
         return gen_coordtest.Generate(BuildArgs("gen_coordtest", args,
             modname: Get(args, 1, "RG_CoordTest")));
