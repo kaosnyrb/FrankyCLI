@@ -26,6 +26,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `docs/formlib/locations.md` | Location (LCTN) record — key fields, parent→child hierarchy, creating from scratch, cell→location linkage, confirmed keyword FormIDs (LocTypeDungeon/Clearable/Overlay/LocEnc*), vanilla lookup by FormID, SpecificLocation vs PCM keyword fill |
 | `docs/formlib/placed_npc.md` | PlacedNpc (ACHR) — required fields, Persistent flag, Base/PersistentLocation/Location post-construction pattern, PlacementUtil routing (Temporary/Persistent), LvlHumanHostile_ NPC pool FormIDs, boss wiring (LocDungeonBossLocRef + MasterSpecialReferences), terrain Z sampling |
 | `docs/formlib/formlist.md` | FormList (FLST) — Items list type, construction pattern, crew/gang pool, waypoint marker collection, slot-to-content mapping, template copy pattern (no master dependency), lookup by EditorID/FormKey, XMarker FormID (0x3B), gang list EditorIDs |
+| `docs/formlib/weapon_upgrade.md` | WeaponModification (OMOD) upgrade chain — OMOD property types (Int/Float/Enum/KeywordFloat/Include/Group), blueprint Book unlock, ConstructibleObject recipe gating, LeveledItem split distribution, modgroup loot injection, attach point mapping, level styles, data-driven YAML config |
 
 ## Design Library
 
