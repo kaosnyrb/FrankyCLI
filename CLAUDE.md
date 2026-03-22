@@ -28,6 +28,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `docs/formlib/formlist.md` | FormList (FLST) — Items list type, construction pattern, crew/gang pool, waypoint marker collection, slot-to-content mapping, template copy pattern (no master dependency), lookup by EditorID/FormKey, XMarker FormID (0x3B), gang list EditorIDs |
 | `docs/formlib/weapon_upgrade.md` | WeaponModification (OMOD) upgrade chain — OMOD property types (Int/Float/Enum/KeywordFloat/Include/Group), blueprint Book unlock, ConstructibleObject recipe gating, LeveledItem split distribution, modgroup loot injection, attach point mapping, level styles, data-driven YAML config |
 | `docs/formlib/ship_module.md` | Ship structural module from scratch — MoveableStatic + SnapTemplate + Cell + PackIn + GBFM + COBJ chain, CellBlock/SubBlock routing, snap node direction system (6 FormIDs), GBFM components (PropertySheet/FormLinkData/Keywords/FullName), multi-directional flip/rotate variants, ship position keywords, FormList pattern |
+| `docs/formlib/enchantment.md` | Enchantment chain (ObjectEffect→MagicEffect) — 3 MGEF archetypes (PeakValueModifier/Script+Perk/Script+Papyrus), MGEF flags, armor OMOD attachment points, LGDI structure, minimum records per stat, engine-native vs custom AVs |
 
 ## Design Library
 
