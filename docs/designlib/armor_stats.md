@@ -57,6 +57,80 @@ Mechanized (+40 carry), Sentinel (75% chance -50% dmg standing still)
 - `PeakValueModifier` (34) — modifies one AV with keyword
 - `Chameleon` (49), `Jetpack` (48), `Stimpack` (31) — Starfield-specific
 
+### Attachment Point Keywords (confirmed via gen_armorinspect)
+
+| Rank | EditorID | FormKey | LGDI Slot |
+|------|----------|---------|-----------|
+| 1 | `ap_Legendary_rank_1` | `1E32C8:Starfield.esm` | First |
+| 2 | `ap_Legendary_rank_2` | `329ABC:Starfield.esm` | Second |
+| 3 | `ap_Legendary_rank_3` | `329ABD:Starfield.esm` | Third |
+| 4 | `ap_Legendary_rank_4` | `3197E8:Starfield.esm` | (unused in vanilla LGDI) |
+
+Each OMOD's `AttachPoint` property is set to the keyword for its tier. The LGDI `Slot` field (First/Second/Third) maps 1:1 to these attach points.
+
+### Vanilla OMOD Anatomy (confirmed via gen_armorinspect)
+
+Every vanilla legendary armor OMOD follows a consistent property pattern:
+
+**Mandatory properties (all OMODs have these):**
+
+| # | Type | Property | FunctionType | Purpose |
+|---|------|----------|-------------|---------|
+| 0 | `ObjectModFloatProperty` | `Value` | `MultAndAdd` | Item price multiplier |
+| 1 | `ObjectModFormLinkIntProperty` | `Enchantment` | `Add` | ObjectEffect → Spell → MagicEffect chain |
+| N | `ObjectModFormLinkIntProperty` | `Keyword` | `Add` | UI display keyword |
+
+**Optional properties (some OMODs add these):**
+
+| Type | Property | FunctionType | Purpose |
+|------|----------|-------------|---------|
+| `ObjectModFormLinkFloatProperty` | `ActorValue` | `Add` | Direct stat modification (AVIF FormKey + float value) |
+| `ObjectModFormLinkIntProperty` | `Enchantment` | `Add` | Additional enchantment (Bolstering uses 2) |
+
+**Value multiplier scales by tier:**
+
+| Tier | Value | Interpretation |
+|------|-------|----------------|
+| 1 (rank_1) | 0.03 | +3% item price |
+| 2 (rank_2) | 0.06 | +6% item price |
+| 3 (rank_3) | 0.12 | +12% item price |
+
+**Inspected OMOD details:**
+
+| OMOD | FormKey | Tier | Props | Extra Properties |
+|------|---------|------|-------|-----------------|
+| Chameleon | `1336C1` | 1 | 3 | (standard only) |
+| Anti-Ballistic | `13369E` | 1 | 5 | AV `LGND_LessDmgBallistic` (`13369D`) = 15, AV `LGND_LessDmgBallisticParticle` (`20D255`) = 3.75 |
+| O2 Filter | `0690AE` | 1 | 3 | (standard only) |
+| Bolstering | `1336C6` | 1 | 4 | 2x Enchantment (energy + physical resist scaling) |
+| Resource Hauler | `060293` | 2 | 3 | (standard only) |
+| Acrobat (FallDamage) | `0710FD` | 2 | 4 | AV `FallingDamageMod` (`0BA43D`) = 50 |
+| Auto-Medic | `0C9A43` | 2 | 3 | (standard only) |
+| Incendiary | `002983` | 3 | 3 | (standard only) |
+| Armor-Plated | `2EDE59` | 3 | 4 | AV `LGND_ArmorPlated` (`2CD667`) = 10 |
+
+**Key insights:**
+1. Even effects that seem like pure enchantments (Chameleon, Auto-Medic) still have the Enchantment property — the actual game effect lives in the ObjectEffect → Spell → MagicEffect chain. The ActorValue property is used for *additional* flat stat modifications on top of the enchantment.
+2. The `LGND_*` ActorValues are **custom variables** (Type=Variable, DefaultToZero) — they don't do anything by themselves. A corresponding Perk with entry points reads these AVs as conditions/magnitudes. This means even "Tier A" effects need an associated perk record to function.
+3. `FallingDamageMod` (`0BA43D`) has a ContextNote confirming this: *"for this actor value to actually do anything, the actor needs to have the associated perk."*
+4. This changes the implementation picture: there's no truly "simple" OMOD-only path. All effects go through Enchantment (for the spell chain) and optionally ActorValue (to parameterize the perk). The perk is what reads the AV and modifies gameplay.
+
+### DefaultLegendaryArmor LGDI Structure (0x1336C3)
+
+- **31 total mods:** 10 First (tier 1), 11 Second (tier 2), 10 Third (tier 3)
+- **BaseObjectList:** `1336C0:Starfield.esm`
+- **IncludeFilters:** 17 entries using keywords `23C7C1`, `23C7BF`, `23C7C0` to gate which mods can appear on which armor types (body vs helmet vs pack)
+
+**LGDI IncludeFilter keywords** (need lookup — likely armor slot keywords):
+
+| Keyword FormKey | Probable role |
+|----------------|---------------|
+| `23C7C1` | Armor body slot |
+| `23C7BF` | Helmet slot |
+| `23C7C0` | Spacesuit/pack slot |
+
+The IncludeFilter `ReferencedMod` field uses tiny FormIDs (0x000001–0x00000A) that appear to be indices into the LegendaryMods list, gating which mods are valid for which armor slot.
+
 ---
 
 ## Actor Value Reference
@@ -461,21 +535,38 @@ Full Perk record with entry points and conditions. Most powerful but most record
 
 | Tier | Count | Notes |
 |------|-------|-------|
-| **A — OMOD ActorValue** | 35 | Flat stat boosts. Simplest — just needs AVIF FormID + float. Reuses weapon OMOD generator pattern. |
-| **C — Perk Entry Point** | 27 | Conditional/triggered effects. Most powerful but requires Perk + conditions per stat. |
+| **A — OMOD ActorValue** | 35 | Flat stat boosts via AVIF. Simplest, but see note below. |
+| **C — Perk Entry Point** | 27 | Conditional/triggered effects. Requires Perk + conditions per stat. |
 
-Note: Many stats previously classified as Tier B (Enchantment chain) were reclassified. Regenerator moved to Tier A since `HealRateMult` is a direct AV. Muffled Steps moved to Tier A via `MovementNoiseMult`. True Tier B (needing full spell chains) is rare — most effects map to either a direct AV or a perk entry point.
+### Revised understanding after OMOD inspection
+
+**All vanilla legendary OMODs use an Enchantment chain** — even the simplest flat stat mods. The "Tier A" classification assumed that an OMOD with `Property = ActorValue` was self-contained, but inspection reveals:
+
+- Every vanilla OMOD has `Property = Enchantment` (ObjectEffect → Spell → MagicEffect)
+- Custom `LGND_*` ActorValues are **inert by themselves** — a Perk reads them to produce gameplay effects
+- `FallingDamageMod` confirms: *"for this actor value to actually do anything, the actor needs to have the associated perk"*
+
+**True minimum per stat (for any tier):**
+1. OMOD — with Value + Enchantment + Keyword properties (and optionally ActorValue)
+2. ObjectEffect (ENCH) — wrapper for the spell
+3. Spell (SPEL) — constant effect attached to the player
+4. MagicEffect (MGEF) — actual ValueModifier archetype targeting the AV
+5. Keyword (KYWD) — UI display keyword
+6. Optionally: custom AVIF + Perk (if the effect needs conditional logic)
+
+**However:** Some generic AVs like `HealRateMult`, `SpeedMult`, `CarryWeight` may work directly via the MagicEffect `ValueModifier` archetype without needing a custom perk. The `LGND_*` pattern is for effects that need conditional logic (e.g. "reduce ballistic damage by X%").
 
 **Recommended phases:**
-1. Start with the 35 Tier A stats — trivial OMOD generation
-2. Add Tier C stats that use simple perk entry points (no spell triggers) — `ModFallingDamage`, `ModBuyPrices`, etc.
-3. Add Tier C stats with spell triggers (`ApplyCombatHitSpellSelf`, `ApplyAimDownSightSpell`) last
+1. Start with effects using **generic AVs** (HealRateMult, SpeedMult, CarryWeight, env resists) — need OMOD + ENCH + SPEL + MGEF + KYWD but no custom perk
+2. Add effects using **custom AVs** — same as above plus custom AVIF + Perk with entry points
+3. Add Tier C effects with spell triggers (`ApplyCombatHitSpellSelf`, `ApplyAimDownSightSpell`) last
 
 ---
 
 ## Implementation Prerequisites
 
-1. **Verify AVIF FormIDs** — Several AVs above use enum indices rather than confirmed FormIDs. Look up via xEdit or a Mutagen enumeration script.
-2. **Create armor OMOD generator** — parallel to weapon upgrade generator, using `Armor.Property` enum and YAML stat definitions
+1. **Test the minimal chain** — Create one OMOD with Enchantment → Spell → MagicEffect (ValueModifier on a generic AV like `HealRateMult`) to confirm it works without a custom perk
+2. **Create armor OMOD generator** — parallel to weapon upgrade generator, using `Armor.Property` enum. Must generate the full ENCH→SPEL→MGEF chain per stat
 3. **Build custom LGDI** — replace vanilla `DefaultLegendaryArmor` with a custom legendary item definition that includes our new OMODs
 4. **Test in-game** — verify stats show on item card, apply correctly, and don't conflict with vanilla legendary system
+5. **Investigate IncludeFilter keywords** — `23C7C1`, `23C7BF`, `23C7C0` gate which mods appear on body/helmet/pack — need to look these up in xEdit (Mutagen keyword enumeration crashes before reaching them)

@@ -391,9 +391,7 @@ namespace FrankyCLI
                         { DumpPcmContentNode(rec); found++; }
                     break;
                 case "keyword":
-                    foreach (var rec in mod.Keywords)
-                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Keyword"); found++; }
+                    found += SearchWithRecovery(mod.Keywords, search, "Keyword");
                     break;
                 case "message":
                 case "mesg":
