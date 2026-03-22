@@ -27,6 +27,9 @@ namespace FrankyCLI
                 Console.WriteLine("              PcmBranchNode, PcmContentNode, Book, Scene");
                 Console.WriteLine("              Quest, Quest_VMAD (full VirtualMachineAdapter + alias dump)");
                 Console.WriteLine("              Message (alias: mesg), Faction, Global, FormList");
+                Console.WriteLine("              Armor (armo), ObjectModification (omod), ObjectEffect (ench)");
+                Console.WriteLine("              Perk, MagicEffect (mgef), DamageType (dmgt), Spell (spel)");
+                Console.WriteLine("              LegendaryItem (lgdi), Outfit (otft), ActorValueInformation (avif)");
                 Console.WriteLine("              Use 'list' as record type to see all available groups.");
                 Console.WriteLine();
                 Console.WriteLine("EditorID search: partial match (contains)");
@@ -413,11 +416,53 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "FormList"); found++; }
                     break;
+                case "armor":
+                case "armo":
+                    found += SearchWithRecovery(mod.Armors, search, "Armor");
+                    break;
+                case "objectmodification":
+                case "omod":
+                    found += SearchWithRecovery(mod.ObjectModifications, search, "ObjectModification");
+                    break;
+                case "objecteffect":
+                case "ench":
+                    found += SearchWithRecovery(mod.ObjectEffects, search, "ObjectEffect");
+                    break;
+                case "perk":
+                    found += SearchWithRecovery(mod.Perks, search, "Perk");
+                    break;
+                case "magiceffect":
+                case "mgef":
+                    found += SearchWithRecovery(mod.MagicEffects, search, "MagicEffect");
+                    break;
+                case "damagetype":
+                case "dmgt":
+                    found += SearchWithRecovery(mod.DamageTypes, search, "DamageType");
+                    break;
+                case "legendaryitem":
+                case "lgdi":
+                    found += SearchWithRecovery(mod.LegendaryItems, search, "LegendaryItem");
+                    break;
+                case "outfit":
+                case "otft":
+                    found += SearchWithRecovery(mod.Outfits, search, "Outfit");
+                    break;
+                case "actorvalueinformation":
+                case "avif":
+                    found += SearchWithRecovery(mod.ActorValueInformation, search, "ActorValueInformation");
+                    break;
+                case "spell":
+                case "spel":
+                    found += SearchWithRecovery(mod.Spells, search, "Spell");
+                    break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
                     Console.WriteLine("Supported: SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
                     Console.WriteLine("           Quest, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)");
                     Console.WriteLine("           Message (alias: mesg), Faction, Global, FormList");
+                    Console.WriteLine("           Armor (alias: armo), ObjectModification (alias: omod), ObjectEffect (alias: ench)");
+                    Console.WriteLine("           Perk, MagicEffect (alias: mgef), DamageType (alias: dmgt), Spell (alias: spel)");
+                    Console.WriteLine("           LegendaryItem (alias: lgdi), Outfit (alias: otft), ActorValueInformation (alias: avif)");
                     Console.WriteLine("           PlacedObject (alias: refr) — search for placed objects by EditorID or FormID (0x...)");
                     break;
             }
@@ -442,6 +487,48 @@ namespace FrankyCLI
                 return true;
 
             return false;
+        }
+
+        /// <summary>
+        /// Iterates a record group with try/catch per record.
+        /// Some record types (Armor, Keyword) crash Mutagen's binary parser on certain records
+        /// (e.g. BGSAdaptiveTriggerData_Component). This skips broken records and continues.
+        /// </summary>
+        private static int SearchWithRecovery<T>(IEnumerable<T> records, string search, string typeName)
+            where T : Mutagen.Bethesda.Plugins.Records.IMajorRecordGetter
+        {
+            int found = 0;
+            var enumerator = records.GetEnumerator();
+            while (true)
+            {
+                try
+                {
+                    if (!enumerator.MoveNext()) break;
+                    var rec = enumerator.Current;
+                    if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                    {
+                        try
+                        {
+                            DumpRecord(rec, typeName);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"--- {typeName} ---");
+                            Console.WriteLine($"  FormKey:  {rec.FormKey}");
+                            Console.WriteLine($"  EditorID: {rec.EditorID}");
+                            Console.WriteLine($"  ERROR dumping properties: {ex.Message}");
+                            Console.WriteLine();
+                        }
+                        found++;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Mutagen parsing error on this record — skip and continue
+                    continue;
+                }
+            }
+            return found;
         }
 
         private static void DumpSurfaceBlock(ISurfaceBlockGetter block)
@@ -1411,11 +1498,21 @@ namespace FrankyCLI
             var groups = new (string Name, int Count)[]
             {
                 ("Activator", mod.Activators.Count),
+                ("ActorValueInformation", mod.ActorValueInformation.Count),
+                ("Armor", mod.Armors.Count),
                 ("Cell", mod.Cells.Sum(b => b.SubBlocks.Sum(sb => sb.Cells.Count))),
+                ("DamageType", mod.DamageTypes.Count),
+                ("LegendaryItem", mod.LegendaryItems.Count),
                 ("Light", mod.Lights.Count),
                 ("Location", mod.Locations.Count),
+                ("MagicEffect", mod.MagicEffects.Count),
                 ("Npc", mod.Npcs.Count),
+                ("ObjectEffect", mod.ObjectEffects.Count),
+                ("ObjectModification", mod.ObjectModifications.Count),
+                ("Outfit", mod.Outfits.Count),
                 ("PackIn", mod.PackIns.Count),
+                ("Perk", mod.Perks.Count),
+                ("Spell", mod.Spells.Count),
                 ("Static", mod.Statics.Count),
                 ("SurfaceBlock", mod.SurfaceBlocks.Count),
                 ("Worldspace", mod.Worldspaces.Count),
