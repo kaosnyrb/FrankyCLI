@@ -38,7 +38,7 @@ Starfield procedural dungeon generation tool using Mutagen.Bethesda.
 | `docs/designlib/principles.md` | Philosophy: extract intent not measurements |
 | `docs/designlib/sci_hallway.md` | SciIntHallSm corridor layout, lighting, decoration |
 | `docs/designlib/sci_room.md` | SciIntRmSm room variants, connectors, archetypes |
-| `docs/designlib/armor_stats.md` | Armor stat boosts — vanilla legendary perks, Armor.Property enum, 28 proposed new stats across 3 feasibility tiers (OMOD/Enchantment/Perk), actor value FormIDs |
+| `docs/designlib/armor_stats.md` | Armor stat boosts — vanilla legendary perks, Armor.Property enum (16 values), 62 proposed new stats (35 Tier A OMOD, 27 Tier C Perk), 80+ actor value FormIDs, perk entry point reference, condition function reference |
 
 ## Critical Rules
 
