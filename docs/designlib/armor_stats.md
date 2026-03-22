@@ -109,11 +109,43 @@ Every vanilla legendary armor OMOD follows a consistent property pattern:
 | Incendiary | `002983` | 3 | 3 | (standard only) |
 | Armor-Plated | `2EDE59` | 3 | 4 | AV `LGND_ArmorPlated` (`2CD667`) = 10 |
 
+### Enchantment Chain Anatomy (confirmed via MGEF inspection)
+
+The OMOD's `Enchantment` property points to an **ObjectEffect (ENCH)**, which contains one `Effect` entry pointing to a **MagicEffect (MGEF)**. Three distinct MGEF patterns exist in vanilla:
+
+| Pattern | MGEF Archetype | PerkToApply | Script | Records needed |
+|---------|---------------|-------------|--------|---------------|
+| **PeakValueModifier** | PeakValueModifier | Null | No | OMOD + ENCH + MGEF + KYWD |
+| **Script + Perk** | Script | FormKey | No | OMOD + ENCH + MGEF + PERK + KYWD |
+| **Script + Papyrus** | Script | Null | Yes (VMA) | OMOD + ENCH + MGEF + Script + KYWD |
+
+**Traced chains:**
+
+| OMOD | ENCH | MGEF | Pattern | Target |
+|------|------|------|---------|--------|
+| O2 Filter | `0690A0` | `2C43D9` Legendary_Armor_OxygenFilter | PeakValueModifier | `PlayerOxygenUseMult` (`2D87CB`) |
+| FallDamage | `071100` | `0710FF` Legendary_Armor_FallDamage_AddPerkEffect | Script + Perk | Perk `ModFallDamage` (`0BA435`) |
+| Anti-Ballistic | `1336BB` | `1E684B` abModLegendaryAddCommonPerk | Script + Perk | Perk `ModLegendaryCommonPerk` (`1E6849`) — shared by multiple OMODs |
+| Armor-Plated | `1336BB` | (same as above) | Script + Perk | (same shared perk) |
+| Incendiary | `00297D` | `002986` Legendary_Armor_Incendiary_AddPerkEffect | Script + Perk | Perk (`00297F`) |
+| Resource Hauler | `0065B9` | `0065B7` Legendary_Armor_CarryWeight_Resources_AddPerkEffect | Script + Perk | Perk (`001301`) |
+| Auto-Medic | `0C9A42` | `0C9A3F` Legendary_Armor_AutoHeal_ScriptEffect | Script + Papyrus | Papyrus script (VMA) |
+
 **Key insights:**
-1. Even effects that seem like pure enchantments (Chameleon, Auto-Medic) still have the Enchantment property — the actual game effect lives in the ObjectEffect → Spell → MagicEffect chain. The ActorValue property is used for *additional* flat stat modifications on top of the enchantment.
-2. The `LGND_*` ActorValues are **custom variables** (Type=Variable, DefaultToZero) — they don't do anything by themselves. A corresponding Perk with entry points reads these AVs as conditions/magnitudes. This means even "Tier A" effects need an associated perk record to function.
-3. `FallingDamageMod` (`0BA43D`) has a ContextNote confirming this: *"for this actor value to actually do anything, the actor needs to have the associated perk."*
-4. This changes the implementation picture: there's no truly "simple" OMOD-only path. All effects go through Enchantment (for the spell chain) and optionally ActorValue (to parameterize the perk). The perk is what reads the AV and modifies gameplay.
+
+1. **PeakValueModifier is the simplest path** — no perk, no script. It directly modifies an engine-native AV. The MGEF fields are: `Archetype.Type = PeakValueModifier`, `ActorValue2 = target AVIF`, `CastType = ConstantEffect`, `Flags = Recover|Detrimental|NoDuration|NoArea|HideInUI`.
+
+2. **Engine-native AVs work without perks.** `PlayerOxygenUseMult` (`2D87CB`) is read directly by the game engine's O2 system. Other likely engine-native AVs: `HealRateMult`, `SpeedMult`, `CarryWeight`, `OxygenRateMult`, env resist AVs. These are the true "Tier A" — just OMOD + ENCH + MGEF + KYWD.
+
+3. **Custom `LGND_*` AVs need a perk.** `LGND_LessDmgBallistic`, `LGND_ArmorPlated`, `FallingDamageMod` are inert variables — they parameterize a perk's magnitude. The OMOD sets the AV value, the enchantment applies the perk, the perk's entry point reads the AV. `FallingDamageMod` ContextNote: *"for this actor value to actually do anything, the actor needs to have the associated perk."*
+
+4. **Anti-Ballistic and Armor-Plated share one enchantment** (`Ench_ModLegendaryAddCommonPerk` → `ModLegendaryCommonPerk`). Their different effects come from their different OMOD ActorValue properties — the shared perk reads whichever `LGND_*` AV has been set.
+
+5. **Minimum records per stat (PeakValueModifier path):**
+   - 1x OMOD (ArmorModification) — 3 properties: Value, Enchantment, Keyword
+   - 1x ENCH (ObjectEffect) — 1 Effect entry pointing to the MGEF
+   - 1x MGEF (MagicEffect) — PeakValueModifier targeting the AV
+   - 1x KYWD (Keyword) — display name for UI
 
 ### DefaultLegendaryArmor LGDI Structure (0x1336C3)
 
@@ -533,40 +565,32 @@ Full Perk record with entry points and conditions. Most powerful but most record
 
 ## Summary by Feasibility
 
-| Tier | Count | Notes |
-|------|-------|-------|
-| **A — OMOD ActorValue** | 35 | Flat stat boosts via AVIF. Simplest, but see note below. |
-| **C — Perk Entry Point** | 27 | Conditional/triggered effects. Requires Perk + conditions per stat. |
+| Tier | Count | Records per stat | Notes |
+|------|-------|-----------------|-------|
+| **A — PeakValueModifier** | ~20 | OMOD + ENCH + MGEF + KYWD (4 records) | Engine-native AVs. No perk, no script. |
+| **B — Script + Perk** | ~15 | OMOD + ENCH + MGEF + PERK + KYWD (5 records) | Custom AVs or perk entry points. OMOD sets AV magnitude, perk reads it. |
+| **C — Script + Papyrus** | ~5 | OMOD + ENCH + MGEF + Script + KYWD | Custom Papyrus logic (Auto-Medic pattern). |
+| **D — Perk Entry Point only** | ~22 | OMOD + ENCH + MGEF + PERK + KYWD (5 records) | Conditional/triggered effects via perk entry points. |
 
-### Revised understanding after OMOD inspection
+### Revised tier classification (post-OMOD inspection)
 
-**All vanilla legendary OMODs use an Enchantment chain** — even the simplest flat stat mods. The "Tier A" classification assumed that an OMOD with `Property = ActorValue` was self-contained, but inspection reveals:
+The original A/C split assumed OMOD ActorValue was self-contained. Inspection shows **all vanilla OMODs use an Enchantment chain**. The true complexity axis is the MGEF archetype:
 
-- Every vanilla OMOD has `Property = Enchantment` (ObjectEffect → Spell → MagicEffect)
-- Custom `LGND_*` ActorValues are **inert by themselves** — a Perk reads them to produce gameplay effects
-- `FallingDamageMod` confirms: *"for this actor value to actually do anything, the actor needs to have the associated perk"*
+- **PeakValueModifier** (Tier A) — targets engine-native AVs directly. Confirmed working: `PlayerOxygenUseMult`. Likely candidates: `HealRateMult`, `SpeedMult`, `CarryWeight`, `OxygenRateMult`, env resist AVs. **4 records per stat, no perk/script needed.**
 
-**True minimum per stat (for any tier):**
-1. OMOD — with Value + Enchantment + Keyword properties (and optionally ActorValue)
-2. ObjectEffect (ENCH) — wrapper for the spell
-3. Spell (SPEL) — constant effect attached to the player
-4. MagicEffect (MGEF) — actual ValueModifier archetype targeting the AV
-5. Keyword (KYWD) — UI display keyword
-6. Optionally: custom AVIF + Perk (if the effect needs conditional logic)
-
-**However:** Some generic AVs like `HealRateMult`, `SpeedMult`, `CarryWeight` may work directly via the MagicEffect `ValueModifier` archetype without needing a custom perk. The `LGND_*` pattern is for effects that need conditional logic (e.g. "reduce ballistic damage by X%").
+- **Script + PerkToApply** (Tier B/D) — the MGEF applies a Perk to the player. Used when the effect needs conditional logic (damage reduction, proc-on-hit, etc.). Some OMODs also set a custom AV that the perk reads as its magnitude (e.g. Anti-Ballistic sets `LGND_LessDmgBallistic=15`, the perk reads that AV to know "reduce by 15%").
 
 **Recommended phases:**
-1. Start with effects using **generic AVs** (HealRateMult, SpeedMult, CarryWeight, env resists) — need OMOD + ENCH + SPEL + MGEF + KYWD but no custom perk
-2. Add effects using **custom AVs** — same as above plus custom AVIF + Perk with entry points
-3. Add Tier C effects with spell triggers (`ApplyCombatHitSpellSelf`, `ApplyAimDownSightSpell`) last
+1. **Phase 1:** PeakValueModifier stats targeting engine-native AVs — 4 records each, lowest risk. Test one first (e.g. `HealRateMult` or `SpeedMult`).
+2. **Phase 2:** Script + PerkToApply stats with simple entry points — 5 records each. Can reuse a shared perk for multiple OMODs (like vanilla's `ModLegendaryCommonPerk`).
+3. **Phase 3:** Complex triggered effects (proc-on-hit, conditional buffs) — 5+ records, most testing needed.
 
 ---
 
 ## Implementation Prerequisites
 
-1. **Test the minimal chain** — Create one OMOD with Enchantment → Spell → MagicEffect (ValueModifier on a generic AV like `HealRateMult`) to confirm it works without a custom perk
-2. **Create armor OMOD generator** — parallel to weapon upgrade generator, using `Armor.Property` enum. Must generate the full ENCH→SPEL→MGEF chain per stat
-3. **Build custom LGDI** — replace vanilla `DefaultLegendaryArmor` with a custom legendary item definition that includes our new OMODs
-4. **Test in-game** — verify stats show on item card, apply correctly, and don't conflict with vanilla legendary system
-5. **Investigate IncludeFilter keywords** — `23C7C1`, `23C7BF`, `23C7C0` gate which mods appear on body/helmet/pack — need to look these up in xEdit (Mutagen keyword enumeration crashes before reaching them)
+1. **Test the PeakValueModifier chain** — Create one OMOD → ENCH → MGEF (PeakValueModifier on `HealRateMult` or `SpeedMult`) to confirm it works without a custom perk. This validates the entire Phase 1 approach.
+2. **Create armor OMOD generator** — parallel to weapon upgrade generator, using `Armor.Property` enum. Must generate the full ENCH→MGEF chain per stat. MGEF flags: `Recover|Detrimental|NoDuration|NoArea|HideInUI`, CastType: `ConstantEffect`, TargetType: `Self`.
+3. **Build custom LGDI** — replace vanilla `DefaultLegendaryArmor` with a custom legendary item definition that includes our new OMODs alongside vanilla ones.
+4. **Look up IncludeFilter keywords** — `23C7C1`, `23C7BF`, `23C7C0` gate which mods appear on body/helmet/pack. Need xEdit (Mutagen keyword enumeration crashes before reaching them).
+5. **Test in-game** — verify stats show on item card, apply correctly, and don't conflict with vanilla legendary system.
