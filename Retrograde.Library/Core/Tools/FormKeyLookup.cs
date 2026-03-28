@@ -1,4 +1,5 @@
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Retrograde.Abstractions;
 using System;
@@ -53,13 +54,13 @@ namespace Retrograde.Utils
             var cache = new Dictionary<string, FormKey>(StringComparer.Ordinal);
 
             // Starfield.esm first (lower priority — template mods may override)
-            foreach (var rec in ctx.StarfieldMod.EnumerateMajorRecords())
+            foreach (var rec in EnumerateSafe(ctx.StarfieldMod.EnumerateMajorRecords(), "Starfield.esm"))
                 if (rec.EditorID != null)
                     cache[rec.EditorID] = rec.FormKey;
 
             // Template mods overwrite Starfield entries (higher priority, matches original search order)
             foreach (var templateMod in ctx.TemplateMods)
-                foreach (var rec in templateMod.EnumerateMajorRecords())
+                foreach (var rec in EnumerateSafe(templateMod.EnumerateMajorRecords(), templateMod.ModKey.FileName))
                     if (rec.EditorID != null)
                         cache[rec.EditorID] = rec.FormKey;
 
@@ -85,6 +86,24 @@ namespace Retrograde.Utils
                 return formKey;
 
             throw new KeyNotFoundException($"FormKeyLookup: no record found with EditorID '{editorID}'. Check that the record exists in the target mod, a template mod, or Starfield.esm.");
+        }
+
+        // Enumerates major records from a mod, skipping any that throw (e.g. BGSAdaptiveTriggerData_Component).
+        private static IEnumerable<IMajorRecordGetter> EnumerateSafe(IEnumerable<IMajorRecordGetter> source, string label)
+        {
+            using var en = source.GetEnumerator();
+            while (true)
+            {
+                bool moved;
+                try { moved = en.MoveNext(); }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[FormKeyLookup] Skipped broken record in {label}: {ex.Message}");
+                    continue;
+                }
+                if (!moved) yield break;
+                yield return en.Current;
+            }
         }
 
         // ── Disk cache ──────────────────────────────────────────────────────────

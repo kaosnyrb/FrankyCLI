@@ -222,6 +222,34 @@ foreach (var rec in mod.EnumerateMajorRecords())
 
 **Old name `ContainedFormLinks` no longer exists in 0.53.1** — use `EnumerateFormLinks()`.
 
+## Safe enumeration — skipping broken records
+
+`EnumerateMajorRecords()` throws mid-iteration on some Starfield.esm Keywords (`BGSAdaptiveTriggerData_Component`). Noggog's `.Catch<T>()` extension does **not** resolve on Mutagen's return type (type mismatch at compile time). Use a manual iterator instead:
+
+```csharp
+// Add: using Mutagen.Bethesda.Plugins.Records;
+
+static IEnumerable<IMajorRecordGetter> EnumerateSafe(
+    IEnumerable<IMajorRecordGetter> source, string label)
+{
+    using var en = source.GetEnumerator();
+    while (true)
+    {
+        bool moved;
+        try { moved = en.MoveNext(); }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Skipped broken record in {label}]: {ex.Message}");
+            continue; // stream has advanced past the bad record — try next
+        }
+        if (!moved) yield break;
+        yield return en.Current;
+    }
+}
+```
+
+After catching, `continue` works because Mutagen's binary overlay enumerator advances its stream position before throwing, so the next `MoveNext()` moves to the following record.
+
 ## Quest Conditions — ConditionGlobal vs ConditionFloat
 
 When a quest condition compares against a global (e.g. `GetDistanceGalacticParsec < distanceGlobal`), the condition type is **`ConditionGlobal`**, not `ConditionFloat`. The global FormKey sits on **`ComparisonValue`**, not inside `Data`:
