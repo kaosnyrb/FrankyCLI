@@ -43,29 +43,16 @@ namespace Retrograde.Quests
             var questActivator = ActivatorSeedData.GetRandomLargeGroundType();
 
 
-            var destroytarget = ItemPrompts.GetDestroyActivatorName(new List<string>(missionTemplate.Addons)
-            {
-                "Activator Base Type:" + questActivator.Name,
-                "Location:" + missionTemplate.Location + "\r\n",
-            });
+            var destroytarget = ItemMadlibs.GetDestroyActivatorName();
             Console.WriteLine("destroytarget: " + destroytarget);
 
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Item we must destroy: " + destroytarget + "\r\n"
-            });
-            Console.WriteLine("questname: " + destroytarget);
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate, destroytarget);
+            Console.WriteLine("questname: " + questname);
 
             IGang outlawGang = GangManager.GetGang();
 
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Destroy the " + destroytarget + " to lead you to " + outlawNpc.name + "\r\n",
-                "Gang protecting the target: " + outlawGang.gangName + "\r\n"
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate, destroytarget);
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
@@ -75,11 +62,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_ground_bounty_quest", "BountyTarget", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());
             newQuest.SetQuestPCMTypeKeyword("DungeonLocation", myMod.Keywords[new FormKey(myMod.ModKey, Convert.ToUInt32(missionTemplate.parameters["FormId"]))].ToNullableLink<IKeywordGetter>());
 
-            var pickupmessage = MessagePrompts.GetDestroyMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + nextQuest.QuestLocation + "\r\n",
-                "Item we must destroy: " + destroytarget + "\r\n"
-            });
+            var pickupmessage = MessageMadlibs.GetDestroyMessage(destroytarget, nextQuest.QuestLocation ?? "");
             Console.WriteLine("pickupmessage: " + pickupmessage);
 
             var message = new MessageNoun(0x000844, pickupmessage);

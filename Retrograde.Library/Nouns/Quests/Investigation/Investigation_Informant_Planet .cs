@@ -57,29 +57,16 @@ namespace Retrograde.Quests
 
             var questActivator = ActivatorSeedData.GetRandomLargeGroundType();
 
-            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Type: Data tablet \r\n",
-
-            });
+            var datasource = ItemMadlibs.GetActivatorName();
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
-            {
-                "Vital clue to their location:" + datasource,
-                "Location:" + missionTemplate.Location + "\r\n",
-            });
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate, datasource);
 
             Console.WriteLine("questname: " + questname);
             IGang outlawGang = GangManager.GetGang();
-            
+
             //Log Entry
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate, datasource);
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);

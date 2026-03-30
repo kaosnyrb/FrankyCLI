@@ -44,21 +44,10 @@ namespace Retrograde.Quests
         {
             Console.WriteLine("Generating Activator Space Station Quest...");
 
-            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
-                "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
-            });
+            var datasource = ItemMadlibs.GetActivatorName();
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
-            {
-                "Vital clue to their location:" + datasource,
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
-                "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
-            });
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate, datasource);
             Console.WriteLine("questname: " + questname);
 
             //Select the Station Design
@@ -69,13 +58,7 @@ namespace Retrograde.Quests
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Find the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
-                "Station Size:" + missionTemplate.parameters["StationSize"].ToString(),
-                "Station Faction:" + missionTemplate.parameters["Faction"].ToString()
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate, datasource);
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);

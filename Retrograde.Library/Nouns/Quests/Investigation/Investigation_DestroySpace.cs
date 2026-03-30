@@ -41,29 +41,16 @@ namespace Retrograde.Quests
             
             var questActivator = ActivatorSeedData.GetRandomSpaceType();
 
-            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
-            {
-                "Activator Base Type:" + questActivator.Name,
-                "Location:" + missionTemplate.Location + "\r\n",
-            });
+            var datasource = ItemMadlibs.GetActivatorName();
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
-            {
-                "Space object that must be destroyed:" + datasource,
-                "Location:" + missionTemplate.Location + "\r\n",
-            });
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate, datasource);
             Console.WriteLine("questname: " + questname);
-
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Destroy the " + datasource + " to lead you to " + outlawNpc.name + "\r\n"
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate, datasource);
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
@@ -75,11 +62,7 @@ namespace Retrograde.Quests
             newQuest.SetQuestReferenceSpaceLocationAlias("SpawnMarker01", SpaceCellTools.GetSpaceMarkerCondition());
 
             //Create the activation message
-            var pickupmessage = MessagePrompts.GetPickupMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + nextQuest.QuestLocation + "\r\n",
-                "Object we just destroyed: " + datasource + "\r\n"
-            });
+            var pickupmessage = MessageMadlibs.GetPickupMessage(datasource, nextQuest.QuestLocation ?? "");
             Console.WriteLine("pickupmessage: " + pickupmessage);
             var message = new MessageNoun(0x000844, pickupmessage);
 

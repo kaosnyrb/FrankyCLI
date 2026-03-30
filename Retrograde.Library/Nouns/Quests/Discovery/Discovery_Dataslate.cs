@@ -42,9 +42,7 @@ namespace Retrograde.Quests
 
             string bookcontents = NarrativePrompts.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons));
 
-            var bookname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons) {
-                "LogMessage: " + nextQuest.LogMessage,
-            });
+            var bookname = $"Bounty: {outlawNpc.name}";
 
             var bountybook = new BookNoun("duout_book_test", bookname, bookcontents);
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());

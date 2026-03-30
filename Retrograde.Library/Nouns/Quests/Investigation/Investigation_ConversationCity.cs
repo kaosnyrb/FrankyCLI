@@ -56,18 +56,10 @@ namespace Retrograde.Quests
             if (missionTemplate.parameters != null && missionTemplate.parameters.TryGetValue("Outfit", out var outfitParam))
                 npc.SpaceOutfit = ((FormKey)outfitParam).ToNullableLink<IOutfitGetter>();
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
-            {
-                "Targets name:" + npc.Name,
-                "Location:" + missionTemplate.Location + "\r\n",
-            });
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate, npc.Name?.String ?? "");
 
             //Log Entry
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Speack to " + npc.Name + " to lead you to " + outlawNpc.name + "\r\n"
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate, npc.Name?.String ?? "");
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
