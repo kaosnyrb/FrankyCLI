@@ -156,7 +156,7 @@ namespace Retrograde.Nouns
         //We do this last as we've built all the infomation to use in it.
         public void GenerateLog()
         {
-            var log = NarrativePrompts.GetOutlawLogfile(name, gender, Traits);
+            var log = NarrativeMadlibs.GetOutlawLogfile(name, gender, Traits);
             LogText = log;
             var bookSrc = RecordLookup.Find<IBookGetter>(0x000800u, m => m.Books);
             var Book = bookSrc.DeepCopy();

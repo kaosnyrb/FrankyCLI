@@ -87,13 +87,7 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 
-            var booklogmessage = NarrativePrompts.GetTransmission(new List<string>(missionTemplate.Addons)
-            {
-                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
-                "Current Location:" + missionTemplate.Location + "\r\n",
-                "Derelict Spaceship: " + shipname + "\r\n",
-                "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
-            });
+            var booklogmessage = NarrativeMadlibs.GetTransmission(outlawNpc, missionTemplate.Location, nextQuest.QuestLocation ?? "", shipname);
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
             // Voice the data-slate as a transmission left on the derelict ship.

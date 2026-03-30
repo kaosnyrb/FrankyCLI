@@ -40,7 +40,7 @@ namespace Retrograde.Quests
             Console.WriteLine("Discovery Quest - Dataslate.");
             questloc = missionTemplate.Location;
 
-            string bookcontents = NarrativePrompts.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons));
+            string bookcontents = NarrativeMadlibs.GetMissionBriefingDataslate(outlawNpc, missionTemplate.Location);
 
             var bookname = $"Bounty: {outlawNpc.name}";
 

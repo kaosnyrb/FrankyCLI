@@ -89,12 +89,7 @@ namespace Retrograde.Quests
 
             //Book
 
-            var booklogmessage = NarrativePrompts.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
-            {
-                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
-                "Log Entry should mention how this character has located the next clue on the target.\r\n",
-                "Current Location:" + missionTemplate.Location + "\r\n",
-            });
+            var booklogmessage = NarrativeMadlibs.GetFirstPersonAccount(outlawNpc, missionTemplate.Location, nextQuest.QuestLocation ?? "");
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
             var bountybook = new BookNoun("duout_book_completeandstart", datasource, booklogmessage);
             bountybook.SetScriptProperty("duout_queststartandend", "questtoend", newQuest.instance.ToLink<IStarfieldMajorRecordGetter>());

@@ -76,14 +76,7 @@ namespace Retrograde.Quests
             newQuest.SetScriptProperty("duout_space_station_quest", "MinGangMembers", (int)missionTemplate.parameters["DefendingShipCountMin"]);
             newQuest.SetScriptProperty("duout_space_station_quest", "MaxGangMembers", (int)missionTemplate.parameters["DefendingShipCountMax"]);
 
-            var booklogmessage = NarrativePrompts.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
-            {
-                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
-                "Current Location:" + missionTemplate.Location + "\r\n",
-                "Board the " + stationname + " and find the " + datasource + "\r\n",
-                "Spacestation: " + stationname + "\r\n",
-                "Faction this station belongs to: " + missionTemplate.parameters["Faction"].ToString() + "\r\n"
-            });
+            var booklogmessage = NarrativeMadlibs.GetFirstPersonAccount(outlawNpc, missionTemplate.Location, nextQuest.QuestLocation ?? "", stationname);
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
             var frmlst = new FormList(myMod)

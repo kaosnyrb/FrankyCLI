@@ -76,13 +76,7 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
             //Log Entry
-            var booklogmessage = NarrativePrompts.GetFirstPersonAccount(new List<string>(missionTemplate.Addons)
-            {
-                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
-                "Current Location:" + missionTemplate.Location + "\r\n",
-                "Recover the " + datasource + " to lead you to " + outlawNpc.name + "\r\n",
-                "Spaceship holding the information: " + shipname + "\r\n",
-            });
+            var booklogmessage = NarrativeMadlibs.GetFirstPersonAccount(outlawNpc, missionTemplate.Location, nextQuest.QuestLocation ?? "", shipname);
 
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
