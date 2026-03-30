@@ -86,13 +86,7 @@ namespace Retrograde.Quests
                 ? ""
                 : $"{npc.Name} — {missionTemplate.NpcBackground}";
 
-            var dialogueScript = DialoguePrompts.GetDialogueScript(new List<string>(missionTemplate.Addons)
-            {
-                "NPC name: " + npc.Name,
-                "Bounty target name: " + outlawNpc.name,
-                "Location: " + missionTemplate.Location,
-                "Intrigue detail: " + FlavourSeedData.GetConversationIntrigueDetail(),
-            }, npcBackground: npcBackground);
+            var dialogueScript = DialogueMadlibs.GetDialogueScript(outlawNpc, npc.Name?.String ?? "", missionTemplate.Location, nextQuest.QuestLocation ?? "", npcBackground: npcBackground);
 
             var voicePool    = npcResult.IsFemale ? VoiceSeedData.FemaleVoices : VoiceSeedData.MaleVoices;
             var elevenLabsId = voicePool[RandomProvider.Random.Next(voicePool.Count)].Id;
