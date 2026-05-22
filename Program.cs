@@ -130,6 +130,10 @@ switch (mode)
         // gen_hunttest [modname] — builds a real ESM with one PredatorHuntTarget per probe planet
         return gen_hunttest.Run(Get(args, 1, "hunttest"));
 
+    case "gen_systemtest":
+        // gen_systemtest — exercises planet->system->level lookup against 10 probe planets
+        return gen_systemtest.Run();
+
     case "gen_aspcpatch":
         // gen_aspcpatch — patches du_retrograde: copies ASPC + expands primitive to cell bounds
         return gen_aspcpatch.Run();

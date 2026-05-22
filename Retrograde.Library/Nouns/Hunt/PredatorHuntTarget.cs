@@ -28,6 +28,74 @@ namespace Retrograde.Nouns.Hunt
             "SEDerelict_EncHexapodAGlider00_Template",
         };
 
+        // System -> recommended level. Sourced from docs/systlistunformmated.txt.
+        public static readonly Dictionary<string, int> SystemLevels =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Al-Battani", 35 },        { "Alchiba", 50 },           { "Algorab", 70 },
+                { "Alpha Andraste", 30 },    { "Alpha Centauri", 1 },     { "Alpha Marae", 45 },
+                { "Alpha Ternion", 60 },     { "Alpha Tirna", 35 },       { "Altair", 15 },
+                { "Andromas", 15 },          { "Aranae", 15 },            { "Archimedes", 75 },
+                { "Arcturus", 15 },          { "Bannoc", 50 },            { "Bannoc Secondus", 50 },
+                { "Bara", 45 },              { "Bardeen", 70 },           { "Barnard's Star", 1 },
+                { "Bel", 55 },               { "Bessel", 10 },            { "Beta Andraste", 20 },
+                { "Beta Marae", 45 },        { "Beta Ternion", 40 },      { "Beta Tirna", 35 },
+                { "Bohr", 75 },              { "Bolivar", 35 },           { "Bradbury", 20 },
+                { "Carinae", 20 },           { "Celebrai", 70 },          { "Charybdis", 65 },
+                { "Cheyenne", 1 },           { "Copernicus", 30 },        { "Copernicus Minor", 30 },
+                { "Decaran", 60 },           { "Delta Pavonis", 25 },     { "Delta Vulpes", 50 },
+                { "Denebola", 30 },          { "Enlil", 65 },             { "Eridani", 20 },
+                { "Eta Cassiopeia", 20 },    { "Fermi", 75 },             { "Feynman", 55 },
+                { "Foucault", 60 },          { "Freya", 40 },             { "Gamma Vulpes", 50 },
+                { "Groombridge", 25 },       { "Guniibuu", 20 },          { "Hawking", 75 },
+                { "Heinlein", 45 },          { "Heisenberg", 55 },        { "Huygens", 75 },
+                { "Hyla", 40 },              { "Indum", 20 },             { "Ixyll", 40 },
+                { "Jaffa", 35 },             { "Kang", 60 },              { "Kapteyn's Star", 10 },
+                { "Katydid", 75 },           { "KavnykSHA", 35 },         { "Khayyam", 45 },
+                { "Kryx", 20 },              { "Kumasi", 25 },            { "Lantana", 30 },
+                { "Leonis", 65 },            { "Leviathan", 55 },         { "Linnaeus", 45 },
+                { "Lunara", 25 },            { "Luyten's Star", 5 },      { "Maal", 60 },
+                { "Maheo", 1 },              { "Marduk", 70 },            { "Masada", 75 },
+                { "McClure", 20 },           { "Moloch", 40 },            { "Muphrid", 15 },
+                { "Narion", 1 },             { "Nemeria", 35 },           { "Newton", 55 },
+                { "Nikola", 40 },            { "Nirah", 55 },             { "Nirvana", 40 },
+                { "Oborum Prime", 20 },      { "Oborum Proxima", 25 },    { "Olympus", 10 },
+                { "Ophion", 45 },            { "Piazzi", 10 },            { "Porrima", 30 },
+                { "Procyon A", 10 },         { "Procyon B", 5 },          { "Proxima Ternion", 65 },
+                { "Pyraas", 70 },            { "Rana", 65 },              { "Rasalhague", 40 },
+                { "Rivera", 35 },            { "Rutherford", 45 },        { "Sagan", 15 },
+                { "Sakharov", 15 },          { "Schrodinger", 65 },       { "Serpentis", 55 },
+                { "Shoza", 35 },             { "Sirius", 5 },             { "Sol", 1 },
+                { "Sparta", 60 },            { "Strix", 70 },             { "Syrma", 55 },
+                { "Tau Ceti", 10 },          { "The Pup", 10 },           { "Tidacha", 45 },
+                { "Toliman", 5 },            { "Ursae Majoris", 30 },     { "Ursae Minoris", 20 },
+                { "Valo", 5 },               { "Van Maanen's Star", 10 }, { "Vega", 25 },
+                { "Verne", 70 },             { "Volii", 5 },              { "Wolf", 5 },
+                { "Xi Ophiuchi", 50 },       { "Zelazny", 60 },           { "Zeta Ophiuchi", 50 },
+                { "Zosma", 50 },
+            };
+
+        // Looks up the parent system for a planet by walking the vanilla Starfield.esm
+        // Planet -> GalaxyData.StarId -> Star.ID chain. Returns null if the planet name
+        // does not match any vanilla Planet record or the parent star can't be resolved.
+        public static (string system, int level)? GetSystemForPlanet(string planet)
+        {
+            var sf = RetrogradeContext.Current.StarfieldMod;
+
+            var planetRec = sf.Planets.FirstOrDefault(p =>
+                string.Equals(p.Name, planet, StringComparison.OrdinalIgnoreCase));
+            if (planetRec?.GalaxyData == null) return null;
+
+            uint starId = planetRec.GalaxyData.StarId;
+            var starRec = sf.Stars.FirstOrDefault(s => s.ID == starId);
+            if (starRec?.Name == null) return null;
+
+            if (!SystemLevels.TryGetValue(starRec.Name, out int level))
+                return (starRec.Name, 1);
+
+            return (starRec.Name, level);
+        }
+
         public static string GetHuntName()
         {
             Random random = RandomProvider.Random;
@@ -133,7 +201,13 @@ namespace Retrograde.Nouns.Hunt
 
             // 5. Boss treatment — bump level, force hostile behaviour, blank the CCT name suffix.
             //    PCM_ NPCs default to Unaggressive/Brave/Level 1; we want a real fight.
-            npc.Level = new NpcLevel { Level = 30 };
+            //    Level comes from the parent system's recommended level (boss-bumped).
+            var sys = GetSystemForPlanet(planet);
+            int systemLevel = sys?.level ?? 30;
+            int predatorLevel = Math.Max(5, systemLevel + 5);
+            Console.WriteLine(
+                $"PredatorHuntTarget: planet {planet} -> system {sys?.system ?? "(unknown)"} (lvl {systemLevel}) -> predator lvl {predatorLevel}");
+            npc.Level = new NpcLevel { Level = (short)predatorLevel };
             npc.Aggression = Npc.AggressionType.VeryAggressive;
             npc.Confidence = Npc.ConfidenceType.Foolhardy;
 
