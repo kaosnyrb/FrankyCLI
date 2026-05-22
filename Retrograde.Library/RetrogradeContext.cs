@@ -36,7 +36,7 @@ public static class RetrogradeContext
     /// <summary>
     /// When false, AI calls are skipped for fast generation.
     /// </summary>
-    public static bool AIMode { get; set; } = true;
+    public static bool AIMode { get; set; } = false;
 
     /// <summary>
     /// When false, WAV/WEM generation is skipped.
