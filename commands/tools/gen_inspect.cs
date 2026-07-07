@@ -11,9 +11,9 @@ namespace FrankyCLI
 {
     /// <summary>
     /// Investigates Starfield forms by dumping their properties.
-    /// Usage: gen_inspect &lt;modname&gt; gen_inspect &lt;prefix&gt; &lt;recordtype&gt; &lt;editorid_or_formid&gt;
-    /// Example: dummy gen_inspect dummy SurfaceBlock OverlayBlockstbblock001
-    /// Example: dummy gen_inspect dummy Worldspace 0x00000C36
+    /// Usage: gen_inspect &lt;recordtype&gt; &lt;editorid_or_formid&gt;
+    /// Example: gen_inspect SurfaceBlock OverlayBlockstbblock001
+    /// Example: gen_inspect Worldspace 0x00000C36
     /// </summary>
     public class gen_inspect
     {
