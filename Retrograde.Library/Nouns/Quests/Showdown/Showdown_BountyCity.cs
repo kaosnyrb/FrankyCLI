@@ -47,16 +47,12 @@ namespace Retrograde.Quests
                 }
             }
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons));
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate);
             Console.WriteLine("questname: " + questname);
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Kill the Outlaw target " + outlawNpc.name + "\r\n"
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate);
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);

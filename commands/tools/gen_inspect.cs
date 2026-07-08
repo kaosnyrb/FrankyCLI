@@ -11,9 +11,9 @@ namespace FrankyCLI
 {
     /// <summary>
     /// Investigates Starfield forms by dumping their properties.
-    /// Usage: gen_inspect &lt;modname&gt; gen_inspect &lt;prefix&gt; &lt;recordtype&gt; &lt;editorid_or_formid&gt;
-    /// Example: dummy gen_inspect dummy SurfaceBlock OverlayBlockstbblock001
-    /// Example: dummy gen_inspect dummy Worldspace 0x00000C36
+    /// Usage: gen_inspect &lt;recordtype&gt; &lt;editorid_or_formid&gt;
+    /// Example: gen_inspect SurfaceBlock OverlayBlockstbblock001
+    /// Example: gen_inspect Worldspace 0x00000C36
     /// </summary>
     public class gen_inspect
     {
@@ -205,7 +205,7 @@ namespace FrankyCLI
                 case "npc":
                     foreach (var rec in mod.Npcs)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Npc"); found++; }
+                        { DumpRecord(rec, "Npc"); DumpNpcExtras(rec, allMods); found++; }
                     break;
                 case "location":
                     foreach (var rec in mod.Locations)
@@ -453,6 +453,41 @@ namespace FrankyCLI
                 case "spel":
                     found += SearchWithRecovery(mod.Spells, search, "Spell");
                     break;
+                case "race":
+                    found += SearchWithRecovery(mod.Races, search, "Race");
+                    break;
+                case "planet":
+                    foreach (var rec in mod.Planets)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        {
+                            DumpRecord(rec, "Planet");
+                            var kwComp = rec.Components?.OfType<IKeywordFormComponentGetter>().FirstOrDefault();
+                            if (kwComp?.Keywords != null && kwComp.Keywords.Count > 0)
+                            {
+                                Console.WriteLine($"  Keywords [{kwComp.Keywords.Count}]:");
+                                foreach (var kw in kwComp.Keywords)
+                                {
+                                    string? eid = null;
+                                    if (allMods != null)
+                                        foreach (var m in allMods)
+                                        {
+                                            var r = m.EnumerateMajorRecords().FirstOrDefault(x => x.FormKey == kw.FormKey);
+                                            if (r != null) { eid = r.EditorID; break; }
+                                        }
+                                    Console.WriteLine($"    {eid ?? "<unresolved>"} [{kw.FormKey}]");
+                                }
+                            }
+                            Console.WriteLine();
+                            found++;
+                        }
+                    break;
+                case "star":
+                    found += SearchWithRecovery(mod.Stars, search, "Star");
+                    break;
+                case "biome":
+                case "biom":
+                    found += SearchWithRecovery(mod.Biomes, search, "Biome");
+                    break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
                     Console.WriteLine("Supported: SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
@@ -461,6 +496,7 @@ namespace FrankyCLI
                     Console.WriteLine("           Armor (alias: armo), ObjectModification (alias: omod), ObjectEffect (alias: ench)");
                     Console.WriteLine("           Perk, MagicEffect (alias: mgef), DamageType (alias: dmgt), Spell (alias: spel)");
                     Console.WriteLine("           LegendaryItem (alias: lgdi), Outfit (alias: otft), ActorValueInformation (alias: avif)");
+                    Console.WriteLine("           Race, Biome (alias: biom)");
                     Console.WriteLine("           PlacedObject (alias: refr) — search for placed objects by EditorID or FormID (0x...)");
                     break;
             }
@@ -1364,7 +1400,7 @@ namespace FrankyCLI
                 {
                     try
                     {
-                        if (!ws.Flags.HasFlag(Worldspace.Flag.SmallWorld)) continue;
+                        if (ws.Flags?.HasFlag(Worldspace.Flag.SmallWorld) != true) continue;
                         if (string.IsNullOrEmpty(ws.EditorID)) continue;
 
                         var overlayComp = ws.Components?.OfType<IWorldSpaceOverlayComponentGetter>().FirstOrDefault();
@@ -1385,6 +1421,83 @@ namespace FrankyCLI
                 }
             }
             return found;
+        }
+
+        private static void DumpNpcExtras(INpcGetter npc, List<IStarfieldModGetter>? allMods)
+        {
+            // Resolve a FormKey to its EditorID by scanning loaded mods.
+            string Resolve(FormKey fk)
+            {
+                if (fk.IsNull) return "Null";
+                if (allMods != null)
+                {
+                    foreach (var m in allMods)
+                    {
+                        var r = m.EnumerateMajorRecords().FirstOrDefault(x => x.FormKey == fk);
+                        if (r != null) return $"{r.EditorID ?? "<no-eid>"} [{fk}]";
+                    }
+                }
+                return fk.ToString();
+            }
+
+            Console.WriteLine("--- Npc Extras ---");
+
+            // Keywords
+            if (npc.Keywords != null && npc.Keywords.Count > 0)
+            {
+                Console.WriteLine($"  Keywords [{npc.Keywords.Count}]:");
+                foreach (var kw in npc.Keywords)
+                    Console.WriteLine($"    {Resolve(kw.FormKey)}");
+            }
+
+            // ObjectTemplates — carries OMOD chains (CCT_Skin variants etc.)
+            if (npc.ObjectTemplates != null && npc.ObjectTemplates.Count > 0)
+            {
+                Console.WriteLine($"  ObjectTemplates [{npc.ObjectTemplates.Count}]:");
+                for (int i = 0; i < npc.ObjectTemplates.Count; i++)
+                {
+                    var ot = npc.ObjectTemplates[i];
+                    Console.WriteLine($"    [{i}] Default={ot.Default}  LevelMin={ot.LevelMin}  LevelMax={ot.LevelMax}");
+
+                    if (ot.Keywords != null && ot.Keywords.Count > 0)
+                    {
+                        Console.WriteLine($"        Keywords [{ot.Keywords.Count}]:");
+                        foreach (var kw in ot.Keywords)
+                            Console.WriteLine($"          {Resolve(kw.FormKey)}");
+                    }
+
+                    if (ot.Includes != null && ot.Includes.Count > 0)
+                    {
+                        Console.WriteLine($"        Includes [{ot.Includes.Count}]:");
+                        foreach (var inc in ot.Includes)
+                        {
+                            Console.WriteLine($"          OMOD: {Resolve(inc.Mod.FormKey)}");
+                            DumpPropertiesReflection(inc, "            ", maxDepth: 1);
+                        }
+                    }
+
+                    if (ot.Properties != null && ot.Properties.Count > 0)
+                    {
+                        Console.WriteLine($"        Properties [{ot.Properties.Count}]:");
+                        for (int p = 0; p < ot.Properties.Count; p++)
+                            Console.WriteLine($"          [{p}] {ot.Properties[p].GetType().Name}");
+                    }
+                }
+            }
+
+            // Properties — AV bindings, can encode species variant
+            if (npc.Properties != null && npc.Properties.Count > 0)
+            {
+                Console.WriteLine($"  Properties [{npc.Properties.Count}]:");
+                for (int i = 0; i < npc.Properties.Count; i++)
+                {
+                    var p = npc.Properties[i];
+                    Console.Write($"    [{i}] ");
+                    DumpPropertiesReflection(p, "      ", maxDepth: 2);
+                }
+            }
+
+            Console.WriteLine();
         }
 
         private static void DumpLight(ILightGetter light)

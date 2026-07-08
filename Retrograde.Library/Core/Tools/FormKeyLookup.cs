@@ -3,8 +3,10 @@ using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Retrograde.Abstractions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 
 namespace Retrograde.Utils
@@ -49,20 +51,19 @@ namespace Retrograde.Utils
             }
 
             // Full scan fallback.
+            // Uses per-group typed access rather than EnumerateMajorRecords() — the unified
+            // iterator terminates on unknown component types introduced by ESM updates, while
+            // individual group properties remain accessible.
             Console.WriteLine("[FormKeyLookup] Building EditorID cache from Starfield.esm + template mods...");
 
             var cache = new Dictionary<string, FormKey>(StringComparer.Ordinal);
 
             // Starfield.esm first (lower priority — template mods may override)
-            foreach (var rec in EnumerateSafe(ctx.StarfieldMod.EnumerateMajorRecords(), "Starfield.esm"))
-                if (rec.EditorID != null)
-                    cache[rec.EditorID] = rec.FormKey;
+            IndexModGroups(ctx.StarfieldMod, cache, "Starfield.esm");
 
             // Template mods overwrite Starfield entries (higher priority, matches original search order)
             foreach (var templateMod in ctx.TemplateMods)
-                foreach (var rec in EnumerateSafe(templateMod.EnumerateMajorRecords(), templateMod.ModKey.FileName))
-                    if (rec.EditorID != null)
-                        cache[rec.EditorID] = rec.FormKey;
+                IndexModGroups(templateMod, cache, templateMod.ModKey.FileName);
 
             Console.WriteLine($"[FormKeyLookup] Cache ready: {cache.Count} records indexed.");
 
@@ -86,6 +87,61 @@ namespace Retrograde.Utils
                 return formKey;
 
             throw new KeyNotFoundException($"FormKeyLookup: no record found with EditorID '{editorID}'. Check that the record exists in the target mod, a template mod, or Starfield.esm.");
+        }
+
+        // Iterates all IStarfieldGroupGetter<T> / IStarfieldListGroupGetter<T> properties on the mod
+        // and indexes each record's EditorID → FormKey into the cache.
+        // Each group is enumerated independently so a parse failure in one group does not stop others.
+        private static void IndexModGroups(IStarfieldModGetter mod, Dictionary<string, FormKey> cache, string label)
+        {
+            foreach (var prop in mod.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var typeName = prop.PropertyType.Name;
+                if (!typeName.StartsWith("IStarfieldGroupGetter") &&
+                    !typeName.StartsWith("IStarfieldListGroupGetter")) continue;
+
+                object? groupVal;
+                try { groupVal = prop.GetValue(mod); }
+                catch { continue; }
+                if (groupVal is not IEnumerable enumerable) continue;
+
+                foreach (var item in EnumerateGroupSafe(enumerable, prop.Name, label))
+                {
+                    if (item.EditorID != null)
+                        cache[item.EditorID] = item.FormKey;
+                }
+            }
+        }
+
+        // Enumerates a group's records, skipping individual records that throw on parse.
+        private static IEnumerable<IMajorRecordGetter> EnumerateGroupSafe(
+            IEnumerable source, string groupName, string modLabel)
+        {
+            var en = source.GetEnumerator();
+            int consecutiveFaults = 0;
+            while (true)
+            {
+                bool moved;
+                try
+                {
+                    moved = en.MoveNext();
+                    consecutiveFaults = 0;
+                }
+                catch (Exception ex)
+                {
+                    consecutiveFaults++;
+                    Console.WriteLine($"[FormKeyLookup] Skipped record in {modLabel}/{groupName}: {ex.Message}");
+                    if (consecutiveFaults >= 20)
+                    {
+                        Console.WriteLine($"[FormKeyLookup] Aborting {groupName} after 20 consecutive errors.");
+                        yield break;
+                    }
+                    continue;
+                }
+                if (!moved) yield break;
+                if (en.Current is IMajorRecordGetter rec)
+                    yield return rec;
+            }
         }
 
         // Enumerates major records from a mod, skipping any that throw (e.g. BGSAdaptiveTriggerData_Component).

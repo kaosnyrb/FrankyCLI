@@ -62,6 +62,23 @@ namespace Retrograde.Writing
 
     // ─────────────────────────────────────────────────────────────────────────
 
+    /// <summary>Wraps the display name of a quest record.</summary>
+    public class QuestNamePolishable : IPolishable
+    {
+        private readonly Quest _quest;
+
+        public QuestNamePolishable(Quest quest) => _quest = quest;
+
+        public string Label       => "QUEST_NAME:" + (_quest.EditorID ?? _quest.FormKey.ID.ToString("X6"));
+        public int    MaxChars    => 40;
+        public string ContentType => "name";
+
+        public string GetText()              => _quest.Name?.String ?? "";
+        public void   SetText(string improved) => _quest.Name = improved;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     /// <summary>Wraps a single quest stage log entry.</summary>
     public class QuestLogPolishable : IPolishable
     {

@@ -40,11 +40,9 @@ namespace Retrograde.Quests
             Console.WriteLine("Discovery Quest - Dataslate.");
             questloc = missionTemplate.Location;
 
-            string bookcontents = NarrativePrompts.GetMissionBriefingDataslate(new List<string>(missionTemplate.Addons));
+            string bookcontents = NarrativeMadlibs.GetMissionBriefingDataslate(outlawNpc, missionTemplate.Location);
 
-            var bookname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons) {
-                "LogMessage: " + nextQuest.LogMessage,
-            });
+            var bookname = $"Bounty: {outlawNpc.name}";
 
             var bountybook = new BookNoun("duout_book_test", bookname, bookcontents);
             bountybook.SetScriptProperty("duout_queststart", "QuestToStart", nextQuest.questform.ToLink<IStarfieldMajorRecordGetter>());

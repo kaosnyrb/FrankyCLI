@@ -122,6 +122,18 @@ switch (mode)
         // gen_deprefscan [modname]
         return gen_deprefscan.Run(Get(args, 1, "outlaws02"));
 
+    case "gen_fkltest":
+        // gen_fkltest — diagnoses FormKeyLookup enumeration regressions after ESM updates
+        return gen_fkltest.Run();
+
+    case "gen_hunttest":
+        // gen_hunttest [modname] — builds a real ESM with one PredatorHuntTarget per probe planet
+        return gen_hunttest.Run(Get(args, 1, "hunttest"));
+
+    case "gen_systemtest":
+        // gen_systemtest — exercises planet->system->level lookup against 10 probe planets
+        return gen_systemtest.Run();
+
     case "gen_aspcpatch":
         // gen_aspcpatch — patches du_retrograde: copies ASPC + expands primitive to cell bounds
         return gen_aspcpatch.Run();

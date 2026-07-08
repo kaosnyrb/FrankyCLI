@@ -22,7 +22,7 @@ The user will provide context about what to investigate, e.g.:
 If investigating a specific record type or form, run gen_inspect to dump its properties:
 
 ```bash
-cd /c/Git/FrankyCLI && dotnet run -- dummy gen_inspect dummy <RecordType> <search>
+cd /c/Git/FrankyCLI && dotnet run -- gen_inspect <RecordType> <search>
 ```
 
 Supported record types: `SurfaceBlock`, `Worldspace`, `PackIn`, `Cell`, `Static`, `Activator`, `Npc`, `Location`

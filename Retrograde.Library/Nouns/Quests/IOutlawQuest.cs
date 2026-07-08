@@ -24,7 +24,10 @@ namespace Retrograde.Chains.Interfaces
         public IEnumerable<IPolishable> GetPolishables()
         {
             if (questform != null)
+            {
+                yield return new QuestNamePolishable(questform);
                 yield return new QuestLogPolishable(questform);
+            }
         }
 
         /// <summary>

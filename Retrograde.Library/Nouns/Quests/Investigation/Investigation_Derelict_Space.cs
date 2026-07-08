@@ -51,32 +51,16 @@ namespace Retrograde.Quests
             Console.WriteLine("shipname: " + shipname);
             //var ship = new SpaceShipNoun(shipname, Convert.ToUInt32(missionTemplate.parameters["FormId"]), factionID);
 
-            var datasource = ItemPrompts.GetActivatorName(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Type: Data tablet \r\n",
-
-            });
+            var datasource = ItemMadlibs.GetActivatorName();
             Console.WriteLine("datasource: " + datasource);
 
-            var questname = QuestPrompts.GetQuestName(new List<string>(missionTemplate.Addons)
-            {
-                "Vital clue to their location:" + datasource,
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Spaceship holding the information: " + shipname + "\r\n"
-            });
+            var questname = QuestMadlibs.GetQuestName(outlawNpc, missionTemplate, shipname);
             Console.WriteLine("questname: " + questname);
 
             var questID = Guid.NewGuid().ToString().Substring(0, 8);
 
             //Log Entry
-            var logmessage = QuestPrompts.GetLogMessage(new List<string>(missionTemplate.Addons)
-            {
-                "Location:" + missionTemplate.Location + "\r\n",
-                "Board the " + shipname + " and find the " + datasource + "\r\n",
-                "Derelict Spaceship: " + shipname + "\r\n",
-                "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
-            });
+            var logmessage = QuestMadlibs.GetLogMessage(outlawNpc, missionTemplate, shipname);
             Console.WriteLine("logmessage: " + logmessage);
 
             var newQuest = new QuestNoun(missionTemplate.formid.ID, questname);
@@ -103,13 +87,7 @@ namespace Retrograde.Quests
             //newQuest.SetQuestReferenceCreateAlias("PrimaryRef", ship.instance.ToLink<IStarfieldMajorRecordGetter>());
 
 
-            var booklogmessage = NarrativePrompts.GetTransmission(new List<string>(missionTemplate.Addons)
-            {
-                "Location this log leads the player to:" + nextQuest.QuestLocation + "\r\n",
-                "Current Location:" + missionTemplate.Location + "\r\n",
-                "Derelict Spaceship: " + shipname + "\r\n",
-                "Faction this ship belongs to: " + (string)missionTemplate.parameters["Label"] + "\r\n"
-            });
+            var booklogmessage = NarrativeMadlibs.GetTransmission(outlawNpc, missionTemplate.Location, nextQuest.QuestLocation ?? "", shipname);
             var bountybook = new BookNoun("duout_book_test", datasource, booklogmessage);
 
             // Voice the data-slate as a transmission left on the derelict ship.

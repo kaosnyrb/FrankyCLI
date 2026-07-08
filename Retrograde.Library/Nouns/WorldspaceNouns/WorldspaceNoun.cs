@@ -243,7 +243,7 @@ public class WorldspaceNoun : INoun<IWorldspaceGetter>
             GNAM = 1f,
             DistantLodMultiplier = 1f,
             Version2 = 10,
-            WorldMapOffsetScale = 1f,
+            WorldMapOffset = new WorldspaceWorldMapOffset { WorldMapOffsetScale = 1f },
         };
         targetMod.Worldspaces.Add(Worldspace);
 
