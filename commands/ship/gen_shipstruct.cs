@@ -37,6 +37,11 @@ namespace FrankyCLI
             //                              e.g. "Starboard@-4,0,0" for a port wing whose
             //                              inboard face sits on the grid at x=-4.
             //                              Faces: Fore Aft Port Starboard Top Bottom.
+            //   --category <EditorID|0xHEX>  the COBJ recipe filter -- which builder tab the
+            //                              part shows under. Default Category_ShipMod_Structure
+            //                              (0x0029C473). An EditorID resolves against the load
+            //                              order; a mod's own category (e.g. Shipyards' custom
+            //                              Category_ShipMod_AvontechStructure) is passed by id.
             //   --swaps <EditorID,...>     material swaps, replacing the three vanilla paints
             //   --bounds <minX,minY,minZ,maxX,maxY,maxZ>  ObjectBounds, min then max (a part is
             //                              not necessarily centred on its own origin)
@@ -46,7 +51,7 @@ namespace FrankyCLI
             // record and its rotation come from the game, never from here. Rotation is a
             // property of the face (confirmed: the Nova wing templates carry the identical
             // rotations for their Starboard/Port/Aft nodes).
-            string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null;
+            string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -56,6 +61,7 @@ namespace FrankyCLI
                     case "--snap-nodes": if (!hasValue) { Console.WriteLine("Error: --snap-nodes needs a value"); return 1; } optSnapNodes = args[++i]; break;
                     case "--swaps": if (!hasValue) { Console.WriteLine("Error: --swaps needs a value"); return 1; } optSwaps = args[++i]; break;
                     case "--bounds": if (!hasValue) { Console.WriteLine("Error: --bounds needs a value"); return 1; } optBounds = args[++i]; break;
+                    case "--category": if (!hasValue) { Console.WriteLine("Error: --category needs a value"); return 1; } optCategory = args[++i]; break;
                     default: Console.WriteLine("Error: unknown option " + args[i]); return 1;
                 }
             }
@@ -446,7 +452,42 @@ namespace FrankyCLI
                 //Constructable object -------------------------
                 Console.WriteLine("Building Record : " + prefix + "_co_" + item);
                 IFormLinkNullable<IKeywordGetter> WorkbenchShipBuildingKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x0029C480).ToNullableLink<IKeywordGetter>();
-                IFormLinkNullable<IKeywordGetter> Category_ShipMod_Structure = new FormKey(env.LoadOrder[0].ModKey, 0x0029C473).ToNullableLink<IKeywordGetter>();
+
+                // The recipe FILTER -- FNAM, the builder-menu category the part shows under.
+                // It was declared here before and never attached, so every generated part had
+                // no category tab. Default Category_ShipMod_Structure (0x0029C473); --category
+                // overrides for non-structural parts (fuel/cargo/engine each carry a different
+                // vanilla category, and a mod can pass its own by id).
+                IFormLinkGetter<IKeywordGetter> categoryLink;
+                if (optCategory != null)
+                {
+                    if (optCategory.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!uint.TryParse(optCategory.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var catId))
+                        {
+                            Console.WriteLine("Error: --category '" + optCategory + "' is not a hex FormID");
+                            return 1;
+                        }
+                        // A bare id is Starfield.esm-relative unless it carries an index byte.
+                        var modKey = (catId >> 24) == 0 ? env.LoadOrder[0].ModKey : newMod;
+                        categoryLink = new FormKey(modKey, catId & 0x00FFFFFF).ToLink<IKeywordGetter>();
+                    }
+                    else
+                    {
+                        var kw = FindKeyword(myMod, env, optCategory);
+                        if (kw == null)
+                        {
+                            Console.WriteLine("Error: no Keyword with EditorID '" + optCategory + "' in " + modname + " or Starfield.esm");
+                            return 1;
+                        }
+                        categoryLink = kw;
+                    }
+                    Console.WriteLine("Recipe filter : " + optCategory);
+                }
+                else
+                {
+                    categoryLink = new FormKey(env.LoadOrder[0].ModKey, 0x0029C473).ToLink<IKeywordGetter>();
+                }
 
                 var co = new ConstructibleObject(myMod)
                 {
@@ -458,6 +499,7 @@ namespace FrankyCLI
                     LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
                     Value = 1000,
                     WorkbenchKeyword = WorkbenchShipBuildingKeyword,
+                    RecipeFilters = new ExtendedList<IFormLinkGetter<IKeywordGetter>>() { categoryLink },
                 };
 
                 myMod.ConstructibleObjects.Add(co);
@@ -494,6 +536,17 @@ namespace FrankyCLI
                 if (string.Equals(st.EditorID, editorId, StringComparison.OrdinalIgnoreCase)) return st;
             foreach (var st in env.LoadOrder[0].Mod!.SnapTemplates)
                 if (string.Equals(st.EditorID, editorId, StringComparison.OrdinalIgnoreCase)) return st.DeepCopy();
+            return null;
+        }
+
+        static IFormLinkGetter<IKeywordGetter>? FindKeyword(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId)
+        {
+            foreach (var kw in myMod.Keywords)
+                if (string.Equals(kw.EditorID, editorId, StringComparison.OrdinalIgnoreCase))
+                    return kw.ToLink<IKeywordGetter>();
+            foreach (var kw in env.LoadOrder[0].Mod!.Keywords)
+                if (string.Equals(kw.EditorID, editorId, StringComparison.OrdinalIgnoreCase))
+                    return kw.ToLink<IKeywordGetter>();
             return null;
         }
 
