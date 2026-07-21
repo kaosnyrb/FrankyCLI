@@ -165,6 +165,7 @@ switch (mode)
     case "spaceencounterquest":
     case "branchcreator":
     case "shipicons":
+    case "setrecipefilter":
         Console.WriteLine($"Legacy mode '{mode}' — pass all original args including modname:");
         Console.WriteLine($"  FrankyCLI {mode} <modname> <prefix> <item> [modelpath] ...");
         if (args.Length < 3) return 1;
@@ -312,6 +313,7 @@ static int RunLegacy(string mode, string[] args)
         "spaceencounterquest"=> gen_spaceencounterquest.Generate(arr),
         "branchcreator"      => gen_branchcreator.Generate(arr),
         "shipicons"          => gen_msicon.Generate(arr),
+        "setrecipefilter"    => gen_setrecipefilter.Generate(arr),
         _                    => 1
     };
 }
