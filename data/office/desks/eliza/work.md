@@ -44,6 +44,16 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Done
 
+- **2026-07-21 — Authored `atsd_wing01` (both sides) end-to-end + built the tools that were missing.** First
+  Stardust part taken start→in-game. Commits: FrankyCLI `fa1b902` (`gen_shipstruct` snap/swaps/bounds flags +
+  `FixNextFormId` unit fix), `3958157` (FixNextFormId → **derive the counter, never read the header**; surveyed all
+  54 Data plugins — 40 store nextObjectID namespaced, 14 local, and it sits *under* live records in Bethesda's own,
+  so the field is not an allocation cursor to anyone — floor 0x800, write local form), `7bdadd5` (COBJ recipe filter
+  = `FNAM` = `RecipeFilters`, was declared and dropped; `--category` override), `987a6ff` (new **`setrecipefilter`**
+  command — patch the FNAM onto existing COBJs FormID-stable; the `GameEnvironment`-holds-the-file-open write trap
+  is documented in it). NIF authoring lives in the modding project (`nif_from_template.py`). **All the durable
+  Bethesda facts → home-office `bethesda.md`; the portable code-health lessons → `craft.md`.** The tools now exist
+  to finish `bottompanel01` (same mesh-only-gap) whenever he wants it. His hands + the rig gate the rest.
 - **2026-07-07 — Fixed `gen_inspect`'s stale invocation docs (commit `9d82d0a`, branch `DeAi`).** The
   XML-summary usage and the `/investigate` skill both documented the dead `dummy gen_inspect dummy …`
   form; corrected to `gen_inspect <recordtype> <search>`. **Latent follow-up (flagged, not touched):**
