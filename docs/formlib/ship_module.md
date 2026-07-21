@@ -4,15 +4,53 @@ Creating a custom ship structural module for Starfield's ship builder. This is d
 
 ## Record chain
 
-A single ship module **authors five records** — MSTT, CELL, PKIN, GBFM, COBJ. The SnapTemplate in the
-tree below is *linked*, not created: `gen_shipstruct` points every base part at the vanilla
-`ShipSnap_SMOD_Generic_1x1x1_All01` (`0x00059B01`).
+A ship module **always authors five records** — MSTT, CELL, PKIN, GBFM, COBJ — **plus a SnapTemplate
+that it either links or authors, depending on the shape of the part.** The tree below indents SNTP
+because it may be a reference rather than a record you create; which it is, is the first decision for
+any new part, and it is a **modelling** question before it is a records question.
 
-A **flipped variant is the exception and authors its own SnapTemplate**, because the snap nodes have to
-be remapped for the rotation (see *Multi-directional modules* below) — so `gen_shipflips` writes seven
-record types per set: FormList + MSTT + SNTP + CELL + PKIN + GBFM + COBJ. Count `new X(myMod)` in the
-generator if you're ever unsure; the indentation in the tree below marks what is referenced rather than
-created.
+- **A 1×1×1 part attaching on all six faces** → link the vanilla
+  `ShipSnap_SMOD_Generic_1x1x1_All01` (`0x00059B01`). This is what `gen_shipstruct` does — a **default
+  that suits that one shape**, not a universal. Five authored records.
+- **Any other shape** → author your own, with nodes matching the faces the part actually attaches on.
+  Six authored records.
+- **A flipped variant always authors its own**, whatever the shape, because the nodes must be remapped
+  for the rotation (see *Multi-directional modules*). `gen_shipflips` therefore writes seven record
+  types per set: FormList + MSTT + SNTP + CELL + PKIN + GBFM + COBJ.
+
+### Node count follows the geometry — read vanilla before inventing one
+
+Vanilla templates are named `ShipSnap_SMOD_<class>_<manufacturer>_<part>`, and the node count tracks the
+part's shape. Enumerate them with `gen_inspect sntp ShipSnap_SMOD` and find the closest-shaped part
+before authoring your own. Observed counts:
+
+| Vanilla template | Nodes |
+|---|--:|
+| `ShipSnap_SMOD_Hab_Nova_LH-2L` | 10 |
+| `ShipSnap_SMOD_Struct_Nova_FR-E6C` | 7 |
+| `ShipSnap_SMOD_Generic_1x1x1_All01` | 6 |
+| `ShipSnap_SMOD_Struct_Nova_Brace6Way` | 6 |
+| `ShipSnap_SMOD_Struct_Nova_CL-3CAft` / `CL-3CFore` | 5 |
+| `ShipSnap_SMOD_Struct_Nova_Wing_Port` / `_Stbd` | 4 |
+| `ShipSnap_SMOD_Docker_Nova_DB1_TOP` | 4 |
+| `ShipSnap_SMOD_LandDeck_Nova_LD-O2C` | 4 |
+| `ShipSnap_SMOD_Cockpit_Nova_FD-K3C` | 3 |
+| `ShipSnap_SMOD_Cockpit_Nova_Magellan-C1` | 2 |
+| `ShipSnap_SMOD_Generic_1x1x1_OnlyAftBtm` | 2 |
+| `ShipSnap_SMOD_Eng_Nova_J-900_PORT` / `_STBD` | 1 |
+| `ShipSnap_SMOD_LandEng_Nova_RE-J01_PORT` / `_STBD` | 1 |
+| `ShipSnap_SMOD_Plug_<DIR>` (6 of them) | 1 |
+| `ShipSnap_SMOD_Plug_ToIntOnly_<DIR>` (6 of them) | 1 |
+
+Two things the table shows that matter for authoring:
+
+- **Endpoints have few nodes, spines and habs have many.** Cockpits sit at 2–3, engines at 1, the
+  all-faces cube at 6, a large hab at 10.
+- **A handed part gets a template per side** — `_Port`/`_Stbd`, `_PORT`/`_STBD` on wings and engines.
+  That is a *different* thing from the flip-rotation variants above; don't conflate them.
+
+*(The `_ToIntOnly_` family is named as if it constrains what may attach, but that's read off the
+EditorID — not confirmed against behaviour. Treat as unverified.)*
 
 ```
 MoveableStatic (MSTT) — 3D model + snap template + paint swaps
