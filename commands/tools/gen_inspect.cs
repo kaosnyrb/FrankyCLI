@@ -1547,16 +1547,36 @@ namespace FrankyCLI
             [0x0004AB78] = "Bottom",
         };
 
-        /// <summary>Resolve a FormKey to "EditorID [FormKey]" by scanning the load order.</summary>
+        /// <summary>
+        /// FormKey -> EditorID index over the whole load order, built once on first use.
+        ///
+        /// This MUST be an index, not a per-lookup scan. Resolving by walking
+        /// EnumerateMajorRecords() for each FormKey is O(load order) per lookup: fine for the
+        /// handful in one record, quadratic the moment you dump a group. Dumping the 397 ship
+        /// modules in AvontechShipyards resolves ~12 FormKeys each, which is ~9,500 full scans
+        /// of Starfield.esm — it does not finish. Worse, Starfield.esm is allMods[0], so every
+        /// mod-local link (each part's own PackIn) pays the biggest scan before finding its
+        /// target, and memoising results alone would not have saved it.
+        /// </summary>
+        private static Dictionary<FormKey, string>? _editorIdIndex;
+
+        private static Dictionary<FormKey, string> EditorIdIndex(List<IStarfieldModGetter> allMods)
+        {
+            if (_editorIdIndex != null) return _editorIdIndex;
+            var index = new Dictionary<FormKey, string>();
+            foreach (var m in allMods)
+                foreach (var r in m.EnumerateMajorRecords())
+                    index[r.FormKey] = r.EditorID ?? "<no-eid>";   // later mods win, matching override order
+            _editorIdIndex = index;
+            return index;
+        }
+
+        /// <summary>Resolve a FormKey to "EditorID [FormKey]", or the bare FormKey if unknown.</summary>
         private static string ResolveName(FormKey fk, List<IStarfieldModGetter>? allMods)
         {
             if (fk.IsNull) return "(null)";
-            if (allMods != null)
-                foreach (var m in allMods)
-                {
-                    var r = m.EnumerateMajorRecords().FirstOrDefault(x => x.FormKey == fk);
-                    if (r != null) return $"{r.EditorID ?? "<no-eid>"} [{fk}]";
-                }
+            if (allMods != null && EditorIdIndex(allMods).TryGetValue(fk, out var eid))
+                return $"{eid} [{fk}]";
             return fk.ToString();
         }
 
