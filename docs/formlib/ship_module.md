@@ -49,6 +49,46 @@ Two things the table shows that matter for authoring:
 - **A handed part gets a template per side** — `_Port`/`_Stbd`, `_PORT`/`_STBD` on wings and engines.
   That is a *different* thing from the flip-rotation variants above; don't conflate them.
 
+### Node offsets track the real geometry, not the grid
+
+**A node's `Offset` is the part's half-extent along that axis.** The vanilla 1×1×1 cube puts its
+Port/Starboard nodes at ∓4 because it *is* 8 units wide. A thin sheet does not:
+
+| Template | Nodes | Offset | Part |
+|---|--:|---|---|
+| `ShipSnap_SMOD_Generic_1x1x1_All01` | 6 | ±4 / ±1.75 | Full 1×1×1 cube |
+| `ats_ShipSnap_OnlyPortStbd` (Shipyards) | 2 | **±0.1** | Panel — *"the panels are thin sheets"* |
+
+Avontech's panels measure 8 × 8 × **0.2**, so ±0.1 is exactly half the thickness (confirmed against
+`bottompanel01_coll.obj`). Measure the part before authoring its template.
+
+**Naming and reuse are a judgement call** — *"kinda dealer's choice, depends on the models."*
+`ats_ShipSnap_OnlyPortStbd` is named for its attach *topology* rather than for a part, so anything with
+that shape can share it; a part whose geometry differs gets its own.
+
+### ObjectBounds — the 1×1×1 grid default
+
+`First = (-4, -4, -1.7675781)`, `Second = (4, 4, 1.7675781)` recurs throughout this doc and throughout
+Avontech. **That is the default 1×1×1 hab size, and most vanilla parts use it as the grid.** It is a
+*grid unit*, not a measurement of your mesh.
+
+It therefore appears on parts it doesn't fit: Shipyards' thin panels carry these exact bounds because
+the record was copied from a struct that size and never adjusted (owner's own note). Copying the grid
+value is the common case and evidently ships fine — just don't read it as evidence of a part's real
+dimensions. **The snap node offsets are where the true geometry lives.**
+
+### Materials: vanilla swaps vs an authored recolour set
+
+Which a mod uses is a per-mod decision, and it changes the MaterialSwaps count:
+
+- **Avontech Shipyards links vanilla swaps** — *"shipyard uses vanilla starfield.esm materials."*
+  `ats_ms_panels_02` carries two, `0x000B6B10` and `0x000B6B1F`, both from `Starfield.esm`.
+- **A mod doing its own recolour authors its own** — Avontech Stardust defines
+  `atsd_matswap_sherpa_P` / `_S` inside its own plugin.
+
+So two swaps rather than three is not by itself a defect. Check which source the mod uses before
+reading anything into the count.
+
 ### A door/plug static is itself a snap point
 
 **Owner's rule: "the door static counts as a unique snappoint."** A module does not have to carry its
