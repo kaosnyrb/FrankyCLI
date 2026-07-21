@@ -18,6 +18,32 @@ any new part, and it is a **modelling** question before it is a records question
   for the rotation (see *Multi-directional modules*). `gen_shipflips` therefore writes seven record
   types per set: FormList + MSTT + SNTP + CELL + PKIN + GBFM + COBJ.
 
+```
+MoveableStatic (MSTT) — 3D model + snap template + paint swaps
+    └─ SnapTemplate (SNTP) — connection points (fore/aft/top/bottom/port/starboard)
+
+Cell (CELL) — interior cell holding the placed MoveableStatic
+    └─ PlacedObject × 3: OutpostGroupPackinDummy + PrefabPackinPivotDummy + the MoveableStatic
+
+PackIn (PKIN) — wraps the Cell for the ship builder system
+
+GenericBaseForm (GBFM) — the ship module record itself
+    └─ Components: PropertySheet + FormLinkData + Keywords + FullName
+
+ConstructibleObject (COBJ) — workbench recipe for the ship builder
+```
+
+### EditorID conventions
+
+```
+{prefix}_ms_{item}       — MoveableStatic
+{prefix}_sn_{item}       — SnapTemplate (flipped variants append direction)
+{prefix}_cell_{item}     — Cell
+{prefix}_pkn_{item}      — PackIn
+{prefix}_gbfm_{item}     — GenericBaseForm
+{prefix}_co_{item}       — ConstructibleObject
+```
+
 ### Node count follows the geometry — read vanilla before inventing one
 
 Vanilla templates are named `ShipSnap_SMOD_<class>_<manufacturer>_<part>`, and the node count tracks the
@@ -45,18 +71,18 @@ before authoring your own. Observed counts:
 Two things the table shows that matter for authoring:
 
 - **Endpoints have few nodes, spines and habs have many.** Cockpits sit at 2–3, engines at 1, the
-  all-faces cube at 6, a large hab at 10.
+  all-faces grid unit at 6, a large hab at 10.
 - **A handed part gets a template per side** — `_Port`/`_Stbd`, `_PORT`/`_STBD` on wings and engines.
   That is a *different* thing from the flip-rotation variants above; don't conflate them.
 
 ### Node offsets track the real geometry, not the grid
 
-**A node's `Offset` is the part's half-extent along that axis.** The vanilla 1×1×1 cube puts its
+**A node's `Offset` is the part's half-extent along that axis.** The vanilla 1×1×1 unit puts its
 Port/Starboard nodes at ∓4 because it *is* 8 units wide. A thin sheet does not:
 
 | Template | Nodes | Offset | Part |
 |---|--:|---|---|
-| `ShipSnap_SMOD_Generic_1x1x1_All01` | 6 | ±4 / ±1.75 | Full 1×1×1 cube |
+| `ShipSnap_SMOD_Generic_1x1x1_All01` | 6 | ±4 / ±1.75 | Full 1×1×1 grid unit |
 | `ats_ShipSnap_OnlyPortStbd` (Shipyards) | 2 | **±0.1** | Panel — *"the panels are thin sheets"* |
 
 Avontech's panels measure 8 × 8 × **0.2**, so ±0.1 is exactly half the thickness (confirmed against
@@ -121,31 +147,41 @@ on the observed usage.
 **Consequence for the cell:** the "exactly three placed objects" rule below is the *minimum* — a plug
 and any cosmetic statics are placed alongside them.
 
-```
-MoveableStatic (MSTT) — 3D model + snap template + paint swaps
-    └─ SnapTemplate (SNTP) — connection points (fore/aft/top/bottom/port/starboard)
+## The canonical 1×1×1 — read this before authoring anything
 
-Cell (CELL) — interior cell holding the placed MoveableStatic
-    └─ PlacedObject × 3: OutpostGroupPackinDummy + PrefabPackinPivotDummy + the MoveableStatic
-
-PackIn (PKIN) — wraps the Cell for the ship builder system
-
-GenericBaseForm (GBFM) — the ship module record itself
-    └─ Components: PropertySheet + FormLinkData + Keywords + FullName
-
-ConstructibleObject (COBJ) — workbench recipe for the ship builder
-```
-
-### EditorID conventions
+**`Deimos Hull A` is the reference implementation of a grid-unit structural part** (owner's pick). Every
+value below is what a plain 1×1×1 looks like when it's done right, so diff against it rather than
+inventing:
 
 ```
-{prefix}_ms_{item}       — MoveableStatic
-{prefix}_sn_{item}       — SnapTemplate (flipped variants append direction)
-{prefix}_cell_{item}     — Cell
-{prefix}_pkn_{item}      — PackIn
-{prefix}_gbfm_{item}     — GenericBaseForm
-{prefix}_co_{item}       — ConstructibleObject
+GBFM  SMS_Struct_Deimos_Hull_A            0x0022D126  Starfield.esm
+  Template      SpaceshipModule (0x0003058E)
+  PropertySheet SpaceshipPartMass = 5                  <- ONE property. No ShipModuleVariant.
+  FormLinkData  SpaceshipLinkedExterior -> ShipPI_SMOD_Struct_Deimos_Hull_A (0x00232930)
+  Keywords      ShipModPositionPortTop (0x0027BAC4)
+                ShipModuleManufacturerDeimos (0x001462C0)
+  FullName      "Deimos Hull A"
+
+MSTT  SMOD_Struct_Deimos_Hull_A           0x002392E9  Starfield.esm
+  Model         Meshes\Ships\Modules\Struct\SMOD\SMOD_Struct_Deimos_Hull_A.nif
+  MaterialSwaps 0x000B6B10, 0x0003EF75                 <- two, both vanilla
+  ObjectBounds  (-4, -4, -1.7675781) .. (4, 4, 1.7675781)
+  SnapTemplate  ShipSnap_SMOD_Generic_1x1x1_All01 (0x00059B01)   <- the generic, all six faces
 ```
+
+Three things worth taking from it:
+
+- **A plain structural part carries only `SpaceshipPartMass`.** `ShipModuleVariant` is for *families* —
+  Avontech's `panels_01/02/03` use it as 1/2/3 so the builder groups them; a standalone part doesn't
+  need it.
+- **This is the one case where the ±4 / ±1.7675781 bounds are literally true** — it really is a 1×1×1.
+  Everywhere else that value is the grid default (see *ObjectBounds* above).
+- **It links the generic snap template rather than authoring one**, because its shape is exactly the
+  case that template was made for.
+
+*(Naming in the `asc_deimos` add-on — `..._Hull_800x800x350_Top` — implies the 1×1×1 grid unit is
+800 × 800 × 350 game units, i.e. ~100 game units per record unit. Consistent with the bounds above,
+but inferred from an EditorID rather than measured — treat as a working figure.)*
 
 ## MoveableStatic (MSTT)
 
@@ -673,16 +709,22 @@ For 45-degree variants (`gen_shipyfortyfiverotates`), the same remapping applies
 
 ### Ship position keywords
 
-Each directional GBFM gets a position keyword:
+Each directional GBFM gets a position keyword. There are **ten**, not six — the four corner positions
+are easy to miss, and `Deimos Hull A` uses one of them (`ShipModPositionPortTop`). Full set, from
+`gen_inspect keyword ShipModPosition`:
 
-| Direction | Keyword FormID |
-|-----------|---------------|
-| Fore | `0x0027BABD` |
-| Aft | `0x0027BABC` |
-| Top | `0x0027BABF` |
-| Bottom | `0x0027BABE` |
-| Starboard | `0x0027BAC2` |
-| Port | `0x0027BAC5` |
+| Keyword | FormID |
+|---|---|
+| `ShipModPositionFore` | `0x0027BABD` |
+| `ShipModPositionAft` | `0x0027BABC` |
+| `ShipModPositionTop` | `0x0027BABF` |
+| `ShipModPositionBottom` | `0x0027BABE` |
+| `ShipModPositionPort` | `0x0027BAC5` |
+| `ShipModPositionStbd` | `0x0027BAC2` |
+| `ShipModPositionPortTop` | `0x0027BAC4` |
+| `ShipModPositionPortBottom` | `0x0027BAC3` |
+| `ShipModPositionStbdTop` | `0x0027BAC1` |
+| `ShipModPositionStbdBottom` | `0x0027BAC0` |
 
 ### FormList pattern
 
