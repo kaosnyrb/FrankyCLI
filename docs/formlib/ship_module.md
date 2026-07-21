@@ -4,7 +4,15 @@ Creating a custom ship structural module for Starfield's ship builder. This is d
 
 ## Record chain
 
-A single ship module requires **six** records. For multi-directional modules (flips), each direction adds its own MoveableStatic → SnapTemplate → Cell → PackIn → GBFM set, collected into a FormList.
+A single ship module **authors five records** — MSTT, CELL, PKIN, GBFM, COBJ. The SnapTemplate in the
+tree below is *linked*, not created: `gen_shipstruct` points every base part at the vanilla
+`ShipSnap_SMOD_Generic_1x1x1_All01` (`0x00059B01`).
+
+A **flipped variant is the exception and authors its own SnapTemplate**, because the snap nodes have to
+be remapped for the rotation (see *Multi-directional modules* below) — so `gen_shipflips` writes seven
+record types per set: FormList + MSTT + SNTP + CELL + PKIN + GBFM + COBJ. Count `new X(myMod)` in the
+generator if you're ever unsure; the indentation in the tree below marks what is referenced rather than
+created.
 
 ```
 MoveableStatic (MSTT) — 3D model + snap template + paint swaps
