@@ -4,7 +4,7 @@ Creating a custom ship structural module for Starfield's ship builder. This is d
 
 ## Record chain
 
-A single ship module requires **five** records. For multi-directional modules (flips), each direction adds its own MoveableStatic → SnapTemplate → Cell → PackIn → GBFM set, collected into a FormList.
+A single ship module requires **six** records. For multi-directional modules (flips), each direction adds its own MoveableStatic → SnapTemplate → Cell → PackIn → GBFM set, collected into a FormList.
 
 ```
 MoveableStatic (MSTT) — 3D model + snap template + paint swaps
@@ -335,8 +335,26 @@ var gbfm_components = new ExtendedList<AComponent>()
 | `0x0003058E` | GenericBaseFormTemplate | `FormSpaceshipModule` — template for all ship modules |
 | `0x0000ACDB` | ActorValueInformation | `SpaceshipPartMass` — module weight |
 | `0x0027BACE` | ActorValueInformation | `ShipModuleVariant` — variant index |
-| `0x0000662F` | Keyword [KYWD] | `SpaceshipLinkedExterior` — links GBFM to PackIn |
+| `0x0000662F` | Keyword [KYWD] | `SpaceshipLinkedExterior` — links GBFM to the exterior PackIn |
+| `0x000055E9` | Keyword [KYWD] | `SpaceshipLinkedInterior` — links GBFM to the **interior** PackIn |
 | `0x001462C0` | Keyword [KYWD] | `ShipModuleManufacturerDeimos` — manufacturer tag |
+
+### Modules with an interior (cockpits, habs) need TWO FormLinkData links
+
+The `FormLinkDataComponent` example above shows one link because it was written from a
+**structural** module, which has no interior. A cockpit or hab has two PackIns — exterior and
+interior — and needs a link for each, or the interior never loads:
+
+```csharp
+new FormLinkComponentLink() { LinkedForm = packinExt.ToNullableLink<IStarfieldMajorRecordGetter>(),
+                              Keyword = SpaceshipLinkedExterior },   // 0x0000662F
+new FormLinkComponentLink() { LinkedForm = packinInt.ToNullableLink<IStarfieldMajorRecordGetter>(),
+                              Keyword = SpaceshipLinkedInterior },   // 0x000055E9
+```
+
+Confirmed against a shipped hand-authored cockpit (`atsd_bf_sherpa`, Avontech Stardust) via
+`gen_inspect gbfm`. Note that module also uses `VisibleFromShipExterior` (`0x0009C20A`) among its
+keywords — an interior module that should still render on the outside hull.
 
 ### Additional GBFM component types (vanilla)
 
@@ -565,6 +583,31 @@ myMod.FormLists.Add(FlipsList);
 // COBJ creates the FormList, not a single GBFM:
 co.CreatedObject = FlipsList.ToNullableLink<IConstructibleObjectTargetGetter>();
 ```
+
+## Inspecting an existing chain
+
+`gen_inspect` reaches every record in the chain, so a part can be verified end to end without
+opening xEdit. Search by EditorID prefix (contains-match) or `0x` FormID:
+
+```
+dotnet run -- gen_inspect moveablestatic <prefix>   # model path + MaterialSwaps + keywords
+dotnet run -- gen_inspect sntp           <prefix>   # snap nodes, decoded to Fore/Aft/Port/...
+dotnet run -- gen_inspect cell           <prefix>   # the three placed objects
+dotnet run -- gen_inspect packin         <prefix>   # Filter path + Cell link
+dotnet run -- gen_inspect gbfm           <prefix>   # components, FormKeys resolved to EditorIDs
+dotnet run -- gen_inspect cobj           <prefix>   # recipe, workbench, CreatedObject
+dotnet run -- gen_inspect lmsw           <prefix>   # paint swaps — EditorID/FormKey only
+```
+
+Two cautions, both learned the hard way:
+
+- **`lmsw` does not show the material mapping.** A CK-authored swap keeps its payload in `REFL`,
+  which reads as opaque binary. Use it to confirm *which* swap records exist and what a
+  MoveableStatic points at — not to prove which textures a swap binds. That still needs xEdit.
+- **A count is evidence; the reason for it is not.** `gen_inspect` will happily show a module
+  with fewer MaterialSwaps or no SnapTemplate than this doc describes. That usually means
+  hand-authored and unfinished, not broken — the generator's chain is the spec, and a CK-built
+  part is that spec minus whatever hasn't been done yet. Ask before calling a gap a defect.
 
 ## Generators
 

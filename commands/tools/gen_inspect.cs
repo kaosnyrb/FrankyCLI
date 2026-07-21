@@ -17,26 +17,31 @@ namespace FrankyCLI
     /// </summary>
     public class gen_inspect
     {
+        /// <summary>
+        /// The supported record types, in ONE place. Program.cs prints this for its usage text
+        /// and the unknown-type branch below prints it too. Previously each site kept its own
+        /// copy and all of them had drifted — none listed MoveableStatic, Planet, Star, Race or
+        /// Biome, which have been supported for some time.
+        /// </summary>
+        public const string SupportedTypes =
+            "  SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, MoveableStatic\n" +
+            "  Activator, Light, Npc, Location, Location_Full, Keyword, Book, Scene\n" +
+            "  PcmBranchNode, PcmContentNode, Planet, Star, Race, Biome (biom)\n" +
+            "  Quest, Quest_VMAD, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)\n" +
+            "  Message (mesg), Faction, Global, FormList\n" +
+            "  Armor (armo), ObjectModification (omod), ObjectEffect (ench), Perk, Spell (spel)\n" +
+            "  MagicEffect (mgef), DamageType (dmgt), LegendaryItem (lgdi), Outfit (otft)\n" +
+            "  ActorValueInformation (avif)\n" +
+            "  Ship-module chain: SnapTemplate (sntp), GenericBaseForm (gbfm),\n" +
+            "                     ConstructibleObject (cobj), LayeredMaterialSwap (lmsw)\n" +
+            "  PlacedObject (refr), refr_xflg, placed\n" +
+            "  worldspace_objects <wsEditorId>, worldspace_smallworld <minDnam>\n" +
+            "  'list' - enumerate all record groups with counts";
+
         public static int Generate(string[] args)
         {
-            if (args.Length < 5)
-            {
-                Console.WriteLine("Usage: <modname> gen_inspect <dummy> <recordtype> <editorid_or_formid>");
-                Console.WriteLine();
-                Console.WriteLine("Record types: SurfaceBlock, Worldspace, PackIn, Cell, Static, Activator, Light, Npc, Keyword");
-                Console.WriteLine("              PcmBranchNode, PcmContentNode, Book, Scene");
-                Console.WriteLine("              Quest, Quest_VMAD (full VirtualMachineAdapter + alias dump)");
-                Console.WriteLine("              Message (alias: mesg), Faction, Global, FormList");
-                Console.WriteLine("              Armor (armo), ObjectModification (omod), ObjectEffect (ench)");
-                Console.WriteLine("              Perk, MagicEffect (mgef), DamageType (dmgt), Spell (spel)");
-                Console.WriteLine("              LegendaryItem (lgdi), Outfit (otft), ActorValueInformation (avif)");
-                Console.WriteLine("              Use 'list' as record type to see all available groups.");
-                Console.WriteLine();
-                Console.WriteLine("EditorID search: partial match (contains)");
-                Console.WriteLine("FormID search:   prefix with 0x (e.g. 0x00000C36)");
-                return 1;
-            }
-
+            // Arity is guaranteed by the caller: Program.cs guards args.Length < 3 and then
+            // always invokes with exactly 5. A second guard here was unreachable (rule 4).
             string recordType = args[3];
             string search = args[4];
 
@@ -191,6 +196,39 @@ namespace FrankyCLI
                     foreach (var rec in mod.MoveableStatics)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpRecord(rec, "MoveableStatic"); found++; }
+                    break;
+                // --- Ship-module chain (docs/formlib/ship_module.md) -------------------
+                // MSTT -> SNTP -> CELL -> PKIN -> GBFM -> COBJ. MoveableStatic, Cell and
+                // PackIn were already reachable; these four close the chain so a part can be
+                // verified end to end without opening xEdit.
+                case "snaptemplate":
+                case "sntp":
+                    foreach (var rec in mod.SnapTemplates)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpSnapTemplate(rec); found++; }
+                    break;
+                case "genericbaseform":
+                case "gbfm":
+                    foreach (var rec in mod.GenericBaseForms)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpGenericBaseForm(rec, allMods); found++; }
+                    break;
+                case "constructibleobject":
+                case "cobj":
+                    foreach (var rec in mod.ConstructibleObjects)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpConstructibleObject(rec, allMods); found++; }
+                    break;
+                case "layeredmaterialswap":
+                case "lmsw":
+                    // Reflection only, deliberately. The generators here never author one (they
+                    // link the three vanilla paint layers by FormID), so we have no source of
+                    // truth for the layout — and a CK-authored swap keeps its payload in REFL,
+                    // which reflection reports as opaque binary. So this resolves EditorID and
+                    // FormKey (enough to verify what a MoveableStatic's MaterialSwaps point at)
+                    // and does NOT show the material mapping. Don't read a dump here as proof of
+                    // which textures a swap binds — that still needs xEdit.
+                    found += SearchWithRecovery(mod.LayeredMaterialSwaps, search, "LayeredMaterialSwap");
                     break;
                 case "activator":
                     foreach (var rec in mod.Activators)
@@ -490,14 +528,8 @@ namespace FrankyCLI
                     break;
                 default:
                     Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported: SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, Activator, Light, Npc, Location, Keyword, PcmBranchNode, PcmContentNode, Book, Scene");
-                    Console.WriteLine("           Quest, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)");
-                    Console.WriteLine("           Message (alias: mesg), Faction, Global, FormList");
-                    Console.WriteLine("           Armor (alias: armo), ObjectModification (alias: omod), ObjectEffect (alias: ench)");
-                    Console.WriteLine("           Perk, MagicEffect (alias: mgef), DamageType (alias: dmgt), Spell (alias: spel)");
-                    Console.WriteLine("           LegendaryItem (alias: lgdi), Outfit (alias: otft), ActorValueInformation (alias: avif)");
-                    Console.WriteLine("           Race, Biome (alias: biom)");
-                    Console.WriteLine("           PlacedObject (alias: refr) — search for placed objects by EditorID or FormID (0x...)");
+                    Console.WriteLine("Supported:");
+                    Console.WriteLine(SupportedTypes);
                     break;
             }
             return found;
@@ -1500,6 +1532,119 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Snap-node directions (Starfield.esm). From docs/formlib/ship_module.md — the whole
+        /// point of dumping a SnapTemplate is checking a flipped variant's nodes got remapped,
+        /// and a bare FormKey can't be eyeballed for that.
+        /// </summary>
+        private static readonly Dictionary<uint, string> SnapNodeDirections = new()
+        {
+            [0x0004AB6F] = "Fore",
+            [0x0004AB70] = "Aft",
+            [0x0004AB73] = "Port",
+            [0x0004AB74] = "Starboard",
+            [0x0004AB77] = "Top",
+            [0x0004AB78] = "Bottom",
+        };
+
+        /// <summary>Resolve a FormKey to "EditorID [FormKey]" by scanning the load order.</summary>
+        private static string ResolveName(FormKey fk, List<IStarfieldModGetter>? allMods)
+        {
+            if (fk.IsNull) return "(null)";
+            if (allMods != null)
+                foreach (var m in allMods)
+                {
+                    var r = m.EnumerateMajorRecords().FirstOrDefault(x => x.FormKey == fk);
+                    if (r != null) return $"{r.EditorID ?? "<no-eid>"} [{fk}]";
+                }
+            return fk.ToString();
+        }
+
+        private static void DumpSnapTemplate(ISnapTemplateGetter snap)
+        {
+            Console.WriteLine($"--- SnapTemplate (SNTP) ---");
+            Console.WriteLine($"  FormKey:    {snap.FormKey}");
+            Console.WriteLine($"  EditorID:   {snap.EditorID}");
+            Console.WriteLine($"  NextNodeID: {snap.NextNodeID}");
+            Console.WriteLine($"  Nodes [{snap.Nodes.Count}]:");
+            foreach (var node in snap.Nodes)
+            {
+                var id = node.Node.FormKey.ID;
+                string dir = SnapNodeDirections.TryGetValue(id, out var d) ? d : "?";
+                Console.WriteLine($"    {dir,-9} NodeID={node.NodeID}  Node={node.Node.FormKey}");
+                Console.WriteLine($"              Rotation={node.Rotation}  Offset={node.Offset}");
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpGenericBaseForm(IGenericBaseFormGetter gbfm, List<IStarfieldModGetter>? allMods)
+        {
+            Console.WriteLine($"--- GenericBaseForm (GBFM) ---");
+            Console.WriteLine($"  FormKey:  {gbfm.FormKey}");
+            Console.WriteLine($"  EditorID: {gbfm.EditorID}");
+            Console.WriteLine($"  Template: {ResolveName(gbfm.Template.FormKey, allMods)}");
+            Console.WriteLine($"  Components [{gbfm.Components?.Count ?? 0}]:");
+            if (gbfm.Components != null)
+            {
+                foreach (var c in gbfm.Components)
+                {
+                    switch (c)
+                    {
+                        case IPropertySheetComponentGetter ps:
+                            Console.WriteLine($"    PropertySheet [{ps.Properties?.Count ?? 0}]:");
+                            if (ps.Properties != null)
+                                foreach (var p in ps.Properties)
+                                    Console.WriteLine($"      {ResolveName(p.ActorValue.FormKey, allMods)} = {p.Value}");
+                            break;
+                        case IFormLinkDataComponentGetter fl:
+                            Console.WriteLine($"    FormLinkData [{fl.Links?.Count ?? 0}]:");
+                            if (fl.Links != null)
+                                foreach (var l in fl.Links)
+                                    Console.WriteLine($"      {ResolveName(l.Keyword.FormKey, allMods)} -> {ResolveName(l.LinkedForm.FormKey, allMods)}");
+                            break;
+                        case IKeywordFormComponentGetter kw:
+                            Console.WriteLine($"    Keywords [{kw.Keywords?.Count ?? 0}]:");
+                            if (kw.Keywords != null)
+                                foreach (var k in kw.Keywords)
+                                    Console.WriteLine($"      {ResolveName(k.FormKey, allMods)}");
+                            break;
+                        case IFullNameComponentGetter fn:
+                            Console.WriteLine($"    FullName: {fn.Name}");
+                            break;
+                        default:
+                            // Vanilla modules carry six more component types (AttachParentArray,
+                            // DestructibleObject, ObjectWindowFilter, StoredTraversals, ...) that
+                            // we don't author. Name them and reflect rather than guess a layout.
+                            Console.WriteLine($"    {c.GetType().Name}:");
+                            DumpPropertiesReflection(c, "      ", maxDepth: 2);
+                            break;
+                    }
+                }
+            }
+            Console.WriteLine();
+        }
+
+        private static void DumpConstructibleObject(IConstructibleObjectGetter co, List<IStarfieldModGetter>? allMods)
+        {
+            Console.WriteLine($"--- ConstructibleObject (COBJ) ---");
+            Console.WriteLine($"  FormKey:          {co.FormKey}");
+            Console.WriteLine($"  EditorID:         {co.EditorID}");
+            Console.WriteLine($"  Description:      {co.Description}");
+            Console.WriteLine($"  CreatedObject:    {ResolveName(co.CreatedObject.FormKey, allMods)}");
+            Console.WriteLine($"  WorkbenchKeyword: {ResolveName(co.WorkbenchKeyword.FormKey, allMods)}");
+            Console.WriteLine($"  AmountProduced:   {co.AmountProduced}");
+            Console.WriteLine($"  MenuSortOrder:    {co.MenuSortOrder}");
+            Console.WriteLine($"  LearnMethod:      {co.LearnMethod}");
+            Console.WriteLine($"  Value:            {co.Value}");
+            if (co.Conditions != null && co.Conditions.Count > 0)
+            {
+                Console.WriteLine($"  Conditions [{co.Conditions.Count}]:");
+                foreach (var cond in co.Conditions)
+                    DumpConditionBrief(cond, "    ");
+            }
+            Console.WriteLine();
+        }
+
         private static void DumpLight(ILightGetter light)
         {
             Console.WriteLine($"--- Light ---");
@@ -1612,7 +1757,10 @@ namespace FrankyCLI
                 ("ActorValueInformation", mod.ActorValueInformation.Count),
                 ("Armor", mod.Armors.Count),
                 ("Cell", mod.Cells.Sum(b => b.SubBlocks.Sum(sb => sb.Cells.Count))),
+                ("ConstructibleObject", mod.ConstructibleObjects.Count),
                 ("DamageType", mod.DamageTypes.Count),
+                ("FormList", mod.FormLists.Count),
+                ("GenericBaseForm", mod.GenericBaseForms.Count),
                 ("LegendaryItem", mod.LegendaryItems.Count),
                 ("Light", mod.Lights.Count),
                 ("Location", mod.Locations.Count),
@@ -1623,8 +1771,10 @@ namespace FrankyCLI
                 ("Outfit", mod.Outfits.Count),
                 ("PackIn", mod.PackIns.Count),
                 ("Perk", mod.Perks.Count),
+                ("SnapTemplate", mod.SnapTemplates.Count),
                 ("Spell", mod.Spells.Count),
                 ("Static", mod.Statics.Count),
+                ("MoveableStatic", mod.MoveableStatics.Count),
                 ("SurfaceBlock", mod.SurfaceBlocks.Count),
                 ("Worldspace", mod.Worldspaces.Count),
             };
