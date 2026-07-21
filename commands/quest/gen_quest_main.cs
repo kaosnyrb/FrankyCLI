@@ -90,17 +90,28 @@ namespace FrankyCLI
             // "An item with the same key has already been added" at group-add time,
             // depending on which record hit an occupied id first.
             //
-            // Compare local against local; put the index byte back when writing.
-            uint raw = mod.ModHeader.Stats.NextFormID;
-            uint indexByte = raw & 0xFF000000;
-            uint max = raw & 0x00FFFFFF;
+            // So DERIVE it and never read the stored value at all. Surveyed all 54 plugins
+            // in the Data folder: 40 store it namespaced, 14 local, and the counter sits
+            // UNDERNEATH that plugin's own live records in the large majority of BOTH forms
+            // -- AvontechShipyards, du_takeover, and Bethesda's own SFBGS003/004 included.
+            // The game plainly does not use this field to allocate; only editing tools do,
+            // and they work it out for themselves (xEdit repairs a mangled header by
+            // reassigning ids from a base and re-sorting, which is why FormIDs move when it
+            // does). A value nothing trustworthy produces is not a value to read.
+            //
+            // Written back in LOCAL form, matching what xEdit leaves behind.
+            //
+            // Floor of 0x800 because the format reserves the first 2048 ids -- every plugin
+            // on disk starts its own records there (suitpowercores and template_terrain sit
+            // exactly on it). Without the floor an empty mod would derive 0.
+            uint max = 0x800;
             foreach (var rec in mod.EnumerateMajorRecords())
             {
                 uint id = rec.FormKey.ID & 0x00FFFFFF;
                 if (id >= max)
                     max = id + 1;
             }
-            mod.ModHeader.Stats.NextFormID = indexByte | max;
+            mod.ModHeader.Stats.NextFormID = max;
         }
 
         public static void PrintNounRegistry()
