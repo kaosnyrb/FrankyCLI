@@ -49,8 +49,37 @@ Two things the table shows that matter for authoring:
 - **A handed part gets a template per side** — `_Port`/`_Stbd`, `_PORT`/`_STBD` on wings and engines.
   That is a *different* thing from the flip-rotation variants above; don't conflate them.
 
-*(The `_ToIntOnly_` family is named as if it constrains what may attach, but that's read off the
-EditorID — not confirmed against behaviour. Treat as unverified.)*
+### A door/plug static is itself a snap point
+
+**Owner's rule: "the door static counts as a unique snappoint."** A module does not have to carry its
+snapping on its own MoveableStatic — a **plug placed in the cell** can supply it, and then the module's
+own `SnapTemplate` is legitimately `Null`.
+
+Worked example, the shipped Sherpa cockpit (`gen_inspect cell 0x00085A`). Its exterior cell holds
+**eight** placed objects, not the three below:
+
+| Placed | Base | Notes |
+|---|---|---|
+| `SMOD_Plug_Taiyo_Cockpit_Aft` | `0x0002C735` MSTT | **Persistent.** At the rear (Y −4.15, Z-rot 180°). Carries `ShipSnap_SMOD_Plug_ToIntOnly_AFT` (`0x0002C6F8`) — **1 node, zero rotation, zero offset.** This is the snap point. |
+| `atsd_ms_sherpa` | the module | `SnapTemplate: Null` — it has none of its own |
+| `ShipNavThrusterRT` ×2 | `0x000785D0` | Cosmetic RCS, `SnapTemplate: Null` |
+| `ShipNavThrusterLFT` ×2 | `0x000785CF` | Cosmetic RCS, `SnapTemplate: Null` |
+| `PrefabPackinPivotDummy` | `0x0003F808` | Required, as below |
+| `OutpostGroupPackinDummy` | `0x00015804` | Required, as below |
+
+So there are **two ways a part gets its attach points**, and which one you want is a modelling decision:
+
+1. **Nodes on the module's own SnapTemplate** — the structural-part route (`gen_shipstruct`, and all the
+   flip generators).
+2. **A plug static placed in the cell, carrying its own single-node template** — used where the
+   attachment *is* a physical feature of the model, e.g. a cockpit's rear door.
+
+The `_ToIntOnly_` plug family is used here on a module that has an interior PackIn, which is consistent
+with the name, though nothing has tested what it actually enforces — don't rely on the constraint, only
+on the observed usage.
+
+**Consequence for the cell:** the "exactly three placed objects" rule below is the *minimum* — a plug
+and any cosmetic statics are placed alongside them.
 
 ```
 MoveableStatic (MSTT) — 3D model + snap template + paint swaps
@@ -232,7 +261,8 @@ if (cellblock == null)
 
 ### Cell contents — three placed objects
 
-Every ship module cell needs exactly three PlacedObjects in `Temporary`:
+Every ship module cell needs **at least** these three PlacedObjects in `Temporary` (a plug static and
+any cosmetic statics are placed alongside them — see *A door/plug static is itself a snap point*):
 
 | Object | FormID | Purpose |
 |--------|--------|---------|
