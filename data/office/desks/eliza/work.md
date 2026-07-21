@@ -24,7 +24,10 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 - **2026-07-07 — Sherpa ship-part investigation (OPEN, needs xEdit).** First live inspection of
   `avontechstardust` (a Taiyo-style cockpit module — cassette-futurism, confirmed working in-game).
-  Reachable chain: MoveableStatic `atsd_ms_sherpa` (`00088A`) + two PackIns (`atsd_pk_sherpa_ext`
+  Reachable chain: MoveableStatic `atsd_ms_sherpa` (**`000828` since 2026-07-21 — was `00088A`; he
+  repaired a mangled header in xEdit, which reassigns ids from a base and re-sorts, so every FormID in
+  this plugin moved. Any id written down here is a snapshot, not an identity — the EditorID is the
+  identity**) + two PackIns (`atsd_pk_sherpa_ext`
   `00080A` → Cell `00085A`; `atsd_pk_sherpa_int` `00080B` → Cell `00080C`) + the two storage Cells they
   pack (ext: 8 objects; int: 61 — a dressed cockpit interior). **Two unresolved questions, both the
   flaky-provenance class:** (1) every Sherpa record dumps under *both* `.esm` and `.esp` masters, and the
