@@ -77,14 +77,30 @@ namespace FrankyCLI
         /// </summary>
         public static void FixNextFormId(StarfieldMod mod)
         {
-            uint max = mod.ModHeader.Stats.NextFormID;
+            // The two numbers here are in DIFFERENT UNITS and comparing them raw is why
+            // this guard used to never fire.
+            //
+            // The header's NextFormID is stored NAMESPACED -- it carries the load-order /
+            // master-index byte (avontechstardust.esm has 0x01000800 on disk). FormKey.ID
+            // is the LOCAL 24-bit id with that byte already stripped (0x00088A for the
+            // highest record in the same plugin). So `0x00088A >= 0x01000800` is false for
+            // every record ever, max stayed at the stale header value, and allocation
+            // restarted at 0x000800 -- underneath 70 existing REFRs. Mutagen then threw
+            // "Two records with the same FormKey were encountered" at write time, or
+            // "An item with the same key has already been added" at group-add time,
+            // depending on which record hit an occupied id first.
+            //
+            // Compare local against local; put the index byte back when writing.
+            uint raw = mod.ModHeader.Stats.NextFormID;
+            uint indexByte = raw & 0xFF000000;
+            uint max = raw & 0x00FFFFFF;
             foreach (var rec in mod.EnumerateMajorRecords())
             {
-                uint id = rec.FormKey.ID;
+                uint id = rec.FormKey.ID & 0x00FFFFFF;
                 if (id >= max)
                     max = id + 1;
             }
-            mod.ModHeader.Stats.NextFormID = max;
+            mod.ModHeader.Stats.NextFormID = indexByte | max;
         }
 
         public static void PrintNounRegistry()

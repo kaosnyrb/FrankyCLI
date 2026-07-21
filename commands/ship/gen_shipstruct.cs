@@ -23,6 +23,48 @@ namespace FrankyCLI
             string item = args[3];
             string modelpath = args[4];
 
+            // ---- optional flags; every one defaults to the previous hardcoded behaviour ----
+            //
+            // The defaults below (generic 1x1x1 all-faces snap, three vanilla paints, grid
+            // bounds) are right for a 1x1x1 structural cube and wrong for anything else. A
+            // SnapTemplate is a function of the part's SHAPE -- vanilla runs 1 node on an
+            // engine, 2-3 on a cockpit, 4 on a wing or docker, 6 on the generic cube, 10 on
+            // a hab -- and a handed part (wing, side engine) needs one PER SIDE.
+            //
+            //   --snap <EditorID>          link an existing SnapTemplate instead of the cube
+            //   --snap-nodes <spec>        author one, named <prefix>_sntp_<item>. Spec is
+            //                              face@x,y,z pairs separated by ';' --
+            //                              e.g. "Starboard@-4,0,0" for a port wing whose
+            //                              inboard face sits on the grid at x=-4.
+            //                              Faces: Fore Aft Port Starboard Top Bottom.
+            //   --swaps <EditorID,...>     material swaps, replacing the three vanilla paints
+            //   --bounds <minX,minY,minZ,maxX,maxY,maxZ>  ObjectBounds, min then max (a part is
+            //                              not necessarily centred on its own origin)
+            //
+            // Each authored node is a VERBATIM copy of the matching node on vanilla's
+            // ShipSnap_SMOD_Generic_1x1x1_All01 with only its Offset moved, so the node
+            // record and its rotation come from the game, never from here. Rotation is a
+            // property of the face (confirmed: the Nova wing templates carry the identical
+            // rotations for their Starboard/Port/Aft nodes).
+            string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null;
+            for (int i = 5; i < args.Length; i++)
+            {
+                bool hasValue = i + 1 < args.Length;
+                switch (args[i])
+                {
+                    case "--snap": if (!hasValue) { Console.WriteLine("Error: --snap needs a value"); return 1; } optSnap = args[++i]; break;
+                    case "--snap-nodes": if (!hasValue) { Console.WriteLine("Error: --snap-nodes needs a value"); return 1; } optSnapNodes = args[++i]; break;
+                    case "--swaps": if (!hasValue) { Console.WriteLine("Error: --swaps needs a value"); return 1; } optSwaps = args[++i]; break;
+                    case "--bounds": if (!hasValue) { Console.WriteLine("Error: --bounds needs a value"); return 1; } optBounds = args[++i]; break;
+                    default: Console.WriteLine("Error: unknown option " + args[i]); return 1;
+                }
+            }
+            if (optSnap != null && optSnapNodes != null)
+            {
+                Console.WriteLine("Error: --snap links an existing template and --snap-nodes authors a new one; pick one");
+                return 1;
+            }
+
             string datapath = "";
             using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
             {
@@ -71,23 +113,88 @@ namespace FrankyCLI
                 byte[] flldarry = new byte[4] { 1, 0, 0, 0 };
                 byte[] xflgarry = new byte[1] { 2 };
 
+                // ---- snap template: link a named one, or author one from a node spec ----
+                if (optSnap != null)
+                {
+                    var found = FindSnapTemplate(myMod, env, optSnap);
+                    if (found == null)
+                    {
+                        Console.WriteLine("Error: no SnapTemplate with EditorID '" + optSnap + "' in " + modname + " or Starfield.esm");
+                        return 1;
+                    }
+                    snaplink = found.ToNullableLink<ISnapTemplateGetter>();
+                    Console.WriteLine("Snap template : linking " + optSnap);
+                }
+                else if (optSnapNodes != null)
+                {
+                    var authored = BuildSnapTemplate(myMod, env, prefix + "_sntp_" + item, optSnapNodes);
+                    if (authored == null) return 1;
+                    myMod.SnapTemplates.Add(authored);
+                    snaplink = authored.ToNullableLink<ISnapTemplateGetter>();
+                    Console.WriteLine("Building Record : " + authored.EditorID + " (" + authored.Nodes.Count + " node(s))");
+                }
+
+                // ---- material swaps ----
+                var swaps = new ExtendedList<IFormLinkGetter<ILayeredMaterialSwapGetter>>();
+                if (optSwaps != null)
+                {
+                    foreach (var editorId in optSwaps.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        var swap = FindMaterialSwap(myMod, env, editorId.Trim());
+                        if (swap == null)
+                        {
+                            Console.WriteLine("Error: no LayeredMaterialSwap with EditorID '" + editorId.Trim() + "' in " + modname + " or Starfield.esm");
+                            return 1;
+                        }
+                        swaps.Add(swap);
+                    }
+                    Console.WriteLine("Material swaps : " + optSwaps);
+                }
+                else
+                {
+                    swaps.Add(paint1);
+                    swaps.Add(paint2);
+                    swaps.Add(paint3);
+                }
+
+                // ---- object bounds ----
+                // Six numbers, min then max -- NOT half-extents, because a part is not
+                // necessarily centred on its own origin (a wing sits entirely outboard).
+                var boundsFirst = new P3Float(-4, -4, -1.767578f);
+                var boundsSecond = new P3Float(4, 4, 1.767578f);
+                if (optBounds != null)
+                {
+                    var parts = optBounds.Split(',');
+                    var n = new float[6];
+                    if (parts.Length != 6)
+                    {
+                        Console.WriteLine("Error: --bounds wants six numbers, minX,minY,minZ,maxX,maxY,maxZ");
+                        return 1;
+                    }
+                    for (int i = 0; i < 6; i++)
+                    {
+                        if (!float.TryParse(parts[i], out n[i]))
+                        {
+                            Console.WriteLine("Error: --bounds value '" + parts[i] + "' is not a number");
+                            return 1;
+                        }
+                    }
+                    boundsFirst = new P3Float(n[0], n[1], n[2]);
+                    boundsSecond = new P3Float(n[3], n[4], n[5]);
+                }
+
                 MoveableStatic moveableStatic = new MoveableStatic(myMod);
                 moveableStatic.EditorID = prefix + "_ms_" + item;
                 moveableStatic.ObjectBounds = new ObjectBounds()
                 {
-                    First = new P3Float(-4, -4, -1.767578f),
-                    Second = new P3Float(4, 4, 1.767578f)
+                    First = boundsFirst,
+                    Second = boundsSecond
                 };
                 moveableStatic.SnapTemplate = snaplink;
                 moveableStatic.Model = new Model()
                 {
                     File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(modelpath),
-                    MaterialSwaps = new ExtendedList<IFormLinkGetter<ILayeredMaterialSwapGetter>>()
-                    {
-                        paint1,
-                        paint2,
-                        paint3,
-                    },
+                    MaterialSwaps = swaps,
                 };
                 moveableStatic.DATA = 4;
                 moveableStatic.Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
@@ -365,6 +472,110 @@ namespace FrankyCLI
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine("Finished");
             return 0;
+        }
+
+        // ShipSnap_SMOD_Generic_1x1x1_All01 -- the canonical six-face cube every authored
+        // node here is copied from, so the node record and its rotation come from the game.
+        const uint CanonicalCube = 0x00059B01;
+
+        static readonly Dictionary<string, uint> SnapFaceNodes = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Fore", 0x0004AB6F },
+            { "Aft", 0x0004AB70 },
+            { "Port", 0x0004AB73 },
+            { "Starboard", 0x0004AB74 },
+            { "Top", 0x0004AB77 },
+            { "Bottom", 0x0004AB78 },
+        };
+
+        static SnapTemplate? FindSnapTemplate(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId)
+        {
+            foreach (var st in myMod.SnapTemplates)
+                if (string.Equals(st.EditorID, editorId, StringComparison.OrdinalIgnoreCase)) return st;
+            foreach (var st in env.LoadOrder[0].Mod!.SnapTemplates)
+                if (string.Equals(st.EditorID, editorId, StringComparison.OrdinalIgnoreCase)) return st.DeepCopy();
+            return null;
+        }
+
+        static IFormLinkGetter<ILayeredMaterialSwapGetter>? FindMaterialSwap(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId)
+        {
+            foreach (var sw in myMod.LayeredMaterialSwaps)
+                if (string.Equals(sw.EditorID, editorId, StringComparison.OrdinalIgnoreCase))
+                    return sw.ToLink<ILayeredMaterialSwapGetter>();
+            foreach (var sw in env.LoadOrder[0].Mod!.LayeredMaterialSwaps)
+                if (string.Equals(sw.EditorID, editorId, StringComparison.OrdinalIgnoreCase))
+                    return sw.ToLink<ILayeredMaterialSwapGetter>();
+            return null;
+        }
+
+        // "Starboard@-4,0,0;Aft@0,-3.65,0" -> a SnapTemplate carrying those faces, each node
+        // lifted verbatim off the vanilla cube with only its Offset moved.
+        static SnapTemplate? BuildSnapTemplate(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId, string spec)
+        {
+            SnapTemplate? canonical = null;
+            foreach (var st in env.LoadOrder[0].Mod!.SnapTemplates)
+                if (st.FormKey.ID == CanonicalCube) canonical = st.DeepCopy();
+            if (canonical == null)
+            {
+                Console.WriteLine("Error: could not read vanilla ShipSnap_SMOD_Generic_1x1x1_All01 to copy nodes from");
+                return null;
+            }
+
+            var template = new SnapTemplate(myMod)
+            {
+                EditorID = editorId,
+                NextNodeID = canonical.NextNodeID,
+                STPT = canonical.STPT,
+            };
+
+            foreach (var entry in spec.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var bits = entry.Split('@');
+                if (bits.Length != 2)
+                {
+                    Console.WriteLine("Error: bad node spec '" + entry + "' -- want Face@x,y,z");
+                    return null;
+                }
+                var face = bits[0].Trim();
+                if (!SnapFaceNodes.TryGetValue(face, out var nodeId))
+                {
+                    Console.WriteLine("Error: unknown face '" + face + "'. Faces: " + string.Join(" ", SnapFaceNodes.Keys));
+                    return null;
+                }
+                var nums = bits[1].Split(',');
+                if (nums.Length != 3
+                    || !float.TryParse(nums[0], out var ox)
+                    || !float.TryParse(nums[1], out var oy)
+                    || !float.TryParse(nums[2], out var oz))
+                {
+                    Console.WriteLine("Error: bad offset in '" + entry + "' -- want three numbers");
+                    return null;
+                }
+
+                SnapNodeEntry? source = null;
+                foreach (var n in canonical.Nodes)
+                    if (n.Node.FormKey.ID == nodeId) source = n;
+                if (source == null)
+                {
+                    Console.WriteLine("Error: the vanilla cube carries no " + face + " node");
+                    return null;
+                }
+
+                template.Nodes.Add(new SnapNodeEntry()
+                {
+                    Node = source.Node,
+                    NodeID = source.NodeID,
+                    Rotation = source.Rotation,
+                    Offset = new P3Float(ox, oy, oz),
+                });
+            }
+
+            if (template.Nodes.Count == 0)
+            {
+                Console.WriteLine("Error: --snap-nodes produced no nodes");
+                return null;
+            }
+            return template;
         }
     }
 }
