@@ -153,6 +153,11 @@ switch (mode)
         }
         return gen_promptlab.Run(args[1], args.Length > 2 ? args[2] : null);
 
+    // checkpart is read-only and JSON-emitting -- its own case so it prints no legacy usage noise.
+    case "checkpart":
+        if (args.Length < 3) { Console.WriteLine("Usage: checkpart <modname> <item>"); return 1; }
+        return RunLegacy(mode, args);
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -316,6 +321,7 @@ static int RunLegacy(string mode, string[] args)
         "shipicons"          => gen_msicon.Generate(arr),
         "setrecipefilter"    => gen_setrecipefilter.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
+        "checkpart"          => gen_checkpart.Generate(arr),
         _                    => 1
     };
 }

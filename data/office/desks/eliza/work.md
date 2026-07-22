@@ -22,17 +22,12 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
-- **2026-07-22 — ⚠ WING REOPENED — `atsd_wing01` does NOT render. Bug, not done.** Visible in the ship-builder
-  BUY MENU (GBFM/COBJ/name/category resolve → the record layer is fine) but no MODEL in the 3D editor → a
-  **NIF/mesh/deploy** failure, not a records one. He's in the CK looking now. **The "start→in-game" in Done
-  below was never verified ON THE GLASS for the render** — deploy + records-load got read as "in-game"; the
-  model drawing was assumed (verify-from-the-consumer's-position). Suspects, likeliest first, all in my lane
-  (the NIF is mine): (1) **deploy drift** — `.nif`/`.mesh` authored but not in Steam `Data\` (the ESM ships →
-  menu works; the model can't load → no draw); `check_starfield_drift.py` settles it from a keyboard. (2)
-  **BSGeometry not in the root NiNode's children list** — I flagged this exact render-risk on the Sherpa NIF;
-  `nif_from_template.py` keeps one geo and repoints it, and unwired-from-root = no draw (readable in NifSkope).
-  (3) **MaterialID not recomputed** — the one field the template tool can't derive; needs NifSkope's clean/
-  update pass. (4) MSTT `Model` path. Ask-then-verify: nothing asserted about the cause till the CK reports.
+- **2026-07-22 — ✅ WING RESOLVED — `atsd_wing01` port DONE (renders, attaches, colours, PAINTS) + now DOCTOR-VALIDATED.**
+  The head of this thread once read "REOPENED — does not render, bug not done"; the sub-bullets below are the earned
+  trail that ran every suspect to ground — deploy → NIF/root-children → NifSkope MaterialID → loose materials → the
+  Model recolour flag. Head closed; the investigation kept in place as the record of *how*. **The part doctor
+  (`check_part.py`, its own entry under Done) now proves the port wing mechanically across all four layers, and will
+  catch every one of those footguns on the NEXT part before an in-game test.**
   - **2026-07-22 (CK narrowing #1, his finding):** the textured wing **DRAWS in the PackIn view** → NIF / mesh /
     material / **deploy all CLEARED** (the asset half is healthy); suspects 1–3 above are out. **LEADING
     CANDIDATE:** the MoveableStatic's **MaterialSwaps were set to source materials the MODEL DOESN'T HAVE** —
@@ -164,6 +159,21 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Done
 
+- **2026-07-22 — Built the PART DOCTOR: `check_part.py <part>` (modding project) + FrankyCLI `checkpart` (new command).**
+  A read-only pre-flight that walks a finished ship-part field-by-field and reports every footgun this session cost
+  us BEFORE an in-game test — the "pull a vanilla and step through" discipline frozen into code. **Two oracles, one
+  judge:** asset checks live in Python (`check_part.py` owns the NIF parser + reads `.mat` JSON + the `.ba2` name
+  table); record checks come from **`gen_checkpart`** (new, registered in `Program.cs` top-level case + `mode
+  switch`) which emits a `CHECKPART_JSON {…}` raw-facts line — MSTT, `Model.File`, the recolour flag, swaps resolve,
+  `MSTT→PKIN→GBFM→COBJ` links, master type — and **ALL pass/fail judgement lives in the Python**, so no split-brain
+  about "healthy". Compiled clean (nullable `Model.Flags` → `.Value.HasFlag`). Parts are self-describing → no
+  hand-spec needed to validate (a spec is a *pipeline* concern). **Proven both ends:** all-green + true on the
+  working port wing (4 groups); **FAIL on starboard — the doctor found it carries the recolour flag (inherited from
+  a Model copy) but has NO swaps wired → still can't paint** (sharper than my predicted "missing flag"; it read the
+  real record state, not my guess). Durable Bethesda facts (BA2 name-table format, the doctor's checklist) →
+  home-office `bethesda.md`. **`check_part.py` is in his modding workspace — his to commit; the FrankyCLI half is
+  mine, committed this session.** **SURFACED TODO: the stb wing needs swaps wired (+ likely the 3-part rebuild)
+  before it can paint — the doctor named it.**
 - **2026-07-21 — Authored `atsd_wing01` (both sides) end-to-end + built the tools that were missing.** First
   Stardust part taken start→in-game — **⚠ REOPENED 2026-07-22: does NOT render in the 3D editor (see Open, top).
   The TOOLS below are done and real; the wing is not.** Commits: FrankyCLI `fa1b902` (`gen_shipstruct` snap/swaps/bounds flags +
