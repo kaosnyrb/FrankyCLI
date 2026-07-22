@@ -201,6 +201,11 @@ namespace FrankyCLI
                 {
                     File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(modelpath),
                     MaterialSwaps = swaps,
+                    // "Support Model Only Swap" (xEdit) / HasFirstPersonModel (Mutagen's mislabel) -- REQUIRED for
+                    // a ship part to be recolourable in the builder. Every vanilla structural part AND the Sherpa
+                    // set it; a part without it renders + attaches + shows its base colour but offers NO paint
+                    // option (2026-07-22, the wing recolour hunt -- found by stepping a vanilla field-by-field).
+                    Flags = Model.Flag.HasFirstPersonModel,
                 };
                 moveableStatic.DATA = 4;
                 moveableStatic.Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
