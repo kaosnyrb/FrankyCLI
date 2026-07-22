@@ -84,6 +84,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     simple BC7 compresses heavy (10.6 MB → ~180 MB byte-exact).** Wing materials now load from the archive →
     should render on game restart. **His workspace has my uncommitted files (build_archive.py, reconciled NIF,
     archlist, 6 mats) — his to commit.**
+  - **2026-07-22 RECOLOUR SOLVED — the Model `Support Model Only Swap` flag (Mutagen: HasFirstPersonModel).**
+    Whole recolour hunt's answer: a MoveableStatic Model flag every repainting part sets + `gen_shipstruct` never
+    did → parts render/attach/colour but offer no paint. **Fixed gen_shipstruct at the root** (`Flags =
+    Model.Flag.HasFirstPersonModel`; flips/rotates copy the base Model so inherit it). Found by stepping a vanilla
+    field-by-field (his directive) after keywords/swaps/materials all matched — I'd chased ShipModPosition (his:
+    that's flips)/swap-channel/vanilla-vs-custom, all wrong. **THE LESSON: step a known-good reference field-by-
+    field BEFORE hypothesising.** **WING (port) DONE: rendered, attached, coloured, PAINTABLE.** Remaining: stb
+    (set the flag or rebuild via the fixed generator), the FormList (his 5-min CK job), bottompanel01 etc.
+    `gen_inspect` gained MSTT + swap keyword expansion this hunt.
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
