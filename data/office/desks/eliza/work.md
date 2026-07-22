@@ -22,6 +22,18 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-22 — ⚠ WING REOPENED — `atsd_wing01` does NOT render. Bug, not done.** Visible in the ship-builder
+  BUY MENU (GBFM/COBJ/name/category resolve → the record layer is fine) but no MODEL in the 3D editor → a
+  **NIF/mesh/deploy** failure, not a records one. He's in the CK looking now. **The "start→in-game" in Done
+  below was never verified ON THE GLASS for the render** — deploy + records-load got read as "in-game"; the
+  model drawing was assumed (verify-from-the-consumer's-position). Suspects, likeliest first, all in my lane
+  (the NIF is mine): (1) **deploy drift** — `.nif`/`.mesh` authored but not in Steam `Data\` (the ESM ships →
+  menu works; the model can't load → no draw); `check_starfield_drift.py` settles it from a keyboard. (2)
+  **BSGeometry not in the root NiNode's children list** — I flagged this exact render-risk on the Sherpa NIF;
+  `nif_from_template.py` keeps one geo and repoints it, and unwired-from-root = no draw (readable in NifSkope).
+  (3) **MaterialID not recomputed** — the one field the template tool can't derive; needs NifSkope's clean/
+  update pass. (4) MSTT `Model` path. Ask-then-verify: nothing asserted about the cause till the CK reports.
+
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
   vanilla bases, the Mutagen from-event→create-obj conversion — are in home-office `bethesda.md`. This is the
@@ -93,7 +105,8 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 ## Done
 
 - **2026-07-21 — Authored `atsd_wing01` (both sides) end-to-end + built the tools that were missing.** First
-  Stardust part taken start→in-game. Commits: FrankyCLI `fa1b902` (`gen_shipstruct` snap/swaps/bounds flags +
+  Stardust part taken start→in-game — **⚠ REOPENED 2026-07-22: does NOT render in the 3D editor (see Open, top).
+  The TOOLS below are done and real; the wing is not.** Commits: FrankyCLI `fa1b902` (`gen_shipstruct` snap/swaps/bounds flags +
   `FixNextFormId` unit fix), `3958157` (FixNextFormId → **derive the counter, never read the header**; surveyed all
   54 Data plugins — 40 store nextObjectID namespaced, 14 local, and it sits *under* live records in Bethesda's own,
   so the field is not an allocation cursor to anyone — floor 0x800, write local form), `7bdadd5` (COBJ recipe filter
