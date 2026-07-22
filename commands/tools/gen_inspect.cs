@@ -195,7 +195,25 @@ namespace FrankyCLI
                 case "moveablestatics":
                     foreach (var rec in mod.MoveableStatics)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "MoveableStatic"); found++; }
+                        {
+                            DumpRecord(rec, "MoveableStatic");
+                            if (rec.Keywords != null && rec.Keywords.Count > 0)
+                            {
+                                Console.WriteLine($"  Keywords [{rec.Keywords.Count}]:");
+                                foreach (var kw in rec.Keywords)
+                                {
+                                    string? eid = null;
+                                    if (allMods != null)
+                                        foreach (var m in allMods)
+                                        {
+                                            var r = m.EnumerateMajorRecords().FirstOrDefault(x => x.FormKey == kw.FormKey);
+                                            if (r != null) { eid = r.EditorID; break; }
+                                        }
+                                    Console.WriteLine($"    {eid ?? "<unresolved>"} [{kw.FormKey}]");
+                                }
+                            }
+                            found++;
+                        }
                     break;
                 // --- Ship-module chain (docs/formlib/ship_module.md) -------------------
                 // MSTT -> SNTP -> CELL -> PKIN -> GBFM -> COBJ. MoveableStatic, Cell and
@@ -228,7 +246,33 @@ namespace FrankyCLI
                     // FormKey (enough to verify what a MoveableStatic's MaterialSwaps point at)
                     // and does NOT show the material mapping. Don't read a dump here as proof of
                     // which textures a swap binds — that still needs xEdit.
-                    found += SearchWithRecovery(mod.LayeredMaterialSwaps, search, "LayeredMaterialSwap");
+                    foreach (var rec in mod.LayeredMaterialSwaps)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        {
+                            Console.WriteLine("--- LayeredMaterialSwap ---");
+                            Console.WriteLine($"  EditorID: {rec.EditorID}");
+                            Console.WriteLine($"  FormKey: {rec.FormKey}");
+                            // REFL (source->target mapping) is opaque; but the KeywordFormComponent
+                            // carries the recolour-CHANNEL keyword the ship-builder repaint UI keys on.
+                            var kwc = rec.Components?.OfType<IKeywordFormComponentGetter>().FirstOrDefault();
+                            if (kwc?.Keywords != null && kwc.Keywords.Count > 0)
+                            {
+                                Console.WriteLine($"  Keywords [{kwc.Keywords.Count}]:");
+                                foreach (var kw in kwc.Keywords)
+                                {
+                                    string? eid = null;
+                                    if (allMods != null)
+                                        foreach (var m in allMods)
+                                        {
+                                            var r = m.EnumerateMajorRecords().FirstOrDefault(x => x.FormKey == kw.FormKey);
+                                            if (r != null) { eid = r.EditorID; break; }
+                                        }
+                                    Console.WriteLine($"    {eid ?? "<unresolved>"} [{kw.FormKey}]");
+                                }
+                            }
+                            else Console.WriteLine("  (no KeywordFormComponent keywords)");
+                            found++;
+                        }
                     break;
                 case "activator":
                     foreach (var rec in mod.Activators)
