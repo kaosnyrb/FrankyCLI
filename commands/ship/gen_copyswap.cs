@@ -9,8 +9,9 @@ using System.Linq;
 
 namespace FrankyCLI
 {
-    // Deep-copy existing LayeredMaterialSwap records under new EditorIDs and wire them onto a
-    // MoveableStatic's Model.MaterialSwaps -- the "REFL-opaque => scaffold + flag" workflow.
+    // Wire LayeredMaterialSwap records onto a MoveableStatic's Model.MaterialSwaps -- either by
+    // DEEP-COPYING existing ones under new EditorIDs (the "REFL-opaque => scaffold + flag" workflow)
+    // or by wiring existing swaps AS-IS (a part that shares another's swaps -- no new records).
     //
     // A LayeredMaterialSwap keeps its base->variant material mapping in an opaque REFL blob that
     // Mutagen reads but cannot author, so such a swap cannot be built from scratch here. This
@@ -19,12 +20,16 @@ namespace FrankyCLI
     // FormID is unchanged; the write goes through Mutagen so all record/group sizes are recomputed
     // and the file cannot be corrupted. Same env-close-before-write discipline as gen_setrecipefilter.
     //
-    //   copyswap <modname> <target_moveablestatic_editorid> <new_editorid>=<source_editorid> [<new>=<source> ...]
+    //   copyswap <modname> <target_mstt> <new=src | existing_swap_editorid> ...
+    //
+    // Two mixable arg forms: `new=src` DEEP-COPIES src (REFL mapping copied, CK repoint if it
+    // differs); a bare `editorid` WIRES an existing swap as-is -- for a part sharing another's swaps
+    // (e.g. a starboard wing reusing the port's wing01 swaps: no new records, no repoint).
     //
     // e.g. copyswap avontechstardust atsd_ms_wing01_port \
-    //        atsd_matswap_wing01_P=atsd_matswap_sherpa_P \
-    //        atsd_matswap_wing01_S=atsd_matswap_sherpa_S \
-    //        atsd_matswap_wing01_T=atsd_matswap_sherpa_P
+    //        atsd_matswap_wing01_P=atsd_matswap_sherpa_P ...                          (copy)
+    //   or  copyswap avontechstardust atsd_ms_wing01_stb \
+    //        atsd_matswap_wing01_P atsd_matswap_wing01_S atsd_matswap_wing01_T        (wire existing)
     class gen_copyswap
     {
         public static int Generate(string[] args)
@@ -39,15 +44,33 @@ namespace FrankyCLI
             string targetMstt = args[2];
 
             var pairs = new List<(string NewId, string SrcId)>();
+            var wireExisting = new List<string>();
             foreach (var a in args.Skip(3))
             {
-                var bits = a.Split('=', 2);
-                if (bits.Length != 2 || bits[0].Trim().Length == 0 || bits[1].Trim().Length == 0)
+                if (a.Contains('='))
                 {
-                    Console.WriteLine($"Error: '{a}' is not of the form <new_editorid>=<source_editorid>");
+                    var bits = a.Split('=', 2);
+                    if (bits.Length != 2 || bits[0].Trim().Length == 0 || bits[1].Trim().Length == 0)
+                    {
+                        Console.WriteLine($"Error: '{a}' is not of the form <new_editorid>=<source_editorid>");
+                        return 1;
+                    }
+                    pairs.Add((bits[0].Trim(), bits[1].Trim()));
+                }
+                else if (a.Trim().Length > 0)
+                {
+                    wireExisting.Add(a.Trim());
+                }
+                else
+                {
+                    Console.WriteLine("Error: empty swap argument");
                     return 1;
                 }
-                pairs.Add((bits[0].Trim(), bits[1].Trim()));
+            }
+            if (pairs.Count == 0 && wireExisting.Count == 0)
+            {
+                Console.WriteLine("Usage: copyswap <modname> <target_mstt> <new=src | existing_swap_editorid> ...");
+                return 1;
             }
 
             if (modname == "Starfield")
@@ -100,6 +123,20 @@ namespace FrankyCLI
                     Console.WriteLine($"  copied {srcId} -> {newId} ({copy.FormKey.ID:X6})");
                 }
 
+                foreach (var swapId in wireExisting)
+                {
+                    ILayeredMaterialSwapGetter? swap =
+                        myMod.LayeredMaterialSwaps.FirstOrDefault(s => string.Equals(s.EditorID, swapId, StringComparison.OrdinalIgnoreCase))
+                        ?? env.LoadOrder[0].Mod!.LayeredMaterialSwaps.FirstOrDefault(s => string.Equals(s.EditorID, swapId, StringComparison.OrdinalIgnoreCase));
+                    if (swap == null)
+                    {
+                        Console.WriteLine($"Error: no LayeredMaterialSwap '{swapId}' in {modname} or Starfield.esm to wire");
+                        return 1;
+                    }
+                    newLinks.Add(swap.ToLink<ILayeredMaterialSwapGetter>());
+                    Console.WriteLine($"  wiring existing {swapId} ({swap.FormKey.ID:X6})");
+                }
+
                 var existing = myMod.MoveableStatics.FirstOrDefault(
                     m => string.Equals(m.EditorID, targetMstt, StringComparison.OrdinalIgnoreCase));
                 if (existing == null)
@@ -124,9 +161,12 @@ namespace FrankyCLI
                 rec.IsCompressed = false;
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
-            Console.WriteLine($"Finished -- {pairs.Count} swap(s) copied + wired onto {targetMstt}; existing FormIDs unchanged.");
-            Console.WriteLine("!! DEEP COPIES: each carries the SOURCE swap's material mapping in its opaque REFL.");
-            Console.WriteLine("   Repoint each in the CK to its own base -> variant, then re-bridge .esm -> .esp.");
+            Console.WriteLine($"Finished -- {pairs.Count} copied, {wireExisting.Count} existing wired onto {targetMstt}; existing FormIDs unchanged.");
+            if (pairs.Count > 0)
+            {
+                Console.WriteLine("!! DEEP COPIES: each carries the SOURCE swap's material mapping in its opaque REFL.");
+                Console.WriteLine("   Repoint each in the CK to its own base -> variant, then re-bridge .esm -> .esp.");
+            }
             return 0;
         }
     }
