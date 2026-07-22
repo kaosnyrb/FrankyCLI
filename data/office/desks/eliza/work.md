@@ -65,6 +65,11 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     me** (his live workspace — Blender/meshes/collision mid-flight; his to commit). **REMAINING (his/gated):
     NifSkope clean pass (MaterialID), 3 REFL-opaque swaps (his CK or my deep-copy+wire+flag, ESM must be free),
     deploy+archlist, stb wing (needs his stb part meshes), in-game test.**
+  - **2026-07-22 WIN — the 3-part wing LOADS + ATTACHES in the editor** (his screenshot). N-geometry NIF pipeline
+    proven end to end. **CTD lesson: NifSkope clean pass is LOAD-CRITICAL (raw script NIF crashes on load till
+    sanitized), not just MaterialID — he tested pre-clean → CTD, cleaned → attaches; tool warning strengthened.**
+    Deployed all 9 files + NIF (robocopy, stb preserved). REMAINING: 3 swaps (recolour), pull NifSkope'd NIF back
+    to source (deployed now newer), stb wing, archlist. Modding project still his to commit (live workspace).
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
