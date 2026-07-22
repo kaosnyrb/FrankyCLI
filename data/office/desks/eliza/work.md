@@ -33,6 +33,19 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
   `nif_from_template.py` keeps one geo and repoints it, and unwired-from-root = no draw (readable in NifSkope).
   (3) **MaterialID not recomputed** — the one field the template tool can't derive; needs NifSkope's clean/
   update pass. (4) MSTT `Model` path. Ask-then-verify: nothing asserted about the cause till the CK reports.
+  - **2026-07-22 (CK narrowing #1, his finding):** the textured wing **DRAWS in the PackIn view** → NIF / mesh /
+    material / **deploy all CLEARED** (the asset half is healthy); suspects 1–3 above are out. **LEADING
+    CANDIDATE:** the MoveableStatic's **MaterialSwaps were set to source materials the MODEL DOESN'T HAVE** —
+    and the **CK UI cannot author that** (it only offers materials the mesh uses), so it came from the
+    **generator**. His hypothesis it's the render cause; he's testing a hand-fix. **MY read (to confirm, not
+    asserted):** a `gen_shipstruct --swaps` seam — a MaterialSwap remaps by matching the model's actual material
+    as its SOURCE key, and `nif_from_template.py` sets the wing's real `.mat`; if the generator wrote swaps whose
+    source is a *template* part's material (Sherpa/placeholder), the swap points at nothing on the wing, and the
+    builder's material-application can fail while the raw PackIn view (base materials) still renders. **IF his
+    fix confirms → the ROOT fix is in `gen_shipstruct`, NOT this one part** — hand-fixing here leaves
+    `bottompanel01` + every future part to inherit it. Offered to `gen_inspect` the swaps to pin the exact
+    source-vs-actual mismatch + prep the generator fix; waiting on his go / test result. Symptom earned; cause
+    under test.
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
