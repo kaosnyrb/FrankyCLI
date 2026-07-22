@@ -159,6 +159,14 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Done
 
+- **2026-07-22 — WING COMPLETE, both sides, in-game ("looking awesome", his).** Starboard finished: 3-part NIF
+  (`nif_from_template` — stb meshes + stb collision bounds, NifSkope-cleaned), matte (shares the port's `wing01`
+  mats), paintable — `check_part` green, confirmed on-glass. **The stb SURFACED-TODO in the doctor entry below
+  (flag present, no swaps) is now CLOSED.** A mirrored two-sided part shares its sibling's materials AND swaps, so
+  I extended **`gen_copyswap` with a wire-existing mode** (bare EditorID wires an existing swap as-is — no deep-copy,
+  no dup, no CK repoint; commit `8fc5966`) and wired the port's `wing01` swaps onto `atsd_ms_wing01_stb`. Finish
+  loop that worked: build NIF → deploy raw NIF+meshes to the GAME dir (NifSkope loads from there) → he cleans →
+  reconcile cleaned NIF back to workspace → `build_archive` → `check_part` green. Remaining: his CK FormList+flip.
 - **2026-07-22 — Built the PART DOCTOR: `check_part.py <part>` (modding project) + FrankyCLI `checkpart` (new command).**
   A read-only pre-flight that walks a finished ship-part field-by-field and reports every footgun this session cost
   us BEFORE an in-game test — the "pull a vanilla and step through" discipline frozen into code. **Two oracles, one
