@@ -70,6 +70,11 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     sanitized), not just MaterialID — he tested pre-clean → CTD, cleaned → attaches; tool warning strengthened.**
     Deployed all 9 files + NIF (robocopy, stb preserved). REMAINING: 3 swaps (recolour), pull NifSkope'd NIF back
     to source (deployed now newer), stb wing, archlist. Modding project still his to commit (live workspace).
+  - **2026-07-22 SWAPS wired — built `gen_copyswap` (FrankyCLI, the REFL-opaque deep-copy+wire tool his rule
+    wanted).** Cloned sherpa_P/_S → `atsd_matswap_wing01_P/_S/_T` (875/876/877), wired onto `atsd_ms_wing01_port`;
+    verified in the ESM. `copyswap <mod> <mstt> <new>=<src>…` — `DuplicateInAsNewRecord` + set `Model.MaterialSwaps`,
+    env-close-before-write; compiled + ran clean. **Owed by HIM: repoint the 3 REFL mappings in the CK (sherpa→wing
+    materials) + re-bridge .esm→.esp, then test.** ESM written by me (his workspace, his to commit).
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
