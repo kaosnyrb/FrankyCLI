@@ -75,6 +75,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     verified in the ESM. `copyswap <mod> <mstt> <new>=<src>…` — `DuplicateInAsNewRecord` + set `Model.MaterialSwaps`,
     env-close-before-write; compiled + ran clean. **Owed by HIM: repoint the 3 REFL mappings in the CK (sherpa→wing
     materials) + re-bridge .esm→.esp, then test.** ESM written by me (his workspace, his to commit).
+  - **2026-07-22 THE BLACK WAS LOOSE MATERIALS — Starfield doesn't load loose `.mat` (his); packaged the `.ba2`.**
+    Ruled out my whole lane first (base graph, formats, colour content bright, variant, MaterialIDs, swaps — all
+    identical to the working Sherpa), then he named it: loose materials aren't read at runtime (CK preview reads
+    them, game doesn't). Built **`build_archive.py`** (wraps Archive2: `Main.ba2` General geo/mat/mesh +
+    `Textures.ba2` DDS, → Steam Data). Reconciled NifSkope'd NIF to source, regenned archlist, built both —
+    verified 29 + 12 files, extract byte-exact, Sherpa intact (source complete). **Verify-by-extraction not size:
+    simple BC7 compresses heavy (10.6 MB → ~180 MB byte-exact).** Wing materials now load from the archive →
+    should render on game restart. **His workspace has my uncommitted files (build_archive.py, reconciled NIF,
+    archlist, 6 mats) — his to commit.**
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
