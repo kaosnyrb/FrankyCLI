@@ -56,6 +56,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     scaffolding a swap for a part he's replacing. **MY DURABLE TODO (proposed, his go): kill `gen_shipstruct`'s
     silent vanilla-swap default — require `--swaps` for a custom-material part so `bottompanel01` doesn't inherit
     the same black/invisible trap.**
+  - **2026-07-22 WING REBUILT (3-part P/S/T) — NIF + 6 mats DONE (mine):** he re-exported the port wing as
+    `_pri`/`_sec`/`_tri` (rotation fixed in Blender — a mesh bake, the NIF was always identity; I dumped it).
+    Extended `nif_from_template.py` → N geometries (4 + 3×N blocks, root n-children, transforms forced identity);
+    built `atsd_wing01_port.nif` (13 blocks, round-trip + transform-dump verified). Authored 6 mats
+    (`wing01_pri/sec/tri` + `_P/_S/_T` variants) as verified transforms of `wing01.mat`/`_P` — shared `wing01_*`
+    textures, res: E74/E75/E76 blocks, Primary/Secondary/Tertiary channels. **Modding project NOT committed by
+    me** (his live workspace — Blender/meshes/collision mid-flight; his to commit). **REMAINING (his/gated):
+    NifSkope clean pass (MaterialID), 3 REFL-opaque swaps (his CK or my deep-copy+wire+flag, ESM must be free),
+    deploy+archlist, stb wing (needs his stb part meshes), in-game test.**
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
