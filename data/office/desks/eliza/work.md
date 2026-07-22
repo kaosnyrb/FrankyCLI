@@ -22,6 +22,43 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
+  build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
+  vanilla bases, the Mutagen from-event→create-obj conversion — are in home-office `bethesda.md`. This is the
+  FrankyCLI-corpus + project half.)*
+  - **THE CREATURE HALF IS ALREADY BUILT** — `Retrograde.Library/Nouns/Hunt/PredatorHuntTarget.cs`.
+    `GetHuntTarget(planet)` → picks the planet-correct vanilla **`PCM_<system>_<planet>_Predator<N>`** NPC (native
+    is encoded in the vanilla EditorID — no lookup), clones it, retargets its template chain to a renderable
+    `_Enc*_Template`, boss-treats it (level from `SystemLevels` table via `GetSystemForPlanet` = planet→
+    `GalaxyData.StarId`→`Star`→level; `VeryAggressive`/`Foolhardy`; boss OMOD `0x32047B`; blank-CCT-name keyword
+    `0x182D74`), names it (`The <Prefix>-<Suffix>`), wraps in a FormList. Filters out aquatic (Skin-OMOD tokens).
+    `gen_hunttest` writes one per probe planet to `hunttest.esm` (overwritable) — proves the creatures; stops
+    before any quest.
+  - **THE QUEST HALF IS THE GAP.** The proven pattern is `RetrogradeBountyQuest` (clone base bounty QUST via
+    `QuestNoun` → override target → register into an `SMQN` node via `FindOrCreateNode` which clones the node
+    preserving `MaxConcurrentQuests`/`HoursUntilReset`/`Parent`). `QuestNoun`(clone + setters) is the primitive;
+    `NPCDialogueNoun` already authors a `Quest` from scratch (the "author from nothing" precedent he wants
+    long-term).
+  - **gen-1 RECIPE (write `gen_jaeger`, model on `RetrogradeBountyQuest` + `gen_hunttest`'s env setup):**
+    (1) `GetHuntTarget(planet)` → creature+FormList. (2) `QuestNoun(FormKeyLookup.GetFormKey("MB_Bounty01Far"))`
+    — vanilla ground remote bounty, **no deps** (QuestNoun copies template records IN, so the output is
+    standalone). (3) **Override `PrimaryRef`**: null `FindMatchingRefFromEvent`, set `CreateReferenceToObject
+    {Object=FormList, AliasID=<create-at loc>, Create, Level}` — the vanilla base is from-event, so
+    `SetQuestReferenceCreateAlias` alone NREs; needs the full reconstruction. (4) pin `TargetPlanetLocation`/
+    `System` to the planet. (5) `MissionBoardDescription` + name. (6) new `SMQN` "Hunt" node, `Parent =
+    Starfield.esm:0x015302`, add the quest. (7) write `hunttest.esm`.
+  - **FOUR VALUES SETTLE ONLY AGAINST A BUILD + xEDIT/IN-GAME LOOP (his eye, not bytes):** the create-at
+    `AliasID`, the `CreateEnum` value, the planet-Location pin, the board-node parent. So gen-1 is a real build
+    session, not a five-minute wire — stopped clean here with the map complete rather than cram a rushed push.
+  - **DESIGN DECISIONS (his):** promoted vanilla fauna (not new creatures) · procedural/tiered roster ·
+    **~300 pre-pinned missions** (one planet + one create each; native baked at gen-time because the board picks
+    the planet at random and a runtime biome condition would lose the roll) · vanilla dungeon locations first,
+    custom lairs later · clone vanilla, no deps · gen 1 first then scale.
+  - **LONG-TERM (his aspiration, banked):** author quests from *nothing* rather than clone — his origination
+    dial pointed at quests, "quests basically don't have a complexity ceiling." Clone-vanilla-now is the
+    stepping stone: every subrecord we inherit is one we study in place, then graduate to authoring. Precedent
+    exists (`NPCDialogueNoun`).
+
 - **2026-07-07 — Sherpa ship-part investigation (OPEN, needs xEdit).** First live inspection of
   `avontechstardust` (a Taiyo-style cockpit module — cassette-futurism, confirmed working in-game).
   Reachable chain: MoveableStatic `atsd_ms_sherpa` (**`000828` since 2026-07-21 — was `00088A`; he
