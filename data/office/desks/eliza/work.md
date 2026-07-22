@@ -46,6 +46,16 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     `bottompanel01` + every future part to inherit it. Offered to `gen_inspect` the swaps to pin the exact
     source-vs-actual mismatch + prep the generator fix; waiting on his go / test result. Symptom earned; cause
     under test.
+  - **2026-07-22 CONFIRMED (ESM-grounded) + his call:** cause = `gen_shipstruct`'s default = 3 VANILLA Starfield
+    swaps (`099196`/`0B6B1F`/`2AF78A`) source-mismatched to the wing's custom `wing01.mat` → render blocked (no
+    swaps → black). Shipyards' `ats_corewing_01` uses the same three and works (vanilla materials) = the default
+    is a Shipyards-ism. Sherpa (working) references its own `atsd_matswap_sherpa_P`(`000813`)/`_S`(`000822`),
+    base→tinted. **LayeredMaterialSwap is REFL-opaque → CK-authored, not generator-authorable** — his standing
+    rule now: deep-copy + wire + flag when I hit REFL-opaque (→ bethesda.md standing rulings). **HE'S REBUILDING
+    THE WING PROPER (P/S/T recolour), hand-authoring the swaps in the CK** — wing is his hands; I stood down on
+    scaffolding a swap for a part he's replacing. **MY DURABLE TODO (proposed, his go): kill `gen_shipstruct`'s
+    silent vanilla-swap default — require `--swaps` for a custom-material part so `bottompanel01` doesn't inherit
+    the same black/invisible trap.**
 
 - **2026-07-22 — Dark Universe: Jaeger — mission-board legendary-creature hunts. DESIGN LOCKED, gen-1 mapped,
   build is the next session.** *(Engine-domain FACTS — QUST anatomy, mission board = SMQN pool, alias fills,
