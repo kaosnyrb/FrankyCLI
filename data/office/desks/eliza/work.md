@@ -54,6 +54,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     **~300 pre-pinned missions** (one planet + one create each; native baked at gen-time because the board picks
     the planet at random and a runtime biome condition would lose the roll) · vanilla dungeon locations first,
     custom lairs later · clone vanilla, no deps · gen 1 first then scale.
+  - **THE CROSS-MOD MULTIPLIER FORK (his, 2026-07-22) — creature source is bigger than "vanilla vs new."**
+    Overtime's POI pool is the OPEN PCM tree: any correctly-registered POI (incl. other mods') is eligible, so
+    it multiplies the whole ecosystem's content for free (launcher × random-order × open-registry — why it
+    holds ~5930/day 15mo on). `PredatorHuntTarget` currently scans `Starfield.esm` NPCs only. **Scanning the
+    whole LOAD ORDER's `PCM_*_Predator*` instead makes Jaeger hunt any correctly-registered predator, vanilla
+    OR modded — the same multiplier.** So "promoted vanilla fauna" (gen-1) has a bigger sibling: ecosystem-wide.
+    Vanilla-first to prove it; load-order-wide PCM scan is a one-line change to `GetHuntTarget`'s source when we
+    want it. Set the Hunt `SMQN` node to RANDOM mode (his: each playthrough different order). Engine facts →
+    [[bethesda.md]] § *The QUEST + mission-board system*.
   - **LONG-TERM (his aspiration, banked):** author quests from *nothing* rather than clone — his origination
     dial pointed at quests, "quests basically don't have a complexity ceiling." Clone-vanilla-now is the
     stepping stone: every subrecord we inherit is one we study in place, then graduate to authoring. Precedent
