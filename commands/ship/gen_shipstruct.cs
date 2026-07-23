@@ -887,7 +887,7 @@ namespace FrankyCLI
 
         // "Starboard@-4,0,0;Aft@0,-3.65,0" -> a SnapTemplate carrying those faces, each node
         // lifted verbatim off the vanilla cube with only its Offset moved.
-        static SnapTemplate? BuildSnapTemplate(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId, string spec)
+        internal static SnapTemplate? BuildSnapTemplate(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId, string spec)
         {
             SnapTemplate? canonical = null;
             foreach (var st in env.LoadOrder[0].Mod!.SnapTemplates)

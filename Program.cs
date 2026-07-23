@@ -172,6 +172,7 @@ switch (mode)
     case "shipicons":
     case "setrecipefilter":
     case "setname":
+    case "setsnap":
     case "copyswap":
         Console.WriteLine($"Legacy mode '{mode}' — pass all original args including modname:");
         Console.WriteLine($"  FrankyCLI {mode} <modname> <prefix> <item> [modelpath] ...");
@@ -322,6 +323,7 @@ static int RunLegacy(string mode, string[] args)
         "shipicons"          => gen_msicon.Generate(arr),
         "setrecipefilter"    => gen_setrecipefilter.Generate(arr),
         "setname"            => gen_setname.Generate(arr),
+        "setsnap"            => gen_setsnap.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),
         _                    => 1

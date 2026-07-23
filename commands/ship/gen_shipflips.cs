@@ -42,7 +42,36 @@ namespace FrankyCLI
             return 0;
         }
 
+        /// <summary>
+        /// The six structural face forms. Anything else in a template -- equipment/weapon mounts
+        /// above all -- is not remappable by face and must survive a flip untouched.
+        /// </summary>
+        static readonly HashSet<uint> FaceNodeForms = new HashSet<uint>
+        { 0x0004AB6F, 0x0004AB70, 0x0004AB73, 0x0004AB74, 0x0004AB77, 0x0004AB78 };
+
         public static ExtendedList<SnapNodeEntry> CalculateNodes(directions direction, ExtendedList<SnapNodeEntry> nodes, IGameEnvironment env)
+        {
+            var results = CalculateFaceNodes(direction, nodes, env);
+
+            // CalculateFaceNodes is a chain of `if (id == fore) ... if (id == aft) ...` with NO
+            // else, so a node outside the six faces was silently DROPPED. atsd_fin01 carries two
+            // SHIP_Equipment_Side01A weapon mounts: they survived on the base template and
+            // vanished from all four orientations, so three quarters of the part's configurations
+            // had nowhere to hang a weapon and nothing reported it.
+            //
+            // Pass them through unchanged. Offset is right to keep: the face remap relabels which
+            // face a node IS and leaves offsets alone, so an equipment mount stays where the
+            // geometry put it. Rotation is kept too -- it encodes which way the mounted thing
+            // points, and there is no grounded mapping from a hull flip to that facing, so
+            // inventing one would be worse than leaving it for a human to eyeball.
+            var have = new HashSet<uint>(results.Select(r => r.NodeID));
+            foreach (var n in nodes)
+                if (!FaceNodeForms.Contains(n.Node.FormKey.ID) && !have.Contains(n.NodeID))
+                    results.Add(n.DeepCopy());
+            return results;
+        }
+
+        static ExtendedList<SnapNodeEntry> CalculateFaceNodes(directions direction, ExtendedList<SnapNodeEntry> nodes, IGameEnvironment env)
         {
 
             int fore = 306031;
