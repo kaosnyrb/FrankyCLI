@@ -821,13 +821,38 @@ namespace FrankyCLI
 
         static readonly Dictionary<string, uint> SnapFaceNodes = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)
         {
-            { "Fore", 0x0004AB6F },
+            { "Fore", 0x0004AB6F },   // structural faces -- these six live on the canonical cube,
+                                      // so their rotation is copied from it (rotation is a property
+                                      // of the face). Everything in SnapExtraNodes below does not.
             { "Aft", 0x0004AB70 },
             { "Port", 0x0004AB73 },
             { "Starboard", 0x0004AB74 },
             { "Top", 0x0004AB77 },
             { "Bottom", 0x0004AB78 },
         };
+
+        // Nodes that are NOT structural faces and NOT on the canonical cube -- chiefly the
+        // EQUIPMENT mounts, which is where a weapon attaches. A survey of the load order's
+        // SnapTemplates finds 59 distinct node forms, not the six above; the six merely happen
+        // to be the ones a cube has. SHIP_Equipment_Side01A is the 4th most-used node in the
+        // whole game (538 uses) and was invisible until gen_inspect stopped printing "?" for
+        // every form outside its six-name table.
+        //
+        // Starfield.esm ONLY. SFBGS050_SHIP_Equipment_FrontBack01A exists but lives in an update
+        // master, and a paid Creation may not depend on one -- so it is deliberately absent.
+        //
+        // Rotation on these is NOT derivable from a face: the same form appears with several
+        // rotations depending on which way the mounted equipment should point. Default is the
+        // most common (270,0,0); pass an explicit rotation as a 4th spec field when it matters.
+        static readonly Dictionary<string, uint> SnapExtraNodes = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "EquipSide", 0x0004AB85 },        // SnapNode_SHIP_Equipment_Side01A  -- the weapon/equipment mount
+            { "EquipSideB", 0x0004AB89 },       // SnapNode_SHIP_Equipment_Side01B  -- rare variant (2 uses)
+            { "GenericSide", 0x0004AB76 },      // SnapNode_SHIP_GenericSide01
+            { "GenericForeAft", 0x00294D0B },   // SnapNode_SHIP_GenericForeAft01
+        };
+
+        static readonly P3Float DefaultExtraRotation = new P3Float(270, 0, 0);
 
         static SnapTemplate? FindSnapTemplate(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string editorId)
         {
@@ -882,17 +907,28 @@ namespace FrankyCLI
 
             foreach (var entry in spec.Split(';', StringSplitOptions.RemoveEmptyEntries))
             {
+                // Face@x,y,z            offset only; rotation comes from the face (structural)
+                // Node@x,y,z@rx,ry,rz   explicit rotation (equipment nodes, where rotation is a
+                //                       property of where the mounted thing should point, not of
+                //                       the host face)
                 var bits = entry.Split('@');
-                if (bits.Length != 2)
+                if (bits.Length != 2 && bits.Length != 3)
                 {
-                    Console.WriteLine("Error: bad node spec '" + entry + "' -- want Face@x,y,z");
+                    Console.WriteLine("Error: bad node spec '" + entry + "' -- want Face@x,y,z or Node@x,y,z@rx,ry,rz");
                     return null;
                 }
                 var face = bits[0].Trim();
+                bool isExtra = false;
                 if (!SnapFaceNodes.TryGetValue(face, out var nodeId))
                 {
-                    Console.WriteLine("Error: unknown face '" + face + "'. Faces: " + string.Join(" ", SnapFaceNodes.Keys));
-                    return null;
+                    if (!SnapExtraNodes.TryGetValue(face, out nodeId))
+                    {
+                        Console.WriteLine("Error: unknown node '" + face + "'. Faces: "
+                            + string.Join(" ", SnapFaceNodes.Keys) + " | Equipment/other: "
+                            + string.Join(" ", SnapExtraNodes.Keys));
+                        return null;
+                    }
+                    isExtra = true;
                 }
                 var nums = bits[1].Split(',');
                 if (nums.Length != 3
@@ -902,6 +938,39 @@ namespace FrankyCLI
                 {
                     Console.WriteLine("Error: bad offset in '" + entry + "' -- want three numbers");
                     return null;
+                }
+
+                P3Float? explicitRot = null;
+                if (bits.Length == 3)
+                {
+                    var r = bits[2].Split(',');
+                    if (r.Length != 3
+                        || !float.TryParse(r[0], out var rx)
+                        || !float.TryParse(r[1], out var ry)
+                        || !float.TryParse(r[2], out var rz))
+                    {
+                        Console.WriteLine("Error: bad rotation in '" + entry + "' -- want three numbers");
+                        return null;
+                    }
+                    explicitRot = new P3Float(rx, ry, rz);
+                }
+
+                if (isExtra)
+                {
+                    // Not on the cube, so there is nothing to copy: build the entry outright and
+                    // allocate a NodeID the template is not already using.
+                    var link = new FormKey(env.LoadOrder[0].ModKey, nodeId).ToLink<ISnapTemplateNodeGetter>();
+                    uint nextId = template.NextNodeID ?? 0;
+                    foreach (var n in template.Nodes) if (n.NodeID >= nextId) nextId = n.NodeID + 1;
+                    template.Nodes.Add(new SnapNodeEntry()
+                    {
+                        Node = link,
+                        NodeID = nextId,
+                        Rotation = explicitRot ?? DefaultExtraRotation,
+                        Offset = new P3Float(ox, oy, oz),
+                    });
+                    template.NextNodeID = nextId + 1;
+                    continue;
                 }
 
                 SnapNodeEntry? source = null;
@@ -917,7 +986,9 @@ namespace FrankyCLI
                 {
                     Node = source.Node,
                     NodeID = source.NodeID,
-                    Rotation = source.Rotation,
+                    // A structural face's rotation IS the face, so an explicit one is almost
+                    // certainly a mistake -- but honour it rather than silently ignore it.
+                    Rotation = explicitRot ?? source.Rotation,
                     Offset = new P3Float(ox, oy, oz),
                 });
             }

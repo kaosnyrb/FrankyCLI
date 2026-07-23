@@ -223,7 +223,7 @@ namespace FrankyCLI
                 case "sntp":
                     foreach (var rec in mod.SnapTemplates)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpSnapTemplate(rec); found++; }
+                        { DumpSnapTemplate(rec, allMods); found++; }
                     break;
                 case "genericbaseform":
                 case "gbfm":
@@ -1624,7 +1624,18 @@ namespace FrankyCLI
             return fk.ToString();
         }
 
-        private static void DumpSnapTemplate(ISnapTemplateGetter snap)
+        /// <summary>EditorID alone (no FormKey suffix) for a compact column; "?" if unresolvable.</summary>
+        private static string ResolveEditorIdOnly(FormKey fk, List<IStarfieldModGetter>? allMods)
+        {
+            if (fk.IsNull) return "(null)";
+            if (allMods != null && EditorIdIndex(allMods).TryGetValue(fk, out var eid))
+                return eid.StartsWith("SnapNode_", StringComparison.OrdinalIgnoreCase)
+                    ? eid.Substring("SnapNode_".Length)   // the prefix is on every one of them
+                    : eid;
+            return "?";
+        }
+
+        private static void DumpSnapTemplate(ISnapTemplateGetter snap, List<IStarfieldModGetter>? allMods)
         {
             Console.WriteLine($"--- SnapTemplate (SNTP) ---");
             Console.WriteLine($"  FormKey:    {snap.FormKey}");
@@ -1633,8 +1644,17 @@ namespace FrankyCLI
             Console.WriteLine($"  Nodes [{snap.Nodes.Count}]:");
             foreach (var node in snap.Nodes)
             {
+                // The six-name table below covers the structural faces; everything else used to
+                // print "?", which reads as "this node has no name" rather than "this tool only
+                // knows six". There are 59 distinct node forms in the load order -- equipment /
+                // weapon mounts (SnapNode_SHIP_Equipment_*) among them -- so the "?" was hiding
+                // most of the vocabulary, and a survey built on this output undercounted them to
+                // six. Fall back to the EditorID index that already exists for every other
+                // FormKey in this file.
                 var id = node.Node.FormKey.ID;
-                string dir = SnapNodeDirections.TryGetValue(id, out var d) ? d : "?";
+                string dir = SnapNodeDirections.TryGetValue(id, out var d)
+                    ? d
+                    : ResolveEditorIdOnly(node.Node.FormKey, allMods);
                 Console.WriteLine($"    {dir,-9} NodeID={node.NodeID}  Node={node.Node.FormKey}");
                 Console.WriteLine($"              Rotation={node.Rotation}  Offset={node.Offset}");
             }
