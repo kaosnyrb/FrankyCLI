@@ -62,6 +62,21 @@ namespace FrankyCLI
             //   --bounds <minX,minY,minZ,maxX,maxY,maxZ>  ObjectBounds, min then max (a part is
             //                              not necessarily centred on its own origin)
             //   --mass <n>                 SpaceshipPartMass. Was hardcoded to 5.
+            //   --name "<display name>"    the GBFM FullName -- the string the ship builder shows
+            //                              on the part card. Defaults to <item>, which is why
+            //                              parts built before this flag shipped showing their
+            //                              EditorID stub ("eng01") instead of a product name.
+            //   --reuse-packin <EditorID>  build ONLY the GenericBaseForm + ConstructibleObject,
+            //                              linking them to a PackIn that already exists. The
+            //                              MoveableStatic, SnapTemplate, Cell and PackIn are all
+            //                              shared, so a second GBFM/COBJ pair over the same PackIn
+            //                              gives a VARIANT of an existing part -- the structural
+            //                              (cosmetic) twin of an engine being the case it was
+            //                              built for: same model, same flare, no engine stats, and
+            //                              a Structure recipe filter instead of an Engine one.
+            //                              Omit --engine on the variant and it falls back to the
+            //                              plain 2-property sheet with no ShipModuleClass keyword,
+            //                              which is what vanilla structural parts carry.
             //   --engine <k=v,...>         make this part an ENGINE: swaps the 2-property GBFM
             //                              sheet for the full 21-property engine sheet and adds
             //                              the ShipModuleClass<X> keyword. Keys:
@@ -91,7 +106,7 @@ namespace FrankyCLI
             // property of the face (confirmed: the Nova wing templates carry the identical
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
-            string? optEngine = null, optMass = null;
+            string? optEngine = null, optMass = null, optName = null, optReusePackin = null;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -104,7 +119,28 @@ namespace FrankyCLI
                     case "--category": if (!hasValue) { Console.WriteLine("Error: --category needs a value"); return 1; } optCategory = args[++i]; break;
                     case "--engine": if (!hasValue) { Console.WriteLine("Error: --engine needs a value"); return 1; } optEngine = args[++i]; break;
                     case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
+                    case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
+                    case "--reuse-packin": if (!hasValue) { Console.WriteLine("Error: --reuse-packin needs a value"); return 1; } optReusePackin = args[++i]; break;
                     default: Console.WriteLine("Error: unknown option " + args[i]); return 1;
+                }
+            }
+
+            // --reuse-packin authors neither the MoveableStatic nor the SnapTemplate, so any flag
+            // that configures those is silently ignored on that path. Refuse rather than accept it
+            // and quietly do nothing -- a flag that appears to work is worse than one that errors.
+            if (optReusePackin != null)
+            {
+                var ignored = new List<string>();
+                if (optSnap != null) ignored.Add("--snap");
+                if (optSnapNodes != null) ignored.Add("--snap-nodes");
+                if (optSwaps != null) ignored.Add("--swaps");
+                if (optBounds != null) ignored.Add("--bounds");
+                if (ignored.Count > 0)
+                {
+                    Console.WriteLine("Error: " + string.Join(", ", ignored)
+                        + " configure the MoveableStatic/SnapTemplate, which --reuse-packin does not author."
+                        + " They belong on the run that built the original part.");
+                    return 1;
                 }
             }
 
@@ -162,6 +198,36 @@ namespace FrankyCLI
                         }
                     }
                 }
+
+                // ---- variant path: reuse an existing PackIn --------------------------------
+                // A second GBFM/COBJ pair over the SAME PackIn is a VARIANT of a part that already
+                // exists -- the structural (cosmetic) twin of an engine being the case this was
+                // built for. The MoveableStatic, SnapTemplate, Cell and everything placed in it
+                // (including the engine flare, which reads ship state on its own and behaves
+                // correctly on a structural part) are all shared, so the entire first half of this
+                // generator is skipped and only the two records that actually differ get authored.
+                // The GBFM/COBJ tail below depends on exactly one thing from that half: `packin`.
+                //
+                // The branch starts HERE, above the MoveableStatic log line, so the run cannot
+                // announce records it did not build -- output is documentation, and a log that
+                // claims a record was created is as false as a doc that describes a field that
+                // does not exist. (It printed exactly that lie once before this was moved.)
+                PackIn packin;
+                if (optReusePackin != null)
+                {
+                    var reused = myMod.PackIns.FirstOrDefault(
+                        p => string.Equals(p.EditorID, optReusePackin, StringComparison.OrdinalIgnoreCase));
+                    if (reused == null)
+                    {
+                        // Fail loud -- a typo'd PackIn must not silently produce an orphan part.
+                        Console.WriteLine("Error: no PackIn with EditorID '" + optReusePackin + "' in " + modname);
+                        return 1;
+                    }
+                    packin = reused;
+                    Console.WriteLine("Reusing PackIn : " + optReusePackin + "  (variant -- GBFM + COBJ only)");
+                }
+                else
+                {
 
                 // Moveable Static ------------------------------------------
                 Console.WriteLine("Building Record : " + prefix + "_ms_" + item);
@@ -442,7 +508,7 @@ namespace FrankyCLI
                 IFormLink<ITransformGetter> link = new FormKey(env.LoadOrder[0].ModKey, 0x00050FAC).ToLink<ITransformGetter>();
 
                 byte[] barray = new byte[4] { 14, 00, 00, 00 };
-                var packin = new PackIn(myMod)
+                packin = new PackIn(myMod)
                 {
                     EditorID = prefix + "_pkn_" + item,
                     ObjectBounds = new ObjectBounds()
@@ -461,6 +527,8 @@ namespace FrankyCLI
                     MaterialSwaps = new ExtendedList<IFormLinkGetter<ILayeredMaterialSwapGetter>>()
                 };
                 myMod.PackIns.Add(packin);
+
+                }   // end of the full-build path (skipped entirely by --reuse-packin)
 
                 //Generic Base Form -------------------------------------------
                 IFormLinkNullable<IGenericBaseFormTemplateGetter> FormSpaceshipModule = new FormKey(env.LoadOrder[0].ModKey, 0x0003058E).ToNullableLink<IGenericBaseFormTemplateGetter>();
@@ -549,7 +617,10 @@ namespace FrankyCLI
                     },
                     new FullNameComponent()
                     {
-                        Name = item
+                        // The string the ship builder shows on the part card. Defaulting this to
+                        // <item> is why parts built before --name shipped displaying their
+                        // EditorID stub ("eng01") rather than a product name.
+                        Name = optName ?? item
                     }
                 };
                 var gbfm = new GenericBaseForm(myMod)
