@@ -103,6 +103,14 @@ namespace FrankyCLI
                 myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
                 gen_quest_main.FixNextFormId(myMod);
 
+                // Changing a placement rotation invalidates the variant's ObjectBounds (OBND
+                // must describe the part AS PLACED -- the builder reads it raw), so re-derive
+                // them from the base part's box alongside every rotation write.
+                var baseMs = myMod.MoveableStatics.FirstOrDefault(
+                    m => string.Equals(m.EditorID, baseId, StringComparison.OrdinalIgnoreCase));
+                if (baseMs?.ObjectBounds == null)
+                    Console.WriteLine($"  WARNING: base '{baseId}' not found or has no bounds -- rotations set, bounds NOT re-derived (run setbounds after fixing)");
+
                 foreach (var (dir, rot) in wanted)
                 {
                     var variantId = baseId + dir.ToString();
@@ -134,6 +142,11 @@ namespace FrankyCLI
                     }
                     var deg = $"{rot.X * 180 / Math.PI:0.#},{rot.Y * 180 / Math.PI:0.#},{rot.Z * 180 / Math.PI:0.#}";
                     Console.WriteLine($"  {dir.ToString().Replace("ShipModPosition", ""),-9} {variantId}: rotation -> ({deg}) deg  [{hits} placement(s)]");
+                    if (baseMs?.ObjectBounds != null)
+                    {
+                        ms.ObjectBounds = gen_setbounds.Derive(baseMs.ObjectBounds, rot);
+                        Console.WriteLine($"            bounds  -> ({ms.ObjectBounds.First.X:0.###},{ms.ObjectBounds.First.Y:0.###},{ms.ObjectBounds.First.Z:0.###})..({ms.ObjectBounds.Second.X:0.###},{ms.ObjectBounds.Second.Y:0.###},{ms.ObjectBounds.Second.Z:0.###})");
+                    }
                     changed += hits;
                 }
             }

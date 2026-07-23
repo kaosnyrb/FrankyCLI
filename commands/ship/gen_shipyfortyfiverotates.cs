@@ -721,6 +721,10 @@ namespace FrankyCLI
                     if (direction == directions.ShipModPositionBottom) newobj.Rotation = new P3Float(0, EulerToRadCardinals(225), 0);
                     if (direction == directions.ShipModPositionStbd) newobj.Rotation = new P3Float(0, EulerToRadCardinals(315), 0);
 
+                    // OBND must describe the part AS PLACED (see gen_shipflips / gen_setbounds).
+                    // At 45 degrees this is the axis-aligned envelope of the rotated box --
+                    // larger than the base box, which is the correct claim.
+                    moveableStatic.ObjectBounds = gen_setbounds.Derive(target.ObjectBounds, newobj.Rotation);
 
                     newCell.Temporary.Add(newobj);
 

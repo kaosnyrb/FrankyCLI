@@ -927,7 +927,14 @@ namespace FrankyCLI
                     if (direction == directions.ShipModPositionStbd) newobj.Rotation = new P3Float(rotationX, 0, EulerToRadCardinals(270));
                     if (direction == directions.ShipModPositionTop) newobj.Rotation = new P3Float(rotationX - EulerToRadCardinals(90), 0, 0);
                     if (direction == directions.ShipModPositionBottom) newobj.Rotation = new P3Float(rotationX + EulerToRadCardinals(90), 0, 0);
-                    
+
+                    // OBND must describe the part AS PLACED. The clone above copied the base's
+                    // unrotated box; the ship builder reads OBND raw (vanilla never rotates a
+                    // placement), and a stale box reads as "module not attached" even with the
+                    // snap nodes lined up. Found on atsd_fin01 -- the first family whose
+                    // rotations change the box; every earlier family's box was
+                    // rotation-invariant, so the copy was accidentally harmless.
+                    moveableStatic.ObjectBounds = gen_setbounds.Derive(target.ObjectBounds, newobj.Rotation);
 
                     newCell.Temporary.Add(newobj);
 

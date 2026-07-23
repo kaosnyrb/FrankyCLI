@@ -712,6 +712,9 @@ namespace FrankyCLI
                     if (direction == directions.ShipModPositionBottom) newobj.Rotation = new P3Float(0, EulerToRadCardinals(180), 0);
                     if (direction == directions.ShipModPositionStbd) newobj.Rotation = new P3Float(0, EulerToRadCardinals(270), 0);
 
+                    // OBND must describe the part AS PLACED (see gen_shipflips / gen_setbounds:
+                    // the builder reads OBND raw, and a Y-roll changes the box).
+                    moveableStatic.ObjectBounds = gen_setbounds.Derive(target.ObjectBounds, newobj.Rotation);
 
                     newCell.Temporary.Add(newobj);
 
