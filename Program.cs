@@ -174,6 +174,7 @@ switch (mode)
     case "setname":
     case "setsnap":
     case "setcreated":
+    case "setrotation":
     case "copyswap":
         Console.WriteLine($"Legacy mode '{mode}' — pass all original args including modname:");
         Console.WriteLine($"  FrankyCLI {mode} <modname> <prefix> <item> [modelpath] ...");
@@ -326,6 +327,7 @@ static int RunLegacy(string mode, string[] args)
         "setname"            => gen_setname.Generate(arr),
         "setsnap"            => gen_setsnap.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),
+        "setrotation"        => gen_setrotation.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),
         _                    => 1
