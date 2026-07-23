@@ -22,6 +22,32 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-23 — SHIP ENGINES: balance math SOLVED, record shape READ, generator gap NAMED.** Groundwork
+  for authoring a Stardust engine. *(Durable engine facts — the per-power storage, the 12-power identity,
+  the class ceilings, the 21-property PropertySheet, the Shipyards audit, his grandfather ruling — are in
+  home-office `bethesda.md` § *Ship ENGINES*. This is the FrankyCLI half.)*
+  - **THE GAP: no generator can author an engine.** `gen_shipstruct` writes a **1**-property PropertySheet
+    (`SpaceshipPartMass`); an engine GBFM needs **21** (`SpaceshipEnginePartForce`/`MaxPower`,
+    `SpaceshipThrusterPartForce`/`MaxPower`/`StrafeForce`/`MaxStrafeSpeed`, `EnginePartMaxForward/Backward
+    Speed`, `ShipSystemEngineHealth`+`EMHealth`, `DamageWeightEngine`, the three Boost props, the three
+    zeroed Max*Velocity props, `CrewRating`, `Health`, `Mass`, `ShipModuleVariant`) plus a
+    `ShipModuleClass<A|B|C>` keyword, a manufacturer keyword, an `s_<NNN>_ShipEngine_*` sort key and a
+    `ShipUpgrade_Eng_*` link. **The rest of the chain (MSTT→CELL→PKIN→GBFM→COBJ) is unchanged** — so this
+    is a PropertySheet + keyword extension, not a new chain.
+  - **PROPOSED (his fork, unresolved): `gen_shipengine` as its own command vs extending `gen_shipstruct`
+    with an `--engine` profile.** My lean: a separate command. The two parts share a chain but not a
+    vocabulary, and stuffing 20 engine-only flags onto the struct generator coupled to a part type that
+    doesn't use them is the grab-bag smell. **Either way it should REFUSE to exceed the class ceiling**
+    (A 7620/1610 · B 8860/1850 · C 9000/3900 thrust/manoeuvre per power) — the Shipyards audit showed
+    every over-ceiling record was hand-typed and every copied one was fine, so the defect is a *process*
+    one and the generator is the right place to fix it. **Also: default nothing silently** — same lesson
+    as `gen_shipstruct`'s vanilla-swap default below.
+  - **METHOD NOTE for whoever builds it:** the record stores thrust/manoeuvre **per power**, so the
+    generator takes the per-power design number directly (no ×power arithmetic); mass and health are
+    absolute per module. Verified against two byte-exact vanilla copies in his own ESM.
+  - **Live tail: his call on which shape, and whether we hand-author one engine first** (my lean — one
+    part through the whole chain teaches the record shape, generator writes itself after).
+
 - **2026-07-22 — ✅ WING RESOLVED — `atsd_wing01` port DONE (renders, attaches, colours, PAINTS) + now DOCTOR-VALIDATED.**
   The head of this thread once read "REOPENED — does not render, bug not done"; the sub-bullets below are the earned
   trail that ran every suspect to ground — deploy → NIF/root-children → NifSkope MaterialID → loose materials → the
