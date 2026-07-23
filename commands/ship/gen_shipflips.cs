@@ -537,9 +537,51 @@ namespace FrankyCLI
             string item = args[3];
             string UIName = args[4];
 
+            // args[5..] : an optional positional MSrotationX (kept for every existing caller)
+            // and/or --dirs <list>. Scanned rather than indexed so the two can appear in any
+            // order and the old two-arg form keeps working untouched.
             int MSrotationX = 0;
-            if (args.Length > 5) {
-                MSrotationX = int.Parse(args[5]);
+            string? optDirs = null;
+            for (int i = 5; i < args.Length; i++)
+            {
+                if (args[i] == "--dirs")
+                {
+                    if (i + 1 >= args.Length) { Console.WriteLine("Error: --dirs needs a value"); return 1; }
+                    optDirs = args[++i];
+                }
+                else if (int.TryParse(args[i], out var rot)) MSrotationX = rot;
+                else { Console.WriteLine("Error: unknown argument '" + args[i] + "'"); return 1; }
+            }
+
+            // Which orientations to stamp. Default stays ALL SIX -- every existing caller
+            // expects that -- but a part is not always sensible in all six: a tail fin wants
+            // Top/Port/Starboard/Bottom and would read wrong pointing fore or aft.
+            List<directions>? wantedDirs = null;
+            if (optDirs != null)
+            {
+                var alias = new Dictionary<string, directions>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Fore", directions.ShipModPositionFore },
+                    { "Aft", directions.ShipModPositionAft },
+                    { "Port", directions.ShipModPositionPort },
+                    { "Stbd", directions.ShipModPositionStbd },
+                    { "Starboard", directions.ShipModPositionStbd },
+                    { "Top", directions.ShipModPositionTop },
+                    { "Bottom", directions.ShipModPositionBottom },
+                    { "Btm", directions.ShipModPositionBottom },
+                };
+                wantedDirs = new List<directions>();
+                foreach (var d in optDirs.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (!alias.TryGetValue(d.Trim(), out var dir))
+                    {
+                        Console.WriteLine("Error: unknown direction '" + d.Trim()
+                            + "'. Use: " + string.Join(" ", alias.Keys));
+                        return 1;
+                    }
+                    if (!wantedDirs.Contains(dir)) wantedDirs.Add(dir);
+                }
+                if (wantedDirs.Count == 0) { Console.WriteLine("Error: --dirs listed no directions"); return 1; }
             }
 
             string datapath = "";
@@ -606,8 +648,8 @@ namespace FrankyCLI
                     EditorID = prefix + "_" + target!.EditorID + "_" + "franky",
                 };
 
-                List<directions> flips = new List<directions>() { 
-                    directions.ShipModPositionFore, 
+                List<directions> flips = wantedDirs ?? new List<directions>() {
+                    directions.ShipModPositionFore,
                     directions.ShipModPositionAft,
                     directions.ShipModPositionPort,
                     directions.ShipModPositionStbd,
@@ -615,6 +657,9 @@ namespace FrankyCLI
                     directions.ShipModPositionBottom,
 
                 };
+                Console.WriteLine("Orientations : " + string.Join(", ",
+                    flips.Select(f => f.ToString().Replace("ShipModPosition", "")))
+                    + (wantedDirs == null ? "  (default: all six)" : "  (--dirs)"));
                 foreach (var direction in flips)
                 {
                     //1: find and clone the moveable static 
