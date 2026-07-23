@@ -22,10 +22,35 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
-- **2026-07-23 — SHIP ENGINES: balance math SOLVED, record shape READ, generator gap NAMED.** Groundwork
-  for authoring a Stardust engine. *(Durable engine facts — the per-power storage, the 12-power identity,
-  the class ceilings, the 21-property PropertySheet, the Shipyards audit, his grandfather ruling — are in
-  home-office `bethesda.md` § *Ship ENGINES*. This is the FrankyCLI half.)*
+- **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
+  *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
+  PropertySheet, the flare, the Shipyards audit, his grandfather ruling — are in home-office
+  `bethesda.md` § *Ship ENGINES*. This is the FrankyCLI half.)*
+  - **DONE (commit `c9a440d`):** `--engine "class=A,force=…,thruster=…,power=…,health=…,speed=…"` +
+    `--mass` (mass was hardcoded to 5 for every part). Writes the full 21-property engine PropertySheet
+    and the `ShipModuleClass<A|B|C>` keyword; constants read off vanilla Ares DT30, not invented.
+    **REFUSES to exceed the class ceiling** (A 7620/1610 · B 8860/1850 · C 9000/3900 per power, + speed
+    by class) — all seven legs bite-tested, each with its own message, multi-axis breach naming every
+    axis in one run. **Also killed the silent three-vanilla-swap default** (the black-render trap) and
+    deleted the three orphaned paint links in the same commit. Header comment's "engines run 1 node"
+    corrected to the counted population.
+  - **PROVEN:** `atsd_eng01` — MSTT · 4-node SNTP · CELL · PKIN · GBFM(ClassA) · COBJ, plus `copyswap`
+    for the 3 REFL-opaque swaps; `check_part` **0 fail 0 warn** across NIF, materials, archive, records.
+    Class A, power 2, 5200/1000 per power, health 70, mass 90, speed 150.
+  - **OPEN GAP 1 — no flare placement.** `gen_shipstruct` writes exactly 3 placed objects (2 dummies +
+    the MSTT); the engine flare is a placed vanilla MoveableStatic (`SMOD_FX_EngineMain*`) in the PackIn
+    cell, so he had to add it by hand in the CK on an otherwise fully-generated part. **Proposed:
+    `--flare <EditorID|0xHEX>@x,y,z[;…]`**; offsets derive from the mesh's aft face, one per nozzle.
+  - **OPEN GAP 2 — `nif_from_template.py --collision` hardcodes `obj Z → game −Y`.** That is one part's
+    export convention, not a law (his wing maps straight through), and when the collision was re-exported
+    the other way the tool silently produced **mirrored render bounds** and reported them as fine.
+    **Fix: derive bounds from the MESH** (authored in game space) and treat the collision as a
+    reconciliation reading, or at minimum detect the mismatch instead of assuming.
+  - **OPEN GAP 3 — `check_part` should assert MESH-vs-COLLISION orientation.** An unapplied Blender
+    rotation cost a rebuild cycle today; the tell (identical tri counts + identical bounding boxes across
+    a supposed flip) is mechanical and belongs in the doctor, not in me noticing.
+  - **Live tail: his in-game test of eng01** (looks/snaps/paints/feels), then the mirrored variant if it
+    wants a pair. Nothing owed by me meanwhile.
   - **THE GAP: no generator can author an engine.** `gen_shipstruct` writes a **1**-property PropertySheet
     (`SpaceshipPartMass`); an engine GBFM needs **21** (`SpaceshipEnginePartForce`/`MaxPower`,
     `SpaceshipThrusterPartForce`/`MaxPower`/`StrafeForce`/`MaxStrafeSpeed`, `EnginePartMaxForward/Backward
