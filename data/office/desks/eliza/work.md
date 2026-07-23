@@ -22,6 +22,33 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-23 (late) — TAIL FIN `atsd_fin01`: flips + attaches VISUALLY in-game, but the shipbuilder's
+  runtime validation reports it UNATTACHED.** Editor snap passes, runtime attach check fails — two different
+  checks. Five surgical commits today, each fixing a real reason a flip LOOKS broken, all tracing to the fin
+  being authored **top-up** (joint at Z=0, blade rising in Z) fighting the fore-facing generator:
+  `ba7cc21` **setsnap** (+ fixed `CalculateNodes` silently dropping weapon mounts from every orientation) ·
+  `836910b` **setcreated** (why the flip was invisible — the visible COBJ created one GBFM not the FormList,
+  and the set COBJ had no recipe filter) · `273d269` **setrotation** (gen_shipflips' hardcoded map is only
+  right for a fore-facing part; fin's four orientations are all about Y) · `2071899` **setbounds** (a rotated
+  variant's OBND must describe the part AS PLACED, not the base's unrotated box). Result: it now snaps + flips
+  on the glass — **but runtime still says unattached, so that check wants more than a corrected axis-aligned box.**
+  - **DECISION (his, for tomorrow): stop using gen_shipflips PLACEMENT-ROTATION for the fin — do it the WING
+    WAY.** Each orientation its own MSTT with its mesh already in that orientation (IDENTITY placement),
+    materials/swaps shared, own snap template with the joint on the correct face. No placement rotation → the
+    game validates each as an ordinary module. The wing (`_port`/`_stb`) passes clean exactly this way;
+    placement-rotation is only proven on rotation-INVARIANT-box parts (the Shipyards dishes — fin01 is the
+    first family whose rotations change the box, which is why the OBND-copy bug hid until now).
+  - **CHEAPER FIX I flagged, unspent — get the log wording FIRST.** The exact "unattached" message names the
+    failing check. IF it's the grown axis-aligned OBND, runtime may apply the placement rotation itself and
+    want the **UN-rotated** box = a one-field flip, not N meshes. IF it's snap-node/connection-graph/keyword,
+    N meshes won't fix it either. He chose separate meshes regardless; still worth reading the log before
+    paying for the exports.
+  - **Modding workspace: `C:\modding\avontech_stardust`** (`nif_from_template.py`, `check_part.py`). Fin is
+    3-part P/S/T (`pri`/`sec`/`tri`), deployed in Steam `Data\`. **Tomorrow's flow:** he rotates + **applies**
+    + exports each orientation's meshes in Blender (apply-before-export or the `.mesh` won't move) → I rebuild
+    N NIFs over their filenames (materials unchanged → the CK-repointed swaps survive) → N MSTTs sharing
+    mats/swaps → `check_part` green before the in-game retest.
+
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
   PropertySheet, the flare, the Shipyards audit, his grandfather ruling — are in home-office
