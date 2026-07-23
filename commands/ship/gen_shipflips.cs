@@ -49,6 +49,28 @@ namespace FrankyCLI
         static readonly HashSet<uint> FaceNodeForms = new HashSet<uint>
         { 0x0004AB6F, 0x0004AB70, 0x0004AB73, 0x0004AB74, 0x0004AB77, 0x0004AB78 };
 
+        /// <summary>Category keyword by EditorID (resolved against the mod then Starfield.esm) or 0xHEX.</summary>
+        static IFormLinkGetter<IKeywordGetter>? ResolveCategory(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string category)
+        {
+            if (category.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!uint.TryParse(category.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
+                {
+                    Console.WriteLine($"Error: category '{category}' is not a hex FormID");
+                    return null;
+                }
+                // A bare hex id is Starfield.esm-relative; an index byte targets that master.
+                var owner = (id >> 24) == 0 ? env.LoadOrder[0].ModKey : myMod.ModKey;
+                return new FormKey(owner, id & 0x00FFFFFF).ToLink<IKeywordGetter>();
+            }
+            foreach (var kw in myMod.Keywords)
+                if (string.Equals(kw.EditorID, category, StringComparison.OrdinalIgnoreCase)) return kw.ToLink<IKeywordGetter>();
+            foreach (var kw in env.LoadOrder[0].Mod!.Keywords)
+                if (string.Equals(kw.EditorID, category, StringComparison.OrdinalIgnoreCase)) return kw.ToLink<IKeywordGetter>();
+            Console.WriteLine($"Error: no Keyword with EditorID '{category}' in this mod or Starfield.esm");
+            return null;
+        }
+
         public static ExtendedList<SnapNodeEntry> CalculateNodes(directions direction, ExtendedList<SnapNodeEntry> nodes, IGameEnvironment env)
         {
             var results = CalculateFaceNodes(direction, nodes, env);
@@ -570,13 +592,18 @@ namespace FrankyCLI
             // and/or --dirs <list>. Scanned rather than indexed so the two can appear in any
             // order and the old two-arg form keeps working untouched.
             int MSrotationX = 0;
-            string? optDirs = null;
+            string? optDirs = null, optCategory = null;
             for (int i = 5; i < args.Length; i++)
             {
                 if (args[i] == "--dirs")
                 {
                     if (i + 1 >= args.Length) { Console.WriteLine("Error: --dirs needs a value"); return 1; }
                     optDirs = args[++i];
+                }
+                else if (args[i] == "--category")
+                {
+                    if (i + 1 >= args.Length) { Console.WriteLine("Error: --category needs a value"); return 1; }
+                    optCategory = args[++i];
                 }
                 else if (int.TryParse(args[i], out var rot)) MSrotationX = rot;
                 else { Console.WriteLine("Error: unknown argument '" + args[i] + "'"); return 1; }
@@ -1028,6 +1055,25 @@ namespace FrankyCLI
                 IFormLinkNullable<IKeywordGetter> WorkbenchShipBuildingKeyword = new FormKey(env.LoadOrder[0].ModKey, 0x0029C480).ToNullableLink<IKeywordGetter>();
                 IFormLinkNullable<IKeywordGetter> Category_ShipMod_Structure = new FormKey(env.LoadOrder[0].ModKey, 0x0029C473).ToNullableLink<IKeywordGetter>();
 
+                // The recipe FILTER (FNAM) -- which builder tab this shows under. It was declared
+                // above and never attached, exactly as it had been in gen_shipstruct, so the flip
+                // recipe existed in no category and was invisible: the builder showed the BASE
+                // part's recipe instead, which creates a single GBFM and therefore cannot flip.
+                // That is what "the flip isn't working" looked like from the outside.
+                var recipeFilters = new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                if (optCategory != null)
+                {
+                    var cat = ResolveCategory(myMod, env, optCategory);
+                    if (cat == null) return 1;
+                    recipeFilters.Add(cat);
+                    Console.WriteLine("Recipe filter : " + optCategory);
+                }
+                else
+                {
+                    recipeFilters.Add(new FormKey(env.LoadOrder[0].ModKey, 0x0029C473).ToLink<IKeywordGetter>());
+                    Console.WriteLine("Recipe filter : Category_ShipMod_Structure (default)");
+                }
+
                 var co = new ConstructibleObject(myMod)
                 {
                     EditorID = prefix + "_co_" + item,
@@ -1038,9 +1084,15 @@ namespace FrankyCLI
                     LearnMethod = ConstructibleObject.LearnMethodEnum.DefaultOrConditions,
                     Value = 1000,
                     WorkbenchKeyword = WorkbenchShipBuildingKeyword,
+                    RecipeFilters = recipeFilters,
                 };
 
                 myMod.ConstructibleObjects.Add(co);
+                Console.WriteLine();
+                Console.WriteLine("  NOTE: a flipped part is sold as a SET -- this COBJ creates the FormList.");
+                Console.WriteLine("        If gen_shipstruct already wrote a base COBJ for this part, that one");
+                Console.WriteLine("        creates a SINGLE GenericBaseForm and cannot flip. Repoint or remove it:");
+                Console.WriteLine("          setcreated " + modname + " " + "<base_cobj> " + FlipsList.EditorID);
             }
 
                 foreach (var rec in myMod.EnumerateMajorRecords())
