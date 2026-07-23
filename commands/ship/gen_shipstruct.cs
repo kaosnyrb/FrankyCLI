@@ -27,9 +27,25 @@ namespace FrankyCLI
             //
             // The defaults below (generic 1x1x1 all-faces snap, three vanilla paints, grid
             // bounds) are right for a 1x1x1 structural cube and wrong for anything else. A
-            // SnapTemplate is a function of the part's SHAPE -- vanilla runs 1 node on an
-            // engine, 2-3 on a cockpit, 4 on a wing or docker, 6 on the generic cube, 10 on
-            // a hab -- and a handed part (wing, side engine) needs one PER SIDE.
+            // SnapTemplate is a function of the part's SHAPE -- 2-3 nodes on a cockpit, 4 on a
+            // wing or docker, 6 on the generic cube, 10 on a hab -- and a handed part (wing,
+            // side engine) needs one PER SIDE.
+            //
+            // ENGINES: counted the population (19 ShipSnap_SMOD_Eng_* templates) rather than
+            // trusting the old "engines run 1 node" note here, which was the MODE quoted as a
+            // rule. Real spread is 1-7 nodes {1:6, 2:2, 3:4, 4:6, 7:1}, and only 12/19 carry a
+            // Fore node. The node set follows HOW THE PART MOUNTS, not what kind of part it is:
+            // a rear-mount engine gets a single Fore (Eng_Amun_Dunn-11); a handed side-pod gets
+            // a single INBOARD Port/Starboard (Eng_Panoptes_DT10_Port carries a Starboard node
+            // -- the face touching the hull, i.e. opposite its name); a flank-mountable barrel
+            // gets the four side faces; a big structural engine gets the lot (Eng_Amun_Dunn-41:
+            // Top x2, Bottom x2, Port, Starboard, Fore).
+            //
+            // OFFSETS: a SINGLE-node template sits at 0,0,0 -- the part is modelled so its
+            // origin IS the attach point, so there is nothing to offset. A MULTI-node template
+            // carries each face's true half-extent, because they cannot all sit at the origin.
+            // Vanilla offsets only LOOK like grid values (+-4, +-1.75) because vanilla parts are
+            // grid-sized; a 3.4844-diameter custom barrel takes +-1.7422 by the same rule.
             //
             //   --snap <EditorID>          link an existing SnapTemplate instead of the cube
             //   --snap-nodes <spec>        author one, named <prefix>_sntp_<item>. Spec is
@@ -45,6 +61,29 @@ namespace FrankyCLI
             //   --swaps <EditorID,...>     material swaps, replacing the three vanilla paints
             //   --bounds <minX,minY,minZ,maxX,maxY,maxZ>  ObjectBounds, min then max (a part is
             //                              not necessarily centred on its own origin)
+            //   --mass <n>                 SpaceshipPartMass. Was hardcoded to 5.
+            //   --engine <k=v,...>         make this part an ENGINE: swaps the 2-property GBFM
+            //                              sheet for the full 21-property engine sheet and adds
+            //                              the ShipModuleClass<X> keyword. Keys:
+            //                                class    A|B|C            (required)
+            //                                force    thrust PER POWER (required)
+            //                                thruster manoeuvre PER POWER (required)
+            //                                power    engine power slots   (default 2)
+            //                                tpower   thruster power slots (default 4)
+            //                                health   engine + EM health   (default 64)
+            //                                speed    max forward speed    (default by class)
+            //                              e.g. --engine "class=A,force=5200,thruster=1000,power=2,health=70"
+            //
+            // ENGINE STATS ARE STORED PER POWER. SpaceshipEnginePartForce and
+            // SpaceshipThrusterPartForce hold the per-power value; the ship builder shows
+            // force x power. Mass and health are absolute per module. Verified three ways
+            // against vanilla: Ares DT30 force 4600 x power 2 = the 9200 the game displays;
+            // Amun Dunn X-300 (8630 x 3 = 25890); Dunn-71 (8860 x 3 = 26580).
+            //
+            // The engine power bar caps at 12, so TOTAL fleet thrust is exactly
+            // (force per power) x 12 regardless of how many modules you fit -- module count is
+            // decorative. That makes per-power the only currency, and it is why the ceilings
+            // below are expressed in it.
             //
             // Each authored node is a VERBATIM copy of the matching node on vanilla's
             // ShipSnap_SMOD_Generic_1x1x1_All01 with only its Offset moved, so the node
@@ -52,6 +91,7 @@ namespace FrankyCLI
             // property of the face (confirmed: the Nova wing templates carry the identical
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
+            string? optEngine = null, optMass = null;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -62,8 +102,24 @@ namespace FrankyCLI
                     case "--swaps": if (!hasValue) { Console.WriteLine("Error: --swaps needs a value"); return 1; } optSwaps = args[++i]; break;
                     case "--bounds": if (!hasValue) { Console.WriteLine("Error: --bounds needs a value"); return 1; } optBounds = args[++i]; break;
                     case "--category": if (!hasValue) { Console.WriteLine("Error: --category needs a value"); return 1; } optCategory = args[++i]; break;
+                    case "--engine": if (!hasValue) { Console.WriteLine("Error: --engine needs a value"); return 1; } optEngine = args[++i]; break;
+                    case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
                     default: Console.WriteLine("Error: unknown option " + args[i]); return 1;
                 }
+            }
+
+            EngineSpec? engine = null;
+            if (optEngine != null)
+            {
+                engine = EngineSpec.Parse(optEngine);
+                if (engine == null) return 1;                 // Parse prints the reason
+            }
+
+            float partMass = 5;
+            if (optMass != null && !float.TryParse(optMass, out partMass))
+            {
+                Console.WriteLine("Error: --mass wants a number");
+                return 1;
             }
             if (optSnap != null && optSnapNodes != null)
             {
@@ -110,9 +166,6 @@ namespace FrankyCLI
                 // Moveable Static ------------------------------------------
                 Console.WriteLine("Building Record : " + prefix + "_ms_" + item);
                 IFormLinkNullable<ISnapTemplateGetter> snaplink = new FormKey(env.LoadOrder[0].ModKey, 0x00059B01).ToNullableLink<ISnapTemplateGetter>();
-                IFormLinkNullable<ILayeredMaterialSwapGetter> paint1 = new FormKey(env.LoadOrder[0].ModKey, 0x00099196).ToNullableLink<ILayeredMaterialSwapGetter>();
-                IFormLinkNullable<ILayeredMaterialSwapGetter> paint2 = new FormKey(env.LoadOrder[0].ModKey, 0x000B6B1F).ToNullableLink<ILayeredMaterialSwapGetter>();
-                IFormLinkNullable<ILayeredMaterialSwapGetter> paint3 = new FormKey(env.LoadOrder[0].ModKey, 0x002AF78A).ToNullableLink<ILayeredMaterialSwapGetter>();
                 IFormLinkNullable<IKeywordGetter> spaceshipformshipmodule = new FormKey(env.LoadOrder[0].ModKey, 0x001BB401).ToNullableLink<IKeywordGetter>();
                 IFormLinkNullable<IKeywordGetter> NavmeshUseDefaultCollisionForGeneration = new FormKey(env.LoadOrder[0].ModKey, 0x00207960).ToNullableLink<IKeywordGetter>();
 
@@ -158,9 +211,21 @@ namespace FrankyCLI
                 }
                 else
                 {
-                    swaps.Add(paint1);
-                    swaps.Add(paint2);
-                    swaps.Add(paint3);
+                    // NO DEFAULT SWAPS -- deliberately. This used to attach three VANILLA
+                    // Starfield paints (0x099196 / 0x0B6B1F / 0x2AF78A), which was a
+                    // Shipyards-ism: those swap FROM vanilla materials, so they work only on a
+                    // part that USES vanilla materials. On a part with its own .mat the source
+                    // key never matches and the part is render-blocked -- it cost a full day on
+                    // atsd_wing01 (2026-07-22) and every part built here inherited the trap
+                    // silently.
+                    //
+                    // A part with no swaps renders correctly; it simply offers no paint option
+                    // until real swaps are wired. That is the honest default: a missing feature
+                    // you are told about beats a broken render you are not.
+                    Console.WriteLine("Material swaps : none (no --swaps given)");
+                    Console.WriteLine("  NOTE: this part will render but will NOT be paintable until swaps are wired.");
+                    Console.WriteLine("        A LayeredMaterialSwap is REFL-opaque and cannot be authored here --");
+                    Console.WriteLine("        deep-copy one with 'copyswap <mod> <mstt> <new>=<src>' and repoint it in the CK.");
                 }
 
                 // ---- object bounds ----
@@ -404,23 +469,68 @@ namespace FrankyCLI
                 IFormLinkNullable<IKeywordGetter> SpaceshipLinkedExterior = new FormKey(env.LoadOrder[0].ModKey, 0x0000662F).ToNullableLink<IKeywordGetter>();
                 IFormLinkNullable<IKeywordGetter> ShipModuleManufacturerDeimos = new FormKey(env.LoadOrder[0].ModKey, 0x001462C0).ToNullableLink<IKeywordGetter>();
                 Console.WriteLine("Building Record : " + prefix + "_gbfm_" + item);
+
+                // The PropertySheet is SPARSE -- a cargo GBFM carries 3 properties, an engine 21.
+                // Anything absent is simply not authored, so build exactly the set this part needs.
+                ObjectProperty Prop(uint av, float value) => new ObjectProperty()
+                {
+                    ActorValue = new FormKey(env.LoadOrder[0].ModKey, av).ToNullableLink<IActorValueInformationGetter>(),
+                    Value = value,
+                };
+
+                var properties = new ExtendedList<ObjectProperty>()
+                {
+                    new ObjectProperty() { ActorValue = SpaceshipPartMass, Value = partMass },
+                    new ObjectProperty() { ActorValue = ShipModuleVariant, Value = 1 },
+                };
+
+                if (engine != null)
+                {
+                    // The 19 engine-specific properties. Constants are the vanilla class-A
+                    // reference (Ares DT30, SMA_Engine_Panoptes_Ares_DT30_Stb_lvl16) read off
+                    // Starfield.esm rather than invented -- backward speed 32, strafe speed 50,
+                    // strafe force 19000, boost 3/2/0.3, crew 0.25, generic Health 5, the three
+                    // Max*Velocity all 0 (every engine sampled zeroes them).
+                    properties.Add(Prop(0x0000ACDC, engine.Force));          // SpaceshipEnginePartForce      (PER POWER)
+                    properties.Add(Prop(0x0000ACDD, engine.Power));          // SpaceshipEnginePartMaxPower
+                    properties.Add(Prop(0x0000ACDE, engine.Thruster));       // SpaceshipThrusterPartForce    (PER POWER)
+                    properties.Add(Prop(0x0000ACDF, engine.ThrusterPower));  // SpaceshipThrusterPartMaxPower
+                    properties.Add(Prop(0x00278988, engine.Speed));          // ...MaxForwardSpeed
+                    properties.Add(Prop(0x00278986, 32));                    // ...MaxBackwardSpeed
+                    properties.Add(Prop(0x002A9542, 19000));                 // ThrusterPartStrafeForce
+                    properties.Add(Prop(0x00278987, 50));                    // ThrusterPartMaxStrafeSpeed
+                    properties.Add(Prop(0x001EF0CD, engine.Health));         // ShipSystemEngineHealth
+                    properties.Add(Prop(0x001EF0C2, engine.Health));         // ShipSystemEngineEMHealth (always equal)
+                    properties.Add(Prop(0x00011589, 1));                     // ShipSystemDamageWeightEngine
+                    properties.Add(Prop(0x00001885, 3));                     // SpaceshipBoostFuel
+                    properties.Add(Prop(0x00001886, 2));                     // SpaceshipBoostSpeed
+                    properties.Add(Prop(0x0006A256, 0.3f));                  // SpaceshipBoostRechargeRate
+                    properties.Add(Prop(0x00019080, 0.25f));                 // SpaceshipCrewRating
+                    properties.Add(Prop(0x000002D4, 5));                     // Health (generic)
+                    properties.Add(Prop(0x002DF170, 0));                     // ...MaxPitchVelocity
+                    properties.Add(Prop(0x002DF171, 0));                     // ...MaxRollVelocity
+                    properties.Add(Prop(0x002E6679, 0));                     // ...MaxYawVelocity
+                }
+
+                // An engine also declares its CLASS -- the keyword the ship builder groups and
+                // gates on. Vanilla engines carry ShipModuleClass<A|B|C>; a structural part
+                // does not, which is why this is added only on the engine path.
+                var gbfmKeywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
+                {
+                    ShipModuleManufacturerDeimos
+                };
+                if (engine != null)
+                {
+                    gbfmKeywords.Add(new FormKey(env.LoadOrder[0].ModKey, engine.ClassKeyword())
+                        .ToLink<IKeywordGetter>());
+                    Console.WriteLine("           keyword ShipModuleClass" + engine.Class);
+                }
+
                 var gbfm_components = new ExtendedList<AComponent>()
                 {
                     new PropertySheetComponent()
                     {
-                        Properties = new ExtendedList<ObjectProperty>()
-                        {
-                            new ObjectProperty()
-                            {
-                                ActorValue = SpaceshipPartMass,
-                                Value = 5,
-                            },
-                            new ObjectProperty()
-                            {
-                                ActorValue = ShipModuleVariant,
-                                Value = 1,
-                            }
-                        }
+                        Properties = properties
                     },
                     new FormLinkDataComponent()
                     {
@@ -435,10 +545,7 @@ namespace FrankyCLI
                     },
                     new KeywordFormComponent()
                     {
-                        Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
-                        {
-                            ShipModuleManufacturerDeimos
-                        }
+                        Keywords = gbfmKeywords
                     },
                     new FullNameComponent()
                     {
@@ -524,6 +631,122 @@ namespace FrankyCLI
         // ShipSnap_SMOD_Generic_1x1x1_All01 -- the canonical six-face cube every authored
         // node here is copied from, so the node record and its rotation come from the game.
         const uint CanonicalCube = 0x00059B01;
+
+        // ---- ENGINE stats -----------------------------------------------------------
+        // Ceilings are the BEST vanilla engine in each class, in per-power units, derived
+        // from the full 66-engine vanilla set. Crossing one makes your engine the strongest
+        // in the game on that axis; crossing two at once is the SAL-6830 failure.
+        //   A  7620 thrust / 1610 manoeuvre  (SA-4330, the level-43 class-A king)
+        //   B  8860 thrust / 1850 manoeuvre  (Dunn-71 / SAE-5660)
+        //   C  9000 thrust / 3900 manoeuvre  (SAL-6330, level 60)
+        // This refusal exists because an audit of AvontechShipyards found every over-ceiling
+        // engine was HAND-TYPED and every one copied from a vanilla stat block was fine. The
+        // defect was a process one, so the fix belongs in the generator.
+        sealed class EngineSpec
+        {
+            public string Class = "A";
+            public float Force, Thruster;
+            public float Power = 2, ThrusterPower = 4, Health = 64, Speed;
+
+            static readonly Dictionary<string, (float thrust, float manoeuvre, float speed)> Ceiling =
+                new(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "A", (7620f, 1610f, 150f) },
+                    { "B", (8860f, 1850f, 140f) },
+                    { "C", (9000f, 3900f, 130f) },
+                };
+
+            public static EngineSpec? Parse(string spec)
+            {
+                var e = new EngineSpec();
+                bool haveForce = false, haveThruster = false, haveClass = false, haveSpeed = false;
+                foreach (var pair in spec.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var kv = pair.Split('=');
+                    if (kv.Length != 2)
+                    {
+                        Console.WriteLine("Error: bad --engine term '" + pair + "' -- want key=value");
+                        return null;
+                    }
+                    var k = kv[0].Trim();
+                    var v = kv[1].Trim();
+                    if (k.Equals("class", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!Ceiling.ContainsKey(v))
+                        {
+                            Console.WriteLine("Error: --engine class must be A, B or C (got '" + v + "')");
+                            return null;
+                        }
+                        e.Class = v.ToUpperInvariant(); haveClass = true; continue;
+                    }
+                    if (!float.TryParse(v, out var n))
+                    {
+                        Console.WriteLine("Error: --engine " + k + " wants a number (got '" + v + "')");
+                        return null;
+                    }
+                    switch (k.ToLowerInvariant())
+                    {
+                        case "force":    e.Force = n; haveForce = true; break;
+                        case "thruster": e.Thruster = n; haveThruster = true; break;
+                        case "power":    e.Power = n; break;
+                        case "tpower":   e.ThrusterPower = n; break;
+                        case "health":   e.Health = n; break;
+                        case "speed":    e.Speed = n; haveSpeed = true; break;
+                        default:
+                            Console.WriteLine("Error: unknown --engine key '" + k
+                                + "'. Keys: class force thruster power tpower health speed");
+                            return null;
+                    }
+                }
+                if (!haveClass || !haveForce || !haveThruster)
+                {
+                    Console.WriteLine("Error: --engine needs at least class, force and thruster");
+                    return null;
+                }
+                var cap = Ceiling[e.Class];
+                if (!haveSpeed) e.Speed = cap.speed;
+
+                // The refusal. Report BOTH axes before returning so one run names every problem.
+                bool over = false;
+                if (e.Force > cap.thrust)
+                {
+                    Console.WriteLine($"REFUSED: force {e.Force}/pwr exceeds the class-{e.Class} vanilla ceiling {cap.thrust}"
+                        + $" ({e.Force / cap.thrust:0.00}x). Total at the 12-power cap would be {e.Force * 12:N0}"
+                        + $" vs the best vanilla {cap.thrust * 12:N0}.");
+                    over = true;
+                }
+                if (e.Thruster > cap.manoeuvre)
+                {
+                    Console.WriteLine($"REFUSED: thruster {e.Thruster}/pwr exceeds the class-{e.Class} vanilla ceiling {cap.manoeuvre}"
+                        + $" ({e.Thruster / cap.manoeuvre:0.00}x).");
+                    over = true;
+                }
+                if (e.Speed > cap.speed)
+                {
+                    Console.WriteLine($"REFUSED: speed {e.Speed} exceeds the class-{e.Class} standard {cap.speed}."
+                        + " Only White Dwarf 3015 goes above its class (180), and it pays with HALF the class's health.");
+                    over = true;
+                }
+                if (over)
+                {
+                    Console.WriteLine("  (These are the vanilla maxima, not a style guide. If you mean it, raise the"
+                        + " ceiling here in one place rather than passing a bigger number.)");
+                    return null;
+                }
+                Console.WriteLine($"Engine   : class {e.Class}, {e.Force}/pwr thrust x {e.Power} pwr = {e.Force * e.Power:N0} shown"
+                    + $"; {e.Thruster}/pwr manoeuvre = {e.Thruster * e.Power:N0} shown; speed {e.Speed}");
+                Console.WriteLine($"           at the 12-power cap: thrust {e.Force * 12:N0} ({e.Force / cap.thrust:P0} of the"
+                    + $" class-{e.Class} ceiling), manoeuvre {e.Thruster * 12:N0} ({e.Thruster / cap.manoeuvre:P0})");
+                return e;
+            }
+
+            public uint ClassKeyword() => Class switch
+            {
+                "A" => 0x0026FE57,
+                "B" => 0x0026FE56,
+                _   => 0x0026FE55,
+            };
+        }
 
         static readonly Dictionary<string, uint> SnapFaceNodes = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)
         {
