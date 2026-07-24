@@ -123,6 +123,21 @@ namespace FrankyCLI
                 if (cobj != null && !cobj.CreatedObject.IsNull) cache.TryResolveIdentifier(cobj.CreatedObject.FormKey, out createdRef);
                 chain["cobj"] = Node(cobj?.EditorID, cobj?.FormKey, ("createdObjectRef", createdRef));
 
+                // set-part: a family regrouped into a flip SET (setflipset) has NO per-part COBJ --
+                // one COBJ creates a FormList that CONTAINS this part's GBFM. Report the membership
+                // fact (the real invariant; a name suffix is only a marker); judgement stays in Python.
+                string? setCobjEid = null; FormKey? setCobjKey = null; string? setFlst = null;
+                if (gbfm != null)
+                    foreach (var c in mod.ConstructibleObjects)
+                    {
+                        if (c.CreatedObject.IsNull) continue;
+                        var fl = mod.FormLists.FirstOrDefault(f => f.FormKey == c.CreatedObject.FormKey);
+                        if (fl == null) continue;
+                        if (fl.Items.Any(itm => itm.FormKey == gbfm.FormKey))
+                        { setCobjEid = c.EditorID; setCobjKey = c.FormKey; setFlst = fl.EditorID; break; }
+                    }
+                chain["setCobj"] = Node(setCobjEid, setCobjKey, ("flst", setFlst));
+
                 outp["ok"] = true;
                 return Emit(outp);
             }
