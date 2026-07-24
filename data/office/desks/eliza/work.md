@@ -74,6 +74,17 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     one change, ESM free of CK when I write. NOTE: new family = separate COBJ per orientation (no
     FormList/flip-key grouping) — four builder entries; if he wants one entry + flip key that's a
     FormList regroup, his call.
+  - **2026-07-24 (cont) — REGROUPED INTO THE SET, his call: one "Avontech Trimmer Fin" entry, flip key
+    cycles all four.** Built `setflipset` (FormList + ShipModPosition keywords, idempotent) and
+    `removerecord` (typed, all-or-nothing, CELL deliberately unsupported) — FrankyCLI `7e16a50`. Ran:
+    `atsd_flst_fin01` over the 4 GBFMs (Top/Port/Stbd/Bottom keywords stamped) → `setcreated
+    atsd_co_fin01 → atsd_flst_fin01` → removed the 3 per-orientation COBJs → `setname` ×3 (all four now
+    "Avontech Trimmer Fin") → esm→esp bridged 98,460 both. Taught the doctor the set shape in the same
+    change (gen_checkpart `setCobj` membership fact; check_part judges it — bite-tested 3 ways); whole
+    family `check_part` green incl. eng01 regression. Modding repo: bot part committed (`26806a6`) +
+    check_part incl. the sibling session's uncommitted 07-23 collision group, named honestly (`79e6cd5`).
+    **Live tail: his in-game test of the set.** Old flip-system records still in plugin — retirement
+    now fully tooled (`removerecord`), still awaiting his explicit nod.
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
