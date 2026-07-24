@@ -115,7 +115,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     (banked earlier). **OPEN — wing display names still stubs:** "Avontech Wing" is already a display
     name somewhere in Shipyards' catalogue (grounded: seen in the load order, owner-record not pinned),
     so the basic plain name would collide across his own mods; his register pick owed.
-  - **2026-07-24 (close) — WINGS NAMED: "Avontech Outrigger Wing" ×2 (his pick, register word).** Bridged
+  - **2026-07-24 (evening) — STOKER TURBINE BLADES IN: eng01 is a 6-part NIF (22 blocks, his NifSkope
+    clean verified by the doctor's MaterialID leg), blade textures converted (BaseColor desaturated —
+    the new line discipline; the unapplied-rotation tell fired a THIRD time on blade_tri and caught it
+    pre-build), 6 blade mats on res-blocks D/E/F — **the single-hex res-id space is now FULL; next part
+    family needs the scheme widened.** Archives rebuilt, doctor = 1 honest FAIL: the three eng01 swaps
+    still carry no blade mappings → **his CK minute** (blade_pri→_P etc.), then glass. Desaturation
+    pass also shipped same session (all 4 colour maps, amber → promo scheme, his ruling; originals in
+    texbackup/ = their only history). Modding repo: blade unit `d560e55`, desaturation `29251f7`, fin
+    mats swept in `994bbf4`. Bridged
     93,591 both; port 0/0, stb 0/1 (the pre-existing stale collision-OBJ WARN). **The Stardust naming
     register is now 4 shipped: Sherpa · Stoker · Trimmer · Outrigger.** Everything from today owed only
     a glass retest: fin set (Trimmer, 4-way flip), wing set (Outrigger, port↔stbd flip), the four
