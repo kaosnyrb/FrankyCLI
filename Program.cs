@@ -178,6 +178,7 @@ switch (mode)
     case "setbounds":
     case "setflipset":
     case "removerecord":
+    case "setdesc":
     case "copyswap":
         Console.WriteLine($"Legacy mode '{mode}' — pass all original args including modname:");
         Console.WriteLine($"  FrankyCLI {mode} <modname> <prefix> <item> [modelpath] ...");
@@ -334,6 +335,7 @@ static int RunLegacy(string mode, string[] args)
         "setbounds"          => gen_setbounds.Generate(arr),
         "setflipset"         => gen_setflipset.Generate(arr),
         "removerecord"       => gen_removerecord.Generate(arr),
+        "setdesc"            => gen_setdesc.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),
         _                    => 1

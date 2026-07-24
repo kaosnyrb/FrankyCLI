@@ -106,7 +106,7 @@ namespace FrankyCLI
             // property of the face (confirmed: the Nova wing templates carry the identical
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
-            string? optEngine = null, optMass = null, optName = null, optReusePackin = null;
+            string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -120,6 +120,7 @@ namespace FrankyCLI
                     case "--engine": if (!hasValue) { Console.WriteLine("Error: --engine needs a value"); return 1; } optEngine = args[++i]; break;
                     case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
+                    case "--desc": if (!hasValue) { Console.WriteLine("Error: --desc needs a value"); return 1; } optDesc = args[++i]; break;
                     case "--reuse-packin": if (!hasValue) { Console.WriteLine("Error: --reuse-packin needs a value"); return 1; } optReusePackin = args[++i]; break;
                     default: Console.WriteLine("Error: unknown option " + args[i]); return 1;
                 }
@@ -675,7 +676,9 @@ namespace FrankyCLI
                 var co = new ConstructibleObject(myMod)
                 {
                     EditorID = prefix + "_co_" + item,
-                    Description = item,
+                    // Default stays the <item> stub so a missing --desc is VISIBLE in the UI
+                    // rather than silently wearing borrowed text; setdesc patches it after.
+                    Description = optDesc ?? item,
                     CreatedObject = gbfm.ToNullableLink<IConstructibleObjectTargetGetter>(),
                     AmountProduced = 1,
                     MenuSortOrder = 1,
