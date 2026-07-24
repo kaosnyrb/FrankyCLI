@@ -95,6 +95,13 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     contents), so they wait for his hands or a properly-built cell remover. **The fin saga is CLOSED:**
     per-orientation baked meshes at identity, one "Avontech Trimmer Fin" recipe, flip key cycles four,
     old placement-rotation system gone.
+  - **2026-07-24 (cont) — WINGS regrouped into a flip set too (his ask):** `atsd_flst_wing01` over
+    port+stb (port's Port keyword was already there — CK touch, kept; stb gained Stbd), port's COBJ
+    repointed at the list, stb's COBJ removed, bridged 93,107 both. Doctor green ×2 (stb's stale
+    collision-OBJ WARN is the pre-existing banked finding, not this change). **OPEN — the card now
+    shows the raw stub "wing01_port": display name is HIS register call** (table proposes wing →
+    Outrigger ⇒ "Avontech Outrigger Wing"); `setname` ×2 when he picks. Retest owed on the glass:
+    one wing entry, flip key port↔stbd.
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
