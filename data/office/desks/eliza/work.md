@@ -57,6 +57,23 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     FormList regrouped over the new identity MSTTs (flip key), COBJ→FormList, swaps shared per MSTT
     (`copyswap` wire-existing), OLD placement-rotated variants retired in the same change, `check_part`
     per orientation.
+  - **2026-07-24 (cont) — BOTTOM BUILT END TO END, `check_part` 0 fail 0 warn, CLEAR TO TEST.** His bot
+    export had ONE unapplied rotation (bot_tri: identical envelope + identical 262 tris to base — the
+    eng01 tell, caught mechanically); he re-exported, verified flipped. Then: NIF built off the cleaned
+    sbd template (13 blocks, shared `fin01_*` mats), bot hull injected (17 verts exact, survived his
+    NifSkope clean — second proof injection/clean are order-independent), deployed + hash-verified,
+    archlist + both .ba2 rebuilt, records via `struct avontechstardust atsd fin01_bot` (CLI is
+    command-first: `dotnet run -- struct <mod> <prefix> <item> <nif> [flags]`) — 7-node SNTP mirrored
+    from the base template by symmetry (Z negated, tip labels swapped, equipment tip-canonical), sibling
+    bounds/mass/name/swaps (shared `atsd_matswap_fin01_*`, wire-existing). esm→esp bridged, pair 98,772.
+    **OPEN, his:** (a) in-game test of bot incl. the two weapon-mount facings (my tip-canonical pick is
+    a proposal, his eye rules); (b) naming drift — base GBFM is "Avontech Trimmer Fin", port/sbd/bot
+    ship as "Avontech Fin"; `setname` fixes all four surgically on his pick; (c) **retirement pass owed
+    on his nod:** 4 old `ShipModPosition*` MSTTs + their `atsd_sn_*` templates + `atsd_gbfm_atsd_ms_*`
+    GBFMs + `atsd_co_atsd_ms_fin01` COBJ + the `_franky` FormList — the dead flip system comes out in
+    one change, ESM free of CK when I write. NOTE: new family = separate COBJ per orientation (no
+    FormList/flip-key grouping) — four builder entries; if he wants one entry + flip key that's a
+    FormList regroup, his call.
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
