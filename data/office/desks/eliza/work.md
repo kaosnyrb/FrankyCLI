@@ -48,13 +48,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     + exports each orientation's meshes in Blender (apply-before-export or the `.mesh` won't move) → I rebuild
     N NIFs over their filenames (materials unchanged → the CK-repointed swaps survive) → N MSTTs sharing
     mats/swaps → `check_part` green before the in-game retest.
-  - **2026-07-24 — THE PIVOT RAN: rotated meshes, everything identity (`0,0,0`) in engine. Top, Port and
-    Starboard are in as of this morning (his report).** Still to settle, not yet earned: (a) whether the
-    runtime attach check now PASSES on the rebuilt orientations — Stbd was one of the two failers, so a
-    clean Stbd is the falsifier for the whole placement-rotation theory; (b) the Bottom orientation
-    (unmentioned — presumed still owed); (c) record-layer follow-through: FormList regrouped over the new
-    MSTTs (flip key), COBJ→FormList, swaps shared onto each new MSTT, and the OLD placement-rotated
-    variants retired in the same change that orphans them. `check_part` per orientation before retest.
+  - **2026-07-24 — THE PIVOT RAN AND THE HUNT IS CLOSED: rotated meshes, everything identity (`0,0,0`)
+    in engine. Top, Port, Starboard in — and Stbd (a failing variant) is 100% WORKING at runtime (his
+    confirmation).** Cause earned at the honest resolution: the runtime attach validator can't handle a
+    placement-rotated variant of a rotation-variant-box part; which field trips was never read and no
+    longer matters for the fin. Full outcome → home-office `bethesda.md` § the fin. **REMAINING:**
+    (a) Bottom — he's making it now (his hands); (b) record-layer follow-through once all four are in:
+    FormList regrouped over the new identity MSTTs (flip key), COBJ→FormList, swaps shared per MSTT
+    (`copyswap` wire-existing), OLD placement-rotated variants retired in the same change, `check_part`
+    per orientation.
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
