@@ -85,6 +85,16 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     check_part incl. the sibling session's uncommitted 07-23 collision group, named honestly (`79e6cd5`).
     **Live tail: his in-game test of the set.** Old flip-system records still in plugin — retirement
     now fully tooled (`removerecord`), still awaiting his explicit nod.
+  - **2026-07-24 (close) — SET CONFIRMED IN-GAME ("all working", his) + THE DEAD FLIP SYSTEM RETIRED
+    on his "clean up".** 18 records removed leaf-first (`removerecord`: 1 cobj, 1 flst, 4 gbfm, 4 pkin,
+    4 mstt, 4 sntp — every EditorID enumerated from the ESM first, Shipyards' own flip records
+    explicitly out of scope); plugin 98,460 → 93,161, esm→esp bridged, all four live parts
+    `check_part` 0/0 after the sweep. **REMAINING, his one-minute CK/xEdit job (flagged, not hidden):
+    4 orphan cells** `PackInatsdpknatsdmsfin01ShipModPosition*StorageCell` — unreferenced + inert, each
+    holding a placed ref to a deleted MSTT; `removerecord` refuses cells by design (block tree +
+    contents), so they wait for his hands or a properly-built cell remover. **The fin saga is CLOSED:**
+    per-orientation baked meshes at identity, one "Avontech Trimmer Fin" recipe, flip key cycles four,
+    old placement-rotation system gone.
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
