@@ -115,6 +115,14 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     (banked earlier). **OPEN — wing display names still stubs:** "Avontech Wing" is already a display
     name somewhere in Shipyards' catalogue (grounded: seen in the load order, owner-record not pinned),
     so the basic plain name would collide across his own mods; his register pick owed.
+  - **2026-07-24 (close) — WINGS NAMED: "Avontech Outrigger Wing" ×2 (his pick, register word).** Bridged
+    93,591 both; port 0/0, stb 0/1 (the pre-existing stale collision-OBJ WARN). **The Stardust naming
+    register is now 4 shipped: Sherpa · Stoker · Trimmer · Outrigger.** Everything from today owed only
+    a glass retest: fin set (Trimmer, 4-way flip), wing set (Outrigger, port↔stbd flip), the four
+    category blurbs on the cards. Remaining open on the lane: 4 orphan cells (his CK minute) ·
+    weapon-mount facings (his eye) · doctor debt (eng01s reuse-packin shape, Sherpa hand-authored
+    shape) · Kim's surface letter (roughness/slot-3, when greenlit) · bottompanel01 (his snap-topology
+    call).
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
