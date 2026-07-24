@@ -102,6 +102,19 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     shows the raw stub "wing01_port": display name is HIS register call** (table proposes wing →
     Outrigger ⇒ "Avontech Outrigger Wing"); `setname` ×2 when he picks. Retest owed on the glass:
     one wing entry, flip key port↔stbd.
+  - **2026-07-24 (cont) — COBJ DESCRIPTIONS set to VANILLA CATEGORY BLURBS (his call — AI-terms caution:
+    bespoke AI-drafted flavour text on a PAID mod could fall foul of the Creations generative-AI rule,
+    so the UI copy stays Bethesda's own).** Built `setdesc` (FrankyCLI `db192f5`): `--from` copies a
+    description BYTE-EXACT from any COBJ in the load order (no shell transcription — curly apostrophes
+    survive; refuses to copy an empty/unresolved localized string) + `gen_shipstruct --desc` (default
+    stays the visible `<item>` stub on purpose). Applied: fin01/wing01_port/eng01s ← structure blurb
+    (`co_SMS_Struct_Deimos_Wing01_Set`), eng01 ← engine blurb (`co_SMA_Engine_Reladyne_White_Dwarf_1020`);
+    sherpa already carried the cockpit blurb. Bridged 93,566 both; fin01/wing01_port/eng01 doctor 0/0.
+    **DOCTOR DEBT, named not swept:** (a) `eng01s` FAILs 2 legs — a `--reuse-packin` twin has no own
+    NIF/MSTT *by design*, a shape check_part can't see; (b) the Sherpa's 7 hand-authored false positives
+    (banked earlier). **OPEN — wing display names still stubs:** "Avontech Wing" is already a display
+    name somewhere in Shipyards' catalogue (grounded: seen in the load order, owner-record not pinned),
+    so the basic plain name would collide across his own mods; his register pick owed.
 
 - **2026-07-23 — ✅ SHIP ENGINES SHIPPED: `gen_shipstruct --engine` built, `atsd_eng01` green end to end.**
   *(Durable engine facts — per-power storage, the 12-power identity, the class ceilings, the 21-property
