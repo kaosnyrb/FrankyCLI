@@ -123,7 +123,15 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
     still carry no blade mappings → **his CK minute** (blade_pri→_P etc.), then glass. Desaturation
     pass also shipped same session (all 4 colour maps, amber → promo scheme, his ruling; originals in
     texbackup/ = their only history). Modding repo: blade unit `d560e55`, desaturation `29251f7`, fin
-    mats swept in `994bbf4`. Bridged
+    mats swept in `994bbf4`.
+  - **2026-07-24 (late) — BLADE SWAPS: 3 NEW forms (his call, vanilla-proven: a swap form is ONE unit —
+    the material + its replacement, NOT a mapping table; vanilla paint swaps each hold exactly one pair,
+    read from Starfield.esm bytes). MSTT list size is no constraint — vanilla SMODs carry up to 8 swaps
+    (counted: 41 parts at 6, 17 at 8). `copyswap` wired all six onto atsd_ms_eng01 (blade_P/S/T =
+    0F30C6-C8, deep-copied from the eng01 three), bridged 95,670 both. **Doctor: 1 FAIL = his CK repoint
+    of the three blade forms** (each: eng01_blade_<zone>.mat -> _<CH> variant), then green, then glass.
+    check_part also gained the ORIENTATION group same evening (his ask — the unapplied-rotation tell is
+    the doctor's now; bite-tested both legs). Bridged
     93,591 both; port 0/0, stb 0/1 (the pre-existing stale collision-OBJ WARN). **The Stardust naming
     register is now 4 shipped: Sherpa · Stoker · Trimmer · Outrigger.** Everything from today owed only
     a glass retest: fin set (Trimmer, 4-way flip), wing set (Outrigger, port↔stbd flip), the four
