@@ -153,6 +153,11 @@ switch (mode)
         }
         return gen_promptlab.Run(args[1], args.Length > 2 ? args[2] : null);
 
+    // placedecals takes a JSON placement file, so it prints no legacy usage noise either.
+    case "placedecals":
+        if (args.Length < 3) { Console.WriteLine("Usage: placedecals <modname> <part> <placements.json> [--clear] [--dry]"); Console.WriteLine("       placedecals <modname> reflect"); return 1; }
+        return RunLegacy(mode, args);
+
     // checkpart is read-only and JSON-emitting -- its own case so it prints no legacy usage noise.
     case "checkpart":
         if (args.Length < 3) { Console.WriteLine("Usage: checkpart <modname> <item>"); return 1; }
@@ -338,6 +343,7 @@ static int RunLegacy(string mode, string[] args)
         "setdesc"            => gen_setdesc.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),
+        "placedecals"        => gen_placedecals.Generate(arr),
         _                    => 1
     };
 }
