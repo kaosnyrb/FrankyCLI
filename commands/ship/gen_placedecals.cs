@@ -65,10 +65,20 @@ namespace FrankyCLI
             var placements = JsonSerializer.Deserialize<List<Placement>>(
                 File.ReadAllText(jsonPath),
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            // An empty file is a mistake on a normal run -- but with --clear it is a
+            // legitimate operation: strip this part's decals and add nothing back.
+            // Clearing surgically rather than restoring the .bak, because the backup
+            // predates any CK edits and would silently throw away work I cannot see.
             if (placements == null || placements.Count == 0)
             {
-                Console.WriteLine("Error: placement file is empty -- refusing to run.");
-                return 1;
+                if (!clear)
+                {
+                    Console.WriteLine("Error: placement file is empty -- refusing to run. "
+                                      + "(Pass --clear if you meant to remove decals and add none.)");
+                    return 1;
+                }
+                placements = new List<Placement>();
+                Console.WriteLine("empty placement list + --clear: removing decals, adding none");
             }
 
             Console.WriteLine($"{placements.Count} placement(s) from {jsonPath}");
