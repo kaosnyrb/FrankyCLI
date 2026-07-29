@@ -743,6 +743,24 @@ namespace FrankyCLI
             }
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+
+            // Two fields every RENDERING part carries have NO property on any Mutagen type, so
+            // they cannot be set on the record objects above -- they are spliced into the written
+            // file. Without them a part builds, attaches, is buyable and paintable, and DRAWS
+            // NOTHING (atsd_panelvent01_port, 2026-07-30 -- the first part ever taken to the glass
+            // without a CK save in between; the CK writes both, which is how fourteen parts hid
+            // it). Wired here rather than left as a step to remember: the gen_setbounds pattern.
+            //
+            // --reuse-packin authors no Cell of its own (it shares the donor's), so there is
+            // nothing to conform on that path -- the GBFM is still ours, but its cell is the
+            // donor's and already correct.
+            if (optReusePackin == null)
+            {
+                Console.WriteLine("Conforming (the fields Mutagen cannot author):");
+                if (gen_conform.Apply(datapath + "\\" + modname + ".esm", prefix, item, verbose: true) != 0)
+                    Console.WriteLine("  !! CONFORM FAILED -- this part will NOT render. Fix before testing.");
+            }
+
             Console.WriteLine("Finished");
             return 0;
         }
