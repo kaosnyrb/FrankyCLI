@@ -22,6 +22,26 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-30 (cont) — BATCH 03 CLOSED: part 3 `atsd_panelvent01_port` = "Avontech Winnower Vent",
+  in-game and rendering.** Texture set identified by the AO oracle (B3_02 at 100.00% on-baked vs
+  chance; vent01/B3_01 as positive control) -- so **B3_03 is the large wing's**, no guessing needed
+  when it lands. res rows 3/4/5 by census. NIF + 24-vert hull + his NifSkope pass + records.
+  - **★ THE CONFORM SET -- carry this into EVERY new part.** `gen_shipstruct` is now correct on
+    LightLayer / LTMP / FarHeightRange / PackIn bounds, but a generated part STILL needs three
+    things it cannot write: **GBFM `STRV`**, **CELL `XCLL` final word = 3** (neither authorable by
+    Mutagen at all) and a **`ShipModPosition` keyword** (`setflipset`). Without them the part builds,
+    attaches and is buyable, and DRAWS NOTHING. Scratchpad `conform_part.py` applies the first two
+    off a known-good donor -- **it should graduate to a real command, with the doctor asserting its
+    output** (check_part already FAILs on all three).
+  - **★ SWAPS ARE NOT NEEDED TO RENDER** -- it rendered with an empty swap list. So build and test a
+    new part with NO swaps, then wire them: it removes a whole confound from the render test, since
+    a source-mismatched swap DOES block rendering.
+  - **OPEN, his:** repoint the three `panelvent01` swaps in the CK (one honest doctor FAIL names it);
+    the starboard twin needs his export.
+  - **★ FLAGGED, NOT STARTED:** the REFL swap mapping is **length-prefixed plain text in a `BETH`
+    blob** (`u16` = len+1, then the path), so the per-part CK repoint could become a mechanical byte
+    edit. Risk is internal `STRT` offsets. Wants a fresh session and his word.
+
 - **2026-07-30 (cont) — BATCH 03 part 2 IN: `atsd_vent01_rear`, the front vent's aft twin, sold as
   ONE flip set.** Per-orientation baked mesh at identity (the wing/fin shape). Unwrap **100.00%**
   shared with the front ⇒ no new textures/materials/swaps; the three existing swaps wired at `struct`
