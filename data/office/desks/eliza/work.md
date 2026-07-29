@@ -22,6 +22,23 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-30 (cont) — BATCH 03 part 2 IN: `atsd_vent01_rear`, the front vent's aft twin, sold as
+  ONE flip set.** Per-orientation baked mesh at identity (the wing/fin shape). Unwrap **100.00%**
+  shared with the front ⇒ no new textures/materials/swaps; the three existing swaps wired at `struct`
+  time via `--swaps`, REFL mapping already correct. Record path:
+  `struct → setflipset atsd_flst_vent01 (for=Fore,rear=Aft) → setcreated atsd_co_vent01_for →
+  removerecord cobj atsd_co_vent01_rear` — one recipe per set, spare-recipe trap avoided. Both
+  `check_part` 0/0; plugin 99,206 → 103,907; esm/esp bridged (1 byte @ offset 8), master Full.
+  modding `9271394`, doctor fix `046ee3a`.
+  - **CARRY IN: the MaterialID hash is a function of the material path ALONE** (proven, 12 NIFs /
+    6 parts) — so a variant sharing a sibling's materials can have its IDs **spliced** from the
+    sibling rather than needing a fresh NifSkope pass for that field. **It does NOT retire the pass**
+    (header sanitization is the load-critical half) — `atsd_vent01_rear.nif` still owes his minute.
+  - **CARRY IN: `tasklist | grep -iE 'starfield|creationkit'` BEFORE any plugin write.** The CK was
+    open when I reached the record half today; the existing rule only caught that after the fact.
+  - **NEXT: `atsd_panelvent01_port`** — his meshes + collision landed mid-session (13:19), no NIF, no
+    records. Handed, so it wants the `_stb` export too, then the wing01-pair pattern (shared mats +
+    swaps, own NIF, own hull, one flip set).
 - **2026-07-30 — BATCH 03 (a contractor deliverable, 3 parts): front vent DONE + in, side vent and
   large wing waiting on his meshes.** Front vent = `atsd_vent01_for`, **"Avontech Scrubber Vent"**,
   `check_part` **0 fail 0 warn**, siblings re-checked green after his CK save. Plugin 99,206, esm/esp
