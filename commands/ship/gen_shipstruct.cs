@@ -62,6 +62,16 @@ namespace FrankyCLI
             //   --bounds <minX,minY,minZ,maxX,maxY,maxZ>  ObjectBounds, min then max (a part is
             //                              not necessarily centred on its own origin)
             //   --mass <n>                 SpaceshipPartMass. Was hardcoded to 5.
+            //   --variant <n>              ShipModuleVariant. Was hardcoded to 1. This is the
+            //                              SHAPE axis, and it is NOT the same axis as the position
+            //                              keyword: a handed pair (port + starboard of one shape)
+            //                              SHARES a variant number, and a genuinely different
+            //                              shape in the same flip set takes the next one.
+            //                              Counted off vanilla SMS_Struct_ASC_Deimos_Wing_TypeA:
+            //                              Port/Stbd = 10, Inwards pair = 15, Rev pair = 20,
+            //                              Rev_Inwards pair = 25 -- so vanilla steps by 5, leaving
+            //                              gaps to insert into. Avontech steps by 1; either is
+            //                              fine, the engine does not care about the interval.
             //   --name "<display name>"    the GBFM FullName -- the string the ship builder shows
             //                              on the part card. Defaults to <item>, which is why
             //                              parts built before this flag shipped showing their
@@ -107,6 +117,7 @@ namespace FrankyCLI
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
+            string? optVariant = null;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -119,6 +130,7 @@ namespace FrankyCLI
                     case "--category": if (!hasValue) { Console.WriteLine("Error: --category needs a value"); return 1; } optCategory = args[++i]; break;
                     case "--engine": if (!hasValue) { Console.WriteLine("Error: --engine needs a value"); return 1; } optEngine = args[++i]; break;
                     case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
+                    case "--variant": if (!hasValue) { Console.WriteLine("Error: --variant needs a value"); return 1; } optVariant = args[++i]; break;
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
                     case "--desc": if (!hasValue) { Console.WriteLine("Error: --desc needs a value"); return 1; } optDesc = args[++i]; break;
                     case "--reuse-packin": if (!hasValue) { Console.WriteLine("Error: --reuse-packin needs a value"); return 1; } optReusePackin = args[++i]; break;
@@ -156,6 +168,12 @@ namespace FrankyCLI
             if (optMass != null && !float.TryParse(optMass, out partMass))
             {
                 Console.WriteLine("Error: --mass wants a number");
+                return 1;
+            }
+            float partVariant = 1;
+            if (optVariant != null && !float.TryParse(optVariant, out partVariant))
+            {
+                Console.WriteLine("Error: --variant wants a number");
                 return 1;
             }
             if (optSnap != null && optSnapNodes != null)
@@ -550,7 +568,7 @@ namespace FrankyCLI
                 var properties = new ExtendedList<ObjectProperty>()
                 {
                     new ObjectProperty() { ActorValue = SpaceshipPartMass, Value = partMass },
-                    new ObjectProperty() { ActorValue = ShipModuleVariant, Value = 1 },
+                    new ObjectProperty() { ActorValue = ShipModuleVariant, Value = partVariant },
                 };
 
                 if (engine != null)
