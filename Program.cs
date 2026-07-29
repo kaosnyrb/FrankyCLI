@@ -177,6 +177,7 @@ switch (mode)
     case "shipicons":
     case "setrecipefilter":
     case "setname":
+    case "setlightlayer":
     case "setsnap":
     case "setcreated":
     case "setrotation":
@@ -334,6 +335,7 @@ static int RunLegacy(string mode, string[] args)
         "shipicons"          => gen_msicon.Generate(arr),
         "setrecipefilter"    => gen_setrecipefilter.Generate(arr),
         "setname"            => gen_setname.Generate(arr),
+        "setlightlayer"      => gen_setlightlayer.Generate(arr),
         "setsnap"            => gen_setsnap.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),
         "setrotation"        => gen_setrotation.Generate(arr),

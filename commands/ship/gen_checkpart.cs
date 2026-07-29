@@ -85,6 +85,9 @@ namespace FrankyCLI
                 string mflags = model?.Flags.ToString() ?? "";
                 msttOut["modelFlags"] = mflags;
                 msttOut["hasRecolourFlag"] = model?.Flags != null && model.Flags.Value.HasFlag(Model.Flag.HasFirstPersonModel);
+                // LightLayer (FLLD). Absent => the part builds, attaches, flips and paints, and
+                // draws NOTHING. Reported as a raw fact (null when absent); the Python judges it.
+                msttOut["lightLayer"] = model?.LightLayer;
 
                 var swapsOut = new List<object?>();
                 if (model?.MaterialSwaps != null)

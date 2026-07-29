@@ -356,6 +356,20 @@ namespace FrankyCLI
                     // set it; a part without it renders + attaches + shows its base colour but offers NO paint
                     // option (2026-07-22, the wing recolour hunt -- found by stepping a vanilla field-by-field).
                     Flags = Model.Flag.HasFirstPersonModel,
+                    // LightLayer (subrecord FLLD) -- REQUIRED for a ship part to RENDER AT ALL. A Model
+                    // without it builds, attaches, flips and paints, and draws NOTHING in the ship
+                    // builder (2026-07-30, atsd_vent01_rear -- the first part ever taken to the glass
+                    // without a CK save in between). Vanilla SMOD_Struct_Deimos_Hull_A carries
+                    // LightLayer 1, and so do all 13 Stardust parts that render -- every one of which
+                    // had been through a CK save, which writes the field. The omission was MASKED by
+                    // the workflow, not absent: "we have shipped 13 parts" was never a test, because
+                    // the variable was never isolated.
+                    //
+                    // Second instance of this exact defect class -- the Flags line above is the same
+                    // shape (a Model sub-field the generator never set, invisible until someone diffed
+                    // a vanilla part field-by-field). If a third turns up, this block wants a
+                    // vanilla-conformance check rather than another hand-added line.
+                    LightLayer = 1,
                 };
                 moveableStatic.DATA = 4;
                 moveableStatic.Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
