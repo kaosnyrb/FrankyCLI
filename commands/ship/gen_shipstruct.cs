@@ -395,14 +395,23 @@ namespace FrankyCLI
                     EditorID = prefix + "_cell_" + item,
                     Temporary = new ExtendedList<IPlaced>(),
                     Flags = Cell.Flag.IsInteriorCell,
+                    // A PackIn's storage cell is what the ship builder renders the module OUT OF,
+                    // and a cell with no lighting draws nothing (2026-07-30, atsd_vent01_rear).
+                    // FarHeightRange and Unknown2 were MISSING here: every CK-saved cell carries
+                    // 10000 and 3 in those two words, every generated one carried 0 and 0. Read off
+                    // the working sibling word-by-word, not guessed.
                     Lighting = new CellLighting()
                     {
                         DirectionalFade = 1,
                         FogPower = 1,
                         FogMax = 1,
                         NearHeightRange = 10000,
+                        FarHeightRange = 10000,
                         Unknown1 = 1951,
                     },
+                    // LTMP. Null-valued, but the SUBRECORD must exist -- absent on every generated
+                    // cell, present on all thirteen that render.
+                    LightingTemplate = FormKey.Null.ToNullableLink<ILightingTemplateGetter>(),
                     WaterHeight = 0,
                     XILS = 1.0f,
                     XCLAs = new ExtendedList<CellXCLAItem>()
@@ -544,10 +553,14 @@ namespace FrankyCLI
                 packin = new PackIn(myMod)
                 {
                     EditorID = prefix + "_pkn_" + item,
+                    // Was HARDCODED to the 1x1x1 grid box while --bounds reached only the
+                    // MoveableStatic -- so a part whose geometry sits outboard of the grid (a face
+                    // plate, a wing) declared a PackIn box its own model was almost entirely
+                    // outside. The CK recomputes this on save, which is why it never surfaced.
                     ObjectBounds = new ObjectBounds()
                     {
-                        First = new P3Float(-4, -4, -1.767578f),
-                        Second = new P3Float(4, 4, 1.767578f)
+                        First = boundsFirst,
+                        Second = boundsSecond
                     },
                     Transforms = new Transforms
                     {

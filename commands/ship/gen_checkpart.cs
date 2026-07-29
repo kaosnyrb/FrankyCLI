@@ -88,6 +88,9 @@ namespace FrankyCLI
                 // LightLayer (FLLD). Absent => the part builds, attaches, flips and paints, and
                 // draws NOTHING. Reported as a raw fact (null when absent); the Python judges it.
                 msttOut["lightLayer"] = model?.LightLayer;
+                var mob = mstt.ObjectBounds;
+                msttOut["objectBounds"] = new[] { mob.First.X, mob.First.Y, mob.First.Z,
+                                                  mob.Second.X, mob.Second.Y, mob.Second.Z };
 
                 var swapsOut = new List<object?>();
                 if (model?.MaterialSwaps != null)
@@ -111,6 +114,38 @@ namespace FrankyCLI
                 string? cellRef = null;
                 if (pkin != null && !pkin.Cell.IsNull) cache.TryResolveIdentifier(pkin.Cell.FormKey, out cellRef);
                 chain["pkin"] = Node(pkin?.EditorID, pkin?.FormKey, ("cellRef", cellRef));
+
+                // The PackIn's OBND and its storage CELL's lighting. Both were silently wrong on
+                // every generated part until 2026-07-30 (the rear vent, invisible in the builder):
+                // the PackIn's bounds were hardcoded to the 1x1x1 grid box, and the cell carried no
+                // LTMP and zeroes where a working cell has FarHeightRange 10000 and a trailing 3.
+                // Nothing noticed because the CK rewrites all of it on save. Raw facts only.
+                if (pkin != null)
+                {
+                    var ob = pkin.ObjectBounds;
+                    outp["packInBounds"] = new[] { ob.First.X, ob.First.Y, ob.First.Z,
+                                                   ob.Second.X, ob.Second.Y, ob.Second.Z };
+                }
+                var cell = pkin != null && !pkin.Cell.IsNull
+                    ? mod.Cells.Records.SelectMany(b => b.SubBlocks).SelectMany(sb => sb.Cells)
+                          .FirstOrDefault(c => c.FormKey == pkin.Cell.FormKey)
+                    : null;
+                if (cell != null)
+                {
+                    var lit = cell.Lighting;
+                    outp["cell"] = new Dictionary<string, object?>
+                    {
+                        ["editorID"] = cell.EditorID,
+                        ["hasLightingTemplate"] = cell.LightingTemplate != null,
+                        ["nearHeightRange"] = lit?.NearHeightRange,
+                        ["farHeightRange"] = lit?.FarHeightRange,
+                        ["unknown1"] = lit?.Unknown1,
+                        // XCLL's LAST word (a 3 on every working cell, 0 on every generated one)
+                        // has NO property on CellLighting -- Mutagen round-trips it but exposes no
+                        // name for it. Opaque to the record model, not to the bytes: check_part.py
+                        // reads it off the plugin directly, the same move the swap-mapping leg makes.
+                    };
+                }
 
                 var gbfm = mod.GenericBaseForms.FirstOrDefault(g => Eid(g.EditorID, prefix + "_gbfm_" + item));
                 string? packInRef = null;
