@@ -22,6 +22,34 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-30 — BATCH 03 (a contractor deliverable, 3 parts): front vent DONE + in, side vent and
+  large wing waiting on his meshes.** Front vent = `atsd_vent01_for`, **"Avontech Scrubber Vent"**,
+  `check_part` **0 fail 0 warn**, siblings re-checked green after his CK save. Plugin 99,206, esm/esp
+  in sync, 80 records, both archives rebuilt (Textures 115.6 → 124.8 MB), assets loose for the CK and
+  packed for the game. modding `2d7d09c`. Durable lane facts (the face-plate snap rule, the res-id
+  space, the generator's fourth positional, the line-wide gamma state) → home-office `bethesda.md`;
+  portable ones → `craft.md`.
+  - **REMAINING IN THE BATCH — his hands only:** the side vent and the large wing need `.mesh` +
+    collision `.obj` exports. **Their textures are already measured and waiting** (`B3_02` / `B3_03`,
+    4096², full six-map sets), so integration is the short half — the 100%-shared-unwrap lesson from
+    the wings says read the batch before starting a part, and that already paid here.
+  - **THE ONE THING TO CARRY IN:** `gen_shipstruct` takes **four** positionals —
+    `struct <mod> <prefix> <item> <modelpath> [flags]`, modelpath used raw as
+    `Meshes\avontechstardust\atsd_<item>.nif`. The desk's old three-arg shorthand silently eats the
+    first flag. Cost me two runs today.
+- **2026-07-30 — OWED, HIS CALL TAKEN AND DEFERRED: rebuild the whole line's colour chain.** He chose
+  the full fix ("3") and then correctly deprioritised it for the deliverable — so this is a real,
+  agreed, unscheduled job, not a dropped one. **Why it can't be a simple re-run:** `texbackup/pre-albedo/`,
+  `pre-wear/` and `pre-grime/` all hold the *buggy* desaturation and each pass restores from its own
+  backup, so re-running `albedo`/`wear` re-applies faithfully on top of the defect. **Shape when it
+  runs:** (1) `surface_pass.py desat` **as real code** — the 2026-07-24 pass was ad-hoc and only its
+  DDS output was committed, which is exactly why the transform had to be reverse-engineered out of two
+  artifacts; (2) wipe the three contaminated intermediates; (3) re-run `desat → albedo → wear` per
+  sheet, plus `grime` on wing01. **The durable fix underneath is the `chain` driver that OWNS the
+  order** (already carded) — it also closes the wear/grime composition hazard, since both want the
+  same thing: one chain rebuilt from pristine through every declared pass. Full state + pristine
+  inventory → `bethesda.md` § the Scrubber vent.
+
 - **2026-07-23 (late) — TAIL FIN `atsd_fin01`: flips + attaches VISUALLY in-game, but the shipbuilder's
   runtime validation reports it UNATTACHED.** Editor snap passes, runtime attach check fails — two different
   checks. Five surgical commits today, each fixing a real reason a flip LOOKS broken, all tracing to the fin
