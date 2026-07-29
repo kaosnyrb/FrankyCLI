@@ -494,7 +494,7 @@ namespace FrankyCLI
                 case "formlist":
                     foreach (var rec in mod.FormLists)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "FormList"); found++; }
+                        { DumpFormList(rec, allMods); found++; }
                     break;
                 case "armor":
                 case "armo":
@@ -1633,6 +1633,23 @@ namespace FrankyCLI
                     ? eid.Substring("SnapNode_".Length)   // the prefix is on every one of them
                     : eid;
             return "?";
+        }
+
+        // A FormList's whole content is its Items array, and DumpRecord printed it as
+        // "<enumerable BinaryOverlayListByLocationArray`1>" -- i.e. the one fact the record
+        // carries was the one fact you could not read. That is not a cosmetic gap: a ship
+        // part's flip SET is a FormList, so "which parts does the builder cycle between"
+        // was unanswerable from this tool, and the answer had to be guessed from counting
+        // GBFMs. Resolve each item to its EditorID, same as every other FormKey here.
+        private static void DumpFormList(IFormListGetter flst, List<IStarfieldModGetter>? allMods)
+        {
+            Console.WriteLine($"--- FormList (FLST) ---");
+            Console.WriteLine($"  FormKey:  {flst.FormKey}");
+            Console.WriteLine($"  EditorID: {flst.EditorID}");
+            Console.WriteLine($"  Items [{flst.Items.Count}]:");
+            foreach (var item in flst.Items)
+                Console.WriteLine($"    {ResolveEditorIdOnly(item.FormKey, allMods)}  [{item.FormKey}]");
+            Console.WriteLine();
         }
 
         private static void DumpSnapTemplate(ISnapTemplateGetter snap, List<IStarfieldModGetter>? allMods)
