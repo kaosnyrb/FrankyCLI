@@ -22,6 +22,51 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-30 (cont) — `atsd_ms_wing03_port`/`_stb`: SWAPS WIRED AND REPOINTED WITHOUT THE CK.**
+  His build, NIFs working, swaps the only gap — `check_part` was 1 FAIL on each, everything else
+  green (Model flag, LightLayer, conform set, PackIn bounds, `atsd_flst_wing03` + one COBJ).
+  Both sides declare the SAME materials ⇒ one set of three swaps on two MSTTs (the wing01 pattern).
+  `copyswap avontechstardust atsd_ms_wing03_port atsd_matswap_wing03_P=atsd_matswap_wing01_P …`
+  then the bare-EditorID wire-existing form for `_stb`. Now **0 fail / 1 warn** both; family
+  regression 8/8 PASS; esm/esp bridged, differing at offset 8 only, 115,571.
+  - **★ THE REFL REPOINT IS NOW A PROVEN MECHANICAL EDIT WHEN THE SUBSTITUTION IS EQUAL-LENGTH.**
+    `wing01`→`wing03` moves no `u16`, no subrecord length, no record or group size ⇒ no `STRT`
+    offset shifts ⇒ the risk I'd flagged does not apply. Six bytes `0x31`→`0x33`, size-identical,
+    plugin re-walked to EOF, wing01 originals byte-verified untouched, and **`check_part`'s
+    swap-mapping leg is the independent oracle** (it reads the REFL bytes itself). **Two bounds,
+    both asserted before writing: equal-length only, and the record must be UNCOMPRESSED — a swap
+    that has been through a CK save may not be.** Full statement → home-office `bethesda.md`.
+  - **OPEN, HIS — two, and both change what he sees the moment he tests:** (a) display names are
+    the raw stubs `wing03_port`/`wing03_stb`; `setname` on his register pick. (b) wing03 is
+    `ShipModuleVariant` **1** — colliding with wing01 — on its own FormList + own COBJ, i.e. a
+    second builder row against his own menu-rows-are-scarce ruling. Folding it into the Outrigger
+    set needs the variant bumped to 3 first; whether it folds is his shape call.
+  - **✅ IT IS "AVONTECH PLANESMAN WING" AND IT IS A NEW SET (his word) — SO BATCH 03 IS GENUINELY
+    CLOSED**, all three commissioned pieces in. `setname` ×2, bridged 115,596. **My fold proposal was
+    wrong**: separate FormList + separate COBJ is correct for a distinct set, and his
+    menu-rows-are-scarce ruling governs a growing line of ONE set. Variant-1 "collision" with wing01
+    dissolves — variant is per-FormList. **The register keys on SETS, not part types.**
+  - **⚠ THE EARLIER "BATCH 03 CLOSED" DESK ENTRY AND BOARD CARD WERE PREMATURE** — they counted four
+    *parts* and called a three-piece *deliverable* whole while the large wing was still out. Corrected
+    on the board rather than quietly amended.
+  - **★ GAMMA STATE CORRECTED, AND IT SUPERSEDES A COMMIT MESSAGE: `wing03` AND `panelvent01` BOTH
+    CARRY ONE LIFT.** modding `b5a4e68` claims wing03 has none and calls panelvent01 the only
+    correctly-converted sheet; both false. Scored against the true contractor source
+    (`B3_B3_<nn>_BaseColor.png`, **not** the `B3_<nn> RGB.png` zone mask beside it): panelvent01 MAE
+    0.02 vs 4.03 (239×), wing03 0.23 vs 18.24 (81×), fingerprint `(64,64,64)→137`. **Null-case control
+    (correct `-srgbi` conversion through the identical decode → 0.00/255) proves the read-back
+    honest.** ⇒ **the deferred rebuild is SIX sheets in TWO populations** — one-lift
+    (`panelvent01`, `wing03`) needs a single re-encode; two-lift (sherpa/wing01/eng01/fin01) needs the
+    desaturation re-run from pristine too.
+  - **NAMED, NOT TOUCHED:** `C:\modding\avontech_stardust\Data\avontechstardust.esm` is a stale
+    **13,882-byte copy dated 21 Jul** beside the live plugin. Fossil or not is his call.
+    Backup of this session's pre-state: `avontechstardust.esm.pre-wing03swaps.bak`.
+  - **CRASH RECOVERY:** a session of me died mid-flight; its **work committed, its record didn't**.
+    Four modding commits (`b5a4e68`/`a240ab2`/`b984695`/`cf4a255`) were on disk and on no office
+    surface. Findings carried across to the room; the two false claims corrected above. **Per-EXPORT,
+    not per-part** is the sharpened axis-map rule from `cf4a255` (port and stb needed different
+    injector flags because the starboard was mirrored in Blender).
+
 - **2026-07-30 (cont) — BATCH 03 CLOSED: part 3 `atsd_panelvent01_port` = "Avontech Winnower Vent",
   in-game and rendering.** Texture set identified by the AO oracle (B3_02 at 100.00% on-baked vs
   chance; vent01/B3_01 as positive control) -- so **B3_03 is the large wing's**, no guessing needed
