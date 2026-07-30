@@ -22,6 +22,36 @@ dense reference knowledge lives in [`reference/`](reference/), not here.*
 
 ## Open
 
+- **2026-07-30 (cont) — ✅ THE TEXTURE CHAIN: the whole colour line rebuilt from the delivery, and
+  it is CONFIRMED IN-GAME** (his screenshot of the full set in green/tan — *"looks pretty good"*).
+  **His design, and it beat mine:** I said *rebuild from pristine*; he said **where pristine lives** —
+  `RawTextures/`, staged from `C:\Git\modellingmanagment\Avontech Stardust\Models`. `texbackup/` was
+  never pristine; it is a snapshot of my own contaminated intermediate state, which is why every copy
+  in it carried the July defect.
+  - **THE TOOLS (modding root, committed `a9e1387`+):** `stage_raw.py` (gitignored output — the
+    delivery repo has a remote, this one does **not**, so a copy here is the *less* durable place;
+    classifies rather than globs, and Phase 09's `Base_color` spelling proves why) · `prove_mapping.py`
+    (**AO correlation** — the one map that crosses untransformed, so it fingerprints independently of
+    everything under test; **8/8 at 1.0000**, separations 35,000×–194,000×, refuses below threshold)
+    · `chain.py` (owns the order `convert -srgbi → desat → albedo → wear → grime`, always from raw,
+    ~25–40 s a part, clears the per-pass `pre-*` so texbackup stops being a rival origin).
+  - **★ THE PREDICTION I GOT BACKWARDS:** I warned the fix would *darken* the line and invalidate his
+    by-eye settings. Mean −9%; the **range** doubled (wing01 p05 173→96, contrast 64→141). The lift
+    was crushing the bottom out of the sheets, not brightening them. **His five words beat my
+    paragraph: *"the darks are darker."*** So *glowing / fuzzy / helps them pop* were **one defect
+    reported three times from outside**, and I had banked all three as separate taste facts.
+  - **★ IT ALSO UNCOVERED AN OLDER FAULT THE COMPRESSION HID:** the two vents sat outside the band
+    (202.6 / 244.5 vs 166–195) having never had albedo+wear. Pre-existing, dated by measurement
+    (passes = −25..−32 on the six, **+0.0** on these). **His call, run:** band **78.5 → 42.6**.
+  - **CARRY IN: the recipe marks RECORD vs DECISION.** Six entries are re-derivable from
+    `texbackup/pre-*/`; the two vent entries exist only because he ruled it and **nothing on disk
+    would say so**. A config line that looks derived but isn't is how a later session "corrects" a
+    deliberate choice back to the evidence.
+  - **NAMED, NOT TOUCHED (his calls):** the stale in-repo `Data/avontechstardust.esm` (13,882 B,
+    21 Jul, against a live 115,596) · `sherpa_metal.DDS` referenced by zero materials · and **his
+    hand-darkened `sherpa` 231 did not survive the rebuild and should not have** — it was
+    compensating by eye for the lift now fixed at source.
+
 - **2026-07-30 (cont) — `atsd_ms_wing03_port`/`_stb`: SWAPS WIRED AND REPOINTED WITHOUT THE CK.**
   His build, NIFs working, swaps the only gap — `check_part` was 1 FAIL on each, everything else
   green (Model flag, LightLayer, conform set, PackIn bounds, `atsd_flst_wing03` + one COBJ).
