@@ -28,7 +28,7 @@ namespace FrankyCLI
             "  Activator, Light, Npc, Location, Location_Full, Keyword, Book, Scene\n" +
             "  PcmBranchNode, PcmContentNode, Planet, Star, Race, Biome (biom)\n" +
             "  Quest, Quest_VMAD, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)\n" +
-            "  Message (mesg), Faction, Global, FormList\n" +
+            "  Message (mesg), Faction, Global, FormList, LeveledSpaceCell (lvsc)\n" +
             "  Armor (armo), ObjectModification (omod), ObjectEffect (ench), Perk, Spell (spel)\n" +
             "  MagicEffect (mgef), DamageType (dmgt), LegendaryItem (lgdi), Outfit (otft)\n" +
             "  ActorValueInformation (avif)\n" +
@@ -495,6 +495,12 @@ namespace FrankyCLI
                     foreach (var rec in mod.FormLists)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpFormList(rec, allMods); found++; }
+                    break;
+                case "leveledspacecell":
+                case "lvsc":
+                    foreach (var rec in mod.LeveledSpaceCells)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpLeveledSpaceCell(rec, allMods); found++; }
                     break;
                 case "armor":
                 case "armo":
@@ -1649,6 +1655,25 @@ namespace FrankyCLI
             Console.WriteLine($"  Items [{flst.Items.Count}]:");
             foreach (var item in flst.Items)
                 Console.WriteLine($"    {ResolveEditorIdOnly(item.FormKey, allMods)}  [{item.FormKey}]");
+            Console.WriteLine();
+        }
+
+        // Same shape, and the same reason, as DumpFormList above: a LeveledSpaceCell IS its
+        // entry list -- the pool a quest's levelled-space-cell alias draws its arrival cell
+        // from -- so the reflection dumper would have printed the one fact the record carries
+        // as "<enumerable ...>". Resolve each entry's Reference to its EditorID, and print the
+        // level/count columns beside it so a pool's shape is readable at a glance.
+        private static void DumpLeveledSpaceCell(ILeveledSpaceCellGetter lvsc, List<IStarfieldModGetter>? allMods)
+        {
+            Console.WriteLine($"--- LeveledSpaceCell (LVSC) ---");
+            Console.WriteLine($"  FormKey:    {lvsc.FormKey}");
+            Console.WriteLine($"  EditorID:   {lvsc.EditorID}");
+            Console.WriteLine($"  ChanceNone: {lvsc.ChanceNone}");
+            Console.WriteLine($"  Entries [{lvsc.Entries?.Count ?? 0}]:");
+            if (lvsc.Entries != null)
+                foreach (var e in lvsc.Entries)
+                    Console.WriteLine($"    Lvl={e.Level,-4} Count={e.Count,-4} " +
+                                      $"{ResolveEditorIdOnly(e.Reference.FormKey, allMods)}  [{e.Reference.FormKey}]");
             Console.WriteLine();
         }
 
