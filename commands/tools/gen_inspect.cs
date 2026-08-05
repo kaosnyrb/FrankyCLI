@@ -2014,6 +2014,15 @@ namespace FrankyCLI
         /// set. Print WHICH one, because that is the fact that classifies the alias: create-obj
         /// means we control what spawns, from-event means the story manager supplies it.
         /// </summary>
+        /// <summary>Properties DumpRefAlias renders itself; everything else gets named as undecoded.</summary>
+        private static readonly HashSet<string> RefAliasPropsRendered = new()
+        {
+            "ID", "Name", "Flags",
+            "CreateReferenceToObject", "FindMatchingRefFromEvent", "ForcedReference",
+            "UniqueActor", "UniqueBaseForm", "Location", "External",
+            "ReferenceCollectionAliasID",
+        };
+
         private static void DumpRefAlias(IQuestReferenceAliasGetter a, List<IStarfieldModGetter>? allMods, string pad)
         {
             Console.WriteLine($"{pad}[RefAlias] ID={a.ID} Name={a.Name}");
@@ -2060,13 +2069,56 @@ namespace FrankyCLI
                 Console.WriteLine($"{pad}  FILL external (ALEQ/ALEA): {a.External}");
                 fills++;
             }
+            // The one the alias-level coverage report surfaced, and it is how a mission's objective
+            // finds its position: a marker alias is filled FROM ANOTHER ALIAS'S COLLECTION. On
+            // duo_MB01a, SpawnMarker01 and PatrolMarker01 both carry ReferenceCollectionAliasID=10,
+            // which is SpaceCellRefs -- the collection created from the levelled space cell. So the
+            // cell is spawned, its markers populate these aliases, and PrimaryRef then creates the
+            // activator AT SpawnMarker01. Undecoded, this read as "no fill set", which was a claim
+            // of absence about the single most load-bearing link in the chain.
+            if (a.ReferenceCollectionAliasID != null)
+            {
+                Console.WriteLine($"{pad}  FILL from-collection: ReferenceCollectionAliasID={a.ReferenceCollectionAliasID}" +
+                                  $"  (filled from that alias's collection -- e.g. markers inside a spawned space cell)");
+                fills++;
+            }
 
             // The fills are meant to be mutually exclusive, so both zero and >1 are worth seeing
             // rather than inferring from an absence of lines.
-            if (fills == 0)
-                Console.WriteLine($"{pad}  FILL: none set");
-            else if (fills > 1)
+            if (fills > 1)
                 Console.WriteLine($"{pad}  ** {fills} fills set -- these are meant to be mutually exclusive **");
+
+            // Coverage, at the ALIAS level. The first cut printed "FILL: none set" whenever none of
+            // the seven fills above were populated -- which is an assertion of absence this code
+            // cannot actually make. SpawnMarker01 reports no fill and is demonstrably resolved (a
+            // PrimaryRef create-obj targets it), so "none set" was false and read as a finding.
+            //
+            // The record-level coverage report could not catch this: it enumerates IQuestGetter,
+            // and an undecoded property on an ALIAS is invisible to it. So the same principle is
+            // applied one level down -- name any non-empty property this dumper did not render,
+            // and never claim emptiness that has not been established.
+            var undecoded = new List<string>();
+            foreach (var pi in typeof(IQuestReferenceAliasGetter).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (pi.GetIndexParameters().Length > 0) continue;
+                if (RefAliasPropsRendered.Contains(pi.Name)) continue;
+                object? v;
+                try { v = pi.GetValue(a); } catch { continue; }
+                if (v == null) continue;
+                if (v is System.Collections.ICollection col && col.Count == 0) continue;
+                var s = v.ToString() ?? "";
+                if (s is "Null" or "") continue;
+                if (s.Length > 70) s = s.Substring(0, 70) + "…";
+                undecoded.Add($"{pi.Name}={s}");
+            }
+
+            if (fills == 0 && undecoded.Count == 0)
+                Console.WriteLine($"{pad}  FILL: no fill property set, and nothing else on the record either");
+            else if (fills == 0)
+                Console.WriteLine($"{pad}  FILL: none of the decoded fills -- see undecoded below");
+
+            if (undecoded.Count > 0)
+                Console.WriteLine($"{pad}  ⚠ not decoded here: {string.Join("  ", undecoded)}");
         }
 
         // Same shape, and the same reason, as DumpFormList above: a LeveledSpaceCell IS its
