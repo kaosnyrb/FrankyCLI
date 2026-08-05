@@ -39,9 +39,17 @@ public class SpaceCellState
     /// i.e. TIGHTER than vanilla, not wider.
     ///
     /// This doc previously read "Default sqrt(2) ~= 1.414 gives approximately twice the vanilla
-    /// cell area", which described a value nothing sets. Corrected rather than deleted because
-    /// the number is the spread dial: raising it above 1.0 is what widens a cell, and 1.414 is
-    /// presumably where it started before being halved.
+    /// cell area", which described a value nothing sets.
+    ///
+    /// THE DIAL HAS A HARD CEILING AND IT IS NOT AESTHETIC (owner, 2026-08-05): the engine has a
+    /// target-distance limit around 15,000 units, past which enemy ships cannot be seen. Vanilla
+    /// space cells already run out to roughly 11-12k, so 1.414 would have placed content near
+    /// 16k -- outside the range at which a hostile is visible. The halving to 0.707 therefore
+    /// reads as a deliberate correction for that limit rather than a leftover, and any future
+    /// widening is bounded by the same wall: keep the outermost placements inside ~15k.
+    ///
+    /// Consequence for design: a cell gets more interesting by COMPOSITION (separated sites with
+    /// negative space between) rather than by radius, because radius is nearly spent.
     /// </summary>
     public float Scale;
 
