@@ -30,6 +30,7 @@ namespace FrankyCLI
             "  Quest, Quest_VMAD, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)\n" +
             "  Message (mesg), Faction, Global, FormList, LeveledSpaceCell (lvsc)\n" +
             "  QuestAlias (qalias) - alias fills: which one is set and what it points at\n" +
+            "  QuestAll (qall)    - the WHOLE quest record + a report of what it did NOT render\n" +
             "  Armor (armo), ObjectModification (omod), ObjectEffect (ench), Perk, Spell (spel)\n" +
             "  MagicEffect (mgef), DamageType (dmgt), LegendaryItem (lgdi), Outfit (otft)\n" +
             "  ActorValueInformation (avif)\n" +
@@ -496,6 +497,12 @@ namespace FrankyCLI
                     foreach (var rec in mod.FormLists)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpFormList(rec, allMods); found++; }
+                    break;
+                case "questall":
+                case "qall":
+                    foreach (var rec in mod.Quests)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpQuestEverything(rec, allMods); found++; }
                     break;
                 case "questalias":
                 case "qalias":
@@ -1663,6 +1670,275 @@ namespace FrankyCLI
             foreach (var item in flst.Items)
                 Console.WriteLine($"    {ResolveEditorIdOnly(item.FormKey, allMods)}  [{item.FormKey}]");
             Console.WriteLine();
+        }
+
+        // The whole quest record in one place, with a coverage report at the end.
+        //
+        // Four commands each showed a slice -- `quest` the header, `quest_vmad` the scripts and
+        // stages, `audiolog` a partial alias dump, `qalias` the fills -- so reading a mission meant
+        // knowing which of them held the field you wanted, and NOT knowing meant working off
+        // whatever the one you picked happened to print.
+        //
+        // The coverage report is the point, not a flourish. Every previous gap here was silent: a
+        // fill swallowed by an else-branch, a struct property printed as a type name, a condition
+        // value printed as "?". A reader that cannot say what it left out is a reader you can only
+        // trust by having read its source. So this one enumerates IQuestGetter's own properties and
+        // names any it did not render -- if a field exists and is not shown above, it is listed
+        // below by name, and the omission is visible instead of inferred.
+        private static readonly HashSet<string> QuestPropsRendered = new()
+        {
+            "FormKey", "EditorID", "Name", "Data", "Stages", "Objectives", "Aliases",
+            "VirtualMachineAdapter", "DialogBranches", "DialogTopics", "Scenes",
+            // the mission-board card + classification, added once the coverage report named them
+            "MissionBoardDescription", "MissionBoardInfoPanels", "MissionTypeKeyword",
+            "QuestType", "QuestFaction", "QuestGroup", "Location", "SourceQuest",
+            "QuestTimeLimit", "Event", "Keywords", "TextDisplayGlobals", "UnusedConditions",
+            "Timestamp", "Unknown",
+            // structural / not content
+            "FormVersion", "Version2", "VersionControl", "IsCompressed", "IsDeleted",
+            "MajorFlags", "MajorRecordFlagsRaw", "StarfieldMajorRecordFlags",
+        };
+
+        private static void DumpQuestEverything(IQuestGetter q, List<IStarfieldModGetter>? allMods)
+        {
+            Console.WriteLine($"=== QUEST (ALL) ===");
+            Console.WriteLine($"  FormKey:  {q.FormKey}");
+            Console.WriteLine($"  EditorID: {q.EditorID}");
+            Console.WriteLine($"  Name:     {q.Name}");
+            Console.WriteLine($"  Priority: {q.Data?.Priority}   Type: {q.Data?.Type}");
+            Console.WriteLine($"  Flags:    {q.Data?.Flags}  (0x{(uint)(q.Data?.Flags ?? 0):X8})");
+            Console.WriteLine();
+
+            // ---- The mission-board card ------------------------------------------------------
+            // This section exists because the coverage report below named it on its first run:
+            // MissionBoardDescription is the text a player reads on the board, and no reader in
+            // this tool had ever shown one. It is printed FIRST and IN FULL -- it is the surface
+            // most of the authored work in du_overtime lives on.
+            Console.WriteLine("  Mission board card:");
+            Console.WriteLine($"    MissionTypeKeyword: {(q.MissionTypeKeyword.IsNull ? "null" : ResolveName(q.MissionTypeKeyword.FormKey, allMods))}");
+            Console.WriteLine($"    QuestType:          {(q.QuestType.IsNull ? "null" : ResolveName(q.QuestType.FormKey, allMods))}");
+            Console.WriteLine($"    Description:        {(q.MissionBoardDescription?.String is { Length: > 0 } d ? $"\"{d}\"" : "(none)")}");
+            Console.WriteLine($"    InfoPanels [{q.MissionBoardInfoPanels?.Count ?? 0}]:");
+            if (q.MissionBoardInfoPanels != null)
+                foreach (var panel in q.MissionBoardInfoPanels)
+                {
+                    // Was six identical type names -- i.e. a populated panel read exactly like an
+                    // empty one. Describe each from its own scalars rather than guess at property
+                    // names a second time.
+                    var bits = new List<string>();
+                    foreach (var pi in panel.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (pi.GetIndexParameters().Length > 0) continue;
+                        object? pv;
+                        try { pv = pi.GetValue(panel); } catch { continue; }
+                        if (pv == null) continue;
+                        if (pv is System.Collections.ICollection pc && pc.Count == 0) continue;
+                        var s = pv.ToString() ?? "";
+                        if (s.StartsWith("Mutagen.")) continue;   // nested overlay, no scalar value
+                        bits.Add($"{pi.Name}={s}");
+                    }
+                    Console.WriteLine($"      {(bits.Count > 0 ? string.Join("  ", bits) : "(no scalar fields)")}");
+                }
+            Console.WriteLine();
+
+            // ---- Classification / linkage ----------------------------------------------------
+            Console.WriteLine("  Linkage:");
+            Console.WriteLine($"    QuestFaction:  {(q.QuestFaction.IsNull  ? "null" : ResolveName(q.QuestFaction.FormKey,  allMods))}");
+            Console.WriteLine($"    QuestGroup:    {(q.QuestGroup.IsNull    ? "null" : ResolveName(q.QuestGroup.FormKey,    allMods))}");
+            Console.WriteLine($"    Location:      {(q.Location.IsNull      ? "null" : ResolveName(q.Location.FormKey,      allMods))}");
+            Console.WriteLine($"    SourceQuest:   {(q.SourceQuest.IsNull   ? "null" : ResolveName(q.SourceQuest.FormKey,   allMods))}");
+            Console.WriteLine($"    Event:         {q.Event}");
+            Console.WriteLine($"    Keywords [{q.Keywords?.Count ?? 0}]:");
+            if (q.Keywords != null)
+                foreach (var kw in q.Keywords)
+                    Console.WriteLine($"      {ResolveName(kw.FormKey, allMods)}");
+            Console.WriteLine();
+
+            // ---- Stages, with their log text -------------------------------------------------
+            Console.WriteLine($"  Stages [{q.Stages?.Count ?? 0}]:");
+            if (q.Stages != null)
+                foreach (var s in q.Stages)
+                {
+                    Console.WriteLine($"    Index={s.Index}  Flags={s.Flags}  logEntries={s.LogEntries?.Count ?? 0}");
+                    if (s.LogEntries != null)
+                        foreach (var e in s.LogEntries)
+                        {
+                            if (e.Entry != null && e.Entry.String?.Length > 0)
+                                Console.WriteLine($"      text: \"{e.Entry}\"");
+                            if (e.Conditions != null && e.Conditions.Count > 0)
+                                foreach (var c in e.Conditions)
+                                    DumpConditionBrief(c, "      cond: ");
+                        }
+                }
+            Console.WriteLine();
+
+            // ---- Objectives ------------------------------------------------------------------
+            Console.WriteLine($"  Objectives [{q.Objectives?.Count ?? 0}]:");
+            if (q.Objectives != null)
+                foreach (var o in q.Objectives)
+                {
+                    Console.WriteLine($"    [{o.Index}] Flags={o.Flags}  \"{o.DisplayText}\"");
+                    if (o.Targets != null)
+                        foreach (var t in o.Targets)
+                        {
+                            // The getter has no `Alias` property (the compiler said so on the first
+                            // cut). Rather than guess a second name, describe the target from its
+                            // own scalars -- self-describing beats a plausible guess, and this is
+                            // the field that says WHICH alias an objective points at.
+                            var bits = new List<string>();
+                            foreach (var pi in t.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                            {
+                                if (pi.GetIndexParameters().Length > 0) continue;
+                                object? pv;
+                                try { pv = pi.GetValue(t); } catch { continue; }
+                                if (pv == null) continue;
+                                if (pv is System.Collections.ICollection pc && pc.Count == 0) continue;
+                                bits.Add($"{pi.Name}={pv}");
+                            }
+                            Console.WriteLine($"      target: {string.Join("  ", bits)}");
+                        }
+                }
+            Console.WriteLine();
+
+            // ---- Aliases, with fills (shares DumpRefAlias with the qalias reader) -------------
+            Console.WriteLine($"  Aliases [{q.Aliases?.Count ?? 0}]:");
+            if (q.Aliases != null)
+                foreach (var alias in q.Aliases)
+                {
+                    switch (alias)
+                    {
+                        case IQuestReferenceAliasGetter ra:
+                            DumpRefAlias(ra, allMods, "    ");
+                            break;
+                        case IQuestCollectionAliasGetter coll:
+                            Console.WriteLine($"    [CollectionAlias] members={coll.Collection?.Count ?? 0}");
+                            if (coll.Collection != null)
+                                foreach (var m in coll.Collection)
+                                    if (m.ReferenceAlias != null)
+                                        DumpRefAlias(m.ReferenceAlias, allMods, "        ");
+                            break;
+                        case IQuestLocationAliasGetter la:
+                            Console.WriteLine($"    [LocationAlias] " +
+                                              $"SpecificLocation={(la.SpecificLocation.IsNull ? "null" : ResolveName(la.SpecificLocation.FormKey, allMods))}");
+                            if (la.Conditions != null)
+                                foreach (var c in la.Conditions)
+                                    DumpConditionBrief(c, "      cond: ");
+                            break;
+                        default:
+                            Console.WriteLine($"    [UNHANDLED ALIAS TYPE: {alias.GetType().Name}] -- extend DumpQuestEverything.");
+                            break;
+                    }
+                }
+            Console.WriteLine();
+
+            // ---- VMAD: the script layer ------------------------------------------------------
+            var vma = q.VirtualMachineAdapter;
+            Console.WriteLine("  VirtualMachineAdapter:");
+            if (vma == null)
+            {
+                Console.WriteLine("    NULL");
+            }
+            else
+            {
+                if (vma.Script != null)
+                    Console.WriteLine($"    FragmentScript: {vma.Script.Name}");
+                Console.WriteLine($"    Fragments [{vma.Fragments?.Count ?? 0}]:");
+                if (vma.Fragments != null)
+                    foreach (var f in vma.Fragments)
+                        Console.WriteLine($"      Stage={f.Stage} idx={f.StageIndex} -> {f.FragmentName}");
+
+                Console.WriteLine($"    Scripts [{vma.Scripts?.Count ?? 0}]:");
+                if (vma.Scripts != null)
+                    foreach (var sc in vma.Scripts)
+                    {
+                        Console.WriteLine($"      {sc.Name}  ({sc.Properties?.Count ?? 0} properties)");
+                        if (sc.Properties != null)
+                            foreach (var p in sc.Properties)
+                                DumpScriptPropertyResolved(p, "        ", allMods);
+                    }
+
+                Console.WriteLine($"    Alias scripts [{vma.Aliases?.Count ?? 0}]:");
+                if (vma.Aliases != null)
+                    foreach (var va in vma.Aliases)
+                        if (va.Scripts != null)
+                            foreach (var sc in va.Scripts)
+                            {
+                                Console.WriteLine($"      {sc.Name}");
+                                if (sc.Properties != null)
+                                    foreach (var p in sc.Properties)
+                                        DumpScriptPropertyResolved(p, "        ", allMods);
+                            }
+            }
+            Console.WriteLine();
+
+            // ---- Coverage: what this reader did NOT show -------------------------------------
+            var missed = new List<string>();
+            foreach (var prop in typeof(IQuestGetter).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (prop.GetIndexParameters().Length > 0) continue;
+                if (QuestPropsRendered.Contains(prop.Name)) continue;
+                object? v;
+                try { v = prop.GetValue(q); } catch { continue; }
+                if (v == null) continue;
+                if (v is System.Collections.ICollection c && c.Count == 0) continue;
+                string shown = v is System.Collections.ICollection cc ? $"[{cc.Count} items]" : v.ToString() ?? "";
+                if (shown.Length > 90) shown = shown.Substring(0, 90) + "…";
+                missed.Add($"    {prop.Name} = {shown}");
+            }
+            if (missed.Count == 0)
+            {
+                Console.WriteLine("  Coverage: every non-empty property on this record is rendered above.");
+            }
+            else
+            {
+                Console.WriteLine($"  ⚠ NOT RENDERED ABOVE [{missed.Count}] -- present on the record, not decoded by this reader:");
+                foreach (var m in missed) Console.WriteLine(m);
+            }
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// DumpScriptProperty with two fixes: FormKeys resolve to EditorIDs (the helper existed and
+        /// this path never used it, so every Object= was a number you had to look up separately),
+        /// and a struct/list property reports its shape instead of only its type name.
+        /// </summary>
+        private static void DumpScriptPropertyResolved(IScriptPropertyGetter prop, string indent,
+                                                       List<IStarfieldModGetter>? allMods)
+        {
+            switch (prop)
+            {
+                case IScriptObjectPropertyGetter o:
+                    Console.WriteLine($"{indent}[Obj]    {prop.Name} = {ResolveName(o.Object.FormKey, allMods)}");
+                    break;
+                case IScriptIntPropertyGetter i:
+                    Console.WriteLine($"{indent}[Int]    {prop.Name} = {i.Data}");
+                    break;
+                case IScriptBoolPropertyGetter b:
+                    Console.WriteLine($"{indent}[Bool]   {prop.Name} = {b.Data}");
+                    break;
+                case IScriptFloatPropertyGetter f:
+                    Console.WriteLine($"{indent}[Float]  {prop.Name} = {f.Data}");
+                    break;
+                case IScriptStringPropertyGetter s:
+                    Console.WriteLine($"{indent}[String] {prop.Name} = \"{s.Data}\"");
+                    break;
+                default:
+                    // Was printed as a bare type name -- so a populated ChangeLocationStages read
+                    // identically to an empty one. Say how many entries it has, at least.
+                    int count = -1;
+                    foreach (var pi in prop.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (pi.GetIndexParameters().Length > 0) continue;
+                        try
+                        {
+                            if (pi.GetValue(prop) is System.Collections.ICollection col) { count = col.Count; break; }
+                        }
+                        catch { }
+                    }
+                    Console.WriteLine($"{indent}[{prop.GetType().Name.Replace("BinaryOverlay", "")}] {prop.Name}"
+                                      + (count >= 0 ? $" = [{count} entries]" : " = (not decoded)"));
+                    break;
+            }
         }
 
         // Quest aliases, and specifically the FILL -- which of the mutually-exclusive fill
