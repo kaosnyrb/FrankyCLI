@@ -32,8 +32,16 @@ public class SpaceCellState
     public float VanillaRadius;
 
     /// <summary>
-    /// Linear scale multiplier applied to placement distances.
-    /// Default sqrt(2) ≈ 1.414 gives approximately twice the vanilla cell area.
+    /// Linear scale multiplier applied to placement distances, as a fraction of VanillaRadius.
+    ///
+    /// The only writer (SpaceCellGenerator) sets sqrt(2) * 0.5 = <b>0.707</b>, so a generated
+    /// cell is currently about 70% of the radius of the vanilla cell it was cloned from —
+    /// i.e. TIGHTER than vanilla, not wider.
+    ///
+    /// This doc previously read "Default sqrt(2) ~= 1.414 gives approximately twice the vanilla
+    /// cell area", which described a value nothing sets. Corrected rather than deleted because
+    /// the number is the spread dial: raising it above 1.0 is what widens a cell, and 1.414 is
+    /// presumably where it started before being halved.
     /// </summary>
     public float Scale;
 

@@ -108,9 +108,12 @@ public class ShipWreckPass : ISpaceCellPass
             Place(targetMod, state.Cell, cargoKey, cx + sx, cy + sy, cz + sz, rng);
         }
 
+        // Report what was placed, not what an earlier shape of this pass placed: there is no
+        // cockpit here and the doc-comment above never claimed one. A log line asserting a
+        // placement that did not happen costs the next reader an hour hunting a missing part.
         Console.WriteLine(
             $"[ShipWreckPass] Placed wreck near ({cx:F0},{cy:F0},{cz:F0}): " +
-            $"1 cockpit, {engineCount} engines, {cargoCount} cargo.");
+            $"{engineCount} engines, {cargoCount} cargo.");
     }
 
     private static void Place(StarfieldMod targetMod, Cell cell, FormKey baseKey,

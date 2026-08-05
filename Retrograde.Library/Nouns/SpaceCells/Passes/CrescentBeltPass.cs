@@ -27,8 +27,13 @@ namespace Retrograde.Passes.SpaceCell;
 /// </summary>
 public class CrescentBeltPass : ISpaceCellPass
 {
-    // Probability this pass fires for any given space cell.
-    private const float CrescentChance = 1.35f;
+    // Probability this pass fires for any given space cell, 0..1.
+    // The gate below is `NextDouble() >= CrescentChance`, and NextDouble() returns [0,1),
+    // so 1.0 already means "always". This was 1.35f, which behaved identically but read as
+    // a tunable 135% — the danger being that dialling it "back a bit" to 0.9 looks like a
+    // third off and is actually a tenth. The belt is this design's main feature and is meant
+    // to fire every time; say that with 1.0 rather than with an out-of-range number.
+    private const float CrescentChance = 1.0f;
 
     // Total angular span of the crescent in radians (150°).
     private const float ArcAngle = 2.618f;
