@@ -2014,6 +2014,93 @@ namespace FrankyCLI
         /// set. Print WHICH one, because that is the fact that classifies the alias: create-obj
         /// means we control what spawns, from-event means the story manager supplies it.
         /// </summary>
+        /// <summary>
+        /// A condition, in full: which function, against what, compared how, and how it chains.
+        ///
+        /// DumpConditionBrief printed the function name, the operator, and "?" for the comparison
+        /// value on anything that was not a float condition -- and hand-decoded exactly two of the
+        /// engine's several hundred condition-data types, so every other one's PARAMETERS were
+        /// invisible. On an alias, the parameters ARE the content: "has keyword X" is only useful
+        /// if you can see which keyword X is.
+        ///
+        /// So the parameters come from reflection over the Data object rather than a case list that
+        /// would be permanently incomplete, with FormKeys resolved to EditorIDs. A condition type
+        /// nobody has hand-written support for still prints its parameters.
+        /// </summary>
+        private static void DumpConditionFull(IConditionGetter cond, string indent,
+                                              List<IStarfieldModGetter>? allMods)
+        {
+            string fn = cond.Data?.GetType().Name.Replace("ConditionDataBinaryOverlay", "")
+                                                  .Replace("ConditionData", "") ?? "?";
+
+            // The comparison value lives on the concrete condition type, not the interface.
+            string val = cond switch
+            {
+                IConditionFloatGetter cf  => cf.ComparisonValue.ToString("0.##"),
+                IConditionGlobalGetter cg => $"global:{ResolveEditorIdOnly(cg.ComparisonValue.FormKey, allMods)}",
+                _                         => "(value not on this condition type)",
+            };
+
+            Console.WriteLine($"{indent}{fn} {cond.CompareOperator} {val}"
+                              + $"   flags={cond.Flags}");
+
+            if (cond.Data == null) return;
+
+            // Parameters, by reflection -- a case list over condition functions is a blocklist
+            // wearing a switch, and the engine has hundreds.
+            foreach (var pi in cond.Data.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (pi.GetIndexParameters().Length > 0) continue;
+                if (pi.Name is "RunOnType" or "Reference" or "Unknown3" or "UseAliases") continue;
+                object? v;
+                try { v = pi.GetValue(cond.Data); } catch { continue; }
+                if (v == null) continue;
+
+                string shown;
+                // FormLink-shaped parameters carry the fact worth reading; resolve them.
+                var linkProp = v.GetType().GetProperty("Link", BindingFlags.Public | BindingFlags.Instance);
+                var fkProp   = (linkProp != null ? linkProp.PropertyType : v.GetType())
+                                   .GetProperty("FormKey", BindingFlags.Public | BindingFlags.Instance);
+                try
+                {
+                    var target = linkProp != null ? linkProp.GetValue(v) : v;
+                    if (target != null && fkProp != null && fkProp.GetValue(target) is FormKey fk && !fk.IsNull)
+                        shown = ResolveName(fk, allMods);
+                    else
+                        shown = v.ToString() ?? "";
+                }
+                catch { shown = v.ToString() ?? ""; }
+
+                // Never drop a parameter silently. The first cut `continue`d on anything that
+                // resolved to a Mutagen type name -- and the casualty was FirstParameter on
+                // HasRefType, i.e. WHICH ref type a marker alias filters by, which is the single
+                // fact the condition exists to carry. An omission that looks like an absent field
+                // is the exact failure this reader keeps being rebuilt to stop.
+                if (shown is "" or "Null") continue;
+                if (shown.StartsWith("Mutagen."))
+                {
+                    // Dig one level for a FormKey the generic path missed, then fall back to naming
+                    // the type rather than pretending the parameter is not there.
+                    string deeper = shown.Substring(shown.LastIndexOf('.') + 1);
+                    foreach (var inner in v.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (inner.GetIndexParameters().Length > 0) continue;
+                        try
+                        {
+                            var iv = inner.GetValue(v);
+                            if (iv is FormKey ifk && !ifk.IsNull) { deeper = ResolveName(ifk, allMods); break; }
+                            var ifkProp = iv?.GetType().GetProperty("FormKey", BindingFlags.Public | BindingFlags.Instance);
+                            if (ifkProp?.GetValue(iv) is FormKey ifk2 && !ifk2.IsNull)
+                            { deeper = ResolveName(ifk2, allMods); break; }
+                        }
+                        catch { }
+                    }
+                    shown = deeper;
+                }
+                Console.WriteLine($"{indent}  {pi.Name}: {shown}");
+            }
+        }
+
         /// <summary>Properties DumpRefAlias renders itself; everything else gets named as undecoded.</summary>
         private static readonly HashSet<string> RefAliasPropsRendered = new()
         {
@@ -2116,6 +2203,17 @@ namespace FrankyCLI
                 Console.WriteLine($"{pad}  FILL: no fill property set, and nothing else on the record either");
             else if (fills == 0)
                 Console.WriteLine($"{pad}  FILL: none of the decoded fills -- see undecoded below");
+
+            // Conditions are how the engine CHOOSES among candidates -- on a marker alias filled
+            // from a collection, they are the filter that decides WHICH marker in the spawned cell
+            // this alias resolves to. That makes them the difference between a composer being able
+            // to aim the objective at a particular site and only being able to offer a pool.
+            if (a.Conditions != null && a.Conditions.Count > 0)
+            {
+                Console.WriteLine($"{pad}  Conditions [{a.Conditions.Count}]:");
+                foreach (var c in a.Conditions)
+                    DumpConditionFull(c, pad + "    ", allMods);
+            }
 
             if (undecoded.Count > 0)
                 Console.WriteLine($"{pad}  ⚠ not decoded here: {string.Join("  ", undecoded)}");
