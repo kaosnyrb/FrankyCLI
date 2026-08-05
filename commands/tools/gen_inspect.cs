@@ -29,6 +29,7 @@ namespace FrankyCLI
             "  PcmBranchNode, PcmContentNode, Planet, Star, Race, Biome (biom)\n" +
             "  Quest, Quest_VMAD, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)\n" +
             "  Message (mesg), Faction, Global, FormList, LeveledSpaceCell (lvsc)\n" +
+            "  QuestAlias (qalias) - alias fills: which one is set and what it points at\n" +
             "  Armor (armo), ObjectModification (omod), ObjectEffect (ench), Perk, Spell (spel)\n" +
             "  MagicEffect (mgef), DamageType (dmgt), LegendaryItem (lgdi), Outfit (otft)\n" +
             "  ActorValueInformation (avif)\n" +
@@ -495,6 +496,12 @@ namespace FrankyCLI
                     foreach (var rec in mod.FormLists)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpFormList(rec, allMods); found++; }
+                    break;
+                case "questalias":
+                case "qalias":
+                    foreach (var rec in mod.Quests)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpQuestAliases(rec, allMods); found++; }
                     break;
                 case "leveledspacecell":
                 case "lvsc":
@@ -1656,6 +1663,134 @@ namespace FrankyCLI
             foreach (var item in flst.Items)
                 Console.WriteLine($"    {ResolveEditorIdOnly(item.FormKey, allMods)}  [{item.FormKey}]");
             Console.WriteLine();
+        }
+
+        // Quest aliases, and specifically the FILL -- which of the mutually-exclusive fill
+        // properties a reference alias actually uses, and what it points at.
+        //
+        // DumpQuestFull (reachable only via `gen_inspect audiolog`) already prints aliases, but
+        // handles ONE alias type and three of its fills; every other alias type falls into an
+        // else-branch that prints a type name and an opaque ToString(). That is why the
+        // levelled-space-cell binding was unreadable: it lives on a QuestCollectionAlias, whose
+        // Collection[n].ReferenceAlias.CreateReferenceToObject.Object carries the LVSC -- a
+        // different type, silently swallowed by the fallback.
+        //
+        // So this reader does two things that one does not: it walks collection aliases into their
+        // member reference aliases, and it NAMES any alias type it cannot handle instead of
+        // printing something that looks like output. An unhandled case that prints nothing useful
+        // reads as "this record has nothing in it", which is the failure being fixed here.
+        private static void DumpQuestAliases(IQuestGetter quest, List<IStarfieldModGetter>? allMods)
+        {
+            Console.WriteLine($"--- Quest Aliases ---");
+            Console.WriteLine($"  FormKey:  {quest.FormKey}");
+            Console.WriteLine($"  EditorID: {quest.EditorID}");
+            Console.WriteLine($"  Name:     {quest.Name}");
+
+            if (quest.Aliases == null || quest.Aliases.Count == 0)
+            {
+                Console.WriteLine("  Aliases: none");
+                Console.WriteLine();
+                return;
+            }
+
+            Console.WriteLine($"  Aliases [{quest.Aliases.Count}]:");
+            foreach (var alias in quest.Aliases)
+            {
+                switch (alias)
+                {
+                    case IQuestReferenceAliasGetter refAlias:
+                        DumpRefAlias(refAlias, allMods, "    ");
+                        break;
+
+                    case IQuestCollectionAliasGetter coll:
+                        // No ID/Name on this getter -- the compiler said so, and rather than guess a
+                        // second property name the identity is left to the member aliases, which
+                        // carry their own. The one thing his own writer proves exists is Collection
+                        // (QuestNoun.SetQuestLevelledSpaceCellAlias walks
+                        // Collection[0].ReferenceAlias.CreateReferenceToObject.Object).
+                        Console.WriteLine($"    [CollectionAlias] members={coll.Collection?.Count ?? 0}");
+                        if (coll.Collection != null)
+                        {
+                            int i = 0;
+                            foreach (var member in coll.Collection)
+                            {
+                                Console.WriteLine($"      member[{i++}]:");
+                                if (member.ReferenceAlias != null)
+                                    DumpRefAlias(member.ReferenceAlias, allMods, "        ");
+                                else
+                                    Console.WriteLine("        (no ReferenceAlias)");
+                            }
+                        }
+                        break;
+
+                    default:
+                        // Loud, not decorative: name the type so the next gap is visible.
+                        Console.WriteLine($"    [UNHANDLED ALIAS TYPE: {alias.GetType().Name}] " +
+                                          $"-- this reader does not decode it; extend DumpQuestAliases.");
+                        break;
+                }
+            }
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// A reference alias's fill properties are mutually exclusive -- exactly one is meant to be
+        /// set. Print WHICH one, because that is the fact that classifies the alias: create-obj
+        /// means we control what spawns, from-event means the story manager supplies it.
+        /// </summary>
+        private static void DumpRefAlias(IQuestReferenceAliasGetter a, List<IStarfieldModGetter>? allMods, string pad)
+        {
+            Console.WriteLine($"{pad}[RefAlias] ID={a.ID} Name={a.Name}");
+            Console.WriteLine($"{pad}  Flags: {a.Flags}");
+
+            int fills = 0;
+
+            if (a.CreateReferenceToObject != null)
+            {
+                var c = a.CreateReferenceToObject;
+                Console.WriteLine($"{pad}  FILL create-obj (ALCO/ALCA/ALCL):");
+                Console.WriteLine($"{pad}    Object:  {ResolveName(c.Object.FormKey, allMods)}");
+                Console.WriteLine($"{pad}    AliasID: {c.AliasID}   (the alias to create AT)");
+                Console.WriteLine($"{pad}    Create:  {c.Create}   Level: {c.Level}");
+                fills++;
+            }
+            if (a.FindMatchingRefFromEvent != null)
+            {
+                Console.WriteLine($"{pad}  FILL from-event (ALFE/ALFD): {a.FindMatchingRefFromEvent}");
+                fills++;
+            }
+            if (!a.ForcedReference.IsNull)
+            {
+                Console.WriteLine($"{pad}  FILL forced-ref (ALFR): {ResolveName(a.ForcedReference.FormKey, allMods)}");
+                fills++;
+            }
+            if (!a.UniqueActor.IsNull)
+            {
+                Console.WriteLine($"{pad}  FILL unique-actor: {ResolveName(a.UniqueActor.FormKey, allMods)}");
+                fills++;
+            }
+            if (!a.UniqueBaseForm.IsNull)
+            {
+                Console.WriteLine($"{pad}  FILL unique-base: {ResolveName(a.UniqueBaseForm.FormKey, allMods)}");
+                fills++;
+            }
+            if (a.Location != null)
+            {
+                Console.WriteLine($"{pad}  FILL location (ALLA): {a.Location}");
+                fills++;
+            }
+            if (a.External != null)
+            {
+                Console.WriteLine($"{pad}  FILL external (ALEQ/ALEA): {a.External}");
+                fills++;
+            }
+
+            // The fills are meant to be mutually exclusive, so both zero and >1 are worth seeing
+            // rather than inferring from an absence of lines.
+            if (fills == 0)
+                Console.WriteLine($"{pad}  FILL: none set");
+            else if (fills > 1)
+                Console.WriteLine($"{pad}  ** {fills} fills set -- these are meant to be mutually exclusive **");
         }
 
         // Same shape, and the same reason, as DumpFormList above: a LeveledSpaceCell IS its
