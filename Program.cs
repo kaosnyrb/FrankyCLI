@@ -184,6 +184,7 @@ switch (mode)
     case "setrotation":
     case "setbounds":
     case "setflipset":
+    case "shiplightlist":
     case "removerecord":
     case "setdesc":
     case "copyswap":
@@ -343,6 +344,7 @@ static int RunLegacy(string mode, string[] args)
         "setrotation"        => gen_setrotation.Generate(arr),
         "setbounds"          => gen_setbounds.Generate(arr),
         "setflipset"         => gen_setflipset.Generate(arr),
+        "shiplightlist"      => gen_shiplightlist.Generate(arr),
         "removerecord"       => gen_removerecord.Generate(arr),
         "setdesc"            => gen_setdesc.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
