@@ -1096,16 +1096,17 @@ namespace FrankyCLI
                     }
                     else if (alias is IQuestLocationAliasGetter locAlias)
                     {
-                        Console.WriteLine($"    [LocAlias]  ID={locAlias.ID}  Name={locAlias.Name}  Flags=0x{(uint)locAlias.Flags:X8}");
-                        Console.WriteLine($"      SpecificLocation: {(locAlias.SpecificLocation.IsNull ? "null" : locAlias.SpecificLocation.FormKey.ToString())}");
-                        if (locAlias.ALPS != null)
-                            Console.WriteLine($"      ALPS.PcmTypeKeyword: {(locAlias.ALPS.PcmTypeKeyword.IsNull ? "null" : locAlias.ALPS.PcmTypeKeyword.FormKey.ToString())}");
-                        if (locAlias.Conditions != null && locAlias.Conditions.Count > 0)
-                        {
-                            Console.WriteLine($"      Conditions [{locAlias.Conditions.Count}]:");
-                            foreach (var cond in locAlias.Conditions)
-                                DumpConditionBrief(cond, "        ");
-                        }
+                        // Was an inline copy printing raw FormKeys where the sibling copy resolved
+                        // names -- two dumpers for one type, already disagreeing. One helper now
+                        // (2026-08-07); it resolves names and reports any property it did not render.
+                        //
+                        // null mod list: DumpQuestVMAD does not take one, and ResolveName's declared
+                        // fallback is the bare FormKey -- which is EXACTLY what this site printed
+                        // before, so behaviour here is preserved rather than quietly degraded.
+                        // Threading allMods down to the VMAD dumper would upgrade this site to
+                        // resolved names; that is a signature change through its callers and is a
+                        // separate, larger edit than the one asked for.
+                        DumpLocAlias(locAlias, null, "    ");
                     }
                     else if (alias is IQuestCollectionAliasGetter colAlias)
                     {
@@ -1830,11 +1831,10 @@ namespace FrankyCLI
                                         DumpRefAlias(m.ReferenceAlias, allMods, "        ");
                             break;
                         case IQuestLocationAliasGetter la:
-                            Console.WriteLine($"    [LocationAlias] " +
-                                              $"SpecificLocation={(la.SpecificLocation.IsNull ? "null" : ResolveName(la.SpecificLocation.FormKey, allMods))}");
-                            if (la.Conditions != null)
-                                foreach (var c in la.Conditions)
-                                    DumpConditionBrief(c, "      cond: ");
+                            // Was an inline copy that printed SpecificLocation and conditions only --
+                            // no ID, no Name, no Flags, and silently nothing at all for an ALPS-filled
+                            // alias, which is the interesting kind. One helper now (2026-08-07).
+                            DumpLocAlias(la, allMods, "    ");
                             break;
                         default:
                             Console.WriteLine($"    [UNHANDLED ALIAS TYPE: {alias.GetType().Name}] -- extend DumpQuestEverything.");
@@ -2009,6 +2009,13 @@ namespace FrankyCLI
                                     Console.WriteLine("        (no ReferenceAlias)");
                             }
                         }
+                        break;
+
+                    // WHERE the mission happens, as against what it spawns. Added 2026-08-07 on his
+                    // "oh get location aliases working now": this was the last alias type falling
+                    // into the default branch, and on a space mission it is two of eleven aliases.
+                    case IQuestLocationAliasGetter locAlias:
+                        DumpLocAlias(locAlias, allMods, "    ");
                         break;
 
                     default:
@@ -2220,6 +2227,148 @@ namespace FrankyCLI
             // from a collection, they are the filter that decides WHICH marker in the spawned cell
             // this alias resolves to. That makes them the difference between a composer being able
             // to aim the objective at a particular site and only being able to offer a pool.
+            if (a.Conditions != null && a.Conditions.Count > 0)
+            {
+                Console.WriteLine($"{pad}  Conditions [{a.Conditions.Count}]:");
+                foreach (var c in a.Conditions)
+                    DumpConditionFull(c, pad + "    ", allMods);
+            }
+
+            if (undecoded.Count > 0)
+                Console.WriteLine($"{pad}  ⚠ not decoded here: {string.Join("  ", undecoded)}");
+        }
+
+        // Properties DumpLocAlias renders explicitly. Same contract as RefAliasPropsRendered:
+        // anything NOT in this set and non-empty gets named in the "not decoded here" line, so a
+        // field this dumper has never heard of surfaces instead of vanishing.
+        private static readonly HashSet<string> LocAliasPropsRendered = new()
+        {
+            "ID", "Name", "Flags", "SpecificLocation", "ALPS", "Conditions",
+            "LocationTypeKeyword", "SystemLocationAliasID", "ALFG",
+        };
+
+        // A quest's LOCATION aliases -- the answer to "where does this mission happen", as opposed
+        // to the reference aliases' "what does it spawn". They resolve one of two ways: a
+        // SpecificLocation (pinned at authoring time) or, far more interestingly, an ALPS block
+        // carrying a PCM type keyword, which is the request into the Planet Content Manager tree --
+        // the open cross-mod registry that makes a board mission's destination pool grow as the
+        // installed ecosystem grows.
+        //
+        // WHY THIS EXISTS (2026-08-07, his "oh get location aliases working now"): this type was
+        // decoded in TWO other paths in this same file and NOT in DumpQuestAliases, so `qalias` --
+        // the command whose entire job is "which fill is set and what does it point at" -- printed
+        // "[UNHANDLED ALIAS TYPE: QuestLocationAliasBinaryOverlay]" for exactly the aliases that
+        // answer the WHERE question. Two of duo_MB15a_qst's eleven aliases read as opaque.
+        //
+        // It is written as ONE helper called from all three sites rather than a third inline copy:
+        // the two existing copies had already drifted apart (one printed raw FormKeys, the other
+        // resolved names and dropped ID/Name/Flags entirely), which is the standing tell that a
+        // rule open-coded in N places is N bugs -- and fixing the first makes the rest invisible.
+        private static void DumpLocAlias(IQuestLocationAliasGetter a, List<IStarfieldModGetter>? allMods, string pad)
+        {
+            Console.WriteLine($"{pad}[LocAlias] ID={a.ID} Name={a.Name}");
+            Console.WriteLine($"{pad}  Flags: {a.Flags} (0x{(uint)a.Flags:X8})");
+
+            int fills = 0;
+            if (!a.SpecificLocation.IsNull)
+            {
+                Console.WriteLine($"{pad}  FILL specific-location (ALFL): {ResolveName(a.SpecificLocation.FormKey, allMods)}");
+                fills++;
+            }
+            if (a.ALPS != null)
+            {
+                // The PCM request. Naming it as such matters: a reader who sees only "ALPS" has no
+                // way to know this is the hook into the cross-mod location registry.
+                Console.WriteLine($"{pad}  FILL pcm-request (ALPS) -- resolves through the Planet Content Manager tree:");
+                Console.WriteLine($"{pad}    PcmTypeKeyword: " +
+                                  (a.ALPS.PcmTypeKeyword.IsNull ? "null" : ResolveName(a.ALPS.PcmTypeKeyword.FormKey, allMods)));
+                foreach (var pi in a.ALPS.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    if (pi.GetIndexParameters().Length > 0 || pi.Name == "PcmTypeKeyword") continue;
+                    object? v; try { v = pi.GetValue(a.ALPS); } catch { continue; }
+                    if (v == null) continue;
+                    var vs = v.ToString() ?? "";
+                    if (vs is "Null" or "" or "0") continue;
+                    if (vs.Length > 60) vs = vs.Substring(0, 60) + "…";
+                    Console.WriteLine($"{pad}    {pi.Name}: {vs}");
+                }
+                fills++;
+            }
+
+            // ---- the three that the FIRST cut of this dumper missed, and they are the ones doing
+            // the work. Rendering SpecificLocation and ALPS only (which is all either inline copy
+            // ever did) reported "no fill set" on every shipped board mission -- because a board
+            // mission does not PIN its destination, it DESCRIBES it and lets the story manager
+            // pick. The reflection reporter below is what surfaced them; this block is it closing.
+            if (!a.LocationTypeKeyword.IsNull)
+            {
+                // The actual filter: the location the board rolls must carry this keyword. Together
+                // with Conditions this IS the fill for a radiant destination.
+                Console.WriteLine($"{pad}  FILL by-type (ALLT): LocationTypeKeyword = " +
+                                  $"{ResolveName(a.LocationTypeKeyword.FormKey, allMods)}");
+                Console.WriteLine($"{pad}    (radiant: the board picks any location matching this keyword + the conditions below)");
+                fills++;
+            }
+            if (a.SystemLocationAliasID != null)
+            {
+                // Which alias supplies the STAR SYSTEM this location is drawn within. Negative
+                // values are sentinels rather than alias indices -- called out as unknown rather
+                // than glossed, because guessing a sentinel's meaning is how a wrong law gets banked.
+                var sid = a.SystemLocationAliasID;
+                Console.WriteLine($"{pad}  SystemLocationAliasID: {sid}" +
+                                  (sid < 0 ? "   (negative = sentinel, meaning NOT established -- do not infer one)"
+                                           : "   (the alias supplying the star system to search within)"));
+            }
+            if (a.ALFG != null && a.ALFG != 0)
+            {
+                // ALFG is a 4-byte FLOAT and the getter surfaces it as an integer, so the raw view
+                // of a tuned value reads as garbage: 1103383190 is 24.54, sitting inside the 8-32
+                // band his own eye settled across four in-game trials. Printed raw it looks exactly
+                // like an uninitialised field, which is the worst possible display for a number
+                // somebody deliberately chose.
+                var bits = unchecked((uint)a.ALFG.Value);
+                var alt = BitConverter.ToSingle(BitConverter.GetBytes(bits), 0);
+                Console.WriteLine($"{pad}  ALFG orbit altitude: {alt:0.###}   (raw int {a.ALFG}; " +
+                                  $"settled band 8-32, and past ~32-256 the engine DISCARDS it and reverts to default)");
+            }
+            else if (a.ALFG != null)
+            {
+                // NOT "zero means ground". The first cut of this line said exactly that and printed
+                // it on PlayerStarSystemLocation -- a star-system alias on a SPACE mission -- so the
+                // tool asserted "ground" about a mission that is not. The banked rule (ground 122 /
+                // space 103, no exceptions) was measured on TargetPlanetLocation specifically, and
+                // carrying it to every location alias is the prescription escaping the bound of its
+                // evidence. State the value; scope the inference.
+                Console.WriteLine($"{pad}  ALFG orbit altitude: 0" +
+                                  (a.Name != null && a.Name.Contains("TargetPlanet", StringComparison.OrdinalIgnoreCase)
+                                      ? "   (on a TargetPlanetLocation, zero = a GROUND mission -- measured, no exceptions either way)"
+                                      : "   (unset; the ground/space reading is only established for TargetPlanetLocation)"));
+            }
+
+            // Same honesty rule as DumpRefAlias: never assert emptiness that has not been
+            // established, and never let "no lines printed" read as "no fill set".
+            var undecoded = new List<string>();
+            foreach (var pi in typeof(IQuestLocationAliasGetter).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (pi.GetIndexParameters().Length > 0) continue;
+                if (LocAliasPropsRendered.Contains(pi.Name)) continue;
+                object? v;
+                try { v = pi.GetValue(a); } catch { continue; }
+                if (v == null) continue;
+                if (v is System.Collections.ICollection col && col.Count == 0) continue;
+                var s = v.ToString() ?? "";
+                if (s is "Null" or "") continue;
+                if (s.Length > 70) s = s.Substring(0, 70) + "…";
+                undecoded.Add($"{pi.Name}={s}");
+            }
+
+            if (fills == 0 && undecoded.Count == 0)
+                Console.WriteLine($"{pad}  FILL: no fill property set, and nothing else on the record either");
+            else if (fills == 0)
+                Console.WriteLine($"{pad}  FILL: none of the decoded fills -- see undecoded below");
+            if (fills > 1)
+                Console.WriteLine($"{pad}  ** {fills} fills set -- these are meant to be mutually exclusive **");
+
             if (a.Conditions != null && a.Conditions.Count > 0)
             {
                 Console.WriteLine($"{pad}  Conditions [{a.Conditions.Count}]:");
