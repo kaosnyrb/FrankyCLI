@@ -1049,7 +1049,19 @@ namespace FrankyCLI
                 {
                     var fa = vma.Aliases[ai];
                     Console.WriteLine($"      [{ai}] Version={fa.Version}  ObjectFormat={fa.ObjectFormat}");
-                    Console.WriteLine($"           Property.Name={fa.Property.Name}  Property.Flags=0x{(ushort)fa.Property.Flags:X4}  Property.Object={fa.Property.Object.FormKey}");
+                    // Every scalar on the linking property, not just the three that used to print.
+                    // The alias INDEX lives on this property, and without it the dump cannot say
+                    // WHICH alias a script is attached to -- the same swallowed-field failure that
+                    // left the quest fragment reader unable to show per-fragment ScriptName.
+                    var linkBits = new List<string>();
+                    foreach (var pi in fa.Property.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (pi.GetIndexParameters().Length > 0) continue;
+                        object? v; try { v = pi.GetValue(fa.Property); } catch { continue; }
+                        if (v == null || v is System.Collections.ICollection) continue;
+                        linkBits.Add($"{pi.Name}={v}");
+                    }
+                    Console.WriteLine($"           Property: {string.Join("  ", linkBits)}");
                     Console.WriteLine($"           Scripts [{fa.Scripts.Count}]:");
                     foreach (var s in fa.Scripts)
                     {

@@ -187,6 +187,7 @@ switch (mode)
     case "shiplightlist":
     case "renamescript":
     case "questprop":
+    case "queststage":
     case "removerecord":
     case "setdesc":
     case "copyswap":
@@ -349,6 +350,7 @@ static int RunLegacy(string mode, string[] args)
         "shiplightlist"      => gen_shiplightlist.Generate(arr),
         "renamescript"       => gen_renamescript.Generate(arr),
         "questprop"          => gen_questprop.Generate(arr),
+        "queststage"         => gen_queststage.Generate(arr),
         "removerecord"       => gen_removerecord.Generate(arr),
         "setdesc"            => gen_setdesc.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
