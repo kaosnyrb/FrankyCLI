@@ -87,6 +87,14 @@ namespace FrankyCLI
             //                              Omit --engine on the variant and it falls back to the
             //                              plain 2-property sheet with no ShipModuleClass keyword,
             //                              which is what vanilla structural parts carry.
+            //   --cargo <capacity>         make this part a CARGO hold: adds CarryWeight (the
+            //                              capacity) and Health to the 2-property sheet. Counted
+            //                              across all 91 vanilla SMS_Cargo GBFMs -- Health is 5 on
+            //                              every one, and capacity/mass runs 4.67-6.10 (median
+            //                              4.72). That ratio is a design guide, deliberately NOT
+            //                              derived here: vanilla itself spans it, so picking the
+            //                              number stays the author's call. Mutually exclusive with
+            //                              --engine (different property sheets).
             //   --engine <k=v,...>         make this part an ENGINE: swaps the 2-property GBFM
             //                              sheet for the full 21-property engine sheet and adds
             //                              the ShipModuleClass<X> keyword. Keys:
@@ -117,7 +125,7 @@ namespace FrankyCLI
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
-            string? optVariant = null;
+            string? optVariant = null, optCargo = null;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -130,6 +138,7 @@ namespace FrankyCLI
                     case "--category": if (!hasValue) { Console.WriteLine("Error: --category needs a value"); return 1; } optCategory = args[++i]; break;
                     case "--engine": if (!hasValue) { Console.WriteLine("Error: --engine needs a value"); return 1; } optEngine = args[++i]; break;
                     case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
+                    case "--cargo": if (!hasValue) { Console.WriteLine("Error: --cargo needs a value"); return 1; } optCargo = args[++i]; break;
                     case "--variant": if (!hasValue) { Console.WriteLine("Error: --variant needs a value"); return 1; } optVariant = args[++i]; break;
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
                     case "--desc": if (!hasValue) { Console.WriteLine("Error: --desc needs a value"); return 1; } optDesc = args[++i]; break;
@@ -155,6 +164,29 @@ namespace FrankyCLI
                         + " They belong on the run that built the original part.");
                     return 1;
                 }
+            }
+
+            // --cargo <capacity>: make this a CARGO part (CarryWeight + Health on the sheet).
+            // Refuses a non-positive capacity -- a zero-capacity hold is exactly the silent
+            // nothing this flag exists to prevent, so it must never be writable by accident.
+            float cargoCapacity = 0;
+            if (optCargo != null)
+            {
+                if (!float.TryParse(optCargo, out cargoCapacity))
+                {
+                    Console.WriteLine("Error: --cargo wants a number (the hold's CarryWeight capacity)");
+                    return 1;
+                }
+                if (cargoCapacity <= 0)
+                {
+                    Console.WriteLine($"Error: --cargo capacity must be positive (got {cargoCapacity})");
+                    return 1;
+                }
+            }
+            if (optCargo != null && optEngine != null)
+            {
+                Console.WriteLine("Error: --cargo and --engine are different property sheets; pick one");
+                return 1;
             }
 
             EngineSpec? engine = null;
@@ -597,6 +629,26 @@ namespace FrankyCLI
                     new ObjectProperty() { ActorValue = SpaceshipPartMass, Value = partMass },
                     new ObjectProperty() { ActorValue = ShipModuleVariant, Value = partVariant },
                 };
+
+                if (optCargo != null)
+                {
+                    // A cargo GBFM carries THREE properties: CarryWeight, SpaceshipPartMass and
+                    // Health. Counted across all 91 vanilla SMS_Cargo records -- Health is 5 on
+                    // every one, and CarryWeight / SpaceshipPartMass runs 4.67 (min) 4.72 (median)
+                    // 6.10 (max), i.e. capacity is ~4.7x mass across the whole catalogue.
+                    //
+                    // The ratio is NOT applied here. It is the design guide for picking the
+                    // number; deriving capacity from mass would turn a measurement into a law and
+                    // take the choice away from the author, and vanilla itself spans 4.67-6.10.
+                    //
+                    // CarryWeight is the whole point of the part. Without it the record builds,
+                    // renders, snaps and paints, and the hold carries nothing -- a silent nothing,
+                    // which is the same shape as the Model.LightLayer gap and is why this is a
+                    // generator flag rather than a step someone has to remember.
+                    properties.Add(Prop(0x000002DC, cargoCapacity));   // CarryWeight
+                    properties.Add(Prop(0x000002D4, 5));               // Health (generic)
+                    Console.WriteLine("           cargo capacity " + cargoCapacity + " (CarryWeight), health 5");
+                }
 
                 if (engine != null)
                 {
