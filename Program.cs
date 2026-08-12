@@ -184,6 +184,7 @@ switch (mode)
     case "setcreated":
     case "setrotation":
     case "setbounds":
+    case "setobnd":
     case "setflipset":
     case "shiplightlist":
     case "renamescript":
@@ -348,6 +349,7 @@ static int RunLegacy(string mode, string[] args)
         "setcreated"         => gen_setcreated.Generate(arr),
         "setrotation"        => gen_setrotation.Generate(arr),
         "setbounds"          => gen_setbounds.Generate(arr),
+        "setobnd"            => gen_setobnd.Generate(arr),
         "setflipset"         => gen_setflipset.Generate(arr),
         "shiplightlist"      => gen_shiplightlist.Generate(arr),
         "renamescript"       => gen_renamescript.Generate(arr),
