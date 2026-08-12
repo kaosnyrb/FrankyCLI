@@ -1100,10 +1100,26 @@ namespace FrankyCLI
                     return null;
                 }
 
+                // A part bigger than one cell carries a node PER CELL PER FACE -- vanilla's 2x1
+                // hab ShipSnap_SMOD_Hab_Nova_LH-2L ships two Port, two Starboard, two Top and
+                // two Bottom, each with its OWN NodeID. So the same face may legitimately be
+                // given more than once, and only the first occurrence can keep the cube's id.
+                // The first keeping it is deliberate: a single-cell part regenerates unchanged.
+                uint chosenId = source.NodeID;
+                bool idTaken = false;
+                foreach (var n in template.Nodes) if (n.NodeID == chosenId) idTaken = true;
+                if (idTaken)
+                {
+                    uint nextId = template.NextNodeID ?? 0;
+                    foreach (var n in template.Nodes) if (n.NodeID >= nextId) nextId = n.NodeID + 1;
+                    chosenId = nextId;
+                    template.NextNodeID = nextId + 1;
+                }
+
                 template.Nodes.Add(new SnapNodeEntry()
                 {
                     Node = source.Node,
-                    NodeID = source.NodeID,
+                    NodeID = chosenId,
                     // A structural face's rotation IS the face, so an explicit one is almost
                     // certainly a mistake -- but honour it rather than silently ignore it.
                     Rotation = explicitRot ?? source.Rotation,
@@ -1116,6 +1132,17 @@ namespace FrankyCLI
                 Console.WriteLine("Error: --snap-nodes produced no nodes");
                 return null;
             }
+
+            // Print what was authored, face#id. A duplicate NodeID is invisible in the record and
+            // in the builder -- it silently cost every multi-cell part until 2026-08-12 -- so the
+            // ids are SHOWN rather than assumed, and a repeated face is legible at authoring time.
+            var faceOf = new Dictionary<uint, string>();
+            foreach (var kv in SnapFaceNodes) faceOf[kv.Value] = kv.Key;
+            foreach (var kv in SnapExtraNodes) faceOf[kv.Value] = kv.Key;
+            Console.WriteLine("  nodes: " + string.Join("  ", template.Nodes.Select(n =>
+                (faceOf.TryGetValue(n.Node.FormKey.ID, out var nm) ? nm : n.Node.FormKey.ID.ToString("X6"))
+                + "#" + n.NodeID)));
+
             return template;
         }
     }
