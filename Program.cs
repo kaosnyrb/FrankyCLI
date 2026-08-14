@@ -179,6 +179,7 @@ switch (mode)
     case "setname":
     case "setlightlayer":
     case "setcargo":
+    case "setmass":
     case "conform":
     case "setsnap":
     case "setcreated":
@@ -344,6 +345,7 @@ static int RunLegacy(string mode, string[] args)
         "setname"            => gen_setname.Generate(arr),
         "setlightlayer"      => gen_setlightlayer.Generate(arr),
         "setcargo"           => gen_setcargo.Generate(arr),
+        "setmass"            => gen_setmass.Generate(arr),
         "conform"            => gen_conform.Generate(arr),
         "setsnap"            => gen_setsnap.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),
