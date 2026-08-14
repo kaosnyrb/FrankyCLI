@@ -15,25 +15,49 @@ namespace FrankyCLI
     // built before that fix has none; this patches them in place WITHOUT moving a single FormID,
     // through Mutagen so all record/group sizes are recomputed and the file cannot be corrupted.
     //
-    //   setrecipefilter <modname> <category> <cobj_editorid> [<cobj_editorid> ...]
+    //   setrecipefilter <modname> [--replace] <category> <cobj_editorid> [<cobj_editorid> ...]
     //     category      Category keyword: EditorID (resolved) or 0xHEX FormID.
     //                   Bare hex is Starfield.esm-relative; an index byte targets that master.
     //     cobj_editorid one or more ConstructibleObject EditorIDs to patch.
+    //     --replace     make the category the ONLY filter: drop every other one first.
     //
     // Idempotent: a COBJ already carrying the category is left untouched and reported as such.
+    //
+    // WHY --replace EXISTS (added 2026-08-14, found by hitting it). RecipeFilters is a LIST and
+    // the only write here was .Add, because this tool was written to patch parts that had NO
+    // filter at all. That makes a WRONG category structurally uncorrectable: gen_shipstruct
+    // DEFAULTS to Category_ShipMod_Structure when --category is omitted, so a cargo part built
+    // without the flag carries Structure forever, and adding Cargo afterwards puts it on BOTH
+    // tabs -- a second builder row, which is the menu bloat his one-recipe-per-set ruling exists
+    // to avoid. Seen in the builder on atsd_co_cargolg_03 (the Drayman), not inferred.
+    //
+    // ⛔ AND THE SUBTLE HALF, which is why the idempotency check below is not shared: under
+    // --replace, "already carries the category" is the WRONG test. A COBJ holding
+    // [Structure, Cargo] does carry Cargo, so the plain check would report "left as is" and skip
+    // the exact record --replace was asked to fix -- a no-op wearing a success line. Under
+    // --replace the skip condition is therefore "carries this and NOTHING ELSE" (count == 1).
+    // Every dropped filter is named on the way out: removing something silently is worse than
+    // adding something silently, because nothing downstream will ever mention the absence.
     class gen_setrecipefilter
     {
         public static int Generate(string[] args)
         {
-            // args: [modname, "setrecipefilter", category, cobj1, cobj2, ...]
-            if (args.Length < 4)
+            // args: [modname, "setrecipefilter", category, cobj1, cobj2, ...] with --replace
+            // permitted anywhere after the mode -- stripped here so it can never be mistaken for
+            // a COBJ EditorID (a flag silently consumed as a target would fail loud on the name
+            // lookup, but a flag silently consumed as the CATEGORY would not).
+            var rest = args.Skip(2).ToList();
+            bool replace = rest.RemoveAll(a => string.Equals(a, "--replace", StringComparison.OrdinalIgnoreCase)) > 0;
+
+            if (args.Length < 4 || rest.Count < 2)
             {
-                Console.WriteLine("Usage: setrecipefilter <modname> <category(EditorID|0xHEX)> <cobj_editorid> [<cobj_editorid> ...]");
+                Console.WriteLine("Usage: setrecipefilter <modname> [--replace] <category(EditorID|0xHEX)> <cobj_editorid> [<cobj_editorid> ...]");
+                Console.WriteLine("  --replace  make the category the ONLY filter (drops every other one, naming each)");
                 return 1;
             }
             string modname = args[0];
-            string category = args[2];
-            var targets = args.Skip(3).ToList();
+            string category = rest[0];
+            var targets = rest.Skip(1).ToList();
 
             if (modname == "Starfield")
             {
@@ -110,15 +134,37 @@ namespace FrankyCLI
 
                     var co = existing.DeepCopy();
                     co.RecipeFilters ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
-                    if (co.RecipeFilters.Any(f => f.FormKey == categoryLink.FormKey))
+
+                    bool carries = co.RecipeFilters.Any(f => f.FormKey == categoryLink.FormKey);
+                    // Under --replace the goal is "this and nothing else", so carrying it is not
+                    // enough -- see the header note. Under append it is exactly the old test.
+                    bool satisfied = replace
+                        ? carries && co.RecipeFilters.Count == 1
+                        : carries;
+                    if (satisfied)
                     {
-                        Console.WriteLine($"  {name}: already carries {category} -- left as is");
+                        Console.WriteLine($"  {name}: already carries {category}"
+                                          + (replace ? " and nothing else" : "") + " -- left as is");
                         continue;
                     }
-                    co.RecipeFilters.Add(categoryLink);
+
+                    if (replace)
+                    {
+                        var dropped = co.RecipeFilters
+                            .Where(f => f.FormKey != categoryLink.FormKey)
+                            .Select(f => NameOfKeyword(f.FormKey, myMod, env.LoadOrder[0].Mod))
+                            .ToList();
+                        co.RecipeFilters.Clear();
+                        if (dropped.Count > 0)
+                            Console.WriteLine($"  {name}: dropped {dropped.Count} filter(s) -- {string.Join(", ", dropped)}");
+                    }
+                    if (!co.RecipeFilters.Any(f => f.FormKey == categoryLink.FormKey))
+                        co.RecipeFilters.Add(categoryLink);
+
                     myMod.ConstructibleObjects.Remove(existing.FormKey);
                     myMod.ConstructibleObjects.Add(co);
-                    Console.WriteLine($"  {name}: recipe filter set -> {category}");
+                    Console.WriteLine($"  {name}: recipe filter{(replace ? "s" : "")} set -> {category}"
+                                      + (replace ? " (sole filter)" : ""));
                     changed++;
                 }
             }
@@ -135,6 +181,20 @@ namespace FrankyCLI
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
             Console.WriteLine($"Finished -- {changed} record(s) patched, FormIDs unchanged.");
             return 0;
+        }
+
+        // Report a dropped filter by NAME, not by FormKey. Same two sources the category
+        // resolution above uses, in the same order (the mod shadows Starfield.esm); falls back
+        // to the raw FormKey rather than inventing a name, because an unresolvable filter is
+        // exactly the case someone needs to see verbatim.
+        private static string NameOfKeyword(FormKey key, IStarfieldMod mine, IStarfieldModGetter? vanilla)
+        {
+            foreach (var kw in mine.Keywords)
+                if (kw.FormKey == key && !string.IsNullOrEmpty(kw.EditorID)) return kw.EditorID!;
+            if (vanilla != null)
+                foreach (var kw in vanilla.Keywords)
+                    if (kw.FormKey == key && !string.IsNullOrEmpty(kw.EditorID)) return kw.EditorID!;
+            return key.ToString();
         }
     }
 }
