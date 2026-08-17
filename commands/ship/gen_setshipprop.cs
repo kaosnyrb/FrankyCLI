@@ -201,6 +201,18 @@ namespace FrankyCLI
             allowZero: false);
     }
 
+    class gen_setreactorhealth
+    {
+        // The FIFTH property gap, found 2026-08-17 diffing our Linesman against
+        // SMA_Reactor_AmunDunn_340T_Stellarator. It is the REACTOR SYSTEM's own health, which
+        // is a different number from the module's Health -- vanilla carries
+        // ShipSystemReactorHealth 25 AND Health 375 on the same record.
+        public static int Generate(string[] args) => ShipProp.Apply(args, 0x1EF0CA,
+            "ShipSystemReactorHealth",
+            "Vanilla A-class reactors carry 25, alongside a module Health of 375.",
+            allowZero: false);
+    }
+
     class gen_setcrew
     {
         public static int Generate(string[] args) => ShipProp.Apply(args, 0x019080,
