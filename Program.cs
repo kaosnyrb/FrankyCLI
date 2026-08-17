@@ -180,6 +180,7 @@ switch (mode)
     case "setlightlayer":
     case "setcargo":
     case "setmass":
+    case "setfuel":
     case "conform":
     case "setsnap":
     case "setcreated":
@@ -346,6 +347,7 @@ static int RunLegacy(string mode, string[] args)
         "setlightlayer"      => gen_setlightlayer.Generate(arr),
         "setcargo"           => gen_setcargo.Generate(arr),
         "setmass"            => gen_setmass.Generate(arr),
+        "setfuel"            => gen_setfuel.Generate(arr),
         "conform"            => gen_conform.Generate(arr),
         "setsnap"            => gen_setsnap.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),
