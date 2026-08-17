@@ -176,6 +176,32 @@ namespace FrankyCLI
                     }
                 chain["setCobj"] = Node(setCobjEid, setCobjKey, ("flst", setFlst));
 
+                // SNAP NODES -- emitted as FACTS (direction + offset per node); the ordering rule
+                // that grades them lives in Python, same seam as every other leg here.
+                //
+                // Added 2026-08-17 after the Fore/Aft label defect SHIPPED TWICE in seven days
+                // (cargosm_01 08-10, fuel_01 08-17), both caught by his eye on the glass and
+                // neither by any check. The direction table is gen_inspect's, REFERENCED rather
+                // than copied -- a face-name map open-coded twice is two places to get a flip
+                // wrong, and it is the very table the defect turned on.
+                var sntp = mod.SnapTemplates.FirstOrDefault(s => Eid(s.EditorID, prefix + "_sntp_" + item));
+                var snapNodes = new List<Dictionary<string, object?>>();
+                if (sntp != null)
+                    foreach (var n in sntp.Nodes)
+                    {
+                        var fid = n.Node.FormKey.ID;
+                        snapNodes.Add(new Dictionary<string, object?>
+                        {
+                            // null = a node this table does not name (equipment/weapon mounts are
+                            // the bulk of them). Reported as null rather than "?" so Python can
+                            // SKIP it explicitly instead of guessing at a face.
+                            ["dir"] = gen_inspect.SnapNodeDirections.TryGetValue(fid, out var dn) ? dn : null,
+                            ["nodeId"] = n.NodeID,
+                            ["offset"] = new[] { n.Offset.X, n.Offset.Y, n.Offset.Z },
+                        });
+                    }
+                chain["sntp"] = Node(sntp?.EditorID, sntp?.FormKey, ("nodes", snapNodes));
+
                 outp["ok"] = true;
                 return Emit(outp);
             }

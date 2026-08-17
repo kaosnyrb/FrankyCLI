@@ -1614,7 +1614,11 @@ namespace FrankyCLI
         /// point of dumping a SnapTemplate is checking a flipped variant's nodes got remapped,
         /// and a bare FormKey can't be eyeballed for that.
         /// </summary>
-        private static readonly Dictionary<uint, string> SnapNodeDirections = new()
+        /// Widened from `private` to `internal` 2026-08-17 so gen_checkpart can emit node
+        /// directions WITHOUT a second copy of this table. A face-name mapping open-coded in
+        /// two places is two places to get a flip wrong, and this is the exact table the
+        /// Fore/Aft defect turned on.
+        internal static readonly Dictionary<uint, string> SnapNodeDirections = new()
         {
             [0x0004AB6F] = "Fore",
             [0x0004AB70] = "Aft",
