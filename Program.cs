@@ -187,6 +187,7 @@ switch (mode)
     case "setcrew":
     case "setreactorhealth":
     case "setkeyword":
+    case "setcondition":
     case "conform":
     case "setsnap":
     case "setcreated":
@@ -360,6 +361,7 @@ static int RunLegacy(string mode, string[] args)
         "setcrew"            => gen_setcrew.Generate(arr),
         "setreactorhealth"   => gen_setreactorhealth.Generate(arr),
         "setkeyword"         => gen_setkeyword.Generate(arr),
+        "setcondition"       => gen_setcondition.Generate(arr),
         "conform"            => gen_conform.Generate(arr),
         "setsnap"            => gen_setsnap.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),

@@ -1182,16 +1182,81 @@ namespace FrankyCLI
         }
 
         private static void DumpConditionBrief(IConditionGetter cond, string indent)
+            => DumpConditionBrief(cond, indent, null);
+
+        /// <summary>
+        /// ⛔ THIS USED TO RENDER THE OPERATOR AND NOT THE PARAMETERS, and that is how a
+        /// _lvl10 ship recipe printed as `GetLevel >= 1.00` with nothing to say which level it
+        /// meant (2026-08-17, the reactor gating spike). Only TWO condition kinds -- GetGlobal
+        /// and GetStage -- were special-cased; every other function's parameters were simply
+        /// absent from the output, and an absent field prints as nothing, which reads as "this
+        /// condition has no parameters" rather than "this tool only knows two".
+        ///
+        /// Same shape as the SnapTemplate node table that printed "?" for 53 of 59 node kinds,
+        /// and the same fix: enumerate generically and fall back honestly. Parameters are read
+        /// by REFLECTION over the ConditionData's First/Second/Third parameter properties, so a
+        /// condition function this file has never heard of still renders its arguments.
+        /// </summary>
+        private static void DumpConditionBrief(IConditionGetter cond, string indent,
+                                               List<IStarfieldModGetter>? allMods)
         {
             string op  = cond.CompareOperator.ToString();
             string val = cond is IConditionFloatGetter cf ? cf.ComparisonValue.ToString("F2") : "?";
             string fn  = cond.Data?.GetType().Name ?? "?";
-            string extra = "";
-            if (cond.Data is IGetGlobalValueConditionDataGetter ggv)
-                extra = $" global={ggv.FirstParameter.Link.FormKey}";
-            else if (cond.Data is IGetStageConditionDataGetter gs)
-                extra = $" quest={gs.FirstParameter.Link.FormKey} stage={gs.SecondParameter}";
+
+            var parts = new List<string>();
+            if (cond.Data != null)
+            {
+                foreach (var prop in cond.Data.GetType().GetProperties())
+                {
+                    if (!prop.Name.EndsWith("Parameter", StringComparison.Ordinal)) continue;
+                    object? raw;
+                    try { raw = prop.GetValue(cond.Data); } catch { continue; }
+                    if (raw == null) continue;
+                    parts.Add($"{prop.Name.Replace("Parameter", "")}={DescribeParam(raw, allMods)}");
+                }
+                // RunOnType / Reference say WHOSE level or keyword is being tested, which is
+                // half the meaning of the condition and was also absent.
+                foreach (var name in new[] { "RunOnType", "Reference" })
+                {
+                    var prop = cond.Data.GetType().GetProperty(name);
+                    if (prop == null) continue;
+                    object? raw;
+                    try { raw = prop.GetValue(cond.Data); } catch { continue; }
+                    if (raw == null) continue;
+                    var s = DescribeParam(raw, allMods);
+                    if (!string.IsNullOrEmpty(s) && s != "Subject" && s != "Null")
+                        parts.Add($"{name}={s}");
+                }
+            }
+            string extra = parts.Count > 0 ? " " + string.Join(" ", parts) : "";
             Console.WriteLine($"{indent}{fn}{extra} {op} {val}  flags=0x{(byte)cond.Flags:X2}");
+        }
+
+        /// Render one condition parameter: resolve a FormLink to its EditorID where we can,
+        /// because a bare FormKey cannot be eyeballed for "is this the right perk".
+        private static string DescribeParam(object raw, List<IStarfieldModGetter>? allMods)
+        {
+            var t = raw.GetType();
+            var linkProp = t.GetProperty("Link");
+            if (linkProp != null)
+            {
+                var link = linkProp.GetValue(raw);
+                var fkProp = link?.GetType().GetProperty("FormKey");
+                if (fkProp?.GetValue(link) is FormKey fk)
+                {
+                    if (fk.IsNull) return "Null";
+                    var eid = ResolveEditorIdOnly(fk, allMods);
+                    return string.IsNullOrEmpty(eid) || eid == "?" ? fk.ToString() : $"{eid} [{fk}]";
+                }
+            }
+            if (raw is FormKey k)
+            {
+                if (k.IsNull) return "Null";
+                var eid = ResolveEditorIdOnly(k, allMods);
+                return string.IsNullOrEmpty(eid) || eid == "?" ? k.ToString() : $"{eid} [{k}]";
+            }
+            return raw.ToString() ?? "?";
         }
 
         private static void DumpDialogBranch(IDialogBranchGetter branch)
@@ -2492,7 +2557,7 @@ namespace FrankyCLI
             {
                 Console.WriteLine($"  Conditions [{co.Conditions.Count}]:");
                 foreach (var cond in co.Conditions)
-                    DumpConditionBrief(cond, "    ");
+                    DumpConditionBrief(cond, "    ", allMods);
             }
             Console.WriteLine();
         }
