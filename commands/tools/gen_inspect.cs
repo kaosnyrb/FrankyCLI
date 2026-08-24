@@ -1,6 +1,7 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Starfield;
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,7 @@ namespace FrankyCLI
             int found = 0;
             foreach (var mod in allMods)
             {
-                found += InspectRecordType(mod, recordType, search, allMods);
+                found += InspectRecordType(mod, recordType, search, allMods, env.LinkCache);
             }
 
             if (found == 0)
@@ -113,7 +114,7 @@ namespace FrankyCLI
             return 0;
         }
 
-        private static int InspectRecordType(IStarfieldModGetter mod, string recordType, string search, List<IStarfieldModGetter>? allMods = null)
+        private static int InspectRecordType(IStarfieldModGetter mod, string recordType, string search, List<IStarfieldModGetter>? allMods = null, ILinkCache? cache = null)
         {
             int found = 0;
             switch (recordType.ToLowerInvariant())
@@ -138,17 +139,17 @@ namespace FrankyCLI
                         foreach (var subBlock in block.SubBlocks)
                             foreach (var cell in subBlock.Cells)
                                 if (MatchesSearch(cell.EditorID, cell.FormKey, search))
-                                { DumpCell(cell); found++; }
+                                { DumpCell(cell, cache); found++; }
                     // Also search worldspace subcells and TopCells
                     foreach (var ws in mod.Worldspaces)
                     {
                         if (ws.TopCell != null && MatchesSearch(ws.TopCell.EditorID, ws.TopCell.FormKey, search))
-                        { Console.Write($"  [Worldspace TopCell: {ws.EditorID}] "); DumpCell(ws.TopCell); found++; }
+                        { Console.Write($"  [Worldspace TopCell: {ws.EditorID}] "); DumpCell(ws.TopCell, cache); found++; }
                         foreach (var wsBlock in ws.SubCells)
                             foreach (var wsSubBlock in wsBlock.Items)
                                 foreach (var cell in wsSubBlock.Items)
                                     if (MatchesSearch(cell.EditorID, cell.FormKey, search))
-                                    { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell); found++; }
+                                    { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell, cache); found++; }
                     }
                     break;
                 case "refr_xflg":
@@ -393,6 +394,11 @@ namespace FrankyCLI
                                 Console.WriteLine($"  Rotation:             {po.Rotation}");
                                 Console.WriteLine($"  Scale:                {po.Scale}");
                                 Console.WriteLine($"  Cell:                 {cell.FormKey} {cell.EditorID}");
+                                // Linked references were absent from this renderer entirely, which is
+                                // worse than it sounds: a REFR that HAS them rendered identically to one
+                                // that does not, so the view could not distinguish wired from unwired.
+                                // (2026-08-24: 0F3287 carried two and this printed none.)
+                                DumpLinkedRefs(po, cache, "  ");
                                 found++;
                             }
                         }
@@ -693,7 +699,85 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
-        private static void DumpCell(ICellGetter cell)
+        /// Resolve a FormKey to its EditorID for display. Returns "" when the cache cannot
+        /// name it -- an unnamed record is normal (most PlacedObjects have no EditorID), so
+        /// this must never present a miss as an error.
+        private static string NameOf(FormKey key, ILinkCache? cache)
+        {
+            if (key.IsNull || cache == null) return "";
+            // The typed resolve, NOT TryResolveIdentifier -- Mutagen marks the identifier
+            // overload obsolete ("not as optimized ... use as a last resort") and this runs
+            // once per cell entry and once per linked ref, which on a 32-object hab interior
+            // is dozens of lookups per dump.
+            return cache.TryResolve<IStarfieldMajorRecordGetter>(key, out var rec)
+                   && !string.IsNullOrEmpty(rec!.EditorID)
+                ? rec.EditorID! : "";
+        }
+
+        /// The linked-reference block, in ONE place. Both cell-entry lists and the refr
+        /// renderer call it, so a REFR's links can never again be visible from one view and
+        /// invisible from another.
+        private static void DumpLinkedRefs(IPlacedObjectGetter po, ILinkCache? cache, string indent)
+        {
+            if (po.LinkedReferences == null || po.LinkedReferences.Count == 0) return;
+            Console.WriteLine($"{indent}    LinkedReferences: [{po.LinkedReferences.Count}]");
+            foreach (var lr in po.LinkedReferences)
+            {
+                var kw = lr.KeywordOrReference.FormKey;
+                var rf = lr.Reference.FormKey;
+                string kwName = NameOf(kw, cache), rfName = NameOf(rf, cache);
+                Console.WriteLine($"{indent}      {(kwName.Length > 0 ? kwName : "(unnamed)")} [{kw}]"
+                                  + $" -> {rf}{(rfName.Length > 0 ? " " + rfName : "")}");
+            }
+        }
+
+        /// ONE renderer for a cell entry, called by BOTH the persistent and temporary lists.
+        /// ⛔ THEY WERE TWO HAND-WRITTEN LOOPS AND THEY HAD DIVERGED: the persistent one
+        /// rendered MapMarker, TeleportDestination and LinkedReferences; the temporary one
+        /// rendered a single summary line. So a temporary entry's links were INVISIBLE, and
+        /// an absence in the view was indistinguishable from an absence in the plugin --
+        /// found 2026-08-24 when a screenshot proved a temporary REFR carried two links this
+        /// dump showed none of. Extracted rather than copied: a rule open-coded in N places
+        /// is N bugs, and fixing the first makes the rest invisible.
+        private static void DumpCellEntry(IPlacedGetter entry, ILinkCache? cache)
+        {
+            if (entry is IPlacedObjectGetter po)
+            {
+                string baseName = NameOf(po.Base.FormKey, cache);
+                Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID}"
+                                  + $" Base={po.Base.FormKey}{(baseName.Length > 0 ? " " + baseName : "")}"
+                                  + $" Pos={po.Position} Rot={po.Rotation}");
+                if (po.MapMarker != null)
+                {
+                    var mm = po.MapMarker;
+                    Console.WriteLine($"      MapMarker:");
+                    Console.WriteLine($"        Flags:   {mm.Flags}");
+                    Console.WriteLine($"        Name:    {mm.Name}");
+                    Console.WriteLine($"        Type:    {mm.Type}");
+                    Console.WriteLine($"        Unknown: {mm.Unknown}");
+                    if (mm.UNAM != null) Console.WriteLine($"        UNAM:    {mm.UNAM}");
+                    if (mm.VNAM != null) Console.WriteLine($"        VNAM:    {mm.VNAM}");
+                    if (mm.VISI != null) Console.WriteLine($"        VISI:    {mm.VISI}");
+                }
+                if (po.TeleportDestination != null)
+                {
+                    var td = po.TeleportDestination;
+                    Console.WriteLine($"      TeleportDestination:");
+                    Console.WriteLine($"        Door:              {td.Door.FormKey}");
+                    Console.WriteLine($"        TransitionInterior:{td.TransitionInterior.FormKey}");
+                    Console.WriteLine($"        Position:          {td.Position}");
+                    Console.WriteLine($"        Rotation:          {td.Rotation}");
+                    Console.WriteLine($"        Flags:             {td.Flags}");
+                }
+                DumpLinkedRefs(po, cache, "  ");
+            }
+            else if (entry is IPlacedNpcGetter npc)
+                Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
+            else
+                Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
+        }
+
+        private static void DumpCell(ICellGetter cell, ILinkCache? cache = null)
         {
             Console.WriteLine($"--- Cell ---");
             Console.WriteLine($"  FormKey:  {cell.FormKey}");
@@ -707,44 +791,7 @@ namespace FrankyCLI
             {
                 Console.WriteLine("  Persistent entries:");
                 foreach (var entry in cell.Persistent.Take(200))
-                {
-                    if (entry is IPlacedObjectGetter po)
-                    {
-                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}");
-                        if (po.MapMarker != null)
-                        {
-                            var mm = po.MapMarker;
-                            Console.WriteLine($"      MapMarker:");
-                            Console.WriteLine($"        Flags:   {mm.Flags}");
-                            Console.WriteLine($"        Name:    {mm.Name}");
-                            Console.WriteLine($"        Type:    {mm.Type}");
-                            Console.WriteLine($"        Unknown: {mm.Unknown}");
-                            if (mm.UNAM != null) Console.WriteLine($"        UNAM:    {mm.UNAM}");
-                            if (mm.VNAM != null) Console.WriteLine($"        VNAM:    {mm.VNAM}");
-                            if (mm.VISI != null) Console.WriteLine($"        VISI:    {mm.VISI}");
-                        }
-                        if (po.TeleportDestination != null)
-                        {
-                            var td = po.TeleportDestination;
-                            Console.WriteLine($"      TeleportDestination:");
-                            Console.WriteLine($"        Door:              {td.Door.FormKey}");
-                            Console.WriteLine($"        TransitionInterior:{td.TransitionInterior.FormKey}");
-                            Console.WriteLine($"        Position:          {td.Position}");
-                            Console.WriteLine($"        Rotation:          {td.Rotation}");
-                            Console.WriteLine($"        Flags:             {td.Flags}");
-                        }
-                        if (po.LinkedReferences != null && po.LinkedReferences.Count > 0)
-                        {
-                            Console.WriteLine($"      LinkedReferences: [{po.LinkedReferences.Count}]");
-                            foreach (var lr in po.LinkedReferences)
-                                Console.WriteLine($"        KeywordOrRef={lr.KeywordOrReference.FormKey} Ref={lr.Reference.FormKey}");
-                        }
-                    }
-                    else if (entry is IPlacedNpcGetter npc)
-                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
-                    else
-                        Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
-                }
+                    DumpCellEntry(entry, cache);
                 if (cell.Persistent.Count > 200)
                     Console.WriteLine($"    ... and {cell.Persistent.Count - 200} more");
             }
@@ -753,14 +800,7 @@ namespace FrankyCLI
             {
                 Console.WriteLine("  Temporary entries:");
                 foreach (var entry in cell.Temporary)
-                {
-                    if (entry is IPlacedObjectGetter po)
-                        Console.WriteLine($"    PlacedObject {po.FormKey} EditorID={po.EditorID} Base={po.Base.FormKey} Pos={po.Position} Rot={po.Rotation}");
-                    else if (entry is IPlacedNpcGetter npc)
-                        Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
-                    else
-                        Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
-                }
+                    DumpCellEntry(entry, cache);
             }
             Console.WriteLine();
         }
@@ -2553,6 +2593,23 @@ namespace FrankyCLI
             Console.WriteLine($"  MenuSortOrder:    {co.MenuSortOrder}");
             Console.WriteLine($"  LearnMethod:      {co.LearnMethod}");
             Console.WriteLine($"  Value:            {co.Value}");
+            Console.WriteLine($"  Tier:             {co.Tier}");
+            // ⛔ RQPK WAS RENDERED NOWHERE AT ALL, and that is how a whole gating mechanism
+            // stayed invisible on 2026-08-17. A COBJ's skill requirement is NOT a condition and
+            // is NOT on the perk record -- it is `Required Perks` on the recipe itself, two
+            // fields below the Conditions this dumper did print. HE found it in xEdit; nothing
+            // here could have. Third instance in one day of "an absent field prints as nothing,
+            // and nothing is invisible in a dump".
+            if (co.RequiredPerks != null && co.RequiredPerks.Count > 0)
+            {
+                Console.WriteLine($"  RequiredPerks [{co.RequiredPerks.Count}]:");
+                foreach (var rp in co.RequiredPerks)
+                {
+                    var eid = ResolveEditorIdOnly(rp.Perk.FormKey, allMods);
+                    var curve = rp.CurveTable.IsNull ? "" : $"  curve={ResolveEditorIdOnly(rp.CurveTable.FormKey, allMods)}";
+                    Console.WriteLine($"    {eid} [{rp.Perk.FormKey}]  rank {rp.Rank}{curve}");
+                }
+            }
             if (co.Conditions != null && co.Conditions.Count > 0)
             {
                 Console.WriteLine($"  Conditions [{co.Conditions.Count}]:");

@@ -87,6 +87,42 @@ namespace FrankyCLI
             //                              Omit --engine on the variant and it falls back to the
             //                              plain 2-property sheet with no ShipModuleClass keyword,
             //                              which is what vanilla structural parts carry.
+            //   --mstt-only                build ONLY the MoveableStatic + SnapTemplate. The Cell,
+            //                              PackIn, GenericBaseForm and ConstructibleObject are all
+            //                              skipped. THE EXACT COMPLEMENT OF --reuse-packin, and it
+            //                              exists for the case --reuse-packin cannot serve: the CK
+            //                              clones a VANILLA part's GBFM and PackIns far more
+            //                              cheaply than this can author them, so for a class this
+            //                              generator does not model (a HAB carries TWO PackIns --
+            //                              SpaceshipLinkedExterior AND SpaceshipLinkedInterior --
+            //                              and nothing here writes the second), the honest split
+            //                              is to author the half that is ours and let the editor
+            //                              clone the half that is Bethesda's.
+            //                              CONFORM IS DELIBERATELY SKIPPED, and that is SAFE
+            //                              rather than an omission: its two unauthorable fields
+            //                              live on the GBFM (STRV) and on the PackIn's cell (the
+            //                              XCLL tail word = 3), neither of which this path
+            //                              authors -- and a CLONED VANILLA record already carries
+            //                              both, because it shipped and it renders. The two
+            //                              fields that ARE load-bearing here (Model.LightLayer = 1
+            //                              and Flags.HasFirstPersonModel) sit on the
+            //                              MoveableStatic and are authored below as normal.
+            //   --no-snap                  author SnapTemplate = Null on the MoveableStatic.
+            //                              THE DEFAULT IS NOT NEUTRAL: with no --snap and no
+            //                              --snap-nodes this generator assigns the canonical
+            //                              cube (0x00059B01), so every part it has ever built
+            //                              carries six faces whether anyone chose them or not.
+            //                              That is right for a STRUCTURAL part -- vanilla's own
+            //                              SMOD_Struct_Deimos_Hull_A carries exactly that link
+            //                              -- and WRONG for a HAB, which decomposes its snap
+            //                              topology into six PLUG MoveableStatics placed in the
+            //                              exterior PackIn's cell, each carrying its own
+            //                              single-face SnapTemplate (SMOD_Plug_Deimos_Top at
+            //                              0,0,+1.75 and its five siblings). The hab shell
+            //                              itself is SnapTemplate Null; giving it the cube
+            //                              would put a second set of faces on top of the plugs'.
+            //                              Pairs with --mstt-only: clone the cell, get the six
+            //                              plugs and their snaps, and leave the shell bare.
             //   --cargo <capacity>         make this part a CARGO hold: adds CarryWeight (the
             //                              capacity) and Health to the 2-property sheet. Counted
             //                              across all 91 vanilla SMS_Cargo GBFMs -- Health is 5 on
@@ -126,6 +162,7 @@ namespace FrankyCLI
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
             string? optVariant = null, optCargo = null;
+            bool optMsttOnly = false, optNoSnap = false;
             for (int i = 5; i < args.Length; i++)
             {
                 bool hasValue = i + 1 < args.Length;
@@ -143,6 +180,8 @@ namespace FrankyCLI
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
                     case "--desc": if (!hasValue) { Console.WriteLine("Error: --desc needs a value"); return 1; } optDesc = args[++i]; break;
                     case "--reuse-packin": if (!hasValue) { Console.WriteLine("Error: --reuse-packin needs a value"); return 1; } optReusePackin = args[++i]; break;
+                    case "--mstt-only": optMsttOnly = true; break;
+                    case "--no-snap": optNoSnap = true; break;
                     default: Console.WriteLine("Error: unknown option " + args[i]); return 1;
                 }
             }
@@ -162,6 +201,54 @@ namespace FrankyCLI
                     Console.WriteLine("Error: " + string.Join(", ", ignored)
                         + " configure the MoveableStatic/SnapTemplate, which --reuse-packin does not author."
                         + " They belong on the run that built the original part.");
+                    return 1;
+                }
+            }
+
+            // --mstt-only is the exact complement of --reuse-packin, so its guard is the exact
+            // mirror: it authors neither the GenericBaseForm nor the ConstructibleObject, so
+            // every flag that configures those must REFUSE rather than be silently ignored.
+            // Same reasoning as above -- a flag that appears to work is worse than one that errors.
+            // --no-snap and --snap/--snap-nodes are a direct contradiction: one says author no
+            // template, the others say author this one. Refuse rather than let precedence
+            // decide it silently -- whichever way it fell, half the callers would be wrong and
+            // the record would look deliberate either way.
+            if (optNoSnap && (optSnap != null || optSnapNodes != null))
+            {
+                Console.WriteLine("Error: --no-snap contradicts "
+                    + (optSnap != null ? "--snap" : "--snap-nodes")
+                    + ". One says author no SnapTemplate, the other says author that one. Pick one.");
+                return 1;
+            }
+            if (optNoSnap && optReusePackin != null)
+            {
+                Console.WriteLine("Error: --no-snap configures the MoveableStatic,"
+                    + " which --reuse-packin does not author.");
+                return 1;
+            }
+
+            if (optMsttOnly && optReusePackin != null)
+            {
+                Console.WriteLine("Error: --mstt-only and --reuse-packin are opposites."
+                    + " --mstt-only builds the MoveableStatic + SnapTemplate and nothing else;"
+                    + " --reuse-packin builds the GBFM + COBJ and nothing else. Pick one.");
+                return 1;
+            }
+            if (optMsttOnly)
+            {
+                var ignored = new List<string>();
+                if (optCargo != null) ignored.Add("--cargo");
+                if (optEngine != null) ignored.Add("--engine");
+                if (optMass != null) ignored.Add("--mass");
+                if (optVariant != null) ignored.Add("--variant");
+                if (optName != null) ignored.Add("--name");
+                if (optDesc != null) ignored.Add("--desc");
+                if (optCategory != null) ignored.Add("--category");
+                if (ignored.Count > 0)
+                {
+                    Console.WriteLine("Error: " + string.Join(", ", ignored)
+                        + " configure the GenericBaseForm/ConstructibleObject, which --mstt-only does not author."
+                        + " They belong on the record you clone in the Creation Kit.");
                     return 1;
                 }
             }
@@ -263,7 +350,9 @@ namespace FrankyCLI
                 // announce records it did not build -- output is documentation, and a log that
                 // claims a record was created is as false as a doc that describes a field that
                 // does not exist. (It printed exactly that lie once before this was moved.)
-                PackIn packin;
+                // Nullable since --mstt-only authors no PackIn at all. It is read only inside
+                // the GBFM/COBJ tail, which that same flag skips, so the null cannot escape.
+                PackIn? packin = null;
                 if (optReusePackin != null)
                 {
                     var reused = myMod.PackIns.FirstOrDefault(
@@ -378,6 +467,10 @@ namespace FrankyCLI
                     First = boundsFirst,
                     Second = boundsSecond
                 };
+                // SetToNull rather than skipping the assignment: the property is not optional
+                // on the record, so what is being authored here is an explicit Null -- the same
+                // shape vanilla's own hab shells carry -- never an absent field.
+                if (optNoSnap) snaplink.SetToNull();
                 moveableStatic.SnapTemplate = snaplink;
                 moveableStatic.Model = new Model()
                 {
@@ -411,6 +504,20 @@ namespace FrankyCLI
                 };
                 myMod.MoveableStatics.Add(moveableStatic);
 
+                // ---- --mstt-only stops HERE ---------------------------------------------
+                // Above this line is ours (the model, its swaps, its snap table); below it is
+                // the record scaffolding the Creation Kit clones more cheaply from vanilla.
+                // The log line sits INSIDE the branch for the same reason the --reuse-packin
+                // one does: output is documentation, and a run must not announce a record it
+                // did not build.
+                if (optMsttOnly)
+                {
+                    Console.WriteLine("--mstt-only : Cell, PackIn, GenericBaseForm and ConstructibleObject NOT authored");
+                    Console.WriteLine("              clone them in the CK and point the exterior PackIn at "
+                                      + prefix + "_ms_" + item);
+                }
+                else
+                {
 
                 //Cell---------------------------
 
@@ -606,7 +713,20 @@ namespace FrankyCLI
                 };
                 myMod.PackIns.Add(packin);
 
+                }   // end of the Cell+PackIn half (skipped entirely by --mstt-only)
+
                 }   // end of the full-build path (skipped entirely by --reuse-packin)
+
+                // The condition is `packin != null` rather than `!optMsttOnly` DELIBERATELY: this
+                // tail's whole dependency on the half above it is the PackIn it links the GBFM to
+                // (SpaceshipLinkedExterior, below), so testing for the thing it needs states the
+                // real precondition where testing the flag only states the reason it might be
+                // missing. Exactly equivalent on all three paths -- --reuse-packin assigns it and
+                // refuses on a miss, the full build assigns it, --mstt-only leaves it null -- and
+                // it is what lets the compiler prove the deref below, so the null cannot escape
+                // without a null-forgiving `!` that a later edit would silently invalidate.
+                if (packin != null)
+                {
 
                 //Generic Base Form -------------------------------------------
                 IFormLinkNullable<IGenericBaseFormTemplateGetter> FormSpaceshipModule = new FormKey(env.LoadOrder[0].ModKey, 0x0003058E).ToNullableLink<IGenericBaseFormTemplateGetter>();
@@ -786,6 +906,9 @@ namespace FrankyCLI
                 };
 
                 myMod.ConstructibleObjects.Add(co);
+
+                }   // end of the GBFM+COBJ tail (skipped entirely by --mstt-only)
+
                 // Finish up ---------------------------------------------
             }
 
@@ -806,7 +929,11 @@ namespace FrankyCLI
             // --reuse-packin authors no Cell of its own (it shares the donor's), so there is
             // nothing to conform on that path -- the GBFM is still ours, but its cell is the
             // donor's and already correct.
-            if (optReusePackin == null)
+            // --mstt-only authors neither the GBFM nor a Cell, which are the only two records
+            // conform touches -- so there is nothing here for it to write, and its
+            // "no GenericBaseForm ... nothing written" refusal would be a FALSE alarm rather
+            // than a finding. A cloned vanilla record carries both fields already.
+            if (optReusePackin == null && !optMsttOnly)
             {
                 Console.WriteLine("Conforming (the fields Mutagen cannot author):");
                 if (gen_conform.Apply(datapath + "\\" + modname + ".esm", prefix, item, verbose: true) != 0)

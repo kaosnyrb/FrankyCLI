@@ -188,7 +188,11 @@ switch (mode)
     case "setreactorhealth":
     case "setkeyword":
     case "setcondition":
+    case "setrequiredperk":
     case "conform":
+    case "setedid":
+    case "setlinks":
+    case "placeprim":
     case "setsnap":
     case "setcreated":
     case "setrotation":
@@ -362,8 +366,12 @@ static int RunLegacy(string mode, string[] args)
         "setreactorhealth"   => gen_setreactorhealth.Generate(arr),
         "setkeyword"         => gen_setkeyword.Generate(arr),
         "setcondition"       => gen_setcondition.Generate(arr),
+        "setrequiredperk"    => gen_setrequiredperk.Generate(arr),
         "conform"            => gen_conform.Generate(arr),
         "setsnap"            => gen_setsnap.Generate(arr),
+        "setlinks"           => gen_setlinks.Generate(arr),
+        "placeprim"          => gen_placeprim.Generate(arr),
+        "setedid"            => gen_setedid.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),
         "setrotation"        => gen_setrotation.Generate(arr),
         "setbounds"          => gen_setbounds.Generate(arr),
