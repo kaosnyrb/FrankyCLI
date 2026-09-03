@@ -19,7 +19,27 @@ namespace FrankyCLI
     //            `PackInatsdpknwing04StorageCell` after. 47 of this mod's 49 cells carry the
     //            second form and the two that do not are exactly the two parts that have never
     //            been through the editor. A name that changes under a save is not an address.
-    //   <base>   a base EditorID in <modname>, or 0xFORMID for anything else.
+    //   <base>   a base EditorID in <modname>, or 0xFORMID for anything else in <modname>,
+    //            or <plugin>:0xFORMID for a form in ANOTHER plugin -- e.g.
+    //            Starfield.esm:0x187750 (ShipLandEngMarkerShort01).
+    //
+    // ⭐ THE CROSS-PLUGIN FORM EXISTS BECAUSE A LANDING GEAR NEEDS IT (2026-09-03). Vanilla's own
+    // lander PackIns place a VANILLA Static -- ShipLandEngMarkerShort01, the floor marker every
+    // gear has -- inside the part's cell, alongside the mod's own statics. Both lookups here
+    // searched myMod only, so there was no way to author that at all; the part built clean and
+    // was missing a piece of furniture every other gear in the game has. His catch, from the
+    // builder, in one line.
+    //
+    // ⛔ IT IS AN EXPLICIT SYNTAX AND NOT A FALLBACK, DELIBERATELY. The obvious cheap version is
+    // "if the id is not in myMod, try the load order" -- and that silently converts a TYPO in a
+    // local FormID into a placement of whatever vanilla record happens to share those bytes.
+    // A wrong base placed successfully is exactly the failure this tool's duplicate guard exists
+    // to prevent, one layer up. Naming the plugin costs eleven characters and cannot misfire.
+    //
+    // ⚠ NO NEW MASTER IS ADDED BY DESIGN, AND IT IS NOT CHECKED HERE: every plugin this tool can
+    // open already masters Starfield.esm, and a cross-plugin reference to anything else would
+    // need a master the caller has not declared. If that ever comes up it wants a real check,
+    // not this comment -- said plainly rather than left as an assumption nobody wrote down.
     //
     // WHY THIS EXISTS. A convex hull cannot have a hole in it, and it cannot have a CROOK either:
     // convexity forces the space between two limbs to be filled, so no single hull can wrap a
@@ -196,7 +216,46 @@ namespace FrankyCLI
                 // they reach the cast, so a guards-only test would have passed over it.
                 FormKey? baseKey = null;
                 string baseKind = "";
-                if (baseName.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                var colon = baseName.IndexOf(':');
+                if (colon > 0 && baseName.Substring(colon + 1)
+                        .StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                {
+                    // <plugin>:0xFORMID -- a form in another plugin, named explicitly.
+                    var plugin = baseName.Substring(0, colon);
+                    var hex = baseName.Substring(colon + 3);
+                    if (!uint.TryParse(hex, System.Globalization.NumberStyles.HexNumber,
+                                       null, out var rawOther))
+                    {
+                        Console.WriteLine("Error: '" + baseName + "' -- '" + hex + "' is not a hex FormID");
+                        return 1;
+                    }
+                    if (!ModKey.TryFromFileName(plugin, out var otherKey))
+                    {
+                        Console.WriteLine("Error: '" + plugin + "' is not a plugin filename"
+                                          + " (want e.g. Starfield.esm:0x187750)");
+                        return 1;
+                    }
+                    if (!env.LoadOrder.ModExists(otherKey))
+                    {
+                        Console.WriteLine("Error: plugin '" + plugin + "' is not in the load order");
+                        return 1;
+                    }
+                    var otherMod = env.LoadOrder.PriorityOrder
+                        .FirstOrDefault(m => m.ModKey == otherKey)?.Mod;
+                    var okey = new FormKey(otherKey, rawOther & 0x00FFFFFF);
+                    var found = otherMod?.EnumerateMajorRecords()
+                        .FirstOrDefault(r => r.FormKey == okey);
+                    if (found == null)
+                    {
+                        Console.WriteLine("Error: FormID 0x" + hex + " is not a record in " + plugin);
+                        return 1;
+                    }
+                    baseKey = okey;
+                    baseKind = found.GetType().Name.Replace("BinaryOverlay", "")
+                               + " '" + (found.EditorID ?? "<no edid>") + "' in " + plugin
+                               + " (cross-plugin -- placeability NOT checked)";
+                }
+                else if (baseName.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!uint.TryParse(baseName.Substring(2), System.Globalization.NumberStyles.HexNumber,
                                        null, out var raw))
