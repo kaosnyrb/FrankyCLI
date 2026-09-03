@@ -142,6 +142,47 @@ namespace FrankyCLI
             //                                health   engine + EM health   (default 64)
             //                                speed    max forward speed    (default by class)
             //                              e.g. --engine "class=A,force=5200,thruster=1000,power=2,health=70"
+            //   --shield <k=v,...>         make this part a SHIELD generator: swaps the
+            //                              2-property GBFM sheet for the full 12-property shield
+            //                              sheet and adds the ShipModuleClass<X> keyword. Keys:
+            //                                class     A|B|C           (required)
+            //                                health    ShieldHealth    (required -- the dial)
+            //                                mass      SpaceshipPartMass (required; it is part of
+            //                                          the balance check below, so it is not left
+            //                                          to --mass, which defaults silently to 5)
+            //                                power     shield power slots       (default 3)
+            //                                syshealth ShipSystemShieldsHealth   (default health/6)
+            //                              e.g. --shield "class=A,health=310,mass=23,power=3,syshealth=50"
+            //                              Mutually exclusive with --cargo and --engine.
+            //
+            // A SHIELD'S SHEET IS SIX CONSTANTS AND TWO DIALS, so the constants are written from
+            // the CLASS rather than accepted as parameters. Measured 2026-09-03 over the 90
+            // PURCHASABLE vanilla shield GBFMs in the load order (51 class A, 20 B, 19 C -- the
+            // levelled ladders plus the rare Experimentals), and within a class there is NO
+            // variation at all: ShieldRegenRate, ShieldRegenRateNonCombat, SpaceshipCrewRating
+            // 0.5, generic Health 5, ShieldVolatileHealth 0 and ShipSystemDamageWeightShield 1.
+            // A dial with one correct value per class is not a dial. The one excluded record and
+            // why it has to be are documented on ShieldSpec.Ceiling below.
+            //
+            // Two further identities hold on all 91 records including the excluded one, and are
+            // enforced here rather than left to the caller: ShieldHealth == ShieldMaxHealth, and
+            // ShipSystemShieldsHealth == ShipSystemShieldsEMHealth.
+            //
+            // ⭐ VANILLA PUTS THE CLASS IN THE EDITORID, NOT ONLY IN A KEYWORD --
+            // SMA_/SMB_/SMC_Shields_<mfr>_<name>_lvlNN. That is why a search for "SMS_Shield"
+            // returns four records from a Creation and none of the base game's; the SMS_ prefix
+            // that every other module class uses does not apply to shields. The class prefix is a
+            // naming convention, and we still carry ShipModuleClass<X>, which is what the builder
+            // actually gates on.
+            //
+            // ⛔ AND THE LEVEL GATE IS NOT IN THE GBFM AT ALL. The _lvlNN in a vanilla EditorID is
+            // a LABEL; the real gate is a GetLevel condition on the COBJ, and the two do not even
+            // agree -- co_SMA_Shields_Sextant_Deflector_SG-30_Set_lvl18 gates at >= 14. A part
+            // built here is UNGATED. That is a product decision (his, 2026-09-03: "people want to
+            // see the parts on new characters"), and its consequence is enforced below: an
+            // ungated part must land at the BOTTOM of its class, or it is the SAL-6830 break --
+            // the strictly-best thing available at level 1, which does not win, it deletes the
+            // tier under it. Use `setcondition` if you ever want a gate.
             //
             // ENGINE STATS ARE STORED PER POWER. SpaceshipEnginePartForce and
             // SpaceshipThrusterPartForce hold the per-power value; the ship builder shows
@@ -161,7 +202,7 @@ namespace FrankyCLI
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
-            string? optVariant = null, optCargo = null;
+            string? optVariant = null, optCargo = null, optShield = null;
             bool optMsttOnly = false, optNoSnap = false;
             for (int i = 5; i < args.Length; i++)
             {
@@ -176,6 +217,7 @@ namespace FrankyCLI
                     case "--engine": if (!hasValue) { Console.WriteLine("Error: --engine needs a value"); return 1; } optEngine = args[++i]; break;
                     case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
                     case "--cargo": if (!hasValue) { Console.WriteLine("Error: --cargo needs a value"); return 1; } optCargo = args[++i]; break;
+                    case "--shield": if (!hasValue) { Console.WriteLine("Error: --shield needs a value"); return 1; } optShield = args[++i]; break;
                     case "--variant": if (!hasValue) { Console.WriteLine("Error: --variant needs a value"); return 1; } optVariant = args[++i]; break;
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
                     case "--desc": if (!hasValue) { Console.WriteLine("Error: --desc needs a value"); return 1; } optDesc = args[++i]; break;
@@ -239,6 +281,7 @@ namespace FrankyCLI
                 var ignored = new List<string>();
                 if (optCargo != null) ignored.Add("--cargo");
                 if (optEngine != null) ignored.Add("--engine");
+                if (optShield != null) ignored.Add("--shield");
                 if (optMass != null) ignored.Add("--mass");
                 if (optVariant != null) ignored.Add("--variant");
                 if (optName != null) ignored.Add("--name");
@@ -270,10 +313,20 @@ namespace FrankyCLI
                     return 1;
                 }
             }
-            if (optCargo != null && optEngine != null)
+            // The three module-class flags are three different PropertySheets, not three sets of
+            // fields that compose. Named individually so one run reports every clash rather than
+            // the first one found.
             {
-                Console.WriteLine("Error: --cargo and --engine are different property sheets; pick one");
-                return 1;
+                var sheets = new List<string>();
+                if (optCargo != null) sheets.Add("--cargo");
+                if (optEngine != null) sheets.Add("--engine");
+                if (optShield != null) sheets.Add("--shield");
+                if (sheets.Count > 1)
+                {
+                    Console.WriteLine("Error: " + string.Join(" and ", sheets)
+                        + " are different property sheets; pick one");
+                    return 1;
+                }
             }
 
             EngineSpec? engine = null;
@@ -283,12 +336,31 @@ namespace FrankyCLI
                 if (engine == null) return 1;                 // Parse prints the reason
             }
 
+            ShieldSpec? shield = null;
+            if (optShield != null)
+            {
+                shield = ShieldSpec.Parse(optShield);
+                if (shield == null) return 1;                 // Parse prints the reason
+            }
+
+            // --shield carries its own mass because the mass is HALF the balance check (a shield
+            // that is light for its health is a stealth buff to the whole ship, the same way an
+            // under-massed engine is). Accepting it from both places would let the refusal grade
+            // one number while the record shipped another.
+            if (optShield != null && optMass != null)
+            {
+                Console.WriteLine("Error: --shield carries mass= and is graded on it;"
+                    + " --mass would set a second, ungraded value. Put the mass in --shield.");
+                return 1;
+            }
+
             float partMass = 5;
             if (optMass != null && !float.TryParse(optMass, out partMass))
             {
                 Console.WriteLine("Error: --mass wants a number");
                 return 1;
             }
+            if (shield != null) partMass = shield.Mass;
             float partVariant = 1;
             if (optVariant != null && !float.TryParse(optVariant, out partVariant))
             {
@@ -798,18 +870,50 @@ namespace FrankyCLI
                     properties.Add(Prop(0x002E6679, 0));                     // ...MaxYawVelocity
                 }
 
-                // An engine also declares its CLASS -- the keyword the ship builder groups and
-                // gates on. Vanilla engines carry ShipModuleClass<A|B|C>; a structural part
-                // does not, which is why this is added only on the engine path.
+                if (shield != null)
+                {
+                    // The 11 shield-specific properties (mass is already on the sheet above).
+                    // Every ActorValue FormID here was READ off a vanilla shield GBFM via
+                    // gen_inspect, not carried from a sibling constant and not guessed.
+                    //
+                    // Six of them are CLASS CONSTANTS, measured over the purchasable vanilla corpus
+                    // (2026-09-03) with zero within-class variation -- see the header. They are
+                    // written from the class rather than exposed, because a dial with one correct
+                    // value is not a dial, and an exposed one is a way to author a record that
+                    // looks vanilla and is not (the ats_gbfm_warp02_01 failure: every individual
+                    // number plausible, four axes over at once, invisible for a year).
+                    //
+                    // ⭐ TWO IDENTITIES ARE ENFORCED RATHER THAN PASSED. ShieldHealth ==
+                    // ShieldMaxHealth on all 91 records, and ShipSystemShieldsHealth ==
+                    // ...EMHealth on all 91. Taking either as two parameters would make the
+                    // wrong record CONSTRUCTIBLE, and a shield whose max is below its current
+                    // health has no loud failure -- it just never recharges to full.
+                    properties.Add(Prop(0x0005BFA7, shield.RegenRate));       // ShieldRegenRate
+                    properties.Add(Prop(0x000090A9, shield.RegenRateNonCombat)); // ...NonCombat
+                    properties.Add(Prop(0x0024A05F, shield.Health));          // ShieldHealth      *the dial*
+                    properties.Add(Prop(0x0005BFA8, shield.Health));          // ShieldMaxHealth   (identity)
+                    properties.Add(Prop(0x0005C74B, 0));                      // ShieldVolatileHealth
+                    properties.Add(Prop(0x0001ECCD, shield.Power));           // SpaceshipShieldPartMaxPower
+                    properties.Add(Prop(0x001EE8C9, shield.SysHealth));       // ShipSystemShieldsHealth
+                    properties.Add(Prop(0x001EF0CC, shield.SysHealth));       // ShipSystemShieldsEMHealth (identity)
+                    properties.Add(Prop(0x0001158A, 1));                      // ShipSystemDamageWeightShield
+                    properties.Add(Prop(0x00019080, 0.5f));                   // SpaceshipCrewRating
+                    properties.Add(Prop(0x000002D4, 5));                      // Health (generic hull)
+                }
+
+                // An engine or a shield also declares its CLASS -- the keyword the ship builder
+                // groups and gates on. Vanilla engines and shields carry ShipModuleClass<A|B|C>;
+                // a structural part does not, which is why this is added only on those paths.
                 var gbfmKeywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>()
                 {
                     ShipModuleManufacturerDeimos
                 };
-                if (engine != null)
+                string? moduleClass = engine?.Class ?? shield?.Class;
+                if (moduleClass != null)
                 {
-                    gbfmKeywords.Add(new FormKey(env.LoadOrder[0].ModKey, engine.ClassKeyword())
+                    gbfmKeywords.Add(new FormKey(env.LoadOrder[0].ModKey, ShipClassKeyword(moduleClass))
                         .ToLink<IKeywordGetter>());
-                    Console.WriteLine("           keyword ShipModuleClass" + engine.Class);
+                    Console.WriteLine("           keyword ShipModuleClass" + moduleClass);
                 }
 
                 var gbfm_components = new ExtendedList<AComponent>()
@@ -1056,12 +1160,190 @@ namespace FrankyCLI
                 return e;
             }
 
-            public uint ClassKeyword() => Class switch
+        }
+
+        // ShipModuleClass<A|B|C>, Starfield.esm. Lifted out of EngineSpec when the shield path
+        // became the second caller: the map is a CLOSED three-entry constant, so two copies would
+        // not have been a bug farm, but reactor and grav drive will each want it and the third
+        // copy is the tell. One call site each, pure function, nothing else moved.
+        static uint ShipClassKeyword(string cls) => cls switch
+        {
+            "A" => 0x0026FE57,
+            "B" => 0x0026FE56,
+            _   => 0x0026FE55,
+        };
+
+        // A shield's stat block. Read off the vanilla corpus (2026-09-03) via
+        // `gen_inspect genericbaseform _Shields_` -- 112 records, of which 91 are player ship
+        // modules in classes A/B/C (the rest are the SMM_ set, which carries no level gate and no
+        // recipe, plus four from a Creation).
+        //
+        // ⭐ THE CLASS IS MOST OF THE DESIGN, exactly as it is for engines. Regen, non-combat
+        // regen, crew rating, hull health, volatile health and damage weight have ZERO within-class
+        // variation across the 90 purchasable records, so they are constants keyed on the class
+        // rather than parameters.
+        // What is left is ShieldHealth (the dial), the mass that pays for it, the power slots and
+        // the module's own system health.
+        //
+        // ⛔ MASS IS THE DENOMINATOR HERE TOO. A shield that is light for its health is a stealth
+        // buff to the whole ship, and a health-only audit under-reports it -- the same error the
+        // Shipyards engine audit made and had to correct. So the refusal grades health/mass against
+        // the class's own measured maximum, not health alone.
+        sealed class ShieldSpec
+        {
+            public string Class = "A";
+            public float Health, Mass;
+            public float Power = 3;
+            public float SysHealth = -1;             // -1 = derive from health (see Parse)
+
+            public float RegenRate          => Class == "A" ? 0.1f  : Class == "B" ? 0.08f : 0.05f;
+            public float RegenRateNonCombat => Class == "C" ? 0.15f : 0.2f;
+
+            // Per class: the ceilings vanilla itself never crosses, plus the ENTRY rung, which is
+            // where an ungated part should be sitting. Measured over the PURCHASABLE set -- the
+            // levelled ladder plus the rare Experimentals, which are real vendor stock.
+            //   A: 51 records, health 310..860,  health/mass max 18.10, sysHP <= 208
+            //   B: 20 records, health 505..1500, health/mass max 16.67, sysHP <= 438
+            //   C: 19 records, health 680..1600, health/mass max 11.34, sysHP <= 660
+            //
+            // ⛔ ONE RECORD IS EXCLUDED AND IT IS THE ONLY EXCLUSION: SMB_Shields_Vanguard_Bulwark_UC01,
+            // a UC Vanguard quest reward that is not sold anywhere. It is the outlier on BOTH axes
+            // that matter here -- health/mass 20.71 against a purchasable class-B max of 16.67, and
+            // ShieldRegenRate 0.065 where the other twenty class-B records all carry 0.08. Leaving
+            // it in would have set the class-B ratio cap 24% above anything a player can buy, which
+            // is raising the cap to fit the subject, and it would have made the "no within-class
+            // variation" claim above FALSE by exactly one record. With it out, all six constants are
+            // uniform in all three classes -- so the exclusion is what makes the class-constant
+            // design true, not a convenience. (I first wrote this table with 20.71 in it and with a
+            // guess about the regen split that was wrong in both directions. Measured, then fixed.)
+            static readonly Dictionary<string, (float health, float ratio, float sysHealth, float entry)> Ceiling =
+                new(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "A", (860f,  18.10f, 208f, 310f) },
+                    { "B", (1500f, 16.67f, 438f, 505f) },
+                    { "C", (1600f, 11.34f, 660f, 680f) },
+                };
+
+            public static ShieldSpec? Parse(string spec)
             {
-                "A" => 0x0026FE57,
-                "B" => 0x0026FE56,
-                _   => 0x0026FE55,
-            };
+                var s = new ShieldSpec();
+                bool haveClass = false, haveHealth = false, haveMass = false;
+                foreach (var pair in spec.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var kv = pair.Split('=');
+                    if (kv.Length != 2)
+                    {
+                        Console.WriteLine("Error: bad --shield term '" + pair + "' -- want key=value");
+                        return null;
+                    }
+                    var k = kv[0].Trim();
+                    var v = kv[1].Trim();
+                    if (k.Equals("class", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!Ceiling.ContainsKey(v))
+                        {
+                            Console.WriteLine("Error: --shield class must be A, B or C (got '" + v + "')");
+                            return null;
+                        }
+                        s.Class = v.ToUpperInvariant(); haveClass = true; continue;
+                    }
+                    if (!float.TryParse(v, out var n))
+                    {
+                        Console.WriteLine("Error: --shield " + k + " wants a number (got '" + v + "')");
+                        return null;
+                    }
+                    switch (k.ToLowerInvariant())
+                    {
+                        case "health":    s.Health = n; haveHealth = true; break;
+                        case "mass":      s.Mass = n; haveMass = true; break;
+                        case "power":     s.Power = n; break;
+                        case "syshealth": s.SysHealth = n; break;
+                        default:
+                            Console.WriteLine("Error: unknown --shield key '" + k
+                                + "'. Keys: class health mass power syshealth");
+                            return null;
+                    }
+                }
+                if (!haveClass || !haveHealth || !haveMass)
+                {
+                    Console.WriteLine("Error: --shield needs at least class, health and mass");
+                    return null;
+                }
+                if (s.Health <= 0 || s.Mass <= 0 || s.Power <= 0)
+                {
+                    // A zero anywhere here is not a small shield. Zero health is a shield that
+                    // absorbs nothing while the card still reads like a shield; zero mass is the
+                    // stealth buff in its purest form; zero power is a module the builder's
+                    // arithmetic reads as absent. Same refusal as --cargo's zero capacity.
+                    Console.WriteLine($"Error: --shield health/mass/power must all be positive"
+                        + $" (got health {s.Health}, mass {s.Mass}, power {s.Power})");
+                    return null;
+                }
+
+                var cap = Ceiling[s.Class];
+
+                // ShipSystemShieldsHealth is the module's OWN durability, not the bubble's. It
+                // runs 0.095-0.277 of ShieldHealth across class A with no tighter law, so the
+                // default is the middle of that band rather than a derived truth -- and it is a
+                // default precisely because leaving it absent would ship a shield the game reads
+                // as having no module health at all.
+                if (s.SysHealth < 0) s.SysHealth = MathF.Round(s.Health / 6f);
+                if (s.SysHealth <= 0)
+                {
+                    Console.WriteLine($"Error: --shield syshealth must be positive (got {s.SysHealth})");
+                    return null;
+                }
+
+                // The refusal. Report EVERY axis before returning, so one run names every problem
+                // rather than sending the author round again for the next one.
+                bool over = false;
+                if (s.Health > cap.health)
+                {
+                    Console.WriteLine($"REFUSED: health {s.Health} exceeds the class-{s.Class} vanilla ceiling"
+                        + $" {cap.health} ({s.Health / cap.health:0.00}x).");
+                    over = true;
+                }
+                float ratio = s.Health / s.Mass;
+                if (ratio > cap.ratio)
+                {
+                    Console.WriteLine($"REFUSED: health/mass {ratio:0.00} exceeds the class-{s.Class} vanilla"
+                        + $" maximum {cap.ratio:0.00}. Mass is the brake -- under-massing a shield is a"
+                        + $" stealth buff to the whole ship, so this refuses at {s.Health}/{s.Mass}"
+                        + $" even though the health alone is in range.");
+                    over = true;
+                }
+                if (s.SysHealth > cap.sysHealth)
+                {
+                    Console.WriteLine($"REFUSED: syshealth {s.SysHealth} exceeds the class-{s.Class} vanilla"
+                        + $" ceiling {cap.sysHealth}.");
+                    over = true;
+                }
+                if (s.Power > 12)
+                {
+                    Console.WriteLine($"REFUSED: power {s.Power} exceeds the 12-slot bar. No vanilla module"
+                        + " of any class goes above it, and the bar itself caps there.");
+                    over = true;
+                }
+                if (over)
+                {
+                    Console.WriteLine("  (These are the vanilla maxima, not a style guide. If you mean it,"
+                        + " raise the ceiling here in one place rather than passing a bigger number.)");
+                    return null;
+                }
+
+                Console.WriteLine($"Shield   : class {s.Class}, health {s.Health} at mass {s.Mass}"
+                    + $" (health/mass {ratio:0.00}, class max {cap.ratio:0.00}), power {s.Power},"
+                    + $" system health {s.SysHealth}");
+                Console.WriteLine($"           regen {s.RegenRate}/s combat, {s.RegenRateNonCombat}/s out of"
+                    + $" combat -- class constants, not authored here");
+                Console.WriteLine($"           {s.Health / cap.health:P0} of the class-{s.Class} ceiling"
+                    + $" ({cap.health}); the class ENTRY rung is {cap.entry}."
+                    + (s.Health <= cap.entry
+                        ? "  <- entry tier, safe to ship UNGATED"
+                        : "  <- ABOVE the entry rung: gate it with `setcondition`, or it is"
+                          + " strictly better than the bottom of the ladder at level 1"));
+                return s;
+            }
         }
 
         static readonly Dictionary<string, uint> SnapFaceNodes = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)

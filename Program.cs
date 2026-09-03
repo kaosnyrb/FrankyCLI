@@ -181,6 +181,7 @@ switch (mode)
     case "setcargo":
     case "setmass":
     case "setfuel":
+    case "setshield":
     case "setmaxpower":
     case "setrepair":
     case "sethealth":
@@ -362,6 +363,7 @@ static int RunLegacy(string mode, string[] args)
         "setcargo"           => gen_setcargo.Generate(arr),
         "setmass"            => gen_setmass.Generate(arr),
         "setfuel"            => gen_setfuel.Generate(arr),
+        "setshield"          => gen_setshield.Generate(arr),
         "setmaxpower"        => gen_setmaxpower.Generate(arr),
         "setrepair"          => gen_setrepair.Generate(arr),
         "sethealth"          => gen_sethealth.Generate(arr),
