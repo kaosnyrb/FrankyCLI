@@ -154,6 +154,57 @@ namespace FrankyCLI
             //                                syshealth ShipSystemShieldsHealth   (default health/6)
             //                              e.g. --shield "class=A,health=310,mass=23,power=3,syshealth=50"
             //                              Mutually exclusive with --cargo and --engine.
+            //   --lander <k=v,...>         make this part a LANDING GEAR: adds Health and
+            //                              SpaceshipLanderRating to the sheet. Keys:
+            //                                rating    SpaceshipLanderRating   (required -- the dial)
+            //                                health    generic Health          (default 4)
+            //                              e.g. --lander "rating=4,health=4"
+            //                              Mass stays on --mass (unlike --shield, a lander's mass
+            //                              is not half of a balance check -- see below).
+            //                              Mutually exclusive with --cargo, --engine and --shield.
+            //   --animgraph <k=v,...>      attach a BGSAnimationGraph_Component to the
+            //                              MoveableStatic, which is what makes a part MOVE. Keys:
+            //                                gear      a vanilla rig folder, e.g. landernovang20 --
+            //                                          fills graph/rig/anims from the convention
+            //                                graph     ANAM, the root animation graph
+            //                                rig       BNAM, the skeleton
+            //                                anims     CNAM, the animations folder
+            //                              e.g. --animgraph "gear=landernovang20"
+            //                              Explicit keys override anything `gear` filled in.
+            //
+            // ⭐ A LANDING GEAR'S SHEET IS THE SMALLEST IN THE GAME -- FOUR ACTORVALUES, AND TWO OF
+            // THEM ARE ALREADY ON THE BASE SHEET. Measured 2026-09-03 across all 35 SMS_Lander
+            // GBFMs in the load order: Health 35/35 (range 1-4), SpaceshipPartMass 35/35 (1-6),
+            // SpaceshipLanderRating 35/35 (1-4), ShipModuleVariant 23/35 (10/20/30, and only on
+            // the families that have variants). So this flag adds exactly two properties; mass and
+            // variant are the base sheet's already, which is why --lander does NOT swallow --mass
+            // the way --shield does. There is no ratio to grade here: a lander's rating is not
+            // bought with mass in any relationship vanilla holds to (rating 1 appears at mass 1
+            // and at mass 3; the 320CB is rating 3 at mass 6).
+            //
+            // ⚠ THE ENVELOPE IS A WARNING, NOT A REFUSAL, AND THAT IS DELIBERATE. Vanilla never
+            // exceeds rating 4 / mass 6, but a paid peer set (odx_antares_sunkx1) ships landers at
+            // mass 50, 120 and 200 and rating 6 -- big structural parts that also happen to let you
+            // land. Refusing above vanilla would refuse a shipping, legitimate design, so the cap
+            // reports and does not block. (Contrast --shield, where the ratio IS refused: there the
+            // number is a stealth buff to the whole ship, and here it is not.)
+            //
+            // ⭐⭐ AND THE ANIMATION IS INHERITED, NEVER AUTHORED -- THAT IS THE WHOLE MECHANISM.
+            // A vanilla landing gear NIF carries ZERO controller, interpolator, sequence, keyframe
+            // or skin blocks (measured on smod_lander_nova_ng-20_landinggear.nif: 98 blocks, none
+            // of any). It is rigid geometry parented onto NAMED EMPTIES, and the game's own
+            // behaviour drives those nodes BY NAME. The component below is the hookup, pointed at
+            // Bethesda's graph, Bethesda's skeleton and Bethesda's animation folder. Nothing is
+            // shipped: no .rig, no .agx, no .hkx. Read off SMOD_Lander_Nova_NG-20_LandingGear
+            // [13F2F1] 2026-09-03 -- ANAM AnimTextData\Tables\Graphs\ShipLandingEngines.agx,
+            // BNAM ships\rigged\landernovang20\characterassets\skeleton.rig, CNAM
+            // ships\rigged\landernovang20\animations, and DNAM/ENAM both null.
+            //
+            // ⛔ SO THE NAMES IN THE NIF ARE A CONTRACT, AND NOTHING HERE CAN CHECK IT. This flag
+            // writes three strings; whether the model on the other end presents the node skeleton
+            // those strings expect is invisible from the record layer. A part with the component
+            // and the wrong node names builds, loads and stands still. The check that can see it
+            // lives at the NIF, not here.
             //
             // A SHIELD'S SHEET IS SIX CONSTANTS AND TWO DIALS, so the constants are written from
             // the CLASS rather than accepted as parameters. Measured 2026-09-03 over the 90
@@ -203,6 +254,7 @@ namespace FrankyCLI
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
             string? optVariant = null, optCargo = null, optShield = null;
+            string? optLander = null, optAnimGraph = null;
             bool optMsttOnly = false, optNoSnap = false;
             for (int i = 5; i < args.Length; i++)
             {
@@ -218,6 +270,8 @@ namespace FrankyCLI
                     case "--mass": if (!hasValue) { Console.WriteLine("Error: --mass needs a value"); return 1; } optMass = args[++i]; break;
                     case "--cargo": if (!hasValue) { Console.WriteLine("Error: --cargo needs a value"); return 1; } optCargo = args[++i]; break;
                     case "--shield": if (!hasValue) { Console.WriteLine("Error: --shield needs a value"); return 1; } optShield = args[++i]; break;
+                    case "--lander": if (!hasValue) { Console.WriteLine("Error: --lander needs a value"); return 1; } optLander = args[++i]; break;
+                    case "--animgraph": if (!hasValue) { Console.WriteLine("Error: --animgraph needs a value"); return 1; } optAnimGraph = args[++i]; break;
                     case "--variant": if (!hasValue) { Console.WriteLine("Error: --variant needs a value"); return 1; } optVariant = args[++i]; break;
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
                     case "--desc": if (!hasValue) { Console.WriteLine("Error: --desc needs a value"); return 1; } optDesc = args[++i]; break;
@@ -238,6 +292,7 @@ namespace FrankyCLI
                 if (optSnapNodes != null) ignored.Add("--snap-nodes");
                 if (optSwaps != null) ignored.Add("--swaps");
                 if (optBounds != null) ignored.Add("--bounds");
+                if (optAnimGraph != null) ignored.Add("--animgraph");
                 if (ignored.Count > 0)
                 {
                     Console.WriteLine("Error: " + string.Join(", ", ignored)
@@ -282,6 +337,7 @@ namespace FrankyCLI
                 if (optCargo != null) ignored.Add("--cargo");
                 if (optEngine != null) ignored.Add("--engine");
                 if (optShield != null) ignored.Add("--shield");
+                if (optLander != null) ignored.Add("--lander");
                 if (optMass != null) ignored.Add("--mass");
                 if (optVariant != null) ignored.Add("--variant");
                 if (optName != null) ignored.Add("--name");
@@ -321,6 +377,7 @@ namespace FrankyCLI
                 if (optCargo != null) sheets.Add("--cargo");
                 if (optEngine != null) sheets.Add("--engine");
                 if (optShield != null) sheets.Add("--shield");
+                if (optLander != null) sheets.Add("--lander");
                 if (sheets.Count > 1)
                 {
                     Console.WriteLine("Error: " + string.Join(" and ", sheets)
@@ -342,6 +399,29 @@ namespace FrankyCLI
                 shield = ShieldSpec.Parse(optShield);
                 if (shield == null) return 1;                 // Parse prints the reason
             }
+
+            LanderSpec? lander = null;
+            if (optLander != null)
+            {
+                lander = LanderSpec.Parse(optLander);
+                if (lander == null) return 1;                 // Parse prints the reason
+            }
+
+            AnimGraphSpec? animGraph = null;
+            if (optAnimGraph != null)
+            {
+                animGraph = AnimGraphSpec.Parse(optAnimGraph);
+                if (animGraph == null) return 1;              // Parse prints the reason
+            }
+
+            // A lander with no animation graph is a STATIC gear -- always deployed, and a real
+            // product (vanilla ships STATIC_Lander_Deimos_320CB_LandingGear off the same mesh as
+            // the animated one). So this is a note, not a refusal: the pairing is a choice, and
+            // the failure it guards against is thinking you built a moving part and shipping a
+            // still one.
+            if (lander != null && animGraph == null)
+                Console.WriteLine("Note: --lander without --animgraph builds a STATIC gear"
+                    + " (permanently deployed). Add --animgraph to make it move.");
 
             // --shield carries its own mass because the mass is HALF the balance check (a shield
             // that is light for its health is a stealth buff to the whole ship, the same way an
@@ -532,7 +612,36 @@ namespace FrankyCLI
                     boundsSecond = new P3Float(n[3], n[4], n[5]);
                 }
 
-                MoveableStatic moveableStatic = new MoveableStatic(myMod);
+                // Components is INIT-ONLY on the record, so the animation graph is supplied at
+                // construction rather than assigned below with everything else.
+                //
+                // ⛔ TWO CONSTRUCTOR CALLS, NOT ONE WITH A TERNARY, AND THE REASON IS A REGRESSION
+                // I ACTUALLY WROTE. The first version was `Components = animGraph == null ? null
+                // : new ExtendedList<...>`, which ASSUMES the record's default is null. Whether it
+                // is or not, that assumption reaches every part this generator has ever built --
+                // and Mutagen walks Components on write (MoveableStaticCommon.EnumerateFormLinks),
+                // so getting it wrong is a crash in the writer for parts that never asked for a
+                // component. Not setting the property at all when the flag is absent is the only
+                // form that cannot change existing behaviour, whatever the default happens to be.
+                MoveableStatic moveableStatic = animGraph == null
+                    ? new MoveableStatic(myMod)
+                    : new MoveableStatic(myMod)
+                {
+                    Components = new ExtendedList<AComponent>()
+                    {
+                        // The hookup, and nothing more. All three paths point at Bethesda's own
+                        // assets; this mod ships no rig, no .agx and no animation files. DNAM and
+                        // ENAM are left unset because they are null on every vanilla lander record
+                        // read (2026-09-03) -- absent because vanilla leaves them absent, not
+                        // because they were never looked at.
+                        new AnimationGraphComponent()
+                        {
+                            ANAM = animGraph.Graph,
+                            BNAM = animGraph.Rig,
+                            CNAM = animGraph.Anims,
+                        }
+                    },
+                };
                 moveableStatic.EditorID = prefix + "_ms_" + item;
                 moveableStatic.ObjectBounds = new ObjectBounds()
                 {
@@ -574,6 +683,12 @@ namespace FrankyCLI
                     spaceshipformshipmodule,
                     NavmeshUseDefaultCollisionForGeneration
                 };
+                if (animGraph != null)
+                {
+                    Console.WriteLine("           animgraph ANAM " + animGraph.Graph);
+                    Console.WriteLine("                     BNAM " + animGraph.Rig);
+                    Console.WriteLine("                     CNAM " + animGraph.Anims);
+                }
                 myMod.MoveableStatics.Add(moveableStatic);
 
                 // ---- --mstt-only stops HERE ---------------------------------------------
@@ -868,6 +983,22 @@ namespace FrankyCLI
                     properties.Add(Prop(0x002DF170, 0));                     // ...MaxPitchVelocity
                     properties.Add(Prop(0x002DF171, 0));                     // ...MaxRollVelocity
                     properties.Add(Prop(0x002E6679, 0));                     // ...MaxYawVelocity
+                }
+
+                if (lander != null)
+                {
+                    // Exactly two properties. SpaceshipPartMass and ShipModuleVariant are on the
+                    // base sheet already, and the measured lander sheet has nothing else on it --
+                    // so this is the whole of what makes a GBFM a landing gear.
+                    properties.Add(Prop(0x0030B58A, lander.Rating));   // SpaceshipLanderRating *the dial*
+                    properties.Add(Prop(0x000002D4, lander.Health));   // Health (generic)
+                    Console.WriteLine("           lander rating " + lander.Rating
+                        + ", health " + lander.Health + ", mass " + partMass);
+                    if (lander.Rating > LanderSpec.VanillaMaxRating || partMass > LanderSpec.VanillaMaxMass)
+                        Console.WriteLine("           NOTE: outside the vanilla envelope"
+                            + $" (rating <= {LanderSpec.VanillaMaxRating}, mass <= {LanderSpec.VanillaMaxMass}"
+                            + " across all 35 SMS_Lander records). Not refused -- a paid peer set"
+                            + " ships rating 6 at mass 200 -- but it is a deliberate choice, not a default.");
                 }
 
                 if (shield != null)
@@ -1189,6 +1320,126 @@ namespace FrankyCLI
         // buff to the whole ship, and a health-only audit under-reports it -- the same error the
         // Shipyards engine audit made and had to correct. So the refusal grades health/mass against
         // the class's own measured maximum, not health alone.
+        // A landing gear's two extra properties. Deliberately tiny -- the measured sheet is four
+        // ActorValues and two of them are the base sheet's already (see the --lander header).
+        sealed class LanderSpec
+        {
+            public float Rating;
+            public float Health = 4;      // 35/35 vanilla landers carry Health; range 1-4
+
+            // Vanilla's ceilings, for the WARNING only. A paid peer ships rating 6 at mass 200,
+            // so these bound Bethesda's art direction, not the engine -- and a cap that refuses a
+            // shipping design is a cap fitted to the wrong corpus.
+            public const float VanillaMaxRating = 4;
+            public const float VanillaMaxMass = 6;
+
+            public static LanderSpec? Parse(string spec)
+            {
+                var s = new LanderSpec();
+                bool haveRating = false;
+                foreach (var pair in spec.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var kv = pair.Split('=');
+                    if (kv.Length != 2)
+                    {
+                        Console.WriteLine("Error: bad --lander term '" + pair + "' -- want key=value");
+                        return null;
+                    }
+                    var k = kv[0].Trim();
+                    if (!float.TryParse(kv[1].Trim(), out var n))
+                    {
+                        Console.WriteLine("Error: --lander " + k + " wants a number (got '"
+                            + kv[1].Trim() + "')");
+                        return null;
+                    }
+                    switch (k.ToLowerInvariant())
+                    {
+                        case "rating": s.Rating = n; haveRating = true; break;
+                        case "health": s.Health = n; break;
+                        default:
+                            Console.WriteLine("Error: unknown --lander key '" + k
+                                + "'. Keys: rating health");
+                            return null;
+                    }
+                }
+                if (!haveRating)
+                {
+                    Console.WriteLine("Error: --lander needs rating= (SpaceshipLanderRating)");
+                    return null;
+                }
+                // Zero rating is the silent nothing this flag exists to prevent: the part builds,
+                // attaches and is called a landing gear, and contributes nothing to whether the
+                // ship can land. Same refusal as --cargo's zero capacity.
+                if (s.Rating <= 0 || s.Health <= 0)
+                {
+                    Console.WriteLine($"Error: --lander rating/health must be positive"
+                        + $" (got rating {s.Rating}, health {s.Health})");
+                    return null;
+                }
+                return s;
+            }
+        }
+
+        // The BGSAnimationGraph_Component's three populated fields. Named by their raw subrecord
+        // signatures because that is what Mutagen calls them (AnimationGraphComponent.ANAM/BNAM/
+        // CNAM, all string; DNAM and ENAM exist and are null on every vanilla lander read).
+        sealed class AnimGraphSpec
+        {
+            public string? Graph, Rig, Anims;
+
+            // Read off SMOD_Lander_Nova_NG-20_LandingGear [13F2F1] 2026-09-03. The graph is a
+            // CONSTANT across rigged landers; the other two are the rig folder's own paths, which
+            // is why `gear=` can fill all three from one word.
+            public const string LanderGraph = @"AnimTextData\Tables\Graphs\ShipLandingEngines.agx";
+
+            public static AnimGraphSpec? Parse(string spec)
+            {
+                var s = new AnimGraphSpec();
+                foreach (var pair in spec.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var kv = pair.Split('=', 2);
+                    if (kv.Length != 2)
+                    {
+                        Console.WriteLine("Error: bad --animgraph term '" + pair + "' -- want key=value");
+                        return null;
+                    }
+                    var v = kv[1].Trim();
+                    switch (kv[0].Trim().ToLowerInvariant())
+                    {
+                        case "gear":
+                            // Expand the convention. Explicit keys still win, whatever the order,
+                            // because they are applied to the same fields and checked after the
+                            // loop -- so `gear=x,rig=y` and `rig=y,gear=x` must not differ.
+                            s.Graph ??= LanderGraph;
+                            s.Rig ??= $@"ships\rigged\{v}\characterassets\skeleton.rig";
+                            s.Anims ??= $@"ships\rigged\{v}\animations";
+                            break;
+                        case "graph": s.Graph = v; break;
+                        case "rig": s.Rig = v; break;
+                        case "anims": s.Anims = v; break;
+                        default:
+                            Console.WriteLine("Error: unknown --animgraph key '" + kv[0].Trim()
+                                + "'. Keys: gear graph rig anims");
+                            return null;
+                    }
+                }
+                // ⛔ A component with a null graph is the loudest failure available here, and it is
+                // still quiet: the record builds and the part stands still. Refuse it.
+                if (string.IsNullOrWhiteSpace(s.Graph))
+                {
+                    Console.WriteLine("Error: --animgraph needs graph= (ANAM), or gear= to fill it");
+                    return null;
+                }
+                if (string.IsNullOrWhiteSpace(s.Rig) || string.IsNullOrWhiteSpace(s.Anims))
+                {
+                    Console.WriteLine("Error: --animgraph needs rig= (BNAM) and anims= (CNAM),"
+                        + " or gear= to fill them. A graph with no skeleton drives nothing.");
+                    return null;
+                }
+                return s;
+            }
+        }
+
         sealed class ShieldSpec
         {
             public string Class = "A";
