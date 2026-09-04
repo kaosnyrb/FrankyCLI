@@ -154,8 +154,38 @@ namespace FrankyCLI
             var tpl = myMod.SnapTemplates.FirstOrDefault(t => t.FormKey == ms.SnapTemplate.FormKey);
             if (tpl == null)
             {
-                Console.WriteLine($"Error: {mstt} links SnapTemplate {ms.SnapTemplate.FormKey}, which is not in this plugin");
-                return false;
+                // THE PART LINKS A TEMPLATE WE DO NOT OWN -- in practice a VANILLA one, shared by
+                // many parts. Patching it is impossible here and would be WRONG if it were: the
+                // nodes are not this part's to change. So author this part its own template and
+                // repoint it, which is the only way to honour the request at all. Said loudly
+                // rather than done quietly -- a part quietly acquiring a private template is a
+                // thing the next reader must be able to see in the log.
+                //
+                // The case it was written for (2026-09-04): atsd_ms_gear_01mod carried vanilla's
+                // ShipSnap_SMOD_Generic_1x1x1_OnlyTop (what every lander module uses) and needed
+                // the inline family's Fore/Aft as well, which no vanilla template offers.
+                var borrowed = ms.SnapTemplate.FormKey;
+                var edid = mstt.Contains("_ms_") ? mstt.Replace("_ms_", "_sntp_") : mstt + "_sntp";
+                if (myMod.SnapTemplates.Any(t => string.Equals(t.EditorID, edid, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Console.WriteLine($"Error: would author {edid} for {mstt}, but that EditorID already exists."
+                                      + " Point the part at it by hand rather than minting a duplicate.");
+                    return false;
+                }
+                var authored = new SnapTemplate(myMod) { EditorID = edid };
+                uint fresh = 0;
+                foreach (var n in nodes)
+                {
+                    authored.Nodes.Add(n.DeepCopy());
+                    if (n.NodeID >= fresh) fresh = n.NodeID + 1;
+                }
+                authored.NextNodeID = fresh;
+                myMod.SnapTemplates.Add(authored);
+                ms.SnapTemplate.SetTo(authored.FormKey);
+                Console.WriteLine($"  {label,-9} {mstt} linked {borrowed}, which is NOT in this plugin (shared/vanilla)");
+                Console.WriteLine($"  {"",-9} -> authored {edid} with {authored.Nodes.Count} node(s) and repointed the part at it");
+                changed++;
+                return true;
             }
 
             var patched = tpl.DeepCopy();
