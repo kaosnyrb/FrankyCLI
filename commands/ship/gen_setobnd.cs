@@ -39,7 +39,7 @@ namespace FrankyCLI
             // args: [modname, "setobnd", mstt_editorid, bounds, (--packin <id>)]
             if (args.Length < 4)
             {
-                Console.WriteLine("Usage: setobnd <modname> <mstt_editorid> <minX,minY,minZ,maxX,maxY,maxZ> [--packin <editorid>]");
+                Console.WriteLine("Usage: setobnd <modname> <mstt_editorid> <minX,minY,minZ,maxX,maxY,maxZ> [--packin <editorid>] [--packin-bounds <spec>]");
                 Console.WriteLine("  the box nif_from_template.py prints as 'bounds ... unioned from the MESHES'");
                 return 1;
             }
@@ -48,12 +48,18 @@ namespace FrankyCLI
             string spec = args[3];
 
             string? optPackin = null;
+            string? optPackinBounds = null;
             for (int i = 4; i < args.Length; i++)
             {
                 if (args[i] == "--packin")
                 {
                     if (i + 1 >= args.Length) { Console.WriteLine("Error: --packin needs a value"); return 1; }
                     optPackin = args[++i];
+                }
+                else if (args[i] == "--packin-bounds")
+                {
+                    if (i + 1 >= args.Length) { Console.WriteLine("Error: --packin-bounds needs a value"); return 1; }
+                    optPackinBounds = args[++i];
                 }
                 else { Console.WriteLine("Error: unknown argument '" + args[i] + "'"); return 1; }
             }
@@ -85,6 +91,46 @@ namespace FrankyCLI
                     Console.WriteLine($"Error: min > max on {"XYZ"[i]} ({v[i]} > {v[i + 3]}) -- the box is inside out");
                     return 1;
                 }
+
+            // --packin-bounds: the PackIn's box, when it is NOT the MoveableStatic's.
+            // A PackIn holding N statics has a box that is the UNION of all of them, which is
+            // not any one static's box. Every part on this line is one static in one PackIn --
+            // except a LANDER, which is two (the fixed module and the moving gear), so the
+            // module's box and the cell's box are different facts for the first time. Absent,
+            // the PackIn keeps taking the MoveableStatic's box, byte-identically to before.
+            var pv = v;
+            if (optPackinBounds != null)
+            {
+                var pnums = optPackinBounds.Split(',');
+                if (pnums.Length != 6)
+                {
+                    Console.WriteLine("Error: --packin-bounds wants six numbers -- minX,minY,minZ,maxX,maxY,maxZ");
+                    return 1;
+                }
+                pv = new float[6];
+                for (int i = 0; i < 6; i++)
+                    if (!float.TryParse(pnums[i], out pv[i]))
+                    {
+                        Console.WriteLine("Error: --packin-bounds '" + pnums[i] + "' is not a number");
+                        return 1;
+                    }
+                for (int i = 0; i < 3; i++)
+                    if (pv[i] > pv[i + 3])
+                    {
+                        Console.WriteLine($"Error: --packin-bounds min > max on {"XYZ"[i]} ({pv[i]} > {pv[i + 3]}) -- the box is inside out");
+                        return 1;
+                    }
+                // A PackIn box that does not CONTAIN the static it holds is the defect this
+                // flag could newly introduce, so it is refused rather than trusted.
+                for (int i = 0; i < 3; i++)
+                    if (pv[i] > v[i] || pv[i + 3] < v[i + 3])
+                    {
+                        Console.WriteLine($"Error: --packin-bounds does not contain the MoveableStatic's box on {"XYZ"[i]}"
+                                          + $" (packin {pv[i]}..{pv[i + 3]} vs static {v[i]}..{v[i + 3]})."
+                                          + " The cell must hold what is placed in it.");
+                        return 1;
+                    }
+            }
 
             string packinId = optPackin ?? target.Replace("_ms_", "_pkn_");
             if (optPackin == null && packinId == target)
@@ -118,6 +164,11 @@ namespace FrankyCLI
                     First = new P3Float(v[0], v[1], v[2]),
                     Second = new P3Float(v[3], v[4], v[5]),
                 };
+                var packinBox = new ObjectBounds()
+                {
+                    First = new P3Float(pv[0], pv[1], pv[2]),
+                    Second = new P3Float(pv[3], pv[4], pv[5]),
+                };
 
                 bool foundMstt = false, foundPackin = false;
                 foreach (var ms in myMod.MoveableStatics)
@@ -132,8 +183,10 @@ namespace FrankyCLI
                 foreach (var pk in myMod.PackIns)
                     if (string.Equals(pk.EditorID, packinId, StringComparison.OrdinalIgnoreCase))
                     {
-                        pk.ObjectBounds = box.DeepCopy();
-                        Console.WriteLine($"  {pk.EditorID}: PackIn box re-stamped to match");
+                        pk.ObjectBounds = packinBox.DeepCopy();
+                        Console.WriteLine(optPackinBounds == null
+                            ? $"  {pk.EditorID}: PackIn box re-stamped to match"
+                            : $"  {pk.EditorID}: PackIn box -> ({pv[0]},{pv[1]},{pv[2]}) .. ({pv[3]},{pv[4]},{pv[5]})  (union, given explicitly)");
                         foundPackin = true; changed++;
                     }
 
