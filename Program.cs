@@ -194,6 +194,7 @@ switch (mode)
     case "setedid":
     case "setlinks":
     case "placeprim":
+    case "setrefbase":
     case "placeref":
     case "setmodel":
     case "newstatic":
@@ -376,6 +377,7 @@ static int RunLegacy(string mode, string[] args)
         "setsnap"            => gen_setsnap.Generate(arr),
         "setlinks"           => gen_setlinks.Generate(arr),
         "placeprim"          => gen_placeprim.Generate(arr),
+        "setrefbase"         => gen_setrefbase.Generate(arr),
         "placeref"           => gen_placeref.Generate(arr),
         "setmodel"           => gen_setmodel.Generate(arr),
         "newstatic"          => gen_newstatic.Generate(arr),
