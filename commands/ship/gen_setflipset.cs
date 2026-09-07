@@ -44,11 +44,24 @@ namespace FrankyCLI
 
         /// <summary>
         /// The Dir word for a member that carries NO position keyword -- an UNHANDED shape.
-        /// Not an escape hatch: vanilla ships five unhanded landers, and Stardust's Drayman is a
-        /// symmetric full-width cargo hold (bounds -4.0011/+4.0008 in X against the handed
-        /// Porters' -4.0/+3.69), so it mounts centrally and has no side to be on. Before this
-        /// existed the only way to fold such a part into a set was to stamp it with a side it
-        /// does not have -- a false fact in the record to satisfy a tool's arity.
+        /// Vanilla ships five unhanded landers, and Stardust's Drayman is a symmetric full-width
+        /// cargo hold (bounds -4.0011/+4.0008 in X against the handed Porters' -4.0/+3.69), so it
+        /// mounts centrally and has no side to be on.
+        ///
+        /// LEGAL ONLY FOR A SET IN WHICH NO MEMBER IS HANDED -- enforced below, see the sibling
+        /// rule. Position and variant are enumerated as the axes IN PLAY across the set: with no
+        /// member claiming a side there is no position axis at all and variant alone enumerates it
+        /// (proven at the glass 2026-09-07 on atsd_flst_inlinestruct_01 -- six unhanded members,
+        /// all six placeable). Mix the two and the keyless member holds no coordinate on an axis
+        /// the builder IS using, and its slot aliases to its neighbour.
+        ///
+        /// The honest cost of that rule, recorded rather than hidden: this word was added so a
+        /// symmetric part need not be stamped with "a side it does not have -- a false fact in the
+        /// record to satisfy a tool's arity". Inside a handed set that false fact is now the only
+        /// thing that works, and the Drayman carries a Port keyword it does not deserve. The engine
+        /// gives a set one position axis or none; it has no way to say "this member is exempt".
+        /// A false keyword that renders correctly beats a true absence that renders as its
+        /// neighbour -- but it IS a false keyword, and that is the trade, not a tidy win.
         /// </summary>
         const string NoPosition = "None";
 
@@ -58,7 +71,10 @@ namespace FrankyCLI
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: setflipset <modname> <flst_editorid> <gbfm=Dir>[,<gbfm=Dir>...]");
-                Console.WriteLine("Dirs: " + string.Join(" ", PositionKeywords.Keys));
+                Console.WriteLine("Dirs: " + string.Join(" ", PositionKeywords.Keys) + " " + NoPosition);
+                Console.WriteLine($"  {NoPosition} = carries no ShipModPosition keyword (an unhanded shape).");
+                Console.WriteLine($"  ALL members must be {NoPosition}, or none: a keyless member of a set whose");
+                Console.WriteLine("  siblings are handed renders as its NEIGHBOUR, not as itself.");
                 return 1;
             }
             string modname = args[0];
@@ -84,6 +100,39 @@ namespace FrankyCLI
                     return 1;
                 }
                 wanted.Add((halves[0].Trim(), halves[1].Trim()));
+            }
+
+            // ---- THE SIBLING RULE (2026-09-07) -------------------------------------------------
+            // A member may carry NO position keyword only when NO member of the set carries one.
+            //
+            // Why: the ship builder enumerates a set on the axes that are IN PLAY across it. If no
+            // member claims a side there is no position axis, variant alone enumerates, and an
+            // all-unhanded set is correct -- proven at the glass on atsd_flst_inlinestruct_01, six
+            // unhanded members, all six placed. If SOME member claims a side then the axis exists,
+            // and the keyless member has no coordinate on it: its slot ALIASES TO ITS NEIGHBOUR.
+            // It does not error and does not blank -- it draws the previous member again, so the
+            // fault reports as "there are two of these" and points at the wrong record. That is
+            // what the Porter set did (the Drayman keyless at variant 3; slot 3 drew as slot 2)
+            // and it cost two wrong diagnoses because the records were exactly as authored.
+            //
+            // Checked over `wanted` and not over the plugin, deliberately: this command REPLACES
+            // the FormList's items with exactly these members, so `wanted` IS the set after the
+            // write. There is no current state to read and therefore none to read stale.
+            //
+            // Sited here, before the environment is opened, for two reasons: validate everything
+            // then mutate, and so the refusal can be bitten without touching a plugin at all.
+            var unhandedMembers = wanted.Where(w => string.Equals(w.dir, NoPosition, StringComparison.OrdinalIgnoreCase)).ToList();
+            var handedMembers = wanted.Where(w => !string.Equals(w.dir, NoPosition, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (unhandedMembers.Count > 0 && handedMembers.Count > 0)
+            {
+                Console.WriteLine("Error: MIXED SET -- nothing written.");
+                Console.WriteLine($"  asked for {NoPosition}: {string.Join(", ", unhandedMembers.Select(u => u.editorId))}");
+                Console.WriteLine($"  but {handedMembers.Count} sibling(s) carry a side: {string.Join(", ", handedMembers.Select(h => h.editorId + "=" + h.dir))}");
+                Console.WriteLine("  A keyless member of a set that HAS a position axis does not render as itself:");
+                Console.WriteLine("  its slot aliases to its neighbour, so the builder draws the previous member again.");
+                Console.WriteLine($"  Give every member a side, or give none of them one. {NoPosition} is for a wholly");
+                Console.WriteLine("  unhanded set, never for one member of a handed one -- even a symmetric part.");
+                return 1;
             }
 
             StarfieldMod myMod;
