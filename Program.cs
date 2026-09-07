@@ -163,6 +163,18 @@ switch (mode)
         if (args.Length < 3) { Console.WriteLine("Usage: checkpart <modname> <item>"); return 1; }
         return RunLegacy(mode, args);
 
+    // catalogue is read-only and takes the RAW args (args[1] = modname), not RunLegacy's
+    // [modname, mode, item] shuffle -- it is a whole-plugin census, not a per-part command.
+    case "catalogue":
+        if (args.Length < 2)
+        {
+            Console.WriteLine("Usage: catalogue <modname> [--json]");
+            Console.WriteLine("  Pass the FULL filename (avontechstardust.esm) where a load order carries");
+            Console.WriteLine("  both an .esm and an .esp of the same name -- a bare name is refused, not guessed.");
+            return 1;
+        }
+        return gen_catalogue.Generate(args);
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
