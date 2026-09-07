@@ -42,6 +42,16 @@ namespace FrankyCLI
             { "Port",      0x0027BAC5 },
         };
 
+        /// <summary>
+        /// The Dir word for a member that carries NO position keyword -- an UNHANDED shape.
+        /// Not an escape hatch: vanilla ships five unhanded landers, and Stardust's Drayman is a
+        /// symmetric full-width cargo hold (bounds -4.0011/+4.0008 in X against the handed
+        /// Porters' -4.0/+3.69), so it mounts centrally and has no side to be on. Before this
+        /// existed the only way to fold such a part into a set was to stamp it with a side it
+        /// does not have -- a false fact in the record to satisfy a tool's arity.
+        /// </summary>
+        const string NoPosition = "None";
+
         public static int Generate(string[] args)
         {
             // args: [modname, "setflipset", flst_editorid, memberspec]
@@ -65,9 +75,12 @@ namespace FrankyCLI
             foreach (var chunk in memberSpec.Split(','))
             {
                 var halves = chunk.Split('=');
-                if (halves.Length != 2 || !PositionKeywords.ContainsKey(halves[1].Trim()))
+                bool known = halves.Length == 2
+                             && (PositionKeywords.ContainsKey(halves[1].Trim())
+                                 || string.Equals(halves[1].Trim(), NoPosition, StringComparison.OrdinalIgnoreCase));
+                if (!known)
                 {
-                    Console.WriteLine($"Error: member '{chunk}' is not <gbfm_editorid>=<Dir> (Dirs: {string.Join(" ", PositionKeywords.Keys)})");
+                    Console.WriteLine($"Error: member '{chunk}' is not <gbfm_editorid>=<Dir> (Dirs: {string.Join(" ", PositionKeywords.Keys)} {NoPosition})");
                     return 1;
                 }
                 wanted.Add((halves[0].Trim(), halves[1].Trim()));
@@ -114,7 +127,11 @@ namespace FrankyCLI
                 for (int i = 0; i < members.Count; i++)
                 {
                     var (editorId, dir) = wanted[i];
-                    var wantKey = new FormKey(starfieldKey, PositionKeywords[dir]);
+                    // An unhanded member wants NO position keyword, so there is no key to want.
+                    // Left null, the stale filter below then treats EVERY position keyword as
+                    // stale -- which is exactly the intent: strip the side, add nothing.
+                    bool unhanded = string.Equals(dir, NoPosition, StringComparison.OrdinalIgnoreCase);
+                    FormKey? wantKey = unhanded ? null : new FormKey(starfieldKey, PositionKeywords[dir]);
                     var gbfm = members[i].DeepCopy();
 
                     var kwComp = gbfm.Components.OfType<KeywordFormComponent>().FirstOrDefault();
@@ -125,8 +142,8 @@ namespace FrankyCLI
                     }
 
                     var stale = kwComp.Keywords.Where(k => allPositionKeys.Contains(k.FormKey) && k.FormKey != wantKey).ToList();
-                    bool has = kwComp.Keywords.Any(k => k.FormKey == wantKey);
-                    if (stale.Count == 0 && has)
+                    bool has = wantKey != null && kwComp.Keywords.Any(k => k.FormKey == wantKey.Value);
+                    if (stale.Count == 0 && (has || unhanded))
                     {
                         Console.WriteLine($"  {editorId}: already {dir} -- left as is");
                         members[i] = members[i]; // unchanged record stays in the mod as read
@@ -137,10 +154,14 @@ namespace FrankyCLI
                         kwComp.Keywords.Remove(s);
                         Console.WriteLine($"  {editorId}: removed stale position keyword {s.FormKey}");
                     }
-                    if (!has)
+                    if (!has && !unhanded)
                     {
-                        kwComp.Keywords.Add(wantKey.ToLink<IKeywordGetter>());
+                        kwComp.Keywords.Add(wantKey!.Value.ToLink<IKeywordGetter>());
                         Console.WriteLine($"  {editorId}: + ShipModPosition{(dir.Equals("Starboard", StringComparison.OrdinalIgnoreCase) ? "Stbd" : dir)}");
+                    }
+                    else if (unhanded)
+                    {
+                        Console.WriteLine($"  {editorId}: unhanded -- no position keyword (carries none by design)");
                     }
                     myMod.GenericBaseForms.Remove(members[i].FormKey);
                     myMod.GenericBaseForms.Add(gbfm);

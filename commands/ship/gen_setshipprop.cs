@@ -183,6 +183,29 @@ namespace FrankyCLI
             allowZero: false);
     }
 
+    /// <summary>
+    /// ShipModuleVariant -- the SHAPE axis of the builder's two controls (position is the mount
+    /// SIDE, variant is the shape). Read off our own shipped cargo set: atsd_gbfm_cargolg_01/02
+    /// carry variant 1 and 04/05 carry variant 2, so a Porter row is a 2x2 grid of
+    /// variant x position.
+    ///
+    /// It exists because COMPRESSING two rows into one is a catalogue-shaping move and the
+    /// variant number is the only thing that separates the members afterwards. Nothing could
+    /// set it: setflipset writes positions and the FormList, and every other ShipProp verb is
+    /// pinned to a stat. So folding a part into a set meant hand-editing in the CK -- on the one
+    /// axis where a collision is silent, because two members sharing a variant number is not an
+    /// error, it is just a shape the player can never reach.
+    /// </summary>
+    class gen_setvariant
+    {
+        public static int Generate(string[] args) => ShipProp.Apply(args, 0x27BACE,
+            "ShipModuleVariant",
+            "The SHAPE axis. Members of one flip set must carry DISTINCT variant numbers within "
+            + "a given position, or the collision is silent -- the unreachable one just never "
+            + "appears. Vanilla cargo carries no variant at all; ours all do.",
+            allowZero: false);
+    }
+
     class gen_setrepair
     {
         public static int Generate(string[] args) => ShipProp.Apply(args, 0x01CAC0,
