@@ -40,6 +40,17 @@ namespace FrankyCLI
             { "Stbd",      0x0027BAC2 },
             { "Starboard", 0x0027BAC2 },
             { "Port",      0x0027BAC5 },
+            // The four CORNERS. The vocabulary is closed at TEN and corners exist only for
+            // Port/Stbd x Top/Bottom (there is no TopAft). Added 2026-09-08: without them this
+            // command could not spell -- and so could not WRITE -- a set it had itself helped
+            // build. The Fettler Pylon put its four rev members on corners on 09-08, which made
+            // that set unextendable: every new member forced either a demotion of the four or a
+            // hand restoration afterwards. Verified against Starfield.esm, all ten read back by
+            // `gen_inspect Keyword ShipModPosition`.
+            { "PortTop",    0x0027BAC4 },
+            { "PortBottom", 0x0027BAC3 },
+            { "StbdTop",    0x0027BAC1 },
+            { "StbdBottom", 0x0027BAC0 },
         };
 
         /// <summary>
