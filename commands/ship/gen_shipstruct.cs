@@ -162,6 +162,18 @@ namespace FrankyCLI
             //                              Mass stays on --mass (unlike --shield, a lander's mass
             //                              is not half of a balance check -- see below).
             //                              Mutually exclusive with --cargo, --engine and --shield.
+            //   --grav <k=v,...>           make this part a GRAV DRIVE: adds the seven grav
+            //                              ActorValues no setter reaches. Keys:
+            //                                rating    ShipSystemGravDriveHealth AND ...EMHealth
+            //                                          (required -- ONE dial, written to BOTH)
+            //                                thrust    SpaceshipGravJumpThrust (required -- the dial
+            //                                          that decides how far the ship jumps)
+            //                                health    generic Health              (default 5)
+            //                                power     SpaceshipGravJumpMaxPower   (default 9)
+            //                                mass      SpaceshipPartMass  (default floor(rating/2))
+            //                              e.g. --grav "rating=52,thrust=16"
+            //                              Mutually exclusive with --cargo, --engine, --shield
+            //                              and --lander.
             //   --animgraph <k=v,...>      attach a BGSAnimationGraph_Component to the
             //                              MoveableStatic, which is what makes a part MOVE. Keys:
             //                                gear      a vanilla rig folder, e.g. landernovang20 --
@@ -253,7 +265,7 @@ namespace FrankyCLI
             // rotations for their Starboard/Port/Aft nodes).
             string? optSnap = null, optSnapNodes = null, optSwaps = null, optBounds = null, optCategory = null;
             string? optEngine = null, optMass = null, optName = null, optReusePackin = null, optDesc = null;
-            string? optVariant = null, optCargo = null, optShield = null;
+            string? optVariant = null, optCargo = null, optShield = null, optGrav = null;
             string? optLander = null, optAnimGraph = null;
             bool optMsttOnly = false, optNoSnap = false;
             for (int i = 5; i < args.Length; i++)
@@ -271,6 +283,7 @@ namespace FrankyCLI
                     case "--cargo": if (!hasValue) { Console.WriteLine("Error: --cargo needs a value"); return 1; } optCargo = args[++i]; break;
                     case "--shield": if (!hasValue) { Console.WriteLine("Error: --shield needs a value"); return 1; } optShield = args[++i]; break;
                     case "--lander": if (!hasValue) { Console.WriteLine("Error: --lander needs a value"); return 1; } optLander = args[++i]; break;
+                    case "--grav": if (!hasValue) { Console.WriteLine("Error: --grav needs a value"); return 1; } optGrav = args[++i]; break;
                     case "--animgraph": if (!hasValue) { Console.WriteLine("Error: --animgraph needs a value"); return 1; } optAnimGraph = args[++i]; break;
                     case "--variant": if (!hasValue) { Console.WriteLine("Error: --variant needs a value"); return 1; } optVariant = args[++i]; break;
                     case "--name": if (!hasValue) { Console.WriteLine("Error: --name needs a value"); return 1; } optName = args[++i]; break;
@@ -338,6 +351,7 @@ namespace FrankyCLI
                 if (optEngine != null) ignored.Add("--engine");
                 if (optShield != null) ignored.Add("--shield");
                 if (optLander != null) ignored.Add("--lander");
+                if (optGrav != null) ignored.Add("--grav");
                 if (optMass != null) ignored.Add("--mass");
                 if (optVariant != null) ignored.Add("--variant");
                 if (optName != null) ignored.Add("--name");
@@ -369,15 +383,17 @@ namespace FrankyCLI
                     return 1;
                 }
             }
-            // The three module-class flags are three different PropertySheets, not three sets of
-            // fields that compose. Named individually so one run reports every clash rather than
-            // the first one found.
+            // The module-class flags are different PropertySheets, not sets of fields that
+            // compose. Named individually so one run reports every clash rather than the first
+            // one found. (Read "three" here until --grav landed; the count was in the prose and
+            // the prose is what goes stale, so it now says what it means instead.)
             {
                 var sheets = new List<string>();
                 if (optCargo != null) sheets.Add("--cargo");
                 if (optEngine != null) sheets.Add("--engine");
                 if (optShield != null) sheets.Add("--shield");
                 if (optLander != null) sheets.Add("--lander");
+                if (optGrav != null) sheets.Add("--grav");
                 if (sheets.Count > 1)
                 {
                     Console.WriteLine("Error: " + string.Join(" and ", sheets)
@@ -405,6 +421,13 @@ namespace FrankyCLI
             {
                 lander = LanderSpec.Parse(optLander);
                 if (lander == null) return 1;                 // Parse prints the reason
+            }
+
+            GravSpec? grav = null;
+            if (optGrav != null)
+            {
+                grav = GravSpec.Parse(optGrav);
+                if (grav == null) return 1;                   // Parse prints the reason
             }
 
             AnimGraphSpec? animGraph = null;
@@ -441,6 +464,12 @@ namespace FrankyCLI
                 return 1;
             }
             if (shield != null) partMass = shield.Mass;
+            // A grav drive's mass is DERIVED from its rating (floor(rating/2), see GravSpec), so
+            // it fills partMass only when the author did not say otherwise -- unlike --shield,
+            // where mass is half of a balance check and therefore always wins. An explicit
+            // --mass here is a deliberate departure from the vanilla relation, not an accident,
+            // so it is honoured rather than overridden.
+            if (grav != null && optMass == null) partMass = grav.Mass;
             float partVariant = 1;
             if (optVariant != null && !float.TryParse(optVariant, out partVariant))
             {
@@ -1001,6 +1030,35 @@ namespace FrankyCLI
                             + " ships rating 6 at mass 200 -- but it is a deliberate choice, not a default.");
                 }
 
+                if (grav != null)
+                {
+                    // The seven grav ActorValues, plus generic Health. SpaceshipPartMass and
+                    // ShipModuleVariant are on the base sheet already. Every FormID below was
+                    // read off SMA_GravDrive_Vanguard_NG170_UC01_QuestOnly with gen_inspect,
+                    // never from notes.
+                    //
+                    // ⭐ RATING WRITES TWO FIELDS BECAUSE VANILLA HOLDS THEM EQUAL ON 17 OF 17.
+                    // Same shape as ShipSystemEngineHealth/EMHealth above, and the same reason:
+                    // where two fields are equal on every record, take ONE parameter and write
+                    // both -- two parameters is two ways to make them disagree.
+                    properties.Add(Prop(0x001EF0CB, grav.Rating));    // ShipSystemGravDriveHealth   *the dial*
+                    properties.Add(Prop(0x001EF0C1, grav.Rating));    // ShipSystemGravDriveEMHealth (always equal)
+                    properties.Add(Prop(0x002BFAFD, grav.Thrust));    // SpaceshipGravJumpThrust     *the dial*
+                    properties.Add(Prop(0x00008223, grav.Power));     // SpaceshipGravJumpMaxPower
+                    properties.Add(Prop(0x0000854E, 1));              // SpaceshipGravJumpDistancePerFuel
+                    properties.Add(Prop(0x0000855E, 0.5f));           // SpaceshipGravJump...InterplanetaryDistanceMultiplier
+                    properties.Add(Prop(0x0001158B, 1));              // ShipSystemDamageWeightGravDrive
+                    properties.Add(Prop(0x000002D4, grav.Health));    // Health (generic)
+                    Console.WriteLine("           grav rating " + grav.Rating
+                        + " (health+EM), thrust " + grav.Thrust + ", power " + grav.Power
+                        + ", health " + grav.Health + ", mass " + partMass);
+                    if (grav.Rating > GravSpec.VanillaMaxRating || grav.Thrust > GravSpec.VanillaMaxThrust)
+                        Console.WriteLine("           NOTE: outside the vanilla envelope"
+                            + $" (rating <= {GravSpec.VanillaMaxRating}, thrust <= {GravSpec.VanillaMaxThrust}"
+                            + " across all 17 SMA_GravDrive records). Not refused -- a warning, the"
+                            + " same posture as --lander's.");
+                }
+
                 if (shield != null)
                 {
                     // The 11 shield-specific properties (mass is already on the sheet above).
@@ -1374,6 +1432,112 @@ namespace FrankyCLI
                 {
                     Console.WriteLine($"Error: --lander rating/health must be positive"
                         + $" (got rating {s.Rating}, health {s.Health})");
+                    return null;
+                }
+                return s;
+            }
+        }
+
+        // A GRAV DRIVE's sheet. Nine properties, of which two (SpaceshipPartMass,
+        // ShipModuleVariant) are the base sheet's already -- so this flag adds seven, and before
+        // it existed exactly TWO of the nine had a writer anywhere in the toolchain (sethealth,
+        // setmass).
+        //
+        // ⭐ MEASURED ACROSS ALL 17 SMA_GravDrive GBFMs IN THE LOAD ORDER, 2026-09-09, and the
+        // class has far less shape than nine properties suggests:
+        //
+        //   ShipSystemGravDriveHealth == ...EMHealth   17/17 identical  -> ONE input, both fields
+        //   SpaceshipPartMass == floor(GravHP / 2)     16/17            -> derived, overridable
+        //   SpaceshipGravJumpDistancePerFuel  = 1      17/17            -> CONSTANT
+        //   ...InterplanetaryDistanceMultiplier = 0.5  17/17            -> CONSTANT
+        //   ShipSystemDamageWeightGravDrive   = 1      17/17            -> CONSTANT
+        //   SpaceshipGravJumpMaxPower         = 9      14/17            -> default (8, 10, 12 exist)
+        //   SpaceshipGravJumpThrust           12..35                    -> the other real dial
+        //
+        // Ranges: rating 47..95, thrust 12..35, mass 23..54. The ONE record breaking the mass
+        // relation is SFTA03_SMA_GravDrive_Reladyne_R-5000_Alpha_lvl37 (95 -> 54, not 47), a DLC
+        // record; it is named rather than smoothed away, because a rule stated without its
+        // exception is a rule that will be trusted where it does not hold.
+        //
+        // ⛔ HEALTH HAS NO HONEST DERIVATION AND THE DEFAULT IS HIS RULING, NOT A MEASUREMENT.
+        // Vanilla splits 9 records at Health 5 against 8 that carry the same number as
+        // GravDriveHealth. That is a coin flip, not a convention with an outlier, so deriving it
+        // would be a balance decision hidden inside a constant. Put to the owner 2026-09-09 and
+        // he ruled: default 5. Recorded here so the next reader knows it was chosen, not counted.
+        sealed class GravSpec
+        {
+            public float Rating, Thrust;
+            public float Health = 5;      // his ruling, 2026-09-09 -- see above
+            public float Power = 9;       // 14/17
+            public float MassOverride = -1;
+
+            // floor(rating/2), which reproduces every odd-rating vanilla row exactly (47->23,
+            // 55->27, 57->28, 61->30, 65->32, 95->47). Integer truncation is the relation, not a
+            // rounding convenience -- round() would give 24/28/29/31/33/48 and match none of them.
+            public float Mass => MassOverride >= 0 ? MassOverride : (float)Math.Floor(Rating / 2.0);
+
+            // Vanilla's ceilings, for the WARNING only -- the same posture as LanderSpec's, and
+            // for the same reason: these bound Bethesda's art direction, not the engine.
+            public const float VanillaMaxRating = 95;
+            public const float VanillaMaxThrust = 35;
+
+            public static GravSpec? Parse(string spec)
+            {
+                var s = new GravSpec();
+                bool haveRating = false, haveThrust = false;
+                foreach (var pair in spec.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var kv = pair.Split('=');
+                    if (kv.Length != 2)
+                    {
+                        Console.WriteLine("Error: bad --grav term '" + pair + "' -- want key=value");
+                        return null;
+                    }
+                    var k = kv[0].Trim();
+                    if (!float.TryParse(kv[1].Trim(), out var n))
+                    {
+                        Console.WriteLine("Error: --grav " + k + " wants a number (got '"
+                            + kv[1].Trim() + "')");
+                        return null;
+                    }
+                    switch (k.ToLowerInvariant())
+                    {
+                        case "rating": s.Rating = n; haveRating = true; break;
+                        case "thrust": s.Thrust = n; haveThrust = true; break;
+                        case "health": s.Health = n; break;
+                        case "power":  s.Power = n; break;
+                        case "mass":   s.MassOverride = n; break;
+                        default:
+                            Console.WriteLine("Error: unknown --grav key '" + k
+                                + "'. Keys: rating thrust health power mass");
+                            return null;
+                    }
+                }
+                // Name WHICH dial is missing. Both-required collapsed to one message reads fine
+                // until you supply one of them and are told to supply both -- two failures
+                // wearing one sentence, which is the shape this repo keeps paying for elsewhere.
+                if (!haveRating || !haveThrust)
+                {
+                    var missing = new List<string>();
+                    if (!haveRating) missing.Add("rating= (ShipSystemGravDriveHealth, written to EMHealth too)");
+                    if (!haveThrust) missing.Add("thrust= (SpaceshipGravJumpThrust)");
+                    Console.WriteLine("Error: --grav needs " + string.Join(" and ", missing));
+                    return null;
+                }
+                // Zero on either dial is the silent nothing this flag exists to prevent: the part
+                // builds, attaches, is called a grav drive and jumps the ship nowhere. Same
+                // refusal as --cargo's zero capacity and --lander's zero rating.
+                if (s.Rating <= 0 || s.Thrust <= 0 || s.Health <= 0 || s.Power <= 0)
+                {
+                    Console.WriteLine($"Error: --grav rating/thrust/health/power must be positive"
+                        + $" (got rating {s.Rating}, thrust {s.Thrust}, health {s.Health},"
+                        + $" power {s.Power})");
+                    return null;
+                }
+                if (s.MassOverride == 0)
+                {
+                    Console.WriteLine("Error: --grav mass=0 -- a massless part is not a design,"
+                        + " it is an unset field. Omit mass= to derive floor(rating/2).");
                     return null;
                 }
                 return s;
