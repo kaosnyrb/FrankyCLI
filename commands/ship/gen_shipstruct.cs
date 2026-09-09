@@ -171,6 +171,8 @@ namespace FrankyCLI
             //                                health    generic Health              (default 5)
             //                                power     SpaceshipGravJumpMaxPower   (default 9)
             //                                mass      SpaceshipPartMass  (default floor(rating/2))
+            //                                class     A|B|C -- ShipModuleClass<x>   (default A;
+            //                                          17/17 vanilla grav drives are A)
             //                              e.g. --grav "rating=52,thrust=16"
             //                              Mutually exclusive with --cargo, --engine, --shield
             //                              and --lander.
@@ -1097,7 +1099,7 @@ namespace FrankyCLI
                 {
                     ShipModuleManufacturerDeimos
                 };
-                string? moduleClass = engine?.Class ?? shield?.Class;
+                string? moduleClass = engine?.Class ?? shield?.Class ?? grav?.Class;
                 if (moduleClass != null)
                 {
                     gbfmKeywords.Add(new FormKey(env.LoadOrder[0].ModKey, ShipClassKeyword(moduleClass))
@@ -1464,12 +1466,19 @@ namespace FrankyCLI
         // GravDriveHealth. That is a coin flip, not a convention with an outlier, so deriving it
         // would be a balance decision hidden inside a constant. Put to the owner 2026-09-09 and
         // he ruled: default 5. Recorded here so the next reader knows it was chosen, not counted.
+        // ⛔ THE CLASS KEYWORD WAS MISSED ON THE FIRST BUILD AND HE CAUGHT IT AT THE GLASS.
+        // ShipModuleClassA is on 17 of 17 vanilla grav drives -- universal, not a majority -- and it
+        // was written in this file's own survey table above while the flag did not stamp it. The
+        // ship-class keyword is what the builder groups and gates on, so a grav drive without one is
+        // a part the ship cannot reason about. Default A because vanilla ships nothing else at this
+        // part type; overridable because "vanilla never does it" is not "it does not work".
         sealed class GravSpec
         {
             public float Rating, Thrust;
             public float Health = 5;      // his ruling, 2026-09-09 -- see above
             public float Power = 9;       // 14/17
             public float MassOverride = -1;
+            public string Class = "A";    // 17/17
 
             // floor(rating/2), which reproduces every odd-rating vanilla row exactly (47->23,
             // 55->27, 57->28, 61->30, 65->32, 95->47). Integer truncation is the relation, not a
@@ -1494,10 +1503,22 @@ namespace FrankyCLI
                         return null;
                     }
                     var k = kv[0].Trim();
-                    if (!float.TryParse(kv[1].Trim(), out var n))
+                    var raw = kv[1].Trim();
+                    if (k.Equals("class", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (raw.Length != 1 || "ABCabc".IndexOf(raw[0]) < 0)
+                        {
+                            Console.WriteLine("Error: --grav class must be A, B or C (got '" + raw
+                                + "'). Vanilla ships only A at this part type -- all 17.");
+                            return null;
+                        }
+                        s.Class = raw.ToUpperInvariant();
+                        continue;
+                    }
+                    if (!float.TryParse(raw, out var n))
                     {
                         Console.WriteLine("Error: --grav " + k + " wants a number (got '"
-                            + kv[1].Trim() + "')");
+                            + raw + "')");
                         return null;
                     }
                     switch (k.ToLowerInvariant())
@@ -1509,7 +1530,7 @@ namespace FrankyCLI
                         case "mass":   s.MassOverride = n; break;
                         default:
                             Console.WriteLine("Error: unknown --grav key '" + k
-                                + "'. Keys: rating thrust health power mass");
+                                + "'. Keys: rating thrust health power mass class");
                             return null;
                     }
                 }
