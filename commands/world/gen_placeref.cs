@@ -214,12 +214,13 @@ namespace FrankyCLI
             // could legitimately be called "placeref" (gen_placeprim says the same in its own head).
             var pos = new List<string>();
             string? rotStr = null, edid = null;
-            bool dry = false;
+            bool dry = false, persistent = false;
             for (int i = 0; i < args.Length; i++)
             {
                 if (i == 1) continue;
                 var a = args[i];
                 if (a == "--dry") { dry = true; }
+                else if (a == "--persistent") { persistent = true; }
                 else if (a == "--rot" && i + 1 < args.Length) { rotStr = args[++i]; }
                 else if (a == "--edid" && i + 1 < args.Length) { edid = args[++i]; }
                 else pos.Add(a);
@@ -228,7 +229,11 @@ namespace FrankyCLI
             if (pos.Count < 4)
             {
                 Console.WriteLine("Usage: placeref <modname> <cell> <base> <x,y,z>");
-                Console.WriteLine("                [--rot <rx,ry,rz>] [--edid <edid>] [--dry]");
+                Console.WriteLine("                [--rot <rx,ry,rz>] [--edid <edid>] [--persistent] [--dry]");
+                Console.WriteLine("  --persistent  put it in the cell's PERSISTENT group AND set record flag");
+                Console.WriteLine("          0x400. Both halves, because either alone fails silently. Needed");
+                Console.WriteLine("          by anything referenced from outside its own cell -- a teleport");
+                Console.WriteLine("          door's XMarkerHeading is the case this was built for.");
                 Console.WriteLine("  <cell>  a Cell EditorID -- READ IT OFF THE PLUGIN. The CK renames a");
                 Console.WriteLine("          generated cell on save (atsd_cell_x -> PackIn<packin>StorageCell).");
                 Console.WriteLine("  <base>  a base EditorID in <modname>, or 0xFORMID.");
@@ -352,8 +357,31 @@ namespace FrankyCLI
                     Base = baseKey.Value.ToLink<IPlaceableObjectGetter>(),
                 };
                 if (edid != null) placed.EditorID = edid;
-                cell.Temporary.Add(placed);
-                Console.WriteLine("  placed REFR " + placed.FormKey + " in " + cell.EditorID);
+
+                // ⛔⛔ PERSISTENCE IS TWO THINGS, NOT ONE, AND DOING HALF OF IT FAILS SILENTLY.
+                // A persistent reference lives in the cell's PERSISTENT child group *and*
+                // carries record flag 0x400. Measured rather than assumed, on one control pair
+                // in Starfield.esm: the Stroud bay's door (temporary) reads
+                // MajorRecordFlagsRaw 0, and the Taiyo bay's ShipMarker_NearRamp (persistent)
+                // reads 1024 / 0x400. Every ref this command wrote before today read 0.
+                //   Setting only the list gives a ref the engine may not resolve across cells;
+                // setting only the flag leaves it in the temporary group. Neither half errors.
+                //
+                // WHY IT EXISTS. A teleport-door marker has to be persistent: both vanilla
+                // landing bays put their XMarkerHeading in Persistent, and a bay door wired to
+                // a temporary one renders correctly, opens, and takes you nowhere -- which is
+                // exactly what it did on avontechstardust's dev bay on 2026-09-14.
+                if (persistent)
+                {
+                    placed.MajorRecordFlagsRaw |= 0x400;
+                    cell.Persistent.Add(placed);
+                }
+                else
+                {
+                    cell.Temporary.Add(placed);
+                }
+                Console.WriteLine("  placed REFR " + placed.FormKey + " in " + cell.EditorID
+                                  + (persistent ? "  [PERSISTENT, flag 0x400]" : ""));
             }
 
             // The GameEnvironment holds the plugin open, so the write happens after the using
