@@ -108,7 +108,9 @@ namespace FrankyCLI
                 Console.WriteLine("         --replace   wipe existing links and set exactly these (default MERGES by keyword)");
                 Console.WriteLine();
                 Console.WriteLine("  <ref>/<target>  PlacedObject FormID: 0F3287, 0x000F3287 or 0F3287:mod.esm");
-                Console.WriteLine("  <keyword>       Keyword EditorID (LinkShipModule) or FormID (0x2C1001)");
+                Console.WriteLine("  <keyword>       Keyword EditorID (LinkShipModule), FormID (0x2C1001),");
+                Console.WriteLine("                  or @null for an UNNAMED link -- the shape both vanilla");
+                Console.WriteLine("                  landing-bay doors use to reach their ShipModuleTrigger");
                 Console.WriteLine();
                 Console.WriteLine("  Read the current state with:  gen_inspect Cell <cell>   (renders LinkedReferences)");
                 return 1;
@@ -218,6 +220,28 @@ namespace FrankyCLI
 
                         // Keyword: EditorID first (that is what a human types), FormID second.
                         FormKey kwKey;
+
+                        // ⭐ @null is the UNNAMED link, and it is a real shape in vanilla rather
+                        // than a hole in this tool. Both landing-bay doors in Starfield.esm carry
+                        // exactly two links -- a named DynamicallyLinkedDoorTeleportMarkerKeyword
+                        // to their XMarkerHeading, and an UNNAMED one to the cell's
+                        // ShipModuleTrigger. Before this, that second link was unwritable, so a
+                        // hand-authored bay door could be wired correctly in every visible respect
+                        // and still not work.
+                        //
+                        // ⛔ IT IS AN EXPLICIT SENTINEL, NOT A FALLBACK ON A FAILED LOOKUP, and the
+                        // distinction is the whole safety of it. "if the EditorID does not resolve,
+                        // write a null keyword" would silently convert every TYPO into an unnamed
+                        // link -- a wrong link that renders identically to a correct one, which is
+                        // the failure the dangling-target check below already exists to prevent.
+                        // '@' cannot appear in a Bethesda EditorID, so this token can never shadow
+                        // a real keyword, and it is matched BEFORE the lookup rather than after it.
+                        if (string.Equals(kwArg, "@null", StringComparison.OrdinalIgnoreCase))
+                        {
+                            kwKey = FormKey.Null;
+                        }
+                        else
+                        {
                         var kw = env.LoadOrder.PriorityOrder.Keyword().WinningOverrides()
                                     .FirstOrDefault(k => string.Equals(k.EditorID, kwArg, StringComparison.OrdinalIgnoreCase));
                         if (kw != null) kwKey = kw.FormKey;
@@ -235,8 +259,10 @@ namespace FrankyCLI
                         else
                         {
                             Console.WriteLine("Error: no Keyword '" + kwArg + "' in the load order"
-                                              + " (give an EditorID like LinkShipModule, or a FormID like 0x2C1001)");
+                                              + " (give an EditorID like LinkShipModule, a FormID like 0x2C1001,"
+                                              + " or @null for an unnamed link)");
                             return 1;
+                        }
                         }
 
                         if (!TryParseFormId(tgtArg, out uint tgtId))
