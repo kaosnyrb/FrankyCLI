@@ -39,7 +39,9 @@ namespace FrankyCLI
             "                     ConstructibleObject (cobj), LayeredMaterialSwap (lmsw)\n" +
             "  PlacedObject (refr), refr_xflg, placed\n" +
             "  worldspace_objects <wsEditorId>, worldspace_smallworld <minDnam>\n" +
-            "  'list' - enumerate all record groups with counts";
+            "  'list' - enumerate all record groups with counts\n" +
+            "  'selftest' - positive + negative controls for the Mutagen field-width tell\n" +
+            "               (no plugin loaded, exits 1 on failure, so it can gate)";
 
         public static int Generate(string[] args)
         {
@@ -47,6 +49,11 @@ namespace FrankyCLI
             // always invokes with exactly 5. A second guard here was unreachable (rule 4).
             string recordType = args[3];
             string search = args[4];
+
+            // Before the environment, because it needs no plugin and booting the whole load order
+            // to check arithmetic would make nobody run it.
+            if (string.Equals(recordType, "selftest", StringComparison.OrdinalIgnoreCase))
+                return SelfTest();
 
             Console.WriteLine($"=== Form Inspector ===");
             Console.WriteLine($"Record type: {recordType}");
@@ -400,6 +407,10 @@ namespace FrankyCLI
                                 // (2026-08-24: 0F3287 carried two and this printed none.)
                                 DumpLinkedRefs(po, cache, "  ");
                                 DumpPlacedExtras(po, cache, "  ");
+                                // Everything this renderer does NOT decode, named rather than
+                                // silently dropped -- see DumpCoverage's head for why it took six
+                                // weeks for the quest dumper's own check to reach a second record.
+                                DumpCoverage<IPlacedObjectGetter>(po, RefrPropsRendered, "  ");
                                 found++;
                             }
                         }
@@ -1878,6 +1889,32 @@ namespace FrankyCLI
         // trust by having read its source. So this one enumerates IQuestGetter's own properties and
         // names any it did not render -- if a field exists and is not shown above, it is listed
         // below by name, and the omission is visible instead of inferred.
+        /// What the REFR renderer below actually prints. Everything else on IPlacedObjectGetter is
+        /// named by the coverage report instead of vanishing.
+        ///
+        /// ⛔ THE MEASUREMENT THAT MADE THIS NECESSARY (2026-09-15). This reader printed TWELVE
+        /// fields. xEdit's REFR definition in Core/wbDefinitionsSF1.pas declares roughly FIFTY
+        /// subrecords, and this repo's own docs/formlib/placed_object.md lists ~70 fields that
+        /// CellTools.CloneCellById copies. So the CLONER knew the record and the READER did not,
+        /// which is the worst possible split: work that moves a field correctly, beside a view that
+        /// cannot show you it moved.
+        ///
+        /// ⚠ THE LIST IS OF NAMES THE RENDERER HANDLES, NOT OF FIELDS THAT MATTER. Adding a name
+        /// here SILENCES it, so a name goes in only when a line above genuinely prints it. That is
+        /// the one way this check can be made to lie, and it is easier to do by accident than on
+        /// purpose -- the qall list one screen down carries the same hazard.
+        private static readonly HashSet<string> RefrPropsRendered = new()
+        {
+            // printed by the REFR renderer
+            "FormKey", "EditorID", "Base", "Position", "Rotation", "Scale",
+            "MajorRecordFlagsRaw", "StarfieldMajorRecordFlags", "XFLG", "XNSE", "XALG",
+            // printed by DumpLinkedRefs / DumpPlacedExtras
+            "LinkedReferences", "Lock", "IsLinkedRefTransient", "XLTW", "XLIB",
+            // structural / not content, same exclusions the quest set makes
+            "FormVersion", "Version2", "VersionControl", "IsCompressed", "IsDeleted",
+            "MajorFlags",
+        };
+
         private static readonly HashSet<string> QuestPropsRendered = new()
         {
             "FormKey", "EditorID", "Name", "Data", "Stages", "Objectives", "Aliases",
@@ -2064,29 +2101,167 @@ namespace FrankyCLI
             Console.WriteLine();
 
             // ---- Coverage: what this reader did NOT show -------------------------------------
-            var missed = new List<string>();
-            foreach (var prop in typeof(IQuestGetter).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            DumpCoverage<IQuestGetter>(q, QuestPropsRendered, "  ");
+        }
+
+        /// Name every non-empty property the renderer above did NOT show.
+        ///
+        /// ⛔ EXTRACTED 2026-09-15 FROM THE QUEST DUMPER, WHERE IT WAS THE ONLY ONE. His instruction
+        /// when it was first built was *"I don't want you working off incomplete data"*, and it
+        /// worked -- its first run named 15 undecoded properties including MissionBoardDescription,
+        /// the card text 146 missions are authored with and which no reader had ever shown. Then it
+        /// stayed welded to ONE record type for six weeks, so every other renderer in this file kept
+        /// the exact defect it was built to cure: a hand-picked list of fields, and no way to tell a
+        /// field that is ABSENT from a field the reader was never taught.
+        ///
+        /// ⭐ A COMPLETENESS CHECK PROTECTS EXACTLY THE LEVEL IT ENUMERATES, and the level you forget
+        /// is the one you needed. That law is already written on this file twice (record vs alias);
+        /// this is the third payout and the cure is generic rather than another copy.
+        ///
+        /// ⚠ IT GRADES MUTAGEN'S SURFACE, NOT THE FORMAT'S. A property Mutagen does not expose at all
+        /// cannot appear here, so a clean coverage line means "this reader showed everything the
+        /// library offered", never "this reader showed everything the record holds". Those are
+        /// different claims and only xEdit's definitions answer the second.
+        /// ⛔ AND ITS FIRST RUN ON A REFR PROVED THE FILTER WAS THE WHOLE JOB. It named 19
+        /// properties, of which 17 read `Null` or `False`: Mutagen's nullable FormLink is a STRUCT
+        /// and is never C# null, so `v == null` -- which is all the quest version ever tested -- does
+        /// not catch an unset link, and `false` is not null either. Nineteen rows of nothing is a
+        /// WOLF-CRIER, and a gate that cries wolf has stopped being a gate, because the reader is the
+        /// component that fails. The real undecoded field would land in that block and nobody would
+        /// read it.
+        ///
+        /// ⭐ SO IT IS TWO TIERS RATHER THAN A TIGHTER FILTER, and that distinction is the point: a
+        /// filter DELETES the empty ones and then "absent from the record" and "suppressed by my
+        /// predicate" become the same blank again, which is the exact defect this whole mechanism
+        /// exists to close. They are counted and named on one line instead, values omitted. Nothing
+        /// is hidden; only the loud half is loud.
+        private static void DumpCoverage<T>(T rec, HashSet<string> rendered, string indent)
+        {
+            var carrying = new List<string>();
+            var empty = new List<string>();
+            foreach (var prop in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (prop.GetIndexParameters().Length > 0) continue;
-                if (QuestPropsRendered.Contains(prop.Name)) continue;
+                if (rendered.Contains(prop.Name)) continue;
                 object? v;
-                try { v = prop.GetValue(q); } catch { continue; }
-                if (v == null) continue;
-                if (v is System.Collections.ICollection c && c.Count == 0) continue;
+                try { v = prop.GetValue(rec); } catch { continue; }
+                if (v == null) { empty.Add(prop.Name); continue; }
+                if (IsEmptyValue(v)) { empty.Add(prop.Name); continue; }
                 string shown = v is System.Collections.ICollection cc ? $"[{cc.Count} items]" : v.ToString() ?? "";
                 if (shown.Length > 90) shown = shown.Substring(0, 90) + "…";
-                missed.Add($"    {prop.Name} = {shown}");
+                carrying.Add($"{indent}  {prop.Name} = {shown}{WidthTell(v)}");
             }
-            if (missed.Count == 0)
+            if (carrying.Count == 0)
             {
-                Console.WriteLine("  Coverage: every non-empty property on this record is rendered above.");
+                Console.WriteLine($"{indent}Coverage: every property Mutagen exposes that CARRIES a value is rendered above.");
             }
             else
             {
-                Console.WriteLine($"  ⚠ NOT RENDERED ABOVE [{missed.Count}] -- present on the record, not decoded by this reader:");
-                foreach (var m in missed) Console.WriteLine(m);
+                Console.WriteLine($"{indent}⚠ NOT RENDERED ABOVE [{carrying.Count}] -- carries a value, not decoded by this reader:");
+                foreach (var m in carrying) Console.WriteLine(m);
             }
+            if (empty.Count > 0)
+                Console.WriteLine($"{indent}  (also undecoded but EMPTY on this record [{empty.Count}]: {string.Join(", ", empty)})");
             Console.WriteLine();
+        }
+
+        /// "Empty" = the record does not carry this field. Deliberately narrow: a zero NUMBER is not
+        /// empty, because 0 is a legitimate authored value (a rotation, an offset, a count) and
+        /// treating it as absence is how a real value gets suppressed. Only the shapes that genuinely
+        /// mean "unset" are counted: an unset FormLink, a false bool, an empty collection or string.
+        private static bool IsEmptyValue(object v)
+        {
+            if (v is IFormLinkGetter fl && fl.IsNull) return true;
+            if (v is bool b) return !b;
+            if (v is string s) return s.Length == 0;
+            if (v is System.Collections.ICollection c) return c.Count == 0;
+            if (v is System.Collections.IEnumerable e && v is not string)
+            {
+                foreach (var _ in e) return false;
+                return true;
+            }
+            return false;
+        }
+
+        /// ⭐ THE REUSABLE HALF OF THE XLOC BUG, TURNED INTO A PROMPT.
+        ///
+        /// Chasing a bay door on 2026-09-15, Mutagen read XLOC's Level as 6357246 and Flags as
+        /// 1087655425 where xEdit's pane read `Inaccessible` and `Unknown 0`. Core/wbDefinitionsSF1.pas
+        /// settles it: XLOC is `Level itU8 + wbUnused(3)`, so Mutagen reads a ONE-byte field FOUR
+        /// bytes wide and swallows the padding. 0x006100FE is Level 0xFE = 254 = Inaccessible.
+        ///
+        /// The general form is worth more than that one fix: A MUTAGEN FIELD ON THIS GAME THAT COMES
+        /// BACK AS A LARGE NONSENSE INTEGER IS A CANDIDATE FOR THE SAME WIDTH BUG, not a quirk of how
+        /// Mutagen exposes it. That reading cost two hours of treating a decoded value as unreadable.
+        ///
+        /// ⚠ IT IS A PROMPT TO LOOK, NEVER A VERDICT, and it is deliberately quiet: it fires only on
+        /// an integer that does not fit in two bytes, where the low byte is a plausible small value
+        /// and the upper bytes are not zero. A band that convicts nothing is decoration; one that
+        /// convicts everything is a wolf-crier. This one says where to grep and stops.
+        /// ⛔ THE POSITIVE CONTROL, AND IT EXISTS BECAUSE THE SWEEP CAME BACK ZERO.
+        ///
+        /// WidthTell was run across all 22 placed refs in avontechstardust and fired on NONE of
+        /// them. That is either "no REFR here carries an undecoded oversized integer" or "the tell
+        /// is broken", and those two are byte-identical from the outside: A SEARCH RETURNING ZERO IS
+        /// A NEEDLE FAILURE UNTIL A POSITIVE CONTROL SAYS OTHERWISE. So the values below are the two
+        /// REAL readings from the 2026-09-15 bay door, the ones xEdit rendered as `Inaccessible` and
+        /// `Unknown 0`, and they are asserted rather than eyeballed.
+        ///
+        /// It also carries NEGATIVE controls, because a tell that fires on everything is the same
+        /// useless as one that fires on nothing.
+        ///
+        ///   dotnet run -- gen_inspect selftest x
+        ///
+        /// Exit 1 on any failure, so it can gate rather than inform.
+        private static int SelfTest()
+        {
+            int fail = 0;
+            void Check(string label, bool ok, string detail)
+            {
+                Console.WriteLine((ok ? "  PASS  " : "  FAIL  ") + label + "   " + detail);
+                if (!ok) fail++;
+            }
+
+            // POSITIVE: the two raw values Mutagen actually returned for the bay door's XLOC.
+            string lvl = WidthTell(6357246u);                 // 0x006100FE -> Level 0xFE = 254
+            Check("XLOC Level 0x006100FE tells", lvl.Contains("0xFE") && lvl.Contains("(254)"),
+                  lvl.Length > 0 ? "fired" : "SILENT -- the tell did not fire on a known case");
+            string flg = WidthTell(1087655425u);              // 0x40D44E01 -> Flags 0x01 = 1
+            Check("XLOC Flags 0x40D44E01 tells", flg.Contains("0x01") && flg.Contains("(1)"),
+                  flg.Length > 0 ? "fired" : "SILENT -- the tell did not fire on a known case");
+
+            // NEGATIVE: values that must stay quiet, or the block becomes noise nobody reads.
+            Check("a 2-byte value stays quiet", WidthTell(65535u).Length == 0, "0x0000FFFF");
+            Check("a large value with a ZERO low byte stays quiet", WidthTell(0x40D44E00u).Length == 0,
+                  "0x40D44E00 -- nothing to recover, so nothing to say");
+            Check("XALG's documented 8uL stays quiet", WidthTell(8uL).Length == 0, "8");
+            Check("a non-integer stays quiet", WidthTell("some string").Length == 0, "string");
+            Check("a negative int stays quiet", WidthTell(-5).Length == 0, "-5");
+
+            Console.WriteLine();
+            Console.WriteLine(fail == 0
+                ? "gen_inspect selftest: all checks passed"
+                : $"gen_inspect selftest: {fail} FAILED");
+            return fail == 0 ? 0 : 1;
+        }
+
+        private static string WidthTell(object v)
+        {
+            ulong raw;
+            switch (v)
+            {
+                case uint u: raw = u; break;
+                case int i when i > 0: raw = (ulong)i; break;
+                case ulong ul: raw = ul; break;
+                case long l when l > 0: raw = (ulong)l; break;
+                default: return "";
+            }
+            if (raw <= 0xFFFF) return "";                 // fits the widths that are genuinely 2 bytes
+            ulong low = raw & 0xFF;
+            if (low == 0) return "";                      // a low byte of 0 tells us nothing
+            return $"   ⚠ >2 bytes: if SF1 declares this itU8 + wbUnused(3), the value is the LOW BYTE"
+                   + $" 0x{low:X2} ({low}). raw 0x{raw:X8}. grep the signature in"
+                   + " C:\\Git\\TES5Edit\\Core\\wbDefinitionsSF1.pas before trusting either reading.";
         }
 
         /// <summary>
