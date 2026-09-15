@@ -103,7 +103,10 @@ namespace FrankyCLI
             return n;
         }
 
-        private static bool TryTriple(string s, out float a, out float b, out float c)
+        // Widened from private 2026-09-15 so moveref parses a triple the SAME way rather than
+        // carrying a second copy -- a rule open-coded in N places is N bugs, and the one that
+        // drifts is never the one you are looking at.
+        public static bool TryTriple(string s, out float a, out float b, out float c)
         {
             a = b = c = 0;
             var p = s.Split(',', StringSplitOptions.RemoveEmptyEntries);
