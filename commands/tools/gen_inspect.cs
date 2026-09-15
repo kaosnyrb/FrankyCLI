@@ -399,6 +399,7 @@ namespace FrankyCLI
                                 // that does not, so the view could not distinguish wired from unwired.
                                 // (2026-08-24: 0F3287 carried two and this printed none.)
                                 DumpLinkedRefs(po, cache, "  ");
+                                DumpPlacedExtras(po, cache, "  ");
                                 found++;
                             }
                         }
@@ -717,6 +718,51 @@ namespace FrankyCLI
         /// The linked-reference block, in ONE place. Both cell-entry lists and the refr
         /// renderer call it, so a REFR's links can never again be visible from one view and
         /// invisible from another.
+        /// XLOC (lock data) and XLKT (linked-ref transient) on a placed reference, plus the two
+        /// nullable links beside them. Called from the SAME two places as DumpLinkedRefs, for the
+        /// reason written on that method: a field visible from one view and invisible from another
+        /// is how an absence in the DUMP becomes indistinguishable from an absence in the PLUGIN.
+        ///
+        /// ⛔ WHY IT EXISTS (2026-09-15). A bay door that renders and does nothing was chased for
+        /// two days, and the one thing nobody could compare was its lock data, because this dumper
+        /// never printed it. The answer arrived as a SCREENSHOT of xEdit. A record field the office
+        /// cannot read is a field the office cannot reason about, and it will reliably be the field
+        /// somebody wants at the worst moment.
+        ///
+        /// ⚠ THE NAMES ARE MUTAGEN'S, NOT xEDIT'S, and they do not match: XLOC is `Lock`, XLKT is
+        /// `IsLinkedRefTransient`, and xEdit's "Unknown" under the lock flags is `Unused`. Both
+        /// spellings are printed so a reader holding an xEdit window can join the two views.
+        private static void DumpPlacedExtras(IPlacedObjectGetter po, ILinkCache? cache, string indent)
+        {
+            var lk = po.Lock;
+            if (lk != null)
+            {
+                string keyName = NameOf(lk.Key.FormKey, cache);
+                // ⚠ RAW, AND SAID SO. Unused agrees with xEdit exactly (1 on both bay doors), so
+                // the struct is being read at the right offset -- but Level and Flags come back as
+                // 6357246 / 1087655425 where xEdit renders "Inaccessible" and "Unknown 0". One of
+                // the two tools is decoding these differently and I have not established which.
+                // Printed as raw decimal AND hex with the disagreement named, because a number
+                // dressed as a decoded enum is a readout you go down the wrong branch holding.
+                Console.WriteLine($"{indent}    XLOC (Lock): Level={lk.Level} (0x{(int)lk.Level:X8}) "
+                                  + $"Flags={(int)lk.Flags} (0x{(int)lk.Flags:X8}) Unused={lk.Unused}");
+                Console.WriteLine($"{indent}      ^ RAW. Unused matches xEdit's \"Unknown\"; Level/Flags "
+                                  + "do NOT decode to xEdit's labels and are UNVERIFIED");
+                Console.WriteLine($"{indent}      Key: {(lk.Key.FormKey.IsNull ? "NULL" : lk.Key.FormKey.ToString())}"
+                                  + (keyName.Length > 0 ? " " + keyName : ""));
+            }
+            // A bool, so it is printed ALWAYS rather than only when true: "false" and "the dumper
+            // does not know about this field" are the same blank otherwise, which is the defect
+            // this whole method was written to close.
+            Console.WriteLine($"{indent}    XLKT (IsLinkedRefTransient): {po.IsLinkedRefTransient}");
+            if (!po.XLTW.IsNull)
+                Console.WriteLine($"{indent}    XLTW: {po.XLTW.FormKey}"
+                                  + (NameOf(po.XLTW.FormKey, cache) is { Length: > 0 } n1 ? " " + n1 : ""));
+            if (!po.XLIB.IsNull)
+                Console.WriteLine($"{indent}    XLIB: {po.XLIB.FormKey}"
+                                  + (NameOf(po.XLIB.FormKey, cache) is { Length: > 0 } n2 ? " " + n2 : ""));
+        }
+
         private static void DumpLinkedRefs(IPlacedObjectGetter po, ILinkCache? cache, string indent)
         {
             if (po.LinkedReferences == null || po.LinkedReferences.Count == 0) return;
@@ -770,6 +816,7 @@ namespace FrankyCLI
                     Console.WriteLine($"        Flags:             {td.Flags}");
                 }
                 DumpLinkedRefs(po, cache, "  ");
+                DumpPlacedExtras(po, cache, "  ");
             }
             else if (entry is IPlacedNpcGetter npc)
                 Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
