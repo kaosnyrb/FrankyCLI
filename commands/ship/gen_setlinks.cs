@@ -106,6 +106,9 @@ namespace FrankyCLI
                 Console.WriteLine("Usage: setlinks <modname> <ref> <keyword>=<target>[,<keyword>=<target>...]");
                 Console.WriteLine("       setlinks <modname> <ref> --clear");
                 Console.WriteLine("         --replace   wipe existing links and set exactly these (default MERGES by keyword)");
+                Console.WriteLine("         --transient / --no-transient   set or clear XLKT on the ref.");
+                Console.WriteLine("                     Legal ALONE, for a ref whose links are already right.");
+                Console.WriteLine("                     xEdit: wbEmpty(XLKT,'Transient') inside Linked References.");
                 Console.WriteLine();
                 Console.WriteLine("  <ref>/<target>  PlacedObject FormID: 0F3287, 0x000F3287 or 0F3287:mod.esm");
                 Console.WriteLine("  <keyword>       Keyword EditorID (LinkShipModule), FormID (0x2C1001),");
@@ -119,6 +122,7 @@ namespace FrankyCLI
             string modname = args[0];
             string refArg = args[2];
             bool clear = false, replace = false;
+            bool? transient = null;          // null = leave XLKT exactly as it is
             string? spec = null;
 
             for (int i = 3; i < args.Length; i++)
@@ -127,6 +131,8 @@ namespace FrankyCLI
                 {
                     case "--clear": clear = true; break;
                     case "--replace": replace = true; break;
+                    case "--transient": transient = true; break;
+                    case "--no-transient": transient = false; break;
                     default:
                         if (args[i].StartsWith("--"))
                         {
@@ -157,11 +163,15 @@ namespace FrankyCLI
                 Console.WriteLine("Error: --replace qualifies a spec, and --clear takes none. --clear alone is the wipe.");
                 return 1;
             }
-            if (!clear && spec == null)
+            if (!clear && spec == null && transient == null)
             {
-                Console.WriteLine("Error: nothing to do -- give a <keyword>=<target> spec, or --clear.");
+                Console.WriteLine("Error: nothing to do -- give a <keyword>=<target> spec, --clear, or --transient.");
                 return 1;
             }
+            // --transient ALONE is legal on purpose: the case it was written for is a ref whose
+            // links are already correct and which only lacks the XLKT stamp. Demanding a link spec
+            // to set a flag would mean rewriting links that are already right, which is a bigger
+            // and less reversible operation than the one being asked for.
             if (modname == "Starfield")
             {
                 Console.WriteLine("No way am I allowing you to edit Starfield.esm");
@@ -337,6 +347,35 @@ namespace FrankyCLI
                         }
                         changed++;
                     }
+                }
+
+                // ---- XLKT, the Transient stamp ---------------------------------------
+                // xEdit's SF1 definitions declare it as wbEmpty(XLKT, 'Transient') INSIDE the
+                // Linked References group, beside the XLKR array: no payload, presence is the
+                // whole meaning, and it can only ever sit on a ref that HAS links. Mutagen
+                // surfaces it as the bool IsLinkedRefTransient.
+                //
+                // Measured 2026-09-15 on the working bay: True on exactly the 11 refs carrying
+                // outgoing links and False on all 22 that do not, 33 records, no exception either
+                // way. The hand-authored devbay_03 has a door with two links and the flag on
+                // nothing. So the CK stamps this on save and placeref/setlinks never have.
+                //
+                // ⚠ OPT-IN RATHER THAN AUTOMATIC, DELIBERATELY. Matching the CK would arguably
+                // make `true whenever links exist` the right default, but that would change the
+                // bytes of every ref this command has ever touched on the strength of an
+                // untested hypothesis. Prove it moves the needle on one door first; the default
+                // is a ruling to take afterwards, on evidence.
+                if (transient != null && target.IsLinkedRefTransient != transient.Value)
+                {
+                    target.IsLinkedRefTransient = transient.Value;
+                    Console.WriteLine("  " + target.FormKey + ": XLKT transient "
+                                      + (!transient.Value) + " -> " + transient.Value);
+                    changed++;
+                }
+                else if (transient != null)
+                {
+                    Console.WriteLine("  " + target.FormKey + ": XLKT transient already "
+                                      + transient.Value + " -- left as is");
                 }
             }
 
