@@ -729,25 +729,49 @@ namespace FrankyCLI
         /// cannot read is a field the office cannot reason about, and it will reliably be the field
         /// somebody wants at the worst moment.
         ///
-        /// ⚠ THE NAMES ARE MUTAGEN'S, NOT xEDIT'S, and they do not match: XLOC is `Lock`, XLKT is
-        /// `IsLinkedRefTransient`, and xEdit's "Unknown" under the lock flags is `Unused`. Both
-        /// spellings are printed so a reader holding an xEdit window can join the two views.
+        /// ⚠ THE NAMES ARE MUTAGEN'S, NOT xEDIT'S, and they do not match: XLOC is `Lock` and
+        /// XLKT is `IsLinkedRefTransient`. Both spellings are printed so a reader holding an xEdit
+        /// window can join the two views.
+        ///
+        /// ⭐ AND XLKT IS AN EMPTY SUBRECORD -- `wbEmpty(XLKT, 'Transient')` in xEdit's SF1
+        /// definitions, sitting INSIDE the Linked References group beside the XLKR array. It has no
+        /// payload: PRESENCE is the whole meaning. That is also why it can only ever appear on a ref
+        /// that has linked references, which is a property of the FORMAT rather than a coincidence
+        /// in the data.
         private static void DumpPlacedExtras(IPlacedObjectGetter po, ILinkCache? cache, string indent)
         {
             var lk = po.Lock;
             if (lk != null)
             {
                 string keyName = NameOf(lk.Key.FormKey, cache);
-                // ⚠ RAW, AND SAID SO. Unused agrees with xEdit exactly (1 on both bay doors), so
-                // the struct is being read at the right offset -- but Level and Flags come back as
-                // 6357246 / 1087655425 where xEdit renders "Inaccessible" and "Unknown 0". One of
-                // the two tools is decoding these differently and I have not established which.
-                // Printed as raw decimal AND hex with the disagreement named, because a number
-                // dressed as a decoded enum is a readout you go down the wrong branch holding.
-                Console.WriteLine($"{indent}    XLOC (Lock): Level={lk.Level} (0x{(int)lk.Level:X8}) "
-                                  + $"Flags={(int)lk.Flags} (0x{(int)lk.Flags:X8}) Unused={lk.Unused}");
-                Console.WriteLine($"{indent}      ^ RAW. Unused matches xEdit's \"Unknown\"; Level/Flags "
-                                  + "do NOT decode to xEdit's labels and are UNVERIFIED");
+                // ⛔ MUTAGEN READS LEVEL AND FLAGS FOUR BYTES WIDE AND THE FORMAT IS ONE BYTE PLUS
+                // THREE UNUSED. Settled at the SOURCE rather than by experiment: xEdit is open, and
+                // Core/wbDefinitionsSF1.pas on branch dev-4.1.5 (matching the 4.1.5p build he runs)
+                // declares XLOC as
+                //     Level itU8 + wbUnused(3) | Key FormID | Flags itU8 + wbUnused(3) | Unknown itU32
+                // So a raw 0x006100FE is Level 0xFE with 00 61 00 of padding swallowed, and
+                // 0x40D44E01 is Flags 0x01 with the same. Take the LOW BYTE.
+                //
+                // ⚠ The enum below is xEdit's table, carried WITH its citation rather than absorbed:
+                // the raw byte is printed beside the label so a drifted table cannot hide the value.
+                // And Mutagen's `Unused` is NOT padding -- it is xEdit's trailing `Unknown` U32, so
+                // the two tools disagree about which field is the throwaway one.
+                int lvl = (int)lk.Level & 0xFF, flg = (int)lk.Flags & 0xFF;
+                string lvlName = lvl switch
+                {
+                    0 => "None", 1 => "Novice 1", 25 => "Novice 25", 50 => "Advanced",
+                    75 => "Expert", 100 => "Master", 251 => "Barred", 252 => "Chained",
+                    253 => "Requires Terminal", 254 => "Inaccessible", 255 => "Requires Key",
+                    _ => "(not in xEdit's table)",
+                };
+                var flagNames = new List<string>();
+                if ((flg & 0x01) != 0) flagNames.Add("Unknown 0");
+                if ((flg & 0x04) != 0) flagNames.Add("Leveled Lock");
+                Console.WriteLine($"{indent}    XLOC (Lock): Level={lvl} ({lvlName}) "
+                                  + $"Flags=0x{flg:X2} ({(flagNames.Count > 0 ? string.Join("+", flagNames) : "none")}) "
+                                  + $"Unknown(U32)={lk.Unused}");
+                Console.WriteLine($"{indent}      raw: Level=0x{(int)lk.Level:X8} Flags=0x{(int)lk.Flags:X8} "
+                                  + "(Mutagen reads both 4 bytes wide; SF1 defines 1 + 3 unused)");
                 Console.WriteLine($"{indent}      Key: {(lk.Key.FormKey.IsNull ? "NULL" : lk.Key.FormKey.ToString())}"
                                   + (keyName.Length > 0 ? " " + keyName : ""));
             }
