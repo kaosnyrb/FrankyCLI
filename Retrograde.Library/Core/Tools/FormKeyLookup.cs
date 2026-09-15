@@ -114,35 +114,16 @@ namespace Retrograde.Utils
         }
 
         // Enumerates a group's records, skipping individual records that throw on parse.
+        //
+        // ⭐ LIFTED TO RecordGroups.Safe 2026-09-15 and called rather than copied. The body moved
+        // VERBATIM -- same 20-consecutive-fault abort, same continue-on-throw, same message shape,
+        // with only the log prefix parameterised -- so this path's behaviour is unchanged by
+        // construction rather than by testing. gen_inspect needed the identical walk to dump any
+        // record group, and a second copy of a fault-tolerance policy is two things that must not
+        // disagree about when to give up.
         private static IEnumerable<IMajorRecordGetter> EnumerateGroupSafe(
             IEnumerable source, string groupName, string modLabel)
-        {
-            var en = source.GetEnumerator();
-            int consecutiveFaults = 0;
-            while (true)
-            {
-                bool moved;
-                try
-                {
-                    moved = en.MoveNext();
-                    consecutiveFaults = 0;
-                }
-                catch (Exception ex)
-                {
-                    consecutiveFaults++;
-                    Console.WriteLine($"[FormKeyLookup] Skipped record in {modLabel}/{groupName}: {ex.Message}");
-                    if (consecutiveFaults >= 20)
-                    {
-                        Console.WriteLine($"[FormKeyLookup] Aborting {groupName} after 20 consecutive errors.");
-                        yield break;
-                    }
-                    continue;
-                }
-                if (!moved) yield break;
-                if (en.Current is IMajorRecordGetter rec)
-                    yield return rec;
-            }
-        }
+            => RecordGroups.Safe(source, groupName, modLabel, "FormKeyLookup");
 
         // Enumerates major records from a mod, skipping any that throw (e.g. BGSAdaptiveTriggerData_Component).
         private static IEnumerable<IMajorRecordGetter> EnumerateSafe(IEnumerable<IMajorRecordGetter> source, string label)

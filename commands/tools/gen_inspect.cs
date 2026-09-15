@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Retrograde.Utils;
 
 namespace FrankyCLI
 {
@@ -19,10 +20,18 @@ namespace FrankyCLI
     public class gen_inspect
     {
         /// <summary>
-        /// The supported record types, in ONE place. Program.cs prints this for its usage text
-        /// and the unknown-type branch below prints it too. Previously each site kept its own
-        /// copy and all of them had drifted — none listed MoveableStatic, Planet, Star, Race or
-        /// Biome, which have been supported for some time.
+        /// The record types with a BESPOKE renderer, in ONE place. Program.cs prints this for its
+        /// usage text and the unknown-type branch below prints it too. Previously each site kept
+        /// its own copy and all of them had drifted — none listed MoveableStatic, Planet, Star,
+        /// Race or Biome, which have been supported for some time.
+        ///
+        /// ⛔ AND IT IS NO LONGER THE LIST OF WHAT WORKS, WHICH IS THE POINT (2026-09-15, his
+        /// *"we have a list of all record types now can we not fill it all out?"*). Every one of
+        /// the mod's 177 record groups is now inspectable through the generic fallback, so this
+        /// names the ones that get a HAND-WRITTEN view — where a relation is resolved rather than
+        /// printed as a link. **Treating this as the list of what the tool can reach is what made
+        /// a Door unreadable for the life of the tool.** `gen_inspect list x` is the real list and
+        /// it is derived, not typed.
         /// </summary>
         public const string SupportedTypes =
             "  SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, MoveableStatic\n" +
@@ -39,7 +48,9 @@ namespace FrankyCLI
             "                     ConstructibleObject (cobj), LayeredMaterialSwap (lmsw)\n" +
             "  PlacedObject (refr), refr_xflg, placed\n" +
             "  worldspace_objects <wsEditorId>, worldspace_smallworld <minDnam>\n" +
-            "  'list' - enumerate all record groups with counts\n" +
+            "  'list' - EVERY record group the mod exposes, with counts, derived from the type\n" +
+            "           system rather than typed here. 177 of them, and ANY of those names works:\n" +
+            "           the ones above get a bespoke view, the rest get a full property dump.\n" +
             "  'selftest' - positive + negative controls for the Mutagen field-width tell\n" +
             "               (no plugin loaded, exits 1 on failure, so it can gate)";
 
@@ -105,15 +116,32 @@ namespace FrankyCLI
             }
 
             int found = 0;
+            bool unknownType = false;
             foreach (var mod in allMods)
             {
-                found += InspectRecordType(mod, recordType, search, allMods, env.LinkCache);
+                found += InspectRecordType(mod, recordType, search, out bool unknown, allMods, env.LinkCache);
+                // Break rather than repeat the refusal once per loaded plugin: an
+                // unknown record type is a property of the ARGUMENT, not of the mod.
+                if (unknown) { unknownType = true; break; }
             }
 
-            if (found == 0)
+            // ⛔ THESE TWO OUTCOMES USED TO PRINT THE SAME SENTENCE AND IT COST REAL CONFUSION.
+            // Asking for a Door printed "Unknown record type" and then, because nothing was found,
+            // ALSO printed "No Door records found matching '0x16C025'". The second line reads as
+            // SEARCHED AND ABSENT, so a reader skimming the tail concludes the record does not
+            // exist when the truth is the tool could not look. *I could not look* and *I looked and
+            // there was nothing* are different facts and they now have different words.
+            if (unknownType)
             {
-                Console.WriteLine($"No {recordType} records found matching '{search}'");
-                Console.WriteLine("Try using 'list' as record type to see available groups.");
+                Console.WriteLine($"'{recordType}' is not a record type this tool can reach.");
+                Console.WriteLine("  NOTHING WAS SEARCHED -- this is not a statement about whether such a record exists.");
+                Console.WriteLine($"  `gen_inspect list x` prints every group the mod exposes (177 of them), and any");
+                Console.WriteLine("  of those names works. Bespoke renderers:");
+                Console.WriteLine(SupportedTypes);
+            }
+            else if (found == 0)
+            {
+                Console.WriteLine($"No {recordType} records found matching '{search}' -- the group WAS searched and holds no match.");
             }
 
             Console.WriteLine();
@@ -121,9 +149,10 @@ namespace FrankyCLI
             return 0;
         }
 
-        private static int InspectRecordType(IStarfieldModGetter mod, string recordType, string search, List<IStarfieldModGetter>? allMods = null, ILinkCache? cache = null)
+        private static int InspectRecordType(IStarfieldModGetter mod, string recordType, string search, out bool unknownType, List<IStarfieldModGetter>? allMods = null, ILinkCache? cache = null)
         {
             int found = 0;
+            unknownType = false;
             switch (recordType.ToLowerInvariant())
             {
                 case "surfaceblock":
@@ -609,9 +638,16 @@ namespace FrankyCLI
                     found += SearchWithRecovery(mod.Biomes, search, "Biome");
                     break;
                 default:
-                    Console.WriteLine($"Unknown record type: {recordType}");
-                    Console.WriteLine("Supported:");
-                    Console.WriteLine(SupportedTypes);
+                    // Not a bespoke renderer -- try the mod's own record groups. This is what
+                    // makes every one of Mutagen's 177 groups inspectable instead of the ~40
+                    // somebody remembered to hand-write a case for.
+                    //
+                    // ⚠ IT IS A FALLBACK, NOT A CATCH-ALL. The group set is CLOSED and derived
+                    // from the type system, so a typo still refuses: `Dor` matches no group and
+                    // comes back as an unknown type, which is the property that keeps this from
+                    // turning a mistyped record type into a silent empty result.
+                    int generic = DumpGenericGroup(mod, recordType, search, allMods, cache);
+                    if (generic < 0) unknownType = true; else found += generic;
                     break;
             }
             return found;
@@ -2198,6 +2234,141 @@ namespace FrankyCLI
         /// an integer that does not fit in two bytes, where the low byte is a plausible small value
         /// and the upper bytes are not zero. A band that convicts nothing is decoration; one that
         /// convicts everything is a wolf-crier. This one says where to grep and stops.
+        /// Dump any record from any group Mutagen exposes, by walking its properties.
+        ///
+        /// ⭐ WHY A FALLBACK AND NOT 137 MORE HAND-WRITTEN CASES (2026-09-15, his *"we have a list
+        /// of all record types now can we not fill it all out?"*). `gen_inspect list` reports 177
+        /// groups; the switch above hand-renders about 40. Writing the other 137 by hand would be
+        /// the same defect at greater length, and every one would rot independently. The generic
+        /// walk costs one method and covers all of them.
+        ///
+        /// ⚠ A BESPOKE RENDERER IS STILL BETTER WHERE ONE EXISTS and this does not replace any: a
+        /// quest's alias fills, a cell's contents and a REFR's linked references are RELATIONS, and
+        /// a property walk prints the link and not what it resolves to. So the rule is bespoke
+        /// where we have it, generic everywhere else, and the usage text says which is which.
+        ///
+        /// Returns the number of records dumped, or -1 when the name matches no group at all --
+        /// which the caller turns into a refusal that says NOTHING WAS SEARCHED.
+        private static int DumpGenericGroup(IStarfieldModGetter mod, string recordType, string search,
+                                            List<IStarfieldModGetter>? allMods, ILinkCache? cache)
+        {
+            RecordGroups.Group? match = null;
+            foreach (var g in RecordGroups.Enumerate(mod))
+            {
+                if (string.Equals(g.Name, recordType, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(g.PropertyName, recordType, StringComparison.OrdinalIgnoreCase))
+                { match = g; break; }
+            }
+            if (match == null) return -1;
+
+            int found = 0;
+            // The SAFE enumerator, not a bare foreach: the [Bethesda] manual's standing caution is
+            // that some record shapes read flaky in Mutagen, and a dumper that dies on one bad
+            // record is useless on exactly the corpus that has one.
+            foreach (var rec in RecordGroups.Safe(match.Value.Records, match.Value.Name,
+                                                  mod.ModKey.FileName, "gen_inspect"))
+            {
+                if (!MatchesSearch(rec.EditorID, rec.FormKey, search)) continue;
+                Console.WriteLine($"--- {match.Value.Name} ({rec.FormKey}) ---");
+                Console.WriteLine($"  EditorID: {rec.EditorID ?? "(none)"}");
+                DumpAllProperties(rec, match.Value.ElementType, cache, "  ");
+                Console.WriteLine();
+                found++;
+            }
+            return found;
+        }
+
+        /// Every property that carries a value, then the empty ones named on one line.
+        ///
+        /// Same two-tier shape as DumpCoverage and for the same reason: filtering the empties away
+        /// would make "the record does not carry this" and "my predicate hid it" the same silence.
+        /// Here it matters more, not less -- this is the ONLY view of these record types.
+        private static void DumpAllProperties(object rec, Type declared, ILinkCache? cache, string indent)
+        {
+            var carrying = new List<string>();
+            var empty = new List<string>();
+            var props = declared.IsInterface
+                ? declared.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                : rec.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var prop in props)
+            {
+                if (prop.GetIndexParameters().Length > 0) continue;
+                if (prop.Name is "FormKey" or "EditorID") continue;   // printed by the caller
+                object? v;
+                try { v = prop.GetValue(rec); } catch { continue; }
+                if (v == null || IsEmptyValue(v)) { empty.Add(prop.Name); continue; }
+
+                string shown = Render(v, cache);
+                if (shown.Length > 200) shown = shown.Substring(0, 200) + "…";
+                carrying.Add($"{indent}  {prop.Name} = {shown}{WidthTell(v)}");
+            }
+            foreach (var c in carrying) Console.WriteLine(c);
+            if (empty.Count > 0)
+                Console.WriteLine($"{indent}  (empty on this record [{empty.Count}]: {string.Join(", ", empty)})");
+        }
+
+        /// Render one property value for the generic dump.
+        ///
+        /// ⛔ ITS FIRST RUN PRINTED `Model = Mutagen.Bethesda.Starfield.ModelBinaryOverlay`, WHICH
+        /// IS THE TYPE NAME STANDING WHERE THE NIF PATH SHOULD BE. On a door the model path is the
+        /// single most useful field on the record, and the dump was hiding it behind the default
+        /// `object.ToString()`. **A value that renders as its own type name is indistinguishable
+        /// from a value the reader cannot show, which is the defect this whole pass exists to
+        /// close, reappearing one layer in.**
+        ///
+        /// ⭐ THE CURE IS A RULE, NOT A LIST OF SPECIAL CASES: when `ToString()` returns the type's
+        /// own name, that IS the default implementation, so expand one level of the value's own
+        /// properties instead. That fixes Model, ObjectBounds, the sound references and every
+        /// future overlay type at once, where a hardcoded list would have fixed the four I happened
+        /// to be looking at and gone stale on the fifth.
+        ///
+        /// ⚠ ONE LEVEL ONLY, deliberately. Deeper is a record browser, not a dump, and an
+        /// unbounded walk over a graph with FormLinks in it does not terminate usefully.
+        private static string Render(object v, ILinkCache? cache, bool expand = true)
+        {
+            // A FormLink prints as an id, and an id is not a name -- resolve it, the same courtesy
+            // the bespoke renderers pay, because an unresolved link is the commonest reason
+            // somebody has to go and run a second command.
+            if (v is IFormLinkGetter fl)
+            {
+                if (fl.IsNull) return "NULL";
+                string n = NameOf(fl.FormKey, cache);
+                return fl.FormKey + (n.Length > 0 ? $"  {n}" : "");
+            }
+            if (v is string s) return s;
+
+            if (v is System.Collections.IEnumerable en and not string)
+            {
+                var parts = new List<string>();
+                int n = 0;
+                foreach (var item in en)
+                {
+                    n++;
+                    if (n <= 6 && item != null) parts.Add(Render(item, cache, expand: false));
+                }
+                if (n == 0) return "[]";
+                string head = string.Join(", ", parts);
+                return n > 6 ? $"[{n} items] {head}, …" : $"[{n}] {head}";
+            }
+
+            var t = v.GetType();
+            string str = v.ToString() ?? "";
+            if (str != t.FullName && str != t.Name) return str;   // a real ToString, use it
+            if (!expand) return t.Name;
+
+            // Default ToString: expand one level rather than print the type name.
+            var bits = new List<string>();
+            foreach (var p in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (p.GetIndexParameters().Length > 0) continue;
+                object? pv;
+                try { pv = p.GetValue(v); } catch { continue; }
+                if (pv == null || IsEmptyValue(pv)) continue;
+                bits.Add($"{p.Name}={Render(pv, cache, expand: false)}");
+            }
+            return bits.Count == 0 ? $"({t.Name}, nothing set)" : "{ " + string.Join(", ", bits) + " }";
+        }
+
         /// ⛔ THE POSITIVE CONTROL, AND IT EXISTS BECAUSE THE SWEEP CAME BACK ZERO.
         ///
         /// WidthTell was run across all 22 placed refs in avontechstardust and fired on NONE of
@@ -2966,43 +3137,46 @@ namespace FrankyCLI
             }
         }
 
+        /// Every record group the mod actually exposes, DERIVED rather than listed.
+        ///
+        /// ⛔ THIS WAS A HAND-WRITTEN TABLE OF 24 ENTRIES AND IT WAS THE THIRD SUCH LIST IN THIS
+        /// FILE. The other two are `SupportedTypes` (the usage text) and the `switch` that decides
+        /// what actually works, and all three had drifted into different subsets of each other:
+        /// `list` advertised 24 groups, the switch handled about 40 types, and a Door was in
+        /// neither. **A rule open-coded in three places is three bugs, and fixing the one you are
+        /// looking at makes the others invisible.**
+        ///
+        /// ⭐ His correction, and it moved the seam rather than lengthening the list: *"we have a
+        /// list of all record types now can we not fill it all out?"* Mutagen already declares every
+        /// group in the type system, so any copy of that list in our source can only go stale.
         private static void ListRecordGroups(IStarfieldModGetter mod)
         {
-            Console.WriteLine("Available record groups in Starfield.esm:");
+            Console.WriteLine("Record groups in Starfield.esm (derived from the mod, not a list):");
             Console.WriteLine();
 
-            var groups = new (string Name, int Count)[]
+            int groups = 0, nonEmpty = 0;
+            foreach (var g in RecordGroups.Enumerate(mod))
             {
-                ("Activator", mod.Activators.Count),
-                ("ActorValueInformation", mod.ActorValueInformation.Count),
-                ("Armor", mod.Armors.Count),
-                ("Cell", mod.Cells.Sum(b => b.SubBlocks.Sum(sb => sb.Cells.Count))),
-                ("ConstructibleObject", mod.ConstructibleObjects.Count),
-                ("DamageType", mod.DamageTypes.Count),
-                ("FormList", mod.FormLists.Count),
-                ("GenericBaseForm", mod.GenericBaseForms.Count),
-                ("LegendaryItem", mod.LegendaryItems.Count),
-                ("Light", mod.Lights.Count),
-                ("Location", mod.Locations.Count),
-                ("MagicEffect", mod.MagicEffects.Count),
-                ("Npc", mod.Npcs.Count),
-                ("ObjectEffect", mod.ObjectEffects.Count),
-                ("ObjectModification", mod.ObjectModifications.Count),
-                ("Outfit", mod.Outfits.Count),
-                ("PackIn", mod.PackIns.Count),
-                ("Perk", mod.Perks.Count),
-                ("SnapTemplate", mod.SnapTemplates.Count),
-                ("Spell", mod.Spells.Count),
-                ("Static", mod.Statics.Count),
-                ("MoveableStatic", mod.MoveableStatics.Count),
-                ("SurfaceBlock", mod.SurfaceBlocks.Count),
-                ("Worldspace", mod.Worldspaces.Count),
-            };
-
-            foreach (var (name, count) in groups.OrderBy(g => g.Name))
-            {
-                Console.WriteLine($"  {name,-20} {count,8:N0} records");
+                groups++;
+                // Count via the group's own Count where it has one; a group whose Count throws is
+                // reported as unreadable rather than as zero, because "no records" and "I could not
+                // ask" are the same blank otherwise and that blank is this file's oldest defect.
+                string count;
+                try
+                {
+                    var cp = g.Records.GetType().GetProperty("Count", BindingFlags.Public | BindingFlags.Instance);
+                    int n = cp == null ? -1 : (int)cp.GetValue(g.Records)!;
+                    count = n < 0 ? "(no Count)" : $"{n:N0} records";
+                    if (n > 0) nonEmpty++;
+                }
+                catch (Exception ex) { count = $"(Count threw: {ex.GetType().Name})"; }
+                Console.WriteLine($"  {g.Name,-28} {count,-22} [{g.PropertyName}]");
             }
+            Console.WriteLine();
+            Console.WriteLine($"  {groups} group(s), {nonEmpty} non-empty in Starfield.esm.");
+            Console.WriteLine("  Any of these names works as a record type; the ones with a bespoke");
+            Console.WriteLine("  renderer are listed by the usage text, the rest fall back to a full");
+            Console.WriteLine("  property dump.");
         }
     }
 }
