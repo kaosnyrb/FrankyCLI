@@ -9,10 +9,21 @@ using System.Linq;
 
 namespace FrankyCLI
 {
-    // Add (or remove) keywords on GenericBaseForms that already exist, FormID-stable.
+    // Add (or remove) keywords on GenericBaseForms -- or PackIns -- that already exist, FormID-stable.
     //
-    //   setkeyword <modname> <gbfm>[,<gbfm>...] <Keyword|0xFORMID>[,...] [--remove]
+    //   setkeyword <modname> <gbfm|pkin>[,...] <Keyword|0xFORMID>[,...] [--remove]
     //   e.g. setkeyword avontechstardust atsd_gbfm_reactor_01 ShipModuleClassA,ShipDestructionCanModuleVaporizeKeyword
+    //        setkeyword avontechstardust atsd_pkn_docker_port SBShip_DockingHatch
+    //
+    // PACKINS, added 2026-09-16. A docker's PackIn must carry SBShip_DockingHatch (and a
+    // top-mounted one SBShip_ModuleTop) or the docker builds, snaps, renders and does not
+    // work -- his find in the Creation Kit on the Wharfinger, after two record dumps of
+    // mine had printed the keyword list as its type name. Nothing in gen_shipstruct writes a
+    // PackIn keyword, so until today the only route was the editor, once per part. A target
+    // EditorID resolves as a GenericBaseForm first and a PackIn second; the two groups do not
+    // share EditorIDs, and a name in neither refuses. A GBFM keeps its keywords in a
+    // KeywordFormComponent; a PackIn carries them as a plain list on the record. Same
+    // idempotency, same validate-everything-then-write.
     //
     // WHY THIS ONE *IS* GENERAL, WHERE THE PROPERTY SETTERS ARE NAMED -- and it is his own
     // argument applied the other way round. He ruled named commands for properties because
@@ -46,9 +57,10 @@ namespace FrankyCLI
             // args: [modname, "setkeyword", gbfm_editorids, keywords, (--remove)?]
             if (args.Length < 4)
             {
-                Console.WriteLine("Usage: setkeyword <modname> <gbfm_editorid>[,...] <Keyword|0xFORMID>[,...] [--remove]");
+                Console.WriteLine("Usage: setkeyword <modname> <gbfm_or_pkin_editorid>[,...] <Keyword|0xFORMID>[,...] [--remove]");
                 Console.WriteLine("  Reactor class: ShipModuleClassA / ClassB / ClassC.");
                 Console.WriteLine("  Vanilla reactors also carry ShipDestructionCanModuleVaporizeKeyword.");
+                Console.WriteLine("  A docker's PackIn wants SBShip_DockingHatch (+ SBShip_ModuleTop when top-mounted).");
                 return 1;
             }
             string modname = args[0];
@@ -106,19 +118,48 @@ namespace FrankyCLI
                     keys.Add((kw.EditorID ?? w, kw.FormKey));
                 }
 
-                var found = new List<IGenericBaseFormGetter>();
+                // Validate every target before touching one: a GBFM first, a PackIn second,
+                // neither -> refuse with nothing written.
+                var foundGbfm = new List<IGenericBaseFormGetter>();
+                var foundPkin = new List<IPackInGetter>();
                 foreach (var target in targets)
                 {
-                    var existing = myMod.GenericBaseForms.FirstOrDefault(
-                        g => string.Equals(g.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                    if (existing == null)
-                    {
-                        Console.WriteLine($"Error: no GenericBaseForm '{target}' in {modname}"); return 1;
-                    }
-                    found.Add(existing);
+                    var g = myMod.GenericBaseForms.FirstOrDefault(
+                        x => string.Equals(x.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                    if (g != null) { foundGbfm.Add(g); continue; }
+                    var pk = myMod.PackIns.FirstOrDefault(
+                        x => string.Equals(x.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                    if (pk != null) { foundPkin.Add(pk); continue; }
+                    Console.WriteLine($"Error: no GenericBaseForm or PackIn '{target}' in {modname}"); return 1;
                 }
 
-                foreach (var existing in found)
+                // One add/remove over a keyword list, whichever record owns the list.
+                bool Apply(string edid, ExtendedList<IFormLinkGetter<IKeywordGetter>> list)
+                {
+                    bool touched = false;
+                    foreach (var (name, key) in keys)
+                    {
+                        bool has = list.Any(k => k.FormKey == key);
+                        if (remove)
+                        {
+                            if (!has) { Console.WriteLine($"  {edid}: {name} not present -- left as is"); continue; }
+                            var hit = list.First(k => k.FormKey == key);
+                            list.Remove(hit);
+                            Console.WriteLine($"  {edid}: - {name}");
+                            touched = true;
+                        }
+                        else
+                        {
+                            if (has) { Console.WriteLine($"  {edid}: {name} already present -- left as is"); continue; }
+                            list.Add(key.ToLink<IKeywordGetter>());
+                            Console.WriteLine($"  {edid}: + {name}");
+                            touched = true;
+                        }
+                    }
+                    return touched;
+                }
+
+                foreach (var existing in foundGbfm)
                 {
                     var gbfm = ((IGenericBaseFormGetter)existing).DeepCopy();
                     var kwc = gbfm.Components.OfType<KeywordFormComponent>().FirstOrDefault();
@@ -134,31 +175,30 @@ namespace FrankyCLI
                         Console.WriteLine($"  {gbfm.EditorID}: + keyword component (was absent)");
                     }
                     kwc.Keywords ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
-
-                    bool touched = false;
-                    foreach (var (name, key) in keys)
-                    {
-                        bool has = kwc.Keywords.Any(k => k.FormKey == key);
-                        if (remove)
-                        {
-                            if (!has) { Console.WriteLine($"  {gbfm.EditorID}: {name} not present -- left as is"); continue; }
-                            var hit = kwc.Keywords.First(k => k.FormKey == key);
-                            kwc.Keywords.Remove(hit);
-                            Console.WriteLine($"  {gbfm.EditorID}: - {name}");
-                            touched = true;
-                        }
-                        else
-                        {
-                            if (has) { Console.WriteLine($"  {gbfm.EditorID}: {name} already present -- left as is"); continue; }
-                            kwc.Keywords.Add(key.ToLink<IKeywordGetter>());
-                            Console.WriteLine($"  {gbfm.EditorID}: + {name}");
-                            touched = true;
-                        }
-                    }
-                    if (!touched) continue;
+                    if (!Apply(gbfm.EditorID ?? "?", kwc.Keywords)) continue;
 
                     myMod.GenericBaseForms.Remove(existing.FormKey);
                     myMod.GenericBaseForms.Add(gbfm);
+                    changed++;
+                }
+
+                foreach (var existing in foundPkin)
+                {
+                    var pkin = ((IPackInGetter)existing).DeepCopy();
+                    if (pkin.Keywords == null)
+                    {
+                        if (remove)
+                        {
+                            Console.WriteLine($"  {pkin.EditorID}: no keyword list -- nothing to remove");
+                            continue;
+                        }
+                        pkin.Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                        Console.WriteLine($"  {pkin.EditorID}: + keyword list (was absent)");
+                    }
+                    if (!Apply(pkin.EditorID ?? "?", pkin.Keywords)) continue;
+
+                    myMod.PackIns.Remove(existing.FormKey);
+                    myMod.PackIns.Add(pkin);
                     changed++;
                 }
             }
@@ -169,7 +209,7 @@ namespace FrankyCLI
                 rec.IsCompressed = false;
 
             myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
-            Console.WriteLine($"Finished -- {changed} GenericBaseForm(s) patched, FormIDs unchanged.");
+            Console.WriteLine($"Finished -- {changed} record(s) patched (GenericBaseForm/PackIn), FormIDs unchanged.");
             return 0;
         }
     }
