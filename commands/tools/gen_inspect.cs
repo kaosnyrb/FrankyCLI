@@ -163,12 +163,12 @@ namespace FrankyCLI
                 case "worldspace":
                     foreach (var rec in mod.Worldspaces)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Worldspace"); found++; }
+                        { DumpRecord(rec, "Worldspace", cache); found++; }
                     break;
                 case "packin":
                     foreach (var rec in mod.PackIns)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "PackIn"); found++; }
+                        { DumpRecord(rec, "PackIn", cache); found++; }
                     break;
                 case "cell":
                     foreach (var block in mod.Cells)
@@ -228,14 +228,14 @@ namespace FrankyCLI
                 case "static":
                     foreach (var rec in mod.Statics)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Static"); found++; }
+                        { DumpRecord(rec, "Static", cache); found++; }
                     break;
                 case "moveablestatic":
                 case "moveablestatics":
                     foreach (var rec in mod.MoveableStatics)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         {
-                            DumpRecord(rec, "MoveableStatic");
+                            DumpRecord(rec, "MoveableStatic", cache);
                             if (rec.Keywords != null && rec.Keywords.Count > 0)
                             {
                                 Console.WriteLine($"  Keywords [{rec.Keywords.Count}]:");
@@ -316,7 +316,7 @@ namespace FrankyCLI
                 case "activator":
                     foreach (var rec in mod.Activators)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Activator"); found++; }
+                        { DumpRecord(rec, "Activator", cache); found++; }
                     break;
                 case "light":
                     foreach (var rec in mod.Lights)
@@ -326,12 +326,12 @@ namespace FrankyCLI
                 case "npc":
                     foreach (var rec in mod.Npcs)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Npc"); DumpNpcExtras(rec, allMods); found++; }
+                        { DumpRecord(rec, "Npc", cache); DumpNpcExtras(rec, allMods); found++; }
                     break;
                 case "location":
                     foreach (var rec in mod.Locations)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Location"); found++; }
+                        { DumpRecord(rec, "Location", cache); found++; }
                     break;
                 case "location_full":
                     foreach (var rec in mod.Locations)
@@ -533,7 +533,7 @@ namespace FrankyCLI
                 case "faction":
                     foreach (var rec in mod.Factions)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpRecord(rec, "Faction"); found++; }
+                        { DumpRecord(rec, "Faction", cache); found++; }
                     break;
                 case "global":
                     foreach (var rec in mod.Globals)
@@ -609,7 +609,7 @@ namespace FrankyCLI
                     foreach (var rec in mod.Planets)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         {
-                            DumpRecord(rec, "Planet");
+                            DumpRecord(rec, "Planet", cache);
                             var kwComp = rec.Components?.OfType<IKeywordFormComponentGetter>().FirstOrDefault();
                             if (kwComp?.Keywords != null && kwComp.Keywords.Count > 0)
                             {
@@ -3052,14 +3052,15 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
-        private static void DumpRecord(object record, string typeName)
+        private static void DumpRecord(object record, string typeName, ILinkCache? cache = null)
         {
             Console.WriteLine($"--- {typeName} ---");
-            DumpPropertiesReflection(record, "  ", maxDepth: 2);
+            DumpPropertiesReflection(record, "  ", maxDepth: 2, currentDepth: 0, cache: cache);
             Console.WriteLine();
         }
 
-        private static void DumpPropertiesReflection(object obj, string indent, int maxDepth, int currentDepth = 0)
+        private static void DumpPropertiesReflection(object obj, string indent, int maxDepth, int currentDepth = 0,
+                                                     ILinkCache? cache = null)
         {
             if (obj == null || currentDepth >= maxDepth) return;
 
@@ -3100,8 +3101,41 @@ namespace FrankyCLI
                     }
                     else if (value is System.Collections.IEnumerable enumerable && valueType != typeof(string) && !valueType.IsPrimitive)
                     {
-                        // Skip complex enumerables to avoid infinite loops
-                        Console.WriteLine($"{indent}{prop.Name}: <enumerable {valueType.Name}>");
+                        // ⛔ THIS PRINTED "<enumerable BinaryOverlayListByStartIndex`1>" AND DROPPED THE
+                        // LIST, and on 2026-09-16 that hid the REQUIRED keyword on a PackIn
+                        // (SBShip_DockingHatch) through two full dumps of the working reference and
+                        // the broken part. A value rendering as its own TYPE NAME is indistinguishable
+                        // from one the reader cannot show -- the same defect this file's generic
+                        // dumper was cured of that morning, in the OTHER of its two generic dumpers.
+                        // Mutagen's keyword/overlay lists are IEnumerable and NOT ICollection, so they
+                        // fell here rather than into the counted branch above.
+                        //
+                        // Bounded, not unbounded: the original comment's infinite-loop worry is real
+                        // for a self-referencing enumerable, so it takes at most 10 like the
+                        // ICollection branch, counts no further, and renders each item through Render
+                        // so a FormLink resolves to an EditorID instead of a bare FormID.
+                        var shown = new List<string>();
+                        int seen = 0;
+                        try
+                        {
+                            foreach (var item in enumerable)
+                            {
+                                seen++;
+                                if (seen <= 10 && item != null) shown.Add(Render(item, cache, expand: false));
+                                if (seen > 10) break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Say WHICH property could not be walked. A swallowed exception here is
+                            // the same blindness one layer down.
+                            Console.WriteLine($"{indent}{prop.Name}: <could not enumerate {valueType.Name}: {ex.GetType().Name}>");
+                            continue;
+                        }
+                        if (seen == 0) continue;                       // empty, same as an empty ICollection
+                        Console.WriteLine($"{indent}{prop.Name}: [{(seen > 10 ? "10+" : seen.ToString())} items]");
+                        foreach (var s in shown) Console.WriteLine($"{indent}  {s}");
+                        if (seen > 10) Console.WriteLine($"{indent}  ... and more");
                     }
                     // Handle simple/value types
                     else if (valueType.IsPrimitive || value is string || value is FormKey || value is Enum
@@ -3123,7 +3157,7 @@ namespace FrankyCLI
                     else if (currentDepth < maxDepth - 1)
                     {
                         Console.WriteLine($"{indent}{prop.Name}: ({valueType.Name})");
-                        DumpPropertiesReflection(value, indent + "  ", maxDepth, currentDepth + 1);
+                        DumpPropertiesReflection(value, indent + "  ", maxDepth, currentDepth + 1, cache);
                     }
                     else
                     {
