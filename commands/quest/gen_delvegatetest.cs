@@ -165,11 +165,24 @@ namespace FrankyCLI
                 return 1;
             }
 
+            string PassLocal = reread.Quests.First(q => q.EditorID == PassQuestId).FormKey.ID.ToString("X6");
+            string FailLocal = reread.Quests.First(q => q.EditorID == FailQuestId).FormKey.ID.ToString("X6");
             Console.WriteLine("=== THE PAIR IS BUILT. THE REST IS HIS EYE. ===");
             Console.WriteLine();
-            Console.WriteLine("  In the console, one at a time, on a fresh save each time:");
-            Console.WriteLine("    startquest " + PassQuestId);
-            Console.WriteLine("    startquest " + FailQuestId);
+            // startquest takes the runtime FORMID, not the EditorID (his correction, 2026-09-23).
+            // The id is printed by the console rather than by this tool ON PURPOSE. A quest FormID
+            // at runtime is <loadOrderIndex><localId>, and the index is assigned only among ENABLED
+            // plugins -- while Mutagen's GameEnvironment reads every entry in plugins.txt, starred
+            // or not. So any index derived from this tool's own load order is wrong the moment a
+            // disabled plugin sits above the target, which is the case here. The console is the only
+            // oracle for its own index; a number from here would be confidently wrong.
+            Console.WriteLine("  In the console, one at a time, on a fresh save each time.");
+            Console.WriteLine("  First get the runtime FormIDs (startquest takes an ID, not an EditorID):");
+            Console.WriteLine("    help duo_delvetest 0");
+            Console.WriteLine("  then:");
+            Console.WriteLine("    startquest <id for " + PassQuestId + ">      local id 0x" + PassLocal);
+            Console.WriteLine("    startquest <id for " + FailQuestId + ">      local id 0x" + FailLocal);
+            Console.WriteLine("  The local half is fixed; only the load-order prefix is the console's to supply.");
             Console.WriteLine();
             Console.WriteLine("  READING THE RESULT:");
             Console.WriteLine("    pass starts + fail does NOT  -> the generated condition IS evaluated. Gate B closes.");
