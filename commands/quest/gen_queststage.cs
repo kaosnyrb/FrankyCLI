@@ -75,7 +75,21 @@ namespace FrankyCLI
                 sets.Add(rest[i + 1]); rest.RemoveRange(i, 2);
             }
 
-            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            // NOT `using var`. GameEnvironment holds every listed plugin open through a
+            // memory-mapped overlay, INCLUDING the one this command is about to overwrite, so a
+            // declaration-scoped using keeps it alive through the write at the bottom of this
+            // method and WriteToBinary throws "used by another process" against our OWN handle.
+            // gen_delvegatetest already carries that finding in a comment and solves it with a
+            // scoped block; the note there is exact and worth repeating: the lock looks
+            // intermittent and looks like somebody else's fault. It cost a misdiagnosis on
+            // 2026-09-23 -- my first reading was that he had the game open.
+            //
+            // A scoped block would be the tidier fix and is what the sibling does, but the env is
+            // needed at four points spread across four verbs, so hoisting ~180 lines into a brace
+            // by hand risks more than it buys. Released explicitly just before the write instead.
+            // Every early return below terminates the process, so the disposal a `using` would
+            // have given those paths is the teardown they already get.
+            var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
             string datapath = env.DataFolderPath;
             if (!env.LoadOrder.ModExists(new ModKey(modname, ModType.Master)))
             { Console.WriteLine($"Error: {modname}.esm is not in the load order"); return 1; }
@@ -258,6 +272,10 @@ namespace FrankyCLI
             }
             if (touched == 0) { Console.WriteLine("  Nothing to do -- nothing written."); return 0; }
             if (dry) { Console.WriteLine($"  --dry: nothing written ({touched} change(s) would land)."); return 0; }
+
+            // Release the memory-mapped load order BEFORE writing over one of its files. See the
+            // note at the top of this method: this is the whole reason the write used to fail.
+            env.Dispose();
 
             foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
