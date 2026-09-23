@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "_note": [
+    "THE TEMPLATE REGISTRY. One row per ALIAS SHAPE, never per mission.",
+    "A template says what a base quest can express and where its moving parts are. Everything in a",
+    "row was READ OFF THE RECORD with `gen_inspect qall <base>`, not inferred, and a row is only",
+    "added after its base has been read whole.",
+    "",
+    "WHY THIS EXISTS RATHER THAN A C# FILE PER MISSION: the objective layer is Papyrus-only. Of 245",
+    "vanilla Default* scripts exactly one touches SetObjectiveDisplayed. So a multi-beat Delve cannot",
+    "show its own objectives from records alone, and the only quests that can are ones driven by a",
+    "script that already does it. The `driver` field names that script. Choosing a template is",
+    "choosing which driver runs the mission, and that is the thing that cannot be authored from data.",
+    "",
+    "TOKENS: a recipe writes <Place> and <Planet>. The generator maps them onto whatever this base",
+    "happens to call its aliases, so prose is portable across templates and an author never has to",
+    "know that one base says DungeonLocation and another says TargetLocation."
+  ],
+
+  "templates": [
+    {
+      "id": "two-beat-one-place",
+      "base": "duo_artifact_localcargo_qst09a",
+      "mod": "du_overtime",
+      "driver": "dou_artifact_ground_dualactivator_local_quest",
+
+      "_shape": [
+        "Pick something up at one marker, carry it to another, hand it over. The driver displays",
+        "objective 10 on quest start, gives the player CargoObject on the first activation, displays",
+        "objective 20, dresses the second target, and on the second activation REQUIRES the player to",
+        "be carrying the cargo before it completes. Without it, FailMessage shows and nothing moves.",
+        "",
+        "THE BASE SHIPS IT ACROSS TWO POIs and this template collapses it into one: both beat markers",
+        "are pointed at the same place alias. That collapse is the whole difference between a cargo",
+        "run and a Delve, and it costs one integer per beat."
+      ],
+
+      "beats": 2,
+      "carriesItem": true,
+      "placeAlias": 0,
+      "mapMarkerAlias": 5,
+      "briefingStage": 0,
+      "completeStage": 100,
+
+      "beatSlots": [
+        { "markerAlias": 1,  "activatorAlias": 2,  "objective": 10, "journalStage": 50 },
+        { "markerAlias": 11, "activatorAlias": 12, "objective": 20, "journalStage": 100 }
+      ],
+
+      "tokens": { "Place": "DungeonLocation", "Planet": "targetPlanet" },
+
+      "collapsedPlaceAliases": [10],
+
+      "_collapsedNote": [
+        "Alias 10 is FinalLocation, the second POI. It is deliberately NOT deleted: it still draws and",
+        "still fills, and nothing points at it any more. Deleting an alias is the operation nobody has",
+        "proven, and an alias that CANNOT fill makes the whole mission silently not load -- which is",
+        "the worst failure shape on this lane. An inert alias that fills costs a draw and nothing else."
+      ],
+
+      "cannot": [
+        "a third beat -- the driver has exactly two activator properties",
+        "a beat that is not an activation -- arrival, death and item pickup need a different driver",
+        "a beat in a second place -- that is what this template collapses away, by design"
+      ],
+
+      "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a, 2026-09-23"
+    }
+  ]
+}

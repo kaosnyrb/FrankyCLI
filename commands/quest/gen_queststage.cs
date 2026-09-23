@@ -19,14 +19,17 @@ namespace FrankyCLI
     //   queststage <mod> stage     <questPattern> <index> [--log "journal text"] [--complete] [--dry]
     //   queststage <mod> objective <questPattern> <index> "<display text>" [--target <aliasName>] [--dry]
     //   queststage <mod> hook      <questPattern> <aliasName> <ScriptName>
-    //                              --stage N [--prereq M] [--turnoff K] [--set Prop=Value ...] [--dry]
+    //                              --stage N [--prereq M] [--turnoff K]
+    //                              [--set Prop=Value ...] [--set-alias Prop=AliasName ...] [--dry]
     //
     // WHY: a Bethesda quest gets its depth from a STAGE GRAPH driven by stock scripts, not from
     // bespoke Papyrus. MQ102 is 66 stages / 25 objectives / 23 alias scripts, of which 19 are stock
     // and 4 are bespoke; 61 of its 66 stages carry no journal text at all and exist purely as machine
-    // state. The whole sequencing mechanism is four inherited properties -- StageToSet, PrereqStage,
+    // state. The whole sequencing mechanism is four properties -- StageToSet, PrereqStage,
     // TurnOffStage, TurnOffStageDone -- so a beat is "hook an event, gate it on the previous stage,
-    // set the next one". `hook` is that sentence. Catalogue of what you can hook:
+    // set the next one". `hook` is that sentence. ⚠ They are INHERITED on 120 stock scripts and
+    // DECLARED PER-SCRIPT on eleven others, which do not all carry the full four; see the
+    // declaration guard below. Catalogue of what you can hook:
     // office/projects/bethesda/10-the-default-script-catalogue.md.
     //
     // ⛔ THE BROKEN-SCRIPT GUARD IS DERIVED, NOT A LIST. Seven vanilla Default* scripts declare
@@ -38,6 +41,26 @@ namespace FrankyCLI
     // ⛔ THE MASTER GUARD, same as questprop and for the same reason: an object value from a plugin
     // the mod does not master ADDS that plugin as a master, and the mod then fails to load for
     // everyone without it. Refused, with the plugin named. No --force.
+    //
+    // ⛔ THE DECLARATION GUARD -- every property written is checked against the script's OWN source,
+    // walking the `extends` chain. It exists because the comment four paragraphs up was WRONG about
+    // a script this tool is used on: "four INHERITED properties" is true of 120 stock scripts and
+    // false of eleven, and DefaultAliasOnDistanceLessThan is one of the eleven. It declares its own
+    // StageToSet and PrereqStage and has NO TurnOffStage at all, so `--turnoff` on it used to write
+    // a property nothing reads. A property the script never declares does not fail, it binds to
+    // nothing and the hook quietly behaves as if you had not set it -- the same silent shape as the
+    // unreachable-prereq bug this file already carries a guard for.
+    //
+    // ⭐ AND THE DECLARATION DECIDES THE PROPERTY KIND, which fixed a live defect rather than a
+    // hypothetical one: `--set TargetDistance=1000` used to write an INT because int.TryParse runs
+    // first, onto a property the script declares `float`. The value's spelling was choosing the
+    // type. Now the declared type chooses it and a value that will not parse as that type is
+    // refused by name. Where the chain cannot be resolved the guard ABSTAINS and says so -- a check
+    // that cannot see its subject must not report on it.
+    //
+    // ⛔ AND MANDATORY MEANS MANDATORY. Papyrus marks some properties Mandatory and the CK enforces
+    // it; nothing enforced it here, so a hook could be attached with TargetAlias unset and would
+    // never fire. Refused, with the missing names printed.
     //
     // WHAT IT WILL NOT DO, said rather than discovered: it does not CREATE aliases (that is a bigger
     // operation and the CK is good at it), and it will not set array or struct properties -- it names
@@ -69,10 +92,23 @@ namespace FrankyCLI
             string? log = Opt("--log"), target = Opt("--target");
             string? sStage = Opt("--stage"), sPrereq = Opt("--prereq"), sTurnoff = Opt("--turnoff");
             var sets = new List<string>();
+            // Exact-match, so `--set-alias` is NOT eaten by this loop. Stated because a prefix
+            // match here would silently swallow the alias flag and hand its value to --set, which
+            // would then look for a RECORD with that EditorID and refuse for the wrong reason.
             for (int i; (i = rest.FindIndex(a => a.Equals("--set", StringComparison.OrdinalIgnoreCase))) >= 0;)
             {
                 if (i + 1 >= rest.Count) { Console.WriteLine("Error: --set needs Prop=Value"); return 1; }
                 sets.Add(rest[i + 1]); rest.RemoveRange(i, 2);
+            }
+            // A separate flag rather than a sigil on --set. An alias-typed property is encoded as a
+            // FormLink to the QUEST ITSELF plus an alias index, which looks identical in a dump to
+            // an object property pointing at the quest -- so the command line is the only place the
+            // difference is visible, and it should be visible there.
+            var setAliases = new List<string>();
+            for (int i; (i = rest.FindIndex(a => a.Equals("--set-alias", StringComparison.OrdinalIgnoreCase))) >= 0;)
+            {
+                if (i + 1 >= rest.Count) { Console.WriteLine("Error: --set-alias needs Prop=AliasName"); return 1; }
+                setAliases.Add(rest[i + 1]); rest.RemoveRange(i, 2);
             }
 
             // NOT `using var`. GameEnvironment holds every listed plugin open through a
@@ -198,6 +234,74 @@ namespace FrankyCLI
                 if (sStage == null || !int.TryParse(sStage, out int stageToSet))
                 { Console.WriteLine("Error: hook needs --stage <n> (the stage this hook sets)"); return 1; }
 
+                // --- what does this script ACTUALLY declare? ----------------------------------
+                var decl = DeclaredProperties(scriptName, out var chain, out var unresolved);
+                if (unresolved != null)
+                {
+                    Console.WriteLine($"  ABSTAIN: could not resolve '{unresolved}' in the extends chain of '{scriptName}',");
+                    Console.WriteLine( "           so the declaration guard is OFF for this call and property names are");
+                    Console.WriteLine( "           NOT checked. Said out loud rather than passed silently.");
+                    decl = null;
+                }
+                else
+                {
+                    Console.WriteLine($"  declarations: {decl!.Count} propert(ies) over {string.Join(" <- ", chain)}");
+                }
+
+                // Every property this call intends to write, gathered BEFORE anything is built, so
+                // a refusal costs nothing and names all of the problems rather than the first.
+                var planned = new List<(string name, string? raw, bool isAlias)>
+                    { ("StageToSet", sStage, false) };
+                if (sPrereq != null) planned.Add(("PrereqStage", sPrereq, false));
+                if (sTurnoff != null) planned.Add(("TurnOffStage", sTurnoff, false));
+                foreach (var kv in sets)
+                {
+                    int eq = kv.IndexOf('=');
+                    if (eq < 1) { Console.WriteLine($"Error: --set '{kv}' is not Prop=Value"); return 1; }
+                    planned.Add((kv[..eq], kv[(eq + 1)..], false));
+                }
+                foreach (var kv in setAliases)
+                {
+                    int eq = kv.IndexOf('=');
+                    if (eq < 1) { Console.WriteLine($"Error: --set-alias '{kv}' is not Prop=AliasName"); return 1; }
+                    planned.Add((kv[..eq], kv[(eq + 1)..], true));
+                }
+
+                if (decl != null)
+                {
+                    var bad = new List<string>();
+                    foreach (var (pn, _, isAlias) in planned)
+                    {
+                        if (!decl.TryGetValue(pn, out var d))
+                        {
+                            bad.Add($"'{scriptName}' declares no property named '{pn}'. It would bind to nothing. " +
+                                    $"Declared: {string.Join(", ", decl.Keys.OrderBy(k => k))}");
+                            continue;
+                        }
+                        // An alias property is a ReferenceAlias in Papyrus. Setting one any other
+                        // way, or setting a non-alias property with --set-alias, is a type error
+                        // that produces a record which reads fine and does nothing.
+                        bool declaredAlias = d.Type.Equals("ReferenceAlias", StringComparison.OrdinalIgnoreCase);
+                        if (isAlias && !declaredAlias)
+                            bad.Add($"--set-alias {pn}: '{scriptName}' declares it as '{d.Type}', not ReferenceAlias.");
+                        if (!isAlias && declaredAlias)
+                            bad.Add($"--set {pn}: '{scriptName}' declares it as a ReferenceAlias -- use --set-alias {pn}=<aliasName>.");
+                    }
+                    // Mandatory means the CK enforces it and nothing here did. A hook missing one
+                    // attaches cleanly and never fires, which is this file's whole failure class.
+                    foreach (var kv in decl.Where(d => d.Value.Mandatory))
+                        if (!planned.Any(p => string.Equals(p.name, kv.Key, StringComparison.OrdinalIgnoreCase)))
+                            bad.Add($"'{scriptName}' declares '{kv.Key}' ({kv.Value.Type}) MANDATORY and this call does not set it.");
+
+                    if (bad.Count > 0)
+                    {
+                        Console.WriteLine();
+                        foreach (var b in bad) Console.WriteLine($"  [REFUSED] {b}");
+                        Console.WriteLine("\n  Nothing written.");
+                        return 1;
+                    }
+                }
+
                 foreach (var q in quests)
                 {
                     var al = FindAlias(q, aliasName);
@@ -236,10 +340,41 @@ namespace FrankyCLI
                         int eq = kv.IndexOf('=');
                         if (eq < 1) { refusals.Add($"{q.EditorID}: --set '{kv}' is not Prop=Value"); bad = true; break; }
                         string pn = kv[..eq], pv = kv[(eq + 1)..];
-                        if (int.TryParse(pv, out int iv)) { AddInt(sc, pn, iv); continue; }
-                        if (bool.TryParse(pv, out bool bv)) { sc.Properties.Add(new ScriptBoolProperty { Name = pn, Data = bv, Flags = ScriptProperty.Flag.Edited }); continue; }
-                        if (float.TryParse(pv, NumberStyles.Float, CultureInfo.InvariantCulture, out float fv))
-                        { sc.Properties.Add(new ScriptFloatProperty { Name = pn, Data = fv, Flags = ScriptProperty.Flag.Edited }); continue; }
+
+                        // THE DECLARED TYPE CHOOSES THE PROPERTY KIND, not the value's spelling.
+                        // `--set TargetDistance=1000` used to fall into int.TryParse and write a
+                        // ScriptIntProperty onto a property the script declares `float`. The record
+                        // reads fine and the binding is wrong. Where the declaration is unknown the
+                        // old spelling-based order still runs, because an abstaining guard must not
+                        // also disable the feature.
+                        string? declType = (decl != null && decl.TryGetValue(pn, out var dd)) ? dd.Type : null;
+                        if (declType != null)
+                        {
+                            switch (declType.ToLowerInvariant())
+                            {
+                                case "int":
+                                    if (!int.TryParse(pv, out int di))
+                                    { refusals.Add($"{q.EditorID}: --set {pn}: '{pv}' is not an int, and {scriptName} declares it int."); bad = true; break; }
+                                    AddInt(sc, pn, di); continue;
+                                case "float":
+                                    if (!float.TryParse(pv, NumberStyles.Float, CultureInfo.InvariantCulture, out float df))
+                                    { refusals.Add($"{q.EditorID}: --set {pn}: '{pv}' is not a float, and {scriptName} declares it float."); bad = true; break; }
+                                    sc.Properties.Add(new ScriptFloatProperty { Name = pn, Data = df, Flags = ScriptProperty.Flag.Edited }); continue;
+                                case "bool":
+                                    if (!bool.TryParse(pv, out bool db))
+                                    { refusals.Add($"{q.EditorID}: --set {pn}: '{pv}' is not a bool, and {scriptName} declares it bool."); bad = true; break; }
+                                    sc.Properties.Add(new ScriptBoolProperty { Name = pn, Data = db, Flags = ScriptProperty.Flag.Edited }); continue;
+                            }
+                            if (bad) break;
+                            // anything else declared is a form type: fall through to the lookup
+                        }
+                        else
+                        {
+                            if (int.TryParse(pv, out int iv)) { AddInt(sc, pn, iv); continue; }
+                            if (bool.TryParse(pv, out bool bv)) { sc.Properties.Add(new ScriptBoolProperty { Name = pn, Data = bv, Flags = ScriptProperty.Flag.Edited }); continue; }
+                            if (float.TryParse(pv, NumberStyles.Float, CultureInfo.InvariantCulture, out float fv))
+                            { sc.Properties.Add(new ScriptFloatProperty { Name = pn, Data = fv, Flags = ScriptProperty.Flag.Edited }); continue; }
+                        }
                         // otherwise: an EditorID -> object, with the master guard
                         IStarfieldMajorRecordGetter? hit = myMod.EnumerateMajorRecords()
                                 .FirstOrDefault(r => string.Equals(r.EditorID, pv, StringComparison.OrdinalIgnoreCase)) as IStarfieldMajorRecordGetter;
@@ -256,6 +391,28 @@ namespace FrankyCLI
                         var op = new ScriptObjectProperty { Name = pn, Flags = ScriptProperty.Flag.Edited };
                         op.Object.SetTo(hit.FormKey);
                         sc.Properties.Add(op);
+                    }
+                    if (bad) continue;
+
+                    // --- alias-typed properties ---------------------------------------------
+                    // The encoding is the same one this file already uses eighty lines up when it
+                    // creates a QuestFragmentAlias: the FormLink points at the QUEST ITSELF and the
+                    // alias index rides beside it. Read off that working code rather than guessed.
+                    foreach (var kv in setAliases)
+                    {
+                        int eq = kv.IndexOf('=');
+                        string pn = kv[..eq], av = kv[(eq + 1)..];
+                        var tgt = FindAlias(q, av);
+                        if (tgt == null)
+                        {
+                            refusals.Add($"{q.EditorID}: --set-alias {pn}: no alias named '{av}' on this quest.");
+                            bad = true; break;
+                        }
+                        var ap = new ScriptObjectProperty { Name = pn, Flags = ScriptProperty.Flag.Edited };
+                        ap.Object.SetTo(q.FormKey);
+                        ap.Alias = (short)tgt.Value.id;
+                        sc.Properties.Add(ap);
+                        Console.WriteLine($"      {pn} -> alias {tgt.Value.id} '{tgt.Value.name}' on {q.EditorID}");
                     }
                     if (bad) continue;
 
@@ -337,15 +494,115 @@ namespace FrankyCLI
         }
 
 
+        /// <summary>
+        /// Every property a script declares, walking its `extends` chain to the root.
+        ///
+        /// ⛔ THE CHAIN IS THE POINT, not a nicety. DefaultAliasOnActivate declares nothing itself:
+        /// StageToSet and PrereqStage come from DefaultAliasParent, two links up through
+        /// DefaultAlias. A reader that looked at one file would refuse every correct call on 120
+        /// stock scripts. And the inverse is what this exists for: DefaultAliasOnDistanceLessThan
+        /// extends ReferenceAlias directly and declares its own StageToSet and PrereqStage, with no
+        /// TurnOffStage anywhere in its chain.
+        ///
+        /// ⚠ It stops at the first name it cannot find on disk and reports it through
+        /// <paramref name="unresolved"/> rather than returning a short table. A partial chain looks
+        /// exactly like a complete one, and "this property is not declared" read off half a chain is
+        /// a confident wrong answer that would refuse correct work.
+        ///
+        /// Declarations look like `  int Property StageToSet = -1 Auto Const Mandatory`. Matched on
+        /// the line rather than parsed properly, which is enough for Type/Name/Mandatory and is not
+        /// enough for anything else -- so nothing else is read out of it.
+        /// </summary>
+        static Dictionary<string, (string Type, bool Mandatory)>? DeclaredProperties(
+            string scriptName, out List<string> chain, out string? unresolved)
+        {
+            chain = new List<string>();
+            unresolved = null;
+            var props = new Dictionary<string, (string, bool)>(StringComparer.OrdinalIgnoreCase);
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var declRx = new Regex(@"^\s*([A-Za-z_][\w\[\]]*)\s+Property\s+([A-Za-z_]\w*)",
+                                   RegexOptions.IgnoreCase);
+            var extRx = new Regex(@"^\s*Scriptname\s+\S+\s+extends\s+([A-Za-z_]\w*)",
+                                  RegexOptions.IgnoreCase);
+
+            string? name = scriptName;
+            while (name != null && seen.Add(name))
+            {
+                // ScriptObject and ReferenceAlias are engine natives with no .psc on disk. They are
+                // the roots of every chain here, so reaching one is a finish, never a failure.
+                if (name.Equals("ScriptObject", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("ReferenceAlias", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("Quest", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("ObjectReference", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("Actor", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("Form", StringComparison.OrdinalIgnoreCase))
+                { chain.Add(name + " (engine native)"); break; }
+
+                string? f = FindScript(name);
+                if (f == null) { unresolved = name; return null; }
+                chain.Add(name);
+
+                string? next = null;
+                foreach (var line in File.ReadAllLines(f))
+                {
+                    var em = extRx.Match(line);
+                    if (em.Success && next == null) { next = em.Groups[1].Value; continue; }
+                    var dm = declRx.Match(line);
+                    if (!dm.Success) continue;
+                    string ty = dm.Groups[1].Value, pn = dm.Groups[2].Value;
+                    if (ty.Equals("Property", StringComparison.OrdinalIgnoreCase)) continue;
+                    // A child's declaration wins over a parent's: first writer through the chain.
+                    if (!props.ContainsKey(pn))
+                        props[pn] = (ty, line.IndexOf("Mandatory", StringComparison.OrdinalIgnoreCase) >= 0);
+                }
+                name = next;
+            }
+            return props.ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+        }
+
         static void AddInt(ScriptEntry sc, string name, int v) =>
             sc.Properties.Add(new ScriptIntProperty { Name = name, Data = v, Flags = ScriptProperty.Flag.Edited });
 
+        /// <summary>
+        /// Resolve an alias by name, and REFUSE an ambiguous one.
+        ///
+        /// ⛔ ALIAS NAMES ARE NOT UNIQUE ON A QUEST AND THE CORPUS PROVES IT.
+        /// duo_artifact_localcargo_qst09a carries TWO aliases called `BountyTargetMarker`, ID 1 in
+        /// DungeonLocation and ID 11 in FinalLocation -- a fetch-and-deliver, so the same name
+        /// genuinely means two different places. This used to return the FIRST match, so
+        /// `--target BountyTargetMarker` or `--set-alias X=BountyTargetMarker` on that base would
+        /// have silently pointed at the pickup while the author meant the delivery. Nothing about
+        /// the result would have looked wrong.
+        ///
+        /// A tool that refuses an ambiguous anchor does not refuse a precise anchor in the wrong
+        /// place, so the disambiguation is by ID: `BountyTargetMarker#11`.
+        /// </summary>
         static (uint id, string name)? FindAlias(IQuestGetter q, string name)
         {
+            uint? wantId = null;
+            int hash = name.IndexOf('#');
+            if (hash > 0 && uint.TryParse(name[(hash + 1)..], out uint parsed))
+            { wantId = parsed; name = name[..hash]; }
+
+            var hits = new List<(uint id, string name)>();
             foreach (var a in q.Aliases ?? Enumerable.Empty<IAQuestAliasGetter>())
                 foreach (var (id, nm) in Flatten(a))
-                    if (string.Equals(nm, name, StringComparison.OrdinalIgnoreCase)) return (id, nm);
-            return null;
+                    if (string.Equals(nm, name, StringComparison.OrdinalIgnoreCase)) hits.Add((id, nm));
+
+            if (wantId != null)
+            {
+                foreach (var h in hits) if (h.id == wantId.Value) return h;
+                Console.WriteLine($"      REFUSED: {q.EditorID} has no alias '{name}' with ID {wantId.Value}" +
+                                  (hits.Count > 0 ? $" (it has IDs {string.Join(", ", hits.Select(h => h.id))})" : ""));
+                return null;
+            }
+            if (hits.Count > 1)
+            {
+                Console.WriteLine($"      REFUSED: '{name}' is AMBIGUOUS on {q.EditorID} -- IDs {string.Join(", ", hits.Select(h => h.id))}.");
+                Console.WriteLine($"               Disambiguate by ID, e.g. {name}#{hits[0].id}. Picking the first would be a guess.");
+                return null;
+            }
+            return hits.Count == 1 ? hits[0] : null;
         }
 
         static IEnumerable<(uint, string)> Flatten(IAQuestAliasGetter a)
@@ -402,7 +659,9 @@ namespace FrankyCLI
             Console.WriteLine("Usage: queststage <mod> list      <questPattern>");
             Console.WriteLine("       queststage <mod> stage     <questPattern> <index> [--log \"text\"] [--complete] [--dry]");
             Console.WriteLine("       queststage <mod> objective <questPattern> <index> \"<text>\" [--target <aliasName>] [--dry]");
-            Console.WriteLine("       queststage <mod> hook      <questPattern> <aliasName> <ScriptName> --stage N [--prereq M] [--turnoff K] [--set P=V ...] [--dry]");
+            Console.WriteLine("       queststage <mod> hook      <questPattern> <aliasName> <ScriptName> --stage N [--prereq M] [--turnoff K] [--set P=V ...] [--set-alias P=AliasName ...] [--dry]");
+            Console.WriteLine("         --set-alias writes an alias-typed property (the FormLink is the quest itself + an alias index).");
+            Console.WriteLine("         Every property written is checked against the script's own .psc and its extends chain.");
         }
     }
 }

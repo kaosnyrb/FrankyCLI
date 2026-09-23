@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "id": "duo_delve01",
+  "template": "two-beat-one-place",
+  "author": "jessica",
+  "source": "office/projects/delves/testcase-01-two-halves.md",
+
+  "_note": [
+    "TESTCASE 01, THE TWO-BEAT CUT. Jessica's page writes four beats: find the load, take it to the",
+    "centre and find the other half gone, recover what took it, come back and finish the job.",
+    "THIS RECIPE IS BEATS ONE AND FOUR. The middle two need a driver that can stage an absence and a",
+    "recovery, and no shipped script does that, so they are not silently dropped -- they are absent.",
+    "It will therefore read as a carry rather than as a delve, which is her own stated failure",
+    "condition 1. That is the honest cost of the first one working end to end.",
+    "",
+    "Her rule the prose is written under: NAME THE HALF THE PLAYER IS CARRYING, NEVER THE HALF THAT",
+    "IS MISSING. No line below describes the fixture, the mount, the machine or the room, because",
+    "what is actually at a RECenterLocRef is untested geometry and her failure condition 2."
+  ],
+
+  "place": {
+    "theme":  { "require": [], "exclude": [] },
+    "_theme": "Deliberately empty. The testcase is themeless so the skeleton is what is under test.",
+    "leash":  "duo_samemapdistance"
+  },
+
+  "prose": {
+    "name": "Never Arrived at the <Place>: <Planet>",
+    "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
+  },
+
+  "beats": [
+    {
+      "at": "RETravelA1LocRef",
+      "_at": "The travel ring. 'Dropped short of where it was going' -- core tier, 99.6% of the pool.",
+      "objective": "Find the load",
+      "journal": "Signed out, never signed in, and it got this far."
+    },
+    {
+      "at": "RECenterLocRef",
+      "_at": "The centre of the site. Core tier, 99.6%. Her beat four: finish the job somebody else started.",
+      "objective": "Finish the job at the <Place>",
+      "journal": null
+    }
+  ]
+}

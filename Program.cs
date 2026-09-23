@@ -156,6 +156,12 @@ switch (mode)
         // clone a working base, aim it at a travel marker, swap the target for a container.
         return gen_delvelayer1.Run(Get(args, 1, "du_overtime"), Get(args, 2, "duo_artifact_local_qst04a"));
 
+    case "gen_delve":
+        // gen_delve templates | lint <recipe> | build <recipe> [--dry]
+        // Delves from DATA: a JSON recipe an author writes, graded and built against a registry of
+        // template rows. One recipe per mission, no code per mission.
+        return gen_delve.Run(args);
+
     case "gen_questcompletetest":
         // gen_questcompletetest [modname]  -- Gate C: can a quest be ENDED from data?
         // Reflects the stage/log-entry type surface, hunts vanilla for a shipped example,
