@@ -141,6 +141,11 @@ switch (mode)
         // gen_dlgtest [modname]  — structural test for NPCDialogueNoun (no AI, no audio)
         return gen_dlgtest.Run(Get(args, 1, "dlgtest"));
 
+    case "gen_locrefcondtest":
+        // gen_locrefcondtest [refTypeEditorId] [modname]  -- Gate B: construct a
+        // LocationHasRefType condition, write it, and round-trip it OFF DISK.
+        return gen_locrefcondtest.Run(Get(args, 1, "RETravelA1LocRef"), Get(args, 2, "locrefcondtest"));
+
     case "gen_promptlab":
         // gen_promptlab <conversationfile> [<N> | --list]
         if (args.Length < 2)
@@ -288,6 +293,12 @@ Console.WriteLine("                     DU_Station_ASPC and expands all placed A
 Console.WriteLine("                     each station cell's full bounding box.");
 Console.WriteLine();
 Console.WriteLine("  gen_dlgtest     [modname]");
+Console.WriteLine("                     Structural test for NPCDialogueNoun.");
+Console.WriteLine();
+Console.WriteLine("  gen_locrefcondtest [refTypeEditorId] [modname]");
+Console.WriteLine("                     Gate B: construct a LocationHasRefType condition, write it,");
+Console.WriteLine("                     and round-trip it OFF DISK against the vanilla shape.");
+Console.WriteLine("                     Defaults: RETravelA1LocRef, locrefcondtest");
 Console.WriteLine("                     Structural test for NPCDialogueNoun — builds a 2-stage dialogue");
 Console.WriteLine("                     quest, prints a record-chain diagnostic, and writes the .esm.");
 Console.WriteLine("                     No AI or audio. Load output in xEdit to verify. Defaults: modname=dlgtest");
