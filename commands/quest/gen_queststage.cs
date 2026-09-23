@@ -16,7 +16,7 @@ namespace FrankyCLI
     // move between them.
     //
     //   queststage <mod> list      <questPattern>
-    //   queststage <mod> stage     <questPattern> <index> [--log "journal text"] [--dry]
+    //   queststage <mod> stage     <questPattern> <index> [--log "journal text"] [--complete] [--dry]
     //   queststage <mod> objective <questPattern> <index> "<display text>" [--target <aliasName>] [--dry]
     //   queststage <mod> hook      <questPattern> <aliasName> <ScriptName>
     //                              --stage N [--prereq M] [--turnoff K] [--set Prop=Value ...] [--dry]
@@ -65,6 +65,7 @@ namespace FrankyCLI
                 if (i + 1 >= rest.Count) { Console.WriteLine($"Error: {name} needs a value"); Environment.Exit(1); }
                 string v = rest[i + 1]; rest.RemoveRange(i, 2); return v;
             }
+            bool complete = rest.RemoveAll(a => a.Equals("--complete", StringComparison.OrdinalIgnoreCase)) > 0;
             string? log = Opt("--log"), target = Opt("--target");
             string? sStage = Opt("--stage"), sPrereq = Opt("--prereq"), sTurnoff = Opt("--turnoff");
             var sets = new List<string>();
@@ -106,11 +107,29 @@ namespace FrankyCLI
                     if (q.Stages.Any(s => s.Index == idx))
                     { refusals.Add($"{q.EditorID}: stage {idx} already exists -- refusing to overwrite"); continue; }
                     var st = new QuestStage { Index = idx };
-                    if (log != null)
-                        st.LogEntries.Add(new QuestLogEntry { Entry = log });
+                    // --complete is what ENDS the quest, and the flag lives on the LOG ENTRY
+                    // rather than on the stage: QuestStage.Flags is only RunOnStart/RunOnStop/
+                    // KeepInstanceDataFromHereOn and cannot express completion. Measured by
+                    // gen_questcompletetest (Gate C, 2026-09-23), which reflects the type surface
+                    // and round-trips the flag off disk; 2,367 shipped stages across the load
+                    // order carry it, so this is the route vanilla and du_overtime already use.
+                    //
+                    // A COMPLETING STAGE THEREFORE NEEDS A LOG ENTRY EVEN WITH NO JOURNAL TEXT,
+                    // which is why this is not simply appended inside the --log branch. An
+                    // entry with an empty Entry and the flag set is exactly what the shipped
+                    // silent completing stages look like.
+                    if (log != null || complete)
+                    {
+                        var entry = new QuestLogEntry();
+                        if (log != null) entry.Entry = log;
+                        if (complete) entry.Flags = QuestLogEntry.Flag.CompleteQuest;
+                        st.LogEntries.Add(entry);
+                    }
                     q.Stages.Add(st);
                     touched++;
-                    Console.WriteLine($"    + {q.EditorID}: stage {idx}" + (log != null ? $"  log=\"{Trim(log)}\"" : "  (silent -- machine state)"));
+                    string how = log != null ? $"  log=\"{Trim(log)}\"" : "  (silent -- machine state)";
+                    if (complete) how += "  [COMPLETES THE QUEST]";
+                    Console.WriteLine($"    + {q.EditorID}: stage {idx}" + how);
                 }
             }
             else if (verb == "objective")
@@ -310,7 +329,7 @@ namespace FrankyCLI
         static void Usage()
         {
             Console.WriteLine("Usage: queststage <mod> list      <questPattern>");
-            Console.WriteLine("       queststage <mod> stage     <questPattern> <index> [--log \"text\"] [--dry]");
+            Console.WriteLine("       queststage <mod> stage     <questPattern> <index> [--log \"text\"] [--complete] [--dry]");
             Console.WriteLine("       queststage <mod> objective <questPattern> <index> \"<text>\" [--target <aliasName>] [--dry]");
             Console.WriteLine("       queststage <mod> hook      <questPattern> <aliasName> <ScriptName> --stage N [--prereq M] [--turnoff K] [--set P=V ...] [--dry]");
         }
