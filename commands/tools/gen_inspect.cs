@@ -2189,7 +2189,16 @@ namespace FrankyCLI
             }
             if (carrying.Count == 0)
             {
-                Console.WriteLine($"{indent}Coverage: every property Mutagen exposes that CARRIES a value is rendered above.");
+                // The claim is scoped to what this pass actually walked, and the scope is printed
+                // WITH it rather than left to the reader. The old wording was "every property
+                // Mutagen exposes that CARRIES a value is rendered above", which was false on the
+                // very record it was printed under: a property listed in `rendered` was treated as
+                // covered even when its renderer had interpolated the object bare and emitted a
+                // CLASS NAME, and this pass walks T only -- it can see nothing nested inside an
+                // alias, a fill or a condition. A completeness check protects exactly the level it
+                // enumerates, and its PASS LINE is where the scope goes missing.
+                Console.WriteLine($"{indent}Coverage: every TOP-LEVEL property of {typeof(T).Name} that carries a value was CLAIMED by a renderer above.");
+                Console.WriteLine($"{indent}  SCOPE, stated rather than assumed: this walks {typeof(T).Name} itself and nothing nested in it. An undecoded field on an alias, a fill or a condition is invisible here and is reported by that level's own coverage line. And CLAIMED means a renderer named the property, not that it printed the contents.");
             }
             else
             {
@@ -2655,6 +2664,101 @@ namespace FrankyCLI
             "ReferenceCollectionAliasID",
         };
 
+        // ---------------------------------------------------------------------------------
+        // DescribeSub -- render a nested Mutagen sub-object by REFLECTION, never by ToString().
+        //
+        // WHY (2026-09-23, his "decode the three fills"): three fill renderers interpolated the
+        // object bare -- `$"FILL location (ALLA): {a.Location}"` -- so the output was
+        // `Mutagen.Bethesda.Starfield.LocationAliasReferenceBinaryOverlay`, the CLASS NAME. Those
+        // properties are in RefAliasPropsRendered, so the alias-level coverage pass treated them as
+        // RENDERED and never named them. The property was marked covered while its contents were
+        // invisible, which is worse than omitting it: the reader sees a line and believes he has
+        // looked. Found while asking whether a ref alias can fill from a POI's marker -- the
+        // mechanism that answers it lives inside the ALLA block and could not be read at all.
+        //
+        // Reflection rather than typed accessors is deliberate. The typed route needs a member name
+        // guessed against a fan-authored library and fails at COMPILE time on a guess, or worse
+        // renders a subset that then looks complete. This walks whatever is actually there, so a
+        // field nobody has heard of surfaces instead of vanishing -- the same contract the alias and
+        // record coverage passes already keep.
+        private static string DescribeSub(object? o, List<IStarfieldModGetter>? allMods, int depth = 0)
+        {
+            if (o == null) return "(null)";
+            var parts = new List<string>();
+            foreach (var pi in o.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (pi.GetIndexParameters().Length > 0) continue;
+                object? v;
+                try { v = pi.GetValue(o); } catch { continue; }
+                var s = DescribeValue(v, allMods, depth);
+                if (s == null) continue;
+                parts.Add($"{pi.Name}={s}");
+            }
+            // An empty render is a CLAIM and it gets said out loud rather than printed as blank:
+            // "nothing readable here" and "I did not look" must not be the same output.
+            return parts.Count == 0 ? "(no readable properties on " + o.GetType().Name + ")" : string.Join("  ", parts);
+        }
+
+        // One value, resolved as far as it can honestly be taken. Returns null for things that
+        // carry nothing, so the caller drops the key entirely rather than printing `X=`.
+        private static string? DescribeValue(object? v, List<IStarfieldModGetter>? allMods, int depth)
+        {
+            if (v == null) return null;
+            var t = v.GetType();
+
+            // A FormLink/FormKey is the whole point: resolve it to an EditorID where we can.
+            var fkProp = t.GetProperty("FormKey");
+            if (fkProp != null)
+            {
+                try
+                {
+                    var fk = fkProp.GetValue(v);
+                    if (fk is FormKey key)
+                    {
+                        if (key.IsNull) return null;
+                        return ResolveName(key, allMods);
+                    }
+                }
+                catch { /* fall through to the generic paths */ }
+            }
+            if (v is FormKey bare) return bare.IsNull ? null : ResolveName(bare, allMods);
+
+            if (v is string str) return str.Length == 0 ? null : "\"" + str + "\"";
+            if (t.IsPrimitive || t.IsEnum) return v.ToString();
+
+            // IEnumerable, NOT the non-generic ICollection. Mutagen's BinaryOverlayList implements
+            // the GENERIC IReadOnlyList<T> and does not implement System.Collections.ICollection,
+            // so an ICollection test falls straight through to the object path and renders the
+            // list's Count property as if it were the value. Caught by RUNNING this on the record
+            // it was written for: the ALPS conditions came back `{Count=6}`, which is the same
+            // class of half-answer this helper exists to kill, produced by the helper itself.
+            if (v is System.Collections.IEnumerable seq && v is not string)
+            {
+                var items = new List<string>();
+                foreach (var item in seq)
+                {
+                    if (depth >= 2) { items.Add("…"); break; }
+                    var s = DescribeValue(item, allMods, depth + 1) ?? DescribeSub(item, allMods, depth + 1);
+                    items.Add(s);
+                }
+                if (items.Count == 0) return null;
+                return "[" + string.Join(" | ", items) + "]";
+            }
+
+            // A nested Mutagen record shape: recurse once, then stop and SAY that we stopped.
+            if (t.Namespace != null && t.Namespace.StartsWith("Mutagen"))
+            {
+                if (depth >= 2) return $"({t.Name}, not expanded at this depth)";
+                return "{" + DescribeSub(v, allMods, depth + 1) + "}";
+            }
+
+            var plain = v.ToString();
+            if (string.IsNullOrEmpty(plain)) return null;
+            // The defect this whole helper exists for: never let a bare type name pass as a value.
+            if (plain == t.FullName || plain == t.Name) return $"({t.Name}, no readable value)";
+            return plain;
+        }
+
         private static void DumpRefAlias(IQuestReferenceAliasGetter a, List<IStarfieldModGetter>? allMods, string pad)
         {
             Console.WriteLine($"{pad}[RefAlias] ID={a.ID} Name={a.Name}");
@@ -2673,7 +2777,7 @@ namespace FrankyCLI
             }
             if (a.FindMatchingRefFromEvent != null)
             {
-                Console.WriteLine($"{pad}  FILL from-event (ALFE/ALFD): {a.FindMatchingRefFromEvent}");
+                Console.WriteLine($"{pad}  FILL from-event (ALFE/ALFD): {DescribeSub(a.FindMatchingRefFromEvent, allMods)}");
                 fills++;
             }
             if (!a.ForcedReference.IsNull)
@@ -2693,12 +2797,12 @@ namespace FrankyCLI
             }
             if (a.Location != null)
             {
-                Console.WriteLine($"{pad}  FILL location (ALLA): {a.Location}");
+                Console.WriteLine($"{pad}  FILL location (ALLA): {DescribeSub(a.Location, allMods)}");
                 fills++;
             }
             if (a.External != null)
             {
-                Console.WriteLine($"{pad}  FILL external (ALEQ/ALEA): {a.External}");
+                Console.WriteLine($"{pad}  FILL external (ALEQ/ALEA): {DescribeSub(a.External, allMods)}");
                 fills++;
             }
             // The one the alias-level coverage report surfaced, and it is how a mission's objective
@@ -2813,9 +2917,12 @@ namespace FrankyCLI
                     if (pi.GetIndexParameters().Length > 0 || pi.Name == "PcmTypeKeyword") continue;
                     object? v; try { v = pi.GetValue(a.ALPS); } catch { continue; }
                     if (v == null) continue;
-                    var vs = v.ToString() ?? "";
-                    if (vs is "Null" or "" or "0") continue;
-                    if (vs.Length > 60) vs = vs.Substring(0, 60) + "…";
+                    // Was `v.ToString()` truncated to 60 chars, which on the ALPS Conditions list
+                    // printed `Mutagen...BinaryOverlayList+Bi…` -- a CLASS NAME, cut in half, under
+                    // a heading promising the PCM request. Same defect as the three fills above and
+                    // the same cure: walk the value, never name its type.
+                    var vs = DescribeValue(v, allMods, 0);
+                    if (vs == null || vs is "Null" or "" or "0") continue;
                     Console.WriteLine($"{pad}    {pi.Name}: {vs}");
                 }
                 fills++;
