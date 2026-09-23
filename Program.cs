@@ -151,6 +151,11 @@ switch (mode)
         // LocationHasRefType condition, write it, and round-trip it OFF DISK.
         return gen_locrefcondtest.Run(Get(args, 1, "RETravelA1LocRef"), Get(args, 2, "locrefcondtest"));
 
+    case "gen_delvelayer1":
+        // gen_delvelayer1 [modname] [sourceQuestEditorId]  -- the first Delve, beat one only:
+        // clone a working base, aim it at a travel marker, swap the target for a container.
+        return gen_delvelayer1.Run(Get(args, 1, "du_overtime"), Get(args, 2, "duo_artifact_local_qst04a"));
+
     case "gen_questcompletetest":
         // gen_questcompletetest [modname]  -- Gate C: can a quest be ENDED from data?
         // Reflects the stage/log-entry type surface, hunts vanilla for a shipped example,

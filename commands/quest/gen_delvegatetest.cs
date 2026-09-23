@@ -280,7 +280,11 @@ namespace FrankyCLI
         /// reflection: alias properties, quest script properties and alias script properties
         /// are three different shapes and a typed path would silently cover only one.
         /// </summary>
-        private static int RepointSelfLinks(object vmad, FormKey oldKey, FormKey newKey)
+        // internal rather than private: gen_delvelayer1 clones a quest the same way and needs the
+        // same repoint. A second copy of this would be a second bug -- the failure it prevents (a
+        // clone silently driving the SOURCE quest's aliases) is invisible in every dump, so the
+        // one place it is implemented is the only place it can be got right.
+        internal static int RepointSelfLinks(object vmad, FormKey oldKey, FormKey newKey)
         {
             int count = 0;
             Walk(vmad, oldKey, newKey, ref count, 0);
