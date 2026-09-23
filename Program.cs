@@ -141,6 +141,11 @@ switch (mode)
         // gen_dlgtest [modname]  — structural test for NPCDialogueNoun (no AI, no audio)
         return gen_dlgtest.Run(Get(args, 1, "dlgtest"));
 
+    case "gen_delvegatetest":
+        // gen_delvegatetest [modname] [sourceQuestEditorId]  -- Gate B behaviour half:
+        // build a matched PAIR of test quests so a pass can be told from a no-op.
+        return gen_delvegatetest.Run(Get(args, 1, "du_overtime"), Get(args, 2, "duo_artifact_local_qst04a"));
+
     case "gen_locrefcondtest":
         // gen_locrefcondtest [refTypeEditorId] [modname]  -- Gate B: construct a
         // LocationHasRefType condition, write it, and round-trip it OFF DISK.
@@ -299,6 +304,11 @@ Console.WriteLine("  gen_locrefcondtest [refTypeEditorId] [modname]");
 Console.WriteLine("                     Gate B: construct a LocationHasRefType condition, write it,");
 Console.WriteLine("                     and round-trip it OFF DISK against the vanilla shape.");
 Console.WriteLine("                     Defaults: RETravelA1LocRef, locrefcondtest");
+Console.WriteLine();
+Console.WriteLine("  gen_delvegatetest [modname] [sourceQuestEditorId]");
+Console.WriteLine("                     Gate B behaviour half: writes a matched PAIR of test quests");
+Console.WriteLine("                     (pass/fail) so an evaluated condition can be told from an");
+Console.WriteLine("                     ignored one. Defaults: du_overtime, duo_artifact_local_qst04a");
 Console.WriteLine("                     Structural test for NPCDialogueNoun — builds a 2-stage dialogue");
 Console.WriteLine("                     quest, prints a record-chain diagnostic, and writes the .esm.");
 Console.WriteLine("                     No AI or audio. Load output in xEdit to verify. Defaults: modname=dlgtest");
