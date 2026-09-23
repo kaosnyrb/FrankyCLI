@@ -49,6 +49,27 @@
 
       "tokens": { "Place": "DungeonLocation", "Planet": "targetPlanet" },
 
+      "maxBeats": 8,
+      "extraBeatStageBase": 60,
+      "extraBeatStageStep": 10,
+
+      "_extraBeats": [
+        "BEATS BEYOND THE DRIVER'S TWO SLOTS ARE INSERTED BETWEEN THEM, never after. The driver",
+        "completes the quest on the second activation, so the LAST beat is always its slot 2 and the",
+        "FIRST is always its slot 1. Everything in between gets a freshly created beat slot: a marker",
+        "alias filling inside the place, an activator create-obj'd at it, a stage carrying its journal",
+        "line, and a stock DefaultAliasOnActivate gated on the previous beat's stage.",
+        "",
+        "⛔ AN EXTRA BEAT CARRIES A JOURNAL AND NO OBJECTIVE. The driver displays objectives 10 and 20",
+        "and nothing else, and of 245 vanilla Default* scripts exactly one displays an objective at",
+        "all. Measured across his own corpus: 237 quests carry one objective, 92 carry two, NONE",
+        "carries three. So an extra beat moves the story and not the on-screen marker, and the lint",
+        "refuses an objective on one rather than writing a string nobody will ever see.",
+        "",
+        "maxBeats is a stage-numbering bound, not an engine one: extras take 60, 70, 80 ... and must",
+        "stay below completeStage."
+      ],
+
       "collapsedPlaceAliases": [10],
 
       "_collapsedNote": [
@@ -59,9 +80,11 @@
       ],
 
       "cannot": [
-        "a third beat -- the driver has exactly two activator properties",
+        "a THIRD OBJECTIVE -- the driver displays 10 and 20 and nothing else, so beats beyond its two carry a journal line and no on-screen marker",
         "a beat that is not an activation -- arrival, death and item pickup need a different driver",
-        "a beat in a second place -- that is what this template collapses away, by design"
+        "a beat AFTER the hand-over -- the driver completes the quest on its second activation",
+        "a beat in a second place -- that is what this template collapses away, by design",
+        "distance -- every beat shares the site diameter, median 133 units, however many there are"
       ],
 
       "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a, 2026-09-23"

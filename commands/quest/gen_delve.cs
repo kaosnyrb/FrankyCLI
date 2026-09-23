@@ -59,6 +59,9 @@ namespace FrankyCLI
             public int briefingStage { get; set; }
             public int completeStage { get; set; }
             public List<BeatSlot> beatSlots { get; set; } = new();
+            public int maxBeats { get; set; }
+            public int extraBeatStageBase { get; set; }
+            public int extraBeatStageStep { get; set; }
             public Dictionary<string, string> tokens { get; set; } = new();
             public List<int> collapsedPlaceAliases { get; set; } = new();
             public List<string> cannot { get; set; } = new();
@@ -179,13 +182,43 @@ namespace FrankyCLI
             // --- shape ---------------------------------------------------------------
             if (r.schema != 1) Fatal($"schema is {r.schema}, this tool speaks 1");
             if (string.IsNullOrWhiteSpace(r.id)) Fatal("no id");
-            if (r.beats.Count != t.beats)
-                Fatal($"recipe has {r.beats.Count} beat(s); template '{t.id}' carries exactly {t.beats}. "
+            int maxBeats = t.maxBeats > 0 ? t.maxBeats : t.beats;
+            if (r.beats.Count < t.beats)
+                Fatal($"recipe has {r.beats.Count} beat(s); template '{t.id}' needs at least {t.beats}. "
                       + "What it cannot do: " + string.Join("; ", t.cannot));
+            else if (r.beats.Count > maxBeats)
+                Fatal($"recipe has {r.beats.Count} beat(s); template '{t.id}' tops out at {maxBeats}.");
+
+            // The driver's own slots are the FIRST and LAST beat. Everything between them is an
+            // extra slot this tool creates, and an extra beat has no objective because there is no
+            // driver to display one -- writing the string anyway would put prose in the record that
+            // no player can ever see, which is worse than refusing it.
             for (int i = 0; i < r.beats.Count; i++)
             {
+                bool driven = i == 0 || i == r.beats.Count - 1;
                 if (string.IsNullOrWhiteSpace(r.beats[i].at)) Fatal($"beat {i + 1} names no marker");
-                if (string.IsNullOrWhiteSpace(r.beats[i].objective)) Fatal($"beat {i + 1} has no objective text");
+                if (driven && string.IsNullOrWhiteSpace(r.beats[i].objective))
+                    Fatal($"beat {i + 1} is one of the driver's own slots and has no objective text");
+                if (!driven && !string.IsNullOrWhiteSpace(r.beats[i].objective))
+                    Fatal($"beat {i + 1} is an EXTRA beat and carries an objective. The driver displays "
+                          + $"objectives {string.Join(" and ", t.beatSlots.Select(s => s.objective))} and no others, "
+                          + "so this text would never reach a player. Give it a journal line instead.");
+                if (!driven && string.IsNullOrWhiteSpace(r.beats[i].journal))
+                    Fatal($"beat {i + 1} is an EXTRA beat with no journal line, so nothing about it would "
+                          + "reach the player at all.");
+            }
+            int extras = Math.Max(0, r.beats.Count - t.beatSlots.Count);
+            if (extras > 0)
+            {
+                int last = t.extraBeatStageBase + t.extraBeatStageStep * (extras - 1);
+                if (t.extraBeatStageBase <= 0 || t.extraBeatStageStep <= 0)
+                    Fatal($"template '{t.id}' declares no extra-beat stage numbering, so it cannot take extras");
+                else if (last >= t.completeStage)
+                    Fatal($"{extras} extra beat(s) would number stages up to {last}, at or past the "
+                          + $"completing stage {t.completeStage}");
+                else
+                    Warn($"{extras} extra beat(s) will be CREATED: a marker alias, an activator, a stage and a "
+                         + $"stock hook each, numbered {t.extraBeatStageBase} to {last}. Journal only, no objective.");
             }
             if (string.IsNullOrWhiteSpace(r.prose.name)) Fatal("prose.name is empty");
             if (string.IsNullOrWhiteSpace(r.prose.briefing)) Fatal("prose.briefing is empty");
@@ -854,8 +887,31 @@ namespace FrankyCLI
 
             int fail = 0;
             fail += WritePlaceConditions(clone, t, r, markers, reqK, excK);
-            for (int i = 0; i < t.beatSlots.Count; i++)
-                fail += WriteBeat(clone, t, t.beatSlots[i], r.beats[i], markers);
+
+            // The driver's own slots are the FIRST and LAST beat; extras are created between them.
+            var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
+            int nb = r.beats.Count;
+            plan.Add((t.beatSlots[0], r.beats[0], false));
+            for (int i = 1; i < nb - 1; i++)
+            {
+                var made = AddBeatSlot(clone, t, i, t.extraBeatStageBase + t.extraBeatStageStep * (i - 1));
+                if (made == null) { fail++; break; }
+                plan.Add((made, r.beats[i], true));
+            }
+            plan.Add((t.beatSlots[^1], r.beats[^1], false));
+
+            for (int i = 0; i < plan.Count && fail == 0; i++)
+                fail += WriteBeat(clone, t, plan[i].slot, plan[i].beat, markers, plan[i].created);
+
+            // An extra beat fires on a stock DefaultAliasOnActivate gated on the PREVIOUS beat's
+            // stage, so the chain sequences itself with no state variable. The first extra gates on
+            // the driver's own stage-50, which it sets on the first activation.
+            for (int i = 1; i < nb - 1 && fail == 0; i++)
+            {
+                var slot = plan[i].slot;
+                int prereq = i == 1 ? t.beatSlots[0].journalStage : plan[i - 1].slot.journalStage;
+                fail += HookActivator(clone, slot.activatorAlias, slot.journalStage, prereq);
+            }
             fail += WriteProse(clone, t, r);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
@@ -866,7 +922,7 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            return Verify(modFile, readParams, t, r, markers);
+            return Verify(modFile, readParams, t, r, markers, plan);
         }
 
         /// <summary>
@@ -912,21 +968,112 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// CREATE A BEAT SLOT: a marker alias that fills inside the place, an activator create-obj'd
+        /// at it, and a stage to carry the beat's journal line.
+        ///
+        /// ⭐ IT CLONES THE TEMPLATE'S FIRST SLOT RATHER THAN CONSTRUCTING FROM NOTHING, and that is
+        /// the whole safety argument. A QuestReferenceAlias carries flags this tool has no business
+        /// having an opinion about -- slot 0's activator is QuestObject | StoresText | CreateRefTemp,
+        /// and a fresh object would have none of them. Copying a slot that demonstrably works in a
+        /// shipped quest brings along every field I do not know exists, which is the same argument
+        /// that made the layer-1 clone safe. Only ID, Name, RefType and the create-at target move.
+        ///
+        /// ⚠ His own warning on this operation, and it is why extras are built as a UNIT rather than
+        /// one alias at a time: "aliases freak out if they are wrong it's better to build in layers."
+        /// A half-made slot -- a marker with no activator, or an activator pointing at an alias that
+        /// does not exist -- is an unfillable non-optional alias, and a mission with one of those
+        /// SILENTLY DOES NOT LOAD. So this returns null and refuses rather than leaving a partial.
+        /// </summary>
+        private static BeatSlot? AddBeatSlot(Quest q, Template t, int index, int stage)
+        {
+            var src = t.beatSlots[0];
+            var srcMarker = q.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)src.markerAlias);
+            var srcAct = q.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)src.activatorAlias);
+            if (srcMarker?.Location == null || srcAct?.CreateReferenceToObject == null)
+            { Console.WriteLine("REFUSED: template slot 0 is not a marker+activator pair on this base."); return null; }
+
+            uint next = 1 + (q.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max());
+            uint mid = next, aid = next + 1;
+
+            var marker = srcMarker.DeepCopy();
+            marker.ID = mid;
+            marker.Name = "DelveBeat" + index + "Marker";
+
+            var act = srcAct.DeepCopy();
+            act.ID = aid;
+            act.Name = "DelveBeat" + index + "Target";
+            act.CreateReferenceToObject!.AliasID = (short)mid;
+
+            q.Aliases.Add(marker);
+            q.Aliases.Add(act);
+
+            // The stage has to exist before anything can set it, and a stage with no log entry
+            // renders nothing at all, so the entry is created here rather than left to the prose
+            // pass to discover missing.
+            if (q.Stages!.Any(s => s.Index == stage))
+            { Console.WriteLine($"REFUSED: stage {stage} already exists on this base; extra-beat numbering collides."); return null; }
+            var st = new QuestStage { Index = (ushort)stage };
+            st.LogEntries.Add(new QuestLogEntry());
+            q.Stages.Add(st);
+
+            Console.WriteLine($"  +slot    : beat {index + 1} created -- marker alias {mid}, activator {aid}, stage {stage}");
+            return new BeatSlot { markerAlias = (int)mid, activatorAlias = (int)aid, objective = -1, journalStage = stage };
+        }
+
+        private static IEnumerable<(uint id, string name)> Flatten(IAQuestAliasGetter a)
+        {
+            if (a is IQuestReferenceAliasGetter r && r.Name != null) yield return (r.ID, r.Name);
+            if (a is IQuestLocationAliasGetter l && l.Name != null) yield return (l.ID, l.Name);
+            if (a is IQuestCollectionAliasGetter c)
+                foreach (var m in c.Collection)
+                    if (m.ReferenceAlias?.Name != null) yield return (m.ReferenceAlias.ID, m.ReferenceAlias.Name!);
+        }
+
+        /// <summary>
+        /// Attach a stock DefaultAliasOnActivate to a created activator: gate it on the previous
+        /// beat's stage, set its own. PrereqStage + StageToSet IS the sequencing mechanism, with no
+        /// state variable and no Papyrus.
+        /// ⛔ The gate is GetStageDone(PrereqStage), so a prereq nothing sets blocks the hook FOR
+        /// EVER and in total silence. That cost an in-game run earlier today.
+        /// </summary>
+        private static int HookActivator(Quest q, int aliasId, int stageToSet, int prereq)
+        {
+            var vma = q.VirtualMachineAdapter;
+            if (vma == null) { Console.WriteLine("REFUSED: quest has no VirtualMachineAdapter to hang a hook on."); return 1; }
+            var entry = new QuestFragmentAlias();
+            entry.Property.Object.SetTo(q.FormKey);
+            entry.Property.Alias = (short)aliasId;
+            var sc = new ScriptEntry { Name = "DefaultAliasOnActivate" };
+            sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = stageToSet, Flags = ScriptProperty.Flag.Edited });
+            sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
+            entry.Scripts.Add(sc);
+            vma.Aliases.Add(entry);
+            Console.WriteLine($"  +hook    : alias {aliasId} DefaultAliasOnActivate  sets {stageToSet} after {prereq}");
+            return 0;
+        }
+
+        /// <summary>
         /// Point one beat's marker alias at the place, and give the beat its objective and journal.
         /// ⚠ BOTH HALVES OF THE FILL ARE SET EVERY TIME, including the half that is not changing.
         /// "Which marker, inside which drawn place" is one fact; writing only the half that moved is
         /// how a quest ends up selecting a POI on one marker and hunting for another.
         /// </summary>
-        private static int WriteBeat(Quest clone, Template t, BeatSlot slot, Beat beat, Dictionary<string, FormKey> markers)
+        private static int WriteBeat(Quest clone, Template t, BeatSlot slot, Beat beat,
+                                     Dictionary<string, FormKey> markers, bool created)
         {
             var al = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
             if (al?.Location == null) { Console.WriteLine("REFUSED: ref alias " + slot.markerAlias + " has no location fill."); return 1; }
             al.Location.AliasID = t.placeAlias;
             al.Location.RefType.SetTo(markers[beat.at]);
 
-            var ob = clone.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
-            if (ob == null) { Console.WriteLine("REFUSED: no objective " + slot.objective + " on the base."); return 1; }
-            ob.DisplayText = Expand(beat.objective!, t);
+            // A created slot has no objective by construction: the driver displays only its own two,
+            // and the lint has already refused any recipe that tried to give one an objective.
+            if (!created)
+            {
+                var ob = clone.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
+                if (ob == null) { Console.WriteLine("REFUSED: no objective " + slot.objective + " on the base."); return 1; }
+                ob.DisplayText = Expand(beat.objective!, t);
+            }
 
             if (beat.journal != null)
             {
@@ -970,7 +1117,8 @@ namespace FrankyCLI
         /// built in memory cannot fail, and what landed in the file is the only thing that matters.
         /// </summary>
         private static int Verify(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
-                                  Template t, Recipe r, Dictionary<string, FormKey> markers)
+                                  Template t, Recipe r, Dictionary<string, FormKey> markers,
+                                  List<(BeatSlot slot, Beat beat, bool created)> plan)
         {
             Console.WriteLine();
             Console.WriteLine("  verification, re-read from disk:");
@@ -988,17 +1136,47 @@ namespace FrankyCLI
                           markers.Values.All(k => condMarkers.Contains(k)) ? "yes" : "no", "yes");
             fail += Check("place demands NOTHING ELSE", condMarkers.Count.ToString(), markers.Count.ToString());
 
-            for (int i = 0; i < t.beatSlots.Count; i++)
+            // ⛔ THE PLAN IS HANDED IN, NEVER RE-DERIVED. The first version of this loop walked the
+            // TEMPLATE's slots against the recipe's beats positionally, which is correct only while
+            // the two have the same length. On the first three-beat build it compared the middle
+            // beat against the last slot and then threw on a null objective, AFTER the file had been
+            // written. Two loops over the same mapping will diverge; there is now one.
+            for (int i = 0; i < plan.Count; i++)
             {
-                var slot = t.beatSlots[i];
+                var (slot, beat, created) = plan[i];
+                string tag = $"beat {i + 1}{(created ? " (created)" : "")}";
                 var al = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
-                fail += Check($"beat {i + 1} fills from {r.beats[i].at}",
-                              al?.Location?.RefType.FormKey == markers[r.beats[i].at] ? "yes" : "no", "yes");
-                fail += Check($"beat {i + 1} searches the place alias",
+                fail += Check($"{tag} fills from {beat.at}",
+                              al?.Location?.RefType.FormKey == markers[beat.at] ? "yes" : "no", "yes");
+                fail += Check($"{tag} searches the place alias",
                               (al?.Location?.AliasID)?.ToString() ?? "unset", t.placeAlias.ToString());
-                var ob = q.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
-                fail += Check($"beat {i + 1} objective rewritten",
-                              (ob?.DisplayText?.String ?? "") == Expand(r.beats[i].objective!, t) ? "yes" : "no", "yes");
+
+                if (created)
+                {
+                    // A created slot's whole value is that the player sees it, and the two ways it
+                    // can silently fail to are an activator that create-objs nowhere and a stage
+                    // whose log entry never got its text.
+                    var act = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
+                    fail += Check($"{tag} activator create-objs AT its own marker",
+                                  (act?.CreateReferenceToObject?.AliasID)?.ToString() ?? "unset", slot.markerAlias.ToString());
+                    fail += Check($"{tag} activator has an object to place",
+                                  act?.CreateReferenceToObject?.Object.IsNull == false ? "yes" : "no", "yes");
+                    var st = q.Stages?.FirstOrDefault(s => s.Index == slot.journalStage);
+                    fail += Check($"{tag} journal landed on stage {slot.journalStage}",
+                                  (st?.LogEntries?.FirstOrDefault()?.Entry?.String ?? "") == Expand(beat.journal ?? "", t) ? "yes" : "no", "yes");
+                    bool hooked = q.VirtualMachineAdapter?.Aliases?
+                        .Any(fa => fa.Property.Alias == slot.activatorAlias
+                                   && fa.Scripts.Any(s => s.Name == "DefaultAliasOnActivate"
+                                                          && s.Properties.OfType<IScriptIntPropertyGetter>()
+                                                              .Any(p => p.Name == "StageToSet" && p.Data == slot.journalStage))) ?? false;
+                    fail += Check($"{tag} hook sets stage {slot.journalStage}", hooked ? "yes" : "no", "yes");
+                }
+                else
+                {
+                    var ob = q.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
+                    fail += Check($"{tag} objective rewritten",
+                                  (ob?.DisplayText?.String ?? "") == Expand(beat.objective ?? "", t) ? "yes" : "no", "yes");
+                }
             }
             fail += Check("name rewritten", (q.Name?.String ?? "") == Expand(r.prose.name!, t) ? "yes" : "no", "yes");
 

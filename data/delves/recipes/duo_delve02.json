@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "id": "duo_delve02",
+  "template": "two-beat-one-place",
+  "author": "eliza",
+  "source": "office/projects/delves/testcase-01-two-halves.md",
+
+  "_note": [
+    "THREE BEATS IN ONE POI, and it exists to prove the created beat slot rather than to be a good",
+    "mission. Beat two is an EXTRA: a marker alias, an activator, a stage and a stock hook, all",
+    "created by the generator rather than present on the base.",
+    "",
+    "⚠ THE PROSE IS A PLACEHOLDER AND IS MINE, NOT JESSICA'S. Her testcase's middle beats are an",
+    "ABSENCE and a RECOVERY, and an extra slot as built is an activation like any other, so it",
+    "cannot stage an absence. Beat two below is the nearest honest thing an activation can be: the",
+    "load's own paperwork, found on the way. When she writes the real middle this recipe is the",
+    "shape it goes into, and the words are one edit.",
+    "",
+    "⛔ An extra beat carries a JOURNAL and no objective, because the driver displays objectives 10",
+    "and 20 and nothing else. The lint refuses an objective here rather than writing a string no",
+    "player could ever see."
+  ],
+
+  "place": {
+    "theme":  { "require": [], "exclude": [] },
+    "leash":  "duo_samemapdistance"
+  },
+
+  "prose": {
+    "name": "Never Arrived at the <Place>: <Planet>",
+    "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
+  },
+
+  "beats": [
+    {
+      "at": "RETravelA1LocRef",
+      "objective": "Find the load",
+      "journal": "Signed out, never signed in, and it got this far."
+    },
+    {
+      "at": "REMarkerMediumLocRef",
+      "journal": "The manifest was still with it. Two halves, one signature, and only one of them ever moved."
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Finish the job at the <Place>",
+      "journal": null
+    }
+  ]
+}
