@@ -2025,10 +2025,23 @@ namespace FrankyCLI
             if (q.Stages != null)
                 foreach (var s in q.Stages)
                 {
-                    Console.WriteLine($"    Index={s.Index}  Flags={s.Flags}  logEntries={s.LogEntries?.Count ?? 0}");
+                    // stageFlags, not Flags: the bare label read as "this stage has no flags at
+                    // all" and cost a wrong claim about how duo_artifact_local_qst04a ends
+                    // (2026-09-23). QuestStage.Flags is only RunOnStart/RunOnStop/
+                    // KeepInstanceDataFromHereOn and CANNOT express completion -- the quest ends on
+                    // QuestLogEntry.Flags = CompleteQuest, one level down, which this never printed.
+                    // So every quest in every mod read Flags=0 and the field that decides the end of
+                    // a quest was invisible. A reader that names a property and hides a DIFFERENT
+                    // one of the same name is worse than one that omits both.
+                    Console.WriteLine($"    Index={s.Index}  stageFlags={s.Flags}  logEntries={s.LogEntries?.Count ?? 0}");
                     if (s.LogEntries != null)
                         foreach (var e in s.LogEntries)
                         {
+                            // Printed for EVERY entry, including a flagless one, and printed BEFORE
+                            // the text: an entry carrying only a flag and no journal line rendered
+                            // nothing whatsoever before this, so the log entry that ends the quest
+                            // was not merely mislabelled, it was absent from the dump.
+                            Console.WriteLine($"      entryFlags: {(e.Flags.HasValue ? e.Flags.Value.ToString() : "(none)")}");
                             if (e.Entry != null && e.Entry.String?.Length > 0)
                                 Console.WriteLine($"      text: \"{e.Entry}\"");
                             if (e.Conditions != null && e.Conditions.Count > 0)
