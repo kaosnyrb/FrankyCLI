@@ -118,6 +118,7 @@ namespace FrankyCLI
             {
                 case "templates": return ListTemplates(templates);
                 case "census": return Census(args.Any(a => a.Equals("--vanilla", StringComparison.OrdinalIgnoreCase)));
+                case "spread": return Spread(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
@@ -252,6 +253,39 @@ namespace FrankyCLI
                 else if (all < 40) Warn($"the draw pool is {all}. Narrow -- the narrowest anything in Overtime leans on is 44.");
             }
 
+            // --- how far apart the beats actually land -------------------------------------
+            // ⛔ THIS EXISTS BECAUSE COVERAGE IS SILENT ABOUT GEOMETRY. The first playable Delve put
+            // its two beats close enough together that the mission read as nothing, and both markers
+            // were 99.6% of the pool. Nothing in a coverage table could have predicted it.
+            //
+            // ⭐ HIS FACT: THE TRAVEL MARKERS ARE THE EDGES OF THE POI. So the two reference rows
+            // below are the site's RADIUS and its DIAMETER, and the diameter is the hard ceiling on
+            // how far apart any two beats in ONE POI can ever be. No printed verdict and no
+            // threshold: three numbers and the author decides, because "far enough" is a question
+            // about the fiction and not about the records.
+            if (!issues.Any(i => i.Fatal) && r.beats.Count >= 2)
+            {
+                Console.WriteLine();
+                Console.WriteLine("  separation, GAME UNITS (units-to-metres is NOT established; compare rows)");
+                var want = new List<(string, string, string)>
+                {
+                    ("THIS RECIPE", r.beats[0].at, r.beats[1].at),
+                    ("site radius", "RECenterLocRef", "RETravelA1LocRef"),
+                    ("site diameter (the ceiling)", "RETravelA1LocRef", "RETravelB1LocRef"),
+                };
+                foreach (var (label, a, b) in want)
+                {
+                    var v = Separations(env, a, b);
+                    if (v.Count == 0) { Console.WriteLine($"    {label,-30} {a} <-> {b}: no POI carries both"); continue; }
+                    v.Sort();
+                    Console.WriteLine($"    {label,-30} n={v.Count,4}  min {v[0],6:F0}  p25 {Pct(v, .25),6:F0}"
+                                      + $"  med {Pct(v, .5),6:F0}  p75 {Pct(v, .75),6:F0}  max {v[^1],6:F0}   ({a} <-> {b})");
+                }
+                Console.WriteLine("    ⚠ Two markers from the SAME travel ring (A1/A2/A3, or B1/B2/B3) sit on top of each");
+                Console.WriteLine("      other: median 7 to 14 units. An A marker paired with a B marker is the widest");
+                Console.WriteLine("      a single POI offers, and it is about double what the centre gives.");
+            }
+
             // --- leash, the stated v1 limit ---------------------------------------------
             if (!string.IsNullOrWhiteSpace(r.place.leash))
             {
@@ -336,6 +370,184 @@ namespace FrankyCLI
         /// Expected on vanilla, measured 2026-09-23: 260 by keyword, 282 by centre marker, 259
         /// intersection, 283 union.
         /// </summary>
+        /// <summary>
+        /// HOW FAR APART TWO BEATS ACTUALLY LAND, measured across the pool.
+        ///
+        /// ⛔ THE GAP THIS EXISTS FOR, found at the glass on the first playable Delve: the two beats
+        /// were about twenty metres apart and the mission read as nothing. Coverage said both markers
+        /// were 99.6% of the pool and coverage is silent about geometry. There is no condition
+        /// function that can filter a POI draw on the distance between two of its own markers, so the
+        /// ONLY lever is which pair of markers a recipe names -- which makes this distribution the
+        /// thing that decides whether a Delve is a walk or a shrug.
+        ///
+        /// Units are game units. Starfield's are roughly 1.4 cm, so ~70 units to the metre; the
+        /// report prints both and says which is derived.
+        /// </summary>
+        private static int Spread(List<string> markerNames)
+        {
+            if (markerNames.Count < 2)
+            {
+                Console.WriteLine("Usage: gen_delve spread <markerA> <markerB> [markerC ...]");
+                Console.WriteLine("       Every pair among the named markers is measured across the POI pool.");
+                return 1;
+            }
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+
+            var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                .Where(x => x.EditorID != null)
+                .GroupBy(x => x.EditorID!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().FormKey, StringComparer.OrdinalIgnoreCase);
+            var keys = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
+            foreach (var n in markerNames)
+            {
+                if (!lcrt.TryGetValue(n, out var k)) { Console.WriteLine("REFUSED: '" + n + "' is not a LocationReferenceType."); return 1; }
+                keys[n] = k;
+            }
+
+            var oeK = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;
+            var ctr = lcrt.TryGetValue("RECenterLocRef", out var ck) ? ck : (FormKey?)null;
+
+            // per marker name -> list of positions, per POI
+            var samples = new Dictionary<string, List<double>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var a in markerNames) foreach (var b in markerNames)
+                if (string.Compare(a, b, StringComparison.OrdinalIgnoreCase) < 0) samples[a + " <-> " + b] = new List<double>();
+
+            int pois = 0, resolvedPois = 0, unresolvable = 0;
+            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
+            {
+                var rt = new Dictionary<FormKey, List<FormKey>>();   // reftype -> marker refs
+                var kw = new HashSet<FormKey>();
+                if (loc.Keywords != null) foreach (var k in loc.Keywords) kw.Add(k.FormKey);
+                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                {
+                    if (g == null) continue;
+                    foreach (var e in g)
+                    {
+                        if (e.LocationRefType.IsNull || e.Marker.IsNull) continue;
+                        if (!rt.TryGetValue(e.LocationRefType.FormKey, out var l)) rt[e.LocationRefType.FormKey] = l = new List<FormKey>();
+                        l.Add(e.Marker.FormKey);
+                    }
+                }
+                bool isPoi = (oeK != null && kw.Contains(oeK.Value)) || (ctr != null && rt.ContainsKey(ctr.Value));
+                if (!isPoi) continue;
+                pois++;
+
+                // Resolve one position per named marker type. ⚠ A POI can carry SEVERAL refs of one
+                // type; the FIRST is taken and that is a stated simplification, not a measurement of
+                // the nearest or the best. Recorded here rather than left for a reader to assume.
+                var pos = new Dictionary<string, P3>();
+                foreach (var kv in keys)
+                {
+                    if (!rt.TryGetValue(kv.Value, out var refs) || refs.Count == 0) continue;
+                    if (TryPos(env, refs[0], out var p)) pos[kv.Key] = p;
+                    else unresolvable++;
+                }
+                if (pos.Count < 2) continue;
+                resolvedPois++;
+                foreach (var pair in samples.Keys.ToList())
+                {
+                    var half = pair.Split(" <-> ");
+                    if (!pos.TryGetValue(half[0], out var p1) || !pos.TryGetValue(half[1], out var p2)) continue;
+                    samples[pair].Add(Dist(p1, p2));
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"  POIs in pool: {pois}, with at least two of these markers resolvable: {resolvedPois}");
+            if (unresolvable > 0) Console.WriteLine($"  marker refs that would not resolve to a position: {unresolvable}");
+            Console.WriteLine();
+            // ⛔ NO METRE COLUMN. The first version printed one at ~70 units/m, which is the
+            // Skyrim/Fallout constant carried over on no evidence, and it produced a median of
+            // "1 metre" for a whole POI. The unit-to-metre conversion is NOT established for this
+            // engine and a fabricated precision beside a real measurement is worse than no column:
+            // the numbers below are comparable to EACH OTHER, which is all a marker choice needs.
+            //
+            // ⭐ HIS FACT, 2026-09-23, and it is what makes this table readable: THE TRAVEL MARKERS
+            // ARE THE EDGES OF THE POI. So an edge-to-edge pair is the site's DIAMETER and an
+            // edge-to-centre pair is its radius. The largest number here is the most separation a
+            // single-POI Delve can ever have, by construction.
+            Console.WriteLine("  distance between beats, GAME UNITS (units-to-metres is NOT established; compare rows)");
+            Console.WriteLine($"  {"pair",-52} {"n",5} {"min",9} {"p25",9} {"med",9} {"p75",9} {"max",9}");
+            foreach (var kv in samples.OrderByDescending(s => Median(s.Value)))
+            {
+                var v = kv.Value.OrderBy(x => x).ToList();
+                if (v.Count == 0) { Console.WriteLine($"  {kv.Key,-52} {0,5}   (no POI carries both)"); continue; }
+                Console.WriteLine($"  {kv.Key,-52} {v.Count,5} {v[0],9:F0} {Pct(v, .25),9:F0} {Pct(v, .5),9:F0} {Pct(v, .75),9:F0} {v[^1],9:F0}");
+            }
+            Console.WriteLine();
+            Console.WriteLine("  ⚠ A MEDIAN IS NOT A GUARANTEE. The draw is random, so a recipe picking the widest pair");
+            Console.WriteLine("    still lands on its own p25 a quarter of the time. Read the SPREAD, not the middle.");
+            return 0;
+        }
+
+        /// <summary>
+        /// Distance between one marker of each named type, per POI. Shared by `spread` and the lint
+        /// so the two can never report different numbers for the same question.
+        /// ⚠ A POI can carry several refs of one type and the FIRST is taken. Stated rather than
+        /// left to be assumed: this is not the nearest pair, nor the farthest, nor a mean.
+        /// </summary>
+        private static List<double> Separations(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string a, string b)
+        {
+            var outp = new List<double>();
+            var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                .Where(x => x.EditorID != null)
+                .GroupBy(x => x.EditorID!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().FormKey, StringComparer.OrdinalIgnoreCase);
+            if (!lcrt.TryGetValue(a, out var ka) || !lcrt.TryGetValue(b, out var kb)) return outp;
+
+            var oeK = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;
+            var ctr = lcrt.TryGetValue("RECenterLocRef", out var ck) ? ck : (FormKey?)null;
+
+            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
+            {
+                FormKey? ma = null, mb = null;
+                bool hasCentre = false;
+                var kw = new HashSet<FormKey>();
+                if (loc.Keywords != null) foreach (var k in loc.Keywords) kw.Add(k.FormKey);
+                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                {
+                    if (g == null) continue;
+                    foreach (var e in g)
+                    {
+                        if (e.LocationRefType.IsNull || e.Marker.IsNull) continue;
+                        var t = e.LocationRefType.FormKey;
+                        if (ctr != null && t == ctr.Value) hasCentre = true;
+                        if (t == ka && ma == null) ma = e.Marker.FormKey;
+                        if (t == kb && mb == null) mb = e.Marker.FormKey;
+                    }
+                }
+                bool isPoi = (oeK != null && kw.Contains(oeK.Value)) || hasCentre;
+                if (!isPoi || ma == null || mb == null) continue;
+                if (TryPos(env, ma.Value, out var pa) && TryPos(env, mb.Value, out var pb)) outp.Add(Dist(pa, pb));
+            }
+            return outp;
+        }
+
+        private readonly record struct P3(float X, float Y, float Z);
+
+        private static bool TryPos(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, FormKey k, out P3 p)
+        {
+            p = default;
+            // Position sits directly on the placed record, not under a Placement sub-object.
+            // Read off gen_moveref, which moves these for real, rather than guessed from the name.
+            if (env.LinkCache.TryResolve<IPlacedObjectGetter>(k, out var po))
+            { p = new P3(po.Position.X, po.Position.Y, po.Position.Z); return true; }
+            return false;
+        }
+
+        private static double Dist(P3 a, P3 b)
+        {
+            double dx = a.X - b.X, dy = a.Y - b.Y, dz = a.Z - b.Z;
+            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        private static double Median(List<double> v) => v.Count == 0 ? -1 : Pct(v.OrderBy(x => x).ToList(), .5);
+        private static double Pct(List<double> sorted, double q)
+            => sorted.Count == 0 ? 0 : sorted[Math.Min(sorted.Count - 1, (int)(q * sorted.Count))];
+
         private static (int, int, int, int) OriginCensus = (-1, -1, -1, -1);
 
         private static int Census(bool vanillaOnly)
