@@ -118,7 +118,9 @@ namespace FrankyCLI
             {
                 case "templates": return ListTemplates(templates);
                 case "census": return Census(args.Any(a => a.Equals("--vanilla", StringComparison.OrdinalIgnoreCase)));
-                case "spread": return Spread(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
+                case "spread": return Spread(args.Skip(2).Where(a => !a.StartsWith("--")).ToList(),
+                                             args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
+                case "markers": return Markers(args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
@@ -383,12 +385,13 @@ namespace FrankyCLI
         /// Units are game units. Starfield's are roughly 1.4 cm, so ~70 units to the metre; the
         /// report prints both and says which is derived.
         /// </summary>
-        private static int Spread(List<string> markerNames)
+        private static int Spread(List<string> markerNames, bool dungeons)
         {
             if (markerNames.Count < 2)
             {
-                Console.WriteLine("Usage: gen_delve spread <markerA> <markerB> [markerC ...]");
-                Console.WriteLine("       Every pair among the named markers is measured across the POI pool.");
+                Console.WriteLine("Usage: gen_delve spread [--dungeons] <markerA> <markerB> [markerC ...]");
+                Console.WriteLine("       Every pair among the named markers is measured across the chosen population.");
+                Console.WriteLine("       --dungeons measures the 71 LocDungeonBossLocRef locations instead of the POI pool.");
                 return 1;
             }
             using var env = GameEnvironment.Typical
@@ -414,11 +417,21 @@ namespace FrankyCLI
             foreach (var a in markerNames) foreach (var b in markerNames)
                 if (string.Compare(a, b, StringComparison.OrdinalIgnoreCase) < 0) samples[a + " <-> " + b] = new List<double>();
 
+            var boss = lcrt.TryGetValue("LocDungeonBossLocRef", out var bk) ? bk : (FormKey?)null;
+
+            // ⭐ HIS FACT, 2026-09-23: on a dungeon the boss markers are INSIDE and the travel
+            // markers are OUTSIDE. That is corroborable without taking anyone's word for it, because
+            // a special reference carries the CELL its marker sits in: an inside marker and an
+            // outside marker cannot share one. Counted below as sameCell / crossCell.
+            var cellOf = new Dictionary<FormKey, FormKey>();
+            int sameCell = 0, crossCell = 0;
+
             int pois = 0, resolvedPois = 0, unresolvable = 0;
             foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
             {
                 var rt = new Dictionary<FormKey, List<FormKey>>();   // reftype -> marker refs
                 var kw = new HashSet<FormKey>();
+                cellOf.Clear();
                 if (loc.Keywords != null) foreach (var k in loc.Keywords) kw.Add(k.FormKey);
                 foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
                 {
@@ -428,19 +441,24 @@ namespace FrankyCLI
                         if (e.LocationRefType.IsNull || e.Marker.IsNull) continue;
                         if (!rt.TryGetValue(e.LocationRefType.FormKey, out var l)) rt[e.LocationRefType.FormKey] = l = new List<FormKey>();
                         l.Add(e.Marker.FormKey);
+                        if (!cellOf.ContainsKey(e.Marker.FormKey) && !e.Location.IsNull) cellOf[e.Marker.FormKey] = e.Location.FormKey;
                     }
                 }
-                bool isPoi = (oeK != null && kw.Contains(oeK.Value)) || (ctr != null && rt.ContainsKey(ctr.Value));
-                if (!isPoi) continue;
+                bool inPop = dungeons
+                    ? (boss != null && rt.ContainsKey(boss.Value))
+                    : ((oeK != null && kw.Contains(oeK.Value)) || (ctr != null && rt.ContainsKey(ctr.Value)));
+                if (!inPop) continue;
                 pois++;
 
                 // Resolve one position per named marker type. ⚠ A POI can carry SEVERAL refs of one
                 // type; the FIRST is taken and that is a stated simplification, not a measurement of
                 // the nearest or the best. Recorded here rather than left for a reader to assume.
                 var pos = new Dictionary<string, P3>();
+                var cell = new Dictionary<string, FormKey>();
                 foreach (var kv in keys)
                 {
                     if (!rt.TryGetValue(kv.Value, out var refs) || refs.Count == 0) continue;
+                    if (cellOf.TryGetValue(refs[0], out var c)) cell[kv.Key] = c;
                     if (TryPos(env, refs[0], out var p)) pos[kv.Key] = p;
                     else unresolvable++;
                 }
@@ -450,13 +468,24 @@ namespace FrankyCLI
                 {
                     var half = pair.Split(" <-> ");
                     if (!pos.TryGetValue(half[0], out var p1) || !pos.TryGetValue(half[1], out var p2)) continue;
+                    // ⛔ A DISTANCE ACROSS TWO CELLS IS NOT A DISTANCE. Marker positions are local to
+                    // the cell the reference sits in, so subtracting a coordinate in an interior from
+                    // one on the surface produces a confident number that means nothing at all. Those
+                    // pairs are COUNTED and EXCLUDED rather than quietly averaged in.
+                    bool same = cell.TryGetValue(half[0], out var c1) && cell.TryGetValue(half[1], out var c2) && c1 == c2;
+                    if (same) sameCell++; else { crossCell++; continue; }
                     samples[pair].Add(Dist(p1, p2));
                 }
             }
 
             Console.WriteLine();
-            Console.WriteLine($"  POIs in pool: {pois}, with at least two of these markers resolvable: {resolvedPois}");
+            Console.WriteLine($"  population: {(dungeons ? "DUNGEONS (LocDungeonBossLocRef)" : "the POI pool")}");
+            Console.WriteLine($"  locations: {pois}, with at least two of these markers resolvable: {resolvedPois}");
             if (unresolvable > 0) Console.WriteLine($"  marker refs that would not resolve to a position: {unresolvable}");
+            Console.WriteLine($"  marker pairs sharing a cell: {sameCell}   in DIFFERENT cells: {crossCell}");
+            if (crossCell > 0)
+                Console.WriteLine("    ⚠ cross-cell pairs are EXCLUDED from the rows below, not averaged in: positions are "
+                                  + "cell-local, so subtracting across two cells gives a confident meaningless number.");
             Console.WriteLine();
             // ⛔ NO METRE COLUMN. The first version printed one at ~70 units/m, which is the
             // Skyrim/Fallout constant carried over on no evidence, and it produced a median of
@@ -524,6 +553,98 @@ namespace FrankyCLI
                 if (TryPos(env, ma.Value, out var pa) && TryPos(env, mb.Value, out var pb)) outp.Add(Dist(pa, pb));
             }
             return outp;
+        }
+
+        /// <summary>
+        /// WHAT EACH MARKER MEANS, on the one axis the records can answer: INSIDE or OUTSIDE.
+        ///
+        /// ⭐ HIS ASK, 2026-09-23: "it doesn't break things, just means we have to know what each
+        /// marker means." A coverage table says how many places carry a marker and nothing about
+        /// what kind of place it is IN, which is how a Delve ends up putting two beats on the same
+        /// rock or straddling a door it cannot see.
+        ///
+        /// ⭐ THE SIGNAL IS MECHANICAL AND COSTS NOTHING: a special reference carries the CELL its
+        /// marker sits in and the cell's GRID coordinate, and an interior cell's grid is the
+        /// sentinel 32767, 32767 (0x7FFF). So "is this marker indoors" is a field, not an opinion.
+        /// Corroborated against his own statement that a dungeon's boss markers are inside and its
+        /// travel markers outside, and it agrees.
+        ///
+        /// ⛔ THIS DELIBERATELY RESOLVES NO POSITIONS. The link cache reads exterior placed refs and
+        /// not interior ones -- 223 of 223 boss markers failed to resolve, and the distance table
+        /// printed "no location carries both", which reads as an absence in the world rather than a
+        /// blind reader. This measurement is built on the fields in the Location itself so it cannot
+        /// go blind the same way.
+        /// </summary>
+        private static int Markers(bool dungeons)
+        {
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+
+            var name = new Dictionary<FormKey, string>();
+            foreach (var x in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>())
+                if (x.EditorID != null) name[x.FormKey] = x.EditorID;
+
+            var oeK = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;
+            FormKey? ctr = null, boss = null;
+            foreach (var kv in name)
+            {
+                if (kv.Value.Equals("RECenterLocRef", StringComparison.OrdinalIgnoreCase)) ctr = kv.Key;
+                if (kv.Value.Equals("LocDungeonBossLocRef", StringComparison.OrdinalIgnoreCase)) boss = kv.Key;
+            }
+
+            var locs = new Dictionary<FormKey, int>();      // reftype -> locations carrying it
+            var inside = new Dictionary<FormKey, int>();    // reftype -> refs in an interior cell
+            var total = new Dictionary<FormKey, int>();     // reftype -> refs
+            int pop = 0;
+
+            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
+            {
+                var seen = new HashSet<FormKey>();
+                var rows = new List<(FormKey type, bool interior)>();
+                var kw = new HashSet<FormKey>();
+                if (loc.Keywords != null) foreach (var k in loc.Keywords) kw.Add(k.FormKey);
+                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                {
+                    if (g == null) continue;
+                    foreach (var e in g)
+                    {
+                        if (e.LocationRefType.IsNull) continue;
+                        // 32767 is short.MaxValue and is the engine's "no grid", i.e. an interior.
+                        bool interior = e.Grid.X == 32767 && e.Grid.Y == 32767;
+                        rows.Add((e.LocationRefType.FormKey, interior));
+                        seen.Add(e.LocationRefType.FormKey);
+                    }
+                }
+                bool inPop = dungeons
+                    ? (boss != null && seen.Contains(boss.Value))
+                    : ((oeK != null && kw.Contains(oeK.Value)) || (ctr != null && seen.Contains(ctr.Value)));
+                if (!inPop) continue;
+                pop++;
+                foreach (var t in seen) locs[t] = locs.GetValueOrDefault(t) + 1;
+                foreach (var (t, i) in rows)
+                {
+                    total[t] = total.GetValueOrDefault(t) + 1;
+                    if (i) inside[t] = inside.GetValueOrDefault(t) + 1;
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"  population: {(dungeons ? "DUNGEONS (LocDungeonBossLocRef)" : "the POI pool")}, {pop} location(s)");
+            Console.WriteLine($"  {"marker",-40} {"locs",6} {"cover",7} {"refs",6} {"inside",7}   where");
+            foreach (var kv in locs.OrderByDescending(k => k.Value))
+            {
+                int t = total.GetValueOrDefault(kv.Key), ins = inside.GetValueOrDefault(kv.Key);
+                double pctIn = t == 0 ? 0 : 100.0 * ins / t;
+                string where = pctIn >= 99 ? "INSIDE" : pctIn <= 1 ? "outside" : "mixed";
+                Console.WriteLine($"  {name.GetValueOrDefault(kv.Key, kv.Key.ToString()),-40} {kv.Value,6} "
+                                  + $"{100.0 * kv.Value / Math.Max(1, pop),6:F1}% {t,6} {pctIn,6:F1}%   {where}");
+            }
+            Console.WriteLine();
+            Console.WriteLine("  inside% is the share of that marker's references sitting in an INTERIOR cell");
+            Console.WriteLine("  (grid sentinel 32767,32767). A 'mixed' marker means the SAME NAME is used both");
+            Console.WriteLine("  sides of a door, which is the one a recipe author has to be careful with.");
+            return 0;
         }
 
         private readonly record struct P3(float X, float Y, float Z);
