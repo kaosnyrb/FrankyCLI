@@ -223,7 +223,11 @@ namespace FrankyCLI
 
                     var sc = new ScriptEntry { Name = scriptName };
                     AddInt(sc, "StageToSet", stageToSet);
-                    if (sPrereq != null && int.TryParse(sPrereq, out int pr)) AddInt(sc, "PrereqStage", pr);
+                    if (sPrereq != null && int.TryParse(sPrereq, out int pr))
+                    {
+                        AddInt(sc, "PrereqStage", pr);
+                        WarnIfPrereqUnreachable(q, pr);
+                    }
                     if (sTurnoff != null && int.TryParse(sTurnoff, out int to)) AddInt(sc, "TurnOffStage", to);
 
                     bool bad = false;
@@ -283,6 +287,55 @@ namespace FrankyCLI
             Console.WriteLine($"  Verify: FrankyCLI queststage {modname} list {pattern}");
             return 0;
         }
+
+        /// <summary>
+        /// A hook gated on a stage that NOTHING SETS is a hook that never fires, and it fails in
+        /// total silence: the script is attached, the record is correct, every dump looks right,
+        /// and the player's action simply does nothing.
+        ///
+        /// It cost an in-game run on 2026-09-23. duo_delve01_layer1's activation hook was written
+        /// --prereq 0 on the reasonable-looking assumption that stage 0 is set when a quest starts.
+        /// It is not: a stage is only set at start if it carries RunOnStart, and neither stage on
+        /// the base carried it. The stock gate is
+        ///     if (PrereqStage > -1 && QuestToSet.GetStageDone(PrereqStage) == FALSE) -> blocked
+        /// so GetStageDone(0) was false for ever and the crate did nothing when he opened it.
+        ///
+        /// ⚠ A WARN AND NOT A REFUSAL, deliberately. A stage can legitimately be set by Papyrus
+        /// this tool cannot see, so refusing would block correct work to prevent a mistake. What it
+        /// can prove is the NEGATIVE case from the record alone: no RunOnStart flag and no other
+        /// hook on this quest setting it. That is worth saying out loud and is not worth blocking.
+        /// </summary>
+        static void WarnIfPrereqUnreachable(IQuestGetter q, int prereq)
+        {
+            if (prereq <= -1) return;   // -1 is the declared default and means "no gate"
+
+            var stage = q.Stages?.FirstOrDefault(s => s.Index == prereq);
+            if (stage == null)
+            {
+                Console.WriteLine($"      WARN: stage {prereq} does not exist on {q.EditorID}, so this hook can NEVER fire.");
+                Console.WriteLine( "            The stock gate is GetStageDone(PrereqStage); a stage that is not there is never done.");
+                return;
+            }
+
+            // Alias hooks hang off the QUEST's VirtualMachineAdapter.Aliases, not off the alias
+            // record. The first version of this reflected over the alias and found nothing, so it
+            // warned on every prereq including reachable ones -- caught by biting the guard on a
+            // case that had to stay QUIET, which is the only direction a false alarm shows up in.
+            bool runOnStart = stage.Flags.HasFlag(QuestStage.Flag.RunOnStart);
+            bool setBySomeHook = q.VirtualMachineAdapter?.Aliases?
+                .SelectMany(fa => fa.Scripts)
+                .SelectMany(sc => sc.Properties.OfType<IScriptIntPropertyGetter>())
+                .Any(p => p.Name == "StageToSet" && p.Data == prereq) ?? false;
+
+            if (!runOnStart && !setBySomeHook)
+            {
+                Console.WriteLine($"      WARN: nothing on this record sets stage {prereq}.");
+                Console.WriteLine( "            It carries no RunOnStart flag and no other alias hook targets it, so unless");
+                Console.WriteLine( "            Papyrus sets it, GetStageDone() stays false and this hook silently never fires.");
+                Console.WriteLine( "            Omit --prereq for an ungated hook (the declared default is -1, which skips the gate).");
+            }
+        }
+
 
         static void AddInt(ScriptEntry sc, string name, int v) =>
             sc.Properties.Add(new ScriptIntProperty { Name = name, Data = v, Flags = ScriptProperty.Flag.Edited });

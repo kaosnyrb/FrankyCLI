@@ -259,8 +259,13 @@ namespace FrankyCLI
             Console.WriteLine();
             Console.WriteLine("  FrankyCLI queststage " + modname + " stage " + NewQuestId
                               + " 200 --log \"The container was never going to get where it was headed.\" --complete");
+            // NO --prereq, and this line shipped wrong once. It read "--prereq 0" on the reasonable
+            // assumption that stage 0 is set when a quest starts. It is not: a stage is set at start
+            // only if it carries RunOnStart, and neither stage on the base does. The stock gate is
+            // GetStageDone(PrereqStage), so the hook was blocked for ever and the crate did nothing
+            // when he opened it in game. The declared default is -1, which skips the gate.
             Console.WriteLine("  FrankyCLI queststage " + modname + " hook " + NewQuestId
-                              + " " + TargetAliasName + " DefaultAliasOnActivate --stage 200 --prereq 0");
+                              + " " + TargetAliasName + " DefaultAliasOnActivate --stage 200");
             Console.WriteLine();
             Console.WriteLine("  Then in game, on a throwaway save:");
             Console.WriteLine("    help " + NewQuestId + " 0");
