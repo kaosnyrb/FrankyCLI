@@ -151,6 +151,12 @@ switch (mode)
         // LocationHasRefType condition, write it, and round-trip it OFF DISK.
         return gen_locrefcondtest.Run(Get(args, 1, "RETravelA1LocRef"), Get(args, 2, "locrefcondtest"));
 
+    case "gen_questcompletetest":
+        // gen_questcompletetest [modname]  -- Gate C: can a quest be ENDED from data?
+        // Reflects the stage/log-entry type surface, hunts vanilla for a shipped example,
+        // then constructs a completing stage and round-trips it OFF DISK. Temp only.
+        return gen_questcompletetest.Run(Get(args, 1, "questcompletetest"), Get(args, 2, ""));
+
     case "gen_promptlab":
         // gen_promptlab <conversationfile> [<N> | --list]
         if (args.Length < 2)
@@ -304,6 +310,11 @@ Console.WriteLine("  gen_locrefcondtest [refTypeEditorId] [modname]");
 Console.WriteLine("                     Gate B: construct a LocationHasRefType condition, write it,");
 Console.WriteLine("                     and round-trip it OFF DISK against the vanilla shape.");
 Console.WriteLine("                     Defaults: RETravelA1LocRef, locrefcondtest");
+Console.WriteLine();
+Console.WriteLine("  gen_questcompletetest [modname]");
+Console.WriteLine("                     Gate C: can a quest be ENDED from data? Reflects the stage");
+Console.WriteLine("                     type surface, hunts vanilla for a shipped example, then");
+Console.WriteLine("                     round-trips a completing stage OFF DISK. Defaults: questcompletetest");
 Console.WriteLine();
 Console.WriteLine("  gen_delvegatetest [modname] [sourceQuestEditorId]");
 Console.WriteLine("                     Gate B behaviour half: writes a matched PAIR of test quests");
