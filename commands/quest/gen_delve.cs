@@ -169,6 +169,7 @@ namespace FrankyCLI
                 case "markers": return Markers(args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "bases": return MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "footprint": return Footprint();
+                case "keywords": return PoolKeywords();
                 case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
@@ -996,6 +997,28 @@ namespace FrankyCLI
             Console.WriteLine("  furthest travel marker from the worldspace origin, per N (metres), for the cell size:");
             foreach (var kv in perN.OrderBy(k => k.Key))
                 Console.WriteLine($"    N={kv.Key}  {kv.Value.n,4} POIs   max |x|,|y| = {kv.Value.maxCoord,7:F1}");
+            return 0;
+        }
+
+        /// <summary>
+        /// EVERY KEYWORD THE POOL'S LOCATIONS CARRY, with counts. What a recipe's theme can condition on
+        /// is exactly this list and nothing else, so it is read rather than guessed.
+        /// ⛔ WHY: I called "not Natural, not Cave, not Abandoned" a PEOPLED filter without looking for a
+        /// keyword that means people. His question, 2026-09-24: "what peopled did you check?"
+        /// </summary>
+        private static int PoolKeywords()
+        {
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            var pool = PoolCensus(env);
+            var tally = new Dictionary<FormKey, int>();
+            foreach (var p in pool) foreach (var k in p.Keywords) tally[k] = tally.GetValueOrDefault(k) + 1;
+            Console.WriteLine($"\n  POI pool: {pool.Count} location(s); {tally.Count} distinct keyword(s)\n");
+            foreach (var kv in tally.OrderByDescending(k => k.Value))
+            {
+                string n = env.LinkCache.TryResolve<IKeywordGetter>(kv.Key, out var kw) ? (kw.EditorID ?? "?") : "(unresolved)";
+                Console.WriteLine($"    {kv.Value,4}  {n,-50} {kv.Key}");
+            }
             return 0;
         }
 
