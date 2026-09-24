@@ -117,7 +117,16 @@ namespace FrankyCLI
             public List<Beat> beats { get; set; } = new();
         }
         /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
-        private sealed class Items { public string? load { get; set; } public string? missing { get; set; } }
+        private sealed class Items
+        {
+            public string? load { get; set; }
+            public string? missing { get; set; }
+            /// <summary>
+            /// OPTIONAL: the NIF the beat-1 crate wears. Absent = the base activator's own model. His eye,
+            /// 2026-09-24: the base's is a BOSS container, so the load read as end-of-dungeon loot.
+            /// </summary>
+            public string? crateModel { get; set; }
+        }
         private sealed class Place
         {
             public Theme theme { get; set; } = new();
@@ -265,6 +274,18 @@ namespace FrankyCLI
                 else if (Tokens(r.items!.load!).Concat(Tokens(r.items.missing!)).Any())
                     Fatal("an item name carries a <Token>. Item names are not alias contexts, so it would print literally in the inventory.");
                 else ItemNameCollisions(env, r, Fatal);
+                if (!string.IsNullOrWhiteSpace(r.items?.crateModel))
+                {
+                    int uses = 0;
+                    foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
+                        if (rec is IModeledGetter mg && mg.Model?.File != null
+                            && string.Equals(mg.Model.File.DataRelativePath.Path, r.items!.crateModel, StringComparison.OrdinalIgnoreCase))
+                            uses++;
+                    Console.WriteLine($"  crate model: {r.items!.crateModel} is used by {uses} record(s) in the load order");
+                    if (uses == 0)
+                        Fatal($"items.crateModel '{r.items.crateModel}' is used by no record in the load order. A path that "
+                              + "resolves to nothing builds clean and renders nothing; use one the game already ships.");
+                }
                 for (int i = 0; i < r.beats.Count; i++)
                 {
                     var m = r.beats[i].message;
@@ -1348,6 +1369,7 @@ namespace FrankyCLI
             public Dictionary<string, bool> BoolProps = new();
             /// <summary>Beat index (0-based) to the message box built for it.</summary>
             public Dictionary<int, FormKey> Messages = new();
+            public FormKey? Crate;
         }
 
         /// <summary>
@@ -1404,6 +1426,32 @@ namespace FrankyCLI
                 return mi.FormKey;
             }
             made.LoadItem = CloneItem("Load", r.items!.load!);
+
+            // --- the crate's model, on a CLONE of the base activator ------------------------------------
+            // The base's activator is shared by his shipped cargo quests, so it is never edited. Model.File
+            // is written and NOTHING ELSE (gen_setmodel's rule: dropping LightLayer once made thirteen parts
+            // invisible), and LightLayer + Flags are asserted unchanged.
+            foreach (var k in myMod.Activators.Where(a => a.EditorID == r.id + "_crate").Select(a => a.FormKey).ToList())
+                myMod.Activators.Remove(k);
+            if (!string.IsNullOrWhiteSpace(r.items.crateModel))
+            {
+                var loadAlias = clone.Aliases?.OfType<QuestReferenceAlias>()
+                    .FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].activatorAlias);
+                var actKey = loadAlias?.CreateReferenceToObject?.Object.FormKey;
+                var actSrc = actKey == null ? null : myMod.Activators.FirstOrDefault(a => a.FormKey == actKey.Value);
+                if (actSrc?.Model == null)
+                { Console.WriteLine($"REFUSED: the load alias does not create an activator of {t.mod} with a model to clone."); return 1; }
+                var act = myMod.Activators.DuplicateInAsNewRecord(actSrc);
+                act.EditorID = r.id + "_crate";
+                var ll = act.Model!.LightLayer; var fl = act.Model.Flags;
+                act.Model.File = new Mutagen.Bethesda.Plugins.Assets.AssetLink<
+                    Mutagen.Bethesda.Starfield.Assets.StarfieldModelAssetType>(r.items.crateModel);
+                if (act.Model.LightLayer != ll || act.Model.Flags != fl)
+                { Console.WriteLine("REFUSED: writing Model.File disturbed LightLayer or Flags."); return 1; }
+                loadAlias!.CreateReferenceToObject!.Object.SetTo(act.FormKey);
+                made.Crate = act.FormKey;
+                Console.WriteLine($"  +crate   : {act.EditorID} {act.FormKey}  model {r.items.crateModel}  (clone of {actSrc.EditorID})");
+            }
             made.MissingItem = CloneItem("OtherHalf", r.items.missing!);
 
             // --- message boxes, one per beat that declares one ------------------------------------------
@@ -1817,6 +1865,14 @@ namespace FrankyCLI
             if (q == null) { Console.WriteLine("    FAIL: the quest is not in the written file."); return 1; }
 
             int fail = 0;
+            if (!string.IsNullOrWhiteSpace(r.items?.crateModel))
+            {
+                var crate = reread.Activators.FirstOrDefault(a => a.EditorID == r.id + "_crate");
+                fail += Check("crate model", crate?.Model?.File?.DataRelativePath.Path ?? "missing", r.items!.crateModel!);
+                var la = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].activatorAlias);
+                fail += Check("the load alias creates the crate clone", la?.CreateReferenceToObject?.Object.FormKey.ToString() ?? "unset",
+                              crate?.FormKey.ToString() ?? "no crate");
+            }
             for (int i = 0; i < r.beats.Count; i++)
             {
                 var bm = r.beats[i].message;

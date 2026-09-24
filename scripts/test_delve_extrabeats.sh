@@ -27,7 +27,8 @@ run() { # run WANT needle label file
   got=UNCLEAR
   [ "$want" = REFUSE ] && [ $code -ne 0 ] && echo "$out" | grep -q "$needle" && got=REFUSE
   [ "$want" = PASS   ] && [ $code -eq 0 ] && echo "$out" | grep -q "$needle" && got=PASS
-  v=$([ "$got" = "$want" ] && echo "  OK " || { fails=$((fails+1)); echo "FAIL"; })
+  # The counter must NOT be incremented inside $( ): that is a subshell and the increment is lost, which is how this suite reported "0 failing" under a [FAIL] line until 2026-09-24.
+  if [ "$got" = "$want" ]; then v="  OK "; else v="FAIL"; fails=$((fails+1)); fi
   echo "[$v] want=$want got=$got :: $label"
   echo "$out" | grep -E "FATAL|warn \]|\+slot|\+hook|LINT" | sed 's/^/          /'
   echo

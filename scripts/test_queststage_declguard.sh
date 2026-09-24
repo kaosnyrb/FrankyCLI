@@ -25,7 +25,8 @@ run() {
   got=UNCLEAR
   if [ "$want" = REFUSE ] && [ $code -ne 0 ] && echo "$out" | grep -q "$needle"; then got=REFUSE; fi
   if [ "$want" = PASS ] && [ $code -eq 0 ] && echo "$out" | grep -q "$needle"; then got=PASS; fi
-  verdict=$([ "$got" = "$want" ] && echo "  OK " || { fails=$((fails+1)); echo "FAIL"; })
+  # The counter must NOT be incremented inside $( ): that is a subshell and the increment is lost, which is how this suite reported "0 failing" under a [FAIL] line until 2026-09-24.
+  if [ "$got" = "$want" ]; then verdict="  OK "; else verdict="FAIL"; fails=$((fails+1)); fi
   echo "[$verdict] want=$want got=$got :: $label"
   echo "$out" | grep -E "REFUSED|ABSTAIN|declarations:|-> alias |sets stage|--dry:" | sed 's/^/          /'
   echo

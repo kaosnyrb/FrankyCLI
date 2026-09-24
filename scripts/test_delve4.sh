@@ -27,7 +27,8 @@ run() { # run WANT needle label file
   got=UNCLEAR
   [ "$want" = REFUSE ] && [ $code -ne 0 ] && echo "$out" | grep -qF "$needle" && got=REFUSE
   [ "$want" = PASS   ] && [ $code -eq 0 ] && echo "$out" | grep -qF "$needle" && got=PASS
-  v=$([ "$got" = "$want" ] && echo "  OK " || { fails=$((fails+1)); echo "FAIL"; })
+  # The counter must NOT be incremented inside $( ): that is a subshell and the increment is lost, which is how this suite reported "0 failing" under a [FAIL] line until 2026-09-24.
+  if [ "$got" = "$want" ]; then v="  OK "; else v="FAIL"; fails=$((fails+1)); fi
   echo "[$v] want=$want got=$got :: $label"
   echo "$out" | grep -E "FATAL|LINT" | sed 's/^/          /'
   echo
@@ -66,6 +67,9 @@ run REFUSE "has a message with no text" "beat 2 message with empty text" "$TMP/n
 
 mut clash 'r["items"]["load"] = "Terran Reclaimer"'
 run REFUSE "is already the name of" "an item named exactly like a vanilla record" "$TMP/clash.json"
+
+mut badmodel 'r["items"]["crateModel"] = "Meshes/NoSuch/Crate.nif"'
+run REFUSE "is used by no record in the load order" "a crate model nothing ships" "$TMP/badmodel.json"
 
 echo "================ $fails failing case(s) ================"
 exit $fails

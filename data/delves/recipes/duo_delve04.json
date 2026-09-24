@@ -40,7 +40,9 @@
   "items": {
     "load": "Reclaimer Housing (1 of 2)",
     "missing": "Reclaimer Filter Core (2 of 2)",
-    "_items": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site."
+    "_items": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site.",
+    "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+    "_crateModel": "His eye, 2026-09-24: the base activator wears BossContainer_Science01, an end-of-dungeon loot container, so the load read as loot. A plain stackable freight crate reads as a consignment. Eliza's pick on the placeholder-not-question rule; his to swap."
   },
   "beats": [
     {
