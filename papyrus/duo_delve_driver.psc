@@ -18,6 +18,9 @@ ReferenceAlias Property CentreTarget Auto Const Mandatory
 {Beats 2 and 4. Where the work was being done. Visited twice, and the second visit is the point.}
 ReferenceAlias Property CarrierMarker Auto Const Mandatory
 {Beat 3. Where whoever took the other half is standing when the player finds it gone.}
+ReferenceAlias Property Carrier Auto Const Mandatory
+{Beat 3. EMPTY and optional until the carrier is spawned into it, so objective 30 follows HIM rather
+than the spot he was placed at. His eye, first play: the marker pointed at the spawn point.}
 
 ; --- things ------------------------------------------------------------------------------------------
 Form Property LoadItem Auto Const Mandatory
@@ -107,10 +110,12 @@ Function SpawnCarrier()
     ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
     ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
 
-    Actor carrier = marker.PlaceAtMe(GangMembers.GetAt(Utility.RandomInt(0, GangMembers.GetSize() - 1)), 1, True, False, True, None, None, True) as Actor
-    carrier.AddItem(MissingItem, 1, False)
-    carrier.SetValue(Suspicious, CONST_Suspicious_DetectedActor)
-    carrier.SetValue(Aggression, CONST_Aggression_VeryAggressive)
+    ; Filled into the Carrier alias AS it is placed, before objective 30 is displayed, so the
+    ; objective never shows with nothing to point at.
+    Actor holder = marker.PlaceAtMe(GangMembers.GetAt(Utility.RandomInt(0, GangMembers.GetSize() - 1)), 1, True, False, True, None, Carrier, True) as Actor
+    holder.AddItem(MissingItem, 1, False)
+    holder.SetValue(Suspicious, CONST_Suspicious_DetectedActor)
+    holder.SetValue(Aggression, CONST_Aggression_VeryAggressive)
 
     Float[] placePosition = new Float[6]
     Int n = Utility.RandomInt(MinGangMembers, MaxGangMembers)

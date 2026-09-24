@@ -143,7 +143,7 @@
       ],
       "_beatSlots": [
         "Beat 3 has no activator: the carrier is spawned by the driver at a marker alias this tool",
-        "CREATES, and objective 30 points at that marker. Beat 4 is beat 2's slot again, so a recipe",
+        "CREATES, into an EMPTY Optional alias also created, and objective 30 points at HIM. Beat 4 is beat 2's slot again, so a recipe",
         "must put beat 4 on the same marker as beat 2 and the lint refuses anything else.",
         "Stages 60 and 70 do not exist on the base and are created with one log entry each."
       ],
@@ -158,7 +158,6 @@
       "cannot": [
         "more or fewer than four beats -- the driver's state machine is exactly this shape",
         "a beat in a second place -- same collapse as two-beat-one-place",
-        "an objective that points at the CARRIER rather than where he spawned -- PlaceAtMe can fill an alias, and an empty alias to fill is not proven yet",
         "staged visibility -- the load and the centre are both in the world from quest start"
       ],
       "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a on Defiant, 2026-09-24"

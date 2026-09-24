@@ -87,6 +87,12 @@ namespace FrankyCLI
             public bool create { get; set; }
             /// <summary>delve4: this beat is an earlier beat's place again (0-based index), not a new one.</summary>
             public int returnTo { get; set; } = -1;
+            /// <summary>
+            /// Set by the build, never by the registry: the alias this beat's objective points at when it
+            /// is neither its activator nor its marker (beat 3's carrier, filled at runtime).
+            /// </summary>
+            [System.Text.Json.Serialization.JsonIgnore] public int targetAlias { get; set; } = -1;
+            public int ObjectiveTarget => targetAlias >= 0 ? targetAlias : activatorAlias >= 0 ? activatorAlias : markerAlias;
         }
         private sealed class TemplateFile { public int schema { get; set; } public List<Template> templates { get; set; } = new(); }
 
@@ -977,7 +983,7 @@ namespace FrankyCLI
         /// <summary>What BuildDelve4 created, handed to Verify rather than re-derived there.</summary>
         private sealed class Delve4Made
         {
-            public uint CarrierMarkerAlias;
+            public uint CarrierMarkerAlias, CarrierAlias;
             public FormKey LoadItem, MissingItem;
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
             public Dictionary<string, int> IntProps = new();
@@ -1057,7 +1063,22 @@ namespace FrankyCLI
                 clone.Aliases.Add(m);
                 made.CarrierMarkerAlias = id;
                 Console.WriteLine($"  +alias   : beat {i + 1} marker {id} (cloned from alias {t.beatSlots[0].markerAlias})");
-                slots.Add(new BeatSlot { markerAlias = (int)id, activatorAlias = -1, objective = ts.objective, journalStage = ts.journalStage });
+
+                // ⭐ THE CARRIER HIMSELF, and the objective points here rather than at the marker (his
+                // eye, first play of duo_delve03). An EMPTY alias: cloned for its shape, then every
+                // fill removed and Optional set, because a non-optional alias with no fill makes the
+                // whole quest silently not start. The driver fills it with PlaceAtMe's akAliasToFill.
+                var c = srcMarker.DeepCopy();
+                c.ID = id + 1;
+                c.Name = "DelveCarrier";
+                c.Location = null;
+                c.Flags = QuestReferenceAlias.Flag.Optional;
+                clone.Aliases.Add(c);
+                made.CarrierAlias = c.ID;
+                Console.WriteLine($"  +alias   : beat {i + 1} carrier {c.ID} (EMPTY, Optional; the driver fills it on spawn)");
+
+                slots.Add(new BeatSlot { markerAlias = (int)id, activatorAlias = -1, objective = ts.objective,
+                                         journalStage = ts.journalStage, targetAlias = (int)c.ID });
             }
 
             // --- objectives the base does not have, cloned from its last one ---------------------------
@@ -1074,13 +1095,12 @@ namespace FrankyCLI
             }
             // Every objective's target is WRITTEN, including the base's own two: which alias an
             // objective points at is one fact per beat, and inheriting it is how a marker ends up
-            // on the wrong thing. Beat 3 points at where the carrier spawns (see the template's
-            // cannot list for why not at the carrier himself).
+            // on the wrong thing. Beat 3 points at the carrier himself, through his empty alias.
             foreach (var s in slots)
             {
                 var ob = clone.Objectives!.First(o => o.Index == s.objective);
                 if (ob.Targets == null || ob.Targets.Count != 1) { Console.WriteLine($"REFUSED: objective {s.objective} has no single target."); return 1; }
-                ob.Targets[0].AliasID = s.activatorAlias >= 0 ? s.activatorAlias : s.markerAlias;
+                ob.Targets[0].AliasID = s.ObjectiveTarget;
             }
 
             // --- beats: fills, objective text, journals -------------------------------------------------
@@ -1127,6 +1147,7 @@ namespace FrankyCLI
             Alias("LoadTarget", slots[0].activatorAlias);
             Alias("CentreTarget", slots[1].activatorAlias);
             Alias("CarrierMarker", (int)made.CarrierMarkerAlias);
+            Alias("Carrier", (int)made.CarrierAlias);
             Obj("LoadItem", made.LoadItem);
             Obj("MissingItem", made.MissingItem);
             Obj("GangMembers", gang.Value);
@@ -1419,7 +1440,7 @@ namespace FrankyCLI
                 {
                     var (slot, beat, _) = plan[i];
                     var ob = q.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
-                    int wantAlias = slot.activatorAlias >= 0 ? slot.activatorAlias : slot.markerAlias;
+                    int wantAlias = slot.ObjectiveTarget;
                     fail += Check($"objective {slot.objective} targets alias {wantAlias}",
                                   (ob?.Targets?.FirstOrDefault()?.AliasID)?.ToString() ?? "none", wantAlias.ToString());
                     if (beat.journal != null)
