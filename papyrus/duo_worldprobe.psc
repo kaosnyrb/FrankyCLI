@@ -80,6 +80,27 @@ Function Run(float afRadius = 0.0) global
         r += 1
     EndWhile
 
+    ; EACH MAP MARKER'S LOCATION, asked whether it CLAIMS the RE kit. Separates "this place has no
+    ; travel markers" from "it has them in the record and the query cannot see them", which the counts
+    ; above cannot do on their own (his second run: 0 RE markers beside a POI, 2 map markers found).
+    LocationRefType a1 = Game.GetFormFromFile(0x05F478, "Starfield.esm") as LocationRefType
+    LocationRefType b1 = Game.GetFormFromFile(0x05F47B, "Starfield.esm") as LocationRefType
+    LocationRefType ctr = Game.GetFormFromFile(0x05F198, "Starfield.esm") as LocationRefType
+    ObjectReference[] maps = player.FindAllReferencesOfType(bases[4], radii[radii.Length - 1])
+    out += "\n\nmap markers, and what their LOCATION claims (A1/B1/Centre):"
+    Int m = 0
+    While m < maps.Length
+        Location l = maps[m].GetCurrentLocation()
+        out += "\n  d " + (player.GetDistance(maps[m]) as Int)
+        If l == None
+            out += "  no location"
+        Else
+            out += "  " + (l.HasRefType(a1) as Int) + "/" + (l.HasRefType(b1) as Int) + "/" + (l.HasRefType(ctr) as Int)
+            out += "  playerHere " + (player.IsInLocation(l) as Int)
+        EndIf
+        m += 1
+    EndWhile
+
     Debug.Trace(out)
     Debug.MessageBox(out)
 EndFunction

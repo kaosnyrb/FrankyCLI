@@ -147,6 +147,7 @@ namespace FrankyCLI
                 case "spread": return Spread(args.Skip(2).Where(a => !a.StartsWith("--")).ToList(),
                                              args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "markers": return Markers(args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
+                case "bases": return MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
@@ -722,6 +723,84 @@ namespace FrankyCLI
             Console.WriteLine("  inside% is the share of that marker's references sitting in an INTERIOR cell");
             Console.WriteLine("  (grid sentinel 32767,32767). A 'mixed' marker means the SAME NAME is used both");
             Console.WriteLine("  sides of a door, which is the one a recipe author has to be careful with.");
+            return 0;
+        }
+
+        /// <summary>
+        /// WHICH BASE OBJECT EACH MARKER TYPE IS ACTUALLY PLACED AS, across the POI pool.
+        ///
+        /// ⛔ WHY THIS EXISTS: a runtime query (FindAllReferencesOfType) matches on the BASE, and the
+        /// marker TYPE's name does not tell you the base. OEJM001Location's A1 travel marker is placed
+        /// as REOverlayTravelA2. The first world probe was built on names, found zero markers standing
+        /// beside a POI, and could not say whether that was the world or the list. So the list is
+        /// DERIVED from placements, never typed from a naming convention.
+        ///
+        ///   gen_delve bases [RETravelA1LocRef RECenterLocRef ...]   (default: the six travel + centre)
+        /// </summary>
+        private static int MarkerBases(List<string> typeNames)
+        {
+            if (typeNames.Count == 0)
+                typeNames = new() { "RETravelA1LocRef", "RETravelA2LocRef", "RETravelA3LocRef",
+                                    "RETravelB1LocRef", "RETravelB2LocRef", "RETravelB3LocRef", "RECenterLocRef" };
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+
+            var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                .Where(x => x.EditorID != null)
+                .GroupBy(x => x.EditorID!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().FormKey, StringComparer.OrdinalIgnoreCase);
+            var want = new Dictionary<FormKey, string>();
+            foreach (var n in typeNames)
+            {
+                if (!lcrt.TryGetValue(n, out var k)) { Console.WriteLine("REFUSED: '" + n + "' is not a LocationReferenceType."); return 1; }
+                want[k] = n;
+            }
+            var pool = PoolCensus(env).Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var tally = new Dictionary<string, Dictionary<FormKey, int>>();
+            foreach (var n in typeNames) tally[n] = new();
+            int refs = 0, unresolved = 0;
+            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
+            {
+                if (!pool.Contains(loc.EditorID ?? "")) continue;
+                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                {
+                    if (g == null) continue;
+                    foreach (var e in g)
+                    {
+                        if (e.LocationRefType.IsNull || e.Marker.IsNull || !want.TryGetValue(e.LocationRefType.FormKey, out var tn)) continue;
+                        refs++;
+                        if (!env.LinkCache.TryResolve<IPlacedObjectGetter>(e.Marker.FormKey, out var po) || po.Base.IsNull) { unresolved++; continue; }
+                        var t = tally[tn];
+                        t[po.Base.FormKey] = t.GetValueOrDefault(po.Base.FormKey) + 1;
+                    }
+                }
+            }
+
+            var name = new Dictionary<FormKey, string>();
+            foreach (var kv in tally) foreach (var b in kv.Value.Keys)
+                if (!name.ContainsKey(b))
+                    name[b] = env.LinkCache.TryResolve<IStarfieldMajorRecordGetter>(b, out var r) ? (r.EditorID ?? b.ToString()) : b + " (unresolved)";
+
+            Console.WriteLine();
+            Console.WriteLine($"  POI pool: {pool.Count}   marker refs of the named types: {refs}   would not resolve to a placed ref: {unresolved}");
+            var every = new Dictionary<FormKey, int>();
+            foreach (var kv in tally)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"  {kv.Key}  ({kv.Value.Values.Sum()} refs, {kv.Value.Count} distinct base(s))");
+                foreach (var b in kv.Value.OrderByDescending(x => x.Value))
+                {
+                    Console.WriteLine($"    {b.Value,5}  {name[b.Key],-40} {b.Key}");
+                    every[b.Key] = every.GetValueOrDefault(b.Key) + b.Value;
+                }
+            }
+            Console.WriteLine();
+            Console.WriteLine("  EVERY base, for a runtime query list (FormID in its plugin):");
+            foreach (var b in every.OrderByDescending(x => x.Value))
+                Console.WriteLine($"    0x{b.Key.ID:X6}  {b.Key.ModKey.FileName,-22} {name[b.Key],-40} {b.Value,5}");
+            if (unresolved > 0)
+                Console.WriteLine($"\n  ⚠ {unresolved} marker ref(s) did not resolve and are NOT in the tally above: the link cache reads exterior refs and not interior ones. Counted, not guessed.");
             return 0;
         }
 
