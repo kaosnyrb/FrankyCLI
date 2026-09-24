@@ -249,18 +249,17 @@ EndFunction
 Function TakeLoad(ObjectReference player)
     ObjectReference load = LoadTarget.GetRef()
     load.BlockActivation(True, True)
+    ; The crate goes the INSTANT the load is taken, with no fade, so it reads as picked up rather
+    ; than vanishing for no cause (his eye, third play, 2026-09-24). A faded Disable left it standing
+    ; a few seconds after the box, which read as the world misbehaving.
     player.AddItem(LoadItem, 1, False)
+    load.Disable(False)
     SetObjectiveCompleted(10, True)
     SetStage(StageTaken)
     SetObjectiveDisplayed(20, True, False)
     RegisterForRemoteEvent(CentreTarget.GetRef(), "OnActivate")
     Beat = 2
     ShowBeat(Beat1Message)
-    ; His eye, first real play (2026-09-24): an emptied crate left standing reads as one that still
-    ; holds something, so the crate goes. It goes LAST: a faded Disable may wait out its fade, and
-    ; everything the player sees (item, objective, box) must not queue behind it. His second play
-    ; reported a delay on the pickup and the message with the fade placed first.
-    load.Disable(True)
 EndFunction
 
 ; Beat 2 -> 3. THE ABSENCE. Nothing is handed over here: the player arrives carrying half of
