@@ -250,6 +250,9 @@ Function TakeLoad(ObjectReference player)
     ObjectReference load = LoadTarget.GetRef()
     load.BlockActivation(True, True)
     player.AddItem(LoadItem, 1, False)
+    ; His eye, first real play (2026-09-24): an emptied crate left standing reads as one that still
+    ; holds something. The load is in the player's hands now, so the crate goes.
+    load.Disable(True)
     ShowBeat(Beat1Message)
     SetObjectiveCompleted(10, True)
     SetStage(StageTaken)
