@@ -43,7 +43,9 @@ Function Run(float afRadius = 0.0) global
         radii[3] = 6400.0
     EndIf
 
-    String out = "WORLD PROBE  loc=" + player.GetCurrentLocation() + "  ws=" + player.GetWorldSpace()
+    ; NUMBERS ONLY. The message box renders HTML, and a form cast to a string prints
+    ; "[Location <name> (id)]": the "<" opened a tag and ate every line after it (his first run).
+    String out = "WORLD PROBE"
     out += "\npos " + (player.GetPositionX() as Int) + ", " + (player.GetPositionY() as Int) + ", " + (player.GetPositionZ() as Int)
 
     Int r = 0
