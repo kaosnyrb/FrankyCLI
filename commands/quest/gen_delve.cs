@@ -148,6 +148,7 @@ namespace FrankyCLI
                                              args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "markers": return Markers(args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "bases": return MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
+                case "footprint": return Footprint();
                 case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
@@ -801,6 +802,118 @@ namespace FrankyCLI
                 Console.WriteLine($"    0x{b.Key.ID:X6}  {b.Key.ModKey.FileName,-22} {name[b.Key],-40} {b.Value,5}");
             if (unresolved > 0)
                 Console.WriteLine($"\n  ⚠ {unresolved} marker ref(s) did not resolve and are NOT in the tally above: the link cache reads exterior refs and not interior ones. Counted, not guessed.");
+            return 0;
+        }
+
+        /// <summary>
+        /// THE GRID EACH POOL POI WAS AUTHORED IN, in cells, off the records. NOT the runtime footprint:
+        /// the first run of this was read as a footprint and it is not one. It is the authoring
+        /// worldspace's cell set, and "does the generator stamp a 5x4 authored grid as a 5x4" is untested.
+        ///
+        /// ⚠ A BOUNDING BOX IS NOT A SHAPE. OESF007 is 10 cells in a 22x11 box. So a rectangle is
+        /// reported with its FILLED count, and only a box with every cell filled is a real rectangle.
+        /// Measured 2026-09-24: 226 of 278 are full squares; 8 are full rectangles, 6 of them
+        /// OverlayTrait* planet-trait overlays and 2 ordinary OE POIs (OESF005 5x4, OEBB001 6x5).
+        ///
+        /// ⭐ HIS FACT, 2026-09-24, from building generated POIs: a POI is N x N cells and the engine did
+        /// not allow rectangles. The census bears it out as the rule and finds two ordinary exceptions. It matters because a runtime query sees a POI cell by cell (the world probe found
+        /// the near travel ring and not the far one), and because a crate meant to read as LOST has to
+        /// land outside the whole square, not just past one marker.
+        ///
+        /// Each vanilla POI is authored in its own small worldspace; the centre marker's cell names it.
+        /// Its exterior cells' grid gives N, and the travel markers' coordinates against that grid give
+        /// the cell size. His square rule is CHECKED here rather than assumed: a rectangle is counted.
+        /// </summary>
+        private static int Footprint()
+        {
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            var sf = env.LoadOrder.ListedOrder
+                .FirstOrDefault(l => l.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase))?.Mod;
+            if (sf == null) { Console.WriteLine("REFUSED: Starfield.esm is not in the load order."); return 1; }
+
+            // cell -> (worldspace, grid), and worldspace -> every exterior cell grid it holds
+            var cellWs = new Dictionary<FormKey, (FormKey ws, int x, int y)>();
+            var wsGrids = new Dictionary<FormKey, List<(int x, int y)>>();
+            var wsName = new Dictionary<FormKey, string>();
+            foreach (var ws in sf.Worldspaces)
+            {
+                var grids = new List<(int, int)>();
+                foreach (var b in ws.SubCells)
+                    foreach (var sb in b.Items)
+                        foreach (var c in sb.Items)
+                        {
+                            if (c.Grid == null) continue;
+                            var g = (c.Grid.Point.X, c.Grid.Point.Y);
+                            cellWs[c.FormKey] = (ws.FormKey, g.X, g.Y);
+                            grids.Add(g);
+                        }
+                wsGrids[ws.FormKey] = grids;
+                wsName[ws.FormKey] = ws.EditorID ?? ws.FormKey.ToString();
+            }
+
+            var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                .Where(x => x.EditorID != null)
+                .ToDictionary(x => x.FormKey, x => x.EditorID!);
+            var pool = PoolCensus(env).Where(p => p.Vanilla).Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var sizes = new Dictionary<string, int>();
+            int sqOe = 0, rectOe = 0, sqFull = 0;
+            var oeKw = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;
+            int squares = 0, rects = 0, noWorld = 0;
+            var rectNames = new List<string>();
+            float maxAbs = 0; int maxAbsN = 0;
+            var perN = new Dictionary<int, (float maxCoord, int n)>();
+            foreach (var loc in sf.Locations)
+            {
+                if (!pool.Contains(loc.EditorID ?? "")) continue;
+                FormKey? ws = null;
+                var markerKeys = new List<FormKey>();
+                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                {
+                    if (g == null) continue;
+                    foreach (var e in g)
+                    {
+                        // ⛔ The special reference's "Location" is xEdit's World/Cell: for an exterior
+                        // marker it names the WORLDSPACE, not a cell. The first run looked it up in a
+                        // cell table and matched 0 of 278 (his screenshot showed the field's type).
+                        if (e.Location.IsNull) continue;
+                        FormKey? here = wsGrids.ContainsKey(e.Location.FormKey) ? e.Location.FormKey
+                                      : cellWs.TryGetValue(e.Location.FormKey, out var cw) ? cw.ws : (FormKey?)null;
+                        if (here == null) continue;
+                        ws ??= here;
+                        if (!e.Marker.IsNull && lcrt.TryGetValue(e.LocationRefType.FormKey, out var n) && n.StartsWith("RETravel"))
+                            markerKeys.Add(e.Marker.FormKey);
+                    }
+                }
+                if (ws == null || wsGrids[ws.Value].Count == 0) { noWorld++; continue; }
+                var gs = wsGrids[ws.Value];
+                int w = gs.Max(p => p.x) - gs.Min(p => p.x) + 1, h = gs.Max(p => p.y) - gs.Min(p => p.y) + 1;
+                string key = w + "x" + h;
+                sizes[key] = sizes.GetValueOrDefault(key) + 1;
+                bool oe = oeKw != null && (loc.Keywords?.Any(k => k.FormKey == oeKw.Value) ?? false);
+                if (w == h) { squares++; if (oe) sqOe++; if (gs.Distinct().Count() == w * h) sqFull++; }
+                else { rects++; if (oe) rectOe++; rectNames.Add($"{key,-7} {(oe ? "OE " : "-- ")} cells {gs.Distinct().Count(),5}/{w * h,-6} {wsName[ws.Value],-44} {loc.EditorID}"); }
+
+                // the travel markers' reach against the grid, so the cell size falls out
+                float reach = 0;
+                foreach (var k in markerKeys)
+                    if (TryPos(env, k, out var p)) reach = Math.Max(reach, Math.Max(Math.Abs(p.X), Math.Abs(p.Y)));
+                var cur = perN.GetValueOrDefault(w);
+                perN[w] = (Math.Max(cur.maxCoord, reach), cur.n + 1);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"  vanilla pool POIs: {pool.Count}   placed in a worldspace this read could name: {pool.Count - noWorld}");
+            Console.WriteLine($"  square: {squares} ({sqOe} carry LocTypeOE_Keyword, {sqFull} have EVERY cell of the box)   NOT square: {rects} ({rectOe} carry it)");
+            foreach (var kv in sizes.OrderByDescending(k => k.Value))
+                Console.WriteLine($"    {kv.Key,-7} {kv.Value,4}");
+            foreach (var r in rectNames) Console.WriteLine("    not square: " + r);
+            Console.WriteLine();
+            Console.WriteLine("  furthest travel marker from the worldspace origin, per N (metres), for the cell size:");
+            foreach (var kv in perN.OrderBy(k => k.Key))
+                Console.WriteLine($"    N={kv.Key}  {kv.Value.n,4} POIs   max |x|,|y| = {kv.Value.maxCoord,7:F1}");
             return 0;
         }
 
