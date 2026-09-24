@@ -1,6 +1,8 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Aspects;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
@@ -138,7 +140,13 @@ namespace FrankyCLI
             /// <summary>"main" (default) or "second": which drawn POI this beat happens at.</summary>
             public string? place { get; set; }
             public bool Second => string.Equals(place, "second", StringComparison.OrdinalIgnoreCase);
+            /// <summary>
+            /// delve4, OPTIONAL: a pausing message box shown when this beat fires. Absent = no box.
+            /// A new optional field, so schema stays 1 and every recipe written before it builds unchanged.
+            /// </summary>
+            public BeatMessage? message { get; set; }
         }
+        private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
         private static readonly JsonSerializerOptions JsonOpts = new()
         { PropertyNameCaseInsensitive = true, ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
@@ -256,6 +264,17 @@ namespace FrankyCLI
                     Fatal("items.load and items.missing are both required: each half is a cloned item the player carries, and an item with no name shows as a blank line in the inventory.");
                 else if (Tokens(r.items!.load!).Concat(Tokens(r.items.missing!)).Any())
                     Fatal("an item name carries a <Token>. Item names are not alias contexts, so it would print literally in the inventory.");
+                else ItemNameCollisions(env, r, Fatal);
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    var m = r.beats[i].message;
+                    if (m == null) continue;
+                    if (string.IsNullOrWhiteSpace(m.text)) Fatal($"beat {i + 1} has a message with no text: an empty pausing box.");
+                    if (string.IsNullOrWhiteSpace(m.title)) Fatal($"beat {i + 1} has a message with no title.");
+                    foreach (var (what, str) in new[] { ("title", m.title ?? ""), ("text", m.text ?? "") })
+                        if (str.Any(ch => ch > 126 || (ch < 32 && ch != '\n')))
+                            Warn($"beat {i + 1} message {what} carries a non-ASCII or control character; the lane writes plain ASCII.");
+                }
                 // ⭐ THE RETURN IS THE DESIGN, so it is refused rather than warned when it is not one.
                 for (int i = 0; i < t.beatSlots.Count && i < r.beats.Count; i++)
                 {
@@ -477,6 +496,35 @@ namespace FrankyCLI
             return outp;
         }
 
+        /// <summary>
+        /// AN ITEM NAME MUST NOT BE ONE THE LOAD ORDER ALREADY USES. An exact match on any named record
+        /// is fatal (two different things with one name in an inventory); a record whose name merely
+        /// CONTAINS the item's first word is listed, not judged, because whether it collides in the
+        /// fiction is the author's call. Prints how many names it read, so a blind read shows as one.
+        /// </summary>
+        private static void ItemNameCollisions(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Recipe r, Action<string> fatal)
+        {
+            var names = new[] { r.items!.load!, r.items.missing! };
+            var heads = names.Select(n => n.Split(' ')[0]).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            int read = 0;
+            var near = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
+            {
+                if (rec is not INamedGetter ng || string.IsNullOrEmpty(ng.Name)) continue;
+                read++;
+                string nm = ng.Name!;
+                if (rec.EditorID != null && rec.EditorID.StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase)) continue; // our own last build
+                foreach (var n in names)
+                    if (string.Equals(nm, n, StringComparison.OrdinalIgnoreCase))
+                        fatal($"item name \"{n}\" is already the name of {rec.EditorID} [{rec.FormKey}]");
+                foreach (var h in heads)
+                    if (nm.Contains(h, StringComparison.OrdinalIgnoreCase)) near.Add($"{nm}  ({rec.EditorID})");
+            }
+            Console.WriteLine($"  item names: {read:N0} named record(s) read; containing {string.Join(" / ", heads)}: {near.Count}");
+            foreach (var n in near.Take(25)) Console.WriteLine("    " + n);
+            if (read == 0) fatal("the item-name check read ZERO named records, so it checked nothing");
+        }
+
         private static IEnumerable<(string, string)> ProseStrings(Recipe r)
         {
             yield return ("prose.name", r.prose.name ?? "");
@@ -485,6 +533,8 @@ namespace FrankyCLI
             {
                 yield return ($"beat {i + 1} objective", r.beats[i].objective ?? "");
                 if (r.beats[i].journal != null) yield return ($"beat {i + 1} journal", r.beats[i].journal!);
+                if (r.beats[i].message?.title != null) yield return ($"beat {i + 1} message title", r.beats[i].message!.title!);
+                if (r.beats[i].message?.text != null) yield return ($"beat {i + 1} message text", r.beats[i].message!.text!);
             }
         }
 
@@ -1296,7 +1346,15 @@ namespace FrankyCLI
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
             public Dictionary<string, int> IntProps = new();
             public Dictionary<string, bool> BoolProps = new();
+            /// <summary>Beat index (0-based) to the message box built for it.</summary>
+            public Dictionary<int, FormKey> Messages = new();
         }
+
+        /// <summary>
+        /// The pausing box every Delve message is cloned from: a MessageBox Overtime already ships
+        /// (patch 04, 2026-07-31), so its flags are ones the game demonstrably shows.
+        /// </summary>
+        private const string MessageTemplate = "duo_alocal01_msg03";
 
         /// <summary>
         /// THE FOUR-BEAT DELVE: carry, absence, recover, return.
@@ -1347,6 +1405,31 @@ namespace FrankyCLI
             }
             made.LoadItem = CloneItem("Load", r.items!.load!);
             made.MissingItem = CloneItem("OtherHalf", r.items.missing!);
+
+            // --- message boxes, one per beat that declares one ------------------------------------------
+            // CLONED from a pausing box Overtime already ships, never constructed (a fresh record brings
+            // none of the fields this tool does not know exist: the stage lesson of 2026-09-24).
+            // OwnerQuest IS THE QUEST: vanilla, 1,152 MESG, 68 carry an <Alias=> token and ALL 68 have
+            // OwnerQuest set; none has a token without one. A token needs an owner to resolve against.
+            foreach (var k in myMod.Messages.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_msg")).Select(m => m.FormKey).ToList())
+                myMod.Messages.Remove(k);
+            if (r.beats.Any(b => b.message != null))
+            {
+                var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
+                if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    var bm = r.beats[i].message;
+                    if (bm == null) continue;
+                    var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                    msg.EditorID = $"{r.id}_msg{i + 1}";
+                    msg.Name = Expand(bm.title!, t);
+                    msg.Description = Expand(bm.text!, t);
+                    msg.OwnerQuest.SetTo(clone.FormKey);
+                    made.Messages[i] = msg.FormKey;
+                    Console.WriteLine($"  +message : beat {i + 1} {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"  (clone of {MessageTemplate})");
+                }
+            }
 
             // --- stages the base does not have --------------------------------------------------------
             foreach (var s in t.beatSlots.Select(s => s.journalStage).Distinct())
@@ -1474,6 +1557,7 @@ namespace FrankyCLI
             // is the story, and moving it out past the delivery site's edge would undo the journey.
             Bool("LoseLoadOnApproach", !r.beats[0].Second);
             Bool("CiviliansAtCentre", r.place.civilians);
+            foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
             return 0;
@@ -1733,6 +1817,20 @@ namespace FrankyCLI
             if (q == null) { Console.WriteLine("    FAIL: the quest is not in the written file."); return 1; }
 
             int fail = 0;
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                var bm = r.beats[i].message;
+                string edid = $"{r.id}_msg{i + 1}";
+                var m = reread.Messages.FirstOrDefault(x => x.EditorID == edid);
+                if (bm == null) { fail += Check($"beat {i + 1} has no message box", m == null ? "none" : edid, "none"); continue; }
+                if (m == null) { fail += Check($"beat {i + 1} message {edid} written", "missing", "present"); continue; }
+                fail += Check($"beat {i + 1} message text", m.Description?.String ?? "", Expand(bm.text!, t));
+                fail += Check($"beat {i + 1} message owned by the quest (OwnerQuest)", m.OwnerQuest.FormKey.ToString(), q.FormKey.ToString());
+                fail += Check($"beat {i + 1} message is a pausing box", m.Flags.ToString(), "MessageBox");
+                var prop = q.VirtualMachineAdapter?.Scripts.SelectMany(sc => sc.Properties).OfType<IScriptObjectPropertyGetter>()
+                    .FirstOrDefault(pp => pp.Name == $"Beat{i + 1}Message");
+                fail += Check($"driver property Beat{i + 1}Message points at it", prop?.Object.FormKey.ToString() ?? "unset", m.FormKey.ToString());
+            }
             // ⛔ FILL ORDER, off disk: an alias listed above the place it fills inside cannot fill, and
             // the quest silently never starts. duo_delve04 shipped that way on 2026-09-24.
             var fwd = gen_aliaslint.ForwardRefs(q.Aliases?.ToList() ?? new List<IAQuestAliasGetter>());

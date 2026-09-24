@@ -60,5 +60,12 @@ run REFUSE "only beat 1 may be at the second place" "beat 2 at the second place"
 mut badplace 'r["beats"][0]["place"] = "elsewhere"'
 run REFUSE "the places are" "a misspelt place name" "$TMP/badplace.json"
 
+# --- message boxes and item names (2026-09-24 pm, Jessica's message boxes) -----------------------------
+mut nomsgtext 'r["beats"][1]["message"]["text"] = ""'
+run REFUSE "has a message with no text" "beat 2 message with empty text" "$TMP/nomsgtext.json"
+
+mut clash 'r["items"]["load"] = "Terran Reclaimer"'
+run REFUSE "is already the name of" "an item named exactly like a vanilla record" "$TMP/clash.json"
+
 echo "================ $fails failing case(s) ================"
 exit $fails

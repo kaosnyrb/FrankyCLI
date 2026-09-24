@@ -34,6 +34,18 @@ Int Property MaxGangMembers Auto Const Mandatory
 {How many stand with the carrier. The carrier himself is always there: he is the key, not an extra.}
 Message Property FailMessage Auto Const Mandatory
 {Shown when the player activates the centre without what that beat needs.}
+
+; One pausing box per beat, all OPTIONAL: a recipe with no message for a beat leaves the property
+; unset and nothing is shown. Each is a MESG whose OwnerQuest is this quest, so <Alias=> tokens in it
+; resolve (vanilla: every MESG carrying a token has an OwnerQuest).
+Message Property Beat1Message Auto Const
+{Beat 1: picking up the load.}
+Message Property Beat2Message Auto Const
+{Beat 2: arriving at the centre and finding the other half gone.}
+Message Property Beat3Message Auto Const
+{Beat 3: recovering the missing half.}
+Message Property Beat4Message Auto Const
+{Beat 4: finishing the job.}
 FormList Property CivilianList Auto Const Mandatory
 {Who is at the centre waiting for the delivery. His ruling 2026-09-24: "the one with the delivery should
 have people there." Taken off the base driver's TargetCivListMembers, the list it already used.}
@@ -227,11 +239,18 @@ Event ObjectReference.OnActivate(ObjectReference akSender, ObjectReference akAct
     EndIf
 EndEvent
 
+Function ShowBeat(Message m)
+    If m
+        m.Show()
+    EndIf
+EndFunction
+
 ; Beat 1 -> 2. The load goes into the player's hands and the centre starts listening.
 Function TakeLoad(ObjectReference player)
     ObjectReference load = LoadTarget.GetRef()
     load.BlockActivation(True, True)
     player.AddItem(LoadItem, 1, False)
+    ShowBeat(Beat1Message)
     SetObjectiveCompleted(10, True)
     SetStage(StageTaken)
     SetObjectiveDisplayed(20, True, False)
@@ -245,6 +264,7 @@ EndFunction
 Function FindItGone()
     SetObjectiveCompleted(20, True)
     SetStage(StageAbsent)
+    ShowBeat(Beat2Message)
     SpawnCarrier()
     RegisterForRemoteEvent(Game.GetPlayer(), "OnItemAdded")
     AddInventoryEventFilter(MissingItem)
@@ -283,6 +303,7 @@ Event ObjectReference.OnItemAdded(ObjectReference akSender, Form akBaseItem, Int
         UnregisterForRemoteEvent(Game.GetPlayer(), "OnItemAdded")
         SetObjectiveCompleted(30, True)
         SetStage(StageRecovered)
+        ShowBeat(Beat3Message)
         SetObjectiveDisplayed(40, True, False)
         Beat = 4
     EndIf
@@ -294,6 +315,7 @@ Function FinishTheJob(ObjectReference player)
     player.RemoveItem(MissingItem, 1, False, None)
     CentreTarget.GetRef().BlockActivation(True, True)
     SetObjectiveCompleted(40, True)
+    ShowBeat(Beat4Message)
     SetStage(StageComplete)
     CompleteQuest()
     Beat = 5

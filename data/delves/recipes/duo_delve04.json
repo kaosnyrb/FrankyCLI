@@ -38,31 +38,48 @@
     "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
   },
   "items": {
-    "load": "Signed-Out Consignment (1 of 2)",
-    "missing": "Signed-Out Consignment (2 of 2)",
-    "_items": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff."
+    "load": "Reclaimer Housing (1 of 2)",
+    "missing": "Reclaimer Filter Core (2 of 2)",
+    "_items": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site."
   },
   "beats": [
     {
       "at": "RETravelA1LocRef",
       "objective": "Find the load",
       "journal": "Signed out, never signed in, and it got this far.",
-      "place": "second"
+      "place": "second",
+      "message": {
+        "title": "Manifest",
+        "text": "MANIFEST, consignment 7713. Two crates for the <Place>. 1 of 2: reclaimer housing. 2 of 2: filter core, sent on ahead. Signed out: yes. Signed in: never."
+      }
     },
     {
       "at": "RECenterLocRef",
       "objective": "Take it to the <Place>",
-      "journal": "The other half should be here. Something has taken it."
+      "journal": "The other half should be here. Something has taken it.",
+      "message": {
+        "title": "Delivery Slate",
+        "text": "DELIVERY SLATE, <Place>. Filter core: received, two days ago. Housing: overdue. Reclaimer: offline. Somebody has written underneath it: \"Core crate opened in the night. Core gone.\""
+      }
     },
     {
       "at": "RETravelB1LocRef",
       "objective": "Recover what was taken",
-      "journal": "It did not go far. Nothing out here does."
+      "journal": "It did not go far. Nothing out here does.",
+      "message": {
+        "title": "Reclaimer Filter Core",
+        "text": "Reclaimer Filter Core (2 of 2). Still sealed. Whoever took it never worked out what it was for."
+      }
     },
     {
       "at": "RECenterLocRef",
       "objective": "Finish the job",
-      "journal": null
+      "journal": null,
+      "message": {
+        "title": "Reclaimer",
+        "text": "Housing and core fitted. The reclaimer at the <Place> is running, and there is clean water in the line for the first time in a week."
+      }
     }
-  ]
+  ],
+  "_messages": "Texts are Jessica's, verbatim, 2026-09-24 pm. TITLES ARE ELIZA'S PLACEHOLDERS, taken from the opening words of each text: hers to rule on. Each box is a MESG cloned from duo_alocal01_msg03 with OwnerQuest set to this quest, so <Place> resolves."
 }
