@@ -34,6 +34,14 @@ Int Property MaxGangMembers Auto Const Mandatory
 {How many stand with the carrier. The carrier himself is always there: he is the key, not an extra.}
 Message Property FailMessage Auto Const Mandatory
 {Shown when the player activates the centre without what that beat needs.}
+FormList Property CivilianList Auto Const Mandatory
+{Who is at the centre waiting for the delivery. His ruling 2026-09-24: "the one with the delivery should
+have people there." Taken off the base driver's TargetCivListMembers, the list it already used.}
+Int Property MinCivilians = 1 Auto Const
+Int Property MaxCivilians = 5 Auto Const
+Bool Property LoseLoadOnApproach Auto Const Mandatory
+{Written by gen_delve. True when the load is at the MAIN place and should be moved out past its edge;
+False when the load is at a second POI, because then the other POI is the story.}
 
 ; --- LOSING THE LOAD. Defaults, not written per mission; metres (read off his HUD 2026-09-24). ------
 ; His ask: the crate should read as actually LOST, not sit at the site's own edge. The world probe
@@ -71,12 +79,33 @@ Event OnQuestStarted()
     RegisterForDistanceLessThanEvent(Game.GetPlayer(), CentreTarget, LoseDistance)
 EndEvent
 
-; Beat 1, before it is found. Fires once, on the player's approach.
+; The first approach to the centre, whatever beat the player is on. Fires once.
 Event OnDistanceLessThan(ObjectReference akObj1, ObjectReference akObj2, float afDistance, int aiEventID)
-    If Beat == 1
+    If !CiviliansPlaced
+        CiviliansPlaced = True
+        PlaceCivilians()
+    EndIf
+    If Beat == 1 && LoseLoadOnApproach
         LoseTheLoad()
     EndIf
 EndEvent
+
+Bool CiviliansPlaced
+
+; People at the site, placed the way his dual-activator driver placed them at a delivery: around the
+; target, within 25 m, snapped to navmesh.
+Function PlaceCivilians()
+    ObjectReference centre = CentreTarget.GetRef()
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(MinCivilians, MaxCivilians)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-25, 25)
+        pos[1] = Utility.RandomFloat(-25, 25)
+        pos[2] = 0
+        centre.PlaceAtMe(CivilianList.GetAt(Utility.RandomInt(0, CivilianList.GetSize() - 1)), 1, True, False, True, pos, None, True)
+        n -= 1
+    EndWhile
+EndFunction
 
 ; Move the load out past the near edge of the site, so it reads as dropped short of where it was
 ; going. The anchor is the nearest loaded travel marker; failing that, the centre.

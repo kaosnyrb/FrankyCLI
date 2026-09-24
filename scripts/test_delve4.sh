@@ -50,5 +50,15 @@ run REFUSE "is exactly 4 beats" "three beats on a four-beat template" "$TMP/thre
 mut noobj 'r["beats"][2]["objective"] = None'
 run REFUSE "has no objective text" "beat 3 with no objective" "$TMP/noobj.json"
 
+# --- the second place (2026-09-24, his "the box should have been at a different POI") ---------------
+REAL="data/delves/recipes/duo_delve04.json"
+run PASS "LINT PASSES" "duo_delve04, the load at a second POI (control)" "$REAL"
+
+mut beat2second 'r["beats"][1]["place"] = "second"'
+run REFUSE "only beat 1 may be at the second place" "beat 2 at the second place" "$TMP/beat2second.json"
+
+mut badplace 'r["beats"][0]["place"] = "elsewhere"'
+run REFUSE "the places are" "a misspelt place name" "$TMP/badplace.json"
+
 echo "================ $fails failing case(s) ================"
 exit $fails

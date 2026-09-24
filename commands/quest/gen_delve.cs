@@ -74,6 +74,12 @@ namespace FrankyCLI
             public int extraBeatStageStep { get; set; }
             public Dictionary<string, string> tokens { get; set; } = new();
             public List<int> collapsedPlaceAliases { get; set; } = new();
+            /// <summary>
+            /// The base's OTHER place alias, which a beat may name with "place": "second" to happen at a
+            /// different POI. -1 = this template has none. His ruling 2026-09-24 on duo_delve03: the load
+            /// "should have been at a different POI and then I take it to that one".
+            /// </summary>
+            public int secondPlaceAlias { get; set; } = -1;
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
@@ -110,10 +116,24 @@ namespace FrankyCLI
         }
         /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
         private sealed class Items { public string? load { get; set; } public string? missing { get; set; } }
-        private sealed class Place { public Theme theme { get; set; } = new(); public string? leash { get; set; } }
+        private sealed class Place
+        {
+            public Theme theme { get; set; } = new();
+            public string? leash { get; set; }
+            /// <summary>The second POI's own theme, for beats with place "second". Absent = no theme.</summary>
+            public Place? second { get; set; }
+        }
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
-        private sealed class Beat { public string at { get; set; } = ""; public string? objective { get; set; } public string? journal { get; set; } }
+        private sealed class Beat
+        {
+            public string at { get; set; } = "";
+            public string? objective { get; set; }
+            public string? journal { get; set; }
+            /// <summary>"main" (default) or "second": which drawn POI this beat happens at.</summary>
+            public string? place { get; set; }
+            public bool Second => string.Equals(place, "second", StringComparison.OrdinalIgnoreCase);
+        }
 
         private static readonly JsonSerializerOptions JsonOpts = new()
         { PropertyNameCaseInsensitive = true, ReadCommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
@@ -302,37 +322,81 @@ namespace FrankyCLI
             markersOut?.Clear();
             foreach (var kv in keys) markersOut?.Add(kv.Key, kv.Value);
 
-            // --- the pool, which is the number the design sits on -----------------------
+            // --- which place each beat is at --------------------------------------------------
+            bool anySecond = r.beats.Any(b => b.Second);
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                var pl = r.beats[i].place;
+                if (pl != null && !pl.Equals("main", StringComparison.OrdinalIgnoreCase) && !r.beats[i].Second)
+                    Fatal($"beat {i + 1} names place '{pl}'; the places are \"main\" and \"second\"");
+            }
+            if (anySecond && t.secondPlaceAlias < 0)
+                Fatal($"a beat is at the \"second\" place and template '{t.id}' has no second place alias");
+            if (anySecond && t.kind == "delve4" && r.beats.Skip(1).Any(b => b.Second))
+                Fatal("only beat 1 may be at the second place on a delve4: beats 2-4 are the centre and the carrier, "
+                      + "and the driver's whole return is to ONE centre");
+            if (!anySecond && r.place.second != null)
+                Warn("place.second is set and no beat is at the second place, so it is never written");
+
+            // --- the pool, PER PLACE, which is the number the design sits on ---------------------
+            // ⭐ Each place alias is drawn on its OWN conditions, so each gets its own pool figure: the
+            // markers of the beats that happen there, the map marker, and that place's theme.
             if (!issues.Any(i => i.Fatal))
             {
                 var pool = PoolCensus(env);
                 Console.WriteLine($"  POI corpus: {pool.Count} location(s) in the working pool");
-
-                int all = 0, mapOnly = 0;
-                var perMarker = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                foreach (var m in keys.Keys) perMarker[m] = 0;
-
-                var reqK = ResolveKeywords(env, r.place.theme.require, Fatal);
-                var excK = ResolveKeywords(env, r.place.theme.exclude, Fatal);
-
-                foreach (var poi in pool)
+                foreach (bool second in anySecond ? new[] { false, true } : new[] { false })
                 {
-                    foreach (var m in keys) if (poi.RefTypes.Contains(m.Value)) perMarker[m.Key]++;
-                    bool hasAll = keys.Values.All(k => poi.RefTypes.Contains(k));
-                    if (!hasAll) continue;
-                    mapOnly++;
-                    if (reqK.Any(k => !poi.Keywords.Contains(k))) continue;
-                    if (excK.Any(k => poi.Keywords.Contains(k))) continue;
-                    all++;
+                    var here = MarkersAt(r, keys, second);
+                    var theme = second ? (r.place.second?.theme ?? new Theme()) : r.place.theme;
+                    Console.WriteLine($"  -- the {(second ? "SECOND" : "MAIN")} place (alias {(second ? t.secondPlaceAlias : t.placeAlias)})");
+                    int all = 0, mapOnly = 0;
+                    var perMarker = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var m in here.Keys) perMarker[m] = 0;
+                    var reqK = ResolveKeywords(env, theme.require, Fatal);
+                    var excK = ResolveKeywords(env, theme.exclude, Fatal);
+                    foreach (var poi in pool)
+                    {
+                        foreach (var m in here) if (poi.RefTypes.Contains(m.Value)) perMarker[m.Key]++;
+                        if (!here.Values.All(k => poi.RefTypes.Contains(k))) continue;
+                        mapOnly++;
+                        if (reqK.Any(k => !poi.Keywords.Contains(k))) continue;
+                        if (excK.Any(k => poi.Keywords.Contains(k))) continue;
+                        all++;
+                    }
+                    foreach (var kv in perMarker)
+                        Console.WriteLine($"    {kv.Key,-34} {kv.Value,4} of {pool.Count}  ({100.0 * kv.Value / Math.Max(1, pool.Count):F1}%)");
+                    Console.WriteLine($"    all markers together               {mapOnly,4}");
+                    Console.WriteLine($"    after the theme predicate          {all,4}   <- the draw pool");
+                    string which = second ? "the SECOND place" : "the main place";
+                    if (all == 0) Fatal($"{which}'s draw pool is ZERO. Nothing would ever select this mission.");
+                    else if (all < 40) Warn($"{which}'s draw pool is {all}. Narrow -- the narrowest anything in Overtime leans on is 44.");
                 }
 
-                foreach (var kv in perMarker)
-                    Console.WriteLine($"    {kv.Key,-34} {kv.Value,4} of {pool.Count}  ({100.0 * kv.Value / Math.Max(1, pool.Count):F1}%)");
-                Console.WriteLine($"    all markers together               {mapOnly,4}");
-                Console.WriteLine($"    after the theme predicate          {all,4}   <- the draw pool");
-
-                if (all == 0) Fatal("the draw pool is ZERO. Nothing would ever select this mission.");
-                else if (all < 40) Warn($"the draw pool is {all}. Narrow -- the narrowest anything in Overtime leans on is 44.");
+                // --- what the build will DROP from the base --------------------------------------------
+                // ⛔ WHY THIS EXISTS: the build rebuilds every keyword condition from the recipe, which is
+                // the design, and for a day it silently threw away the base's own "not Natural, not Cave"
+                // exclusions, so the Delves drew exactly the places his quest refused. His eye found it
+                // ("It's mainly caves and natural locations atm"). The drop stays; it is never silent.
+                var baseQ = env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.@base);
+                if (baseQ?.Aliases != null)
+                    foreach (bool second in anySecond ? new[] { false, true } : new[] { false })
+                    {
+                        int aid = second ? t.secondPlaceAlias : t.placeAlias;
+                        var theme = second ? (r.place.second?.theme ?? new Theme()) : r.place.theme;
+                        var la = baseQ.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
+                        foreach (var c in la?.Conditions ?? Enumerable.Empty<IConditionGetter>())
+                        {
+                            if (c.Data is not ILocationHasKeywordConditionDataGetter kd) continue;
+                            var kfk = kd.FirstParameter.Link.FormKey;
+                            string kn = env.LinkCache.TryResolve<IKeywordGetter>(kfk, out var kw) ? (kw.EditorID ?? kfk.ToString()) : kfk.ToString();
+                            bool excluded = c is IConditionFloatGetter cf && cf.ComparisonValue == 0f;
+                            var list = excluded ? theme.exclude : theme.require;
+                            if (list.Contains(kn, StringComparer.OrdinalIgnoreCase)) continue;
+                            Warn($"the base's alias {aid} {(excluded ? "EXCLUDES" : "REQUIRES")} {kn} and this recipe does not; "
+                                 + "the build DROPS it. Put it in the recipe's theme if the mission should keep it.");
+                        }
+                    }
             }
 
             // --- how far apart the beats actually land -------------------------------------
@@ -355,6 +419,13 @@ namespace FrankyCLI
                     ("site radius", "RECenterLocRef", "RETravelA1LocRef"),
                     ("site diameter (the ceiling)", "RETravelA1LocRef", "RETravelB1LocRef"),
                 };
+                if (r.beats[0].Second != r.beats[1].Second)
+                {
+                    // Two POIs: beats 1 and 2 are not in one site, so a marker-to-marker distance between
+                    // them is not a thing. Their separation is the second place's leash (see the warn).
+                    Console.WriteLine("    THIS RECIPE: beats 1 and 2 are at DIFFERENT POIs; no in-site separation applies.");
+                    want.RemoveAt(0);
+                }
                 foreach (var (label, a, b) in want)
                 {
                     var v = Separations(env, a, b);
@@ -387,6 +458,17 @@ namespace FrankyCLI
                 ? $"  LINT PASSES ({issues.Count - fatal} warning(s))."
                 : $"  LINT FAILS: {fatal} fatal, {issues.Count - fatal} warning(s).");
             return fatal == 0;
+        }
+
+        private static Dictionary<string, FormKey> MarkersAt(Recipe r, Dictionary<string, FormKey> all, bool second)
+        {
+            // The markers one place must carry: its own beats' markers, plus the map marker every
+            // shipped target place carries (the player has to be able to navigate there).
+            var outp = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
+            foreach (var b in r.beats.Where(b => b.Second == second))
+                if (all.TryGetValue(b.at, out var k)) outp[b.at] = k;
+            if (all.TryGetValue("MapMarkerRefType", out var mm)) outp["MapMarkerRefType"] = mm;
+            return outp;
         }
 
         private static IEnumerable<(string, string)> ProseStrings(Recipe r)
@@ -1079,8 +1161,6 @@ namespace FrankyCLI
             if (!File.Exists(modFile)) { Console.WriteLine("REFUSED: " + modFile + " does not exist."); return 1; }
             var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
 
-            var reqK = ResolveKeywords(env, r.place.theme.require, _ => { });
-            var excK = ResolveKeywords(env, r.place.theme.exclude, _ => { });
 
             var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
             gen_quest_main.FixNextFormId(myMod);
@@ -1123,7 +1203,13 @@ namespace FrankyCLI
             if (repointed == 0) { Console.WriteLine("REFUSED: expected at least one self-reference and found none."); return 1; }
 
             int fail = 0;
-            fail += WritePlaceConditions(clone, t, r, markers, reqK, excK);
+            foreach (bool second in r.beats.Any(b => b.Second) ? new[] { false, true } : new[] { false })
+            {
+                var theme = second ? (r.place.second?.theme ?? new Theme()) : r.place.theme;
+                fail += WritePlaceConditions(clone, second ? t.secondPlaceAlias : t.placeAlias, MarkersAt(r, markers, second),
+                                             ResolveKeywords(env, theme.require, _ => { }),
+                                             ResolveKeywords(env, theme.exclude, _ => { }));
+            }
 
             var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
             var made4 = new Delve4Made();
@@ -1179,6 +1265,7 @@ namespace FrankyCLI
             public FormKey LoadItem, MissingItem;
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
             public Dictionary<string, int> IntProps = new();
+            public Dictionary<string, bool> BoolProps = new();
         }
 
         /// <summary>
@@ -1208,9 +1295,10 @@ namespace FrankyCLI
             int? IntOf(string n) => old.Properties.OfType<ScriptIntProperty>()
                 .FirstOrDefault(p => string.Equals(p.Name, n, StringComparison.OrdinalIgnoreCase))?.Data;
             var cargo = ObjOf("CargoObject"); var gang = ObjOf("GangMembers"); var failMsg = ObjOf("FailMessage");
+            var civs = ObjOf("TargetCivListMembers");
             var gangMax = IntOf("MaxGangMembers");
-            if (cargo == null || gang == null || failMsg == null || gangMax == null)
-            { Console.WriteLine("REFUSED: the replaced driver lacks CargoObject, GangMembers, FailMessage or MaxGangMembers."); return 1; }
+            if (cargo == null || gang == null || failMsg == null || gangMax == null || civs == null)
+            { Console.WriteLine("REFUSED: the replaced driver lacks CargoObject, GangMembers, FailMessage, MaxGangMembers or TargetCivListMembers."); return 1; }
 
             // --- the two halves, cloned ---------------------------------------------------------------
             var src = myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
@@ -1336,6 +1424,11 @@ namespace FrankyCLI
                 sc.Properties.Add(new ScriptIntProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
                 made.IntProps[n] = v;
             }
+            void Bool(string n, bool v)
+            {
+                sc.Properties.Add(new ScriptBoolProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
+                made.BoolProps[n] = v;
+            }
             Alias("LoadTarget", slots[0].activatorAlias);
             Alias("CentreTarget", slots[1].activatorAlias);
             Alias("CarrierMarker", (int)made.CarrierMarkerAlias);
@@ -1346,6 +1439,10 @@ namespace FrankyCLI
             Obj("FailMessage", failMsg.Value);
             Int("MinGangMembers", t.gangMin);
             Int("MaxGangMembers", gangMax.Value);
+            Obj("CivilianList", civs.Value);
+            // The lose-on-approach move is for a load at the MAIN place. At a second POI the other POI
+            // is the story, and moving it out past the delivery site's edge would undo the journey.
+            Bool("LoseLoadOnApproach", !r.beats[0].Second);
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
             return 0;
@@ -1362,12 +1459,12 @@ namespace FrankyCLI
         /// That is why an author cannot desynchronise the selection from the beats: there is no field
         /// in which to say something different.
         /// </summary>
-        private static int WritePlaceConditions(Quest clone, Template t, Recipe r,
+        private static int WritePlaceConditions(Quest clone, int placeAlias,
                                                 Dictionary<string, FormKey> markers,
                                                 List<FormKey> require, List<FormKey> exclude)
         {
-            var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
-            if (loc?.Conditions == null) { Console.WriteLine("REFUSED: place alias " + t.placeAlias + " has no conditions."); return 1; }
+            var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)placeAlias);
+            if (loc?.Conditions == null) { Console.WriteLine("REFUSED: place alias " + placeAlias + " has no conditions."); return 1; }
 
             var kept = loc.Conditions.Where(c => c.Data is not ILocationHasRefTypeConditionDataGetter
                                               && c.Data is not ILocationHasKeywordConditionDataGetter).ToList();
@@ -1388,7 +1485,7 @@ namespace FrankyCLI
             }
             foreach (var c in kept) loc.Conditions.Add(c);
 
-            Console.WriteLine($"  place    : {markers.Count} marker + {require.Count} require + {exclude.Count} exclude, "
+            Console.WriteLine($"  place {placeAlias,-2} : {markers.Count} marker + {require.Count} require + {exclude.Count} exclude, "
                               + $"{kept.Count} preserved (dropped {dropped} authored by the base)");
             return 0;
         }
@@ -1489,7 +1586,8 @@ namespace FrankyCLI
         {
             var al = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
             if (al?.Location == null) { Console.WriteLine("REFUSED: ref alias " + slot.markerAlias + " has no location fill."); return 1; }
-            al.Location.AliasID = t.placeAlias;
+            int placeAlias = beat.Second ? t.secondPlaceAlias : t.placeAlias;
+            al.Location.AliasID = placeAlias;
             al.Location.RefType.SetTo(markers[beat.at]);
 
             // A created slot has no objective by construction: the driver displays only its own two,
@@ -1513,7 +1611,7 @@ namespace FrankyCLI
                 e.Entry = Expand(beat.journal, t);
             }
 
-            Console.WriteLine($"  beat     : alias {slot.markerAlias} -> {beat.at} inside place alias {t.placeAlias}"
+            Console.WriteLine($"  beat     : alias {slot.markerAlias} -> {beat.at} inside place alias {placeAlias}"
                               + $", objective {slot.objective}"
                               + (beat.journal != null ? $", journal at stage {slot.journalStage}" : ", no journal"));
             return 0;
@@ -1553,14 +1651,21 @@ namespace FrankyCLI
             if (q == null) { Console.WriteLine("    FAIL: the quest is not in the written file."); return 1; }
 
             int fail = 0;
-            var loc = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
-            var condMarkers = loc?.Conditions?
-                .Select(c => c.Data).OfType<ILocationHasRefTypeConditionDataGetter>()
-                .Select(h => h.FirstParameter.Link.FormKey).ToHashSet() ?? new HashSet<FormKey>();
-
-            fail += Check("place demands every beat marker + the map marker",
-                          markers.Values.All(k => condMarkers.Contains(k)) ? "yes" : "no", "yes");
-            fail += Check("place demands NOTHING ELSE", condMarkers.Count.ToString(), markers.Count.ToString());
+            // Each place demands exactly ITS beats' markers plus the map marker: a place that also
+            // demanded the other place's markers would shrink its pool for nothing.
+            bool twoPlaces = r.beats.Any(b => b.Second);
+            foreach (bool second in twoPlaces ? new[] { false, true } : new[] { false })
+            {
+                int aid = second ? t.secondPlaceAlias : t.placeAlias;
+                var want = MarkersAt(r, markers, second);
+                var loc = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
+                var condMarkers = loc?.Conditions?
+                    .Select(c => c.Data).OfType<ILocationHasRefTypeConditionDataGetter>()
+                    .Select(h => h.FirstParameter.Link.FormKey).ToHashSet() ?? new HashSet<FormKey>();
+                fail += Check($"place {aid} demands its beats' markers + the map marker",
+                              want.Values.All(k => condMarkers.Contains(k)) ? "yes" : "no", "yes");
+                fail += Check($"place {aid} demands NOTHING ELSE", condMarkers.Count.ToString(), want.Count.ToString());
+            }
 
             // ⛔ THE PLAN IS HANDED IN, NEVER RE-DERIVED. The first version of this loop walked the
             // TEMPLATE's slots against the recipe's beats positionally, which is correct only while
@@ -1574,8 +1679,8 @@ namespace FrankyCLI
                 var al = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
                 fail += Check($"{tag} fills from {beat.at}",
                               al?.Location?.RefType.FormKey == markers[beat.at] ? "yes" : "no", "yes");
-                fail += Check($"{tag} searches the place alias",
-                              (al?.Location?.AliasID)?.ToString() ?? "unset", t.placeAlias.ToString());
+                fail += Check($"{tag} searches the {(beat.Second ? "SECOND" : "main")} place alias",
+                              (al?.Location?.AliasID)?.ToString() ?? "unset", (beat.Second ? t.secondPlaceAlias : t.placeAlias).ToString());
 
                 if (created)
                 {
@@ -1623,6 +1728,11 @@ namespace FrankyCLI
                     string want = kv.Value.obj + (kv.Value.alias >= 0 ? " alias " + kv.Value.alias : "");
                     fail += Check($"property {kv.Key}", got, want);
                 }
+                foreach (var kv in made4.BoolProps)
+                {
+                    var p = drv?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
+                    fail += Check($"property {kv.Key}", p?.Data.ToString() ?? "missing", kv.Value.ToString());
+                }
                 foreach (var kv in made4.IntProps)
                 {
                     var p = drv?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
@@ -1655,13 +1765,19 @@ namespace FrankyCLI
             // the mission quietly spanned two POIs. So assert the thing that must have MOVED.
             Console.WriteLine();
             Console.WriteLine("  negative control:");
+            // A beat DECLARED at the second place is meant to search it; anything else searching a
+            // collapsed place is a stray, and the second place is only exempt when a beat claims it.
+            var claimed = plan.Where(p => p.beat.Second).Select(p => (uint)p.slot.markerAlias).ToHashSet();
             var strays = q.Aliases?.OfType<IQuestReferenceAliasGetter>()
-                .Where(a => a.Location != null && t.collapsedPlaceAliases.Contains(a.Location.AliasID ?? -1))
+                .Where(a => a.Location != null && t.collapsedPlaceAliases.Contains(a.Location.AliasID ?? -1)
+                            && !claimed.Contains(a.ID))
                 .Select(a => a.ID).ToList() ?? new List<uint>();
             Console.WriteLine("    ref aliases still searching a collapsed place: "
                               + (strays.Count == 0 ? "none" : string.Join(", ", strays)));
             if (strays.Count > 0) { Console.WriteLine("    FAIL: the collapse was partial, so this spans two POIs."); fail++; }
-            else Console.WriteLine("    control behaved: every beat resolves inside ONE drawn POI.");
+            else Console.WriteLine(twoPlaces
+                ? "    control behaved: only the beat(s) declared at the second place search it."
+                : "    control behaved: every beat resolves inside ONE drawn POI.");
 
             Console.WriteLine();
             if (fail > 0) { Console.WriteLine("=== WRITTEN, BUT " + fail + " VERIFICATION FAILURE(S). Do not test yet. ==="); return 1; }

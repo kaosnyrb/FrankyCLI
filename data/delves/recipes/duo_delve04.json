@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "id": "duo_delve04",
+  "template": "carry-absence-recover-return",
+  "author": "jessica",
+  "source": "office/projects/delves/testcase-01-two-halves.md",
+  "_note": [
+    "TESTCASE 01, THE LOAD AT ANOTHER POI. Same four beats and the same prose as duo_delve03, on his",
+    "2026-09-24 verdict on that one: the box \"should have been at a different POI and then I take it to",
+    "that one\". So beat 1 is at the SECOND place, and the delivery site is the main place.",
+    "",
+    "And his second note, same morning: \"the one with the delivery should have people there. It's mainly",
+    "caves and natural locations atm.\" The delivery site excludes Natural, Cave and Abandoned (the base",
+    "quest excluded the first two all along; gen_delve dropped them silently until today), and the driver",
+    "places civilians there. The load's own POI takes no theme: a load can get lost anywhere.",
+    "",
+    "The two item names are still placeholders, and still Jessica's to replace."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeOE_ThemeAbandonedKeyword"
+      ]
+    },
+    "_theme": "The DELIVERY site: somewhere people work. Pool 121 measured 2026-09-24.",
+    "leash": "duo_samemapdistance",
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": []
+      }
+    }
+  },
+  "prose": {
+    "name": "Never Arrived at the <Place>: <Planet>",
+    "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
+  },
+  "items": {
+    "load": "Signed-Out Load",
+    "missing": "The Other Half",
+    "_items": "PLACEHOLDERS, mine. Her rule is that the part is never named; the inventory needs a word."
+  },
+  "beats": [
+    {
+      "at": "RETravelA1LocRef",
+      "objective": "Find the load",
+      "journal": "Signed out, never signed in, and it got this far.",
+      "place": "second"
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Take it to the <Place>",
+      "journal": "The other half should be here. Something has taken it."
+    },
+    {
+      "at": "RETravelB1LocRef",
+      "objective": "Recover what was taken",
+      "journal": "It did not go far. Nothing out here does."
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Finish the job",
+      "journal": null
+    }
+  ]
+}

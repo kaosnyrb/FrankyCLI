@@ -155,9 +155,11 @@
       "collapsedPlaceAliases": [
         10
       ],
+      "secondPlaceAlias": 10,
+      "_secondPlace": "The base's FinalLocation, re-opened on his ruling 2026-09-24: a recipe may put beat 1 there, so the load is found at another POI and carried to this one. It keeps the base's own GetDistance leash; its markers and theme are written from the recipe.",
       "cannot": [
         "more or fewer than four beats -- the driver's state machine is exactly this shape",
-        "a beat in a second place -- same collapse as two-beat-one-place",
+        "a beat OTHER THAN beat 1 at the second place -- beats 2-4 are the centre, the carrier and the return to that one centre",
         "staged visibility -- the load and the centre are both in the world from quest start"
       ],
       "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a on Defiant, 2026-09-24"
