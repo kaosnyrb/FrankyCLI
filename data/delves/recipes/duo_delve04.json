@@ -13,7 +13,7 @@
     "caves and natural locations atm.\" So the delivery site requires LocTypeOE_NonHostile (see _theme),",
     "and the load's own POI takes no theme, because a load can get lost anywhere.",
     "",
-    "The two item names are still placeholders, and still Jessica's to replace."
+    "The two item names are Jessica's, 2026-09-24 (see items._items)."
   ],
   "place": {
     "theme": {
