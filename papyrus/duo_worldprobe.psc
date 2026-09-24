@@ -3,60 +3,103 @@ Scriptname duo_worldprobe Hidden
 references can a script find around a player standing on a planet surface, WITHOUT an alias?
 
 His ask, 2026-09-24: place the first Delve crate away from the drawn POI, on a real marker the
-world already holds, so it reads as actually lost. The query API is FindAllReferencesOfType and it
-sees only the LOADED area, so the probe measures that area, centred on the player, because a board
-quest of this kind draws its POI in the worldspace the player is already standing in.
+world already holds, so it reads as actually lost. The query API is FindAllReferencesOfType, it
+matches on a placed ref's BASE, and it sees only the LOADED area.
+
+SEARCHES THE STATICS, NOT THE TAGS (his steer). A LocationRefType such as RETravelA1LocRef is a tag
+in the Location record; the thing in the world is a REFR whose base is a STAT such as
+REOverlayTravelA1 [0E3800]. Every REOverlay* static in Starfield.esm is listed below, plus the map
+marker family and XMarkerHeading (the base the ~2% of POIs without an REOverlay A1 use).
 
 NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes:
-    cgf "duo_worldprobe.Run" 0          all four radii
-    cgf "duo_worldprobe.Run" 250        one radius
-Output goes to a message box and to the Papyrus log.
-
-The bases are the RE overlay marker statics that POIs carry (read off OEJM001Location's special
-references and the REOverlay* statics in Starfield.esm, 2026-09-24) plus the plain map marker.}
+    cgf "duo_worldprobe.Run" 0          radius 6400
+    cgf "duo_worldprobe.Run" 400        any radius
+Only bases with at least one hit are printed, so the box stays readable; the rest are counted.
+NUMBERS ONLY in the output: the message box renders HTML, and a form cast to a string prints
+"[Location <name> (id)]", whose "<" opened a tag and ate every line after it (his first run).}
 
 Function Run(float afRadius = 0.0) global
     ObjectReference player = Game.GetPlayer()
-
-    Form[] bases = new Form[5]
-    String[] names = new String[5]
-    bases[0] = Game.GetFormFromFile(0x0E3800, "Starfield.esm")
-    names[0] = "TravelA1"
-    bases[1] = Game.GetFormFromFile(0x0E37FD, "Starfield.esm")
-    names[1] = "TravelB1"
-    bases[2] = Game.GetFormFromFile(0x0E37F4, "Starfield.esm")
-    names[2] = "Center"
-    bases[3] = Game.GetFormFromFile(0x20748B, "Starfield.esm")
-    names[3] = "MarkerMed"
-    bases[4] = Game.GetFormFromFile(0x000010, "Starfield.esm")
-    names[4] = "MapMarker"
-
-    Float[] radii
-    If afRadius > 0.0
-        radii = new Float[1]
-        radii[0] = afRadius
-    Else
-        radii = new Float[4]
-        radii[0] = 100.0
-        radii[1] = 400.0
-        radii[2] = 1600.0
-        radii[3] = 6400.0
+    Float radius = afRadius
+    If radius <= 0.0
+        radius = 6400.0
     EndIf
 
-    ; NUMBERS ONLY. The message box renders HTML, and a form cast to a string prints
-    ; "[Location <name> (id)]": the "<" opened a tag and ate every line after it (his first run).
-    String out = "WORLD PROBE"
+    Int[] ids = new Int[28]
+    String[] names = new String[28]
+    ids[0] = 0x0E3800
+    names[0] = "TravelA1"
+    ids[1] = 0x0E37FF
+    names[1] = "TravelA2"
+    ids[2] = 0x0E37FE
+    names[2] = "TravelA3"
+    ids[3] = 0x0E37FD
+    names[3] = "TravelB1"
+    ids[4] = 0x0E37FC
+    names[4] = "TravelB2"
+    ids[5] = 0x0E37FB
+    names[5] = "TravelB3"
+    ids[6] = 0x0E37F4
+    names[6] = "Center"
+    ids[7] = 0x0E37FA
+    names[7] = "SceneA1"
+    ids[8] = 0x0E37F9
+    names[8] = "SceneA2"
+    ids[9] = 0x0E37F8
+    names[9] = "SceneA3"
+    ids[10] = 0x0E37F7
+    names[10] = "SceneB1"
+    ids[11] = 0x0E37F6
+    names[11] = "SceneB2"
+    ids[12] = 0x0E37F5
+    names[12] = "SceneB3"
+    ids[13] = 0x0E37F2
+    names[13] = "InteriorMarker"
+    ids[14] = 0x0E37F3
+    names[14] = "ExteriorMarker"
+    ids[15] = 0x0E518D
+    names[15] = "MarkerSmallImportant"
+    ids[16] = 0x18E542
+    names[16] = "LeaderMarker"
+    ids[17] = 0x204006
+    names[17] = "MarkerDetail"
+    ids[18] = 0x204008
+    names[18] = "MarkerLargeFloor"
+    ids[19] = 0x20748A
+    names[19] = "MarkerLargeGround"
+    ids[20] = 0x20748B
+    names[20] = "MarkerMedium"
+    ids[21] = 0x20748C
+    names[21] = "MarkerSmall"
+    ids[22] = 0x37C3B5
+    names[22] = "MarkerSmallLiving"
+    ids[23] = 0x37C3B6
+    names[23] = "MarkerSmallWorking"
+    ids[24] = 0x000010
+    names[24] = "MapMarker"
+    ids[25] = 0x254245
+    names[25] = "MapMarker_ShortRange"
+    ids[26] = 0x254244
+    names[26] = "MapMarker_LongRange"
+    ids[27] = 0x000034
+    names[27] = "XMarkerHeading"
+
+    String out = "WORLD PROBE  r=" + (radius as Int)
     out += "\npos " + (player.GetPositionX() as Int) + ", " + (player.GetPositionY() as Int) + ", " + (player.GetPositionZ() as Int)
 
-    Int r = 0
-    While r < radii.Length
-        out += "\n\nr=" + (radii[r] as Int)
-        Int b = 0
-        While b < bases.Length
-            If bases[b] == None
-                out += "\n  " + names[b] + ": BASE DID NOT RESOLVE"
+    Int empty = 0
+    Int unresolved = 0
+    Int b = 0
+    While b < ids.Length
+        Form base = Game.GetFormFromFile(ids[b], "Starfield.esm")
+        If base == None
+            unresolved += 1
+            out += "\n  " + names[b] + ": BASE DID NOT RESOLVE"
+        Else
+            ObjectReference[] found = player.FindAllReferencesOfType(base, radius)
+            If found.Length == 0
+                empty += 1
             Else
-                ObjectReference[] found = player.FindAllReferencesOfType(bases[b], radii[r])
                 Float near = -1.0
                 Float far = -1.0
                 Int i = 0
@@ -70,36 +113,15 @@ Function Run(float afRadius = 0.0) global
                     EndIf
                     i += 1
                 EndWhile
-                out += "\n  " + names[b] + ": " + found.Length
-                If found.Length > 0
-                    out += "  near " + (near as Int) + "  far " + (far as Int)
-                EndIf
+                out += "\n  " + names[b] + ": " + found.Length + "  near " + (near as Int) + "  far " + (far as Int)
             EndIf
-            b += 1
-        EndWhile
-        r += 1
-    EndWhile
-
-    ; EACH MAP MARKER'S LOCATION, asked whether it CLAIMS the RE kit. Separates "this place has no
-    ; travel markers" from "it has them in the record and the query cannot see them", which the counts
-    ; above cannot do on their own (his second run: 0 RE markers beside a POI, 2 map markers found).
-    LocationRefType a1 = Game.GetFormFromFile(0x05F478, "Starfield.esm") as LocationRefType
-    LocationRefType b1 = Game.GetFormFromFile(0x05F47B, "Starfield.esm") as LocationRefType
-    LocationRefType ctr = Game.GetFormFromFile(0x05F198, "Starfield.esm") as LocationRefType
-    ObjectReference[] maps = player.FindAllReferencesOfType(bases[4], radii[radii.Length - 1])
-    out += "\n\nmap markers, and what their LOCATION claims (A1/B1/Centre):"
-    Int m = 0
-    While m < maps.Length
-        Location l = maps[m].GetCurrentLocation()
-        out += "\n  d " + (player.GetDistance(maps[m]) as Int)
-        If l == None
-            out += "  no location"
-        Else
-            out += "  " + (l.HasRefType(a1) as Int) + "/" + (l.HasRefType(b1) as Int) + "/" + (l.HasRefType(ctr) as Int)
-            out += "  playerHere " + (player.IsInLocation(l) as Int)
         EndIf
-        m += 1
+        b += 1
     EndWhile
+    out += "\n\n" + empty + " of " + ids.Length + " bases found nothing"
+    If unresolved > 0
+        out += ", " + unresolved + " did not resolve"
+    EndIf
 
     Debug.Trace(out)
     Debug.MessageBox(out)
