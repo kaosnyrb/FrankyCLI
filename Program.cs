@@ -156,6 +156,11 @@ switch (mode)
         // clone a working base, aim it at a travel marker, swap the target for a container.
         return gen_delvelayer1.Run(Get(args, 1, "du_overtime"), Get(args, 2, "duo_artifact_local_qst04a"));
 
+    case "gen_aliaslint":
+        // gen_aliaslint <questSearch> [--quiet]  -- can this quest fill its aliases? Graded off the
+        // BUILT record: fill order, dependencies, static place pools and the joint pool per place.
+        return gen_aliaslint.Run(args);
+
     case "gen_delve":
         // gen_delve templates | lint <recipe> | build <recipe> [--dry]
         // Delves from DATA: a JSON recipe an author writes, graded and built against a registry of

@@ -1273,6 +1273,7 @@ namespace FrankyCLI
             }
             fail += WriteProse(clone, t, r);
             SortStages(clone);
+            fail += OrderAliases(clone);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
@@ -1603,6 +1604,27 @@ namespace FrankyCLI
             q.Stages.AddRange(sorted);
         }
 
+        /// <summary>
+        /// PUT EVERY ALIAS BELOW EVERYTHING IT FILLS FROM. The engine fills aliases in list order
+        /// (vanilla: 7,731 dependencies across 2,092 quests, ZERO pointing down the list), and a
+        /// second place re-opened for beat one sits BELOW beat one's marker in the base's list.
+        /// Stable: nothing moves unless it has to. Refuses on a cycle rather than guessing.
+        /// </summary>
+        private static int OrderAliases(Quest q)
+        {
+            if (q.Aliases == null) return 0;
+            var before = q.Aliases.ToList();
+            var fwd = gen_aliaslint.ForwardRefs(before);
+            var order = gen_aliaslint.DependencyOrder(before);
+            if (order == null) { Console.WriteLine("REFUSED: the aliases depend on each other in a cycle; no fill order exists."); return 1; }
+            int moved = before.Where((a, i) => !ReferenceEquals(order[i], a)).Count();
+            q.Aliases.Clear();
+            q.Aliases.AddRange(order);
+            Console.WriteLine($"  alias order: {fwd.Count} forward reference(s) before, {moved} list position(s) changed"
+                              + (fwd.Count > 0 ? "  (" + string.Join(", ", fwd.Select(f => $"{f.alias}->{f.dep}")) + ")" : ""));
+            return gen_aliaslint.ForwardRefs(q.Aliases.ToList()).Count == 0 ? 0 : 1;
+        }
+
         private static IEnumerable<(uint id, string name)> Flatten(IAQuestAliasGetter a)
         {
             if (a is IQuestReferenceAliasGetter r && r.Name != null) yield return (r.ID, r.Name);
@@ -1711,6 +1733,11 @@ namespace FrankyCLI
             if (q == null) { Console.WriteLine("    FAIL: the quest is not in the written file."); return 1; }
 
             int fail = 0;
+            // ⛔ FILL ORDER, off disk: an alias listed above the place it fills inside cannot fill, and
+            // the quest silently never starts. duo_delve04 shipped that way on 2026-09-24.
+            var fwd = gen_aliaslint.ForwardRefs(q.Aliases?.ToList() ?? new List<IAQuestAliasGetter>());
+            fail += Check("no alias is listed above an alias it fills from (gen_aliaslint R1)",
+                          fwd.Count == 0 ? "none" : string.Join(", ", fwd.Select(f => $"{f.alias}->{f.dep}")), "none");
             // Each place demands exactly ITS beats' markers plus the map marker: a place that also
             // demanded the other place's markers would shrink its pool for nothing.
             bool twoPlaces = r.beats.Any(b => b.Second);
