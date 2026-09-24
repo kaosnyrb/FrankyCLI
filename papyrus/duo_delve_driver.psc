@@ -133,7 +133,9 @@ Function LoseTheLoad()
     origin.Delete()
 
     If DebugNotes
-        Debug.Notification("Delve: load lost via " + how + ", " + (dist as Int) + " m out, now " + (load.GetDistance(centre) as Int) + " m from centre")
+        ; The anchor's own distance is printed so "now X from centre" can be checked as anchor + push
+        ; rather than inferred (his first run: 63 m out, 310 m from centre, on a large site).
+        Debug.Notification("Delve: load lost via " + how + ", edge " + (anchor.GetDistance(centre) as Int) + " m + " + (dist as Int) + " m, now " + (load.GetDistance(centre) as Int) + " m from centre")
     EndIf
 EndFunction
 
