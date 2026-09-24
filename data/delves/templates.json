@@ -88,6 +88,80 @@
       ],
 
       "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a, 2026-09-23"
+    },
+    {
+      "id": "carry-absence-recover-return",
+      "kind": "delve4",
+      "base": "duo_artifact_localcargo_qst09a",
+      "mod": "du_overtime",
+      "driver": "duo_delve_driver",
+      "replacesDriver": "dou_artifact_ground_dualactivator_local_quest",
+      "_shape": [
+        "JESSICA'S TESTCASE 01 WHOLE: find the load, take it to the centre and find the other half gone,",
+        "take it back off whoever has it, return to the centre and finish the job. Four objectives,",
+        "which no shipped driver can show, so the driver is ours: FrankyCLI/papyrus/duo_delve_driver.psc,",
+        "compiled with papyrus/compile.py into the mod's Data/scripts.",
+        "",
+        "SAME BASE AND SAME COLLAPSE as two-beat-one-place. The base's own driver is REMOVED and ours",
+        "put in its place, taking its property values (the cargo item, the gang list, the fail message)",
+        "off the entry it replaces rather than restating them here."
+      ],
+      "beats": 4,
+      "maxBeats": 4,
+      "carriesItem": true,
+      "placeAlias": 0,
+      "mapMarkerAlias": 5,
+      "briefingStage": 0,
+      "completeStage": 100,
+      "beatSlots": [
+        {
+          "markerAlias": 1,
+          "activatorAlias": 2,
+          "objective": 10,
+          "journalStage": 50
+        },
+        {
+          "markerAlias": 11,
+          "activatorAlias": 12,
+          "objective": 20,
+          "journalStage": 60
+        },
+        {
+          "markerAlias": -1,
+          "activatorAlias": -1,
+          "objective": 30,
+          "journalStage": 70,
+          "create": true
+        },
+        {
+          "markerAlias": 11,
+          "activatorAlias": 12,
+          "objective": 40,
+          "journalStage": 100,
+          "returnTo": 1
+        }
+      ],
+      "_beatSlots": [
+        "Beat 3 has no activator: the carrier is spawned by the driver at a marker alias this tool",
+        "CREATES, and objective 30 points at that marker. Beat 4 is beat 2's slot again, so a recipe",
+        "must put beat 4 on the same marker as beat 2 and the lint refuses anything else.",
+        "Stages 60 and 70 do not exist on the base and are created with one log entry each."
+      ],
+      "gangMin": 0,
+      "tokens": {
+        "Place": "DungeonLocation",
+        "Planet": "targetPlanet"
+      },
+      "collapsedPlaceAliases": [
+        10
+      ],
+      "cannot": [
+        "more or fewer than four beats -- the driver's state machine is exactly this shape",
+        "a beat in a second place -- same collapse as two-beat-one-place",
+        "an objective that points at the CARRIER rather than where he spawned -- PlaceAtMe can fill an alias, and an empty alias to fill is not proven yet",
+        "staged visibility -- the load and the centre are both in the world from quest start"
+      ],
+      "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a on Defiant, 2026-09-24"
     }
   ]
 }

@@ -49,9 +49,19 @@ namespace FrankyCLI
         private sealed class Template
         {
             public string id { get; set; } = "";
+            /// <summary>
+            /// Which build path the row takes. "dualactivator" is the first row's: the base's own
+            /// driver runs the mission and extra beats are journal-only. "delve4" REPLACES the base's
+            /// driver with one of ours from FrankyCLI/papyrus, so every beat has an objective.
+            /// </summary>
+            public string kind { get; set; } = "dualactivator";
             public string @base { get; set; } = "";
             public string mod { get; set; } = "";
             public string driver { get; set; } = "";
+            /// <summary>delve4: the base's script entry that ours replaces, and whose values it takes.</summary>
+            public string? replacesDriver { get; set; }
+            /// <summary>delve4: fewest who stand with the carrier. The most is taken off the base.</summary>
+            public int gangMin { get; set; }
             public int beats { get; set; }
             public bool carriesItem { get; set; }
             public int placeAlias { get; set; }
@@ -73,6 +83,10 @@ namespace FrankyCLI
             public int activatorAlias { get; set; }
             public int objective { get; set; }
             public int journalStage { get; set; }
+            /// <summary>delve4: this beat's marker alias does not exist on the base and is created.</summary>
+            public bool create { get; set; }
+            /// <summary>delve4: this beat is an earlier beat's place again (0-based index), not a new one.</summary>
+            public int returnTo { get; set; } = -1;
         }
         private sealed class TemplateFile { public int schema { get; set; } public List<Template> templates { get; set; } = new(); }
 
@@ -85,8 +99,11 @@ namespace FrankyCLI
             public string source { get; set; } = "";
             public Place place { get; set; } = new();
             public Prose prose { get; set; } = new();
+            public Items? items { get; set; }
             public List<Beat> beats { get; set; } = new();
         }
+        /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
+        private sealed class Items { public string? load { get; set; } public string? missing { get; set; } }
         private sealed class Place { public Theme theme { get; set; } = new(); public string? leash { get; set; } }
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
@@ -193,9 +210,31 @@ namespace FrankyCLI
             // extra slot this tool creates, and an extra beat has no objective because there is no
             // driver to display one -- writing the string anyway would put prose in the record that
             // no player can ever see, which is worse than refusing it.
+            bool delve4 = t.kind == "delve4";
+            if (delve4)
+            {
+                // Our driver displays every beat's objective, so every beat is driven, and the beat
+                // count is the state machine's shape rather than a ceiling.
+                if (r.beats.Count != t.beatSlots.Count)
+                    Fatal($"template '{t.id}' is exactly {t.beatSlots.Count} beats; the recipe has {r.beats.Count}.");
+                if (string.IsNullOrWhiteSpace(t.replacesDriver)) Fatal($"template '{t.id}' names no replacesDriver");
+                if (string.IsNullOrWhiteSpace(r.items?.load) || string.IsNullOrWhiteSpace(r.items?.missing))
+                    Fatal("items.load and items.missing are both required: each half is a cloned item the player carries, and an item with no name shows as a blank line in the inventory.");
+                else if (Tokens(r.items!.load!).Concat(Tokens(r.items.missing!)).Any())
+                    Fatal("an item name carries a <Token>. Item names are not alias contexts, so it would print literally in the inventory.");
+                // ⭐ THE RETURN IS THE DESIGN, so it is refused rather than warned when it is not one.
+                for (int i = 0; i < t.beatSlots.Count && i < r.beats.Count; i++)
+                {
+                    int back = t.beatSlots[i].returnTo;
+                    if (back >= 0 && back < r.beats.Count
+                        && !string.Equals(r.beats[i].at, r.beats[back].at, StringComparison.OrdinalIgnoreCase))
+                        Fatal($"beat {i + 1} is a RETURN to beat {back + 1}'s place and must name the same marker "
+                              + $"('{r.beats[back].at}'); it names '{r.beats[i].at}'.");
+                }
+            }
             for (int i = 0; i < r.beats.Count; i++)
             {
-                bool driven = i == 0 || i == r.beats.Count - 1;
+                bool driven = delve4 || i == 0 || i == r.beats.Count - 1;
                 if (string.IsNullOrWhiteSpace(r.beats[i].at)) Fatal($"beat {i + 1} names no marker");
                 if (driven && string.IsNullOrWhiteSpace(r.beats[i].objective))
                     Fatal($"beat {i + 1} is one of the driver's own slots and has no objective text");
@@ -888,29 +927,37 @@ namespace FrankyCLI
             int fail = 0;
             fail += WritePlaceConditions(clone, t, r, markers, reqK, excK);
 
-            // The driver's own slots are the FIRST and LAST beat; extras are created between them.
             var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
-            int nb = r.beats.Count;
-            plan.Add((t.beatSlots[0], r.beats[0], false));
-            for (int i = 1; i < nb - 1; i++)
+            var made4 = new Delve4Made();
+            if (t.kind == "delve4")
             {
-                var made = AddBeatSlot(clone, t, i, t.extraBeatStageBase + t.extraBeatStageStep * (i - 1));
-                if (made == null) { fail++; break; }
-                plan.Add((made, r.beats[i], true));
+                if (fail == 0) fail += BuildDelve4(myMod, clone, t, r, markers, plan, made4);
             }
-            plan.Add((t.beatSlots[^1], r.beats[^1], false));
-
-            for (int i = 0; i < plan.Count && fail == 0; i++)
-                fail += WriteBeat(clone, t, plan[i].slot, plan[i].beat, markers, plan[i].created);
-
-            // An extra beat fires on a stock DefaultAliasOnActivate gated on the PREVIOUS beat's
-            // stage, so the chain sequences itself with no state variable. The first extra gates on
-            // the driver's own stage-50, which it sets on the first activation.
-            for (int i = 1; i < nb - 1 && fail == 0; i++)
+            else
             {
-                var slot = plan[i].slot;
-                int prereq = i == 1 ? t.beatSlots[0].journalStage : plan[i - 1].slot.journalStage;
-                fail += HookActivator(clone, slot.activatorAlias, slot.journalStage, prereq);
+                // The driver's own slots are the FIRST and LAST beat; extras are created between them.
+                int nb = r.beats.Count;
+                plan.Add((t.beatSlots[0], r.beats[0], false));
+                for (int i = 1; i < nb - 1; i++)
+                {
+                    var made = AddBeatSlot(clone, t, i, t.extraBeatStageBase + t.extraBeatStageStep * (i - 1));
+                    if (made == null) { fail++; break; }
+                    plan.Add((made, r.beats[i], true));
+                }
+                plan.Add((t.beatSlots[^1], r.beats[^1], false));
+
+                for (int i = 0; i < plan.Count && fail == 0; i++)
+                    fail += WriteBeat(clone, t, plan[i].slot, plan[i].beat, markers, plan[i].created);
+
+                // An extra beat fires on a stock DefaultAliasOnActivate gated on the PREVIOUS beat's
+                // stage, so the chain sequences itself with no state variable. The first extra gates on
+                // the driver's own stage-50, which it sets on the first activation.
+                for (int i = 1; i < nb - 1 && fail == 0; i++)
+                {
+                    var slot = plan[i].slot;
+                    int prereq = i == 1 ? t.beatSlots[0].journalStage : plan[i - 1].slot.journalStage;
+                    fail += HookActivator(clone, slot.activatorAlias, slot.journalStage, prereq);
+                }
             }
             fail += WriteProse(clone, t, r);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
@@ -922,7 +969,173 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            return Verify(modFile, readParams, t, r, markers, plan);
+            return Verify(modFile, readParams, t, r, markers, plan, made4);
+        }
+
+        // ------------------------------------------------------------------ delve4
+
+        /// <summary>What BuildDelve4 created, handed to Verify rather than re-derived there.</summary>
+        private sealed class Delve4Made
+        {
+            public uint CarrierMarkerAlias;
+            public FormKey LoadItem, MissingItem;
+            public Dictionary<string, (FormKey obj, short alias)> Props = new();
+            public Dictionary<string, int> IntProps = new();
+        }
+
+        /// <summary>
+        /// THE FOUR-BEAT DELVE: carry, absence, recover, return.
+        ///
+        /// ⭐ WHAT MAKES IT POSSIBLE IS REPLACING THE DRIVER, NOT ADDING TO IT. The base's own script
+        /// knows two objectives. Ours (FrankyCLI/papyrus/duo_delve_driver.psc) knows four, so the
+        /// base's entry is removed and ours goes in its place, TAKING the values that are facts about
+        /// this base (the cargo item, the gang list, the most who stand, the fail message) off the
+        /// entry it replaces. Anything we cannot find there is a refusal, never a default.
+        ///
+        /// ⛔ NEITHER ITEM IS THE BASE'S. The base's cargo item ships in every Overtime cargo quest
+        /// that uses it; renaming it would rename his live missions. Both halves are CLONES of it,
+        /// keyed on this recipe's id so a rebuild replaces them instead of piling up copies.
+        /// </summary>
+        private static int BuildDelve4(StarfieldMod myMod, Quest clone, Template t, Recipe r,
+                                       Dictionary<string, FormKey> markers,
+                                       List<(BeatSlot slot, Beat beat, bool created)> plan, Delve4Made made)
+        {
+            // --- the base's driver, whose values we take ------------------------------------------
+            var vma = clone.VirtualMachineAdapter;
+            var old = vma?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
+            if (vma == null || old == null)
+            { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' script entry to replace."); return 1; }
+            FormKey? ObjOf(string n) => old.Properties.OfType<ScriptObjectProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, n, StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+            int? IntOf(string n) => old.Properties.OfType<ScriptIntProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, n, StringComparison.OrdinalIgnoreCase))?.Data;
+            var cargo = ObjOf("CargoObject"); var gang = ObjOf("GangMembers"); var failMsg = ObjOf("FailMessage");
+            var gangMax = IntOf("MaxGangMembers");
+            if (cargo == null || gang == null || failMsg == null || gangMax == null)
+            { Console.WriteLine("REFUSED: the replaced driver lacks CargoObject, GangMembers, FailMessage or MaxGangMembers."); return 1; }
+
+            // --- the two halves, cloned ---------------------------------------------------------------
+            var src = myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
+            if (src == null)
+            { Console.WriteLine($"REFUSED: the cargo item {cargo} is not a MiscItem in {t.mod}; this tool clones only its own mod's items."); return 1; }
+            FormKey CloneItem(string suffix, string name)
+            {
+                string edid = r.id + "_" + suffix;
+                foreach (var k in myMod.MiscItems.Where(m => m.EditorID == edid).Select(m => m.FormKey).ToList())
+                    myMod.MiscItems.Remove(k);
+                var mi = myMod.MiscItems.DuplicateInAsNewRecord(src);
+                mi.EditorID = edid;
+                mi.Name = name;
+                Console.WriteLine($"  +item    : {edid} {mi.FormKey}  \"{name}\"  (clone of {src.EditorID})");
+                return mi.FormKey;
+            }
+            made.LoadItem = CloneItem("Load", r.items!.load!);
+            made.MissingItem = CloneItem("OtherHalf", r.items.missing!);
+
+            // --- stages the base does not have --------------------------------------------------------
+            foreach (var s in t.beatSlots.Select(s => s.journalStage).Distinct())
+            {
+                if (clone.Stages!.Any(x => x.Index == s)) continue;
+                var st = new QuestStage { Index = (ushort)s };
+                st.LogEntries.Add(new QuestLogEntry());
+                clone.Stages.Add(st);
+                Console.WriteLine($"  +stage   : {s}");
+            }
+
+            // --- the created marker (beat 3's) -----------------------------------------------------------
+            var srcMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].markerAlias);
+            if (srcMarker?.Location == null) { Console.WriteLine("REFUSED: slot 0's marker alias has no location fill to clone."); return 1; }
+            var slots = new List<BeatSlot>();
+            for (int i = 0; i < t.beatSlots.Count; i++)
+            {
+                var ts = t.beatSlots[i];
+                if (!ts.create) { slots.Add(ts); continue; }
+                uint id = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                var m = srcMarker.DeepCopy();
+                m.ID = id;
+                m.Name = "DelveCarrierMarker";
+                clone.Aliases.Add(m);
+                made.CarrierMarkerAlias = id;
+                Console.WriteLine($"  +alias   : beat {i + 1} marker {id} (cloned from alias {t.beatSlots[0].markerAlias})");
+                slots.Add(new BeatSlot { markerAlias = (int)id, activatorAlias = -1, objective = ts.objective, journalStage = ts.journalStage });
+            }
+
+            // --- objectives the base does not have, cloned from its last one ---------------------------
+            var lastOb = clone.Objectives?.OrderBy(o => o.Index).LastOrDefault();
+            if (lastOb == null || lastOb.Targets == null || lastOb.Targets.Count != 1)
+            { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
+            foreach (var s in slots)
+            {
+                if (clone.Objectives!.Any(o => o.Index == s.objective)) continue;
+                var ob = lastOb.DeepCopy();
+                ob.Index = (ushort)s.objective;
+                clone.Objectives.Add(ob);
+                Console.WriteLine($"  +obj     : {s.objective}");
+            }
+            // Every objective's target is WRITTEN, including the base's own two: which alias an
+            // objective points at is one fact per beat, and inheriting it is how a marker ends up
+            // on the wrong thing. Beat 3 points at where the carrier spawns (see the template's
+            // cannot list for why not at the carrier himself).
+            foreach (var s in slots)
+            {
+                var ob = clone.Objectives!.First(o => o.Index == s.objective);
+                if (ob.Targets == null || ob.Targets.Count != 1) { Console.WriteLine($"REFUSED: objective {s.objective} has no single target."); return 1; }
+                ob.Targets[0].AliasID = s.activatorAlias >= 0 ? s.activatorAlias : s.markerAlias;
+            }
+
+            // --- beats: fills, objective text, journals -------------------------------------------------
+            for (int i = 0; i < slots.Count; i++)
+            {
+                plan.Add((slots[i], r.beats[i], false));
+                // A return writes no fill: it IS the earlier beat's alias, already written.
+                if (t.beatSlots[i].returnTo >= 0)
+                {
+                    var ob = clone.Objectives!.First(o => o.Index == slots[i].objective);
+                    ob.DisplayText = Expand(r.beats[i].objective!, t);
+                    if (r.beats[i].journal != null)
+                        clone.Stages!.First(s => s.Index == slots[i].journalStage).LogEntries[0].Entry = Expand(r.beats[i].journal!, t);
+                    Console.WriteLine($"  beat     : {i + 1} returns to beat {t.beatSlots[i].returnTo + 1}'s place, objective {slots[i].objective}");
+                    continue;
+                }
+                int f = WriteBeat(clone, t, slots[i], r.beats[i], markers, false);
+                if (f > 0) return f;
+            }
+
+            // --- the driver swap ------------------------------------------------------------------------
+            vma.Scripts.Remove(old);
+            var sc = new ScriptEntry { Name = t.driver };
+            void Alias(string n, int aliasId)
+            {
+                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
+                p.Object.SetTo(clone.FormKey);
+                p.Alias = (short)aliasId;
+                sc.Properties.Add(p);
+                made.Props[n] = (clone.FormKey, (short)aliasId);
+            }
+            void Obj(string n, FormKey k)
+            {
+                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
+                p.Object.SetTo(k);
+                sc.Properties.Add(p);
+                made.Props[n] = (k, (short)-1);
+            }
+            void Int(string n, int v)
+            {
+                sc.Properties.Add(new ScriptIntProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
+                made.IntProps[n] = v;
+            }
+            Alias("LoadTarget", slots[0].activatorAlias);
+            Alias("CentreTarget", slots[1].activatorAlias);
+            Alias("CarrierMarker", (int)made.CarrierMarkerAlias);
+            Obj("LoadItem", made.LoadItem);
+            Obj("MissingItem", made.MissingItem);
+            Obj("GangMembers", gang.Value);
+            Obj("FailMessage", failMsg.Value);
+            Int("MinGangMembers", t.gangMin);
+            Int("MaxGangMembers", gangMax.Value);
+            vma.Scripts.Add(sc);
+            Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
+            return 0;
         }
 
         /// <summary>
@@ -1118,7 +1331,7 @@ namespace FrankyCLI
         /// </summary>
         private static int Verify(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
                                   Template t, Recipe r, Dictionary<string, FormKey> markers,
-                                  List<(BeatSlot slot, Beat beat, bool created)> plan)
+                                  List<(BeatSlot slot, Beat beat, bool created)> plan, Delve4Made made4)
         {
             Console.WriteLine();
             Console.WriteLine("  verification, re-read from disk:");
@@ -1179,6 +1392,50 @@ namespace FrankyCLI
                 }
             }
             fail += Check("name rewritten", (q.Name?.String ?? "") == Expand(r.prose.name!, t) ? "yes" : "no", "yes");
+
+            if (t.kind == "delve4")
+            {
+                // The driver swap, every property, every objective's TARGET and every journal. The
+                // off-disk read is the point: these are the fields a half-applied write would get
+                // wrong while the in-memory objects looked perfect.
+                var scripts = q.VirtualMachineAdapter?.Scripts ?? new List<IScriptEntryGetter>();
+                fail += Check($"old driver {t.replacesDriver} gone",
+                              scripts.Any(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase)) ? "present" : "gone", "gone");
+                var drv = scripts.FirstOrDefault(s => s.Name == t.driver);
+                fail += Check($"driver {t.driver} attached", drv != null ? "yes" : "no", "yes");
+                foreach (var kv in made4.Props)
+                {
+                    var p = drv?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
+                    string got = p == null ? "missing" : p.Object.FormKey + (kv.Value.alias >= 0 ? " alias " + p.Alias : "");
+                    string want = kv.Value.obj + (kv.Value.alias >= 0 ? " alias " + kv.Value.alias : "");
+                    fail += Check($"property {kv.Key}", got, want);
+                }
+                foreach (var kv in made4.IntProps)
+                {
+                    var p = drv?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
+                    fail += Check($"property {kv.Key}", p?.Data.ToString() ?? "missing", kv.Value.ToString());
+                }
+                for (int i = 0; i < plan.Count; i++)
+                {
+                    var (slot, beat, _) = plan[i];
+                    var ob = q.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
+                    int wantAlias = slot.activatorAlias >= 0 ? slot.activatorAlias : slot.markerAlias;
+                    fail += Check($"objective {slot.objective} targets alias {wantAlias}",
+                                  (ob?.Targets?.FirstOrDefault()?.AliasID)?.ToString() ?? "none", wantAlias.ToString());
+                    if (beat.journal != null)
+                    {
+                        var st = q.Stages?.FirstOrDefault(s => s.Index == slot.journalStage);
+                        fail += Check($"beat {i + 1} journal on stage {slot.journalStage}",
+                                      (st?.LogEntries?.FirstOrDefault()?.Entry?.String ?? "") == Expand(beat.journal, t) ? "yes" : "no", "yes");
+                    }
+                }
+                var mod = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+                foreach (var (label, key, name) in new[] { ("load", made4.LoadItem, r.items!.load!), ("missing", made4.MissingItem, r.items.missing!) })
+                {
+                    var mi = mod.MiscItems.FirstOrDefault(m => m.FormKey == key);
+                    fail += Check($"item {label} {key} named", mi?.Name?.String ?? "missing", name);
+                }
+            }
 
             // NEGATIVE CONTROL. Every check above passes trivially if the collapse never happened --
             // an alias still pointing at the base's SECOND place would satisfy "fills from X" while

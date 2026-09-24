@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "id": "duo_delve03",
+  "template": "carry-absence-recover-return",
+  "author": "jessica",
+  "source": "office/projects/delves/testcase-01-two-halves.md",
+
+  "_note": [
+    "TESTCASE 01 WHOLE, all four beats, on his \"continue trying to get Jessica's first demo mission",
+    "built out\" (2026-09-24). Every line of prose below is hers, verbatim, from the page's",
+    "THE PROSE section. The two item names are NOT hers: they are placeholders, because an item",
+    "needs a name in the inventory and her page deliberately never names the part. Hers to replace.",
+    "",
+    "Beat three sits on the B travel ring, beat one on the A ring: the widest pair one POI offers.",
+    "Beat four is beat two's place again, because the return IS the design."
+  ],
+
+  "place": {
+    "theme":  { "require": [], "exclude": [] },
+    "_theme": "Deliberately empty, her generic ruling. The skeleton is what is under test.",
+    "leash":  "duo_samemapdistance"
+  },
+
+  "prose": {
+    "name": "Never Arrived at the <Place>: <Planet>",
+    "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
+  },
+
+  "items": {
+    "load": "Signed-Out Load",
+    "missing": "The Other Half",
+    "_items": "PLACEHOLDERS, mine. Her rule is that the part is never named; the inventory needs a word."
+  },
+
+  "beats": [
+    {
+      "at": "RETravelA1LocRef",
+      "objective": "Find the load",
+      "journal": "Signed out, never signed in, and it got this far."
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Take it to the <Place>",
+      "journal": "The other half should be here. Something has taken it."
+    },
+    {
+      "at": "RETravelB1LocRef",
+      "objective": "Recover what was taken",
+      "journal": "It did not go far. Nothing out here does."
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Finish the job",
+      "journal": null
+    }
+  ]
+}
