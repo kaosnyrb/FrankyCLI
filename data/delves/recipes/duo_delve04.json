@@ -9,30 +9,29 @@
     "2026-09-24 verdict on that one: the box \"should have been at a different POI and then I take it to",
     "that one\". So beat 1 is at the SECOND place, and the delivery site is the main place.",
     "",
-    "And his second note, same morning: \"the one with the delivery should have people there. It's mainly",
-    "caves and natural locations atm.\" The delivery site excludes Natural, Cave and Abandoned (the base",
-    "quest excluded the first two all along; gen_delve dropped them silently until today), and the driver",
-    "places civilians there. The load's own POI takes no theme: a load can get lost anywhere.",
+    "His second note, same morning: \"the one with the delivery should have people there. It's mainly",
+    "caves and natural locations atm.\" So the delivery site requires LocTypeOE_NonHostile (see _theme),",
+    "and the load's own POI takes no theme, because a load can get lost anywhere.",
     "",
     "The two item names are still placeholders, and still Jessica's to replace."
   ],
   "place": {
     "theme": {
-      "require": [],
-      "exclude": [
-        "LocTypeOE_ThemeNaturalKeyword",
-        "LocTypeOE_ThemeCaveKeyword",
-        "LocTypeOE_ThemeAbandonedKeyword"
-      ]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": []
     },
-    "_theme": "The DELIVERY site: somewhere people work. Pool 121 measured 2026-09-24.",
+    "_theme": "The DELIVERY site, where people work: LocTypeOE_NonHostile, the engine's own keyword for a site with people on it who are not hostile. Pool 62, measured 2026-09-24. It replaced my first cut (excluding Natural, Cave, Abandoned: pool 121), which approximated people without checking a keyword; his question found this one.",
     "leash": "duo_samemapdistance",
     "second": {
       "theme": {
         "require": [],
         "exclude": []
       }
-    }
+    },
+    "civilians": false,
+    "_civilians": "Off: a NonHostile site brings its own people. The carrier's gang is kept, his call: the friendly site gets hit."
   },
   "prose": {
     "name": "Never Arrived at the <Place>: <Planet>",

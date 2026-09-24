@@ -122,6 +122,11 @@ namespace FrankyCLI
             public string? leash { get; set; }
             /// <summary>The second POI's own theme, for beats with place "second". Absent = no theme.</summary>
             public Place? second { get; set; }
+            /// <summary>
+            /// delve4: place civilians at the centre on the first approach. Default true. Set false when the
+            /// theme already guarantees people (LocTypeOE_NonHostile), or the site gets a crowd.
+            /// </summary>
+            public bool civilians { get; set; } = true;
         }
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
@@ -1466,6 +1471,7 @@ namespace FrankyCLI
             // The lose-on-approach move is for a load at the MAIN place. At a second POI the other POI
             // is the story, and moving it out past the delivery site's edge would undo the journey.
             Bool("LoseLoadOnApproach", !r.beats[0].Second);
+            Bool("CiviliansAtCentre", r.place.civilians);
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
             return 0;

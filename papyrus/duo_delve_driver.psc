@@ -37,6 +37,9 @@ Message Property FailMessage Auto Const Mandatory
 FormList Property CivilianList Auto Const Mandatory
 {Who is at the centre waiting for the delivery. His ruling 2026-09-24: "the one with the delivery should
 have people there." Taken off the base driver's TargetCivListMembers, the list it already used.}
+Bool Property CiviliansAtCentre Auto Const Mandatory
+{Written by gen_delve from the recipe. Off when the delivery site already has its own people (a
+LocTypeOE_NonHostile site is populated by the encounter system; stacking ours on it is a crowd).}
 Int Property MinCivilians = 1 Auto Const
 Int Property MaxCivilians = 5 Auto Const
 Bool Property LoseLoadOnApproach Auto Const Mandatory
@@ -81,7 +84,7 @@ EndEvent
 
 ; The first approach to the centre, whatever beat the player is on. Fires once.
 Event OnDistanceLessThan(ObjectReference akObj1, ObjectReference akObj2, float afDistance, int aiEventID)
-    If !CiviliansPlaced
+    If !CiviliansPlaced && CiviliansAtCentre
         CiviliansPlaced = True
         PlaceCivilians()
     EndIf
