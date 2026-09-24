@@ -347,7 +347,7 @@ namespace FrankyCLI
             if (!issues.Any(i => i.Fatal) && r.beats.Count >= 2)
             {
                 Console.WriteLine();
-                Console.WriteLine("  separation, GAME UNITS (units-to-metres is NOT established; compare rows)");
+                Console.WriteLine("  separation, METRES (1 unit = 1 m, read off his HUD 2026-09-24)");
                 var want = new List<(string, string, string)>
                 {
                     ("THIS RECIPE", r.beats[0].at, r.beats[1].at),
@@ -566,17 +566,17 @@ namespace FrankyCLI
                 Console.WriteLine("    ⚠ cross-cell pairs are EXCLUDED from the rows below, not averaged in: positions are "
                                   + "cell-local, so subtracting across two cells gives a confident meaningless number.");
             Console.WriteLine();
-            // ⛔ NO METRE COLUMN. The first version printed one at ~70 units/m, which is the
-            // Skyrim/Fallout constant carried over on no evidence, and it produced a median of
-            // "1 metre" for a whole POI. The unit-to-metre conversion is NOT established for this
-            // engine and a fabricated precision beside a real measurement is worse than no column:
-            // the numbers below are comparable to EACH OTHER, which is all a marker choice needs.
+            // ⭐ THE UNITS ARE METRES, read 2026-09-24: duo_worldprobe put a MapMarker_LongRange at
+            // 196 in the same frame his HUD read 196M. The first version of this table printed a
+            // metre column at ~70 units/m, the Skyrim/Fallout constant carried over on no evidence,
+            // and called a whole POI one metre across. That column was deleted; this label is the
+            // fact that replaced it, from an instrument beside a known quantity.
             //
             // ⭐ HIS FACT, 2026-09-23, and it is what makes this table readable: THE TRAVEL MARKERS
             // ARE THE EDGES OF THE POI. So an edge-to-edge pair is the site's DIAMETER and an
             // edge-to-centre pair is its radius. The largest number here is the most separation a
             // single-POI Delve can ever have, by construction.
-            Console.WriteLine("  distance between beats, GAME UNITS (units-to-metres is NOT established; compare rows)");
+            Console.WriteLine("  distance between beats, METRES (1 unit = 1 m, read off his HUD 2026-09-24)");
             Console.WriteLine($"  {"pair",-52} {"n",5} {"min",9} {"p25",9} {"med",9} {"p75",9} {"max",9}");
             foreach (var kv in samples.OrderByDescending(s => Median(s.Value)))
             {
