@@ -1272,6 +1272,7 @@ namespace FrankyCLI
                 }
             }
             fail += WriteProse(clone, t, r);
+            SortStages(clone);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
@@ -1350,10 +1351,10 @@ namespace FrankyCLI
             foreach (var s in t.beatSlots.Select(s => s.journalStage).Distinct())
             {
                 if (clone.Stages!.Any(x => x.Index == s)) continue;
-                var st = new QuestStage { Index = (ushort)s };
-                st.LogEntries.Add(new QuestLogEntry());
+                var st = CloneStage(clone, s);
+                if (st == null) return 1;
                 clone.Stages.Add(st);
-                Console.WriteLine($"  +stage   : {s}");
+                Console.WriteLine($"  +stage   : {s} (cloned from a base stage)");
             }
 
             // --- the created marker (beat 3's) -----------------------------------------------------------
@@ -1564,12 +1565,42 @@ namespace FrankyCLI
             // pass to discover missing.
             if (q.Stages!.Any(s => s.Index == stage))
             { Console.WriteLine($"REFUSED: stage {stage} already exists on this base; extra-beat numbering collides."); return null; }
-            var st = new QuestStage { Index = (ushort)stage };
-            st.LogEntries.Add(new QuestLogEntry());
+            var st = CloneStage(q, stage);
+            if (st == null) return null;
             q.Stages.Add(st);
 
             Console.WriteLine($"  +slot    : beat {index + 1} created -- marker alias {mid}, activator {aid}, stage {stage}");
             return new BeatSlot { markerAlias = (int)mid, activatorAlias = (int)aid, objective = -1, journalStage = stage };
+        }
+
+        /// <summary>
+        /// A NEW STAGE IS A CLONE OF ONE THAT WORKS, never constructed. His xEdit, 2026-09-24: every
+        /// created stage was written as INDX + CNAM only, because a fresh QuestLogEntry has no flags and
+        /// Mutagen writes nothing for a field that was never set. The base's stages are INDX, QSDT,
+        /// CNAM, QSRD, QSRD. xEdit lost its place at the first bare CNAM and read every objective and
+        /// alias after it as "unexpected", so the record showed empty. Same argument as AddBeatSlot's
+        /// alias clone: copying a working stage brings every field this tool does not know exists.
+        /// The source is a plain journal stage that does NOT complete the quest; its text is cleared
+        /// so it cannot leak the base's journal line.
+        /// </summary>
+        private static QuestStage? CloneStage(Quest q, int index)
+        {
+            var src = q.Stages?.OrderBy(x => x.Index)
+                .FirstOrDefault(x => x.Index != 0 && x.LogEntries.Count == 1 && x.LogEntries[0].Flags != null
+                                     && !x.LogEntries[0].Flags!.Value.HasFlag(QuestLogEntry.Flag.CompleteQuest));
+            if (src == null) { Console.WriteLine("REFUSED: the base has no plain journal stage to clone a new one from."); return null; }
+            var st = src.DeepCopy();
+            st.Index = (ushort)index;
+            st.LogEntries[0].Entry = null;
+            return st;
+        }
+
+        /// <summary>Stages in ascending index order, as every shipped quest writes them.</summary>
+        private static void SortStages(Quest q)
+        {
+            var sorted = q.Stages!.OrderBy(x => x.Index).ToList();
+            q.Stages.Clear();
+            q.Stages.AddRange(sorted);
         }
 
         private static IEnumerable<(uint id, string name)> Flatten(IAQuestAliasGetter a)
@@ -1739,6 +1770,12 @@ namespace FrankyCLI
                 }
             }
             fail += Check("name rewritten", (q.Name?.String ?? "") == Expand(r.prose.name!, t) ? "yes" : "no", "yes");
+            // The two defects his xEdit found and every check above passed over: a stage whose log
+            // entry has no flags (no QSDT on disk) and stages out of index order.
+            var idx = q.Stages?.Select(x => (int)x.Index).ToList() ?? new List<int>();
+            fail += Check("stages in ascending order", string.Join(",", idx), string.Join(",", idx.OrderBy(x => x)));
+            var bare = q.Stages?.Where(x => x.LogEntries.Any(le => le.Flags == null)).Select(x => x.Index.ToString()).ToList() ?? new List<string>();
+            fail += Check("every stage's log entry has flags (QSDT)", bare.Count == 0 ? "yes" : "no: " + string.Join(",", bare), "yes");
 
             if (t.kind == "delve4")
             {
