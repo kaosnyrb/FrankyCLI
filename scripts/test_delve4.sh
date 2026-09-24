@@ -71,5 +71,8 @@ run REFUSE "is already the name of" "an item named exactly like a vanilla record
 mut badmodel 'r["items"]["crateModel"] = "Meshes/NoSuch/Crate.nif"'
 run REFUSE "is used by no record in the load order" "a crate model nothing ships" "$TMP/badmodel.json"
 
+mut tokname 'r["items"]["centreName"] = "Reclaimer at the <Place>"'
+run REFUSE "items.centreName carries a <Token>" "a token in the delivery point name" "$TMP/tokname.json"
+
 echo "================ $fails failing case(s) ================"
 exit $fails
