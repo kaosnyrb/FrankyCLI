@@ -34,9 +34,9 @@
     "_civilians": "Off: a NonHostile site brings its own people. The carrier's gang is kept, his call: the friendly site gets hit."
   },
   "prose": {
-    "name": "Finish the Delivery to the <Place>",
+    "name": "Hauling: Water Reclaimer on <Planet>",
     "briefing": "The <Place> is waiting on a reclaimer housing that was signed out to them and never arrived. I should find where the crate stopped.",
-    "_prose": "Rewritten 2026-09-26 against the vanilla style guide (home-office office/projects/bethesda/33-vanilla-quest-text-style.md). Title: vanilla board shape, imperative, no colon, HIS pick over the Overtime colon pattern ('vanilla and yeah that reads better'). Briefing is the first JOURNAL entry, so it is first person like vanilla's journal. The board posting Jessica wrote (Local Contract / we / Payment on delivery) has NO slot here: MissionBoardDescription is copied from the base clone. Eliza's."
+    "_prose": "Rewritten 2026-09-26 against the vanilla style guide (home-office office/projects/bethesda/33-vanilla-quest-text-style.md). This is an ARTIFACT (treasure-map) Delve, his 16:12: 'we'll have both kinds, we've just started on the treasure map (named Artifact in overtime)'. So the title takes the artifact family's shape, Category: thing on <Planet>, which is vanilla's own for this system (slates named 'Report: Abandoned X Shipment') and his base's ('Hauling: Goods Package on <Planet>'). It reads as a plain haul until the core is found missing. Board-kind Delves take the board shape instead. Briefing is the first JOURNAL entry, first person."
   },
   "items": {
     "load": "Reclaimer Housing (1 of 2)",
