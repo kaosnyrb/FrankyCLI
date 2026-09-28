@@ -12,19 +12,21 @@ namespace FrankyCLI
     // must resolve before anything is removed, so a typo can never write half a deletion.
     //
     //   removerecord <modname> <type> <editorid>[,<editorid>...]
-    //   types: mstt sntp gbfm cobj flst pkin
+    //   types: mstt sntp gbfm cobj flst pkin stat cell
     //
     // The case it was written for: retiring a dead flip system (rule 4 -- dead records come out
     // in the same change that orphans them) and pruning the per-orientation COBJs when a family
-    // regroups into a FormList set. CELL is deliberately NOT supported -- cells live in the
-    // CellBlock/SubBlock tree keyed off their own FormID digits, and removing one safely means
-    // removing its placed contents with it; that is a bigger job than a flat group delete and
-    // pretending otherwise here would corrupt quietly. If a retirement needs cells gone, say so
-    // and it gets built properly.
+    // regroups into a FormList set.
     //
-    // NOTE: this does not check inbound references. A record still referenced elsewhere in the
-    // plugin will leave a dangling link -- run gen_inspect on the family first and remove
-    // leaf-first (COBJ/FLST before GBFM before MSTT/SNTP).
+    // CELL (added 2026-09-28, retiring the half-size hab_01): a cell is found in the
+    // CellBlock/SubBlock tree and removed WITH its placed contents, which are its children in the
+    // record tree. It is meant for PackIn STORAGE cells, the only cells this line authors.
+    //
+    // THE INBOUND GUARD (same day): before writing, every surviving record's FormLinks are walked,
+    // and if any points at a removed record -- or at a placed object inside a removed cell -- the
+    // tool refuses and writes NOTHING. So order is enforced rather than remembered: remove
+    // leaf-first (COBJ/FLST, then GBFM, then PKIN, then its CELL, then MSTT/STAT/SNTP), and a
+    // wrong order is a printed refusal, never a dangling link.
     class gen_removerecord
     {
         public static int Generate(string[] args)
@@ -33,7 +35,7 @@ namespace FrankyCLI
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: removerecord <modname> <type> <editorid>[,<editorid>...]");
-                Console.WriteLine("types: mstt sntp gbfm cobj flst pkin   (cell deliberately unsupported)");
+                Console.WriteLine("types: mstt sntp gbfm cobj flst pkin stat cell");
                 return 1;
             }
             string modname = args[0];
@@ -73,8 +75,17 @@ namespace FrankyCLI
                     case "cobj": group = _ => myMod.ConstructibleObjects; remove = k => myMod.ConstructibleObjects.Remove(k); break;
                     case "flst": group = _ => myMod.FormLists; remove = k => myMod.FormLists.Remove(k); break;
                     case "pkin": group = _ => myMod.PackIns; remove = k => myMod.PackIns.Remove(k); break;
+                    case "stat": group = _ => myMod.Statics; remove = k => myMod.Statics.Remove(k); break;
+                    case "cell":
+                        group = _ => myMod.Cells.Records.SelectMany(b => b.SubBlocks).SelectMany(sb => sb.Cells);
+                        remove = k =>
+                        {
+                            foreach (var sb in myMod.Cells.Records.SelectMany(b => b.SubBlocks))
+                                sb.Cells.RemoveAll(c => c.FormKey == k);
+                        };
+                        break;
                     default:
-                        Console.WriteLine($"Error: unknown type '{type}' (mstt sntp gbfm cobj flst pkin)");
+                        Console.WriteLine($"Error: unknown type '{type}' (mstt sntp gbfm cobj flst pkin stat cell)");
                         return 1;
                 }
 
@@ -91,11 +102,34 @@ namespace FrankyCLI
                     }
                     doomed.Add(rec);
                 }
+                // Everything that leaves: the named records, plus a removed cell's placed children.
+                var gone = new HashSet<FormKey>();
                 foreach (var rec in doomed)
-                {
+                    foreach (var r in rec.EnumerateMajorRecords())
+                        gone.Add(r.FormKey);
+                foreach (var rec in doomed) gone.Add(rec.FormKey);
+
+                foreach (var rec in doomed)
                     remove(rec.FormKey);
-                    Console.WriteLine($"  removed {type} {rec.EditorID} [{rec.FormKey}]");
+
+                // The inbound guard: refuse the write if anything that survives still links to what left.
+                var dangling = new List<string>();
+                foreach (var rec in myMod.EnumerateMajorRecords())
+                {
+                    if (gone.Contains(rec.FormKey)) continue;
+                    foreach (var link in rec.EnumerateFormLinks())
+                        if (!link.IsNull && gone.Contains(link.FormKey))
+                            dangling.Add($"{rec.EditorID ?? "(no EditorID)"} [{rec.FormKey}] -> {link.FormKey}");
                 }
+                if (dangling.Count > 0)
+                {
+                    Console.WriteLine($"REFUSED -- {dangling.Count} surviving link(s) point at what would be removed; nothing written:");
+                    foreach (var d in dangling.Distinct().Take(20)) Console.WriteLine("  " + d);
+                    return 1;
+                }
+                foreach (var rec in doomed)
+                    Console.WriteLine($"  removed {type} {rec.EditorID} [{rec.FormKey}]");
+                Console.WriteLine($"  inbound guard: 0 surviving links into {gone.Count} removed record(s)");
             }
 
             foreach (var rec in myMod.EnumerateMajorRecords())
