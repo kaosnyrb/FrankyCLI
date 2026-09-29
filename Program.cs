@@ -223,6 +223,7 @@ switch (mode)
     case "setname":
     case "setlightlayer":
     case "setcargo":
+    case "copymodule":
     case "setmass":
     case "setfuel":
     case "setshield":
@@ -425,6 +426,7 @@ static int RunLegacy(string mode, string[] args)
         "setname"            => gen_setname.Generate(arr),
         "setlightlayer"      => gen_setlightlayer.Generate(arr),
         "setcargo"           => gen_setcargo.Generate(arr),
+        "copymodule"         => gen_copymodule.Generate(arr),
         "setmass"            => gen_setmass.Generate(arr),
         "setfuel"            => gen_setfuel.Generate(arr),
         "setshield"          => gen_setshield.Generate(arr),
