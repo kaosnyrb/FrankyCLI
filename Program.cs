@@ -258,6 +258,7 @@ switch (mode)
     case "queststage":
     case "removerecord":
     case "setdesc":
+    case "setsortorder":
     case "copyswap":
         Console.WriteLine($"Legacy mode '{mode}' — pass all original args including modname:");
         Console.WriteLine($"  FrankyCLI {mode} <modname> <prefix> <item> [modelpath] ...");
@@ -461,6 +462,7 @@ static int RunLegacy(string mode, string[] args)
         "queststage"         => gen_queststage.Generate(arr),
         "removerecord"       => gen_removerecord.Generate(arr),
         "setdesc"            => gen_setdesc.Generate(arr),
+        "setsortorder"       => gen_setsortorder.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),
         "placedecals"        => gen_placedecals.Generate(arr),
