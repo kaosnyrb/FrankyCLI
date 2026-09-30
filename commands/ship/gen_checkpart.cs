@@ -298,12 +298,34 @@ namespace FrankyCLI
                     // name: a name that matches nothing in the link set is still ignored.
                     IGenericBaseFormGetter? gbfm = null;
                     int gbfmCandidates = 0;
+                    var candidatesOut = new List<object?>();
                     if (pkin != null && gbfmsByLinkedForm.TryGetValue(pkin.FormKey, out var gcands))
                     {
                         gbfmCandidates = gcands.Count;
                         gbfm = gcands.Count == 1
                             ? gcands[0]
                             : gcands.FirstOrDefault(g => Eid(g.EditorID, prefix + "_gbfm_" + part)) ?? gcands[0];
+                        // Every GBFM on this PackIn, with the ActorValue EditorIDs on its property
+                        // sheet, reported as raw facts. check_part.py judges which of them is a
+                        // DECORATIVE TWIN (a sheet of mass + variant only, 01 § the decorative twin);
+                        // this only says what each one carries.
+                        foreach (var g in gcands)
+                        {
+                            var props = new List<string?>();
+                            foreach (var comp in g.Components)
+                                if (comp is IPropertySheetComponentGetter ps && ps.Properties != null)
+                                    foreach (var p in ps.Properties)
+                                    {
+                                        cache.TryResolveIdentifier(p.ActorValue.FormKey, out var av);
+                                        props.Add(av ?? p.ActorValue.FormKey.ToString());
+                                    }
+                            candidatesOut.Add(new Dictionary<string, object?>
+                            {
+                                ["editorId"] = g.EditorID,
+                                ["formKey"] = g.FormKey.ToString(),
+                                ["properties"] = props,
+                            });
+                        }
                     }
 
                     // ⛔ packInRef USED TO KEEP ONLY THE LAST LINK, and a bay carries TWO
@@ -336,7 +358,8 @@ namespace FrankyCLI
                         ("nameMatchesConvention", Eid(gbfm?.EditorID, prefix + "_gbfm_" + part)),
                         // >1 means several GBFMs link this PackIn (the decorative-twin shape). The
                         // convention name broke the tie; check_part.py should say so out loud.
-                        ("gbfmCandidateCount", gbfmCandidates));
+                        ("gbfmCandidateCount", gbfmCandidates),
+                        ("gbfmCandidates", candidatesOut));
 
                     // COBJ: the one that CREATES this GBFM.
                     var cobj = gbfm == null ? null
