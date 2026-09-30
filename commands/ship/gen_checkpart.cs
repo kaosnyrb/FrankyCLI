@@ -155,22 +155,65 @@ namespace FrankyCLI
                     outp["masterType"] = masterType;
                     outp["masterFlags"] = ft;
 
-                    // MoveableStatic -- found by the "_ms_<item>" suffix so <prefix> is read, not passed
-                    string msttSuffix = "_ms_" + part;
-                    var mstt = mod.MoveableStatics.FirstOrDefault(
-                        m => m.EditorID != null && m.EditorID.EndsWith(msttSuffix, StringComparison.OrdinalIgnoreCase));
+                    // ================= THE PART IS FOUND BY THE NIF IT USES =================
+                    //
+                    // ⛔ WHAT THIS REPLACED, 2026-09-30: the MoveableStatic was the last hop still
+                    // found by COMPOSING a name ("_ms_" + item), the 09-15 walk having fixed every
+                    // other one. It missed atsd_ms_gear01mod (the item is gear_01_module) and had no
+                    // word for a DOOR, whose base is not a MoveableStatic at all, so both reported
+                    // "no MoveableStatic" over records that exist and work in game.
+                    //
+                    // check_part.py keys a part on its NIF, <prefix>_<item>.nif, so the join is
+                    // the record whose Model.File IS that file. The prefix is read off the NIF's
+                    // name, and the MSTT's EditorID drops to a reported fact like every other node.
+                    // A record that matches by NAME but uses a different NIF is reported as its own
+                    // fact, never taken as the answer: that disagreement is exactly what a silent
+                    // name fallback would hide.
+                    static string NifStem(string? path) =>
+                        path == null ? "" : System.IO.Path.GetFileNameWithoutExtension(path.Replace('\\', '/'));
+                    bool UsesPartNif(IModelGetter? m) =>
+                        NifStem(m?.File?.GivenPath).EndsWith("_" + part, StringComparison.OrdinalIgnoreCase);
+
+                    var byModel = mod.MoveableStatics.Where(m => UsesPartNif(m.Model)).ToList();
                     var msttOut = new Dictionary<string, object?>();
                     outp["mstt"] = msttOut;
+                    msttOut["candidates"] = byModel.Select(m => m.EditorID).ToList();
+                    // ⚠ SEVERAL RECORDS MAY SHARE ONE NIF BY DESIGN: the static lander
+                    // atsd_ms_wing05gear_port wears the wing's own mesh. The tie breaks on the
+                    // convention name, as the GBFM tie below does for the decorative twin, and the
+                    // candidates list stays in the output so the pick is never silent. With no
+                    // convention-named candidate there is nothing honest to pick: not found.
+                    string stemPrefix(IMoveableStaticGetter m)
+                    {
+                        string s = NifStem(m.Model?.File?.GivenPath);
+                        return s.Substring(0, s.Length - ("_" + part).Length);
+                    }
+                    var mstt = byModel.Count == 1 ? byModel[0]
+                             : byModel.FirstOrDefault(m => Eid(m.EditorID, stemPrefix(m) + "_ms_" + part));
                     if (mstt == null)
                     {
                         msttOut["found"] = false;
-                        outp["ok"] = true;                 // ran fine; the part just isn't there
+                        // What DOES use the NIF, when a MoveableStatic does not. A door is a part
+                        // with a different base type, not a missing one.
+                        var door = mod.Doors.FirstOrDefault(d => UsesPartNif(d.Model));
+                        if (door != null)
+                            outp["otherBase"] = Node(door.EditorID, door.FormKey, ("kind", "DOOR"),
+                                                     ("modelFile", door.Model?.File?.GivenPath));
+                        var byName = mod.MoveableStatics.FirstOrDefault(m => m.EditorID != null &&
+                            m.EditorID.EndsWith("_ms_" + part, StringComparison.OrdinalIgnoreCase));
+                        if (byName != null)
+                            outp["nameMatchUsesOtherNif"] = Node(byName.EditorID, byName.FormKey,
+                                                                 ("modelFile", byName.Model?.File?.GivenPath));
+                        outp["ok"] = true;                 // ran fine; the facts say what is there
                         return outp;
                     }
+                    string nifStem = NifStem(mstt.Model?.File?.GivenPath);
+                    string prefix = nifStem.Substring(0, nifStem.Length - ("_" + part).Length);
                     msttOut["found"] = true;
                     msttOut["editorId"] = mstt.EditorID;
                     msttOut["formKey"] = mstt.FormKey.ToString();
-                    string prefix = mstt.EditorID!.Substring(0, mstt.EditorID.Length - msttSuffix.Length);
+                    msttOut["expectedEditorId"] = prefix + "_ms_" + part;
+                    msttOut["nameMatchesConvention"] = Eid(mstt.EditorID, prefix + "_ms_" + part);
 
                     var model = mstt.Model;
                     msttOut["modelFile"] = model?.File?.GivenPath;
