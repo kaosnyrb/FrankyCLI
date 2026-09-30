@@ -269,7 +269,11 @@ def cmd_solve(a):
         if not plan:
             print(f"CONVERGED after {n} render(s).")
             if blank:
-                print("  blank (renders nothing -- a mesh/model problem, not framing):", ", ".join(blank))
+                # Not framing: a blank renders nothing at ANY camera. On Stardust (2026-09-30) all 10
+                # blanks, and 4 magenta icons, were assets packed in the .ba2 but never deployed
+                # LOOSE -- the CK renders its preview from loose files. Deploy, then re-solve.
+                print("  blank (renders nothing -- check the part's textures/.mat are deployed LOOSE):",
+                      ", ".join(blank))
             return 0
         write_plan(a.modname, plan)
     print(f"NOT converged after {a.passes} passes -- the last pass was written; re-run to continue.")
