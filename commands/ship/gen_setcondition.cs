@@ -19,7 +19,7 @@ namespace FrankyCLI
     //
     // WHY THIS EXISTS. Nothing in this tool could author a COBJ condition, so every Stardust
     // part is buildable from level 1 with no requirement of any kind -- verified on our own
-    // atsd_co_reactor_01, which carries NO conditions at all. gen_shipstruct sets
+    // atsd_co_reactor_01 (now atsd_co_linesman_64), which carried NO conditions then. gen_shipstruct sets
     // LearnMethod = DefaultOrConditions and then writes nothing for those conditions to be.
     // His ask 2026-08-17: "level/perk gated versions".
     //

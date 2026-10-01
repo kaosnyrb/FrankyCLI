@@ -12,7 +12,7 @@ namespace FrankyCLI
     // Add (or remove) keywords on GenericBaseForms -- or PackIns -- that already exist, FormID-stable.
     //
     //   setkeyword <modname> <gbfm|pkin>[,...] <Keyword|0xFORMID>[,...] [--remove]
-    //   e.g. setkeyword avontechstardust atsd_gbfm_reactor_01 ShipModuleClassA,ShipDestructionCanModuleVaporizeKeyword
+    //   e.g. setkeyword avontechstardust atsd_gbfm_linesman_64 ShipModuleClassA,ShipDestructionCanModuleVaporizeKeyword
     //        setkeyword avontechstardust atsd_pkn_docker_port SBShip_DockingHatch
     //
     // PACKINS, added 2026-09-16. A docker's PackIn must carry SBShip_DockingHatch (and a
