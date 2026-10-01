@@ -58,46 +58,26 @@ namespace FrankyCLI
                 return 1;
             }
 
-            StarfieldMod myMod;
-            string datapath;
             int changed = 0;
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            using var session = PluginSession.Open(modname);
+            if (session == null) return 1;
+            var myMod = session.Mod;
+
+            var missing = wanted.Where(w => !myMod.ConstructibleObjects.Any(
+                c => string.Equals(c.EditorID, w.edid, StringComparison.OrdinalIgnoreCase))).Select(w => w.edid).ToList();
+            if (missing.Count > 0)
             {
-                datapath = env.DataFolderPath;
-                if (!env.LoadOrder.ModExists(new ModKey(modname, ModType.Master)))
-                {
-                    Console.WriteLine($"Error: {modname}.esm is not in the load order");
-                    return 1;
-                }
-                ModPath modPath = System.IO.Path.Combine(datapath, modname + ".esm");
-                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                gen_quest_main.FixNextFormId(myMod);
-
-                var missing = wanted.Where(w => !myMod.ConstructibleObjects.Any(
-                    c => string.Equals(c.EditorID, w.edid, StringComparison.OrdinalIgnoreCase))).Select(w => w.edid).ToList();
-                if (missing.Count > 0)
-                {
-                    Console.WriteLine($"Error: no ConstructibleObject in {modname}: {string.Join(", ", missing)} -- nothing written");
-                    return 1;
-                }
-
-                foreach (var (edid, value) in wanted)
-                {
-                    var existing = myMod.ConstructibleObjects.First(
-                        c => string.Equals(c.EditorID, edid, StringComparison.OrdinalIgnoreCase));
-                    if (existing.Value == value)
-                    {
-                        Console.WriteLine($"  {edid}: already {value} -- left as is");
-                        continue;
-                    }
-                    Console.WriteLine($"  {edid}: {existing.Value} -> {value}");
-                    var cobj = existing.DeepCopy();
-                    cobj.Value = value;
-                    myMod.ConstructibleObjects.Remove(existing.FormKey);
-                    myMod.ConstructibleObjects.Add(cobj);
-                    changed++;
-                }
+                Console.WriteLine($"Error: no ConstructibleObject in {modname}: {string.Join(", ", missing)} -- nothing written");
+                return 1;
             }
+
+            foreach (var (edid, value) in wanted)
+            {
+                var existing = myMod.ConstructibleObjects.First(
+                    c => string.Equals(c.EditorID, edid, StringComparison.OrdinalIgnoreCase));
+                if (Apply(myMod, existing, value)) changed++;
+            }
+            session.Close();
 
             if (dry)
             {
@@ -109,11 +89,28 @@ namespace FrankyCLI
                 Console.WriteLine("Nothing to write.");
                 return 0;
             }
-            foreach (var rec in myMod.EnumerateMajorRecords())
-                rec.IsCompressed = false;
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+            session.Write();
             Console.WriteLine($"Finished -- {changed} record(s) updated, FormIDs unchanged.");
             return 0;
+        }
+
+        /// <summary>
+        /// The CORE: set one recipe's price on an already-loaded plugin. True when it changed.
+        /// Shared by this command and `batch`; the caller validates and owns the load and write.
+        /// </summary>
+        public static bool Apply(StarfieldMod myMod, IConstructibleObjectGetter existing, uint value)
+        {
+            if (existing.Value == value)
+            {
+                Console.WriteLine($"  {existing.EditorID}: already {value} -- left as is");
+                return false;
+            }
+            Console.WriteLine($"  {existing.EditorID}: {existing.Value} -> {value}");
+            var cobj = existing.DeepCopy();
+            cobj.Value = value;
+            myMod.ConstructibleObjects.Remove(existing.FormKey);
+            myMod.ConstructibleObjects.Add(cobj);
+            return true;
         }
     }
 }

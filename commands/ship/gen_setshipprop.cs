@@ -79,97 +79,89 @@ namespace FrankyCLI
                 return 1;
             }
 
-            StarfieldMod myMod;
-            string datapath;
             int changed = 0;
+            using var session = PluginSession.Open(modname);
+            if (session == null) return 1;
+            var myMod = session.Mod;
 
-            // env holds the plugin open, so it is scoped to close BEFORE the write -- a
-            // same-path WriteToBinary inside the using throws and leaves the old bytes looking
-            // like a persisted no-op.
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            // Validate EVERY target before mutating anything. A lookup that fails halfway
+            // leaves a partly-patched plugin -- the exact defect that bit conform, which
+            // printed a success line over an untouched disk.
+            var found = new List<IGenericBaseFormGetter>();
+            foreach (var target in targets)
             {
-                datapath = env.DataFolderPath;
-
-                ModKey modKey = new ModKey(modname, ModType.Master);
-                if (!env.LoadOrder.ModExists(modKey))
+                var existing = myMod.GenericBaseForms.FirstOrDefault(
+                    g => string.Equals(g.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
                 {
-                    Console.WriteLine($"Error: {modname}.esm is not in the load order");
+                    Console.WriteLine($"Error: no GenericBaseForm '{target}' in {modname}");
                     return 1;
                 }
-                ModPath modPath = System.IO.Path.Combine(datapath, modname + ".esm");
-                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                gen_quest_main.FixNextFormId(myMod);
-
-                var sfKey = env.LoadOrder[0].ModKey;
-
-                // Validate EVERY target before mutating anything. A lookup that fails halfway
-                // leaves a partly-patched plugin -- the exact defect that bit conform, which
-                // printed a success line over an untouched disk.
-                var found = new List<IGenericBaseFormGetter>();
-                foreach (var target in targets)
-                {
-                    var existing = myMod.GenericBaseForms.FirstOrDefault(
-                        g => string.Equals(g.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                    if (existing == null)
-                    {
-                        Console.WriteLine($"Error: no GenericBaseForm '{target}' in {modname}");
-                        return 1;
-                    }
-                    found.Add(existing);
-                }
-
-                foreach (var existing in found)
-                {
-                    var gbfm = ((IGenericBaseFormGetter)existing).DeepCopy();
-                    var sheet = gbfm.Components.OfType<PropertySheetComponent>().FirstOrDefault();
-                    if (sheet == null)
-                    {
-                        Console.WriteLine($"Error: {gbfm.EditorID} has no PropertySheet -- refusing to invent one");
-                        return 1;
-                    }
-
-                    var key = new FormKey(sfKey, actorValue);
-                    var prop = sheet.Properties.FirstOrDefault(p => p.ActorValue.FormKey == key);
-                    if (prop != null)
-                    {
-                        if (Math.Abs(prop.Value - value) < 0.0001f)
-                        {
-                            Console.WriteLine($"  {gbfm.EditorID}: {propName} already {value} -- left as is");
-                            continue;
-                        }
-                        Console.WriteLine($"  {gbfm.EditorID}: {propName} {prop.Value} -> {value}");
-                        prop.Value = value;
-                    }
-                    else
-                    {
-                        // An add and an update are different events; the caller should be able
-                        // to tell them apart from the output alone.
-                        Console.WriteLine($"  {gbfm.EditorID}: + {propName} = {value}  (was absent)");
-                        sheet.Properties.Add(new ObjectProperty()
-                        {
-                            ActorValue = key.ToNullableLink<IActorValueInformationGetter>(),
-                            Value = value,
-                        });
-                    }
-
-                    myMod.GenericBaseForms.Remove(existing.FormKey);
-                    myMod.GenericBaseForms.Add(gbfm);
-                    changed++;
-                }
+                found.Add(existing);
             }
+
+            var key = new FormKey(session.SfKey, actorValue);
+            foreach (var existing in found)
+            {
+                var r = Set(myMod, existing, key, propName, value);
+                if (r == null) return 1;
+                if (r == true) changed++;
+            }
+            session.Close();
 
             if (changed == 0)
             {
                 Console.WriteLine("Nothing to write.");
                 return 0;
             }
-
-            foreach (var rec in myMod.EnumerateMajorRecords())
-                rec.IsCompressed = false;
-
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+            session.Write();
             Console.WriteLine($"Finished -- {changed} GenericBaseForm(s) patched, FormIDs unchanged.");
             return 0;
+        }
+
+        /// <summary>
+        /// The CORE: set (or add) one property on one GBFM's PropertySheet, on an already-loaded
+        /// plugin. True = changed, false = already at the value, null = refused (printed).
+        /// Shared by every ShipProp verb and by `batch`; the caller validates and owns load/write.
+        /// It never INVENTS a sheet: a GBFM with no PropertySheet is refused, not given one.
+        /// </summary>
+        public static bool? Set(StarfieldMod myMod, IGenericBaseFormGetter existing, FormKey key,
+                                string propName, float value)
+        {
+            var gbfm = existing.DeepCopy();
+            var sheet = gbfm.Components.OfType<PropertySheetComponent>().FirstOrDefault();
+            if (sheet == null)
+            {
+                Console.WriteLine($"Error: {gbfm.EditorID} has no PropertySheet -- refusing to invent one");
+                return null;
+            }
+
+            var prop = sheet.Properties.FirstOrDefault(p => p.ActorValue.FormKey == key);
+            if (prop != null)
+            {
+                if (Math.Abs(prop.Value - value) < 0.0001f)
+                {
+                    Console.WriteLine($"  {gbfm.EditorID}: {propName} already {value} -- left as is");
+                    return false;
+                }
+                Console.WriteLine($"  {gbfm.EditorID}: {propName} {prop.Value} -> {value}");
+                prop.Value = value;
+            }
+            else
+            {
+                // An add and an update are different events; the caller should be able
+                // to tell them apart from the output alone.
+                Console.WriteLine($"  {gbfm.EditorID}: + {propName} = {value}  (was absent)");
+                sheet.Properties.Add(new ObjectProperty()
+                {
+                    ActorValue = key.ToNullableLink<IActorValueInformationGetter>(),
+                    Value = value,
+                });
+            }
+
+            myMod.GenericBaseForms.Remove(existing.FormKey);
+            myMod.GenericBaseForms.Add(gbfm);
+            return true;
         }
     }
 
