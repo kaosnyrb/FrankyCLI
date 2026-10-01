@@ -12,7 +12,7 @@ namespace FrankyCLI
     // must resolve before anything is removed, so a typo can never write half a deletion.
     //
     //   removerecord <modname> <type> <editorid>[,<editorid>...]
-    //   types: mstt sntp gbfm cobj flst pkin stat cell
+    //   types: mstt sntp gbfm cobj flst pkin stat cell kywd
     //
     // The case it was written for: retiring a dead flip system (rule 4 -- dead records come out
     // in the same change that orphans them) and pruning the per-orientation COBJs when a family
@@ -35,7 +35,7 @@ namespace FrankyCLI
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: removerecord <modname> <type> <editorid>[,<editorid>...]");
-                Console.WriteLine("types: mstt sntp gbfm cobj flst pkin stat cell");
+                Console.WriteLine("types: mstt sntp gbfm cobj flst pkin stat cell kywd");
                 return 1;
             }
             string modname = args[0];
@@ -76,6 +76,10 @@ namespace FrankyCLI
                     case "flst": group = _ => myMod.FormLists; remove = k => myMod.FormLists.Remove(k); break;
                     case "pkin": group = _ => myMod.PackIns; remove = k => myMod.PackIns.Remove(k); break;
                     case "stat": group = _ => myMod.Statics; remove = k => myMod.Statics.Remove(k); break;
+                    // kywd 2026-10-01: the engine upgrade chains came out on his ruling (the upgrade screen
+                    // cannot change variant, so an inline Stoker upgraded to a rear one breaks the save). The
+                    // inbound guard refuses while any record still carries the keyword: unstamp first.
+                    case "kywd": group = _ => myMod.Keywords; remove = k => myMod.Keywords.Remove(k); break;
                     case "cell":
                         group = _ => myMod.Cells.Records.SelectMany(b => b.SubBlocks).SelectMany(sb => sb.Cells);
                         remove = k =>
@@ -85,7 +89,7 @@ namespace FrankyCLI
                         };
                         break;
                     default:
-                        Console.WriteLine($"Error: unknown type '{type}' (mstt sntp gbfm cobj flst pkin stat cell)");
+                        Console.WriteLine($"Error: unknown type '{type}' (mstt sntp gbfm cobj flst pkin stat cell kywd)");
                         return 1;
                 }
 
