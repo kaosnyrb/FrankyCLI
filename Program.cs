@@ -207,6 +207,11 @@ switch (mode)
         }
         return gen_catalogue.Generate(args);
 
+    // batch applies an end-state plan (ladder_plan.json) in one load and one write.
+    case "batch":
+        if (args.Length < 3) { Console.WriteLine("Usage: batch <modname> <plan.json> [--built-only] [--dry]"); return 1; }
+        return RunLegacy(mode, args);
+
     // Legacy ship generators (keep original arg layout)
     case "struct":
     case "flip":
@@ -468,6 +473,7 @@ static int RunLegacy(string mode, string[] args)
         "setdesc"            => gen_setdesc.Generate(arr),
         "setsortorder"       => gen_setsortorder.Generate(arr),
         "setvalue"           => gen_setvalue.Generate(arr),
+        "batch"              => gen_batch.Generate(arr),
         "seticontransform"   => gen_seticontransform.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),

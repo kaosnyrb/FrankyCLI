@@ -147,7 +147,7 @@ namespace FrankyCLI
             return null;
         }
 
-        private static ModuleInfo Describe(IGenericBaseFormGetter g)
+        internal static ModuleInfo Describe(IGenericBaseFormGetter g)
         {
             var m = new ModuleInfo { EditorId = g.EditorID ?? "(none)", FormKey = g.FormKey.ToString() };
             if (g.Components == null) return m;
@@ -167,7 +167,7 @@ namespace FrankyCLI
         /// EditorID: the vanilla `_lvlNN` label and the real GetLevel value disagree by four on
         /// at least one shipped record, so the label is not the gate.
         /// </summary>
-        private static string? LevelGate(IConstructibleObjectGetter co)
+        internal static string? LevelGate(IConstructibleObjectGetter co)
         {
             if (co.Conditions == null) return null;
             foreach (var cond in co.Conditions)
@@ -192,7 +192,7 @@ namespace FrankyCLI
             return null;
         }
 
-        private static string Name(FormKey k, ILinkCache cache)
+        internal static string Name(FormKey k, ILinkCache cache)
         {
             if (k.IsNull) return "-";
             if (cache.TryResolve<IStarfieldMajorRecordGetter>(k, out var rec) && !string.IsNullOrEmpty(rec.EditorID))
@@ -301,7 +301,7 @@ namespace FrankyCLI
             Console.WriteLine(JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }));
         }
 
-        private class ModuleInfo
+        internal class ModuleInfo
         {
             public string EditorId = "";
             public string FormKey = "";
