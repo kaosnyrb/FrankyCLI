@@ -93,6 +93,8 @@ namespace FrankyCLI
                                  .Select(f => Name(f.FormKey, cache)).ToList(),
                     LevelGate = LevelGate(co),
                     CreatedObject = Name(co.CreatedObject.FormKey, cache),
+                    RequiredPerks = (co.RequiredPerks ?? Enumerable.Empty<IConstructibleRequiredPerkGetter>())
+                                    .Select(p => $"{Name(p.Perk.FormKey, cache)}:{p.Rank}").ToList(),
                 };
 
                 // CreatedObject is either a module directly, or a FormList of the flip-set.
@@ -154,6 +156,8 @@ namespace FrankyCLI
                 if (c is IFullNameComponentGetter fn) m.FullName = fn.Name?.ToString() ?? "";
                 else if (c is IKeywordFormComponentGetter kw && kw.Keywords != null)
                     foreach (var k in kw.Keywords) m.KeywordKeys.Add(k.FormKey);
+                else if (c is IPropertySheetComponentGetter ps && ps.Properties != null)
+                    foreach (var p in ps.Properties) m.Props.Add((p.ActorValue.FormKey, p.Value));
             }
             return m;
         }
@@ -272,7 +276,7 @@ namespace FrankyCLI
                 recipes = recipes.Select(r => new
                 {
                     r.EditorId, r.FormKey, r.Description, r.Value, r.MenuSortOrder,
-                    r.Workbench, r.Categories, r.LevelGate, r.CreatedObject, r.CreatedKind,
+                    r.Workbench, r.Categories, r.LevelGate, r.RequiredPerks, r.CreatedObject, r.CreatedKind,
                     members = r.Members.Select(m => new
                     {
                         editorId = Name(m, cache),
@@ -281,6 +285,14 @@ namespace FrankyCLI
                         position = modules.TryGetValue(m, out var m3) ? m3.Keyword(cache, "ShipModPosition") : null,
                         moduleClass = modules.TryGetValue(m, out var m4) ? m4.Keyword(cache, "ShipModuleClass") : null,
                         sortKey = modules.TryGetValue(m, out var m5) ? m5.SortKey(cache) : null,
+                        // The whole PropertySheet, ActorValue EditorID -> value, so a readback can grade
+                        // the stats (and ShipModuleVariant, which lives here) without a second load.
+                        // A property the sheet does not carry is ABSENT, never 0: the sheet is sparse.
+                        // A LIST, not a map: a sheet carrying one property twice is a fact for the
+                        // reader to grade, and a map would either throw or silently keep one.
+                        props = modules.TryGetValue(m, out var m6)
+                            ? m6.Props.Select(p => new { av = Name(p.Av, cache), value = p.Value }).ToList()
+                            : null,
                     }).ToList(),
                 }).ToList(),
                 orphans = orphans.Select(k => Name(k, cache)).ToList(),
@@ -295,6 +307,7 @@ namespace FrankyCLI
             public string FormKey = "";
             public string FullName = "";
             public List<FormKey> KeywordKeys = new();
+            public List<(FormKey Av, float Value)> Props = new();
 
             public string? Keyword(ILinkCache cache, string prefix)
             {
@@ -327,6 +340,7 @@ namespace FrankyCLI
             public string Workbench = "";
             public List<string> Categories = new();
             public string? LevelGate;
+            public List<string> RequiredPerks = new();   // RQPK, "<Perk EditorID>:<rank>"; not a condition
             public string CreatedObject = "";
             public string CreatedKind = "";
             public List<FormKey> Members = new();
