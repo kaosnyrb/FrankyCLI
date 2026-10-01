@@ -328,6 +328,18 @@ namespace FrankyCLI
             return hit;
         }
 
+        /// <summary>
+        /// Read-only, for a caller that has just WRITTEN GenericBaseForms (batch): does the GBFM
+        /// with this EditorID carry STRV in the bytes on disk? Null when no such record is found.
+        /// The same walker conform itself uses, so the two cannot disagree about where a record is.
+        /// </summary>
+        public static bool? GbfmHasStrv(string pluginPath, string editorId)
+        {
+            var raw = new List<byte>(File.ReadAllBytes(pluginPath));
+            if (!Index(raw).TryGetValue(editorId.ToLowerInvariant(), out var rec)) return null;
+            return FindSub(raw, rec, "STRV") != null;
+        }
+
         static Sub? FindSub(List<byte> raw, Rec rec, string want)
         {
             int p = rec.Offset + 24;

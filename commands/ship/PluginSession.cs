@@ -74,6 +74,9 @@ namespace FrankyCLI
 
         public void Dispose() => Close();
 
+        /// <summary>The file Write() writes, for a caller that must read its own output back.</summary>
+        public string PluginPath => _dataPath + "\\" + ModName + ".esm";
+
         public void Write()
         {
             if (_env != null)
@@ -81,7 +84,7 @@ namespace FrankyCLI
                                                     + "or the write fails after the edits have reported success");
             foreach (var rec in Mod.EnumerateMajorRecords())
                 rec.IsCompressed = false;
-            Mod.WriteToBinary(_dataPath + "\\" + ModName + ".esm", gen_quest_main.BuildWriteParams());
+            Mod.WriteToBinary(PluginPath, gen_quest_main.BuildWriteParams());
         }
     }
 }
