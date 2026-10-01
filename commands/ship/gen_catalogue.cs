@@ -232,7 +232,8 @@ namespace FrankyCLI
             Count("category (COBJ.RecipeFilters)", recipes.SelectMany(r => r.Categories.DefaultIfEmpty("(none)")));
             Count("manufacturer keyword", modules.Values.Select(m => m.Keyword(cache, "ShipModuleManufacturer") ?? "(none)"));
             Count("class keyword", modules.Values.Select(m => m.Keyword(cache, "ShipModuleClass") ?? "(none)"));
-            Count("sort key (s_*)", modules.Values.Select(m => m.SortKey(cache) ?? "(none)"));
+            Count("engine sound keyword (s_*)", modules.Values.Select(m => m.SoundKey(cache) ?? "(none)"));
+            Count("upgrade chain (ShipModuleUpgrade)", modules.Values.Select(m => m.Upgrade(cache) ?? "(none)"));
             Count("MenuSortOrder", recipes.Select(r => r.MenuSortOrder.ToString("0.##")));
             Count("Value", recipes.Select(r => r.Value.ToString()));
             Console.WriteLine($"  level-gated recipes: {recipes.Count(r => r.LevelGate != null)} of {recipes.Count}");
@@ -284,7 +285,12 @@ namespace FrankyCLI
                         manufacturer = modules.TryGetValue(m, out var m2) ? m2.Keyword(cache, "ShipModuleManufacturer") : null,
                         position = modules.TryGetValue(m, out var m3) ? m3.Keyword(cache, "ShipModPosition") : null,
                         moduleClass = modules.TryGetValue(m, out var m4) ? m4.Keyword(cache, "ShipModuleClass") : null,
-                        sortKey = modules.TryGetValue(m, out var m5) ? m5.SortKey(cache) : null,
+                        // s_* is the engine SOUND (keyword Type SoundEngine, read 2026-10-01); it was
+                        // called a sort key here and in manual 01 until then. Nothing read the old name.
+                        soundKey = modules.TryGetValue(m, out var m5) ? m5.SoundKey(cache) : null,
+                        // The ship services upgrade chain: the keyword whose TYPE is ShipModuleUpgrade,
+                        // found by type rather than by name, so a minted atsd_ chain is seen too.
+                        upgrade = modules.TryGetValue(m, out var m7) ? m7.Upgrade(cache) : null,
                         // The whole PropertySheet, ActorValue EditorID -> value, so a readback can grade
                         // the stats (and ShipModuleVariant, which lives here) without a second load.
                         // A property the sheet does not carry is ABSENT, never 0: the sheet is sparse.
@@ -319,7 +325,15 @@ namespace FrankyCLI
                 return null;
             }
 
-            public string? SortKey(ILinkCache cache)
+            public string? Upgrade(ILinkCache cache)
+            {
+                foreach (var k in KeywordKeys)
+                    if (cache.TryResolve<IKeywordGetter>(k, out var kw) && kw.Type == Mutagen.Bethesda.Starfield.Keyword.TypeEnum.ShipModuleUpgrade)
+                        return kw.EditorID;
+                return null;
+            }
+
+            public string? SoundKey(ILinkCache cache)
             {
                 foreach (var k in KeywordKeys)
                 {

@@ -253,6 +253,7 @@ switch (mode)
     case "newstatic":
     case "setsnap":
     case "setcreated":
+    case "mkkeyword":
     case "mkplug":
     case "setrotation":
     case "setbounds":
@@ -460,6 +461,7 @@ static int RunLegacy(string mode, string[] args)
         "newstatic"          => gen_newstatic.Generate(arr),
         "setedid"            => gen_setedid.Generate(arr),
         "setcreated"         => gen_setcreated.Generate(arr),
+        "mkkeyword"          => gen_mkkeyword.Generate(arr),
         "mkplug"             => gen_mkplug.Generate(arr),
         "setrotation"        => gen_setrotation.Generate(arr),
         "setbounds"          => gen_setbounds.Generate(arr),
