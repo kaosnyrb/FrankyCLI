@@ -43,10 +43,16 @@ namespace FrankyCLI
     /// the conform set): a missing one is a part that builds and draws nothing, so it is a loud
     /// failure, never a quiet success.
     ///
+    /// A BUILT rung can also GAIN members (2026-10-01, the flips of his ruling 12): a planned member
+    /// missing from the rung's FormList is DUPLICATED from its template exactly as a created rung's
+    /// housing is, and appended. Its ShipModPosition is INHERITED from the template and must equal
+    /// the plan's `position`, refused otherwise, because batch has no core to re-stamp one and a
+    /// silently wrong position is the aliasing/unreachable failure of manual 25.
+    ///
     /// ⛔ STILL OUT OF SCOPE, AND REFUSED BY NAME RATHER THAN SKIPPED: on a BUILT rung, a planned
-    /// difference in name, class, gate, perk, category or FormList membership (creation sets all
-    /// of these; editing them on an existing rung is not wired yet), and a category that differs
-    /// from the template recipe's (there is no recipe-filter core yet).
+    /// difference in name, class, gate, perk or category, and a live member the plan drops (there is
+    /// no removal core); and a category that differs from the template recipe's (there is no
+    /// recipe-filter core yet).
     /// </summary>
     class gen_batch
     {
@@ -89,10 +95,27 @@ namespace FrankyCLI
             foreach (var pk in cache.PriorityOrder.WinningOverrides<IPerkGetter>())
                 if (!string.IsNullOrEmpty(pk.EditorID)) perks[pk.EditorID!] = pk.FormKey;
 
+            // A member's template: it must exist, and every property it carries must be planned,
+            // because batch has no core to remove one. Shared by a created rung and an added member.
+            IGenericBaseFormGetter? Template(JsonElement m, string rungName, List<string> errs)
+            {
+                string gT = Str(m, "template") ?? "";
+                var tg = mod.GenericBaseForms.FirstOrDefault(g => g.EditorID == gT);
+                if (tg == null) { errs.Add($"{rungName}: template GBFM {Show(gT)} does not exist"); return null; }
+                var planProps = m.GetProperty("props").EnumerateObject().Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
+                foreach (var (av, _) in gen_catalogue.Describe(tg).Props)
+                    if (!planProps.Contains(gen_catalogue.Name(av, cache)))
+                        errs.Add($"{rungName}: template {gT} carries {gen_catalogue.Name(av, cache)}, which the plan omits, and batch has no core to remove a property");
+                if (Str(m, "upgrade") is string up && !keywords.ContainsKey(up))
+                    errs.Add($"{rungName}: upgrade chain {Show(up)} is not in the load order");
+                return tg;
+            }
+
             // ---- pass 1: validate EVERYTHING, touch nothing ----------------------------------
             var errors = new List<string>();
             var skipped = new List<string>();
-            var edits = new List<(IConstructibleObjectGetter co, JsonElement recipe, List<(IGenericBaseFormGetter g, JsonElement m)> members)>();
+            var edits = new List<(IConstructibleObjectGetter co, JsonElement recipe, List<(IGenericBaseFormGetter g, JsonElement m)> members,
+                                  List<(IGenericBaseFormGetter template, JsonElement m)> adds, FormKey flst)>();
             var creates = new List<(string name, JsonElement recipe, IConstructibleObjectGetter coTemplate, List<(IGenericBaseFormGetter template, JsonElement m)> members)>();
             var newIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -142,15 +165,8 @@ namespace FrankyCLI
                     var mem = new List<(IGenericBaseFormGetter, JsonElement)>();
                     foreach (var m in planMembers)
                     {
-                        string gT = Str(m, "template") ?? "";
-                        var tg = mod.GenericBaseForms.FirstOrDefault(g => g.EditorID == gT);
-                        if (tg == null) { errors.Add($"{name}: template GBFM {Show(gT)} does not exist"); continue; }
-                        var tInfo = gen_catalogue.Describe(tg);
-                        var planProps = m.GetProperty("props").EnumerateObject().Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
-                        foreach (var (av, _) in tInfo.Props)
-                            if (!planProps.Contains(gen_catalogue.Name(av, cache)))
-                                errors.Add($"{name}: template {gT} carries {gen_catalogue.Name(av, cache)}, which the plan omits, and batch has no core to remove a property");
-                        mem.Add((tg, m));
+                        var tg = Template(m, name, errors);
+                        if (tg != null) mem.Add((tg, m));
                     }
                     creates.Add((name, recipe, coTemplate, mem));
                     continue;
@@ -174,19 +190,37 @@ namespace FrankyCLI
                 var flst = mod.FormLists.FirstOrDefault(f => f.FormKey == co.CreatedObject.FormKey);
                 var liveIds = flst == null ? new List<string>()
                     : flst.Items.Select(i => gen_catalogue.Name(i.FormKey, cache)).ToList();
-                Same("members", string.Join(",", liveIds.OrderBy(s => s, StringComparer.Ordinal)),
-                     string.Join(",", planMembers.Select(m => m.GetProperty("editorId").GetString())
-                                                 .OrderBy(s => s, StringComparer.Ordinal)));
+                var planIds = planMembers.Select(m => m.GetProperty("editorId").GetString()!).ToHashSet(StringComparer.Ordinal);
+                foreach (var gone in liveIds.Where(id => !planIds.Contains(id)))
+                    errors.Add($"{name}: {gone} is in the live FormList and not in the plan, and batch has no core to remove a member");
 
                 var members = new List<(IGenericBaseFormGetter, JsonElement)>();
+                var adds = new List<(IGenericBaseFormGetter, JsonElement)>();
                 foreach (var m in planMembers)
                 {
                     string gId = m.GetProperty("editorId").GetString()!;
+                    string? planPos = Str(m, "position") is string pp ? "ShipModPosition" + pp : null;
+                    if (!liveIds.Contains(gId))
+                    {
+                        // ---- a member to ADD to this built rung --------------------------------
+                        if (flst == null) { errors.Add($"{name}: plans member {gId} but the recipe creates no FormList to add it to"); continue; }
+                        if (mod.EnumerateMajorRecords().Any(r => string.Equals(r.EditorID, gId, StringComparison.OrdinalIgnoreCase)))
+                            errors.Add($"{name}: {gId} already exists but is not in the rung's FormList -- refusing to guess");
+                        if (!newIds.Add(gId)) errors.Add($"{name}: {gId} is planned twice");
+                        var tg = Template(m, name, errors);
+                        if (tg == null) continue;
+                        var tPos = gen_catalogue.Describe(tg).Keyword(cache, "ShipModPosition");
+                        if (tPos != planPos)
+                            errors.Add($"{name}: {gId} plans position {Show(planPos)} but its template {tg.EditorID} carries {Show(tPos)}, and batch has no core to re-stamp a position");
+                        adds.Add((tg, m));
+                        continue;
+                    }
                     var g = mod.GenericBaseForms.FirstOrDefault(x => x.EditorID == gId);
                     if (g == null) { errors.Add($"{name}: member {gId} does not exist"); continue; }
                     var info = gen_catalogue.Describe(g);
                     Same($"{gId}.fullName", info.FullName, Str(m, "fullName"));
                     Same($"{gId}.moduleClass", info.Keyword(cache, "ShipModuleClass"), Str(m, "moduleClass"));
+                    Same($"{gId}.position", info.Keyword(cache, "ShipModPosition"), planPos);
                     var planProps = m.GetProperty("props").EnumerateObject().Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
                     foreach (var (av, _) in info.Props)
                     {
@@ -196,7 +230,7 @@ namespace FrankyCLI
                     }
                     members.Add((g, m));
                 }
-                edits.Add((co, recipe, members));
+                edits.Add((co, recipe, members, adds, flst?.FormKey ?? FormKey.Null));
             }
 
             if (errors.Count > 0)
@@ -210,41 +244,57 @@ namespace FrankyCLI
             int changed = 0;
             bool? Track(bool? r) { if (r == true) changed++; return r; }
 
-            foreach (var (co, recipe, members) in edits)
+            var created = new List<string>();
+            // Duplicate a template into a new member: named, classed, chained and given the planned
+            // sheet. The ONE path for a created rung's housing and a built rung's added member, so
+            // the two cannot disagree about what a member carries. Null = refused (printed).
+            FormKey? AddMember(IGenericBaseFormGetter template, JsonElement m)
+            {
+                string gId = m.GetProperty("editorId").GetString()!;
+                var g = template.Duplicate(mod.GetNextFormKey());
+                g.EditorID = gId;
+                mod.GenericBaseForms.Add(g);
+                Console.WriteLine($"  + {gId}  (duplicated from {template.EditorID})");
+                created.Add(gId);
+                changed++;
+
+                Track(gen_setname.Apply(mod, G(mod, g.FormKey), Str(m, "fullName")!));
+                void Swap(string? had, string? want)
+                {
+                    if (had == want) return;
+                    if (had != null) Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g.FormKey), new() { (had, keywords[had]) }, remove: true));
+                    if (want != null) Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g.FormKey), new() { (want, keywords[want]) }, remove: false));
+                }
+                Swap(gen_catalogue.Describe(G(mod, g.FormKey)).Keyword(cache, "ShipModuleClass"), Str(m, "moduleClass")!);
+                // The chain is found by TYPE, as the catalogue reads it; only a plan that names one moves it.
+                if (Str(m, "upgrade") is string up)
+                    Swap(gen_catalogue.Describe(G(mod, g.FormKey)).Upgrade(cache), up);
+                if (SetSheet(mod, g.FormKey, m, avs, Track) == null) return null;
+                return g.FormKey;
+            }
+
+            foreach (var (co, recipe, members, adds, flstKey) in edits)
             {
                 Console.WriteLine($"[edit {co.EditorID}]");
                 foreach (var (g0, m) in members)
                     if (SetSheet(mod, g0.FormKey, m, avs, Track) == null) return Refused();
+                foreach (var (template, m) in adds)
+                {
+                    if (AddMember(template, m) is not FormKey k) return Refused();
+                    mod.FormLists.First(f => f.FormKey == flstKey).Items.Add(k.ToLink<IStarfieldMajorRecordGetter>());
+                }
                 Track(gen_setvalue.Apply(mod, Co(mod, co.FormKey), recipe.GetProperty("value").GetUInt32()));
                 Track(gen_setsortorder.Apply(mod, Co(mod, co.FormKey), (float)recipe.GetProperty("menuSortOrder").GetDouble()));
             }
 
-            var created = new List<string>();
             foreach (var (name, recipe, coTemplate, members) in creates)
             {
                 Console.WriteLine($"[create {name}]");
                 var flst = new FormList(mod) { EditorID = Str(recipe, "formList") };
                 foreach (var (template, m) in members)
                 {
-                    string gId = m.GetProperty("editorId").GetString()!;
-                    var g = template.Duplicate(mod.GetNextFormKey());
-                    g.EditorID = gId;
-                    mod.GenericBaseForms.Add(g);
-                    Console.WriteLine($"  + {gId}  (duplicated from {template.EditorID})");
-                    created.Add(gId);
-                    changed++;
-
-                    Track(gen_setname.Apply(mod, G(mod, g.FormKey), Str(m, "fullName")!));
-                    string cls = Str(m, "moduleClass")!;
-                    var oldCls = gen_catalogue.Describe(G(mod, g.FormKey)).Keyword(cache, "ShipModuleClass");
-                    if (oldCls != cls)
-                    {
-                        if (oldCls != null)
-                            Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g.FormKey), new() { (oldCls, keywords[oldCls]) }, remove: true));
-                        Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g.FormKey), new() { (cls, keywords[cls]) }, remove: false));
-                    }
-                    if (SetSheet(mod, g.FormKey, m, avs, Track) == null) return Refused();
-                    flst.Items.Add(g.FormKey.ToLink<IStarfieldMajorRecordGetter>());
+                    if (AddMember(template, m) is not FormKey k) return Refused();
+                    flst.Items.Add(k.ToLink<IStarfieldMajorRecordGetter>());
                 }
                 mod.FormLists.Add(flst);
                 Console.WriteLine($"  + {flst.EditorID}  ({flst.Items.Count} member(s))");
