@@ -111,132 +111,134 @@ namespace FrankyCLI
                 }
             }
 
-            StarfieldMod myMod;
-            string datapath;
             int changed = 0;
+            using var session = PluginSession.Open(modname);
+            if (session == null) return 1;
+            var myMod = session.Mod;
+            var cache = session.Cache;
 
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            // Resolve the referenced form FIRST. A typo must refuse, never become a
+            // FormKey pointing at nothing -- which the record model accepts and the game
+            // silently ignores, i.e. a gate that is not there.
+            FormKey formKey = FormKey.Null;
+            if (formArg.Length > 0)
             {
-                datapath = env.DataFolderPath;
-                ModKey modKey = new ModKey(modname, ModType.Master);
-                if (!env.LoadOrder.ModExists(modKey))
-                { Console.WriteLine($"Error: {modname}.esm is not in the load order"); return 1; }
-                ModPath modPath = System.IO.Path.Combine(datapath, modname + ".esm");
-                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                gen_quest_main.FixNextFormId(myMod);
-                var cache = env.LinkCache;
-
-                // Resolve the referenced form FIRST. A typo must refuse, never become a
-                // FormKey pointing at nothing -- which the record model accepts and the game
-                // silently ignores, i.e. a gate that is not there.
-                FormKey formKey = FormKey.Null;
-                if (formArg.Length > 0)
+                if (formArg.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (formArg.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!uint.TryParse(formArg.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
-                        { Console.WriteLine($"Error: '{formArg}' is not a valid FormID"); return 1; }
-                        formKey = new FormKey(env.LoadOrder[0].ModKey, id);
-                    }
-                    else if (fn == "haskeyword")
-                    {
-                        var kw = cache.PriorityOrder.WinningOverrides<IKeywordGetter>()
-                                      .FirstOrDefault(k => string.Equals(k.EditorID, formArg, StringComparison.OrdinalIgnoreCase));
-                        if (kw == null) { Console.WriteLine($"Error: no Keyword '{formArg}' in the load order -- refusing"); return 1; }
-                        formKey = kw.FormKey;
-                    }
-                    else
-                    {
-                        var pk = cache.PriorityOrder.WinningOverrides<IPerkGetter>()
-                                      .FirstOrDefault(k => string.Equals(k.EditorID, formArg, StringComparison.OrdinalIgnoreCase));
-                        if (pk == null) { Console.WriteLine($"Error: no Perk '{formArg}' in the load order -- refusing"); return 1; }
-                        formKey = pk.FormKey;
-                    }
+                    if (!uint.TryParse(formArg.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
+                    { Console.WriteLine($"Error: '{formArg}' is not a valid FormID"); return 1; }
+                    formKey = new FormKey(session.SfKey, id);
                 }
-
-                var found = new List<IConstructibleObjectGetter>();
-                foreach (var target in targets)
+                else if (fn == "haskeyword")
                 {
-                    var existing = myMod.ConstructibleObjects.FirstOrDefault(
-                        c => string.Equals(c.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                    if (existing == null)
-                    { Console.WriteLine($"Error: no ConstructibleObject '{target}' in {modname}"); return 1; }
-                    found.Add(existing);
+                    var kw = cache.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                                  .FirstOrDefault(k => string.Equals(k.EditorID, formArg, StringComparison.OrdinalIgnoreCase));
+                    if (kw == null) { Console.WriteLine($"Error: no Keyword '{formArg}' in the load order -- refusing"); return 1; }
+                    formKey = kw.FormKey;
                 }
-
-                foreach (var existing in found)
+                else
                 {
-                    var cobj = ((IConstructibleObjectGetter)existing).DeepCopy();
-                    // Conditions is init-only on the record, so it cannot be replaced here --
-                    // only mutated in place. Mutagen constructs the list, so a null would mean
-                    // a record shape this command does not understand: refuse rather than
-                    // silently skip, because a skipped gate looks exactly like a set one.
-                    if (cobj.Conditions == null)
-                    {
-                        Console.WriteLine($"Error: {cobj.EditorID} has no Conditions list -- refusing to invent one");
-                        return 1;
-                    }
-
-                    if (clear)
-                    {
-                        if (cobj.Conditions.Count == 0)
-                        { Console.WriteLine($"  {cobj.EditorID}: no conditions -- left as is"); continue; }
-                        Console.WriteLine($"  {cobj.EditorID}: - {cobj.Conditions.Count} condition(s)");
-                        cobj.Conditions.Clear();
-                    }
-                    else
-                    {
-                        ConditionData data = fn switch
-                        {
-                            "getlevel"   => new GetLevelConditionData(),
-                            "haskeyword" => Kw(formKey),
-                            _            => Perk(formKey),
-                        };
-                        // Replace any existing condition of the SAME function, so a re-run
-                        // retunes the gate rather than stacking a second one beside it.
-                        var wantType = data.GetType();
-                        int removed = 0;
-                        for (int i = cobj.Conditions.Count - 1; i >= 0; i--)
-                            if (cobj.Conditions[i].Data?.GetType() == wantType) { cobj.Conditions.RemoveAt(i); removed++; }
-
-                        // ⛔ RUN IT ON THE PLAYER, EXPLICITLY. Every vanilla reactor recipe's
-                        // GetLevel carries `RunOnType=Reference Reference=000014` (PlayerRef);
-                        // a condition left on the default subject reads Reference=Null and is
-                        // asking about nobody. Caught 2026-08-17 by reading the gate back
-                        // through the parameter rendering added to gen_inspect the same hour --
-                        // it would otherwise have shipped as a gate that looked set and tested
-                        // the wrong actor.
-                        if (fn == "getlevel")
-                        {
-                            data.RunOnType = Condition.RunOnType.Reference;
-                            data.Reference.SetTo(PLAYER_REF);
-                            data.Reference.SetTo(PLAYER_REF);
-                        }
-                        cobj.Conditions.Add(new ConditionFloat()
-                        {
-                            CompareOperator = op,
-                            ComparisonValue = value,
-                            Data = data,
-                        });
-                        string what = fn == "getlevel" ? $"{fn} {op} {value}" : $"{fn} {formArg}";
-                        Console.WriteLine($"  {cobj.EditorID}: {(removed > 0 ? "~" : "+")} {what}"
-                                          + (removed > 0 ? $"  (replaced {removed})" : ""));
-                    }
-
-                    myMod.ConstructibleObjects.Remove(existing.FormKey);
-                    myMod.ConstructibleObjects.Add(cobj);
-                    changed++;
+                    var pk = cache.PriorityOrder.WinningOverrides<IPerkGetter>()
+                                  .FirstOrDefault(k => string.Equals(k.EditorID, formArg, StringComparison.OrdinalIgnoreCase));
+                    if (pk == null) { Console.WriteLine($"Error: no Perk '{formArg}' in the load order -- refusing"); return 1; }
+                    formKey = pk.FormKey;
                 }
             }
 
+            var found = new List<IConstructibleObjectGetter>();
+            foreach (var target in targets)
+            {
+                var existing = myMod.ConstructibleObjects.FirstOrDefault(
+                    c => string.Equals(c.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
+                { Console.WriteLine($"Error: no ConstructibleObject '{target}' in {modname}"); return 1; }
+                found.Add(existing);
+            }
+
+            foreach (var existing in found)
+            {
+                var r = Apply(myMod, existing, fn, op, value, formKey, formArg, clear);
+                if (r == null) return 1;
+                if (r == true) changed++;
+            }
+            session.Close();
+
             if (changed == 0) { Console.WriteLine("Nothing to write."); return 0; }
-
-            foreach (var rec in myMod.EnumerateMajorRecords())
-                rec.IsCompressed = false;
-
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+            session.Write();
             Console.WriteLine($"Finished -- {changed} ConstructibleObject(s) patched, FormIDs unchanged.");
             return 0;
+        }
+
+        /// <summary>
+        /// The CORE: author one condition (or clear them all) on one COBJ, on an already-loaded
+        /// plugin. True = changed, false = left as is, null = refused (printed). Shared by this
+        /// command and `batch`. `fn` is getlevel / haskeyword / hasperk; `formKey` is resolved.
+        /// ⚠ A getlevel/haskeyword/hasperk call REPLACES any condition of the same function and
+        /// reports a change even when the new one is identical: the command has always behaved
+        /// so, and this split keeps it byte-for-byte rather than improving it in passing.
+        /// </summary>
+        public static bool? Apply(StarfieldMod myMod, IConstructibleObjectGetter existing, string fn,
+                                  CompareOperator op, float value, FormKey formKey, string formArg, bool clear)
+        {
+            var cobj = ((IConstructibleObjectGetter)existing).DeepCopy();
+            // Conditions is init-only on the record, so it cannot be replaced here --
+            // only mutated in place. Mutagen constructs the list, so a null would mean
+            // a record shape this command does not understand: refuse rather than
+            // silently skip, because a skipped gate looks exactly like a set one.
+            if (cobj.Conditions == null)
+            {
+                Console.WriteLine($"Error: {cobj.EditorID} has no Conditions list -- refusing to invent one");
+                return null;
+            }
+
+            if (clear)
+            {
+                if (cobj.Conditions.Count == 0)
+                { Console.WriteLine($"  {cobj.EditorID}: no conditions -- left as is"); return false; }
+                Console.WriteLine($"  {cobj.EditorID}: - {cobj.Conditions.Count} condition(s)");
+                cobj.Conditions.Clear();
+            }
+            else
+            {
+                ConditionData data = fn switch
+                {
+                    "getlevel"   => new GetLevelConditionData(),
+                    "haskeyword" => Kw(formKey),
+                    _            => Perk(formKey),
+                };
+                // Replace any existing condition of the SAME function, so a re-run
+                // retunes the gate rather than stacking a second one beside it.
+                var wantType = data.GetType();
+                int removed = 0;
+                for (int i = cobj.Conditions.Count - 1; i >= 0; i--)
+                    if (cobj.Conditions[i].Data?.GetType() == wantType) { cobj.Conditions.RemoveAt(i); removed++; }
+
+                // ⛔ RUN IT ON THE PLAYER, EXPLICITLY. Every vanilla reactor recipe's
+                // GetLevel carries `RunOnType=Reference Reference=000014` (PlayerRef);
+                // a condition left on the default subject reads Reference=Null and is
+                // asking about nobody. Caught 2026-08-17 by reading the gate back
+                // through the parameter rendering added to gen_inspect the same hour --
+                // it would otherwise have shipped as a gate that looked set and tested
+                // the wrong actor.
+                if (fn == "getlevel")
+                {
+                    data.RunOnType = Condition.RunOnType.Reference;
+                    data.Reference.SetTo(PLAYER_REF);
+                }
+                cobj.Conditions.Add(new ConditionFloat()
+                {
+                    CompareOperator = op,
+                    ComparisonValue = value,
+                    Data = data,
+                });
+                string what = fn == "getlevel" ? $"{fn} {op} {value}" : $"{fn} {formArg}";
+                Console.WriteLine($"  {cobj.EditorID}: {(removed > 0 ? "~" : "+")} {what}"
+                                  + (removed > 0 ? $"  (replaced {removed})" : ""));
+            }
+
+            myMod.ConstructibleObjects.Remove(existing.FormKey);
+            myMod.ConstructibleObjects.Add(cobj);
+            return true;
         }
 
         private static ConditionData Kw(FormKey k)

@@ -43,73 +43,59 @@ namespace FrankyCLI
                 return 1;
             }
 
-            StarfieldMod myMod;
-            string datapath;
             int changed = 0;
+            using var session = PluginSession.Open(modname);
+            if (session == null) return 1;
+            var myMod = session.Mod;
 
-            // env holds the plugin open, so it is scoped to close before the write (same reason as
-            // gen_setrecipefilter -- a same-path WriteToBinary inside the using throws and leaves
-            // the old bytes looking like a persisted no-op).
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            var existing = myMod.GenericBaseForms.FirstOrDefault(
+                g => string.Equals(g.EditorID, target, StringComparison.OrdinalIgnoreCase));
+            if (existing == null)
             {
-                datapath = env.DataFolderPath;
-
-                ModKey modKey = new ModKey(modname, ModType.Master);
-                if (!env.LoadOrder.ModExists(modKey))
-                {
-                    Console.WriteLine($"Error: {modname}.esm is not in the load order");
-                    return 1;
-                }
-                ModPath modPath = System.IO.Path.Combine(datapath, modname + ".esm");
-                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                gen_quest_main.FixNextFormId(myMod);
-
-                var existing = myMod.GenericBaseForms.FirstOrDefault(
-                    g => string.Equals(g.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                if (existing == null)
-                {
-                    // Fail loud on a name that is not there -- a typo must never read as success.
-                    Console.WriteLine($"Error: no GenericBaseForm '{target}' in {modname}");
-                    return 1;
-                }
-
-                var gbfm = existing.DeepCopy();
-                var full = gbfm.Components.OfType<FullNameComponent>().FirstOrDefault();
-                if (full == null)
-                {
-                    gbfm.Components.Add(new FullNameComponent() { Name = display });
-                    Console.WriteLine($"  {target}: no FullName component -- added \"{display}\"");
-                }
-                else if (string.Equals(full.Name?.String, display, StringComparison.Ordinal))
-                {
-                    Console.WriteLine($"  {target}: already named \"{display}\" -- left as is");
-                    goto done;
-                }
-                else
-                {
-                    Console.WriteLine($"  {target}: \"{full.Name?.String}\" -> \"{display}\"");
-                    full.Name = display;
-                }
-
-                myMod.GenericBaseForms.Remove(existing.FormKey);
-                myMod.GenericBaseForms.Add(gbfm);
-                changed++;
-
-                done: ;
+                // Fail loud on a name that is not there -- a typo must never read as success.
+                Console.WriteLine($"Error: no GenericBaseForm '{target}' in {modname}");
+                return 1;
             }
+            if (Apply(myMod, existing, display)) changed++;
+            session.Close();
 
             if (changed == 0)
             {
                 Console.WriteLine("Nothing to write.");
                 return 0;
             }
-
-            foreach (var rec in myMod.EnumerateMajorRecords())
-                rec.IsCompressed = false;
-
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+            session.Write();
             Console.WriteLine($"Finished -- {changed} record(s) renamed, FormIDs unchanged.");
             return 0;
+        }
+
+        /// <summary>
+        /// The CORE: set one GBFM's display name (FullName) on an already-loaded plugin. True when
+        /// it changed. Shared by this command and `batch`; the caller validates and owns load/write.
+        /// </summary>
+        public static bool Apply(StarfieldMod myMod, IGenericBaseFormGetter existing, string display)
+        {
+            string target = existing.EditorID ?? existing.FormKey.ToString();
+            var gbfm = existing.DeepCopy();
+            var full = gbfm.Components.OfType<FullNameComponent>().FirstOrDefault();
+            if (full == null)
+            {
+                gbfm.Components.Add(new FullNameComponent() { Name = display });
+                Console.WriteLine($"  {target}: no FullName component -- added \"{display}\"");
+            }
+            else if (string.Equals(full.Name?.String, display, StringComparison.Ordinal))
+            {
+                Console.WriteLine($"  {target}: already named \"{display}\" -- left as is");
+                return false;
+            }
+            else
+            {
+                Console.WriteLine($"  {target}: \"{full.Name?.String}\" -> \"{display}\"");
+                full.Name = display;
+            }
+            myMod.GenericBaseForms.Remove(existing.FormKey);
+            myMod.GenericBaseForms.Add(gbfm);
+            return true;
         }
     }
 }

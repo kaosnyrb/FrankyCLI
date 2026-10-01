@@ -72,98 +72,107 @@ namespace FrankyCLI
                 return 1;
             }
 
-            StarfieldMod myMod;
-            string datapath;
             int changed = 0;
+            using var session = PluginSession.Open(modname);
+            if (session == null) return 1;
+            var myMod = session.Mod;
+            var cache = session.Cache;
 
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            // Resolve the perk FIRST and refuse on a miss -- an unresolvable FormKey is a
+            // requirement the game cannot test, i.e. a gate that silently is not there.
+            FormKey perkKey = FormKey.Null;
+            string perkName = perkArg;
+            if (!clear)
             {
-                datapath = env.DataFolderPath;
-                ModKey modKey = new ModKey(modname, ModType.Master);
-                if (!env.LoadOrder.ModExists(modKey))
-                { Console.WriteLine($"Error: {modname}.esm is not in the load order"); return 1; }
-                ModPath modPath = System.IO.Path.Combine(datapath, modname + ".esm");
-                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                gen_quest_main.FixNextFormId(myMod);
-                var cache = env.LinkCache;
-
-                // Resolve the perk FIRST and refuse on a miss -- an unresolvable FormKey is a
-                // requirement the game cannot test, i.e. a gate that silently is not there.
-                FormKey perkKey = FormKey.Null;
-                string perkName = perkArg;
-                if (!clear)
+                if (perkArg.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (perkArg.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!uint.TryParse(perkArg.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
-                        { Console.WriteLine($"Error: '{perkArg}' is not a valid FormID"); return 1; }
-                        perkKey = new FormKey(env.LoadOrder[0].ModKey, id);
-                    }
-                    else
-                    {
-                        var pk = cache.PriorityOrder.WinningOverrides<IPerkGetter>()
-                                      .FirstOrDefault(k => string.Equals(k.EditorID, perkArg, StringComparison.OrdinalIgnoreCase));
-                        if (pk == null) { Console.WriteLine($"Error: no Perk '{perkArg}' in the load order -- refusing"); return 1; }
-                        perkKey = pk.FormKey; perkName = pk.EditorID ?? perkArg;
-                    }
+                    if (!uint.TryParse(perkArg.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
+                    { Console.WriteLine($"Error: '{perkArg}' is not a valid FormID"); return 1; }
+                    perkKey = new FormKey(session.SfKey, id);
                 }
-
-                var found = new List<IConstructibleObjectGetter>();
-                foreach (var target in targets)
+                else
                 {
-                    var existing = myMod.ConstructibleObjects.FirstOrDefault(
-                        c => string.Equals(c.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                    if (existing == null)
-                    { Console.WriteLine($"Error: no ConstructibleObject '{target}' in {modname}"); return 1; }
-                    found.Add(existing);
-                }
-
-                foreach (var existing in found)
-                {
-                    var cobj = ((IConstructibleObjectGetter)existing).DeepCopy();
-                    if (cobj.RequiredPerks == null)
-                    {
-                        Console.WriteLine($"Error: {cobj.EditorID} has no RequiredPerks list -- refusing to invent one");
-                        return 1;
-                    }
-
-                    if (clear)
-                    {
-                        if (cobj.RequiredPerks.Count == 0)
-                        { Console.WriteLine($"  {cobj.EditorID}: no required perks -- left as is"); continue; }
-                        Console.WriteLine($"  {cobj.EditorID}: - {cobj.RequiredPerks.Count} required perk(s)");
-                        cobj.RequiredPerks.Clear();
-                    }
-                    else
-                    {
-                        var already = cobj.RequiredPerks.FirstOrDefault(r => r.Perk.FormKey == perkKey);
-                        if (already != null && already.Rank == rank)
-                        { Console.WriteLine($"  {cobj.EditorID}: {perkName} rank {rank} already required -- left as is"); continue; }
-                        int removed = 0;
-                        for (int i = cobj.RequiredPerks.Count - 1; i >= 0; i--)
-                            if (cobj.RequiredPerks[i].Perk.FormKey == perkKey) { cobj.RequiredPerks.RemoveAt(i); removed++; }
-
-                        var entry = new ConstructibleRequiredPerk() { Rank = rank };
-                        entry.Perk.SetTo(perkKey);
-                        cobj.RequiredPerks.Add(entry);
-                        Console.WriteLine($"  {cobj.EditorID}: {(removed > 0 ? "~" : "+")} {perkName} rank {rank}"
-                                          + (removed > 0 ? "  (replaced)" : ""));
-                    }
-
-                    myMod.ConstructibleObjects.Remove(existing.FormKey);
-                    myMod.ConstructibleObjects.Add(cobj);
-                    changed++;
+                    var pk = cache.PriorityOrder.WinningOverrides<IPerkGetter>()
+                                  .FirstOrDefault(k => string.Equals(k.EditorID, perkArg, StringComparison.OrdinalIgnoreCase));
+                    if (pk == null) { Console.WriteLine($"Error: no Perk '{perkArg}' in the load order -- refusing"); return 1; }
+                    perkKey = pk.FormKey; perkName = pk.EditorID ?? perkArg;
                 }
             }
 
+            var found = new List<IConstructibleObjectGetter>();
+            foreach (var target in targets)
+            {
+                var existing = myMod.ConstructibleObjects.FirstOrDefault(
+                    c => string.Equals(c.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
+                { Console.WriteLine($"Error: no ConstructibleObject '{target}' in {modname}"); return 1; }
+                found.Add(existing);
+            }
+
+            foreach (var existing in found)
+            {
+                var r = Apply(myMod, existing, perkKey, perkName, rank, clear);
+                if (r == null) return 1;
+                if (r == true) changed++;
+            }
+            session.Close();
+
             if (changed == 0) { Console.WriteLine("Nothing to write."); return 0; }
-
-            foreach (var rec in myMod.EnumerateMajorRecords())
-                rec.IsCompressed = false;
-
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+            session.Write();
             Console.WriteLine($"Finished -- {changed} ConstructibleObject(s) patched, FormIDs unchanged.");
             return 0;
+        }
+
+        /// <summary>
+        /// The CORE: require one perk at one rank (or clear the list) on one COBJ, on an
+        /// already-loaded plugin. True = changed, false = left as is, null = refused (printed).
+        /// Shared by this command and `batch`. `perkKey` is resolved by the caller.
+        /// </summary>
+        public static bool? Apply(StarfieldMod myMod, IConstructibleObjectGetter existing, FormKey perkKey,
+                                  string perkName, uint rank, bool clear)
+        {
+            var cobj = existing.DeepCopy();
+            // ⭐ AN ABSENT LIST IS NOW CREATED, NOT REFUSED (2026-10-01, the A/B/C ladder). This used
+            // to refuse "to invent one", a caution from before the subrecord's shape was known, and
+            // it meant no recipe gen_shipstruct ever wrote could take a skill requirement at all:
+            // the generator never emits RQPK. The shape is now known from an independent spec
+            // (xEdit wbDefinitionsSF1.pas: RQPK = an array of {Perk FormID, Rank u32, 4 unknown
+            // bytes}, after the components, before CNAM), and the first write was checked byte by
+            // byte against it. An absent list on --clear is simply nothing to clear.
+            if (cobj.RequiredPerks == null)
+            {
+                if (clear)
+                { Console.WriteLine($"  {cobj.EditorID}: no required perks -- left as is"); return false; }
+                cobj.RequiredPerks = new ExtendedList<ConstructibleRequiredPerk>();
+                Console.WriteLine($"  {cobj.EditorID}: + RequiredPerks list (was absent)");
+            }
+
+            if (clear)
+            {
+                if (cobj.RequiredPerks.Count == 0)
+                { Console.WriteLine($"  {cobj.EditorID}: no required perks -- left as is"); return false; }
+                Console.WriteLine($"  {cobj.EditorID}: - {cobj.RequiredPerks.Count} required perk(s)");
+                cobj.RequiredPerks.Clear();
+            }
+            else
+            {
+                var already = cobj.RequiredPerks.FirstOrDefault(r => r.Perk.FormKey == perkKey);
+                if (already != null && already.Rank == rank)
+                { Console.WriteLine($"  {cobj.EditorID}: {perkName} rank {rank} already required -- left as is"); return false; }
+                int removed = 0;
+                for (int i = cobj.RequiredPerks.Count - 1; i >= 0; i--)
+                    if (cobj.RequiredPerks[i].Perk.FormKey == perkKey) { cobj.RequiredPerks.RemoveAt(i); removed++; }
+
+                var entry = new ConstructibleRequiredPerk() { Rank = rank };
+                entry.Perk.SetTo(perkKey);
+                cobj.RequiredPerks.Add(entry);
+                Console.WriteLine($"  {cobj.EditorID}: {(removed > 0 ? "~" : "+")} {perkName} rank {rank}"
+                                  + (removed > 0 ? "  (replaced)" : ""));
+            }
+
+            myMod.ConstructibleObjects.Remove(existing.FormKey);
+            myMod.ConstructibleObjects.Add(cobj);
+            return true;
         }
     }
 }

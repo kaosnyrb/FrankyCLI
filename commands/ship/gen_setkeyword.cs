@@ -74,143 +74,137 @@ namespace FrankyCLI
                 return 1;
             }
 
-            StarfieldMod myMod;
-            string datapath;
             int changed = 0;
+            using var session = PluginSession.Open(modname);
+            if (session == null) return 1;
+            var myMod = session.Mod;
+            var cache = session.Cache;
 
-            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            // Resolve every keyword FIRST. A typo must refuse, never become a dangling
+            // FormKey the builder ignores in silence.
+            var keys = new List<(string name, FormKey key)>();
+            foreach (var w in wanted)
             {
-                datapath = env.DataFolderPath;
-                ModKey modKey = new ModKey(modname, ModType.Master);
-                if (!env.LoadOrder.ModExists(modKey))
+                if (w.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine($"Error: {modname}.esm is not in the load order");
+                    if (!uint.TryParse(w.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
+                    {
+                        Console.WriteLine($"Error: '{w}' is not a valid FormID"); return 1;
+                    }
+                    keys.Add((w, new FormKey(session.SfKey, id)));
+                    continue;
+                }
+                var kw = cache.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                              .FirstOrDefault(k => string.Equals(k.EditorID, w, StringComparison.OrdinalIgnoreCase));
+                if (kw == null)
+                {
+                    Console.WriteLine($"Error: no Keyword '{w}' anywhere in the load order -- refusing "
+                                      + "rather than writing a FormKey that points at nothing");
                     return 1;
                 }
-                ModPath modPath = System.IO.Path.Combine(datapath, modname + ".esm");
-                myMod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
-                gen_quest_main.FixNextFormId(myMod);
-
-                var cache = env.LinkCache;
-
-                // Resolve every keyword FIRST. A typo must refuse, never become a dangling
-                // FormKey the builder ignores in silence.
-                var keys = new List<(string name, FormKey key)>();
-                foreach (var w in wanted)
-                {
-                    if (w.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!uint.TryParse(w.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out var id))
-                        {
-                            Console.WriteLine($"Error: '{w}' is not a valid FormID"); return 1;
-                        }
-                        keys.Add((w, new FormKey(env.LoadOrder[0].ModKey, id)));
-                        continue;
-                    }
-                    var kw = cache.PriorityOrder.WinningOverrides<IKeywordGetter>()
-                                  .FirstOrDefault(k => string.Equals(k.EditorID, w, StringComparison.OrdinalIgnoreCase));
-                    if (kw == null)
-                    {
-                        Console.WriteLine($"Error: no Keyword '{w}' anywhere in the load order -- refusing "
-                                          + "rather than writing a FormKey that points at nothing");
-                        return 1;
-                    }
-                    keys.Add((kw.EditorID ?? w, kw.FormKey));
-                }
-
-                // Validate every target before touching one: a GBFM first, a PackIn second,
-                // neither -> refuse with nothing written.
-                var foundGbfm = new List<IGenericBaseFormGetter>();
-                var foundPkin = new List<IPackInGetter>();
-                foreach (var target in targets)
-                {
-                    var g = myMod.GenericBaseForms.FirstOrDefault(
-                        x => string.Equals(x.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                    if (g != null) { foundGbfm.Add(g); continue; }
-                    var pk = myMod.PackIns.FirstOrDefault(
-                        x => string.Equals(x.EditorID, target, StringComparison.OrdinalIgnoreCase));
-                    if (pk != null) { foundPkin.Add(pk); continue; }
-                    Console.WriteLine($"Error: no GenericBaseForm or PackIn '{target}' in {modname}"); return 1;
-                }
-
-                // One add/remove over a keyword list, whichever record owns the list.
-                bool Apply(string edid, ExtendedList<IFormLinkGetter<IKeywordGetter>> list)
-                {
-                    bool touched = false;
-                    foreach (var (name, key) in keys)
-                    {
-                        bool has = list.Any(k => k.FormKey == key);
-                        if (remove)
-                        {
-                            if (!has) { Console.WriteLine($"  {edid}: {name} not present -- left as is"); continue; }
-                            var hit = list.First(k => k.FormKey == key);
-                            list.Remove(hit);
-                            Console.WriteLine($"  {edid}: - {name}");
-                            touched = true;
-                        }
-                        else
-                        {
-                            if (has) { Console.WriteLine($"  {edid}: {name} already present -- left as is"); continue; }
-                            list.Add(key.ToLink<IKeywordGetter>());
-                            Console.WriteLine($"  {edid}: + {name}");
-                            touched = true;
-                        }
-                    }
-                    return touched;
-                }
-
-                foreach (var existing in foundGbfm)
-                {
-                    var gbfm = ((IGenericBaseFormGetter)existing).DeepCopy();
-                    var kwc = gbfm.Components.OfType<KeywordFormComponent>().FirstOrDefault();
-                    if (kwc == null)
-                    {
-                        if (remove)
-                        {
-                            Console.WriteLine($"  {gbfm.EditorID}: no keyword component -- nothing to remove");
-                            continue;
-                        }
-                        kwc = new KeywordFormComponent();
-                        gbfm.Components.Add(kwc);
-                        Console.WriteLine($"  {gbfm.EditorID}: + keyword component (was absent)");
-                    }
-                    kwc.Keywords ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
-                    if (!Apply(gbfm.EditorID ?? "?", kwc.Keywords)) continue;
-
-                    myMod.GenericBaseForms.Remove(existing.FormKey);
-                    myMod.GenericBaseForms.Add(gbfm);
-                    changed++;
-                }
-
-                foreach (var existing in foundPkin)
-                {
-                    var pkin = ((IPackInGetter)existing).DeepCopy();
-                    if (pkin.Keywords == null)
-                    {
-                        if (remove)
-                        {
-                            Console.WriteLine($"  {pkin.EditorID}: no keyword list -- nothing to remove");
-                            continue;
-                        }
-                        pkin.Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
-                        Console.WriteLine($"  {pkin.EditorID}: + keyword list (was absent)");
-                    }
-                    if (!Apply(pkin.EditorID ?? "?", pkin.Keywords)) continue;
-
-                    myMod.PackIns.Remove(existing.FormKey);
-                    myMod.PackIns.Add(pkin);
-                    changed++;
-                }
+                keys.Add((kw.EditorID ?? w, kw.FormKey));
             }
 
+            // Validate every target before touching one: a GBFM first, a PackIn second,
+            // neither -> refuse with nothing written.
+            var foundGbfm = new List<IGenericBaseFormGetter>();
+            var foundPkin = new List<IPackInGetter>();
+            foreach (var target in targets)
+            {
+                var g = myMod.GenericBaseForms.FirstOrDefault(
+                    x => string.Equals(x.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                if (g != null) { foundGbfm.Add(g); continue; }
+                var pk = myMod.PackIns.FirstOrDefault(
+                    x => string.Equals(x.EditorID, target, StringComparison.OrdinalIgnoreCase));
+                if (pk != null) { foundPkin.Add(pk); continue; }
+                Console.WriteLine($"Error: no GenericBaseForm or PackIn '{target}' in {modname}"); return 1;
+            }
+
+            foreach (var existing in foundGbfm)
+                if (ApplyGbfm(myMod, existing, keys, remove)) changed++;
+            foreach (var existing in foundPkin)
+                if (ApplyPackIn(myMod, existing, keys, remove)) changed++;
+            session.Close();
+
             if (changed == 0) { Console.WriteLine("Nothing to write."); return 0; }
-
-            foreach (var rec in myMod.EnumerateMajorRecords())
-                rec.IsCompressed = false;
-
-            myMod.WriteToBinary(datapath + "\\" + modname + ".esm", gen_quest_main.BuildWriteParams());
+            session.Write();
             Console.WriteLine($"Finished -- {changed} record(s) patched (GenericBaseForm/PackIn), FormIDs unchanged.");
             return 0;
+        }
+
+        /// <summary>
+        /// The CORE for a GBFM: add (or remove) resolved keywords on an already-loaded plugin.
+        /// True when it changed. Shared by this command and `batch`.
+        /// </summary>
+        public static bool ApplyGbfm(StarfieldMod myMod, IGenericBaseFormGetter existing,
+                                     List<(string name, FormKey key)> keys, bool remove)
+        {
+            var gbfm = existing.DeepCopy();
+            var kwc = gbfm.Components.OfType<KeywordFormComponent>().FirstOrDefault();
+            if (kwc == null)
+            {
+                if (remove)
+                {
+                    Console.WriteLine($"  {gbfm.EditorID}: no keyword component -- nothing to remove");
+                    return false;
+                }
+                kwc = new KeywordFormComponent();
+                gbfm.Components.Add(kwc);
+                Console.WriteLine($"  {gbfm.EditorID}: + keyword component (was absent)");
+            }
+            kwc.Keywords ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+            if (!Edit(gbfm.EditorID ?? "?", kwc.Keywords, keys, remove)) return false;
+            myMod.GenericBaseForms.Remove(existing.FormKey);
+            myMod.GenericBaseForms.Add(gbfm);
+            return true;
+        }
+
+        /// <summary>The CORE for a PackIn, same contract as ApplyGbfm.</summary>
+        public static bool ApplyPackIn(StarfieldMod myMod, IPackInGetter existing,
+                                       List<(string name, FormKey key)> keys, bool remove)
+        {
+            var pkin = existing.DeepCopy();
+            if (pkin.Keywords == null)
+            {
+                if (remove)
+                {
+                    Console.WriteLine($"  {pkin.EditorID}: no keyword list -- nothing to remove");
+                    return false;
+                }
+                pkin.Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                Console.WriteLine($"  {pkin.EditorID}: + keyword list (was absent)");
+            }
+            if (!Edit(pkin.EditorID ?? "?", pkin.Keywords, keys, remove)) return false;
+            myMod.PackIns.Remove(existing.FormKey);
+            myMod.PackIns.Add(pkin);
+            return true;
+        }
+
+        // One add/remove over a keyword list, whichever record owns the list.
+        private static bool Edit(string edid, ExtendedList<IFormLinkGetter<IKeywordGetter>> list,
+                                 List<(string name, FormKey key)> keys, bool remove)
+        {
+            bool touched = false;
+            foreach (var (name, key) in keys)
+            {
+                bool has = list.Any(k => k.FormKey == key);
+                if (remove)
+                {
+                    if (!has) { Console.WriteLine($"  {edid}: {name} not present -- left as is"); continue; }
+                    var hit = list.First(k => k.FormKey == key);
+                    list.Remove(hit);
+                    Console.WriteLine($"  {edid}: - {name}");
+                    touched = true;
+                }
+                else
+                {
+                    if (has) { Console.WriteLine($"  {edid}: {name} already present -- left as is"); continue; }
+                    list.Add(key.ToLink<IKeywordGetter>());
+                    Console.WriteLine($"  {edid}: + {name}");
+                    touched = true;
+                }
+            }
+            return touched;
         }
     }
 }
