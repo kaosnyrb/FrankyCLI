@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "id": "duo_delve05",
+  "template": "carry-absence-recover-return",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/status.md (testcase 02)",
+  "_note": [
+    "TESTCASE 02, A DIFFERENT LOST THING ON THE SAME FOUR BEATS. His go, 2026-10-02 21:03: \"yeah lets try",
+    "abother artifact recipe\". The question it answers: is carry-absence-recover-return a FAMILY or one",
+    "mission? So the template, the place rules and the leash are testcase 01's unchanged, and everything",
+    "the player reads is new: the object, the absence, the people waiting and why it matters to them.",
+    "",
+    "Testcase 01 was a utility (water). This one is a comms relay, and the reason it matters is that the",
+    "people at the <Place> have not spoken to home since it went down. The last box pays that off."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": []
+    },
+    "_theme": "Testcase 01's delivery rule, unchanged on purpose: people who are waiting on the relay have to be there. LocTypeOE_NonHostile, pool 62 when measured 2026-09-24.",
+    "leash": "duo_samemapdistance",
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": []
+      }
+    },
+    "civilians": false,
+    "_civilians": "Off, as testcase 01: the site brings its own people."
+  },
+  "prose": {
+    "name": "Hauling: Relay Dish on <Planet>",
+    "briefing": "The <Place> has been without a comms relay for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.",
+    "_prose": "Artifact family title shape, Category: thing on <Planet> (style guide 4b), as testcase 01. Journal lines follow section 3: first person, what just happened then what next, about 23 words, and beat 4 is the standalone recap."
+  },
+  "items": {
+    "load": "Relay Dish (1 of 2)",
+    "missing": "Relay Transmitter (2 of 2)",
+    "_items": "Jessica's, 2026-10-02. Named objects, never a described site.",
+    "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+    "_crateModel": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot.",
+    "centreModel": "Meshes\\SetDressing\\SatelliteDish\\SatelliteDish_A_TripodFloor01.nif",
+    "centreName": "Comms Relay",
+    "_centre": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right."
+  },
+  "beats": [
+    {
+      "at": "RETravelA1LocRef",
+      "objective": "Find the Relay Dish",
+      "journal": "I found the dish crate, set down well short of the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
+      "place": "second",
+      "message": {
+        "title": "Shipping Tag",
+        "text": "SHIPPING TAG. To: <Place>. Relay dish, 1 of 2. Transmitter, 2 of 2, shipped separately. Handle with care. Somebody didn't."
+      }
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Deliver the Dish to the <Place>",
+      "journal": "The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.",
+      "message": {
+        "title": "Comms Log",
+        "text": "COMMS LOG, <Place>. Relay down, nine days. Transmitter crate: arrived, opened, empty. Dish: still out there somewhere. Nobody here has spoken to home since."
+      }
+    },
+    {
+      "at": "RETravelB1LocRef",
+      "objective": "Recover the Relay Transmitter",
+      "journal": "I've got the transmitter back, still in its packing. I should take it to the <Place> and get the relay working.",
+      "message": {
+        "title": "Relay Transmitter",
+        "text": "Relay Transmitter (2 of 2). Still in its packing. Someone has written a price on the box in grease pencil, and it isn't much."
+      }
+    },
+    {
+      "at": "RECenterLocRef",
+      "objective": "Bring the Relay Online",
+      "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
+      "message": {
+        "title": "Relay Online",
+        "text": "Dish and transmitter fitted. The relay at the <Place> is live, and the first call out of it was somebody ringing home."
+      }
+    }
+  ],
+  "_messages": "Texts and titles are Jessica's, 2026-10-02. Each box is a MESG cloned the same way as testcase 01's, so <Place> resolves.",
+  "_journal": "Contractions on purpose (didn't, I've, isn't): the journal and the boxes are people writing in a hurry, and a log with none reads generated (the Outlaws 01 read, 2026-10-02)."
+}
