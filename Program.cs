@@ -207,6 +207,11 @@ switch (mode)
         }
         return gen_catalogue.Generate(args);
 
+    // glowtwin builds glow twins (MSTT, cell, PackIn, GBFM) from a plan in one load and one write.
+    case "glowtwin":
+        if (args.Length < 3) { Console.WriteLine("Usage: glowtwin <modname> <plan.json> [--dry]"); return 1; }
+        return RunLegacy(mode, args);
+
     // batch applies an end-state plan (ladder_plan.json) in one load and one write.
     case "batch":
         if (args.Length < 3) { Console.WriteLine("Usage: batch <modname> <plan.json> [--built-only] [--dry]"); return 1; }
@@ -476,6 +481,7 @@ static int RunLegacy(string mode, string[] args)
         "setsortorder"       => gen_setsortorder.Generate(arr),
         "setvalue"           => gen_setvalue.Generate(arr),
         "batch"              => gen_batch.Generate(arr),
+        "glowtwin"           => gen_glowtwin.Generate(arr),
         "seticontransform"   => gen_seticontransform.Generate(arr),
         "copyswap"           => gen_copyswap.Generate(arr),
         "checkpart"          => gen_checkpart.Generate(arr),
