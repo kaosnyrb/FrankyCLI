@@ -132,8 +132,10 @@ namespace FrankyCLI
                 {
                     foreach (var p in m.GetProperty("props").EnumerateObject().Where(p => !avs.ContainsKey(p.Name)))
                         errors.Add($"{name}: {m.GetProperty("editorId").GetString()} plans property {p.Name}, which is no ActorValue in the load order");
-                    string cls = Str(m, "moduleClass") ?? "";
-                    if (!keywords.ContainsKey(cls)) errors.Add($"{name}: class keyword {Show(cls)} is not in the load order");
+                    // No class is legal: vanilla fuel tanks, cargo and gear carry none. A NAMED class
+                    // that is not in the load order is still refused.
+                    if (Str(m, "moduleClass") is string cls && !keywords.ContainsKey(cls))
+                        errors.Add($"{name}: class keyword {Show(cls)} is not in the load order");
                 }
                 foreach (var pr in recipe.GetProperty("requiredPerks").EnumerateArray())
                 {
@@ -265,7 +267,7 @@ namespace FrankyCLI
                     if (had != null) Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g.FormKey), new() { (had, keywords[had]) }, remove: true));
                     if (want != null) Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g.FormKey), new() { (want, keywords[want]) }, remove: false));
                 }
-                Swap(gen_catalogue.Describe(G(mod, g.FormKey)).Keyword(cache, "ShipModuleClass"), Str(m, "moduleClass")!);
+                Swap(gen_catalogue.Describe(G(mod, g.FormKey)).Keyword(cache, "ShipModuleClass"), Str(m, "moduleClass"));
                 // The chain is found by TYPE, as the catalogue reads it; only a plan that names one moves it.
                 if (Str(m, "upgrade") is string up)
                     Swap(gen_catalogue.Describe(G(mod, g.FormKey)).Upgrade(cache), up);
