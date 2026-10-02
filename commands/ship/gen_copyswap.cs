@@ -22,6 +22,10 @@ namespace FrankyCLI
     //
     //   copyswap <modname> <target_mstt> <new=src | existing_swap_editorid> ...
     //
+    // ⛔ IT REPLACES Model.MaterialSwaps, it does not append: list EVERY swap the part should carry,
+    // existing ones included, or the ones you leave out are unwired (2026-10-02, the Foreman lost its
+    // P/S/T adding a fourth). The records themselves are untouched; re-run with the full list to restore.
+    //
     // Two mixable arg forms: `new=src` DEEP-COPIES src (REFL mapping copied, CK repoint if it
     // differs); a bare `editorid` WIRES an existing swap as-is -- for a part sharing another's swaps
     // (e.g. a starboard wing reusing the port's wing01 swaps: no new records, no repoint).
