@@ -235,4 +235,24 @@ namespace FrankyCLI
             "Vanilla reactors 1-2; our eng01 carries 0.25. Zero is legal and common.",
             allowZero: true);
     }
+
+    // 2026-10-05, the Foreman Bridge matched to the DS30.2 Ares Bridge: a COCKPIT carries two crew
+    // properties that are NOT SpaceshipCrewRating (above), and nothing could write either one.
+    // "only like 4 of these left" was true of the properties counted that day, which were the
+    // reactor/engine/cargo sheets; cockpits had never been in the count.
+    class gen_setcrewcapacity
+    {
+        public static int Generate(string[] args) => ShipProp.Apply(args, 0x040CE0,
+            "SpaceshipCrew",
+            "A cockpit's crew capacity. DS30.2 Ares Bridge 3; our Sherpa 2.",
+            allowZero: true);
+    }
+
+    class gen_setcrewslots
+    {
+        public static int Generate(string[] args) => ShipProp.Apply(args, 0x2CC9EA,
+            "SpaceshipCrewSlots",
+            "A cockpit's crew stations. DS30.2 Ares Bridge 8; our Sherpa 2.",
+            allowZero: true);
+    }
 }

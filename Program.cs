@@ -243,6 +243,8 @@ switch (mode)
     case "setvariant":
     case "sethealth":
     case "setcrew":
+    case "setcrewcapacity":
+    case "setcrewslots":
     case "setreactorhealth":
     case "setkeyword":
     case "setcondition":
@@ -451,6 +453,8 @@ static int RunLegacy(string mode, string[] args)
         "setvariant"         => gen_setvariant.Generate(arr),
         "sethealth"          => gen_sethealth.Generate(arr),
         "setcrew"            => gen_setcrew.Generate(arr),
+        "setcrewcapacity"    => gen_setcrewcapacity.Generate(arr),
+        "setcrewslots"       => gen_setcrewslots.Generate(arr),
         "setreactorhealth"   => gen_setreactorhealth.Generate(arr),
         "setkeyword"         => gen_setkeyword.Generate(arr),
         "setcondition"       => gen_setcondition.Generate(arr),
