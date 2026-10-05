@@ -289,7 +289,10 @@ def cmd_convert(a):
         sys.exit(f"no TIFs in {src} -- run render or solve first")
     r = subprocess.run([str(XTEXCONV), "-nologo", "-y", "-w", "128", "-h", "128", "-m", "1", "-f", "BC1_UNORM",
                         "-if", "CUBIC", "-l", "-srgbnoconvert", "-o", str(out)] + [t.name for t in tifs],
-                       cwd=src, capture_output=True, text=True)
+                       cwd=src, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    # errors="replace" is load-bearing (2026-10-05, 303 icons): xtexconv's output carried a byte the
+    # locale codec could not decode, the reader thread died, stdout came back None, and the crash
+    # skipped the header assertion below after every DDS was already written.
     bad = [ln for ln in r.stdout.splitlines() if "FAIL" in ln.upper()]
     if r.returncode or bad:
         sys.exit(r.stdout)
