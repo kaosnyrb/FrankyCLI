@@ -29,12 +29,19 @@ namespace FrankyCLI
     ///                    fins, markers, kept as it stands)
     ///   PackIn           EditorID, Cell
     ///   GenericBaseForm  EditorID, the SpaceshipLinkedExterior link (source PackIn -> twin PackIn; 0x00662F, read off every dumped GBFM),
-    ///                    ShipModuleVariant (the plan's number)
+    ///                    ShipModuleVariant (the plan's number), and its upgrade chain ONLY when the
+    ///                    module plans an "upgrade"
     ///   FormList         the twin GBFM appended, only where the source GBFM is already a member
     ///
     /// PLAN: { "packins": [ {"src": pkin, "mstt": its shell MSTT, "item": "glow_x", "model": "Meshes\\..."} ],
     ///         "modules": [ {"src": gbfm, "dst": gbfm, "packin": twin pkin (planned above or live),
-    ///                       "variant": n, "formList": flst or null} ] }
+    ///                       "variant": n, "formList": flst or null, "upgrade": kywd (optional)} ] }
+    ///
+    /// "upgrade" (2026-10-05, his "think there own" for the glow Stokers): a Stoker is a CHAIN OF ONE
+    /// (manual 35: the upgrade screen cannot change variant), so its twin may not share the source's
+    /// chain. The named keyword must be Type ShipModuleUpgrade and the source must carry EXACTLY ONE
+    /// chain, which the twin's replaces. Omitted, the twin keeps the source's chain, as every non-Stoker
+    /// twin does.
     ///
     /// ⛔ VALIDATE EVERYTHING, THEN MUTATE: every name resolves, no planned name exists yet, every model
     /// is on disk, every source cell has no PERSISTENT ref and exactly one ref on the planned shell,
@@ -102,15 +109,34 @@ namespace FrankyCLI
             }
             var plannedPk = pkPlans.Select(x => $"atsd_pkn_{x.item}").ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            var modPlans = new List<(IGenericBaseFormGetter g, string dst, string packin, float variant, IFormListGetter? fl)>();
+            var cache = session.Cache;
+            List<FormKey> ChainsOf(IGenericBaseFormGetter g) =>
+                g.Components.OfType<IKeywordFormComponentGetter>().SelectMany(c => c.Keywords ?? Enumerable.Empty<IFormLinkGetter<IKeywordGetter>>())
+                 .Where(k => cache.TryResolve<IKeywordGetter>(k.FormKey, out var kw) && kw.Type == Keyword.TypeEnum.ShipModuleUpgrade)
+                 .Select(k => k.FormKey).ToList();
+
+            var modPlans = new List<(IGenericBaseFormGetter g, string dst, string packin, float variant, IFormListGetter? fl, (FormKey had, FormKey want)? chain)>();
             foreach (var m in plan.GetProperty("modules").EnumerateArray())
             {
                 string src = m.GetProperty("src").GetString()!, dst = m.GetProperty("dst").GetString()!;
                 string packin = m.GetProperty("packin").GetString()!;
                 float variant = (float)m.GetProperty("variant").GetDouble();
                 string? flId = m.TryGetProperty("formList", out var f) && f.ValueKind == JsonValueKind.String ? f.GetString() : null;
+                string? upId = m.TryGetProperty("upgrade", out var u) && u.ValueKind == JsonValueKind.String ? u.GetString() : null;
                 var g = ByEid(mod.GenericBaseForms, src);
                 if (g == null) { errs.Add($"no GenericBaseForm {src}"); continue; }
+                (FormKey, FormKey)? chain = null;
+                if (upId != null)
+                {
+                    var want = cache.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                        .Where(k => string.Equals(k.EditorID, upId, StringComparison.Ordinal)).ToList();
+                    var had = ChainsOf(g);
+                    if (want.Count != 1) errs.Add($"{dst}: upgrade {upId} names {want.Count} keywords in the load order, not one");
+                    else if (want[0].Type != Keyword.TypeEnum.ShipModuleUpgrade) errs.Add($"{dst}: {upId} is Type {want[0].Type}, not ShipModuleUpgrade");
+                    else if (had.Count != 1) errs.Add($"{dst}: source {src} carries {had.Count} upgrade chains; replacing one needs exactly one");
+                    else if (had[0] == want[0].FormKey) errs.Add($"{dst}: upgrade {upId} is the source's own chain -- omit the field to keep it");
+                    else chain = (had[0], want[0].FormKey);
+                }
                 if (Exists(dst)) errs.Add($"{dst} already exists");
                 if (!plannedPk.Contains(packin) && ByEid(mod.PackIns, packin) == null) errs.Add($"{dst}: twin PackIn {packin} neither planned nor live");
                 var links = g.Components.OfType<IFormLinkDataComponentGetter>().SelectMany(c => c.Links).ToList();
@@ -127,7 +153,7 @@ namespace FrankyCLI
                     if (fl == null) errs.Add($"no FormList {flId}");
                     else if (!fl.Items.Any(i => i.FormKey == g.FormKey)) errs.Add($"{src} is not a member of {flId}");
                 }
-                modPlans.Add((g, dst, packin, variant, fl));
+                modPlans.Add((g, dst, packin, variant, fl, chain));
             }
             if (errs.Count > 0)
             {
@@ -170,7 +196,7 @@ namespace FrankyCLI
 
             var created = new List<string>();
             var avVariant = new FormKey(sf, AV_SHIP_MODULE_VARIANT);
-            foreach (var (g, dst, packin, variant, fl) in modPlans)
+            foreach (var (g, dst, packin, variant, fl, chain) in modPlans)
             {
                 FormKey pkKey = twinPk.TryGetValue(packin, out var k) ? k : mod.PackIns.First(p => string.Equals(p.EditorID, packin, StringComparison.OrdinalIgnoreCase)).FormKey;
                 var ng = g.Duplicate(mod.GetNextFormKey());
@@ -183,11 +209,19 @@ namespace FrankyCLI
                 var v = sheet.Properties.FirstOrDefault(p => p.ActorValue.FormKey == avVariant);
                 if (v != null) v.Value = variant;
                 else sheet.Properties.Add(new ObjectProperty { ActorValue = avVariant.ToNullableLink<IActorValueInformationGetter>(), Value = variant });
+                string chainNote = "";
+                if (chain is (FormKey had, FormKey want))
+                {
+                    var kws = ng.Components.OfType<KeywordFormComponent>().Single().Keywords!;
+                    int at = kws.FindIndex(k => k.FormKey == had);
+                    kws[at] = want.ToLink<IKeywordGetter>();
+                    chainNote = $"  chain {gen_catalogue.Name(had, cache)} -> {gen_catalogue.Name(want, cache)}";
+                }
                 mod.GenericBaseForms.Add(ng);
                 created.Add(dst);
                 if (fl != null)
                     mod.FormLists.First(x => x.FormKey == fl.FormKey).Items.Add(ng.FormKey.ToLink<IStarfieldMajorRecordGetter>());
-                Console.WriteLine($"  + {dst}  <- {g.EditorID}  variant {variant}  -> {packin}{(fl != null ? "  in " + fl.EditorID : "")}");
+                Console.WriteLine($"  + {dst}  <- {g.EditorID}  variant {variant}  -> {packin}{(fl != null ? "  in " + fl.EditorID : "")}{chainNote}");
             }
 
             if (dry)
