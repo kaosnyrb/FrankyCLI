@@ -146,12 +146,13 @@ namespace FrankyCLI
                 Console.WriteLine($"Error: no MoveableStatic '{mstt}' in this plugin");
                 return false;
             }
-            if (ms.SnapTemplate.IsNull)
-            {
-                Console.WriteLine($"Error: {mstt} links no SnapTemplate to patch");
-                return false;
-            }
-            var tpl = myMod.SnapTemplates.FirstOrDefault(t => t.FormKey == ms.SnapTemplate.FormKey);
+            // A part that links NO template takes the same authoring path as one that links a
+            // template we do not own: either way there is nothing of ours to patch. The case
+            // (2026-10-06): atsd_ms_foreman, a CK clone whose snaps were only its cell's door
+            // plugs, needed structural faces on its walls, shoulders and underside.
+            var tpl = ms.SnapTemplate.IsNull
+                ? null
+                : myMod.SnapTemplates.FirstOrDefault(t => t.FormKey == ms.SnapTemplate.FormKey);
             if (tpl == null)
             {
                 // THE PART LINKS A TEMPLATE WE DO NOT OWN -- in practice a VANILLA one, shared by
@@ -182,7 +183,9 @@ namespace FrankyCLI
                 authored.NextNodeID = fresh;
                 myMod.SnapTemplates.Add(authored);
                 ms.SnapTemplate.SetTo(authored.FormKey);
-                Console.WriteLine($"  {label,-9} {mstt} linked {borrowed}, which is NOT in this plugin (shared/vanilla)");
+                Console.WriteLine(borrowed.IsNull
+                    ? $"  {label,-9} {mstt} linked NO SnapTemplate"
+                    : $"  {label,-9} {mstt} linked {borrowed}, which is NOT in this plugin (shared/vanilla)");
                 Console.WriteLine($"  {"",-9} -> authored {edid} with {authored.Nodes.Count} node(s) and repointed the part at it");
                 changed++;
                 return true;
