@@ -33,7 +33,8 @@ namespace FrankyCLI
     /// second copy of their rules, and reads records with gen_catalogue's readers, so the applier
     /// and the readback cannot disagree about what a field holds.
     ///
-    /// A BUILT rung is EDITED: its sheet, price and sort. A rung whose recipe does not exist is
+    /// A BUILT rung is EDITED: its sheet, price and sort, and each member's upgrade CHAIN when the
+    /// plan names a different one (since 2026-10-06; before that a planned chain was silently skipped). A rung whose recipe does not exist is
     /// CREATED from the plan's templates: each housing DUPLICATED from its template GBFM (so the
     /// PackIn link, the manufacturer keyword and every unplanned component come with it), named,
     /// re-classed and given the planned sheet; a new FormList of those housings; the recipe
@@ -279,7 +280,25 @@ namespace FrankyCLI
             {
                 Console.WriteLine($"[edit {co.EditorID}]");
                 foreach (var (g0, m) in members)
+                {
+                    // A built member's CHAIN moves when the plan names a different one (2026-10-06, his
+                    // "make it so the plain don't upgrade either": every reactor, shield and grav rung
+                    // onto a chain of one). Until then this path SKIPPED a planned chain without saying
+                    // so, and only the readback would have noticed. The remove targets the link the
+                    // record holds (UpgradeKey), not a same-named keyword off the load order.
+                    if (Str(m, "upgrade") is string up)
+                    {
+                        var held = gen_catalogue.Describe(G(mod, g0.FormKey));
+                        string? had = held.Upgrade(cache);
+                        if (had != up)
+                        {
+                            if (had != null && held.UpgradeKey(cache) is FormKey hk)
+                                Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g0.FormKey), new() { (had, hk) }, remove: true));
+                            Track(gen_setkeyword.ApplyGbfm(mod, G(mod, g0.FormKey), new() { (up, keywords[up]) }, remove: false));
+                        }
+                    }
                     if (SetSheet(mod, g0.FormKey, m, avs, Track) == null) return Refused();
+                }
                 foreach (var (template, m) in adds)
                 {
                     if (AddMember(template, m) is not FormKey k) return Refused();

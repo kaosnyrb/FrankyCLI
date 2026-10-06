@@ -333,6 +333,16 @@ namespace FrankyCLI
                 return null;
             }
 
+            /// <summary>The FormKey of the chain this module ACTUALLY holds, so a remove targets the
+            /// record's own link, never a same-named keyword resolved off the load order.</summary>
+            public FormKey? UpgradeKey(ILinkCache cache)
+            {
+                foreach (var k in KeywordKeys)
+                    if (cache.TryResolve<IKeywordGetter>(k, out var kw) && kw.Type == Mutagen.Bethesda.Starfield.Keyword.TypeEnum.ShipModuleUpgrade)
+                        return k;
+                return null;
+            }
+
             public string? SoundKey(ILinkCache cache)
             {
                 foreach (var k in KeywordKeys)
