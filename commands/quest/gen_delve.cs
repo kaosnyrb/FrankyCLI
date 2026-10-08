@@ -82,6 +82,14 @@ namespace FrankyCLI
             /// "should have been at a different POI and then I take it to that one".
             /// </summary>
             public int secondPlaceAlias { get; set; } = -1;
+            /// <summary>
+            /// choice: a THIRD place the base does not have, CREATED by cloning one of its location
+            /// aliases. Null = this template has none. His ruling 2026-10-08, "third place, time to
+            /// learn": the medal's owner and buyer are two different peopled sites.
+            /// </summary>
+            public ThirdPlace? thirdPlace { get; set; }
+            /// <summary>choice: the stage the offer's journal line lands on, between the find and the endings.</summary>
+            public int offerStage { get; set; } = -1;
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
@@ -102,6 +110,13 @@ namespace FrankyCLI
             [System.Text.Json.Serialization.JsonIgnore] public int targetAlias { get; set; } = -1;
             public int ObjectiveTarget => targetAlias >= 0 ? targetAlias : activatorAlias >= 0 ? activatorAlias : markerAlias;
         }
+        /// <summary>
+        /// A created place. cloneOf names the base location alias it is copied from, so it inherits
+        /// that alias's flags and its GetDistance leash (the one condition type this tool preserves
+        /// rather than constructs); its marker and theme conditions are then written from the recipe
+        /// like any other place.
+        /// </summary>
+        private sealed class ThirdPlace { public int cloneOf { get; set; } = -1; public string name { get; set; } = ""; }
         private sealed class TemplateFile { public int schema { get; set; } public List<Template> templates { get; set; } = new(); }
 
         private sealed class Recipe
@@ -115,7 +130,13 @@ namespace FrankyCLI
             public Prose prose { get; set; } = new();
             public Items? items { get; set; }
             public List<Beat> beats { get; set; } = new();
+            /// <summary>choice: the surprise between the find and the endings (journal + optional box).</summary>
+            public Offer? offer { get; set; }
+            /// <summary>choice: credits per ending, paid by the driver. His numbers.</summary>
+            public Reward? reward { get; set; }
         }
+        private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } }
+        private sealed class Reward { public int owner { get; set; } = -1; public int buyer { get; set; } = -1; }
         /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
         private sealed class Items
         {
@@ -133,6 +154,13 @@ namespace FrankyCLI
             public string? centreModel { get; set; }
             /// <summary>OPTIONAL: the delivery point's display name, i.e. its activate prompt. Absent = the base's.</summary>
             public string? centreName { get; set; }
+            /// <summary>
+            /// choice, REQUIRED there: the buyer's delivery point, a second clone of the base activator. Required
+            /// because the buyer's slot is cloned from the owner's, so without its own model and name the buyer
+            /// would wear the owner's prompt.
+            /// </summary>
+            public string? buyerModel { get; set; }
+            public string? buyerName { get; set; }
         }
         private sealed class Place
         {
@@ -140,6 +168,8 @@ namespace FrankyCLI
             public string? leash { get; set; }
             /// <summary>The second POI's own theme, for beats with place "second". Absent = no theme.</summary>
             public Place? second { get; set; }
+            /// <summary>choice: the third POI's own theme, for beats with place "third". Absent = no theme.</summary>
+            public Place? third { get; set; }
             /// <summary>
             /// delve4: place civilians at the centre on the first approach. Default true. Set false when the
             /// theme already guarantees people (LocTypeOE_NonHostile), or the site gets a crowd.
@@ -153,9 +183,13 @@ namespace FrankyCLI
             public string at { get; set; } = "";
             public string? objective { get; set; }
             public string? journal { get; set; }
-            /// <summary>"main" (default) or "second": which drawn POI this beat happens at.</summary>
+            /// <summary>"main" (default), "second" or "third": which drawn POI this beat happens at.</summary>
             public string? place { get; set; }
-            public bool Second => string.Equals(place, "second", StringComparison.OrdinalIgnoreCase);
+            /// <summary>0 main, 1 second, 2 third; -1 for a name that is none of them (the lint refuses it).</summary>
+            public int PlaceIndex => place == null || place.Equals("main", StringComparison.OrdinalIgnoreCase) ? 0
+                                   : place.Equals("second", StringComparison.OrdinalIgnoreCase) ? 1
+                                   : place.Equals("third", StringComparison.OrdinalIgnoreCase) ? 2 : -1;
+            public bool Second => PlaceIndex == 1;
             /// <summary>
             /// delve4, OPTIONAL: a pausing message box shown when this beat fires. Absent = no box.
             /// A new optional field, so schema stays 1 and every recipe written before it builds unchanged.
@@ -198,7 +232,7 @@ namespace FrankyCLI
                 case "markers": return Markers(args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "bases": return MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "footprint": return Footprint();
-                case "keywords": return PoolKeywords();
+                case "keywords": return PoolKeywords(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
@@ -269,23 +303,59 @@ namespace FrankyCLI
             // driver to display one -- writing the string anyway would put prose in the record that
             // no player can ever see, which is worse than refusing it.
             bool delve4 = t.kind == "delve4";
+            bool choice = t.kind == "choice";
             if (delve4)
+            {
+                if (string.IsNullOrWhiteSpace(r.items?.load) || string.IsNullOrWhiteSpace(r.items?.missing))
+                    Fatal("items.load and items.missing are both required: each half is a cloned item the player carries, and an item with no name shows as a blank line in the inventory.");
+            }
+            if (choice)
+            {
+                // ⭐ THE SHAPE IS THE DESIGN: found at one place, owned at a second, wanted at a third.
+                // Each place is a different POI by construction (and the pool check below proves the two
+                // endings cannot coincide), so the choice is made by where the player walks.
+                if (r.beats.Count == 3)
+                {
+                    var want = new[] { 1, 0, 2 };
+                    var role = new[] { "the find", "the owner", "the buyer" };
+                    for (int i = 0; i < 3; i++)
+                        if (r.beats[i].PlaceIndex != want[i])
+                            Fatal($"beat {i + 1} is {role[i]} and must be at the {PlaceLabel(want[i]).ToLowerInvariant()} place; it names '{r.beats[i].place ?? "main"}'.");
+                }
+                if (string.IsNullOrWhiteSpace(r.items?.load))
+                    Fatal("items.load is required: it is the thing the player carries to whichever ending, and an item with no name shows as a blank line.");
+                if (!string.IsNullOrWhiteSpace(r.items?.missing))
+                    Fatal("items.missing is set; a choice Delve carries ONE thing, so it would never be used.");
+                foreach (var (f, v) in new[] { ("centreModel", r.items?.centreModel), ("centreName", r.items?.centreName),
+                                                ("buyerModel", r.items?.buyerModel), ("buyerName", r.items?.buyerName) })
+                    if (string.IsNullOrWhiteSpace(v))
+                        Fatal($"items.{f} is required on a choice Delve: the buyer's delivery point is cloned from the owner's, "
+                              + "so each needs its own model and name or one wears the other's prompt.");
+                if (string.IsNullOrWhiteSpace(r.offer?.journal))
+                    Fatal("offer.journal is required: the offer is the beat that makes it a choice, and it must reach the journal.");
+                if (r.reward == null || r.reward.owner < 0 || r.reward.buyer < 0)
+                    Fatal("reward.owner and reward.buyer are both required: the driver pays them, and the Delves pay nothing otherwise.");
+                else if (r.reward.buyer <= r.reward.owner)
+                    Warn($"reward.buyer ({r.reward.buyer}) is not more than reward.owner ({r.reward.owner}); the design has the buyer paying more.");
+            }
+            if (delve4 || choice)
             {
                 // Our driver displays every beat's objective, so every beat is driven, and the beat
                 // count is the state machine's shape rather than a ceiling.
                 if (r.beats.Count != t.beatSlots.Count)
                     Fatal($"template '{t.id}' is exactly {t.beatSlots.Count} beats; the recipe has {r.beats.Count}.");
                 if (string.IsNullOrWhiteSpace(t.replacesDriver)) Fatal($"template '{t.id}' names no replacesDriver");
-                if (string.IsNullOrWhiteSpace(r.items?.load) || string.IsNullOrWhiteSpace(r.items?.missing))
-                    Fatal("items.load and items.missing are both required: each half is a cloned item the player carries, and an item with no name shows as a blank line in the inventory.");
-                else if (Tokens(r.items!.load!).Concat(Tokens(r.items.missing!)).Any())
+                var itemNames = new[] { r.items?.load, r.items?.missing }.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n!).ToList();
+                if (itemNames.SelectMany(Tokens).Any())
                     Fatal("an item name carries a <Token>. Item names are not alias contexts, so it would print literally in the inventory.");
-                else ItemNameCollisions(env, r, Fatal);
-                if (r.items?.centreName != null && Tokens(r.items.centreName).Any())
-                    Fatal("items.centreName carries a <Token>. An activator name is not an alias context, so it would print literally.");
+                else if (itemNames.Count > 0) ItemNameCollisions(env, r, itemNames, Fatal);
+                foreach (var (f, v) in new[] { ("centreName", r.items?.centreName), ("buyerName", r.items?.buyerName) })
+                    if (v != null && Tokens(v).Any())
+                        Fatal($"items.{f} carries a <Token>. An activator name is not an alias context, so it would print literally.");
                 if (r.items?.centreName != null && string.IsNullOrEmpty(r.items.centreModel))
                     Warn("items.centreName is set with no centreModel; a name only goes onto the clone, so it is not written.");
-                foreach (var (field, path) in new[] { ("crateModel", r.items?.crateModel), ("centreModel", r.items?.centreModel) })
+                foreach (var (field, path) in new[] { ("crateModel", r.items?.crateModel), ("centreModel", r.items?.centreModel),
+                                                      ("buyerModel", r.items?.buyerModel) })
                 {
                     if (string.IsNullOrWhiteSpace(path)) continue;
                     int uses = 0;
@@ -313,15 +383,16 @@ namespace FrankyCLI
                             Warn($"items.{field} '{path}' is a NEW asset (no record uses it), found in {where}.");
                     }
                 }
-                for (int i = 0; i < r.beats.Count; i++)
+                var boxes = r.beats.Select((b, i) => ($"beat {i + 1}", b.message)).ToList();
+                if (r.offer?.message != null) boxes.Add(("the offer", r.offer.message));
+                foreach (var (who, m) in boxes)
                 {
-                    var m = r.beats[i].message;
                     if (m == null) continue;
-                    if (string.IsNullOrWhiteSpace(m.text)) Fatal($"beat {i + 1} has a message with no text: an empty pausing box.");
-                    if (string.IsNullOrWhiteSpace(m.title)) Fatal($"beat {i + 1} has a message with no title.");
+                    if (string.IsNullOrWhiteSpace(m.text)) Fatal($"{who} has a message with no text: an empty pausing box.");
+                    if (string.IsNullOrWhiteSpace(m.title)) Fatal($"{who} has a message with no title.");
                     foreach (var (what, str) in new[] { ("title", m.title ?? ""), ("text", m.text ?? "") })
                         if (str.Any(ch => ch > 126 || (ch < 32 && ch != '\n')))
-                            Warn($"beat {i + 1} message {what} carries a non-ASCII or control character; the lane writes plain ASCII.");
+                            Warn($"{who} message {what} carries a non-ASCII or control character; the lane writes plain ASCII.");
                 }
                 // ⭐ THE RETURN IS THE DESIGN, so it is refused rather than warned when it is not one.
                 for (int i = 0; i < t.beatSlots.Count && i < r.beats.Count; i++)
@@ -335,7 +406,7 @@ namespace FrankyCLI
             }
             for (int i = 0; i < r.beats.Count; i++)
             {
-                bool driven = delve4 || i == 0 || i == r.beats.Count - 1;
+                bool driven = delve4 || choice || i == 0 || i == r.beats.Count - 1;
                 if (string.IsNullOrWhiteSpace(r.beats[i].at)) Fatal($"beat {i + 1} names no marker");
                 if (driven && string.IsNullOrWhiteSpace(r.beats[i].objective))
                     Fatal($"beat {i + 1} is one of the driver's own slots and has no objective text");
@@ -397,14 +468,16 @@ namespace FrankyCLI
 
             // --- which place each beat is at --------------------------------------------------
             bool anySecond = r.beats.Any(b => b.Second);
+            bool anyThird = r.beats.Any(b => b.PlaceIndex == 2);
             for (int i = 0; i < r.beats.Count; i++)
-            {
-                var pl = r.beats[i].place;
-                if (pl != null && !pl.Equals("main", StringComparison.OrdinalIgnoreCase) && !r.beats[i].Second)
-                    Fatal($"beat {i + 1} names place '{pl}'; the places are \"main\" and \"second\"");
-            }
+                if (r.beats[i].PlaceIndex < 0)
+                    Fatal($"beat {i + 1} names place '{r.beats[i].place}'; the places are \"main\", \"second\" and \"third\"");
             if (anySecond && t.secondPlaceAlias < 0)
                 Fatal($"a beat is at the \"second\" place and template '{t.id}' has no second place alias");
+            if (anyThird && t.thirdPlace == null)
+                Fatal($"a beat is at the \"third\" place and template '{t.id}' creates no third place");
+            if (!anyThird && r.place.third != null)
+                Warn("place.third is set and no beat is at the third place, so it is never written");
             if (anySecond && t.kind == "delve4" && r.beats.Skip(1).Any(b => b.Second))
                 Fatal("only beat 1 may be at the second place on a delve4: beats 2-4 are the centre and the carrier, "
                       + "and the driver's whole return is to ONE centre");
@@ -418,11 +491,14 @@ namespace FrankyCLI
             {
                 var pool = PoolCensus(env);
                 Console.WriteLine($"  POI corpus: {pool.Count} location(s) in the working pool");
-                foreach (bool second in anySecond ? new[] { false, true } : new[] { false })
+                var drawn = new Dictionary<int, HashSet<string>>();
+                foreach (int pi in PlacesUsed(r))
                 {
-                    var here = MarkersAt(r, keys, second);
-                    var theme = second ? (r.place.second?.theme ?? new Theme()) : r.place.theme;
-                    Console.WriteLine($"  -- the {(second ? "SECOND" : "MAIN")} place (alias {(second ? t.secondPlaceAlias : t.placeAlias)})");
+                    var here = MarkersAt(r, keys, pi);
+                    var theme = ThemeOf(r, pi);
+                    Console.WriteLine($"  -- the {PlaceLabel(pi)} place (alias "
+                                      + (pi == 2 ? $"CREATED at build, a clone of {t.thirdPlace?.cloneOf}" : PlaceAliasOf(t, pi, -1).ToString()) + ")");
+                    drawn[pi] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     int all = 0, mapOnly = 0;
                     var perMarker = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                     foreach (var m in here.Keys) perMarker[m] = 0;
@@ -436,14 +512,29 @@ namespace FrankyCLI
                         if (reqK.Any(k => !poi.Keywords.Contains(k))) continue;
                         if (excK.Any(k => poi.Keywords.Contains(k))) continue;
                         all++;
+                        drawn[pi].Add(poi.Edid);
                     }
                     foreach (var kv in perMarker)
                         Console.WriteLine($"    {kv.Key,-34} {kv.Value,4} of {pool.Count}  ({100.0 * kv.Value / Math.Max(1, pool.Count):F1}%)");
                     Console.WriteLine($"    all markers together               {mapOnly,4}");
                     Console.WriteLine($"    after the theme predicate          {all,4}   <- the draw pool");
-                    string which = second ? "the SECOND place" : "the main place";
+                    string which = $"the {PlaceLabel(pi).ToLowerInvariant()} place";
                     if (all == 0) Fatal($"{which}'s draw pool is ZERO. Nothing would ever select this mission.");
                     else if (all < 40) Warn($"{which}'s draw pool is {all}. Narrow -- the narrowest anything in Overtime leans on is 44.");
+                }
+
+                // ⛔ TWO ENDINGS MUST BE TWO PLACES. Whether the engine de-duplicates two location aliases
+                // of one quest is NOT established (part 32: eight shipped cargo quests draw pickup and
+                // delivery from an identical pool, untested). The shipped separation mechanism is the
+                // THEME PREDICATE, disjoint by construction, so the choice's two delivery pools must not
+                // share a single POI. Measured here, not trusted to the author's keywords.
+                if (t.kind == "choice" && drawn.ContainsKey(0) && drawn.ContainsKey(2))
+                {
+                    var both = drawn[0].Intersect(drawn[2], StringComparer.OrdinalIgnoreCase).ToList();
+                    Console.WriteLine($"  owner (main) and buyer (third) pools overlap on {both.Count} POI(s)");
+                    if (both.Count > 0)
+                        Fatal($"the owner's and the buyer's places can draw the SAME POI ({both.Count}: {string.Join(", ", both.Take(5))}). "
+                              + "Make their themes disjoint: one requires a keyword the other excludes.");
                 }
 
                 // --- what the build will DROP from the base --------------------------------------------
@@ -453,10 +544,11 @@ namespace FrankyCLI
                 // ("It's mainly caves and natural locations atm"). The drop stays; it is never silent.
                 var baseQ = env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.@base);
                 if (baseQ?.Aliases != null)
-                    foreach (bool second in anySecond ? new[] { false, true } : new[] { false })
+                    foreach (int pi in PlacesUsed(r))
                     {
-                        int aid = second ? t.secondPlaceAlias : t.placeAlias;
-                        var theme = second ? (r.place.second?.theme ?? new Theme()) : r.place.theme;
+                        // The third place is a clone, so what it would inherit and drop is its source's.
+                        int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : PlaceAliasOf(t, pi, -1);
+                        var theme = ThemeOf(r, pi);
                         var la = baseQ.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
                         foreach (var c in la?.Conditions ?? Enumerable.Empty<IConditionGetter>())
                         {
@@ -492,7 +584,7 @@ namespace FrankyCLI
                     ("site radius", "RECenterLocRef", "RETravelA1LocRef"),
                     ("site diameter (the ceiling)", "RETravelA1LocRef", "RETravelB1LocRef"),
                 };
-                if (r.beats[0].Second != r.beats[1].Second)
+                if (r.beats[0].PlaceIndex != r.beats[1].PlaceIndex)
                 {
                     // Two POIs: beats 1 and 2 are not in one site, so a marker-to-marker distance between
                     // them is not a thing. Their separation is the second place's leash (see the warn).
@@ -533,12 +625,28 @@ namespace FrankyCLI
             return fatal == 0;
         }
 
-        private static Dictionary<string, FormKey> MarkersAt(Recipe r, Dictionary<string, FormKey> all, bool second)
+        /// <summary>The places a recipe uses, by index: main always, then any a beat names.</summary>
+        private static List<int> PlacesUsed(Recipe r)
+            => new[] { 0 }.Concat(r.beats.Select(b => b.PlaceIndex).Where(i => i > 0)).Distinct().OrderBy(i => i).ToList();
+
+        private static Theme ThemeOf(Recipe r, int place)
+            => place == 0 ? r.place.theme : (place == 1 ? r.place.second : r.place.third)?.theme ?? new Theme();
+
+        private static string PlaceLabel(int place) => place == 0 ? "MAIN" : place == 1 ? "SECOND" : "THIRD";
+
+        /// <summary>
+        /// The location alias a place is drawn on. The third place does not exist on the base: it is
+        /// created at build time, so its id is handed in (-1 at lint time, where nothing is built yet).
+        /// </summary>
+        private static int PlaceAliasOf(Template t, int place, int thirdId)
+            => place == 0 ? t.placeAlias : place == 1 ? t.secondPlaceAlias : thirdId;
+
+        private static Dictionary<string, FormKey> MarkersAt(Recipe r, Dictionary<string, FormKey> all, int place)
         {
             // The markers one place must carry: its own beats' markers, plus the map marker every
             // shipped target place carries (the player has to be able to navigate there).
             var outp = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
-            foreach (var b in r.beats.Where(b => b.Second == second))
+            foreach (var b in r.beats.Where(b => b.PlaceIndex == place))
                 if (all.TryGetValue(b.at, out var k)) outp[b.at] = k;
             if (all.TryGetValue("MapMarkerRefType", out var mm)) outp["MapMarkerRefType"] = mm;
             return outp;
@@ -550,9 +658,9 @@ namespace FrankyCLI
         /// CONTAINS the item's first word is listed, not judged, because whether it collides in the
         /// fiction is the author's call. Prints how many names it read, so a blind read shows as one.
         /// </summary>
-        private static void ItemNameCollisions(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Recipe r, Action<string> fatal)
+        private static void ItemNameCollisions(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Recipe r,
+                                               List<string> names, Action<string> fatal)
         {
-            var names = new[] { r.items!.load!, r.items.missing! };
             var heads = names.Select(n => n.Split(' ')[0]).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             int read = 0;
             var near = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -584,6 +692,9 @@ namespace FrankyCLI
                 if (r.beats[i].message?.title != null) yield return ($"beat {i + 1} message title", r.beats[i].message!.title!);
                 if (r.beats[i].message?.text != null) yield return ($"beat {i + 1} message text", r.beats[i].message!.text!);
             }
+            if (r.offer?.journal != null) yield return ("offer journal", r.offer.journal);
+            if (r.offer?.message?.title != null) yield return ("offer message title", r.offer.message.title);
+            if (r.offer?.message?.text != null) yield return ("offer message text", r.offer.message.text);
         }
 
         private static IEnumerable<string> Tokens(string s)
@@ -1109,11 +1220,29 @@ namespace FrankyCLI
         /// ⛔ WHY: I called "not Natural, not Cave, not Abandoned" a PEOPLED filter without looking for a
         /// keyword that means people. His question, 2026-09-24: "what peopled did you check?"
         /// </summary>
-        private static int PoolKeywords()
+        /// <summary>
+        /// Keyword tally over the POI pool, optionally NARROWED first: each argument is a keyword the
+        /// POI must carry or a ref type it must carry (resolved as either; a name that is neither
+        /// refuses). Added 2026-10-08 for the three-place Delve, whose two delivery sites must both be
+        /// LocTypeOE_NonHostile and must draw from DISJOINT pools, so the question is which theme
+        /// splits the peopled pool, not which themes the whole pool has.
+        /// </summary>
+        private static int PoolKeywords(List<string> narrow)
         {
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
             var pool = PoolCensus(env);
+            foreach (var n in narrow)
+            {
+                var kw = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
+                    .FirstOrDefault(x => string.Equals(x.EditorID, n, StringComparison.OrdinalIgnoreCase));
+                var rt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                    .FirstOrDefault(x => string.Equals(x.EditorID, n, StringComparison.OrdinalIgnoreCase));
+                if (kw == null && rt == null) { Console.WriteLine($"REFUSED: '{n}' is neither a keyword nor a ref type"); return 1; }
+                int before = pool.Count;
+                pool = pool.Where(p => (kw != null && p.Keywords.Contains(kw.FormKey)) || (rt != null && p.RefTypes.Contains(rt.FormKey))).ToList();
+                Console.WriteLine($"  narrowed by {n} ({(kw != null ? "keyword" : "ref type")}): {before} -> {pool.Count}");
+            }
             var tally = new Dictionary<FormKey, int>();
             foreach (var p in pool) foreach (var k in p.Keywords) tally[k] = tally.GetValueOrDefault(k) + 1;
             Console.WriteLine($"\n  POI pool: {pool.Count} location(s); {tally.Count} distinct keyword(s)\n");
@@ -1356,19 +1485,32 @@ namespace FrankyCLI
             if (repointed == 0) { Console.WriteLine("REFUSED: expected at least one self-reference and found none."); return 1; }
 
             int fail = 0;
-            foreach (bool second in r.beats.Any(b => b.Second) ? new[] { false, true } : new[] { false })
+            var made4 = new BuildMade();
+            if (r.beats.Any(b => b.PlaceIndex == 2))
             {
-                var theme = second ? (r.place.second?.theme ?? new Theme()) : r.place.theme;
-                fail += WritePlaceConditions(clone, second ? t.secondPlaceAlias : t.placeAlias, MarkersAt(r, markers, second),
+                made4.ThirdPlaceAlias = CreateThirdPlace(clone, t);
+                if (made4.ThirdPlaceAlias < 0) fail++;
+            }
+            foreach (int pi in PlacesUsed(r))
+            {
+                if (fail > 0) break;
+                var theme = ThemeOf(r, pi);
+                fail += WritePlaceConditions(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), MarkersAt(r, markers, pi),
                                              ResolveKeywords(env, theme.require, _ => { }),
                                              ResolveKeywords(env, theme.exclude, _ => { }));
             }
 
             var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
-            var made4 = new Delve4Made();
             if (t.kind == "delve4")
             {
                 if (fail == 0) fail += BuildDelve4(myMod, clone, t, r, markers, plan, made4);
+            }
+            else if (t.kind == "choice")
+            {
+                var credits = env.LoadOrder.PriorityOrder.WinningOverrides<IMiscItemGetter>()
+                    .FirstOrDefault(m => m.FormKey.ModKey.FileName == "Starfield.esm" && m.EditorID == "Credits");
+                if (credits == null) { Console.WriteLine("REFUSED: Starfield.esm's Credits misc item does not resolve."); fail++; }
+                else if (fail == 0) fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, credits.FormKey);
             }
             else
             {
@@ -1384,7 +1526,7 @@ namespace FrankyCLI
                 plan.Add((t.beatSlots[^1], r.beats[^1], false));
 
                 for (int i = 0; i < plan.Count && fail == 0; i++)
-                    fail += WriteBeat(clone, t, plan[i].slot, plan[i].beat, markers, plan[i].created);
+                    fail += WriteBeat(clone, t, plan[i].slot, plan[i].beat, markers, plan[i].created, PlaceAliasOf(t, plan[i].beat.PlaceIndex, -1));
 
                 // An extra beat fires on a stock DefaultAliasOnActivate gated on the PREVIOUS beat's
                 // stage, so the chain sequences itself with no state variable. The first extra gates on
@@ -1413,9 +1555,14 @@ namespace FrankyCLI
 
         // ------------------------------------------------------------------ delve4
 
-        /// <summary>What BuildDelve4 created, handed to Verify rather than re-derived there.</summary>
-        private sealed class Delve4Made
+        /// <summary>What a build created (delve4 or choice), handed to Verify rather than re-derived there.</summary>
+        private sealed class BuildMade
         {
+            /// <summary>The created third place's alias id, -1 when the recipe has none.</summary>
+            public int ThirdPlaceAlias = -1;
+            /// <summary>choice: the buyer's created marker and activator aliases.</summary>
+            public uint BuyerMarkerAlias, BuyerAlias;
+            public FormKey OfferMessage;
             public uint CarrierMarkerAlias, CarrierAlias;
             public FormKey LoadItem, MissingItem;
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
@@ -1476,7 +1623,7 @@ namespace FrankyCLI
         /// </summary>
         private static int BuildDelve4(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                        Dictionary<string, FormKey> markers,
-                                       List<(BeatSlot slot, Beat beat, bool created)> plan, Delve4Made made)
+                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made)
         {
             // --- the base's driver, whose values we take ------------------------------------------
             var vma = clone.VirtualMachineAdapter;
@@ -1622,7 +1769,7 @@ namespace FrankyCLI
                     Console.WriteLine($"  beat     : {i + 1} returns to beat {t.beatSlots[i].returnTo + 1}'s place, objective {slots[i].objective}");
                     continue;
                 }
-                int f = WriteBeat(clone, t, slots[i], r.beats[i], markers, false);
+                int f = WriteBeat(clone, t, slots[i], r.beats[i], markers, false, PlaceAliasOf(t, r.beats[i].PlaceIndex, -1));
                 if (f > 0) return f;
             }
 
@@ -1670,6 +1817,205 @@ namespace FrankyCLI
             Bool("LoseLoadOnApproach", !r.beats[0].Second);
             Bool("CiviliansAtCentre", r.place.civilians);
             foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
+            vma.Scripts.Add(sc);
+            Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
+            return 0;
+        }
+
+        // ------------------------------------------------------------------ choice
+
+        /// <summary>
+        /// CREATE THE THIRD PLACE by cloning one of the base's location aliases. The first location alias
+        /// this tool has ever created (2026-10-08, the medal Delve, his "third place, time to learn").
+        ///
+        /// ⭐ A CLONE, NEVER A CONSTRUCTION, for the reason every created thing here is a clone: a
+        /// QuestLocationAlias carries flags and fields this tool has no opinion about (the source's flags
+        /// read 0x40000101 and its ParentSystemLocationAliasID -2, neither of them understood), and copying
+        /// one that demonstrably fills brings them along. It also carries the source's GetDistance leash,
+        /// which is the one condition WritePlaceConditions preserves, so the two delivery places share a
+        /// leash: the closest thing to "both endings are about the same drive" the records can say.
+        /// Its marker and theme conditions are then rebuilt from the recipe like any other place's.
+        ///
+        /// ⚠ What is NOT established, named rather than assumed: that the story manager fills a quest's
+        /// location aliases independently, so that two aliases with disjoint pools always land on two
+        /// different POIs. The disjointness is measured at lint; the fill is his playthrough.
+        /// </summary>
+        private static int CreateThirdPlace(Quest clone, Template t)
+        {
+            var src = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)(t.thirdPlace?.cloneOf ?? -1));
+            if (src == null || string.IsNullOrWhiteSpace(t.thirdPlace?.name))
+            { Console.WriteLine($"REFUSED: template '{t.id}' names no location alias {t.thirdPlace?.cloneOf} to clone a third place from, or no name for it."); return -1; }
+            uint id = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+            var loc = src.DeepCopy();
+            loc.ID = id;
+            loc.Name = t.thirdPlace!.name;
+            clone.Aliases.Add(loc);
+            Console.WriteLine($"  +place   : THIRD place alias {id} \"{loc.Name}\" (clone of location alias {src.ID} \"{src.Name}\", "
+                              + $"{loc.Conditions?.Count ?? 0} condition(s) carried before the rebuild)");
+            return (int)id;
+        }
+
+        /// <summary>
+        /// THE CHOICE DELVE: find a thing with a name on it, then deliver it to its owner OR sell it to a
+        /// buyer, at two different places; walking to one ends the mission. Jessica's Type 2.
+        ///
+        /// Same skeleton as BuildDelve4 and the same rules: the base's driver is REPLACED by ours
+        /// (FrankyCLI/papyrus/duo_delve_choice.psc), the cargo item is CLONED never edited, every activator
+        /// that changes model is a clone, every new stage and box is a clone of one that works.
+        ///
+        /// ⭐ WHAT IS NEW: the buyer's delivery point is a COPY OF THE OWNER'S SLOT (marker + activator)
+        /// moved to the third place, and the buyer's ending is stage 100 cloned to 110, so it carries the
+        /// CompleteQuest flag on its log entry exactly as the owner's does. Two completing stages, one
+        /// recap each: the branching lives in which stage the driver sets, not in any conditional text.
+        /// </summary>
+        private static int BuildChoice(StarfieldMod myMod, Quest clone, Template t, Recipe r,
+                                       Dictionary<string, FormKey> markers,
+                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made, FormKey credits)
+        {
+            var vma = clone.VirtualMachineAdapter;
+            var old = vma?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
+            if (vma == null || old == null)
+            { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' script entry to replace."); return 1; }
+            var cargo = old.Properties.OfType<ScriptObjectProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, "CargoObject", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+            var src = cargo == null ? null : myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
+            if (src == null)
+            { Console.WriteLine($"REFUSED: the replaced driver's CargoObject is not a MiscItem in {t.mod}; this tool clones only its own mod's items."); return 1; }
+
+            // --- the one thing carried, cloned -------------------------------------------------------
+            string itemEdid = r.id + "_Item";
+            foreach (var k in myMod.MiscItems.Where(m => m.EditorID == itemEdid).Select(m => m.FormKey).ToList())
+                myMod.MiscItems.Remove(k);
+            var mi = myMod.MiscItems.DuplicateInAsNewRecord(src);
+            mi.EditorID = itemEdid;
+            mi.Name = r.items!.load!;
+            made.LoadItem = mi.FormKey;
+            Console.WriteLine($"  +item    : {itemEdid} {mi.FormKey}  \"{mi.Name}\"  (clone of {src.EditorID})");
+
+            // --- the buyer's slot: the owner's marker + activator, copied, moved to the third place --------
+            var ownerSlot = t.beatSlots[1];
+            var ownerMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)ownerSlot.markerAlias);
+            var ownerAct = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)ownerSlot.activatorAlias);
+            if (ownerMarker?.Location == null || ownerAct?.CreateReferenceToObject == null)
+            { Console.WriteLine("REFUSED: the template's owner slot is not a marker+activator pair on this base."); return 1; }
+            uint next = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+            var bm = ownerMarker.DeepCopy(); bm.ID = next; bm.Name = "DelveBuyerMarker";
+            var ba = ownerAct.DeepCopy(); ba.ID = next + 1; ba.Name = "DelveBuyerTarget";
+            ba.CreateReferenceToObject!.AliasID = (short)bm.ID;
+            clone.Aliases.Add(bm);
+            clone.Aliases.Add(ba);
+            made.BuyerMarkerAlias = bm.ID;
+            made.BuyerAlias = ba.ID;
+            Console.WriteLine($"  +alias   : buyer marker {bm.ID} + activator {ba.ID} (cloned from the owner's {ownerSlot.markerAlias}/{ownerSlot.activatorAlias})");
+
+            // --- three activators, each a clone wearing its own model -------------------------------------
+            if (ReskinActivator(myMod, clone, t, r.id + "_crate", t.beatSlots[0].activatorAlias, r.items.crateModel, null) != 0) return 1;
+            if (ReskinActivator(myMod, clone, t, r.id + "_centre", ownerSlot.activatorAlias, r.items.centreModel, r.items.centreName) != 0) return 1;
+            if (ReskinActivator(myMod, clone, t, r.id + "_buyer", (int)ba.ID, r.items.buyerModel, r.items.buyerName) != 0) return 1;
+
+            // --- message boxes, cloned from a shipped pausing box, owned by the quest ----------------------
+            foreach (var k in myMod.Messages.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_msg")).Select(m => m.FormKey).ToList())
+                myMod.Messages.Remove(k);
+            var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
+            if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+            FormKey Box(string suffix, BeatMessage m)
+            {
+                var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                msg.EditorID = $"{r.id}_msg{suffix}";
+                msg.Name = Expand(m.title!, t);
+                msg.Description = Expand(m.text!, t);
+                msg.OwnerQuest.SetTo(clone.FormKey);
+                Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"  (clone of {MessageTemplate})");
+                return msg.FormKey;
+            }
+            for (int i = 0; i < r.beats.Count; i++)
+                if (r.beats[i].message != null) made.Messages[i] = Box((i + 1).ToString(), r.beats[i].message!);
+            if (r.offer?.message != null) made.OfferMessage = Box("Offer", r.offer.message);
+
+            // --- stages: the offer and the buyer's ending -------------------------------------------------
+            if (clone.Stages!.Any(s => s.Index == t.offerStage) || clone.Stages.Any(s => s.Index == t.beatSlots[2].journalStage))
+            { Console.WriteLine($"REFUSED: stage {t.offerStage} or {t.beatSlots[2].journalStage} already exists on this base."); return 1; }
+            var offerSt = CloneStage(clone, t.offerStage);
+            if (offerSt == null) return 1;
+            offerSt.LogEntries[0].Entry = Expand(r.offer!.journal!, t);
+            clone.Stages.Add(offerSt);
+            Console.WriteLine($"  +stage   : {t.offerStage} (the offer, cloned from a plain journal stage)");
+            // The buyer's ending is the OWNER'S completing stage copied, so it ends the quest the same way.
+            var done = clone.Stages.FirstOrDefault(s => s.Index == ownerSlot.journalStage);
+            if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
+            { Console.WriteLine($"REFUSED: stage {ownerSlot.journalStage} is not a single-entry completing stage to clone the buyer's ending from."); return 1; }
+            var buyerSt = done.DeepCopy();
+            buyerSt.Index = (ushort)t.beatSlots[2].journalStage;
+            buyerSt.LogEntries[0].Entry = null;
+            clone.Stages.Add(buyerSt);
+            Console.WriteLine($"  +stage   : {buyerSt.Index} (the buyer's ending, a clone of completing stage {ownerSlot.journalStage})");
+
+            // --- objectives: the base has 10 and 20; 30 is the buyer's ---------------------------------------
+            var slots = new List<BeatSlot>
+            {
+                t.beatSlots[0],
+                ownerSlot,
+                new BeatSlot { markerAlias = (int)bm.ID, activatorAlias = (int)ba.ID, objective = t.beatSlots[2].objective,
+                               journalStage = t.beatSlots[2].journalStage },
+            };
+            var lastOb = clone.Objectives?.OrderBy(o => o.Index).LastOrDefault();
+            if (lastOb == null || lastOb.Targets == null || lastOb.Targets.Count != 1)
+            { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
+            foreach (var s in slots)
+            {
+                if (clone.Objectives!.Any(o => o.Index == s.objective)) continue;
+                var ob = lastOb.DeepCopy();
+                ob.Index = (ushort)s.objective;
+                clone.Objectives.Add(ob);
+                Console.WriteLine($"  +obj     : {s.objective}");
+            }
+            foreach (var s in slots)
+            {
+                var ob = clone.Objectives!.First(o => o.Index == s.objective);
+                if (ob.Targets == null || ob.Targets.Count != 1) { Console.WriteLine($"REFUSED: objective {s.objective} has no single target."); return 1; }
+                ob.Targets[0].AliasID = s.ObjectiveTarget;
+            }
+
+            // --- beats: fills, objective text, journals -------------------------------------------------
+            for (int i = 0; i < slots.Count; i++)
+            {
+                plan.Add((slots[i], r.beats[i], false));
+                int f = WriteBeat(clone, t, slots[i], r.beats[i], markers, false, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
+                if (f > 0) return f;
+            }
+
+            // --- the driver swap ------------------------------------------------------------------------
+            vma.Scripts.Remove(old);
+            var sc = new ScriptEntry { Name = t.driver };
+            void Alias(string n, int aliasId)
+            {
+                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
+                p.Object.SetTo(clone.FormKey);
+                p.Alias = (short)aliasId;
+                sc.Properties.Add(p);
+                made.Props[n] = (clone.FormKey, (short)aliasId);
+            }
+            void Obj(string n, FormKey k)
+            {
+                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
+                p.Object.SetTo(k);
+                sc.Properties.Add(p);
+                made.Props[n] = (k, (short)-1);
+            }
+            void Int(string n, int v)
+            {
+                sc.Properties.Add(new ScriptIntProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
+                made.IntProps[n] = v;
+            }
+            Alias("FindTarget", slots[0].activatorAlias);
+            Alias("OwnerTarget", slots[1].activatorAlias);
+            Alias("BuyerTarget", slots[2].activatorAlias);
+            Obj("Item", made.LoadItem);
+            Obj("Credits", credits);
+            Int("OwnerReward", r.reward!.owner);
+            Int("BuyerReward", r.reward.buyer);
+            foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
+            if (!made.OfferMessage.IsNull) Obj("OfferMessage", made.OfferMessage);
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
             return 0;
@@ -1860,11 +2206,10 @@ namespace FrankyCLI
         /// how a quest ends up selecting a POI on one marker and hunting for another.
         /// </summary>
         private static int WriteBeat(Quest clone, Template t, BeatSlot slot, Beat beat,
-                                     Dictionary<string, FormKey> markers, bool created)
+                                     Dictionary<string, FormKey> markers, bool created, int placeAlias)
         {
             var al = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
             if (al?.Location == null) { Console.WriteLine("REFUSED: ref alias " + slot.markerAlias + " has no location fill."); return 1; }
-            int placeAlias = beat.Second ? t.secondPlaceAlias : t.placeAlias;
             al.Location.AliasID = placeAlias;
             al.Location.RefType.SetTo(markers[beat.at]);
 
@@ -1920,7 +2265,7 @@ namespace FrankyCLI
         /// </summary>
         private static int Verify(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
                                   Template t, Recipe r, Dictionary<string, FormKey> markers,
-                                  List<(BeatSlot slot, Beat beat, bool created)> plan, Delve4Made made4)
+                                  List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made4)
         {
             Console.WriteLine();
             Console.WriteLine("  verification, re-read from disk:");
@@ -1964,10 +2309,10 @@ namespace FrankyCLI
             // Each place demands exactly ITS beats' markers plus the map marker: a place that also
             // demanded the other place's markers would shrink its pool for nothing.
             bool twoPlaces = r.beats.Any(b => b.Second);
-            foreach (bool second in twoPlaces ? new[] { false, true } : new[] { false })
+            foreach (int pi in PlacesUsed(r))
             {
-                int aid = second ? t.secondPlaceAlias : t.placeAlias;
-                var want = MarkersAt(r, markers, second);
+                int aid = PlaceAliasOf(t, pi, made4.ThirdPlaceAlias);
+                var want = MarkersAt(r, markers, pi);
                 var loc = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
                 var condMarkers = loc?.Conditions?
                     .Select(c => c.Data).OfType<ILocationHasRefTypeConditionDataGetter>()
@@ -1989,8 +2334,8 @@ namespace FrankyCLI
                 var al = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
                 fail += Check($"{tag} fills from {beat.at}",
                               al?.Location?.RefType.FormKey == markers[beat.at] ? "yes" : "no", "yes");
-                fail += Check($"{tag} searches the {(beat.Second ? "SECOND" : "main")} place alias",
-                              (al?.Location?.AliasID)?.ToString() ?? "unset", (beat.Second ? t.secondPlaceAlias : t.placeAlias).ToString());
+                fail += Check($"{tag} searches the {PlaceLabel(beat.PlaceIndex)} place alias",
+                              (al?.Location?.AliasID)?.ToString() ?? "unset", PlaceAliasOf(t, beat.PlaceIndex, made4.ThirdPlaceAlias).ToString());
 
                 if (created)
                 {
@@ -2027,7 +2372,49 @@ namespace FrankyCLI
             var bare = q.Stages?.Where(x => x.LogEntries.Any(le => le.Flags == null)).Select(x => x.Index.ToString()).ToList() ?? new List<string>();
             fail += Check("every stage's log entry has flags (QSDT)", bare.Count == 0 ? "yes" : "no: " + string.Join(",", bare), "yes");
 
-            if (t.kind == "delve4")
+            if (t.kind == "choice")
+            {
+                // ⭐ THE THIRD PLACE, OFF DISK: it exists, it is a location alias, and the buyer's marker
+                // searches inside it. A created alias that did not land is an unfillable reference and the
+                // quest silently never starts, so this is the check that matters most on this kind.
+                var third = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)made4.ThirdPlaceAlias);
+                fail += Check($"third place alias {made4.ThirdPlaceAlias} is a location alias named {t.thirdPlace?.name}",
+                              third?.Name ?? "missing", t.thirdPlace?.name ?? "");
+                var src = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)(t.thirdPlace?.cloneOf ?? -1));
+                string Leash(IQuestLocationAliasGetter? l) => string.Join(" | ", (l?.Conditions ?? new List<IConditionGetter>())
+                    .Where(c => c.Data is not ILocationHasRefTypeConditionDataGetter && c.Data is not ILocationHasKeywordConditionDataGetter)
+                    .Select(c => c.Data.GetType().Name + " " + c.CompareOperator + " " + (c is IConditionGlobalGetter g ? g.ComparisonValue.FormKey.ToString() : c is IConditionFloatGetter f ? f.ComparisonValue.ToString() : "?")));
+                fail += Check("third place carries the same leash as the owner's place", Leash(third), Leash(src));
+                var bmk = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == made4.BuyerMarkerAlias);
+                fail += Check("buyer marker searches the third place", (bmk?.Location?.AliasID)?.ToString() ?? "unset", made4.ThirdPlaceAlias.ToString());
+                var bact = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == made4.BuyerAlias);
+                fail += Check("buyer activator create-objs AT the buyer marker", (bact?.CreateReferenceToObject?.AliasID)?.ToString() ?? "unset", made4.BuyerMarkerAlias.ToString());
+                var buyerClone = reread.Activators.FirstOrDefault(a => a.EditorID == r.id + "_buyer");
+                fail += Check("buyer activator creates the _buyer clone", bact?.CreateReferenceToObject?.Object.FormKey.ToString() ?? "unset", buyerClone?.FormKey.ToString() ?? "no clone");
+                fail += Check("buyer model", buyerClone?.Model?.File?.DataRelativePath.Path ?? "missing", r.items!.buyerModel!);
+                fail += Check("buyer name", buyerClone?.Name?.String ?? "missing", r.items.buyerName!);
+                // Two endings, each a completing stage with its own recap.
+                foreach (var st in new[] { t.beatSlots[1].journalStage, t.beatSlots[2].journalStage })
+                {
+                    var e = q.Stages?.FirstOrDefault(x => x.Index == st)?.LogEntries.FirstOrDefault();
+                    fail += Check($"stage {st} ends the quest (entryFlags CompleteQuest)",
+                                  e?.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) == true ? "yes" : "no", "yes");
+                }
+                var offer = q.Stages?.FirstOrDefault(x => x.Index == t.offerStage)?.LogEntries.FirstOrDefault();
+                fail += Check($"offer journal on stage {t.offerStage}", offer?.Entry?.String ?? "missing", Expand(r.offer!.journal!, t));
+                fail += Check($"stage {t.offerStage} does NOT end the quest",
+                              offer?.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) == true ? "ends" : "no", "no");
+                if (r.offer.message != null)
+                {
+                    var om = reread.Messages.FirstOrDefault(x => x.EditorID == r.id + "_msgOffer");
+                    fail += Check("offer message text", om?.Description?.String ?? "missing", Expand(r.offer.message.text!, t));
+                    fail += Check("offer message owned by the quest", om?.OwnerQuest.FormKey.ToString() ?? "missing", q.FormKey.ToString());
+                }
+                var it = reread.MiscItems.FirstOrDefault(m => m.FormKey == made4.LoadItem);
+                fail += Check($"item {made4.LoadItem} named", it?.Name?.String ?? "missing", r.items.load!);
+            }
+
+            if (t.kind == "delve4" || t.kind == "choice")
             {
                 // The driver swap, every property, every objective's TARGET and every journal. The
                 // off-disk read is the point: these are the fields a half-applied write would get
@@ -2068,6 +2455,9 @@ namespace FrankyCLI
                                       (st?.LogEntries?.FirstOrDefault()?.Entry?.String ?? "") == Expand(beat.journal, t) ? "yes" : "no", "yes");
                     }
                 }
+            }
+            if (t.kind == "delve4")
+            {
                 var mod = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
                 foreach (var (label, key, name) in new[] { ("load", made4.LoadItem, r.items!.load!), ("missing", made4.MissingItem, r.items.missing!) })
                 {

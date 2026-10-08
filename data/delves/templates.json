@@ -163,6 +163,62 @@
         "staged visibility -- the load and the centre are both in the world from quest start"
       ],
       "verifiedFrom": "gen_inspect qall duo_artifact_localcargo_qst09a on Defiant, 2026-09-24"
+        },
+    {
+      "id": "find-owner-or-buyer",
+      "kind": "choice",
+      "base": "duo_artifact_localcargo_qst09a",
+      "mod": "du_overtime",
+      "driver": "duo_delve_choice",
+      "replacesDriver": "dou_artifact_ground_dualactivator_local_quest",
+      "_shape": [
+        "JESSICA'S TYPE 2, KEEP IT OR GIVE IT BACK: find a thing with a name on it at one place, then take",
+        "it to its owner at a second place OR sell it to a buyer at a third. Walking to one completes the",
+        "mission and the other objective closes (hidden, never failed: neither side is the villain). His",
+        "ruling 2026-10-08: the choice is made by WHERE YOU GO, not by a dialogue menu; and the third",
+        "place, 'time to learn', rather than putting both endings at one site.",
+        "",
+        "SAME BASE as the four-beat template. The find is at the base's second place (FinalLocation, as",
+        "duo_delve05), the owner at its main place, and the buyer at a THIRD location alias the build",
+        "CREATES by cloning DungeonLocation, so the two endings carry the same distance leash.",
+        "The buyer's marker + activator are the owner's slot copied; the buyer's ending is stage 100",
+        "copied to 110, so both endings are completing stages with their own recap."
+      ],
+      "beats": 3,
+      "maxBeats": 3,
+      "carriesItem": true,
+      "placeAlias": 0,
+      "mapMarkerAlias": 5,
+      "briefingStage": 0,
+      "completeStage": 100,
+      "beatSlots": [
+        { "markerAlias": 1,  "activatorAlias": 2,  "objective": 10, "journalStage": 50 },
+        { "markerAlias": 11, "activatorAlias": 12, "objective": 20, "journalStage": 100 },
+        { "markerAlias": -1, "activatorAlias": -1, "objective": 30, "journalStage": 110, "create": true }
+      ],
+      "_beatSlots": [
+        "Beat 1 is the find (stage 50, its journal points at the owner). The offer lands on stage 60",
+        "straight after, from the recipe's offer block. Beat 2 is the owner's ending on the base's own",
+        "completing stage 100; beat 3 the buyer's on 110, which this tool creates."
+      ],
+      "offerStage": 60,
+      "tokens": {
+        "FindPlace": "FinalLocation",
+        "OwnerPlace": "DungeonLocation",
+        "BuyerPlace": "BuyerLocation",
+        "Planet": "targetPlanet"
+      },
+      "collapsedPlaceAliases": [
+        10
+      ],
+      "secondPlaceAlias": 10,
+      "thirdPlace": { "cloneOf": 0, "name": "BuyerLocation" },
+      "cannot": [
+        "more or fewer than three beats -- find, owner, buyer is the driver's whole state machine",
+        "the two endings at one site -- the owner and the buyer must be different places, and the lint refuses overlapping pools",
+        "a choice made in conversation -- there are no dialogue trees in this shape, by his ruling"
+      ],
+      "verifiedFrom": "gen_inspect qall duo_delve05 (same base) on Defiant, 2026-10-08"
     }
   ]
 }

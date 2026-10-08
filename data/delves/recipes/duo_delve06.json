@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "id": "duo_delve06",
+  "template": "find-owner-or-buyer",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/type-02-keep-or-give-back.md (variant a, the medal)",
+  "_note": [
+    "TYPE 2 VARIANT A, THE MEDAL. His go 2026-10-08 11:42, and 11:51 on the shape: \"third place, time",
+    "to learn\". Every player-facing word is Jessica's, written 2026-10-08 on his \"yeah write\".",
+    "Her placeholders map onto this template's tokens unchanged in meaning: <DungeonLocation> (the",
+    "stash) is <FindPlace>, <TargetPlanet> is <Planet>, <OwnerPlace> and <BuyerPlace> as written.",
+    "",
+    "NOT IN THIS RECIPE: the salvager's slate (\"Salvage Note: Engraved Medal\", signed R.). It is the",
+    "mission's entry item and no Delve has an entry item yet; 03-05 start from the console."
+  ],
+  "place": {
+    "theme": {
+      "require": [ "LocTypeOE_NonHostile" ],
+      "exclude": [ "LocTypeOE_ThemeInfrastructureKeyword" ]
+    },
+    "_theme": "The OWNER (the Vale family). Peopled, and NOT infrastructure, so the buyer's pool below is disjoint from this one by construction: one requires the keyword the other excludes. Census 2026-10-08 on Defiant: 62 peopled POIs carrying RECenterLocRef + MapMarker, 36 infrastructure and 26 not. ⏳ Which side gets which is a PLACEHOLDER (Eliza's split on the numbers); Jessica's call on the fiction.",
+    "second": {
+      "theme": { "require": [], "exclude": [] }
+    },
+    "_second": "The FIND (the salvager's stash), any POI, as duo_delve05's find.",
+    "third": {
+      "theme": {
+        "require": [ "LocTypeOE_NonHostile", "LocTypeOE_ThemeInfrastructureKeyword" ],
+        "exclude": []
+      }
+    },
+    "_third": "The BUYER (Curator Oduya's war room). Peopled AND infrastructure."
+  },
+  "prose": {
+    "name": "Salvage: Service Medal on <Planet>",
+    "briefing": "A salvager stashed a war medal at the <FindPlace>. If it's engraved, somebody is missing it."
+  },
+  "items": {
+    "load": "Colony War Service Medal",
+    "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+    "_crateModel": "PLACEHOLDER: testcase 01's freight crate. A salvager's stash may want something smaller; his eye.",
+    "centreModel": "Meshes\\Architecture\\City\\Akila\\Unique\\Memorial\\AK_Memorial_Podium.nif",
+    "centreName": "Vale Family",
+    "_centre": "PLACEHOLDER, the owner's delivery point: Akila's memorial podium, z 0.00..1.22, STANDS (gen_inspect bounds 2026-10-08). Name is Eliza's placeholder; Jessica's to word.",
+    "buyerModel": "Meshes\\SetDressing\\Displays\\Tilted\\DisplayCase_Tilted_A_Full01.nif",
+    "buyerName": "Oduya's War Room",
+    "_buyer": "PLACEHOLDER, the buyer's delivery point: a tilted display case, z -0.00..1.30, 3.0 x 1.0 m, STANDS. Name is Eliza's placeholder; Jessica's to word."
+  },
+  "beats": [
+    {
+      "at": "RETravelA1LocRef",
+      "place": "second",
+      "objective": "Recover the medal from <FindPlace>",
+      "journal": "The medal has a name on it, Sergeant Vale, and his service record lists family at the <OwnerPlace>. I should take it to them.",
+      "message": {
+        "title": "Service Medal",
+        "text": "The medal is engraved on the back: SGT I. VALE, COLONY WAR. His service record lists next of kin as the Vale family, at the <OwnerPlace>."
+      }
+    },
+    {
+      "at": "RECenterLocRef",
+      "place": "main",
+      "objective": "Return the medal to the Vale family",
+      "journal": "I found Sergeant Idris Vale's Colony War medal in a salvager's stash and took it home to his family at the <OwnerPlace>.",
+      "message": {
+        "title": "Returned",
+        "text": "His daughter turns the medal over twice, says nothing for a while, and puts it in her pocket. She pays what she can."
+      }
+    },
+    {
+      "at": "RECenterLocRef",
+      "place": "third",
+      "objective": "Sell the medal to Curator Oduya",
+      "journal": "I found Sergeant Idris Vale's Colony War medal in a salvager's stash and sold it to Curator Oduya, who hung it in his war room at the <BuyerPlace>.",
+      "message": {
+        "title": "Sold",
+        "text": "Oduya pays in full and has it on the wall within the hour, with a card underneath: SGT IDRIS VALE, and the years."
+      }
+    }
+  ],
+  "offer": {
+    "journal": "Word travels fast. A curator called Oduya wants the medal for his war room and will pay more than the family can. It's my call.",
+    "message": {
+      "title": "Incoming Message",
+      "text": "Heard you turned up a Vale medal. I keep a small war room at the <BuyerPlace>. People come to see it. I'll pay more than the family can, and it goes on the wall with his name under it. - Oduya"
+    }
+  },
+  "reward": { "owner": 1500, "buyer": 2500 },
+  "_reward": "⏳ PLACEHOLDERS, HIS NUMBERS: the gap is his to tune, and these are only a buyer-pays-more shape. For scale (part 04): vanilla Cargo 1,200 Local / 1,600 Far, ground Bounty 3,200. Both live on the record as the driver's OwnerReward / BuyerReward, so a change is a property edit, not a recompile."
+}
