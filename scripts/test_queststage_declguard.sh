@@ -9,7 +9,10 @@
 # nothing, and the tell was the UNIFORMITY. So a REFUSE verdict now requires the
 # guard's OWN words in the output, and a PASS requires the declaration line.
 cd /c/Git/FrankyCLI || exit 1
-Q=duo_delve01_layer1
+# Q moved 2026-10-08: it was duo_delve01_layer1, which came out of du_overtime before a release (his
+# ruling). duo_artifact_local_qst04a is the shipped quest layer 1 was cloned from, with the same
+# aliases; every case here is --dry, so nothing is written to it.
+Q=duo_artifact_local_qst04a
 DIST=DefaultAliasOnDistanceLessThan
 fails=0
 run() {
