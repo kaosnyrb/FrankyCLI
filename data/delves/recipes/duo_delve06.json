@@ -40,10 +40,10 @@
     "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
     "_crateModel": "PLACEHOLDER: testcase 01's freight crate. A salvager's stash may want something smaller; his eye.",
     "centreModel": "Meshes\\Architecture\\City\\Akila\\Unique\\Memorial\\AK_Memorial_Podium.nif",
-    "centreName": "Vale Family",
+    "centreName": "Vale Memorial",
     "_centre": "PLACEHOLDER, the owner's delivery point: Akila's memorial podium, z 0.00..1.22, STANDS (gen_inspect bounds 2026-10-08). Name is Eliza's placeholder; Jessica's to word.",
     "buyerModel": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-    "buyerName": "Oduya's War Room",
+    "buyerName": "Oduya's Collection",
     "_buyer": "The buyer's delivery point is a footlocker (AK_FootLocker01_Static: z -0.00..0.28, 1.0 x 0.4 m, STANDS). His playtest 2026-10-08: \"The display cabinent looks wierd in the middle of a POI. Prob be a chest.\" The tilted display case it replaced is shop furniture, which reads wrong standing alone on open ground. Name is Eliza's placeholder; Jessica's to word."
   },
   "beats": [
@@ -64,17 +64,17 @@
       "journal": "I found Sergeant Idris Vale's Colony War medal in a salvager's stash and took it home to his family at the <OwnerPlace>.",
       "message": {
         "title": "Returned",
-        "text": "His daughter turns the medal over twice, says nothing for a while, and puts it in her pocket. She pays what she can."
+        "text": "Maren Vale turns her father's medal over twice, says nothing for a while, and puts it in her pocket. She pays what she can."
       }
     },
     {
       "at": "RECenterLocRef",
       "place": "third",
       "objective": "Sell the medal to Curator Oduya",
-      "journal": "I found Sergeant Idris Vale's Colony War medal in a salvager's stash and sold it to Curator Oduya, who hung it in his war room at the <BuyerPlace>.",
+      "journal": "I found Sergeant Idris Vale's Colony War medal in a salvager's stash and sold it to Curator Oduya for his war room.",
       "message": {
         "title": "Sold",
-        "text": "Oduya pays in full and has it on the wall within the hour, with a card underneath: SGT IDRIS VALE, and the years."
+        "text": "Oduya pays in full and packs it away for the war room. The card is already written: SGT IDRIS VALE, and the years."
       }
     }
   ],
@@ -82,11 +82,11 @@
     "journal": "Word travels fast. A curator called Oduya wants the medal for his war room and will pay more than the family can. It's my call.",
     "message": {
       "title": "Incoming Message",
-      "text": "Heard you turned up a Vale medal. I keep a small war room at the <BuyerPlace>. People come to see it. I'll pay more than the family can, and it goes on the wall with his name under it. - Oduya"
+      "text": "Heard you turned up a Vale medal. I keep a small war room back home. People come to see it. I'm at the <BuyerPlace> now. I'll pay more than the family can, and it goes on the wall with his name under it. - Oduya"
     }
   },
   "people": {
-    "owner": { "name": "Vale's Daughter", "template": "UC_NA_MASTWorkerFemale01" },
+    "owner": { "name": "Maren Vale", "template": "UC_NA_MASTWorkerFemale01" },
     "buyer": { "name": "Curator Oduya", "template": "UC_NA_MASTWorkerMale01" }
   },
   "_people": "His playtest 2026-10-08: \"Returning the medal talks about a person who isn't there\", then \"FrankyCLI has npc creation tools\". Templates are from NPCTools.GetTemplateFriendlyNPC's talkable set. ⏳ \"Vale's Daughter\" is a PLACEHOLDER: Jessica's prose never names her, so the name is hers to give (checked against his who's-who, no family name). Oduya is her name.",
