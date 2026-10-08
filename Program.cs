@@ -168,6 +168,11 @@ switch (mode)
         // template rows. One recipe per mission, no code per mission.
         return gen_delve.Run(args);
 
+    case "gen_stageprobe":
+        // gen_stageprobe [--dry]  -- SPIKE: a quest with no driver. Stock hooks set the stages and a
+        // bound fragment script shows the objectives; the stages are the state machine (his ruling).
+        return gen_stageprobe.Run(args);
+
     case "gen_questcompletetest":
         // gen_questcompletetest [modname]  -- Gate C: can a quest be ENDED from data?
         // Reflects the stage/log-entry type surface, hunts vanilla for a shipped example,
