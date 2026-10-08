@@ -251,11 +251,14 @@ namespace FrankyCLI
                 case "bases": return MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "footprint": return Footprint();
                 case "keywords": return PoolKeywords(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
-                case "lint": return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
+                case "lint":
+                    if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
+                    return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId>");
+                    Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     return 1;
             }
@@ -265,16 +268,30 @@ namespace FrankyCLI
                                       Func<Recipe, Template, IGameEnvironment<IStarfieldMod, IStarfieldModGetter>, int> body)
         {
             if (path == null) { Console.WriteLine("REFUSED: name a recipe."); return 1; }
+            var recipe = LoadRecipe(path, dataDir, templates, out var t);
+            if (recipe == null || t == null) return 1;
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            return body(recipe, t, env);
+        }
+
+        /// <summary>
+        /// Read one recipe and refuse it before any game data is touched: not JSON, an unknown key, an id that
+        /// is not its file name, or a template that does not exist. Prints its own refusal.
+        /// </summary>
+        private static Recipe? LoadRecipe(string path, string dataDir, List<Template> templates, out Template? t)
+        {
+            t = null;
             // A bare id is resolved against the recipes folder, so the common case is short and the
             // explicit path still works for a recipe living anywhere else.
             string file = File.Exists(path) ? path : Path.Combine(dataDir, "recipes", path + ".json");
-            if (!File.Exists(file)) { Console.WriteLine("REFUSED: no recipe at " + file); return 1; }
+            if (!File.Exists(file)) { Console.WriteLine("REFUSED: no recipe at " + file); return null; }
 
             Recipe? recipe;
             string text = File.ReadAllText(file);
             try { recipe = JsonSerializer.Deserialize<Recipe>(text, JsonOpts); }
-            catch (JsonException ex) { Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " is not valid JSON -- " + ex.Message); return 1; }
-            if (recipe == null) { Console.WriteLine("REFUSED: " + file + " parsed to nothing."); return 1; }
+            catch (JsonException ex) { Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " is not valid JSON -- " + ex.Message); return null; }
+            if (recipe == null) { Console.WriteLine("REFUSED: " + file + " parsed to nothing."); return null; }
             // ⛔ A KEY THE TOOL DOES NOT KNOW IS A TYPO UNTIL PROVEN OTHERWISE. The reader ignores unknown
             // fields, so "outift" linted clean and built an undressed NPC. A default's harm is the error it
             // suppresses, and the cure is refusing unknown keys (his ask, 2026-10-08: "a linter for the json
@@ -287,23 +304,118 @@ namespace FrankyCLI
                 Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " has key(s) this tool does not know, so they would be IGNORED:");
                 foreach (var u in unknown) Console.WriteLine("  " + u);
                 Console.WriteLine("  (a key starting with _ is a note and is always allowed)");
-                return 1;
+                return null;
             }
+            // ⛔ THE ID IS THE QUEST'S EDITORID AND A BUILD REPLACES ANY QUEST OF THAT NAME. Two recipes sharing
+            // an id would silently overwrite each other's mission, which is the first thing a batch of recipes
+            // written quickly will do. So the id must be the file's own name: two files cannot share one.
+            string stem = Path.GetFileNameWithoutExtension(file);
+            if (!string.Equals(recipe.id, stem, StringComparison.Ordinal))
+            { Console.WriteLine($"REFUSED: {Path.GetFileName(file)} has id '{recipe.id}'; a recipe's id must be its file name ('{stem}'), so no two can collide."); return null; }
+            if (!System.Text.RegularExpressions.Regex.IsMatch(recipe.id, "^duo_delve[0-9a-z_]+$"))
+            { Console.WriteLine($"REFUSED: id '{recipe.id}' must look like duo_delveNN (lower case, digits, underscores): it becomes an EditorID and every clone's prefix."); return null; }
             Console.WriteLine("  recipe: " + file);
 
-            var t = templates.FirstOrDefault(x => string.Equals(x.id, recipe.template, StringComparison.OrdinalIgnoreCase));
+            t = templates.FirstOrDefault(x => string.Equals(x.id, recipe.template, StringComparison.OrdinalIgnoreCase));
             if (t == null)
             {
                 Console.WriteLine("REFUSED: no template '" + recipe.template + "'. Known: "
                                   + string.Join(", ", templates.Select(x => x.id)));
-                return 1;
+                return null;
             }
             Console.WriteLine("  template: " + t.id + "  (base " + t.@base + ", driver " + t.driver + ")");
             Console.WriteLine();
+            return recipe;
+        }
 
-            using var env = GameEnvironment.Typical
-                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            return body(recipe, t, env);
+        /// <summary>
+        /// EVERY RECIPE, ONE GAME-DATA LOAD, ONE LINE EACH. His ask, 2026-10-08: "I want Jessica to be able to
+        /// spam these jsons". A single lint costs a minute of loading the load order; this pays it once. Each
+        /// recipe's full lint is captured and only its verdict printed, with the fatal lines under a failure.
+        /// Then the checks that only exist ACROSS recipes: two missions sharing a delivery model (his ruling,
+        /// 2026-10-08 08:55: the flavour axis is the mission, one centreModel per recipe, distinct across them).
+        /// </summary>
+        private static int LintAll(string dataDir, List<Template> templates)
+        {
+            var files = Directory.GetFiles(Path.Combine(dataDir, "recipes"), "*.json").OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
+            Console.WriteLine($"  lint --all: {files.Count} recipe(s) in {Path.Combine(dataDir, "recipes")}");
+            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            var real = Console.Out;
+            int failed = 0;
+            var models = new List<(string recipe, string field, string path)>();
+            var names = new List<(string recipe, string field, string name)>();
+            int clashes = 0;
+            var loaded = new List<Recipe>();
+            foreach (var f in files)
+            {
+                var sw = new StringWriter();
+                Console.SetOut(sw);
+                bool ok;
+                Recipe? r = null;
+                try
+                {
+                    r = LoadRecipe(f, dataDir, templates, out var t);
+                    ok = r != null && t != null && Grade(r, t, env, null);
+                }
+                finally { Console.SetOut(real); }
+                string log = sw.ToString();
+                var lines = log.Split('\n').Select(l => l.TrimEnd('\r')).ToList();
+                string warns = lines.FirstOrDefault(l => l.Contains("LINT PASSES"))?.Trim() ?? "";
+                Console.WriteLine($"  {(ok ? "PASS" : "FAIL"),-5} {Path.GetFileNameWithoutExtension(f),-24} {(ok ? warns : "")}");
+                if (!ok)
+                {
+                    failed++;
+                    foreach (var l in lines.Where(l => l.Contains("[FATAL]") || l.StartsWith("REFUSED") || l.StartsWith("  ") && log.Contains("REFUSED") && l.Contains("did you mean")))
+                        Console.WriteLine("        " + l.Trim());
+                }
+                if (r?.items != null)
+                    foreach (var (field, path) in new[] { ("centreModel", r.items.centreModel), ("buyerModel", r.items.buyerModel) })
+                        if (!string.IsNullOrWhiteSpace(path)) models.Add((r.id, field, path!));
+                if (r != null) loaded.Add(r);
+                if (r != null)
+                    foreach (var (field, nm) in new[] { ("items.load", r.items?.load), ("items.missing", r.items?.missing),
+                                                        ("people.owner.name", r.people?.owner?.name), ("people.buyer.name", r.people?.buyer?.name) })
+                        if (!string.IsNullOrWhiteSpace(nm)) names.Add((r.id, field, nm!));
+            }
+            Console.WriteLine();
+            foreach (var g in models.GroupBy(m => m.path, StringComparer.OrdinalIgnoreCase).Where(g => g.Select(x => x.recipe).Distinct().Count() > 1))
+                Console.WriteLine($"  [warn ] {g.Key} is a delivery point in {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: "
+                                  + "his ruling is one delivery model per mission, distinct across missions.");
+            // ⭐ LETTER SIBLINGS. His convention, 2026-10-08: "01a and 01b would have the same kinda content but
+            // with different lore", as FULL recipes (his pick over a variant file). The cost of full copies is
+            // drift: a fix made in 06a and forgotten in 06b. So siblings sharing a number are compared on
+            // STRUCTURE (everything that is not lore) and any difference is named. A warning, not a refusal:
+            // a sibling that differs on purpose is a new mission number, and that call is the author's.
+            foreach (var fam in loaded.GroupBy(x => System.Text.RegularExpressions.Regex.Match(x.id, "^(duo_delve[0-9]+)[a-z]$").Groups[1].Value)
+                                      .Where(g => g.Key != "" && g.Count() > 1))
+            {
+                string Shape(Recipe x, string part) => part switch
+                {
+                    "template" => x.template,
+                    "beats" => string.Join(" | ", x.beats.Select(b => $"{b.at}@{b.place ?? "main"}")),
+                    "themes" => string.Join(" | ", new[] { x.place.theme, x.place.second?.theme, x.place.third?.theme }
+                                    .Select(th => th == null ? "-" : "+" + string.Join(",", th.require.OrderBy(k => k)) + " -" + string.Join(",", th.exclude.OrderBy(k => k)))),
+                    "reward" => $"{x.reward?.owner}/{x.reward?.buyer}",
+                    _ => ""
+                };
+                var first = fam.OrderBy(x => x.id).First();
+                foreach (var sib in fam.OrderBy(x => x.id).Skip(1))
+                    foreach (var part in new[] { "template", "beats", "themes", "reward" })
+                        if (Shape(first, part) != Shape(sib, part))
+                            Console.WriteLine($"  [warn ] {sib.id} and {first.id} are letter siblings with different {part}: "
+                                              + $"'{Shape(sib, part)}' vs '{Shape(first, part)}'. Same number, same content: fix both, or give it its own number.");
+            }
+
+            // The item-name check inside each lint sees only what is already BUILT into the plugin, so two new
+            // recipes naming the same thing both pass until one is built. Across the batch it is a failure.
+            foreach (var g in names.GroupBy(n => n.name, StringComparer.OrdinalIgnoreCase).Where(g => g.Select(x => x.recipe).Distinct().Count() > 1))
+            {
+                clashes++;
+                Console.WriteLine($"  [FATAL] \"{g.Key}\" is used by {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: two things with one name in a player's inventory or world.");
+            }
+            Console.WriteLine(failed == 0 && clashes == 0 ? $"  ALL {files.Count} RECIPES LINT CLEAN."
+                              : $"  {failed} of {files.Count} RECIPE(S) FAIL" + (clashes > 0 ? $", and {clashes} name clash(es) ACROSS recipes." : "."));
+            return failed == 0 && clashes == 0 ? 0 : 1;
         }
 
         /// <summary>
@@ -480,12 +592,21 @@ namespace FrankyCLI
                 {
                     if (string.IsNullOrWhiteSpace(path)) continue;
                     int uses = 0;
-                    foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
-                        if (rec is IModeledGetter mg && mg.Model?.File != null
-                            && !(rec.EditorID ?? "").StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase) // not our own last build
-                            && string.Equals(mg.Model.File.DataRelativePath.Path, path, StringComparison.OrdinalIgnoreCase))
-                            uses++;
-                    Console.WriteLine($"  {field}: {path} is used by {uses} record(s) in the load order");
+                    string? stands = null;
+                    // ⭐ RULE 1 OF EVERY DELVE (2026-10-08, the tripod dish 2 m underground): read a mesh's lowest z
+                    // before it becomes a placed activator, graded off a STATIC that owns the mesh (the index does it).
+                    foreach (var u in IndexOf(env).ByModel.GetValueOrDefault(path!) ?? new List<(string? edid, string? stands)>())
+                    {
+                        if ((u.edid ?? "").StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase)) continue; // our own last build
+                        uses++;
+                        stands ??= u.stands;
+                    }
+                    Console.WriteLine($"  {field}: {path} is used by {uses} record(s) in the load order"
+                                      + (stands != null ? $"; {stands}" : ""));
+                    if (stands != null && !stands.StartsWith("STANDS"))
+                        Warn($"items.{field} {stands}: a placed activator stands its origin on the marker, so it will not sit on the ground.");
+                    else if (stands == null && uses > 0)
+                        Warn($"items.{field}: no Static owns this mesh, so whether it stands cannot be read off the records; look at it (gen_inspect bounds, or his NifSkope).");
                     if (uses == 0)
                     {
                         // "Used by a record" was standing in for "the file exists", and the two part
@@ -552,6 +673,65 @@ namespace FrankyCLI
                     Warn($"{extras} extra beat(s) will be CREATED: a marker alias, an activator, a stage and a "
                          + $"stock hook each, numbered {t.extraBeatStageBase} to {last}. Journal only, no objective.");
             }
+            // ⛔ A FIELD THE TEMPLATE NEVER READS IS SILENTLY DROPPED, which reads to an author exactly like it
+            // worked. Each kind names what it writes; anything else set on the recipe is refused.
+            var unused = new List<string>();
+            if (!choice)
+            {
+                if (r.offer != null) unused.Add("offer");
+                if (r.reward != null) unused.Add("reward");
+                if (r.people != null) unused.Add("people");
+                if (r.place.third != null) unused.Add("place.third");
+                if (r.items?.buyerModel != null) unused.Add("items.buyerModel");
+                if (r.items?.buyerName != null) unused.Add("items.buyerName");
+            }
+            if (!delve4 && !choice)
+            {
+                if (r.items != null) unused.Add("items");
+                if (r.beats.Any(b => b.message != null)) unused.Add("beats[].message");
+            }
+            foreach (var u in unused)
+                Fatal($"{u} is set, and template '{t.id}' ({t.kind}) never reads it, so it would be silently ignored.");
+
+            // ⛔ THE QUEST LOG SHOWS ONLY THE NEWEST STAGE'S LINE (his play, 2026-10-08: "I think the family
+            // delivery one is skipped"). On a choice, beat 1's stage and the offer's are set in one instant.
+            if (choice && !string.IsNullOrWhiteSpace(r.beats.FirstOrDefault()?.journal))
+                Warn("beat 1's journal is NEVER SHOWN on this template: its stage and the offer's are set in the same instant and "
+                     + "the log shows only the newest line. Put what the player must read in offer.journal.");
+
+            // --- prose, against the style guide (part 33) and the house rule -------------------------------
+            foreach (var (where, text) in ProseStrings(r))
+            {
+                if (where.Contains("message")) continue;   // the message boxes have their own check above
+                if (text.Contains('\u2014')) Warn($"{where} carries an em dash; the house rule is none, and vanilla's quest text has zero.");
+                else if (text.Any(ch => ch > 126 || (ch < 32 && ch != '\n')))
+                    Warn($"{where} carries a non-ASCII or control character; the lane writes plain ASCII.");
+            }
+            foreach (var (b, i) in r.beats.Select((b, i) => (b, i)))
+            {
+                var o = b.objective;
+                if (string.IsNullOrWhiteSpace(o)) continue;
+                int words = o.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+                if (words > 12) Warn($"beat {i + 1} objective is {words} words; vanilla objectives run a median of 4 and never past 12.");
+                if (".!?".Contains(o.TrimEnd()[^1])) Warn($"beat {i + 1} objective ends in punctuation; vanilla objectives never do.");
+            }
+
+            // --- two beats on top of each other ------------------------------------------------------------
+            // Two beats on one marker in one place happen in one spot; two on the same travel RING (A1/A2/A3 or
+            // B1/B2/B3) sit 7 to 14 units apart (part 32). A declared return is the one legitimate repeat.
+            for (int i = 0; i < r.beats.Count; i++)
+                for (int j = i + 1; j < r.beats.Count; j++)
+                {
+                    var (a, b) = (r.beats[i], r.beats[j]);
+                    if (a.PlaceIndex != b.PlaceIndex) continue;
+                    bool ret = j < t.beatSlots.Count && t.beatSlots[j].returnTo == i;
+                    if (string.Equals(a.at, b.at, StringComparison.OrdinalIgnoreCase))
+                    { if (!ret) Warn($"beats {i + 1} and {j + 1} are both on {a.at} at the same place: one spot, two beats."); }
+                    else if (a.at.Length > 9 && b.at.Length > 9 && a.at.StartsWith("RETravel") && b.at.StartsWith("RETravel")
+                             && a.at[8] == b.at[8])
+                        Warn($"beats {i + 1} and {j + 1} are on the same travel ring ({a.at}, {b.at}): they land 7 to 14 m apart.");
+                }
+
             if (string.IsNullOrWhiteSpace(r.prose.name)) Fatal("prose.name is empty");
             if (string.IsNullOrWhiteSpace(r.prose.briefing)) Fatal("prose.briefing is empty");
 
@@ -785,17 +965,15 @@ namespace FrankyCLI
             var heads = names.Select(n => n.Split(' ')[0]).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             int read = 0;
             var near = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
+            foreach (var (nm, edid, fk) in IndexOf(env).Named)
             {
-                if (rec is not INamedGetter ng || string.IsNullOrEmpty(ng.Name)) continue;
                 read++;
-                string nm = ng.Name!;
-                if (rec.EditorID != null && rec.EditorID.StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase)) continue; // our own last build
+                if (edid != null && edid.StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase)) continue; // our own last build
                 foreach (var n in names)
                     if (string.Equals(nm, n, StringComparison.OrdinalIgnoreCase))
-                        fatal($"item name \"{n}\" is already the name of {rec.EditorID} [{rec.FormKey}]");
+                        fatal($"item name \"{n}\" is already the name of {edid} [{fk}]");
                 foreach (var h in heads)
-                    if (nm.Contains(h, StringComparison.OrdinalIgnoreCase)) near.Add($"{nm}  ({rec.EditorID})");
+                    if (nm.Contains(h, StringComparison.OrdinalIgnoreCase)) near.Add($"{nm}  ({edid})");
             }
             Console.WriteLine($"  item names: {read:N0} named record(s) read; containing {string.Join(" / ", heads)}: {near.Count}");
             foreach (var n in near.Take(25)) Console.WriteLine("    " + n);
@@ -1494,7 +1672,45 @@ namespace FrankyCLI
         /// 282 carry RECenterLocRef, and the intersection is 259. Keying on either alone loses real
         /// places. Measured 2026-09-23; part 32 of the manual carries the working.
         /// </summary>
+        /// <summary>
+        /// ONE PASS OVER THE LOAD ORDER, KEPT FOR THE LIFE OF THE ENVIRONMENT. lint --all took six minutes for
+        /// four recipes because every recipe re-walked ~1.08M records for the item names and once per model
+        /// field, and re-ran the location census. Same answers, read once. Keyed on the environment object,
+        /// so a different load order is a different index.
+        /// </summary>
+        private sealed class LoadIndex
+        {
+            public object Env = null!;
+            public List<(string name, string? edid, FormKey fk)> Named = new();
+            public Dictionary<string, List<(string? edid, string? stands)>> ByModel = new(StringComparer.OrdinalIgnoreCase);
+            public List<Poi>? Pool;
+        }
+        private static LoadIndex? _index;
+
+        private static LoadIndex IndexOf(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+        {
+            if (_index != null && ReferenceEquals(_index.Env, env)) return _index;
+            var ix = new LoadIndex { Env = env };
+            foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
+            {
+                if (rec is INamedGetter ng && !string.IsNullOrEmpty(ng.Name)) ix.Named.Add((ng.Name!, rec.EditorID, rec.FormKey));
+                if (rec is IModeledGetter mg && mg.Model?.File != null)
+                {
+                    string path = mg.Model.File.DataRelativePath.Path;
+                    string? stands = rec is IStaticGetter sg && sg.ObjectBounds != null
+                        ? gen_inspect.BoundsVerdict(sg.ObjectBounds.First.Z, sg.ObjectBounds.Second.Z) + $" ({sg.EditorID})" : null;
+                    if (!ix.ByModel.TryGetValue(path, out var list)) ix.ByModel[path] = list = new();
+                    // a Static's verdict first, so the first one read is the one a reader can trust
+                    if (stands != null) list.Insert(0, (rec.EditorID, stands)); else list.Add((rec.EditorID, null));
+                }
+            }
+            return _index = ix;
+        }
+
         private static List<Poi> PoolCensus(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+            => IndexOf(env).Pool ??= PoolCensusUncached(env);
+
+        private static List<Poi> PoolCensusUncached(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
         {
             var oeKeyword = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
                 .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;

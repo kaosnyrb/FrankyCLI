@@ -13,10 +13,13 @@ REAL="data/delves/recipes/duo_delve03.json"
 fails=0
 
 mut() {  # mut <name> <python expression over r>
-  python - "$REAL" "$TMP/$1.json" "$2" <<'EOF'
-import json, sys
+  # The file is named for the id it carries: since 2026-10-08 a recipe whose id is not its own file
+  # name is REFUSED before any check runs, which turned every case here into UNCLEAR.
+  python - "$REAL" "$TMP/duo_delvebite_$1.json" "$2" <<'EOF'
+import json, os, sys
 r = json.load(open(sys.argv[1], encoding="utf-8"))
 exec(sys.argv[3])
+r["id"] = os.path.splitext(os.path.basename(sys.argv[2]))[0]
 json.dump(r, open(sys.argv[2], "w", encoding="utf-8"))
 EOF
 }
@@ -37,42 +40,42 @@ run() { # run WANT needle label file
 run PASS "LINT PASSES" "the real recipe (control)" "$REAL"
 
 mut noreturn 'r["beats"][3]["at"] = "RETravelA1LocRef"'
-run REFUSE "is a RETURN to beat 2's place" "beat 4 does not go back to the centre" "$TMP/noreturn.json"
+run REFUSE "is a RETURN to beat 2's place" "beat 4 does not go back to the centre" "$TMP/duo_delvebite_noreturn.json"
 
 mut noitems 'del r["items"]'
-run REFUSE "items.load and items.missing are both required" "no item names" "$TMP/noitems.json"
+run REFUSE "items.load and items.missing are both required" "no item names" "$TMP/duo_delvebite_noitems.json"
 
 mut token 'r["items"]["missing"] = "Half of the <Place>"'
-run REFUSE "an item name carries a <Token>" "a token in an item name" "$TMP/token.json"
+run REFUSE "an item name carries a <Token>" "a token in an item name" "$TMP/duo_delvebite_token.json"
 
 mut three 'del r["beats"][2]'
-run REFUSE "is exactly 4 beats" "three beats on a four-beat template" "$TMP/three.json"
+run REFUSE "is exactly 4 beats" "three beats on a four-beat template" "$TMP/duo_delvebite_three.json"
 
 mut noobj 'r["beats"][2]["objective"] = None'
-run REFUSE "has no objective text" "beat 3 with no objective" "$TMP/noobj.json"
+run REFUSE "has no objective text" "beat 3 with no objective" "$TMP/duo_delvebite_noobj.json"
 
 # --- the second place (2026-09-24, his "the box should have been at a different POI") ---------------
 REAL="data/delves/recipes/duo_delve04.json"
 run PASS "LINT PASSES" "duo_delve04, the load at a second POI (control)" "$REAL"
 
 mut beat2second 'r["beats"][1]["place"] = "second"'
-run REFUSE "only beat 1 may be at the second place" "beat 2 at the second place" "$TMP/beat2second.json"
+run REFUSE "only beat 1 may be at the second place" "beat 2 at the second place" "$TMP/duo_delvebite_beat2second.json"
 
 mut badplace 'r["beats"][0]["place"] = "elsewhere"'
-run REFUSE "the places are" "a misspelt place name" "$TMP/badplace.json"
+run REFUSE "the places are" "a misspelt place name" "$TMP/duo_delvebite_badplace.json"
 
 # --- message boxes and item names (2026-09-24 pm, Jessica's message boxes) -----------------------------
 mut nomsgtext 'r["beats"][1]["message"]["text"] = ""'
-run REFUSE "has a message with no text" "beat 2 message with empty text" "$TMP/nomsgtext.json"
+run REFUSE "has a message with no text" "beat 2 message with empty text" "$TMP/duo_delvebite_nomsgtext.json"
 
 mut clash 'r["items"]["load"] = "Terran Reclaimer"'
-run REFUSE "is already the name of" "an item named exactly like a vanilla record" "$TMP/clash.json"
+run REFUSE "is already the name of" "an item named exactly like a vanilla record" "$TMP/duo_delvebite_clash.json"
 
 mut badmodel 'r["items"]["crateModel"] = "Meshes/NoSuch/Crate.nif"'
-run REFUSE "is used by no record in the load order" "a crate model nothing ships" "$TMP/badmodel.json"
+run REFUSE "is used by no record in the load order" "a crate model nothing ships" "$TMP/duo_delvebite_badmodel.json"
 
 mut tokname 'r["items"]["centreName"] = "Reclaimer at the <Place>"'
-run REFUSE "items.centreName carries a <Token>" "a token in the delivery point name" "$TMP/tokname.json"
+run REFUSE "items.centreName carries a <Token>" "a token in the delivery point name" "$TMP/duo_delvebite_tokname.json"
 
 echo "================ $fails failing case(s) ================"
 exit $fails

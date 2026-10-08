@@ -11,8 +11,8 @@ mkdir -p "$TMP"
 fails=0
 
 mk() {  # mk <file> <beats-json>
-  cat > "$TMP/$1.json" <<EOF
-{ "schema": 1, "id": "duo_bite", "template": "two-beat-one-place",
+  cat > "$TMP/duo_delvebite_$1.json" <<EOF
+{ "schema": 1, "id": "duo_delvebite_$1", "template": "two-beat-one-place",
   "place": { "theme": { "require": [], "exclude": [] } },
   "prose": { "name": "n <Place>", "briefing": "b <Place>" },
   "beats": $2 }
@@ -21,7 +21,7 @@ EOF
 
 run() { # run WANT needle label file
   want="$1"; needle="$2"; label="$3"; f="$4"
-  out=$(timeout 900 dotnet run -- gen_delve lint "$TMP/$f.json" 2>&1); code=$?
+  out=$(timeout 900 dotnet run -- gen_delve lint "$TMP/duo_delvebite_$f.json" 2>&1); code=$?
   if echo "$out" | grep -qi "Unknown mode"; then
     echo "[FAIL] harness :: $label -- never dispatched"; fails=$((fails+1)); return; fi
   got=UNCLEAR

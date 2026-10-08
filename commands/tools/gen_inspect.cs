@@ -2528,7 +2528,7 @@ namespace FrankyCLI
         private const float BoundsTolerance = 0.05f;
 
         /// <summary>Pure: the verdict for a box's z range relative to its origin. Selftested.</summary>
-        private static string BoundsVerdict(float zmin, float zmax)
+        internal static string BoundsVerdict(float zmin, float zmax)
         {
             if (zmax - zmin < 0.001f) return "UNREADABLE (zero height)";
             if (Math.Abs(zmin) <= BoundsTolerance) return "STANDS";
