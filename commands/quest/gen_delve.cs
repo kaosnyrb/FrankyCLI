@@ -378,7 +378,10 @@ namespace FrankyCLI
                         if (!string.IsNullOrWhiteSpace(nm)) names.Add((r.id, field, nm!));
             }
             Console.WriteLine();
-            foreach (var g in models.GroupBy(m => m.path, StringComparer.OrdinalIgnoreCase).Where(g => g.Select(x => x.recipe).Distinct().Count() > 1))
+            // Letter siblings may share a model (his ruling, 2026-10-08: "should be allowed the same model, it's
+            // fine"), so the count is of mission NUMBERS: 06a and 06b are one mission, 06 and 07 are two.
+            static string Mission(string id) => System.Text.RegularExpressions.Regex.Replace(id, "(?<=[0-9])[a-z]$", "");
+            foreach (var g in models.GroupBy(m => m.path, StringComparer.OrdinalIgnoreCase).Where(g => g.Select(x => Mission(x.recipe)).Distinct().Count() > 1))
                 Console.WriteLine($"  [warn ] {g.Key} is a delivery point in {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: "
                                   + "his ruling is one delivery model per mission, distinct across missions.");
             // ⭐ LETTER SIBLINGS. His convention, 2026-10-08: "01a and 01b would have the same kinda content but
