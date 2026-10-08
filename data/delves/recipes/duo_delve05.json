@@ -42,7 +42,8 @@
     "_items": "Jessica's, 2026-10-02. Named objects, never a described site.",
     "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
     "_crateModel": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot.",
-    "centreModel": "Meshes\\ccs\\machinebase.nif",
+    "centreModel": "Meshes\\ccs\\relaydish01.nif",
+    "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
     "_centreModel": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
     "centreName": "Comms Relay",
     "_centre": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right."

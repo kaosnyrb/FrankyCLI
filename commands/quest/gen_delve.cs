@@ -296,8 +296,22 @@ namespace FrankyCLI
                             uses++;
                     Console.WriteLine($"  {field}: {path} is used by {uses} record(s) in the load order");
                     if (uses == 0)
-                        Fatal($"items.{field} '{path}' is used by no record in the load order. A path that "
-                              + "resolves to nothing builds clean and renders nothing; use one the game already ships.");
+                    {
+                        // "Used by a record" was standing in for "the file exists", and the two part
+                        // company exactly when the model is NEW (2026-10-08: the office's first kitbash,
+                        // relaydish01, refused). So ask the real question: is the FILE there, loose in
+                        // Data or inside this mod's own archives? Nowhere still fails, unchanged.
+                        string where = FindAsset(env.DataFolderPath.Path, t.mod, path!);
+                        if (where == "")
+                            Fatal($"items.{field} '{path}' is used by no record in the load order AND is not in Data "
+                                  + $"loose or in any '{t.mod} - *.ba2'. A path that resolves to nothing builds clean "
+                                  + "and renders nothing; use one the game already ships.");
+                        else if (where == "loose")
+                            Warn($"items.{field} '{path}' is a NEW asset (no record uses it) and exists LOOSE ONLY. "
+                                 + "It renders on this machine and on NO player's: pack it into the mod's archives before a release.");
+                        else
+                            Warn($"items.{field} '{path}' is a NEW asset (no record uses it), found in {where}.");
+                    }
                 }
                 for (int i = 0; i < r.beats.Count; i++)
                 {
@@ -1259,6 +1273,33 @@ namespace FrankyCLI
         }
 
         // ------------------------------------------------------------------ the build
+
+        /// <summary>
+        /// Where a data-relative asset path actually lives: the name of the first "{mod} - *.ba2" whose
+        /// BTDX name table lists it, else "loose" if the file is in Data, else "" (nowhere). Archives
+        /// are checked FIRST because loose-only is the state that ships broken.
+        /// </summary>
+        private static string FindAsset(string dataDir, string mod, string path)
+        {
+            string want = path.Replace('\\', '/').ToLowerInvariant();
+            foreach (var ba2 in Directory.GetFiles(dataDir, mod + " - *.ba2"))
+            {
+                using var f = File.OpenRead(ba2);
+                using var br = new BinaryReader(f);
+                if (new string(br.ReadChars(4)) != "BTDX") continue;
+                f.Seek(12, SeekOrigin.Begin);
+                uint count = br.ReadUInt32();
+                long nameTable = (long)br.ReadUInt64();
+                f.Seek(nameTable, SeekOrigin.Begin);
+                for (uint i = 0; i < count; i++)
+                {
+                    int len = br.ReadUInt16();
+                    string name = System.Text.Encoding.ASCII.GetString(br.ReadBytes(len));
+                    if (name.Replace('\\', '/').ToLowerInvariant() == want) return Path.GetFileName(ba2);
+                }
+            }
+            return File.Exists(Path.Combine(dataDir, path)) ? "loose" : "";
+        }
 
         private static int Build(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool dry)
         {
