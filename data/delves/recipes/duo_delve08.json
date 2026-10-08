@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "id": "duo_delve08",
+  "template": "beats",
+  "author": "eliza",
+  "source": "home-office office/projects/delves/v2-mission-types.md, type 3 (the trail); office/projects/delves/stages-not-a-driver.md",
+  "_note": [
+    "TYPE 3, THE TRAIL, the first Delve across THREE places: a slate at one POI points to a second at",
+    "another, and both go to a third. Three links, then it ends (his: 'ok for the chain to end, otherwise",
+    "its a thradmill'). A MECHANISM TEST: every player-facing word is an Eliza PLACEHOLDER, Jessica's to write."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "The END of the trail, peopled: somebody to hand the slates to.",
+    "second": {
+      "theme": {
+        "require": [
+          "LocTypeOE_ThemeNaturalKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_NonHostile"
+        ]
+      }
+    },
+    "third": {
+      "theme": {
+        "require": [
+          "LocTypeOE_ThemeMilitaryKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeNaturalKeyword"
+        ]
+      }
+    },
+    "_themes": "THREE DISJOINT POOLS, so no two links can be one site: the end is peopled (keeping the base's no-natural, no-cave exclusions); the first slate is at an unpeopled NATURAL site; the second at an unpeopled MILITARY one. Split on the two biggest themes in the pool (gen_delve keywords, 2026-10-08: Natural 121, Military 119); 'infrastructure and not peopled' was 16. Which fiction suits which site is Jessica's call."
+  },
+  "prose": {
+    "name": "Trail: Slates on <Planet>",
+    "briefing": "PLACEHOLDER. A slate at <SecondPlace> is the first link in something."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "place": "second",
+      "objective": "Find the slate at <SecondPlace>",
+      "item": "Trail Slate (1 of 2)",
+      "journal": "PLACEHOLDER. The first slate names <ThirdPlace>.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif"
+    },
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "place": "third",
+      "objective": "Find the next slate at <ThirdPlace>",
+      "item": "Trail Slate (2 of 2)",
+      "journal": "PLACEHOLDER. The second slate says to take both to <Place>.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif"
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "Take both slates to <Place>",
+      "journal": "PLACEHOLDER. Handed over. The trail ends here.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Slate Drop"
+    }
+  ]
+}

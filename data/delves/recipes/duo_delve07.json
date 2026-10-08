@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "id": "duo_delve07",
+  "template": "beats",
+  "author": "eliza",
+  "source": "home-office office/projects/delves/v2-mission-types.md, type 1 (the fix-up); office/projects/delves/stages-not-a-driver.md",
+  "_note": [
+    "TYPE 1, THE FIX-UP, the first beats Delve: three broken things at a peopled POI, repaired in ANY ORDER",
+    "behind one counted objective. A MECHANISM TEST: every player-facing word here is an Eliza PLACEHOLDER,",
+    "Jessica's to write. Built 2026-10-08 on his \"yeah build that now\"."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "Peopled, so somebody is there to have the broken kit (type 1's row: 'three broken things at a peopled POI'). Keeps the base's own exclusions (no natural sites, no caves)."
+  },
+  "prose": {
+    "name": "Repairs on <Planet>",
+    "briefing": "PLACEHOLDER. The crew at <Place> have three pieces of kit down and nobody free to fix them."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "fix",
+      "at": "RECenterLocRef",
+      "objective": "Repair the equipment at <Place>",
+      "journal": "PLACEHOLDER. One repaired.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Faulty Water Reclaimer"
+    },
+    {
+      "type": "use",
+      "group": "fix",
+      "at": "RETravelA1LocRef",
+      "journal": "PLACEHOLDER. Another one repaired.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Leaking Water Reclaimer"
+    },
+    {
+      "type": "use",
+      "group": "fix",
+      "at": "RETravelB1LocRef",
+      "journal": "PLACEHOLDER. All three running again.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Stalled Water Reclaimer"
+    }
+  ]
+}

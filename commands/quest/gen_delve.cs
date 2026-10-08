@@ -50,7 +50,7 @@ namespace FrankyCLI
     /// because constructing a GetDistance condition has not been proven the way LocationHasRefType
     /// has. Named here rather than discovered by someone whose leash quietly did nothing.
     /// </summary>
-    public static class gen_delve
+    public static partial class gen_delve
     {
         // ------------------------------------------------------------------ models
 
@@ -219,6 +219,15 @@ namespace FrankyCLI
             /// A new optional field, so schema stays 1 and every recipe written before it builds unchanged.
             /// </summary>
             public BeatMessage? message { get; set; }
+            /// <summary>beats: "use", "pickup" or "deliver". Absent on every other kind.</summary>
+            public string? type { get; set; }
+            /// <summary>beats: consecutive use beats sharing a group name are done in ANY order, with one counted objective.</summary>
+            public string? group { get; set; }
+            /// <summary>beats, pickup only: the inventory name of what this beat hands the player (a cloned item).</summary>
+            public string? item { get; set; }
+            /// <summary>beats, OPTIONAL: the NIF this beat's object wears, and its activate prompt. Absent = the base's.</summary>
+            public string? model { get; set; }
+            public string? name { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -504,6 +513,10 @@ namespace FrankyCLI
             // no player can ever see, which is worse than refusing it.
             bool delve4 = t.kind == "delve4";
             bool choice = t.kind == "choice";
+            bool beats = t.kind == "beats";
+            if (beats) GradeBeats(r, t, env, Fatal, Warn);
+            else if (r.beats.Any(b => b.type != null || b.group != null || b.item != null || b.model != null || b.name != null))
+                Fatal($"a beat sets type, group, item, model or name, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (delve4)
             {
                 if (string.IsNullOrWhiteSpace(r.items?.load) || string.IsNullOrWhiteSpace(r.items?.missing))
@@ -655,7 +668,7 @@ namespace FrankyCLI
                               + $"('{r.beats[back].at}'); it names '{r.beats[i].at}'.");
                 }
             }
-            for (int i = 0; i < r.beats.Count; i++)
+            for (int i = 0; i < r.beats.Count && !beats; i++)
             {
                 bool driven = delve4 || choice || i == 0 || i == r.beats.Count - 1;
                 if (string.IsNullOrWhiteSpace(r.beats[i].at)) Fatal($"beat {i + 1} names no marker");
@@ -669,7 +682,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is an EXTRA beat with no journal line, so nothing about it would "
                           + "reach the player at all.");
             }
-            int extras = Math.Max(0, r.beats.Count - t.beatSlots.Count);
+            int extras = beats ? 0 : Math.Max(0, r.beats.Count - t.beatSlots.Count);
             if (extras > 0)
             {
                 int last = t.extraBeatStageBase + t.extraBeatStageStep * (extras - 1);
@@ -690,14 +703,14 @@ namespace FrankyCLI
                 if (r.offer != null) unused.Add("offer");
                 if (r.reward != null) unused.Add("reward");
                 if (r.people != null) unused.Add("people");
-                if (r.place.third != null) unused.Add("place.third");
+                if (r.place.third != null && !beats) unused.Add("place.third");
                 if (r.items?.buyerModel != null) unused.Add("items.buyerModel");
                 if (r.items?.buyerName != null) unused.Add("items.buyerName");
             }
             if (!delve4 && !choice)
             {
                 if (r.items != null) unused.Add("items");
-                if (r.beats.Any(b => b.message != null)) unused.Add("beats[].message");
+                if (!beats && r.beats.Any(b => b.message != null)) unused.Add("beats[].message");
             }
             foreach (var u in unused)
                 Fatal($"{u} is set, and template '{t.id}' ({t.kind}) never reads it, so it would be silently ignored.");
@@ -846,6 +859,17 @@ namespace FrankyCLI
                         Fatal($"the owner's and the buyer's places can draw the SAME POI ({both.Count}: {string.Join(", ", both.Take(5))}). "
                               + "Make their themes disjoint: one requires a keyword the other excludes.");
                 }
+
+                // A beats Delve has no ending to keep apart, but two of its places drawing ONE POI would put
+                // two legs of a trail on the same site. Whether the engine de-duplicates location aliases is
+                // not established (part 32), so the overlap is measured and named rather than trusted.
+                if (beats)
+                    foreach (var (a, b) in new[] { (0, 1), (0, 2), (1, 2) })
+                        if (drawn.ContainsKey(a) && drawn.ContainsKey(b))
+                        {
+                            int both = drawn[a].Intersect(drawn[b], StringComparer.OrdinalIgnoreCase).Count();
+                            if (both > 0) Warn($"the {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} places can draw the same POI ({both} in common); give one a theme the other excludes if they must differ.");
+                        }
 
                 // --- what the build will DROP from the base --------------------------------------------
                 // ⛔ WHY THIS EXISTS: the build rebuilds every keyword condition from the recipe, which is
@@ -1833,6 +1857,7 @@ namespace FrankyCLI
 
             int fail = 0;
             var made4 = new BuildMade();
+            var madeBeats = new BeatsMade();
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
                 made4.ThirdPlaceAlias = CreateThirdPlace(clone, t);
@@ -1851,6 +1876,10 @@ namespace FrankyCLI
             if (t.kind == "delve4")
             {
                 if (fail == 0) fail += BuildDelve4(myMod, clone, t, r, markers, plan, made4);
+            }
+            else if (t.kind == "beats")
+            {
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats);
             }
             else if (t.kind == "choice")
             {
@@ -1925,7 +1954,8 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            return Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
+            return t.kind == "beats" ? VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore)
+                                     : Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
         }
 
         // ------------------------------------------------------------------ delve4

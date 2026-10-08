@@ -52,6 +52,7 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
 | `carry-absence-recover-return` | delve4 | exactly 4 | find the load, find the other half gone, take it back off the carrier, finish the job (testcase 01; `duo_delve03`-`05`) |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06`) |
+| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group` (types 1 and 3; `duo_delve07`, `duo_delve08`). See *Beats* below |
 
 **Tokens** an author writes in prose, mapped by the template onto its real aliases:
 
@@ -59,6 +60,7 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 |---|---|
 | two-beat-one-place, carry-absence-recover-return | `<Place>`, `<Planet>` |
 | find-owner-or-buyer | `<FindPlace>`, `<OwnerPlace>`, `<BuyerPlace>`, `<Planet>` |
+| beats | `<Place>` (main), `<SecondPlace>`, `<ThirdPlace>`, `<Planet>` |
 
 An unknown token is refused (it would print to the player literally). Names (items, delivery points,
 NPCs) take **no** tokens.
@@ -228,6 +230,40 @@ every place demands exactly its markers, the plugin's masters are unchanged, and
 objective target, journal, stage reward and NPC field reads back as written.
 
 ---
+
+## Beats: a Delve with no driver
+
+**His ruling, 2026-10-08: "The stages of the quest are the state machine. All of vanilla Starfield was
+built this way."** A `beats` recipe lists its beats by **type**. Each type is a stock `Default*` alias
+script that sets the beat's stage once the previous step's stage is done, plus a few lines in ONE
+fragment script the build generates (`papyrus/gen/duo_qf_<id>.psc`, gitignored, never hand-edited) for
+the half that is Papyrus-only: objectives, the counter, taking delivered items, a message box.
+
+| `type` | the player | stock hook | fragment |
+|---|---|---|---|
+| `use` | activates it; the prompt goes | `DefaultAliasOnActivate` | objective done, next shown |
+| `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
+| `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up since the last deliver |
+
+**Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
+`objective`, `journal`, `message`, and optionally `item` (pickup only, the inventory name), `model` and
+`name` (what the object looks like and its prompt), `group`.
+
+**Any order, with a counter:** consecutive `use` beats with the same `group` are one step. Only the first
+carries the `objective`; the build appends the vanilla counter, `(<Global=…>/N)`, and the step completes
+when all N are done. The counter resets when the quest starts, because these quests are repeatable.
+
+**Stages are numbered by the build:** 0 runs on start, then 10, 20, … per beat (a group takes one more),
+and the last step always lands on 100, the base's completing stage, which carries the reward.
+`setstage <id> <stage>` jumps straight to a beat.
+
+⛔ **Deliver is gated by STAGE ORDER, not by the stock `DefaultAliasOnActivateRemoveItems`:** that script
+sets its stage first and checks the item afterwards, so as a gate it would complete empty-handed.
+
+**Build:** as above, then compile the generated script by name, which `compile.py` finds in `gen/`:
+`python papyrus/compile.py C:/modding/DU_Overtime/Data duo_qf_<id>` and copy the `.pex` into Steam
+`Data/scripts`. **Two places drawing one POI is warned**, so keep a trail's places disjoint by theme
+(`duo_delve08` splits natural and military).
 
 ## Not yet
 

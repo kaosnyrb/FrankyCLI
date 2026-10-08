@@ -219,6 +219,45 @@
         "a choice made in conversation -- there are no dialogue trees in this shape, by his ruling"
       ],
       "verifiedFrom": "gen_inspect qall duo_delve05 (same base) on Defiant, 2026-10-08"
+    },
+    {
+      "id": "beats",
+      "kind": "beats",
+      "base": "duo_artifact_localcargo_qst09a",
+      "mod": "du_overtime",
+      "driver": "",
+      "replacesDriver": "dou_artifact_ground_dualactivator_local_quest",
+      "_shape": [
+        "NO DRIVER: THE STAGES ARE THE STATE MACHINE (his ruling 2026-10-08, proven by gen_stageprobe).",
+        "A recipe lists beats by TYPE (use, pickup, deliver); each is a stock Default* alias hook that sets",
+        "the beat's stage after the previous step's, plus a few lines in ONE generated fragment script",
+        "(papyrus/gen/duo_qf_<id>.psc) bound to that stage. Consecutive use beats sharing a group are done",
+        "in any order behind one counted objective. The base's driver is REMOVED; the last step lands on",
+        "the base's completing stage 100, which carries the reward. See gen_delve_beats.cs."
+      ],
+      "beats": 1,
+      "maxBeats": 9,
+      "carriesItem": true,
+      "placeAlias": 0,
+      "mapMarkerAlias": 5,
+      "briefingStage": 0,
+      "completeStage": 100,
+      "beatSlots": [
+        { "markerAlias": 1,  "activatorAlias": 2,  "objective": 10, "journalStage": 10 },
+        { "markerAlias": 11, "activatorAlias": 12, "objective": 20, "journalStage": 20 }
+      ],
+      "_beatSlots": "Beats 1 and 2 take the base's two marker+activator pairs; beat 3 on clones slot 1. Stages and objectives are numbered by the build from the recipe, not from this table.",
+      "tokens": { "Place": "DungeonLocation", "SecondPlace": "FinalLocation", "ThirdPlace": "ThirdLocation", "Planet": "targetPlanet" },
+      "collapsedPlaceAliases": [],
+      "secondPlaceAlias": 10,
+      "thirdPlace": { "cloneOf": 0, "name": "ThirdLocation" },
+      "cannot": [
+        "dialogue -- the people stand there, his ruling",
+        "a recover or choose beat -- not yet; 03 to 06 keep their drivers until those types exist and play the same",
+        "a fourth place",
+        "any order for pickups or delivers -- a group is use beats only"
+      ],
+      "verifiedFrom": "gen_stageprobe on duo_artifact_localcargo_qst09a, Defiant, played 2026-10-08"
     }
   ]
 }

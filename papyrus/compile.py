@@ -42,6 +42,9 @@ def main(argv: list[str]) -> int:
         stem = name[:-4] if name.lower().endswith(".psc") else name
         psc = HERE / f"{stem}.psc"
         if not psc.exists():
+            # gen_delve writes a beats Delve's fragment script here (generated, never hand-edited).
+            psc = HERE / "gen" / f"{stem}.psc"
+        if not psc.exists():
             print(f"[FAIL] no such library script: {psc}")
             failed += 1
             continue
@@ -51,7 +54,7 @@ def main(argv: list[str]) -> int:
             continue
         pex = out / f"{stem}.pex"
         started = time.time()
-        r = subprocess.run([str(COMPILER), psc.name, f"-i={HERE};{BASE_SRC}", f"-o={out}", f"-f={FLAGS}"],
+        r = subprocess.run([str(COMPILER), psc.name, f"-i={psc.parent};{HERE};{BASE_SRC}", f"-o={out}", f"-f={FLAGS}"],
                            capture_output=True, text=True, errors="replace")
         fresh = pex.exists() and pex.stat().st_mtime >= started - 1
         if "Compilation succeeded" in (r.stdout or "") and fresh:
