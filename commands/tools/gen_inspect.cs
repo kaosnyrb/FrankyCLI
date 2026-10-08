@@ -51,7 +51,12 @@ namespace FrankyCLI
             "  'list' - EVERY record group the mod exposes, with counts, derived from the type\n" +
             "           system rather than typed here. 177 of them, and ANY of those names works:\n" +
             "           the ones above get a bespoke view, the rest get a full property dump.\n" +
+            "  'bounds' <search> - OBND of every Static / MoveableStatic / Activator whose EditorID OR\n" +
+            "           MODEL PATH matches, with a verdict on whether it STANDS on its origin. Read\n" +
+            "           this before a mesh becomes a placed object (2026-10-08: a tripod dish hung\n" +
+            "           2.1 m below its origin and sat underground at a Delve's centre)\n" +
             "  'selftest' - positive + negative controls for the Mutagen field-width tell\n" +
+            "               and for the bounds verdict\n" +
             "               (no plugin loaded, exits 1 on failure, so it can gate)";
 
         public static int Generate(string[] args)
@@ -93,6 +98,9 @@ namespace FrankyCLI
                 ListRecordGroups(starfield);
                 return 0;
             }
+
+            if (recordType.Equals("bounds", StringComparison.OrdinalIgnoreCase))
+                return Bounds(allMods, search);
 
             if (recordType.Equals("worldspace_smallworld", StringComparison.OrdinalIgnoreCase))
             {
@@ -2431,11 +2439,105 @@ namespace FrankyCLI
             Check("a non-integer stays quiet", WidthTell("some string").Length == 0, "string");
             Check("a negative int stays quiet", WidthTell(-5).Length == 0, "-5");
 
+            // BOUNDS VERDICT. The positives are REAL readings off Starfield.esm, 2026-10-08: the
+            // tripod that sat underground at duo_delve05's centre, and the three that sat right.
+            Check("SatelliteDish_A_TripodFloor01 HANGS", BoundsVerdict(-2.14f, 0.06f).StartsWith("HANGS"), BoundsVerdict(-2.14f, 0.06f));
+            Check("SatelliteDish_A_01 STANDS", BoundsVerdict(0f, 3.96f) == "STANDS", BoundsVerdict(0f, 3.96f));
+            Check("CrateStackableA_01 STANDS", BoundsVerdict(0f, 0.92f) == "STANDS", BoundsVerdict(0f, 0.92f));
+            Check("WaterFiltrationCart01 STANDS", BoundsVerdict(0f, 1.25f) == "STANDS", BoundsVerdict(0f, 1.25f));
+            Check("RadarDish01 (z -0.02) STANDS, inside tolerance", BoundsVerdict(-0.02f, 5.07f) == "STANDS", BoundsVerdict(-0.02f, 5.07f));
+            // NEGATIVES for each other branch, so no verdict is the only one that can come back.
+            Check("half below the origin SINKS", BoundsVerdict(-0.5f, 2f).StartsWith("SINKS"), BoundsVerdict(-0.5f, 2f));
+            Check("lifted off the origin FLOATS", BoundsVerdict(0.3f, 1f).StartsWith("FLOATS"), BoundsVerdict(0.3f, 1f));
+            Check("a degenerate box is UNREADABLE, never STANDS", BoundsVerdict(0f, 0f).StartsWith("UNREADABLE"), BoundsVerdict(0f, 0f));
+
             Console.WriteLine();
             Console.WriteLine(fail == 0
                 ? "gen_inspect selftest: all checks passed"
                 : $"gen_inspect selftest: {fail} FAILED");
             return fail == 0 ? 0 : 1;
+        }
+
+        /// <summary>
+        /// WILL THIS MESH STAND ON ITS MARKER? A placed object puts its ORIGIN on the marker, so the
+        /// answer is the OBND's lowest z. Built 2026-10-08 after duo_delve05's delivery point,
+        /// SatelliteDish_A_TripodFloor01, sat 2.1 m underground: its bounds run z -2.14 to +0.06,
+        /// a mesh that hangs from its origin. `static` printed "ObjectBounds: (ObjectBoundsBinaryOverlay)"
+        /// and no numbers, which is a reader that renders EXISTENCE and not DATA.
+        ///
+        /// Matches on EditorID OR model path, so `bounds machinebase` finds every record wearing
+        /// a kitbash NIF. Read-only.
+        ///
+        /// ⚠ An ACTIVATOR's OBND belongs to the record, not to its NIF. gen_delve's reskin writes
+        /// Model.File and nothing else, so a reskinned activator carries its SOURCE's bounds. Grade
+        /// the STATIC that owns the mesh, never the reskinned activator.
+        /// </summary>
+        private static int Bounds(List<IStarfieldModGetter> allMods, string search)
+        {
+            Console.WriteLine("bounds: Static, MoveableStatic, Activator; match on EditorID or model path");
+            Console.WriteLine($"  STANDS = lowest z within +/-{BoundsTolerance} m of the origin");
+            Console.WriteLine();
+            int found = 0, unreadable = 0, activators = 0;
+            var verdicts = new Dictionary<string, int>();
+
+            void One(string mod, string kind, Mutagen.Bethesda.Plugins.Records.IMajorRecordGetter rec, IObjectBoundsGetter? ob, string? model)
+            {
+                bool byId = rec.EditorID != null && rec.EditorID.Contains(search, StringComparison.OrdinalIgnoreCase);
+                bool byModel = model != null && model.Contains(search, StringComparison.OrdinalIgnoreCase);
+                if (!byId && !byModel && !MatchesSearch(rec.EditorID, rec.FormKey, search)) return;
+                found++;
+                if (ob == null)
+                {
+                    unreadable++;
+                    Console.WriteLine($"  NO OBND (could not read)  {kind,-14} {rec.EditorID} [{rec.FormKey}]  {model}");
+                    return;
+                }
+                var lo = ob.First; var hi = ob.Second;
+                string v = BoundsVerdict(lo.Z, hi.Z);
+                string key = v.Split(' ')[0];
+                verdicts[key] = verdicts.TryGetValue(key, out int n) ? n + 1 : 1;
+                // An activator's box is the RECORD's, usually inherited by cloning, so its verdict is
+                // starred: 2026-10-08, all 21 records wearing his ~2 m machinebase console carried a
+                // 0.3 m box and read STANDS. A verdict over inherited data must not look like a pass.
+                string act = "";
+                if (kind == "Activator") { activators++; v += "*"; act = "  *record bounds"; }
+                Console.WriteLine($"  {v,-22} {kind,-14} {rec.EditorID} [{rec.FormKey}]  ({mod})");
+                Console.WriteLine($"      z {lo.Z,7:0.00} .. {hi.Z,7:0.00}   footprint {hi.X - lo.X:0.0} x {hi.Y - lo.Y:0.0} m   height {hi.Z - lo.Z:0.0} m{act}");
+                Console.WriteLine($"      model {model ?? "(none)"}");
+            }
+
+            foreach (var mod in allMods)
+            {
+                string name = mod.ModKey.FileName;
+                foreach (var r in mod.Statics) One(name, "Static", r, r.ObjectBounds, r.Model?.File?.GivenPath);
+                foreach (var r in mod.MoveableStatics) One(name, "MoveableStatic", r, r.ObjectBounds, r.Model?.File?.GivenPath);
+                foreach (var r in mod.Activators) One(name, "Activator", r, r.ObjectBounds, r.Model?.File?.GivenPath);
+            }
+
+            Console.WriteLine();
+            if (found == 0)
+                Console.WriteLine($"No match for '{search}' -- Statics, MoveableStatics and Activators in {allMods.Count} plugin(s) WERE searched.");
+            else
+                Console.WriteLine($"Total: {found}   " + string.Join("  ", verdicts.OrderBy(k => k.Key).Select(k => $"{k.Key} {k.Value}"))
+                                  + (unreadable > 0 ? $"  NO-OBND {unreadable}" : ""));
+            if (activators > 0)
+                Console.WriteLine($"  * {activators} ACTIVATOR verdict(s) are on the RECORD's box, which a clone inherits from its source: NOT evidence about the NIF. Grade a Static that owns the mesh, or look at the NIF.");
+            return 0;
+        }
+
+        private const float BoundsTolerance = 0.05f;
+
+        /// <summary>Pure: the verdict for a box's z range relative to its origin. Selftested.</summary>
+        private static string BoundsVerdict(float zmin, float zmax)
+        {
+            if (zmax - zmin < 0.001f) return "UNREADABLE (zero height)";
+            if (Math.Abs(zmin) <= BoundsTolerance) return "STANDS";
+            if (zmin > BoundsTolerance) return $"FLOATS {zmin:0.00} m";
+            // HANGS = more than 90% of the height is below the origin (the tripod: 2.14 of 2.20,
+            // the 6 cm above it being the cap he saw). A proportion, because a fixed cut-off at the
+            // stand tolerance called the tripod SINKS over a 1 cm difference.
+            if (-zmin > 0.9f * (zmax - zmin)) return $"HANGS {-zmin:0.00} m";
+            return $"SINKS {-zmin:0.00} m";
         }
 
         private static string WidthTell(object v)
