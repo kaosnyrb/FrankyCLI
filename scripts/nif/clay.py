@@ -1,12 +1,18 @@
 """CLAY RENDER of a Starfield NIF: grey, flat-shaded, four views in one PNG, so I can LOOK at a model.
 
-    python clay.py <nif> <out.png> [--size 360] [--mod <plugin name>]
+    python clay.py <nif> <out.png> [--size 360] [--mod <plugin name>] [--textured]
 
 His ask, 2026-10-08: "so can we use nifskope to give you eyes on the nifs?" NifSkope has no render-to-file
 command, so this reads what NifSkope reads: the node tree (sfnif walk, the transform convention proven
 against three vanilla OBNDs in kbounds.py) and each BSGeometry's LOD0 .mesh (from Data/geometries loose,
-else the mod's and the game's archives). Shape, placement and silhouette only: NO materials, NO textures.
+else the mod's and the game's archives). Default: shape, placement and silhouette only, in grey.
 "Does it look good" stays his eye.
+
+--textured (his ask, 2026-10-08 evening): each geometry's material -> its FIRST LAYER's albedo (smat.py)
+-> the texture out of the archives (ba2get.texture, a <=512 px mip) -> sampled through the .mesh's UVs,
+times the material tint, times the same flat shading. Nearest texel, sRGB values shaded as they come.
+Grunge and paint-over layers are not blended, so it reads cleaner than the game; no normal maps.
+A geometry whose material or texture cannot be resolved is drawn in grey and LISTED with the reason.
 
 Views: front (from -Y), side (from +X), top (from +Z), and a 3/4 view (yaw 35, pitch 25). The z = 0
 ground line is drawn in red on the elevations, so a hanging or floating mesh is visible at a glance.
@@ -17,7 +23,7 @@ import math, struct, sys
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
-import sfnif, ba2get
+import sfnif, ba2get, smat
 from sfnif import Nif
 from kbounds import xf, mv, mm
 
@@ -57,8 +63,65 @@ def parse_mesh(d: bytes):
     return q.astype(np.float64) / 32767.0 * scale, idx.astype(np.int64)
 
 
-def collect(n: Nif, mod_hint: str | None):
-    tris, missing, boxes = [], [], []
+def parse_uv(d: bytes):
+    """The UV block straight after the positions: u32 count == vertexCount, then half-float (u, v) pairs.
+    V is NOT flipped (measured against baked AO on five parts, bethesda/02). None if the count disagrees."""
+    ni = struct.unpack_from("<I", d, 4)[0]
+    o = 8 + ni * 2
+    nv = struct.unpack_from("<I", d, o + 8)[0]
+    o += 12 + nv * 6
+    if struct.unpack_from("<I", d, o)[0] != nv:
+        return None
+    return np.frombuffer(d, dtype="<f2", count=nv * 2, offset=o + 4).reshape(nv, 2).astype(np.float64)
+
+
+_TEX: dict[str, Path] = {}
+
+
+def texture_index(mod_hint: str | None) -> dict[str, Path]:
+    """member -> archive, patch archives first so they win, a mod's own textures before the game's."""
+    if not _TEX:
+        arcs = sorted(ba2get.DATA.glob("Starfield - TexturesPatch*.ba2"), reverse=True)
+        arcs += sorted(ba2get.DATA.glob("Starfield - Textures[0-9]*.ba2"))
+        if mod_hint:
+            arcs = sorted(ba2get.DATA.glob(f"{mod_hint} - Textures*.ba2")) + arcs
+        for a in arcs:
+            if a.name.lower().endswith(("_xbox.ba2", "_ps.ba2")):
+                continue                       # console archives are tiled; Pillow cannot read them
+            for k in ba2get.index(a):
+                _TEX.setdefault(k, a)
+    return _TEX
+
+
+def surface(matpath: str | None, mod_hint: str | None, cache: dict):
+    """(RGB float array 0..1, Albedo) for a material, or a reason string."""
+    if not matpath:
+        return "geometry has no material"
+    if matpath in cache:
+        return cache[matpath]
+    a = smat.albedo(matpath, mod_hint)
+    if isinstance(a, str):
+        out = a
+    elif a.file is None and a.flat is None:
+        out = (None, a)                        # no colour layer: not drawn, and listed
+    elif a.file is None:
+        out = (np.array(a.flat, dtype=np.float64).reshape(1, 1, 3), a)
+    else:
+        arc = texture_index(mod_hint).get(a.file)
+        if arc is None:
+            out = f"texture not in any archive: {a.file}"
+        else:
+            im = ba2get.texture(arc, a.file, max_px=512).convert("RGB")
+            out = (np.asarray(im, dtype=np.float64) / 255.0, a)
+    cache[matpath] = out
+    return out
+
+
+def collect(n: Nif, mod_hint: str | None, textured: bool = False):
+    """(triangles, missing meshes, boxes, surfaces). `surfaces` is per-triangle-run: (count, uv (N,3,2)
+    or None, texture or None, Albedo or None, geometry name, reason); filled only when `textured`."""
+    tris, missing, boxes, surfs = [], [], [], []
+    cache: dict = {}
 
     def visit(i, PT, PR, PS):
         t, bl = n.type_of(i), n.blocks[i]
@@ -94,10 +157,24 @@ def collect(n: Nif, mod_hint: str | None):
         v, f = parse_mesh(raw)
         world = v @ (np.array(WR).T * WS) + np.array(WT)
         tris.append(world[f])
+        if textured:
+            sh = struct.unpack_from("<I", bl, w.refs[-2])[0]         # skin, SHADER, alpha: the shader's
+            mat = None                                              # name string is the material path
+            if sh != NONE:
+                si = struct.unpack_from("<I", n.blocks[sh], 0)[0]
+                mat = n.strings[si] if si != NONE else None
+            uv = parse_uv(raw)
+            s = surface(mat, mod_hint, cache)
+            if uv is None:
+                surfs.append((len(f), None, None, None, nm, "the .mesh has no UV block"))
+            elif isinstance(s, str):
+                surfs.append((len(f), None, None, None, nm, s))
+            else:
+                surfs.append((len(f), uv[f], s[0], s[1], nm, None))
 
     I = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     visit(0, [0, 0, 0], I, 1.0)
-    return (np.concatenate(tris) if tris else np.zeros((0, 3, 3))), missing, boxes
+    return (np.concatenate(tris) if tris else np.zeros((0, 3, 3))), missing, boxes, surfs
 
 
 def view_matrix(yaw, pitch):
@@ -110,7 +187,26 @@ def view_matrix(yaw, pitch):
 VIEWS = [("front", 0, 0), ("side", -90, 0), ("top", 0, 90), ("3/4", 35, 25)]
 
 
-def render(tris, boxes, yaw, pitch, size, lo, hi):
+def flatten(surfs):
+    """Per-triangle (uv (N,3,2), texture id (N,), textures [(array, tint, scale, offset)]);
+    id -1 = grey (unresolved), -2 = not drawn (the material has no colour layer)."""
+    n = sum(s[0] for s in surfs)
+    uv, tid, texs, ids = np.zeros((n, 3, 2)), np.full(n, -1), [], {}
+    k = 0
+    for count, u, arr, alb, _, _ in surfs:
+        if arr is None and alb is not None:
+            tid[k:k + count] = -2
+        elif arr is not None:
+            key = id(arr), alb.tint, alb.scale, alb.offset
+            if key not in ids:
+                ids[key] = len(texs)
+                texs.append((arr, np.array(alb.tint), np.array(alb.scale), np.array(alb.offset)))
+            uv[k:k + count], tid[k:k + count] = u, ids[key]
+        k += count
+    return uv, tid, texs
+
+
+def render(tris, boxes, yaw, pitch, size, lo, hi, tex=None):
     M = view_matrix(yaw, pitch)
     P = tris @ M.T
     allpts = np.array([[x, y, z] for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])]) @ M.T
@@ -122,7 +218,7 @@ def render(tris, boxes, yaw, pitch, size, lo, hi):
     def to_px(p):
         return (p[..., 0] - cx) * k + size / 2, size / 2 - (p[..., 2] - cz) * k
 
-    img = np.full((size, size), 235.0)
+    img = np.full((size, size, 3), 235.0)
     zb = np.full((size, size), np.inf)
     light = np.array([0.35, -0.6, 0.72]); light /= np.linalg.norm(light)
     nrm = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
@@ -130,6 +226,8 @@ def render(tris, boxes, yaw, pitch, size, lo, hi):
     shade = np.full(len(tris), 0.6); shade[ok] = 0.25 + 0.7 * np.abs((nrm[ok] / ln[ok, None]) @ light)
     xs, ys = to_px(P)
     for t in range(len(P)):
+        if tex is not None and tex[1][t] == -2:
+            continue
         x0, y0 = xs[t], ys[t]
         bx0, bx1 = int(max(0, math.floor(x0.min()))), int(min(size - 1, math.ceil(x0.max())))
         by0, by1 = int(max(0, math.floor(y0.min()))), int(min(size - 1, math.ceil(y0.max())))
@@ -150,8 +248,16 @@ def render(tris, boxes, yaw, pitch, size, lo, hi):
         sub = zb[by0:by1 + 1, bx0:bx1 + 1]
         win = inside & (depth < sub)
         sub[win] = depth[win]
-        img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * shade[t]
-    rgb = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).convert("RGB")
+        if tex is not None and tex[1][t] >= 0:
+            arr, tint, sc, of = tex[2][tex[1][t]]
+            u = (l1 * tex[0][t, 0, 0] + l2 * tex[0][t, 1, 0] + l3 * tex[0][t, 2, 0])[win] * sc[0] + of[0]
+            v = (l1 * tex[0][t, 0, 1] + l2 * tex[0][t, 1, 1] + l3 * tex[0][t, 2, 1])[win] * sc[1] + of[1]
+            th, tw = arr.shape[:2]
+            col = arr[(np.floor(v * th).astype(np.int64) % th), (np.floor(u * tw).astype(np.int64) % tw)]
+            img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * col * tint * shade[t]
+        else:
+            img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * shade[t]
+    rgb = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
     d = ImageDraw.Draw(rgb)
     if pitch != 90:                              # the ground line on an elevation
         g = np.array([[lo[0] - 1, 0, 0], [hi[0] + 1, 0, 0], [0, lo[1] - 1, 0], [0, hi[1] + 1, 0]]) @ M.T
@@ -170,14 +276,16 @@ def main(argv):
     size = int(argv[argv.index("--size") + 1]) if "--size" in argv else 360
     # --mod NAME also searches "NAME - Main*.ba2" (a mod's own packed meshes) before the game's archives.
     mod_hint = argv[argv.index("--mod") + 1] if "--mod" in argv else None
+    textured = "--textured" in argv
     n = Nif(src.read_bytes())
-    tris, missing, boxes = collect(n, mod_hint)
+    tris, missing, boxes, surfs = collect(n, mod_hint, textured)
+    tex = flatten(surfs) if textured else None
     pts = [tris.reshape(-1, 3)] + [b for b in boxes]
     allp = np.concatenate(pts) if len(tris) or boxes else np.zeros((1, 3))
     lo, hi = allp.min(0), allp.max(0)
     sheet = Image.new("RGB", (size * 2, size * 2 + 40), (255, 255, 255))
     for k, (label, yaw, pitch) in enumerate(VIEWS):
-        im = render(tris, boxes, yaw, pitch, size, lo, hi)
+        im = render(tris, boxes, yaw, pitch, size, lo, hi, tex)
         ImageDraw.Draw(im).text((6, 6), label, fill=(0, 0, 0))
         sheet.paste(im, ((k % 2) * size, (k // 2) * size))
     ImageDraw.Draw(sheet).text((6, size * 2 + 6),
@@ -187,6 +295,15 @@ def main(argv):
     print(f"  {out}  {len(tris):,} triangles  z {lo[2]:.2f}..{hi[2]:.2f}")
     for nm, p in missing:
         print(f"  MISSING mesh for {nm}: {p}  (drawn as a blue box)")
+    if textured:
+        bare = [s for s in surfs if s[2] is None and s[3] is not None]
+        done = sum(1 for s in surfs if s[2] is not None)
+        print(f"  textured {done} of {len(surfs)} geometries, {len(bare)} with no colour layer")
+        for _, _, _, _, nm, why in surfs:
+            if why:
+                print(f"  UNTEXTURED {nm}: {why}  (drawn in grey)")
+        for _, _, _, _, nm, _ in bare:
+            print(f"  NOT DRAWN {nm}: its material has no colour layer (a normal-only decal or an effect)")
     return 0
 
 

@@ -10,7 +10,8 @@ for the walk and round-trip legs.
 from __future__ import annotations
 import json, os, struct, sys, tempfile
 from pathlib import Path
-import ba2get, sfnif, kbounds, kitbash, clay
+import numpy as np
+import ba2get, sfnif, kbounds, kitbash, clay, smat
 from sfnif import Nif
 
 fail = 0
@@ -164,11 +165,61 @@ print("clay render")
 for p, zmax_below in ((TRIPOD, True), (DISH, False)):
     if not p: continue
     n = Nif(p.read_bytes())
-    tris, missing, _ = clay.collect(n, None)
+    tris, missing, _, _ = clay.collect(n, None)
     check(f"clay {p.name}: every mesh found", not missing, f"{len(missing)} missing")
     zlo = float(tris[..., 2].min()) if len(tris) else 0.0
     check(f"clay {p.name}: lowest z {'below' if zmax_below else 'at'} the ground", (zlo < -2.0) if zmax_below else abs(zlo) < 0.05, f"{zlo:.2f}")
     clay.main([str(p), str(TMP / (p.stem + ".png"))])
+
+print("textures: DX10 archives, LZ4")
+LABELS = "textures/ships/discovery/buttonlabels_color.dds"      # 1024 BC1, mips 0 and 1 in separate chunks
+arc = next((a for a in sorted(ba2get.DATA.glob("Starfield - Textures[0-9]*.ba2")) if LABELS in ba2get.index(a)), None)
+if arc is None:
+    print(f"  CANNOT RUN: {LABELS} in no texture archive under {ba2get.DATA}"); cannot += 1
+else:
+    rec = ba2get.texture_record(arc, LABELS)
+    check("the two mips sit in different chunks", [c[3:] for c in rec[4]][:2] == [(0, 0), (1, 1)], str([c[3:] for c in rec[4]]))
+    m0 = np.asarray(ba2get.texture(arc, LABELS, mip=0).convert("RGB"), dtype=float)
+    m1 = np.asarray(ba2get.texture(arc, LABELS, mip=1).convert("RGB"), dtype=float)
+    down = m0.reshape(m1.shape[0], 2, m1.shape[1], 2, 3).mean((1, 3))
+    r = np.corrcoef(down.ravel(), m1.ravel())[0, 1]
+    check("mip 0 halved matches mip 1 (two chunks decoded independently)", r > 0.98, f"corr {r:.4f}")
+    other = "textures/common/metal/metalalu_color.dds"
+    oa = next(a for a in sorted(ba2get.DATA.glob("Starfield - Textures[0-9]*.ba2")) if other in ba2get.index(a))
+    ro = np.corrcoef(down.ravel(), np.asarray(ba2get.texture(oa, other, mip=1).convert("RGB"), dtype=float).ravel())[0, 1]
+    check("a different texture does not match (the control can fail)", abs(ro) < 0.5, f"corr {ro:.4f}")
+    off, packed, size = rec[4][1][:3]
+    with arc.open("rb") as f:
+        f.seek(off); raw = f.read(packed)
+    check("LZ4 decodes a chunk to its recorded size", len(ba2get.lz4_block(raw, size)) == size)
+    try:
+        ba2get.lz4_block(raw[:-1], size); check("a truncated LZ4 stream is refused", False)
+    except SystemExit:
+        check("a truncated LZ4 stream is refused", True)
+
+print("materials and the textured render")
+if not smat.ZIP.exists():
+    print(f"  CANNOT RUN: no material sources at {smat.ZIP} (set SF_MATERIALS)"); cannot += 1
+else:
+    orange = smat.albedo("Materials/SetDressing/DigitalTables/PaintedMetalPanel01_Orange01.mat")
+    check("a colour variant carries its tint", not isinstance(orange, str) and orange.tint[0] > orange.tint[2] + 0.3,
+          str(getattr(orange, "tint", orange)))
+    white = smat.albedo("Materials/Ships/HighTech/PaintedMetalPanel01_White01.mat")
+    check("a null layer inherits from its parent material", not isinstance(white, str) and white.flat is not None, str(white))
+    check("the tint check can fail: white is not orange", not white.tint[0] > white.tint[2] + 0.3, str(white.tint))
+    bolt = smat.albedo("Materials/Common/Decal/DecalBoltsTrims02n.mat")
+    check("a normal-only decal reads as NO colour layer", not isinstance(bolt, str) and bolt.file is None and bolt.flat is None, str(bolt))
+    check("an unknown material is a reason, not a guess", isinstance(smat.albedo("Materials/No/Such.mat"), str))
+    if CART:
+        _, _, _, surfs = clay.collect(Nif(CART.read_bytes()), None, textured=True)
+        whys = [s[5] for s in surfs if s[5]]
+        check("every geometry on the cart is textured", len(surfs) > 0 and not whys, f"{len(surfs)} geometries; {whys[:2]}")
+        clay.main([str(CART), str(TMP / "cart_grey.png"), "--size", "160"])
+        clay.main([str(CART), str(TMP / "cart_tex.png"), "--size", "160", "--textured"])
+        sat = lambda p: float((np.ptp(np.asarray(Image.open(p).convert("RGB"), dtype=int), axis=2) > 40).mean())
+        from PIL import Image
+        g, t = sat(TMP / "cart_grey.png"), sat(TMP / "cart_tex.png")
+        check("the textured render has colour the grey one does not", g < 0.01 and t > 0.05, f"coloured px grey {g:.3f}, textured {t:.3f}")
 
 print(f"\n{'ALL PASS' if not fail and not cannot else f'{fail} FAILED, {cannot} COULD NOT RUN'}   (scratch: {TMP})")
 sys.exit(1 if fail else (2 if cannot else 0))
