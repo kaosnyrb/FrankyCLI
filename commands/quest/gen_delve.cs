@@ -132,7 +132,10 @@ namespace FrankyCLI
             public List<Beat> beats { get; set; } = new();
             /// <summary>choice: the surprise between the find and the endings (journal + optional box).</summary>
             public Offer? offer { get; set; }
-            /// <summary>choice: credits per ending, paid by the driver. His numbers.</summary>
+            /// <summary>
+            /// choice: Overtime's reward TIER per ending ("easy", "med", "hard"), written onto that ending's
+            /// completing stage as the duo_reward_creds_TIER / duo_reward_xp_TIER globals. His ladder.
+            /// </summary>
             public Reward? reward { get; set; }
             /// <summary>choice, OPTIONAL: who stands at each ending. Absent = nobody is placed.</summary>
             public People? people { get; set; }
@@ -141,7 +144,7 @@ namespace FrankyCLI
         /// <summary>A named NPC cloned from a vanilla template by EditorID (NPCTools' friendly set is the menu).</summary>
         private sealed class Person { public string? name { get; set; } public string? template { get; set; } }
         private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } }
-        private sealed class Reward { public int owner { get; set; } = -1; public int buyer { get; set; } = -1; }
+        private sealed class Reward { public string? owner { get; set; } public string? buyer { get; set; } }
         /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
         private sealed class Items
         {
@@ -349,10 +352,25 @@ namespace FrankyCLI
                     if (tn == null) Fatal($"people.{who}.template '{pp.template}' is not an NPC in this load order.");
                     else Console.WriteLine($"  people.{who}: \"{pp.name}\" from {tn.EditorID} [{tn.FormKey}]");
                 }
-                if (r.reward == null || r.reward.owner < 0 || r.reward.buyer < 0)
-                    Fatal("reward.owner and reward.buyer are both required: the driver pays them, and the Delves pay nothing otherwise.");
-                else if (r.reward.buyer <= r.reward.owner)
-                    Warn($"reward.buyer ({r.reward.buyer}) is not more than reward.owner ({r.reward.owner}); the design has the buyer paying more.");
+                // THE PAY IS ON THE STAGE, never in the driver. Each ending's completing stage names a credits
+                // global and an xp global (QRCR / QRXP), and Overtime ships a ladder of them. The driver paid
+                // on top of the inherited stage reward once, and the buyer's ending paid twice (his first play).
+                var tierCredits = new Dictionary<string, float>();
+                foreach (var (who, tier) in new[] { ("owner", r.reward?.owner), ("buyer", r.reward?.buyer) })
+                {
+                    if (string.IsNullOrWhiteSpace(tier)) { Fatal($"reward.{who} is required: a tier, e.g. easy / med / hard."); continue; }
+                    foreach (var kind in new[] { "creds", "xp" })
+                    {
+                        var g = env.LoadOrder.PriorityOrder.WinningOverrides<IGlobalGetter>()
+                            .FirstOrDefault(x => string.Equals(x.EditorID, $"duo_reward_{kind}_{tier}", StringComparison.OrdinalIgnoreCase));
+                        if (g == null) { Fatal($"reward.{who} '{tier}': no global duo_reward_{kind}_{tier} in the load order."); continue; }
+                        float v = (float)(g.Data ?? 0f);
+                        Console.WriteLine($"  reward.{who}: {g.EditorID} = {v:G}");
+                        if (kind == "creds") tierCredits[who] = v;
+                    }
+                }
+                if (tierCredits.Count == 2 && tierCredits["buyer"] <= tierCredits["owner"])
+                    Warn($"the buyer's tier pays {tierCredits["buyer"]:G} and the owner's {tierCredits["owner"]:G}; the design has the buyer paying more.");
             }
             if (delve4 || choice)
             {
@@ -1523,17 +1541,14 @@ namespace FrankyCLI
             }
             else if (t.kind == "choice")
             {
-                var credits = env.LoadOrder.PriorityOrder.WinningOverrides<IMiscItemGetter>()
-                    .FirstOrDefault(m => m.FormKey.ModKey.FileName == "Starfield.esm" && m.EditorID == "Credits");
-                if (credits == null) { Console.WriteLine("REFUSED: Starfield.esm's Credits misc item does not resolve."); fail++; }
-                else if (fail == 0)
+                if (fail == 0)
                 {
                     var templates = new Dictionary<string, INpcGetter>();
                     foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
                         if (pp?.template != null)
                             templates[who] = env.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>()
                                 .First(n => string.Equals(n.EditorID, pp.template, StringComparison.OrdinalIgnoreCase));
-                    fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, credits.FormKey, templates);
+                    fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, templates);
                 }
             }
             else
@@ -1589,6 +1604,8 @@ namespace FrankyCLI
             public FormKey OfferMessage;
             /// <summary>choice: "owner"/"buyer" to the NPC placed at that ending.</summary>
             public Dictionary<string, FormKey> People = new();
+            /// <summary>choice: stage index to the (credits, xp) globals its reward entry was pointed at.</summary>
+            public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public uint CarrierMarkerAlias, CarrierAlias;
             public FormKey LoadItem, MissingItem;
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
@@ -1896,7 +1913,7 @@ namespace FrankyCLI
         /// </summary>
         private static int BuildChoice(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                        Dictionary<string, FormKey> markers,
-                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made, FormKey credits,
+                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made,
                                        Dictionary<string, INpcGetter> personTemplates)
         {
             var vma = clone.VirtualMachineAdapter;
@@ -1977,6 +1994,23 @@ namespace FrankyCLI
             clone.Stages.Add(buyerSt);
             Console.WriteLine($"  +stage   : {buyerSt.Index} (the buyer's ending, a clone of completing stage {ownerSlot.journalStage})");
 
+            // --- the pay, ON THE STAGE: each ending's completing stage names its tier's two globals ----------
+            // QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas: BonusCredits (QRCR), XpAwarded (QRXP).
+            // The base's stage 100 carries one reward entry pointing at the easy tier, and the clone copied
+            // it, so both stages are written here rather than either being trusted.
+            foreach (var (st, tier) in new[] { (done, r.reward!.owner!), (buyerSt, r.reward.buyer!) })
+            {
+                var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
+                var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
+                var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
+                if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
+                rds[0].BonusCredits.SetTo(cg.FormKey);
+                rds[0].XpAwarded.SetTo(xg.FormKey);
+                made.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
+                Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
+            }
+
             // --- objectives: the base has 10 and 20; 30 is the buyer's ---------------------------------------
             var slots = new List<BeatSlot>
             {
@@ -2038,9 +2072,6 @@ namespace FrankyCLI
             Alias("OwnerTarget", slots[1].activatorAlias);
             Alias("BuyerTarget", slots[2].activatorAlias);
             Obj("Item", made.LoadItem);
-            Obj("Credits", credits);
-            Int("OwnerReward", r.reward!.owner);
-            Int("BuyerReward", r.reward.buyer);
             foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
             if (!made.OfferMessage.IsNull) Obj("OfferMessage", made.OfferMessage);
 
@@ -2468,6 +2499,17 @@ namespace FrankyCLI
                     fail += Check($"{who} person is unaggressive", npc?.Aggression.ToString() ?? "missing", "Unaggressive");
                     fail += Check($"{who} person has a voice", npc == null || npc.Voice.IsNull ? "no" : "yes", "yes");
                 }
+                foreach (var kv in made4.StageReward)
+                {
+                    var rds = q.Stages?.FirstOrDefault(x => x.Index == kv.Key)?.LogEntries.FirstOrDefault()?
+                        .StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList() ?? new List<IQuestStageRewardDataGetter>();
+                    fail += Check($"stage {kv.Key} carries ONE reward entry", rds.Count.ToString(), "1");
+                    fail += Check($"stage {kv.Key} pays credits global", rds.FirstOrDefault()?.BonusCredits.FormKey.ToString() ?? "none", kv.Value.creds.ToString());
+                    fail += Check($"stage {kv.Key} pays xp global", rds.FirstOrDefault()?.XpAwarded.FormKey.ToString() ?? "none", kv.Value.xp.ToString());
+                }
+                var drvc = q.VirtualMachineAdapter?.Scripts.FirstOrDefault(sx => sx.Name == t.driver);
+                fail += Check("the driver pays nothing (no Credits / OwnerReward / BuyerReward property)",
+                              drvc?.Properties.Any(pp => pp.Name is "Credits" or "OwnerReward" or "BuyerReward") == true ? "pays" : "nothing", "nothing");
                 var it = reread.MiscItems.FirstOrDefault(m => m.FormKey == made4.LoadItem);
                 fail += Check($"item {made4.LoadItem} named", it?.Name?.String ?? "missing", r.items.load!);
             }

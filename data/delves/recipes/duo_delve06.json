@@ -90,6 +90,6 @@
     "buyer": { "name": "Curator Oduya", "template": "UC_NA_MASTWorkerMale01" }
   },
   "_people": "His playtest 2026-10-08: \"Returning the medal talks about a person who isn't there\", then \"FrankyCLI has npc creation tools\". Templates are from NPCTools.GetTemplateFriendlyNPC's talkable set. ⏳ \"Vale's Daughter\" is a PLACEHOLDER: Jessica's prose never names her, so the name is hers to give (checked against his who's-who, no family name). Oduya is her name.",
-  "reward": { "owner": 1500, "buyer": 2500 },
-  "_reward": "⏳ PLACEHOLDERS, HIS NUMBERS: the gap is his to tune, and these are only a buyer-pays-more shape. For scale (part 04): vanilla Cargo 1,200 Local / 1,600 Far, ground Bounty 3,200. Both live on the record as the driver's OwnerReward / BuyerReward, so a change is a property edit, not a recompile."
+  "reward": { "owner": "easy", "buyer": "med" },
+  "_reward": "Overtime's own ladder, on each ending's completing stage (QRCR/QRXP): easy 1,250 cr / 250 xp, med 2,800 / 500, hard 7,500 / 1,500. His first play 2026-10-08 paid 1,250 + 2,500 on the buyer's ending, because the stage reward the base carries was copied to it AND the driver paid on top; the driver pays nothing now. ⏳ PLACEHOLDER TIERS, his to set: the buyer one rung above the owner, which is the design's only rule."
 }

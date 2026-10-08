@@ -9,9 +9,9 @@ THE STATE IS ONE INTEGER AND EVERY EVENT CHECKS IT FIRST, as in duo_delve_driver
 arrives in the wrong beat does nothing, so neither ending can fire before the find, and the second
 ending cannot fire after the first.
 
-THE PAY IS OURS. The Delves sit on Overtime's self-driven artifact generation, which has no reward
-machinery (no RewardGlobal, no MissionQuestScript), so a credit reward exists only if the driver
-gives one. Two numbers on the record, one per ending, so the gap is tuned without a recompile.}
+THE PAY IS NOT HERE. A completing stage carries its own reward (QRCR credits, QRXP xp, each a link to
+one of Overtime's duo_reward_* globals), and gen_delve points each ending's stage at a tier. This
+script paid on top of that once, and the buyer's ending paid twice (his first play, 2026-10-08).}
 
 ; --- aliases, all written by gen_delve --------------------------------------------------------------
 ReferenceAlias Property FindTarget Auto Const Mandatory
@@ -24,12 +24,6 @@ ReferenceAlias Property BuyerTarget Auto Const Mandatory
 ; --- things ------------------------------------------------------------------------------------------
 Form Property Item Auto Const Mandatory
 {What the player carries from beat 1 to whichever ending they choose.}
-Form Property Credits Auto Const Mandatory
-{Starfield.esm's Credits, written by gen_delve and checked off disk.}
-Int Property OwnerReward Auto Const Mandatory
-{Credits paid on the owner's ending.}
-Int Property BuyerReward Auto Const Mandatory
-{Credits paid on the buyer's ending. The design has the buyer paying more; the gap is his number.}
 
 ; The PEOPLE at each ending, OPTIONAL: a recipe with no person leaves the property unset and nobody is
 ; placed. His playtest 2026-10-08: "Returning the medal talks about a person who isn't there." Each is
@@ -90,9 +84,9 @@ Event ObjectReference.OnActivate(ObjectReference akSender, ObjectReference akAct
         EndIf
     ElseIf Beat == 2 && player.GetItemCount(Item) >= 1
         If akSender == OwnerTarget.GetRef()
-            Finish(player, StageOwner, ObjOwner, ObjBuyer, OwnerReward, Beat2Message)
+            Finish(player, StageOwner, ObjOwner, ObjBuyer, Beat2Message)
         ElseIf akSender == BuyerTarget.GetRef()
-            Finish(player, StageBuyer, ObjBuyer, ObjOwner, BuyerReward, Beat3Message)
+            Finish(player, StageBuyer, ObjBuyer, ObjOwner, Beat3Message)
         EndIf
     EndIf
 EndEvent
@@ -154,14 +148,13 @@ EndFunction
 
 ; Beat 2 -> done, on whichever ending the player walked to. The other objective is HIDDEN, not failed:
 ; Jessica's rule is that neither side is the villain, so the road not taken must not read as a loss.
-Function Finish(ObjectReference player, Int stage, Int chosen, Int other, Int reward, Message m)
+Function Finish(ObjectReference player, Int stage, Int chosen, Int other, Message m)
     Beat = 3
     player.RemoveItem(Item, 1, False, None)
     OwnerTarget.GetRef().BlockActivation(True, True)
     BuyerTarget.GetRef().BlockActivation(True, True)
     SetObjectiveDisplayed(other, False, False)
     SetObjectiveCompleted(chosen, True)
-    player.AddItem(Credits, reward, False)
     ShowBeat(m)
     SetStage(stage)
     CompleteQuest()
