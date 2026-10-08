@@ -2,12 +2,15 @@
   "schema": 1,
   "id": "duo_delve08",
   "template": "beats",
-  "author": "eliza",
+  "author": "jessica",
   "source": "home-office office/projects/delves/v2-mission-types.md, type 3 (the trail); office/projects/delves/stages-not-a-driver.md",
   "_note": [
-    "TYPE 3, THE TRAIL, the first Delve across THREE places: a slate at one POI points to a second at",
-    "another, and both go to a third. Three links, then it ends (his: 'ok for the chain to end, otherwise",
-    "its a thradmill'). A MECHANISM TEST: every player-facing word is an Eliza PLACEHOLDER, Jessica's to write."
+    "TYPE 3, THE TRAIL, the first Delve across THREE places: a note at one POI points to letters at another,",
+    "and both go to a third. Three links, then it ends (his: 'ok for the chain to end, otherwise its a",
+    "thradmill'). Built by Eliza 2026-10-08; every player-facing word is Jessica's, written 2026-10-08 on his",
+    "\"yeah 2\". The fiction: a soldier's unsent letters, taken home. The natural site is where he left a note,",
+    "the military one is where he served, the peopled end is where his sister lives. Nobody is placed at the",
+    "end (beats has no people block), so no box describes her as present."
   ],
   "place": {
     "theme": {
@@ -44,35 +47,47 @@
     "_themes": "THREE DISJOINT POOLS, so no two links can be one site: the end is peopled (keeping the base's no-natural, no-cave exclusions); the first slate is at an unpeopled NATURAL site; the second at an unpeopled MILITARY one. Split on the two biggest themes in the pool (gen_delve keywords, 2026-10-08: Natural 121, Military 119); 'infrastructure and not peopled' was 16. Which fiction suits which site is Jessica's call."
   },
   "prose": {
-    "name": "Trail: Slates on <Planet>",
-    "briefing": "PLACEHOLDER. A slate at <SecondPlace> is the first link in something."
+    "name": "Errand: Soldier's Letters on <Planet>",
+    "briefing": "I came across a soldier's note pointing to a cache at the <SecondPlace>. Whatever he left there, he never came back for it."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
       "place": "second",
-      "objective": "Find the slate at <SecondPlace>",
-      "item": "Trail Slate (1 of 2)",
-      "journal": "PLACEHOLDER. The first slate names <ThirdPlace>.",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif"
+      "objective": "Search the cache at the <SecondPlace>",
+      "item": "Brask's Field Note",
+      "journal": "The cache held a note from Private Teodor Brask. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "message": {
+        "title": "Field Note",
+        "text": "The note is folded small and signed T. BRASK. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home."
+      }
     },
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
       "place": "third",
-      "objective": "Find the next slate at <ThirdPlace>",
-      "item": "Trail Slate (2 of 2)",
-      "journal": "PLACEHOLDER. The second slate says to take both to <Place>.",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif"
+      "objective": "Find Brask's letters at the <ThirdPlace>",
+      "item": "Brask's Unsent Letters",
+      "journal": "I've found Brask's letters at the <ThirdPlace>. They're all addressed to his sister at the <Place>, so that's where they're going.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "message": {
+        "title": "Unsent Letters",
+        "text": "A bundle of slates tied with wire. Every one is addressed to the same person, L. Brask, at the <Place>. None of them were ever sent."
+      }
     },
     {
       "type": "deliver",
       "at": "RECenterLocRef",
-      "objective": "Take both slates to <Place>",
-      "journal": "PLACEHOLDER. Handed over. The trail ends here.",
+      "objective": "Take the letters to the <Place>",
+      "journal": "I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and left them in the post locker at the <Place> for his sister.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Slate Drop"
+      "name": "Post Locker",
+      "message": {
+        "title": "Delivered",
+        "text": "The letters go into the post locker with her name facing up, and the note on top."
+      }
     }
   ]
 }

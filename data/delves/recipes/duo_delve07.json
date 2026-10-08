@@ -2,12 +2,14 @@
   "schema": 1,
   "id": "duo_delve07",
   "template": "beats",
-  "author": "eliza",
+  "author": "jessica",
   "source": "home-office office/projects/delves/v2-mission-types.md, type 1 (the fix-up); office/projects/delves/stages-not-a-driver.md",
   "_note": [
     "TYPE 1, THE FIX-UP, the first beats Delve: three broken things at a peopled POI, repaired in ANY ORDER",
-    "behind one counted objective. A MECHANISM TEST: every player-facing word here is an Eliza PLACEHOLDER,",
-    "Jessica's to write. Built 2026-10-08 on his \"yeah build that now\"."
+    "behind one counted objective. Built by Eliza 2026-10-08 on his \"yeah build that now\"; every player-facing",
+    "word is Jessica's, written 2026-10-08 on his \"yeah 2\". Each repair sets its OWN stage, in whatever order",
+    "the player does them, so no journal line may say first, next or last. His play 17:4x: it completes; the",
+    "repaired ones showed their markers again (Eliza's)."
   ],
   "place": {
     "theme": {
@@ -22,16 +24,16 @@
     "_theme": "Peopled, so somebody is there to have the broken kit (type 1's row: 'three broken things at a peopled POI'). Keeps the base's own exclusions (no natural sites, no caves)."
   },
   "prose": {
-    "name": "Repairs on <Planet>",
-    "briefing": "PLACEHOLDER. The crew at <Place> have three pieces of kit down and nobody free to fix them."
+    "name": "Repairs: Water Reclaimers on <Planet>",
+    "briefing": "The crew at the <Place> have three water reclaimers down and nobody spare to look at them. I said I'd go and get them running."
   },
   "beats": [
     {
       "type": "use",
       "group": "fix",
       "at": "RECenterLocRef",
-      "objective": "Repair the equipment at <Place>",
-      "journal": "PLACEHOLDER. One repaired.",
+      "objective": "Repair the water reclaimers at the <Place>",
+      "journal": "The faulty reclaimer had a clogged intake filter. I've swapped in a clean one and it's drawing water again.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Faulty Water Reclaimer"
     },
@@ -39,7 +41,7 @@
       "type": "use",
       "group": "fix",
       "at": "RETravelA1LocRef",
-      "journal": "PLACEHOLDER. Another one repaired.",
+      "journal": "The leaking reclaimer only needed its hose clamps tightened. It's holding pressure now.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Leaking Water Reclaimer"
     },
@@ -47,7 +49,7 @@
       "type": "use",
       "group": "fix",
       "at": "RETravelB1LocRef",
-      "journal": "PLACEHOLDER. All three running again.",
+      "journal": "The stalled reclaimer had a seized pump. I've freed it, reset the breaker, and it's running.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Stalled Water Reclaimer"
     }
