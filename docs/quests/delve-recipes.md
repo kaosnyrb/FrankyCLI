@@ -36,7 +36,10 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 4. If the template's driver changed, compile it: `python papyrus/compile.py C:/modding/DU_Overtime/Data <driver>`,
    then copy the `.pex` into Steam `Data/scripts`.
 5. `python sync_plugin.py`, commit the Overtime repo, snapshot again with a label.
-6. In game, on a throwaway save: `startquest <id>`. A rebuild re-mints FormIDs, so start it fresh.
+6. In game: `startquest <id>`. A rebuild re-mints FormIDs, so start it fresh. **No reload is needed
+   between runs:** the Delve base is repeatable, so `startquest <id>` again resets its stages and
+   re-draws its aliases (his fact, 2026-10-08). `setstage <id> <stage>` jumps straight to a beat once a
+   Delve is built on its stage graph.
 
 ---
 
