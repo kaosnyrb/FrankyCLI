@@ -42,8 +42,8 @@
     "_items": "Jessica's, 2026-10-02. Named objects, never a described site.",
     "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
     "_crateModel": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot.",
-    "centreModel": "Meshes\\SetDressing\\SatelliteDish\\SatelliteDish_A_01.nif",
-    "_centreModel": "2026-10-08, after his first play: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06), so at the marker it sat 2.1 m underground with only the cap showing. A_01 stands on its origin (z 0 to 3.96, 4.5 x 4.5 m), like the crate and the reclaimer cart. Still a placeholder: his eye on whether 4.5 m clips at a cramped centre. A kitbash model is the open alternative (his).",
+    "centreModel": "Meshes\\ccs\\machinebase.nif",
+    "_centreModel": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
     "centreName": "Comms Relay",
     "_centre": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right."
   },
