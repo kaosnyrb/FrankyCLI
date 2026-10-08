@@ -195,6 +195,10 @@ Map dependant"*).
 
 ## Letter variants
 
+**Why they exist: a quest runs ONE instance at a time** (his, 2026-10-08), so the same mission cannot
+sit in the player's log twice. Each letter is its own quest record, which is what lets `07a` and `07b`
+run in parallel. A variant is not only new lore; it is another copy that can be live at once.
+
 **Full recipes** (his ruling, 2026-10-08). `duo_delve07a`, `duo_delve07b`: same structure, new names
 and words. `lint --all` compares siblings that share a number and names any drift in template, beats,
 themes or reward tier, so a fix made in `a` and forgotten in `b` shows up. Siblings **may** share a
