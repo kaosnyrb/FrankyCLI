@@ -79,7 +79,8 @@
     }
   ],
   "offer": {
-    "journal": "Word travels fast. A curator called Oduya wants the medal for his war room and will pay more than the family can. It's my call.",
+    "journal": "The medal has a name on it, Sergeant Vale, and his service record lists family at the <OwnerPlace>. Word travels fast. A curator called Oduya wants the medal for his war room and will pay more than the family can. It's my call.",
+    "_journal": "His play 2026-10-08: \"the log doesn't read quite right, I think the family delivery one is skipped\". The log shows only the NEWEST stage's line, and the driver sets 50 (the family line) and 60 (this one) in the same instant, so 50 is never seen. So this line carries both of Jessica's sentences, verbatim, family first; her \"I should take it to them\" is dropped as the one clause the choice contradicts. ⏳ Jessica's to reword as one line if she likes.",
     "message": {
       "title": "Incoming Message",
       "text": "Heard you turned up a Vale medal. I keep a small war room back home. People come to see it. I'm at the <BuyerPlace> now. I'll pay more than the family can, and it goes on the wall with his name under it. - Oduya"
