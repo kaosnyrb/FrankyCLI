@@ -230,17 +230,40 @@ def merge(spec: dict, out_path: Path) -> None:
         if src.footer != struct.pack("<II", 1, 0):
             raise SystemExit(f"REFUSED: {p['nif']} footer is not one root at block 0")
         base = len(blocks)
+        # "collision": false drops the part's Havok blocks. Measured 2026-10-08 in game: collision does
+        # NOT follow a NiNode's scale, so a quarter-scale dish kept a full-size invisible collider.
+        dropped = set()
+        if p.get("collision", True) is False:
+            if base == 0:
+                raise SystemExit("REFUSED: collision:false on the BASE part; it is the object you stand by")
+            dropped = {i for i in range(len(src.blocks))
+                       if src.type_of(i) in ("bhkNPCollisionObject", "bhkPhysicsSystem")}
+        remap, k = {}, 0
+        for i in range(len(src.blocks)):
+            if i not in dropped:
+                remap[i] = base + k; k += 1
         for i, bl in enumerate(src.blocks):
             t = src.type_of(i); w = walk(t, bl)
             if w.used != len(bl):
                 raise SystemExit(f"REFUSED: {p['nif']} block {i} {t} does not walk ({w.used}/{len(bl)})")
+            if i in dropped:
+                continue
             nb = bytearray(bl)
             for off in w.strs:
                 v = struct.unpack_from("<I", nb, off)[0]
                 if v != NONE: struct.pack_into("<I", nb, off, si(src.strings[v]))
             for off in w.refs:
                 v = struct.unpack_from("<I", nb, off)[0]
-                if v != NONE: struct.pack_into("<I", nb, off, base + v)
+                if v == NONE:
+                    continue
+                if v in dropped:
+                    # Only a NiAVObject's own collision link may point at a dropped block; it becomes "none".
+                    if w.xform is None or off != w.xform + 52:
+                        raise SystemExit(f"REFUSED: {p['nif']} block {i} {t} links dropped block {v} "
+                                         "through a field that is not its collision link")
+                    struct.pack_into("<I", nb, off, NONE)
+                else:
+                    struct.pack_into("<I", nb, off, remap[v])
             if i == 0 and base > 0:
                 if t != "NiNode":
                     raise SystemExit(f"REFUSED: {p['nif']} root is {t}, not NiNode")

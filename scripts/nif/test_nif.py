@@ -132,6 +132,34 @@ if DISH and CART:
             pd += v != sfnif.NONE and u - base != v
     check("a planted wrong link is caught by the un-merge", pd > 0, f"{pd} link(s) flagged")
 
+print("kitbash: collision false")
+if DISH and CART:
+    nc = json.loads(pristine); nc["parts"][1]["collision"] = False
+    kitbash.resolve(nc)
+    sfnif.merge(nc, TMP / "kb_nocoll.nif")
+    with_c, no_c = Nif((TMP / "kb.nif").read_bytes()), Nif((TMP / "kb_nocoll.nif").read_bytes())
+    count = lambda n, t: sum(n.type_of(i) == t for i in range(len(n.blocks)))
+    dish_src = Nif(DISH.read_bytes())
+    havok = count(dish_src, "bhkNPCollisionObject") + count(dish_src, "bhkPhysicsSystem")
+    check("the pasted part brought Havok blocks to drop", havok > 0, f"{havok} in the dish")
+    check("exactly the part's Havok blocks are gone", len(with_c.blocks) - len(no_c.blocks) == havok,
+          f"{len(with_c.blocks)} -> {len(no_c.blocks)}")
+    check("the base keeps its collision", count(no_c, "bhkNPCollisionObject") == count(Nif(CART.read_bytes()), "bhkNPCollisionObject"))
+    check("geometry count unchanged", count(no_c, "BSGeometry") == count(with_c, "BSGeometry"))
+    check("walks clean", sfnif.check_walk(TMP / "kb_nocoll.nif") == 0)
+    bad = 0
+    for i, bl in enumerate(no_c.blocks):
+        w = sfnif.walk(no_c.type_of(i), bl)
+        for off in w.refs:
+            v = struct.unpack_from("<I", bl, off)[0]
+            bad += v != sfnif.NONE and v >= len(no_c.blocks)
+    check("every link in range", bad == 0, f"{bad} out of range")
+    try:
+        b0 = json.loads(pristine); b0["parts"][0]["collision"] = False
+        sfnif.merge(b0, TMP / "x.nif"); check("collision:false on the base is refused", False)
+    except SystemExit:
+        check("collision:false on the base is refused", True)
+
 print("clay render")
 for p, zmax_below in ((TRIPOD, True), (DISH, False)):
     if not p: continue
