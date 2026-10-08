@@ -55,7 +55,7 @@
       "place": "second",
       "message": {
         "title": "Shipping Tag",
-        "text": "SHIPPING TAG. To: <Place>. Relay dish, 1 of 2. Transmitter, 2 of 2, shipped separately. Handle with care. Somebody didn't."
+        "text": "The crate's shipping tag is addressed to the <Place>. Relay dish, 1 of 2. The transmitter was shipped separately."
       }
     },
     {
@@ -64,7 +64,7 @@
       "journal": "The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.",
       "message": {
         "title": "Comms Log",
-        "text": "COMMS LOG, <Place>. Relay down, nine days. Transmitter crate: arrived, opened, empty. Dish: still out there somewhere. Nobody here has spoken to home since."
+        "text": "The comms log shows the relay has been down for nine days. The transmitter crate is here, opened and empty."
       }
     },
     {
@@ -73,7 +73,7 @@
       "journal": "I've got the transmitter back, still in its packing. I should take it to the <Place> and get the relay working.",
       "message": {
         "title": "Relay Transmitter",
-        "text": "Relay Transmitter (2 of 2). Still in its packing. Someone has written a price on the box in grease pencil, and it isn't much."
+        "text": "The transmitter, still in its packing. Someone has scrawled a low price on the box."
       }
     },
     {
@@ -82,7 +82,7 @@
       "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
       "message": {
         "title": "Relay Online",
-        "text": "Dish and transmitter fitted. The relay at the <Place> is live, and the first call out of it was somebody ringing home."
+        "text": "The dish and transmitter are fitted. The relay at the <Place> is live, and someone is already calling home."
       }
     }
   ],

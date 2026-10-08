@@ -56,7 +56,7 @@
       "place": "second",
       "message": {
         "title": "Manifest",
-        "text": "MANIFEST, consignment 7713. Two crates for the <Place>. 1 of 2: reclaimer housing. 2 of 2: filter core, sent on ahead. Signed out: yes. Signed in: never."
+        "text": "The manifest lists two crates for the <Place>: this one, the reclaimer housing, and a filter core sent on ahead. Signed out, never signed in."
       }
     },
     {
@@ -65,7 +65,7 @@
       "journal": "The filter core reached the <Place> two days ago and was taken from its crate overnight. Without it the reclaimer stays offline. I need to find whoever took it.",
       "message": {
         "title": "Delivery Slate",
-        "text": "DELIVERY SLATE, <Place>. Filter core: received, two days ago. Housing: overdue. Reclaimer: offline. Somebody has written underneath it: \"Core crate opened in the night. Core gone.\""
+        "text": "The delivery slate shows the filter core arrived two days ago and the housing never did. The reclaimer is offline. A note underneath says the core crate was opened in the night."
       }
     },
     {
@@ -74,7 +74,7 @@
       "journal": "I've recovered the filter core, still sealed. I should take it back to the <Place> and get the reclaimer running.",
       "message": {
         "title": "Reclaimer Filter Core",
-        "text": "Reclaimer Filter Core (2 of 2). Still sealed. Whoever took it never worked out what it was for."
+        "text": "The filter core, still sealed. Whoever took it never worked out what it was for."
       }
     },
     {
@@ -83,7 +83,7 @@
       "journal": "A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
       "message": {
         "title": "Reclaimer Online",
-        "text": "Housing and core fitted. The reclaimer at the <Place> is running, and there is clean water in the line for the first time in a week."
+        "text": "The housing and core are fitted. The reclaimer at the <Place> is running, with clean water in the line for the first time in a week."
       }
     }
   ],
