@@ -271,9 +271,24 @@ namespace FrankyCLI
             if (!File.Exists(file)) { Console.WriteLine("REFUSED: no recipe at " + file); return 1; }
 
             Recipe? recipe;
-            try { recipe = JsonSerializer.Deserialize<Recipe>(File.ReadAllText(file), JsonOpts); }
+            string text = File.ReadAllText(file);
+            try { recipe = JsonSerializer.Deserialize<Recipe>(text, JsonOpts); }
             catch (JsonException ex) { Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " is not valid JSON -- " + ex.Message); return 1; }
             if (recipe == null) { Console.WriteLine("REFUSED: " + file + " parsed to nothing."); return 1; }
+            // ⛔ A KEY THE TOOL DOES NOT KNOW IS A TYPO UNTIL PROVEN OTHERWISE. The reader ignores unknown
+            // fields, so "outift" linted clean and built an undressed NPC. A default's harm is the error it
+            // suppresses, and the cure is refusing unknown keys (his ask, 2026-10-08: "a linter for the json
+            // that validates the outfits/companies etc"). Keys starting with "_" are the authors' notes.
+            var unknown = new List<string>();
+            using (var doc = JsonDocument.Parse(text, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true }))
+                UnknownKeys(doc.RootElement, typeof(Recipe), "", unknown);
+            if (unknown.Count > 0)
+            {
+                Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " has key(s) this tool does not know, so they would be IGNORED:");
+                foreach (var u in unknown) Console.WriteLine("  " + u);
+                Console.WriteLine("  (a key starting with _ is a note and is always allowed)");
+                return 1;
+            }
             Console.WriteLine("  recipe: " + file);
 
             var t = templates.FirstOrDefault(x => string.Equals(x.id, recipe.template, StringComparison.OrdinalIgnoreCase));
@@ -289,6 +304,52 @@ namespace FrankyCLI
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
             return body(recipe, t, env);
+        }
+
+        /// <summary>
+        /// Walk a recipe's JSON against the model it deserialises into and name every key the model does
+        /// not have, with its path. Recurses into object properties and list elements. Names match
+        /// case-insensitively, as the deserialiser does.
+        /// </summary>
+        private static void UnknownKeys(JsonElement e, Type t, string path, List<string> outp)
+        {
+            if (e.ValueKind == JsonValueKind.Array)
+            {
+                var elem = t.IsGenericType ? t.GetGenericArguments()[0] : null;
+                int i = 0;
+                if (elem != null) foreach (var item in e.EnumerateArray()) UnknownKeys(item, elem, $"{path}[{i++}]", outp);
+                return;
+            }
+            if (e.ValueKind != JsonValueKind.Object || t == typeof(string)) return;
+            var props = t.GetProperties().ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+            foreach (var kv in e.EnumerateObject())
+            {
+                if (kv.Name.StartsWith("_")) continue;
+                string here = path == "" ? kv.Name : path + "." + kv.Name;
+                if (!props.TryGetValue(kv.Name, out var prop))
+                {
+                    var near = props.Keys.Where(k => Close(k, kv.Name)).ToList();
+                    outp.Add($"{here}" + (near.Count > 0 ? $"   (did you mean {string.Join(" / ", near)}?)" : "") + $"   known here: {string.Join(", ", props.Keys.Where(k => char.IsLower(k[0])))}");
+                    continue;
+                }
+                var pt = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                UnknownKeys(kv.Value, pt, here, outp);
+            }
+        }
+
+        /// <summary>Two names one edit apart, or one a transposition of the other: the shape of a typo.</summary>
+        private static bool Close(string a, string b)
+        {
+            a = a.ToLowerInvariant(); b = b.ToLowerInvariant();
+            if (a == b || Math.Abs(a.Length - b.Length) > 1) return false;
+            if (a.Length == b.Length)
+            {
+                var diff = Enumerable.Range(0, a.Length).Where(i => a[i] != b[i]).ToList();
+                return diff.Count == 1 || (diff.Count == 2 && diff[1] == diff[0] + 1 && a[diff[0]] == b[diff[1]] && a[diff[1]] == b[diff[0]]);
+            }
+            var (l, sh) = a.Length > b.Length ? (a, b) : (b, a);
+            for (int i = 0; i < l.Length; i++) if (l.Remove(i, 1) == sh) return true;
+            return false;
         }
 
         // ------------------------------------------------------------------ the lint
@@ -357,22 +418,19 @@ namespace FrankyCLI
                     if (string.IsNullOrWhiteSpace(pp.name) || string.IsNullOrWhiteSpace(pp.template))
                     { Fatal($"people.{who} needs both a name and a template."); continue; }
                     if (Tokens(pp.name).Any()) Fatal($"people.{who}.name carries a <Token>; an NPC name is not an alias context.");
-                    var tn = env.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>()
-                        .FirstOrDefault(n => string.Equals(n.EditorID, pp.template, StringComparison.OrdinalIgnoreCase));
-                    if (tn == null) Fatal($"people.{who}.template '{pp.template}' is not an NPC in this load order.");
+                    var tn = OwnOrMaster<INpcGetter>(Allowed(env, t), env, pp.template);
+                    if (tn == null) Fatal($"people.{who}.template '{pp.template}' is not an NPC in {t.mod} or one of its masters.");
                     else Console.WriteLine($"  people.{who}: \"{pp.name}\" from {tn.EditorID} [{tn.FormKey}]");
                     if (!string.IsNullOrWhiteSpace(pp.outfit))
                     {
-                        var of = env.LoadOrder.PriorityOrder.WinningOverrides<IOutfitGetter>()
-                            .FirstOrDefault(o => string.Equals(o.EditorID, pp.outfit, StringComparison.OrdinalIgnoreCase));
-                        if (of == null) Fatal($"people.{who}.outfit '{pp.outfit}' is not an Outfit in this load order.");
+                        var of = OwnOrMaster<IOutfitGetter>(Allowed(env, t), env, pp.outfit);
+                        if (of == null) Fatal($"people.{who}.outfit '{pp.outfit}' is not an Outfit in {t.mod} or one of its masters.");
                         else Console.WriteLine($"  people.{who}.outfit: {of.EditorID} [{of.FormKey}]");
                     }
                     if (pp.company != null)
                     {
-                        var fl = env.LoadOrder.PriorityOrder.WinningOverrides<IFormListGetter>()
-                            .FirstOrDefault(f => string.Equals(f.EditorID, pp.company.list, StringComparison.OrdinalIgnoreCase));
-                        if (fl == null) Fatal($"people.{who}.company.list '{pp.company.list}' is not a FormList in this load order.");
+                        var fl = OwnOrMaster<IFormListGetter>(Allowed(env, t), env, pp.company.list ?? "");
+                        if (fl == null) Fatal($"people.{who}.company.list '{pp.company.list}' is not a FormList in {t.mod} or one of its masters.");
                         else if (fl.Items.Count == 0) Fatal($"people.{who}.company.list '{pp.company.list}' is EMPTY, so nobody would ever be placed.");
                         else Console.WriteLine($"  people.{who}.company: {pp.company.min}-{pp.company.max} from {fl.EditorID} ({fl.Items.Count} entries)");
                         if (pp.company.min < 0 || pp.company.max < pp.company.min)
@@ -1929,10 +1987,21 @@ namespace FrankyCLI
         /// </summary>
         private static T? OwnOrMaster<T>(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string edid)
             where T : class, IMajorRecordGetter
-        {
-            var allowed = new HashSet<ModKey>(myMod.ModHeader.MasterReferences.Select(m => m.Master)) { myMod.ModKey };
-            return env.LoadOrder.PriorityOrder.WinningOverrides<T>()
+            => OwnOrMaster<T>(new HashSet<ModKey>(myMod.ModHeader.MasterReferences.Select(m => m.Master)) { myMod.ModKey }, env, edid);
+
+        private static T? OwnOrMaster<T>(HashSet<ModKey> allowed, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string edid)
+            where T : class, IMajorRecordGetter
+            => env.LoadOrder.PriorityOrder.WinningOverrides<T>()
                 .FirstOrDefault(x => allowed.Contains(x.FormKey.ModKey) && string.Equals(x.EditorID, edid, StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>The template's mod and its masters, read off the load order (the lint has no mod object of its own).</summary>
+        private static HashSet<ModKey> Allowed(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Template t)
+        {
+            var key = ModKey.FromNameAndExtension(t.mod + ".esm");
+            var mod = env.LoadOrder.ListedOrder.FirstOrDefault(l => l.ModKey == key)?.Mod;
+            var set = new HashSet<ModKey> { key };
+            if (mod != null) foreach (var m in mod.ModHeader.MasterReferences) set.Add(m.Master);
+            return set;
         }
 
         /// <summary>
