@@ -142,7 +142,17 @@ namespace FrankyCLI
         }
         private sealed class People { public Person? owner { get; set; } public Person? buyer { get; set; } }
         /// <summary>A named NPC cloned from a vanilla template by EditorID (NPCTools' friendly set is the menu).</summary>
-        private sealed class Person { public string? name { get; set; } public string? template { get; set; } }
+        private sealed class Person
+        {
+            public string? name { get; set; }
+            public string? template { get; set; }
+            /// <summary>OPTIONAL: an Outfit EditorID written as the NPC's DefaultOutfit. Absent = the template's own.</summary>
+            public string? outfit { get; set; }
+            /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>
+            public Company? company { get; set; }
+        }
+        /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
+        private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } }
         private sealed class Reward { public string? owner { get; set; } public string? buyer { get; set; } }
         /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
@@ -351,6 +361,25 @@ namespace FrankyCLI
                         .FirstOrDefault(n => string.Equals(n.EditorID, pp.template, StringComparison.OrdinalIgnoreCase));
                     if (tn == null) Fatal($"people.{who}.template '{pp.template}' is not an NPC in this load order.");
                     else Console.WriteLine($"  people.{who}: \"{pp.name}\" from {tn.EditorID} [{tn.FormKey}]");
+                    if (!string.IsNullOrWhiteSpace(pp.outfit))
+                    {
+                        var of = env.LoadOrder.PriorityOrder.WinningOverrides<IOutfitGetter>()
+                            .FirstOrDefault(o => string.Equals(o.EditorID, pp.outfit, StringComparison.OrdinalIgnoreCase));
+                        if (of == null) Fatal($"people.{who}.outfit '{pp.outfit}' is not an Outfit in this load order.");
+                        else Console.WriteLine($"  people.{who}.outfit: {of.EditorID} [{of.FormKey}]");
+                    }
+                    if (pp.company != null)
+                    {
+                        var fl = env.LoadOrder.PriorityOrder.WinningOverrides<IFormListGetter>()
+                            .FirstOrDefault(f => string.Equals(f.EditorID, pp.company.list, StringComparison.OrdinalIgnoreCase));
+                        if (fl == null) Fatal($"people.{who}.company.list '{pp.company.list}' is not a FormList in this load order.");
+                        else if (fl.Items.Count == 0) Fatal($"people.{who}.company.list '{pp.company.list}' is EMPTY, so nobody would ever be placed.");
+                        else Console.WriteLine($"  people.{who}.company: {pp.company.min}-{pp.company.max} from {fl.EditorID} ({fl.Items.Count} entries)");
+                        if (pp.company.min < 0 || pp.company.max < pp.company.min)
+                            Fatal($"people.{who}.company needs 0 <= min <= max; it has {pp.company.min}-{pp.company.max}.");
+                        else if (pp.company.max > 8)
+                            Warn($"people.{who}.company.max is {pp.company.max}; more than 8 at one delivery point is a crowd.");
+                    }
                 }
                 // THE PAY IS ON THE STAGE, never in the driver. Each ending's completing stage names a credits
                 // global and an xp global (QRCR / QRXP), and Overtime ships a ladder of them. The driver paid
@@ -1480,6 +1509,7 @@ namespace FrankyCLI
 
             var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
             gen_quest_main.FixNextFormId(myMod);
+            var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
 
             var source = myMod.Quests.FirstOrDefault(q => q.EditorID == t.@base);
             if (source == null) { Console.WriteLine("REFUSED: no base quest '" + t.@base + "' in " + t.mod); return 1; }
@@ -1543,12 +1573,35 @@ namespace FrankyCLI
             {
                 if (fail == 0)
                 {
+                    // ⛔ OWN-OR-MASTER, NEVER "WHATEVER WINS". du_overtime.esp (the CK bridge) carries a copy of
+                    // every duo_ record under its own ModKey and loads later, so a winning-override lookup by
+                    // EditorID found duo_GangMembersList_Civ_LIST in the ESP, the write linked to it, and
+                    // Mutagen ADDED du_overtime.esp TO THE ESM'S MASTERS (2026-10-08, caught before he played).
                     var templates = new Dictionary<string, INpcGetter>();
+                    var outfits = new Dictionary<string, FormKey>();
+                    var companies = new Dictionary<string, FormKey>();
                     foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
+                    {
                         if (pp?.template != null)
-                            templates[who] = env.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>()
-                                .First(n => string.Equals(n.EditorID, pp.template, StringComparison.OrdinalIgnoreCase));
-                    fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, templates);
+                        {
+                            var n = OwnOrMaster<INpcGetter>(myMod, env, pp.template);
+                            if (n == null) { Console.WriteLine($"REFUSED: NPC '{pp.template}' is not in {t.mod} or one of its masters."); fail++; }
+                            else templates[who] = n;
+                        }
+                        if (!string.IsNullOrWhiteSpace(pp?.outfit))
+                        {
+                            var o = OwnOrMaster<IOutfitGetter>(myMod, env, pp!.outfit!);
+                            if (o == null) { Console.WriteLine($"REFUSED: Outfit '{pp.outfit}' is not in {t.mod} or one of its masters."); fail++; }
+                            else outfits[who] = o.FormKey;
+                        }
+                        if (pp?.company != null)
+                        {
+                            var f = OwnOrMaster<IFormListGetter>(myMod, env, pp.company.list!);
+                            if (f == null) { Console.WriteLine($"REFUSED: FormList '{pp.company.list}' is not in {t.mod} or one of its masters."); fail++; }
+                            else companies[who] = f.FormKey;
+                        }
+                    }
+                    if (fail == 0) fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, templates, outfits, companies);
                 }
             }
             else
@@ -1589,7 +1642,7 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            return Verify(modFile, readParams, t, r, markers, plan, made4);
+            return Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
         }
 
         // ------------------------------------------------------------------ delve4
@@ -1604,6 +1657,8 @@ namespace FrankyCLI
             public FormKey OfferMessage;
             /// <summary>choice: "owner"/"buyer" to the NPC placed at that ending.</summary>
             public Dictionary<string, FormKey> People = new();
+            /// <summary>choice: "owner"/"buyer" to the Outfit written as that person's DefaultOutfit.</summary>
+            public Dictionary<string, FormKey> Outfits = new();
             /// <summary>choice: stage index to the (credits, xp) globals its reward entry was pointed at.</summary>
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public uint CarrierMarkerAlias, CarrierAlias;
@@ -1868,6 +1923,19 @@ namespace FrankyCLI
         // ------------------------------------------------------------------ choice
 
         /// <summary>
+        /// A record this plugin may LINK to: one in the plugin itself or in one of its masters, found by
+        /// EditorID. Never the load order's winner by name, because a plugin that is not a master (his CK
+        /// bridge, du_overtime.esp) can carry a same-named copy, and linking to it makes it a master.
+        /// </summary>
+        private static T? OwnOrMaster<T>(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string edid)
+            where T : class, IMajorRecordGetter
+        {
+            var allowed = new HashSet<ModKey>(myMod.ModHeader.MasterReferences.Select(m => m.Master)) { myMod.ModKey };
+            return env.LoadOrder.PriorityOrder.WinningOverrides<T>()
+                .FirstOrDefault(x => allowed.Contains(x.FormKey.ModKey) && string.Equals(x.EditorID, edid, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
         /// CREATE THE THIRD PLACE by cloning one of the base's location aliases. The first location alias
         /// this tool has ever created (2026-10-08, the medal Delve, his "third place, time to learn").
         ///
@@ -1914,7 +1982,8 @@ namespace FrankyCLI
         private static int BuildChoice(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                        Dictionary<string, FormKey> markers,
                                        List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made,
-                                       Dictionary<string, INpcGetter> personTemplates)
+                                       Dictionary<string, INpcGetter> personTemplates,
+                                       Dictionary<string, FormKey> outfits, Dictionary<string, FormKey> companies)
         {
             var vma = clone.VirtualMachineAdapter;
             var old = vma?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
@@ -2092,10 +2161,26 @@ namespace FrankyCLI
                 npc.Voice.SetTo(tmpl.Voice.FormKey);
                 npc.Aggression = Npc.AggressionType.Unaggressive;
                 npc.Confidence = Npc.ConfidenceType.Average;
+                // ⭐ DRESSED FROM THE RECIPE (his ask, 2026-10-08: "can we set there outfit in the json"). Only
+                // DefaultOutfit is written; the template's SpaceOutfit stands, so a hazard world still suits them.
+                if (outfits.TryGetValue(who, out var outfit))
+                {
+                    npc.DefaultOutfit.SetTo(outfit);
+                    made.Outfits[who] = outfit;
+                }
                 myMod.Npcs.Add(npc);
                 made.People[who] = npc.FormKey;
-                Obj(who == "owner" ? "OwnerPerson" : "BuyerPerson", npc.FormKey);
-                Console.WriteLine($"  +npc     : {edid} {npc.FormKey}  \"{pp.name}\"  (clone of {tmpl.EditorID})");
+                string role = who == "owner" ? "Owner" : "Buyer";
+                Obj(role + "Person", npc.FormKey);
+                Console.WriteLine($"  +npc     : {edid} {npc.FormKey}  \"{pp.name}\"  (clone of {tmpl.EditorID})"
+                                  + (outfits.ContainsKey(who) ? $"  outfit {pp.outfit}" : ""));
+                if (pp.company != null && companies.TryGetValue(who, out var list))
+                {
+                    Obj(role + "Company", list);
+                    Int(role + "CompanyMin", pp.company.min);
+                    Int(role + "CompanyMax", pp.company.max);
+                    Console.WriteLine($"  company  : {who} gets {pp.company.min}-{pp.company.max} from {pp.company.list}");
+                }
             }
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
@@ -2346,7 +2431,7 @@ namespace FrankyCLI
         /// </summary>
         private static int Verify(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
                                   Template t, Recipe r, Dictionary<string, FormKey> markers,
-                                  List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made4)
+                                  List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made4, string mastersBefore)
         {
             Console.WriteLine();
             Console.WriteLine("  verification, re-read from disk:");
@@ -2355,6 +2440,12 @@ namespace FrankyCLI
             if (q == null) { Console.WriteLine("    FAIL: the quest is not in the written file."); return 1; }
 
             int fail = 0;
+            // ⛔ A BUILD MUST NEVER CHANGE WHAT THE PLUGIN DEPENDS ON. A link to a record in a plugin that is not
+            // a master silently ADDS that plugin as a master, and a player without it cannot load the mod. It
+            // happened once (du_overtime.esp, 2026-10-08) and the property checks passed over it, because they
+            // compared the link against the same wrong lookup that made it. This one compares against the file.
+            fail += Check("the plugin's masters are unchanged by the build",
+                          string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String)), mastersBefore);
             foreach (var (label, suffix, aliasId, path) in new[] {
                          ("crate", "_crate", t.beatSlots[0].activatorAlias, r.items?.crateModel),
                          ("delivery point", "_centre", t.beatSlots[1].activatorAlias, r.items?.centreModel) })
@@ -2498,6 +2589,8 @@ namespace FrankyCLI
                     fail += Check($"{who} person named", npc?.Name?.String ?? "missing", pp.name!);
                     fail += Check($"{who} person is unaggressive", npc?.Aggression.ToString() ?? "missing", "Unaggressive");
                     fail += Check($"{who} person has a voice", npc == null || npc.Voice.IsNull ? "no" : "yes", "yes");
+                    if (made4.Outfits.TryGetValue(who, out var of))
+                        fail += Check($"{who} person wears the recipe's outfit", npc?.DefaultOutfit.FormKey.ToString() ?? "missing", of.ToString());
                 }
                 foreach (var kv in made4.StageReward)
                 {

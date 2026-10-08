@@ -38,6 +38,18 @@ places its civilians: a ref placed at a site the world has not loaded has no gro
 Float Property PersonOffset = 1.5 Auto Const
 {How far beside the delivery point the person stands, in metres.}
 
+; The COMPANY around each person, OPTIONAL: nameless friendly NPCs drawn from a list, so the named
+; person does not stand alone in an empty POI (his play, 2026-10-08: "the created NPCs are alone at
+; the POIs which looks wierd"). No list = nobody else. Placed with the person, on the same approach.
+FormList Property OwnerCompany Auto Const
+Int Property OwnerCompanyMin = 0 Auto Const
+Int Property OwnerCompanyMax = 0 Auto Const
+FormList Property BuyerCompany Auto Const
+Int Property BuyerCompanyMin = 0 Auto Const
+Int Property BuyerCompanyMax = 0 Auto Const
+Float Property CompanyRadius = 8.0 Auto Const
+{The company stands within this many metres of the delivery point, snapped to the navmesh.}
+
 ; One pausing box per beat, all OPTIONAL: a recipe with no message for a beat leaves the property
 ; unset and nothing is shown. Each is a MESG whose OwnerQuest is this quest, so <Alias=> tokens resolve.
 Message Property Beat1Message Auto Const
@@ -132,9 +144,11 @@ Event OnDistanceLessThan(ObjectReference akObj1, ObjectReference akObj2, float a
     If !OwnerPlaced && (akObj1 == owner || akObj2 == owner)
         OwnerPlaced = True
         PlacePerson(owner, OwnerPerson)
+        PlaceCompany(owner, OwnerCompany, OwnerCompanyMin, OwnerCompanyMax)
     ElseIf !BuyerPlaced && (akObj1 == buyer || akObj2 == buyer)
         BuyerPlaced = True
         PlacePerson(buyer, BuyerPerson)
+        PlaceCompany(buyer, BuyerCompany, BuyerCompanyMin, BuyerCompanyMax)
     EndIf
 EndEvent
 
@@ -144,6 +158,22 @@ Function PlacePerson(ObjectReference target, ActorBase person)
     pos[1] = 0
     pos[2] = 0
     target.PlaceAtMe(person, 1, False, False, True, pos, None, True)
+EndFunction
+
+; As duo_delve_driver.PlaceCivilians: a random spot within the radius, snapped to navmesh.
+Function PlaceCompany(ObjectReference target, FormList company, Int least, Int most)
+    If !company || company.GetSize() == 0 || most <= 0
+        Return
+    EndIf
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(least, most)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-CompanyRadius, CompanyRadius)
+        pos[1] = Utility.RandomFloat(-CompanyRadius, CompanyRadius)
+        pos[2] = 0
+        target.PlaceAtMe(company.GetAt(Utility.RandomInt(0, company.GetSize() - 1)), 1, False, False, True, pos, None, True)
+        n -= 1
+    EndWhile
 EndFunction
 
 ; Beat 2 -> done, on whichever ending the player walked to. The other objective is HIDDEN, not failed:

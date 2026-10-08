@@ -87,9 +87,18 @@
     }
   },
   "people": {
-    "owner": { "name": "Maren Vale", "template": "UC_NA_MASTWorkerFemale01" },
-    "buyer": { "name": "Curator Oduya", "template": "UC_NA_MASTWorkerMale01" }
+    "owner": {
+      "name": "Maren Vale", "template": "UC_NA_MASTWorkerFemale01",
+      "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+      "company": { "list": "duo_GangMembersList_Civ_LIST", "min": 2, "max": 4 }
+    },
+    "buyer": {
+      "name": "Curator Oduya", "template": "UC_NA_MASTWorkerMale01",
+      "outfit": "Outfit_Clothes_Formal_ShirtSlacks_Vest",
+      "company": { "list": "duo_GangMembersList_Civ_Construx", "min": 2, "max": 4 }
+    }
   },
+  "_company": "His play 2026-10-08: \"the created NPCs are alone at the POIs which looks wierd. Can we get like a few nameless npcs\", and \"can we set there outfit in the json, so we can dress them up\". ⏳ PLACEHOLDERS, his to dress: Maren in a colonist's padded vest among colonists (Civ_LIST = LvlLISTColonist); Oduya in shirt, slacks and vest among Construx workers (an infrastructure site). Outfits are any vanilla Outfit EditorID (596 in Starfield.esm); company lists are Overtime's duo_GangMembersList_Civ_* (friendly).",
   "_people": "His playtest 2026-10-08: \"Returning the medal talks about a person who isn't there\", then \"FrankyCLI has npc creation tools\". Templates are from NPCTools.GetTemplateFriendlyNPC's talkable set. ⏳ \"Vale's Daughter\" is a PLACEHOLDER: Jessica's prose never names her, so the name is hers to give (checked against his who's-who, no family name). Oduya is her name.",
   "reward": { "owner": "easy", "buyer": "med" },
   "_reward": "Overtime's own ladder, on each ending's completing stage (QRCR/QRXP): easy 1,250 cr / 250 xp, med 2,800 / 500, hard 7,500 / 1,500. His first play 2026-10-08 paid 1,250 + 2,500 on the buyer's ending, because the stage reward the base carries was copied to it AND the driver paid on top; the driver pays nothing now. ⏳ PLACEHOLDER TIERS, his to set: the buyer one rung above the owner, which is the design's only rule."
