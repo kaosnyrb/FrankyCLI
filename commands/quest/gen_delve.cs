@@ -134,7 +134,12 @@ namespace FrankyCLI
             public Offer? offer { get; set; }
             /// <summary>choice: credits per ending, paid by the driver. His numbers.</summary>
             public Reward? reward { get; set; }
+            /// <summary>choice, OPTIONAL: who stands at each ending. Absent = nobody is placed.</summary>
+            public People? people { get; set; }
         }
+        private sealed class People { public Person? owner { get; set; } public Person? buyer { get; set; } }
+        /// <summary>A named NPC cloned from a vanilla template by EditorID (NPCTools' friendly set is the menu).</summary>
+        private sealed class Person { public string? name { get; set; } public string? template { get; set; } }
         private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } }
         private sealed class Reward { public int owner { get; set; } = -1; public int buyer { get; set; } = -1; }
         /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
@@ -333,6 +338,17 @@ namespace FrankyCLI
                               + "so each needs its own model and name or one wears the other's prompt.");
                 if (string.IsNullOrWhiteSpace(r.offer?.journal))
                     Fatal("offer.journal is required: the offer is the beat that makes it a choice, and it must reach the journal.");
+                foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
+                {
+                    if (pp == null) { Warn($"people.{who} is absent, so nobody stands at that ending and a box that talks about a person talks about nobody."); continue; }
+                    if (string.IsNullOrWhiteSpace(pp.name) || string.IsNullOrWhiteSpace(pp.template))
+                    { Fatal($"people.{who} needs both a name and a template."); continue; }
+                    if (Tokens(pp.name).Any()) Fatal($"people.{who}.name carries a <Token>; an NPC name is not an alias context.");
+                    var tn = env.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>()
+                        .FirstOrDefault(n => string.Equals(n.EditorID, pp.template, StringComparison.OrdinalIgnoreCase));
+                    if (tn == null) Fatal($"people.{who}.template '{pp.template}' is not an NPC in this load order.");
+                    else Console.WriteLine($"  people.{who}: \"{pp.name}\" from {tn.EditorID} [{tn.FormKey}]");
+                }
                 if (r.reward == null || r.reward.owner < 0 || r.reward.buyer < 0)
                     Fatal("reward.owner and reward.buyer are both required: the driver pays them, and the Delves pay nothing otherwise.");
                 else if (r.reward.buyer <= r.reward.owner)
@@ -1510,7 +1526,15 @@ namespace FrankyCLI
                 var credits = env.LoadOrder.PriorityOrder.WinningOverrides<IMiscItemGetter>()
                     .FirstOrDefault(m => m.FormKey.ModKey.FileName == "Starfield.esm" && m.EditorID == "Credits");
                 if (credits == null) { Console.WriteLine("REFUSED: Starfield.esm's Credits misc item does not resolve."); fail++; }
-                else if (fail == 0) fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, credits.FormKey);
+                else if (fail == 0)
+                {
+                    var templates = new Dictionary<string, INpcGetter>();
+                    foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
+                        if (pp?.template != null)
+                            templates[who] = env.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>()
+                                .First(n => string.Equals(n.EditorID, pp.template, StringComparison.OrdinalIgnoreCase));
+                    fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, credits.FormKey, templates);
+                }
             }
             else
             {
@@ -1563,6 +1587,8 @@ namespace FrankyCLI
             /// <summary>choice: the buyer's created marker and activator aliases.</summary>
             public uint BuyerMarkerAlias, BuyerAlias;
             public FormKey OfferMessage;
+            /// <summary>choice: "owner"/"buyer" to the NPC placed at that ending.</summary>
+            public Dictionary<string, FormKey> People = new();
             public uint CarrierMarkerAlias, CarrierAlias;
             public FormKey LoadItem, MissingItem;
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
@@ -1870,7 +1896,8 @@ namespace FrankyCLI
         /// </summary>
         private static int BuildChoice(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                        Dictionary<string, FormKey> markers,
-                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made, FormKey credits)
+                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made, FormKey credits,
+                                       Dictionary<string, INpcGetter> personTemplates)
         {
             var vma = clone.VirtualMachineAdapter;
             var old = vma?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
@@ -2016,6 +2043,29 @@ namespace FrankyCLI
             Int("BuyerReward", r.reward.buyer);
             foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
             if (!made.OfferMessage.IsNull) Obj("OfferMessage", made.OfferMessage);
+
+            // --- the people at each ending: named NPCs cloned from a friendly vanilla template ------------
+            // NPCTools.CloneNPC copies the body field by field and NOT the name or the voice (gen_dlgtest
+            // sets the voice after it for the same reason), so both are written here. Unaggressive and
+            // Average confidence, as NPCTools.CreateRandomNpc does for a friendly NPC.
+            foreach (var who in new[] { "owner", "buyer" })
+            {
+                string edid = $"{r.id}_{who}_npc";
+                foreach (var k in myMod.Npcs.Where(n => n.EditorID == edid).Select(n => n.FormKey).ToList())
+                    myMod.Npcs.Remove(k);
+                var pp = who == "owner" ? r.people?.owner : r.people?.buyer;
+                if (pp == null || !personTemplates.TryGetValue(who, out var tmpl)) continue;
+                var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, tmpl.DeepCopy());
+                npc.EditorID = edid;
+                npc.Name = pp.name!;
+                npc.Voice.SetTo(tmpl.Voice.FormKey);
+                npc.Aggression = Npc.AggressionType.Unaggressive;
+                npc.Confidence = Npc.ConfidenceType.Average;
+                myMod.Npcs.Add(npc);
+                made.People[who] = npc.FormKey;
+                Obj(who == "owner" ? "OwnerPerson" : "BuyerPerson", npc.FormKey);
+                Console.WriteLine($"  +npc     : {edid} {npc.FormKey}  \"{pp.name}\"  (clone of {tmpl.EditorID})");
+            }
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
             return 0;
@@ -2409,6 +2459,14 @@ namespace FrankyCLI
                     var om = reread.Messages.FirstOrDefault(x => x.EditorID == r.id + "_msgOffer");
                     fail += Check("offer message text", om?.Description?.String ?? "missing", Expand(r.offer.message.text!, t));
                     fail += Check("offer message owned by the quest", om?.OwnerQuest.FormKey.ToString() ?? "missing", q.FormKey.ToString());
+                }
+                foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
+                {
+                    if (pp == null) continue;
+                    var npc = reread.Npcs.FirstOrDefault(n => n.EditorID == $"{r.id}_{who}_npc");
+                    fail += Check($"{who} person named", npc?.Name?.String ?? "missing", pp.name!);
+                    fail += Check($"{who} person is unaggressive", npc?.Aggression.ToString() ?? "missing", "Unaggressive");
+                    fail += Check($"{who} person has a voice", npc == null || npc.Voice.IsNull ? "no" : "yes", "yes");
                 }
                 var it = reread.MiscItems.FirstOrDefault(m => m.FormKey == made4.LoadItem);
                 fail += Check($"item {made4.LoadItem} named", it?.Name?.String ?? "missing", r.items.load!);

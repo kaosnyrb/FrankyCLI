@@ -31,6 +31,19 @@ Int Property OwnerReward Auto Const Mandatory
 Int Property BuyerReward Auto Const Mandatory
 {Credits paid on the buyer's ending. The design has the buyer paying more; the gap is his number.}
 
+; The PEOPLE at each ending, OPTIONAL: a recipe with no person leaves the property unset and nobody is
+; placed. His playtest 2026-10-08: "Returning the medal talks about a person who isn't there." Each is
+; an NPC gen_delve clones from a friendly vanilla template (NPCTools' talkable set), named, unaggressive.
+ActorBase Property OwnerPerson Auto Const
+{Stands beside the owner's delivery point.}
+ActorBase Property BuyerPerson Auto Const
+{Stands beside the buyer's delivery point.}
+Float Property PersonDistance = 250.0 Auto Const
+{How close the player comes to a delivery point before its person is placed, as duo_delve_driver
+places its civilians: a ref placed at a site the world has not loaded has no ground to stand on.}
+Float Property PersonOffset = 1.5 Auto Const
+{How far beside the delivery point the person stands, in metres.}
+
 ; One pausing box per beat, all OPTIONAL: a recipe with no message for a beat leaves the property
 ; unset and nothing is shown. Each is a MESG whose OwnerQuest is this quest, so <Alias=> tokens resolve.
 Message Property Beat1Message Auto Const
@@ -106,7 +119,37 @@ Function TakeIt(ObjectReference player)
     SetObjectiveDisplayed(ObjBuyer, True, False)
     RegisterForRemoteEvent(OwnerTarget.GetRef(), "OnActivate")
     RegisterForRemoteEvent(BuyerTarget.GetRef(), "OnActivate")
+    If OwnerPerson
+        RegisterForDistanceLessThanEvent(Game.GetPlayer(), OwnerTarget, PersonDistance)
+    EndIf
+    If BuyerPerson
+        RegisterForDistanceLessThanEvent(Game.GetPlayer(), BuyerTarget, PersonDistance)
+    EndIf
     Beat = 2
+EndFunction
+
+Bool OwnerPlaced
+Bool BuyerPlaced
+
+; The first approach to each delivery point puts its person beside it. Once each.
+Event OnDistanceLessThan(ObjectReference akObj1, ObjectReference akObj2, float afDistance, int aiEventID)
+    ObjectReference owner = OwnerTarget.GetRef()
+    ObjectReference buyer = BuyerTarget.GetRef()
+    If !OwnerPlaced && (akObj1 == owner || akObj2 == owner)
+        OwnerPlaced = True
+        PlacePerson(owner, OwnerPerson)
+    ElseIf !BuyerPlaced && (akObj1 == buyer || akObj2 == buyer)
+        BuyerPlaced = True
+        PlacePerson(buyer, BuyerPerson)
+    EndIf
+EndEvent
+
+Function PlacePerson(ObjectReference target, ActorBase person)
+    Float[] pos = new Float[6]
+    pos[0] = PersonOffset
+    pos[1] = 0
+    pos[2] = 0
+    target.PlaceAtMe(person, 1, False, False, True, pos, None, True)
 EndFunction
 
 ; Beat 2 -> done, on whichever ending the player walked to. The other objective is HIDDEN, not failed:
