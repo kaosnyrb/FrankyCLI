@@ -162,7 +162,8 @@ switch (mode)
         return gen_aliaslint.Run(args);
 
     case "gen_delve":
-        // gen_delve templates | lint <recipe> | build <recipe> [--dry]
+        // gen_delve templates | lint <recipe> | lint --all | build <recipe> [--dry] | keywords [filter...]
+        // Reference: docs/quests/delve-recipes.md
         // Delves from DATA: a JSON recipe an author writes, graded and built against a registry of
         // template rows. One recipe per mission, no code per mission.
         return gen_delve.Run(args);
@@ -349,6 +350,11 @@ Console.WriteLine("  gen_questcompletetest [modname]");
 Console.WriteLine("                     Gate C: can a quest be ENDED from data? Reflects the stage");
 Console.WriteLine("                     type surface, hunts vanilla for a shipped example, then");
 Console.WriteLine("                     round-trips a completing stage OFF DISK. Defaults: questcompletetest");
+Console.WriteLine();
+Console.WriteLine("  gen_delve        templates | lint <recipe> | lint --all | build <recipe> [--dry]");
+Console.WriteLine("                     Delves from JSON recipes in data/delves/recipes, graded and built");
+Console.WriteLine("                     into du_overtime.esm. lint --all grades every recipe in one pass.");
+Console.WriteLine("                     The format and every rule: docs/quests/delve-recipes.md");
 Console.WriteLine();
 Console.WriteLine("  gen_delvegatetest [modname] [sourceQuestEditorId]");
 Console.WriteLine("                     Gate B behaviour half: writes a matched PAIR of test quests");

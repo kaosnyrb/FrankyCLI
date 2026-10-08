@@ -18,8 +18,14 @@ namespace FrankyCLI
     /// shipped quest shape can carry it; this command lints one against the other and builds it.
     ///
     ///   gen_delve templates                     list the registry
-    ///   gen_delve lint  <recipe.json>           grade a recipe without writing anything
-    ///   gen_delve build <recipe.json> [--dry]   lint, then clone + rewire + verify OFF DISK
+    ///   gen_delve lint  <recipe.json | id>      grade a recipe without writing anything
+    ///   gen_delve lint  --all                   grade every recipe, one load-order index, one line each
+    ///   gen_delve build <recipe.json | id> [--dry]   lint, then clone + rewire + verify OFF DISK
+    ///   gen_delve keywords [filter ...]         theme tally inside a narrowed POI pool
+    ///
+    /// ⭐ THE FORMAT, EVERY FIELD AND EVERY RULE: docs/quests/delve-recipes.md. Three template kinds:
+    /// dualactivator (two-beat-one-place), delve4 (carry-absence-recover-return), choice
+    /// (find-owner-or-buyer, which CREATES a third place).
     ///
     /// ⭐ THE DIVISION IS HIS AND IT IS THE POINT: the recipe is content and belongs to whoever
     /// writes the mission; the template is mechanism and belongs to whoever reads records. Adding a
