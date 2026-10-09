@@ -14,15 +14,10 @@
   ],
   "place": {
     "theme": {
-      "require": [
-        "LocTypeOE_NonHostile"
-      ],
-      "exclude": [
-        "LocTypeOE_ThemeNaturalKeyword",
-        "LocTypeOE_ThemeCaveKeyword"
-      ]
+      "require": [],
+      "exclude": []
     },
-    "_theme": "Peopled, as the design's variant a: a relay at a peopled site, and the waves are the noise it brings. Keeps the base's own exclusions."
+    "_theme": "No theme demand, his ruling 2026-10-09 after the first good play: drop LocTypeOE_NonHostile, and the base's own exclusions of natural and cave sites. Any POI with the markers will do; the waves are the fight wherever it is."
   },
   "prose": {
     "name": "Relay Alignment on <Planet>",
@@ -49,7 +44,10 @@
       "objective": "Defend the relay",
       "journal": "I fitted the relay at the <Place> and held off three waves of attackers while it aligned. The relay is live.",
       "waves": 3,
-      "size": [3, 5],
+      "size": [
+        3,
+        5
+      ],
       "defend": 2
     }
   ]
