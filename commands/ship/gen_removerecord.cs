@@ -12,7 +12,7 @@ namespace FrankyCLI
     // must resolve before anything is removed, so a typo can never write half a deletion.
     //
     //   removerecord <modname> <type> <editorid>[,<editorid>...]
-    //   types: mstt sntp gbfm cobj flst pkin stat cell kywd qust misc lcrt
+    //   types: mstt sntp gbfm cobj flst pkin stat cell kywd qust misc lcrt acti npc_
     //
     // The case it was written for: retiring a dead flip system (rule 4 -- dead records come out
     // in the same change that orphans them) and pruning the per-orientation COBJs when a family
@@ -35,7 +35,7 @@ namespace FrankyCLI
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: removerecord <modname> <type> <editorid>[,<editorid>...]");
-                Console.WriteLine("types: mstt sntp gbfm cobj flst pkin stat cell kywd qust misc lcrt");
+                Console.WriteLine("types: mstt sntp gbfm cobj flst pkin stat cell kywd qust misc lcrt acti npc_");
                 return 1;
             }
             string modname = args[0];
@@ -87,6 +87,10 @@ namespace FrankyCLI
                     case "qust": group = _ => myMod.Quests; remove = k => myMod.Quests.Remove(k); break;
                     case "misc": group = _ => myMod.MiscItems; remove = k => myMod.MiscItems.Remove(k); break;
                     case "lcrt": group = _ => myMod.LocationReferenceTypes; remove = k => myMod.LocationReferenceTypes.Remove(k); break;
+                    // 2026-10-09, the Delves' orphaned clones once every Delve moved onto the beats kind (the old
+                    // builders named their item, activator and NPC clones differently, so no rebuild cleared them).
+                    case "acti": group = _ => myMod.Activators; remove = k => myMod.Activators.Remove(k); break;
+                    case "npc_": group = _ => myMod.Npcs; remove = k => myMod.Npcs.Remove(k); break;
                     case "cell":
                         group = _ => myMod.Cells.Records.SelectMany(b => b.SubBlocks).SelectMany(sb => sb.Cells);
                         remove = k =>
