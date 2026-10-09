@@ -236,6 +236,13 @@ namespace FrankyCLI
             /// <summary>beats, OPTIONAL: the NIF this beat's object wears, and its activate prompt. Absent = the base's.</summary>
             public string? model { get; set; }
             public string? name { get; set; }
+            /// <summary>
+            /// beats, OPTIONAL: the marker is a PLACED OBJECT (REContainerLocRef is the box itself), so disable
+            /// it when the quest starts and let this beat's object stand in its place. His way in his own
+            /// quests (ccs_missioninfestation01: ContainerRef.Disable(False), never re-enabled). duo_delve08,
+            /// 2026-10-09: the locker spawned INSIDE the box. Absent = false.
+            /// </summary>
+            public bool replace { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -523,8 +530,8 @@ namespace FrankyCLI
             bool choice = t.kind == "choice";
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
-            else if (r.beats.Any(b => b.type != null || b.group != null || b.item != null || b.model != null || b.name != null))
-                Fatal($"a beat sets type, group, item, model or name, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            else if (r.beats.Any(b => b.type != null || b.group != null || b.item != null || b.model != null || b.name != null || b.replace))
+                Fatal($"a beat sets type, group, item, model, name or replace, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (!beats && r.recap != null)
                 Fatal($"the recipe has a recap, and template '{t.id}' ({t.kind}) is not a beats Delve, so it would be silently ignored.");
             if (delve4)

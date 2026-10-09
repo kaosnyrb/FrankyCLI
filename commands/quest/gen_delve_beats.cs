@@ -208,7 +208,8 @@ namespace FrankyCLI
             public Dictionary<int, string> ObjectiveText = new();
             public string PscPath = "";
             public string? Recap;                                        // the completing stage's line, when ending on a group
-            public List<(int objective, int alias, int stage)> TargetGates = new();  // a group member's target, lit until its stage
+            public List<(int objective, int alias, int stage)> TargetGates = new();
+            public List<(string name, int alias)> Replaced = new();   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
@@ -420,16 +421,26 @@ namespace FrankyCLI
 
             // --- 10. the fragment script: generated, bound per stage -----------------------------------------
             string name = FragmentScriptName(r);
-            var props = new List<(string type, string pname, FormKey key)>();
+            var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
             var code = new SortedDictionary<int, List<string>>();
             void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
 
             foreach (var kv in counterOf)
             {
                 string p = $"Counter{kv.Key + 1}";
-                props.Add(("GlobalVariable", p, kv.Value.key));
+                props.Add(("GlobalVariable", p, kv.Value.key, -1));
                 Add(0, $"{p}.SetValue(0)");
                 Add(0, $"UpdateCurrentInstanceGlobal({p})");
+            }
+            // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
+            // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.
+            for (int b = 0; b < r.beats.Count; b++)
+            {
+                if (!r.beats[b].replace) continue;
+                string an = $"Alias_Beat{b + 1}Marker";
+                props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].markerAlias));
+                bm.Replaced.Add((an, slotOf[b].markerAlias));
+                Add(0, $"{an}.GetRef().Disable(False)");
             }
             Add(0, $"SetObjectiveDisplayed({steps[0].Objective})");
             var held = new List<int>();   // pickups not yet delivered
@@ -440,13 +451,13 @@ namespace FrankyCLI
                 foreach (var b in s.Beats)
                 {
                     int st = beatStage[b];
-                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b])); Add(st, $"Beat{b + 1}Message.Show()"); }
+                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
                     if (r.beats[b].type == "pickup") held.Add(b);
                     if (r.beats[b].type == "deliver")
                     {
                         foreach (var h in held)
                         {
-                            props.Add(("Form", $"Item{h + 1}", itemOf[h]));
+                            props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
                             Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
                         }
                         held.Clear();
@@ -487,6 +498,7 @@ namespace FrankyCLI
             {
                 var op = new ScriptObjectProperty { Name = p.pname, Flags = ScriptProperty.Flag.Edited };
                 op.Object.SetTo(p.key);
+                if (p.alias >= 0) op.Alias = (short)p.alias;   // a ReferenceAlias: the quest plus its alias id
                 vma.Script.Properties.Add(op);
             }
             vma.Fragments.Clear();
@@ -544,6 +556,11 @@ namespace FrankyCLI
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
+            foreach (var (an, alias) in bm.Replaced)
+            {
+                var p = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == an);
+                fail += Check($"fragment property {an} (disabled at start)", p == null ? "missing" : $"{p.Object.FormKey} alias {p.Alias}", $"{q.FormKey} alias {alias}");
+            }
             foreach (var (obj, alias, stage) in bm.TargetGates)
             {
                 var tg = q.Objectives.FirstOrDefault(o => o.Index == obj)?.Targets?.FirstOrDefault(x => x.AliasID == alias);

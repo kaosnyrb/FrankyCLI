@@ -80,6 +80,7 @@
     {
       "type": "deliver",
       "at": "REContainerLocRef",
+      "replace": true,
       "objective": "Take the letters to the <Place>",
       "journal": "I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and left them in the post locker at the <Place> for his sister.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",

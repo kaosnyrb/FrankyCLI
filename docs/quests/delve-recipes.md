@@ -249,6 +249,9 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup only, the inventory name), `model` and
 `name` (what the object looks like and its prompt), `group`.
+`replace: true` is for a marker that IS a placed object (`REContainerLocRef` is the box itself): the
+box is disabled when the quest starts and the beat's object stands in its place (his way: `Disable(False)`,
+never re-enabled). Without it the beat's object spawns inside the box (`duo_delve08`, 2026-10-09).
 
 **Any order, with a counter:** consecutive `use` beats with the same `group` are one step. Only the first
 carries the `objective`; the build appends the vanilla counter, `(<Global=…>/N)`, and the step completes
