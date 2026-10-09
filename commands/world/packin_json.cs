@@ -46,6 +46,34 @@ public static class packin_json
     static readonly HashSet<string> TopKeys = new() { "name", "refs", "bounds", "source", "note" };
     const int MaxDepth = 8;
 
+    /// The expanded-refs cache: one file per PackIn FormKey under %TEMP%\FrankyCLI\packin-cache\<load order>\,
+    /// read before the cell is loaded (~19s per PackIn, measured 2026-10-09) and written after. His ask.
+    /// The subfolder is a FINGERPRINT of the load order (every plugin's name, size and modified time,
+    /// plus CacheVersion), so editing any plugin starts a fresh folder instead of serving stale refs.
+    /// Bump CacheVersion when the shape CellRefs writes changes. A PackIn with any unresolved base is
+    /// never written, so a failure is not frozen into the cache. Delete the folder to clear it.
+    const int CacheVersion = 1;
+    static string? _cacheDir;
+
+    static string CacheDir(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+    {
+        if (_cacheDir != null) return _cacheDir;
+        var sb = new System.Text.StringBuilder($"v{CacheVersion}\n");
+        foreach (var listing in env.LoadOrder.ListedOrder)
+        {
+            var f = new FileInfo(Path.Combine(env.DataFolderPath, listing.ModKey.FileName));
+            sb.Append(listing.ModKey.FileName).Append('|')
+              .Append(f.Exists ? $"{f.Length}|{f.LastWriteTimeUtc.Ticks}" : "absent").Append('\n');
+        }
+        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(sb.ToString())))[..16];
+        _cacheDir = Path.Combine(Path.GetTempPath(), "FrankyCLI", "packin-cache", hash);
+        Directory.CreateDirectory(_cacheDir);
+        return _cacheDir;
+    }
+
+    static string CachePath(FormKey fk) =>
+        Path.Combine(_cacheDir!, $"{fk.ID:X6}_{fk.ModKey.FileName}.json");
+
     public static int Run(string[] args)
     {
         if (args.Length < 4 || (args[1] != "export" && args[1] != "resolve"))
@@ -58,6 +86,7 @@ public static class packin_json
         using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
         Console.WriteLine($"  [{(DateTime.Now - t0).TotalSeconds:F1}s] environment: {env.LoadOrder.Count} plugins");
         var cache = env.LinkCache;
+        Console.WriteLine($"  cache: {CacheDir(env)}");
         int unresolved = 0;
         JsonObject doc;
         if (args[1] == "export")
@@ -116,7 +145,24 @@ public static class packin_json
         return any;
     }
 
+    /// A PackIn's refs, nested PackIns expanded: from the cache when it has them, else from the cell.
     static JsonArray CellRefs(IPackInGetter pk, ILinkCache cache, int depth, ref int unresolved)
+    {
+        var path = CachePath(pk.FormKey);
+        if (File.Exists(path))
+        {
+            var hit = JsonNode.Parse(File.ReadAllText(path))!.AsArray();
+            Console.WriteLine($"  cache hit {pk.EditorID} ({pk.FormKey}): {Count(hit)} refs");
+            return hit;
+        }
+        int before = unresolved;
+        var arr = LoadCellRefs(pk, cache, depth, ref unresolved);
+        if (unresolved == before)
+            File.WriteAllText(path, arr.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        return arr;
+    }
+
+    static JsonArray LoadCellRefs(IPackInGetter pk, ILinkCache cache, int depth, ref int unresolved)
     {
         var arr = new JsonArray();
         var tc = DateTime.Now;
