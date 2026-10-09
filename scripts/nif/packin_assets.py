@@ -17,8 +17,9 @@ record is built once. ⚠ A NEW loose file dropped into Data over an archived on
 NIF's record is deleted: loose files are checked first on a build, but nothing stamps their absence.
 
 Per geometry: `xform` is a 4x4 (row-major) with world = xform @ [x, y, z, 1] inside the NIF, from the same
-walk clay.py draws with (clay.geometries). The ref's own pos/rot is NOT applied here: the axis order of a
-REFR's rotation is unmeasured, and baking a guess into the cache would make a wrong answer look settled.
+walk clay.py draws with (clay.geometries). The ref's own pos/rot is NOT applied here: placement is the
+consumer's job (packin_render.py, which carries the measured rotation convention), so this file holds only
+what was read off the game's files and nothing that had to be decided.
 Anything that cannot be resolved is LISTED with its reason, never dropped, the same rule as clay.py.
 Nothing here writes to the game folder, and nothing extracted may be committed (see README: Assets).
 """

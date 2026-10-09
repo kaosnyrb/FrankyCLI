@@ -294,15 +294,9 @@ def render(tris, boxes, yaw, pitch, size, lo, hi, tex=None):
     return rgb
 
 
-def main(argv):
-    src, out = Path(argv[0]), Path(argv[1])
-    size = int(argv[argv.index("--size") + 1]) if "--size" in argv else 360
-    # --mod NAME also searches "NAME - Main*.ba2" (a mod's own packed meshes) before the game's archives.
-    mod_hint = argv[argv.index("--mod") + 1] if "--mod" in argv else None
-    textured = "--textured" in argv
-    n = Nif(src.read_bytes())
-    tris, missing, boxes, surfs = collect(n, mod_hint, textured)
-    tex = flatten(surfs) if textured else None
+def contact_sheet(tris, boxes, tex, size, caption):
+    """The four VIEWS on one sheet with a caption line; shared by main() and packin_render.py.
+    Returns (image, lo, hi), the bounds every view was framed on."""
     pts = [tris.reshape(-1, 3)] + [b for b in boxes]
     allp = np.concatenate(pts) if len(tris) or boxes else np.zeros((1, 3))
     lo, hi = allp.min(0), allp.max(0)
@@ -312,8 +306,21 @@ def main(argv):
         ImageDraw.Draw(im).text((6, 6), label, fill=(0, 0, 0))
         sheet.paste(im, ((k % 2) * size, (k // 2) * size))
     ImageDraw.Draw(sheet).text((6, size * 2 + 6),
-        f"{src.name}  {len(tris):,} tris  x {lo[0]:.2f}..{hi[0]:.2f}  y {lo[1]:.2f}..{hi[1]:.2f}  z {lo[2]:.2f}..{hi[2]:.2f}"
-        f"  missing meshes {len(missing)}", fill=(0, 0, 0))
+        f"{caption}  {len(tris):,} tris  x {lo[0]:.2f}..{hi[0]:.2f}  y {lo[1]:.2f}..{hi[1]:.2f}  z {lo[2]:.2f}..{hi[2]:.2f}",
+        fill=(0, 0, 0))
+    return sheet, lo, hi
+
+
+def main(argv):
+    src, out = Path(argv[0]), Path(argv[1])
+    size = int(argv[argv.index("--size") + 1]) if "--size" in argv else 360
+    # --mod NAME also searches "NAME - Main*.ba2" (a mod's own packed meshes) before the game's archives.
+    mod_hint = argv[argv.index("--mod") + 1] if "--mod" in argv else None
+    textured = "--textured" in argv
+    n = Nif(src.read_bytes())
+    tris, missing, boxes, surfs = collect(n, mod_hint, textured)
+    tex = flatten(surfs) if textured else None
+    sheet, lo, hi = contact_sheet(tris, boxes, tex, size, f"{src.name}  missing meshes {len(missing)}")
     sheet.save(out)
     print(f"  {out}  {len(tris):,} triangles  z {lo[2]:.2f}..{hi[2]:.2f}")
     for nm, p in missing:
