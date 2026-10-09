@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "duo_delve05",
-  "template": "carry-absence-recover-return",
+  "template": "beats",
   "author": "jessica",
   "source": "home-office office/projects/delves/status.md (testcase 02)",
   "_note": [
@@ -11,7 +11,8 @@
     "the player reads is new: the object, the absence, the people waiting and why it matters to them.",
     "",
     "Testcase 01 was a utility (water). This one is a comms relay, and the reason it matters is that the",
-    "people at the <Place> have not spoken to home since it went down. The last box pays that off."
+    "people at the <Place> have not spoken to home since it went down. The last box pays that off.",
+    "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"work on the other beats and missions so everything is on this system\"). The items block went into the beats it belongs to; every word is unchanged."
   ],
   "place": {
     "theme": {
@@ -36,20 +37,9 @@
     "briefing": "The <Place> has been without a comms relay for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.",
     "_prose": "Artifact family title shape, Category: thing on <Planet> (style guide 4b), as testcase 01. Journal lines follow section 3: first person, what just happened then what next, about 23 words, and beat 4 is the standalone recap."
   },
-  "items": {
-    "load": "Relay Dish (1 of 2)",
-    "missing": "Relay Transmitter (2 of 2)",
-    "_items": "Jessica's, 2026-10-02. Named objects, never a described site.",
-    "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
-    "_crateModel": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot.",
-    "centreModel": "Meshes\\ccs\\relaydish01.nif",
-    "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
-    "_centreModel": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
-    "centreName": "Comms Relay",
-    "_centre": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right."
-  },
   "beats": [
     {
+      "type": "pickup",
       "at": "RETravelA1LocRef",
       "objective": "Find the Relay Dish",
       "journal": "I found the dish crate, set down well short of the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
@@ -57,27 +47,42 @@
       "message": {
         "title": "Shipping Tag",
         "text": "The crate's shipping tag is addressed to the <Place>. Relay dish, 1 of 2. The transmitter was shipped separately."
-      }
+      },
+      "item": "Relay Dish (1 of 2)",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "_item": "Jessica's, 2026-10-02. Named objects, never a described site.",
+      "_model": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot."
     },
     {
+      "type": "use",
       "at": "RECenterLocRef",
       "objective": "Deliver the Dish to the <Place>",
       "journal": "The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.",
       "message": {
         "title": "Comms Log",
         "text": "The comms log shows the relay has been down for nine days. The transmitter crate is here, opened and empty."
-      }
+      },
+      "model": "Meshes\\ccs\\relaydish01.nif",
+      "name": "Comms Relay",
+      "_model": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
+      "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
+      "_name": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right."
     },
     {
+      "type": "recover",
       "at": "RETravelB1LocRef",
       "objective": "Recover the Relay Transmitter",
       "journal": "I've got the transmitter back, still in its packing. I should take it to the <Place> and get the relay working.",
       "message": {
         "title": "Relay Transmitter",
         "text": "The transmitter, still in its packing. Someone has scrawled a low price on the box."
-      }
+      },
+      "item": "Relay Transmitter (2 of 2)",
+      "_item": "Jessica's, 2026-10-02. Named objects, never a described site."
     },
     {
+      "type": "deliver",
+      "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Bring the Relay Online",
       "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",

@@ -43,7 +43,7 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_delve
     {
-        private static readonly string[] BeatTypes = { "use", "pickup", "deliver" };
+        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover" };
 
         /// <summary>One step of a beats Delve: a single beat, or an any-order group of them.</summary>
         private sealed class Step
@@ -107,10 +107,32 @@ namespace FrankyCLI
                 var b = r.beats[i];
                 if (b.type == null || !BeatTypes.Contains(b.type))
                     Fatal($"beat {i + 1} has type '{b.type ?? "(none)"}'; a beats Delve knows {string.Join(", ", BeatTypes)}.");
-                if (b.type == "pickup" && string.IsNullOrWhiteSpace(b.item))
-                    Fatal($"beat {i + 1} is a pickup with no item: the player is handed a thing with no name.");
-                if (b.type != "pickup" && b.item != null)
-                    Fatal($"beat {i + 1} names an item and is not a pickup, so it would be silently ignored.");
+                if ((b.type == "pickup" || b.type == "recover") && string.IsNullOrWhiteSpace(b.item))
+                    Fatal($"beat {i + 1} is a {b.type} with no item: the player gets a thing with no name.");
+                if (b.type != "pickup" && b.type != "recover" && b.item != null)
+                    Fatal($"beat {i + 1} names an item and is not a pickup or a recover, so it would be silently ignored.");
+                if (b.type == "recover" && (b.model != null || b.name != null || b.replace))
+                    Fatal($"beat {i + 1} is a recover: it has no object of its own (the holder carries the item), so model, name and replace would be ignored.");
+                if (b.returnTo is int back)
+                {
+                    if (back < 1 || back > i)
+                        Fatal($"beat {i + 1} returns to beat {back}, which is not an earlier beat.");
+                    else
+                    {
+                        var tgt = r.beats[back - 1];
+                        if (tgt.type != "use" || tgt.returnTo != null)
+                            Fatal($"beat {i + 1} returns to beat {back}, a {tgt.type}{(tgt.returnTo != null ? " return" : "")}; only a use beat's object stays in the world to come back to.");
+                        if (!string.Equals(tgt.at, b.at, StringComparison.OrdinalIgnoreCase) || tgt.PlaceIndex != b.PlaceIndex)
+                            Fatal($"beat {i + 1} returns to beat {back} and must name its marker and place ('{tgt.at}', {tgt.place ?? "main"}).");
+                        if (r.beats.Take(i).Count(x => x.returnTo == back) > 0)
+                            Fatal($"beat {back} is returned to twice; the stock hook has ONE duplicate (DefaultAliasOnActivateA), so once.");
+                    }
+                    if (b.type != "use" && b.type != "deliver")
+                        Fatal($"beat {i + 1} is a {b.type} return; a return activates an object already there, so it is a use or a deliver.");
+                    if (b.group != null) Fatal($"beat {i + 1} is a return inside group '{b.group}'; a return comes after something, so it cannot be any-order.");
+                    if (b.model != null || b.name != null || b.replace)
+                        Fatal($"beat {i + 1} is a return; the object is beat {back}'s, so model, name and replace would be ignored.");
+                }
                 if (b.group != null && b.type != "use")
                     Fatal($"beat {i + 1} is in group '{b.group}' and is a {b.type}; only use beats can be done in any order.");
                 if (b.name != null && Tokens(b.name).Any())
@@ -150,14 +172,18 @@ namespace FrankyCLI
                 Fatal($"the Delve ends on a single beat, whose journal is already stage {t.completeStage}'s line; the recap would overwrite it. "
                       + "Put the words in that beat's journal.");
 
-            // Delivering needs something in hand: the first deliver must come after a pickup.
+            int recoverCount = r.beats.Count(b => b.type == "recover");
+            if (recoverCount > 5) Fatal($"{recoverCount} recover beats; the player's OnItemAdded hook has the base and four duplicates, so five.");
+            if (recoverCount > 0 && t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
+
+            // Delivering needs something in hand: the first deliver must come after a pickup or a recover.
             int carried = 0;
             for (int i = 0; i < r.beats.Count; i++)
             {
-                if (r.beats[i].type == "pickup") carried++;
+                if (r.beats[i].type == "pickup" || r.beats[i].type == "recover") carried++;
                 else if (r.beats[i].type == "deliver")
                 {
-                    if (carried == 0) Fatal($"beat {i + 1} is a deliver with nothing picked up before it, so there is nothing to hand over.");
+                    if (carried == 0) Fatal($"beat {i + 1} is a deliver with nothing picked up or recovered before it, so there is nothing to hand over.");
                     carried = 0;
                 }
             }
@@ -209,7 +235,8 @@ namespace FrankyCLI
             public string PscPath = "";
             public string? Recap;                                        // the completing stage's line, when ending on a group
             public List<(int objective, int alias, int stage)> TargetGates = new();
-            public List<(string name, int alias)> Replaced = new();   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
+            public List<(string name, int alias)> Replaced = new();
+            public List<int> Holders = new();   // recover beats' empty Optional aliases   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
@@ -224,6 +251,13 @@ namespace FrankyCLI
             var cargo = old.Properties.OfType<ScriptObjectProperty>()
                 .FirstOrDefault(p => string.Equals(p.Name, "CargoObject", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
             var itemSrc = cargo == null ? null : myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
+            // recover: the holder and his gang are drawn from the removed driver's own list, as delve4's were.
+            var gangKey = old.Properties.OfType<ScriptObjectProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, "GangMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+            int? gangMax = old.Properties.OfType<ScriptIntProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, "MaxGangMembers", StringComparison.OrdinalIgnoreCase))?.Data;
+            if (r.beats.Any(b => b.type == "recover") && (gangKey == null || gangMax == null))
+            { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
             vma.Scripts.Remove(old);
             if (vma.Scripts.Count != 0)
             { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
@@ -241,12 +275,32 @@ namespace FrankyCLI
             var srcAct = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)src0.activatorAlias);
             if (srcMarker?.Location == null || srcAct?.CreateReferenceToObject == null)
             { Console.WriteLine("REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
+            int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
             for (int i = 0; i < r.beats.Count; i++)
             {
-                if (i < t.beatSlots.Count)
+                if (r.beats[i].returnTo != null) continue;   // shares an earlier beat's object; filled in below
+                if (r.beats[i].type == "recover")
                 {
-                    slotOf[i] = new BeatSlot { markerAlias = t.beatSlots[i].markerAlias, activatorAlias = t.beatSlots[i].activatorAlias,
+                    // A marker where the holder appears, and an EMPTY Optional alias he is placed into, which the
+                    // objective targets so it follows him (delve4's shape: a non-optional alias with no fill
+                    // makes the whole quest silently not start).
+                    uint rid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    var rm = srcMarker.DeepCopy(); rm.ID = rid; rm.Name = "DelveBeat" + (i + 1) + "Marker";
+                    var rh = srcMarker.DeepCopy(); rh.ID = rid + 1; rh.Name = "DelveBeat" + (i + 1) + "Holder";
+                    rh.Location = null;
+                    rh.Flags = QuestReferenceAlias.Flag.Optional;
+                    clone.Aliases.Add(rm);
+                    clone.Aliases.Add(rh);
+                    slotOf[i] = new BeatSlot { markerAlias = (int)rm.ID, activatorAlias = -1, targetAlias = (int)rh.ID, journalStage = beatStage[i] };
+                    bm.Holders.Add((int)rh.ID);
+                    Console.WriteLine($"  +slot    : beat {i + 1} (recover) -- marker alias {rm.ID}, holder {rh.ID} (EMPTY, Optional; filled on spawn)");
+                    continue;
+                }
+                if (baseNext < t.beatSlots.Count)
+                {
+                    slotOf[i] = new BeatSlot { markerAlias = t.beatSlots[baseNext].markerAlias, activatorAlias = t.beatSlots[baseNext].activatorAlias,
                                                journalStage = beatStage[i] };
+                    baseNext++;
                     continue;
                 }
                 uint next = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
@@ -258,6 +312,16 @@ namespace FrankyCLI
                 slotOf[i] = new BeatSlot { markerAlias = (int)m.ID, activatorAlias = (int)a.ID, journalStage = beatStage[i] };
                 Console.WriteLine($"  +slot    : beat {i + 1} -- marker alias {m.ID}, activator {a.ID}");
             }
+            // A return is the earlier beat's own object visited again: same aliases, its own stage and journal.
+            for (int i = 0; i < r.beats.Count; i++)
+                if (r.beats[i].returnTo is int back)
+                {
+                    var o = slotOf[back - 1];
+                    slotOf[i] = new BeatSlot { markerAlias = o.markerAlias, activatorAlias = o.activatorAlias, journalStage = beatStage[i] };
+                    Console.WriteLine($"  slot     : beat {i + 1} returns to beat {back}'s object (alias {o.activatorAlias})");
+                }
+            if (baseNext < t.beatSlots.Count)
+            { Console.WriteLine($"REFUSED: the recipe gives the base's {t.beatSlots.Count} object slots only {baseNext} beat(s) with an object of its own."); return 1; }
 
             // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
             var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Distinct().OrderBy(x => x).ToList();
@@ -289,9 +353,21 @@ namespace FrankyCLI
             // --- 4. fills, journals, reskins ---------------------------------------------------------
             for (int i = 0; i < r.beats.Count; i++)
             {
+                if (r.beats[i].returnTo != null)
+                {
+                    // The fill is the earlier beat's; only this beat's journal is its own.
+                    if (r.beats[i].journal != null)
+                    {
+                        var je = clone.Stages.FirstOrDefault(s => s.Index == beatStage[i])?.LogEntries.FirstOrDefault();
+                        if (je == null) { Console.WriteLine($"REFUSED: stage {beatStage[i]} has no log entry for beat {i + 1}'s journal."); return 1; }
+                        je.Entry = Expand(r.beats[i].journal!, t);
+                    }
+                    continue;
+                }
                 int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
                 if (f > 0) return f;
-                if (ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
+                if (slotOf[i].activatorAlias >= 0
+                    && ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
             }
 
             // --- 5. items, one clone per pickup -----------------------------------------------------------
@@ -300,7 +376,7 @@ namespace FrankyCLI
             var itemOf = new Dictionary<int, FormKey>();
             for (int i = 0; i < r.beats.Count; i++)
             {
-                if (r.beats[i].type != "pickup") continue;
+                if (r.beats[i].type != "pickup" && r.beats[i].type != "recover") continue;
                 if (itemSrc == null) { Console.WriteLine($"REFUSED: the removed driver's CargoObject is not a MiscItem in {t.mod} to clone."); return 1; }
                 var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
                 mi.EditorID = $"{r.id}_item{i + 1}";
@@ -344,7 +420,7 @@ namespace FrankyCLI
                 foreach (var b in s.Beats)
                 {
                     var tt = tgt.DeepCopy();
-                    tt.AliasID = slotOf[b].activatorAlias;
+                    tt.AliasID = slotOf[b].ObjectiveTarget;
                     if (s.IsGroup)
                     {
                         // A group's ONE objective targets every member and stays up until all are done, so
@@ -356,7 +432,7 @@ namespace FrankyCLI
                         d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
                         tt.Conditions.Clear();
                         tt.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f });
-                        bm.TargetGates.Add((s.Objective, slotOf[b].activatorAlias, beatStage[b]));
+                        bm.TargetGates.Add((s.Objective, slotOf[b].ObjectiveTarget, beatStage[b]));
                     }
                     ob.Targets.Add(tt);
                 }
@@ -364,7 +440,7 @@ namespace FrankyCLI
                 if (s.IsGroup) text += $" (<Global={counterOf[k].edid}>/{s.Beats.Count})";
                 ob.DisplayText = text;
                 bm.ObjectiveText[s.Objective] = text;
-                Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].activatorAlias))}");
+                Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].ObjectiveTarget))}");
             }
             var sortedObs = clone.Objectives.OrderBy(o => o.Index).ToList();
             clone.Objectives.Clear();
@@ -390,16 +466,33 @@ namespace FrankyCLI
             }
 
             // --- 9. the events: one stock hook per beat --------------------------------------------------
+            int recovers = 0;
             for (int k = 0; k < steps.Count; k++)
             {
                 int prereq = k == 0 ? 0 : steps[k - 1].DoneStage;
                 foreach (var b in steps[k].Beats)
                 {
                     var beat = r.beats[b];
-                    string script = beat.type == "pickup" ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
-                    var entry = new QuestFragmentAlias();
-                    entry.Property.Object.SetTo(clone.FormKey);
-                    entry.Property.Alias = (short)slotOf[b].activatorAlias;
+                    int hookAlias; string script;
+                    if (beat.type == "recover")
+                    {
+                        // On the PLAYER: the stage is set however the item reaches the pack (looted, picked up,
+                        // handed over). The A-D duplicates exist so one alias can carry the hook several times.
+                        hookAlias = t.playerAlias;
+                        script = "DefaultAliasOnItemAddedScript" + (recovers == 0 ? "" : ((char)('A' + recovers - 1)).ToString());
+                        recovers++;
+                    }
+                    else if (beat.returnTo != null)
+                    {
+                        // The same object a second time: the stock hook's one duplicate, on the same alias.
+                        hookAlias = slotOf[b].activatorAlias;
+                        script = "DefaultAliasOnActivateA";
+                    }
+                    else
+                    {
+                        hookAlias = slotOf[b].activatorAlias;
+                        script = beat.type == "pickup" ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
+                    }
                     var sc = new ScriptEntry { Name = script };
                     sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
                     sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
@@ -410,12 +503,31 @@ namespace FrankyCLI
                         sc.Properties.Add(ip);
                         sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldDisableAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
                     }
+                    else if (beat.type == "recover")
+                    {
+                        var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
+                        fp.Object.SetTo(itemOf[b]);
+                        sc.Properties.Add(fp);
+                    }
                     else
-                        sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                    {
+                        // An object a later beat comes back to keeps its prompt, or the return could never fire.
+                        bool comesBack = r.beats.Any(x => x.returnTo == b + 1);
+                        sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
+                    }
+                    var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == hookAlias);
+                    if (entry == null)
+                    {
+                        entry = new QuestFragmentAlias();
+                        entry.Property.Object.SetTo(clone.FormKey);
+                        entry.Property.Alias = (short)hookAlias;
+                        vma.Aliases.Add(entry);
+                    }
+                    if (entry.Scripts.Any(x => x.Name == script))
+                    { Console.WriteLine($"REFUSED: alias {hookAlias} already carries {script}; a beat cannot hook it twice."); return 1; }
                     entry.Scripts.Add(sc);
-                    vma.Aliases.Add(entry);
-                    bm.Hooks.Add((slotOf[b].activatorAlias, script, beatStage[b], prereq));
-                    Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {slotOf[b].activatorAlias} {script} sets {beatStage[b]} after {prereq}");
+                    bm.Hooks.Add((hookAlias, script, beatStage[b], prereq));
+                    Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {hookAlias} {script} sets {beatStage[b]} after {prereq}");
                 }
             }
 
@@ -442,8 +554,23 @@ namespace FrankyCLI
                 bm.Replaced.Add((an, slotOf[b].markerAlias));
                 Add(0, $"{an}.GetRef().Disable(False)");
             }
-            Add(0, $"SetObjectiveDisplayed({steps[0].Objective})");
-            var held = new List<int>();   // pickups not yet delivered
+            // Entering a step: a recover beat's holder appears (and fills the alias the objective targets)
+            // BEFORE the objective is shown, so it never shows with nothing to point at.
+            void Enter(int k, int stage)
+            {
+                foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "recover"))
+                {
+                    string mk = $"Alias_Beat{b + 1}Marker", hd = $"Alias_Beat{b + 1}Holder";
+                    props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                    props.Add(("ReferenceAlias", hd, clone.FormKey, slotOf[b].targetAlias));
+                    props.Add(("FormList", "Gang", gangKey!.Value, -1));
+                    props.Add(("Form", $"Item{b + 1}", itemOf[b], -1));
+                    Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {t.gangMin}, {gangMax})");
+                }
+                Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
+            }
+            Enter(0, 0);
+            var held = new List<int>();   // pickups and recovered items not yet delivered
             for (int k = 0; k < steps.Count; k++)
             {
                 var s = steps[k];
@@ -452,7 +579,7 @@ namespace FrankyCLI
                 {
                     int st = beatStage[b];
                     if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
-                    if (r.beats[b].type == "pickup") held.Add(b);
+                    if (r.beats[b].type == "pickup" || r.beats[b].type == "recover") held.Add(b);
                     if (r.beats[b].type == "deliver")
                     {
                         foreach (var h in held)
@@ -472,7 +599,7 @@ namespace FrankyCLI
                 int done = s.DoneStage;
                 if (!s.IsGroup) Add(done, $"SetObjectiveCompleted({s.Objective})");
                 if (last) { Add(done, "CompleteQuest()"); Add(done, "Stop()"); }
-                else Add(done, $"SetObjectiveDisplayed({steps[k + 1].Objective})");
+                else Enter(k + 1, done);
             }
 
             var psc = new StringBuilder();
@@ -556,6 +683,13 @@ namespace FrankyCLI
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
+            foreach (var h in bm.Holders)
+            {
+                var ha = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)h);
+                fail += Check($"holder alias {h} is empty and Optional", ha == null ? "missing"
+                              : $"fill {(ha.Location == null && ha.ForcedReference.IsNull && ha.UniqueActor.IsNull ? "none" : "SET")}, optional {ha.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}",
+                              "fill none, optional True");
+            }
             foreach (var (an, alias) in bm.Replaced)
             {
                 var p = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == an);

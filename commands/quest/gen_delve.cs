@@ -70,6 +70,8 @@ namespace FrankyCLI
             public string? replacesDriver { get; set; }
             /// <summary>delve4: fewest who stand with the carrier. The most is taken off the base.</summary>
             public int gangMin { get; set; }
+            /// <summary>beats: the base's alias filled with the player, which a recover beat's OnItemAdded hook sits on. -1 = none.</summary>
+            public int playerAlias { get; set; } = -1;
             public int beats { get; set; }
             public bool carriesItem { get; set; }
             public int placeAlias { get; set; }
@@ -243,6 +245,12 @@ namespace FrankyCLI
             /// 2026-10-09: the locker spawned INSIDE the box. Absent = false.
             /// </summary>
             public bool replace { get; set; }
+            /// <summary>
+            /// beats, OPTIONAL: this beat is an EARLIER beat's object visited again (1-based beat number), not a
+            /// new one: the centre in 03 to 05 is visited to find the half gone and again to finish. It names
+            /// the same at and place as its target, and only a use beat can be returned to, once.
+            /// </summary>
+            public int? returnTo { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -530,8 +538,8 @@ namespace FrankyCLI
             bool choice = t.kind == "choice";
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
-            else if (r.beats.Any(b => b.type != null || b.group != null || b.item != null || b.model != null || b.name != null || b.replace))
-                Fatal($"a beat sets type, group, item, model, name or replace, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null))
+                Fatal($"a beat sets type, group, item, model, name, replace or returnTo, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (!beats && r.recap != null)
                 Fatal($"the recipe has a recap, and template '{t.id}' ({t.kind}) is not a beats Delve, so it would be silently ignored.");
             if (delve4)
@@ -763,7 +771,7 @@ namespace FrankyCLI
                 {
                     var (a, b) = (r.beats[i], r.beats[j]);
                     if (a.PlaceIndex != b.PlaceIndex) continue;
-                    bool ret = j < t.beatSlots.Count && t.beatSlots[j].returnTo == i;
+                    bool ret = (j < t.beatSlots.Count && t.beatSlots[j].returnTo == i) || b.returnTo == i + 1;
                     if (string.Equals(a.at, b.at, StringComparison.OrdinalIgnoreCase))
                     { if (!ret) Warn($"beats {i + 1} and {j + 1} are both on {a.at} at the same place: one spot, two beats."); }
                     else if (a.at.Length > 9 && b.at.Length > 9 && a.at.StartsWith("RETravel") && b.at.StartsWith("RETravel")

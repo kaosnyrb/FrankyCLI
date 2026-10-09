@@ -227,6 +227,9 @@
       "mod": "du_overtime",
       "driver": "",
       "replacesDriver": "dou_artifact_ground_dualactivator_local_quest",
+  "playerAlias": 32,
+  "_playerAlias": "MBRIR02Player, filled with the player as a unique actor: a recover beat's OnItemAdded hook sits on it.",
+  "gangMin": 0,
       "_shape": [
         "NO DRIVER: THE STAGES ARE THE STATE MACHINE (his ruling 2026-10-08, proven by gen_stageprobe).",
         "A recipe lists beats by TYPE (use, pickup, deliver); each is a stock Default* alias hook that sets",
@@ -253,7 +256,7 @@
       "thirdPlace": { "cloneOf": 0, "name": "ThirdLocation" },
       "cannot": [
         "dialogue -- the people stand there, his ruling",
-        "a recover or choose beat -- not yet; 03 to 06 keep their drivers until those types exist and play the same",
+        "a choose beat -- not yet; 06 keeps its driver until it exists and plays the same",
         "a fourth place",
         "any order for pickups or delivers -- a group is use beats only"
       ],
