@@ -65,7 +65,8 @@
       },
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Water Reclaimer",
-      "_name": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job."
+      "_name": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job.",
+      "say": "That's the housing, but the core's gone. Someone opened the crate in the night. We need it back, or we're drinking recycled for another week."
     },
     {
       "type": "recover",
@@ -88,9 +89,16 @@
       "message": {
         "title": "Reclaimer Online",
         "text": "The housing and core are fitted. The reclaimer at the <Place> is running, with clean water in the line for the first time in a week."
-      }
+      },
+      "say": "Water's in the line. First clean water in a week. Thank you."
     }
   ],
   "_messages": "Texts are Jessica's, verbatim, 2026-09-24 pm. TITLES ARE ELIZA'S PLACEHOLDERS, taken from the opening words of each text: hers to rule on. Each box is a MESG cloned from duo_alocal01_msg03 with OwnerQuest set to this quest, so <Place> resolves.",
-  "_journal": "Journal lines rewritten 2026-09-26 (Jessica) to vanilla's measured shape: first person, what just happened then what next, ~23 words. Beat 4 now carries the completion RECAP, which vanilla ends every quest with. Message box texts unchanged: he played them, 'It's good'. Box 4 title is Jessica's post-play ruling, Reclaimer Online."
+  "_journal": "Journal lines rewritten 2026-09-26 (Jessica) to vanilla's measured shape: first person, what just happened then what next, ~23 words. Beat 4 now carries the completion RECAP, which vanilla ends every quest with. Message box texts unchanged: he played them, 'It's good'. Box 4 title is Jessica's post-play ruling, Reclaimer Online.",
+  "speaker": {
+    "name": "Site Foreman",
+    "voice": "GenericMale01",
+    "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
+  },
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
 }

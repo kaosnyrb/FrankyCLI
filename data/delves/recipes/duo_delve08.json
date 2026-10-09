@@ -56,25 +56,25 @@
       "at": "RETravelA1LocRef",
       "place": "second",
       "objective": "Search the cache at the <SecondPlace>",
-      "item": "Brask's Field Note",
-      "journal": "The cache held a note from Private Teodor Brask. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home.",
+      "item": "Private's Field Note",
+      "journal": "The cache held a note from a private. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "message": {
         "title": "Field Note",
-        "text": "The note is folded small and signed T. BRASK. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home."
+        "text": "The note is folded small and signed with a service number. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home."
       }
     },
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
       "place": "third",
-      "objective": "Find Brask's letters at the <ThirdPlace>",
-      "item": "Brask's Unsent Letters",
-      "journal": "I've found Brask's letters at the <ThirdPlace>. They're all addressed to his sister at the <Place>, so that's where they're going.",
+      "objective": "Find the private's letters at the <ThirdPlace>",
+      "item": "Private's Unsent Letters",
+      "journal": "I've found the private's letters at the <ThirdPlace>. They're all addressed to his sister at the <Place>, so that's where they're going.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "message": {
         "title": "Unsent Letters",
-        "text": "A bundle of slates tied with wire. Every one is addressed to the same person, L. Brask, at the <Place>. None of them were ever sent."
+        "text": "A bundle of slates tied with wire. Every one is addressed to the same person, his sister, at the <Place>. None of them were ever sent."
       }
     },
     {

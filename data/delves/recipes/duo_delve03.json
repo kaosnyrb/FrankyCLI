@@ -46,7 +46,8 @@
       "objective": "Recover what was taken",
       "journal": "It did not go far. Nothing out here does.",
       "item": "Signed-Out Consignment (2 of 2)",
-      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff."
+      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",
+      "say": "You got it back? Good. Bring it in and I'll close the docket."
     },
     {
       "type": "deliver",
@@ -61,5 +62,12 @@
     "civilians": true,
     "lose": 1,
     "_approach": "The old driver's two approach behaviours, made explicit: on first coming within 250 m of the delivery point, people appear around it (the delve4 default, civilians true, his ruling 2026-09-24 'the one with the delivery should have people there') and the crate, which is at this same site, is moved out past its near edge so it reads as lost (LoseLoadOnApproach was true because the load is at the main place)."
-  }
+  },
+  "speaker": {
+    "name": "Dispatch",
+    "voice": "GenericMale01",
+    "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
+  },
+  "broadcast": "This is dispatch. A load went out from here and never got where it was going. Nobody's been out to look. Find where it stopped.",
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
 }
