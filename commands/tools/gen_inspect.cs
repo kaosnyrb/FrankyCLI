@@ -384,6 +384,34 @@ namespace FrankyCLI
                         }
                     }
                     break;
+                case "package":
+                case "pack":
+                    // The generic dump renders a package's Data as "[5] [1, PackageDataLocation], ..." and
+                    // stops: the TYPE of each input is shown and its CONTENTS (which ref, which radius) are
+                    // not, which is the whole package. One level more for Data and Conditions (2026-10-09,
+                    // read while copying a Travel package onto a Delve's waves).
+                    foreach (var rec in mod.Packages)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        {
+                            Console.WriteLine($"--- Package ({rec.FormKey}) ---");
+                            Console.WriteLine($"  EditorID: {rec.EditorID ?? "(none)"}");
+                            DumpAllProperties(rec, typeof(IPackageGetter), cache, "  ");
+                            Console.WriteLine("  Data, each input expanded:");
+                            foreach (var kv in rec.Data)
+                            {
+                                Console.WriteLine($"    [{kv.Key}] {kv.Value.GetType().Name.Replace("BinaryOverlay", "")}: {Render(kv.Value, cache)}");
+                                // A location input's target IS the package (which ref, how far), one level further in.
+                                if (kv.Value is IPackageDataLocationGetter pl)
+                                    Console.WriteLine($"        location: {Render(pl.Location, cache)}"
+                                                      + (pl.Location is ILocationTargetRadiusGetter tr ? $"  target: {Render(tr.Target, cache)}" : ""));
+                            }
+                            Console.WriteLine("  Conditions, expanded:");
+                            foreach (var c in rec.Conditions)
+                                Console.WriteLine($"    {Render(c, cache)}  data: {Render(c.Data, cache)}");
+                            Console.WriteLine();
+                            found++;
+                        }
+                    break;
                 case "quest":
                     foreach (var rec in mod.Quests)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))

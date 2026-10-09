@@ -248,7 +248,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
-| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at `at` INTO its collection, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at a random one of the site's travel markers 40 m or more from the player (else the farthest, else `at`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
@@ -269,8 +269,10 @@ when all N are done. The counter resets when the quest starts, because these que
 Each member's marker goes out as it is done: its target is lit only while its stage is not done (`GetStageDone == 0`, vanilla's way). Clearing the alias was tried and does not drop a marker.
 
 **A hold (Jessica's Type 6, `duo_delve09`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
-least 1: an empty wave never clears) spawn one after another at `at`, ideally a travel marker so they come
-from the edge of the site. The objective gets the counter `(n/waves)` appended and is redisplayed as each
+least 1: an empty wave never clears) spawn one after another, each at a random travel marker of the site at least 40 m from the player (his
+first play: one spot every wave, and on top of him); `at` is the search anchor and the last fallback. Every
+wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,
+to PlayerRef, only while he is 9 to 1000 m away), so they come for him. The objective gets the counter `(n/waves)` appended and is redisplayed as each
 wave falls, which is the player's feedback (no message boxes in this type, his ruling). `defend: N` points
 the objective at beat N's object (a use or a deliver; absent, the spawn marker). Each wave is one stage, the
 last landing on the step's done stage. **The stuck-enemy guard:** a wave still alive `stuck` seconds after it

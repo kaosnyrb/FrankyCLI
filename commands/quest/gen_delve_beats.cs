@@ -390,6 +390,7 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
+            public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
             public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
@@ -401,7 +402,7 @@ namespace FrankyCLI
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
                                       Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons,
-                                      IQuestCollectionAliasGetter? waveSrc)
+                                      IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -427,8 +428,37 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
             if (r.beats.Any(b => b.type == "hold") && gangKey == null)
             { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
-            if (r.beats.Any(b => b.type == "hold") && waveSrc == null)
-            { Console.WriteLine("REFUSED: a hold needs a source collection alias to copy its waves from, and none was handed in."); return 1; }
+            if (r.beats.Any(b => b.type == "hold") && (waveSrc == null || travelSrc == null))
+            { Console.WriteLine("REFUSED: a hold needs a source collection alias and a source package to copy its waves from, and one was not handed in."); return 1; }
+
+            // A hold's waves come FOR the player: one package per Delve, a copy of the bounty hunters' Travel
+            // (jog, weapon drawn, to PlayerRef), worn by every wave collection, so every member runs it. The
+            // copy keeps the two GetDistance conditions (travel while the player is 9 to 1000 m away; closer
+            // than that they are in combat) and drops what belongs to the bounty quest: its two GetStageDone
+            // conditions, its fragment scripts and its dialogue on begin/end/change.
+            FormKey travelPkg = default;
+            foreach (var k in myMod.Packages.Where(p => p.EditorID != null && p.EditorID.StartsWith(r.id + "_wavepkg")).Select(p => p.FormKey).ToList())
+                myMod.Packages.Remove(k);
+            if (r.beats.Any(b => b.type == "hold"))
+            {
+                var pk = myMod.Packages.DuplicateInAsNewRecord(travelSrc!);
+                pk.EditorID = r.id + "_wavepkg";
+                pk.VirtualMachineAdapter = null;
+                pk.OwnerQuest.SetTo(clone.FormKey);
+                pk.OnBegin?.Topics.Clear();
+                pk.OnEnd?.Topics.Clear();
+                pk.OnChange?.Topics.Clear();
+                pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
+                foreach (var c in pk.Conditions)
+                {
+                    var gd = (GetDistanceConditionData)c.Data;
+                    if (gd.FirstParameter.Link.FormKey.ID != 0x14)
+                    { Console.WriteLine($"REFUSED: the copied package's distance condition measures to {gd.FirstParameter.Link.FormKey}, not PlayerRef."); return 1; }
+                }
+                travelPkg = pk.FormKey;
+                bm.WavePackage = pk.FormKey;
+                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {travelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept)");
+            }
             vma.Scripts.Remove(old);
             if (vma.Scripts.Count != 0)
             { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
@@ -475,6 +505,8 @@ namespace FrankyCLI
                         if (entry.ID == ra.ID) entry.ID = cid;
                         ra.ID = cid;
                         ra.Name = $"DelveBeat{i + 1}Wave{w + 1}";
+                        ra.PackageData.Clear();
+                        ra.PackageData.Add(travelPkg.ToLink<IPackageGetter>());
                         clone.Aliases.Add(col);
                         waveAliases[i].Add((int)cid);
                         bm.Waves.Add((int)cid);
@@ -1212,6 +1244,17 @@ namespace FrankyCLI
                 fail += Check($"wave collection {wv} is empty and Optional", wa == null ? "missing"
                               : $"fill {(wa.Location == null && wa.ForcedReference.IsNull && wa.UniqueActor.IsNull && wa.CreateReferenceToObject == null ? "none" : "SET")}, optional {wa.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}",
                               "fill none, optional True");
+                fail += Check($"wave collection {wv} wears the wave package", wa == null ? "missing"
+                              : string.Join(",", wa.PackageData.Select(p => p.FormKey)), bm.WavePackage.ToString());
+            }
+            if (bm.Waves.Count > 0)
+            {
+                var pk = m.Packages.FirstOrDefault(p => p.FormKey == bm.WavePackage);
+                var loc = pk?.Data.Values.OfType<IPackageDataLocationGetter>().FirstOrDefault()?.Location as ILocationTargetRadiusGetter;
+                string target = (loc?.Target as ILocationTargetGetter)?.Link.FormKey.ToString() ?? "unreadable";
+                fail += Check("the wave package travels to PlayerRef, with no script and no bounty-quest condition",
+                              pk == null ? "missing" : $"{target} vma {(pk.VirtualMachineAdapter == null ? "none" : "SET")} conditions {string.Join("+", pk.Conditions.Select(c => c.Data.GetType().Name.Replace("BinaryOverlay", "")))}",
+                              "000014:Starfield.esm vma none conditions GetDistanceConditionData+GetDistanceConditionData");
             }
             if (bm.PityTimer)
                 fail += Check("the stuck-enemy guard is in the fragment script",

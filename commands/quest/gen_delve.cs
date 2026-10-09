@@ -1956,6 +1956,7 @@ namespace FrankyCLI
                 // collection its wave scripts fill as hostiles go live (Optional, AllowDisabled, no fill).
                 // Read off Starfield.esm itself, never a winning override.
                 IQuestCollectionAliasGetter? waveSrc = null;
+                IPackageGetter? travelSrc = null;
                 if (fail == 0 && r.beats.Any(b => b.type == "hold"))
                 {
                     var sfm = env.LoadOrder[0].Mod;
@@ -1964,8 +1965,13 @@ namespace FrankyCLI
                     waveSrc = uc08?.Aliases.OfType<IQuestCollectionAliasGetter>()
                         .FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == "ActiveHostiles");
                     if (waveSrc == null) { Console.WriteLine("REFUSED: a hold copies its wave collections from UC08_QueenBattle's ActiveHostiles [03E832:Starfield.esm], and it is not there."); fail++; }
+                    // And the waves come FOR the player (his ask, after the first play: "there's AI packages in
+                    // the game which control enemies, would be good to have them attack the player"): a copy of
+                    // the Wanted trait's bounty hunters' Travel package, jog, weapon drawn, to PlayerRef.
+                    travelSrc = sfm?.Packages.FirstOrDefault(p => p.EditorID == "Trait_Wanted_TravelToPlayer");
+                    if (travelSrc == null) { Console.WriteLine("REFUSED: a hold copies its waves' package from Trait_Wanted_TravelToPlayer [0E830B:Starfield.esm], and it is not there."); fail++; }
                 }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc);
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc);
             }
             else if (t.kind == "choice")
             {
