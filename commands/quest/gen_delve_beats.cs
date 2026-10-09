@@ -1164,10 +1164,17 @@ namespace FrankyCLI
 
                     var action = new RadioSceneAction { Name = "Say", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0 };
                     action.Topic.SetTo(topic.FormKey);
+                    // ⛔ THE BROADCAST CANNOT BE STARTED FROM STAGE 0's FRAGMENT: that runs while the quest is still
+                    // starting, and Start() then does nothing at all. Measured in his play, 2026-10-09, with an
+                    // on-screen probe: stage 0 "playing = FALSE", the same scene started again at stage 10 played,
+                    // voice and subtitle. So a stage-0 line is started by the ENGINE, with the scene's own
+                    // BeginOnQuestStart flag, and every later stage's line by its fragment.
+                    bool atStart = lst == 0;
                     var scene = new Scene(myMod)
                     {
                         EditorID = tag + "_scene",
-                        Flags = (Scene.Flag)0x80,   // on every vanilla audio-log scene; undocumented (book_audio.md)
+                        // 0x80 is on every vanilla audio-log scene; undocumented (book_audio.md)
+                        Flags = (Scene.Flag)0x80 | (atStart ? Scene.Flag.BeginOnQuestStart : 0),
                         VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
                     };
                     scene.Quest.SetTo(clone.FormKey);
@@ -1177,10 +1184,13 @@ namespace FrankyCLI
                     clone.Scenes.Add(scene);
 
                     string sv = $"Say{n + 1}";
-                    props.Add(("Scene", sv, scene.FormKey, -1));
-                    Add(lst, $"{sv}.Start()");
+                    if (!atStart)
+                    {
+                        props.Add(("Scene", sv, scene.FormKey, -1));
+                        Add(lst, $"{sv}.Start()");
+                    }
                     bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));
-                    Console.WriteLine($"  +speech  : stage {lst} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
+                    Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
                 }
             }
             var held = new List<int>();   // pickups and recovered items not yet delivered
@@ -1500,6 +1510,9 @@ namespace FrankyCLI
                               sc == null ? "scene missing"
                               : $"alias {act?.AliasID}, speaker {rsp?.Speaker.FormKey}, wem {line?.WEMFile:X8}, text \"{line?.ResponseText?.String}\"",
                               $"alias -4, speaker {bm.Speaker}, wem {wem:X8}, text \"{text}\"");
+                if (lst == 0)
+                    fail += Check("the broadcast scene begins on quest start (a stage-0 Start() plays nothing)",
+                                  (sc?.Flags?.HasFlag(Scene.Flag.BeginOnQuestStart) ?? false).ToString(), "True");
             }
             if (bm.PityTimer)
                 fail += Check("the stuck-enemy guard is in the fragment script",

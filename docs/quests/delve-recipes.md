@@ -323,8 +323,10 @@ sets its stage first and checks the item afterwards, so as a gate it would compl
 "broadcast": "This is Relay Control. ...",
 ```
 
-and `"say": "..."` on any beat. `broadcast` plays when the quest starts (stage 0); a beat's `say` plays when
-that beat's stage is set. Each line is a RADIO scene with no actor in the world (`AliasID -4`, the vanilla
+and `"say": "..."` on any beat. `broadcast` plays when the quest starts; a beat's `say` plays when that beat's
+stage is set. ⛔ **The broadcast is started by the ENGINE (the scene's `BeginOnQuestStart` flag), never by
+stage 0's fragment:** stage 0 runs while the quest is still starting and a `Start()` there plays nothing (his
+probe, 2026-10-09: stage 0 `playing = FALSE`, the same scene started at stage 10 played with voice and subtitle). Each line is a RADIO scene with no actor in the world (`AliasID -4`, the vanilla
 audio-log shape, `docs/formlib/book_audio.md`): one topic, one response the speaker says, started by the
 stage's fragment. The speaker is an NPC that is never placed; it carries the subtitle name and the voice type
 whose folder the audio lives in. **Words only:** a spoken line cannot carry a `<Token>` (the voice cannot say
