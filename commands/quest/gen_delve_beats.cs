@@ -208,7 +208,7 @@ namespace FrankyCLI
             public Dictionary<int, string> ObjectiveText = new();
             public string PscPath = "";
             public string? Recap;                                        // the completing stage's line, when ending on a group
-            public List<(string name, int alias)> ClearedAliases = new();  // fragment properties bound to a beat's alias
+            public List<(int objective, int alias, int stage)> TargetGates = new();  // a group member's target, lit until its stage
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
@@ -344,6 +344,19 @@ namespace FrankyCLI
                 {
                     var tt = tgt.DeepCopy();
                     tt.AliasID = slotOf[b].activatorAlias;
+                    if (s.IsGroup)
+                    {
+                        // A group's ONE objective targets every member and stays up until all are done, so
+                        // each member's marker must go out on its own: lit while its stage is NOT done.
+                        // Vanilla's way (1,006 of Starfield.esm's 2,968 targets are conditioned, 694 by
+                        // GetStageDone; shape copied off SFTA06 obj 1135). Clearing the alias in the
+                        // fragment was tried first and does NOT drop the marker (his play, 2026-10-09).
+                        var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = beatStage[b] };
+                        d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
+                        tt.Conditions.Clear();
+                        tt.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f });
+                        bm.TargetGates.Add((s.Objective, slotOf[b].activatorAlias, beatStage[b]));
+                    }
                     ob.Targets.Add(tt);
                 }
                 string text = Expand(r.beats[s.Beats[0]].objective!, t);
@@ -407,14 +420,14 @@ namespace FrankyCLI
 
             // --- 10. the fragment script: generated, bound per stage -----------------------------------------
             string name = FragmentScriptName(r);
-            var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
+            var props = new List<(string type, string pname, FormKey key)>();
             var code = new SortedDictionary<int, List<string>>();
             void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
 
             foreach (var kv in counterOf)
             {
                 string p = $"Counter{kv.Key + 1}";
-                props.Add(("GlobalVariable", p, kv.Value.key, -1));
+                props.Add(("GlobalVariable", p, kv.Value.key));
                 Add(0, $"{p}.SetValue(0)");
                 Add(0, $"UpdateCurrentInstanceGlobal({p})");
             }
@@ -427,28 +440,20 @@ namespace FrankyCLI
                 foreach (var b in s.Beats)
                 {
                     int st = beatStage[b];
-                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
+                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b])); Add(st, $"Beat{b + 1}Message.Show()"); }
                     if (r.beats[b].type == "pickup") held.Add(b);
                     if (r.beats[b].type == "deliver")
                     {
                         foreach (var h in held)
                         {
-                            props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
+                            props.Add(("Form", $"Item{h + 1}", itemOf[h]));
                             Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
                         }
                         held.Clear();
                     }
                     if (s.IsGroup)
                     {
-                        // A group's ONE objective targets every member, and a target stays lit until the
-                        // objective completes, so a done member's marker came back (his play of 07,
-                        // 2026-10-08). Clearing its alias drops the target; the object stays in the world.
-                        // Vanilla clears aliases in fragments (45 of 1,468 fragment scripts).
-                        string an = $"Alias_Beat{b + 1}";
-                        props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].activatorAlias));
-                        bm.ClearedAliases.Add((an, slotOf[b].activatorAlias));
-                        Add(st, $"{an}.Clear()");
-                        Add(st, $"If ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Beats.Count}.0)");
+                        Add(st,$"If ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Beats.Count}.0)");
                         Add(st, $"    SetStage({s.DoneStage})");
                         Add(st, "EndIf");
                     }
@@ -482,7 +487,6 @@ namespace FrankyCLI
             {
                 var op = new ScriptObjectProperty { Name = p.pname, Flags = ScriptProperty.Flag.Edited };
                 op.Object.SetTo(p.key);
-                if (p.alias >= 0) op.Alias = (short)p.alias;   // a ReferenceAlias: the quest plus its alias id
                 vma.Script.Properties.Add(op);
             }
             vma.Fragments.Clear();
@@ -540,10 +544,15 @@ namespace FrankyCLI
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
-            foreach (var (an, alias) in bm.ClearedAliases)
+            foreach (var (obj, alias, stage) in bm.TargetGates)
             {
-                var p = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == an);
-                fail += Check($"fragment property {an}", p == null ? "missing" : $"{p.Object.FormKey} alias {p.Alias}", $"{q.FormKey} alias {alias}");
+                var tg = q.Objectives.FirstOrDefault(o => o.Index == obj)?.Targets?.FirstOrDefault(x => x.AliasID == alias);
+                var c = tg?.Conditions.Count == 1 ? tg.Conditions[0] as IConditionFloatGetter : null;
+                var gd = c?.Data as IGetStageDoneConditionDataGetter;
+                string got = gd == null ? $"{tg?.Conditions.Count ?? -1} condition(s), not one GetStageDone"
+                    : $"GetStageDone({gd.FirstParameter.Link.FormKey}, {gd.SecondParameter}) {c!.CompareOperator} {c.ComparisonValue} on {gd.RunOnType}";
+                fail += Check($"objective {obj} target alias {alias} lit until its stage", got,
+                              $"GetStageDone({q.FormKey}, {stage}) EqualTo 0 on Subject");
             }
             if (bm.Recap != null)
             {

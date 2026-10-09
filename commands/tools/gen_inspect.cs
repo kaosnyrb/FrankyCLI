@@ -113,6 +113,9 @@ namespace FrankyCLI
                 return 0;
             }
 
+            if (recordType.Equals("questtargets", StringComparison.OrdinalIgnoreCase))
+                return QuestTargetCensus(allMods, search);
+
             if (recordType.Equals("worldspace_objects", StringComparison.OrdinalIgnoreCase))
             {
                 int found3 = 0;
@@ -1125,6 +1128,75 @@ namespace FrankyCLI
                     Console.WriteLine($"    Name={p.Name} Flags={p.Flags} StartConds={p.StartConditions.Count} CompletionConds={p.CompletionConditions.Count}");
             }
             Console.WriteLine();
+        }
+
+        /// <summary>
+        /// questtargets: per plugin, how many quest-objective TARGETS carry conditions, with examples.
+        /// Asked 2026-10-09: clearing a target's alias did not drop its marker (his play of duo_delve07,
+        /// the counter rose and all three markers stayed), so the question is how vanilla lights a
+        /// target off. Typed Quest group only, no link-cache resolution. The denominator always prints,
+        /// so a zero reads as "looked at N targets", never as "could not look". Search = example count.
+        /// </summary>
+        private static int QuestTargetCensus(List<IStarfieldModGetter> allMods, string search)
+        {
+            // An EditorID instead of a number: dump THAT quest's target conditions whole, every field,
+            // so a writer can copy vanilla's exact shape rather than an assumed one.
+            if (!string.IsNullOrEmpty(search) && !int.TryParse(search, out _))
+            {
+                int hit = 0;
+                foreach (var mod in allMods)
+                    foreach (var q in mod.Quests.Where(x => string.Equals(x.EditorID, search, StringComparison.OrdinalIgnoreCase)))
+                        foreach (var o in q.Objectives ?? (IReadOnlyList<IQuestObjectiveGetter>)Array.Empty<IQuestObjectiveGetter>())
+                            foreach (var t in o.Targets ?? (IReadOnlyList<IQuestObjectiveTargetGetter>)Array.Empty<IQuestObjectiveTargetGetter>())
+                            {
+                                if (t.Conditions == null || t.Conditions.Count == 0) continue;
+                                hit++;
+                                Console.WriteLine($"{mod.ModKey.FileName} {q.EditorID} {q.FormKey} obj {o.Index} target alias {t.AliasID}  targetFlags={t.Flags}");
+                                foreach (var c in t.Conditions)
+                                {
+                                    Console.WriteLine($"    {c.GetType().Name}  op={c.CompareOperator}  flags={c.Flags}  value={(c is IConditionFloatGetter f ? f.ComparisonValue.ToString() : "(global)")}");
+                                    foreach (var pi in c.Data.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                                    {
+                                        if (pi.GetIndexParameters().Length > 0) continue;
+                                        object? v; try { v = pi.GetValue(c.Data); } catch { continue; }
+                                        Console.WriteLine($"        {pi.Name} = {v}");
+                                    }
+                                }
+                            }
+                Console.WriteLine(hit == 0 ? $"no conditioned target on any quest '{search}' (the quest group WAS searched)" : $"{hit} conditioned target(s)");
+                return 0;
+            }
+            int examples = int.TryParse(search, out int e) ? e : 8;
+            foreach (var mod in allMods)
+            {
+                int quests = 0, objectives = 0, targets = 0, conditioned = 0, shown = 0;
+                var funcs = new Dictionary<string, int>();
+                foreach (var q in mod.Quests)
+                {
+                    quests++;
+                    foreach (var o in q.Objectives ?? (IReadOnlyList<IQuestObjectiveGetter>)Array.Empty<IQuestObjectiveGetter>())
+                    {
+                        objectives++;
+                        foreach (var t in o.Targets ?? (IReadOnlyList<IQuestObjectiveTargetGetter>)Array.Empty<IQuestObjectiveTargetGetter>())
+                        {
+                            targets++;
+                            if (t.Conditions == null || t.Conditions.Count == 0) continue;
+                            conditioned++;
+                            var names = t.Conditions.Select(c => c.Data.GetType().Name.Replace("ConditionData", "")).ToList();
+                            foreach (var n in names) funcs[n] = funcs.GetValueOrDefault(n) + 1;
+                            if (shown++ < examples)
+                                Console.WriteLine($"  {mod.ModKey.FileName}  {q.EditorID} obj {o.Index} alias {t.AliasID}: "
+                                    + string.Join(" AND ", t.Conditions.Select(c => $"{c.Data.GetType().Name.Replace("ConditionData", "")} {c.CompareOperator} {(c is IConditionFloatGetter f ? f.ComparisonValue.ToString() : "?")}")));
+                        }
+                    }
+                }
+                if (quests == 0) continue;
+                Console.WriteLine($"{mod.ModKey.FileName}: {quests} quests, {objectives} objectives, {targets} targets, "
+                    + $"{conditioned} targets carry conditions");
+                foreach (var kv in funcs.OrderByDescending(x => x.Value).Take(10))
+                    Console.WriteLine($"    {kv.Value,6}  {kv.Key}");
+            }
+            return 0;
         }
 
         private static void DumpQuest(IQuestGetter quest)

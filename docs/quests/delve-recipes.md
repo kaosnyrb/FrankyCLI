@@ -253,7 +253,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 **Any order, with a counter:** consecutive `use` beats with the same `group` are one step. Only the first
 carries the `objective`; the build appends the vanilla counter, `(<Global=…>/N)`, and the step completes
 when all N are done. The counter resets when the quest starts, because these quests are repeatable.
-Each member's marker goes out as it is done: its fragment clears its own alias (the object stays).
+Each member's marker goes out as it is done: its target is lit only while its stage is not done (`GetStageDone == 0`, vanilla's way). Clearing the alias was tried and does not drop a marker.
 
 **`recap` when the Delve ENDS on a group:** the last member sets its stage and stage 100 in the same
 instant, and the quest log shows only the newest line, so its own `journal` is never read and stage 100
