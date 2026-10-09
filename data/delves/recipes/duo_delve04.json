@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "duo_delve04",
-  "template": "carry-absence-recover-return",
+  "template": "beats",
   "author": "jessica",
   "source": "office/projects/delves/testcase-01-two-halves.md",
   "_note": [
@@ -13,7 +13,8 @@
     "caves and natural locations atm.\" So the delivery site requires LocTypeOE_NonHostile (see _theme),",
     "and the load's own POI takes no theme, because a load can get lost anywhere.",
     "",
-    "The two item names are Jessica's, 2026-09-24 (see items._items)."
+    "The two item names are Jessica's, 2026-09-24 (see items._items).",
+    "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"work on the other beats and missions so everything is on this system\"). The items block went into the beats it belongs to; every word is unchanged."
   ],
   "place": {
     "theme": {
@@ -38,18 +39,9 @@
     "briefing": "The <Place> is waiting on a reclaimer housing that was signed out to them and never arrived. I should find where the crate stopped.",
     "_prose": "Rewritten 2026-09-26 against the vanilla style guide (home-office office/projects/bethesda/33-vanilla-quest-text-style.md). This is an ARTIFACT (treasure-map) Delve, his 16:12: 'we'll have both kinds, we've just started on the treasure map (named Artifact in overtime)'. So the title takes the artifact family's shape, Category: thing on <Planet>, which is vanilla's own for this system (slates named 'Report: Abandoned X Shipment') and his base's ('Hauling: Goods Package on <Planet>'). It reads as a plain haul until the core is found missing. Board-kind Delves take the board shape instead. Briefing is the first JOURNAL entry, first person."
   },
-  "items": {
-    "load": "Reclaimer Housing (1 of 2)",
-    "missing": "Reclaimer Filter Core (2 of 2)",
-    "_items": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site.",
-    "crateModel": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
-    "_crateModel": "His eye, 2026-09-24: the base activator wears BossContainer_Science01, an end-of-dungeon loot container, so the load read as loot. A plain stackable freight crate reads as a consignment. Eliza's pick on the placeholder-not-question rule; his to swap.",
-    "centreModel": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
-    "centreName": "Water Reclaimer",
-    "_centre": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job."
-  },
   "beats": [
     {
+      "type": "pickup",
       "at": "RETravelA1LocRef",
       "objective": "Find the Reclaimer Housing",
       "journal": "I found the housing crate, dropped well short of where it was going. The manifest says a filter core was sent on ahead. I should take the housing to the <Place>.",
@@ -57,27 +49,40 @@
       "message": {
         "title": "Manifest",
         "text": "The manifest lists two crates for the <Place>: this one, the reclaimer housing, and a filter core sent on ahead. Signed out, never signed in."
-      }
+      },
+      "item": "Reclaimer Housing (1 of 2)",
+      "_item": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "_model": "His eye, 2026-09-24: the base activator wears BossContainer_Science01, an end-of-dungeon loot container, so the load read as loot. A plain stackable freight crate reads as a consignment. Eliza's pick on the placeholder-not-question rule; his to swap."
     },
     {
+      "type": "use",
       "at": "RECenterLocRef",
       "objective": "Deliver the Housing to the <Place>",
       "journal": "The filter core reached the <Place> two days ago and was taken from its crate overnight. Without it the reclaimer stays offline. I need to find whoever took it.",
       "message": {
         "title": "Delivery Slate",
         "text": "The delivery slate shows the filter core arrived two days ago and the housing never did. The reclaimer is offline. A note underneath says the core crate was opened in the night."
-      }
+      },
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Water Reclaimer",
+      "_name": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job."
     },
     {
+      "type": "recover",
       "at": "RETravelB1LocRef",
       "objective": "Recover the Filter Core",
       "journal": "I've recovered the filter core, still sealed. I should take it back to the <Place> and get the reclaimer running.",
       "message": {
         "title": "Reclaimer Filter Core",
         "text": "The filter core, still sealed. Whoever took it never worked out what it was for."
-      }
+      },
+      "item": "Reclaimer Filter Core (2 of 2)",
+      "_item": "Jessica's, 2026-09-24 pm (office/projects/delves/testcase-01-two-halves.md, 'MESSAGE BOXES, AND THE PART GETS A NAME'), on his 'we might need message boxes as the piece missing is super vague'. They replace 'Signed-Out Consignment'. Her rule, narrowed: name the objects, never describe the site."
     },
     {
+      "type": "deliver",
+      "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Get the Reclaimer Running",
       "journal": "A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
