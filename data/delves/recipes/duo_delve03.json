@@ -32,13 +32,15 @@
       "objective": "Find the load",
       "journal": "Signed out, never signed in, and it got this far.",
       "item": "Signed-Out Consignment (1 of 2)",
-      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff."
+      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",
+      "say": "That's it. Finish the run for them and take it where it was going."
     },
     {
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Take it to the <Place>",
-      "journal": "The other half should be here. Something has taken it."
+      "journal": "The other half should be here. Something has taken it.",
+      "say": "That's only half of it. The rest was here, and someone's taken it. Go and get it back."
     },
     {
       "type": "recover",
