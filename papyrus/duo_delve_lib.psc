@@ -62,6 +62,11 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
         Actor enemy = marker.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, placePosition, akWave, True) as Actor
         enemy.SetValue(Suspicious, detected)
         enemy.SetValue(Aggression, veryAggressive)
+        ; Pick up the wave's Travel package NOW. Without this they stood where they spawned (his second play,
+        ; 2026-10-09): being filled into the alias does not make an actor re-pick its package. Vanilla's idiom
+        ; after a change of what an actor should be doing (QF_OE_KT_Trait_Wanted_Bounty stage 150,
+        ; QF_BE_CF02_Ragana_BoardingQu, QF_OE_KT_UCMilitaryTrainingE).
+        enemy.EvaluatePackage()
         n -= 1
     EndWhile
 EndFunction
