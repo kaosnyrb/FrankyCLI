@@ -34,6 +34,10 @@ switch (mode)
             quiet:         Get(args, 6, ""),
             seed:          Get(args, 2, "")));
 
+    case "packin":
+        // packin export <PackIn> <out.json> | packin resolve <in.json> <out.json>
+        return packin_json.Run(args);
+
     case "gen_inspect":
         // gen_inspect <recordtype> <editorid_or_formid>
         if (args.Length < 3)
