@@ -57,10 +57,6 @@
       "at": "RECenterLocRef",
       "objective": "Deliver the Dish to the <Place>",
       "journal": "The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.",
-      "message": {
-        "title": "Comms Log",
-        "text": "The comms log shows the relay has been down for nine days. The transmitter crate is here, opened and empty."
-      },
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Comms Relay",
       "_model": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
@@ -86,10 +82,6 @@
       "at": "RECenterLocRef",
       "objective": "Bring the Relay Online",
       "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
-      "message": {
-        "title": "Relay Online",
-        "text": "The dish and transmitter are fitted. The relay at the <Place> is live, and someone is already calling home."
-      },
       "say": "We're live. Half the crew's already queuing to call home."
     }
   ],
@@ -100,5 +92,5 @@
     "voice": "GenericFemale01",
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
-  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."
 }

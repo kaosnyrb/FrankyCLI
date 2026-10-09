@@ -59,10 +59,6 @@
       "at": "RECenterLocRef",
       "objective": "Deliver the Housing to the <Place>",
       "journal": "The filter core reached the <Place> two days ago and was taken from its crate overnight. Without it the reclaimer stays offline. I need to find whoever took it.",
-      "message": {
-        "title": "Delivery Slate",
-        "text": "The delivery slate shows the filter core arrived two days ago and the housing never did. The reclaimer is offline. A note underneath says the core crate was opened in the night."
-      },
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Water Reclaimer",
       "_name": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job.",
@@ -86,10 +82,6 @@
       "at": "RECenterLocRef",
       "objective": "Get the Reclaimer Running",
       "journal": "A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
-      "message": {
-        "title": "Reclaimer Online",
-        "text": "The housing and core are fitted. The reclaimer at the <Place> is running, with clean water in the line for the first time in a week."
-      },
       "say": "Water's in the line. First clean water in a week. Thank you."
     }
   ],
@@ -100,5 +92,5 @@
     "voice": "GenericMale01",
     "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
   },
-  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."
 }

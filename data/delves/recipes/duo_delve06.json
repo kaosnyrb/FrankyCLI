@@ -60,8 +60,7 @@
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "_model": "PLACEHOLDER: testcase 01's freight crate. A salvager's stash may want something smaller; his eye.",
       "_journal_never_shown": "The medal has a name on it, Sergeant Vale, and his service record lists family at the <Place>. I should take it to them.",
-      "_journal_note": "This line was beat 1's journal on the choice kind and was NEVER SHOWN: the offer is set in the same instant and the log shows only the newest line (part 13, his play 2026-10-08). offer.journal opens with the same sentence and is what the player reads. Kept here as Jessica wrote it.",
-      "say": "You're the one with the Colony War medal? I keep a war room. People come to see what the war cost. The family can't pay what I can. Come see me. Your call."
+      "_journal_note": "This line was beat 1's journal on the choice kind and was NEVER SHOWN: the offer is set in the same instant and the log shows only the newest line (part 13, his play 2026-10-08). offer.journal opens with the same sentence and is what the player reads. Kept here as Jessica wrote it."
     },
     {
       "type": "deliver",
@@ -127,10 +126,5 @@
   "_company": "His play 2026-10-08: \"the created NPCs are alone at the POIs which looks wierd. Can we get like a few nameless npcs\", and \"can we set there outfit in the json, so we can dress them up\". ⏳ PLACEHOLDERS, his to dress: Maren in a colonist's padded vest among colonists (Civ_LIST = LvlLISTColonist); Oduya in shirt, slacks and vest among Construx workers (an infrastructure site). Outfits are any vanilla Outfit EditorID (596 in Starfield.esm); company lists are Overtime's duo_GangMembersList_Civ_* (friendly).",
   "_people": "His playtest 2026-10-08: \"Returning the medal talks about a person who isn't there\", then \"FrankyCLI has npc creation tools\". Templates are from NPCTools.GetTemplateFriendlyNPC's talkable set. ⏳ \"Vale's Daughter\" is a PLACEHOLDER: Jessica's prose never names her, so the name is hers to give (checked against his who's-who, no family name). Oduya is her name.",
   "_reward": "Overtime's own ladder, on each ending's completing stage (QRCR/QRXP): easy 1,250 cr / 250 xp, med 2,800 / 500, hard 7,500 / 1,500. His first play 2026-10-08 paid 1,250 + 2,500 on the buyer's ending, because the stage reward the base carries was copied to it AND the driver paid on top; the driver pays nothing now. ⏳ PLACEHOLDER TIERS, his to set: the buyer one rung above the owner, which is the design's only rule.",
-  "speaker": {
-    "name": "Curator",
-    "voice": "GenericMale01",
-    "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
-  },
-  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
+  "_speech": "Jessica 2026-10-09: NO SPEECH, his \"either or\" (a box and a line on one beat clash). Pickup already shows two boxes, the engraving and the curator's offer, so the curator's line (George, JBFqnCBsd6RMkjVDRZzb) is parked in home-office office/projects/delves/radio-lines.md."
 }
