@@ -40,17 +40,26 @@ def archives(mod_hint: str | None):
     return out
 
 
-def fetch_mesh(rel: str, mod_hint: str | None) -> bytes | None:
-    rel = "geometries/" + rel.lower().replace("\\", "/") + ".mesh"
-    loose = DATA / rel
+def mesh_member(rel: str) -> str:
+    """A BSGeometry's LOD0 path as the archive member that holds it."""
+    return "geometries/" + rel.lower().replace("\\", "/") + ".mesh"
+
+
+def fetch(member: str, mod_hint: str | None) -> bytes | None:
+    """A file from Data: loose first, then the mod's and the game's mesh archives."""
+    loose = DATA / member
     if loose.exists():
         return loose.read_bytes()
     for ba2 in archives(mod_hint):
         if ba2 not in _IDX:
             _IDX[ba2] = ba2get.index(ba2)
-        if ba2get.norm(rel) in _IDX[ba2]:
-            return ba2get.extract(ba2, rel)
+        if ba2get.norm(member) in _IDX[ba2]:
+            return ba2get.extract(ba2, member)
     return None
+
+
+def fetch_mesh(rel: str, mod_hint: str | None) -> bytes | None:
+    return fetch(mesh_member(rel), mod_hint)
 
 
 def parse_mesh(d: bytes):
@@ -117,11 +126,13 @@ def surface(matpath: str | None, mod_hint: str | None, cache: dict):
     return out
 
 
-def collect(n: Nif, mod_hint: str | None, textured: bool = False):
-    """(triangles, missing meshes, boxes, surfaces). `surfaces` is per-triangle-run: (count, uv (N,3,2)
-    or None, texture or None, Albedo or None, geometry name, reason); filled only when `textured`."""
-    tris, missing, boxes, surfs = [], [], [], []
-    cache: dict = {}
+def geometries(n: Nif):
+    """Every BSGeometry in the tree, in file order, carried through its node transforms. ONE walk, shared
+    by collect() below and packin_assets.py, so the transform convention cannot fork. Each is a dict:
+    name, T (world translation), R (3x3), S (uniform scale): world = S * R @ v + T; `mesh` the LOD0 path
+    or None; `material` the shader's name string (the material path) or None; `box` its own centre and
+    half-extents, in its local space."""
+    out = []
 
     def visit(i, PT, PR, PS):
         t, bl = n.type_of(i), n.blocks[i]
@@ -144,36 +155,48 @@ def collect(n: Nif, mod_hint: str | None, textured: bool = False):
             ln = struct.unpack_from("<I", bl, o + 13)[0]
             path = bl[o + 17:o + 17 + ln].decode("utf-8")
         nm_i = struct.unpack_from("<I", bl, 0)[0]
-        nm = n.strings[nm_i] if nm_i != NONE else "(unnamed)"
-        raw = fetch_mesh(path, mod_hint) if path else None
+        box = w.xform + 52 + 4 + 16
+        sh = struct.unpack_from("<I", bl, w.refs[-2])[0]             # skin, SHADER, alpha: the shader's
+        mat = None                                                  # name string is the material path
+        if sh != NONE:
+            si = struct.unpack_from("<I", n.blocks[sh], 0)[0]
+            mat = n.strings[si] if si != NONE else None
+        out.append({"name": n.strings[nm_i] if nm_i != NONE else "(unnamed)", "T": WT, "R": WR, "S": WS,
+                    "mesh": path, "material": mat,
+                    "box": (struct.unpack_from("<3f", bl, box), struct.unpack_from("<3f", bl, box + 12))})
+
+    I = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    visit(0, [0, 0, 0], I, 1.0)
+    return out
+
+
+def collect(n: Nif, mod_hint: str | None, textured: bool = False):
+    """(triangles, missing meshes, boxes, surfaces). `surfaces` is per-triangle-run: (count, uv (N,3,2)
+    or None, texture or None, Albedo or None, geometry name, reason); filled only when `textured`."""
+    tris, missing, boxes, surfs = [], [], [], []
+    cache: dict = {}
+    for g in geometries(n):
+        nm, WT, WR, WS = g["name"], g["T"], g["R"], g["S"]
+        raw = fetch_mesh(g["mesh"], mod_hint) if g["mesh"] else None
         if raw is None:
-            missing.append((nm, path))
-            box = w.xform + 52 + 4 + 16
-            c = np.array(struct.unpack_from("<3f", bl, box)); d = np.array(struct.unpack_from("<3f", bl, box + 12))
+            missing.append((nm, g["mesh"]))
+            c, d = np.array(g["box"][0]), np.array(g["box"][1])
             corners = np.array([[c[0] + sx * d[0], c[1] + sy * d[1], c[2] + sz * d[2]]
                                 for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)])
             boxes.append(corners @ (np.array(WR).T * WS) + np.array(WT))
-            return
+            continue
         v, f = parse_mesh(raw)
         world = v @ (np.array(WR).T * WS) + np.array(WT)
         tris.append(world[f])
         if textured:
-            sh = struct.unpack_from("<I", bl, w.refs[-2])[0]         # skin, SHADER, alpha: the shader's
-            mat = None                                              # name string is the material path
-            if sh != NONE:
-                si = struct.unpack_from("<I", n.blocks[sh], 0)[0]
-                mat = n.strings[si] if si != NONE else None
             uv = parse_uv(raw)
-            s = surface(mat, mod_hint, cache)
+            s = surface(g["material"], mod_hint, cache)
             if uv is None:
                 surfs.append((len(f), None, None, None, nm, "the .mesh has no UV block"))
             elif isinstance(s, str):
                 surfs.append((len(f), None, None, None, nm, s))
             else:
                 surfs.append((len(f), uv[f], s[0], s[1], nm, None))
-
-    I = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    visit(0, [0, 0, 0], I, 1.0)
     return (np.concatenate(tris) if tris else np.zeros((0, 3, 3))), missing, boxes, surfs
 
 

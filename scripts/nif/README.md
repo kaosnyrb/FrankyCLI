@@ -10,6 +10,7 @@ Python 3, numpy and Pillow. Nothing here writes to the game folder; outputs go w
 | `kbounds.py` | A NIF tree's overall bounds, every geometry's box carried through its node transforms. Matches the game's own OBND records to within a few mm. |
 | `kparts.py` | The same, per pasted object and per named geometry: what to anchor a part to. |
 | `kitbash.py` | Build a kitbash from a JSON spec. Part 0 is the base and its root is the file's root (the shape NifSkope's Copy Branch produces); every other part is pasted under it, placed by raw `translate` or by an **anchor** resolved from measured boxes. Asserts each anchored part landed within 1 cm. |
+| `packin_assets.py` | A PackIn as ONE render-ready JSON: the refs from `FrankyCLI packin export`, plus every NIF they use walked (the same walk `clay.py` draws with) to its geometries, each with its in-NIF `xform`, its `.mesh` and its first-layer albedo (texture PNG, or flat colour, plus tint and UV tiling). The files are extracted to `%TEMP%\FrankyCLI\asset-cache\` (override `PACKIN_ASSETS`) and the JSON points at them, so a consumer needs no archive code. A NIF's record is reused while every archive and the material zip it could read from are unchanged. The ref's own `pos`/`rot` is NOT applied: the REFR rotation axis order is unmeasured. Editor markers (`meshes/markers/`) carry `marker: true`. |
 | `clay.py` | A grey, flat-shaded render, four views in one PNG, with the ground plane in red. A mesh it cannot find is listed and drawn as a box, never dropped. `--textured` paints each geometry with its material's first-layer albedo through the mesh UVs; an unresolved material is drawn grey and listed with the reason, and a material with no colour layer (normal-only decals, effects) is listed and not drawn. |
 
 ```json
@@ -23,6 +24,7 @@ Python 3, numpy and Pillow. Nothing here writes to the game folder; outputs go w
 ```
 python kitbash.py spec.json out.nif
 python clay.py out.nif out.png [--mod <plugin name>] [--textured]
+python packin_assets.py packin.json out.json [--mod <plugin name>] [--max 512]
 python test_nif.py
 ```
 
