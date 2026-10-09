@@ -391,6 +391,7 @@ namespace FrankyCLI
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
+            public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
             public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
@@ -445,9 +446,15 @@ namespace FrankyCLI
                 pk.EditorID = r.id + "_wavepkg";
                 pk.VirtualMachineAdapter = null;
                 pk.OwnerQuest.SetTo(clone.FormKey);
-                pk.OnBegin?.Topics.Clear();
-                pk.OnEnd?.Topics.Clear();
-                pk.OnChange?.Topics.Clear();
+                // ⛔ THE BEGIN/END/CHANGE EVENTS ARE COPIED UNTOUCHED. Each carries ONE TopicReference that is
+                // an EMPTY placeholder (no topic set), so there is no dialogue to strip; the first build
+                // cleared the list "to drop the bounty hunters' lines", changed the record's shape for
+                // nothing, and his next play crashed to desktop (2026-10-09; the leading suspect, not proven).
+                // Read a field before removing it.
+                // NOT a suspect, measured: the copy's inputs are written sorted (1,3,5,7,8 where the source
+                // stores 1,3,5,8,7), because Mutagen's writer sorts them whatever order they are given, and
+                // Starfield.esm ships BOTH orders on Travel packages (248 sorted, 214 not).
+                bm.WavePackageShape = $"topics {string.Join("/", new[] { travelSrc!.OnBegin, travelSrc.OnEnd, travelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
                 pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
                 foreach (var c in pk.Conditions)
                 {
@@ -1255,6 +1262,9 @@ namespace FrankyCLI
                 fail += Check("the wave package travels to PlayerRef, with no script and no bounty-quest condition",
                               pk == null ? "missing" : $"{target} vma {(pk.VirtualMachineAdapter == null ? "none" : "SET")} conditions {string.Join("+", pk.Conditions.Select(c => c.Data.GetType().Name.Replace("BinaryOverlay", "")))}",
                               "000014:Starfield.esm vma none conditions GetDistanceConditionData+GetDistanceConditionData");
+                fail += Check("the wave package keeps its source's begin/end/change events",
+                              pk == null ? "missing" : $"topics {string.Join("/", new[] { pk.OnBegin, pk.OnEnd, pk.OnChange }.Select(e => e?.Topics.Count ?? -1))}",
+                              bm.WavePackageShape);
             }
             if (bm.PityTimer)
                 fail += Check("the stuck-enemy guard is in the fragment script",

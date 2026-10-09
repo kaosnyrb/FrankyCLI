@@ -405,6 +405,10 @@ namespace FrankyCLI
                                     Console.WriteLine($"        location: {Render(pl.Location, cache)}"
                                                       + (pl.Location is ILocationTargetRadiusGetter tr ? $"  target: {Render(tr.Target, cache)}" : ""));
                             }
+                            foreach (var (en, ev) in new[] { ("OnBegin", rec.OnBegin), ("OnEnd", rec.OnEnd), ("OnChange", rec.OnChange) })
+                                Console.WriteLine($"  {en}: " + (ev == null ? "absent" : $"{ev.Topics.Count} topic(s) "
+                                    + string.Join(", ", ev.Topics.Select(tp => Render(tp, cache))) + $"  idle {Render(ev.Idle, cache)}"));
+                            Console.WriteLine($"  Data input order as stored: {string.Join(",", rec.Data.Keys)}");
                             Console.WriteLine("  Conditions, expanded:");
                             foreach (var c in rec.Conditions)
                                 Console.WriteLine($"    {Render(c, cache)}  data: {Render(c.Data, cache)}");
