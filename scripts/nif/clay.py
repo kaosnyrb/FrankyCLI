@@ -229,6 +229,60 @@ def flatten(surfs):
     return uv, tid, texs
 
 
+def shading(tris):
+    """Per-triangle flat shade from the world-space normal, both faces lit."""
+    light = np.array([0.35, -0.6, 0.72]); light /= np.linalg.norm(light)
+    nrm = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
+    ln = np.linalg.norm(nrm, axis=1); ok = ln > 1e-12
+    shade = np.full(len(tris), 0.6); shade[ok] = 0.25 + 0.7 * np.abs((nrm[ok] / ln[ok, None]) @ light)
+    return shade
+
+
+def raster(img, zb, xs, ys, depth, shade, tex=None, invw=None):
+    """THE triangle fill, shared by the orthographic views and packin_render's perspective camera.
+    xs, ys (N,3) pixel coords; depth (N,3) per vertex, smaller is nearer; tex as flatten() returns.
+    invw (N,3) = 1/view-depth for a PERSPECTIVE projection, so depth and UVs interpolate correctly;
+    None for orthographic, which keeps the plain (and byte-identical to before) linear interpolation."""
+    H, W = zb.shape
+    for t in range(len(xs)):
+        if tex is not None and tex[1][t] == -2:
+            continue
+        x0, y0 = xs[t], ys[t]
+        bx0, bx1 = int(max(0, math.floor(x0.min()))), int(min(W - 1, math.ceil(x0.max())))
+        by0, by1 = int(max(0, math.floor(y0.min()))), int(min(H - 1, math.ceil(y0.max())))
+        if bx0 > bx1 or by0 > by1:
+            continue
+        gx, gy = np.meshgrid(np.arange(bx0, bx1 + 1) + 0.5, np.arange(by0, by1 + 1) + 0.5)
+        (ax, bx_, cx_), (ay, by_, cy_) = x0, y0
+        den = (by_ - cy_) * (ax - cx_) + (cx_ - bx_) * (ay - cy_)
+        if abs(den) < 1e-12:
+            continue
+        l1 = ((by_ - cy_) * (gx - cx_) + (cx_ - bx_) * (gy - cy_)) / den
+        l2 = ((cy_ - ay) * (gx - cx_) + (ax - cx_) * (gy - cy_)) / den
+        l3 = 1 - l1 - l2
+        inside = (l1 >= 0) & (l2 >= 0) & (l3 >= 0)
+        if not inside.any():
+            continue
+        if invw is None:
+            def lerp(a): return l1 * a[0] + l2 * a[1] + l3 * a[2]
+        else:
+            q = l1 * invw[t, 0] + l2 * invw[t, 1] + l3 * invw[t, 2]
+            def lerp(a, w=invw[t]): return (l1 * a[0] * w[0] + l2 * a[1] * w[1] + l3 * a[2] * w[2]) / q
+        d = lerp(depth[t])
+        sub = zb[by0:by1 + 1, bx0:bx1 + 1]
+        win = inside & (d < sub)
+        sub[win] = d[win]
+        if tex is not None and tex[1][t] >= 0:
+            arr, tint, sc, of = tex[2][tex[1][t]]
+            u = lerp(tex[0][t, :, 0])[win] * sc[0] + of[0]
+            v = lerp(tex[0][t, :, 1])[win] * sc[1] + of[1]
+            th, tw = arr.shape[:2]
+            col = arr[(np.floor(v * th).astype(np.int64) % th), (np.floor(u * tw).astype(np.int64) % tw)]
+            img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * col * tint * shade[t]
+        else:
+            img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * shade[t]
+
+
 def render(tris, boxes, yaw, pitch, size, lo, hi, tex=None):
     M = view_matrix(yaw, pitch)
     P = tris @ M.T
@@ -243,43 +297,8 @@ def render(tris, boxes, yaw, pitch, size, lo, hi, tex=None):
 
     img = np.full((size, size, 3), 235.0)
     zb = np.full((size, size), np.inf)
-    light = np.array([0.35, -0.6, 0.72]); light /= np.linalg.norm(light)
-    nrm = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
-    ln = np.linalg.norm(nrm, axis=1); ok = ln > 1e-12
-    shade = np.full(len(tris), 0.6); shade[ok] = 0.25 + 0.7 * np.abs((nrm[ok] / ln[ok, None]) @ light)
     xs, ys = to_px(P)
-    for t in range(len(P)):
-        if tex is not None and tex[1][t] == -2:
-            continue
-        x0, y0 = xs[t], ys[t]
-        bx0, bx1 = int(max(0, math.floor(x0.min()))), int(min(size - 1, math.ceil(x0.max())))
-        by0, by1 = int(max(0, math.floor(y0.min()))), int(min(size - 1, math.ceil(y0.max())))
-        if bx0 > bx1 or by0 > by1:
-            continue
-        gx, gy = np.meshgrid(np.arange(bx0, bx1 + 1) + 0.5, np.arange(by0, by1 + 1) + 0.5)
-        (ax, bx_, cx_), (ay, by_, cy_) = x0, y0
-        den = (by_ - cy_) * (ax - cx_) + (cx_ - bx_) * (ay - cy_)
-        if abs(den) < 1e-12:
-            continue
-        l1 = ((by_ - cy_) * (gx - cx_) + (cx_ - bx_) * (gy - cy_)) / den
-        l2 = ((cy_ - ay) * (gx - cx_) + (ax - cx_) * (gy - cy_)) / den
-        l3 = 1 - l1 - l2
-        inside = (l1 >= 0) & (l2 >= 0) & (l3 >= 0)
-        if not inside.any():
-            continue
-        depth = l1 * P[t, 0, 1] + l2 * P[t, 1, 1] + l3 * P[t, 2, 1]
-        sub = zb[by0:by1 + 1, bx0:bx1 + 1]
-        win = inside & (depth < sub)
-        sub[win] = depth[win]
-        if tex is not None and tex[1][t] >= 0:
-            arr, tint, sc, of = tex[2][tex[1][t]]
-            u = (l1 * tex[0][t, 0, 0] + l2 * tex[0][t, 1, 0] + l3 * tex[0][t, 2, 0])[win] * sc[0] + of[0]
-            v = (l1 * tex[0][t, 0, 1] + l2 * tex[0][t, 1, 1] + l3 * tex[0][t, 2, 1])[win] * sc[1] + of[1]
-            th, tw = arr.shape[:2]
-            col = arr[(np.floor(v * th).astype(np.int64) % th), (np.floor(u * tw).astype(np.int64) % tw)]
-            img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * col * tint * shade[t]
-        else:
-            img[by0:by1 + 1, bx0:bx1 + 1][win] = 255 * shade[t]
+    raster(img, zb, xs, ys, P[..., 1], shading(tris), tex)
     rgb = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
     d = ImageDraw.Draw(rgb)
     if pitch != 90:                              # the ground line on an elevation
