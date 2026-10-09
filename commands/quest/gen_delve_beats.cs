@@ -32,6 +32,15 @@ namespace FrankyCLI
     /// complete the beat empty-handed and merely show a message. The gate here is STAGE ORDER: deliver's
     /// prereq is a stage only a pickup can set.
     ///
+    /// A HOLD is waves of enemies at a marker, one after another, each when the last is down (Jessica's Type 6).
+    /// Each wave is spawned by a fragment INTO its own empty RefCollection alias (a copy of vanilla's
+    /// UC08_QueenBattle ActiveHostiles), and a stock DefaultCollectionAliasOnDeath on that collection sets
+    /// the next stage when every member is dead, so the waves are N stages and N stock hooks, no driver.
+    /// The objective carries a "(n/N)" counter. A wave that cannot be finished (an enemy stuck out of reach)
+    /// must not soft-lock the quest: a pity timer in the fragment script sets the wave's stage anyway after
+    /// `stuck` seconds (his infestation driver's 180 s), and the hook's TurnOffStageDone stops a late kill
+    /// from setting it twice.
+    ///
     /// A GROUP is consecutive `use` beats sharing a "group" name: done in ANY order, one objective with a
     /// vanilla counter "(<Global=X>/N)", each member's fragment calls ModObjectiveGlobal, and the last
     /// one sets the group's own done stage. The counter global is reset in stage 0's fragment, because
@@ -43,7 +52,10 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_delve
     {
-        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover" };
+        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold" };
+
+        /// <summary>The stuck-enemy guard's default, in seconds: his infestation driver's pity timer.</summary>
+        private const int DefaultStuckSeconds = 180;
 
         /// <summary>One step of a beats Delve: a single beat, or an any-order group of them.</summary>
         private sealed class Step
@@ -51,10 +63,13 @@ namespace FrankyCLI
             public List<int> Beats = new();          // indices into r.beats
             public string? Group;                    // null = a single beat
             public string? Choose;                   // the endings: one objective and one completing stage each
+            public int Waves;                        // a hold: its wave count; 0 on every other step
+            public List<int> WaveStages = new();     // a hold: the stage each wave's last death sets; the last is DoneStage
             public int Objective;                    // objective index, 10 * (step + 1)
             public int DoneStage;                    // the stage that means this step is finished
             public bool IsGroup => Group != null;
             public bool IsChoose => Choose != null;
+            public bool IsHold => Waves > 0;
         }
 
         /// <summary>Split the beats into steps. Pure, so the lint and the build agree by construction.</summary>
@@ -67,7 +82,10 @@ namespace FrankyCLI
                 var c = r.beats[i].choose;
                 if (g != null && steps.Count > 0 && steps[^1].Group == g) { steps[^1].Beats.Add(i); continue; }
                 if (c != null && steps.Count > 0 && steps[^1].Choose == c) { steps[^1].Beats.Add(i); continue; }
-                steps.Add(new Step { Beats = { i }, Group = g, Choose = c });
+                // A hold with no usable wave count is still one wave here, so the lint and the build number
+                // its stages the same way; the lint refuses the count itself.
+                int waves = r.beats[i].type == "hold" ? Math.Max(1, r.beats[i].waves ?? 1) : 0;
+                steps.Add(new Step { Beats = { i }, Group = g, Choose = c, Waves = waves });
             }
             for (int k = 0; k < steps.Count; k++) steps[k].Objective = 10 * (k + 1);
             return steps;
@@ -92,7 +110,17 @@ namespace FrankyCLI
                     s.DoneStage = complete;
                     continue;
                 }
-                if (!s.IsGroup)
+                if (s.IsHold)
+                {
+                    // One stage per wave cleared; the last wave's is the step's done stage.
+                    for (int w = 0; w < s.Waves - 1; w++) { s.WaveStages.Add(next); next += 10; }
+                    int st = last ? complete : next;
+                    if (!last) next += 10;
+                    s.WaveStages.Add(st);
+                    beatStage[s.Beats[0]] = st;
+                    s.DoneStage = st;
+                }
+                else if (!s.IsGroup)
                 {
                     int st = last ? complete : next;
                     if (!last) next += 10;
@@ -146,6 +174,33 @@ namespace FrankyCLI
                 }
                 if (b.group != null && b.type != "use")
                     Fatal($"beat {i + 1} is in group '{b.group}' and is a {b.type}; only use beats can be done in any order.");
+                if (b.type == "hold")
+                {
+                    if (b.waves is not int w || w < 1 || w > 5)
+                        Fatal($"beat {i + 1} is a hold and needs \"waves\" from 1 to 5; it has {(b.waves?.ToString() ?? "none")}.");
+                    if (b.size == null || b.size.Count != 2 || b.size[0] < 1 || b.size[1] < b.size[0])
+                        Fatal($"beat {i + 1} is a hold and needs \"size\": [min, max] with 1 <= min <= max; a wave of nobody has no last death, so it never clears.");
+                    else if (b.size[1] > 12)
+                        Warn($"beat {i + 1}'s waves reach {b.size[1]} enemies each; more than 12 at one marker is a crowd the navmesh may not seat.");
+                    if (b.stuck is int s && s < 30)
+                        Fatal($"beat {i + 1}'s stuck is {s} s; the guard would move the quest on mid-fight. 30 or more.");
+                    if (b.model != null || b.name != null || b.replace)
+                        Fatal($"beat {i + 1} is a hold: it has no object of its own (the waves come to a marker), so model, name and replace would be ignored.");
+                    if (b.objective is string ho && ho.Contains('('))
+                        Warn($"beat {i + 1}'s objective has a bracket; the build appends the counter \"(n/{b.waves})\" itself.");
+                    if (b.defend is int d)
+                    {
+                        if (d < 1 || d > i) Fatal($"beat {i + 1} defends beat {d}, which is not an earlier beat.");
+                        else
+                        {
+                            var dt = r.beats[d - 1];
+                            if (dt.type == "pickup" || dt.type == "recover" || dt.type == "hold")
+                                Fatal($"beat {i + 1} defends beat {d}, a {dt.type}, which leaves no object standing to defend; defend a use or a deliver.");
+                        }
+                    }
+                }
+                else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null)
+                    Fatal($"beat {i + 1} sets waves, size, defend or stuck and is not a hold, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))
@@ -193,7 +248,7 @@ namespace FrankyCLI
                 else
                 {
                     var tb = r.beats[ap.to - 1];
-                    if (tb.type == "recover" || tb.returnTo != null)
+                    if (tb.type == "recover" || tb.type == "hold" || tb.returnTo != null)
                         Fatal($"approach.to is beat {ap.to}, a {(tb.returnTo != null ? "return" : tb.type)}, which has no object of its own to approach.");
                     if (ap.lose is int l)
                     {
@@ -280,12 +335,14 @@ namespace FrankyCLI
             if (carried > 0 && !endsOnChoice) Warn($"{carried} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
 
             var beatStage = StagesOf(steps, t.completeStage);
-            int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Where(x => x < t.completeStage).DefaultIfEmpty(0).Max();
+            int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
+                .Where(x => x < t.completeStage).DefaultIfEmpty(0).Max();
             if (highest >= t.completeStage)
                 Fatal($"the beats number stages up to {highest}, at or past the completing stage {t.completeStage}: too many beats.");
             Console.WriteLine("  steps    : " + string.Join("  ", steps.Select((s, k) =>
                 $"[{k + 1}] " + (s.IsGroup ? $"group '{s.Group}' x{s.Beats.Count} -> {s.DoneStage}"
                                 : s.IsChoose ? $"choose '{s.Choose}' x{s.Beats.Count} -> {string.Join("/", s.Beats.Select(b => beatStage[b]))}"
+                                : s.IsHold ? $"hold x{s.Waves} waves -> {string.Join("/", s.WaveStages)}"
                                 : $"{r.beats[s.Beats[0]].type} -> {s.DoneStage}"))));
 
             var items = r.beats.Where(b => b.item != null).Select(b => b.item!).ToList();
@@ -332,6 +389,8 @@ namespace FrankyCLI
             public List<(int objective, int alias, int stage)> TargetGates = new();
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
+            public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
+            public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
@@ -341,7 +400,8 @@ namespace FrankyCLI
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
-                                      Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons)
+                                      Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons,
+                                      IQuestCollectionAliasGetter? waveSrc)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -365,6 +425,10 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: approach.lose places its helper from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
             if (r.beats.Any(b => b.type == "recover") && (gangKey == null || gangMax == null))
             { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
+            if (r.beats.Any(b => b.type == "hold") && gangKey == null)
+            { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
+            if (r.beats.Any(b => b.type == "hold") && waveSrc == null)
+            { Console.WriteLine("REFUSED: a hold needs a source collection alias to copy its waves from, and none was handed in."); return 1; }
             vma.Scripts.Remove(old);
             if (vma.Scripts.Count != 0)
             { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
@@ -383,9 +447,41 @@ namespace FrankyCLI
             if (srcMarker?.Location == null || srcAct?.CreateReferenceToObject == null)
             { Console.WriteLine("REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
             int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
+            var waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
             for (int i = 0; i < r.beats.Count; i++)
             {
                 if (r.beats[i].returnTo != null) continue;   // shares an earlier beat's object; filled in below
+                if (r.beats[i].type == "hold")
+                {
+                    // A marker the waves spawn at, and one EMPTY collection per wave, each a copy of vanilla's
+                    // ActiveHostiles (Optional, AllowDisabled, no fill), renamed and renumbered. Filled at
+                    // runtime by PlaceAtMe's akAliasToFill, as vanilla's MissionBoardCargoContainerScript does.
+                    uint hid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    var hm = srcMarker.DeepCopy(); hm.ID = hid; hm.Name = "DelveBeat" + (i + 1) + "Spawn";
+                    clone.Aliases.Add(hm);
+                    slotOf[i] = new BeatSlot { markerAlias = (int)hm.ID, activatorAlias = -1, journalStage = beatStage[i] };
+                    waveAliases[i] = new List<int>();
+                    int nw = steps.First(s => s.Beats.Contains(i)).Waves;
+                    for (int w = 0; w < nw; w++)
+                    {
+                        uint cid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                        var col = waveSrc!.DeepCopy();
+                        var entry = col.Collection[0];
+                        var ra = entry.ReferenceAlias!;
+                        if (ra.Location != null || !ra.ForcedReference.IsNull || !ra.UniqueActor.IsNull || ra.CreateReferenceToObject != null)
+                        { Console.WriteLine("REFUSED: the source collection carries a fill; a wave must start empty."); return 1; }
+                        // The entry carries its own ID beside the inner alias's; where vanilla keeps them equal,
+                        // so does the copy.
+                        if (entry.ID == ra.ID) entry.ID = cid;
+                        ra.ID = cid;
+                        ra.Name = $"DelveBeat{i + 1}Wave{w + 1}";
+                        clone.Aliases.Add(col);
+                        waveAliases[i].Add((int)cid);
+                        bm.Waves.Add((int)cid);
+                    }
+                    Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
+                    continue;
+                }
                 if (r.beats[i].type == "recover")
                 {
                     // A marker where the holder appears, and an EMPTY Optional alias he is placed into, which the
@@ -429,6 +525,14 @@ namespace FrankyCLI
                 }
             if (baseNext < t.beatSlots.Count)
             { Console.WriteLine($"REFUSED: the recipe gives the base's {t.beatSlots.Count} object slots only {baseNext} beat(s) with an object of its own."); return 1; }
+            // A hold's objective points at what is being defended, when it names one (a return shares its
+            // original's object, so this runs after the returns are filled).
+            for (int i = 0; i < r.beats.Count; i++)
+                if (r.beats[i].type == "hold" && r.beats[i].defend is int d)
+                {
+                    slotOf[i].targetAlias = slotOf[d - 1].activatorAlias;
+                    Console.WriteLine($"  slot     : beat {i + 1} (hold) defends beat {d}'s object (alias {slotOf[i].targetAlias})");
+                }
 
             // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
             // An ending's person is placed on its own stage, numbered after the approach's.
@@ -451,7 +555,7 @@ namespace FrankyCLI
                     clone.Stages.Add(copy);
                     Console.WriteLine($"  +stage   : {st} (ending {j + 1} of choose '{cs.Choose}', a copy of completing stage {t.completeStage})");
                 }
-            var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage))
+            var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                 .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
                 .Concat(personStage.Values).Distinct().OrderBy(x => x).ToList();
             foreach (var st in allStages)
@@ -549,7 +653,7 @@ namespace FrankyCLI
             var counterOf = new Dictionary<int, (FormKey key, string edid)>();   // step index -> counter
             for (int k = 0; k < steps.Count; k++)
             {
-                if (!steps[k].IsGroup) continue;
+                if (!steps[k].IsGroup && !steps[k].IsHold) continue;
                 if (globalSrc == null) { Console.WriteLine($"REFUSED: no global duo_reward_xp_easy in {t.mod} to clone a counter from."); return 1; }
                 var g = (Global)myMod.Globals.DuplicateInAsNewRecord(globalSrc);
                 g.EditorID = $"{r.id}_count{k + 1}";
@@ -616,6 +720,7 @@ namespace FrankyCLI
                 }
                 string text = Expand(r.beats[s.Beats[0]].objective!, t);
                 if (s.IsGroup) text += $" (<Global={counterOf[k].edid}>/{s.Beats.Count})";
+                if (s.IsHold) text += $" (<Global={counterOf[k].edid}>/{s.Waves})";
                 ob.DisplayText = text;
                 bm.ObjectiveText[s.Objective] = text;
                 Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].ObjectiveTarget))}");
@@ -686,6 +791,30 @@ namespace FrankyCLI
                 foreach (var b in steps[k].Beats)
                 {
                     var beat = r.beats[b];
+                    if (beat.type == "hold")
+                    {
+                        // One stock death hook per wave, on that wave's collection: when every member is dead
+                        // it sets the wave's stage, armed only once the wave before it is down. TurnOffStageDone
+                        // is the wave's own stage, so a kill after the pity timer moved on cannot set it twice.
+                        var ws = steps[k].WaveStages;
+                        for (int w = 0; w < ws.Count; w++)
+                        {
+                            int col = waveAliases[b][w];
+                            int pre = w == 0 ? prereq : ws[w - 1];
+                            var hs = new ScriptEntry { Name = "DefaultCollectionAliasOnDeath" };
+                            hs.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = ws[w], Flags = ScriptProperty.Flag.Edited });
+                            hs.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = pre, Flags = ScriptProperty.Flag.Edited });
+                            hs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = ws[w], Flags = ScriptProperty.Flag.Edited });
+                            var he = new QuestFragmentAlias();
+                            he.Property.Object.SetTo(clone.FormKey);
+                            he.Property.Alias = (short)col;
+                            he.Scripts.Add(hs);
+                            vma.Aliases.Add(he);
+                            bm.Hooks.Add((col, hs.Name, ws[w], pre));
+                            Console.WriteLine($"  +hook    : beat {b + 1} (hold) wave {w + 1} collection {col} {hs.Name} sets {ws[w]} after {pre}");
+                        }
+                        continue;
+                    }
                     int hookAlias; string script;
                     if (beat.type == "recover")
                     {
@@ -816,10 +945,27 @@ namespace FrankyCLI
                 bm.Replaced.Add((an, slotOf[b].markerAlias));
                 Add(0, $"{an}.GetRef().Disable(False)");
             }
+            // A hold's wave w (0-based) appears at the spawn marker, INTO its own collection, and the stuck-enemy
+            // guard starts: the timer's id is the stage this wave's last death sets, which OnTimer sets anyway.
+            var pity = new List<int>();
+            void SpawnWave(int b, int w, int stage)
+            {
+                var ws = steps.First(s => s.Beats.Contains(b)).WaveStages;
+                string mk = $"Alias_Beat{b + 1}Spawn", wv = $"Alias_Beat{b + 1}Wave{w + 1}";
+                props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                props.Add(("RefCollectionAlias", wv, clone.FormKey, waveAliases[b][w]));
+                props.Add(("FormList", "Gang", gangKey!.Value, -1));
+                var sz = r.beats[b].size!;
+                Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]})");
+                Add(stage, $"StartTimer({r.beats[b].stuck ?? DefaultStuckSeconds}.0, {ws[w]})   ; the stuck-enemy guard for wave {w + 1}");
+                pity.Add(ws[w]);
+            }
             // Entering a step: a recover beat's holder appears (and fills the alias the objective targets)
             // BEFORE the objective is shown, so it never shows with nothing to point at.
             void Enter(int k, int stage)
             {
+                foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "hold"))
+                    SpawnWave(b, 0, stage);
                 foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "recover"))
                 {
                     string mk = $"Alias_Beat{b + 1}Marker", hd = $"Alias_Beat{b + 1}Holder";
@@ -905,6 +1051,16 @@ namespace FrankyCLI
                         Add(st, "CompleteQuest()");
                         Add(st, "Stop()");
                     }
+                    if (s.IsHold)
+                    {
+                        // Each wave down: the counter ticks (and redisplays the objective, which is the player's
+                        // only feedback: no message boxes in this type, his ruling), then the next wave comes.
+                        for (int w = 0; w < s.WaveStages.Count; w++)
+                        {
+                            Add(s.WaveStages[w], $"ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Waves}.0)");
+                            if (w + 1 < s.WaveStages.Count) SpawnWave(b, w + 1, s.WaveStages[w]);
+                        }
+                    }
                     if (s.IsGroup)
                     {
                         Add(st,$"If ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Beats.Count}.0)");
@@ -930,6 +1086,21 @@ namespace FrankyCLI
                 foreach (var line in kv.Value) psc.AppendLine("    " + line);
                 psc.AppendLine("EndFunction");
                 psc.AppendLine();
+            }
+            if (pity.Count > 0)
+            {
+                // The stuck-enemy guard (his infestation driver: "There is a chance that we can't reach all
+                // targets"). A wave still alive when its timer ends is let go: its stage is set as if it fell.
+                psc.AppendLine("Event OnTimer(Int aiTimerID)");
+                for (int p = 0; p < pity.Count; p++)
+                {
+                    psc.AppendLine($"    {(p == 0 ? "If" : "ElseIf")} aiTimerID == {pity[p]} && !GetStageDone({pity[p]})");
+                    psc.AppendLine($"        SetStage({pity[p]})");
+                }
+                psc.AppendLine("    EndIf");
+                psc.AppendLine("EndEvent");
+                psc.AppendLine();
+                bm.PityTimer = true;
             }
             foreach (var p in props.DistinctBy(p => p.pname))
                 psc.AppendLine($"{p.type} Property {p.pname} Auto Const Mandatory");
@@ -1034,6 +1205,17 @@ namespace FrankyCLI
                               : $"fill {(ha.Location == null && ha.ForcedReference.IsNull && ha.UniqueActor.IsNull ? "none" : "SET")}, optional {ha.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}",
                               "fill none, optional True");
             }
+            foreach (var wv in bm.Waves)
+            {
+                var wa = q.Aliases.OfType<IQuestCollectionAliasGetter>()
+                    .Select(c => c.Collection.FirstOrDefault()?.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)wv);
+                fail += Check($"wave collection {wv} is empty and Optional", wa == null ? "missing"
+                              : $"fill {(wa.Location == null && wa.ForcedReference.IsNull && wa.UniqueActor.IsNull && wa.CreateReferenceToObject == null ? "none" : "SET")}, optional {wa.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}",
+                              "fill none, optional True");
+            }
+            if (bm.PityTimer)
+                fail += Check("the stuck-enemy guard is in the fragment script",
+                              (File.Exists(bm.PscPath) && File.ReadAllText(bm.PscPath).Contains("Event OnTimer(")).ToString(), "True");
             foreach (var (an, alias) in bm.Replaced)
             {
                 var p = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == an);

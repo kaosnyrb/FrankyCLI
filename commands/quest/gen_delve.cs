@@ -273,6 +273,20 @@ namespace FrankyCLI
             public string? reward { get; set; }
             /// <summary>beats, a choose ending, OPTIONAL: the named NPC (and company) placed beside it on the first approach after the find.</summary>
             public Person? person { get; set; }
+            /// <summary>
+            /// beats, a hold: how many waves come, one after another, each when the last is down (Jessica's
+            /// Type 6, his "a hold the point while enemies attack in waves misson", 2026-10-08).
+            /// </summary>
+            public int? waves { get; set; }
+            /// <summary>beats, a hold: each wave's head count, [min, max], rolled per wave. Both at least 1: an empty wave never clears.</summary>
+            public List<int>? size { get; set; }
+            /// <summary>beats, a hold, OPTIONAL: the earlier beat (1-based) whose object is defended, which the objective points at. Absent = the spawn marker.</summary>
+            public int? defend { get; set; }
+            /// <summary>
+            /// beats, a hold, OPTIONAL: seconds a wave may stay alive before the quest moves on without it
+            /// (the stuck-enemy guard: his infestation driver's 180 s pity timer). Absent = 180.
+            /// </summary>
+            public int? stuck { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -559,8 +573,9 @@ namespace FrankyCLI
             bool choice = t.kind == "choice";
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
-            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null) || r.approach != null)
-                Fatal($"a beat sets type, group, item, model, name, replace or returnTo, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null
+                                      || b.waves != null || b.size != null || b.defend != null || b.stuck != null) || r.approach != null)
+                Fatal($"a beat sets type, group, item, model, name, replace, returnTo or a hold's fields, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
             if (!beats && r.recap != null)
@@ -1936,7 +1951,21 @@ namespace FrankyCLI
                     }
                     persons[i] = (n, of, co);
                 }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons);
+                // A hold's waves are empty RefCollection aliases filled at runtime. None of our bases carries
+                // one, so each is a copy of vanilla's own: UC08_QueenBattle's ActiveHostiles, an empty
+                // collection its wave scripts fill as hostiles go live (Optional, AllowDisabled, no fill).
+                // Read off Starfield.esm itself, never a winning override.
+                IQuestCollectionAliasGetter? waveSrc = null;
+                if (fail == 0 && r.beats.Any(b => b.type == "hold"))
+                {
+                    var sfm = env.LoadOrder[0].Mod;
+                    var uc08 = sfm == null || sfm.ModKey.FileName != "Starfield.esm" ? null
+                        : sfm.Quests.FirstOrDefault(q => q.FormKey.ID == 0x03E832);
+                    waveSrc = uc08?.Aliases.OfType<IQuestCollectionAliasGetter>()
+                        .FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == "ActiveHostiles");
+                    if (waveSrc == null) { Console.WriteLine("REFUSED: a hold copies its wave collections from UC08_QueenBattle's ActiveHostiles [03E832:Starfield.esm], and it is not there."); fail++; }
+                }
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc);
             }
             else if (t.kind == "choice")
             {

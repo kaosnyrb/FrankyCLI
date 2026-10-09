@@ -51,7 +51,7 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 |---|---|---|---|
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06`) |
-| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between (`duo_delve03`-`08`). See *Beats* below |
+| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03`-`09`). See *Beats* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
 onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
@@ -248,11 +248,13 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at `at` INTO its collection, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
 `model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
-`group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`.
+`group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`, and on a hold `waves`,
+`size`, `defend`, `stuck`.
 `returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to
 finish). The target must be a `use` beat, returned to once (the stock hook has one duplicate,
 `DefaultAliasOnActivateA`); this beat repeats its `at` and `place` and sets no model or name. The first
@@ -265,6 +267,16 @@ never re-enabled). Without it the beat's object spawns inside the box (`duo_delv
 carries the `objective`; the build appends the vanilla counter, `(<Global=…>/N)`, and the step completes
 when all N are done. The counter resets when the quest starts, because these quests are repeatable.
 Each member's marker goes out as it is done: its target is lit only while its stage is not done (`GetStageDone == 0`, vanilla's way). Clearing the alias was tried and does not drop a marker.
+
+**A hold (Jessica's Type 6, `duo_delve09`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
+least 1: an empty wave never clears) spawn one after another at `at`, ideally a travel marker so they come
+from the edge of the site. The objective gets the counter `(n/waves)` appended and is redisplayed as each
+wave falls, which is the player's feedback (no message boxes in this type, his ruling). `defend: N` points
+the objective at beat N's object (a use or a deliver; absent, the spawn marker). Each wave is one stage, the
+last landing on the step's done stage. **The stuck-enemy guard:** a wave still alive `stuck` seconds after it
+spawned (default 180, his infestation driver's pity timer) is let go and its stage set anyway, by an
+`OnTimer` in the generated fragment script; a later kill cannot set it twice. A hold has no object of its own,
+so no `model`, `name` or `replace`, and an approach cannot target it.
 
 **`recap` when the Delve ENDS on a group:** the last member sets its stage and stage 100 in the same
 instant, and the quest log shows only the newest line, so its own `journal` is never read and stage 100

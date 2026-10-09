@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "id": "duo_delve09",
+  "template": "beats",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/type-06-hold-the-point.md, variant a (the relay alignment)",
+  "_note": [
+    "TYPE 6, HOLD THE POINT, the first hold: bring the relay, start it, hold three waves. Built by Eliza",
+    "2026-10-09 on his \"lets try it without the talking first, just the gameplay\": no relay voice, no",
+    "message boxes (his 2026-10-08 ruling for this type). The design's beats 1 and 2 (bring, start) are",
+    "folded into one deliver at the dish for this first test; fitting the part IS starting it.",
+    "Jessica's words: the deliver and hold objectives, the deliver journal, and the hold journal (her recap).",
+    "ELIZA'S PLACEHOLDERS, owed to Jessica: prose.name, prose.briefing, the pickup's objective, the item name."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "Peopled, as the design's variant a: a relay at a peopled site, and the waves are the noise it brings. Keeps the base's own exclusions."
+  },
+  "prose": {
+    "name": "Relay Alignment on <Planet>",
+    "briefing": "The relay at the <Place> is missing its transmitter. I said I'd find one, fit it, and get the dish talking again."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "objective": "Collect the Relay Transmitter Unit",
+      "item": "Relay Transmitter Unit"
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "Start the relay alignment",
+      "journal": "The relay dish is fitted, but it has to align before it can lock on, and the noise has drawn attention. I need to hold until it's done.",
+      "model": "Meshes\\ccs\\relaydish01.nif",
+      "name": "Relay Dish"
+    },
+    {
+      "type": "hold",
+      "at": "RETravelB1LocRef",
+      "objective": "Defend the relay",
+      "journal": "I fitted the relay at the <Place> and held off three waves of attackers while it aligned. The relay is live.",
+      "waves": 3,
+      "size": [3, 5],
+      "defend": 2
+    }
+  ]
+}

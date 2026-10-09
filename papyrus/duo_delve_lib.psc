@@ -37,6 +37,32 @@ Function SpawnHolder(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList 
     EndWhile
 EndFunction
 
+; THE HOLD BEAT. One wave: aiMin to aiMax enemies from the gang list at the spawn marker, each placed INTO
+; akWave (PlaceAtMe's akAliasToFill on a RefCollectionAlias, as vanilla's MissionBoardCargoContainerScript
+; fills its CargoCollection), all aggressive so they come for the player. A stock DefaultCollectionAliasOnDeath
+; on akWave sets the next stage when every one of them is dead, so nothing here watches anything. Persistent
+; while the quest holds them, so a wave cannot be unloaded out of its own collection. Scattered within 10 m
+; of the marker, snapped to navmesh, so they arrive as one group from one side.
+Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax) Global
+    ObjectReference marker = akMarker.GetRef()
+    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
+    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
+    Float detected = 2.0       ; Suspicious: DetectedActor
+    Float veryAggressive = 2.0 ; Aggression: VeryAggressive
+
+    Float[] placePosition = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        placePosition[0] = Utility.RandomFloat(-10, 10)
+        placePosition[1] = Utility.RandomFloat(-10, 10)
+        placePosition[2] = 0
+        Actor enemy = marker.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, placePosition, akWave, True) as Actor
+        enemy.SetValue(Suspicious, detected)
+        enemy.SetValue(Aggression, veryAggressive)
+        n -= 1
+    EndWhile
+EndFunction
+
 ; THE APPROACH (stage 5 on a beats Delve, set by a stock DefaultAliasOnDistanceLessThan on the player).
 ; People at the site, placed the way his dual-activator driver placed them at a delivery: around the
 ; target, within 25 m, snapped to navmesh. His ruling 2026-09-24: "the one with the delivery should have
