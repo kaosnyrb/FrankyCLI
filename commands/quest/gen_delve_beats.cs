@@ -1132,6 +1132,7 @@ namespace FrankyCLI
             // FrankyCLI docs/formlib/book_audio.md) holding one topic and one response the speaker says, started
             // by the fragment of the stage it belongs to. The response's WEMFile is the topic's own id, and
             // the game looks the audio up as Sound\Voice\<plugin>\<voice type>\<that id, 8 hex>.wem.
+            var spokenAt = new List<(int stage, int n)>();   // fragment-started lines, by stage
             if (speakerSrc != null)
             {
                 var lines = new List<(int stage, string text)>();
@@ -1188,10 +1189,28 @@ namespace FrankyCLI
                     {
                         props.Add(("Scene", sv, scene.FormKey, -1));
                         Add(lst, $"{sv}.Start()");
+                        spokenAt.Add((lst, n + 1));
                     }
                     bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));
                     Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
                 }
+            }
+            // A quest's scenes stop with it, so a line on the stage that ENDS the quest would be cut off by the
+            // Stop() after it ("Link is online", 2026-10-09). There, wait for the line to finish first: a second
+            // for the scene to begin, then while it plays, capped at 30 s so a scene that never reports done
+            // cannot hold the quest open.
+            void StopQuest(int st)
+            {
+                foreach (var (_, n) in spokenAt.Where(x => x.stage == st))
+                {
+                    Add(st, $"Utility.Wait(1.0)   ; let Say{n} begin before asking whether it plays");
+                    Add(st, $"Int waited{n} = 0");
+                    Add(st, $"While Say{n}.IsPlaying() && waited{n} < 30");
+                    Add(st, "    Utility.Wait(1.0)");
+                    Add(st, $"    waited{n} += 1");
+                    Add(st, "EndWhile");
+                }
+                Add(st, "Stop()");
             }
             var held = new List<int>();   // pickups and recovered items not yet delivered
             for (int k = 0; k < steps.Count; k++)
@@ -1226,7 +1245,7 @@ namespace FrankyCLI
                         }
                         Add(st, $"SetObjectiveCompleted({own})");
                         Add(st, "CompleteQuest()");
-                        Add(st, "Stop()");
+                        StopQuest(st);
                     }
                     if (s.IsHold)
                     {
@@ -1247,7 +1266,7 @@ namespace FrankyCLI
                 }
                 int done = s.DoneStage;
                 if (!s.IsGroup && !s.IsChoose) Add(done, $"SetObjectiveCompleted({s.Objective})");
-                if (last) { if (!s.IsChoose) { Add(done, "CompleteQuest()"); Add(done, "Stop()"); } }
+                if (last) { if (!s.IsChoose) { Add(done, "CompleteQuest()"); StopQuest(done); } }
                 else Enter(k + 1, done);
             }
 

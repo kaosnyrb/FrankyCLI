@@ -11,7 +11,8 @@
     "folded into one deliver at the dish for this first test; fitting the part IS starting it.",
     "Jessica's words: the deliver and hold objectives, the deliver journal, and the hold journal (her recap).",
     "ELIZA'S PLACEHOLDERS, owed to Jessica: prose.name, prose.briefing, the pickup's objective, the item name.",
-    "2026-10-09: speech, his pick of voice (ElevenLabs CwhRBWXzGAHq8TQ4Fs17) and speaker (\"relay control yeah\"). The broadcast is ELIZA'S PLACEHOLDER, owed to Jessica."
+    "2026-10-09: speech, his pick of voice (ElevenLabs CwhRBWXzGAHq8TQ4Fs17) and speaker (\"relay control yeah\"). The broadcast is ELIZA'S PLACEHOLDER, owed to Jessica.",
+    "2026-10-09: the deliver and hold beats' say lines are HIS words (\"Great that's aligning now, keep an eye out\", \"Link is online, thanks for your help\"), punctuated."
   ],
   "place": {
     "theme": {
@@ -37,7 +38,8 @@
       "objective": "Start the relay alignment",
       "journal": "The relay dish is fitted, but it has to align before it can lock on, and the noise has drawn attention. I need to hold until it's done.",
       "model": "Meshes\\ccs\\relaydish01.nif",
-      "name": "Relay Dish"
+      "name": "Relay Dish",
+      "say": "Great, that's aligning now. Keep an eye out."
     },
     {
       "type": "hold",
@@ -49,7 +51,8 @@
         3,
         5
       ],
-      "defend": 2
+      "defend": 2,
+      "say": "Link is online. Thanks for your help."
     }
   ],
   "speaker": {
