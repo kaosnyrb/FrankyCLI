@@ -391,6 +391,7 @@ namespace FrankyCLI
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
+            public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
             public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
             public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
@@ -767,6 +768,36 @@ namespace FrankyCLI
             var sortedObs = clone.Objectives.OrderBy(o => o.Index).ToList();
             clone.Objectives.Clear();
             clone.Objectives.AddRange(sortedObs);
+
+            // A ONE-PLACE Delve drops the base's second place. Left in, it is a non-Optional location alias that
+            // still draws a SECOND POI the quest never visits, so the quest only starts where two qualifying POIs
+            // are in range, and the base's text about it lingers (his catch on duo_delve09, 2026-10-09: "we have
+            // DungeonLocation and FinalLocation but the quest takes part in one POI"). Refused, writing nothing,
+            // if anything the player can read or any alias still depends on it.
+            if (t.secondPlaceAlias >= 0 && !r.beats.Any(b => b.PlaceIndex == 1))
+            {
+                var second = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias);
+                if (second == null) { Console.WriteLine($"REFUSED: the template names second place alias {t.secondPlaceAlias} and the base has none."); return 1; }
+                string token = $"<Alias={second.Name}>";
+                var users = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location?.AliasID == t.secondPlaceAlias).Select(a => $"ref alias {a.ID}")
+                    .Concat(clone.Aliases!.OfType<QuestLocationAlias>().Where(a => a.ParentSystemLocationAliasID == t.secondPlaceAlias).Select(a => $"location alias {a.ID}"))
+                    .Concat(clone.Objectives!.Where(o => o.DisplayText?.String?.Contains(token) == true).Select(o => $"objective {o.Index}"))
+                    .Concat(clone.Stages!.Where(s => allStages.Contains(s.Index))   // stage 0's briefing is the recipe's, written after this and graded off disk
+                        .Where(s => s.LogEntries.Any(e => e.Entry?.String?.Contains(token) == true)).Select(s => $"stage {s.Index}'s journal"))
+                    .ToList();
+                if (users.Count > 0) { Console.WriteLine($"REFUSED: the unused second place {second.Name} is still named by {string.Join(", ", users)}."); return 1; }
+                // A base stage this Delve never sets can still carry the base's line about it: clear the line.
+                foreach (var s in clone.Stages!.Where(s => !allStages.Contains(s.Index) && s.Index != 0))
+                    foreach (var e in s.LogEntries.Where(e => e.Entry?.String?.Contains(token) == true))
+                    {
+                        e.Entry = null;
+                        Console.WriteLine($"  unused   : stage {s.Index} (never set here) loses the base's line naming {second.Name}");
+                    }
+                clone.Aliases!.Remove(second);
+                bm.DroppedPlace = (t.secondPlaceAlias, second.Name!);
+                Console.WriteLine($"  -place   : {second.Name} (alias {t.secondPlaceAlias}) removed: every beat is at the main place, so it would draw a second POI for nothing");
+            }
+
 
             // --- 8. message boxes ---------------------------------------------------------------------
             foreach (var k in myMod.Messages.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_msg")).Select(m => m.FormKey).ToList())
@@ -1265,6 +1296,17 @@ namespace FrankyCLI
                 fail += Check("the wave package keeps its source's begin/end/change events",
                               pk == null ? "missing" : $"topics {string.Join("/", new[] { pk.OnBegin, pk.OnEnd, pk.OnChange }.Select(e => e?.Topics.Count ?? -1))}",
                               bm.WavePackageShape);
+            }
+            if (bm.DroppedPlace is (int dpId, string dpName))
+            {
+                string tok = $"<Alias={dpName}>";
+                bool aliasGone = !q.Aliases.OfType<IQuestLocationAliasGetter>().Any(a => a.ID == (uint)dpId);
+                var named = q.Stages.Where(s => s.LogEntries.Any(e => e.Entry?.String?.Contains(tok) == true)).Select(s => $"stage {s.Index}")
+                    .Concat(q.Objectives.Where(o => o.DisplayText?.String?.Contains(tok) == true).Select(o => $"objective {o.Index}"))
+                    .Concat(q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Location?.AliasID == dpId).Select(a => $"ref alias {a.ID}")).ToList();
+                fail += Check($"the unused second place {dpName} is gone and nothing names it",
+                              $"alias {(aliasGone ? "gone" : "PRESENT")}, named by {(named.Count == 0 ? "nothing" : string.Join(", ", named))}",
+                              "alias gone, named by nothing");
             }
             if (bm.PityTimer)
                 fail += Check("the stuck-enemy guard is in the fragment script",

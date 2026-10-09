@@ -107,7 +107,7 @@ refused rather than silently ignored.
 | field | what it is |
 |---|---|
 | `theme.require` / `theme.exclude` | location keywords the MAIN place must / must not carry. The place must also carry every marker its beats sit on, plus a map marker; the build derives those, you never write them |
-| `second` | the second POI's own theme (a beat with `"place": "second"`) |
+| `second` | the second POI's own theme (a beat with `"place": "second"`). **On a beats Delve with no beat at `second`, the build REMOVES the base's second place alias** (FinalLocation), which otherwise draws a second POI the quest never visits and only lets it start where two qualify (his catch on `duo_delve09`). It refuses if anything the player reads still names it |
 | `third` | choice only: the third POI's own theme (a beat with `"place": "third"`) |
 | `leash` | **advisory, not written.** The base's own distance limit is kept as is |
 | `civilians` | **retired with delve4, and refused.** On a beats Delve write `approach.civilians` |
