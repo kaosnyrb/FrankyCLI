@@ -13,7 +13,7 @@
     "2026-10-09: each repair now clears its own marker, and 'recap' is stage 100's line, the last thing the",
     "player reads. The recap below is ELIZA'S PLACEHOLDER, owed to Jessica."
   ],
-  "recap": "All three water reclaimers at the <Place> are running again, and the crew have their water back.",
+  "recap": "The crew at the <Place> had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
   "place": {
     "theme": {
       "require": [
