@@ -50,15 +50,18 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 | template | kind | beats | the shape |
 |---|---|---|---|
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
-| `carry-absence-recover-return` | delve4 | exactly 4 | find the load, find the other half gone, take it back off the carrier, finish the job (testcase 01; `duo_delve03`-`05`) |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06`) |
-| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group` (types 1 and 3; `duo_delve07`, `duo_delve08`). See *Beats* below |
+| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach` (`duo_delve03`-`05`, `07`, `08`). See *Beats* below |
+
+*Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
+onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
+`recover` / `deliver` with `returnTo: 2` and, on 03, an `approach`.*
 
 **Tokens** an author writes in prose, mapped by the template onto its real aliases:
 
 | template | tokens |
 |---|---|
-| two-beat-one-place, carry-absence-recover-return | `<Place>`, `<Planet>` |
+| two-beat-one-place | `<Place>`, `<Planet>` |
 | find-owner-or-buyer | `<FindPlace>`, `<OwnerPlace>`, `<BuyerPlace>`, `<Planet>` |
 | beats | `<Place>` (main), `<SecondPlace>`, `<ThirdPlace>`, `<Planet>` |
 
@@ -83,12 +86,13 @@ refused rather than silently ignored.
 | `author`, `source` | string | no | none | provenance; not written into the game |
 | `place` | object | yes | all | where the mission happens (below) |
 | `prose` | object | yes | all | `name` (the quest title) and `briefing` (the journal's opening line) |
-| `items` | object | delve4, choice | delve4, choice | what is carried and what the objects look like (below) |
+| `items` | object | choice | choice | what is carried and what the objects look like (below) |
 | `beats` | list | yes | all | one entry per beat (below) |
 | `offer` | object | choice: yes | choice | the surprise between the find and the endings |
 | `reward` | object | choice: yes | choice | the pay tier per ending |
 | `people` | object | no | choice | named NPCs at each ending, with outfits and company |
 | `recap` | string | beats ending on a `group`: yes; otherwise refused | beats | stage 100's journal line, the last thing the player reads (see *Beats*) |
+| `approach` | object | no | beats | what happens the first time the player comes near one beat's object (see *Beats*) |
 
 ### `place`
 
@@ -106,7 +110,7 @@ refused rather than silently ignored.
 | `second` | the second POI's own theme (a beat with `"place": "second"`) |
 | `third` | choice only: the third POI's own theme (a beat with `"place": "third"`) |
 | `leash` | **advisory, not written.** The base's own distance limit is kept as is |
-| `civilians` | delve4 only, default `true`: put civilians at the centre. Set `false` when the theme already guarantees people. ⚠ The lint cannot tell an explicit `true` from the default, so it does not refuse this on other templates |
+| `civilians` | **retired with delve4, and refused.** On a beats Delve write `approach.civilians` |
 
 **Useful keywords**, from the census (`gen_delve keywords [filter…]` tallies themes inside a narrowed
 pool): `LocTypeOE_NonHostile` (people are there, 62 POIs with a centre and map marker) ·
@@ -126,8 +130,6 @@ pool): `LocTypeOE_NonHostile` (people are there, 62 POIs with a centre and map m
 **Per template:**
 - **two-beat-one-place:** beats 1 and last are the driver's (objective required); beats in between are
   created, carry a `journal` and **no** `objective`.
-- **carry-absence-recover-return:** exactly 4. Beat 4 is a return and must name beat 2's marker. Only
-  beat 1 may be at the second place.
 - **find-owner-or-buyer:** exactly 3, in this order: the find at `second`, the owner at `main`, the
   buyer at `third`.
 
@@ -135,10 +137,10 @@ pool): `LocTypeOE_NonHostile` (people are there, 62 POIs with a centre and map m
 
 | field | template | what it is |
 |---|---|---|
-| `load` | delve4, choice | the carried thing's inventory name (a clone; never the base's item) |
-| `missing` | delve4 only | the other half's name |
-| `crateModel` | delve4, choice | the NIF the found thing wears, `Meshes\…` |
-| `centreModel`, `centreName` | delve4, choice | the delivery point's NIF and its activate prompt (on a choice, the OWNER's) |
+| `load` | choice | the carried thing's inventory name (a clone; never the base's item) |
+| `missing` | refused | (was delve4's other half; on beats it is a `recover` beat's `item`) |
+| `crateModel` | choice | the NIF the found thing wears, `Meshes\…` |
+| `centreModel`, `centreName` | choice | the OWNER's delivery point's NIF and its activate prompt |
 | `buyerModel`, `buyerName` | choice only, required | the buyer's delivery point |
 
 **A model must sit on the ground.** The lint grades each against the vanilla Static that owns the mesh
@@ -244,11 +246,17 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 |---|---|---|---|
 | `use` | activates it; the prompt goes | `DefaultAliasOnActivate` | objective done, next shown |
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
-| `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up since the last deliver |
+| `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
+| `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
-`objective`, `journal`, `message`, and optionally `item` (pickup only, the inventory name), `model` and
-`name` (what the object looks like and its prompt), `group`.
+`objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
+`model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
+`group`, `replace`, `returnTo`.
+`returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to
+finish). The target must be a `use` beat, returned to once (the stock hook has one duplicate,
+`DefaultAliasOnActivateA`); this beat repeats its `at` and `place` and sets no model or name. The first
+visit keeps its prompt so the return can fire.
 `replace: true` is for a marker that IS a placed object (`REContainerLocRef` is the box itself): the
 box is disabled when the quest starts and the beat's object stands in its place (his way: `Disable(False)`,
 never re-enabled). Without it the beat's object spawns inside the box (`duo_delve08`, 2026-10-09).
@@ -262,6 +270,13 @@ Each member's marker goes out as it is done: its target is lit only while its st
 instant, and the quest log shows only the newest line, so its own `journal` is never read and stage 100
 would show the base's line. `recap` is stage 100's line, and the lint requires it there. Ending on a
 single beat, that beat's `journal` already is stage 100's line, so a `recap` is refused.
+
+**`approach: { "to": N, "civilians": true, "lose": M }`:** the first time the player comes within
+250 m of beat N's object, a stock `DefaultAliasOnDistanceLessThan` on the player sets stage 5, whose
+fragment places 1 to 5 people from the base driver's own civilian list around it (`civilians`) and, if
+pickup beat M's crate is still there, moves it out past the site's near edge so it reads as lost on the
+way (`lose`; M must be at the same place). The work is `papyrus/duo_delve_lib.psc`, Global functions
+lifted from the retired driver; **`duo_delve_lib.pex` must be packed with the mod.**
 
 **Stages are numbered by the build:** 0 runs on start, then 10, 20, … per beat (a group takes one more),
 and the last step always lands on 100, the base's completing stage, which carries the reward.

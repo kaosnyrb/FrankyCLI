@@ -24,8 +24,9 @@ namespace FrankyCLI
     ///   gen_delve keywords [filter ...]         theme tally inside a narrowed POI pool
     ///
     /// ⭐ THE FORMAT, EVERY FIELD AND EVERY RULE: docs/quests/delve-recipes.md. Three template kinds:
-    /// dualactivator (two-beat-one-place), delve4 (carry-absence-recover-return), choice
-    /// (find-owner-or-buyer, which CREATES a third place).
+    /// dualactivator (two-beat-one-place), choice (find-owner-or-buyer, which CREATES a third place), and
+    /// beats (no driver; gen_delve_beats.cs). The delve4 kind (carry-absence-recover-return) was retired
+    /// 2026-10-09 when 03 to 05 played the same on beats.
     ///
     /// ⭐ THE DIVISION IS HIS AND IT IS THE POINT: the recipe is content and belongs to whoever
     /// writes the mission; the template is mechanism and belongs to whoever reads records. Adding a
@@ -59,16 +60,16 @@ namespace FrankyCLI
             public string id { get; set; } = "";
             /// <summary>
             /// Which build path the row takes. "dualactivator" is the first row's: the base's own
-            /// driver runs the mission and extra beats are journal-only. "delve4" REPLACES the base's
-            /// driver with one of ours from FrankyCLI/papyrus, so every beat has an objective.
+            /// driver runs the mission and extra beats are journal-only. "choice" REPLACES the base's
+            /// driver with one of ours from FrankyCLI/papyrus; "beats" removes it and has none.
             /// </summary>
             public string kind { get; set; } = "dualactivator";
             public string @base { get; set; } = "";
             public string mod { get; set; } = "";
             public string driver { get; set; } = "";
-            /// <summary>delve4: the base's script entry that ours replaces, and whose values it takes.</summary>
+            /// <summary>choice and beats: the base's script entry that is replaced or removed, and whose values are taken off it.</summary>
             public string? replacesDriver { get; set; }
-            /// <summary>delve4: fewest who stand with the carrier. The most is taken off the base.</summary>
+            /// <summary>beats: fewest who stand with a recover beat's holder. The most is taken off the base's driver.</summary>
             public int gangMin { get; set; }
             /// <summary>beats: the base's alias filled with the player, which a recover beat's OnItemAdded hook sits on. -1 = none.</summary>
             public int playerAlias { get; set; } = -1;
@@ -109,10 +110,6 @@ namespace FrankyCLI
             public int activatorAlias { get; set; }
             public int objective { get; set; }
             public int journalStage { get; set; }
-            /// <summary>delve4: this beat's marker alias does not exist on the base and is created.</summary>
-            public bool create { get; set; }
-            /// <summary>delve4: this beat is an earlier beat's place again (0-based index), not a new one.</summary>
-            public int returnTo { get; set; } = -1;
             /// <summary>
             /// Set by the build, never by the registry: the alias this beat's objective points at when it
             /// is neither its activator nor its marker (beat 3's carrier, filled at runtime).
@@ -188,7 +185,7 @@ namespace FrankyCLI
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } }
         private sealed class Reward { public string? owner { get; set; } public string? buyer { get; set; } }
-        /// <summary>delve4: inventory names for the two halves. Both are CLONED items, never the base's.</summary>
+        /// <summary>choice: the carried item's inventory name and the delivery points' models and names. The item is CLONED, never the base's.</summary>
         private sealed class Items
         {
             public string? load { get; set; }
@@ -221,11 +218,8 @@ namespace FrankyCLI
             public Place? second { get; set; }
             /// <summary>choice: the third POI's own theme, for beats with place "third". Absent = no theme.</summary>
             public Place? third { get; set; }
-            /// <summary>
-            /// delve4: place civilians at the centre on the first approach. Default true. Set false when the
-            /// theme already guarantees people (LocTypeOE_NonHostile), or the site gets a crowd.
-            /// </summary>
-            public bool? civilians { get; set; }   // absent = true on delve4; refused on beats (approach.civilians there)
+            /// <summary>RETIRED with the delve4 kind, 2026-10-09: kept only so the lint can refuse it (a beats Delve writes approach.civilians).</summary>
+            public bool? civilians { get; set; }
         }
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
@@ -242,7 +236,7 @@ namespace FrankyCLI
                                    : place.Equals("third", StringComparison.OrdinalIgnoreCase) ? 2 : -1;
             public bool Second => PlaceIndex == 1;
             /// <summary>
-            /// delve4, OPTIONAL: a pausing message box shown when this beat fires. Absent = no box.
+            /// OPTIONAL: a pausing message box shown when this beat fires. Absent = no box.
             /// A new optional field, so schema stays 1 and every recipe written before it builds unchanged.
             /// </summary>
             public BeatMessage? message { get; set; }
@@ -551,19 +545,15 @@ namespace FrankyCLI
             // extra slot this tool creates, and an extra beat has no objective because there is no
             // driver to display one -- writing the string anyway would put prose in the record that
             // no player can ever see, which is worse than refusing it.
-            bool delve4 = t.kind == "delve4";
             bool choice = t.kind == "choice";
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
             else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null) || r.approach != null)
                 Fatal($"a beat sets type, group, item, model, name, replace or returnTo, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            if (r.place.civilians != null)
+                Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
             if (!beats && r.recap != null)
                 Fatal($"the recipe has a recap, and template '{t.id}' ({t.kind}) is not a beats Delve, so it would be silently ignored.");
-            if (delve4)
-            {
-                if (string.IsNullOrWhiteSpace(r.items?.load) || string.IsNullOrWhiteSpace(r.items?.missing))
-                    Fatal("items.load and items.missing are both required: each half is a cloned item the player carries, and an item with no name shows as a blank line in the inventory.");
-            }
             if (choice)
             {
                 // ⭐ THE SHAPE IS THE DESIGN: found at one place, owned at a second, wanted at a third.
@@ -635,7 +625,7 @@ namespace FrankyCLI
                 if (tierCredits.Count == 2 && tierCredits["buyer"] <= tierCredits["owner"])
                     Warn($"the buyer's tier pays {tierCredits["buyer"]:G} and the owner's {tierCredits["owner"]:G}; the design has the buyer paying more.");
             }
-            if (delve4 || choice)
+            if (choice)
             {
                 // Our driver displays every beat's objective, so every beat is driven, and the beat
                 // count is the state machine's shape rather than a ceiling.
@@ -700,19 +690,10 @@ namespace FrankyCLI
                         if (str.Any(ch => ch > 126 || (ch < 32 && ch != '\n')))
                             Warn($"{who} message {what} carries a non-ASCII or control character; the lane writes plain ASCII.");
                 }
-                // ⭐ THE RETURN IS THE DESIGN, so it is refused rather than warned when it is not one.
-                for (int i = 0; i < t.beatSlots.Count && i < r.beats.Count; i++)
-                {
-                    int back = t.beatSlots[i].returnTo;
-                    if (back >= 0 && back < r.beats.Count
-                        && !string.Equals(r.beats[i].at, r.beats[back].at, StringComparison.OrdinalIgnoreCase))
-                        Fatal($"beat {i + 1} is a RETURN to beat {back + 1}'s place and must name the same marker "
-                              + $"('{r.beats[back].at}'); it names '{r.beats[i].at}'.");
-                }
             }
             for (int i = 0; i < r.beats.Count && !beats; i++)
             {
-                bool driven = delve4 || choice || i == 0 || i == r.beats.Count - 1;
+                bool driven = choice || i == 0 || i == r.beats.Count - 1;
                 if (string.IsNullOrWhiteSpace(r.beats[i].at)) Fatal($"beat {i + 1} names no marker");
                 if (driven && string.IsNullOrWhiteSpace(r.beats[i].objective))
                     Fatal($"beat {i + 1} is one of the driver's own slots and has no objective text");
@@ -749,7 +730,7 @@ namespace FrankyCLI
                 if (r.items?.buyerModel != null) unused.Add("items.buyerModel");
                 if (r.items?.buyerName != null) unused.Add("items.buyerName");
             }
-            if (!delve4 && !choice)
+            if (!choice)
             {
                 if (r.items != null) unused.Add("items");
                 if (!beats && r.beats.Any(b => b.message != null)) unused.Add("beats[].message");
@@ -788,7 +769,7 @@ namespace FrankyCLI
                 {
                     var (a, b) = (r.beats[i], r.beats[j]);
                     if (a.PlaceIndex != b.PlaceIndex) continue;
-                    bool ret = (j < t.beatSlots.Count && t.beatSlots[j].returnTo == i) || b.returnTo == i + 1;
+                    bool ret = b.returnTo == i + 1;
                     if (string.Equals(a.at, b.at, StringComparison.OrdinalIgnoreCase))
                     { if (!ret) Warn($"beats {i + 1} and {j + 1} are both on {a.at} at the same place: one spot, two beats."); }
                     else if (a.at.Length > 9 && b.at.Length > 9 && a.at.StartsWith("RETravel") && b.at.StartsWith("RETravel")
@@ -843,9 +824,6 @@ namespace FrankyCLI
                 Fatal($"a beat is at the \"third\" place and template '{t.id}' creates no third place");
             if (!anyThird && r.place.third != null)
                 Warn("place.third is set and no beat is at the third place, so it is never written");
-            if (anySecond && t.kind == "delve4" && r.beats.Skip(1).Any(b => b.Second))
-                Fatal("only beat 1 may be at the second place on a delve4: beats 2-4 are the centre and the carrier, "
-                      + "and the driver's whole return is to ONE centre");
             if (!anySecond && r.place.second != null)
                 Warn("place.second is set and no beat is at the second place, so it is never written");
 
@@ -1915,11 +1893,7 @@ namespace FrankyCLI
             }
 
             var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
-            if (t.kind == "delve4")
-            {
-                if (fail == 0) fail += BuildDelve4(myMod, clone, t, r, markers, plan, made4);
-            }
-            else if (t.kind == "beats")
+            if (t.kind == "beats")
             {
                 if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats);
             }
@@ -2000,9 +1974,9 @@ namespace FrankyCLI
                                      : Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
         }
 
-        // ------------------------------------------------------------------ delve4
+        // ------------------------------------------------------------------ shared by the choice and beats builds
 
-        /// <summary>What a build created (delve4 or choice), handed to Verify rather than re-derived there.</summary>
+        /// <summary>What a build created (choice, and the beats kind's third place), handed to Verify rather than re-derived there.</summary>
         private sealed class BuildMade
         {
             /// <summary>The created third place's alias id, -1 when the recipe has none.</summary>
@@ -2016,8 +1990,7 @@ namespace FrankyCLI
             public Dictionary<string, FormKey> Outfits = new();
             /// <summary>choice: stage index to the (credits, xp) globals its reward entry was pointed at.</summary>
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
-            public uint CarrierMarkerAlias, CarrierAlias;
-            public FormKey LoadItem, MissingItem;
+            public FormKey LoadItem;
             public Dictionary<string, (FormKey obj, short alias)> Props = new();
             public Dictionary<string, int> IntProps = new();
             public Dictionary<string, bool> BoolProps = new();
@@ -2060,220 +2033,6 @@ namespace FrankyCLI
         /// (patch 04, 2026-07-31), so its flags are ones the game demonstrably shows.
         /// </summary>
         private const string MessageTemplate = "duo_alocal01_msg03";
-
-        /// <summary>
-        /// THE FOUR-BEAT DELVE: carry, absence, recover, return.
-        ///
-        /// ⭐ WHAT MAKES IT POSSIBLE IS REPLACING THE DRIVER, NOT ADDING TO IT. The base's own script
-        /// knows two objectives. Ours (FrankyCLI/papyrus/duo_delve_driver.psc) knows four, so the
-        /// base's entry is removed and ours goes in its place, TAKING the values that are facts about
-        /// this base (the cargo item, the gang list, the most who stand, the fail message) off the
-        /// entry it replaces. Anything we cannot find there is a refusal, never a default.
-        ///
-        /// ⛔ NEITHER ITEM IS THE BASE'S. The base's cargo item ships in every Overtime cargo quest
-        /// that uses it; renaming it would rename his live missions. Both halves are CLONES of it,
-        /// keyed on this recipe's id so a rebuild replaces them instead of piling up copies.
-        /// </summary>
-        private static int BuildDelve4(StarfieldMod myMod, Quest clone, Template t, Recipe r,
-                                       Dictionary<string, FormKey> markers,
-                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made)
-        {
-            // --- the base's driver, whose values we take ------------------------------------------
-            var vma = clone.VirtualMachineAdapter;
-            var old = vma?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
-            if (vma == null || old == null)
-            { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' script entry to replace."); return 1; }
-            FormKey? ObjOf(string n) => old.Properties.OfType<ScriptObjectProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, n, StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
-            int? IntOf(string n) => old.Properties.OfType<ScriptIntProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, n, StringComparison.OrdinalIgnoreCase))?.Data;
-            var cargo = ObjOf("CargoObject"); var gang = ObjOf("GangMembers"); var failMsg = ObjOf("FailMessage");
-            var civs = ObjOf("TargetCivListMembers");
-            var gangMax = IntOf("MaxGangMembers");
-            if (cargo == null || gang == null || failMsg == null || gangMax == null || civs == null)
-            { Console.WriteLine("REFUSED: the replaced driver lacks CargoObject, GangMembers, FailMessage, MaxGangMembers or TargetCivListMembers."); return 1; }
-
-            // --- the two halves, cloned ---------------------------------------------------------------
-            var src = myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
-            if (src == null)
-            { Console.WriteLine($"REFUSED: the cargo item {cargo} is not a MiscItem in {t.mod}; this tool clones only its own mod's items."); return 1; }
-            FormKey CloneItem(string suffix, string name)
-            {
-                string edid = r.id + "_" + suffix;
-                foreach (var k in myMod.MiscItems.Where(m => m.EditorID == edid).Select(m => m.FormKey).ToList())
-                    myMod.MiscItems.Remove(k);
-                var mi = myMod.MiscItems.DuplicateInAsNewRecord(src);
-                mi.EditorID = edid;
-                mi.Name = name;
-                Console.WriteLine($"  +item    : {edid} {mi.FormKey}  \"{name}\"  (clone of {src.EditorID})");
-                return mi.FormKey;
-            }
-            made.LoadItem = CloneItem("Load", r.items!.load!);
-
-            // --- the crate's model, on a CLONE of the base activator ------------------------------------
-            // The base's activator is shared by his shipped cargo quests, so it is never edited. Model.File
-            // is written and NOTHING ELSE (gen_setmodel's rule: dropping LightLayer once made thirteen parts
-            // invisible), and LightLayer + Flags are asserted unchanged.
-            if (ReskinActivator(myMod, clone, t, r.id + "_crate", t.beatSlots[0].activatorAlias, r.items.crateModel, null) != 0) return 1;
-            if (ReskinActivator(myMod, clone, t, r.id + "_centre", t.beatSlots[1].activatorAlias, r.items.centreModel, r.items.centreName) != 0) return 1;
-            made.MissingItem = CloneItem("OtherHalf", r.items.missing!);
-
-            // --- message boxes, one per beat that declares one ------------------------------------------
-            // CLONED from a pausing box Overtime already ships, never constructed (a fresh record brings
-            // none of the fields this tool does not know exist: the stage lesson of 2026-09-24).
-            // OwnerQuest IS THE QUEST: vanilla, 1,152 MESG, 68 carry an <Alias=> token and ALL 68 have
-            // OwnerQuest set; none has a token without one. A token needs an owner to resolve against.
-            foreach (var k in myMod.Messages.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_msg")).Select(m => m.FormKey).ToList())
-                myMod.Messages.Remove(k);
-            if (r.beats.Any(b => b.message != null))
-            {
-                var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
-                if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
-                for (int i = 0; i < r.beats.Count; i++)
-                {
-                    var bm = r.beats[i].message;
-                    if (bm == null) continue;
-                    var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
-                    msg.EditorID = $"{r.id}_msg{i + 1}";
-                    msg.Name = Expand(bm.title!, t);
-                    msg.Description = Expand(bm.text!, t);
-                    msg.OwnerQuest.SetTo(clone.FormKey);
-                    made.Messages[i] = msg.FormKey;
-                    Console.WriteLine($"  +message : beat {i + 1} {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"  (clone of {MessageTemplate})");
-                }
-            }
-
-            // --- stages the base does not have --------------------------------------------------------
-            foreach (var s in t.beatSlots.Select(s => s.journalStage).Distinct())
-            {
-                if (clone.Stages!.Any(x => x.Index == s)) continue;
-                var st = CloneStage(clone, s);
-                if (st == null) return 1;
-                clone.Stages.Add(st);
-                Console.WriteLine($"  +stage   : {s} (cloned from a base stage)");
-            }
-
-            // --- the created marker (beat 3's) -----------------------------------------------------------
-            var srcMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].markerAlias);
-            if (srcMarker?.Location == null) { Console.WriteLine("REFUSED: slot 0's marker alias has no location fill to clone."); return 1; }
-            var slots = new List<BeatSlot>();
-            for (int i = 0; i < t.beatSlots.Count; i++)
-            {
-                var ts = t.beatSlots[i];
-                if (!ts.create) { slots.Add(ts); continue; }
-                uint id = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-                var m = srcMarker.DeepCopy();
-                m.ID = id;
-                m.Name = "DelveCarrierMarker";
-                clone.Aliases.Add(m);
-                made.CarrierMarkerAlias = id;
-                Console.WriteLine($"  +alias   : beat {i + 1} marker {id} (cloned from alias {t.beatSlots[0].markerAlias})");
-
-                // ⭐ THE CARRIER HIMSELF, and the objective points here rather than at the marker (his
-                // eye, first play of duo_delve03). An EMPTY alias: cloned for its shape, then every
-                // fill removed and Optional set, because a non-optional alias with no fill makes the
-                // whole quest silently not start. The driver fills it with PlaceAtMe's akAliasToFill.
-                var c = srcMarker.DeepCopy();
-                c.ID = id + 1;
-                c.Name = "DelveCarrier";
-                c.Location = null;
-                c.Flags = QuestReferenceAlias.Flag.Optional;
-                clone.Aliases.Add(c);
-                made.CarrierAlias = c.ID;
-                Console.WriteLine($"  +alias   : beat {i + 1} carrier {c.ID} (EMPTY, Optional; the driver fills it on spawn)");
-
-                slots.Add(new BeatSlot { markerAlias = (int)id, activatorAlias = -1, objective = ts.objective,
-                                         journalStage = ts.journalStage, targetAlias = (int)c.ID });
-            }
-
-            // --- objectives the base does not have, cloned from its last one ---------------------------
-            var lastOb = clone.Objectives?.OrderBy(o => o.Index).LastOrDefault();
-            if (lastOb == null || lastOb.Targets == null || lastOb.Targets.Count != 1)
-            { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
-            foreach (var s in slots)
-            {
-                if (clone.Objectives!.Any(o => o.Index == s.objective)) continue;
-                var ob = lastOb.DeepCopy();
-                ob.Index = (ushort)s.objective;
-                clone.Objectives.Add(ob);
-                Console.WriteLine($"  +obj     : {s.objective}");
-            }
-            // Every objective's target is WRITTEN, including the base's own two: which alias an
-            // objective points at is one fact per beat, and inheriting it is how a marker ends up
-            // on the wrong thing. Beat 3 points at the carrier himself, through his empty alias.
-            foreach (var s in slots)
-            {
-                var ob = clone.Objectives!.First(o => o.Index == s.objective);
-                if (ob.Targets == null || ob.Targets.Count != 1) { Console.WriteLine($"REFUSED: objective {s.objective} has no single target."); return 1; }
-                ob.Targets[0].AliasID = s.ObjectiveTarget;
-            }
-
-            // --- beats: fills, objective text, journals -------------------------------------------------
-            for (int i = 0; i < slots.Count; i++)
-            {
-                plan.Add((slots[i], r.beats[i], false));
-                // A return writes no fill: it IS the earlier beat's alias, already written.
-                if (t.beatSlots[i].returnTo >= 0)
-                {
-                    var ob = clone.Objectives!.First(o => o.Index == slots[i].objective);
-                    ob.DisplayText = Expand(r.beats[i].objective!, t);
-                    if (r.beats[i].journal != null)
-                        clone.Stages!.First(s => s.Index == slots[i].journalStage).LogEntries[0].Entry = Expand(r.beats[i].journal!, t);
-                    Console.WriteLine($"  beat     : {i + 1} returns to beat {t.beatSlots[i].returnTo + 1}'s place, objective {slots[i].objective}");
-                    continue;
-                }
-                int f = WriteBeat(clone, t, slots[i], r.beats[i], markers, false, PlaceAliasOf(t, r.beats[i].PlaceIndex, -1));
-                if (f > 0) return f;
-            }
-
-            // --- the driver swap ------------------------------------------------------------------------
-            vma.Scripts.Remove(old);
-            var sc = new ScriptEntry { Name = t.driver };
-            void Alias(string n, int aliasId)
-            {
-                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
-                p.Object.SetTo(clone.FormKey);
-                p.Alias = (short)aliasId;
-                sc.Properties.Add(p);
-                made.Props[n] = (clone.FormKey, (short)aliasId);
-            }
-            void Obj(string n, FormKey k)
-            {
-                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
-                p.Object.SetTo(k);
-                sc.Properties.Add(p);
-                made.Props[n] = (k, (short)-1);
-            }
-            void Int(string n, int v)
-            {
-                sc.Properties.Add(new ScriptIntProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
-                made.IntProps[n] = v;
-            }
-            void Bool(string n, bool v)
-            {
-                sc.Properties.Add(new ScriptBoolProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
-                made.BoolProps[n] = v;
-            }
-            Alias("LoadTarget", slots[0].activatorAlias);
-            Alias("CentreTarget", slots[1].activatorAlias);
-            Alias("CarrierMarker", (int)made.CarrierMarkerAlias);
-            Alias("Carrier", (int)made.CarrierAlias);
-            Obj("LoadItem", made.LoadItem);
-            Obj("MissingItem", made.MissingItem);
-            Obj("GangMembers", gang.Value);
-            Obj("FailMessage", failMsg.Value);
-            Int("MinGangMembers", t.gangMin);
-            Int("MaxGangMembers", gangMax.Value);
-            Obj("CivilianList", civs.Value);
-            // The lose-on-approach move is for a load at the MAIN place. At a second POI the other POI
-            // is the story, and moving it out past the delivery site's edge would undo the journey.
-            Bool("LoseLoadOnApproach", !r.beats[0].Second);
-            Bool("CiviliansAtCentre", r.place.civilians ?? true);
-            foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
-            vma.Scripts.Add(sc);
-            Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
-            return 0;
-        }
 
         // ------------------------------------------------------------------ choice
 
@@ -2336,7 +2095,7 @@ namespace FrankyCLI
         /// THE CHOICE DELVE: find a thing with a name on it, then deliver it to its owner OR sell it to a
         /// buyer, at two different places; walking to one ends the mission. Jessica's Type 2.
         ///
-        /// Same skeleton as BuildDelve4 and the same rules: the base's driver is REPLACED by ours
+        /// The base's driver is REPLACED by ours
         /// (FrankyCLI/papyrus/duo_delve_choice.psc), the cargo item is CLONED never edited, every activator
         /// that changes model is a clone, every new stage and box is a clone of one that works.
         ///
@@ -2973,7 +2732,7 @@ namespace FrankyCLI
                 fail += Check($"item {made4.LoadItem} named", it?.Name?.String ?? "missing", r.items.load!);
             }
 
-            if (t.kind == "delve4" || t.kind == "choice")
+            if (t.kind == "choice")
             {
                 // The driver swap, every property, every objective's TARGET and every journal. The
                 // off-disk read is the point: these are the fields a half-applied write would get
@@ -3013,15 +2772,6 @@ namespace FrankyCLI
                         fail += Check($"beat {i + 1} journal on stage {slot.journalStage}",
                                       (st?.LogEntries?.FirstOrDefault()?.Entry?.String ?? "") == Expand(beat.journal, t) ? "yes" : "no", "yes");
                     }
-                }
-            }
-            if (t.kind == "delve4")
-            {
-                var mod = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
-                foreach (var (label, key, name) in new[] { ("load", made4.LoadItem, r.items!.load!), ("missing", made4.MissingItem, r.items.missing!) })
-                {
-                    var mi = mod.MiscItems.FirstOrDefault(m => m.FormKey == key);
-                    fail += Check($"item {label} {key} named", mi?.Name?.String ?? "missing", name);
                 }
             }
 

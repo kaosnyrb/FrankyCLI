@@ -1,4 +1,9 @@
 Scriptname duo_delve_driver extends Quest
+; RETIRED 2026-10-09 (his "yeah retire"). No quest uses this driver: duo_delve03, 04 and 05 moved onto
+; gen_delve's beats kind (no driver; the stages are the state machine) and played the same in his hands.
+; What replaced each part: recover beats + papyrus/duo_delve_lib.psc SpawnHolder (SpawnCarrier), returnTo
+; (the second centre visit), approach + duo_delve_lib PlaceCivilians / LoseTheLoad (OnDistanceLessThan).
+; The .pex was removed from Steam Data and the Overtime repo; the source stays for its history.
 {The Delve driver, four beats at one place: find the load, find the other half gone, take it back
 off whoever has it, finish the job. FrankyCLI's Papyrus library, source of truth in FrankyCLI/papyrus;
 gen_delve writes the stages, objectives, prose and every property below from a recipe.
