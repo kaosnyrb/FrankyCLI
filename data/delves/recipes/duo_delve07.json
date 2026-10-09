@@ -9,8 +9,11 @@
     "behind one counted objective. Built by Eliza 2026-10-08 on his \"yeah build that now\"; every player-facing",
     "word is Jessica's, written 2026-10-08 on his \"yeah 2\". Each repair sets its OWN stage, in whatever order",
     "the player does them, so no journal line may say first, next or last. His play 17:4x: it completes; the",
-    "repaired ones showed their markers again (Eliza's)."
+    "repaired ones showed their markers again (Eliza's).",
+    "2026-10-09: each repair now clears its own marker, and 'recap' is stage 100's line, the last thing the",
+    "player reads. The recap below is ELIZA'S PLACEHOLDER, owed to Jessica."
   ],
+  "recap": "All three water reclaimers at the <Place> are running again, and the crew have their water back.",
   "place": {
     "theme": {
       "require": [

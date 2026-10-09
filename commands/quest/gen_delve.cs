@@ -145,6 +145,14 @@ namespace FrankyCLI
             public Reward? reward { get; set; }
             /// <summary>choice, OPTIONAL: who stands at each ending. Absent = nobody is placed.</summary>
             public People? people { get; set; }
+            /// <summary>
+            /// beats, REQUIRED when the last step is a group (and refused otherwise): the completing stage's
+            /// journal line. The group's last member sets its own stage and then the completing stage in the
+            /// same instant, and the quest log shows only the newest line, so without this the player reads
+            /// the BASE's recap. Ending on a single beat, that beat's journal already IS the completing line.
+            /// A new optional field, so schema stays 1. His play of duo_delve07, 2026-10-08.
+            /// </summary>
+            public string? recap { get; set; }
         }
         private sealed class People { public Person? owner { get; set; } public Person? buyer { get; set; } }
         /// <summary>A named NPC cloned from a vanilla template by EditorID (NPCTools' friendly set is the menu).</summary>
@@ -517,6 +525,8 @@ namespace FrankyCLI
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
             else if (r.beats.Any(b => b.type != null || b.group != null || b.item != null || b.model != null || b.name != null))
                 Fatal($"a beat sets type, group, item, model or name, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            if (!beats && r.recap != null)
+                Fatal($"the recipe has a recap, and template '{t.id}' ({t.kind}) is not a beats Delve, so it would be silently ignored.");
             if (delve4)
             {
                 if (string.IsNullOrWhiteSpace(r.items?.load) || string.IsNullOrWhiteSpace(r.items?.missing))

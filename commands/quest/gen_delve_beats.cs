@@ -140,6 +140,15 @@ namespace FrankyCLI
                 if (s.IsGroup && r.beats[s.Beats[0]].objective is string go && go.Contains('('))
                     Warn($"group '{s.Group}' objective has a bracket; the build appends the counter \"(n/{s.Beats.Count})\" itself.");
             }
+            // The completing stage's line. A group's last member sets its stage and the completing stage in
+            // one instant, and the log shows only the newest line, so a Delve ENDING on a group needs a recap
+            // or the player reads the base's. Ending on a single beat, that beat's journal is the line.
+            if (steps.Count > 0 && steps[^1].IsGroup && string.IsNullOrWhiteSpace(r.recap))
+                Fatal($"the Delve ends on group '{steps[^1].Group}', so stage {t.completeStage} is the line the player reads last "
+                      + "and it would carry the base's recap; write a \"recap\".");
+            if (steps.Count > 0 && !steps[^1].IsGroup && r.recap != null)
+                Fatal($"the Delve ends on a single beat, whose journal is already stage {t.completeStage}'s line; the recap would overwrite it. "
+                      + "Put the words in that beat's journal.");
 
             // Delivering needs something in hand: the first deliver must come after a pickup.
             int carried = 0;
@@ -198,6 +207,8 @@ namespace FrankyCLI
             public List<FormKey> Globals = new();
             public Dictionary<int, string> ObjectiveText = new();
             public string PscPath = "";
+            public string? Recap;                                        // the completing stage's line, when ending on a group
+            public List<(string name, int alias)> ClearedAliases = new();  // fragment properties bound to a beat's alias
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
@@ -260,6 +271,16 @@ namespace FrankyCLI
             // Reused stages (the base's 50) carry the base's journal line; clear it unless a beat writes one.
             foreach (var st in clone.Stages!.Where(s => allStages.Contains(s.Index) && s.Index != t.completeStage))
                 if (st.LogEntries.FirstOrDefault() is QuestLogEntry e) e.Entry = null;
+            // Ending on a group, the completing stage's line is the recipe's recap (the lint requires it).
+            if (steps[^1].IsGroup)
+            {
+                var cs = clone.Stages.FirstOrDefault(s => s.Index == t.completeStage);
+                if (cs?.LogEntries.FirstOrDefault() is not QuestLogEntry ce)
+                { Console.WriteLine($"REFUSED: the base's completing stage {t.completeStage} has no log entry to carry the recap."); return 1; }
+                bm.Recap = Expand(r.recap!, t);
+                ce.Entry = bm.Recap;
+                Console.WriteLine($"  recap    : stage {t.completeStage} \"{bm.Recap}\"");
+            }
             var s0 = clone.Stages.FirstOrDefault(s => s.Index == 0);
             if (s0 == null) { Console.WriteLine("REFUSED: the base has no stage 0 to run on start."); return 1; }
             s0.Flags |= QuestStage.Flag.RunOnStart;
@@ -386,14 +407,14 @@ namespace FrankyCLI
 
             // --- 10. the fragment script: generated, bound per stage -----------------------------------------
             string name = FragmentScriptName(r);
-            var props = new List<(string type, string pname, FormKey key)>();
+            var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
             var code = new SortedDictionary<int, List<string>>();
             void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
 
             foreach (var kv in counterOf)
             {
                 string p = $"Counter{kv.Key + 1}";
-                props.Add(("GlobalVariable", p, kv.Value.key));
+                props.Add(("GlobalVariable", p, kv.Value.key, -1));
                 Add(0, $"{p}.SetValue(0)");
                 Add(0, $"UpdateCurrentInstanceGlobal({p})");
             }
@@ -406,19 +427,27 @@ namespace FrankyCLI
                 foreach (var b in s.Beats)
                 {
                     int st = beatStage[b];
-                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b])); Add(st, $"Beat{b + 1}Message.Show()"); }
+                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
                     if (r.beats[b].type == "pickup") held.Add(b);
                     if (r.beats[b].type == "deliver")
                     {
                         foreach (var h in held)
                         {
-                            props.Add(("Form", $"Item{h + 1}", itemOf[h]));
+                            props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
                             Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
                         }
                         held.Clear();
                     }
                     if (s.IsGroup)
                     {
+                        // A group's ONE objective targets every member, and a target stays lit until the
+                        // objective completes, so a done member's marker came back (his play of 07,
+                        // 2026-10-08). Clearing its alias drops the target; the object stays in the world.
+                        // Vanilla clears aliases in fragments (45 of 1,468 fragment scripts).
+                        string an = $"Alias_Beat{b + 1}";
+                        props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].activatorAlias));
+                        bm.ClearedAliases.Add((an, slotOf[b].activatorAlias));
+                        Add(st, $"{an}.Clear()");
                         Add(st, $"If ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Beats.Count}.0)");
                         Add(st, $"    SetStage({s.DoneStage})");
                         Add(st, "EndIf");
@@ -453,6 +482,7 @@ namespace FrankyCLI
             {
                 var op = new ScriptObjectProperty { Name = p.pname, Flags = ScriptProperty.Flag.Edited };
                 op.Object.SetTo(p.key);
+                if (p.alias >= 0) op.Alias = (short)p.alias;   // a ReferenceAlias: the quest plus its alias id
                 vma.Script.Properties.Add(op);
             }
             vma.Fragments.Clear();
@@ -510,6 +540,18 @@ namespace FrankyCLI
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
+            foreach (var (an, alias) in bm.ClearedAliases)
+            {
+                var p = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == an);
+                fail += Check($"fragment property {an}", p == null ? "missing" : $"{p.Object.FormKey} alias {p.Alias}", $"{q.FormKey} alias {alias}");
+            }
+            if (bm.Recap != null)
+            {
+                var ce = q.Stages.FirstOrDefault(s => s.Index == t.completeStage)?.LogEntries.FirstOrDefault();
+                fail += Check($"stage {t.completeStage} recap", ce?.Entry?.String ?? "missing", bm.Recap);
+                fail += Check($"stage {t.completeStage} still completes the quest",
+                              (ce?.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) ?? false).ToString(), "True");
+            }
             fail += Check("generated fragment source exists", File.Exists(bm.PscPath).ToString(), "True");
             Console.WriteLine();
             if (fail == 0)
