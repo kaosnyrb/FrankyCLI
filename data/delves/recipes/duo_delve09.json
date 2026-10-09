@@ -10,7 +10,8 @@
     "message boxes (his 2026-10-08 ruling for this type). The design's beats 1 and 2 (bring, start) are",
     "folded into one deliver at the dish for this first test; fitting the part IS starting it.",
     "Jessica's words: the deliver and hold objectives, the deliver journal, and the hold journal (her recap).",
-    "ELIZA'S PLACEHOLDERS, owed to Jessica: prose.name, prose.briefing, the pickup's objective, the item name."
+    "ELIZA'S PLACEHOLDERS, owed to Jessica: prose.name, prose.briefing, the pickup's objective, the item name.",
+    "2026-10-09: speech, his pick of voice (ElevenLabs CwhRBWXzGAHq8TQ4Fs17) and speaker (\"relay control yeah\"). The broadcast is ELIZA'S PLACEHOLDER, owed to Jessica."
   ],
   "place": {
     "theme": {
@@ -50,5 +51,11 @@
       ],
       "defend": 2
     }
-  ]
+  ],
+  "speaker": {
+    "name": "Relay Control",
+    "voice": "GenericMale01",
+    "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
+  },
+  "broadcast": "This is Relay Control. A relay on this planet has lost its transmitter. Find the replacement unit at the site, fit it to the dish, and hold the site while it aligns. Expect company."
 }

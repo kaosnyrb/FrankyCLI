@@ -2,6 +2,7 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
+using Retrograde.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -365,6 +366,29 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(m.text)) Fatal($"beat {i + 1} has a message with no text: an empty pausing box.");
                 if (string.IsNullOrWhiteSpace(m.title)) Fatal($"beat {i + 1} has a message with no title.");
             }
+            // --- speech: a speaker and the lines it says (broadcast at the start, say on a beat's stage) -------
+            var spoken = new List<(string where, string text)>();
+            if (r.broadcast != null) spoken.Add(("broadcast", r.broadcast));
+            for (int i = 0; i < r.beats.Count; i++) if (r.beats[i].say != null) spoken.Add(($"beat {i + 1}'s say", r.beats[i].say!));
+            if (spoken.Count > 0 && r.speaker == null) Fatal("there are spoken lines and no speaker: say who speaks them (name, voice, elevenlabs).");
+            if (r.speaker != null)
+            {
+                if (spoken.Count == 0) Fatal("a speaker is set and nothing is said (no broadcast, no beat says anything), so it would be silently ignored.");
+                if (string.IsNullOrWhiteSpace(r.speaker.name)) Fatal("speaker.name is required: it is the name on the subtitle.");
+                else if (Tokens(r.speaker.name).Any()) Fatal("speaker.name carries a <Token>; an NPC name is not an alias context.");
+                if (string.IsNullOrWhiteSpace(r.speaker.elevenlabs)) Fatal("speaker.elevenlabs is required: the voice the audio is generated in.");
+                if (string.IsNullOrWhiteSpace(r.speaker.voice)
+                    || !env.LoadOrder.PriorityOrder.WinningOverrides<IVoiceTypeGetter>().Any(v => Allowed(env, t).Contains(v.FormKey.ModKey)
+                           && string.Equals(v.EditorID, r.speaker.voice, StringComparison.OrdinalIgnoreCase)))
+                    Fatal($"speaker.voice '{r.speaker.voice}' is not a VoiceType in {t.mod} or a master (GenericMale01, GenericFemale01, ...).");
+            }
+            foreach (var (where, text) in spoken)
+            {
+                if (string.IsNullOrWhiteSpace(text)) Fatal($"{where} is empty.");
+                else if (Tokens(text).Any()) Fatal($"{where} carries a <Token>: the subtitle could fill it and the voice could not say it.");
+                if (text.Length > 250) Fatal($"{where} is {text.Length} characters; a spoken response holds 250 (split it into two beats' lines).");
+            }
+
             string fname = FragmentScriptName(r);
             if (fname.Length > 38) Fatal($"the fragment script name {fname} is {fname.Length} chars; the Papyrus compiler refuses over 38. Shorten the id.");
         }
@@ -392,6 +416,8 @@ namespace FrankyCLI
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
             public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
+            public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
+            public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
             public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
             public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
@@ -404,7 +430,8 @@ namespace FrankyCLI
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
                                       Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons,
-                                      IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc)
+                                      IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc,
+                                      (INpcGetter tmpl, FormKey voice)? speakerSrc)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -853,6 +880,21 @@ namespace FrankyCLI
                 Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
             }
 
+            // --- the speaker: an NPC that is never placed, carrying the subtitle's NAME and the VOICE TYPE whose
+            // folder the audio is looked up in (gen_dlgtest's shape: clone, then set Voice) ----------------------
+            foreach (var k in myMod.Npcs.Where(n => n.EditorID == r.id + "_speaker").Select(n => n.FormKey).ToList())
+                myMod.Npcs.Remove(k);
+            if (speakerSrc is (INpcGetter stmpl, FormKey svoice))
+            {
+                var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
+                sp.EditorID = r.id + "_speaker";
+                sp.Name = r.speaker!.name!;
+                sp.Voice.SetTo(svoice);
+                myMod.Npcs.Add(sp);
+                bm.Speaker = sp.FormKey;
+                Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
+            }
+
             // --- 9. the events: one stock hook per beat --------------------------------------------------
             int recovers = 0;
             for (int k = 0; k < steps.Count; k++)
@@ -1086,6 +1128,61 @@ namespace FrankyCLI
                     Add(t.approachStage, "EndIf");
                 }
             }
+            // Speech: each line is a RADIO scene (no actor in the world: AliasID -4, the vanilla audio-log shape,
+            // FrankyCLI docs/formlib/book_audio.md) holding one topic and one response the speaker says, started
+            // by the fragment of the stage it belongs to. The response's WEMFile is the topic's own id, and
+            // the game looks the audio up as Sound\Voice\<plugin>\<voice type>\<that id, 8 hex>.wem.
+            if (speakerSrc != null)
+            {
+                var lines = new List<(int stage, string text)>();
+                if (r.broadcast != null) lines.Add((0, r.broadcast));
+                for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
+                for (int n = 0; n < lines.Count; n++)
+                {
+                    var (lst, ltext) = lines[n];
+                    string tag = $"{r.id}_say{n + 1}";
+                    var topic = new DialogTopic(myMod)
+                    {
+                        EditorID = tag + "_topic",
+                        Category = DialogTopic.CategoryEnum.Scene,
+                        Subtype = DialogTopic.SubtypeEnum.CustomScene,
+                        SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+                    };
+                    topic.Quest.SetTo(clone.FormKey);
+                    var info = new DialogResponses(myMod) { EditorID = tag + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+                    info.Speaker.SetTo(bm.Speaker);
+                    info.Responses.Add(new DialogResponse
+                    {
+                        ResponseText = ltext,
+                        WEMFile = topic.FormKey.ID,
+                        TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(ltext))[..4],
+                    });
+                    topic.Responses.Add(info);
+                    // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
+                    topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
+                    clone.DialogTopics.Add(topic);
+
+                    var action = new RadioSceneAction { Name = "Say", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0 };
+                    action.Topic.SetTo(topic.FormKey);
+                    var scene = new Scene(myMod)
+                    {
+                        EditorID = tag + "_scene",
+                        Flags = (Scene.Flag)0x80,   // on every vanilla audio-log scene; undocumented (book_audio.md)
+                        VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
+                    };
+                    scene.Quest.SetTo(clone.FormKey);
+                    scene.Actors.Add(new SceneActor { ID = unchecked((uint)-4), Flags = SceneActor.Flag.NoCommandState, BehaviorFlags = 0 });
+                    scene.Phases.Add(new ScenePhase { Name = "SayPhase", EditorWidth = 500 });
+                    scene.Actions = new Noggog.ExtendedList<ASceneAction> { action };
+                    clone.Scenes.Add(scene);
+
+                    string sv = $"Say{n + 1}";
+                    props.Add(("Scene", sv, scene.FormKey, -1));
+                    Add(lst, $"{sv}.Start()");
+                    bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));
+                    Console.WriteLine($"  +speech  : stage {lst} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
+                }
+            }
             var held = new List<int>();   // pickups and recovered items not yet delivered
             for (int k = 0; k < steps.Count; k++)
             {
@@ -1199,6 +1296,90 @@ namespace FrankyCLI
             return 0;
         }
 
+        /// <summary>
+        /// The voice cache, in the Overtime repo so it is versioned and backed up with the plugin (his ask,
+        /// 2026-10-09: "can we keep the audio files somewhere so we can just rename when needed"). One
+        /// file per spoken line, named by a hash of its ElevenLabs voice, voice type and exact words, with
+        /// a .txt beside it saying which. A rebuild re-mints every topic id, so the game file's NAME changes
+        /// each build; the cache is what makes that a copy rather than a new generation.
+        /// </summary>
+        private const string VoiceCacheDir = @"C:\modding\DU_Overtime\voicecache";
+
+        /// <summary>
+        /// Put each spoken line's audio where the game looks for it: Sound\Voice\&lt;plugin&gt;\&lt;voice type&gt;\
+        /// &lt;topic id, 8 hex&gt;.wem. From the cache when the same words in the same voice exist, else generated
+        /// (ElevenLabs, then Wwise) and cached. The previous build's files go first, by its manifest.
+        /// </summary>
+        private static int DeployVoice(Recipe r, Template t, BeatsMade bm)
+        {
+            if (bm.Lines.Count == 0) return 0;
+            Console.WriteLine();
+            Console.WriteLine("  voice:");
+            string plugin = t.mod + ".esm";
+            string vt = r.speaker!.voice!, vid = r.speaker.elevenlabs!;
+            string gameDir = Path.Combine(SpeechTools.GameVoiceDir, plugin, vt);
+            Directory.CreateDirectory(VoiceCacheDir);
+            Directory.CreateDirectory(gameDir);
+
+            string manifest = Path.Combine(VoiceCacheDir, $"deployed_{r.id}.txt");
+            if (File.Exists(manifest))
+                foreach (var p in File.ReadAllLines(manifest).Where(p => p.Length > 0 && File.Exists(p)))
+                {
+                    File.Delete(p);
+                    Console.WriteLine($"    -old     : {p}");
+                }
+
+            int fail = 0;
+            var deployed = new List<string>();
+            var toMake = new List<(uint wem, string key, string text)>();
+            foreach (var (_, wem, text, _) in bm.Lines)
+            {
+                string key = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes($"{vid}|{vt}|{text}")))[..16].ToLowerInvariant();
+                string cached = Path.Combine(VoiceCacheDir, key + ".wem");
+                string dest = Path.Combine(gameDir, $"{wem:X8}.wem");
+                if (File.Exists(cached))
+                {
+                    File.Copy(cached, dest, true);
+                    deployed.Add(dest);
+                    Console.WriteLine($"    cached   : {key}.wem -> {wem:X8}.wem  \"{text}\"");
+                }
+                else toMake.Add((wem, key, text));
+            }
+            if (toMake.Count > 0)
+            {
+                SpeechTools.generateWavs = true;
+                var mk = ModKey.FromNameAndExtension(plugin);
+                foreach (var (wem, _, text) in toMake) SpeechTools.GenerateWavs(wem, vt, mk, text, vid);
+                SpeechTools.GenerateAllWavs();
+                SpeechTools.ConvertAndDeploy();
+                foreach (var (wem, key, text) in toMake)
+                {
+                    string dest = Path.Combine(gameDir, $"{wem:X8}.wem");
+                    // SpeechTools also writes the .wav beside it and an .esp-named twin; all of it is this build's.
+                    string espDir = Path.Combine(SpeechTools.GameVoiceDir, t.mod + ".esp", vt);
+                    foreach (var p in new[] { dest, Path.ChangeExtension(dest, ".wav"),
+                                              Path.Combine(espDir, $"{wem:X8}.wem"), Path.Combine(espDir, $"{wem:X8}.wav") })
+                        if (File.Exists(p)) deployed.Add(p);
+                    if (!File.Exists(dest)) { Console.WriteLine($"    FAIL     : no {dest} after generation (Wwise prints its own error above)"); fail++; continue; }
+                    if (SpeechTools.UsedSapiFallback)
+                    {
+                        Console.WriteLine($"    NOT CACHED: {wem:X8}.wem is the Windows fallback voice, not ElevenLabs; it plays, and the next build tries again");
+                        continue;
+                    }
+                    File.Copy(dest, Path.Combine(VoiceCacheDir, key + ".wem"), true);
+                    string wav = Path.Combine(SpeechTools.AudioStagingDir, plugin, vt, $"{wem:X8}.wav");
+                    if (File.Exists(wav)) File.Copy(wav, Path.Combine(VoiceCacheDir, key + ".wav"), true);
+                    File.WriteAllText(Path.Combine(VoiceCacheDir, key + ".txt"), $"elevenlabs {vid}\nvoice {vt}\n{text}\n");
+                    Console.WriteLine($"    new      : {wem:X8}.wem, cached as {key}  \"{text}\"");
+                }
+            }
+            File.WriteAllLines(manifest, deployed);
+            foreach (var (_, wem, _, _) in bm.Lines)
+                fail += Check($"{wem:X8}.wem is where the game looks", File.Exists(Path.Combine(gameDir, $"{wem:X8}.wem")).ToString(), "True");
+            Console.WriteLine(fail == 0 ? $"  VOICE DEPLOYED: {bm.Lines.Count} line(s) under {gameDir}" : $"  {fail} VOICE CHECK(S) FAILED.");
+            return fail == 0 ? 0 : 1;
+        }
+
         /// <summary>A cloned counter starts at zero whatever the global it was cloned from holds.</summary>
         private static void SetGlobalZero(Global g) => g.Data = 0f;
 
@@ -1307,6 +1488,18 @@ namespace FrankyCLI
                 fail += Check($"the unused second place {dpName} is gone and nothing names it",
                               $"alias {(aliasGone ? "gone" : "PRESENT")}, named by {(named.Count == 0 ? "nothing" : string.Join(", ", named))}",
                               "alias gone, named by nothing");
+            }
+            foreach (var (lst, wem, text, sceneKey) in bm.Lines)
+            {
+                var sc = q.Scenes.FirstOrDefault(s => s.FormKey == sceneKey);
+                var act = sc?.Actions?.OfType<IRadioSceneActionGetter>().FirstOrDefault();
+                var tp = act == null ? null : q.DialogTopics.FirstOrDefault(d => d.FormKey == act.Topic.FormKey);
+                var rsp = tp?.Responses.FirstOrDefault();
+                var line = rsp?.Responses.FirstOrDefault();
+                fail += Check($"stage {lst}'s line is a radio scene the speaker says, voiced as {wem:X8}.wem",
+                              sc == null ? "scene missing"
+                              : $"alias {act?.AliasID}, speaker {rsp?.Speaker.FormKey}, wem {line?.WEMFile:X8}, text \"{line?.ResponseText?.String}\"",
+                              $"alias -4, speaker {bm.Speaker}, wem {wem:X8}, text \"{text}\"");
             }
             if (bm.PityTimer)
                 fail += Check("the stuck-enemy guard is in the fragment script",

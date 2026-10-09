@@ -160,6 +160,25 @@ namespace FrankyCLI
             /// approach stage, whose fragment does the rest. Ported from duo_delve_driver.OnDistanceLessThan.
             /// </summary>
             public Approach? approach { get; set; }
+            /// <summary>
+            /// beats, OPTIONAL (required by broadcast or any beat's say): WHO speaks this Delve's lines. Spoken over
+            /// the radio, with no actor in the world: his ask 2026-10-09, "a broadcast to the player at the start
+            /// of the mission", then "something different, speech ... there should be like topics that play on
+            /// stages in the vanilla game".
+            /// </summary>
+            public Speaker? speaker { get; set; }
+            /// <summary>beats, OPTIONAL: a line the speaker says when the quest starts (stage 0). Plain words, no tokens.</summary>
+            public string? broadcast { get; set; }
+        }
+        /// <summary>The voice of a Delve's spoken lines.</summary>
+        private sealed class Speaker
+        {
+            /// <summary>The subtitle's speaker name ("Relay Control"). No tokens.</summary>
+            public string? name { get; set; }
+            /// <summary>A vanilla VoiceType EditorID: the folder the audio lives in (GenericMale01, GenericFemale01, as Outlaws 02 ships).</summary>
+            public string? voice { get; set; }
+            /// <summary>The ElevenLabs voice id the audio is generated in. His pick for the first one: CwhRBWXzGAHq8TQ4Fs17.</summary>
+            public string? elevenlabs { get; set; }
         }
         private sealed class Approach
         {
@@ -287,6 +306,8 @@ namespace FrankyCLI
             /// (the stuck-enemy guard: his infestation driver's 180 s pity timer). Absent = 180.
             /// </summary>
             public int? stuck { get; set; }
+            /// <summary>beats, OPTIONAL: a line the recipe's speaker says over the radio when this beat's stage is set. Plain words, no tokens.</summary>
+            public string? say { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -574,7 +595,8 @@ namespace FrankyCLI
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
             else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null
-                                      || b.waves != null || b.size != null || b.defend != null || b.stuck != null) || r.approach != null)
+                                      || b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.say != null) || r.approach != null
+                     || r.speaker != null || r.broadcast != null)
                 Fatal($"a beat sets type, group, item, model, name, replace, returnTo or a hold's fields, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
@@ -1971,7 +1993,17 @@ namespace FrankyCLI
                     travelSrc = sfm?.Packages.FirstOrDefault(p => p.EditorID == "Trait_Wanted_TravelToPlayer");
                     if (travelSrc == null) { Console.WriteLine("REFUSED: a hold copies its waves' package from Trait_Wanted_TravelToPlayer [0E830B:Starfield.esm], and it is not there."); fail++; }
                 }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc);
+                // The speaker of a Delve's spoken lines: a friendly MAST worker cloned only to carry a NAME and a
+                // VOICE TYPE (the voice folder the audio is looked up in). Never placed: the lines are radio.
+                (INpcGetter tmpl, FormKey voice)? speakerSrc = null;
+                if (fail == 0 && r.speaker != null)
+                {
+                    var st = OwnOrMaster<INpcGetter>(myMod, env, "UC_NA_MASTWorkerMale01");
+                    var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, r.speaker.voice ?? "");
+                    if (st == null || vt == null) { Console.WriteLine($"REFUSED: the speaker needs UC_NA_MASTWorkerMale01 and VoiceType '{r.speaker.voice}' in {t.mod} or a master."); fail++; }
+                    else speakerSrc = (st, vt.FormKey);
+                }
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc);
             }
             else if (t.kind == "choice")
             {
@@ -2046,8 +2078,10 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            return t.kind == "beats" ? VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore)
-                                     : Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
+            if (t.kind != "beats") return Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
+            int vb = VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
+            // The audio last, and only over a verified plugin: its file names are the written topics' ids.
+            return vb == 0 ? DeployVoice(r, t, madeBeats) : vb;
         }
 
         // ------------------------------------------------------------------ shared by the choice and beats builds

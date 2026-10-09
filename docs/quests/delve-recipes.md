@@ -316,6 +316,28 @@ sets its stage first and checks the item afterwards, so as a gate it would compl
 `Data/scripts`. **Two places drawing one POI is warned**, so keep a trail's places disjoint by theme
 (`duo_delve08` splits natural and military).
 
+## Speech: a speaker, a broadcast, and lines on stages (opt in)
+
+```json
+"speaker": { "name": "Relay Control", "voice": "GenericMale01", "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17" },
+"broadcast": "This is Relay Control. ...",
+```
+
+and `"say": "..."` on any beat. `broadcast` plays when the quest starts (stage 0); a beat's `say` plays when
+that beat's stage is set. Each line is a RADIO scene with no actor in the world (`AliasID -4`, the vanilla
+audio-log shape, `docs/formlib/book_audio.md`): one topic, one response the speaker says, started by the
+stage's fragment. The speaker is an NPC that is never placed; it carries the subtitle name and the voice type
+whose folder the audio lives in. **Words only:** a spoken line cannot carry a `<Token>` (the voice cannot say
+one), and holds 250 characters. The lint refuses lines with no speaker and a speaker with no lines.
+
+**The audio** is generated at build time (ElevenLabs, then Wwise) into
+`Data/Sound/Voice/<plugin>.esm/<voice>/<topic id, 8 hex>.wem`. A rebuild re-mints every topic id, so
+**`C:/modding/DU_Overtime/voicecache/`** keeps each line by a hash of voice, voice type and exact words (with a
+`.txt` saying which), and a rebuild COPIES the cached file to its new name; ElevenLabs is called only for new
+or changed words (his ask). The previous build's files are deleted first by `deployed_<id>.txt`. A line that
+fell back to the Windows voice plays but is not cached. ⚠ The deployed files are LOOSE: pack them before a
+release.
+
 ## Not yet
 
 - **An entry item.** No Delve has one; they start from the console. Jessica's design starts them from a

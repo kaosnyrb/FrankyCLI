@@ -54,6 +54,13 @@ public static class SpeechTools
     private static bool _useSapiFallback = false;
 
     /// <summary>
+    /// True once this run has fallen back to Windows SAPI. A caller that CACHES audio by its ElevenLabs voice
+    /// must refuse to store anything generated after this, or the fallback voice is reused for ever under
+    /// the wrong key (gen_delve's voice cache, 2026-10-09).
+    /// </summary>
+    public static bool UsedSapiFallback => _useSapiFallback;
+
+    /// <summary>
     /// Overload that accepts a raw NPC ID from the target mod.
     /// Speaker FormKey is built from <c>targetMod.ModKey + speakerId</c>.
     /// </summary>
