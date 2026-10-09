@@ -230,6 +230,8 @@
   "playerAlias": 32,
   "_playerAlias": "MBRIR02Player, filled with the player as a unique actor: a recover beat's OnItemAdded hook sits on it.",
   "gangMin": 0,
+  "approachStage": 5,
+  "_approachStage": "A recipe's approach (civilians, losing the crate) fires here, before the first beat's 10. The base has no stage 5.",
       "_shape": [
         "NO DRIVER: THE STAGES ARE THE STATE MACHINE (his ruling 2026-10-08, proven by gen_stageprobe).",
         "A recipe lists beats by TYPE (use, pickup, deliver); each is a stock Default* alias hook that sets",

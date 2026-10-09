@@ -31,8 +31,7 @@
         "exclude": []
       }
     },
-    "civilians": false,
-    "_civilians": "Off: a NonHostile site brings its own people. The carrier's gang is kept, his call: the friendly site gets hit."
+    "_civilians": "Off: a NonHostile site brings its own people. The carrier's gang is kept, his call: the friendly site gets hit. (2026-10-09: the delve4 'civilians: false' key is gone; a beats Delve with no approach places nobody.)"
   },
   "prose": {
     "name": "Hauling: Water Reclaimer on <Planet>",

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "id": "duo_delve03",
-  "template": "carry-absence-recover-return",
+  "template": "beats",
   "author": "jessica",
   "source": "office/projects/delves/testcase-01-two-halves.md",
   "_note": [
@@ -10,7 +10,8 @@
     "THE PROSE section. The two item names are hers too (2026-09-24, see items._items).",
     "",
     "Beat three sits on the B travel ring, beat one on the A ring: the widest pair one POI offers.",
-    "Beat four is beat two's place again, because the return IS the design."
+    "Beat four is beat two's place again, because the return IS the design.",
+    "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"work on the other beats and missions so everything is on this system\"). The items block went into the beats it belongs to; every word is unchanged."
   ],
   "place": {
     "theme": {
@@ -24,31 +25,41 @@
     "name": "Never Arrived at the <Place>: <Planet>",
     "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
   },
-  "items": {
-    "load": "Signed-Out Consignment (1 of 2)",
-    "missing": "Signed-Out Consignment (2 of 2)",
-    "_items": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff."
-  },
   "beats": [
     {
+      "type": "pickup",
       "at": "RETravelA1LocRef",
       "objective": "Find the load",
-      "journal": "Signed out, never signed in, and it got this far."
+      "journal": "Signed out, never signed in, and it got this far.",
+      "item": "Signed-Out Consignment (1 of 2)",
+      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff."
     },
     {
+      "type": "use",
       "at": "RECenterLocRef",
       "objective": "Take it to the <Place>",
       "journal": "The other half should be here. Something has taken it."
     },
     {
+      "type": "recover",
       "at": "RETravelB1LocRef",
       "objective": "Recover what was taken",
-      "journal": "It did not go far. Nothing out here does."
+      "journal": "It did not go far. Nothing out here does.",
+      "item": "Signed-Out Consignment (2 of 2)",
+      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff."
     },
     {
+      "type": "deliver",
+      "returnTo": 2,
       "at": "RECenterLocRef",
       "objective": "Finish the job",
       "journal": null
     }
-  ]
+  ],
+  "approach": {
+    "to": 2,
+    "civilians": true,
+    "lose": 1,
+    "_approach": "The old driver's two approach behaviours, made explicit: on first coming within 250 m of the delivery point, people appear around it (the delve4 default, civilians true, his ruling 2026-09-24 'the one with the delivery should have people there') and the crate, which is at this same site, is moved out past its near edge so it reads as lost (LoseLoadOnApproach was true because the load is at the main place)."
+  }
 }

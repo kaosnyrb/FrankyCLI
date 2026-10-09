@@ -172,6 +172,29 @@ namespace FrankyCLI
                 Fatal($"the Delve ends on a single beat, whose journal is already stage {t.completeStage}'s line; the recap would overwrite it. "
                       + "Put the words in that beat's journal.");
 
+            if (r.place.civilians != null)
+                Fatal("place.civilians is the delve4 spelling and a beats Delve ignores it; write approach.civilians.");
+            if (r.approach is Approach ap)
+            {
+                if (t.approachStage < 0) Fatal($"template '{t.id}' names no approachStage, so an approach has no stage to set.");
+                if (t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for the approach's hook.");
+                if (ap.to < 1 || ap.to > r.beats.Count) Fatal($"approach.to is beat {ap.to}, which does not exist.");
+                else
+                {
+                    var tb = r.beats[ap.to - 1];
+                    if (tb.type == "recover" || tb.returnTo != null)
+                        Fatal($"approach.to is beat {ap.to}, a {(tb.returnTo != null ? "return" : tb.type)}, which has no object of its own to approach.");
+                    if (ap.lose is int l)
+                    {
+                        if (l < 1 || l > r.beats.Count || r.beats[l - 1].type != "pickup")
+                            Fatal($"approach.lose is beat {l}; only a pickup's crate can be lost.");
+                        else if (r.beats[l - 1].PlaceIndex != tb.PlaceIndex)
+                            Fatal($"approach.lose is beat {l} at another place; the crate is moved out past the edge of the site being approached, so it must be at that site.");
+                    }
+                }
+                if (!ap.civilians && ap.lose == null) Fatal("approach does nothing: set civilians, lose, or both.");
+            }
+
             int recoverCount = r.beats.Count(b => b.type == "recover");
             if (recoverCount > 5) Fatal($"{recoverCount} recover beats; the player's OnItemAdded hook has the base and four duplicates, so five.");
             if (recoverCount > 0 && t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
@@ -222,6 +245,9 @@ namespace FrankyCLI
 
         private static string FragmentScriptName(Recipe r) => "duo_qf_" + r.id;
 
+        /// <summary>The driver's LoseDistance: how close to the approached object the player comes before the approach fires.</summary>
+        private const float ApproachDistance = 250f;
+
         private static string FragmentFunction(int stage) => $"Fragment_Stage_{stage:D4}_Item_00";
 
         /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
@@ -236,7 +262,8 @@ namespace FrankyCLI
             public string? Recap;                                        // the completing stage's line, when ending on a group
             public List<(int objective, int alias, int stage)> TargetGates = new();
             public List<(string name, int alias)> Replaced = new();
-            public List<int> Holders = new();   // recover beats' empty Optional aliases   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
+            public List<int> Holders = new();   // recover beats' empty Optional aliases
+            public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
@@ -256,6 +283,12 @@ namespace FrankyCLI
                 .FirstOrDefault(p => string.Equals(p.Name, "GangMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
             int? gangMax = old.Properties.OfType<ScriptIntProperty>()
                 .FirstOrDefault(p => string.Equals(p.Name, "MaxGangMembers", StringComparison.OrdinalIgnoreCase))?.Data;
+            var civsKey = old.Properties.OfType<ScriptObjectProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, "TargetCivListMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+            if (r.approach?.civilians == true && civsKey == null)
+            { Console.WriteLine($"REFUSED: approach.civilians needs the removed driver's TargetCivListMembers, and '{t.replacesDriver}' lacks it."); return 1; }
+            if (r.approach?.lose != null && gangKey == null)
+            { Console.WriteLine($"REFUSED: approach.lose places its helper from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
             if (r.beats.Any(b => b.type == "recover") && (gangKey == null || gangMax == null))
             { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
             vma.Scripts.Remove(old);
@@ -324,7 +357,8 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: the recipe gives the base's {t.beatSlots.Count} object slots only {baseNext} beat(s) with an object of its own."); return 1; }
 
             // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
-            var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Distinct().OrderBy(x => x).ToList();
+            var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage))
+                .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
             foreach (var st in allStages)
             {
                 if (clone.Stages!.Any(s => s.Index == st)) continue;
@@ -531,6 +565,32 @@ namespace FrankyCLI
                 }
             }
 
+            // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
+            if (r.approach is Approach apr)
+            {
+                int toAlias = slotOf[apr.to - 1].activatorAlias;
+                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
+                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
+                ta.Object.SetTo(clone.FormKey);
+                ta.Alias = (short)toAlias;
+                sc.Properties.Add(ta);
+                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = t.approachStage, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = -1, Flags = ScriptProperty.Flag.Edited });
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == t.playerAlias);
+                if (entry == null)
+                {
+                    entry = new QuestFragmentAlias();
+                    entry.Property.Object.SetTo(clone.FormKey);
+                    entry.Property.Alias = (short)t.playerAlias;
+                    vma.Aliases.Add(entry);
+                }
+                entry.Scripts.Add(sc);
+                bm.Hooks.Add((t.playerAlias, sc.Name, t.approachStage, -1));
+                bm.ApproachTarget = (t.playerAlias, toAlias);
+                Console.WriteLine($"  +hook    : approach within {ApproachDistance} of beat {apr.to}'s object (alias {toAlias}) sets {t.approachStage}");
+            }
+
             // --- 10. the fragment script: generated, bound per stage -----------------------------------------
             string name = FragmentScriptName(r);
             var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
@@ -570,6 +630,26 @@ namespace FrankyCLI
                 Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
             }
             Enter(0, 0);
+            if (r.approach is Approach af)
+            {
+                // Civilians first, then the crate, as the driver did.
+                string ta = $"Alias_Beat{af.to}Target";
+                props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[af.to - 1].activatorAlias));
+                if (af.civilians)
+                {
+                    props.Add(("FormList", "Civilians", civsKey!.Value, -1));
+                    Add(t.approachStage, $"duo_delve_lib.PlaceCivilians({ta}, Civilians, 1, 5)");
+                }
+                if (af.lose is int l)
+                {
+                    string la = $"Alias_Beat{l}Target";
+                    props.Add(("ReferenceAlias", la, clone.FormKey, slotOf[l - 1].activatorAlias));
+                    props.Add(("FormList", "Gang", gangKey!.Value, -1));
+                    Add(t.approachStage, $"If !GetStageDone({beatStage[l - 1]})   ; lose the crate only while it is still there");
+                    Add(t.approachStage, $"    duo_delve_lib.LoseTheLoad({la}, {ta}, Gang.GetAt(0))");
+                    Add(t.approachStage, "EndIf");
+                }
+            }
             var held = new List<int>();   // pickups and recovered items not yet delivered
             for (int k = 0; k < steps.Count; k++)
             {
@@ -683,6 +763,14 @@ namespace FrankyCLI
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
+            if (bm.ApproachTarget is (int aon, int ato))
+            {
+                var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == aon)?.Scripts.FirstOrDefault(x => x.Name == "DefaultAliasOnDistanceLessThan");
+                var tp = dsc?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == "TargetAlias");
+                var dp = dsc?.Properties.OfType<IScriptFloatPropertyGetter>().FirstOrDefault(x => x.Name == "TargetDistance");
+                fail += Check("approach measures to its object", tp == null ? "missing" : $"{tp.Object.FormKey} alias {tp.Alias} within {dp?.Data}",
+                              $"{q.FormKey} alias {ato} within {ApproachDistance}");
+            }
             foreach (var h in bm.Holders)
             {
                 var ha = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)h);

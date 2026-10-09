@@ -36,3 +36,108 @@ Function SpawnHolder(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList 
         n -= 1
     EndWhile
 EndFunction
+
+; THE APPROACH (stage 5 on a beats Delve, set by a stock DefaultAliasOnDistanceLessThan on the player).
+; People at the site, placed the way his dual-activator driver placed them at a delivery: around the
+; target, within 25 m, snapped to navmesh. His ruling 2026-09-24: "the one with the delivery should have
+; people there." Lifted from duo_delve_driver.PlaceCivilians.
+Function PlaceCivilians(ReferenceAlias akCentre, FormList akList, Int aiMin, Int aiMax) Global
+    ObjectReference centre = akCentre.GetRef()
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-25, 25)
+        pos[1] = Utility.RandomFloat(-25, 25)
+        pos[2] = 0
+        centre.PlaceAtMe(akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1)), 1, True, False, True, pos, None, True)
+        n -= 1
+    EndWhile
+EndFunction
+
+; LOSING THE LOAD. Move it out past the near edge of the site, so it reads as dropped short of where it
+; was going (his ask: actually LOST, not sitting at the site's own edge). A POI's markers become
+; queryable only from ~200 m out and only on the near side (duo_worldprobe.psc), so this runs on the
+; approach and anchors to the travel marker nearest the player; failing that, the centre. Metres, read
+; off his HUD 2026-09-24. Lifted from duo_delve_driver.LoseTheLoad; its DebugNotes line is not ported.
+Function LoseTheLoad(ReferenceAlias akLoad, ReferenceAlias akCentre, Form akHelper) Global
+    Float PushMin = 60.0
+    Float PushMax = 100.0
+    Float FallbackEdge = 100.0
+    ObjectReference player = Game.GetPlayer()
+    ObjectReference centre = akCentre.GetRef()
+    ObjectReference load = akLoad.GetRef()
+
+    ObjectReference anchor = NearestTravelMarker(player)
+    Float edge = 0.0
+    Float dx
+    Float dy
+    If anchor != None
+        ; Outward is centre -> anchor: the side of the site the player is coming from.
+        dx = anchor.GetPositionX() - centre.GetPositionX()
+        dy = anchor.GetPositionY() - centre.GetPositionY()
+    Else
+        anchor = centre
+        edge = FallbackEdge
+        dx = player.GetPositionX() - centre.GetPositionX()
+        dy = player.GetPositionY() - centre.GetPositionY()
+    EndIf
+    Float len = Math.Sqrt(dx * dx + dy * dy)
+    If len < 1.0
+        ; Degenerate: anchor on top of the centre. Any direction is honest; use the player's.
+        dx = player.GetPositionX() - centre.GetPositionX()
+        dy = player.GetPositionY() - centre.GetPositionY()
+        len = Math.Sqrt(dx * dx + dy * dy)
+        If len < 1.0
+            dx = 1.0
+            dy = 0.0
+            len = 1.0
+        EndIf
+    EndIf
+    Float dist = edge + Utility.RandomFloat(PushMin, PushMax)
+
+    ; A ZERO-ROTATION ORIGIN, so the offset below is in world axes whichever way the anchor faces.
+    ObjectReference origin = anchor.PlaceAtMe(Game.GetFormFromFile(0x00003B, "Starfield.esm"), 1, False, False, True, None, None, False) ; XMarker
+    origin.SetAngle(0.0, 0.0, 0.0)
+    Float[] off = new Float[6]
+    off[0] = dx / len * dist
+    off[1] = dy / len * dist
+    off[2] = 0.0
+
+    ; HIS TRICK (ccs_missioninfestation01.SpawnNest): an actor placed with navmesh snap lands on walkable
+    ; ground where an object would not, so place one, put the load on it, remove it. Initially disabled,
+    ; so the player never sees who stood there.
+    ObjectReference helper = origin.PlaceAtMe(akHelper, 1, False, True, True, off, None, True)
+    load.MoveTo(helper)
+    helper.Delete()
+    origin.Delete()
+EndFunction
+
+; The nearest REOverlayTravel* reference to the player, or None. The bases are Starfield.esm's
+; (gen_delve bases: 434-448 of ~450 POIs place their travel markers on exactly these).
+ObjectReference Function NearestTravelMarker(ObjectReference player) Global
+    Float RingSearch = 400.0
+    Int[] ids = new Int[6]
+    ids[0] = 0x0E3800 ; REOverlayTravelA1
+    ids[1] = 0x0E37FF ; A2
+    ids[2] = 0x0E37FE ; A3
+    ids[3] = 0x0E37FD ; B1
+    ids[4] = 0x0E37FC ; B2
+    ids[5] = 0x0E37FB ; B3
+    ObjectReference best = None
+    Float bestD = -1.0
+    Int b = 0
+    While b < ids.Length
+        ObjectReference[] found = player.FindAllReferencesOfType(Game.GetFormFromFile(ids[b], "Starfield.esm"), RingSearch)
+        Int i = 0
+        While i < found.Length
+            Float d = player.GetDistance(found[i])
+            If bestD < 0.0 || d < bestD
+                best = found[i]
+                bestD = d
+            EndIf
+            i += 1
+        EndWhile
+        b += 1
+    EndWhile
+    Return best
+EndFunction

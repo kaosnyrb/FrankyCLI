@@ -72,6 +72,8 @@ namespace FrankyCLI
             public int gangMin { get; set; }
             /// <summary>beats: the base's alias filled with the player, which a recover beat's OnItemAdded hook sits on. -1 = none.</summary>
             public int playerAlias { get; set; } = -1;
+            /// <summary>beats: the stage a recipe's approach sets (below the first beat's 10). -1 = no approach on this template.</summary>
+            public int approachStage { get; set; } = -1;
             public int beats { get; set; }
             public bool carriesItem { get; set; }
             public int placeAlias { get; set; }
@@ -155,6 +157,21 @@ namespace FrankyCLI
             /// A new optional field, so schema stays 1. His play of duo_delve07, 2026-10-08.
             /// </summary>
             public string? recap { get; set; }
+            /// <summary>
+            /// beats, OPTIONAL: what happens the FIRST time the player comes within range of one beat's object
+            /// (the delivery point). A stock DefaultAliasOnDistanceLessThan on the player sets the template's
+            /// approach stage, whose fragment does the rest. Ported from duo_delve_driver.OnDistanceLessThan.
+            /// </summary>
+            public Approach? approach { get; set; }
+        }
+        private sealed class Approach
+        {
+            /// <summary>The beat (1-based) whose object is approached; it must have an object of its own.</summary>
+            public int to { get; set; }
+            /// <summary>Place 1 to 5 people from the base's own civilian list around that object.</summary>
+            public bool civilians { get; set; }
+            /// <summary>OPTIONAL: a pickup beat (1-based) at the same place whose crate is moved out past the site's edge, if not yet taken.</summary>
+            public int? lose { get; set; }
         }
         private sealed class People { public Person? owner { get; set; } public Person? buyer { get; set; } }
         /// <summary>A named NPC cloned from a vanilla template by EditorID (NPCTools' friendly set is the menu).</summary>
@@ -208,7 +225,7 @@ namespace FrankyCLI
             /// delve4: place civilians at the centre on the first approach. Default true. Set false when the
             /// theme already guarantees people (LocTypeOE_NonHostile), or the site gets a crowd.
             /// </summary>
-            public bool civilians { get; set; } = true;
+            public bool? civilians { get; set; }   // absent = true on delve4; refused on beats (approach.civilians there)
         }
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
@@ -538,8 +555,8 @@ namespace FrankyCLI
             bool choice = t.kind == "choice";
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
-            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null))
-                Fatal($"a beat sets type, group, item, model, name, replace or returnTo, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null) || r.approach != null)
+                Fatal($"a beat sets type, group, item, model, name, replace or returnTo, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (!beats && r.recap != null)
                 Fatal($"the recipe has a recap, and template '{t.id}' ({t.kind}) is not a beats Delve, so it would be silently ignored.");
             if (delve4)
@@ -2251,7 +2268,7 @@ namespace FrankyCLI
             // The lose-on-approach move is for a load at the MAIN place. At a second POI the other POI
             // is the story, and moving it out past the delivery site's edge would undo the journey.
             Bool("LoseLoadOnApproach", !r.beats[0].Second);
-            Bool("CiviliansAtCentre", r.place.civilians);
+            Bool("CiviliansAtCentre", r.place.civilians ?? true);
             foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
             vma.Scripts.Add(sc);
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
