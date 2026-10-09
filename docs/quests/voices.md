@@ -19,6 +19,21 @@ label is not a listen.
 **A Delve should always name its voice.** The default exists for a call that forgot; a recipe never relies
 on it, and the lint requires `speaker.elevenlabs`.
 
+## Taken: the office's own voices
+
+Three ids in the library below are the staff's own voices, cast by his ear on 2026-06-16 and kept in the
+home office (`office/staff/<persona>/voice.json`, the source of truth). **Do not cast them as a Delve
+stranger without asking him**: a player who has heard the office would be hearing one of us as Relay Control.
+
+| id | whose | the library calls it | his direction |
+|---|---|---|---|
+| `RILOU7YmBhvwJGDGjNmP` | Eliza | Jeanette, Audiobook | warm-and-low, settled, not sultry |
+| `56bWURjYFHyYyVf490Dp` | Jessica | Emma | dry, even, unimpressed by default |
+| `tnVKC6NjwhdRxoQIfKue` | Kim | Lyan, Conversational Female Character | fast, bright, a half-step ahead of herself |
+
+⚠ The names in the office's files (Lauren, Isla, Caty) no longer match the library's; the ids do. **An id is the
+address, a name is a label that moves.**
+
 ## Matching the folder
 
 `speaker.voice` is a vanilla **VoiceType**, and it decides only which folder the audio is filed under
