@@ -141,3 +141,33 @@ ObjectReference Function NearestTravelMarker(ObjectReference player) Global
     EndWhile
     Return best
 EndFunction
+
+; THE PEOPLE AT AN ENDING (a choose beat's person, on the first approach to its delivery point after the
+; find). His playtest 2026-10-08: "Returning the medal talks about a person who isn't there." A ref placed
+; at a site the world has not loaded has no ground to stand on, so this runs on the approach. Lifted from
+; duo_delve_choice.PlacePerson / PlaceCompany.
+Function PlacePerson(ReferenceAlias akTarget, ActorBase akPerson, Float afOffset) Global
+    Float[] pos = new Float[6]
+    pos[0] = afOffset
+    pos[1] = 0
+    pos[2] = 0
+    akTarget.GetRef().PlaceAtMe(akPerson, 1, False, False, True, pos, None, True)
+EndFunction
+
+; Nameless friendly NPCs around the delivery point, so the named person does not stand alone in an empty
+; POI (his play, 2026-10-08: "the created NPCs are alone at the POIs which looks wierd").
+Function PlaceCompany(ReferenceAlias akTarget, FormList akCompany, Int aiMin, Int aiMax, Float afRadius) Global
+    If !akCompany || akCompany.GetSize() == 0 || aiMax <= 0
+        Return
+    EndIf
+    ObjectReference target = akTarget.GetRef()
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-afRadius, afRadius)
+        pos[1] = Utility.RandomFloat(-afRadius, afRadius)
+        pos[2] = 0
+        target.PlaceAtMe(akCompany.GetAt(Utility.RandomInt(0, akCompany.GetSize() - 1)), 1, False, False, True, pos, None, True)
+        n -= 1
+    EndWhile
+EndFunction

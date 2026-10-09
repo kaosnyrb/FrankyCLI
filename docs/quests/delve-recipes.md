@@ -51,7 +51,7 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 |---|---|---|---|
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06`) |
-| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach` (`duo_delve03`-`05`, `07`, `08`). See *Beats* below |
+| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between (`duo_delve03`-`08`). See *Beats* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
 onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
@@ -88,7 +88,7 @@ refused rather than silently ignored.
 | `prose` | object | yes | all | `name` (the quest title) and `briefing` (the journal's opening line) |
 | `items` | object | choice | choice | what is carried and what the objects look like (below) |
 | `beats` | list | yes | all | one entry per beat (below) |
-| `offer` | object | choice: yes | choice | the surprise between the find and the endings |
+| `offer` | object | choice: yes | choice, beats ending on a `choose` | the surprise between the find and the endings: `journal` lands on the stage that opens the choice, `message` shows after the find's box |
 | `reward` | object | choice: yes | choice | the pay tier per ending |
 | `people` | object | no | choice | named NPCs at each ending, with outfits and company |
 | `recap` | string | beats ending on a `group`: yes; otherwise refused | beats | stage 100's journal line, the last thing the player reads (see *Beats*) |
@@ -252,7 +252,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
 `model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
-`group`, `replace`, `returnTo`.
+`group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`.
 `returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to
 finish). The target must be a `use` beat, returned to once (the stock hook has one duplicate,
 `DefaultAliasOnActivateA`); this beat repeats its `at` and `place` and sets no model or name. The first
@@ -270,6 +270,18 @@ Each member's marker goes out as it is done: its target is lit only while its st
 instant, and the quest log shows only the newest line, so its own `journal` is never read and stage 100
 would show the base's line. `recap` is stage 100's line, and the lint requires it there. Ending on a
 single beat, that beat's `journal` already is stage 100's line, so a `recap` is refused.
+
+**Endings, `choose`:** consecutive `deliver` beats with the same `choose` name are the ENDINGS, and they
+must be the last step. Each is its own place (two endings' places that can draw one POI are refused), its
+own objective (all shown together once the choice opens), and its own completing stage: the first ending
+100, the next a COPY of 100 at 110 (so it completes and pays the same way), and so on. Each needs a
+`reward` tier (`easy` / `med` / `hard`, Overtime's `duo_reward_*` globals) written onto its stage.
+Walking to one takes the carried things, blocks every ending's prompt, HIDES the others' objectives
+(never failed: neither side is the villain) and ends the quest. An optional `person`
+`{ "name", "template", "outfit", "company": { "list", "min", "max" } }` is a friendly NPC cloned from a
+vanilla template, placed beside the ending (with nameless company around it) the first time the player
+comes within 250 m of it after the choice opens. ⚠ The beat before the endings must have no `journal`:
+`offer.journal` lands on that stage in the same instant and is the line the player reads.
 
 **`approach: { "to": N, "civilians": true, "lose": M }`:** the first time the player comes within
 250 m of beat N's object, a stock `DefaultAliasOnDistanceLessThan` on the player sets stage 5, whose

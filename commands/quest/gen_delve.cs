@@ -262,6 +262,17 @@ namespace FrankyCLI
             /// the same at and place as its target, and only a use beat can be returned to, once.
             /// </summary>
             public int? returnTo { get; set; }
+            /// <summary>
+            /// beats, OPTIONAL: consecutive deliver beats sharing a choose name are the ENDINGS (the last step):
+            /// each is shown, walking to one completes the quest on its own stage and hides the others (hidden,
+            /// never failed: neither side is the villain). Jessica's Type 2; his ruling that the choice is made
+            /// by WHERE YOU GO. The first ending completes on 100, the next on a copy of 100 at 110, and so on.
+            /// </summary>
+            public string? choose { get; set; }
+            /// <summary>beats, a choose ending: Overtime's pay tier (easy / med / hard) written onto its completing stage.</summary>
+            public string? reward { get; set; }
+            /// <summary>beats, a choose ending, OPTIONAL: the named NPC (and company) placed beside it on the first approach after the find.</summary>
+            public Person? person { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -548,7 +559,7 @@ namespace FrankyCLI
             bool choice = t.kind == "choice";
             bool beats = t.kind == "beats";
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
-            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null) || r.approach != null)
+            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null) || r.approach != null)
                 Fatal($"a beat sets type, group, item, model, name, replace or returnTo, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
@@ -723,7 +734,7 @@ namespace FrankyCLI
             var unused = new List<string>();
             if (!choice)
             {
-                if (r.offer != null) unused.Add("offer");
+                if (r.offer != null && !beats) unused.Add("offer");
                 if (r.reward != null) unused.Add("reward");
                 if (r.people != null) unused.Add("people");
                 if (r.place.third != null && !beats) unused.Add("place.third");
@@ -888,7 +899,13 @@ namespace FrankyCLI
                         if (drawn.ContainsKey(a) && drawn.ContainsKey(b))
                         {
                             int both = drawn[a].Intersect(drawn[b], StringComparer.OrdinalIgnoreCase).Count();
-                            if (both > 0) Warn($"the {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} places can draw the same POI ({both} in common); give one a theme the other excludes if they must differ.");
+                            // Two ENDINGS must be two places (the choice kind's rule above, carried over): a refusal.
+                            bool endings = r.beats.Any(x => x.choose != null && x.PlaceIndex == a) && r.beats.Any(x => x.choose != null && x.PlaceIndex == b);
+                            if (endings) Console.WriteLine($"  {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} (two endings) overlap on {both} POI(s)");
+                            if (both > 0 && endings)
+                                Fatal($"two endings' places, {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()}, can draw the SAME POI ({both}). "
+                                      + "Make their themes disjoint: one requires a keyword the other excludes.");
+                            else if (both > 0) Warn($"the {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} places can draw the same POI ({both} in common); give one a theme the other excludes if they must differ.");
                         }
 
                 // --- what the build will DROP from the base --------------------------------------------
@@ -1895,7 +1912,31 @@ namespace FrankyCLI
             var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
             if (t.kind == "beats")
             {
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats);
+                // A choose ending's person is resolved here, where the load order is, own-or-master (never the
+                // winner by name: see the choice branch below for the master it once added).
+                var persons = new Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)>();
+                for (int i = 0; i < r.beats.Count && fail == 0; i++)
+                {
+                    var pp = r.beats[i].person;
+                    if (pp == null) continue;
+                    var n = OwnOrMaster<INpcGetter>(myMod, env, pp.template ?? "");
+                    if (n == null) { Console.WriteLine($"REFUSED: NPC '{pp.template}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                    FormKey? of = null, co = null;
+                    if (!string.IsNullOrWhiteSpace(pp.outfit))
+                    {
+                        var o = OwnOrMaster<IOutfitGetter>(myMod, env, pp.outfit!);
+                        if (o == null) { Console.WriteLine($"REFUSED: Outfit '{pp.outfit}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                        of = o.FormKey;
+                    }
+                    if (pp.company != null)
+                    {
+                        var f = OwnOrMaster<IFormListGetter>(myMod, env, pp.company.list ?? "");
+                        if (f == null) { Console.WriteLine($"REFUSED: FormList '{pp.company.list}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                        co = f.FormKey;
+                    }
+                    persons[i] = (n, of, co);
+                }
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons);
             }
             else if (t.kind == "choice")
             {

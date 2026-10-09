@@ -50,9 +50,11 @@ namespace FrankyCLI
         {
             public List<int> Beats = new();          // indices into r.beats
             public string? Group;                    // null = a single beat
+            public string? Choose;                   // the endings: one objective and one completing stage each
             public int Objective;                    // objective index, 10 * (step + 1)
             public int DoneStage;                    // the stage that means this step is finished
             public bool IsGroup => Group != null;
+            public bool IsChoose => Choose != null;
         }
 
         /// <summary>Split the beats into steps. Pure, so the lint and the build agree by construction.</summary>
@@ -62,8 +64,10 @@ namespace FrankyCLI
             for (int i = 0; i < r.beats.Count; i++)
             {
                 var g = r.beats[i].group;
+                var c = r.beats[i].choose;
                 if (g != null && steps.Count > 0 && steps[^1].Group == g) { steps[^1].Beats.Add(i); continue; }
-                steps.Add(new Step { Beats = { i }, Group = g });
+                if (c != null && steps.Count > 0 && steps[^1].Choose == c) { steps[^1].Beats.Add(i); continue; }
+                steps.Add(new Step { Beats = { i }, Group = g, Choose = c });
             }
             for (int k = 0; k < steps.Count; k++) steps[k].Objective = 10 * (k + 1);
             return steps;
@@ -81,6 +85,13 @@ namespace FrankyCLI
             {
                 var s = steps[k];
                 bool last = k == steps.Count - 1;
+                if (s.IsChoose)
+                {
+                    // The endings (the lint holds them to the last step): each completes on its own stage.
+                    for (int j = 0; j < s.Beats.Count; j++) beatStage[s.Beats[j]] = complete + 10 * j;
+                    s.DoneStage = complete;
+                    continue;
+                }
                 if (!s.IsGroup)
                 {
                     int st = last ? complete : next;
@@ -152,7 +163,7 @@ namespace FrankyCLI
                 for (int j = 0; j < s.Beats.Count; j++)
                 {
                     var b = r.beats[s.Beats[j]];
-                    bool carries = j == 0;
+                    bool carries = j == 0 || s.IsChoose;
                     if (carries && string.IsNullOrWhiteSpace(b.objective))
                         Fatal($"beat {s.Beats[j] + 1} has no objective" + (s.IsGroup ? $" (it opens group '{s.Group}', and the group's one objective is its)" : ""));
                     if (!carries && !string.IsNullOrWhiteSpace(b.objective))
@@ -195,29 +206,87 @@ namespace FrankyCLI
                 if (!ap.civilians && ap.lose == null) Fatal("approach does nothing: set civilians, lose, or both.");
             }
 
+            // --- the endings ------------------------------------------------------------------------------
+            var chooseSteps = steps.Where(s => s.IsChoose).ToList();
+            foreach (var cs in chooseSteps)
+            {
+                if (cs != steps[^1]) Fatal($"choose '{cs.Choose}' is not the last step; an ending ends the quest, so nothing can follow it.");
+                if (cs == steps[0]) Fatal($"choose '{cs.Choose}' is the first step; there is nothing found yet to choose what to do with.");
+                if (cs.Beats.Count < 2) Fatal($"choose '{cs.Choose}' has one ending; a choice of one is a deliver.");
+                foreach (var b in cs.Beats)
+                {
+                    var eb = r.beats[b];
+                    if (eb.type != "deliver") Fatal($"beat {b + 1} is an ending of choose '{cs.Choose}' and a {eb.type}; an ending is a deliver.");
+                    if (eb.group != null || eb.returnTo != null) Fatal($"beat {b + 1} is an ending and also a group member or a return; an ending is its own object.");
+                    if (cs.Beats.Any(o => o != b && r.beats[o].PlaceIndex == eb.PlaceIndex))
+                        Fatal($"beat {b + 1} is an ending at the same place as another ending; the choice is made by WHERE the player goes, so each ending is its own place.");
+                    if (string.IsNullOrWhiteSpace(eb.reward)) Fatal($"beat {b + 1} is an ending with no reward tier (easy / med / hard).");
+                    else
+                        foreach (var kind in new[] { "creds", "xp" })
+                            if (!env.LoadOrder.PriorityOrder.WinningOverrides<IGlobalGetter>()
+                                    .Any(x => string.Equals(x.EditorID, $"duo_reward_{kind}_{eb.reward}", StringComparison.OrdinalIgnoreCase)))
+                                Fatal($"beat {b + 1} reward '{eb.reward}': no global duo_reward_{kind}_{eb.reward} in the load order.");
+                    if (eb.person is Person pp)
+                    {
+                        if (string.IsNullOrWhiteSpace(pp.name) || string.IsNullOrWhiteSpace(pp.template)) Fatal($"beat {b + 1} person needs both a name and a template.");
+                        else if (Tokens(pp.name).Any()) Fatal($"beat {b + 1} person name carries a <Token>; an NPC name is not an alias context.");
+                        if (pp.company != null && (pp.company.min < 0 || pp.company.max < pp.company.min))
+                            Fatal($"beat {b + 1} person.company needs 0 <= min <= max; it has {pp.company.min}-{pp.company.max}.");
+                    }
+                    else Warn($"beat {b + 1} is an ending with no person, so nobody stands there; a box that talks about a person talks about nobody.");
+                }
+            }
+            for (int i = 0; i < r.beats.Count; i++)
+                if (r.beats[i].choose == null && (r.beats[i].reward != null || r.beats[i].person != null))
+                    Fatal($"beat {i + 1} sets reward or person and is not a choose ending, so it would be silently ignored.");
+            if (r.offer != null)
+            {
+                if (chooseSteps.Count == 0) Fatal("offer is set and no step is a choose; the offer is the beat that makes it a choice.");
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(r.offer.journal)) Fatal("offer.journal is required: it is the line the player reads at the find.");
+                    var before = steps[steps.IndexOf(chooseSteps[0]) - 1];
+                    foreach (var b in before.Beats)
+                        if (r.beats[b].journal != null)
+                            Fatal($"beat {b + 1} has a journal, and the offer's journal lands on the same stage in the same instant and overwrites it (the log shows only the newest line). Put what the player must read in offer.journal.");
+                    if (r.offer.message != null && (string.IsNullOrWhiteSpace(r.offer.message.title) || string.IsNullOrWhiteSpace(r.offer.message.text)))
+                        Fatal("offer.message needs a title and text.");
+                }
+            }
+            int personCount = r.beats.Count(b => b.person != null);
+            if (personCount > 0)
+            {
+                if (t.approachStage < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or playerAlias for an ending's person.");
+                else if (t.approachStage + personCount >= 10) Fatal($"{personCount} people need stages {t.approachStage + 1} to {t.approachStage + personCount}, which reach the first beat's 10.");
+            }
+
             int recoverCount = r.beats.Count(b => b.type == "recover");
             if (recoverCount > 5) Fatal($"{recoverCount} recover beats; the player's OnItemAdded hook has the base and four duplicates, so five.");
             if (recoverCount > 0 && t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
 
             // Delivering needs something in hand: the first deliver must come after a pickup or a recover.
             int carried = 0;
+            bool endsOnChoice = false;
             for (int i = 0; i < r.beats.Count; i++)
             {
                 if (r.beats[i].type == "pickup" || r.beats[i].type == "recover") carried++;
                 else if (r.beats[i].type == "deliver")
                 {
                     if (carried == 0) Fatal($"beat {i + 1} is a deliver with nothing picked up or recovered before it, so there is nothing to hand over.");
-                    carried = 0;
+                    if (r.beats[i].choose == null) carried = 0;   // every ending takes the same things
+                    else endsOnChoice = true;
                 }
             }
-            if (carried > 0) Warn($"{carried} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
+            if (carried > 0 && !endsOnChoice) Warn($"{carried} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
 
             var beatStage = StagesOf(steps, t.completeStage);
-            int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Where(x => x != t.completeStage).DefaultIfEmpty(0).Max();
+            int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Where(x => x < t.completeStage).DefaultIfEmpty(0).Max();
             if (highest >= t.completeStage)
                 Fatal($"the beats number stages up to {highest}, at or past the completing stage {t.completeStage}: too many beats.");
             Console.WriteLine("  steps    : " + string.Join("  ", steps.Select((s, k) =>
-                $"[{k + 1}] " + (s.IsGroup ? $"group '{s.Group}' x{s.Beats.Count} -> {s.DoneStage}" : $"{r.beats[s.Beats[0]].type} -> {s.DoneStage}"))));
+                $"[{k + 1}] " + (s.IsGroup ? $"group '{s.Group}' x{s.Beats.Count} -> {s.DoneStage}"
+                                : s.IsChoose ? $"choose '{s.Choose}' x{s.Beats.Count} -> {string.Join("/", s.Beats.Select(b => beatStage[b]))}"
+                                : $"{r.beats[s.Beats[0]].type} -> {s.DoneStage}"))));
 
             var items = r.beats.Where(b => b.item != null).Select(b => b.item!).ToList();
             if (items.SelectMany(Tokens).Any()) Fatal("an item name carries a <Token>; item names are not alias contexts.");
@@ -263,11 +332,16 @@ namespace FrankyCLI
             public List<(int objective, int alias, int stage)> TargetGates = new();
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
-            public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
+            public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
+            public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
+            public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
+            public Dictionary<int, (FormKey npc, string name)> People = new();
+            public (int stage, string text)? OfferJournal;   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
-                                      Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm)
+                                      Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
+                                      Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -357,8 +431,29 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: the recipe gives the base's {t.beatSlots.Count} object slots only {baseNext} beat(s) with an object of its own."); return 1; }
 
             // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
+            // An ending's person is placed on its own stage, numbered after the approach's.
+            var personStage = new Dictionary<int, int>();
+            foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null))
+                personStage[b] = t.approachStage + 1 + personStage.Count;
+            // A second ending completes the quest the same way as the first: a COPY of the completing stage
+            // (its CompleteQuest flag and its reward entry), never a plain stage, which completes nothing.
+            foreach (var cs in steps.Where(s => s.IsChoose))
+                for (int j = 1; j < cs.Beats.Count; j++)
+                {
+                    int st = beatStage[cs.Beats[j]];
+                    if (clone.Stages!.Any(x => x.Index == st)) { Console.WriteLine($"REFUSED: stage {st} already exists on this base."); return 1; }
+                    var done = clone.Stages.FirstOrDefault(x => x.Index == t.completeStage);
+                    if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
+                    { Console.WriteLine($"REFUSED: stage {t.completeStage} is not a single-entry completing stage to copy an ending from."); return 1; }
+                    var copy = done.DeepCopy();
+                    copy.Index = (ushort)st;
+                    copy.LogEntries[0].Entry = null;
+                    clone.Stages.Add(copy);
+                    Console.WriteLine($"  +stage   : {st} (ending {j + 1} of choose '{cs.Choose}', a copy of completing stage {t.completeStage})");
+                }
             var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage))
-                .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
+                .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
+                .Concat(personStage.Values).Distinct().OrderBy(x => x).ToList();
             foreach (var st in allStages)
             {
                 if (clone.Stages!.Any(s => s.Index == st)) continue;
@@ -404,6 +499,34 @@ namespace FrankyCLI
                     && ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
             }
 
+            // The endings' pay, ON THE STAGE: QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas,
+            // BonusCredits (QRCR) and XpAwarded (QRXP), pointed at the tier's two globals. Written for every
+            // ending, the first one too, rather than trusting what the copy inherited.
+            foreach (var cs in steps.Where(s => s.IsChoose))
+                foreach (var b in cs.Beats)
+                {
+                    var st = clone.Stages.First(x => x.Index == beatStage[b]);
+                    var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                    if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
+                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
+                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{r.beats[b].reward}");
+                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward} / duo_reward_xp_{r.beats[b].reward}."); return 1; }
+                    rds[0].BonusCredits.SetTo(cg.FormKey);
+                    rds[0].XpAwarded.SetTo(xg.FormKey);
+                    bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
+                    Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
+                }
+            // The offer: the line the player reads at the find, on the stage that enters the choice.
+            if (r.offer?.journal != null)
+            {
+                int enter = steps[steps.FindIndex(s => s.IsChoose) - 1].DoneStage;
+                var oe = clone.Stages.FirstOrDefault(x => x.Index == enter)?.LogEntries.FirstOrDefault();
+                if (oe == null) { Console.WriteLine($"REFUSED: stage {enter} has no log entry for the offer's journal."); return 1; }
+                oe.Entry = Expand(r.offer.journal, t);
+                bm.OfferJournal = (enter, oe.Entry.String!);
+                Console.WriteLine($"  offer    : journal on stage {enter}");
+            }
+
             // --- 5. items, one clone per pickup -----------------------------------------------------------
             foreach (var k in myMod.MiscItems.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_item")).Select(m => m.FormKey).ToList())
                 myMod.MiscItems.Remove(k);
@@ -443,10 +566,31 @@ namespace FrankyCLI
             if (lastOb?.Targets == null || lastOb.Targets.Count != 1)
             { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
             var obSrc = lastOb.DeepCopy();
-            clone.Objectives!.RemoveAll(o => !steps.Any(s => s.Objective == o.Index));
+            int ObjOf(Step st, int b) => st.IsChoose ? st.Objective + 10 * st.Beats.IndexOf(b) : st.Objective;
+            var obIdx = steps.SelectMany(st => st.Beats.Select(b => ObjOf(st, b))).ToHashSet();
+            clone.Objectives!.RemoveAll(o => !obIdx.Contains(o.Index));
             for (int k = 0; k < steps.Count; k++)
             {
                 var s = steps[k];
+                if (s.IsChoose)
+                {
+                    // One objective per ending, each pointing at its own delivery point.
+                    foreach (var b in s.Beats)
+                    {
+                        int oi = ObjOf(s, b);
+                        var eo = clone.Objectives.FirstOrDefault(o => o.Index == oi);
+                        if (eo == null) { eo = obSrc.DeepCopy(); eo.Index = (ushort)oi; clone.Objectives.Add(eo); }
+                        var et = eo.Targets![0].DeepCopy();
+                        et.AliasID = slotOf[b].ObjectiveTarget;
+                        eo.Targets.Clear();
+                        eo.Targets.Add(et);
+                        string etext = Expand(r.beats[b].objective!, t);
+                        eo.DisplayText = etext;
+                        bm.ObjectiveText[oi] = etext;
+                        Console.WriteLine($"  objective: {oi} \"{etext}\" -> alias {slotOf[b].ObjectiveTarget} (ending of '{s.Choose}')");
+                    }
+                    continue;
+                }
                 var ob = clone.Objectives.FirstOrDefault(o => o.Index == s.Objective);
                 if (ob == null) { ob = obSrc.DeepCopy(); ob.Index = (ushort)s.Objective; clone.Objectives.Add(ob); }
                 var tgt = ob.Targets![0].DeepCopy();
@@ -497,6 +641,41 @@ namespace FrankyCLI
                 msg.OwnerQuest.SetTo(clone.FormKey);
                 msgOf[i] = msg.FormKey;
                 Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"");
+            }
+
+            FormKey offerMsg = default;
+            if (r.offer?.message != null)
+            {
+                if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                var om = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                om.EditorID = $"{r.id}_msgOffer";
+                om.Name = Expand(r.offer.message.title!, t);
+                om.Description = Expand(r.offer.message.text!, t);
+                om.OwnerQuest.SetTo(clone.FormKey);
+                offerMsg = om.FormKey;
+                Console.WriteLine($"  +message : {om.EditorID} {om.FormKey}  \"{om.Name}\"  (the offer)");
+            }
+
+            // --- the people at the endings: named NPCs cloned from a friendly vanilla template -------------
+            // NPCTools.CloneNPC copies the body field by field and NOT the name or the voice, so both are
+            // written here; unaggressive, average confidence, dressed from the recipe (his 2026-10-08 asks).
+            var npcOf = new Dictionary<int, FormKey>();
+            foreach (var k in myMod.Npcs.Where(n => n.EditorID != null && n.EditorID.StartsWith(r.id + "_person")).Select(n => n.FormKey).ToList())
+                myMod.Npcs.Remove(k);
+            foreach (var (b, pr) in persons)
+            {
+                var pp = r.beats[b].person!;
+                var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, pr.tmpl.DeepCopy());
+                npc.EditorID = $"{r.id}_person{b + 1}";
+                npc.Name = pp.name!;
+                npc.Voice.SetTo(pr.tmpl.Voice.FormKey);
+                npc.Aggression = Npc.AggressionType.Unaggressive;
+                npc.Confidence = Npc.ConfidenceType.Average;
+                if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
+                myMod.Npcs.Add(npc);
+                npcOf[b] = npc.FormKey;
+                bm.People[b] = (npc.FormKey, pp.name!);
+                Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
             }
 
             // --- 9. the events: one stock hook per beat --------------------------------------------------
@@ -565,6 +744,29 @@ namespace FrankyCLI
                 }
             }
 
+            // An ending's person: a stock distance hook on the ending's OWN object, measuring to the player,
+            // armed only once the choice is open (PrereqStage = the stage that enters it), as the choice
+            // driver registered its distance events at the find.
+            foreach (var (b, pst) in personStage)
+            {
+                int own = slotOf[b].activatorAlias;
+                int enter = steps[steps.FindIndex(s => s.Beats.Contains(b)) - 1].DoneStage;
+                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
+                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
+                ta.Object.SetTo(clone.FormKey);
+                ta.Alias = (short)t.playerAlias;
+                sc.Properties.Add(ta);
+                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = pst, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = enter, Flags = ScriptProperty.Flag.Edited });
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == own);
+                if (entry == null) { Console.WriteLine($"REFUSED: ending alias {own} carries no hook entry to add the approach to."); return 1; }
+                entry.Scripts.Add(sc);
+                bm.Hooks.Add((own, sc.Name, pst, enter));
+                bm.PersonApproach.Add((own, t.playerAlias));
+                Console.WriteLine($"  +hook    : beat {b + 1}'s person, within {ApproachDistance} of its object (alias {own}) after {enter}, sets {pst}");
+            }
+
             // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
             if (r.approach is Approach apr)
             {
@@ -627,9 +829,27 @@ namespace FrankyCLI
                     props.Add(("Form", $"Item{b + 1}", itemOf[b], -1));
                     Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {t.gangMin}, {gangMax})");
                 }
-                Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
+                if (steps[k].IsChoose)
+                {
+                    if (!offerMsg.IsNull) { props.Add(("Message", "OfferMessage", offerMsg, -1)); Add(stage, "OfferMessage.Show()"); }
+                    foreach (var b in steps[k].Beats) Add(stage, $"SetObjectiveDisplayed({ObjOf(steps[k], b)})");
+                }
+                else Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
             }
             Enter(0, 0);
+            foreach (var (b, pst) in personStage)
+            {
+                string ta = $"Alias_Beat{b + 1}Target", pn = $"Person{b + 1}";
+                props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[b].activatorAlias));
+                props.Add(("ActorBase", pn, npcOf[b], -1));
+                Add(pst, $"duo_delve_lib.PlacePerson({ta}, {pn}, 1.5)");
+                var pc = r.beats[b].person!.company;
+                if (pc != null && persons[b].company is FormKey cfk)
+                {
+                    props.Add(("FormList", $"Company{b + 1}", cfk, -1));
+                    Add(pst, $"duo_delve_lib.PlaceCompany({ta}, Company{b + 1}, {pc.min}, {pc.max}, 8.0)");
+                }
+            }
             if (r.approach is Approach af)
             {
                 // Civilians first, then the crate, as the driver did.
@@ -667,7 +887,23 @@ namespace FrankyCLI
                             props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
                             Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
                         }
-                        held.Clear();
+                        if (!s.IsChoose) held.Clear();   // every ending takes the same things
+                    }
+                    if (s.IsChoose)
+                    {
+                        // Whichever ending the player walked to: every ending's prompt goes, the others' objectives
+                        // are HIDDEN (never failed: neither side is the villain), and the quest ends here.
+                        int own = ObjOf(s, b);
+                        foreach (var e in s.Beats)
+                        {
+                            string ea = $"Alias_Beat{e + 1}Target";
+                            props.Add(("ReferenceAlias", ea, clone.FormKey, slotOf[e].activatorAlias));
+                            Add(st, $"{ea}.GetRef().BlockActivation(True, True)");
+                            if (e != b) Add(st, $"SetObjectiveDisplayed({ObjOf(s, e)}, False)");
+                        }
+                        Add(st, $"SetObjectiveCompleted({own})");
+                        Add(st, "CompleteQuest()");
+                        Add(st, "Stop()");
                     }
                     if (s.IsGroup)
                     {
@@ -677,8 +913,8 @@ namespace FrankyCLI
                     }
                 }
                 int done = s.DoneStage;
-                if (!s.IsGroup) Add(done, $"SetObjectiveCompleted({s.Objective})");
-                if (last) { Add(done, "CompleteQuest()"); Add(done, "Stop()"); }
+                if (!s.IsGroup && !s.IsChoose) Add(done, $"SetObjectiveCompleted({s.Objective})");
+                if (last) { if (!s.IsChoose) { Add(done, "CompleteQuest()"); Add(done, "Stop()"); } }
                 else Enter(k + 1, done);
             }
 
@@ -771,6 +1007,26 @@ namespace FrankyCLI
                 fail += Check("approach measures to its object", tp == null ? "missing" : $"{tp.Object.FormKey} alias {tp.Alias} within {dp?.Data}",
                               $"{q.FormKey} alias {ato} within {ApproachDistance}");
             }
+            foreach (var (on, to) in bm.PersonApproach)
+            {
+                var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == on)?.Scripts.FirstOrDefault(x => x.Name == "DefaultAliasOnDistanceLessThan");
+                var tp = dsc?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == "TargetAlias");
+                fail += Check($"ending alias {on}'s person hook measures to the player", tp == null ? "missing" : $"alias {tp.Alias}", $"alias {to}");
+            }
+            foreach (var (stg, (cg, xg)) in bm.StageReward)
+            {
+                var le = q.Stages.FirstOrDefault(x => x.Index == stg)?.LogEntries.FirstOrDefault();
+                var rd = le?.StageCompleteDatas.SelectMany(c => c.RewardDatas).FirstOrDefault();
+                fail += Check($"stage {stg} completes the quest and pays its tier",
+                              $"{le?.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) ?? false} {rd?.BonusCredits.FormKey} {rd?.XpAwarded.FormKey}",
+                              $"True {cg} {xg}");
+            }
+            foreach (var (b, (npc, nm)) in bm.People)
+            {
+                fail += Check($"beat {b + 1}'s person", m.Npcs.FirstOrDefault(n => n.FormKey == npc)?.Name?.String ?? "missing", nm);
+            }
+            if (bm.OfferJournal is (int ost, string otx))
+                fail += Check($"offer journal on stage {ost}", q.Stages.FirstOrDefault(x => x.Index == ost)?.LogEntries.FirstOrDefault()?.Entry?.String ?? "missing", otx);
             foreach (var h in bm.Holders)
             {
                 var ha = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)h);
