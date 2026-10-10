@@ -54,6 +54,9 @@ namespace FrankyCLI
     public static partial class gen_delve
     {
         private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold" };
+        // A hold wave's style -> how many distinct unseen origins duo_delve_lib.SpawnWave deals it across.
+        // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
+        private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 3 };
 
         /// <summary>The stuck-enemy guard's default, in seconds: his infestation driver's pity timer.</summary>
         private const int DefaultStuckSeconds = 180;
@@ -183,6 +186,13 @@ namespace FrankyCLI
                         Fatal($"beat {i + 1} is a hold and needs \"size\": [min, max] with 1 <= min <= max; a wave of nobody has no last death, so it never clears.");
                     else if (b.size[1] > 12)
                         Warn($"beat {i + 1}'s waves reach {b.size[1]} enemies each; more than 12 at one marker is a crowd the navmesh may not seat.");
+                    if (b.style != null)
+                    {
+                        if (b.style.Count != (b.waves ?? 0))
+                            Fatal($"beat {i + 1} has {b.style.Count} style(s) for {(b.waves?.ToString() ?? "no")} waves; give one per wave, or leave style out for all squads.");
+                        foreach (var st in b.style.Where(st => !WaveStyles.ContainsKey(st)))
+                            Fatal($"beat {i + 1} has wave style '{st}'; the styles are {string.Join(", ", WaveStyles.Keys)}.");
+                    }
                     if (b.stuck is int s && s < 30)
                         Fatal($"beat {i + 1}'s stuck is {s} s; the guard would move the quest on mid-fight. 30 or more.");
                     if (b.model != null || b.name != null || b.replace)
@@ -200,8 +210,8 @@ namespace FrankyCLI
                         }
                     }
                 }
-                else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null)
-                    Fatal($"beat {i + 1} sets waves, size, defend or stuck and is not a hold, so they would be silently ignored.");
+                else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null)
+                    Fatal($"beat {i + 1} sets waves, size, defend, stuck or style and is not a hold, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))
@@ -1068,7 +1078,8 @@ namespace FrankyCLI
                 props.Add(("RefCollectionAlias", wv, clone.FormKey, waveAliases[b][w]));
                 props.Add(("FormList", "Gang", gangKey!.Value, -1));
                 var sz = r.beats[b].size!;
-                Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]})");
+                int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
+                Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]}, {origins})");
                 Add(stage, $"StartTimer({r.beats[b].stuck ?? DefaultStuckSeconds}.0, {ws[w]})   ; the stuck-enemy guard for wave {w + 1}");
                 pity.Add(ws[w]);
             }

@@ -306,6 +306,13 @@ namespace FrankyCLI
             /// (the stuck-enemy guard: his infestation driver's 180 s pity timer). Absent = 180.
             /// </summary>
             public int? stuck { get; set; }
+            /// <summary>
+            /// beats, a hold, OPTIONAL: each wave's style, one per wave, "squad" or "horde". A squad comes as one
+            /// group from one unseen side; a horde is dealt across up to three unseen sides (WaveStyles) at once (his
+            /// asks 2026-10-10: "scattering them across points / grouping for horde vs squad combat styles").
+            /// Absent = every wave a squad, which is how every hold played before the field existed.
+            /// </summary>
+            public List<string>? style { get; set; }
             /// <summary>beats, OPTIONAL: a line the recipe's speaker says over the radio when this beat's stage is set. Plain words, no tokens.</summary>
             public string? say { get; set; }
         }

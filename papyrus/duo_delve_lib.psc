@@ -37,17 +37,20 @@ Function SpawnHolder(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList 
     EndWhile
 EndFunction
 
-; THE HOLD BEAT. One wave: aiMin to aiMax enemies from the gang list at the spawn marker, each placed INTO
-; akWave (PlaceAtMe's akAliasToFill on a RefCollectionAlias, as vanilla's MissionBoardCargoContainerScript
-; fills its CargoCollection), all aggressive so they come for the player. A stock DefaultCollectionAliasOnDeath
-; on akWave sets the next stage when every one of them is dead, so nothing here watches anything. Persistent
-; while the quest holds them, so a wave cannot be unloaded out of its own collection. Scattered within 10 m
-; of where they arrive, snapped to navmesh, so they come as one group from one side.
+; THE HOLD BEAT. One wave: aiMin to aiMax enemies from the gang list, each placed INTO akWave (PlaceAtMe's
+; akAliasToFill on a RefCollectionAlias, as vanilla's MissionBoardCargoContainerScript fills its
+; CargoCollection), all aggressive so they come for the player. A stock DefaultCollectionAliasOnDeath on
+; akWave sets the next stage when every one of them is dead, so nothing here watches anything. Persistent
+; while the quest holds them, so a wave cannot be unloaded out of its own collection.
 ; WHERE they arrive changes per wave (his first play, 2026-10-09: "enemies spawn in the same spot each wave
-; ... bonus points if they aren't near the player"): see WaveOrigin. They then come FOR him because each
-; wave collection wears a Travel-to-player package (gen_delve writes it), not because of anything here.
-Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax) Global
-    ObjectReference marker = WaveOrigin(akMarker.GetRef(), Game.GetPlayer())
+; ... bonus points if they aren't near the player"), and since 2026-10-10 it is chosen where he is NOT
+; LOOKING (see WaveOrigins). aiOrigins is the wave's style, written by gen_delve from the recipe: 1 is a
+; SQUAD (one group from one side), more is a HORDE (the wave dealt round-robin across up to that many
+; origins, so it comes from several sides at once). Each group scatters within 10 m of its origin, snapped
+; to navmesh. They then come FOR him because each wave collection wears a Travel-to-player package
+; (gen_delve writes it), not because of anything here.
+Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax, Int aiOrigins) Global
+    ObjectReference[] origins = WaveOrigins(akMarker.GetRef(), Game.GetPlayer(), aiOrigins)
     ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
     ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
     Float detected = 2.0       ; Suspicious: DetectedActor
@@ -55,11 +58,13 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
 
     Float[] placePosition = new Float[6]
     Int n = Utility.RandomInt(aiMin, aiMax)
-    While n > 0
+    Int k = 0
+    While k < n
         placePosition[0] = Utility.RandomFloat(-10, 10)
         placePosition[1] = Utility.RandomFloat(-10, 10)
         placePosition[2] = 0
-        Actor enemy = marker.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, placePosition, akWave, True) as Actor
+        ObjectReference origin = origins[k % origins.Length]
+        Actor enemy = origin.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, placePosition, akWave, True) as Actor
         enemy.SetValue(Suspicious, detected)
         enemy.SetValue(Aggression, veryAggressive)
         ; Pick up the wave's Travel package NOW. Without this they stood where they spawned (his second play,
@@ -67,16 +72,25 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
         ; after a change of what an actor should be doing (QF_OE_KT_Trait_Wanted_Bounty stage 150,
         ; QF_BE_CF02_Ragana_BoardingQu, QF_OE_KT_UCMilitaryTrainingE).
         enemy.EvaluatePackage()
-        n -= 1
+        k += 1
     EndWhile
 EndFunction
 
-; Where a wave arrives: one of the SITE's own travel markers (the A and B rings round the POI, the same bases
-; NearestTravelMarker reads), drawn at random from those at least 40 m from the player, so each wave can come
-; from a different side and none drops on top of him. None that far: the farthest ring marker. None found
-; at all (a site with no ring in reach): the recipe's own spawn marker. Searched round the SITE, not the
-; player, so a wave never arrives at some other POI the player happens to be near.
-ObjectReference Function WaveOrigin(ObjectReference akSite, ObjectReference akPlayer) Global
+; Where a wave arrives: up to aiCount DISTINCT markers from the SITE's own travel rings (the A and B rings
+; round the POI, the same bases NearestTravelMarker reads), searched round the site, not the player, so a
+; wave never arrives at some other POI he happens to be near. His asks, 2026-10-10: "spawning the enemies at
+; points the player isnt looking at". Drawn at random, best tier first:
+;   1. FAR AND UNSEEN: 40 m+ from him, and either behind him (his heading more than 90 degrees off it, the
+;      test vanilla's doors use) or out of his line of sight (Actor.HasDetectionLOS; its header: "Only the
+;      player can check LOS to a non-actor", so this is the one actor allowed to ask about a marker).
+;      Vanilla's precedent for "move it where he cannot see": QF_COM_Quest_Andreja_Q01, HasDirectLOS == 0.
+;   2. FAR: 40 m+ from him, seen or not (today's rule before this one).
+;   3. Nothing far at all: the single farthest ring marker.
+; No ring in reach (a site without the markers): the recipe's own spawn marker, once. Never empty.
+; HasDetectionLOS on a bare marker is UNVERIFIED in game: if it always says "seen", tier 1 is "behind him";
+; if it always says "unseen", tier 1 is tier 2. Neither breaks a wave, which is why it is a filter and not
+; the rule.
+ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, Int aiCount) Global
     Float SiteSearch = 300.0   ; metres round the site; the widest POI diameter measured is 373 (gen_delve lint)
     Float MinFromPlayer = 40.0
     Int[] ids = new Int[6]
@@ -86,7 +100,8 @@ ObjectReference Function WaveOrigin(ObjectReference akSite, ObjectReference akPl
     ids[3] = 0x0E37FD ; B1
     ids[4] = 0x0E37FC ; B2
     ids[5] = 0x0E37FB ; B3
-    ObjectReference[] far = new ObjectReference[0]
+    ObjectReference[] unseen = new ObjectReference[0]
+    ObjectReference[] seen = new ObjectReference[0]
     ObjectReference farthest = None
     Float farthestD = -1.0
     Int b = 0
@@ -96,7 +111,11 @@ ObjectReference Function WaveOrigin(ObjectReference akSite, ObjectReference akPl
         While i < found.Length
             Float d = akPlayer.GetDistance(found[i])
             If d >= MinFromPlayer
-                far.Add(found[i])
+                If Math.abs(akPlayer.GetHeadingAngle(found[i])) > 90.0 || !akPlayer.HasDetectionLOS(found[i])
+                    unseen.Add(found[i])
+                Else
+                    seen.Add(found[i])
+                EndIf
             EndIf
             If d > farthestD
                 farthest = found[i]
@@ -106,12 +125,27 @@ ObjectReference Function WaveOrigin(ObjectReference akSite, ObjectReference akPl
         EndWhile
         b += 1
     EndWhile
-    If far.Length > 0
-        Return far[Utility.RandomInt(0, far.Length - 1)]
-    ElseIf farthest != None
-        Return farthest
+    ObjectReference[] picked = new ObjectReference[0]
+    DrawInto(unseen, picked, aiCount)
+    DrawInto(seen, picked, aiCount)
+    If picked.Length == 0
+        If farthest != None
+            picked.Add(farthest)
+        Else
+            picked.Add(akSite)
+        EndIf
     EndIf
-    Return akSite
+    Return picked
+EndFunction
+
+; Moves random members of akPool into akOut until akOut holds aiWant (or the pool is empty). Draws without
+; replacement, so a horde's origins are distinct markers.
+Function DrawInto(ObjectReference[] akPool, ObjectReference[] akOut, Int aiWant) Global
+    While akOut.Length < aiWant && akPool.Length > 0
+        Int j = Utility.RandomInt(0, akPool.Length - 1)
+        akOut.Add(akPool[j])
+        akPool.Remove(j)
+    EndWhile
 EndFunction
 
 ; THE APPROACH (stage 5 on a beats Delve, set by a stock DefaultAliasOnDistanceLessThan on the player).

@@ -248,13 +248,13 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
-| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at a random one of the site's travel markers 40 m or more from the player (else the farthest, else `at`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at the site's travel markers, preferring ones 40 m or more from the player AND unseen by him (behind his heading or out of his line of sight), then any 40 m+, else the farthest, else `at`; a `horde` wave is dealt across up to three such markers (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
 `model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
 `group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`, and on a hold `waves`,
-`size`, `defend`, `stuck`.
+`size`, `defend`, `stuck`, `style`.
 `returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to
 finish). The target must be a `use` beat, returned to once (the stock hook has one duplicate,
 `DefaultAliasOnActivateA`); this beat repeats its `at` and `place` and sets no model or name. The first
@@ -269,8 +269,15 @@ when all N are done. The counter resets when the quest starts, because these que
 Each member's marker goes out as it is done: its target is lit only while its stage is not done (`GetStageDone == 0`, vanilla's way). Clearing the alias was tried and does not drop a marker.
 
 **A hold (Jessica's Type 6, `duo_delve09`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
-least 1: an empty wave never clears) spawn one after another, each at a random travel marker of the site at least 40 m from the player (his
-first play: one spot every wave, and on top of him); `at` is the search anchor and the last fallback. Every
+least 1: an empty wave never clears) spawn one after another, each at the site's travel markers (his first play: one spot every wave, and on top of
+him). **Where (2026-10-10, his "spawning the enemies at points the player isnt looking at"):** a marker 40 m+ from
+him that he cannot see (his heading more than 90 degrees off it, or `HasDetectionLOS` false), then any 40 m+, then
+the farthest; `at` is the search anchor and the last fallback. ⚠ `HasDetectionLOS` on a bare marker is unverified
+in game; if it misreads, the rule degrades to "behind him" or to "far", never to an empty wave. **`style`**,
+optional, one per wave: `squad` (one group from one side, the default and every hold before the field) or `horde`
+(the wave dealt round-robin across up to three distinct such markers, so it comes from several sides at once). The
+lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
+hold. Every
 wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,
 to PlayerRef, only while he is 9 to 1000 m away), so they come for him. The objective gets the counter `(n/waves)` appended and is redisplayed as each
 wave falls, which is the player's feedback (no message boxes in this type, his ruling). `defend: N` points
