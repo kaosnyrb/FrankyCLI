@@ -54,7 +54,10 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
     ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
     ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
     Float detected = 2.0       ; Suspicious: DetectedActor
-    Float veryAggressive = 2.0 ; Aggression: VeryAggressive
+    ; Aggression 1 (Aggressive: enemies only), NOT his gang idiom's 2 (VeryAggressive, which also attacks
+    ; neutrals): a wave crossing open ground at 2 stopped to fight every animal it met (his play of 09,
+    ; 2026-10-10: "the waves tend to try and attack any wildlife they run into").
+    Float aggressive = 1.0
 
     Float[] placePosition = new Float[6]
     Int n = Utility.RandomInt(aiMin, aiMax)
@@ -66,12 +69,17 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
         ObjectReference origin = origins[k % origins.Length]
         Actor enemy = origin.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, placePosition, akWave, True) as Actor
         enemy.SetValue(Suspicious, detected)
-        enemy.SetValue(Aggression, veryAggressive)
+        enemy.SetValue(Aggression, aggressive)
         ; Pick up the wave's Travel package NOW. Without this they stood where they spawned (his second play,
         ; 2026-10-09): being filled into the alias does not make an actor re-pick its package. Vanilla's idiom
         ; after a change of what an actor should be doing (QF_OE_KT_Trait_Wanted_Bounty stage 150,
         ; QF_BE_CF02_Ragana_BoardingQu, QF_OE_KT_UCMilitaryTrainingE).
         enemy.EvaluatePackage()
+        ; And put them in combat with HIM now, as his preferred target, so they close at combat pace instead of
+        ; jogging the Travel package until they happen to see him (his play of 09: "They are slowish, so you
+        ; spend a lot of time looking around for them"). Vanilla's commonest form, StartCombat(Game.GetPlayer()
+        ; (74 sites in the vanilla source).
+        enemy.StartCombat(Game.GetPlayer(), True)
         k += 1
     EndWhile
 EndFunction
