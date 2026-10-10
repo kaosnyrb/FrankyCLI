@@ -10,8 +10,8 @@
     "message boxes (his 2026-10-08 ruling for this type). The design's beats 1 and 2 (bring, start) are",
     "folded into one deliver at the dish for this first test; fitting the part IS starting it.",
     "Jessica's words: the deliver and hold objectives, the deliver journal, and the hold journal (her recap).",
-    "ELIZA'S PLACEHOLDERS, owed to Jessica: prose.name, prose.briefing, the pickup's objective, the item name.",
-    "2026-10-09: speech, his pick of voice (ElevenLabs CwhRBWXzGAHq8TQ4Fs17) and speaker (\"relay control yeah\"). The broadcast is ELIZA'S PLACEHOLDER, owed to Jessica.",
+    "2026-10-10: prose.name, prose.briefing and the pickup's objective are now Jessica's; the item name (Eliza's) is kept on purpose, plain and new.",
+    "2026-10-09: speech, his pick of voice (ElevenLabs CwhRBWXzGAHq8TQ4Fs17) and speaker (\"relay control yeah\"). The broadcast is Jessica's since 2026-10-10 (radio rules: no names, no places).",
     "2026-10-09: the deliver and hold beats' say lines are HIS words (\"Great that's aligning now, keep an eye out\", \"Link is online, thanks for your help\"), punctuated."
   ],
   "place": {
@@ -22,14 +22,14 @@
     "_theme": "No theme demand, his ruling 2026-10-09 after the first good play: drop LocTypeOE_NonHostile, and the base's own exclusions of natural and cave sites. Any POI with the markers will do; the waves are the fight wherever it is."
   },
   "prose": {
-    "name": "Relay Alignment on <Planet>",
-    "briefing": "The relay at the <Place> is missing its transmitter. I said I'd find one, fit it, and get the dish talking again."
+    "name": "Security: Relay Alignment on <Planet>",
+    "briefing": "The relay at the <Place> has lost its transmitter, and a replacement was dropped at the site. Fitting it will make noise, and noise out here brings company."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
-      "objective": "Collect the Relay Transmitter Unit",
+      "objective": "Find the relay transmitter",
       "item": "Relay Transmitter Unit"
     },
     {
@@ -60,5 +60,5 @@
     "voice": "GenericMale01",
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
-  "broadcast": "This is Relay Control. A relay on this planet has lost its transmitter. Find the replacement unit at the site, fit it to the dish, and hold the site while it aligns. Expect company."
+  "broadcast": "We've lost a relay down there. The replacement transmitter is at the site. Fit it to the dish and stay with it while it aligns. It will be loud, and loud draws company."
 }
