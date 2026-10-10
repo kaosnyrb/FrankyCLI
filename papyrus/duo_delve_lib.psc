@@ -60,7 +60,10 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
     Float aggressive = 1.0
 
     Float[] placePosition = new Float[6]
-    Int n = Utility.RandomInt(aiMin, aiMax)
+    ; A HORDE is the wave's size PER SIDE it was dealt (his play of 09: "third wave seems small"), and it is
+    ; sized on aiOrigins, not on how many sides were found: a POI loads by cell, so the far ring is usually
+    ; not there to find (manual part 32) and a horde most often arrives from one side, at double strength.
+    Int n = Utility.RandomInt(aiMin, aiMax) * aiOrigins
     Int k = 0
     While k < n
         placePosition[0] = Utility.RandomFloat(-10, 10)
@@ -75,11 +78,9 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
         ; after a change of what an actor should be doing (QF_OE_KT_Trait_Wanted_Bounty stage 150,
         ; QF_BE_CF02_Ragana_BoardingQu, QF_OE_KT_UCMilitaryTrainingE).
         enemy.EvaluatePackage()
-        ; And put them in combat with HIM now, as his preferred target, so they close at combat pace instead of
-        ; jogging the Travel package until they happen to see him (his play of 09: "They are slowish, so you
-        ; spend a lot of time looking around for them"). Vanilla's commonest form, StartCombat(Game.GetPlayer()
-        ; (74 sites in the vanilla source).
-        enemy.StartCombat(Game.GetPlayer(), True)
+        ; NO StartCombat here. Tried 2026-10-10 for pace and dropped on his next play: "emenies spawn in combat
+        ; but seem to drop out before reaching the player" (40 m+ out of sight they cannot detect him, so combat
+        ; lapses into a search). Pace comes from the wave package running instead (gen_delve sets it).
         k += 1
     EndWhile
 EndFunction
@@ -90,8 +91,10 @@ EndFunction
 ; the only two distinct sides a site offers. His asks, 2026-10-10: "spawning the enemies at points the
 ; player isnt looking at"; and after a horde across three markers came from one side, his pick of "one
 ; group per ring".
-; aiCount 1 (SQUAD): one marker from either ring. 2 or more (HORDE): one marker from EACH ring, so the wave
-; comes from both sides; a ring with nothing far enough from him sends nothing.
+; aiCount 1 (SQUAD): one marker from either ring. 2 or more (HORDE): one marker from EACH ring IN REACH, so
+; the wave comes from both sides when both are loaded; a ring with nothing far enough from him sends nothing.
+; ⚠ Usually only ONE ring is in reach: the POI loads by cell, and from its edge the far ring does not exist
+; for FindAllReferencesOfType (part 32, measured 2026-09-24; his play of 09: wave 3 "in one place").
 ; Within the choice, best first, drawn at random:
 ;   1. FAR AND UNSEEN: 40 m+ from him, and either behind him (his heading more than 90 degrees off it, the
 ;      test vanilla's doors use) or out of his line of sight (Actor.HasDetectionLOS; its header: "Only the

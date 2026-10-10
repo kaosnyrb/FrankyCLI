@@ -277,11 +277,15 @@ in game; if it misreads, the rule degrades to "behind him" or to "far", never to
 optional, one per wave: `squad` (one group from one side, the default and every hold before the field) or `horde`
 (the wave split between ring A and ring B, the site's ONLY two distinct sides: within a ring the markers sit 7 to 14
 units apart, manual part 32; his pick 2026-10-10 after a three-marker horde came from one side). A ring with no marker
-40 m+ from him sends nothing that wave. The
+40 m+ from him sends nothing that wave. A horde is `size` PER SIDE (his "third wave seems small"), and ⚠ most often
+lands on ONE side at double strength: the POI loads by cell, so the far ring is usually not there to find (part 32;
+his play, 2026-10-10). The
 lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
 hold. Every
 wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,
-to PlayerRef, only while he is 9 to 1000 m away), so they come for him. The objective gets the counter `(n/waves)` appended and is redisplayed as each
+to PlayerRef, only while he is 9 to 1000 m away) at **Run** (the source jogs; his "They are slowish"), so they come
+for him. No `StartCombat` at spawn: tried and dropped, because from 40 m+ out of sight combat lapsed and they stopped
+short. The objective gets the counter `(n/waves)` appended and is redisplayed as each
 wave falls, which is the player's feedback (no message boxes in this type, his ruling). `defend: N` points
 the objective at beat N's object (a use or a deliver; absent, the spawn marker). Each wave is one stage, the
 last landing on the step's done stage. **The stuck-enemy guard:** a wave still alive `stuck` seconds after it

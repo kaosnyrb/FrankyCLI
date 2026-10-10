@@ -184,8 +184,8 @@ namespace FrankyCLI
                         Fatal($"beat {i + 1} is a hold and needs \"waves\" from 1 to 5; it has {(b.waves?.ToString() ?? "none")}.");
                     if (b.size == null || b.size.Count != 2 || b.size[0] < 1 || b.size[1] < b.size[0])
                         Fatal($"beat {i + 1} is a hold and needs \"size\": [min, max] with 1 <= min <= max; a wave of nobody has no last death, so it never clears.");
-                    else if (b.size[1] > 12)
-                        Warn($"beat {i + 1}'s waves reach {b.size[1]} enemies each; more than 12 at one marker is a crowd the navmesh may not seat.");
+                    else if (b.size[1] * (b.style?.Max(st => WaveStyles.GetValueOrDefault(st, 1)) ?? 1) is int peak && peak > 12)
+                        Warn($"beat {i + 1}'s waves reach {peak} enemies (a horde is size per side, and usually lands on one side); more than 12 at one marker is a crowd the navmesh may not seat.");
                     if (b.style != null)
                     {
                         if (b.style.Count != (b.waves ?? 0))
@@ -500,9 +500,14 @@ namespace FrankyCLI
                     if (gd.FirstParameter.Link.FormKey.ID != 0x14)
                     { Console.WriteLine($"REFUSED: the copied package's distance condition measures to {gd.FirstParameter.Link.FormKey}, not PlayerRef."); return 1; }
                 }
+                // RUN, not the bounty hunters' jog (his play of 09, 2026-10-10: "They are slowish, so you spend a lot
+                // of time looking around for them"). A StartCombat at spawn was tried first and dropped: they could not
+                // detect him from 40 m+ out of sight, combat lapsed, and they stopped short (his next play).
+                var wasSpeed = pk.PreferredSpeed;
+                pk.PreferredSpeed = Package.Speed.Run;
                 travelPkg = pk.FormKey;
                 bm.WavePackage = pk.FormKey;
-                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {travelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept)");
+                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {travelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
             }
             vma.Scripts.Remove(old);
             if (vma.Scripts.Count != 0)
