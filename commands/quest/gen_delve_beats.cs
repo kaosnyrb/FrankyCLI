@@ -54,9 +54,9 @@ namespace FrankyCLI
     public static partial class gen_delve
     {
         private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold" };
-        // A hold wave's style -> how many distinct unseen origins duo_delve_lib.SpawnWave deals it across.
+        // A hold wave's style -> duo_delve_lib.SpawnWave's origins: 1 one side, 2 one per travel ring (a site has two).
         // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
-        private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 3 };
+        private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 2 };
 
         /// <summary>The stuck-enemy guard's default, in seconds: his infestation driver's pity timer.</summary>
         private const int DefaultStuckSeconds = 180;

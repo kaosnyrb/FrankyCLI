@@ -248,7 +248,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
-| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at the site's travel markers, preferring ones 40 m or more from the player AND unseen by him (behind his heading or out of his line of sight), then any 40 m+, else the farthest, else `at`; a `horde` wave is dealt across up to three such markers (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at the site's travel markers, preferring ones 40 m or more from the player AND unseen by him (behind his heading or out of his line of sight), then any 40 m+, else the farthest, else `at`; a `horde` wave is split between the site's two travel rings (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
@@ -275,7 +275,9 @@ him that he cannot see (his heading more than 90 degrees off it, or `HasDetectio
 the farthest; `at` is the search anchor and the last fallback. ⚠ `HasDetectionLOS` on a bare marker is unverified
 in game; if it misreads, the rule degrades to "behind him" or to "far", never to an empty wave. **`style`**,
 optional, one per wave: `squad` (one group from one side, the default and every hold before the field) or `horde`
-(the wave dealt round-robin across up to three distinct such markers, so it comes from several sides at once). The
+(the wave split between ring A and ring B, the site's ONLY two distinct sides: within a ring the markers sit 7 to 14
+units apart, manual part 32; his pick 2026-10-10 after a three-marker horde came from one side). A ring with no marker
+40 m+ from him sends nothing that wave. The
 lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
 hold. Every
 wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,

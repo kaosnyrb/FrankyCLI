@@ -45,8 +45,8 @@ EndFunction
 ; WHERE they arrive changes per wave (his first play, 2026-10-09: "enemies spawn in the same spot each wave
 ; ... bonus points if they aren't near the player"), and since 2026-10-10 it is chosen where he is NOT
 ; LOOKING (see WaveOrigins). aiOrigins is the wave's style, written by gen_delve from the recipe: 1 is a
-; SQUAD (one group from one side), more is a HORDE (the wave dealt round-robin across up to that many
-; origins, so it comes from several sides at once). Each group scatters within 10 m of its origin, snapped
+; SQUAD (one group from one side), 2 is a HORDE (the wave dealt round-robin across one origin per travel
+; ring, so it comes from both of the site's sides at once). Each group scatters within 10 m of its origin, snapped
 ; to navmesh. They then come FOR him because each wave collection wears a Travel-to-player package
 ; (gen_delve writes it), not because of anything here.
 Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax, Int aiOrigins) Global
@@ -84,20 +84,22 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
     EndWhile
 EndFunction
 
-; Where a wave arrives: up to aiCount DISTINCT markers from the SITE's own travel rings (the A and B rings
-; round the POI, the same bases NearestTravelMarker reads), searched round the site, not the player, so a
-; wave never arrives at some other POI he happens to be near. His asks, 2026-10-10: "spawning the enemies at
-; points the player isnt looking at". Drawn at random, best tier first:
+; Where a wave arrives, from the SITE's own travel rings, searched round the site, not the player, so a wave
+; never arrives at some other POI he happens to be near. ⚠ The six markers are TWO PLACES, not six: within a
+; ring A1/A2/A3 (and B1/B2/B3) sit a median 7 to 14 units apart (manual part 32), so ring A and ring B are
+; the only two distinct sides a site offers. His asks, 2026-10-10: "spawning the enemies at points the
+; player isnt looking at"; and after a horde across three markers came from one side, his pick of "one
+; group per ring".
+; aiCount 1 (SQUAD): one marker from either ring. 2 or more (HORDE): one marker from EACH ring, so the wave
+; comes from both sides; a ring with nothing far enough from him sends nothing.
+; Within the choice, best first, drawn at random:
 ;   1. FAR AND UNSEEN: 40 m+ from him, and either behind him (his heading more than 90 degrees off it, the
 ;      test vanilla's doors use) or out of his line of sight (Actor.HasDetectionLOS; its header: "Only the
-;      player can check LOS to a non-actor", so this is the one actor allowed to ask about a marker).
-;      Vanilla's precedent for "move it where he cannot see": QF_COM_Quest_Andreja_Q01, HasDirectLOS == 0.
-;   2. FAR: 40 m+ from him, seen or not (today's rule before this one).
-;   3. Nothing far at all: the single farthest ring marker.
-; No ring in reach (a site without the markers): the recipe's own spawn marker, once. Never empty.
-; HasDetectionLOS on a bare marker is UNVERIFIED in game: if it always says "seen", tier 1 is "behind him";
-; if it always says "unseen", tier 1 is tier 2. Neither breaks a wave, which is why it is a filter and not
-; the rule.
+;      player can check LOS to a non-actor"). Vanilla's precedent for "move it where he cannot see":
+;      QF_COM_Quest_Andreja_Q01, HasDirectLOS == 0. His first play: the waves came from out of sight.
+;   2. FAR: 40 m+ from him, seen or not.
+; Nothing far on either ring: the single farthest ring marker. No ring in reach (a site without the
+; markers): the recipe's own spawn marker. Never empty.
 ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, Int aiCount) Global
     Float SiteSearch = 300.0   ; metres round the site; the widest POI diameter measured is 373 (gen_delve lint)
     Float MinFromPlayer = 40.0
@@ -108,8 +110,10 @@ ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, I
     ids[3] = 0x0E37FD ; B1
     ids[4] = 0x0E37FC ; B2
     ids[5] = 0x0E37FB ; B3
-    ObjectReference[] unseen = new ObjectReference[0]
-    ObjectReference[] seen = new ObjectReference[0]
+    ObjectReference[] unseenA = new ObjectReference[0]
+    ObjectReference[] farA = new ObjectReference[0]
+    ObjectReference[] unseenB = new ObjectReference[0]
+    ObjectReference[] farB = new ObjectReference[0]
     ObjectReference farthest = None
     Float farthestD = -1.0
     Int b = 0
@@ -119,10 +123,15 @@ ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, I
         While i < found.Length
             Float d = akPlayer.GetDistance(found[i])
             If d >= MinFromPlayer
-                If Math.abs(akPlayer.GetHeadingAngle(found[i])) > 90.0 || !akPlayer.HasDetectionLOS(found[i])
-                    unseen.Add(found[i])
+                Bool unseen = Math.abs(akPlayer.GetHeadingAngle(found[i])) > 90.0 || !akPlayer.HasDetectionLOS(found[i])
+                If b < 3 && unseen
+                    unseenA.Add(found[i])
+                ElseIf b < 3
+                    farA.Add(found[i])
+                ElseIf unseen
+                    unseenB.Add(found[i])
                 Else
-                    seen.Add(found[i])
+                    farB.Add(found[i])
                 EndIf
             EndIf
             If d > farthestD
@@ -134,8 +143,27 @@ ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, I
         b += 1
     EndWhile
     ObjectReference[] picked = new ObjectReference[0]
-    DrawInto(unseen, picked, aiCount)
-    DrawInto(seen, picked, aiCount)
+    If aiCount >= 2
+        ObjectReference fromA = PickOne(unseenA, farA)
+        If fromA != None
+            picked.Add(fromA)
+        EndIf
+        ObjectReference fromB = PickOne(unseenB, farB)
+        If fromB != None
+            picked.Add(fromB)
+        EndIf
+    Else
+        ObjectReference[] unseen = new ObjectReference[0]
+        ObjectReference[] far = new ObjectReference[0]
+        AddAll(unseenA, unseen)
+        AddAll(unseenB, unseen)
+        AddAll(farA, far)
+        AddAll(farB, far)
+        ObjectReference one = PickOne(unseen, far)
+        If one != None
+            picked.Add(one)
+        EndIf
+    EndIf
     If picked.Length == 0
         If farthest != None
             picked.Add(farthest)
@@ -146,13 +174,22 @@ ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, I
     Return picked
 EndFunction
 
-; Moves random members of akPool into akOut until akOut holds aiWant (or the pool is empty). Draws without
-; replacement, so a horde's origins are distinct markers.
-Function DrawInto(ObjectReference[] akPool, ObjectReference[] akOut, Int aiWant) Global
-    While akOut.Length < aiWant && akPool.Length > 0
-        Int j = Utility.RandomInt(0, akPool.Length - 1)
-        akOut.Add(akPool[j])
-        akPool.Remove(j)
+; A random member of akBest, else of akNext, else None.
+ObjectReference Function PickOne(ObjectReference[] akBest, ObjectReference[] akNext) Global
+    If akBest.Length > 0
+        Return akBest[Utility.RandomInt(0, akBest.Length - 1)]
+    ElseIf akNext.Length > 0
+        Return akNext[Utility.RandomInt(0, akNext.Length - 1)]
+    EndIf
+    Return None
+EndFunction
+
+; Appends every member of akFrom to akTo.
+Function AddAll(ObjectReference[] akFrom, ObjectReference[] akTo) Global
+    Int i = 0
+    While i < akFrom.Length
+        akTo.Add(akFrom[i])
+        i += 1
     EndWhile
 EndFunction
 
