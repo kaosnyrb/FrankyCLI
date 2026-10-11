@@ -222,6 +222,8 @@ Map dependant"*).
 sit in the player's log twice. Each letter is its own quest record, which is what lets `07a` and `07b`
 run in parallel. A variant is not only new lore; it is another copy that can be live at once.
 
+**Every recipe has a letter**, even when it has no sibling yet (`duo_delve03a`), and **new numbers fill 01 and 02 first** (his, 2026-10-11: *"its bugging me that our delves dont start at 1"*; the old 01 and 02 test quests are out of the plugin).
+
 **Full recipes** (his ruling, 2026-10-08). `duo_delve07a`, `duo_delve07b`: same structure, new names
 and words. `lint --all` compares siblings that share a number and names any drift in template, beats,
 themes or reward tier, so a fix made in `a` and forgotten in `b` shows up. Siblings **may** share a
