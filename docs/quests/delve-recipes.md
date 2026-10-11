@@ -225,8 +225,12 @@ run in parallel. A variant is not only new lore; it is another copy that can be 
 **Every recipe has a letter**, even when it has no sibling yet (`duo_delve03a`), and **new numbers fill 01 and 02 first** (his, 2026-10-11: *"its bugging me that our delves dont start at 1"*; the old 01 and 02 test quests are out of the plugin).
 
 **Full recipes** (his ruling, 2026-10-08). `duo_delve07a`, `duo_delve07b`: same structure, new names
-and words. `lint --all` compares siblings that share a number and names any drift in template, beats,
-themes or reward tier, so a fix made in `a` and forgotten in `b` shows up. Siblings **may** share a
+and words. `lint --all` compares siblings that share a number and names any drift in template, beats
+(each beat's place, type, group, choose, `returnTo`, `replace`, a hold's numbers, and WHETHER it
+carries a person, box, line or item, never their words), themes or reward tier (top-level on the choice
+kind, per ending on beats), so a fix made in `a` and forgotten in `b` shows up. Until 2026-10-11 the
+beats and reward legs read only the choice kind's fields and compared nothing on a beats recipe
+(Jessica's find). Siblings **may** share a
 delivery model, and so may different missions (his, 2026-10-11: *"two missions sharing a model isnt really an issue"*). A variant that needs different structure is a
 new number.
 
@@ -240,7 +244,7 @@ objective on a driven beat, or an objective on an extra beat · a marker, keywor
 NPC template, model or reward tier that does not exist where `du_overtime` can reach it (the mod and its
 masters, never the CK bridge `du_overtime.esp`) · a place whose pool is zero · a choice whose two endings
 can be the same POI · a token in a name · an item or NPC name already in the game, or used by two
-recipes · an empty message box.
+recipes (the choice kind's `items`/`people` and each beat's `item`/`person.name`) · an empty message box.
 
 **Warned:** a first objective that names no place (his, 2026-10-11: *"the first objective name should
 have a POI name in it. It helps to know what POI your looking for"*) · an object beat (a use, pickup or deliver that is not a `returnTo`) with no `model` or no

@@ -471,9 +471,19 @@ namespace FrankyCLI
                 }
                 if (r != null) loaded.Add(r);
                 if (r != null)
-                    foreach (var (field, nm) in new[] { ("items.load", r.items?.load), ("items.missing", r.items?.missing),
-                                                        ("people.owner.name", r.people?.owner?.name), ("people.buyer.name", r.people?.buyer?.name) })
+                {
+                    // Both kinds: the choice kind names its things at the top level, the beats kind per beat.
+                    // Reading only the first left the check comparing nothing on every beats recipe (Jessica, 2026-10-11).
+                    var named = new List<(string field, string? name)> { ("items.load", r.items?.load), ("items.missing", r.items?.missing),
+                                                                       ("people.owner.name", r.people?.owner?.name), ("people.buyer.name", r.people?.buyer?.name) };
+                    for (int i = 0; i < r.beats.Count; i++)
+                    {
+                        named.Add(($"beats[{i + 1}].item", r.beats[i].item));
+                        named.Add(($"beats[{i + 1}].person.name", r.beats[i].person?.name));
+                    }
+                    foreach (var (field, nm) in named)
                         if (!string.IsNullOrWhiteSpace(nm)) names.Add((r.id, field, nm!));
+                }
             }
             Console.WriteLine();
             // (A cross-recipe "two missions share a delivery model" warning stood here from his 2026-10-08 ruling.
@@ -490,10 +500,20 @@ namespace FrankyCLI
                 string Shape(Recipe x, string part) => part switch
                 {
                     "template" => x.template,
-                    "beats" => string.Join(" | ", x.beats.Select(b => $"{b.at}@{b.place ?? "main"}")),
+                    // Everything about a beat that is not lore: where and what kind, how it groups or returns, a hold's
+                    // numbers, and WHETHER it carries a person, box, line or item (never their words).
+                    "beats" => string.Join(" | ", x.beats.Select(b => string.Join(" ", new[] {
+                                    $"{b.at}@{b.place ?? "main"}", b.type, b.group == null ? null : "group:" + b.group,
+                                    b.choose == null ? null : "choose:" + b.choose, b.returnTo == null ? null : "return:" + b.returnTo,
+                                    b.replace ? "replace" : null, b.waves == null ? null : "waves:" + b.waves,
+                                    b.size == null ? null : "size:" + string.Join("-", b.size), b.defend == null ? null : "defend:" + b.defend,
+                                    b.stuck == null ? null : "stuck:" + b.stuck, b.style == null ? null : "style:" + string.Join(",", b.style),
+                                    b.person == null ? null : "+person", b.message == null ? null : "+box", b.say == null ? null : "+say",
+                                    b.item == null ? null : "+item" }.Where(s => s != null)))),
                     "themes" => string.Join(" | ", new[] { x.place.theme, x.place.second?.theme, x.place.third?.theme }
                                     .Select(th => th == null ? "-" : "+" + string.Join(",", th.require.OrderBy(k => k)) + " -" + string.Join(",", th.exclude.OrderBy(k => k)))),
-                    "reward" => $"{x.reward?.owner}/{x.reward?.buyer}",
+                    // The choice kind's tiers are top-level; the beats kind's ride each ending. Read both.
+                    "reward" => $"{x.reward?.owner}/{x.reward?.buyer}" + string.Concat(x.beats.Select((b, i) => b.reward == null ? "" : $" beat{i + 1}:{b.reward}")),
                     _ => ""
                 };
                 var first = fam.OrderBy(x => x.id).First();
