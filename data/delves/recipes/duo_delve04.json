@@ -42,7 +42,7 @@
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
-      "objective": "Find the Reclaimer Housing",
+      "objective": "Find the Reclaimer Housing at the <SecondPlace>",
       "journal": "I found the housing crate, dropped well short of where it was going. The manifest says a filter core was sent on ahead. I should take the housing to the <Place>.",
       "place": "second",
       "message": {

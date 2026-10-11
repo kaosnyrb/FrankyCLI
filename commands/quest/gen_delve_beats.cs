@@ -227,6 +227,12 @@ namespace FrankyCLI
                 }
             }
 
+            // His, 2026-10-11: "the first objective name should have a POI name in it. It helps to know
+            // what POI your looking for". So the first objective names its place by token.
+            if (r.beats.Count > 0 && r.beats[0].objective is string first
+                && !Tokens(first).Any(tk => tk is "Place" or "SecondPlace" or "ThirdPlace"))
+                Warn($"beat 1's objective \"{first}\" names no place; the first objective tells the player which POI to look for, so give it <Place> (or <SecondPlace>, <ThirdPlace>, wherever beat 1 is).");
+
             var steps = StepsOf(r);
             // A group name used twice, apart, is two groups an author meant as one.
             var seen = new HashSet<string>();

@@ -40,7 +40,7 @@
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
-      "objective": "Find the Relay Dish",
+      "objective": "Find the Relay Dish at the <SecondPlace>",
       "journal": "I found the dish crate, set down well short of the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
       "place": "second",
       "message": {
