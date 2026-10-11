@@ -94,6 +94,24 @@ refused rather than silently ignored.
 | `recap` | string | beats ending on a `group`: yes; otherwise refused | beats | stage 100's journal line, the last thing the player reads (see *Beats*) |
 | `approach` | object | no | beats | what happens the first time the player comes near one beat's object (see *Beats*) |
 
+### `prose.name`: `Type: Thing on <Planet>`
+
+His, 2026-10-11: *"I'm thinking of going back to the [Quest type]: [quest desc] format. I found the
+missionboard hard to read with just the narrative quest names."* So a Delve's name is **one fixed type
+word per Delve type**, a colon, then the specific thing. The type word tells the player what they will be
+doing; it is fixed so the board can be scanned. Overtime's own words are reused where one fits, so old and
+new missions read as one board. A new Delve type gets its word on the day it is written.
+
+| Delve type | type word | example |
+|---|---|---|
+| return a lost thing (03, 04, 05) | `Recovery` | Recovery: Relay Dish on `<Planet>` |
+| keep or give back (06) | `Salvage` | Salvage: Service Medal on `<Planet>` |
+| fix up (07) | `Repairs` | Repairs: Water Reclaimers on `<Planet>` |
+| the trail (08) | `Search` | Search: Soldier's Letters on `<Planet>` |
+| hold the point (09) | `Defense` | Defense: Relay Alignment on `<Planet>` (US spelling, as the game's UI) |
+| talk (type 7, not yet built) | `Inquiry` | Inquiry: Survey Crate on `<Planet>` |
+| here, then another planet (type 8, not yet built) | `Supply Run` | Supply Run: Dig Site on `<SecondPlanet>` |
+
 ### `place`
 
 ```json

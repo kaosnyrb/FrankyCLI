@@ -22,7 +22,7 @@
     "leash": "duo_samemapdistance"
   },
   "prose": {
-    "name": "Never Arrived at the <Place>: <Planet>",
+    "name": "Recovery: Lost Consignment on <Planet>",
     "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
   },
   "beats": [

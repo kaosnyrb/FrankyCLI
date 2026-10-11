@@ -32,7 +32,7 @@
     "_civilians": "Off, as testcase 01: the site brings its own people. (2026-10-09: the delve4 'civilians: false' key is gone; a beats Delve with no approach places nobody.)"
   },
   "prose": {
-    "name": "Hauling: Relay Dish on <Planet>",
+    "name": "Recovery: Relay Dish on <Planet>",
     "briefing": "The <Place> has been without a comms relay for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.",
     "_prose": "Artifact family title shape, Category: thing on <Planet> (style guide 4b), as testcase 01. Journal lines follow section 3: first person, what just happened then what next, about 23 words, and beat 4 is the standalone recap."
   },
