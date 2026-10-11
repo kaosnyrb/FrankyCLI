@@ -63,5 +63,10 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": "Three reclaimers down and nobody spare to look at them. If you can get them running, there's pay in it.",
-  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides.",
+  "approach": {
+    "to": 1,
+    "civilians": true,
+    "_approach": "His fact 2026-10-11: LocTypeOE_NonHostile POIs mostly have nobody unless a quest is there, so the crew the briefing names must be placed. Civilians appear round the first reclaimer on first approach."
+  }
 }

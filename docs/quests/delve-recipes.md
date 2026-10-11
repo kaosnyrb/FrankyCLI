@@ -131,7 +131,7 @@ new missions read as one board. A new Delve type gets its word on the day it is 
 | `civilians` | **retired with delve4, and refused.** On a beats Delve write `approach.civilians` |
 
 **Useful keywords**, from the census (`gen_delve keywords [filter…]` tallies themes inside a narrowed
-pool): `LocTypeOE_NonHostile` (people are there, 62 POIs with a centre and map marker) ·
+pool): `LocTypeOE_NonHostile` (nobody hostile, 62 POIs with a centre and map marker; ⚠ NOT people: his, 2026-10-11, *"LocTypeOE_NonHostile mostly dont spawn NPCs, only if there is a quest present at it"*, so a Delve that needs people places them) ·
 `LocTypeOE_ThemeInfrastructureKeyword` (36 of those 62) · `LocTypeOE_ThemeNaturalKeyword` ·
 `LocTypeOE_ThemeCaveKeyword`.
 
@@ -210,7 +210,7 @@ The person and their company appear the first time the player comes within 250 m
 
 The two delivery places **must never be able to draw the same POI.** The lint measures the two pools
 and refuses any overlap; the shipped way to separate them is the theme: one requires a keyword the other
-excludes. ⚠ **Asking for people at both ends is expensive:** the peopled pool is 62 POIs galaxy-wide, so
+excludes. ⚠ **Asking for people at both ends is expensive:** the non-hostile pool is 62 POIs galaxy-wide, so
 `duo_delve06` starts only on maps that have one of each in range (his play: *"Quest starts, sometimes.
 Map dependant"*).
 
