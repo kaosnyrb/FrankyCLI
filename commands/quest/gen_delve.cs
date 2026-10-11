@@ -435,8 +435,7 @@ namespace FrankyCLI
         /// EVERY RECIPE, ONE GAME-DATA LOAD, ONE LINE EACH. His ask, 2026-10-08: "I want Jessica to be able to
         /// spam these jsons". A single lint costs a minute of loading the load order; this pays it once. Each
         /// recipe's full lint is captured and only its verdict printed, with the fatal lines under a failure.
-        /// Then the checks that only exist ACROSS recipes: two missions sharing a delivery model (his ruling,
-        /// 2026-10-08 08:55: the flavour axis is the mission, one centreModel per recipe, distinct across them).
+        /// Then the checks that only exist ACROSS recipes (names used twice, letter-sibling drift).
         /// </summary>
         private static int LintAll(string dataDir, List<Template> templates)
         {
@@ -445,7 +444,6 @@ namespace FrankyCLI
             using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
             var real = Console.Out;
             int failed = 0;
-            var models = new List<(string recipe, string field, string path)>();
             var names = new List<(string recipe, string field, string name)>();
             int clashes = 0;
             var loaded = new List<Recipe>();
@@ -471,9 +469,6 @@ namespace FrankyCLI
                     foreach (var l in lines.Where(l => l.Contains("[FATAL]") || l.StartsWith("REFUSED") || l.StartsWith("  ") && log.Contains("REFUSED") && l.Contains("did you mean")))
                         Console.WriteLine("        " + l.Trim());
                 }
-                if (r?.items != null)
-                    foreach (var (field, path) in new[] { ("centreModel", r.items.centreModel), ("buyerModel", r.items.buyerModel) })
-                        if (!string.IsNullOrWhiteSpace(path)) models.Add((r.id, field, path!));
                 if (r != null) loaded.Add(r);
                 if (r != null)
                     foreach (var (field, nm) in new[] { ("items.load", r.items?.load), ("items.missing", r.items?.missing),
@@ -481,12 +476,9 @@ namespace FrankyCLI
                         if (!string.IsNullOrWhiteSpace(nm)) names.Add((r.id, field, nm!));
             }
             Console.WriteLine();
-            // Letter siblings may share a model (his ruling, 2026-10-08: "should be allowed the same model, it's
-            // fine"), so the count is of mission NUMBERS: 06a and 06b are one mission, 06 and 07 are two.
-            static string Mission(string id) => System.Text.RegularExpressions.Regex.Replace(id, "(?<=[0-9])[a-z]$", "");
-            foreach (var g in models.GroupBy(m => m.path, StringComparer.OrdinalIgnoreCase).Where(g => g.Select(x => Mission(x.recipe)).Distinct().Count() > 1))
-                Console.WriteLine($"  [warn ] {g.Key} is a delivery point in {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: "
-                                  + "his ruling is one delivery model per mission, distinct across missions.");
+            // (A cross-recipe "two missions share a delivery model" warning stood here from his 2026-10-08 ruling.
+            // Retired on his 2026-10-11: "two missions sharing a model isnt really an issue... Im aiming for like
+            // 300/700 delves". At that count it fires on everything.)
             // ⭐ LETTER SIBLINGS. His convention, 2026-10-08: "01a and 01b would have the same kinda content but
             // with different lore", as FULL recipes (his pick over a variant file). The cost of full copies is
             // drift: a fix made in 06a and forgotten in 06b. So siblings sharing a number are compared on

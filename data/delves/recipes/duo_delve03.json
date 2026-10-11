@@ -42,7 +42,9 @@
       "at": "RECenterLocRef",
       "objective": "Take it to the <Place>",
       "journal": "The other half should be here. Something has taken it.",
-      "say": "That's only half of it. The rest was here, and someone's taken it. Go and get it back."
+      "say": "That's only half of it. The rest was here, and someone's taken it. Go and get it back.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Receiving Locker"
     },
     {
       "type": "recover",

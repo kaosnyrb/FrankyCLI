@@ -207,7 +207,7 @@ run in parallel. A variant is not only new lore; it is another copy that can be 
 **Full recipes** (his ruling, 2026-10-08). `duo_delve07a`, `duo_delve07b`: same structure, new names
 and words. `lint --all` compares siblings that share a number and names any drift in template, beats,
 themes or reward tier, so a fix made in `a` and forgotten in `b` shows up. Siblings **may** share a
-delivery model; two different numbers sharing one warns. A variant that needs different structure is a
+delivery model, and so may different missions (his, 2026-10-11: *"two missions sharing a model isnt really an issue"*). A variant that needs different structure is a
 new number.
 
 ---
@@ -227,7 +227,7 @@ recipes · an empty message box.
 want defaults"*) · a pool under 40 · a model that sinks, hangs or floats, or that no Static owns · a journal
 line the log will never show · an objective over 12 words or ending in punctuation · any em dash or
 non-ASCII character · two beats on one marker or one travel ring · a base exclusion the recipe drops ·
-two mission numbers sharing a delivery model · letter siblings that differ in structure · the buyer not
+letter siblings that differ in structure · the buyer not
 paying more than the owner.
 
 **The build adds, off disk:** every alias fills below what it fills from (the order the engine needs),
