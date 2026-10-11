@@ -41,6 +41,9 @@ namespace FrankyCLI
             "  Message (mesg), Faction, Global, FormList, LeveledSpaceCell (lvsc)\n" +
             "  QuestAlias (qalias) - alias fills: which one is set and what it points at\n" +
             "  QuestAll (qall)    - the WHOLE quest record + a report of what it did NOT render\n" +
+            "  smtree <search>    - a Story Manager subtree as the engine walks it: branch and quest nodes\n" +
+            "                       under each match, siblings in PreviousSibling order, conditions in full\n" +
+            "                       (with RunOnType), quest members in list order\n" +
             "  Armor (armo), ObjectModification (omod), ObjectEffect (ench), Perk, Spell (spel)\n" +
             "  MagicEffect (mgef), DamageType (dmgt), LegendaryItem (lgdi), Outfit (otft)\n" +
             "  ActorValueInformation (avif)\n" +
