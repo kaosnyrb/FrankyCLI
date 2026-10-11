@@ -50,7 +50,7 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 | template | kind | beats | the shape |
 |---|---|---|---|
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
-| `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06`) |
+| `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06a`, `06b`) |
 | `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03`-`09`). See *Beats* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
@@ -211,7 +211,7 @@ The person and their company appear the first time the player comes within 250 m
 The two delivery places **must never be able to draw the same POI.** The lint measures the two pools
 and refuses any overlap; the shipped way to separate them is the theme: one requires a keyword the other
 excludes. ⚠ **Asking for people at both ends is expensive:** the non-hostile pool is 62 POIs galaxy-wide, so
-`duo_delve06` starts only on maps that have one of each in range (his play: *"Quest starts, sometimes.
+`duo_delve06a` starts only on maps that have one of each in range (his play: *"Quest starts, sometimes.
 Map dependant"*).
 
 ---

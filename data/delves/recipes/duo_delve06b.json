@@ -10,8 +10,8 @@
     "Jessica's, written 2026-10-11 on his \"yeah\".",
     "DO NOT BUILD YET: the who's-there dial is not in gen_delve, so built today the find would be EMPTY",
     "while every line about it says nest. See _occupancy.",
-    "duo_delve06 has no letter, so the sibling lint does not pair them; renaming 06 to 06a is his call",
-    "(a rename re-mints the quest)."
+    "06 was renamed duo_delve06a on his \"yeah do 06a\" (2026-10-11), so the sibling lint pairs",
+    "them. The rename re-mints the quest, so the old duo_delve06 record comes out on the next build."
   ],
   "_occupancy": {
     "second": "infested (the find: nests, the salvager could not go back for it)",
