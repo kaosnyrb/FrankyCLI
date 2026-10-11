@@ -31,6 +31,8 @@
       "type": "pickup",
       "at": "RETravelA1LocRef",
       "objective": "Find the relay transmitter",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Transmitter Crate",
       "item": "Relay Transmitter Unit"
     },
     {

@@ -20,7 +20,7 @@ join here when he approves them; the wish list for those is home-office
 
 | mesh | reads as | seen in game | used by | notes |
 |---|---|---|---|---|
-| `Meshes\SetDressing\Container\CrateStackableA_01.nif` | freight crate | ✅ his plays (04 today) | 04, 05, 06, 08 | the default carry. A salvager's stash may want something smaller (06's note) |
+| `Meshes\SetDressing\Container\CrateStackableA_01.nif` | freight crate | ✅ his plays (04 today) | 04, 05, 06, 08, 09 | the default carry. A salvager's stash may want something smaller (06's note) |
 | `Meshes\SetDressing\WaterFiltrationCart\WaterFiltrationCart01.nif` | water reclaimer cart | ✅ 07 confirmed at his glass; 04 today | 04, 07 | the fix-up job's machine |
 | `Meshes\SetDressing\Furniture\Foot_Locker\AK_FootLocker01.nif` | footlocker / chest | ⏳ his pick from a playtest, not confirmed seen since | 06 (buyer), 08 (post locker) | replaced the display case on his "prob be a chest" |
 | `Meshes\Architecture\City\Akila\Unique\Memorial\AK_Memorial_Podium.nif` | memorial podium | ✅ 06 playtest, 2026-10-08 | 06 (owner) | ⚠ **approved but city furniture, waiting on a replacement** (a cairn or marker post, the wish list's #8) |
