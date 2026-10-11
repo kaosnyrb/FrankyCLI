@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "id": "duo_delve06b",
+  "template": "beats",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/backlog.md (the who's-there dial) and type-02-keep-or-give-back.md (the medal)",
+  "_note": [
+    "TYPE 2, THE MEDAL, LETTER b: same beats as duo_delve06, new lore, and the FIND IS INFESTED. His ask",
+    "2026-10-11: \"There might be a Medal quest variant where the first POI is infested.\" Every word is",
+    "Jessica's, written 2026-10-11 on his \"yeah\".",
+    "DO NOT BUILD YET: the who's-there dial is not in gen_delve, so built today the find would be EMPTY",
+    "while every line about it says nest. See _occupancy.",
+    "duo_delve06 has no letter, so the sibling lint does not pair them; renaming 06 to 06a is his call",
+    "(a rename re-mints the quest)."
+  ],
+  "_occupancy": {
+    "second": "infested (the find: nests, the salvager could not go back for it)",
+    "main": "workers via the ending's person and company, as 06",
+    "third": "workers via the ending's person and company, as 06",
+    "_why": "His dial, 2026-10-11, card 20261011-073659. Hostile find, so the tiers below are one rung up from 06 (README rule 3: the tier is the difficulty signal). The field is a note until Eliza's build gives it a key."
+  },
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeInfrastructureKeyword"
+      ]
+    },
+    "_theme": "The OWNER (the soldier's brother). Non-hostile and not infrastructure, disjoint from the buyer's pool, as 06.",
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": []
+      }
+    },
+    "_second": "The FIND, any POI, infested once the dial exists.",
+    "third": {
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeInfrastructureKeyword"
+        ],
+        "exclude": []
+      }
+    },
+    "_third": "The BUYER, a militia post. Non-hostile AND infrastructure, as 06."
+  },
+  "prose": {
+    "name": "Salvage: Militia Clasp on <Planet>",
+    "briefing": "A salvager's note says he left a militia clasp at the <SecondPlace> and never went back for it. Something has nested there since."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "place": "second",
+      "objective": "Recover the clasp from the <SecondPlace>",
+      "message": {
+        "title": "Militia Clasp",
+        "text": "The stash is under the nest debris, intact. The name on the clasp is scratched away, but the militia number is not, and the roster lists a brother at the <Place>."
+      },
+      "item": "Militia Long Service Clasp",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Buried Stash"
+    },
+    {
+      "type": "deliver",
+      "choose": "ending",
+      "at": "RECenterLocRef",
+      "place": "main",
+      "objective": "Return the clasp to his brother",
+      "journal": "I dug a militia clasp out of an infested stash and took it to the soldier's brother at the <Place>.",
+      "message": {
+        "title": "Returned",
+        "text": "His brother holds it up to the light to read the number, then pins it to his own jacket. He pays what he can."
+      },
+      "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Memorial\\AK_Memorial_Podium.nif",
+      "name": "Family Shrine",
+      "person": {
+        "name": "Militiaman's Brother",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "company": {
+          "list": "duo_GangMembersList_Civ_LIST",
+          "min": 2,
+          "max": 4
+        }
+      },
+      "reward": "med"
+    },
+    {
+      "type": "deliver",
+      "choose": "ending",
+      "at": "RECenterLocRef",
+      "place": "third",
+      "objective": "Sell the clasp to the militia post",
+      "journal": "I dug a militia clasp out of an infested stash and sold it to a militia post for their case of honours.",
+      "message": {
+        "title": "Sold",
+        "text": "The quartermaster pays in full and sets it in the case by the door, between two others with the same unit number."
+      },
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Unit Footlocker",
+      "person": {
+        "name": "Post Quartermaster",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "company": {
+          "list": "duo_GangMembersList_Civ_StrongArm",
+          "min": 2,
+          "max": 4
+        }
+      },
+      "reward": "hard"
+    }
+  ],
+  "offer": {
+    "journal": "The clasp's militia number matches a soldier whose brother lives at the <Place>. A militia post wants it for their case of honours and will pay more than he can. It's my call.",
+    "message": {
+      "title": "Incoming Message",
+      "text": "Heard you pulled a militia clasp out of that nest. Our post keeps the old unit's honours in a case by the door, for the new ones to read. I'm at the <ThirdPlace>. I'll pay more than his brother can. - Post Quartermaster"
+    }
+  },
+  "_people": "Names checked against his who's-who (office/staff/bryn/people.md): no family name. Templates from the talkable set, 02 so neither person shares a face with 06's. Outfits and company lists are placeholders, his to dress.",
+  "_speech": "No speech, his \"either or\" (a box and a line on one beat clash), as 06."
+}
