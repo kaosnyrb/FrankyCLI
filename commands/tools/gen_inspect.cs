@@ -116,6 +116,9 @@ namespace FrankyCLI
             if (recordType.Equals("questtargets", StringComparison.OrdinalIgnoreCase))
                 return QuestTargetCensus(allMods, search);
 
+            if (recordType.Equals("smtree", StringComparison.OrdinalIgnoreCase))
+                return StoryManagerTree(allMods, search, env.LinkCache);
+
             if (recordType.Equals("worldspace_objects", StringComparison.OrdinalIgnoreCase))
             {
                 int found3 = 0;
@@ -2383,6 +2386,102 @@ namespace FrankyCLI
         ///
         /// Returns the number of records dumped, or -1 when the name matches no group at all --
         /// which the caller turns into a refusal that says NOTHING WAS SEARCHED.
+        /// <summary>
+        /// A Story Manager subtree as the engine walks it: every branch and quest node under each node whose
+        /// EditorID matches, SIBLINGS IN PreviousSibling ORDER (the order is the chain, not the file), each with
+        /// its flags, its conditions in full and its quest members in list order. His 2026-10-11 ask, for the
+        /// one-slate-one-mission spike: the generic dump printed a node's flags and a member COUNT, and nothing
+        /// of the conditions or the order the design depends on. The winning override is used for each FormKey.
+        /// </summary>
+        private static int StoryManagerTree(List<IStarfieldModGetter> allMods, string search, ILinkCache cache)
+        {
+            var nodes = new Dictionary<FormKey, IStarfieldMajorRecordGetter>();
+            foreach (var mod in allMods)
+            {
+                foreach (var n in mod.StoryManagerBranchNodes) nodes[n.FormKey] = n;
+                foreach (var n in mod.StoryManagerQuestNodes) nodes[n.FormKey] = n;
+            }
+            object? Prop(object o, string name) => o.GetType().GetProperty(name)?.GetValue(o);
+            FormKey Link(object o, string name) => Prop(o, name) is IFormLinkGetter l && !l.IsNull ? l.FormKey : FormKey.Null;
+            var children = nodes.Values.GroupBy(n => Link(n, "Parent")).ToDictionary(g => g.Key, g => g.ToList());
+
+            List<IStarfieldMajorRecordGetter> Ordered(List<IStarfieldMajorRecordGetter> sibs)
+            {
+                // The chain: the first sibling has no PreviousSibling, each next names the one before it.
+                var byPrev = sibs.GroupBy(s => Link(s, "PreviousSibling")).ToDictionary(g => g.Key, g => g.ToList());
+                var outList = new List<IStarfieldMajorRecordGetter>();
+                var cur = FormKey.Null;
+                while (byPrev.TryGetValue(cur, out var next) && next.Count > 0 && outList.Count < sibs.Count)
+                {
+                    var n = next[0];
+                    if (next.Count > 1) Console.WriteLine($"  ⚠ {next.Count} siblings claim the same PreviousSibling {cur}; the chain is ambiguous here.");
+                    outList.Add(n); cur = n.FormKey;
+                }
+                // Anything the chain never reached is printed after it and SAID, never silently dropped.
+                foreach (var s in sibs.Where(s => !outList.Contains(s)))
+                {
+                    Console.WriteLine($"  ⚠ {s.EditorID} is not on its siblings' PreviousSibling chain; printed after it.");
+                    outList.Add(s);
+                }
+                return outList;
+            }
+
+            void Print(IStarfieldMajorRecordGetter n, string pad, int depth)
+            {
+                bool quest = n is IStoryManagerQuestNodeGetter;
+                Console.WriteLine($"{pad}{(quest ? "SMQN" : "SMBN")} {n.EditorID}  [{n.FormKey}]");
+                foreach (var name in new[] { "Flags", "QuestFlags", "MaxConcurrentQuests", "MaxNumQuestsToRun", "HoursUntilReset" })
+                {
+                    var v = Prop(n, name);
+                    if (v != null && !(v is int i && i == 0)) Console.WriteLine($"{pad}  {name} = {v}");
+                }
+                if (Prop(n, "Conditions") is System.Collections.IEnumerable conds)
+                {
+                    var list = conds.Cast<IConditionGetter>().ToList();
+                    Console.WriteLine($"{pad}  Conditions [{list.Count}]:");
+                    foreach (var c in list)
+                    {
+                        DumpConditionFull(c, pad + "    ", allMods);
+                        // The shared printer skips RunOnType; on a Story Manager node it is WHO the test reads
+                        // (the event's Ref1/Ref2, the subject), which is the half the design hangs on.
+                        if (c.Data != null && Prop(c.Data, "RunOnType") is object rt) Console.WriteLine($"{pad}      RunOnType: {rt}");
+                    }
+                }
+                if (quest && Prop(n, "Quests") is System.Collections.IEnumerable qs)
+                {
+                    int k = 0;
+                    foreach (var q in qs)
+                    {
+                        k++;
+                        var bits = new List<string>();
+                        foreach (var p in q.GetType().GetProperties())
+                        {
+                            if (p.GetIndexParameters().Length > 0 || p.Name == "StaticRegistration") continue;
+                            object? v; try { v = p.GetValue(q); } catch { continue; }
+                            if (v is IFormLinkGetter l) { if (!l.IsNull) bits.Add($"{p.Name}={l.FormKey.ID:X6} {NameOf(l.FormKey, cache)}"); }
+                            else if (v is System.Collections.IEnumerable e and not string) { int c = e.Cast<object>().Count(); if (c > 0) bits.Add($"{p.Name}[{c}]"); }
+                            else if (v != null && v.ToString() is string s && s != "0" && s != "" && !s.Contains("BinaryOverlay")) bits.Add($"{p.Name}={s}");
+                        }
+                        Console.WriteLine($"{pad}  {k,3}. {string.Join("  ", bits)}");
+                    }
+                }
+                if (depth < 12 && children.TryGetValue(n.FormKey, out var kids))
+                    foreach (var kid in Ordered(kids)) Print(kid, pad + "    ", depth + 1);
+            }
+
+            int found = 0;
+            foreach (var n in nodes.Values.Where(n => MatchesSearch(n.EditorID, n.FormKey, search)).OrderBy(n => n.EditorID))
+            {
+                var parent = Link(n, "Parent");
+                Console.WriteLine($"=== under {(parent.IsNull ? "(no parent)" : NameOf(parent, cache) + " " + parent)} ===");
+                Print(n, "", 0);
+                Console.WriteLine();
+                found++;
+            }
+            Console.WriteLine($"Total root matches: {found}");
+            return found > 0 ? 0 : 1;
+        }
+
         private static int DumpGenericGroup(IStarfieldModGetter mod, string recordType, string search,
                                             List<IStarfieldModGetter>? allMods, ILinkCache? cache)
         {
@@ -2421,8 +2520,17 @@ namespace FrankyCLI
         {
             var carrying = new List<string>();
             var empty = new List<string>();
+            // ⛔ An interface's GetProperties() returns ONLY its own declared members, never the ones it
+            // inherits from base interfaces. So until 2026-10-11 every inherited field (a Story Manager
+            // node's Conditions, Parent and PreviousSibling live on its base node interface) was silently
+            // absent, and the "(empty on this record ...)" line below read as a complete account. Walk
+            // the game's own interfaces too; the generic Mutagen plumbing (FormVersion, flags raw, link
+            // enumeration) is left out because every record carries it and none of it is content.
             var props = declared.IsInterface
-                ? declared.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                ? new[] { declared }.Concat(declared.GetInterfaces())
+                      .Where(i => i == declared || i.Namespace == declared.Namespace)
+                      .SelectMany(i => i.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                      .GroupBy(p => p.Name).Select(g => g.First()).ToArray()
                 : rec.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (var prop in props)
             {
