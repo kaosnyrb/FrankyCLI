@@ -60,7 +60,8 @@
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "_model": "PLACEHOLDER: testcase 01's freight crate. A salvager's stash may want something smaller; his eye.",
       "_journal_never_shown": "The medal has a name on it, Sergeant Vale, and his service record lists family at the <Place>. I should take it to them.",
-      "_journal_note": "This line was beat 1's journal on the choice kind and was NEVER SHOWN: the offer is set in the same instant and the log shows only the newest line (part 13, his play 2026-10-08). offer.journal opens with the same sentence and is what the player reads. Kept here as Jessica wrote it."
+      "_journal_note": "This line was beat 1's journal on the choice kind and was NEVER SHOWN: the offer is set in the same instant and the log shows only the newest line (part 13, his play 2026-10-08). offer.journal opens with the same sentence and is what the player reads. Kept here as Jessica wrote it.",
+      "name": "Salvager's Stash"
     },
     {
       "type": "deliver",

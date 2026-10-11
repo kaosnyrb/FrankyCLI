@@ -62,7 +62,8 @@
       "message": {
         "title": "Field Note",
         "text": "The note is folded small and signed with a service number. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home."
-      }
+      },
+      "name": "Field Cache"
     },
     {
       "type": "pickup",
@@ -75,7 +76,8 @@
       "message": {
         "title": "Unsent Letters",
         "text": "A bundle of slates tied with wire. Every one is addressed to the same person, his sister, at the <Place>. None of them were ever sent."
-      }
+      },
+      "name": "Letter Cache"
     },
     {
       "type": "deliver",

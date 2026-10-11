@@ -50,7 +50,8 @@
       "item": "Relay Dish (1 of 2)",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "_item": "Jessica's, 2026-10-02. Named objects, never a described site.",
-      "_model": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot."
+      "_model": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot.",
+      "name": "Relay Dish Crate"
     },
     {
       "type": "use",
