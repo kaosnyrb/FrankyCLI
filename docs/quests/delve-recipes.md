@@ -222,7 +222,9 @@ masters, never the CK bridge `du_overtime.esp`) · a place whose pool is zero ·
 can be the same POI · a token in a name · an item or NPC name already in the game, or used by two
 recipes · an empty message box.
 
-**Warned:** a pool under 40 · a model that sinks, hangs or floats, or that no Static owns · a journal
+**Warned:** an object beat (a use, pickup or deliver that is not a `returnTo`) with no `model` or no
+`name`, because absent means the base's boss crate and generic prompt (his, 2026-10-11: *"we dont really
+want defaults"*) · a pool under 40 · a model that sinks, hangs or floats, or that no Static owns · a journal
 line the log will never show · an objective over 12 words or ending in punctuation · any em dash or
 non-ASCII character · two beats on one marker or one travel ring · a base exclusion the recipe drops ·
 two mission numbers sharing a delivery model · letter siblings that differ in structure · the buyer not

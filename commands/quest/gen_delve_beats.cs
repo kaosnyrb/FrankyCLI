@@ -216,6 +216,15 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))
                     Warn($"beat {i + 1} has a name and no model; a name only goes onto a clone, so it is not written.");
+                // His, 2026-10-11, after 09's pickup played as the base's boss crate with a generic prompt:
+                // "we dont really want defaults". An object beat with no model or name falls back to the base's.
+                if ((b.type == "use" || b.type == "pickup" || b.type == "deliver") && b.returnTo == null)
+                {
+                    if (string.IsNullOrWhiteSpace(b.model))
+                        Warn($"beat {i + 1} is a {b.type} with no model; the player sees the base's default object. Pick one from docs/quests/objects.md.");
+                    if (string.IsNullOrWhiteSpace(b.name))
+                        Warn($"beat {i + 1} is a {b.type} with no name; its prompt is the base's generic one.");
+                }
             }
 
             var steps = StepsOf(r);
