@@ -169,6 +169,14 @@ namespace FrankyCLI
             public Speaker? speaker { get; set; }
             /// <summary>beats, OPTIONAL: a line the speaker says when the quest starts (stage 0). Plain words, no tokens.</summary>
             public string? broadcast { get; set; }
+            /// <summary>
+            /// OPTIONAL, either kind: the EditorID of a Story Manager quest node in the template's own mod that deals this
+            /// Delve, i.e. a slate pool (duo_MS_ArtifactMap_LocalNode and its siblings). The build appends the quest to
+            /// that node and removes the previous build's entry from every node. Absent = in no pool, started by hand with
+            /// `startquest`, as every Delve was before this field. His go, 2026-10-11: "do you have the tooling to add the
+            /// delves to the existing story nodes" / "yeah go". A new optional field, so schema stays 1.
+            /// </summary>
+            public string? deal { get; set; }
         }
         /// <summary>The voice of a Delve's spoken lines.</summary>
         private sealed class Speaker
@@ -805,6 +813,30 @@ namespace FrankyCLI
             }
             foreach (var u in unused)
                 Fatal($"{u} is set, and template '{t.id}' ({t.kind}) never reads it, so it would be silently ignored.");
+
+            // --- deal: which slate pool hands this Delve out (2026-10-11) ------------------------------------
+            // Only a node in the template's OWN mod: the build appends to it, and appending to a master's node
+            // would write an override of somebody else's record.
+            if (r.deal != null)
+            {
+                var own = ModKey.FromNameAndExtension(t.mod + ".esm");
+                var node = OwnOrMaster<IStoryManagerQuestNodeGetter>(new HashSet<ModKey> { own }, env, r.deal);
+                if (node == null)
+                {
+                    var pools = env.LoadOrder.PriorityOrder.WinningOverrides<IStoryManagerQuestNodeGetter>()
+                        .Where(n => n.FormKey.ModKey == own).Select(n => n.EditorID).OrderBy(x => x);
+                    Fatal($"deal '{r.deal}' is not a Story Manager quest node in {t.mod}. Its nodes: {string.Join(", ", pools)}.");
+                }
+                else
+                {
+                    Console.WriteLine($"  deal: {node.EditorID} [{node.FormKey}], {node.Quests.Count} quest(s), {node.Flags} / {node.QuestFlags}");
+                    // Structural, not by name: a pool that never dealt this template's base quest is a pool the
+                    // base was not built to be started from (another event, other event data).
+                    var baseQ = OwnOrMaster<IQuestGetter>(new HashSet<ModKey> { own }, env, t.@base);
+                    if (baseQ != null && !node.Quests.Any(e => e.Quest.FormKey == baseQ.FormKey))
+                        Warn($"deal '{node.EditorID}' does not deal this template's base quest ({t.@base}); check the pool's event and conditions suit a Delve built on that base.");
+                }
+            }
 
             // ⛔ THE QUEST LOG SHOWS ONLY THE NEWEST STAGE'S LINE (his play, 2026-10-08: "I think the family
             // delivery one is skipped"). On a choice, beat 1's stage and the offer's are set in one instant.
@@ -1941,6 +1973,25 @@ namespace FrankyCLI
             };
             myMod.Quests.Add(clone);
 
+            // POOLS. The previous build's quest was just removed, so any node entry pointing at it would dangle:
+            // remove those from EVERY node (which also handles a recipe whose deal changed or was dropped), then
+            // append the new quest to the node the recipe names, once.
+            int unpooled = 0;
+            foreach (var n in myMod.StoryManagerQuestNodes)
+            {
+                var drop = n.Quests.Where(e => stale.Contains(e.Quest.FormKey)).ToList();
+                foreach (var e in drop) n.Quests.Remove(e);
+                unpooled += drop.Count;
+            }
+            if (unpooled > 0) Console.WriteLine($"  unpooled : {unpooled} entr{(unpooled == 1 ? "y" : "ies")} for the previous {r.id}");
+            if (r.deal != null)
+            {
+                var pool = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, r.deal, StringComparison.OrdinalIgnoreCase));
+                if (pool == null) { Console.WriteLine($"REFUSED: no Story Manager quest node '{r.deal}' in {t.mod}."); return 1; }
+                pool.Quests.Add(new StoryManagerQuest { Quest = clone.ToNullableLink<IQuestGetter>() });
+                Console.WriteLine($"  dealt    : {r.id} into {pool.EditorID}, now {pool.Quests.Count} quests");
+            }
+
             // A clone that does not repoint its self-links drives the SOURCE quest's aliases,
             // silently, and looks correct in every dump. On a driver whose activator targets are
             // alias properties this is the difference between a new mission and a second copy of
@@ -2098,10 +2149,34 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            if (t.kind != "beats") return Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore);
-            int vb = VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
+            int v = t.kind != "beats" ? Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore)
+                                      : VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
+            v += VerifyDeal(modFile, readParams, r);
             // The audio last, and only over a verified plugin: its file names are the written topics' ids.
-            return vb == 0 ? DeployVoice(r, t, madeBeats) : vb;
+            return t.kind == "beats" && v == 0 ? DeployVoice(r, t, madeBeats) : v;
+        }
+
+        /// <summary>
+        /// The pools, re-read OFF DISK: the quest sits in exactly the node it names (once) or in none, and no node
+        /// in the plugin points at a quest of the plugin's own that no longer exists (the class a rebuild creates).
+        /// </summary>
+        private static int VerifyDeal(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams, Recipe r)
+        {
+            var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            var q = reread.Quests.FirstOrDefault(x => x.EditorID == r.id);
+            if (q == null) return 0;   // Verify has already failed on this
+            var holding = reread.StoryManagerQuestNodes
+                .Select(n => (n.EditorID, count: n.Quests.Count(e => e.Quest.FormKey == q.FormKey))).Where(x => x.count > 0).ToList();
+            int fail = Check("the quest is dealt from exactly the node the recipe names",
+                             holding.Count == 0 ? "(none)" : string.Join(", ", holding.Select(h => h.count == 1 ? h.EditorID : $"{h.EditorID} x{h.count}")),
+                             r.deal ?? "(none)");
+            var own = reread.Quests.Select(x => x.FormKey).ToHashSet();
+            var dangling = reread.StoryManagerQuestNodes
+                .SelectMany(n => n.Quests.Where(e => e.Quest.FormKey.ModKey == reread.ModKey && !own.Contains(e.Quest.FormKey))
+                                         .Select(e => $"{n.EditorID} -> {e.Quest.FormKey}")).ToList();
+            fail += Check("no story-manager entry points at a quest the plugin no longer has",
+                          dangling.Count == 0 ? "none" : string.Join("; ", dangling), "none");
+            return fail;
         }
 
         // ------------------------------------------------------------------ shared by the choice and beats builds

@@ -93,6 +93,7 @@ refused rather than silently ignored.
 | `people` | object | no | choice | named NPCs at each ending, with outfits and company |
 | `recap` | string | beats ending on a `group`: yes; otherwise refused | beats | stage 100's journal line, the last thing the player reads (see *Beats*) |
 | `approach` | object | no | beats | what happens the first time the player comes near one beat's object (see *Beats*) |
+| `deal` | string | no | all | **which slate pool hands this Delve out**: the EditorID of a Story Manager quest node in the template's own mod. The build appends the quest to it and removes the previous build's entry from every node. **Absent = in no pool**: started by hand with `startquest`. ⚠ It is live content: a dealt Delve reaches players from slates on the next release, once per `DoAllBeforeRepeating` rotation. **The beats template's base is a local-CARGO slate quest, so a beats Delve's pool is `duo_MS_ArtifactMap_LocalCargoNode`**; the lint warns when the named pool never dealt the template's base quest (his go, 2026-10-11) |
 
 ### `prose.name`: `Type: Thing on <Planet>`
 
@@ -244,7 +245,7 @@ objective on a driven beat, or an objective on an extra beat · a marker, keywor
 NPC template, model or reward tier that does not exist where `du_overtime` can reach it (the mod and its
 masters, never the CK bridge `du_overtime.esp`) · a place whose pool is zero · a choice whose two endings
 can be the same POI · a token in a name · an item or NPC name already in the game, or used by two
-recipes (the choice kind's `items`/`people` and each beat's `item`/`person.name`) · an empty message box.
+recipes (the choice kind's `items`/`people` and each beat's `item`/`person.name`) · an empty message box · a `deal` that is not a Story Manager quest node in the template's own mod (the refusal lists the mod's nodes).
 
 **Warned:** a first objective that names no place (his, 2026-10-11: *"the first objective name should
 have a POI name in it. It helps to know what POI your looking for"*) · an object beat (a use, pickup or deliver that is not a `returnTo`) with no `model` or no
@@ -252,12 +253,12 @@ have a POI name in it. It helps to know what POI your looking for"*) · an objec
 want defaults"*) · a pool under 40 · a model that sinks, hangs or floats, or that no Static owns · a journal
 line the log will never show · an objective over 12 words or ending in punctuation · any em dash or
 non-ASCII character · two beats on one marker or one travel ring · a base exclusion the recipe drops ·
-letter siblings that differ in structure · the buyer not
+letter siblings that differ in structure · a `deal` pool that never dealt the template's base quest · the buyer not
 paying more than the owner.
 
 **The build adds, off disk:** every alias fills below what it fills from (the order the engine needs),
 every place demands exactly its markers, the plugin's masters are unchanged, and every driver property,
-objective target, journal, stage reward and NPC field reads back as written.
+objective target, journal, stage reward and NPC field reads back as written, the quest sits in exactly the node its `deal` names (or none), and no node points at a quest the plugin no longer has.
 
 ---
 
