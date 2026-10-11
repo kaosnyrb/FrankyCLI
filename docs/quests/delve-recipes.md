@@ -51,7 +51,7 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 |---|---|---|---|
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06a`, `06b`) |
-| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03`-`09`). See *Beats* below |
+| `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03a`-`09a`). See *Beats* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
 onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
@@ -289,7 +289,7 @@ carries the `objective`; the build appends the vanilla counter, `(<Global=…>/N
 when all N are done. The counter resets when the quest starts, because these quests are repeatable.
 Each member's marker goes out as it is done: its target is lit only while its stage is not done (`GetStageDone == 0`, vanilla's way). Clearing the alias was tried and does not drop a marker.
 
-**A hold (Jessica's Type 6, `duo_delve09`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
+**A hold (Jessica's Type 6, `duo_delve09a`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
 least 1: an empty wave never clears) spawn one after another, each at the site's travel markers (his first play: one spot every wave, and on top of
 him). **Where (2026-10-10, his "spawning the enemies at points the player isnt looking at"):** a marker 40 m+ from
 him that he cannot see (his heading more than 90 degrees off it, or `HasDetectionLOS` false), then any 40 m+, then
@@ -348,7 +348,7 @@ sets its stage first and checks the item afterwards, so as a gate it would compl
 **Build:** as above, then compile the generated script by name, which `compile.py` finds in `gen/`:
 `python papyrus/compile.py C:/modding/DU_Overtime/Data duo_qf_<id>` and copy the `.pex` into Steam
 `Data/scripts`. **Two places drawing one POI is warned**, so keep a trail's places disjoint by theme
-(`duo_delve08` splits natural and military).
+(`duo_delve08a` splits natural and military).
 
 ## Speech: a speaker, a broadcast, and lines on stages (opt in)
 

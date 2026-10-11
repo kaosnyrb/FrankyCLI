@@ -12,7 +12,7 @@ label is not a listen.
 
 | id | described as | by whom | heard in game | voice type folder | used by |
 |---|---|---|---|---|---|
-| `CwhRBWXzGAHq8TQ4Fs17` | **A professional-sounding male voice, fairly neutral.** (ElevenLabs labels it *Roger, laid-back, casual, resonant*; his ear wins) | him, 2026-10-09 | ✅ yes, Relay Control | `GenericMale01` | `duo_delve09` (Relay Control) |
+| `CwhRBWXzGAHq8TQ4Fs17` | **A professional-sounding male voice, fairly neutral.** (ElevenLabs labels it *Roger, laid-back, casual, resonant*; his ear wins) | him, 2026-10-09 | ✅ yes, Relay Control | `GenericMale01` | `duo_delve09a` (Relay Control) |
 | `ClKfJnuqp0hQ7Ax41F4w` | Female. *Ada*: ElevenLabs labels her young, Canadian, casual | the library's labels | ⏳ not in a Delve | `GenericFemale01` | `gen_dlgtest` (a structure test) |
 | `21m00Tcm4TlvDq8ikWAM` | The default in `Retrograde.Library/Core/AI/elevenlabsAPI.cs` when no id is given. **Not in his library** (below) | the code | ⏳ no | | nothing on purpose |
 
