@@ -41,6 +41,8 @@ namespace FrankyCLI
             "  Message (mesg), Faction, Global, FormList, LeveledSpaceCell (lvsc)\n" +
             "  QuestAlias (qalias) - alias fills: which one is set and what it points at\n" +
             "  QuestAll (qall)    - the WHOLE quest record + a report of what it did NOT render\n" +
+            "  scriptprop <prop>[@plugin] - every record of ANY type whose script carries that property,\n" +
+            "                       its value, and the contents of any FormList it points at\n" +
             "  smtree <search>    - a Story Manager subtree as the engine walks it: branch and quest nodes\n" +
             "                       under each match, siblings in PreviousSibling order, conditions in full\n" +
             "                       (with RunOnType), quest members in list order\n" +
@@ -118,6 +120,9 @@ namespace FrankyCLI
 
             if (recordType.Equals("questtargets", StringComparison.OrdinalIgnoreCase))
                 return QuestTargetCensus(allMods, search);
+
+            if (recordType.Equals("scriptprop", StringComparison.OrdinalIgnoreCase))
+                return ScriptPropertyCensus(allMods, search, env.LinkCache);
 
             if (recordType.Equals("smtree", StringComparison.OrdinalIgnoreCase))
                 return StoryManagerTree(allMods, search, env.LinkCache);
@@ -2389,6 +2394,66 @@ namespace FrankyCLI
         ///
         /// Returns the number of records dumped, or -1 when the name matches no group at all --
         /// which the caller turns into a refusal that says NOTHING WAS SEARCHED.
+        /// <summary>
+        /// Every record, of ANY type, whose attached script carries a property of this name, with the script, the
+        /// value, and the CONTENTS of any FormList the value points at. Search is "<property>" or
+        /// "<property>@<plugin substring>" (scope it: walking every group of Starfield.esm is slow). His
+        /// 2026-10-11 ask, "look at the activators and that list": the activator view reflects two levels deep and
+        /// so never reached a script's properties, and Overtime's `artifactlist` lives on quests AND activators.
+        /// Quest ALIAS scripts are not walked here (quest_vmad prints those).
+        /// </summary>
+        private static int ScriptPropertyCensus(List<IStarfieldModGetter> allMods, string search, ILinkCache cache)
+        {
+            string prop = search, scope = "";
+            int at = search.IndexOf('@');
+            if (at >= 0) { prop = search.Substring(0, at); scope = search.Substring(at + 1); }
+            var mods = allMods.Where(m => scope == "" || m.ModKey.FileName.String.Contains(scope, StringComparison.OrdinalIgnoreCase)).ToList();
+            Console.WriteLine($"  property '{prop}' in {(scope == "" ? "EVERY plugin (unscoped)" : string.Join(", ", mods.Select(m => m.ModKey.FileName)))}");
+            if (mods.Count == 0) { Console.WriteLine($"REFUSED: no loaded plugin matches '{scope}'."); return 1; }
+            object? Get(object o, string n) => o.GetType().GetProperty(n)?.GetValue(o);
+            var values = new Dictionary<FormKey, int>();
+            int hits = 0;
+            foreach (var mod in mods)
+                foreach (var g in RecordGroups.Enumerate(mod))
+                    foreach (var rec in RecordGroups.Safe(g.Records, g.Name, mod.ModKey.FileName, "scriptprop"))
+                    {
+                        if (Get(rec, "VirtualMachineAdapter") is not object vma) continue;
+                        if (Get(vma, "Scripts") is not System.Collections.IEnumerable scripts) continue;
+                        foreach (var sc in scripts)
+                        {
+                            if (Get(sc, "Properties") is not System.Collections.IEnumerable ps) continue;
+                            foreach (var p in ps)
+                            {
+                                if (!string.Equals(Get(p, "Name") as string, prop, StringComparison.OrdinalIgnoreCase)) continue;
+                                string shown;
+                                if (Get(p, "Object") is IFormLinkGetter l && !l.IsNull)
+                                {
+                                    shown = $"{l.FormKey} {NameOf(l.FormKey, cache)}";
+                                    values[l.FormKey] = values.TryGetValue(l.FormKey, out var n) ? n + 1 : 1;
+                                }
+                                else shown = $"({p.GetType().Name.Replace("BinaryOverlay", "")}, not an object)";
+                                Console.WriteLine($"  {g.Name,-18} {rec.EditorID,-44} {Get(sc, "Name"),-40} = {shown}");
+                                hits++;
+                            }
+                        }
+                    }
+            Console.WriteLine($"\n  {hits} script propert{(hits == 1 ? "y" : "ies")} named '{prop}', {values.Count} distinct value(s).");
+            foreach (var kv in values.OrderByDescending(kv => kv.Value))
+            {
+                Console.WriteLine($"\n  {kv.Key} {NameOf(kv.Key, cache)}  (used {kv.Value}x)");
+                if (cache.TryResolve<IFormListGetter>(kv.Key, out var fl))
+                {
+                    Console.WriteLine($"    FormList, {fl.Items.Count} item(s):");
+                    foreach (var it in fl.Items)
+                    {
+                        string kind = cache.TryResolve<IStarfieldMajorRecordGetter>(it.FormKey, out var r) ? r.GetType().Name.Replace("BinaryOverlay", "") : "?";
+                        Console.WriteLine($"      {it.FormKey}  {kind,-12} {NameOf(it.FormKey, cache)}");
+                    }
+                }
+            }
+            return hits > 0 ? 0 : 1;
+        }
+
         /// <summary>
         /// A Story Manager subtree as the engine walks it: every branch and quest node under each node whose
         /// EditorID matches, SIBLINGS IN PreviousSibling ORDER (the order is the chain, not the file), each with
