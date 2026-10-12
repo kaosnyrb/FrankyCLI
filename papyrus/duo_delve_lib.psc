@@ -43,9 +43,9 @@ EndFunction
 ; akWave sets the next stage when every one of them is dead, so nothing here watches anything. Persistent
 ; while the quest holds them, so a wave cannot be unloaded out of its own collection.
 ; WHERE they arrive changes per wave (his first play, 2026-10-09: "enemies spawn in the same spot each wave
-; ... bonus points if they aren't near the player"); since 2026-10-12 it is close BEHIND HIM (see
+; ... bonus points if they aren't near the player"); since 2026-10-12 it is AROUND HIM, never in front (see
 ; WaveOrigins). aiOrigins is the wave's style, written by gen_delve from the recipe: 1 is a SQUAD (one group
-; from behind), 2 is a HORDE (the wave dealt round-robin across behind-left and behind-right, so it closes
+; from anywhere but in front), 2 is a HORDE (the wave dealt round-robin across his left and right, so it closes
 ; from two sides). Each group scatters within 10 m of its origin, snapped to navmesh. They then come FOR him because each wave collection wears a Travel-to-player package
 ; (gen_delve writes it), not because of anything here.
 Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax, Int aiOrigins) Global
@@ -90,8 +90,10 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
     EndWhile
 EndFunction
 
-; Where a wave arrives: CLOSE BEHIND HIM, not at the site's travel rings (his ask, 2026-10-12: "spawning
-; the enemies closer to the player to make the defense mission more intense"). The rings were the wrong
+; Where a wave arrives: AROUND HIM, ANYWHERE BUT IN FRONT, at a random distance, not at the site's travel
+; rings (his asks, 2026-10-12: "spawning the enemies closer to the player to make the defense mission more
+; intense", then, after he could aim where they landed: "Let's have the distance between 30-100m and the
+; arc choosen randoming outside of a 45 angle where the player is facing"). The rings were the wrong
 ; instrument for close: they sit ~70 m from a site's centre and ~133 m from each other (manual part 32),
 ; so a ring wave started 60 to 130 m out, where he saw them stutter (2026-10-10), and a horde rarely had
 ; both rings loaded to come from two sides.
@@ -101,15 +103,18 @@ EndFunction
 ; ⛔ NOT MoveTo's abRotateOffset, which the first build used: his play 2026-10-12, "they seemed to spawn in
 ; the same place" every wave. Vanilla only ever pairs abRotateOffset with abMatchRotation = True (four
 ; TIF_City_CY_Psych01 fragments) and the first build passed False, so the offset most likely stayed in
-; world axes, the same compass side of him every wave. aiCount 1 (SQUAD): one origin within 30 degrees of straight
-; behind. 2 (HORDE): behind-left and behind-right, 35 to 65 degrees off straight behind, so the wave
-; closes from two sides. Height is his; SpawnWave's PlaceAtMe snaps each enemy to navmesh round it.
+; world axes, the same compass side of him every wave.
+; THE ARC: any bearing outside a 45-degree cone centred on his facing, so more than FrontHalf (22.5) degrees
+; either side of it (Eliza's reading of "outside of a 45 angle": the cone is 45 wide; widen FrontHalf if he
+; meant 45 each side). aiCount 1 (SQUAD): one origin anywhere on that arc. 2 (HORDE): one on his left half
+; of it and one on his right, so it still closes from two sides. Height is his; SpawnWave's PlaceAtMe snaps each enemy to navmesh round it.
 ; Not at the site (more than SiteReach from the hold's marker, e.g. the pity timer firing while he has
 ; wandered off): the wave forms at the marker instead, as every hold did before rings.
 ; The caller owns the returned markers: SpawnWave deletes every origin that is not akSite.
 ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, Int aiCount) Global
-    Float NearMin = 25.0       ; metres; a feel to tune on his play, not a measurement
-    Float NearMax = 35.0
+    Float NearMin = 30.0       ; metres, his numbers 2026-10-12 (25 to 35 first: he could aim where they landed)
+    Float NearMax = 100.0
+    Float FrontHalf = 22.5     ; degrees either side of his facing that a wave never comes from
     Float SiteReach = 150.0    ; metres from the hold's marker; the median POI is ~133 m across (part 32)
     ObjectReference[] picked = new ObjectReference[0]
     If akPlayer.GetDistance(akSite) > SiteReach
@@ -119,14 +124,15 @@ ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, I
     Static XMarker = Game.GetFormFromFile(0x00003B, "Starfield.esm") as Static
     Int i = 0
     While i < aiCount
-        Float off = Utility.RandomFloat(-30.0, 30.0)
+        ; Degrees clockwise from his facing: right half (FrontHalf, 180], left half [180, 360 - FrontHalf).
+        Float off = Utility.RandomFloat(FrontHalf, 360.0 - FrontHalf)
         If aiCount >= 2 && i == 0
-            off = Utility.RandomFloat(-65.0, -35.0)
+            off = Utility.RandomFloat(FrontHalf, 180.0)
         ElseIf aiCount >= 2
-            off = Utility.RandomFloat(35.0, 65.0)
+            off = Utility.RandomFloat(180.0, 360.0 - FrontHalf)
         EndIf
         Float d = Utility.RandomFloat(NearMin, NearMax)
-        Float heading = akPlayer.GetAngleZ() + 180.0 + off   ; read per wave, so it follows him round
+        Float heading = akPlayer.GetAngleZ() + off   ; read per wave, so it follows him round
         ObjectReference m = akPlayer.PlaceAtMe(XMarker, 1, False, False, True)
         m.MoveTo(akPlayer, d * Math.sin(heading), d * Math.cos(heading), 0.0, False)
         picked.Add(m)

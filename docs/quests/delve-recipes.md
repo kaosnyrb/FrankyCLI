@@ -285,7 +285,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
-| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns 25 to 35 m BEHIND the player (else at `at` when he is more than 150 m from it); a `horde` wave is split behind-left and behind-right (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns 30 to 100 m from the player on any bearing outside the 45-degree cone he faces (else at `at` when he is more than 150 m from it); a `horde` wave is split between his left and his right (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
@@ -307,15 +307,15 @@ Each member's marker goes out as it is done: its target is lit only while its st
 
 **A hold (Jessica's Type 6, `duo_delve09a`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
 least 1: an empty wave never clears) spawn one after another. **Where (2026-10-12, his "spawning the enemies
-closer to the player to make the defense mission more intense"):** 25 to 35 m BEHIND him, re-read every wave from his
-heading the way vanilla does (facing is `(sin, cos)` of `GetAngleZ()`), each enemy snapped to navmesh within 10 m
-of it. *The first build used `MoveTo`'s `abRotateOffset` without `abMatchRotation`, and every wave came from "the
-same place" (his play, 2026-10-12).* When he is more than 150 m from `at` (a pity
-timer while he has wandered off) the wave forms at `at`. *Before this, 2026-10-10 to 10-12, waves came from the site's
-travel rings, unseen and 40 m+ from him; the rings sit ~70 m from a site's centre (part 32), so a wave started 60 to
-130 m out, where he saw them stutter.* **`style`**, optional, one per wave: `squad` (one group from behind him, within
-30 degrees of straight behind; the default) or `horde` (the wave split behind-left and behind-right, 35 to 65 degrees
-off straight behind, so it closes from two sides). A horde is `size` PER SIDE (his "third wave seems small"). The
+closer to the player", then "the distance between 30-100m and the arc choosen randoming outside of a 45 angle where
+the player is facing"):** a random 30 to 100 m from him, on any bearing outside a 45-degree cone centred on his
+facing (more than 22.5 degrees off it), re-read every wave from his heading the way vanilla does (`(sin, cos)` of
+`GetAngleZ()`), each enemy snapped to navmesh within 10 m of the point. When he is more than 150 m from `at` (a
+pity timer while he has wandered off) the wave forms at `at`. *History: the site's travel rings to 10-12 (60 to
+130 m out, where he saw them stutter); then 25 to 35 m behind him, close enough that he could aim where they
+landed; the first behind-him build used `MoveTo`'s `abRotateOffset` without `abMatchRotation` and every wave came
+from "the same place".* **`style`**, optional, one per wave: `squad` (one group, anywhere on that arc; the default)
+or `horde` (one group on his left half of the arc and one on his right, so it closes from two sides). A horde is `size` PER SIDE (his "third wave seems small"). The
 lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
 hold. Every
 wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,
