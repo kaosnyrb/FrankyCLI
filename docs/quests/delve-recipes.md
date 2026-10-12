@@ -151,7 +151,9 @@ new missions read as one board. A new Delve type gets its word on the day it is 
 | the trail (08) | `Search` | Search: Soldier's Letters on `<Planet>` |
 | hold the point (09) | `Defense` | Defense: Relay Alignment on `<Planet>` (US spelling, as the game's UI) |
 | talk (type 7, not yet built) | `Inquiry` | Inquiry: Survey Crate on `<Planet>` |
-| here, then another planet (type 8, not yet built) | `Supply Run` | Supply Run: Dig Site on `<SecondPlanet>` |
+| here, then another planet (type 8, not yet built; now 10a) | `Supply Run` | Supply Run: Dig Site on `<SecondPlanet>` |
+| survey (01) | `Survey` | Survey: Seismic Sensors on `<Planet>` |
+| retrieve under fire (02) | `Extraction` | Extraction: Core Samples on `<Planet>` |
 
 ### `place`
 
