@@ -377,14 +377,109 @@ namespace FrankyCLI
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 case "unbuild": return Unbuild(path, templates, dry);
+                case "testnode": return TestNode(args, templates, dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId>");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
+                    Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q] [--dry]   swap a slate pool's parking condition");
                     return 1;
             }
+        }
+
+        // ------------------------------------------------------------------ testnode
+
+        /// <summary>
+        /// His test workflow for a slate pool, as records (his words 2026-10-12): "I'd put the ammo condition onto
+        /// the real node then take it off the test one. Then I'd have only the test missions on that node." A
+        /// parked test node carries a condition no slate meets (HasKeyword ObjectTypeAmmo on the event's treasure:
+        /// every Overtime slate's treasure is LL_LegendaryItem_WeaponList), so it never deals. `on` MOVES that
+        /// condition onto the real node (the real pool goes quiet, the test node deals); `off` moves it back.
+        /// `--keep a,b` (on only) empties the test node down to the named quests, so the first play is certain.
+        /// Refuses unless exactly one node carries the ammo condition and it is the one being moved FROM, so
+        /// the pair can never end with both nodes live or both parked.
+        /// </summary>
+        private static int TestNode(string[] args, List<Template> templates, bool dry)
+        {
+            // Positionals are everything after the verb that is not a flag and not --keep's value.
+            var pos = new List<string>();
+            for (int i = 2; i < args.Length; i++)
+            {
+                if (args[i].Equals("--keep", StringComparison.OrdinalIgnoreCase)) { i++; continue; }
+                if (!args[i].StartsWith("--")) pos.Add(args[i]);
+            }
+            if (pos.Count != 3 || (pos[0] != "on" && pos[0] != "off"))
+            { Console.WriteLine("REFUSED: gen_delve testnode on|off <testNode> <realNode> [--keep quest,quest] [--dry]"); return 1; }
+            bool on = pos[0] == "on";
+            string testName = pos[1], realName = pos[2];
+            var keepArg = args.SkipWhile(a => !a.Equals("--keep", StringComparison.OrdinalIgnoreCase)).Skip(1).FirstOrDefault();
+            if (keepArg != null && !on) { Console.WriteLine("REFUSED: --keep is for `on` only."); return 1; }
+            var keep = keepArg?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
+
+            var mods = templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (mods.Count != 1) { Console.WriteLine("REFUSED: the templates name " + mods.Count + " mods; testnode knows which plugin only when they agree."); return 1; }
+            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            string modFile = Path.Combine(env.DataFolderPath, mods[0] + ".esm");
+            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+            var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
+            gen_quest_main.FixNextFormId(myMod);
+            var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
+
+            var test = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, testName, StringComparison.OrdinalIgnoreCase));
+            var real = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, realName, StringComparison.OrdinalIgnoreCase));
+            if (test == null || real == null) { Console.WriteLine($"REFUSED: no Story Manager quest node '{(test == null ? testName : realName)}' in {mods[0]}.esm."); return 1; }
+            if (test.FormKey == real.FormKey) { Console.WriteLine("REFUSED: the test node and the real node are the same node."); return 1; }
+
+            const string Ammo = "ObjectTypeAmmo";
+            var AmmoKeyword = FormKey.Factory("0F4AE8:Starfield.esm");   // ObjectTypeAmmo, read off the parked node by gen_inspect smtree
+            bool IsPark(IConditionGetter c) =>
+                c.Data is IHasKeywordConditionDataGetter k && k.FirstParameter.Link.FormKey == AmmoKeyword;
+            var from = on ? test : real;
+            var to = on ? real : test;
+            var parks = from.Conditions.Where(IsPark).ToList();
+            if (parks.Count != 1) { Console.WriteLine($"REFUSED: {from.EditorID} carries {parks.Count} {Ammo} condition(s); `{pos[0]}` moves exactly one FROM it."); return 1; }
+            if (to.Conditions.Any(IsPark)) { Console.WriteLine($"REFUSED: {to.EditorID} already carries the {Ammo} condition; both nodes would be parked."); return 1; }
+
+            Console.WriteLine();
+            Console.WriteLine($"=== TESTNODE {pos[0]}: {test.EditorID} {(on ? "DEALS" : "parked")}, {real.EditorID} {(on ? "parked" : "DEALS")} ===");
+            var moved = parks[0].DeepCopy();
+            from.Conditions.Remove(parks[0]);
+            to.Conditions.Add(moved);
+            Console.WriteLine($"  moved {Ammo} condition: {from.EditorID} -> {to.EditorID}");
+
+            if (keep != null)
+            {
+                var questsByName = myMod.Quests.ToDictionary(q => q.EditorID ?? "", q => q.FormKey, StringComparer.OrdinalIgnoreCase);
+                var missing = keep.Where(k => !questsByName.ContainsKey(k)).ToList();
+                if (missing.Count > 0) { Console.WriteLine("REFUSED: no quest " + string.Join(", ", missing) + " in the plugin. Nothing written."); return 1; }
+                var keepKeys = keep.Select(k => questsByName[k]).ToHashSet();
+                var notThere = keep.Where(k => !test.Quests.Any(e => e.Quest.FormKey == questsByName[k])).ToList();
+                if (notThere.Count > 0) { Console.WriteLine("REFUSED: " + string.Join(", ", notThere) + " is not on " + test.EditorID + " (deal it there first). Nothing written."); return 1; }
+                foreach (var e in test.Quests.Where(e => !keepKeys.Contains(e.Quest.FormKey)).ToList())
+                {
+                    test.Quests.Remove(e);
+                    Console.WriteLine($"  off the test node: {e.Quest.FormKey}");
+                }
+            }
+            Console.WriteLine($"  {test.EditorID} now deals: " + string.Join(", ", test.Quests.Select(e => myMod.Quests.FirstOrDefault(q => q.FormKey == e.Quest.FormKey)?.EditorID ?? e.Quest.FormKey.ToString())));
+            if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
+
+            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+            env.Dispose();
+            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
+            Console.WriteLine("  wrote " + modFile);
+
+            using var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            var t2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == test.FormKey);
+            var r2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == real.FormKey);
+            int tp = t2.Conditions.Count(IsPark), rp = r2.Conditions.Count(IsPark);
+            bool ok = (on ? (tp == 0 && rp == 1) : (tp == 1 && rp == 0));
+            var mastersAfter = string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
+            Console.WriteLine($"  [{(ok ? "OK  " : "FAIL")}] off disk: {Ammo} on {t2.EditorID} x{tp}, on {r2.EditorID} x{rp}");
+            Console.WriteLine($"  [{(mastersAfter == mastersBefore ? "OK  " : "FAIL")}] the plugin's masters are unchanged ({mastersAfter})");
+            return ok && mastersAfter == mastersBefore ? 0 : 1;
         }
 
         // ------------------------------------------------------------------ unbuild

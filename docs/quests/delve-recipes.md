@@ -36,6 +36,15 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 4. If the template's driver changed, compile it: `python papyrus/compile.py C:/modding/DU_Overtime/Data <driver>`,
    then copy the `.pex` into Steam `Data/scripts`.
 5. `python sync_plugin.py`, commit the Overtime repo, snapshot again with a label.
+**Testing a Delve from a real slate: `gen_delve testnode on|off <testNode> <realNode> [--keep q,q] [--dry]`**
+(2026-10-12, his workflow: *"I'd put the ammo condition onto the real node then take it off the test one. Then I'd
+have only the test missions on that node"*). Each slate branch has a PARKED test node, conditioned on the event's
+treasure carrying `ObjectTypeAmmo`, which no slate's does (all four carry `LL_LegendaryItem_WeaponList`). Deal the
+Delve there (`"deal": "_duo_MS_ArtifactMapLocalCargo_TEST"`), build, then `testnode on ... --keep <id>`: the condition
+moves to the real node (parked) and the test node deals only what you kept, so every slate of that kind starts the
+Delve. `off` moves it back. It refuses unless exactly one of the pair carries the condition, so the pair can never
+end with both live or both parked. ⚠ Turn it OFF before a release, and point the recipe's `deal` at the real node.
+
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
 go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the
