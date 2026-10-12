@@ -2,6 +2,8 @@
   "schema": 1,
   "id": "duo_delve07a",
   "template": "beats",
+  "deal": "_duo_MS_ArtifactMapLocalCargo_TEST",
+  "_deal": "TEST POOL, 2026-10-12, his \"add them all and I'll test them in a min\": dealt from the local-cargo test node while `gen_delve testnode on` has the real pool parked. Move to duo_MS_ArtifactMap_LocalCargoNode for the migration.",
   "author": "jessica",
   "source": "home-office office/projects/delves/v2-mission-types.md, type 1 (the fix-up); office/projects/delves/stages-not-a-driver.md",
   "_note": [
