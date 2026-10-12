@@ -14,8 +14,9 @@
     "2. GUARDS on a pickup: spacers placed round the crate when the player first comes near, PROPOSED as the pickup's",
     "   guard block (a hostile twin of approach.civilians). The built fallback is a recover beat, but that takes the",
     "   item off a body, and his design has a crate you can see.",
-    "Crash sites: LocTypeOE_ThemeShipwreckKeyword is on 11 of 491 POIs, under the lint's pool floor of 40, so this",
-    "will start only on maps with a wreck in range. His call whether that rarity is fine or the theme widens.",
+    "Crash sites: LocTypeOE_ThemeShipwreckKeyword is on 11 of 491 existing POIs, but that count does NOT bind here.",
+    "His, 2026-10-12: \"Missionboards spawn the POI, so it is always created\". The board places a new wreck, so",
+    "the mission always starts; the theme says WHICH kind of POI the board spawns, not which existing one it finds.",
     "The second place is local and leashed (built, as 08a): a POI near the wreck, where the cargo was bound.",
     "Message box on the pickup only, after the fight: a calm moment (his 2026-10-08 rule). Either or: no say there.",
     "Pay: a guarded pickup; suggest med."
