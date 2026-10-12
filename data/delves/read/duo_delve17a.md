@@ -22,7 +22,7 @@
 > You came! Brilliant. Okay. The cool box fell off the hauler, which is fine, but the lollies are in it, which is less fine.
 
 **▸ I'll find the cool box.** *(ends the talk)*
-> Hero! It's blue. Probably blue. The cups fell off too, grab those. Twenty minutes before they go soft. Loads of time!
+> Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!
 
 **▸ What's the occasion?**
 > It's Friday! The fourth one, which is lolly Friday, which nobody voted for, I just started doing it and now there's a rota and a song.
@@ -33,7 +33,7 @@
 **▸ Do I get one?**
 > Obviously! Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now.
 
-📓 *Journal:* The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. It's out on the site somewhere, with a bag of cups. She says there's twenty minutes before they go soft.
+📓 *Journal:* The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. It's out on the site somewhere, with a bag of cups. She says there's five minutes before they go soft.
 
 ---
 
@@ -71,3 +71,14 @@
 > You found it! Still cold, feel, it's still cold! And we've got loads of time. Here. Have a red one. The red ones are the best ones.
 
 📓 *Journal:* Somebody's Friday lollies fell off a hauler at the <Place>. I found the cool box and the cups and brought them back. I got first pick. It's a rule now.
+
+---
+
+## ⏱️ DEADLINE · 5 min
+
+Starts when beat 1 is done. Beat 4 by then, or the mission fails.
+
+🔊 **Organiser, on failure:**
+> Oh! That's five minutes. They're soup now. Lolly soup! Honestly, that's still a good Friday.
+
+📓 *Journal, failed:* Somebody's Friday lollies fell off a hauler at the <Place>. I didn't get the cool box back before they melted. She called it lolly soup and didn't seem to mind.

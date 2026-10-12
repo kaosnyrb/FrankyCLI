@@ -12,15 +12,20 @@
     "when she gets excited. Never finds anything remarkable. Her tell, kept: she checks the time and is pleased.",
     "Her heat does not apply (Overtime is adult, not explicit, his 10-12). Her world and voice do.",
     "Beats are 16a's: talk, two pickups, a deliver that speaks. Nothing new to build.",
-    "A real melt timer would be the joke done properly; the hold timer is proven (11:19 today), so that is Eliza's",
-    "call, not this recipe's. As written the twenty minutes is only something she says.",
+    "THE MELT IS REAL (his 2026-10-12 19:28: \"go on, make it a real timer. We can have Mission failure as well,",
+    "theres a failed objective animation\"). See `deadline`, PROPOSED: the recipe is the ask (his 10-12).",
     "Voiced lines: no names, no places, no flags. She has seven colleagues and names none of them.",
     "MODELS: the freight crate stands in for a cool box (Kim's list); the picnic blanket is 13a's, his eye owed."
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "A worked site with a small team on it. She is placed by the talk beat: NonHostile mostly has nobody."
   },
@@ -33,7 +38,7 @@
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the organiser at the <Place>",
-      "journal": "The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. It's out on the site somewhere, with a bag of cups. She says there's twenty minutes before they go soft.",
+      "journal": "The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. It's out on the site somewhere, with a bag of cups. She says there's five minutes before they go soft.",
       "person": {
         "name": "Tess Ambry",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -45,7 +50,7 @@
       "exchanges": [
         {
           "prompt": "I'll find the cool box.",
-          "reply": "Hero! It's blue. Probably blue. The cups fell off too, grab those. Twenty minutes before they go soft. Loads of time!"
+          "reply": "Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!"
         },
         {
           "prompt": "What's the occasion?",
@@ -96,6 +101,27 @@
       "say": "You found it! Still cold, feel, it's still cold! And we've got loads of time. Here. Have a red one. The red ones are the best ones."
     }
   ],
+  "deadline": {
+    "after": 1,
+    "seconds": 300,
+    "until": 4,
+    "fail": {
+      "say": "Oh! That's five minutes. They're soup now. Lolly soup! Honestly, that's still a good Friday.",
+      "journal": "Somebody's Friday lollies fell off a hauler at the <Place>. I didn't get the cool box back before they melted. She called it lolly soup and didn't seem to mind."
+    },
+    "_deadline": [
+      "PROPOSED. Starts when beat 1 (the talk) completes, i.e. on exchange 0. If beat 4 (the deliver) has not",
+      "completed after `seconds`, the quest FAILS: every open objective shows failed (his 'failed objective",
+      "animation'), `fail.say` plays in the speaker's voice, `fail.journal` is the journal, and the quest stops.",
+      "MECHANISM, from Eliza's own code (gen_delve_beats.cs:40-45): NOT StartTimer, whose OnTimer never fires in a",
+      "fragment; a Utility.Wait in beat 1's completion fragment, then a stage check, as the stuck guard does.",
+      "300 s, not her original twenty minutes: the cells sit 53 to 96 m out (p25 to p75, the lint's separation),",
+      "so the route is about 275 m at the median and twenty minutes could never run out. His to tune.",
+      "WANTED from the build: the carried items (Cool Box, Bag of Cups) removed on failure, or they sit in the",
+      "inventory as the lint already warns for an undelivered pickup.",
+      "The fail line obeys Momo's cartridge: nothing sad, never quieter than it started."
+    ]
+  },
   "speaker": {
     "name": "Organiser",
     "voice": "GenericFemale01",

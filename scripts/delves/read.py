@@ -124,6 +124,25 @@ def render(recipe, notes):
             say(f"📓 *Journal:* {beat['journal']}")
             say("")
 
+    deadline = recipe.get("deadline")
+    if deadline:
+        mins, secs = divmod(deadline.get("seconds", 0), 60)
+        clock = f"{mins} min" + (f" {secs} s" if secs else "")
+        say("---")
+        say("")
+        say(f"## ⏱️ DEADLINE · {clock}")
+        say("")
+        say(f"Starts when beat {deadline.get('after')} is done. Beat {deadline.get('until')} by then, or the mission fails.")
+        say("")
+        fail = deadline.get("fail", {})
+        if fail.get("say"):
+            say(f"🔊 **{speaker.get('name', 'voice')}, on failure:**")
+            say(f"> {fail['say']}")
+            say("")
+        if fail.get("journal"):
+            say(f"📓 *Journal, failed:* {fail['journal']}")
+            say("")
+
     if notes:
         say("---")
         say("")
