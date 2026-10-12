@@ -378,6 +378,7 @@ namespace FrankyCLI
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
                 case "unbuild": return Unbuild(path, templates, dry);
                 case "testnode": return TestNode(args, templates, dry);
+                case "nodeflag": return NodeFlag(args, templates, dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId>");
@@ -385,8 +386,61 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
                     Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
+                    Console.WriteLine("       gen_delve nodeflag <node> runone on|off [--dry]   one quest per event (NumQuestsToRun, max 1)");
                     return 1;
             }
+        }
+
+        // ------------------------------------------------------------------ nodeflag
+
+        /// <summary>
+        /// `gen_delve nodeflag <node> runone on|off [--dry]`: set or clear a slate pool's "start one quest per event"
+        /// (QuestFlags.NumQuestsToRun with MaxNumQuestsToRun = 1, the shape his board test node
+        /// _duo_MB_MissionNode_test already carries). His ask 2026-10-12: one dataslate should give one mission,
+        /// falling through to another quest when a quest's aliases fail; today a pool without the flag started
+        /// several Delves off one slate. ⚠ WHAT THE FLAG MEANS IN STARFIELD IS THE EXPERIMENT, not a fact: per
+        /// event (one quest per slate, and a quest that fails to fill should not count), or a cap on how many of
+        /// the node's quests run at once (his reading). The record also carries a separate MaxConcurrentQuests,
+        /// which is suggestive only. The test: two slates picked up without finishing the first.
+        /// </summary>
+        private static int NodeFlag(string[] args, List<Template> templates, bool dry)
+        {
+            var pos = args.Skip(2).Where(a => !a.StartsWith("--")).ToList();
+            if (pos.Count != 3 || pos[1] != "runone" || (pos[2] != "on" && pos[2] != "off"))
+            { Console.WriteLine("REFUSED: gen_delve nodeflag <node> runone on|off [--dry]"); return 1; }
+            string nodeName = pos[0]; bool on = pos[2] == "on";
+            var mods = templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (mods.Count != 1) { Console.WriteLine("REFUSED: the templates name " + mods.Count + " mods; nodeflag knows which plugin only when they agree."); return 1; }
+            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            string modFile = Path.Combine(env.DataFolderPath, mods[0] + ".esm");
+            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+            var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
+            gen_quest_main.FixNextFormId(myMod);
+            var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
+            var node = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, nodeName, StringComparison.OrdinalIgnoreCase));
+            if (node == null) { Console.WriteLine($"REFUSED: no Story Manager quest node '{nodeName}' in {mods[0]}.esm."); return 1; }
+
+            bool had = node.QuestFlags.HasFlag(StoryManagerQuestNode.QuestFlag.NumQuestsToRun);
+            Console.WriteLine();
+            Console.WriteLine($"=== NODEFLAG {node.EditorID} runone {pos[2]} ===");
+            Console.WriteLine($"  before: QuestFlags = {node.QuestFlags}, MaxNumQuestsToRun = {node.MaxNumQuestsToRun?.ToString() ?? "(none)"}, MaxConcurrentQuests = {node.MaxConcurrentQuests?.ToString() ?? "(none)"}");
+            if (had == on && (!on || node.MaxNumQuestsToRun == 1)) { Console.WriteLine("REFUSED: already " + pos[2] + ". Nothing written."); return 1; }
+            if (on) { node.QuestFlags |= StoryManagerQuestNode.QuestFlag.NumQuestsToRun; node.MaxNumQuestsToRun = 1; }
+            else { node.QuestFlags &= ~StoryManagerQuestNode.QuestFlag.NumQuestsToRun; node.MaxNumQuestsToRun = null; }
+            Console.WriteLine($"  after : QuestFlags = {node.QuestFlags}, MaxNumQuestsToRun = {node.MaxNumQuestsToRun?.ToString() ?? "(none)"}");
+            if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
+
+            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+            env.Dispose();
+            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
+            Console.WriteLine("  wrote " + modFile);
+            using var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            var n2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == node.FormKey);
+            bool ok = n2.QuestFlags.HasFlag(StoryManagerQuestNode.QuestFlag.NumQuestsToRun) == on && (on ? n2.MaxNumQuestsToRun == 1 : n2.MaxNumQuestsToRun == null);
+            var mastersAfter = string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
+            Console.WriteLine($"  [{(ok ? "OK  " : "FAIL")}] off disk: QuestFlags = {n2.QuestFlags}, MaxNumQuestsToRun = {n2.MaxNumQuestsToRun?.ToString() ?? "(none)"}");
+            Console.WriteLine($"  [{(mastersAfter == mastersBefore ? "OK  " : "FAIL")}] the plugin's masters are unchanged ({mastersAfter})");
+            return ok && mastersAfter == mastersBefore ? 0 : 1;
         }
 
         // ------------------------------------------------------------------ testnode
