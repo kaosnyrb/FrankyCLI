@@ -275,3 +275,27 @@ Function PlaceCompany(ReferenceAlias akTarget, FormList akCompany, Int aiMin, In
         n -= 1
     EndWhile
 EndFunction
+
+; WHO IS THERE: INFESTED (his dial, 2026-10-11; first used by duo_delve06b, the medal whose find has nested).
+; ONE species from the list, as his infestation missions do (duo_missioninfestation_lists picks one Heatleech and
+; places the rest as copies), so it reads as a nest rather than a zoo. aiMin to aiMax of them scattered within
+; afRadius of the object, snapped to navmesh, set to attack. Placed by a 250 m distance hook on that object, so
+; they are there before the player is. Aggression 2 (his gang idiom, which also attacks neutrals) is right here,
+; unlike a wave's 1: a nest does not cross open ground, it stays round what it is guarding.
+Function PlaceNest(ReferenceAlias akCentre, FormList akList, Int aiMin, Int aiMax, Float afRadius) Global
+    ObjectReference centre = akCentre.GetRef()
+    Form species = akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
+    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
+    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-afRadius, afRadius)
+        pos[1] = Utility.RandomFloat(-afRadius, afRadius)
+        pos[2] = 0
+        Actor creature = centre.PlaceAtMe(species, 1, True, False, True, pos, None, True) as Actor
+        creature.SetValue(Suspicious, 2.0) ; DetectedActor
+        creature.SetValue(Aggression, 2.0) ; VeryAggressive
+        n -= 1
+    EndWhile
+EndFunction

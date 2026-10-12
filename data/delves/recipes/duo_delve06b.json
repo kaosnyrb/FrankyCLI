@@ -8,16 +8,16 @@
     "TYPE 2, THE MEDAL, LETTER b: same beats as duo_delve06, new lore, and the FIND IS INFESTED. His ask",
     "2026-10-11: \"There might be a Medal quest variant where the first POI is infested.\" Every word is",
     "Jessica's, written 2026-10-11 on his \"yeah\".",
-    "DO NOT BUILD YET: the who's-there dial is not in gen_delve, so built today the find would be EMPTY",
-    "while every line about it says nest. See _occupancy.",
-    "06 was renamed duo_delve06a on his \"yeah do 06a\" (2026-10-11), so the sibling lint pairs",
-    "them. The rename re-mints the quest, so the old duo_delve06 record comes out on the next build."
+    "BUILT 2026-10-12 on his \"do the whole quest\": place.second.who is the first use of the who's-there",
+    "dial (Eliza's build: gen_delve's who, duo_delve_lib.PlaceNest). The creature list is a placeholder, his",
+    "to pick (seven PreditorMegalist lists, A to G). 06 was renamed duo_delve06a on 2026-10-11; the old",
+    "duo_delve06 record is out of the plugin (10-12)."
   ],
   "_occupancy": {
     "second": "infested (the find: nests, the salvager could not go back for it)",
     "main": "workers via the ending's person and company, as 06",
     "third": "workers via the ending's person and company, as 06",
-    "_why": "His dial, 2026-10-11, card 20261011-073659. Hostile find, so the tiers below are one rung up from 06 (README rule 3: the tier is the difficulty signal). The field is a note until Eliza's build gives it a key."
+    "_why": "His dial, 2026-10-11, card 20261011-073659. Hostile find, so the tiers below are one rung up from 06 (README rule 3: the tier is the difficulty signal). Built 2026-10-12 as place.second.who. main and third stay notes here: workers is not built, and the ending's person and company already carry them."
   },
   "place": {
     "theme": {
@@ -33,9 +33,15 @@
       "theme": {
         "require": [],
         "exclude": []
+      },
+      "who": {
+        "kind": "infested",
+        "list": "duo_GangMembersList_PreditorMegalist_A",
+        "min": 4,
+        "max": 7
       }
     },
-    "_second": "The FIND, any POI, infested once the dial exists.",
+    "_second": "The FIND, any POI, infested: one species, 4 to 7 of them round the stash.",
     "third": {
       "theme": {
         "require": [

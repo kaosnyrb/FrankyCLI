@@ -247,7 +247,19 @@ namespace FrankyCLI
             public Place? third { get; set; }
             /// <summary>RETIRED with the delve4 kind, 2026-10-09: kept only so the lint can refuse it (a beats Delve writes approach.civilians).</summary>
             public bool? civilians { get; set; }
+            /// <summary>
+            /// OPTIONAL: who is at THIS place (his dial, 2026-10-11, office/projects/delves/backlog.md "Who's there").
+            /// Absent = empty, the default. Only "infested" is built; any other kind is refused by name, never
+            /// read as empty, because a briefing that names a crew at an empty site is the failure this exists for.
+            /// </summary>
+            public Who? who { get; set; }
         }
+        /// <summary>
+        /// infested: one species drawn from list (a FormList of creature bases, Overtime's
+        /// duo_GangMembersList_PreditorMegalist_* are his), min to max of them around the first object at the
+        /// place, placed when the player comes within 250 m of it.
+        /// </summary>
+        private sealed class Who { public string? kind { get; set; } public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
         private sealed class Beat
@@ -822,10 +834,18 @@ namespace FrankyCLI
                     "reward" => $"{x.reward?.owner}/{x.reward?.buyer}" + string.Concat(x.beats.Select((b, i) => b.reward == null ? "" : $" beat{i + 1}:{b.reward}")),
                     _ => ""
                 };
+                // Who is at each place is NOT drift: a letter that changes it does so on purpose (his 06b, the medal
+                // with an infested find), and the tier moves with the danger (delves README rule 3), so a reward
+                // difference between siblings that differ in who is there is expected and not reported.
+                string WhoAt(Recipe x) => string.Join(" | ", new[] { x.place, x.place.second, x.place.third }.Select(p => p?.who?.kind ?? "empty"));
                 var first = fam.OrderBy(x => x.id).First();
                 foreach (var sib in fam.OrderBy(x => x.id).Skip(1))
                     foreach (var part in new[] { "template", "beats", "themes", "reward" })
-                        if (Shape(first, part) != Shape(sib, part))
+                        if (Shape(first, part) == Shape(sib, part)) continue;
+                        else if (part == "reward" && WhoAt(first) != WhoAt(sib))
+                            Console.WriteLine($"  [info ] {sib.id} and {first.id} differ in who is there ('{WhoAt(sib)}' vs '{WhoAt(first)}'), so their rewards may differ: "
+                                              + $"'{Shape(sib, part)}' vs '{Shape(first, part)}'.");
+                        else
                             Console.WriteLine($"  [warn ] {sib.id} and {first.id} are letter siblings with different {part}: "
                                               + $"'{Shape(sib, part)}' vs '{Shape(first, part)}'. Same number, same content: fix both, or give it its own number.");
             }
@@ -1224,6 +1244,8 @@ namespace FrankyCLI
                 Warn("place.third is set and no beat is at the third place, so it is never written");
             if (!anySecond && r.place.second != null)
                 Warn("place.second is set and no beat is at the second place, so it is never written");
+            if (t.kind != "beats" && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.who != null))
+                Fatal($"a place sets who, and template '{t.id}' is a {t.kind} Delve; only the beats kind places anyone, so it would be silently ignored.");
 
             // --- the pool, PER PLACE, which is the number the design sits on ---------------------
             // ⭐ Each place alias is drawn on its OWN conditions, so each gets its own pool figure: the
@@ -2372,7 +2394,15 @@ namespace FrankyCLI
                     if (st == null || vt == null) { Console.WriteLine($"REFUSED: the speaker needs UC_NA_MASTWorkerMale01 and VoiceType '{r.speaker.voice}' in {t.mod} or a master."); fail++; }
                     else speakerSrc = (st, vt.FormKey);
                 }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc);
+                // Who is at each place: its creature list, own-or-master, as a person's company list is.
+                var whoLists = new Dictionary<int, FormKey>();
+                foreach (var (p, w, _) in WhoOf(r))
+                {
+                    var f = OwnOrMaster<IFormListGetter>(myMod, env, w.list ?? "");
+                    if (f == null) { Console.WriteLine($"REFUSED: FormList '{w.list}' ({PlaceKey[p]}.who.list) is not in {t.mod} or one of its masters."); fail++; continue; }
+                    whoLists[p] = f.FormKey;
+                }
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists);
             }
             else if (t.kind == "choice")
             {

@@ -82,6 +82,27 @@ namespace FrankyCLI
             public bool IsHold => Waves > 0;
         }
 
+        /// <summary>
+        /// The places that say who is there (place / place.second / place.third .who), each with the beat whose
+        /// object the occupants are placed around: the first pickup, use or deliver at that place that is not a
+        /// return (a return shares its original's object). -1 when there is none. Pure, so the lint and the
+        /// build agree by construction.
+        /// </summary>
+        private static List<(int place, Who who, int anchor)> WhoOf(Recipe r)
+        {
+            var found = new List<(int, Who, int)>();
+            var places = new[] { r.place, r.place.second, r.place.third };
+            for (int p = 0; p < places.Length; p++)
+            {
+                if (places[p]?.who is not Who w) continue;
+                int a = Enumerable.Range(0, r.beats.Count).FirstOrDefault(i => r.beats[i].PlaceIndex == p && r.beats[i].returnTo == null
+                            && (r.beats[i].type == "pickup" || r.beats[i].type == "use" || r.beats[i].type == "deliver"), -1);
+                found.Add((p, w, a));
+            }
+            return found;
+        }
+        private static readonly string[] PlaceKey = { "place", "place.second", "place.third" };
+
         /// <summary>Split the beats into steps. Pure, so the lint and the build agree by construction.</summary>
         private static List<Step> StepsOf(Recipe r)
         {
@@ -355,6 +376,34 @@ namespace FrankyCLI
                 else if (t.approachStage + personCount >= 10) Fatal($"{personCount} people need stages {t.approachStage + 1} to {t.approachStage + personCount}, which reach the first beat's 10.");
             }
 
+            // --- who is there (his dial, 2026-10-11) --------------------------------------------------------
+            var whos = WhoOf(r);
+            foreach (var (p, w, a) in whos)
+            {
+                string at = PlaceKey[p] + ".who";
+                if (w.kind != "infested")
+                {
+                    Fatal($"{at}.kind is '{w.kind}'; only \"infested\" is built. Empty is the default (leave who out); workers, spacers and the dead "
+                          + "are designed in office/projects/delves/backlog.md and not built, and a briefing that names them at an empty site is the failure this field exists for.");
+                    continue;
+                }
+                if (a < 0) Fatal($"{at} is infested and no pickup, use or deliver is at that place, so there is no object to place the nest around.");
+                else if (r.beats[a].person != null) Fatal($"{at}: the nest forms around beat {a + 1}, an ending whose person already hooks that object's distance; one alias carries one distance hook.");
+                else Console.WriteLine($"  {at}: infested, {w.min}-{w.max} placed around beat {a + 1}'s object when the player is within {ApproachDistance} of it");
+                var fl = OwnOrMaster<IFormListGetter>(Allowed(env, t), env, w.list ?? "");
+                if (fl == null) Fatal($"{at}.list '{w.list}' is not a FormList in {t.mod} or one of its masters.");
+                else if (fl.Items.Count == 0) Fatal($"{at}.list '{w.list}' is EMPTY, so nothing would ever be placed.");
+                else Console.WriteLine($"  {at}.list: one species from {fl.EditorID} ({fl.Items.Count} entries)");
+                if (w.min < 1 || w.max < w.min) Fatal($"{at} needs 1 <= min <= max; it has {w.min}-{w.max}.");
+                else if (w.max > 12) Warn($"{at}.max is {w.max}; more than 12 creatures round one object is a swarm.");
+            }
+            if (whos.Count > 0)
+            {
+                if (t.approachStage < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or playerAlias for a nest's stage and hook.");
+                else if (t.approachStage + personCount + whos.Count >= 10)
+                    Fatal($"{personCount} people and {whos.Count} nest(s) need stages {t.approachStage + 1} to {t.approachStage + personCount + whos.Count}, which reach the first beat's 10.");
+            }
+
             int recoverCount = r.beats.Count(b => b.type == "recover");
             if (recoverCount > 5) Fatal($"{recoverCount} recover beats; the player's OnItemAdded hook has the base and four duplicates, so five.");
             if (recoverCount > 0 && t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
@@ -436,6 +485,9 @@ namespace FrankyCLI
 
         /// <summary>The driver's LoseDistance: how close to the approached object the player comes before the approach fires.</summary>
         private const float ApproachDistance = 250f;
+        /// <summary>How far round its object a nest scatters, in metres. His infestation missions use 40 round a
+        /// creature; a stash is a smaller thing to guard, so the nest sits closer.</summary>
+        private const float NestRadius = 20f;
 
         private static string FragmentFunction(int stage) => $"Fragment_Stage_{stage:D4}_Item_00";
 
@@ -471,7 +523,7 @@ namespace FrankyCLI
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
                                       Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons,
                                       IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc,
-                                      (INpcGetter tmpl, FormKey voice)? speakerSrc)
+                                      (INpcGetter tmpl, FormKey voice)? speakerSrc, Dictionary<int, FormKey> whoLists)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -651,6 +703,10 @@ namespace FrankyCLI
             var personStage = new Dictionary<int, int>();
             foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null))
                 personStage[b] = t.approachStage + 1 + personStage.Count;
+            // A place's occupants, after the people: their own stage, set by a distance hook on the object they surround.
+            var whos = WhoOf(r);
+            var whoStage = new Dictionary<int, int>();
+            foreach (var (p, _, _) in whos) whoStage[p] = t.approachStage + 1 + personStage.Count + whoStage.Count;
             // A second ending completes the quest the same way as the first: a COPY of the completing stage
             // (its CompleteQuest flag and its reward entry), never a plain stage, which completes nothing.
             foreach (var cs in steps.Where(s => s.IsChoose))
@@ -669,7 +725,7 @@ namespace FrankyCLI
                 }
             var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                 .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
-                .Concat(personStage.Values).Distinct().OrderBy(x => x).ToList();
+                .Concat(personStage.Values).Concat(whoStage.Values).Distinct().OrderBy(x => x).ToList();
             foreach (var st in allStages)
             {
                 if (clone.Stages!.Any(s => s.Index == st)) continue;
@@ -1078,6 +1134,34 @@ namespace FrankyCLI
                 Console.WriteLine($"  +hook    : beat {b + 1}'s person, within {ApproachDistance} of its object (alias {own}) after {enter}, sets {pst}");
             }
 
+            // A nest: a stock distance hook on the object it surrounds, measuring to the player, at any stage (no
+            // PrereqStage), as a person's is on its ending: 250 m out, so the creatures are there before he is.
+            foreach (var (p, w, a) in whos)
+            {
+                int own = slotOf[a].activatorAlias;
+                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
+                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
+                ta.Object.SetTo(clone.FormKey);
+                ta.Alias = (short)t.playerAlias;
+                sc.Properties.Add(ta);
+                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = whoStage[p], Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = -1, Flags = ScriptProperty.Flag.Edited });
+                var entry = vma.Aliases.FirstOrDefault(x => x.Property.Alias == own);
+                if (entry == null)
+                {
+                    entry = new QuestFragmentAlias();
+                    entry.Property.Object.SetTo(clone.FormKey);
+                    entry.Property.Alias = (short)own;
+                    vma.Aliases.Add(entry);
+                }
+                if (entry.Scripts.Any(x => x.Name == sc.Name))
+                { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the nest at {PlaceKey[p]} cannot hook it twice."); return 1; }
+                entry.Scripts.Add(sc);
+                bm.Hooks.Add((own, sc.Name, whoStage[p], -1));
+                Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
+            }
+
             // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
             if (r.approach is Approach apr)
             {
@@ -1206,6 +1290,13 @@ namespace FrankyCLI
                     props.Add(("FormList", $"Company{b + 1}", cfk, -1));
                     Add(pst, $"duo_delve_lib.PlaceCompany({ta}, Company{b + 1}, {pc.min}, {pc.max}, 8.0)");
                 }
+            }
+            foreach (var (p, w, a) in whos)
+            {
+                string ta = $"Alias_Beat{a + 1}Target", nl2 = $"Nest{p + 1}";
+                props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[a].activatorAlias));
+                props.Add(("FormList", nl2, whoLists[p], -1));
+                Add(whoStage[p], $"duo_delve_lib.PlaceNest({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})");
             }
             if (r.approach is Approach af)
             {

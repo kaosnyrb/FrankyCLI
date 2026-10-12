@@ -22,7 +22,7 @@
       "id": "two-beat-one-place",
       "base": "duo_artifact_localcargo_qst09a",
       "mod": "du_overtime",
-      "driver": "dou_artifact_ground_dualactivator_local_quest",
+      "driver": "dou_artifact_ground_dualact_local_qst",
 
       "_shape": [
         "Pick something up at one marker, carry it to another, hand it over. The driver displays",
@@ -95,7 +95,7 @@
       "base": "duo_artifact_localcargo_qst09a",
       "mod": "du_overtime",
       "driver": "duo_delve_choice",
-      "replacesDriver": "dou_artifact_ground_dualactivator_local_quest",
+      "replacesDriver": "dou_artifact_ground_dualact_local_qst",
       "_shape": [
         "JESSICA'S TYPE 2, KEEP IT OR GIVE IT BACK: find a thing with a name on it at one place, then take",
         "it to its owner at a second place OR sell it to a buyer at a third. Walking to one completes the",
@@ -151,7 +151,7 @@
       "base": "duo_artifact_localcargo_qst09a",
       "mod": "du_overtime",
       "driver": "",
-      "replacesDriver": "dou_artifact_ground_dualactivator_local_quest",
+      "replacesDriver": "dou_artifact_ground_dualact_local_qst",
   "playerAlias": 32,
   "_playerAlias": "MBRIR02Player, filled with the player as a unique actor: a recover beat's OnItemAdded hook sits on it.",
   "gangMin": 0,
