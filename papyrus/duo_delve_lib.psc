@@ -43,11 +43,10 @@ EndFunction
 ; akWave sets the next stage when every one of them is dead, so nothing here watches anything. Persistent
 ; while the quest holds them, so a wave cannot be unloaded out of its own collection.
 ; WHERE they arrive changes per wave (his first play, 2026-10-09: "enemies spawn in the same spot each wave
-; ... bonus points if they aren't near the player"), and since 2026-10-10 it is chosen where he is NOT
-; LOOKING (see WaveOrigins). aiOrigins is the wave's style, written by gen_delve from the recipe: 1 is a
-; SQUAD (one group from one side), 2 is a HORDE (the wave dealt round-robin across one origin per travel
-; ring, so it comes from both of the site's sides at once). Each group scatters within 10 m of its origin, snapped
-; to navmesh. They then come FOR him because each wave collection wears a Travel-to-player package
+; ... bonus points if they aren't near the player"); since 2026-10-12 it is close BEHIND HIM (see
+; WaveOrigins). aiOrigins is the wave's style, written by gen_delve from the recipe: 1 is a SQUAD (one group
+; from behind), 2 is a HORDE (the wave dealt round-robin across behind-left and behind-right, so it closes
+; from two sides). Each group scatters within 10 m of its origin, snapped to navmesh. They then come FOR him because each wave collection wears a Travel-to-player package
 ; (gen_delve writes it), not because of anything here.
 Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList akGang, Int aiMin, Int aiMax, Int aiOrigins) Global
     ObjectReference[] origins = WaveOrigins(akMarker.GetRef(), Game.GetPlayer(), aiOrigins)
@@ -60,9 +59,7 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
     Float aggressive = 1.0
 
     Float[] placePosition = new Float[6]
-    ; A HORDE is the wave's size PER SIDE it was dealt (his play of 09: "third wave seems small"), and it is
-    ; sized on aiOrigins, not on how many sides were found: a POI loads by cell, so the far ring is usually
-    ; not there to find (manual part 32) and a horde most often arrives from one side, at double strength.
+    ; A HORDE is the wave's size PER SIDE (his play of 09: "third wave seems small"), sized on aiOrigins.
     Int n = Utility.RandomInt(aiMin, aiMax) * aiOrigins
     Int k = 0
     While k < n
@@ -83,117 +80,55 @@ Function SpawnWave(ReferenceAlias akMarker, RefCollectionAlias akWave, FormList 
         ; lapses into a search). Pace comes from the wave package running instead (gen_delve sets it).
         k += 1
     EndWhile
-EndFunction
-
-; Where a wave arrives, from the SITE's own travel rings, searched round the site, not the player, so a wave
-; never arrives at some other POI he happens to be near. ⚠ The six markers are TWO PLACES, not six: within a
-; ring A1/A2/A3 (and B1/B2/B3) sit a median 7 to 14 units apart (manual part 32), so ring A and ring B are
-; the only two distinct sides a site offers. His asks, 2026-10-10: "spawning the enemies at points the
-; player isnt looking at"; and after a horde across three markers came from one side, his pick of "one
-; group per ring".
-; aiCount 1 (SQUAD): one marker from either ring. 2 or more (HORDE): one marker from EACH ring IN REACH, so
-; the wave comes from both sides when both are loaded; a ring with nothing far enough from him sends nothing.
-; ⚠ Usually only ONE ring is in reach: the POI loads by cell, and from its edge the far ring does not exist
-; for FindAllReferencesOfType (part 32, measured 2026-09-24; his play of 09: wave 3 "in one place").
-; Within the choice, best first, drawn at random:
-;   1. FAR AND UNSEEN: 40 m+ from him, and either behind him (his heading more than 90 degrees off it, the
-;      test vanilla's doors use) or out of his line of sight (Actor.HasDetectionLOS; its header: "Only the
-;      player can check LOS to a non-actor"). Vanilla's precedent for "move it where he cannot see":
-;      QF_COM_Quest_Andreja_Q01, HasDirectLOS == 0. His first play: the waves came from out of sight.
-;   2. FAR: 40 m+ from him, seen or not.
-; Nothing far on either ring: the single farthest ring marker. No ring in reach (a site without the
-; markers): the recipe's own spawn marker. Never empty.
-ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, Int aiCount) Global
-    Float SiteSearch = 300.0   ; metres round the site; the widest POI diameter measured is 373 (gen_delve lint)
-    Float MinFromPlayer = 40.0
-    Int[] ids = new Int[6]
-    ids[0] = 0x0E3800 ; REOverlayTravelA1
-    ids[1] = 0x0E37FF ; A2
-    ids[2] = 0x0E37FE ; A3
-    ids[3] = 0x0E37FD ; B1
-    ids[4] = 0x0E37FC ; B2
-    ids[5] = 0x0E37FB ; B3
-    ObjectReference[] unseenA = new ObjectReference[0]
-    ObjectReference[] farA = new ObjectReference[0]
-    ObjectReference[] unseenB = new ObjectReference[0]
-    ObjectReference[] farB = new ObjectReference[0]
-    ObjectReference farthest = None
-    Float farthestD = -1.0
-    Int b = 0
-    While b < ids.Length
-        ObjectReference[] found = akSite.FindAllReferencesOfType(Game.GetFormFromFile(ids[b], "Starfield.esm"), SiteSearch)
-        Int i = 0
-        While i < found.Length
-            Float d = akPlayer.GetDistance(found[i])
-            If d >= MinFromPlayer
-                Bool unseen = Math.abs(akPlayer.GetHeadingAngle(found[i])) > 90.0 || !akPlayer.HasDetectionLOS(found[i])
-                If b < 3 && unseen
-                    unseenA.Add(found[i])
-                ElseIf b < 3
-                    farA.Add(found[i])
-                ElseIf unseen
-                    unseenB.Add(found[i])
-                Else
-                    farB.Add(found[i])
-                EndIf
-            EndIf
-            If d > farthestD
-                farthest = found[i]
-                farthestD = d
-            EndIf
-            i += 1
-        EndWhile
-        b += 1
+    ; The origins behind him were temporary markers; the site marker is the quest's and stays.
+    Int o = 0
+    While o < origins.Length
+        If origins[o] != akMarker.GetRef()
+            origins[o].Delete()
+        EndIf
+        o += 1
     EndWhile
+EndFunction
+
+; Where a wave arrives: CLOSE BEHIND HIM, not at the site's travel rings (his ask, 2026-10-12: "spawning
+; the enemies closer to the player to make the defense mission more intense"). The rings were the wrong
+; instrument for close: they sit ~70 m from a site's centre and ~133 m from each other (manual part 32),
+; so a ring wave started 60 to 130 m out, where he saw them stutter (2026-10-10), and a horde rarely had
+; both rings loaded to come from two sides.
+; Each origin is a temporary XMarker [STAT:0000003B] placed NearMin to NearMax metres from him, MoveTo'd
+; with abRotateOffset so the offset turns with his facing (ObjectReference.psc). +Y is taken as AHEAD of
+; him, so behind is -Y: ⚠ UNVERIFIED in game; if it is wrong the waves come from in front or the side,
+; which his first play will show at once. aiCount 1 (SQUAD): one origin within 30 degrees of straight
+; behind. 2 (HORDE): behind-left and behind-right, 35 to 65 degrees off straight behind, so the wave
+; closes from two sides. Height is his; SpawnWave's PlaceAtMe snaps each enemy to navmesh round it.
+; Not at the site (more than SiteReach from the hold's marker, e.g. the pity timer firing while he has
+; wandered off): the wave forms at the marker instead, as every hold did before rings.
+; The caller owns the returned markers: SpawnWave deletes every origin that is not akSite.
+ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, Int aiCount) Global
+    Float NearMin = 25.0       ; metres; a feel to tune on his play, not a measurement
+    Float NearMax = 35.0
+    Float SiteReach = 150.0    ; metres from the hold's marker; the median POI is ~133 m across (part 32)
     ObjectReference[] picked = new ObjectReference[0]
-    If aiCount >= 2
-        ObjectReference fromA = PickOne(unseenA, farA)
-        If fromA != None
-            picked.Add(fromA)
-        EndIf
-        ObjectReference fromB = PickOne(unseenB, farB)
-        If fromB != None
-            picked.Add(fromB)
-        EndIf
-    Else
-        ObjectReference[] unseen = new ObjectReference[0]
-        ObjectReference[] far = new ObjectReference[0]
-        AddAll(unseenA, unseen)
-        AddAll(unseenB, unseen)
-        AddAll(farA, far)
-        AddAll(farB, far)
-        ObjectReference one = PickOne(unseen, far)
-        If one != None
-            picked.Add(one)
-        EndIf
+    If akPlayer.GetDistance(akSite) > SiteReach
+        picked.Add(akSite)
+        Return picked
     EndIf
-    If picked.Length == 0
-        If farthest != None
-            picked.Add(farthest)
-        Else
-            picked.Add(akSite)
-        EndIf
-    EndIf
-    Return picked
-EndFunction
-
-; A random member of akBest, else of akNext, else None.
-ObjectReference Function PickOne(ObjectReference[] akBest, ObjectReference[] akNext) Global
-    If akBest.Length > 0
-        Return akBest[Utility.RandomInt(0, akBest.Length - 1)]
-    ElseIf akNext.Length > 0
-        Return akNext[Utility.RandomInt(0, akNext.Length - 1)]
-    EndIf
-    Return None
-EndFunction
-
-; Appends every member of akFrom to akTo.
-Function AddAll(ObjectReference[] akFrom, ObjectReference[] akTo) Global
+    Static XMarker = Game.GetFormFromFile(0x00003B, "Starfield.esm") as Static
     Int i = 0
-    While i < akFrom.Length
-        akTo.Add(akFrom[i])
+    While i < aiCount
+        Float off = Utility.RandomFloat(-30.0, 30.0)
+        If aiCount >= 2 && i == 0
+            off = Utility.RandomFloat(-65.0, -35.0)
+        ElseIf aiCount >= 2
+            off = Utility.RandomFloat(35.0, 65.0)
+        EndIf
+        Float d = Utility.RandomFloat(NearMin, NearMax)
+        ObjectReference m = akPlayer.PlaceAtMe(XMarker, 1, False, False, True)
+        m.MoveTo(akPlayer, d * Math.sin(off), -d * Math.cos(off), 0.0, False, True)
+        picked.Add(m)
         i += 1
     EndWhile
+    Return picked
 EndFunction
 
 ; THE APPROACH (stage 5 on a beats Delve, set by a stock DefaultAliasOnDistanceLessThan on the player).

@@ -316,9 +316,9 @@ namespace FrankyCLI
             public int? stuck { get; set; }
             /// <summary>
             /// beats, a hold, OPTIONAL: each wave's style, one per wave, "squad" or "horde". A squad comes as one
-            /// group from one unseen side; a horde is split across both travel rings, the site's only two sides (his
-            /// asks 2026-10-10: "scattering them across points / grouping for horde vs squad combat styles").
-            /// His pick of "one group per ring" (2026-10-10) after a three-marker horde came from one side.
+            /// group from behind him; a horde is split behind-left and behind-right, so it closes from two sides
+            /// (his asks 2026-10-10: "scattering them across points / grouping for horde vs squad combat styles";
+            /// close behind him since 2026-10-12, "spawning the enemies closer to the player").
             /// Absent = every wave a squad, which is how every hold played before the field existed.
             /// </summary>
             public List<string>? style { get; set; }

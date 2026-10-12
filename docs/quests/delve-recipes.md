@@ -276,7 +276,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
-| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns at the site's travel markers, preferring ones 40 m or more from the player AND unseen by him (behind his heading or out of his line of sight), then any 40 m+, else the farthest, else `at`; a `horde` wave is split between the site's two travel rings (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns 25 to 35 m BEHIND the player (else at `at` when he is more than 150 m from it); a `horde` wave is split behind-left and behind-right (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
@@ -297,17 +297,15 @@ when all N are done. The counter resets when the quest starts, because these que
 Each member's marker goes out as it is done: its target is lit only while its stage is not done (`GetStageDone == 0`, vanilla's way). Clearing the alias was tried and does not drop a marker.
 
 **A hold (Jessica's Type 6, `duo_delve09a`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
-least 1: an empty wave never clears) spawn one after another, each at the site's travel markers (his first play: one spot every wave, and on top of
-him). **Where (2026-10-10, his "spawning the enemies at points the player isnt looking at"):** a marker 40 m+ from
-him that he cannot see (his heading more than 90 degrees off it, or `HasDetectionLOS` false), then any 40 m+, then
-the farthest; `at` is the search anchor and the last fallback. ⚠ `HasDetectionLOS` on a bare marker is unverified
-in game; if it misreads, the rule degrades to "behind him" or to "far", never to an empty wave. **`style`**,
-optional, one per wave: `squad` (one group from one side, the default and every hold before the field) or `horde`
-(the wave split between ring A and ring B, the site's ONLY two distinct sides: within a ring the markers sit 7 to 14
-units apart, manual part 32; his pick 2026-10-10 after a three-marker horde came from one side). A ring with no marker
-40 m+ from him sends nothing that wave. A horde is `size` PER SIDE (his "third wave seems small"), and ⚠ most often
-lands on ONE side at double strength: the POI loads by cell, so the far ring is usually not there to find (part 32;
-his play, 2026-10-10). The
+least 1: an empty wave never clears) spawn one after another. **Where (2026-10-12, his "spawning the enemies
+closer to the player to make the defense mission more intense"):** 25 to 35 m BEHIND him, an offset turned with his
+facing (`MoveTo` with `abRotateOffset`), each enemy snapped to navmesh within 10 m of it. ⚠ That +Y is AHEAD of him is
+unverified in game: wrong, and the waves come from in front or the side. When he is more than 150 m from `at` (a pity
+timer while he has wandered off) the wave forms at `at`. *Before this, 2026-10-10 to 10-12, waves came from the site's
+travel rings, unseen and 40 m+ from him; the rings sit ~70 m from a site's centre (part 32), so a wave started 60 to
+130 m out, where he saw them stutter.* **`style`**, optional, one per wave: `squad` (one group from behind him, within
+30 degrees of straight behind; the default) or `horde` (the wave split behind-left and behind-right, 35 to 65 degrees
+off straight behind, so it closes from two sides). A horde is `size` PER SIDE (his "third wave seems small"). The
 lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
 hold. Every
 wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,
