@@ -27,7 +27,7 @@
   },
   "prose": {
     "name": "Repairs: Relay Power on <Planet>",
-    "briefing": "A relay post at the <Place> wants a contractor to carry two power cells. The posting is four words long and signed with a rank."
+    "briefing": "A relay post at the <Place> wants a contractor to carry two power cells. The posting is short and signed with a rank."
   },
   "beats": [
     {
