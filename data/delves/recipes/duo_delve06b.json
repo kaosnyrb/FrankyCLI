@@ -124,11 +124,10 @@
   ],
   "offer": {
     "journal": "The clasp's militia number matches a soldier whose brother lives at the <Place>. A militia post wants it for their case of honours and will pay more than he can. It's my call.",
-    "message": {
-      "title": "Incoming Message",
-      "text": "Heard you pulled a militia clasp out of that nest. Our post keeps the old unit's honours in a case by the door, for the new ones to read. I'm at the <ThirdPlace>. I'll pay more than his brother can. - Post Quartermaster"
-    }
+    "say": "Heard you pulled a militia clasp out of that nest. Our post keeps the old unit's honours in a case by the door, for the new ones to read. I'll pay more than his brother can.",
+    "_say": "Jessica's message text, spoken (his 2026-10-12: the call should be radio, not a box). Two cuts and no new words: \"I'm at the <ThirdPlace>.\" (a voice cannot say a token; the objective names the place) and the sign-off (the subtitle carries the speaker's name)."
   },
   "_people": "Names checked against his who's-who (office/staff/bryn/people.md): no family name. Templates from the talkable set, 02 so neither person shares a face with 06's. Outfits and company lists are placeholders, his to dress.",
-  "_speech": "No speech, his \"either or\" (a box and a line on one beat clash), as 06."
+  "speaker": { "name": "Post Quartermaster", "voice": "GenericFemale01", "elevenlabs": "XW70ikSsadUbinwLMZ5w" },
+  "_speech": "One line: the quartermaster's call, as radio (offer.say, his 2026-10-12). It plays after the find's box is closed, so his \"either or\" holds: the offer's box is gone. Voice: Annie K, calm, grounded, unheard in game until his listen."
 }

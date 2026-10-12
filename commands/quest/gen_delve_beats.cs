@@ -458,6 +458,9 @@ namespace FrankyCLI
             var spoken = new List<(string where, string text)>();
             if (r.broadcast != null) spoken.Add(("broadcast", r.broadcast));
             for (int i = 0; i < r.beats.Count; i++) if (r.beats[i].say != null) spoken.Add(($"beat {i + 1}'s say", r.beats[i].say!));
+            if (r.offer?.say != null) spoken.Add(("offer.say", r.offer.say));
+            if (r.offer?.say != null && r.offer.message != null)
+                Fatal("offer has both a message and a say; his \"either or\": a box and a line on one stage clash. Keep one.");
             if (spoken.Count > 0 && r.speaker == null) Fatal("there are spoken lines and no speaker: say who speaks them (name, voice, elevenlabs).");
             if (r.speaker != null)
             {
@@ -1328,6 +1331,17 @@ namespace FrankyCLI
                 var lines = new List<(int stage, string text)>();
                 if (r.broadcast != null) lines.Add((0, r.broadcast));
                 for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
+                // The offer's line plays on the stage that opens the choice as a TAIL, after every other line of that
+                // stage, so it starts once the find's box is closed (Message.Show waits). Added like a beat's line it
+                // landed BEFORE the box (the speech lines are emitted ahead of the boxes), so the radio played under
+                // an open box: the clash his "either or" exists for. Caught reading 06b's fragment, 2026-10-12.
+                int offerLine = -1;
+                if (r.offer?.say != null)
+                {
+                    var cs = steps.First(s => s.IsChoose);
+                    offerLine = lines.Count;
+                    lines.Add((steps[steps.IndexOf(cs) - 1].DoneStage, r.offer.say));
+                }
                 for (int n = 0; n < lines.Count; n++)
                 {
                     var (lst, ltext) = lines[n];
@@ -1378,7 +1392,8 @@ namespace FrankyCLI
                     if (!atStart)
                     {
                         props.Add(("Scene", sv, scene.FormKey, -1));
-                        Add(lst, $"{sv}.Start()");
+                        if (n == offerLine) Tail(lst, $"{sv}.Start()   ; the offer's call, after the find's box is closed");
+                        else Add(lst, $"{sv}.Start()");
                         spokenAt.Add((lst, n + 1));
                     }
                     bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));

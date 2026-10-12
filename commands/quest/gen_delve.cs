@@ -210,7 +210,13 @@ namespace FrankyCLI
         }
         /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
-        private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } }
+        /// <summary>
+        /// The offer: the journal line at the find, and EITHER a message box OR a spoken radio line (say), never both
+        /// (his "either or", 2026-10-11). say is beats-only, needs the recipe's speaker, and plays on the stage that
+        /// opens the choice AFTER the find's box is closed (Message.Show waits), so the two never overlap. His ask,
+        /// 2026-10-12 on 06b: "the call from the guy to buy is a textbox and not a radio messsage".
+        /// </summary>
+        private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } public string? say { get; set; } }
         private sealed class Reward { public string? owner { get; set; } public string? buyer { get; set; } }
         /// <summary>choice: the carried item's inventory name and the delivery points' models and names. The item is CLONED, never the base's.</summary>
         private sealed class Items
@@ -1244,6 +1250,8 @@ namespace FrankyCLI
                 Warn("place.third is set and no beat is at the third place, so it is never written");
             if (!anySecond && r.place.second != null)
                 Warn("place.second is set and no beat is at the second place, so it is never written");
+            if (t.kind != "beats" && r.offer?.say != null)
+                Fatal($"offer.say is set and template '{t.id}' is a {t.kind} Delve; only the beats kind speaks, so it would be silently ignored.");
             if (t.kind != "beats" && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.who != null))
                 Fatal($"a place sets who, and template '{t.id}' is a {t.kind} Delve; only the beats kind places anyone, so it would be silently ignored.");
 
@@ -1473,6 +1481,7 @@ namespace FrankyCLI
             if (r.offer?.journal != null) yield return ("offer journal", r.offer.journal);
             if (r.offer?.message?.title != null) yield return ("offer message title", r.offer.message.title);
             if (r.offer?.message?.text != null) yield return ("offer message text", r.offer.message.text);
+            if (r.offer?.say != null) yield return ("offer say", r.offer.say);
         }
 
         private static IEnumerable<string> Tokens(string s)

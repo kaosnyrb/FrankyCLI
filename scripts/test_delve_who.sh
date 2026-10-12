@@ -23,6 +23,8 @@ case('kind',   lambda x: x['place']['second']['who'].__setitem__('kind', 'spacer
 case('list',   lambda x: x['place']['second']['who'].__setitem__('list', 'duo_NoSuchList'))
 case('anchor', lambda x: x['place'].__setitem__('who', {'kind': 'infested', 'list': 'duo_GangMembersList_PreditorMegalist_A', 'min': 2, 'max': 3}))
 case('count',  lambda x: x['place']['second']['who'].__setitem__('min', 0))
+# offer.say (2026-10-12) rides the same recipe: a box AND a line on the offer is his "either or".
+case('offerboth', lambda x: x['offer'].__setitem__('message', {'title': 'Incoming Message', 'text': 'x'}))
 EOF
 
 run() { # run WANT case needle
@@ -37,5 +39,6 @@ run REFUSE kind   'only "infested" is built'
 run REFUSE list   'is not a FormList'
 run REFUSE anchor "already hooks that object's distance"
 run REFUSE count  'needs 1 <= min <= max'
+run REFUSE offerboth 'offer has both a message and a say'
 echo "failing: $fails"
 [ $fails -eq 0 ]
