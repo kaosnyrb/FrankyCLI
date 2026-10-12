@@ -564,7 +564,7 @@ namespace FrankyCLI
             public List<(int objective, int alias, int seconds, int stage)> Reveals = new();   // each revealed wave: its objective, collection, wait, death stage
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
-            public List<(uint wem, string text, string voice, string elevenlabs)> TalkLines = new();   // a talk person's voiced lines
+            public List<(uint wem, string text, string voice, string elevenlabs, bool female)> TalkLines = new();   // a talk person's voiced lines (female picks the face actor)
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
@@ -1091,7 +1091,9 @@ namespace FrankyCLI
                 Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
             }
 
-            foreach (var b in talkAlias.Keys) BuildTalk(myMod, clone, r, b, steps, beatStage, slotOf[b].targetAlias, npcOf[b], bm);
+            foreach (var b in talkAlias.Keys)
+                BuildTalk(myMod, clone, r, b, steps, beatStage, slotOf[b].targetAlias, npcOf[b],
+                          myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm);
 
             // --- 9. the events: one stock hook per beat --------------------------------------------------
             int recovers = 0;
@@ -1613,7 +1615,7 @@ namespace FrankyCLI
         /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
         /// </summary>
         private static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
-                                      Dictionary<int, int> beatStage, int personAlias, FormKey npc, BeatsMade bm)
+                                      Dictionary<int, int> beatStage, int personAlias, FormKey npc, bool female, BeatsMade bm)
         {
             var tb = r.beats[b];
             int stage = beatStage[b];
@@ -1660,7 +1662,7 @@ namespace FrankyCLI
                 // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
                 topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
                 clone.DialogTopics.Add(topic);
-                if (his) bm.TalkLines.Add((topic.FormKey.ID, text, vt, vid));
+                if (his) bm.TalkLines.Add((topic.FormKey.ID, text, vt, vid, female));
                 return (topic, info);
             }
             Scene NewScene(string name, uint flags)
@@ -1708,6 +1710,70 @@ namespace FrankyCLI
                 Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (closes the talk, sets {stage} when the reply ends)" : "  (loops to the menu)"));
             }
             bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));
+        }
+
+        // The Creation Kit's lipsync, without the CK (office/projects/bethesda/39-voice-dialogue-and-lipsync.md, proven
+        // at his glass 2026-10-12: "LIP SYNC WORKED 100%"). Its own command lines, read out of CreationKit.exe.
+        private static readonly string ToolsDir = Path.Combine(Path.GetDirectoryName(SpeechTools.GameVoiceDir.TrimEnd('\\'))!, "..", "..", "Tools");
+
+        /// <summary>
+        /// One lip file per voiced talk line, beside its .wem: LipGenerator (the TEXT argument is the spoken words,
+        /// measured: a file path is lip-synced as text) to an .animset, a one-animset .ffxcproj (two in one project
+        /// collide on their animation group), ffxc -p=x86, then &lt;id&gt;.ffxanim copied in. Radio lines have no face
+        /// and get none.
+        /// ⛔ NOT CACHED, deliberately: the file carries a 12-byte value at offset 12 that differs with the line id (the
+        /// animation is named after the wav, which is named after the id; measured 2026-10-12, two builds of one line
+        /// identical but for bytes 12-23). A cached file copied under a NEW id would carry the old one, and whether the
+        /// game checks it is unmeasured. The tools are local and take about a second a line, so every build re-makes them.
+        /// </summary>
+        private static int DeployLips(BeatsMade bm, Func<string, string> dir, List<string> deployed)
+        {
+            if (bm.TalkLines.Count == 0) return 0;
+            string tools = Path.GetFullPath(ToolsDir);
+            string lipgen = Path.Combine(tools, "LipGenerator", "LipGenerator.exe"), ffxc = Path.Combine(tools, "FaceFX", "ffxc.exe");
+            string analysis = Path.Combine(tools, "FaceFX", "GenesisDefault.facefx");
+            foreach (var exe in new[] { lipgen, ffxc, analysis })
+                if (!File.Exists(exe)) { Console.WriteLine($"    FAIL     : lipsync needs {exe}, which is not there"); return 1; }
+            string work = Path.Combine(VoiceCacheDir, "lipwork");
+            int fail = 0;
+            foreach (var (wem, text, vt, vid, female) in bm.TalkLines)
+            {
+                string key = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes($"{vid}|{vt}|{text}")))[..16].ToLowerInvariant();
+                string dest = Path.Combine(dir(vt), $"{wem:X8}.ffxanim");
+                string wav = Path.Combine(VoiceCacheDir, key + ".wav");
+                if (!File.Exists(wav)) { Console.WriteLine($"    FAIL     : no {wav} to lip-sync {wem:X8} from"); fail++; continue; }
+                string actor = Path.Combine(tools, "FaceFX", female ? "StarfieldHumanFemale.facefx" : "StarfieldHumanMale.facefx");
+                if (Directory.Exists(work)) Directory.Delete(work, true);
+                Directory.CreateDirectory(work);
+                string id = $"{wem:X8}";   // the animation is named after the wav, so the wav is named after the line
+                File.Copy(wav, Path.Combine(work, id + ".wav"));
+                string animset = Path.Combine(work, id + ".animset");
+                int c1 = RunTool(lipgen, work, Path.Combine(work, id + ".wav"), text, actor, analysis, $"-OutputFileName:{animset}", $"-AnimationGroupName:{vt}");
+                string proj = Path.Combine(work, id + ".ffxcproj");
+                File.WriteAllText(proj, string.Join("\r\n", new[] { "version: 10300", "items:", $" - facefx_file: {actor}", "   mount_files:", $"    - {animset}" }) + "\r\n");
+                int c2 = c1 != 0 || !File.Exists(animset) ? -1
+                       : RunTool(ffxc, work, "-p=x86", "-Wno-empty-bone-pose", "-Wno-unused-track", "-Wno-snap", $"-o={Path.Combine(work, "out")}", proj);
+                string built = Path.Combine(work, "out", Path.GetFileNameWithoutExtension(actor), "x86", vt, id + ".ffxanim");
+                if (c2 != 0 || !File.Exists(built))
+                { Console.WriteLine($"    FAIL     : lipsync for {id} (LipGenerator exit {c1}, ffxc exit {c2}; {work})"); fail++; continue; }
+                Console.WriteLine($"    lip      : {id}.ffxanim  ({(female ? "female" : "male")} face)");
+                File.Copy(built, dest, true);
+                deployed.Add(dest);
+                fail += Check($"{wem:X8}.ffxanim sits beside its .wem ({vt})",
+                              (File.Exists(dest) && File.Exists(Path.ChangeExtension(dest, ".wem"))).ToString(), "True");
+            }
+            return fail;
+        }
+
+        /// <summary>Runs a tool with each argument passed as its own argument (no shell, no quoting), returns its exit code.</summary>
+        private static int RunTool(string exe, string cwd, params string[] args)
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo(exe) { WorkingDirectory = cwd, UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var a in args) psi.ArgumentList.Add(a);
+            using var p = System.Diagnostics.Process.Start(psi)!;
+            p.StandardOutput.ReadToEnd(); p.StandardError.ReadToEnd();
+            p.WaitForExit();
+            return p.ExitCode;
         }
 
         private static int DeployVoice(Recipe r, Template t, BeatsMade bm)
@@ -1775,6 +1841,7 @@ namespace FrankyCLI
                     Console.WriteLine($"    new      : {wem:X8}.wem, cached as {key}  \"{text}\"");
                 }
             }
+            fail += DeployLips(bm, Dir, deployed);
             File.WriteAllLines(manifest, deployed);
             foreach (var (wem, _, vt, _) in all)
                 fail += Check($"{wem:X8}.wem is where the game looks ({vt})", File.Exists(Path.Combine(Dir(vt), $"{wem:X8}.wem")).ToString(), "True");
