@@ -207,7 +207,13 @@ namespace FrankyCLI
             public string? outfit { get; set; }
             /// <summary>OPTIONAL: nameless friendly NPCs placed around this person. Absent = they stand alone.</summary>
             public Company? company { get; set; }
+            /// <summary>talk, REQUIRED there: the VoiceType EditorID his lines are filed under (GenericMale01 / GenericFemale01).</summary>
+            public string? voice { get; set; }
+            /// <summary>talk, REQUIRED there: the ElevenLabs voice id his lines are generated in (docs/quests/voices.md).</summary>
+            public string? elevenlabs { get; set; }
         }
+        /// <summary>talk: one question the player can ask and the person's answer. Prompt is silent menu text, reply is voiced.</summary>
+        private sealed class Exchange { public string? prompt { get; set; } public string? reply { get; set; } }
         /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         /// <summary>
@@ -352,6 +358,14 @@ namespace FrankyCLI
             public List<string>? style { get; set; }
             /// <summary>beats, OPTIONAL: a line the recipe's speaker says over the radio when this beat's stage is set. Plain words, no tokens.</summary>
             public string? say { get; set; }
+            /// <summary>talk, REQUIRED there: what the person says when the player first speaks to him. Voiced, no tokens.</summary>
+            public string? greeting { get; set; }
+            /// <summary>
+            /// talk, REQUIRED there: the questions, in menu order. exchanges[0] ENDS the conversation and sets the beat's
+            /// stage when its reply finishes; the rest can be asked in any order and loop back to the menu
+            /// (docs/specs/npc_dialogue.md, the Completion and Regular topic shapes).
+            /// </summary>
+            public List<Exchange>? exchanges { get; set; }
         }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
@@ -2351,7 +2365,7 @@ namespace FrankyCLI
             {
                 // A choose ending's person is resolved here, where the load order is, own-or-master (never the
                 // winner by name: see the choice branch below for the master it once added).
-                var persons = new Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)>();
+                var persons = new Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)>();
                 for (int i = 0; i < r.beats.Count && fail == 0; i++)
                 {
                     var pp = r.beats[i].person;
@@ -2371,7 +2385,14 @@ namespace FrankyCLI
                         if (f == null) { Console.WriteLine($"REFUSED: FormList '{pp.company.list}' is not in {t.mod} or one of its masters."); fail++; continue; }
                         co = f.FormKey;
                     }
-                    persons[i] = (n, of, co);
+                    FormKey? vo = null;
+                    if (!string.IsNullOrWhiteSpace(pp.voice))
+                    {
+                        var vty = OwnOrMaster<IVoiceTypeGetter>(myMod, env, pp.voice!);
+                        if (vty == null) { Console.WriteLine($"REFUSED: VoiceType '{pp.voice}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                        vo = vty.FormKey;
+                    }
+                    persons[i] = (n, of, co, vo);
                 }
                 // A hold's waves are empty RefCollection aliases filled at runtime. None of our bases carries
                 // one, so each is a copy of vanilla's own: UC08_QueenBattle's ActiveHostiles, an empty

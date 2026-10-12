@@ -56,7 +56,7 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_delve
     {
-        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold" };
+        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold", "talk" };
         // A hold wave's style -> duo_delve_lib.SpawnWave's origins: 1 anywhere but in front, 2 his left and his right.
         // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
         private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 2 };
@@ -168,6 +168,49 @@ namespace FrankyCLI
             return beatStage;
         }
 
+        // The talk beat's limits, docs/specs/npc_dialogue.md: a prompt is a menu line, a reply a spoken one.
+        private const int TalkPromptMax = 60, TalkReplyMax = 200;
+
+        /// <summary>
+        /// A talk beat: a person who stands at the beat's marker from quest start, a greeting, and the questions the
+        /// player can ask. exchanges[0] closes the conversation and sets the beat's stage. It has no object, no box
+        /// and no radio line: the person is the object and his voice is the line (his "either or").
+        /// </summary>
+        private static void GradeTalk(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Action<string> Fatal)
+        {
+            string at = $"beat {i + 1} (talk)";
+            if (b.model != null || b.name != null || b.replace || b.message != null || b.say != null || b.returnTo != null
+                || b.group != null || b.choose != null || b.reward != null)
+                Fatal($"{at} sets model, name, replace, message, say, returnTo, group, choose or reward; a talk beat has none of them "
+                      + "(the person is its object and his voice its line), so they would be silently ignored.");
+            if (b.person is not Person p) { Fatal($"{at} has no person: nobody to talk to."); }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(p.name) || string.IsNullOrWhiteSpace(p.template)) Fatal($"{at} person needs both a name and a template.");
+                else if (Tokens(p.name).Any()) Fatal($"{at} person name carries a <Token>; an NPC name is not an alias context.");
+                if (p.company != null) Fatal($"{at} person.company is an ending's; a talk beat's person stands alone, so it would be silently ignored.");
+                if (string.IsNullOrWhiteSpace(p.elevenlabs)) Fatal($"{at} person.elevenlabs is required: the voice his lines are generated in.");
+                if (string.IsNullOrWhiteSpace(p.voice)
+                    || !env.LoadOrder.PriorityOrder.WinningOverrides<IVoiceTypeGetter>().Any(v => Allowed(env, t).Contains(v.FormKey.ModKey)
+                           && string.Equals(v.EditorID, p.voice, StringComparison.OrdinalIgnoreCase)))
+                    Fatal($"{at} person.voice '{p.voice}' is not a VoiceType in {t.mod} or one of its masters: his lines are filed under it.");
+            }
+            void Spoken(string where, string? text, int max)
+            {
+                if (string.IsNullOrWhiteSpace(text)) { Fatal($"{at} {where} is empty."); return; }
+                if (Tokens(text).Any()) Fatal($"{at} {where} carries a <Token>; a voice cannot say one and a scene line is not expanded.");
+                if (text.Length > max) Fatal($"{at} {where} is {text.Length} characters; the limit is {max}.");
+            }
+            Spoken("greeting", b.greeting, TalkReplyMax);
+            if (b.exchanges == null || b.exchanges.Count == 0) Fatal($"{at} has no exchanges: there is nothing to ask, and exchanges[0] is what ends the talk.");
+            else
+                for (int x = 0; x < b.exchanges.Count; x++)
+                {
+                    Spoken($"exchanges[{x}].prompt", b.exchanges[x].prompt, TalkPromptMax);
+                    Spoken($"exchanges[{x}].reply", b.exchanges[x].reply, TalkReplyMax);
+                }
+        }
+
         /// <summary>The lint's beats-only half. Called from Grade; Fatal/Warn are Grade's.</summary>
         private static void GradeBeats(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                        Action<string> Fatal, Action<string> Warn)
@@ -183,6 +226,9 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} names an item and is not a pickup or a recover, so it would be silently ignored.");
                 if (b.type == "recover" && (b.model != null || b.name != null || b.replace))
                     Fatal($"beat {i + 1} is a recover: it has no object of its own (the holder carries the item), so model, name and replace would be ignored.");
+                if (b.type == "talk") GradeTalk(b, i, t, env, Fatal);
+                else if (b.greeting != null || b.exchanges != null)
+                    Fatal($"beat {i + 1} has a greeting or exchanges and is a {b.type}; only a talk beat has a conversation, so they would be silently ignored.");
                 if (b.returnTo is int back)
                 {
                     if (back < 1 || back > i)
@@ -353,7 +399,7 @@ namespace FrankyCLI
                 }
             }
             for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].choose == null && (r.beats[i].reward != null || r.beats[i].person != null))
+                if (r.beats[i].choose == null && (r.beats[i].reward != null || (r.beats[i].person != null && r.beats[i].type != "talk")))
                     Fatal($"beat {i + 1} sets reward or person and is not a choose ending, so it would be silently ignored.");
             if (r.offer != null)
             {
@@ -369,7 +415,8 @@ namespace FrankyCLI
                         Fatal("offer.message needs a title and text.");
                 }
             }
-            int personCount = r.beats.Count(b => b.person != null);
+            // The people the approach places at the endings; a talk beat's person is created by its alias instead.
+            int personCount = r.beats.Count(b => b.person != null && b.type != "talk");
             if (personCount > 0)
             {
                 if (t.approachStage < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or playerAlias for an ending's person.");
@@ -517,6 +564,8 @@ namespace FrankyCLI
             public List<(int objective, int alias, int seconds, int stage)> Reveals = new();   // each revealed wave: its objective, collection, wait, death stage
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
+            public List<(uint wem, string text, string voice, string elevenlabs)> TalkLines = new();   // a talk person's voiced lines
+            public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
             public (int stage, string text)? OfferJournal;   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
@@ -524,7 +573,7 @@ namespace FrankyCLI
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
-                                      Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company)> persons,
+                                      Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)> persons,
                                       IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc,
                                       (INpcGetter tmpl, FormKey voice)? speakerSrc, Dictionary<int, FormKey> whoLists)
         {
@@ -612,6 +661,7 @@ namespace FrankyCLI
             if (srcMarker?.Location == null || srcAct?.CreateReferenceToObject == null)
             { Console.WriteLine("REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
             int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
+            var talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
             var waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
             for (int i = 0; i < r.beats.Count; i++)
             {
@@ -647,6 +697,22 @@ namespace FrankyCLI
                         bm.Waves.Add((int)cid);
                     }
                     Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
+                    continue;
+                }
+                if (r.beats[i].type == "talk")
+                {
+                    // A marker, and an alias that CREATES the person there at quest start: a copy of the base's own
+                    // activator alias with the cloned NPC as its object (set once he is cloned, below). So he stands at
+                    // his marker before the player arrives and the objective can point at him from anywhere.
+                    uint tid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    var tm = srcMarker.DeepCopy(); tm.ID = tid; tm.Name = "DelveBeat" + (i + 1) + "Marker";
+                    var tp = srcAct.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
+                    tp.CreateReferenceToObject!.AliasID = (short)tm.ID;
+                    clone.Aliases.Add(tm);
+                    clone.Aliases.Add(tp);
+                    slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = beatStage[i] };
+                    talkAlias[i] = tp;
+                    Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)");
                     continue;
                 }
                 if (r.beats[i].type == "recover")
@@ -704,7 +770,7 @@ namespace FrankyCLI
             // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
             // An ending's person is placed on its own stage, numbered after the approach's.
             var personStage = new Dictionary<int, int>();
-            foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null))
+            foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null && r.beats[b].type != "talk"))
                 personStage[b] = t.approachStage + 1 + personStage.Count;
             // A place's occupants, after the people: their own stage, set by a distance hook on the object they surround.
             var whos = WhoOf(r);
@@ -999,12 +1065,13 @@ namespace FrankyCLI
                 var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, pr.tmpl.DeepCopy());
                 npc.EditorID = $"{r.id}_person{b + 1}";
                 npc.Name = pp.name!;
-                npc.Voice.SetTo(pr.tmpl.Voice.FormKey);
+                npc.Voice.SetTo(pr.voice ?? pr.tmpl.Voice.FormKey);
                 npc.Aggression = Npc.AggressionType.Unaggressive;
                 npc.Confidence = Npc.ConfidenceType.Average;
                 if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
                 myMod.Npcs.Add(npc);
                 npcOf[b] = npc.FormKey;
+                if (talkAlias.TryGetValue(b, out var tpa)) tpa.CreateReferenceToObject!.Object.SetTo(npc.FormKey);
                 bm.People[b] = (npc.FormKey, pp.name!);
                 Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
             }
@@ -1024,6 +1091,8 @@ namespace FrankyCLI
                 Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
             }
 
+            foreach (var b in talkAlias.Keys) BuildTalk(myMod, clone, r, b, steps, beatStage, slotOf[b].targetAlias, npcOf[b], bm);
+
             // --- 9. the events: one stock hook per beat --------------------------------------------------
             int recovers = 0;
             for (int k = 0; k < steps.Count; k++)
@@ -1032,6 +1101,7 @@ namespace FrankyCLI
                 foreach (var b in steps[k].Beats)
                 {
                     var beat = r.beats[b];
+                    if (beat.type == "talk") continue;   // set by the conversation's closing reply, not a hook (BuildTalk)
                     if (beat.type == "hold")
                     {
                         // One stock death hook per wave, on that wave's collection: when every member is dead
@@ -1531,16 +1601,127 @@ namespace FrankyCLI
         /// &lt;topic id, 8 hex&gt;.wem. From the cache when the same words in the same voice exist, else generated
         /// (ElevenLabs, then Wwise) and cached. The previous build's files go first, by its manifest.
         /// </summary>
+        /// <summary>
+        /// A talk beat's conversation, built INSIDE the Delve's own quest on the scene shapes of
+        /// docs/specs/npc_dialogue.md (atbb_mq01, tested in game; NPCDialogueNoun builds the same records for a quest
+        /// of its own): a Greeting scene (0x1834) the person opens with, then one Top Level scene per exchange.
+        /// exchanges[0] is the Completion topic (0x2810): its reply sets the beat's stage when it ENDS (the INFO's
+        /// own SetParentQuestStage, as NPCDialogueNoun does), and the talk closes. The rest are Regular topics
+        /// (0x2814, TopLevelTopicsOnEnd): asked in any order, each loops back to the menu.
+        /// Every scene is gated on this person (GetIsID) and on the step being open: the beat's stage not done,
+        /// and, past the first step, the stage that opens it done. So he speaks only while the talk is live.
+        /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
+        /// </summary>
+        private static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
+                                      Dictionary<int, int> beatStage, int personAlias, FormKey npc, BeatsMade bm)
+        {
+            var tb = r.beats[b];
+            int stage = beatStage[b];
+            int k = steps.FindIndex(s => s.Beats.Contains(b));
+            int enter = k == 0 ? 0 : steps[k - 1].DoneStage;
+            string tag = $"{r.id}_talk{b + 1}";
+            string vt = tb.person!.voice!, vid = tb.person.elevenlabs!;
+
+            ConditionFloat IsHim()
+            {
+                var d = new GetIsIDConditionData();
+                d.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(d, npc);
+                return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+            }
+            ConditionFloat StageDone(int st, float want)
+            {
+                var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = st };
+                d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
+                return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = want };
+            }
+            (DialogTopic topic, DialogResponses info) Line(string name, string text, bool his)
+            {
+                var topic = new DialogTopic(myMod)
+                {
+                    EditorID = name,
+                    Category = DialogTopic.CategoryEnum.Scene,
+                    Subtype = DialogTopic.SubtypeEnum.CustomScene,
+                    SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+                };
+                topic.Quest.SetTo(clone.FormKey);
+                var info = new DialogResponses(myMod) { EditorID = name + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+                if (his) info.Speaker.SetTo(npc);
+                var resp = new DialogResponse
+                {
+                    ResponseText = text,
+                    // The game plays the file this field names; ours is the topic's id, as the radio lines are.
+                    WEMFile = his ? topic.FormKey.ID : 0u,
+                    TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4],
+                    EmotionOut = 7.466667f,
+                };
+                resp.Emotion.SetTo(FormKey.None);   // FFFFFFFF, the "None Reference" (npc_dialogue.md's gotcha)
+                info.Responses.Add(resp);
+                topic.Responses.Add(info);
+                // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
+                topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
+                clone.DialogTopics.Add(topic);
+                if (his) bm.TalkLines.Add((topic.FormKey.ID, text, vt, vid));
+                return (topic, info);
+            }
+            Scene NewScene(string name, uint flags)
+            {
+                var sc = new Scene(myMod)
+                {
+                    EditorID = name,
+                    Flags = (Scene.Flag)flags,
+                    VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
+                };
+                sc.Quest.SetTo(clone.FormKey);
+                sc.Conditions.Add(IsHim());
+                sc.Conditions.Add(StageDone(stage, 0f));
+                if (enter > 0) sc.Conditions.Add(StageDone(enter, 1f));
+                sc.Actors.Add(new SceneActor { ID = (uint)personAlias, BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+                sc.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
+                clone.Scenes.Add(sc);
+                return sc;
+            }
+
+            var (gt, _) = Line(tag + "_greet", tb.greeting!, true);
+            var gs = NewScene(tag + "_greet_scene", 0x00001834u);
+            gs.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
+            var ga = new DialogueSceneAction { Index = 1, AliasID = personAlias, StartPhase = 0, EndPhase = 0 };
+            ga.Topic.SetTo(gt.FormKey);
+            gs.Actions = new Noggog.ExtendedList<ASceneAction> { ga };
+            Console.WriteLine($"  +talk    : {gs.EditorID} greets  \"{tb.greeting}\"");
+
+            for (int x = 0; x < tb.exchanges!.Count; x++)
+            {
+                var ex = tb.exchanges[x];
+                var (pt, _) = Line($"{tag}_ask{x + 1}", ex.prompt!, false);
+                var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
+                if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
+                var sc = NewScene($"{tag}_topic{x + 1}_scene", x == 0 ? 0x00002810u : 0x00002814u);
+                sc.Index = (uint)(x * 10);
+                sc.SCPI = BitConverter.GetBytes((ushort)100);
+                sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
+                var pa = new DialogueSceneAction { Index = 3, AliasID = -2, StartPhase = 0, EndPhase = 0 };
+                pa.Topic.SetTo(pt.FormKey);
+                var na = new DialogueSceneAction { Index = 4, AliasID = personAlias, StartPhase = 1, EndPhase = 1 };
+                na.Topic.SetTo(nt.FormKey);
+                sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
+                Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (closes the talk, sets {stage} when the reply ends)" : "  (loops to the menu)"));
+            }
+            bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));
+        }
+
         private static int DeployVoice(Recipe r, Template t, BeatsMade bm)
         {
-            if (bm.Lines.Count == 0) return 0;
+            // Every voiced line with the voice it is said in: the radio speaker's, and each talk person's own.
+            var all = bm.Lines.Select(l => (l.wem, l.text, vt: r.speaker!.voice!, vid: r.speaker.elevenlabs!))
+                      .Concat(bm.TalkLines.Select(l => (l.wem, l.text, vt: l.voice, vid: l.elevenlabs))).ToList();
+            if (all.Count == 0) return 0;
             Console.WriteLine();
             Console.WriteLine("  voice:");
             string plugin = t.mod + ".esm";
-            string vt = r.speaker!.voice!, vid = r.speaker.elevenlabs!;
-            string gameDir = Path.Combine(SpeechTools.GameVoiceDir, plugin, vt);
+            string Dir(string vt) => Path.Combine(SpeechTools.GameVoiceDir, plugin, vt);
             Directory.CreateDirectory(VoiceCacheDir);
-            Directory.CreateDirectory(gameDir);
+            foreach (var vt in all.Select(l => l.vt).Distinct()) Directory.CreateDirectory(Dir(vt));
 
             string manifest = Path.Combine(VoiceCacheDir, $"deployed_{r.id}.txt");
             if (File.Exists(manifest))
@@ -1552,30 +1733,30 @@ namespace FrankyCLI
 
             int fail = 0;
             var deployed = new List<string>();
-            var toMake = new List<(uint wem, string key, string text)>();
-            foreach (var (_, wem, text, _) in bm.Lines)
+            var toMake = new List<(uint wem, string key, string text, string vt, string vid)>();
+            foreach (var (wem, text, vt, vid) in all)
             {
                 string key = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes($"{vid}|{vt}|{text}")))[..16].ToLowerInvariant();
                 string cached = Path.Combine(VoiceCacheDir, key + ".wem");
-                string dest = Path.Combine(gameDir, $"{wem:X8}.wem");
+                string dest = Path.Combine(Dir(vt), $"{wem:X8}.wem");
                 if (File.Exists(cached))
                 {
                     File.Copy(cached, dest, true);
                     deployed.Add(dest);
                     Console.WriteLine($"    cached   : {key}.wem -> {wem:X8}.wem  \"{text}\"");
                 }
-                else toMake.Add((wem, key, text));
+                else toMake.Add((wem, key, text, vt, vid));
             }
             if (toMake.Count > 0)
             {
                 SpeechTools.generateWavs = true;
                 var mk = ModKey.FromNameAndExtension(plugin);
-                foreach (var (wem, _, text) in toMake) SpeechTools.GenerateWavs(wem, vt, mk, text, vid);
+                foreach (var (wem, _, text, vt, vid) in toMake) SpeechTools.GenerateWavs(wem, vt, mk, text, vid);
                 SpeechTools.GenerateAllWavs();
                 SpeechTools.ConvertAndDeploy();
-                foreach (var (wem, key, text) in toMake)
+                foreach (var (wem, key, text, vt, vid) in toMake)
                 {
-                    string dest = Path.Combine(gameDir, $"{wem:X8}.wem");
+                    string dest = Path.Combine(Dir(vt), $"{wem:X8}.wem");
                     // SpeechTools also writes the .wav beside it and an .esp-named twin; all of it is this build's.
                     string espDir = Path.Combine(SpeechTools.GameVoiceDir, t.mod + ".esp", vt);
                     foreach (var p in new[] { dest, Path.ChangeExtension(dest, ".wav"),
@@ -1595,9 +1776,9 @@ namespace FrankyCLI
                 }
             }
             File.WriteAllLines(manifest, deployed);
-            foreach (var (_, wem, _, _) in bm.Lines)
-                fail += Check($"{wem:X8}.wem is where the game looks", File.Exists(Path.Combine(gameDir, $"{wem:X8}.wem")).ToString(), "True");
-            Console.WriteLine(fail == 0 ? $"  VOICE DEPLOYED: {bm.Lines.Count} line(s) under {gameDir}" : $"  {fail} VOICE CHECK(S) FAILED.");
+            foreach (var (wem, _, vt, _) in all)
+                fail += Check($"{wem:X8}.wem is where the game looks ({vt})", File.Exists(Path.Combine(Dir(vt), $"{wem:X8}.wem")).ToString(), "True");
+            Console.WriteLine(fail == 0 ? $"  VOICE DEPLOYED: {all.Count} line(s) under {Path.Combine(SpeechTools.GameVoiceDir, plugin)}" : $"  {fail} VOICE CHECK(S) FAILED.");
             return fail == 0 ? 0 : 1;
         }
 
@@ -1724,6 +1905,34 @@ namespace FrankyCLI
                 if (lst == 0)
                     fail += Check("the broadcast scene begins on quest start (a stage-0 Start() plays nothing)",
                                   (sc?.Flags?.HasFlag(Scene.Flag.BeginOnQuestStart) ?? false).ToString(), "True");
+            }
+            // A talk beat, read back: the alias that creates him, every scene gated on him and on the step, the
+            // greeting's shape, and the one reply that ends the talk by setting the beat's stage.
+            foreach (var (tbeat, tstage, talias, tnpc, nex, tconds) in bm.Talks)
+            {
+                string who = $"beat {tbeat + 1} (talk)";
+                var pa = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)talias);
+                fail += Check($"{who}: alias {talias} creates the person at his marker",
+                              pa?.CreateReferenceToObject == null ? "no create" : $"{pa.CreateReferenceToObject.Object.FormKey} at alias {pa.CreateReferenceToObject.AliasID}",
+                              $"{tnpc} at alias {pa?.CreateReferenceToObject?.AliasID}");
+                var mine = q.Scenes.Where(x => x.EditorID != null && x.EditorID.StartsWith($"{r.id}_talk{tbeat + 1}_")).ToList();
+                fail += Check($"{who}: a greeting and one scene per exchange", mine.Count.ToString(), (1 + nex).ToString());
+                var greet = mine.FirstOrDefault(x => x.EditorID!.EndsWith("_greet_scene"));
+                fail += Check($"{who}: the greeting is a Greeting scene", greet == null ? "missing" : $"0x{(uint)(greet.Flags ?? 0):X8}", "0x00001834");
+                foreach (var sc in mine)
+                {
+                    var isId = sc.Conditions.FirstOrDefault()?.Data as IGetIsIDConditionDataGetter;
+                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step",
+                                  $"{isId?.FirstParameter.Link.FormKey}, {sc.Conditions.Count} conditions, actor {sc.Actors.FirstOrDefault()?.ID}",
+                                  $"{tnpc}, {tconds} conditions, actor {talias}");
+                }
+                var closer = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{tbeat + 1}_reply1")?.Responses.FirstOrDefault();
+                fail += Check($"{who}: the first reply ends the talk by setting {tstage}",
+                              closer?.SetParentQuestStage == null ? "none" : $"OnEnd {closer.SetParentQuestStage.OnEnd}, speaker {closer.Speaker.FormKey}",
+                              $"OnEnd {tstage}, speaker {tnpc}");
+                int setters = q.DialogTopics.Where(d => d.EditorID != null && d.EditorID.StartsWith($"{r.id}_talk{tbeat + 1}_"))
+                               .SelectMany(d => d.Responses).Count(x => x.SetParentQuestStage != null);
+                fail += Check($"{who}: no other line sets a stage", setters.ToString(), "1");
             }
             string fsrc = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
             foreach (var ds in bm.StuckWaits)
