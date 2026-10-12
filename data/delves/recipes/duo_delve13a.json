@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "id": "duo_delve13a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12.",
+  "author": "jessica",
+  "source": "his 2026-10-12 14:34: \"just as a test, are you able to see the gaps we have and build a mission from that? make 13a\"",
+  "_note": [
+    "THE PICNIC, built FROM THE GAPS, counted over the 13 recipes on 2026-10-12, not felt:",
+    "1. PLACE: LocTypeOE_ThemeNaturalKeyword is the largest theme in the POI pool (144 of 491, gen_delve keywords),",
+    "   and 0 of 13 recipes require it while 7 exclude it (the base quest excludes it too). A stranger on 09-23 named",
+    "   non-combat missions at Natural Landmark POIs as what Overtime does well. So this one REQUIRES natural.",
+    "2. TONE: 4 of 13 are about someone's loss (06a medal, 06b clasp, 08a letters, 11a bag) and 0 are funny.",
+    "   So this one is light: a courier drone dropped a proposal picnic in the wrong spot.",
+    "Mechanics are deliberately known (pickup, pickup, deliver, like 08a on one place): the gap was where and what,",
+    "not how. Calm, no combat. The lint warns that it drops the base's natural exclusion: that is the point of it,",
+    "the same move he ruled on 09a.",
+    "Boxes on the two pickups (calm moments); the deliver speaks instead (either or). Boxes describe objects only,",
+    "never the site and never a person (rules 2 and 'never describe the site').",
+    "MODEL NOT ON THE APPROVED LIST, his eye first: BeachBlanket01.nif (vanilla BeachBlanket01) as the picnic spot.",
+    "Found on the way: vanilla has RockCairns_01 to 04 (SetDressing\\StoneCairns), Kim's wish-list #8, a candidate",
+    "to replace 06a's Akila podium."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_ThemeNaturalKeyword"],
+      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "Natural sites only, and never a cave: a proposal wants open sky."
+  },
+  "prose": {
+    "name": "Errand: Proposal Picnic on <Planet>",
+    "briefing": "A courier drone was meant to set out a proposal picnic at the <Place> and came down in the wrong spot. Somebody is about to have a very awkward evening unless it gets sorted."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "item": "Ring Box (1 of 2)",
+      "objective": "Find the courier drop at the <Place>",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Split Courier Crate",
+      "message": {
+        "title": "Split Courier Crate",
+        "text": "The crate split open on landing. A small ring box has a note taped to it: DO NOT OPEN. Underneath, smaller: sorry."
+      }
+    },
+    {
+      "type": "pickup",
+      "at": "RETravelB1LocRef",
+      "item": "Picnic Hamper (2 of 2)",
+      "objective": "Find the picnic hamper",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Courier Hamper",
+      "message": {
+        "title": "Courier Hamper",
+        "text": "The hamper bounced further than the ring did. The bottle inside survived. Both glasses did not."
+      }
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "Set out the picnic",
+      "journal": "A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the ring and the hamper and laid it all out where it was meant to be. I did not open the small box.",
+      "model": "Meshes\\SetDressing\\BeachProps\\BeachBlanket01.nif",
+      "name": "Picnic Spot",
+      "say": "It's all there? Okay. Okay. I can do this. Thank you."
+    }
+  ],
+  "speaker": {
+    "name": "Courier Customer",
+    "voice": "GenericMale01",
+    "elevenlabs": "bIHbv24MWmeRgasZH58o"
+  },
+  "broadcast": "Bit of an odd one. I've got a very important picnic tonight and the drone dropped it in the wrong place. Please don't open the small box.",
+  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Will, Relaxed Optimist', NOT heard in game; a nervous man in a relaxed voice is the joke, his ear decides."
+}
