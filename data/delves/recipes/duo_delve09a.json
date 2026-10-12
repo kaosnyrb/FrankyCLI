@@ -15,8 +15,8 @@
     "2026-10-09: the deliver and hold beats' say lines are HIS words (\"Great that's aligning now, keep an eye out\", \"Link is online, thanks for your help\"), punctuated.",
     "2026-10-10: wave styles, his asks (\"spawning the enemies at points the player isnt looking at\", \"horde vs squad\"). squad, squad, horde is ELIZA'S PLACEHOLDER escalation; the shape is Jessica's."
   ],
-  "deal": "_duo_MS_ArtifactMapLocalCargo_TEST",
-  "_deal": "TEST POOL, 2026-10-12, his \"let's get 1 working, then the migration is one job\": a local-cargo slate deals this while `gen_delve testnode on` has the real pool parked. Move to duo_MS_ArtifactMap_LocalCargoNode for the migration.",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "LIVE POOL since 2026-10-12: tested off the local-cargo test node (his slate tests), then moved here by `gen_delve testnode off --promote`, a node edit with no rebuild (his: \"think it's a bit wasteful to rebuilt all the quests just to put them in a different list\").",
   "place": {
     "theme": {
       "require": [],

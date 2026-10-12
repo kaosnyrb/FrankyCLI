@@ -2,8 +2,8 @@
   "schema": 1,
   "id": "duo_delve08a",
   "template": "beats",
-  "deal": "_duo_MS_ArtifactMapLocalCargo_TEST",
-  "_deal": "TEST POOL, 2026-10-12, his \"add them all and I'll test them in a min\": dealt from the local-cargo test node while `gen_delve testnode on` has the real pool parked. Move to duo_MS_ArtifactMap_LocalCargoNode for the migration.",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "LIVE POOL since 2026-10-12: tested off the local-cargo test node (his slate tests), then moved here by `gen_delve testnode off --promote`, a node edit with no rebuild (his: \"think it's a bit wasteful to rebuilt all the quests just to put them in a different list\").",
   "author": "jessica",
   "source": "home-office office/projects/delves/v2-mission-types.md, type 3 (the trail); office/projects/delves/stages-not-a-driver.md",
   "_note": [
