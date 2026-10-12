@@ -45,6 +45,23 @@ moves to the real node (parked) and the test node deals only what you kept, so e
 Delve. `off` moves it back. It refuses unless exactly one of the pair carries the condition, so the pair can never
 end with both live or both parked. ⚠ Turn it OFF before a release, and point the recipe's `deal` at the real node.
 
+**The pairs, measured 2026-10-12 (`gen_inspect smtree`; his: *"I believe theres other test nodes too"*).** One parked
+test node per slate branch, each beside its real pool:
+
+| branch | test node (parked by `ObjectTypeAmmo`) | real node(s) |
+|---|---|---|
+| `duo_SQ_ArtifactLocalCargoBranch` | `_duo_MS_ArtifactMapLocalCargo_TEST` | `duo_MS_ArtifactMap_LocalCargoNode` |
+| `duo_SQ_ArtifactLocalEventBranch` | `_duo_MS_ArtifactMapLocal_TEST` | `duo_MS_ArtifactMap_LocalNode` **and** `_Local_LowChance_Node` (gated by `GetRandomPercent`) |
+| `duo_SQ_ArtifactRemotePlanetEventBranch` | `_duo_MS_ArtifactMapRemotePlanet_TEST` | `duo_MS_ArtifactMap_RemotePlanetNode` |
+| `duo_SQ_ArtifactRemoteSpaceEventBranch` | `_duo_MS_ArtifactMapRemoteSpace_TEST` | `duo_MS_ArtifactMap_RemoteSpaceNode` |
+
+⚠ **The local branch has TWO real nodes**, and `testnode` parks one: testing there leaves the low-chance pool live
+unless it is parked too (a second call cannot do it, since the test node has given its condition away). ⚠ **The
+board's `_duo_MB_MissionNode_test`** (under vanilla's `MissionBranch`) is a different shape: no conditions at all,
+`SharesEvent`, `NumQuestsToRun` 1. `testnode` does not apply to it. ⚠ The `.esp` twin carries its own copy of every
+node; `testnode` edits the `.esm` only.
+
+
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
 go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the
