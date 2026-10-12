@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "id": "duo_delve12a",
+  "template": "beats",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The mission board's test node (under vanilla's MissionBranch): no conditions, SharesEvent, NumQuestsToRun 1. ELIZA: the beats base is a SLATE quest, so a board Delve needs a board base (posting title + body) before this node can deal it.",
+  "author": "jessica",
+  "source": "his 2026-10-12 14:16: \"Missonboard quest where a crate was onboard a ship that crashed. Go to the crash site, get the crate which is gaurded by spacers and return it to a POI local to the crashed ship.\"",
+  "_note": [
+    "THE CRASH SITE CARGO, his design, words Jessica's. Entry: the MISSION BOARD (his \"I'm looking for work\"),",
+    "so the opening voice is the issuer's posting (style guide 33 s4: we, payer on line one, flat, stock closer).",
+    "TWO PIECES ARE NOT BUILT, and this recipe is the request:",
+    "1. A BOARD posting: written below as board.title / board.body, PROPOSED fields. The beats base is a slate quest.",
+    "2. GUARDS on a pickup: spacers placed round the crate when the player first comes near, PROPOSED as the pickup's",
+    "   guard block (a hostile twin of approach.civilians). The built fallback is a recover beat, but that takes the",
+    "   item off a body, and his design has a crate you can see.",
+    "Crash sites: LocTypeOE_ThemeShipwreckKeyword is on 11 of 491 POIs, under the lint's pool floor of 40, so this",
+    "will start only on maps with a wreck in range. His call whether that rarity is fine or the theme widens.",
+    "The second place is local and leashed (built, as 08a): a POI near the wreck, where the cargo was bound.",
+    "Message box on the pickup only, after the fight: a calm moment (his 2026-10-08 rule). Either or: no say there.",
+    "Pay: a guarded pickup; suggest med."
+  ],
+  "board": {
+    "title": "Recovery: Crash Site Cargo on <Planet>",
+    "body": "Local Contract. Our freighter came down on <Planet> with a consignment still aboard, and spacers have found the wreck. Recover the crate from the <Place> and deliver it to the <SecondPlace>. Payment on delivery.",
+    "_board": "PROPOSED. Style guide 33 s4: the issuer's we, payer on line one, flat, stock closer."
+  },
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_ThemeShipwreckKeyword"],
+      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+    },
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": ["LocTypeOE_ThemeShipwreckKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      }
+    },
+    "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn)."
+  },
+  "prose": {
+    "name": "Recovery: Crash Site Cargo on <Planet>",
+    "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate delivered to the <SecondPlace>."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "item": "Freighter Consignment",
+      "objective": "Recover the freighter's crate at the <Place>",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Wreck Cargo Crate",
+      "guard": { "faction": "spacers", "min": 3, "max": 5, "near": 250 },
+      "_guard": "PROPOSED: spacers placed round the crate on first approach, from Overtime's hostile gang list. Absent support, nothing guards it.",
+      "message": {
+        "title": "Wreck Cargo Crate",
+        "text": "The crate came through the crash in better shape than the ship did. The seals are scorched, but they held."
+      }
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "place": "second",
+      "objective": "Deliver the crate to the <SecondPlace>",
+      "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I took the consignment off them and delivered it to the <SecondPlace>, where it was meant to go.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Consignee Drop"
+    }
+  ]
+}
