@@ -43,7 +43,12 @@ treasure carrying `ObjectTypeAmmo`, which no slate's does (all four carry `LL_Le
 Delve there (`"deal": "_duo_MS_ArtifactMapLocalCargo_TEST"`), build, then `testnode on ... --keep <id>`: the condition
 moves to the real node (parked) and the test node deals only what you kept, so every slate of that kind starts the
 Delve. `off` moves it back. It refuses unless exactly one of the pair carries the condition, so the pair can never
-end with both live or both parked. ⚠ Turn it OFF before a release, and point the recipe's `deal` at the real node.
+end with both live or both parked. **The migration is `testnode off <test> <real> --promote`**: the test node's quests
+move into the real pool (skipping any already there), the test node is emptied, and the real pool goes live. Then
+edit each recipe's `deal` to the real node, JSON only, so the next rebuild agrees with the plugin. ⛔ **Never rebuild a
+Delve to move it between pools** (his ruling, 2026-10-12: *"think it's a bit wasteful to rebuilt all the quests just to
+put them in a different list. Everytime you build the formid's increment"*): a pool is a node's list; a rebuild
+re-mints every record the build owns.
 
 **The pairs, measured 2026-10-12 (`gen_inspect smtree`; his: *"I believe theres other test nodes too"*).** One parked
 test node per slate branch, each beside its real pool:

@@ -384,7 +384,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
-                    Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q] [--dry]   swap a slate pool's parking condition");
+                    Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
                     return 1;
             }
         }
@@ -398,6 +398,10 @@ namespace FrankyCLI
         /// every Overtime slate's treasure is LL_LegendaryItem_WeaponList), so it never deals. `on` MOVES that
         /// condition onto the real node (the real pool goes quiet, the test node deals); `off` moves it back.
         /// `--keep a,b` (on only) empties the test node down to the named quests, so the first play is certain.
+        /// `--promote` (off only) is the MIGRATION: the test node's quests move into the real node (skipping any
+        /// already there) and the test node is left empty. It edits node lists and touches no quest: his ruling
+        /// 2026-10-12, "think it's a bit wasteful to rebuilt all the quests just to put them in a different list.
+        /// Everytime you build the formid's increment".
         /// Refuses unless exactly one node carries the ammo condition and it is the one being moved FROM, so
         /// the pair can never end with both nodes live or both parked.
         /// </summary>
@@ -411,11 +415,13 @@ namespace FrankyCLI
                 if (!args[i].StartsWith("--")) pos.Add(args[i]);
             }
             if (pos.Count != 3 || (pos[0] != "on" && pos[0] != "off"))
-            { Console.WriteLine("REFUSED: gen_delve testnode on|off <testNode> <realNode> [--keep quest,quest] [--dry]"); return 1; }
+            { Console.WriteLine("REFUSED: gen_delve testnode on|off <testNode> <realNode> [--keep quest,quest | --promote] [--dry]"); return 1; }
             bool on = pos[0] == "on";
             string testName = pos[1], realName = pos[2];
             var keepArg = args.SkipWhile(a => !a.Equals("--keep", StringComparison.OrdinalIgnoreCase)).Skip(1).FirstOrDefault();
             if (keepArg != null && !on) { Console.WriteLine("REFUSED: --keep is for `on` only."); return 1; }
+            bool promote = args.Any(a => a.Equals("--promote", StringComparison.OrdinalIgnoreCase));
+            if (promote && on) { Console.WriteLine("REFUSED: --promote is for `off` only (it moves the tested quests into the real pool)."); return 1; }
             var keep = keepArg?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList();
 
             var mods = templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
@@ -463,6 +469,21 @@ namespace FrankyCLI
                     Console.WriteLine($"  off the test node: {e.Quest.FormKey}");
                 }
             }
+            var promoted = new List<FormKey>();
+            if (promote)
+            {
+                foreach (var e in test.Quests.ToList())
+                {
+                    if (!real.Quests.Any(x => x.Quest.FormKey == e.Quest.FormKey))
+                    {
+                        real.Quests.Add(e.DeepCopy());
+                        Console.WriteLine($"  promoted into {real.EditorID}: {myMod.Quests.FirstOrDefault(q => q.FormKey == e.Quest.FormKey)?.EditorID ?? e.Quest.FormKey.ToString()}");
+                    }
+                    promoted.Add(e.Quest.FormKey);
+                    test.Quests.Remove(e);
+                }
+                if (promoted.Count == 0) { Console.WriteLine($"REFUSED: {test.EditorID} holds no quests to promote. Nothing written."); return 1; }
+            }
             Console.WriteLine($"  {test.EditorID} now deals: " + string.Join(", ", test.Quests.Select(e => myMod.Quests.FirstOrDefault(q => q.FormKey == e.Quest.FormKey)?.EditorID ?? e.Quest.FormKey.ToString())));
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
 
@@ -476,6 +497,12 @@ namespace FrankyCLI
             var r2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == real.FormKey);
             int tp = t2.Conditions.Count(IsPark), rp = r2.Conditions.Count(IsPark);
             bool ok = (on ? (tp == 0 && rp == 1) : (tp == 1 && rp == 0));
+            if (promote)
+            {
+                bool allIn = promoted.All(k => r2.Quests.Count(e => e.Quest.FormKey == k) == 1);
+                Console.WriteLine($"  [{(allIn ? "OK  " : "FAIL")}] off disk: {promoted.Count} promoted quest(s) each on {r2.EditorID} exactly once, {t2.EditorID} holds {t2.Quests.Count}");
+                ok &= allIn && t2.Quests.Count == 0;
+            }
             var mastersAfter = string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
             Console.WriteLine($"  [{(ok ? "OK  " : "FAIL")}] off disk: {Ammo} on {t2.EditorID} x{tp}, on {r2.EditorID} x{rp}");
             Console.WriteLine($"  [{(mastersAfter == mastersBefore ? "OK  " : "FAIL")}] the plugin's masters are unchanged ({mastersAfter})");
