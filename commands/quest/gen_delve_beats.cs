@@ -38,9 +38,12 @@ namespace FrankyCLI
     /// UC08_QueenBattle ActiveHostiles), and a stock DefaultCollectionAliasOnDeath on that collection sets
     /// the next stage when every member is dead, so the waves are N stages and N stock hooks, no driver.
     /// The objective carries a "(n/N)" counter. A wave that cannot be finished (an enemy stuck out of reach)
-    /// must not soft-lock the quest: a pity timer in the fragment script sets the wave's stage anyway after
-    /// `stuck` seconds (his infestation driver's 180 s), and the hook's TurnOffStageDone stops a late kill
-    /// from setting it twice.
+    /// must not soft-lock the quest: the fragment that spawns a wave WAITS (Utility.Wait) and sets the wave's
+    /// stage anyway after `stuck` seconds (his infestation driver's 180 s), and the hook's TurnOffStageDone
+    /// stops a late kill from setting it twice. ⛔ NOT a timer: StartTimer is selfonly and a fragment script is
+    /// not attached to the quest as a script, so its OnTimer never fired (his play of 09a, 2026-10-12: the
+    /// reveal never showed; so the stuck guard had never worked either). Vanilla never puts OnTimer in a
+    /// fragment; its one fragment timer calls a method on the quest's ATTACHED script (QF_RI06, kmyQuest).
     ///
     /// A GROUP is consecutive `use` beats sharing a "group" name: done in ANY order, one objective with a
     /// vanilla counter "(<Global=X>/N)", each member's fragment calls ModObjectiveGlobal, and the last
@@ -63,8 +66,6 @@ namespace FrankyCLI
         /// <summary>A hold's reveal default, in seconds (his "after like 20 seconds"), and its words (Eliza's placeholder).</summary>
         private const int DefaultRevealSeconds = 20;
         private const string DefaultRevealObjective = "Eliminate the attackers";
-        /// <summary>A reveal timer's id is this plus the wave's own stage, so it never collides with a stuck guard's (the stage).</summary>
-        private const int RevealTimerBase = 1000;
 
         /// <summary>One step of a beats Delve: a single beat, or an any-order group of them.</summary>
         private sealed class Step
@@ -457,8 +458,8 @@ namespace FrankyCLI
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
             public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
             public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
-            public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
-            public List<(int objective, int alias, int timer, int stage)> Reveals = new();   // each revealed wave: its objective, collection, timer id, death stage
+            public List<int> StuckWaits = new();   // each hold wave's death stage, which its spawning fragment sets after the stuck wait
+            public List<(int objective, int alias, int seconds, int stage)> Reveals = new();   // each revealed wave: its objective, collection, wait, death stage
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
@@ -976,7 +977,7 @@ namespace FrankyCLI
                     {
                         // One stock death hook per wave, on that wave's collection: when every member is dead
                         // it sets the wave's stage, armed only once the wave before it is down. TurnOffStageDone
-                        // is the wave's own stage, so a kill after the pity timer moved on cannot set it twice.
+                        // is the wave's own stage, so a kill after the stuck guard moved on cannot set it twice.
                         var ws = steps[k].WaveStages;
                         for (int w = 0; w < ws.Count; w++)
                         {
@@ -1126,9 +1127,13 @@ namespace FrankyCLI
                 bm.Replaced.Add((an, slotOf[b].markerAlias));
                 Add(0, $"{an}.GetRef().Disable(False)");
             }
-            // A hold's wave w (0-based) appears at the spawn marker, INTO its own collection, and the stuck-enemy
-            // guard starts: the timer's id is the stage this wave's last death sets, which OnTimer sets anyway.
-            var pity = new List<int>();
+            // A hold's wave w (0-based) appears round him, INTO its own collection. Then the spawning fragment
+            // WAITS, at its very end (a tail, after every other line of that stage): the reveal after `reveal`
+            // seconds, the stuck guard after `stuck`, each only while the wave is still up. Utility.Wait is
+            // latent, so the script is free for the next stage while it sleeps; stage 100 already waits on its
+            // radio line this way, and he has heard that one finish.
+            var tails = new Dictionary<int, List<string>>();
+            void Tail(int st, string line) { if (!tails.ContainsKey(st)) tails[st] = new(); tails[st].Add(line); }
             void SpawnWave(int b, int w, int stage)
             {
                 var ws = steps.First(s => s.Beats.Contains(b)).WaveStages;
@@ -1139,17 +1144,32 @@ namespace FrankyCLI
                 var sz = r.beats[b].size!;
                 int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
                 Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]}, {origins})");
-                Add(stage, $"StartTimer({r.beats[b].stuck ?? DefaultStuckSeconds}.0, {ws[w]})   ; the stuck-enemy guard for wave {w + 1}");
-                pity.Add(ws[w]);
+                int stuck = r.beats[b].stuck ?? DefaultStuckSeconds;
                 int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
+                Tail(stage, $"; wave {w + 1}: {(rv > 0 ? $"pointed out after {rv} s, " : "")}let go after {stuck} s if it is still up");
                 if (rv > 0)
                 {
                     var hs = steps.First(s => s.Beats.Contains(b));
-                    int robj = hs.Objective + 1 + w, rid = RevealTimerBase + ws[w];
-                    Add(stage, $"StartTimer({rv}.0, {rid})   ; point wave {w + 1} out if it is still up");
+                    int robj = hs.Objective + 1 + w;
                     Add(ws[w], $"SetObjectiveDisplayed({robj}, False)   ; wave {w + 1} is down: its marker goes");
-                    bm.Reveals.Add((robj, waveAliases[b][w], rid, ws[w]));
+                    Tail(stage, $"Utility.Wait({rv}.0)");
+                    Tail(stage, $"If !GetStageDone({ws[w]})");
+                    Tail(stage, $"    SetObjectiveDisplayed({robj})");
+                    Tail(stage, $"    Utility.Wait({stuck - rv}.0)");
+                    Tail(stage, $"    If !GetStageDone({ws[w]})");
+                    Tail(stage, $"        SetStage({ws[w]})");
+                    Tail(stage, "    EndIf");
+                    Tail(stage, "EndIf");
+                    bm.Reveals.Add((robj, waveAliases[b][w], rv, ws[w]));
                 }
+                else
+                {
+                    Tail(stage, $"Utility.Wait({stuck}.0)");
+                    Tail(stage, $"If !GetStageDone({ws[w]})");
+                    Tail(stage, $"    SetStage({ws[w]})");
+                    Tail(stage, "EndIf");
+                }
+                bm.StuckWaits.Add(ws[w]);
             }
             // Entering a step: a recover beat's holder appears (and fills the alias the objective targets)
             // BEFORE the objective is shown, so it never shows with nothing to point at.
@@ -1359,29 +1379,10 @@ namespace FrankyCLI
             {
                 psc.AppendLine($"Function {FragmentFunction(kv.Key)}()");
                 foreach (var line in kv.Value) psc.AppendLine("    " + line);
+                if (tails.TryGetValue(kv.Key, out var tail))
+                    foreach (var line in tail) psc.AppendLine("    " + line);
                 psc.AppendLine("EndFunction");
                 psc.AppendLine();
-            }
-            if (pity.Count > 0)
-            {
-                // The stuck-enemy guard (his infestation driver: "There is a chance that we can't reach all
-                // targets"). A wave still alive when its timer ends is let go: its stage is set as if it fell.
-                psc.AppendLine("Event OnTimer(Int aiTimerID)");
-                for (int p = 0; p < pity.Count; p++)
-                {
-                    psc.AppendLine($"    {(p == 0 ? "If" : "ElseIf")} aiTimerID == {pity[p]} && !GetStageDone({pity[p]})");
-                    psc.AppendLine($"        SetStage({pity[p]})");
-                }
-                // The reveal (his ask 2026-10-12): a wave still up when its timer ends becomes objective markers.
-                foreach (var (robj, _, rid, rstage) in bm.Reveals)
-                {
-                    psc.AppendLine($"    ElseIf aiTimerID == {rid} && !GetStageDone({rstage})");
-                    psc.AppendLine($"        SetObjectiveDisplayed({robj})");
-                }
-                psc.AppendLine("    EndIf");
-                psc.AppendLine("EndEvent");
-                psc.AppendLine();
-                bm.PityTimer = true;
             }
             foreach (var p in props.DistinctBy(p => p.pname))
                 psc.AppendLine($"{p.type} Property {p.pname} Auto Const Mandatory");
@@ -1618,9 +1619,12 @@ namespace FrankyCLI
                     fail += Check("the broadcast scene begins on quest start (a stage-0 Start() plays nothing)",
                                   (sc?.Flags?.HasFlag(Scene.Flag.BeginOnQuestStart) ?? false).ToString(), "True");
             }
-            if (bm.PityTimer)
-                fail += Check("the stuck-enemy guard is in the fragment script",
-                              (File.Exists(bm.PscPath) && File.ReadAllText(bm.PscPath).Contains("Event OnTimer(")).ToString(), "True");
+            string fsrc = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
+            foreach (var ds in bm.StuckWaits)
+                fail += Check($"wave stage {ds}: the stuck guard waits in its spawning fragment and sets it",
+                              (fsrc.Contains($"If !GetStageDone({ds})") && fsrc.Contains($"SetStage({ds})")).ToString(), "True");
+            fail += Check("no timer event in the fragment script (a fragment's OnTimer never fires)",
+                          fsrc.Contains("Event OnTimer(").ToString(), "False");
             foreach (var (an, alias) in bm.Replaced)
             {
                 var p = vma.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == an);
@@ -1636,15 +1640,14 @@ namespace FrankyCLI
                 fail += Check($"objective {obj} target alias {alias} lit until its stage", got,
                               $"GetStageDone({q.FormKey}, {stage}) EqualTo 0 on Subject");
             }
-            foreach (var (robj, alias, rid, rstage) in bm.Reveals)
+            foreach (var (robj, alias, rsecs, rstage) in bm.Reveals)
             {
                 var ro = q.Objectives.FirstOrDefault(o => o.Index == robj);
                 fail += Check($"objective {robj} points at wave collection {alias}, unconditioned",
                               ro == null ? "missing" : string.Join("+", ro.Targets.Select(x => $"{x.AliasID}/{x.Conditions.Count}")), $"{alias}/0");
-                string src = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
-                fail += Check($"objective {robj} is shown by reveal timer {rid} and hidden at stage {rstage}",
-                              (src.Contains($"aiTimerID == {rid} && !GetStageDone({rstage})") && src.Contains($"SetObjectiveDisplayed({robj})")
-                               && src.Contains($"SetObjectiveDisplayed({robj}, False)")).ToString(), "True");
+                fail += Check($"objective {robj} is shown after a {rsecs} s wait and hidden at stage {rstage}",
+                              (fsrc.Contains($"Utility.Wait({rsecs}.0)") && fsrc.Contains($"    SetObjectiveDisplayed({robj})")
+                               && fsrc.Contains($"SetObjectiveDisplayed({robj}, False)")).ToString(), "True");
             }
             if (bm.Recap != null)
             {

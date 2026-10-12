@@ -285,7 +285,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
-| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns 30 to 100 m from the player on any bearing outside the 45-degree cone he faces (else at `at` when he is more than 150 m from it); a `horde` wave is split between his left and his right (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and a pity timer starts (`duo_delve_lib.SpawnWave`) |
+| `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns 30 to 100 m from the player on any bearing outside the 45-degree cone he faces (else at `at` when he is more than 150 m from it); a `horde` wave is split between his left and his right (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and the spawning fragment waits out the reveal and the stuck guard (`duo_delve_lib.SpawnWave`, `Utility.Wait`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
@@ -319,7 +319,7 @@ or `horde` (one group on his left half of the arc and one on his right, so it cl
 optional (his ask 2026-10-12: "after like 20 seconds of the wave we set the enemies as objectives? That way if the
 player hasn't seen them it points them out"): seconds after a wave spawns before its enemies carry objective markers.
 Absent = 20, `0` = never, and it must be under `stuck` (lint). Each wave gets its own objective, the hold's index + 1
-+ wave (31, 32, 33 on `duo_delve09a`), targeting that wave's collection; a timer shows it and the wave's own stage
++ wave (31, 32, 33 on `duo_delve09a`), targeting that wave's collection; the spawning fragment shows it after a `Utility.Wait` and the wave's own stage
 hides it, so a cleared wave's bodies never keep a marker. **`revealObjective`** is its text, absent = "Eliminate the
 attackers" (Eliza's placeholder; words are Jessica's). Both are refused on a beat that is not a hold. A horde is `size` PER SIDE (his "third wave seems small"). The
 lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
@@ -331,8 +331,11 @@ short. The objective gets the counter `(n/waves)` appended and is redisplayed as
 wave falls, which is the player's feedback (no message boxes in this type, his ruling). `defend: N` points
 the objective at beat N's object (a use or a deliver; absent, the spawn marker). Each wave is one stage, the
 last landing on the step's done stage. **The stuck-enemy guard:** a wave still alive `stuck` seconds after it
-spawned (default 180, his infestation driver's pity timer) is let go and its stage set anyway, by an
-`OnTimer` in the generated fragment script; a later kill cannot set it twice. A hold has no object of its own,
+spawned (default 180, his infestation driver's pity timer) is let go and its stage set anyway, by the
+fragment that spawned it waiting (`Utility.Wait`) at its end; a later kill cannot set it twice. ⛔ **Not a timer:**
+`StartTimer` is `selfonly` and a fragment script is not attached to the quest, so an `OnTimer` in one never fires
+(his play of `duo_delve09a`, 2026-10-12: the reveal never showed, so the guard had never worked either; vanilla's one
+fragment timer, `QF_RI06`, calls a method on the quest's ATTACHED script). The build verifies there is no `OnTimer`. A hold has no object of its own,
 so no `model`, `name` or `replace`, and an approach cannot target it.
 
 **`recap` when the Delve ENDS on a group:** the last member sets its stage and stage 100 in the same
