@@ -291,7 +291,7 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
 `model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
 `group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`, and on a hold `waves`,
-`size`, `defend`, `stuck`, `style`.
+`size`, `defend`, `stuck`, `style`, `reveal`, `revealObjective`.
 `returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to
 finish). The target must be a `use` beat, returned to once (the stock hook has one duplicate,
 `DefaultAliasOnActivateA`); this beat repeats its `at` and `place` and sets no model or name. The first
@@ -315,7 +315,13 @@ pity timer while he has wandered off) the wave forms at `at`. *History: the site
 130 m out, where he saw them stutter); then 25 to 35 m behind him, close enough that he could aim where they
 landed; the first behind-him build used `MoveTo`'s `abRotateOffset` without `abMatchRotation` and every wave came
 from "the same place".* **`style`**, optional, one per wave: `squad` (one group, anywhere on that arc; the default)
-or `horde` (one group on his left half of the arc and one on his right, so it closes from two sides). A horde is `size` PER SIDE (his "third wave seems small"). The
+or `horde` (one group on his left half of the arc and one on his right, so it closes from two sides). **`reveal`**,
+optional (his ask 2026-10-12: "after like 20 seconds of the wave we set the enemies as objectives? That way if the
+player hasn't seen them it points them out"): seconds after a wave spawns before its enemies carry objective markers.
+Absent = 20, `0` = never, and it must be under `stuck` (lint). Each wave gets its own objective, the hold's index + 1
++ wave (31, 32, 33 on `duo_delve09a`), targeting that wave's collection; a timer shows it and the wave's own stage
+hides it, so a cleared wave's bodies never keep a marker. **`revealObjective`** is its text, absent = "Eliminate the
+attackers" (Eliza's placeholder; words are Jessica's). Both are refused on a beat that is not a hold. A horde is `size` PER SIDE (his "third wave seems small"). The
 lint refuses a count that is not one per wave, an unknown word (case counts), and `style` on a beat that is not a
 hold. Every
 wave collection wears `<id>_wavepkg`, a copy of vanilla's `Trait_Wanted_TravelToPlayer` (jog, weapon drawn,

@@ -60,6 +60,11 @@ namespace FrankyCLI
 
         /// <summary>The stuck-enemy guard's default, in seconds: his infestation driver's pity timer.</summary>
         private const int DefaultStuckSeconds = 180;
+        /// <summary>A hold's reveal default, in seconds (his "after like 20 seconds"), and its words (Eliza's placeholder).</summary>
+        private const int DefaultRevealSeconds = 20;
+        private const string DefaultRevealObjective = "Eliminate the attackers";
+        /// <summary>A reveal timer's id is this plus the wave's own stage, so it never collides with a stuck guard's (the stage).</summary>
+        private const int RevealTimerBase = 1000;
 
         /// <summary>One step of a beats Delve: a single beat, or an any-order group of them.</summary>
         private sealed class Step
@@ -195,6 +200,14 @@ namespace FrankyCLI
                     }
                     if (b.stuck is int s && s < 30)
                         Fatal($"beat {i + 1}'s stuck is {s} s; the guard would move the quest on mid-fight. 30 or more.");
+                    if (b.reveal is int rv && (rv < 0 || (rv > 0 && rv >= (b.stuck ?? DefaultStuckSeconds))))
+                        Fatal($"beat {i + 1}'s reveal is {rv} s; it must be 0 (never) or less than the stuck guard ({b.stuck ?? DefaultStuckSeconds} s), or the wave is let go before it is pointed out.");
+                    if (b.reveal == 0 && b.revealObjective != null)
+                        Fatal($"beat {i + 1} sets revealObjective with reveal 0, so the text would never show.");
+                    if (b.revealObjective is string ro && Tokens(ro).Any())
+                        Fatal($"beat {i + 1}'s revealObjective carries a <Token>; keep it plain.");
+                    if ((b.waves ?? 0) > 9)
+                        Fatal($"beat {i + 1} has {b.waves} waves; each revealed wave takes an objective index after the hold's, and there are 9.");
                     if (b.model != null || b.name != null || b.replace)
                         Fatal($"beat {i + 1} is a hold: it has no object of its own (the waves come to a marker), so model, name and replace would be ignored.");
                     if (b.objective is string ho && ho.Contains('('))
@@ -210,8 +223,8 @@ namespace FrankyCLI
                         }
                     }
                 }
-                else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null)
-                    Fatal($"beat {i + 1} sets waves, size, defend, stuck or style and is not a hold, so they would be silently ignored.");
+                else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null)
+                    Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal or revealObjective and is not a hold, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))
@@ -445,6 +458,7 @@ namespace FrankyCLI
             public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
             public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
             public bool PityTimer;              // a hold put an OnTimer guard in the fragment script
+            public List<(int objective, int alias, int timer, int stage)> Reveals = new();   // each revealed wave: its objective, collection, timer id, death stage
             public (int on, int to)? ApproachTarget;   // the approach hook's alias and the alias it measures to
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
@@ -822,6 +836,31 @@ namespace FrankyCLI
                 bm.ObjectiveText[s.Objective] = text;
                 Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].ObjectiveTarget))}");
             }
+            // A hold's revealed waves (his ask 2026-10-12): one objective per wave, index hold objective + 1 + w,
+            // targeting that wave's own collection. Not shown at the start: the fragment shows it when the reveal
+            // timer fires and hides it when the wave is down, so a cleared wave's bodies never keep a marker.
+            for (int k = 0; k < steps.Count; k++)
+            {
+                if (!steps[k].IsHold) continue;
+                int hb = steps[k].Beats[0];
+                if ((r.beats[hb].reveal ?? DefaultRevealSeconds) == 0) continue;
+                string rtext = r.beats[hb].revealObjective ?? DefaultRevealObjective;
+                for (int w = 0; w < waveAliases[hb].Count; w++)
+                {
+                    int ri = steps[k].Objective + 1 + w;
+                    if (clone.Objectives.Any(o => o.Index == ri)) { Console.WriteLine($"REFUSED: objective {ri} for wave {w + 1}'s reveal is already in use."); return 1; }
+                    var ro = obSrc.DeepCopy(); ro.Index = (ushort)ri;
+                    var rt = ro.Targets![0].DeepCopy();
+                    rt.AliasID = waveAliases[hb][w];
+                    rt.Conditions.Clear();
+                    ro.Targets.Clear();
+                    ro.Targets.Add(rt);
+                    ro.DisplayText = rtext;
+                    clone.Objectives.Add(ro);
+                    bm.ObjectiveText[ri] = rtext;
+                    Console.WriteLine($"  objective: {ri} \"{rtext}\" -> wave {w + 1}'s collection {waveAliases[hb][w]} (shown {r.beats[hb].reveal ?? DefaultRevealSeconds} s after it spawns)");
+                }
+            }
             var sortedObs = clone.Objectives.OrderBy(o => o.Index).ToList();
             clone.Objectives.Clear();
             clone.Objectives.AddRange(sortedObs);
@@ -1102,6 +1141,15 @@ namespace FrankyCLI
                 Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]}, {origins})");
                 Add(stage, $"StartTimer({r.beats[b].stuck ?? DefaultStuckSeconds}.0, {ws[w]})   ; the stuck-enemy guard for wave {w + 1}");
                 pity.Add(ws[w]);
+                int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
+                if (rv > 0)
+                {
+                    var hs = steps.First(s => s.Beats.Contains(b));
+                    int robj = hs.Objective + 1 + w, rid = RevealTimerBase + ws[w];
+                    Add(stage, $"StartTimer({rv}.0, {rid})   ; point wave {w + 1} out if it is still up");
+                    Add(ws[w], $"SetObjectiveDisplayed({robj}, False)   ; wave {w + 1} is down: its marker goes");
+                    bm.Reveals.Add((robj, waveAliases[b][w], rid, ws[w]));
+                }
             }
             // Entering a step: a recover beat's holder appears (and fills the alias the objective targets)
             // BEFORE the objective is shown, so it never shows with nothing to point at.
@@ -1323,6 +1371,12 @@ namespace FrankyCLI
                 {
                     psc.AppendLine($"    {(p == 0 ? "If" : "ElseIf")} aiTimerID == {pity[p]} && !GetStageDone({pity[p]})");
                     psc.AppendLine($"        SetStage({pity[p]})");
+                }
+                // The reveal (his ask 2026-10-12): a wave still up when its timer ends becomes objective markers.
+                foreach (var (robj, _, rid, rstage) in bm.Reveals)
+                {
+                    psc.AppendLine($"    ElseIf aiTimerID == {rid} && !GetStageDone({rstage})");
+                    psc.AppendLine($"        SetObjectiveDisplayed({robj})");
                 }
                 psc.AppendLine("    EndIf");
                 psc.AppendLine("EndEvent");
@@ -1581,6 +1635,16 @@ namespace FrankyCLI
                     : $"GetStageDone({gd.FirstParameter.Link.FormKey}, {gd.SecondParameter}) {c!.CompareOperator} {c.ComparisonValue} on {gd.RunOnType}";
                 fail += Check($"objective {obj} target alias {alias} lit until its stage", got,
                               $"GetStageDone({q.FormKey}, {stage}) EqualTo 0 on Subject");
+            }
+            foreach (var (robj, alias, rid, rstage) in bm.Reveals)
+            {
+                var ro = q.Objectives.FirstOrDefault(o => o.Index == robj);
+                fail += Check($"objective {robj} points at wave collection {alias}, unconditioned",
+                              ro == null ? "missing" : string.Join("+", ro.Targets.Select(x => $"{x.AliasID}/{x.Conditions.Count}")), $"{alias}/0");
+                string src = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
+                fail += Check($"objective {robj} is shown by reveal timer {rid} and hidden at stage {rstage}",
+                              (src.Contains($"aiTimerID == {rid} && !GetStageDone({rstage})") && src.Contains($"SetObjectiveDisplayed({robj})")
+                               && src.Contains($"SetObjectiveDisplayed({robj}, False)")).ToString(), "True");
             }
             if (bm.Recap != null)
             {

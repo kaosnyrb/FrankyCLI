@@ -315,6 +315,16 @@ namespace FrankyCLI
             /// </summary>
             public int? stuck { get; set; }
             /// <summary>
+            /// beats, a hold, OPTIONAL: seconds after a wave spawns before its enemies become objective markers, so
+            /// a wave he has not found is pointed out (his ask 2026-10-12: "after like 20 seconds of the wave we set
+            /// the enemies as objectives? That way if the player hasn't seen them it points them out"). Absent = 20;
+            /// 0 = never. Each wave is its own objective (hold objective + 1 + wave), hidden when the wave is down,
+            /// so a cleared wave's bodies never keep a marker.
+            /// </summary>
+            public int? reveal { get; set; }
+            /// <summary>beats, a hold, OPTIONAL: the revealed waves' objective text. Absent = "Eliminate the attackers" (Eliza's placeholder).</summary>
+            public string? revealObjective { get; set; }
+            /// <summary>
             /// beats, a hold, OPTIONAL: each wave's style, one per wave, "squad" or "horde". A squad comes as one
             /// group from anywhere but in front of him; a horde is split between his left and right, so it closes from two sides
             /// (his asks 2026-10-10: "scattering them across points / grouping for horde vs squad combat styles";
