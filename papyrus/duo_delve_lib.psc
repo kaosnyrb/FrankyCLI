@@ -95,10 +95,13 @@ EndFunction
 ; instrument for close: they sit ~70 m from a site's centre and ~133 m from each other (manual part 32),
 ; so a ring wave started 60 to 130 m out, where he saw them stutter (2026-10-10), and a horde rarely had
 ; both rings loaded to come from two sides.
-; Each origin is a temporary XMarker [STAT:0000003B] placed NearMin to NearMax metres from him, MoveTo'd
-; with abRotateOffset so the offset turns with his facing (ObjectReference.psc). +Y is taken as AHEAD of
-; him, so behind is -Y: ⚠ UNVERIFIED in game; if it is wrong the waves come from in front or the side,
-; which his first play will show at once. aiCount 1 (SQUAD): one origin within 30 degrees of straight
+; Each origin is a temporary XMarker [STAT:0000003B] placed NearMin to NearMax metres from him in WORLD
+; axes, the direction worked out from his heading the way vanilla does it: facing is (sin, cos) of
+; GetAngleZ() (HeavyActorPushOnImpact.psc pushes along exactly that), so behind is that angle + 180.
+; ⛔ NOT MoveTo's abRotateOffset, which the first build used: his play 2026-10-12, "they seemed to spawn in
+; the same place" every wave. Vanilla only ever pairs abRotateOffset with abMatchRotation = True (four
+; TIF_City_CY_Psych01 fragments) and the first build passed False, so the offset most likely stayed in
+; world axes, the same compass side of him every wave. aiCount 1 (SQUAD): one origin within 30 degrees of straight
 ; behind. 2 (HORDE): behind-left and behind-right, 35 to 65 degrees off straight behind, so the wave
 ; closes from two sides. Height is his; SpawnWave's PlaceAtMe snaps each enemy to navmesh round it.
 ; Not at the site (more than SiteReach from the hold's marker, e.g. the pity timer firing while he has
@@ -123,8 +126,9 @@ ObjectReference[] Function WaveOrigins(ObjectReference akSite, Actor akPlayer, I
             off = Utility.RandomFloat(35.0, 65.0)
         EndIf
         Float d = Utility.RandomFloat(NearMin, NearMax)
+        Float heading = akPlayer.GetAngleZ() + 180.0 + off   ; read per wave, so it follows him round
         ObjectReference m = akPlayer.PlaceAtMe(XMarker, 1, False, False, True)
-        m.MoveTo(akPlayer, d * Math.sin(off), -d * Math.cos(off), 0.0, False, True)
+        m.MoveTo(akPlayer, d * Math.sin(heading), d * Math.cos(heading), 0.0, False)
         picked.Add(m)
         i += 1
     EndWhile

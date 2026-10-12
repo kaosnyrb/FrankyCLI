@@ -298,9 +298,10 @@ Each member's marker goes out as it is done: its target is lit only while its st
 
 **A hold (Jessica's Type 6, `duo_delve09a`):** `waves` (1 to 5) waves of `size` [min, max] enemies (min at
 least 1: an empty wave never clears) spawn one after another. **Where (2026-10-12, his "spawning the enemies
-closer to the player to make the defense mission more intense"):** 25 to 35 m BEHIND him, an offset turned with his
-facing (`MoveTo` with `abRotateOffset`), each enemy snapped to navmesh within 10 m of it. ⚠ That +Y is AHEAD of him is
-unverified in game: wrong, and the waves come from in front or the side. When he is more than 150 m from `at` (a pity
+closer to the player to make the defense mission more intense"):** 25 to 35 m BEHIND him, re-read every wave from his
+heading the way vanilla does (facing is `(sin, cos)` of `GetAngleZ()`), each enemy snapped to navmesh within 10 m
+of it. *The first build used `MoveTo`'s `abRotateOffset` without `abMatchRotation`, and every wave came from "the
+same place" (his play, 2026-10-12).* When he is more than 150 m from `at` (a pity
 timer while he has wandered off) the wave forms at `at`. *Before this, 2026-10-10 to 10-12, waves came from the site's
 travel rings, unseen and 40 m+ from him; the rings sit ~70 m from a site's centre (part 32), so a wave started 60 to
 130 m out, where he saw them stutter.* **`style`**, optional, one per wave: `squad` (one group from behind him, within
