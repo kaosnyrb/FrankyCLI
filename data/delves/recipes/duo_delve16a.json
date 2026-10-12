@@ -20,8 +20,13 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "A quiet worked site with a relay on it. She is placed by the talk beat: NonHostile mostly has nobody."
   },
@@ -63,6 +68,24 @@
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 3 is the flirt his 10-12 ceiling allows, answered in register: with the action it implies."
+    },
+    {
+      "type": "read",
+      "optional": true,
+      "at": "RETravelA1LocRef",
+      "objective": "Read the relay log",
+      "slate": {
+        "title": "Relay Post Log",
+        "text": "D212. Relay nominal. Cells low. Requested two.\nD213. Relay nominal. Requested two.\nD214. Relay nominal. Cells critical. Contractor requested.\nD215. Relay nominal. Contractor eleven minutes late.\n\nBunks: six. Lockers: six. Mugs: six.\nIn use: one.\n\nNext drop: nine days."
+      },
+      "_read": [
+        "PROPOSED, his 2026-10-12 21:41: lore slates must be 'actual objectives tho so players find them. If they are",
+        "just loose in the POI people will walk past.' So: a real objective with a marker, flagged OPTIONAL so it never",
+        "blocks the quest (Eliza: whether the build can show it as optional, or it must be a required beat).",
+        "A TEXT data-slate (BOOK, docs/formlib/book_audio.md), placed at `at`, completes on read. Text, so it may name",
+        "things a conversion can patch; this one names none. Written as Vance: the count stops at 'one' and the six",
+        "is never explained."
+      ]
     },
     {
       "type": "pickup",

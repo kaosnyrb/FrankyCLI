@@ -110,6 +110,13 @@ def render(recipe, notes):
                 say(f"> {ex.get('reply', '')}")
                 say("")
 
+        slate = beat.get("slate")
+        if slate:
+            say(f"📄 **Slate: {slate.get('title', '')}**" + (" *(optional)*" if beat.get("optional") else ""))
+            for line in slate.get("text", "").splitlines():
+                say(f"> {line}" if line else ">")
+            say("")
+
         msg = beat.get("message")
         if msg:
             say(f"🪧 **Box: {msg.get('title', '')}**")

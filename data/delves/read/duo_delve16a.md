@@ -37,7 +37,24 @@
 
 ---
 
-## 2. PICKUP · out at the edge of the site
+## 2. READ · out at the edge of the site
+
+🎯 Read the relay log
+
+📄 **Slate: Relay Post Log** *(optional)*
+> D212. Relay nominal. Cells low. Requested two.
+> D213. Relay nominal. Requested two.
+> D214. Relay nominal. Cells critical. Contractor requested.
+> D215. Relay nominal. Contractor eleven minutes late.
+>
+> Bunks: six. Lockers: six. Mugs: six.
+> In use: one.
+>
+> Next drop: nine days.
+
+---
+
+## 3. PICKUP · out at the edge of the site
 
 🎯 Collect the first power cell
 
@@ -49,7 +66,7 @@
 
 ---
 
-## 3. PICKUP · out at the far edge of the site
+## 4. PICKUP · out at the far edge of the site
 
 🎯 Collect the second power cell
 
@@ -61,7 +78,7 @@
 
 ---
 
-## 4. DELIVER · the centre of the site
+## 5. DELIVER · the centre of the site
 
 🎯 Fit the power cells to the relay
 
