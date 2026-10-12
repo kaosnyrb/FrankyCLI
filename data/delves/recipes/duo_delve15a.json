@@ -87,7 +87,7 @@
       "objective": "Deliver the package at the <SecondPlace>",
       "journal": "A man at the <Place> asked me to carry a present to a woman at the <SecondPlace>. It was real coffee. She's going to thank him herself.",
       "person": {
-        "name": "Ines Calder",
+        "name": "Mae Hollins",
         "template": "UC_NA_MASTWorkerFemale03",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericFemale01",

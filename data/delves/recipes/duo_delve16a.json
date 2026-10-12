@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "id": "duo_delve16a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12.",
+  "author": "jessica, as Vance Okonkwo-Reyes",
+  "source": "his 2026-10-12 18:15: \"Do you want to try using a penname to write a delve?\" and, on Vance, \"yup go for it\"",
+  "_note": [
+    "THE FIRST DELVE WRITTEN UNDER A PEN NAME. The person is the sergeant herself: home-office",
+    "office/pennames/vance-okonkwo-reyes.json, named live the same evening. Her register: flat imperative, states",
+    "and never explains, answers a question with the action it implies, gives a count or a time where a warmer",
+    "voice gives a feeling. The one thing she will not count is what she carries; it is not said here at all.",
+    "Her heat checks do not apply (Overtime is adult, not explicit, his 10-12). Her voice floor does.",
+    "Beats are all known: talk (14a), two pickups (13a), a deliver that speaks (13a). No new template work,",
+    "unless one person who briefs at the talk and speaks again at the deliver needs it.",
+    "Voiced lines: no names, no places, no flags. 'Navy' is a role; she never says which navy.",
+    "MODELS: the relay dish (approved, his rig) stands in for the comms mast until Kim's kitbash has a mesh path;",
+    "the power cell is vanilla Power_Cell_Static_PackinOnly (Kim's carries pass, C4)."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_NonHostile"],
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "A quiet worked site with a relay on it. She is placed by the talk beat: NonHostile mostly has nobody."
+  },
+  "prose": {
+    "name": "Repairs: Relay Power on <Planet>",
+    "briefing": "A relay post at the <Place> wants a contractor to carry two power cells. The posting is four words long and signed with a rank."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Report to the sergeant at the <Place>",
+      "journal": "The sergeant at the <Place> keeps the relay running alone. Two power cells are waiting at the drop. She wants them in the relay, left bay first.",
+      "person": {
+        "name": "Sergeant Okafor",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "_outfit": "WANTED: a vanilla Navy or UC service outfit; Eliza or Kim picks the EditorID. Never guessed here.",
+        "voice": "GenericFemale01",
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear."
+      },
+      "greeting": "You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go.",
+      "exchanges": [
+        {
+          "prompt": "I'll get the cells.",
+          "reply": "Two. Don't drop them. Left bay first, then right. I'll have the panel open."
+        },
+        {
+          "prompt": "Why can't you fetch them yourself?",
+          "reply": "Relay can't be left. Standing order. Not mine. I follow it."
+        },
+        {
+          "prompt": "Are you out here alone?",
+          "reply": "Relay needs one. Rations for one. Cells for one. Next drop in nine days."
+        },
+        {
+          "prompt": "Buy you a drink when you're off?",
+          "reply": "Off in nine days. Ask me then. Cells first."
+        }
+      ],
+      "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 3 is the flirt his 10-12 ceiling allows, answered in register: with the action it implies."
+    },
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "item": "Relay Power Cell (1 of 2)",
+      "objective": "Collect the first power cell",
+      "model": "Meshes\\setdressing\\powercell\\powercell01.nif",
+      "name": "Relay Power Cell",
+      "message": {
+        "title": "Relay Power Cell",
+        "text": "A power cell, signed for in advance. The signature is a rank and a surname. Someone has written LEFT on the casing."
+      }
+    },
+    {
+      "type": "pickup",
+      "at": "RETravelB1LocRef",
+      "item": "Relay Power Cell (2 of 2)",
+      "objective": "Collect the second power cell",
+      "model": "Meshes\\setdressing\\powercell\\powercell01.nif",
+      "name": "Relay Power Cell",
+      "message": {
+        "title": "Relay Power Cell",
+        "text": "The second cell. RIGHT, in the same hand. The letters are exactly the same height."
+      }
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "Fit the power cells to the relay",
+      "journal": "A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them. She said next, and meant it.",
+      "model": "Meshes\\ccs\\relaydish01.nif",
+      "name": "Relay",
+      "say": "Left bay. Good. Right bay. Good. Relay's up. Payment's sent. Next."
+    }
+  ],
+  "speaker": {
+    "name": "Relay Post",
+    "voice": "GenericFemale01",
+    "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
+  },
+  "broadcast": "Relay post needs a contractor. Two cells to carry. Paid on completion. Out.",
+  "_speech": "Her voice on the radio, in person and at the relay. No names, no places, no flags."
+}
