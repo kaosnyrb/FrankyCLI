@@ -26,11 +26,18 @@
   "place": {
     "kind": "dungeon",
     "_kind": "PROPOSED. Fill the main place from the dungeon pool (LocTypeDungeon + LocDungeonBossLocRef), not the POI pool.",
-    "theme": { "require": [], "exclude": [] },
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
     "second": {
       "theme": {
-        "require": ["LocTypeOE_NonHostile"],
-        "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
       }
     },
     "_theme": "A dungeon there; a quiet non-hostile site here for her to be waiting at (she is placed, rule 2). One peopled end only, so the pool cost of rule 4 does not apply."
@@ -56,7 +63,9 @@
       "person": {
         "name": "Petra Hollis",
         "template": "UC_NA_MASTWorkerFemale03",
-        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat"
+        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
       },
       "greeting": "You've got that look. Did you actually go in there?",
       "exchanges": [
@@ -77,7 +86,7 @@
           "reply": "Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."
         }
       ],
-      "_talk": "PROPOSED fields. Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100. Voiced lines: no names, no places (radio rules)."
+      "_talk": "PROPOSED fields. Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100. Voiced lines: no names, no places (radio rules). person.voice / person.elevenlabs PROPOSED, as 14a: the same voice as the radio speaker."
     }
   ],
   "speaker": {
