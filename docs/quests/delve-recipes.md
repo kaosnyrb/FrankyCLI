@@ -36,6 +36,15 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 4. If the template's driver changed, compile it: `python papyrus/compile.py C:/modding/DU_Overtime/Data <driver>`,
    then copy the `.pex` into Steam `Data/scripts`.
 5. `python sync_plugin.py`, commit the Overtime repo, snapshot again with a label.
+**Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
+record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
+go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the
+plugin off disk after. It refuses an id that is not a quest in the plugin, so a stray prefix matches nothing.
+Snapshot first (step 2). It LISTS the loose files a build deployed (`duo_qf_<id>.pex`, the wems in
+`voicecache/deployed_<id>.txt`) and does not delete them. Written for the 10-11 lettering: the old unlettered
+builds (`duo_delve03` to `08`) are still in the plugin on `Defiant`, where the name-clash lint refuses their
+lettered recipes until they come out. `duo_delve09` was the first, the same day.
+
 6. In game: `startquest <id>`. A rebuild re-mints FormIDs, so start it fresh. **No reload is needed
    between runs:** the Delve base is repeatable, so `startquest <id>` again resets its stages and
    re-draws its aliases (his fact, 2026-10-08). `setstage <id> <stage>` jumps straight to a beat once a

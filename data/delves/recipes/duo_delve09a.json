@@ -18,9 +18,9 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": []
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
     },
-    "_theme": "No theme demand, his ruling 2026-10-09 after the first good play: drop LocTypeOE_NonHostile, and the base's own exclusions of natural and cave sites. Any POI with the markers will do; the waves are the fight wherever it is."
+    "_theme": "No natural or cave sites, his ruling 2026-10-12 (\"set this one to not use natural and cave pois\"), once the waves spawn close behind him. Before that, 2026-10-09 to 10-12: no theme demand at all, his ruling after the first good play (drop LocTypeOE_NonHostile and the base's own natural and cave exclusions)."
   },
   "prose": {
     "name": "Defense: Relay Alignment on <Planet>",

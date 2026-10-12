@@ -366,13 +366,125 @@ namespace FrankyCLI
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
                 case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
+                case "unbuild": return Unbuild(path, templates, dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId>");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
+                    Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
                     return 1;
             }
+        }
+
+        // ------------------------------------------------------------------ unbuild
+
+        /// <summary>
+        /// Take a built Delve back OUT of the plugin: every record a build of <paramref name="id"/> made, and its
+        /// Story Manager pool entries. His ask 2026-10-12 ("yeah make unbuild"), when the 10-11 lettering renamed
+        /// every recipe (duo_delve09 -> duo_delve09a) and the old unlettered builds stayed in the plugin, where the
+        /// name-clash lint correctly refused to build the new ones beside them.
+        ///
+        /// ONE RULE, NOT A COPY OF THE BUILD'S LIST: a record is the build's when its EditorID IS the id or starts
+        /// with the id plus "_" (the quest, _item, _msg, _count, _wavepkg, _speaker, _sayN_topic/_scene/_info, the
+        /// cloned activators...). The build's own cleanup is ten per-type prefix matches spread over two files; a
+        /// second enumeration of those would be the one that drifts. Every type the build has ever minted follows
+        /// the naming, so the rule covers types added after this was written.
+        ///
+        /// Guards: the id must name a QUEST in the plugin (so a stray prefix like "duo" matches nothing and is
+        /// refused); only records the plugin itself owns are touched; removerecord's inbound guard (any surviving
+        /// FormLink into what leaves refuses the whole write); and the result is re-read off disk: nothing of the
+        /// id left, the masters unchanged. --dry lists and writes nothing.
+        ///
+        /// Records only. Loose files a build deployed (the fragment .pex, voice .wem) are LISTED, not deleted:
+        /// they sit in Steam Data and the mod's repo, and a delete there is the owner's call.
+        /// </summary>
+        private static int Unbuild(string? id, List<Template> templates, bool dry)
+        {
+            if (string.IsNullOrWhiteSpace(id)) { Console.WriteLine("REFUSED: name the built id, e.g. gen_delve unbuild duo_delve09"); return 1; }
+            var mods = templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (mods.Count != 1) { Console.WriteLine("REFUSED: the templates name " + mods.Count + " mods (" + string.Join(", ", mods) + "); unbuild knows which plugin only when they agree."); return 1; }
+            string mod = mods[0];
+
+            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            string modFile = Path.Combine(env.DataFolderPath, mod + ".esm");
+            if (!File.Exists(modFile)) { Console.WriteLine("REFUSED: " + modFile + " does not exist."); return 1; }
+            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+            var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
+            gen_quest_main.FixNextFormId(myMod);
+            var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
+            var modKey = myMod.ModKey;
+
+            Console.WriteLine();
+            Console.WriteLine("=== UNBUILD " + id + " from " + mod + ".esm ===");
+            var quest = myMod.Quests.FirstOrDefault(q => string.Equals(q.EditorID, id, StringComparison.OrdinalIgnoreCase));
+            if (quest == null) { Console.WriteLine("REFUSED: no quest '" + id + "' in " + mod + ".esm, so this is not a built Delve. Nothing written."); return 1; }
+
+            bool Ours(IMajorRecordGetter r) =>
+                r.FormKey.ModKey == modKey && r.EditorID != null &&
+                (r.EditorID.Equals(id, StringComparison.OrdinalIgnoreCase) || r.EditorID.StartsWith(id + "_", StringComparison.OrdinalIgnoreCase));
+
+            var matched = myMod.EnumerateMajorRecords().Where(Ours).ToList();
+            // A matched record nested inside another matched record (a topic's infos) leaves with its parent.
+            var nestedOnly = new HashSet<FormKey>();
+            foreach (var m in matched)
+                foreach (var c in m.EnumerateMajorRecords())
+                    if (c.FormKey != m.FormKey) nestedOnly.Add(c.FormKey);
+            var top = matched.Where(m => !nestedOnly.Contains(m.FormKey)).ToList();
+            var gone = new HashSet<FormKey>(top.SelectMany(m => m.EnumerateMajorRecords()).Select(r => r.FormKey));
+            foreach (var m in top) gone.Add(m.FormKey);
+
+            foreach (var g in matched.GroupBy(m => m.Registration.ClassType.Name).OrderBy(g => g.Key))
+                foreach (var m in g.OrderBy(m => m.EditorID))
+                    Console.WriteLine($"  {g.Key,-22} {m.EditorID} [{m.FormKey}]{(nestedOnly.Contains(m.FormKey) ? "  (inside its parent)" : "")}");
+
+            int unpooled = 0;
+            foreach (var n in myMod.StoryManagerQuestNodes)
+                unpooled += n.Quests.Count(e => gone.Contains(e.Quest.FormKey));
+            Console.WriteLine($"  {matched.Count} record(s), {gone.Count} leaving with their children; {unpooled} pool entr{(unpooled == 1 ? "y" : "ies")} to drop");
+
+            Console.WriteLine("  loose files a build of " + id + " deployed, NOT touched (the owner's call):");
+            Console.WriteLine("    Data/scripts/duo_qf_" + id + ".pex  (the fragment script; its quest is what leaves)");
+            Console.WriteLine("    the voice files listed in the mod repo's voicecache/deployed_" + id + ".txt, if it has one");
+
+            if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
+
+            foreach (var n in myMod.StoryManagerQuestNodes)
+                foreach (var e in n.Quests.Where(e => gone.Contains(e.Quest.FormKey)).ToList())
+                    n.Quests.Remove(e);
+            foreach (var m in top)
+                myMod.Remove(m.FormKey, m.Registration.GetterType);
+
+            // removerecord's inbound guard: anything that survives and still links in refuses the whole write.
+            var dangling = new List<string>();
+            foreach (var rec in myMod.EnumerateMajorRecords())
+            {
+                if (gone.Contains(rec.FormKey)) continue;
+                foreach (var link in rec.EnumerateFormLinks())
+                    if (!link.IsNull && gone.Contains(link.FormKey))
+                        dangling.Add($"{rec.EditorID ?? "(no EditorID)"} [{rec.FormKey}] -> {link.FormKey}");
+            }
+            if (dangling.Count > 0)
+            {
+                Console.WriteLine($"REFUSED: {dangling.Count} surviving link(s) point at what would leave. NOTHING WRITTEN:");
+                foreach (var d in dangling.Distinct().Take(20)) Console.WriteLine("  " + d);
+                return 1;
+            }
+            Console.WriteLine($"  inbound guard: 0 surviving links into {gone.Count} removed record(s)");
+
+            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+            env.Dispose();   // release the memory-mapped load order before overwriting one of its files
+            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
+            Console.WriteLine("  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
+
+            // Off disk: nothing of the id is left, and the masters did not move.
+            using var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            int left = reread.EnumerateMajorRecords().Count(Ours);
+            var mastersAfter = string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
+            bool ok = left == 0 && mastersAfter == mastersBefore;
+            Console.WriteLine($"  [{(left == 0 ? "OK  " : "FAIL")}] off disk: {left} record(s) of {id} left");
+            Console.WriteLine($"  [{(mastersAfter == mastersBefore ? "OK  " : "FAIL")}] the plugin's masters are unchanged ({mastersAfter})");
+            return ok ? 0 : 1;
         }
 
         private static int WithRecipe(string? path, string dataDir, List<Template> templates,
