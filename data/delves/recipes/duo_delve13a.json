@@ -63,7 +63,7 @@
       "at": "RECenterLocRef",
       "objective": "Set out the picnic",
       "journal": "A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the ring and the hamper and laid it all out where it was meant to be. I did not open the small box.",
-      "model": "Meshes\\SetDressing\\BeachProps\\BeachBlanket01.nif",
+      "model": "Meshes\\ccs\\picnicpallet01.nif",
       "name": "Picnic Spot",
       "say": "It's all there? Okay. Okay. I can do this. Thank you."
     }

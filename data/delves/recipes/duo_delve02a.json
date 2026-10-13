@@ -59,7 +59,7 @@
       "at": "RECenterLocRef",
       "objective": "Take the samples to the crew's drop beacon",
       "journal": "I got the crew's core samples out of the <Place> under fire and left them at their drop beacon for pickup.",
-      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Crew Drop Beacon",
       "say": "Got it. That's a whole season's work. Thank you."
     }

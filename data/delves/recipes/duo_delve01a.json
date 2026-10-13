@@ -60,7 +60,7 @@
       "at": "RECenterLocRef",
       "objective": "Send the readings from the survey beacon",
       "journal": "The survey team's sensors at the <Place> had been sitting unread. I collected all three sets of readings and sent them from the team's beacon.",
-      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Survey Uplink Beacon",
       "say": "That's all three. Data's coming through. Thank you."
     }
