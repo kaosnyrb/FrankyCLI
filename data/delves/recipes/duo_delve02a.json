@@ -40,7 +40,7 @@
       "_say": "Moved here from the hold beat 2026-10-12 (Eliza): a beat's say plays when its stage is SET, and the hold's is set when the third wave dies, so the warning would have come after the danger. Beat 1's stage is where wave 1 spawns, as 09a's \"Keep an eye out\" sits on the beat before its hold. Words unchanged.",
       "at": "RETravelA1LocRef",
       "objective": "Recover the core sample case at the <Place>",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Abandoned Sample Case",
       "item": "Core Sample Case"
     },

@@ -51,7 +51,7 @@
       "at": "RETravelB1LocRef",
       "item": "Picnic Hamper (2 of 2)",
       "objective": "Find the picnic hamper",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\hamper01.nif",
       "name": "Courier Hamper",
       "message": {
         "title": "Courier Hamper",
