@@ -53,7 +53,7 @@
         "title": "Supply Crate",
         "text": "Still sealed. The label has the old camp crossed out, and the new site written underneath in marker, twice, in case the first one was missed."
       },
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\supplycrate01.nif",
       "name": "Supply Crate"
     },
     {

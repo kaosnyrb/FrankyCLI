@@ -71,7 +71,7 @@
       "at": "RETravelA1LocRef",
       "item": "Sealed Survey Crate",
       "objective": "Collect the survey crate",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\surveycratemarked01.nif",
       "name": "Marked Survey Crate",
       "message": {
         "title": "Survey Crate",

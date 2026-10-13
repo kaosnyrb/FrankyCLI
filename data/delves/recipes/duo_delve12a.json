@@ -49,7 +49,7 @@
       "at": "RETravelA1LocRef",
       "item": "Freighter Consignment",
       "objective": "Recover the freighter's crate at the <Place>",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Wreck Cargo Crate",
       "guard": { "faction": "spacers", "min": 3, "max": 5, "near": 250 },
       "_guard": "PROPOSED: spacers placed round the crate on first approach, from Overtime's hostile gang list. Absent support, nothing guards it.",

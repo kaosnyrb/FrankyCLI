@@ -73,7 +73,7 @@
       "at": "RETravelA1LocRef",
       "item": "Wrapped Package",
       "objective": "Collect the package",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\wrappedpackage01.nif",
       "name": "Wrapped Package",
       "message": {
         "title": "Wrapped Package",

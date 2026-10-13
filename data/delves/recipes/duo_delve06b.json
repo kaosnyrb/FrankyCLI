@@ -68,7 +68,7 @@
         "text": "The stash is under the nest debris, intact. The name on the clasp is scratched away, but the militia number is not, and the roster lists a brother at the <Place>."
       },
       "item": "Militia Long Service Clasp",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\buriedstash01.nif",
       "name": "Buried Stash"
     },
     {

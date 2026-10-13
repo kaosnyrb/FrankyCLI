@@ -36,7 +36,7 @@
       "item": "Signed-Out Consignment (1 of 2)",
       "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",
       "say": "That's it. Finish the run for them and take it where it was going.",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\consignmentcrate01.nif",
       "name": "Consignment Crate"
     },
     {

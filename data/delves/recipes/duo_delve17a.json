@@ -72,7 +72,7 @@
       "at": "RETravelA1LocRef",
       "item": "Cool Box (1 of 2)",
       "objective": "Find the cool box",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\coolbox01.nif",
       "name": "Cool Box",
       "message": {
         "title": "Cool Box",
@@ -84,7 +84,7 @@
       "at": "RETravelB1LocRef",
       "item": "Bag of Cups (2 of 2)",
       "objective": "Find the bag of cups",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\bagofcups01.nif",
       "name": "Bag of Cups",
       "message": {
         "title": "Bag of Cups",
