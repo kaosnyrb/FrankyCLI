@@ -95,8 +95,13 @@ namespace FrankyCLI
             for (int p = 0; p < places.Length; p++)
             {
                 if (places[p]?.who is not Who w) continue;
-                int a = Enumerable.Range(0, r.beats.Count).FirstOrDefault(i => r.beats[i].PlaceIndex == p && r.beats[i].returnTo == null
-                            && (r.beats[i].type == "pickup" || r.beats[i].type == "use" || r.beats[i].type == "deliver"), -1);
+                bool Holds(int i) => r.beats[i].PlaceIndex == p && r.beats[i].returnTo == null
+                            && (r.beats[i].type == "pickup" || r.beats[i].type == "use" || r.beats[i].type == "deliver");
+                // who.beat names the object; one that is not a pickup / use / deliver at this place resolves to -1,
+                // which the lint refuses by name rather than quietly falling back to the first object.
+                int a = w.beat is int nb
+                    ? (nb >= 1 && nb <= r.beats.Count && Holds(nb - 1) ? nb - 1 : -1)
+                    : Enumerable.Range(0, r.beats.Count).FirstOrDefault(Holds, -1);
                 found.Add((p, w, a));
             }
             return found;
@@ -469,21 +474,25 @@ namespace FrankyCLI
             foreach (var (p, w, a) in whos)
             {
                 string at = PlaceKey[p] + ".who";
-                if (w.kind != "infested")
+                if (!WhoKinds.Contains(w.kind))
                 {
-                    Fatal($"{at}.kind is '{w.kind}'; only \"infested\" is built. Empty is the default (leave who out); workers, spacers and the dead "
-                          + "are designed in office/projects/delves/backlog.md and not built, and a briefing that names them at an empty site is the failure this field exists for.");
+                    Fatal($"{at}.kind is '{w.kind}'; built: {string.Join(", ", WhoKinds.Select(k => "\"" + k + "\""))}. Empty is the default (leave who out); the dead "
+                          + "is designed in office/projects/delves/backlog.md and not built, and a briefing that names them at an empty site is the failure this field exists for.");
                     continue;
                 }
-                if (a < 0) Fatal($"{at} is infested and no pickup, use or deliver is at that place, so there is no object to place the nest around.");
-                else if (r.beats[a].person != null) Fatal($"{at}: the nest forms around beat {a + 1}, an ending whose person already hooks that object's distance; one alias carries one distance hook.");
-                else Console.WriteLine($"  {at}: infested, {w.min}-{w.max} placed around beat {a + 1}'s object when the player is within {ApproachDistance} of it");
+                if (a < 0)
+                    Fatal(w.beat is int nb
+                        ? $"{at}.beat is {nb}, which is not a pickup, use or deliver at this place, so there is no object to gather round."
+                        : $"{at} is {w.kind} and no pickup, use or deliver is at that place, so there is no object to place them around.");
+                else if (r.beats[a].person != null) Fatal($"{at}: they gather round beat {a + 1}, an ending whose person already hooks that object's distance; one alias carries one distance hook.");
+                else Console.WriteLine($"  {at}: {w.kind}, {w.min}-{w.max} placed around beat {a + 1}'s object when the player is within {ApproachDistance} of it");
                 var fl = OwnOrMaster<IFormListGetter>(Allowed(env, t), env, w.list ?? "");
                 if (fl == null) Fatal($"{at}.list '{w.list}' is not a FormList in {t.mod} or one of its masters.");
                 else if (fl.Items.Count == 0) Fatal($"{at}.list '{w.list}' is EMPTY, so nothing would ever be placed.");
-                else Console.WriteLine($"  {at}.list: one species from {fl.EditorID} ({fl.Items.Count} entries)");
+                else Console.WriteLine($"  {at}.list: {(w.kind == "infested" ? "one species" : "a mix")} from {fl.EditorID} ({fl.Items.Count} entries)");
                 if (w.min < 1 || w.max < w.min) Fatal($"{at} needs 1 <= min <= max; it has {w.min}-{w.max}.");
-                else if (w.max > 12) Warn($"{at}.max is {w.max}; more than 12 creatures round one object is a swarm.");
+                else if (w.kind == "workers" && w.max > 8) Warn($"{at}.max is {w.max}; more than 8 workers round one object is a crowd.");
+                else if (w.max > 12) Warn($"{at}.max is {w.max}; more than 12 round one object is a swarm.");
             }
             if (whos.Count > 0)
             {
@@ -581,6 +590,9 @@ namespace FrankyCLI
         /// <summary>How far round its object a nest scatters, in metres. His infestation missions use 40 round a
         /// creature; a stash is a smaller thing to guard, so the nest sits closer.</summary>
         private const float NestRadius = 20f;
+        /// <summary>How far round its object a who: workers crowd stands, in metres: wider than an ending's 8 m
+        /// company (people at work, not a welcoming party), tighter than a nest.</summary>
+        private const float WorkersRadius = 12f;
 
         private static string FragmentFunction(int stage) => $"Fragment_Stage_{stage:D4}_Item_00";
 
@@ -1294,7 +1306,7 @@ namespace FrankyCLI
                     vma.Aliases.Add(entry);
                 }
                 if (entry.Scripts.Any(x => x.Name == sc.Name))
-                { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the nest at {PlaceKey[p]} cannot hook it twice."); return 1; }
+                { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the {w.kind} at {PlaceKey[p]} cannot hook it twice."); return 1; }
                 entry.Scripts.Add(sc);
                 bm.Hooks.Add((own, sc.Name, whoStage[p], -1));
                 Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
@@ -1431,10 +1443,19 @@ namespace FrankyCLI
             }
             foreach (var (p, w, a) in whos)
             {
-                string ta = $"Alias_Beat{a + 1}Target", nl2 = $"Nest{p + 1}";
+                string ta = $"Alias_Beat{a + 1}Target", nl2 = $"Who{p + 1}";
                 props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[a].activatorAlias));
                 props.Add(("FormList", nl2, whoLists[p], -1));
-                Add(whoStage[p], $"duo_delve_lib.PlaceNest({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})");
+                // One placer per kind, all in duo_delve_lib: a nest is one species and attacks, workers are a
+                // friendly mix stood round the object, spacers a hostile mix that holds it.
+                string call = w.kind switch
+                {
+                    "infested" => $"duo_delve_lib.PlaceNest({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})",
+                    "workers"  => $"duo_delve_lib.PlaceCompany({ta}, {nl2}, {w.min}, {w.max}, {WorkersRadius:0.0})",
+                    "spacers"  => $"duo_delve_lib.PlaceCrew({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})",
+                    _ => throw new InvalidOperationException($"who.kind '{w.kind}' passed the lint and has no placer")
+                };
+                Add(whoStage[p], call);
             }
             if (r.approach is Approach af)
             {

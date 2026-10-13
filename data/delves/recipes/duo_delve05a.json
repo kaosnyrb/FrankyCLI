@@ -17,6 +17,8 @@
     "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"work on the other beats and missions so everything is on this system\"). The items block went into the beats it belongs to; every word is unchanged."
   ],
   "place": {
+    "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
+    "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_Construx", "min": 2, "max": 4},
     "theme": {
       "require": [
         "LocTypeOE_NonHostile"

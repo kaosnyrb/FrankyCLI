@@ -25,6 +25,8 @@
       "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
     },
     "second": {
+      "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
+      "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_ArgosMiner", "min": 2, "max": 4},
       "theme": { "require": [], "exclude": ["LocTypeOE_ThemeCaveKeyword"] }
     },
     "_theme": "A quiet worked site for the site hand to be at (he is placed by the talk beat; NonHostile mostly has nobody). The drop is anywhere that is not a cave."

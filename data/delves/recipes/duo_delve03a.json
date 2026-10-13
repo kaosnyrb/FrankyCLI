@@ -16,6 +16,8 @@
     "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"work on the other beats and missions so everything is on this system\"). The items block went into the beats it belongs to; every word is unchanged."
   ],
   "place": {
+    "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
+    "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_UnitedTransport", "min": 2, "max": 4, "beat": 2},
     "theme": {
       "require": [],
       "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
@@ -67,9 +69,9 @@
   ],
   "approach": {
     "to": 2,
-    "civilians": true,
+    "civilians": false,
     "lose": 1,
-    "_approach": "The old driver's two approach behaviours, made explicit: on first coming within 250 m of the delivery point, people appear around it (the delve4 default, civilians true, his ruling 2026-09-24 'the one with the delivery should have people there') and the crate, which is at this same site, is moved out past its near edge so it reads as lost (LoseLoadOnApproach was true because the load is at the main place)."
+    "_approach": "civilians turned OFF 2026-10-13 (his playtest: 'The people should be workers. Currently homesteaders'): place.who workers replaces them. The old driver's two approach behaviours, made explicit: on first coming within 250 m of the delivery point, people appear around it (the delve4 default, civilians true, his ruling 2026-09-24 'the one with the delivery should have people there') and the crate, which is at this same site, is moved out past its near edge so it reads as lost (LoseLoadOnApproach was true because the load is at the main place)."
   },
   "speaker": {
     "name": "Dispatch",

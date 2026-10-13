@@ -299,3 +299,25 @@ Function PlaceNest(ReferenceAlias akCentre, FormList akList, Int aiMin, Int aiMa
         n -= 1
     EndWhile
 EndFunction
+
+; WHO IS THERE: SPACERS (his dial, 2026-10-11; built 2026-10-13, his "crowds driven from the json"). A hostile
+; crew holding the site: a MIX from the gang list (unlike a nest's one species), aiMin to aiMax of them scattered
+; within afRadius of the object, snapped to navmesh. Aggression 2, his gang idiom (as SpawnHolder): a crew holds
+; its ground round the object rather than crossing open country, which is where a wave's 1 was needed.
+; WORKERS need no function of their own: PlaceCompany is the friendly mix, called with a wider radius.
+Function PlaceCrew(ReferenceAlias akCentre, FormList akGang, Int aiMin, Int aiMax, Float afRadius) Global
+    ObjectReference centre = akCentre.GetRef()
+    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
+    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-afRadius, afRadius)
+        pos[1] = Utility.RandomFloat(-afRadius, afRadius)
+        pos[2] = 0
+        Actor member = centre.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, pos, None, True) as Actor
+        member.SetValue(Suspicious, 2.0) ; DetectedActor
+        member.SetValue(Aggression, 2.0) ; VeryAggressive
+        n -= 1
+    EndWhile
+EndFunction

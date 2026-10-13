@@ -261,17 +261,21 @@ namespace FrankyCLI
             public bool? civilians { get; set; }
             /// <summary>
             /// OPTIONAL: who is at THIS place (his dial, 2026-10-11, office/projects/delves/backlog.md "Who's there").
-            /// Absent = empty, the default. Only "infested" is built; any other kind is refused by name, never
-            /// read as empty, because a briefing that names a crew at an empty site is the failure this exists for.
+            /// Absent = empty, the default. infested, workers and spacers are built; any other kind is refused by
+            /// name, never read as empty, because a briefing that names a crew at an empty site is the failure this exists for.
             /// </summary>
             public Who? who { get; set; }
         }
         /// <summary>
-        /// infested: one species drawn from list (a FormList of creature bases, Overtime's
-        /// duo_GangMembersList_PreditorMegalist_* are his), min to max of them around the first object at the
-        /// place, placed when the player comes within 250 m of it.
+        /// Who is at a place, placed round one object there when the player comes within 250 m of it.
+        /// infested: ONE species drawn from list (creature bases; Overtime's duo_GangMembersList_PreditorMegalist_*),
+        /// set to attack. workers: a friendly MIX from list (the duo_GangMembersList_Civ_* lists). spacers: a hostile
+        /// MIX from list (a gang list). "the dead" is designed and refused (delves backlog, who's there).
+        /// beat: OPTIONAL, 1-based, which pickup / use / deliver at this place they gather round; absent = the
+        /// first one (his 2026-10-13: crowds driven from the json).
         /// </summary>
-        private sealed class Who { public string? kind { get; set; } public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
+        private sealed class Who { public string? kind { get; set; } public string? list { get; set; } public int min { get; set; } public int max { get; set; } public int? beat { get; set; } }
+        private static readonly string[] WhoKinds = { "infested", "workers", "spacers" };
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
         private sealed class Beat
