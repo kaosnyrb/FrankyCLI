@@ -11,8 +11,9 @@
     "and both go to a third. Three links, then it ends (his: 'ok for the chain to end, otherwise its a",
     "thradmill'). Built by Eliza 2026-10-08; every player-facing word is Jessica's, written 2026-10-08 on his",
     "\"yeah 2\". The fiction: a soldier's unsent letters, taken home. The natural site is where he left a note,",
-    "the military one is where he served, the peopled end is where his sister lives. Nobody is placed at the",
-    "end (beats has no people block), so no box describes her as present."
+    "the military one is where he served, the peopled end is where his sister lives.",
+    "2026-10-13, his: \"the payoff feels off. Lets change the last to a talk with his sister\". The post locker",
+    "is gone: the last step is a hand-back TALK (as 11a), so the letters reach a person, not furniture."
   ],
   "place": {
     "theme": {
@@ -24,7 +25,7 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "The END of the trail, peopled: somebody to hand the slates to.",
+    "_theme": "The END of the trail, peopled: his sister, placed at the centre.",
     "second": {
       "theme": {
         "require": [
@@ -82,17 +83,37 @@
       "name": "Letter Cache"
     },
     {
-      "type": "deliver",
-      "at": "REContainerLocRef",
-      "replace": true,
-      "objective": "Take the letters to the <Place>",
-      "journal": "I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and left them in the post locker at the <Place> for his sister.",
-      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Post Locker",
-      "message": {
-        "title": "Delivered",
-        "text": "The letters go into the post locker with her name facing up, and the note on top."
-      }
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Take the letters to his sister at the <Place>",
+      "journal": "I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and gave them to his sister at the <Place>.",
+      "person": {
+        "name": "Ilse Corran",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+      },
+      "greeting": "You've come a long way to stand at my door. What is it?",
+      "exchanges": [
+        {
+          "prompt": "These are your brother's letters.",
+          "reply": "That's his writing. He wrote every week and none of it ever came. I thought he'd stopped. He hadn't."
+        },
+        {
+          "prompt": "What happened to him?",
+          "reply": "His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking."
+        },
+        {
+          "prompt": "Why didn't he send them?",
+          "reply": "Knowing him, he meant to bring them himself. He never paid for anything he could carry."
+        },
+        {
+          "prompt": "Will you be all right?",
+          "reply": "I've had years to get used to not hearing from him. I'm not used to this yet."
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-back: ends the talk, takes the letters and the note, sets stage 100. Voiced: no names, no places. ElevenLabs 'Lucy, friendly, relaxed, thoughtful' (american, middle aged), NOT heard in game; his ear decides."
     }
   ]
 }

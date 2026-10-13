@@ -16,7 +16,7 @@
 🎯 Search the cache at the <SecondPlace>
 
 📦 Item: **Private's Field Note**
-🧱 Object: Field Cache · CrateStackableA_01.nif
+🧱 Object: Field Cache · fieldcache01.nif
 
 🪧 **Box: Field Note**
 > The note is folded small and signed with a service number. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home.
@@ -30,7 +30,7 @@
 🎯 Find the private's letters at the <ThirdPlace>
 
 📦 Item: **Private's Unsent Letters**
-🧱 Object: Letter Cache · CrateStackableA_01.nif
+🧱 Object: Letter Cache · lettercache01.nif
 
 🪧 **Box: Unsent Letters**
 > A bundle of slates tied with wire. Every one is addressed to the same person, his sister, at the <Place>. None of them were ever sent.
@@ -39,13 +39,24 @@
 
 ---
 
-## 3. DELIVER · REContainerLocRef
+## 3. TALK · the centre of the site
 
-🎯 Take the letters to the <Place>
+🎯 Take the letters to his sister at the <Place>
 
-🧱 Object: Post Locker · AK_FootLocker01.nif
+🗣️ **Ilse Corran**
 
-🪧 **Box: Delivered**
-> The letters go into the post locker with her name facing up, and the note on top.
+> You've come a long way to stand at my door. What is it?
 
-📓 *Journal:* I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and left them in the post locker at the <Place> for his sister.
+**▸ These are your brother's letters.** *(ends the talk)*
+> That's his writing. He wrote every week and none of it ever came. I thought he'd stopped. He hadn't.
+
+**▸ What happened to him?**
+> His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking.
+
+**▸ Why didn't he send them?**
+> Knowing him, he meant to bring them himself. He never paid for anything he could carry.
+
+**▸ Will you be all right?**
+> I've had years to get used to not hearing from him. I'm not used to this yet.
+
+📓 *Journal:* I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and gave them to his sister at the <Place>.
