@@ -92,11 +92,11 @@
         "voice": "GenericFemale01",
         "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
       },
-      "greeting": "You've come a long way to stand at my door. What is it?",
+      "greeting": "That's his writing on those. I'd know it anywhere. Where did you find them?",
       "exchanges": [
         {
-          "prompt": "These are your brother's letters.",
-          "reply": "That's his writing. He wrote every week and none of it ever came. I thought he'd stopped. He hadn't."
+          "prompt": "Here. They're yours.",
+          "reply": "He wrote every week and none of it ever came. I thought he'd stopped. He hadn't. Thank you."
         },
         {
           "prompt": "What happened to him?",
@@ -108,10 +108,10 @@
         },
         {
           "prompt": "Will you be all right?",
-          "reply": "I've had years to get used to not hearing from him. I'm not used to this yet."
+          "reply": "Ask me once I've read them. I've had years of not hearing from him. I'm not ready for this."
         }
       ],
-      "_talk": "Exchange 0 is the hand-back: ends the talk, takes the letters and the note, sets stage 100. Voiced: no names, no places. ElevenLabs 'Lucy, friendly, relaxed, thoughtful' (american, middle aged), NOT heard in game; his ear decides."
+      "_talk": "The menu lists exchanges 1 to 3 ABOVE the closer (his play, 2026-10-13), so she sees the letters in the greeting and every question works before the hand-over; the hand-over is the last option, where it reads naturally. Exchange 0 ends the talk, takes the letters and the note, sets stage 100. Voiced: no names, no places. ElevenLabs 'Lucy' (american), heard in game 2026-10-13."
     }
   ]
 }

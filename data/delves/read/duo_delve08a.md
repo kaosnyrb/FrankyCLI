@@ -11,7 +11,7 @@
 
 ---
 
-## 1. PICKUP · out at the edge of the site, at the second place
+## 1. PICKUP · REMarkerMediumLocRef, at the second place
 
 🎯 Search the cache at the <SecondPlace>
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 2. PICKUP · out at the edge of the site
+## 2. PICKUP · REMarkerMediumLocRef
 
 🎯 Find the private's letters at the <ThirdPlace>
 
@@ -45,10 +45,10 @@
 
 🗣️ **Ilse Corran**
 
-> You've come a long way to stand at my door. What is it?
+> That's his writing on those. I'd know it anywhere. Where did you find them?
 
-**▸ These are your brother's letters.** *(ends the talk)*
-> That's his writing. He wrote every week and none of it ever came. I thought he'd stopped. He hadn't.
+**▸ Here. They're yours.** *(ends the talk)*
+> He wrote every week and none of it ever came. I thought he'd stopped. He hadn't. Thank you.
 
 **▸ What happened to him?**
 > His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking.
@@ -57,6 +57,6 @@
 > Knowing him, he meant to bring them himself. He never paid for anything he could carry.
 
 **▸ Will you be all right?**
-> I've had years to get used to not hearing from him. I'm not used to this yet.
+> Ask me once I've read them. I've had years of not hearing from him. I'm not ready for this.
 
 📓 *Journal:* I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and gave them to his sister at the <Place>.
