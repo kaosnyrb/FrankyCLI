@@ -6,7 +6,7 @@
 
 **Briefing:** Raiders cleaned out a homesteader's place and took everything to the <Place>. She says they can keep most of it. She wants her bag back.
 
-**Where:** the dungeon pool.
+**Where:** anywhere.
 **Then:** a second place, a quiet, non-hostile site, never caves.
 
 📻 **Homesteader, on the radio:**
