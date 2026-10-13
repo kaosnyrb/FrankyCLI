@@ -1274,8 +1274,8 @@ namespace FrankyCLI
             // markers of the beats that happen there, the map marker, and that place's theme.
             if (!issues.Any(i => i.Fatal))
             {
-                var pool = PoolCensus(env);
-                Console.WriteLine($"  POI corpus: {pool.Count} location(s) in the working pool");
+                var pool = DrawPopulation(env);
+                Console.WriteLine($"  corpus: {pool.Count} location(s) a place can draw (the POI pool plus every location carrying LocDungeonBossLocRef)");
                 var drawn = new Dictionary<int, HashSet<string>>();
                 foreach (int pi in PlacesUsed(r))
                 {
@@ -2186,6 +2186,7 @@ namespace FrankyCLI
             public List<(string name, string? edid, FormKey fk)> Named = new();
             public Dictionary<string, List<(string? edid, string? stands)>> ByModel = new(StringComparer.OrdinalIgnoreCase);
             public List<Poi>? Pool;
+            public List<Poi>? Draw;
         }
         private static LoadIndex? _index;
 
@@ -2236,6 +2237,43 @@ namespace FrankyCLI
                 p.Vanilla = loc.FormKey.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase);
                 p.Edid = loc.EditorID ?? "";
                 if (p.ByKeyword || p.ByCentre) outp.Add(p);
+            }
+            return outp;
+        }
+
+        /// <summary>
+        /// WHAT A PLACE CAN DRAW: the POI pool plus every location carrying LocDungeonBossLocRef. The marker conditions
+        /// do the selecting, so the lint must count every location the game could select, not only the POI pool.
+        /// ⛔ WHY IT IS A UNION, his 2026-10-13: "loads of pois have mapmarkers and boss markers". Part 32 held the
+        /// two populations disjoint off a Starfield.esm census; on Defiant 106 of the 491 POIs carry the boss marker,
+        /// and vanilla's MB_Bounty01Far asks a place for that one marker and nothing else. A first cut of this change
+        /// (a place "kind" switching between two populations) encoded the split and was deleted before it shipped.
+        /// </summary>
+        private static List<Poi> DrawPopulation(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+            => IndexOf(env).Draw ??= DrawPopulationUncached(env);
+
+        private static List<Poi> DrawPopulationUncached(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+        {
+            var boss = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                .FirstOrDefault(x => string.Equals(x.EditorID, "LocDungeonBossLocRef", StringComparison.OrdinalIgnoreCase))?.FormKey;
+            var outp = PoolCensus(env).ToList();
+            var seen = outp.Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (boss == null) return outp;
+            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
+            {
+                if (seen.Contains(loc.EditorID ?? "")) continue;
+                var p = new Poi();
+                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                {
+                    if (g == null) continue;
+                    foreach (var e in g)
+                        if (!e.LocationRefType.IsNull) p.RefTypes.Add(e.LocationRefType.FormKey);
+                }
+                if (!p.RefTypes.Contains(boss.Value)) continue;
+                if (loc.Keywords != null) foreach (var k in loc.Keywords) p.Keywords.Add(k.FormKey);
+                p.Vanilla = loc.FormKey.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase);
+                p.Edid = loc.EditorID ?? "";
+                outp.Add(p);
             }
             return outp;
         }

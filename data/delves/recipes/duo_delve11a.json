@@ -3,29 +3,26 @@
   "id": "duo_delve11a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
-  "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12. ELIZA: a dungeon Delve may want its own node.",
+  "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12. A dungeon only fills within the base's 20 km leash of the player, so on most planets this Delve is simply not a candidate and the slate deals another; whether a dungeon Delve wants its own node is still open (his).",
   "author": "jessica",
   "source": "his 2026-10-12 14:12: \"we also have one where someones personal posations are in a dungon and you recover and talk to the person\"",
   "_note": [
     "THE DUNGEON RETURN, a new type: raiders took a homesteader's things into a dungeon; you take her bag back off",
     "whoever leads them, carry it home and hand it to her in a conversation. His idea, 2026-10-12; words Jessica's.",
-    "TWO PIECES ARE NOT BUILT, both his seeds, and this recipe is the request (his: \"she sees the jsons and is like",
-    "'oh I need to build that'\"):",
-    "1. A DUNGEON main place. bethesda 32: no POI carries LocDungeonBossLocRef and no dungeon carries the OE keyword,",
-    "   so the main place has to be filled from the dungeon pool (71 carry the boss marker), as MB_Bounty01Far does.",
-    "   Written below as place.kind = dungeon, a PROPOSED field. The boss marker is indoors only ~29% of the time, so",
-    "   the holder may stand outside; his 10-10 read is that the boss is usually in a building.",
-    "2. A TALK beat (type 7's verb, docs/specs/npc_dialogue.md): greeting, then a flat menu; exchange 0 ends the",
-    "   conversation and must set stage 100 AND take the recovered item. Prompts <= 60 chars, replies <= 200. Field",
-    "   names below are PROPOSED, mapped to DialogueScript (NpcGreeting, Exchanges[].PlayerPrompt / NpcReply).",
-    "   Optional exchanges 1 to 3 are read in any order; none relies on another.",
-    "The person is placed by the talk beat's own person block at the second place, as a choose ending's is.",
-    "Same voice on the radio and in person: the broadcast is HER, before you have met her.",
-    "Pay: a dungeon with a boss is hard work; suggest hard, Eliza's question whether a single ending can set it."
+    "BUILT 2026-10-13 on his \"11a\" (Eliza), the two pieces this recipe asked for:",
+    "1. A DUNGEON main place: beat 1 sits on LocDungeonBossLocRef, and that marker does the selecting, as vanilla's",
+    "   MB_Bounty01Far asks a place for it and nothing else (his screenshot, 2026-10-13). POIs carry it too (his: \"loads",
+    "   of pois have mapmarkers and boss markers\"), so the lint measures the POI pool plus every boss-marker location.",
+    "   The boss marker is indoors only ~29% of the time, so the holder may stand outside; his play settles which.",
+    "2. The talk is the whole last step, so it is the HAND-BACK: exchange 0's reply sets stage 100, which takes the",
+    "   Homesteader's Bag and completes. Exchanges 1 to 3 loop in any order.",
+    "The base's two object slots are unused here (neither beat has an object), so the build removes them rather than",
+    "leave a marker alias the dungeon cannot fill.",
+    "Pay: reward on the talk, the single ending, replaces stage 100's easy. 'hard' is Jessica's suggestion and a",
+    "placeholder; the tier is his.",
+    "Same voice on the radio and in person: the broadcast is HER, before you have met her."
   ],
   "place": {
-    "kind": "dungeon",
-    "_kind": "PROPOSED. Fill the main place from the dungeon pool (LocTypeDungeon + LocDungeonBossLocRef), not the POI pool.",
     "theme": {
       "require": [],
       "exclude": []
@@ -86,7 +83,8 @@
           "reply": "Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."
         }
       ],
-      "_talk": "PROPOSED fields. Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100. Voiced lines: no names, no places (radio rules). person.voice / person.elevenlabs PROPOSED, as 14a: the same voice as the radio speaker."
+      "_talk": "Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100, which pays 'reward'. Voiced lines: no names, no places (radio rules). The same voice as the radio speaker.",
+      "reward": "hard"
     }
   ],
   "speaker": {

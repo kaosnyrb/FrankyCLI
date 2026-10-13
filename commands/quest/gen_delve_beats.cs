@@ -168,6 +168,31 @@ namespace FrankyCLI
             return beatStage;
         }
 
+        /// <summary>
+        /// Who still points at a marker+activator pair from OUTSIDE it: a ref alias filling in it or created at it, an
+        /// objective target, an alias script. The pair's own activator, created at its own marker, is not a user. One
+        /// function for the build's refusal and the off-disk check, so they cannot disagree about what "unused" means.
+        /// </summary>
+        private static List<string> SlotUsers(IEnumerable<IQuestReferenceAliasGetter> refs, IEnumerable<IQuestObjectiveGetter> objectives,
+                                              IEnumerable<int> scriptedAliases, int[] pair)
+            => refs.Where(a => !pair.Contains((int)a.ID)
+                               && ((a.Location?.AliasID is int li && pair.Contains(li))
+                                   || (a.CreateReferenceToObject?.AliasID is short ci && pair.Contains(ci))))
+                   .Select(a => $"ref alias {a.ID}")
+                .Concat(objectives.Where(o => o.Targets?.Any(x => x.AliasID is int id && pair.Contains(id)) == true).Select(o => $"objective {o.Index}"))
+                .Concat(scriptedAliases.Where(pair.Contains).Select(a => $"alias {a}'s scripts"))
+                .ToList();
+
+        /// <summary>
+        /// The talk beat that ENDS the Delve, or -1: a talk that is the whole last step. Its closing reply sets the
+        /// completing stage, and that stage takes everything the player still carries, as a deliver's does (11a,
+        /// 2026-10-13: the bag goes back to its owner in the conversation). A talk anywhere earlier takes nothing.
+        /// Pure, so the lint and the build agree by construction.
+        /// </summary>
+        private static int HandBackTalk(Recipe r, List<Step> steps)
+            => steps.Count > 0 && !steps[^1].IsGroup && !steps[^1].IsChoose && r.beats[steps[^1].Beats[0]].type == "talk"
+               ? steps[^1].Beats[0] : -1;
+
         // The talk beat's limits, docs/specs/npc_dialogue.md: a prompt is a menu line, a reply a spoken one.
         private const int TalkPromptMax = 60, TalkReplyMax = 200;
 
@@ -180,8 +205,8 @@ namespace FrankyCLI
         {
             string at = $"beat {i + 1} (talk)";
             if (b.model != null || b.name != null || b.replace || b.message != null || b.say != null || b.returnTo != null
-                || b.group != null || b.choose != null || b.reward != null)
-                Fatal($"{at} sets model, name, replace, message, say, returnTo, group, choose or reward; a talk beat has none of them "
+                || b.group != null || b.choose != null)
+                Fatal($"{at} sets model, name, replace, message, say, returnTo, group or choose; a talk beat has none of them "
                       + "(the person is its object and his voice its line), so they would be silently ignored.");
             if (b.person is not Person p) { Fatal($"{at} has no person: nobody to talk to."); }
             else
@@ -399,8 +424,24 @@ namespace FrankyCLI
                 }
             }
             for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].choose == null && (r.beats[i].reward != null || (r.beats[i].person != null && r.beats[i].type != "talk")))
-                    Fatal($"beat {i + 1} sets reward or person and is not a choose ending, so it would be silently ignored.");
+                if (r.beats[i].choose == null && r.beats[i].person != null && r.beats[i].type != "talk")
+                    Fatal($"beat {i + 1} sets person and is not a choose ending or a talk, so it would be silently ignored.");
+            // A reward tier is read on an ENDING: every choose ending, or the beat that is the whole last step (it sets
+            // the completing stage, whose pay this replaces). Anywhere else the stage it would pay on completes nothing.
+            int soleLast = steps.Count > 0 && !steps[^1].IsChoose && !steps[^1].IsGroup ? steps[^1].Beats[0] : -1;
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                if (r.beats[i].reward is not string tier || r.beats[i].choose != null) continue;
+                if (i != soleLast)
+                {
+                    Fatal($"beat {i + 1} sets reward and is not an ending (a choose ending, or the single beat that ends the Delve), so it would be silently ignored.");
+                    continue;
+                }
+                foreach (var kind in new[] { "creds", "xp" })
+                    if (!env.LoadOrder.PriorityOrder.WinningOverrides<IGlobalGetter>()
+                            .Any(x => string.Equals(x.EditorID, $"duo_reward_{kind}_{tier}", StringComparison.OrdinalIgnoreCase)))
+                        Fatal($"beat {i + 1} reward '{tier}': no global duo_reward_{kind}_{tier} in the load order.");
+            }
             if (r.offer != null)
             {
                 if (chooseSteps.Count == 0) Fatal("offer is set and no step is a choose; the offer is the beat that makes it a choice.");
@@ -458,9 +499,11 @@ namespace FrankyCLI
             // Delivering needs something in hand: the first deliver must come after a pickup or a recover.
             int carried = 0;
             bool endsOnChoice = false;
+            int handBack = HandBackTalk(r, steps);
             for (int i = 0; i < r.beats.Count; i++)
             {
-                if (r.beats[i].type == "pickup" || r.beats[i].type == "recover") carried++;
+                if (i == handBack) carried = 0;   // the talk that ends the Delve takes what is carried
+                else if (r.beats[i].type == "pickup" || r.beats[i].type == "recover") carried++;
                 else if (r.beats[i].type == "deliver")
                 {
                     if (carried == 0) Fatal($"beat {i + 1} is a deliver with nothing picked up or recovered before it, so there is nothing to hand over.");
@@ -557,6 +600,8 @@ namespace FrankyCLI
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
             public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
+            public List<(int marker, int activator)> DroppedSlots = new();   // the base's object slots no beat took, removed
+            public (int stage, List<string> lines)? HandBack;   // the talk that ends the Delve: its stage and the RemoveItem lines it must run
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
             public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
             public string WavePackageShape = "";   // its source's begin/end/change topic counts, which the copy must keep
@@ -756,8 +801,11 @@ namespace FrankyCLI
                     slotOf[i] = new BeatSlot { markerAlias = o.markerAlias, activatorAlias = o.activatorAlias, journalStage = beatStage[i] };
                     Console.WriteLine($"  slot     : beat {i + 1} returns to beat {back}'s object (alias {o.activatorAlias})");
                 }
-            if (baseNext < t.beatSlots.Count)
-            { Console.WriteLine($"REFUSED: the recipe gives the base's {t.beatSlots.Count} object slots only {baseNext} beat(s) with an object of its own."); return 1; }
+            // The base's object slots no beat took (11a, 2026-10-13: a recover and a talk, neither with an object of its
+            // own). Each is removed after the objectives are rebuilt, below, as the one-place Delve's second place is: a
+            // non-Optional marker alias left in still demands its marker at the place, which a dungeon does not carry, so
+            // the whole quest would silently never start.
+            var unusedSlots = t.beatSlots.Skip(baseNext).ToList();
             // A hold's objective points at what is being defended, when it names one (a return shares its
             // original's object, so this runs after the returns are filled).
             for (int i = 0; i < r.beats.Count; i++)
@@ -843,20 +891,24 @@ namespace FrankyCLI
             // The endings' pay, ON THE STAGE: QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas,
             // BonusCredits (QRCR) and XpAwarded (QRXP), pointed at the tier's two globals. Written for every
             // ending, the first one too, rather than trusting what the copy inherited.
-            foreach (var cs in steps.Where(s => s.IsChoose))
-                foreach (var b in cs.Beats)
-                {
-                    var st = clone.Stages.First(x => x.Index == beatStage[b]);
-                    var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
-                    if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
-                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
-                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{r.beats[b].reward}");
-                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward} / duo_reward_xp_{r.beats[b].reward}."); return 1; }
-                    rds[0].BonusCredits.SetTo(cg.FormKey);
-                    rds[0].XpAwarded.SetTo(xg.FormKey);
-                    bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
-                    Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
-                }
+            // A single-beat last step with a tier is an ending too: it sets the completing stage, so its tier
+            // replaces the base's own pay there (the lint holds reward to these two places).
+            var paid = steps.Where(s => s.IsChoose).SelectMany(s => s.Beats)
+                .Concat(steps[^1].IsChoose || steps[^1].IsGroup || r.beats[steps[^1].Beats[0]].reward == null
+                        ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] });
+            foreach (var b in paid)
+            {
+                var st = clone.Stages.First(x => x.Index == beatStage[b]);
+                var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
+                var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
+                var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{r.beats[b].reward}");
+                if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward} / duo_reward_xp_{r.beats[b].reward}."); return 1; }
+                rds[0].BonusCredits.SetTo(cg.FormKey);
+                rds[0].XpAwarded.SetTo(xg.FormKey);
+                bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
+                Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
+            }
             // The offer: the line the player reads at the find, on the stage that enters the choice.
             if (r.offer?.journal != null)
             {
@@ -1018,6 +1070,17 @@ namespace FrankyCLI
                 clone.Aliases!.Remove(second);
                 bm.DroppedPlace = (t.secondPlaceAlias, second.Name!);
                 Console.WriteLine($"  -place   : {second.Name} (alias {t.secondPlaceAlias}) removed: every beat is at the main place, so it would draw a second POI for nothing");
+            }
+            foreach (var us in unusedSlots)
+            {
+                var pair = new[] { us.markerAlias, us.activatorAlias };
+                var gone = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => pair.Contains((int)a.ID)).ToList();
+                if (gone.Count != 2) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
+                var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
+                if (users.Count > 0) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is still named by {string.Join(", ", users)}."); return 1; }
+                foreach (var a in gone) clone.Aliases!.Remove(a);
+                bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
+                Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
             }
 
 
@@ -1490,6 +1553,7 @@ namespace FrankyCLI
                 Add(st, "Stop()");
             }
             var held = new List<int>();   // pickups and recovered items not yet delivered
+            int handBack = HandBackTalk(r, steps);
             for (int k = 0; k < steps.Count; k++)
             {
                 var s = steps[k];
@@ -1499,13 +1563,14 @@ namespace FrankyCLI
                     int st = beatStage[b];
                     if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
                     if (r.beats[b].type == "pickup" || r.beats[b].type == "recover") held.Add(b);
-                    if (r.beats[b].type == "deliver")
+                    if (r.beats[b].type == "deliver" || b == handBack)
                     {
                         foreach (var h in held)
                         {
                             props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
                             Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
                         }
+                        if (b == handBack) bm.HandBack = (st, held.Select(h => $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)").ToList());
                         if (!s.IsChoose) held.Clear();   // every ending takes the same things
                     }
                     if (s.IsChoose)
@@ -1958,6 +2023,26 @@ namespace FrankyCLI
                               $"alias {(aliasGone ? "gone" : "PRESENT")}, named by {(named.Count == 0 ? "nothing" : string.Join(", ", named))}",
                               "alias gone, named by nothing");
             }
+            string fsrc = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
+            if (bm.HandBack is (int hst, List<string> hlines))
+            {
+                // The completing stage's own function, cut out of the generated source, must take every carried item.
+                string fn = $"Function {FragmentFunction(hst)}()";
+                int at = fsrc.IndexOf(fn, StringComparison.Ordinal);
+                string body = at < 0 ? "" : fsrc[at..(fsrc.IndexOf("EndFunction", at, StringComparison.Ordinal) is int e && e > at ? e : fsrc.Length)];
+                fail += Check($"the talk that ends the Delve takes what is carried, on stage {hst}",
+                              at < 0 ? "no fragment" : $"{hlines.Count(body.Contains)} of {hlines.Count} item(s) taken",
+                              $"{hlines.Count} of {hlines.Count} item(s) taken");
+            }
+            foreach (var (sm, sa) in bm.DroppedSlots)
+            {
+                var pair = new[] { sm, sa };
+                bool aliasGone = !q.Aliases.OfType<IQuestReferenceAliasGetter>().Any(a => pair.Contains((int)a.ID));
+                var users = SlotUsers(q.Aliases.OfType<IQuestReferenceAliasGetter>(), q.Objectives, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
+                fail += Check($"the unused base slot {sm}/{sa} is gone and nothing names it",
+                              $"aliases {(aliasGone ? "gone" : "PRESENT")}, named by {(users.Count == 0 ? "nothing" : string.Join(", ", users))}",
+                              "aliases gone, named by nothing");
+            }
             foreach (var (lst, wem, text, sceneKey) in bm.Lines)
             {
                 var sc = q.Scenes.FirstOrDefault(s => s.FormKey == sceneKey);
@@ -2001,7 +2086,6 @@ namespace FrankyCLI
                                .SelectMany(d => d.Responses).Count(x => x.SetParentQuestStage != null);
                 fail += Check($"{who}: no other line sets a stage", setters.ToString(), "1");
             }
-            string fsrc = File.Exists(bm.PscPath) ? File.ReadAllText(bm.PscPath) : "";
             foreach (var ds in bm.StuckWaits)
                 fail += Check($"wave stage {ds}: the stuck guard waits in its spawning fragment and sets it",
                               (fsrc.Contains($"If !GetStageDone({ds})") && fsrc.Contains($"SetStage({ds})")).ToString(), "True");

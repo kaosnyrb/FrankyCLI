@@ -150,7 +150,8 @@ new missions read as one board. A new Delve type gets its word on the day it is 
 | fix up (07) | `Repairs` | Repairs: Water Reclaimers on `<Planet>` |
 | the trail (08) | `Search` | Search: Soldier's Letters on `<Planet>` |
 | hold the point (09) | `Defense` | Defense: Relay Alignment on `<Planet>` (US spelling, as the game's UI) |
-| talk (type 7, not yet built) | `Inquiry` | Inquiry: Survey Crate on `<Planet>` |
+| talk (type 7, 14a) | `Inquiry` | Inquiry: Survey Crate on `<Planet>` |
+| the dungeon return (11a) | `Recovery` | Recovery: Stolen Belongings on `<Planet>` |
 | here, then another planet (type 8, not yet built; now 10a) | `Supply Run` | Supply Run: Dig Site on `<SecondPlanet>` |
 | survey (01) | `Survey` | Survey: Seismic Sensors on `<Planet>` |
 | retrieve under fire (02) | `Extraction` | Extraction: Core Samples on `<Planet>` |
@@ -172,6 +173,8 @@ new missions read as one board. A new Delve type gets its word on the day it is 
 | `third` | choice only: the third POI's own theme (a beat with `"place": "third"`) |
 | `leash` | **advisory, not written.** The base's own distance limit is kept as is |
 | `civilians` | **retired with delve4, and refused.** On a beats Delve write `approach.civilians` |
+
+**Where a place can be** (2026-10-13): the lint measures each place's pool across the POI pool PLUS every location carrying `LocDungeonBossLocRef`, because the marker conditions do the selecting and POIs carry the boss marker too (his, correcting bethesda part 32: "loads of pois have mapmarkers and boss markers"). A beat on `LocDungeonBossLocRef` (`duo_delve11a`) draws from both; vanilla's `MB_Bounty01Far` asks a place for that one marker and nothing else. ⚠ The boss marker is indoors only about 29% of the time.
 
 **Useful keywords**, from the census (`gen_delve keywords [filter…]` tallies themes inside a narrowed
 pool): `LocTypeOE_NonHostile` (nobody hostile, 62 POIs with a centre and map marker; ⚠ NOT people: his, 2026-10-11, *"LocTypeOE_NonHostile mostly dont spawn NPCs, only if there is a quest present at it"*, so a Delve that needs people places them) ·
@@ -317,13 +320,14 @@ the half that is Papyrus-only: objectives, the counter, taking delivered items, 
 | `use` | activates it; the prompt goes | `DefaultAliasOnActivate` | objective done, next shown |
 | `pickup` | activates it; gets `item`, the object vanishes | `DefaultAliasOnActivateGiveItem` | objective done, next shown |
 | `deliver` | activates it after the earlier steps | `DefaultAliasOnActivate` | takes every item picked up or recovered since the last deliver |
+| `talk` | talks to a `person` created at `at` on quest start: a `greeting`, then `exchanges` (`{ "prompt", "reply" }`, prompt 60 characters, reply 200, words only). `exchanges[0]` closes the talk; the rest loop back to the menu in any order | none: the closing reply's own `SetParentQuestStage` (on END) sets the beat's stage | objective done, next shown. **A talk that is the whole LAST step is a HAND-BACK** (since 2026-10-13, 11a): its stage is 100 and takes every item still carried, as a deliver does. The person's lines are voiced (`person.voice`, `person.elevenlabs`) with lipsync built in (bethesda 39) |
 | `recover` | takes `item` off whoever has it (loot, pick up, be handed it: all count) | `DefaultAliasOnItemAddedScript` on the PLAYER (A-D duplicates for a second to fifth) | on ENTERING the step: the holder and a gang (0 to the base driver's max, from its own list) spawn at `at`, the holder into an empty alias the objective follows |
 | `hold` | fights off `waves` waves at `at`, each arriving when the last is down | `DefaultCollectionAliasOnDeath` on each wave's own empty collection alias (a copy of vanilla's UC08 `ActiveHostiles`), `TurnOffStageDone` its own stage | on ENTERING the step and on each wave's stage: the next wave (`size` [min, max], from the base driver's gang list) spawns 30 to 100 m from the player on any bearing outside the 45-degree cone he faces (else at `at` when he is more than 150 m from it); a `horde` wave is split between his left and his right (see `style`) INTO its collection, which wears a Travel-to-player package, the counter ticks, and the spawning fragment waits out the reveal and the stuck guard (`duo_delve_lib.SpawnWave`, `Utility.Wait`) |
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
 `model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),
-`group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`, and on a hold `waves`,
+`group`, `replace`, `returnTo`, and on an ending `choose`, `reward`, `person`, on a talk `person`, `greeting`, `exchanges`, and on a hold `waves`,
 `size`, `defend`, `stuck`, `style`, `reveal`, `revealObjective`.
 `returnTo: N` makes this beat an EARLIER beat's object visited again (03 to 05 come back to the centre to
 finish). The target must be a `use` beat, returned to once (the stock hook has one duplicate,
@@ -397,6 +401,16 @@ lifted from the retired driver; **`duo_delve_lib.pex` must be packed with the mo
 
 **Stages are numbered by the build:** 0 runs on start, then 10, 20, … per beat (a group takes one more),
 and the last step always lands on 100, the base's completing stage, which carries the reward.
+**`reward` on a single ending** (since 2026-10-13): the beat that is the whole last step (not a group, not a
+choose) may carry a tier, which replaces the base's own pay on stage 100 and is read back off disk. Anywhere
+else `reward` is refused, because the stage it would pay on completes nothing. Absent, stage 100 pays the base's
+(`easy`).
+
+**The base's object slots no beat takes are REMOVED** (since 2026-10-13): beats with an object of their own
+(use, pickup, deliver) take the base's two marker+activator slots first. A recipe with fewer (11a: a recover and a
+talk) leaves slots whose marker alias would still demand its marker at the place, which a dungeon does not carry,
+so the quest would silently never start. The build removes each such pair after the objectives are rebuilt,
+refuses if anything still names it, and the verification reads back that it is gone and named by nothing.
 `setstage <id> <stage>` jumps straight to a beat.
 
 ⛔ **Deliver is gated by STAGE ORDER, not by the stock `DefaultAliasOnActivateRemoveItems`:** that script
@@ -433,7 +447,6 @@ release.
 
 ## Not yet
 
-- **An entry item.** No Delve has one; they start from the console. Jessica's design starts them from a
-  dataslate (an enemy's drop, or his buildable mission terminal).
+- ~~**An entry item.**~~ Every Delve is dealt from a dataslate pool by its `deal` (2026-10-12); `startquest` still works for a test.
 - **A third place outside the choice template**, and a choice with more than two endings.
-- **Dialogue.** The people stand and are present; they do not talk.
+- ~~**Dialogue.**~~ The `talk` beat (2026-10-12). Choose endings' people still stand and do not talk.
