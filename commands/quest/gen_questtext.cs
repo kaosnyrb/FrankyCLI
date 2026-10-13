@@ -38,9 +38,11 @@ namespace FrankyCLI
 
         public static int Run(string[] args)
         {
+            if (args.Length >= 4 && args[1] == "list") return List(args[2], args[3]);
             if (args.Length < 3 || args[1] != "apply")
             {
                 Console.WriteLine("Usage: gen_questtext apply <patch.md | manifest.json> [--dry]");
+                Console.WriteLine("       gen_questtext list <plugin.esm> <out.json>");
                 return 1;
             }
             bool dry = args.Contains("--dry");
@@ -130,6 +132,63 @@ namespace FrankyCLI
             foreach (var kv in want.Where(kv => !after.TryGetValue(kv.Key, out var n) || n != kv.Value).Take(10))
                 Console.WriteLine($"    {kv.Key}: got '{(after.TryGetValue(kv.Key, out var g) ? g : "missing")}'");
             return right == want.Count && strayed.Count == 0 && mastersAfter == mastersBefore ? 0 : 1;
+        }
+
+        /// <summary>
+        /// READ-ONLY: every quest a plugin owns, with what the player reads (title, board description, the stage-0
+        /// journal line, objectives) and HOW IT REACHES THEM: each Story Manager quest node that deals it, with that
+        /// node's branch chain up to the root, read at the winning override of every node in the load order. So
+        /// "board", "local slate" or "remote slate" is read off the wiring, never inferred from an EditorID.
+        /// The "current text" read the August text patches did by hand (overtime/text/2026-08-04-*-current-text.md).
+        /// </summary>
+        private static int List(string plugin, string outPath)
+        {
+            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            var mod = env.LoadOrder.PriorityOrder.Select(l => l.Mod).FirstOrDefault(m => m != null
+                          && m.ModKey.FileName.String.Equals(plugin, StringComparison.OrdinalIgnoreCase));
+            if (mod == null) { Console.WriteLine("REFUSED: " + plugin + " is not in the load order."); return 1; }
+
+            // Winning override per node: PriorityOrder runs highest first, so the first seen wins.
+            var nodes = new Dictionary<FormKey, IStarfieldMajorRecordGetter>();
+            foreach (var m in env.LoadOrder.PriorityOrder.Select(l => l.Mod).Where(m => m != null))
+            {
+                foreach (var n in m!.StoryManagerBranchNodes) nodes.TryAdd(n.FormKey, n);
+                foreach (var n in m.StoryManagerQuestNodes) nodes.TryAdd(n.FormKey, n);
+            }
+            FormKey Parent(IStarfieldMajorRecordGetter n)
+                => n.GetType().GetProperty("Parent")?.GetValue(n) is IFormLinkGetter l && !l.IsNull ? l.FormKey : FormKey.Null;
+            List<string> Chain(IStarfieldMajorRecordGetter n)
+            {
+                var c = new List<string>();
+                var cur = Parent(n);
+                while (!cur.IsNull && nodes.TryGetValue(cur, out var p) && c.Count < 20) { c.Add(p.EditorID ?? p.FormKey.ToString()); cur = Parent(p); }
+                return c;
+            }
+            var dealtBy = new Dictionary<FormKey, List<object>>();
+            foreach (var qn in nodes.Values.OfType<IStoryManagerQuestNodeGetter>())
+                foreach (var e in qn.Quests)
+                {
+                    if (!dealtBy.TryGetValue(e.Quest.FormKey, out var l)) dealtBy[e.Quest.FormKey] = l = new();
+                    l.Add(new { node = qn.EditorID, nodeMod = qn.FormKey.ModKey.FileName.String, chain = Chain(qn) });
+                }
+
+            var rows = mod.Quests.Where(q => q.FormKey.ModKey == mod.ModKey && q.EditorID != null)
+                .OrderBy(q => q.EditorID, StringComparer.OrdinalIgnoreCase)
+                .Select(q => new
+                {
+                    edid = q.EditorID,
+                    formKey = q.FormKey.ToString(),
+                    name = q.Name?.String ?? "",
+                    board = q.MissionBoardDescription?.String ?? "",
+                    briefing = q.Stages.FirstOrDefault(s => s.Index == 0)?.LogEntries.FirstOrDefault()?.Entry?.String ?? "",
+                    objectives = q.Objectives.OrderBy(o => o.Index).Select(o => new { index = (int)o.Index, text = o.DisplayText?.String ?? "" }).ToList(),
+                    stages = q.Stages.Count,
+                    dealtBy = dealtBy.TryGetValue(q.FormKey, out var d) ? d : new List<object>(),
+                }).ToList();
+            File.WriteAllText(outPath, JsonSerializer.Serialize(new { plugin, quests = rows },
+                new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
+            Console.WriteLine($"  {rows.Count} quest(s) from {plugin}; {rows.Count(r => r.dealtBy.Count > 0)} dealt by a Story Manager node, {rows.Count(r => r.dealtBy.Count == 0)} by none -> {outPath}");
+            return 0;
         }
     }
 }
