@@ -70,7 +70,7 @@
     },
     {
       "type": "pickup",
-      "at": "REMarkerMediumLocRef",
+      "at": "LocDungeonBossLocRef",
       "place": "third",
       "objective": "Find the private's letters at the <ThirdPlace>",
       "item": "Private's Unsent Letters",
