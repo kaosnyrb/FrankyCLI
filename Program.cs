@@ -172,6 +172,11 @@ switch (mode)
         // template rows. One recipe per mission, no code per mission.
         return gen_delve.Run(args);
 
+    case "gen_questtext":
+        // gen_questtext apply <patch.md | manifest.json> [--dry]  -- an author's quest-text patch (FULL names)
+        // applied to the plugin it names, refused whole on any unknown field or edid, read back off disk.
+        return gen_questtext.Run(args);
+
     case "gen_questcompletetest":
         // gen_questcompletetest [modname]  -- Gate C: can a quest be ENDED from data?
         // Reflects the stage/log-entry type surface, hunts vanilla for a shipped example,
