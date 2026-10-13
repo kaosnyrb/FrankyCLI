@@ -643,7 +643,7 @@ namespace FrankyCLI
         /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
         /// constructed one. Refuses if an anchor is missing or is listed after the place it anchors (fill order).
         /// </summary>
-        private static int LeashPlaces(Quest clone, BeatsMade bm)
+        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach)
         {
             var all = clone.Aliases.ToList();
             // A collection alias has no id of its own; its members carry theirs at its list position (manual 12).
@@ -661,7 +661,8 @@ namespace FrankyCLI
             var second = loc.GetValueOrDefault(10u);
             var longDrive = second != null ? Leash(second) : null;
             if (longDrive == null) { Console.WriteLine("REFUSED: the second place carries no single GetDistance leash to copy duo_longdrivedistance from."); return 1; }
-            var driveGlobal = longDrive.ComparisonValue.FormKey;
+            // place.reach overrides the base's duo_longdrivedistance (his 08a, 2026-10-13).
+            var driveGlobal = reach ?? longDrive.ComparisonValue.FormKey;
 
             int Anchor(QuestLocationAlias place, ConditionGlobal c, QuestReferenceAlias to, string why)
             {
@@ -672,7 +673,7 @@ namespace FrankyCLI
                 d.FirstParameter.Index = to.ID;
                 c.ComparisonValue.SetTo(driveGlobal);
                 bm.Leashes.Add(((int)place.ID, (int)to.ID, driveGlobal));
-                Console.WriteLine($"  +leash   : {place.Name} (alias {place.ID}) within duo_longdrivedistance of alias {to.ID} {to.Name} ({why})");
+                Console.WriteLine($"  +leash   : {place.Name} (alias {place.ID}) within {(reach == null ? "duo_longdrivedistance" : "place.reach " + driveGlobal)} of alias {to.ID} {to.Name} ({why})");
                 return 0;
             }
 

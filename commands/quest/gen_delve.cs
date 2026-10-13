@@ -256,6 +256,12 @@ namespace FrankyCLI
         {
             public Theme theme { get; set; } = new();
             public string? leash { get; set; }
+            /// <summary>
+            /// OPTIONAL, written: the Global every OTHER place is held within, of the main place and of each other
+            /// (LeashPlaces). Absent = duo_longdrivedistance (7,500). His 2026-10-13, 08a: "tighten this one quest
+            /// down to duo_shortdrivedistance". The main place's own limit (from the player) is not this field.
+            /// </summary>
+            public string? reach { get; set; }
             /// <summary>The second POI's own theme, for beats with place "second". Absent = no theme.</summary>
             public Place? second { get; set; }
             /// <summary>choice: the third POI's own theme, for beats with place "third". Absent = no theme.</summary>
@@ -1438,6 +1444,16 @@ namespace FrankyCLI
                           + "verbatim and this value is not written. Constructing a GetDistance condition is unproven.");
             }
 
+            // --- reach: how close the other places are held (written, unlike leash) -------------------
+            if (r.place.reach != null)
+            {
+                var g = OwnOrMaster<IGlobalGetter>(Allowed(env, t), env, r.place.reach);
+                if (g == null) Fatal($"place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters.");
+                else if (r.place.second == null && r.place.third == null)
+                    Fatal($"place.reach is set but the recipe has no second or third place, so there is nothing to hold near the main one.");
+                else Console.WriteLine($"  place.reach: every other place within {g.EditorID} of the main place and of each other");
+            }
+
             // --- report ------------------------------------------------------------------
             Console.WriteLine();
             foreach (var i in issues) Console.WriteLine((i.Fatal ? "  [FATAL] " : "  [warn ] ") + i.Text);
@@ -2493,7 +2509,14 @@ namespace FrankyCLI
                     whoLists[p] = f.FormKey;
                 }
                 if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists);
-                if (fail == 0) fail += LeashPlaces(clone, madeBeats);
+                FormKey? reach = null;
+                if (r.place.reach != null)
+                {
+                    var rg = OwnOrMaster<IGlobalGetter>(myMod, env, r.place.reach);
+                    if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
+                    else reach = rg.FormKey;
+                }
+                if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach);
             }
             else if (t.kind == "choice")
             {
