@@ -38,6 +38,9 @@ namespace FrankyCLI
     ///   R4 joint pool  -- the place must ALSO carry every ref type its non-optional in-location ref
     ///                     aliases ask for, at the SAME location. Each pool non-empty alone proves
     ///                     nothing about the intersection.
+    ///   R5 leash anchor -- a place's GetDistance that takes an ALIAS parameter must name an alias that
+    ///                     exists, is listed above the place, and is not filled inside that same place.
+    ///                     UNKNOWN when it fails (such quests start; their distance is not the promised one).
     ///
     /// ⚠ STATED LIMIT: whether conditions evaluate up the location hierarchy (ParentLocation) is NOT
     /// established (manual part 32). Pools here count a location's OWN references and keywords, so a
@@ -178,6 +181,24 @@ namespace FrankyCLI
                     else info.Add($"R1 ok   {line}");
                 }
             }
+
+            // --- R5: leash anchors. A GetDistance whose parameter is an ALIAS NUMBER (UseAliases) measures from
+            // that alias, and the alias must exist, be listed above the place, and not be filled INSIDE the place it
+            // leashes (2026-10-13: six built Delves measured their second place from its own marker, and 11a from a
+            // removed alias; all of them started and played, so this is UNKNOWN, never CANNOT: the distance the
+            // record promises is not the one the engine can read).
+            foreach (var la in aliases.OfType<IQuestLocationAliasGetter>())
+                foreach (var c in la.Conditions ?? new List<IConditionGetter>())
+                {
+                    if (c.Data is not IGetDistanceConditionDataGetter d || !d.UseAliases || !IsSubject(d)) continue;
+                    if (d.FirstParameter.Index is not uint anchor) { unknown.Add($"R5 place {Label(la.ID)}'s GetDistance takes an alias parameter and carries no alias number"); continue; }
+                    string line = $"R5 place {Label(la.ID)}'s GetDistance measures from alias {anchor}";
+                    if (!byId.TryGetValue(anchor, out var an)) unknown.Add($"{line}, which does not exist");
+                    else if (pos[anchor] > pos[la.ID]) unknown.Add($"{line} = {AliasName(an)}, listed BELOW the place, so it is unfilled when the leash is read");
+                    else if (an is IQuestReferenceAliasGetter ar && ar.Location != null && (uint)ar.Location.AliasID == la.ID)
+                        unknown.Add($"{line} = {AliasName(an)}, which fills INSIDE that same place, so the leash measures from itself");
+                    else info.Add($"{line} = {AliasName(an)}");
+                }
 
             // --- R3 + R4: each location alias's static pool, then the joint pool ----------------------
             foreach (var la in aliases.OfType<IQuestLocationAliasGetter>())

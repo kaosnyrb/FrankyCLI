@@ -623,9 +623,73 @@ namespace FrankyCLI
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public List<(uint wem, string text, string voice, string elevenlabs, bool female)> TalkLines = new();   // a talk person's voiced lines (female picks the face actor)
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
+            public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
             public (int stage, string text)? OfferJournal;   // "replace" beats: the marker alias stage 0 disables  // a group member's target, lit until its stage
+        }
+
+        /// <summary>
+        /// EVERY PLACE WITHIN duo_longdrivedistance OF THE OTHERS (his, 2026-10-13: "make all points within 7500").
+        /// The base's leashes are GetDistance conditions whose parameter is an ALIAS NUMBER (UseAliases): the main
+        /// place measures from alias 32, the player, under duo_samemapdistance (20,000; left alone, it is the slate to
+        /// the first site); the second place measured from alias 1, a marker that the BASE fills inside the main place.
+        /// A beat at the second place takes slot alias 1 INTO the second place, so its leash measured from its own
+        /// unfilled marker, and a one-object Delve removes alias 1 outright, leaving the leash pointing at nothing:
+        /// measured on six built Delves that afternoon, and the likely cause of "the delves spawn really far apart".
+        /// So, after every alias is final: the second place is leashed to the MAIN place's map marker (the alias
+        /// filling inside place 0 on MapMarkerRefType, which every Delve demands); the third place to that marker AND
+        /// to a marker filling inside the second place, so all three are within one drive of each other pairwise.
+        /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
+        /// constructed one. Refuses if an anchor is missing or is listed after the place it anchors (fill order).
+        /// </summary>
+        private static int LeashPlaces(Quest clone, BeatsMade bm)
+        {
+            var all = clone.Aliases.ToList();
+            // A collection alias has no id of its own; its members carry theirs at its list position (manual 12).
+            static uint? IdOf(AQuestAlias a) => a switch { QuestReferenceAlias x => x.ID, QuestLocationAlias x => x.ID, _ => null };
+            int Pos(uint id) => all.FindIndex(a => IdOf(a) == id);
+            var loc = all.OfType<QuestLocationAlias>().ToDictionary(a => a.ID);
+            if (!loc.ContainsKey(10) && !loc.ContainsKey(33)) return 0;
+            var refs = all.OfType<QuestReferenceAlias>().ToList();
+            QuestReferenceAlias? Inside(uint place, bool mapMarker) => refs.FirstOrDefault(a => a.Location != null && a.Location.AliasID == (int)place
+                && (!mapMarker || a.Location.RefType.FormKey.ToString().StartsWith("02271F:")));   // MapMarkerRefType [02271F:Starfield.esm]
+
+            var mainMap = Inside(0, true);
+            if (mainMap == null) { Console.WriteLine("REFUSED: no alias fills the main place's map marker, so the other places have nothing to be near."); return 1; }
+            ConditionGlobal? Leash(QuestLocationAlias l) => l.Conditions.OfType<ConditionGlobal>().SingleOrDefault(c => c.Data is GetDistanceConditionData);
+            var second = loc.GetValueOrDefault(10u);
+            var longDrive = second != null ? Leash(second) : null;
+            if (longDrive == null) { Console.WriteLine("REFUSED: the second place carries no single GetDistance leash to copy duo_longdrivedistance from."); return 1; }
+            var driveGlobal = longDrive.ComparisonValue.FormKey;
+
+            int Anchor(QuestLocationAlias place, ConditionGlobal c, QuestReferenceAlias to, string why)
+            {
+                if (Pos(to.ID) < 0 || Pos(to.ID) > Pos(place.ID))
+                { Console.WriteLine($"REFUSED: {place.Name}'s leash anchor alias {to.ID} is listed after it, so it would not be filled when the leash is read."); return 1; }
+                var d = (GetDistanceConditionData)c.Data;
+                if (!d.UseAliases) { Console.WriteLine($"REFUSED: {place.Name}'s leash does not take an alias parameter; nothing here has been proven for that shape."); return 1; }
+                d.FirstParameter.Index = to.ID;
+                c.ComparisonValue.SetTo(driveGlobal);
+                bm.Leashes.Add(((int)place.ID, (int)to.ID, driveGlobal));
+                Console.WriteLine($"  +leash   : {place.Name} (alias {place.ID}) within duo_longdrivedistance of alias {to.ID} {to.Name} ({why})");
+                return 0;
+            }
+
+            int fail = 0;
+            if (second != null) fail += Anchor(second, longDrive, mainMap, "the main place's map marker");
+            if (loc.GetValueOrDefault(33u) is QuestLocationAlias third)
+            {
+                var c = Leash(third);
+                if (c == null) { Console.WriteLine("REFUSED: the third place carries no single GetDistance leash."); return fail + 1; }
+                var toSecond = Inside(10, false);
+                if (toSecond == null) { Console.WriteLine("REFUSED: a third place with no alias filling inside the second, so it cannot be held near it."); return fail + 1; }
+                var c2 = c.DeepCopy();
+                third.Conditions.Add(c2);
+                fail += Anchor(third, c, mainMap, "the main place's map marker");
+                fail += Anchor(third, c2, toSecond, "a marker in the second place");
+            }
+            return fail;
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
@@ -1974,6 +2038,13 @@ namespace FrankyCLI
             }
             foreach (var g in bm.Globals)
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
+            foreach (var (place, anchor, global) in bm.Leashes)
+            {
+                var la = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)place);
+                var ok = la?.Conditions.OfType<IConditionGlobalGetter>().Any(c => c.Data is IGetDistanceConditionDataGetter d
+                             && d.UseAliases && d.FirstParameter.Index == (uint)anchor && c.ComparisonValue.FormKey == global) ?? false;
+                fail += Check($"place alias {place} is leashed within {global} of alias {anchor}", ok.ToString(), "True");
+            }
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
             if (bm.ApproachTarget is (int aon, int ato))

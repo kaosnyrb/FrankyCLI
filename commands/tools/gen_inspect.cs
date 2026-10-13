@@ -2995,6 +2995,23 @@ namespace FrankyCLI
 
             if (cond.Data == null) return;
 
+            // WHO the test runs on, and whether its parameters are alias numbers rather than forms. Skipped from the
+            // reflection walk below and printed here in one line, because without them a GetDistance reads as
+            // "from PortalMarker [000020]" when the 0x20 may be an alias id (2026-10-13: a Delve's leash anchors).
+            {
+                var bits = new List<string>();
+                foreach (var name in new[] { "RunOnType", "Reference", "Unknown3", "UseAliases" })
+                {
+                    var p = cond.Data.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+                    object? v = null;
+                    try { v = p?.GetValue(cond.Data); } catch { }
+                    if (v == null) continue;
+                    var fk = v.GetType().GetProperty("FormKey")?.GetValue(v);
+                    bits.Add($"{name}={(fk ?? v)}");
+                }
+                if (bits.Count > 0) Console.WriteLine($"{indent}  on: {string.Join("  ", bits)}");
+            }
+
             // Parameters, by reflection -- a case list over condition functions is a blocklist
             // wearing a switch, and the engine has hundreds.
             foreach (var pi in cond.Data.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))

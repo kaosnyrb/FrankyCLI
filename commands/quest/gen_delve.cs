@@ -46,10 +46,13 @@ namespace FrankyCLI
     /// quest picks a POI on one marker and then hunts for another is unconstructible rather than
     /// checked.
     ///
-    /// ⚠ ONE STATED LIMIT, v1: `place.leash` is ADVISORY. The base's own GetDistance condition is
-    /// preserved verbatim and a recipe naming a different leash gets a WARN rather than a rewrite,
-    /// because constructing a GetDistance condition has not been proven the way LocationHasRefType
-    /// has. Named here rather than discovered by someone whose leash quietly did nothing.
+    /// ⚠ ONE STATED LIMIT, v1: `place.leash` is ADVISORY. A recipe naming a leash gets a WARN rather than a
+    /// rewrite, because constructing a GetDistance condition has not been proven the way LocationHasRefType
+    /// has. The MAIN place keeps the base's condition verbatim (within duo_samemapdistance of the player).
+    /// The second and third places do NOT, since 2026-10-13: a beats build re-anchors their copied leash to
+    /// duo_longdrivedistance of the main place's map marker (and the third also of a marker in the second),
+    /// changing only the copy's alias parameter and global (LeashPlaces, gen_delve_beats.cs; his "make all
+    /// points within 7500"). Named here rather than discovered by someone whose leash quietly did nothing.
     /// </summary>
     public static partial class gen_delve
     {
@@ -2475,6 +2478,7 @@ namespace FrankyCLI
                     whoLists[p] = f.FormKey;
                 }
                 if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists);
+                if (fail == 0) fail += LeashPlaces(clone, madeBeats);
             }
             else if (t.kind == "choice")
             {
