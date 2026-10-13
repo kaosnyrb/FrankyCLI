@@ -53,7 +53,7 @@
     {
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
-      "objective": "Find the load at the <Place>",
+      "objective": "Find the load at the <SecondPlace>",
       "journal": "Signed out, never signed in, and it got this far.",
       "item": "Signed-Out Consignment (1 of 2)",
       "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",

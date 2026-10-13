@@ -1237,6 +1237,21 @@ namespace FrankyCLI
                               + string.Join(", ", t.tokens.Keys.Select(k => "<" + k + ">")));
             }
 
+            // --- an objective names the place its marker is at -------------------------------------
+            // The objective is the line the player follows to the marker, so if it names a place it must name THIS
+            // beat's place. His play, 2026-10-13: 03a's crate moved to the second POI and its objective still said
+            // "Find the load at the <Place>", pointing him at the wrong site with the marker somewhere else.
+            string[] placeTok = { "Place", "SecondPlace", "ThirdPlace" };
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                var b = r.beats[i];
+                if (b.objective == null || b.PlaceIndex < 0) continue;
+                var named = Tokens(b.objective).Where(placeTok.Contains).Distinct().ToList();
+                if (named.Count > 0 && !named.Contains(placeTok[b.PlaceIndex]))
+                    Fatal($"beat {i + 1} objective names <{string.Join(">, <", named)}> but the beat is at the {PlaceKey[b.PlaceIndex]} "
+                          + $"(<{placeTok[b.PlaceIndex]}>): the player would be sent to a site its marker is not at.");
+            }
+
             // --- markers --------------------------------------------------------------
             var lcrts = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
                 .Where(x => x.EditorID != null)
