@@ -17,13 +17,33 @@
   ],
   "place": {
     "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
-    "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_UnitedTransport", "min": 2, "max": 4, "beat": 2},
+    "who": {
+      "kind": "workers",
+      "list": "duo_GangMembersList_Civ_UnitedTransport",
+      "min": 2,
+      "max": 4,
+      "beat": 2
+    },
     "theme": {
       "require": [],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "Deliberately empty, her generic ruling. The skeleton is what is under test.",
-    "leash": "duo_samemapdistance"
+    "leash": "duo_samemapdistance",
+    "second": {
+      "theme": {
+        "require": [
+          "LocTypeOE_ThemeNaturalKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      },
+      "_theme": "Eliza's, 2026-10-13: natural, so it can never be the main place (which excludes natural): the load was lost out in the open, at a different POI as he asked."
+    }
   },
   "prose": {
     "name": "Recovery: Lost Consignment on <Planet>",
@@ -39,7 +59,9 @@
       "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",
       "say": "That's it. Finish the run for them and take it where it was going.",
       "model": "Meshes\\ccs\\consignmentcrate01.nif",
-      "name": "Consignment Crate"
+      "name": "Consignment Crate",
+      "place": "second",
+      "_place": "His playtest 2026-10-13: 'Don't like the pushing back away from site thing. Let's switch that to just using a med marker at a different POI.' The crate waits at a second POI; approach.lose is gone."
     },
     {
       "type": "use",
@@ -67,12 +89,6 @@
       "journal": null
     }
   ],
-  "approach": {
-    "to": 2,
-    "civilians": false,
-    "lose": 1,
-    "_approach": "civilians turned OFF 2026-10-13 (his playtest: 'The people should be workers. Currently homesteaders'): place.who workers replaces them. The old driver's two approach behaviours, made explicit: on first coming within 250 m of the delivery point, people appear around it (the delve4 default, civilians true, his ruling 2026-09-24 'the one with the delivery should have people there') and the crate, which is at this same site, is moved out past its near edge so it reads as lost (LoseLoadOnApproach was true because the load is at the main place)."
-  },
   "speaker": {
     "name": "Dispatch",
     "voice": "GenericMale01",

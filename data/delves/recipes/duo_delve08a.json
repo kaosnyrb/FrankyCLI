@@ -38,16 +38,14 @@
     },
     "third": {
       "theme": {
-        "require": [
-          "LocTypeOE_ThemeMilitaryKeyword"
-        ],
+        "require": [],
         "exclude": [
           "LocTypeOE_NonHostile",
           "LocTypeOE_ThemeNaturalKeyword"
         ]
       }
     },
-    "_themes": "THREE DISJOINT POOLS, so no two links can be one site: the end is peopled (keeping the base's no-natural, no-cave exclusions); the first slate is at an unpeopled NATURAL site; the second at an unpeopled MILITARY one. Split on the two biggest themes in the pool (gen_delve keywords, 2026-10-08: Natural 121, Military 119); 'infrastructure and not peopled' was 16. Which fiction suits which site is Jessica's call."
+    "_themes": "THREE DISJOINT POOLS, so no two links can be one site: the end is peopled (keeping the base's no-natural, no-cave exclusions); the first slate is at an unpeopled NATURAL site; the second at an unpeopled MILITARY one (DROPPED 2026-10-13, his: 'I couldn't test, think the requirements are too narrow. Let's drop the Military keyword req': now any unpeopled, non-natural site, still disjoint from both). Split on the two biggest themes in the pool (gen_delve keywords, 2026-10-08: Natural 121, Military 119); 'infrastructure and not peopled' was 16. Which fiction suits which site is Jessica's call."
   },
   "prose": {
     "name": "Search: Soldier's Letters on <Planet>",
@@ -70,7 +68,7 @@
     },
     {
       "type": "pickup",
-      "at": "LocDungeonBossLocRef",
+      "at": "REMarkerMediumLocRef",
       "place": "third",
       "objective": "Find the private's letters at the <ThirdPlace>",
       "item": "Private's Unsent Letters",
