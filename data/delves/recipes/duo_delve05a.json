@@ -21,7 +21,7 @@
       "require": [
         "LocTypeOE_NonHostile"
       ],
-      "exclude": []
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
     },
     "_theme": "Testcase 01's delivery rule, unchanged on purpose: people who are waiting on the relay have to be there. LocTypeOE_NonHostile, pool 62 when measured 2026-09-24.",
     "leash": "duo_samemapdistance",
@@ -41,7 +41,7 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "objective": "Find the Relay Dish at the <SecondPlace>",
       "journal": "I found the dish crate, set down well short of the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
       "place": "second",

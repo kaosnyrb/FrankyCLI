@@ -56,7 +56,7 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "place": "second",
       "objective": "Search the cache at the <SecondPlace>",
       "item": "Private's Field Note",
@@ -70,7 +70,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "place": "third",
       "objective": "Find the private's letters at the <ThirdPlace>",
       "item": "Private's Unsent Letters",

@@ -68,7 +68,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "item": "Sealed Survey Crate",
       "objective": "Collect the survey crate",
       "model": "Meshes\\ccs\\surveycratemarked01.nif",

@@ -18,7 +18,7 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": []
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
     },
     "_theme": "Deliberately empty, her generic ruling. The skeleton is what is under test.",
     "leash": "duo_samemapdistance"
@@ -30,7 +30,7 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "objective": "Find the load at the <Place>",
       "journal": "Signed out, never signed in, and it got this far.",
       "item": "Signed-Out Consignment (1 of 2)",
