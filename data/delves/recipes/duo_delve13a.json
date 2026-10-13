@@ -39,7 +39,7 @@
       "at": "RETravelA1LocRef",
       "item": "Ring Box (1 of 2)",
       "objective": "Find the courier drop at the <Place>",
-      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "model": "Meshes\\ccs\\ringbox01.nif",
       "name": "Split Courier Crate",
       "message": {
         "title": "Split Courier Crate",
