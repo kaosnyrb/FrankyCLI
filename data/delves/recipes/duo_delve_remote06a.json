@@ -2,7 +2,7 @@
   "schema": 1,
   "id": "duo_delve_remote06a",
   "template": "beats",
-  "_note": "PROOF RECIPE for the clear beat (spike office/spikes/2026-10-14-defeat-and-clear-beats.md), Eliza 2026-10-14 on his scope. Gameplay of duo_artifact_remote_planet_qst02a as a Delve beat, remote. Journal and objective are duo_artifact_remote_planet_qst02a's own words; the radio lines are Eliza's PLACEHOLDERS. Jessica's to rewrite once it plays.",
+  "_note": "PROOF RECIPE for the clear beat (spike office/spikes/2026-10-14-defeat-and-clear-beats.md, graduated on his play), Eliza 2026-10-14 on his scope; gameplay of duo_artifact_remote_planet_qst02a. WORDS ARE JESSICA'S since 2026-10-14 11:0x, on his 'yeah rewrite'. The <Place> can be any site (no theme), so it is where the subjects went to ground, never the station itself. Nobody is placed there, so the speaker is station security, sealed in elsewhere. The opening line does not say how the job arrived (a slate off a body, or his mission terminal).",
   "author": "eliza",
   "source": "Overtime duo_artifact_remote_planet_qst02a (Hunt), its driver dou_artifact_ground_hunt_quest",
   "place": {
@@ -16,14 +16,14 @@
   },
   "prose": {
     "name": "Hunt: Escaped Test Subjects on <Planet>",
-    "briefing": "A science facility on <Planet> has lost its test subjects, and the slate got off the planet before the news did. They are loose at the <Place> and nobody left there is going to handle it. I need to fly out and put them down."
+    "briefing": "A research station lost its test subjects in a containment failure, and they have gone to ground at the <Place>. The staff have sealed themselves in and nobody is opening a door until every one is dead."
   },
   "speaker": {
-    "name": "Facility Security",
+    "name": "Station Security",
     "voice": "GenericFemale01",
-    "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
+    "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
   },
-  "broadcast": "The containment pens are open and the subjects are out. Nobody here can stop them. If you can hear this, we need help.",
+  "broadcast": "Containment failed and our test subjects got out. They've gone to ground nearby. We've sealed ourselves in. Nobody opens a door until they're dead.",
   "beats": [
     {
       "type": "clear",
@@ -39,8 +39,9 @@
         "chance": 25
       },
       "objective": "Put down the test subjects at the <Place>",
-      "journal": "Every one of the escaped test subjects at the <Place> is dead.",
-      "say": "That's the last of them. We're safe. Thank you."
+      "journal": "Every one of the escaped test subjects at the <Place> is dead. The station can open its doors again.",
+      "say": "That's the last of them. We can open the doors. Thank you."
     }
-  ]
+  ],
+  "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Matilda, Knowledgable, Professional', NOT yet heard in game (voices.md); his ear decides. Sarah moved off this speaker because she is remote02a's Clinic Dispatch."
 }
