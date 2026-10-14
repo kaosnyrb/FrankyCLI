@@ -382,12 +382,126 @@ namespace FrankyCLI
                     }
                     break;
                 case "dialogtopic":
-                    // DialogTopics are sub-records of Quests (or top-level DIAL group)
+                    // DialogTopics are sub-records of Quests (or top-level DIAL group). Vanilla mostly leaves them
+                    // unnamed, so `quest:<EditorID>` dumps every topic of one quest instead of matching the topic.
+                    string? questScope = search.StartsWith("quest:", StringComparison.OrdinalIgnoreCase) ? search[6..] : null;
+                    if (search.Equals("perkfield", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Lines whose INFO carries a Perk LINK (a field, not a condition): the tagged checks
+                        // ([Background], [Trait], [Skill]) are suspected to be this. One line each, perk named.
+                        var perkNames = mod.Perks.ToDictionary(p => p.FormKey, p => $"{p.EditorID} \"{p.Name}\"");
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                                foreach (var resp in topic.Responses)
+                                {
+                                    if (resp.Perk.IsNull) continue;
+                                    var first = resp.Responses.FirstOrDefault();
+                                    Console.WriteLine($"PERKFIELD\t{quest.EditorID}\t{resp.FormKey}\t{resp.Perk.FormKey}\t{perkNames.GetValueOrDefault(resp.Perk.FormKey, "?")}"
+                                        + $"\t{resp.Speaker.IsNull}\t{first?.WEMFile}\t{resp.Prompt}\t{first?.ResponseText}\t{string.Join(" & ", resp.Conditions.Select(DescribeCondition))}");
+                                    found++;
+                                }
+                        break;
+                    }
+                    if (search.Equals("fieldtally", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Every property SET on any dialogue response (and on its topic), counted, by reflection: finds
+                        // a dedicated field (a perk link, a challenge) a hand-picked printer would never show.
+                        var ft = new Dictionary<string, int>();
+                        void Count(string prefix, object rec)
+                        {
+                            foreach (var p in rec.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                            {
+                                if (p.GetIndexParameters().Length > 0) continue;
+                                object? v; try { v = p.GetValue(rec); } catch { continue; }
+                                bool set = v switch
+                                {
+                                    null => false,
+                                    string s => s.Length > 0,
+                                    Enum e => Convert.ToInt64(e) != 0,
+                                    bool b => b,
+                                    IFormLinkGetter fl => !fl.IsNull,
+                                    System.Collections.ICollection col => col.Count > 0,
+                                    IConvertible cv when v.GetType().IsPrimitive => Convert.ToDouble(cv) != 0,
+                                    _ => v.GetType().Name.Contains("TranslatedString") ? (v.ToString() ?? "").Length > 0 : true,
+                                };
+                                if (set) { string k = prefix + p.Name; ft[k] = ft.GetValueOrDefault(k) + 1; }
+                            }
+                        }
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                            {
+                                Count("DIAL.", topic);
+                                foreach (var resp in topic.Responses) Count("INFO.", resp);
+                            }
+                        foreach (var kv in ft.OrderBy(kv => kv.Value))
+                            Console.WriteLine($"FIELD\t{kv.Value}\t{kv.Key}");
+                        found += ft.Count;
+                        break;
+                    }
+                    if (search.Equals("condtally", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Every condition function used on any dialogue response in the plugin, with a count: the
+                        // census that finds HOW a kind of check is wired before guessing which quest shows one.
+                        var tally = new Dictionary<string, int>();
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                                foreach (var resp in topic.Responses)
+                                    foreach (var c in resp.Conditions)
+                                    {
+                                        string fn = c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "");
+                                        tally[fn] = tally.GetValueOrDefault(fn) + 1;
+                                    }
+                        foreach (var kv in tally.OrderByDescending(kv => kv.Value))
+                            Console.WriteLine($"TALLY\t{kv.Value}\t{kv.Key}");
+                        // Which condition forms IsTrueForConditionForm points at, by name: vanilla packages reusable
+                        // logic (the player's pronoun, and possibly checks) in them.
+                        var cndf = new Dictionary<FormKey, int>();
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                                foreach (var resp in topic.Responses)
+                                    foreach (var c in resp.Conditions)
+                                        if (c.Data.GetType().Name.StartsWith("IsTrueForConditionForm")
+                                            && c.Data.GetType().GetProperty("FirstParameter")?.GetValue(c.Data) is object fp
+                                            && fp.GetType().GetProperty("Link")?.GetValue(fp) is IFormLinkGetter l)
+                                            cndf[l.FormKey] = cndf.GetValueOrDefault(l.FormKey) + 1;
+                        var names = mod.ConditionRecords.ToDictionary(r => r.FormKey, r => r.EditorID ?? "");
+                        foreach (var kv in cndf.OrderByDescending(kv => kv.Value))
+                            Console.WriteLine($"CNDF\t{kv.Value}\t{kv.Key}\t{names.GetValueOrDefault(kv.Key, "?")}");
+                        found += tally.Count;
+                        break;
+                    }
+                    if (search.Equals("perkchecks", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Every response in the plugin gated on HasPerk, one compact line each: how background, trait
+                        // and skill checks are wired (his ask, 2026-10-14). Speaker/WEM say whose line it is.
+                        foreach (var quest in mod.Quests)
+                            foreach (var topic in quest.DialogTopics)
+                                foreach (var resp in topic.Responses)
+                                {
+                                    // HasPerk anywhere, plus GetValue / HasKeyword / GetBaseValue when run on the player:
+                                    // a skill may be an actor value and a background may grant a keyword.
+                                    var perks = resp.Conditions.Where(c =>
+                                    {
+                                        string n = c.Data.GetType().Name;
+                                        if (n.StartsWith("HasPerk")) return true;
+                                        if (!(n.StartsWith("GetValue") || n.StartsWith("HasKeyword") || n.StartsWith("GetBaseValue"))) return false;
+                                        return c.Data.Reference.FormKey.ID == 0x14;   // PlayerRef
+                                    }).ToList();
+                                    if (perks.Count == 0) continue;
+                                    var first = resp.Responses.FirstOrDefault();
+                                    bool npcLine = (resp.Speaker != null && !resp.Speaker.IsNull) || (first != null && first.WEMFile != 0);
+                                    Console.WriteLine($"CHECK\t{quest.EditorID}\t{topic.FormKey}\t{resp.FormKey}\t{(npcLine ? "npc" : "player?")}\t"
+                                        + $"{string.Join(" & ", perks.Select(DescribeCondition))}\t{resp.Prompt}\t{first?.ResponseText}\t{topic.Name}");
+                                    found++;
+                                }
+                        break;
+                    }
                     foreach (var quest in mod.Quests)
                     {
+                        if (questScope != null && !string.Equals(quest.EditorID, questScope, StringComparison.OrdinalIgnoreCase)) continue;
                         foreach (var topic in quest.DialogTopics)
                         {
-                            if (MatchesSearch(topic.EditorID, topic.FormKey, search))
+                            if (questScope != null || MatchesSearch(topic.EditorID, topic.FormKey, search))
                             {
                                 DumpDialogTopic(topic);
                                 found++;
@@ -1760,6 +1874,70 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
+        /// <summary>Print every public property of a record that is SET (non-null, non-empty, non-default), by
+        /// reflection, so an unread field cannot hide behind a hand-picked list. Scalars, enums, strings and
+        /// form links print; collections print their count.</summary>
+        private static void DumpSetProperties(object rec, string indent, HashSet<string> skip, int depth = 0)
+        {
+            foreach (var p in rec.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                if (skip.Contains(p.Name) || p.GetIndexParameters().Length > 0) continue;
+                object? v;
+                try { v = p.GetValue(rec); } catch { continue; }
+                if (v == null) continue;
+                // A translated string (a player's choice text, a prompt) is not a System.String: print its text.
+                if (v.GetType().Name.Contains("TranslatedString"))
+                {
+                    string ts = v.ToString() ?? "";
+                    if (ts.Length > 0) Console.WriteLine($"{indent}{p.Name,-12}{ts}");
+                    continue;
+                }
+                // A Mutagen sub-object (a flags block, a data struct): one level in, so its set fields show too.
+                if (depth == 0 && v is not IFormLinkGetter && v is not System.Collections.IEnumerable && !v.GetType().IsPrimitive && !(v is Enum)
+                    && (v.GetType().Namespace ?? "").StartsWith("Mutagen"))
+                {
+                    Console.WriteLine($"{indent}{p.Name}:");
+                    DumpSetProperties(v, indent + "  ", skip, depth + 1);
+                    continue;
+                }
+                string? shown = v switch
+                {
+                    string s => s.Length == 0 ? null : s,
+                    Enum e => Convert.ToInt64(e) == 0 ? null : $"{e} (0x{Convert.ToInt64(e):X})",
+                    bool b => b ? "true" : null,
+                    IFormLinkGetter fl => fl.IsNull ? null : fl.FormKey.ToString(),
+                    System.Collections.ICollection col => col.Count == 0 ? null : $"[{col.Count}]",
+                    IConvertible cv when v.GetType().IsPrimitive => Convert.ToDouble(cv) == 0 ? null : v.ToString(),
+                    _ => null,
+                };
+                if (shown != null) Console.WriteLine($"{indent}{p.Name,-12}{shown}");
+            }
+        }
+
+        /// <summary>A condition as "Function(params) op value", the function read off its Data type's name.</summary>
+        private static string DescribeCondition(IConditionGetter c)
+        {
+            string fn = c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "");
+            var parts = new List<string>();
+            foreach (var p in c.Data.GetType().GetProperties())
+            {
+                if (!(p.Name.EndsWith("Parameter") || p.Name == "RunOnType" || p.Name == "Reference")) continue;
+                object? v;
+                try { v = p.GetValue(c.Data); } catch { continue; }
+                if (v == null) continue;
+                // A FormLinkOrIndex<T> carries its link on a `Link` property whatever T is; read it by reflection.
+                if (v is not IFormLinkGetter && v.GetType().GetProperty("Link")?.GetValue(v) is IFormLinkGetter inner) v = inner;
+                string s = v switch
+                {
+                    IFormLinkGetter fl => fl.FormKey.ToString(),
+                    _ => v.ToString() ?? "",
+                };
+                if (s.Length > 0 && s != "Subject" && s != "0") parts.Add($"{p.Name.Replace("Parameter", "")}={s}");
+            }
+            string val = c is IConditionFloatGetter cf ? cf.ComparisonValue.ToString(System.Globalization.CultureInfo.InvariantCulture) : "(global)";
+            return $"{fn}({string.Join(", ", parts)}) {c.CompareOperator} {val}{(c.Flags != 0 ? $" [{c.Flags}]" : "")}";
+        }
+
         private static void DumpDialogTopic(IDialogTopicGetter topic)
         {
             Console.WriteLine($"--- DialogTopic ---");
@@ -1777,6 +1955,13 @@ namespace FrankyCLI
                     Console.WriteLine($"      MajorFlags: {resp.MajorFlags}");
                     if (resp.Speaker != null && !resp.Speaker.IsNull)
                         Console.WriteLine($"      Speaker:    {resp.Speaker.FormKey}");
+                    // Every other set field and every condition, by reflection: a skill, background or trait check
+                    // has to live in one of them, and a hand-picked field list is blind to the one we did not name
+                    // (his ask, 2026-10-14: "look for skill and background checks in conversations").
+                    DumpSetProperties(resp, "      ", new HashSet<string> { "FormKey", "EditorID", "MajorFlags", "Speaker", "Responses", "Conditions", "FormVersion", "Version2", "VersionControl", "StarfieldMajorRecordFlags", "IsCompressed", "IsDeleted", "Registration", "StaticRegistration", "EnumerateFormLinks", "ContainedFormLinks" });
+                    if (resp.Conditions != null)
+                        foreach (var c in resp.Conditions)
+                            Console.WriteLine($"      Condition:  {DescribeCondition(c)}");
                     foreach (var r in resp.Responses)
                     {
                         Console.WriteLine($"      Response:");
