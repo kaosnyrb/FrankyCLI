@@ -16,7 +16,10 @@
     "The first beat was a claim board on paper; every vanilla board is wall-mounted or New Atlantis signage, so it",
     "is now the abandoned camp's beacon, the same model 01a and 02a propose.",
     "Pay should be med (it crosses a planet, README rule 3); whether a single-ending beats Delve can set its own tier",
-    "is Eliza's open question."
+    "is Eliza's open question.",
+    "BUILT 2026-10-14 22:1x (Eliza, his \"build 10a\"): the template need above is met by place.second.remote behind a",
+    "LOCAL main (alias 60 SecondPlanetLocation for <SecondPlanet>); the beacon is Kim's commsmast01 (Satellite_Beacon ruled",
+    "out on land, his 10-12); the deliver pays med (a single ending can set its tier since 10-13). Not yet played."
   ],
   "place": {
     "theme": {
@@ -24,9 +27,11 @@
       "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
     },
     "second": {
+      "remote": true,
+      "_remote": "A REQUEST on another planet (Eliza, 2026-10-14 22:1x, on his \"build 10a\"): the second-place request proven by duo_delve_twosite01a and missionboard02a, here behind a LOCAL main place, the first Delve of that shape.",
       "theme": {
         "require": [],
-        "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+        "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword", "LocTypeTest"]
       }
     },
     "_theme": "An abandoned camp here, a working dig there. The base's own exclusions at both ends: no caves, no natural sites; a dig crew camps by kit, not in the wild."
@@ -41,7 +46,7 @@
       "at": "RECenterLocRef",
       "objective": "Check the camp beacon at the <Place>",
       "journal": "The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.",
-      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Abandoned Camp Beacon"
     },
     {
@@ -65,7 +70,8 @@
       "journal": "I got the crate out to the <SecondPlace>. The crew had been rationing for a week and had stopped expecting it.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Dig Site Stores",
-      "say": "That's ours. We'd given up on it. Thank you."
+      "reward": "med",
+      "say":"That's ours. We'd given up on it. Thank you."
     }
   ],
   "speaker": {

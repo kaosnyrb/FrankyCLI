@@ -177,9 +177,11 @@
         { "markerAlias": 11, "activatorAlias": 12, "objective": 20, "journalStage": 20 }
       ],
       "_beatSlots": "Beats 1 and 2 take the base's two marker+activator pairs; beat 3 on clones slot 1. Stages and objectives are numbered by the build from the recipe, not from this table.",
-      "tokens": { "Place": "DungeonLocation", "SecondPlace": "FinalLocation", "ThirdPlace": "ThirdLocation", "Planet": "targetPlanet" },
+      "tokens": { "Place": "DungeonLocation", "SecondPlace": "FinalLocation", "ThirdPlace": "ThirdLocation", "Planet": "targetPlanet", "SecondPlanet": "SecondPlanetLocation" },
       "collapsedPlaceAliases": [],
       "secondPlaceAlias": 10,
+      "secondPlanet": { "cloneOf": 3, "id": 60, "name": "SecondPlanetLocation" },
+      "_secondPlanet": "Made ONLY when the second place is a request (place.second.remote), as the board's: a copy of targetPlanet (3) whose parent is FinalLocation (10), so <SecondPlanet> names where he flies. A found second place is on the main place's planet, so it has no planet of its own and the lint refuses the token there. Added 2026-10-14 for 10a, the first local-here, requested-there Delve.",
       "thirdPlace": { "cloneOf": 0, "name": "ThirdLocation" },
       "remotePlaceFrom": "duo_artifact_remote_planet_qst01a",
       "_remotePlaceFrom": "place.remote: true copies THIS quest's DungeonLocation (alias 0, a PCM_QuestGeneral request) over the base's, so the site is placed on another planet. Its alias layout matches the base's 0-5 (read 2026-10-14). One place only.",

@@ -1459,8 +1459,15 @@ namespace FrankyCLI
                 Fatal("remote is set on place.third; only the main and the second place can be requested.");
             if (r.place.second?.remote == false)
                 Fatal("place.second.remote is false; leave it out for a found second place.");
-            if (secondRemote && r.place.remote != true && !IsBoard(t))
-                Fatal("place.second.remote is set and the main place is not remote; a requested second site rides on a requested first (set place.remote).");
+            // A LOCAL main place with a requested second (10a, his 2026-10-14 "build 10a": here, then another planet) is
+            // allowed: the main keeps its leash to the player, the second its guard off the main's planet and no leash.
+            // A third place would be leashed to a second that is on another planet, so it is refused beside a request.
+            if (secondRemote && (anyThird || r.place.third != null))
+                Fatal("place.second.remote is set and the recipe has a third place; a third place is held within a drive of the second, which is on another planet.");
+            if (!secondRemote && !IsBoard(t))
+                foreach (var (where, text) in ProseStrings(r))
+                    if (Tokens(text).Contains("SecondPlanet"))
+                        Fatal($"{where}: <SecondPlanet> needs place.second.remote; a found second place is on the main place's planet and gets no planet alias of its own.");
             if (secondRemote)
                 Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); the build guards it off the first site's planet (the guard is not yet played)");
             if (r.place.remote == true && t.remotePlaceFrom == null)
@@ -1477,7 +1484,7 @@ namespace FrankyCLI
             if (!issues.Any(i => i.Fatal))
             {
                 var drawPool = DrawPopulation(env);
-                var reqPool = remote ? PcmRequestPool(env) : null;
+                var reqPool = remote || secondRemote ? PcmRequestPool(env) : null;
                 if (remote)
                     Console.WriteLine($"  corpus: {reqPool!.Count} place(s) a PCM_QuestGeneral request can put down (gen_delve pcmpool {PcmGeneralNode}), "
                                       + (IsBoard(t) ? "read as the board base's own request (no PCM type keyword, so tested by no node, as QuestGeneral is), with no parsec limit: the board picks the system. "
@@ -1537,7 +1544,7 @@ namespace FrankyCLI
                 // not established (part 32), so the overlap is measured and named rather than trusted.
                 if (beats)
                     foreach (var (a, b) in new[] { (0, 1), (0, 2), (1, 2) })
-                        if (drawn.ContainsKey(a) && drawn.ContainsKey(b) && !(a == 0 && b == 1 && remote && secondRemote))   // two REQUESTS each make a new site: no shared POI to draw
+                        if (drawn.ContainsKey(a) && drawn.ContainsKey(b) && !(a == 0 && b == 1 && secondRemote))   // a second REQUEST makes a new site on another planet: no shared POI to draw
                         {
                             int both = drawn[a].Intersect(drawn[b], StringComparer.OrdinalIgnoreCase).Count();
                             // Two ENDINGS must be two places (the choice kind's rule above, carried over): a refusal.
@@ -1557,13 +1564,13 @@ namespace FrankyCLI
                 var baseQ = env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.@base);
                 // A remote main place is the remotePlaceFrom quest's alias, so what it would drop is THAT alias's.
                 // A board place is the base's own request, so the base is what it drops from.
-                bool copied = r.place.remote == true;
+                bool copied = r.place.remote == true || (secondRemote && t.remotePlaceFrom != null);
                 var remoteQ = copied ? env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.remotePlaceFrom) : null;
                 if (copied && remoteQ == null) Fatal($"remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in this load order.");
                 if (baseQ?.Aliases != null)
                     foreach (int pi in PlacesUsed(r))
                     {
-                        var fromQ = (pi == 0 || (pi == 1 && secondRemote)) && remoteQ != null ? remoteQ : baseQ;
+                        var fromQ = ((pi == 0 && r.place.remote == true) || (pi == 1 && secondRemote)) && remoteQ != null ? remoteQ : baseQ;
                         // The third place is a clone, so what it would inherit and drop is its source's.
                         int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : pi == 1 && secondRemote ? t.placeAlias : PlaceAliasOf(t, pi, -1);
                         var theme = ThemeOf(r, pi);
@@ -2772,7 +2779,7 @@ namespace FrankyCLI
                 fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias);
                 if (fail == 0) fail += GuardOtherPlanet(clone, t, env);
             }
-            if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1))
+            if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1) && (IsBoard(t) || r.place.second?.remote == true))
             {
                 fail += MakeSecondPlanet(clone, t);
                 madeBeats.SecondPlanet = t.secondPlanet.id;
