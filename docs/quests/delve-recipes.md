@@ -134,6 +134,7 @@ refused rather than silently ignored.
 | `reward` | object | choice: yes | choice | the pay tier per ending |
 | `people` | object | no | choice | named NPCs at each ending, with outfits and company |
 | `recap` | string | beats ending on a `group`: yes; otherwise refused | beats | stage 100's journal line, the last thing the player reads (see *Beats*) |
+| `recapSay` | string | no; refused unless the Delve ends on a `group` | beats | the speaker's closing line, `recap`'s spoken twin, on the completing stage. A group's members fire in any order, so no member's `say` can be the last line heard (Jessica, remote03a); a single-beat ending's own `say` already is. His play of remote03a, 2026-10-14: *"first radio message played but nothing at the end?"* Needs a `speaker` |
 | `approach` | object | no | beats | what happens the first time the player comes near one beat's object (see *Beats*) |
 | `deal` | string | no | all | **which slate pool hands this Delve out**: the EditorID of a Story Manager quest node in the template's own mod. The build appends the quest to it and removes the previous build's entry from every node. **Absent = in no pool**: started by hand with `startquest`. ⚠ It is live content: a dealt Delve reaches players from slates on the next release, once per `DoAllBeforeRepeating` rotation. **The beats template's base is a local-CARGO slate quest, so a beats Delve's pool is `duo_MS_ArtifactMap_LocalCargoNode`**; the lint warns when the named pool never dealt the template's base quest (his go, 2026-10-11) |
 

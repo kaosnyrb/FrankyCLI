@@ -441,6 +441,8 @@ namespace FrankyCLI
             if (steps.Count > 0 && steps[^1].IsGroup && string.IsNullOrWhiteSpace(r.recap))
                 Fatal($"the Delve ends on group '{steps[^1].Group}', so stage {t.completeStage} is the line the player reads last "
                       + "and it would carry the base's recap; write a \"recap\".");
+            if (steps.Count > 0 && !steps[^1].IsGroup && r.recapSay != null)
+                Fatal("recapSay is set and the Delve ends on a single beat, whose own say is already the closing line; put the words there.");
             if (steps.Count > 0 && !steps[^1].IsGroup && r.recap != null)
                 Fatal($"the Delve ends on a single beat, whose journal is already stage {t.completeStage}'s line; the recap would overwrite it. "
                       + "Put the words in that beat's journal.");
@@ -628,6 +630,7 @@ namespace FrankyCLI
             if (r.broadcast != null) spoken.Add(("broadcast", r.broadcast));
             for (int i = 0; i < r.beats.Count; i++) if (r.beats[i].say != null) spoken.Add(($"beat {i + 1}'s say", r.beats[i].say!));
             if (r.offer?.say != null) spoken.Add(("offer.say", r.offer.say));
+            if (r.recapSay != null) spoken.Add(("recapSay", r.recapSay));
             if (r.offer?.say != null && r.offer.message != null)
                 Fatal("offer has both a message and a say; his \"either or\": a box and a line on one stage clash. Keep one.");
             if (spoken.Count > 0 && r.speaker == null) Fatal("there are spoken lines and no speaker: say who speaks them (name, voice, elevenlabs).");
@@ -1864,6 +1867,8 @@ namespace FrankyCLI
                 var lines = new List<(int stage, string text)>();
                 if (r.broadcast != null) lines.Add((arrival ? t.arrivalStage : t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
                 for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
+                // A group ending's closing call: on the completing stage, which every member's last fix sets whatever the order.
+                if (r.recapSay != null) lines.Add((steps[^1].DoneStage, r.recapSay));
                 // The offer's line plays on the stage that opens the choice as a TAIL, after every other line of that
                 // stage, so it starts once the find's box is closed (Message.Show waits). Added like a beat's line it
                 // landed BEFORE the box (the speech lines are emitted ahead of the boxes), so the radio played under

@@ -200,6 +200,13 @@ namespace FrankyCLI
             /// </summary>
             public string? recap { get; set; }
             /// <summary>
+            /// beats, OPTIONAL when the last step is a group (and refused otherwise): the speaker's closing line, spoken on the
+            /// completing stage, recap's spoken twin. A group's members fire in any order, so no member's say can be the last
+            /// thing heard (Jessica, remote03a); a single-beat ending's own say already is. His play of remote03a, 2026-10-14:
+            /// "first radio message played but nothing at the end?" A new optional field, so schema stays 1.
+            /// </summary>
+            public string? recapSay { get; set; }
+            /// <summary>
             /// beats, OPTIONAL: what happens the FIRST time the player comes within range of one beat's object
             /// (the delivery point). A stock DefaultAliasOnDistanceLessThan on the player sets the template's
             /// approach stage, whose fragment does the rest. Ported from duo_delve_driver.OnDistanceLessThan.
@@ -1041,7 +1048,7 @@ namespace FrankyCLI
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
             else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null
                                       || b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.say != null) || r.approach != null
-                     || r.speaker != null || r.broadcast != null)
+                     || r.speaker != null || r.broadcast != null || r.recapSay != null)
                 Fatal($"a beat sets type, group, item, model, name, replace, returnTo or a hold's fields, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
             if (IsBoard(t))
             {
@@ -1640,6 +1647,7 @@ namespace FrankyCLI
             if (r.offer?.message?.title != null) yield return ("offer message title", r.offer.message.title);
             if (r.offer?.message?.text != null) yield return ("offer message text", r.offer.message.text);
             if (r.offer?.say != null) yield return ("offer say", r.offer.say);
+            if (r.recapSay != null) yield return ("recapSay", r.recapSay);
         }
 
         private static IEnumerable<string> Tokens(string s)
