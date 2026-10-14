@@ -726,8 +726,11 @@ namespace FrankyCLI
         /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
         /// constructed one. Refuses if an anchor is missing or is listed after the place it anchors (fill order).
         /// </summary>
-        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach)
+        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false)
         {
+            // A REQUESTED second place is a new site on (meant to be) another planet: no drive leash to the first, which is
+            // the point of it, and its own request carries the parsec limit from the player (the remote source's).
+            if (secondRemote) { Console.WriteLine("  leash    : none on the second place; it is a second request, not a drive away"); return 0; }
             var all = clone.Aliases.ToList();
             // A collection alias has no id of its own; its members carry theirs at its list position (manual 12).
             static uint? IdOf(AQuestAlias a) => a switch { QuestReferenceAlias x => x.ID, QuestLocationAlias x => x.ID, _ => null };
@@ -2379,6 +2382,18 @@ namespace FrankyCLI
             var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
             fail += Check($"nothing in the quest points at its base {t.@base}",
                           baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
+            // Each REQUESTED place reads back as a PCM request (a remote main place, and a remote second one).
+            foreach (var (on, label) in new[] { (r.place.remote == true, t.placeAlias), (r.place.second?.remote == true, t.secondPlaceAlias) })
+            {
+                if (!on) continue;
+                var pl = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
+                fail += Check($"place alias {label} is a PCM request (a new site, placed by the planet content manager)",
+                              pl == null ? "missing" : (pl.ALPS != null).ToString(), "True");
+            }
+            if (r.place.second?.remote == true)
+                fail += Check("the second request carries no drive leash to the first (it is meant for another planet)",
+                              q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
+                                  .Conditions.Any(c => c.Data is IGetDistanceConditionDataGetter g && g.UseAliases).ToString() ?? "missing", "False");
             if (t.questScript == null)
             {
                 // No driver: the only quest-level script is the reject handler, carrying every objective.

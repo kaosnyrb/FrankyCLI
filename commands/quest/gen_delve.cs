@@ -1386,11 +1386,21 @@ namespace FrankyCLI
                 Fatal($"a place sets who, and template '{t.id}' is a {t.kind} Delve; only the beats kind places anyone, so it would be silently ignored.");
             // A board mission's place is a request already (the base's own), so it is graded as a remote one is.
             bool remote = r.place.remote == true || IsBoard(t);
-            if (r.place.second?.remote != null || r.place.third?.remote != null)
-                Fatal("remote is set on place.second or place.third; only the MAIN place can be requested.");
+            // A remote SECOND place (his 2026-10-14, missionboard02a and 10a: a cargo run remote to remote) is a second
+            // request beside the main one. NO SHIPPED QUEST DOES THIS (556 vanilla requesting quests and Overtime's 140, none
+            // with two: manual), so it is warned on every build until his play proves it.
+            bool secondRemote = r.place.second?.remote == true;
+            if (r.place.third?.remote != null)
+                Fatal("remote is set on place.third; only the main and the second place can be requested.");
+            if (r.place.second?.remote == false)
+                Fatal("place.second.remote is false; leave it out for a found second place.");
+            if (secondRemote && r.place.remote != true && !IsBoard(t))
+                Fatal("place.second.remote is set and the main place is not remote; a requested second site rides on a requested first (set place.remote).");
+            if (secondRemote)
+                Warn("place.second is a SECOND REQUEST. No shipped quest requests two sites (manual, 2026-10-14); this shape is unproven until his play shows two new sites.");
             if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
-            if (remote && (anySecond || anyThird || r.place.second != null || r.place.third != null))
+            if (remote && (anyThird || r.place.third != null || (!secondRemote && (anySecond || r.place.second != null))))
                 Fatal("place.remote is set and the recipe has a second or third place. A remote Delve is ONE requested site "
                       + "(his 2026-10-14 pick); every beat happens there.");
             if (remote && r.place.reach != null)
@@ -1413,7 +1423,7 @@ namespace FrankyCLI
                 var drawn = new Dictionary<int, HashSet<string>>();
                 foreach (int pi in PlacesUsed(r))
                 {
-                    var pool = pi == 0 && remote ? reqPool! : drawPool;
+                    var pool = (pi == 0 && remote) || (pi == 1 && secondRemote) ? reqPool! : drawPool;
                     var here = MarkersAt(r, keys, pi);
                     var theme = ThemeOf(r, pi);
                     Console.WriteLine($"  -- the {PlaceLabel(pi)} place (alias "
@@ -1488,9 +1498,9 @@ namespace FrankyCLI
                 if (baseQ?.Aliases != null)
                     foreach (int pi in PlacesUsed(r))
                     {
-                        var fromQ = pi == 0 && remoteQ != null ? remoteQ : baseQ;
+                        var fromQ = (pi == 0 || (pi == 1 && secondRemote)) && remoteQ != null ? remoteQ : baseQ;
                         // The third place is a clone, so what it would inherit and drop is its source's.
-                        int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : PlaceAliasOf(t, pi, -1);
+                        int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : pi == 1 && secondRemote ? t.placeAlias : PlaceAliasOf(t, pi, -1);
                         var theme = ThemeOf(r, pi);
                         var la = fromQ.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
                         foreach (var c in la?.Conditions ?? Enumerable.Empty<IConditionGetter>())
@@ -2690,7 +2700,8 @@ namespace FrankyCLI
             int fail = 0;
             var made4 = new BuildMade();
             var madeBeats = new BeatsMade();
-            if (r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t);
+            if (r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias);
+            if (r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias);
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
                 made4.ThirdPlaceAlias = CreateThirdPlace(clone, t);
@@ -2807,7 +2818,7 @@ namespace FrankyCLI
                     if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
                     else reach = rg.FormKey;
                 }
-                if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach);
+                if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true);
             }
             else if (t.kind == "choice")
             {
@@ -3271,19 +3282,23 @@ namespace FrankyCLI
         /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
         /// link into it adds the esp to the esm's masters: 2026-10-08).
         /// </summary>
-        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t)
+        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target)
         {
+            // The request is always the source's MAIN place alias; a second request is that same alias copied over the
+            // second place, keeping the second place's ID and name so <SecondPlace> and everything filled from it still bind.
             var src = myMod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom);
             if (src == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in {t.mod}."); return 1; }
             var from = src.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
             if (from?.ALPS == null) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is not a PCM request (no ALPS)."); return 1; }
-            int at = clone.Aliases!.FindIndex(a => a is QuestLocationAlias l && l.ID == (uint)t.placeAlias);
-            if (at < 0) { Console.WriteLine($"REFUSED: the clone has no place alias {t.placeAlias}."); return 1; }
+            int at = clone.Aliases!.FindIndex(a => a is QuestLocationAlias l && l.ID == (uint)target);
+            if (at < 0) { Console.WriteLine($"REFUSED: the clone has no place alias {target}."); return 1; }
             var old = (QuestLocationAlias)clone.Aliases[at];
             var copy = from.DeepCopy();
-            if (copy.Name != old.Name) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is '{copy.Name}' and the base's is '{old.Name}'; the <Place> token would bind to a different name."); return 1; }
+            if (target == t.placeAlias && copy.Name != old.Name) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is '{copy.Name}' and the base's is '{old.Name}'; the <Place> token would bind to a different name."); return 1; }
+            copy.ID = (uint)target;
+            copy.Name = old.Name;
             clone.Aliases[at] = copy;
-            Console.WriteLine($"  remote   : place alias {t.placeAlias} {copy.Name} is now {src.EditorID}'s PCM request "
+            Console.WriteLine($"  remote   : place alias {target} {copy.Name} is now {src.EditorID}'s PCM request "
                               + $"({(copy.ALPS!.PcmTypeKeyword.IsNull ? "no type" : copy.ALPS.PcmTypeKeyword.FormKey.ToString())}), flags {copy.Flags}");
             return 0;
         }
