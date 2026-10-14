@@ -13,11 +13,12 @@
     "says first, next or last.",
     "Why it is remote, in the fiction: the beacons send the supply ships past, and any tech the crew could call is on one of them.",
     "The beacon model is lit and blinking whatever state it is in, so no fault says 'dark': each is wrong, not off.",
-    "No say on the group: members fire in any order, so a line on one of them would not be the last.",
+    "No say on the group: members fire in any order, so a line on one of them would not be the last. The closing call is recapSay (Eliza's field, 0537c08, off his play: nothing played at the end).",
     "MODEL NOT ON THE APPROVED LIST, his eye first: Beacon01 (vanilla outpost beacon, STANDS, 4.9 m, measured",
     "2026-10-14). It is the beacon players build for their own outposts, which is why it reads as somebody's pad."
   ],
   "recap": "The crew at the <Place> had supply ships flying straight past them. I got all three landing beacons broadcasting properly, so the runs can find the pad again.",
+  "recapSay": "All three beacons are right. There's a ship turning in for the pad already. Thank you.",
   "place": {
     "theme": {
       "require": [
