@@ -190,6 +190,67 @@
         "any order for pickups or delivers -- a group is use beats only"
       ],
       "verifiedFrom": "gen_stageprobe on duo_artifact_localcargo_qst09a, Defiant, played 2026-10-08"
+    },
+    {
+      "id": "board",
+      "kind": "board",
+      "base": "duo_MB28a_qst",
+      "mod": "du_overtime",
+      "driver": "",
+      "replacesDriver": "duo_bountyscript",
+      "questScript": "MissionQuestScript",
+      "questScriptKeeps": [
+        "MissionParent",
+        "RewardAmountGlobal",
+        "RewardAmountGlobalActual",
+        "PlayerStarSystemLocation",
+        "TargetSystemLocation",
+        "TargetPlanetLocation",
+        "TargetLocation",
+        "PrimaryRef",
+        "PlayerShip",
+        "ShutdownOnFailure"
+      ],
+      "_questScript": "THE MISSION BOARD TALKS TO ONE SCRIPT, vanilla's MissionQuestScript (Data/Scripts/Source): OnQuestStarted sets ReadyStage 5, the board's accept sets AcceptStage 10, MissionComplete() pays through MissionParent and sets CompleteStage 100, a turn-down sets FailStage 200. Vanilla attaches it BARE, with no driver, on MB_Bounty03_FCR02, MB_Bounty04_FCR04 and MB_Bounty05_UC (read 2026-10-14), and duo_MB28a_qst is that skeleton plus duo_bountyscript. So the driver goes and the base class goes on in its place, carrying the ten properties the driver set that MissionQuestScript declares; the driver's own six (GangMembers, Min/MaxGangMembers, targetNPC, EnemyType, artifactlist) go with it, the recipe naming its lists instead.",
+      "playerAlias": -1,
+      "approachStage": -1,
+      "entryStage": 10,
+      "_entryStage": "A board quest STARTS when the board refreshes, long before the player takes it, so nothing may spawn or show at stage 0: every step-one spawn, objective, counter and broadcast goes on AcceptStage 10, and the first step's hooks wait for it.",
+      "beats": 1,
+      "maxBeats": 9,
+      "allows": [
+        "defeat",
+        "clear",
+        "hold"
+      ],
+      "_allows": "The fights only. This base has no marker+activator pair to give an object beat, no player alias for a recover's hook, and no approach stage.",
+      "carriesItem": false,
+      "placeAlias": 5,
+      "mapMarkerAlias": 11,
+      "briefingStage": 10,
+      "completeStage": 100,
+      "beatSlots": [],
+      "markerSource": 3,
+      "_markerSource": "PrimaryRef (alias 3): a ref alias filled from the place (ALLA from alias 5). It IS beat 1's marker, its ref type rewritten to the recipe's at, and later beats' markers are copies of it. Never removed: TargetSystemLocation and TargetPlanetLocation resolve FROM it (their system and parent aliases are 3), and MissionQuestScript.PrimaryRef names it. Its base DefaultAliasOnDeath (the driver's kill, no prereq) is removed: a marker never dies.",
+      "driverAliases": [
+        13
+      ],
+      "_driverAliases": "EnemyType (alias 13, Optional, no fill): the removed driver's, named by nothing once it goes, so it goes too.",
+      "tokens": {
+        "Place": "TargetLocation",
+        "Planet": "TargetPlanetLocation",
+        "System": "TargetSystemLocation"
+      },
+      "collapsedPlaceAliases": [],
+      "secondPlaceAlias": -1,
+      "_place": "The place is ALREADY a request (ALPS, PcmTypeKeyword none, with MB_IsPlayerLevelAppropriate and a habitability condition), dealt by the board in Overtime, so a recipe never sets place.remote: the lint measures it against the request pool as it does a remote place.",
+      "cannot": [
+        "an object beat (use, pickup, deliver, talk) or a recover -- see allows",
+        "a second or third place",
+        "an approach, a who, a person at an ending",
+        "a choose"
+      ],
+      "verifiedFrom": "gen_inspect qall duo_MB28a_qst and MB_Bounty05_UC, Defiant, 2026-10-14; MissionQuestScript.psc read whole"
     }
   ]
 }

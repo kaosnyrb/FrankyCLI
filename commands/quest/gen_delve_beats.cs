@@ -144,10 +144,10 @@ namespace FrankyCLI
         /// Stage numbers: every beat gets one, a group also gets a done stage, the last step finishes on
         /// the completing stage. Returns beat index -> stage, and fills each step's DoneStage.
         /// </summary>
-        private static Dictionary<int, int> StagesOf(List<Step> steps, int complete)
+        private static Dictionary<int, int> StagesOf(List<Step> steps, int complete, int first = 10)
         {
             var beatStage = new Dictionary<int, int>();
-            int next = 10;
+            int next = first;   // the first beat's stage: 10 after a slate Delve's 0, 20 after the board's accept at 10
             for (int k = 0; k < steps.Count; k++)
             {
                 var s = steps[k];
@@ -592,7 +592,7 @@ namespace FrankyCLI
             }
             if (carried > 0 && !endsOnChoice) Warn($"{carried} picked-up item(s) are never delivered, so they stay in the player's inventory after the quest.");
 
-            var beatStage = StagesOf(steps, t.completeStage);
+            var beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
             int highest = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                 .Where(x => x < t.completeStage).DefaultIfEmpty(0).Max();
             if (highest >= t.completeStage)
@@ -691,6 +691,7 @@ namespace FrankyCLI
             public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
             public List<int> RejectObjectives = new();    // what duo_delve_quest hides when the mission is turned down
             public List<(int marker, int activator)> DroppedSlots = new();   // the base's object slots no beat took, removed
+            public List<int> DroppedDriverAliases = new();   // board: the removed driver's own aliases, removed with it
             public (int stage, List<string> lines)? HandBack;   // the talk that ends the Delve: its stage and the RemoveItem lines it must run
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
             public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
@@ -850,24 +851,69 @@ namespace FrankyCLI
             if (vma.Scripts.Count != 0)
             { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED; the stages are the state machine");
-            // The driver was also the only OnQuestRejected handler, so one small quest script takes that job alone
-            // (his 2026-10-14: a turned-down Delve could not be restarted). Its Objectives are filled at the end of
-            // the build, once every objective is written (RejectScript).
-            vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
-            Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
+            if (t.questScript != null)
+            {
+                // A board mission: the base class the board talks to goes on in the driver's place, carrying the driver's
+                // values for the properties it declares. It handles a turn-down itself (OnQuestRejected -> FailStage).
+                var qs = new ScriptEntry { Name = t.questScript };
+                foreach (var keep in t.questScriptKeeps)
+                {
+                    var p = old.Properties.FirstOrDefault(x => string.Equals(x.Name, keep, StringComparison.OrdinalIgnoreCase));
+                    if (p == null) { Console.WriteLine($"REFUSED: the removed driver carries no '{keep}' for {t.questScript} to keep."); return 1; }
+                    qs.Properties.Add(p.DeepCopy());
+                }
+                vma.Scripts.Add(qs);
+                var gone = old.Properties.Select(x => x.Name).Where(n => !t.questScriptKeeps.Contains(n, StringComparer.OrdinalIgnoreCase)).ToList();
+                Console.WriteLine($"  script   : {t.questScript} attached with the driver's {qs.Properties.Count} board properties; dropped its own: {string.Join(", ", gone)}");
+            }
+            else
+            {
+                // The driver was also the only OnQuestRejected handler, so one small quest script takes that job alone
+                // (his 2026-10-14: a turned-down Delve could not be restarted). Its Objectives are filled at the end of
+                // the build, once every objective is written (RejectScript).
+                vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
+                Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
+            }
+            // The base's own alias hooks on the alias the beats take over as a marker went with its driver's design
+            // (MB28a's DefaultAliasOnDeath on PrimaryRef sets 100 with no prereq; a marker never dies).
+            if (t.markerSource >= 0)
+                foreach (var e in vma.Aliases.Where(a => a.Property.Alias == t.markerSource).ToList())
+                {
+                    vma.Aliases.Remove(e);
+                    Console.WriteLine($"  -hook    : the base's {string.Join(", ", e.Scripts.Select(s => s.Name))} on alias {t.markerSource} (it is beat 1's marker now)");
+                }
 
             var steps = StepsOf(r);
-            var beatStage = StagesOf(steps, t.completeStage);
+            var beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
 
             // --- 2. one marker + activator per beat -------------------------------------------------------
             // Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the
             // same argument as AddBeatSlot: a slot that works brings every field this tool does not know).
+            // A base with no slots (the board) names a marker alias instead, and has no activator to give.
             var slotOf = new Dictionary<int, BeatSlot>();
-            var src0 = t.beatSlots[0];
-            var srcMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)src0.markerAlias);
-            var srcAct = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)src0.activatorAlias);
-            if (srcMarker?.Location == null || srcAct?.CreateReferenceToObject == null)
-            { Console.WriteLine("REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
+            bool slotless = t.beatSlots.Count == 0;
+            int srcMarkerId = slotless ? t.markerSource : t.beatSlots[0].markerAlias;
+            var srcMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)srcMarkerId);
+            var srcAct = slotless ? null : clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].activatorAlias);
+            if (srcMarker?.Location == null || (!slotless && srcAct?.CreateReferenceToObject == null))
+            { Console.WriteLine(slotless ? $"REFUSED: markerSource alias {srcMarkerId} is not a ref alias filled from a place on this base."
+                                         : "REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
+            srcMarker = srcMarker.DeepCopy();   // the pattern, taken before beat 1 may rewrite the alias itself
+            // A slotless base's marker alias IS the first fight's marker (on the board, the system and planet resolve
+            // from it, so it stays); every later marker is a copy of it.
+            bool sourceTaken = !slotless;
+            QuestReferenceAlias NewMarker(int i, string suffix)
+            {
+                if (!sourceTaken)
+                {
+                    sourceTaken = true;
+                    return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)srcMarkerId);
+                }
+                uint id = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                var m = srcMarker.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
+                clone.Aliases.Add(m);
+                return m;
+            }
             int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
             var talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
             var waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
@@ -879,9 +925,7 @@ namespace FrankyCLI
                     // A marker the waves spawn at, and one EMPTY collection per wave, each a copy of vanilla's
                     // ActiveHostiles (Optional, AllowDisabled, no fill), renamed and renumbered. Filled at
                     // runtime by PlaceAtMe's akAliasToFill, as vanilla's MissionBoardCargoContainerScript does.
-                    uint hid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-                    var hm = srcMarker.DeepCopy(); hm.ID = hid; hm.Name = "DelveBeat" + (i + 1) + "Spawn";
-                    clone.Aliases.Add(hm);
+                    var hm = NewMarker(i, "Spawn");
                     slotOf[i] = new BeatSlot { markerAlias = (int)hm.ID, activatorAlias = -1, journalStage = beatStage[i] };
                     waveAliases[i] = new List<int>();
                     int nw = steps.First(s => s.Beats.Contains(i)).Waves;
@@ -911,12 +955,11 @@ namespace FrankyCLI
                 {
                     // recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into
                     // when the step begins, which the objective targets and the death hook sits on.
+                    var dm = NewMarker(i, "Marker");
                     uint did = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-                    var dm = srcMarker.DeepCopy(); dm.ID = did; dm.Name = "DelveBeat" + (i + 1) + "Marker";
-                    var dt = srcMarker.DeepCopy(); dt.ID = did + 1; dt.Name = "DelveBeat" + (i + 1) + "Target";
+                    var dt = srcMarker.DeepCopy(); dt.ID = did; dt.Name = "DelveBeat" + (i + 1) + "Target";
                     dt.Location = null;
                     dt.Flags = QuestReferenceAlias.Flag.Optional;
-                    clone.Aliases.Add(dm);
                     clone.Aliases.Add(dt);
                     slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = beatStage[i] };
                     bm.Holders.Add((int)dt.ID);
@@ -927,10 +970,8 @@ namespace FrankyCLI
                 {
                     // ONE hold wave at the site: a marker, and an EMPTY collection (a copy of vanilla's ActiveHostiles)
                     // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
-                    uint cid0 = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-                    var cm = srcMarker.DeepCopy(); cm.ID = cid0; cm.Name = "DelveBeat" + (i + 1) + "Spawn";
-                    clone.Aliases.Add(cm);
-                    uint cid = cid0 + 1;
+                    var cm = NewMarker(i, "Spawn");
+                    uint cid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
                     var col = waveSrc!.DeepCopy();
                     var centry = col.Collection[0];
                     var cra = centry.ReferenceAlias!;
@@ -953,7 +994,7 @@ namespace FrankyCLI
                     // his marker before the player arrives and the objective can point at him from anywhere.
                     uint tid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
                     var tm = srcMarker.DeepCopy(); tm.ID = tid; tm.Name = "DelveBeat" + (i + 1) + "Marker";
-                    var tp = srcAct.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
+                    var tp = srcAct!.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
                     tp.CreateReferenceToObject!.AliasID = (short)tm.ID;
                     clone.Aliases.Add(tm);
                     clone.Aliases.Add(tp);
@@ -988,7 +1029,7 @@ namespace FrankyCLI
                 }
                 uint next = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
                 var m = srcMarker.DeepCopy(); m.ID = next; m.Name = "DelveBeat" + (i + 1) + "Marker";
-                var a = srcAct.DeepCopy(); a.ID = next + 1; a.Name = "DelveBeat" + (i + 1) + "Target";
+                var a = srcAct!.DeepCopy(); a.ID = next + 1; a.Name = "DelveBeat" + (i + 1) + "Target";
                 a.CreateReferenceToObject!.AliasID = (short)m.ID;
                 clone.Aliases.Add(m);
                 clone.Aliases.Add(a);
@@ -1066,9 +1107,20 @@ namespace FrankyCLI
                 ce.Entry = bm.Recap;
                 Console.WriteLine($"  recap    : stage {t.completeStage} \"{bm.Recap}\"");
             }
-            var s0 = clone.Stages.FirstOrDefault(s => s.Index == 0);
-            if (s0 == null) { Console.WriteLine("REFUSED: the base has no stage 0 to run on start."); return 1; }
-            s0.Flags |= QuestStage.Flag.RunOnStart;
+            if (t.entryStage == 0)
+            {
+                var s0 = clone.Stages.FirstOrDefault(s => s.Index == 0);
+                if (s0 == null) { Console.WriteLine("REFUSED: the base has no stage 0 to run on start."); return 1; }
+                s0.Flags |= QuestStage.Flag.RunOnStart;
+            }
+            else
+            {
+                // Set by something outside the quest (the board's accept), never on start: on start is the board refresh.
+                var se = clone.Stages.FirstOrDefault(s => s.Index == t.entryStage);
+                if (se == null) { Console.WriteLine($"REFUSED: the base has no entry stage {t.entryStage}."); return 1; }
+                if (se.Flags.HasFlag(QuestStage.Flag.RunOnStart)) { Console.WriteLine($"REFUSED: entry stage {t.entryStage} runs on start; the mission would begin before it is taken."); return 1; }
+                Console.WriteLine($"  entry    : stage {t.entryStage} (set by the board's accept); step one spawns and shows there, not on start");
+            }
 
             // --- 4. fills, journals, reskins ---------------------------------------------------------
             for (int i = 0; i < r.beats.Count; i++)
@@ -1097,7 +1149,27 @@ namespace FrankyCLI
             // replaces the base's own pay there (the lint holds reward to these two places).
             var paid = steps.Where(s => s.IsChoose).SelectMany(s => s.Beats)
                 .Concat(steps[^1].IsChoose || steps[^1].IsGroup || r.beats[steps[^1].Beats[0]].reward == null
-                        ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] });
+                        ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] }).ToList();
+            if (t.questScript != null)
+            {
+                // A board mission pays through the board (MissionComplete -> MissionParent), off the script's reward
+                // globals, which the card also shows: so a tier goes THERE, and never onto the stage, or it pays twice.
+                // Absent, the base's own globals stand (MB28a: duo_reward_creds_easy), as a slate Delve keeps its base's stage pay.
+                var qs = vma.Scripts.First(s => s.Name == t.questScript);
+                foreach (var b in paid)
+                {
+                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
+                    if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward}."); return 1; }
+                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
+                    {
+                        var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
+                        if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
+                        rp.Object.SetTo(cg.FormKey);
+                    }
+                    Console.WriteLine($"  reward   : the board pays {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                }
+                paid.Clear();
+            }
             foreach (var b in paid)
             {
                 var st = clone.Stages.First(x => x.Index == beatStage[b]);
@@ -1259,6 +1331,19 @@ namespace FrankyCLI
                 bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
                 Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
             }
+            // The removed driver's own aliases (the board's EnemyType), named by nothing once it is gone.
+            foreach (int da in t.driverAliases)
+            {
+                var gone = clone.Aliases!.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)da);
+                if (gone == null) { Console.WriteLine($"REFUSED: the template names driver alias {da} and the base has none."); return 1; }
+                var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), new[] { da });
+                string token = $"<Alias={gone.Name}>";
+                if (clone.MissionBoardDescription?.String?.Contains(token) == true || clone.Name?.String?.Contains(token) == true) users.Add("the quest's name or card");
+                if (users.Count > 0) { Console.WriteLine($"REFUSED: driver alias {da} ({gone.Name}) is still named by {string.Join(", ", users)}."); return 1; }
+                clone.Aliases!.Remove(gone);
+                bm.DroppedDriverAliases.Add(da);
+                Console.WriteLine($"  -alias   : {gone.Name} (alias {da}) removed: the driver's, and the driver is gone");
+            }
             // A ONE-PLACE Delve drops the base's second place. Left in, it is a non-Optional location alias that
             // still draws a SECOND POI the quest never visits, so the quest only starts where two qualifying POIs
             // are in range, and the base's text about it lingers (his catch on duo_delve09, 2026-10-09: "we have
@@ -1367,7 +1452,7 @@ namespace FrankyCLI
             int recovers = 0;
             for (int k = 0; k < steps.Count; k++)
             {
-                int prereq = k == 0 ? 0 : steps[k - 1].DoneStage;
+                int prereq = k == 0 ? t.entryStage : steps[k - 1].DoneStage;
                 foreach (var b in steps[k].Beats)
                 {
                     var beat = r.beats[b];
@@ -1565,8 +1650,8 @@ namespace FrankyCLI
             {
                 string p = $"Counter{kv.Key + 1}";
                 props.Add(("GlobalVariable", p, kv.Value.key, -1));
-                Add(0, $"{p}.SetValue(0)");
-                Add(0, $"UpdateCurrentInstanceGlobal({p})");
+                Add(t.entryStage, $"{p}.SetValue(0)");
+                Add(t.entryStage, $"UpdateCurrentInstanceGlobal({p})");
             }
             // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
             // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.
@@ -1576,7 +1661,7 @@ namespace FrankyCLI
                 string an = $"Alias_Beat{b + 1}Marker";
                 props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].markerAlias));
                 bm.Replaced.Add((an, slotOf[b].markerAlias));
-                Add(0, $"{an}.GetRef().Disable(False)");
+                Add(t.entryStage, $"{an}.GetRef().Disable(False)");
             }
             // A hold's wave w (0-based) appears round him, INTO its own collection. Then the spawning fragment
             // WAITS, at its very end (a tail, after every other line of that stage): the reveal after `reveal`
@@ -1674,7 +1759,7 @@ namespace FrankyCLI
                 }
                 else Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
             }
-            Enter(0, 0);
+            Enter(0, t.entryStage);
             foreach (var (b, pst) in personStage)
             {
                 string ta = $"Alias_Beat{b + 1}Target", pn = $"Person{b + 1}";
@@ -1732,7 +1817,7 @@ namespace FrankyCLI
             if (speakerSrc != null)
             {
                 var lines = new List<(int stage, string text)>();
-                if (r.broadcast != null) lines.Add((0, r.broadcast));
+                if (r.broadcast != null) lines.Add((t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
                 for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
                 // The offer's line plays on the stage that opens the choice as a TAIL, after every other line of that
                 // stage, so it starts once the find's box is closed (Message.Show waits). Added like a beat's line it
@@ -1809,6 +1894,21 @@ namespace FrankyCLI
             // cannot hold the quest open.
             void StopQuest(int st)
             {
+                WaitForLines(st);
+                Add(st, "Stop()");
+            }
+            // A board mission ends through the script the board talks to: MissionComplete() pays through MissionParent,
+            // completes every objective, sets CompleteStage and shuts the quest down. Vanilla's own stage-100 fragment
+            // (QF_MB_Bounty05_UC_003303A5) is exactly this autocast and call.
+            void CompleteMission(int st)
+            {
+                WaitForLines(st);
+                Add(st, "Quest __temp = Self as Quest");
+                Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
+                Add(st, "kmyQuest.MissionComplete()");
+            }
+            void WaitForLines(int st)
+            {
                 foreach (var (_, n) in spokenAt.Where(x => x.stage == st))
                 {
                     Add(st, $"Utility.Wait(1.0)   ; let Say{n} begin before asking whether it plays");
@@ -1818,7 +1918,6 @@ namespace FrankyCLI
                     Add(st, $"    waited{n} += 1");
                     Add(st, "EndWhile");
                 }
-                Add(st, "Stop()");
             }
             var held = new List<int>();   // pickups and recovered items not yet delivered
             int handBack = HandBackTalk(r, steps);
@@ -1876,7 +1975,11 @@ namespace FrankyCLI
                 }
                 int done = s.DoneStage;
                 if (!s.IsGroup && !s.IsChoose) Add(done, $"SetObjectiveCompleted({s.Objective})");
-                if (last) { if (!s.IsChoose) { Add(done, "CompleteQuest()"); StopQuest(done); } }
+                if (last)
+                {
+                    if (!s.IsChoose && t.questScript != null) CompleteMission(done);
+                    else if (!s.IsChoose) { Add(done, "CompleteQuest()"); StopQuest(done); }
+                }
                 else Enter(k + 1, done);
             }
 
@@ -1916,15 +2019,19 @@ namespace FrankyCLI
 
             // The reject script's Objectives: every objective the quest now carries, so a turned-down Delve leaves
             // nothing on screen whichever step was showing.
-            var reject = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript);
-            if (reject == null) { Console.WriteLine($"REFUSED: {RejectScript} is not on the quest."); return 1; }
-            var objs = clone.Objectives.Select(o => (int)o.Index).OrderBy(i => i).ToList();
-            if (objs.Count == 0) { Console.WriteLine("REFUSED: the quest has no objectives for the reject script to hide."); return 1; }
-            reject.Properties.Clear();
-            var ol = new ScriptIntListProperty { Name = "Objectives", Flags = ScriptProperty.Flag.Edited };
-            ol.Data.AddRange(objs);
-            reject.Properties.Add(ol);
-            bm.RejectObjectives = objs;
+            // (A board mission has no reject script: the board's own handles a turn-down.)
+            if (t.questScript == null)
+            {
+                var reject = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript);
+                if (reject == null) { Console.WriteLine($"REFUSED: {RejectScript} is not on the quest."); return 1; }
+                var objs = clone.Objectives.Select(o => (int)o.Index).OrderBy(i => i).ToList();
+                if (objs.Count == 0) { Console.WriteLine("REFUSED: the quest has no objectives for the reject script to hide."); return 1; }
+                reject.Properties.Clear();
+                var ol = new ScriptIntListProperty { Name = "Objectives", Flags = ScriptProperty.Flag.Edited };
+                ol.Data.AddRange(objs);
+                reject.Properties.Add(ol);
+                bm.RejectObjectives = objs;
+            }
 
             string dir = Path.Combine(PapyrusDir(), "gen");
             Directory.CreateDirectory(dir);
@@ -1965,7 +2072,7 @@ namespace FrankyCLI
             var tb = r.beats[b];
             int stage = beatStage[b];
             int k = steps.FindIndex(s => s.Beats.Contains(b));
-            int enter = k == 0 ? 0 : steps[k - 1].DoneStage;
+            int enter = k == 0 ? 0 : steps[k - 1].DoneStage;   // a talk is slate-only (the board allows fights), so its entry is 0
             string tag = $"{r.id}_talk{b + 1}";
             string vt = tb.person!.voice!, vid = tb.person.elevenlabs!;
 
@@ -2218,19 +2325,64 @@ namespace FrankyCLI
             var q = m.Quests.FirstOrDefault(x => x.EditorID == r.id);
             if (q?.VirtualMachineAdapter == null) { Console.WriteLine("    FAIL: the quest or its VMAD is not in the written file."); return 1; }
             var vma = q.VirtualMachineAdapter;
-            // No driver: the only quest-level script is the reject handler, carrying every objective.
-            fail += Check("quest-level scripts (no driver, the reject handler only)", string.Join(",", vma.Scripts.Select(s => s.Name)), RejectScript);
-            var rj = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript)?.Properties.OfType<IScriptIntListPropertyGetter>()
-                .FirstOrDefault(p => p.Name == "Objectives");
-            fail += Check("the reject handler hides every objective",
-                          rj == null ? "no Objectives" : string.Join(",", rj.Data),
-                          string.Join(",", q.Objectives.Select(o => (int)o.Index).OrderBy(i => i)));
+            if (t.questScript == null)
+            {
+                // No driver: the only quest-level script is the reject handler, carrying every objective.
+                fail += Check("quest-level scripts (no driver, the reject handler only)", string.Join(",", vma.Scripts.Select(s => s.Name)), RejectScript);
+                var rj = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript)?.Properties.OfType<IScriptIntListPropertyGetter>()
+                    .FirstOrDefault(p => p.Name == "Objectives");
+                fail += Check("the reject handler hides every objective",
+                              rj == null ? "no Objectives" : string.Join(",", rj.Data),
+                              string.Join(",", q.Objectives.Select(o => (int)o.Index).OrderBy(i => i)));
+            }
+            else
+            {
+                // A board mission: the script the board talks to, alone, with exactly the driver's board properties.
+                fail += Check($"quest-level scripts (no driver, {t.questScript} only)", string.Join(",", vma.Scripts.Select(s => s.Name)), t.questScript);
+                var qs = vma.Scripts.FirstOrDefault(s => s.Name == t.questScript);
+                fail += Check($"{t.questScript} carries the driver's board properties",
+                              string.Join(",", (qs?.Properties.Select(p => p.Name) ?? Enumerable.Empty<string>()).OrderBy(n => n)),
+                              string.Join(",", t.questScriptKeeps.OrderBy(n => n)));
+                foreach (var pn in new[] { "MissionParent", "PrimaryRef", "TargetLocation" })
+                {
+                    var op = qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == pn);
+                    fail += Check($"{t.questScript}.{pn} is set", (op != null && !op.Object.IsNull).ToString(), "True");
+                }
+                var pr = qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "PrimaryRef");
+                fail += Check($"{t.questScript}.PrimaryRef names this quest's alias {t.markerSource}",
+                              pr == null ? "missing" : $"{pr.Object.FormKey} alias {pr.Alias}", $"{q.FormKey} alias {t.markerSource}");
+                var pa = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.markerSource);
+                fail += Check($"alias {t.markerSource} stands, filled from the place (the system and planet resolve from it)",
+                              pa?.Location == null ? "missing" : $"from alias {pa.Location.AliasID}", $"from alias {t.placeAlias}");
+                fail += Check($"alias {t.markerSource} carries none of the base's hooks",
+                              vma.Aliases.Any(a => a.Property.Alias == t.markerSource && a.Scripts.Any(s => !bm.Hooks.Any(h => h.alias == t.markerSource && h.script == s.Name))).ToString(), "False");
+                foreach (int da in bm.DroppedDriverAliases)
+                    fail += Check($"driver alias {da} is gone", q.Aliases.OfType<IQuestReferenceAliasGetter>().Any(a => a.ID == (uint)da) ? "PRESENT" : "gone", "gone");
+                fail += Check("the board's card is the recipe's", q.MissionBoardDescription?.String ?? "none", Expand(r.prose.card!, t));
+                // The pay and the shutdown are in the generated SOURCE: a fragment the compiler has not seen yet.
+                string src = File.ReadAllText(bm.PscPath);
+                fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete()",
+                              src.Contains($"Function {FragmentFunction(t.completeStage)}()") && src.Contains("kmyQuest.MissionComplete()")
+                              && !src.Contains("CompleteQuest()") && !src.Contains("    Stop()") ? "True" : "False", "True");
+            }
             fail += Check("fragment script", vma.Script?.Name ?? "none", bm.Script);
             fail += Check("fragment stages", string.Join(",", vma.Fragments.Select(f => f.Stage).OrderBy(x => x)), string.Join(",", bm.FragStages));
             foreach (var f in vma.Fragments)
                 fail += Check($"stage {f.Stage} fragment", $"{f.ScriptName}.{f.FragmentName}", $"{bm.Script}.{FragmentFunction(f.Stage)}");
-            fail += Check("stage 0 runs on start",
-                          q.Stages.Any(s => s.Index == 0 && s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "True");
+            if (t.entryStage == 0)
+                fail += Check("stage 0 runs on start",
+                              q.Stages.Any(s => s.Index == 0 && s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "True");
+            else
+            {
+                // Nothing of the mission may happen at the board refresh: no stage runs on start, and step one's
+                // spawn and objective live on the entry stage's fragment.
+                fail += Check("no stage runs on start (the quest starts at the board refresh)",
+                              q.Stages.Any(s => s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "False");
+                fail += Check($"no fragment on stages below the entry stage {t.entryStage}",
+                              string.Join(",", vma.Fragments.Where(f => f.Stage < t.entryStage).Select(f => f.Stage)), "");
+                fail += Check($"step one begins on entry stage {t.entryStage}",
+                              bm.FragStages.Contains(t.entryStage).ToString(), "True");
+            }
             foreach (var h in bm.Hooks)
             {
                 var sc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == h.alias)?.Scripts.FirstOrDefault(s => s.Name == h.script);

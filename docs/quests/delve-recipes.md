@@ -92,6 +92,7 @@ lettered recipes until they come out. `duo_delve09` was the first, the same day.
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06a`, `06b`) |
 | `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03a`-`09a`). See *Beats* below |
+| `board` | board | 1 to 9, fights only | **a mission-board mission on the beats machinery** (his 2026-10-14). The base is `duo_MB28a_qst`; its driver comes off and vanilla's `MissionQuestScript` goes on, so the BOARD starts it, takes it and pays it. `defeat`, `clear` and `hold` only. See *Board* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
 onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
@@ -104,6 +105,7 @@ onto `beats` and played the same in his hands the same morning; the old shape is
 | two-beat-one-place | `<Place>`, `<Planet>` |
 | find-owner-or-buyer | `<FindPlace>`, `<OwnerPlace>`, `<BuyerPlace>`, `<Planet>` |
 | beats | `<Place>` (main), `<SecondPlace>`, `<ThirdPlace>`, `<Planet>` |
+| board | `<Place>`, `<Planet>`, `<System>` |
 
 An unknown token is refused (it would print to the player literally). Names (items, delivery points,
 NPCs) take **no** tokens.
@@ -125,7 +127,7 @@ refused rather than silently ignored.
 | `template` | string | yes | all | a template id from the table above |
 | `author`, `source` | string | no | none | provenance; not written into the game |
 | `place` | object | yes | all | where the mission happens (below) |
-| `prose` | object | yes | all | `name` (the quest title) and `briefing` (the journal's opening line) |
+| `prose` | object | yes | all | `name` (the quest title) and `briefing` (the journal's opening line); on a `board` mission also **`card`, required there and refused elsewhere**: the board's description, what he reads before taking the job |
 | `items` | object | choice | choice | what is carried and what the objects look like (below) |
 | `beats` | list | yes | all | one entry per beat (below) |
 | `offer` | object | choice: yes | choice, beats ending on a `choose` | the surprise between the find and the endings: `journal` lands on the stage that opens the choice, `message` shows after the find's box |
@@ -458,6 +460,34 @@ one), and holds 250 characters. The lint refuses lines with no speaker and a spe
 or changed words (his ask). The previous build's files are deleted first by `deployed_<id>.txt`. A line that
 fell back to the Windows voice plays but is not cached. ⚠ The deployed files are LOOSE: pack them before a
 release.
+
+## Board: a mission from the mission board
+
+His 2026-10-14: *"full sep missionboard template"*. The board talks to ONE script, vanilla's `MissionQuestScript`
+(`Data/Scripts/Source`, read whole): it sets **stage 5** when the mission is ready to show, the board's accept
+sets **stage 10**, `MissionComplete()` pays through `MissionParent` and sets **stage 100**, and a turn-down sets
+**200**. Vanilla runs it with no driver at all on three ground bounties (`MB_Bounty03_FCR02`, `MB_Bounty04_FCR04`,
+`MB_Bounty05_UC`), and Overtime's `duo_MB28a_qst` is that skeleton plus `duo_bountyscript`. So the `board`
+template clones MB28a, takes `duo_bountyscript` off, and puts `MissionQuestScript` on carrying the ten board
+properties the driver set (`questScriptKeeps` in the row). What changes from a slate Delve:
+
+- **It begins on stage 10, never on start.** A board quest STARTS when the board refreshes, long before
+  anyone takes it, so step one's spawn, its objective, its counters and its `broadcast` all go on the accept
+  stage (`entryStage`), and the first step's hooks wait for it. Beat stages number from 20. Verify refuses a
+  stage that runs on start and any fragment below 10.
+- **It pays through the board.** The last stage waits for its radio line and calls `MissionComplete()`
+  (vanilla's own stage-100 fragment, autocast and all), never `CompleteQuest()` and `Stop()`. A beat's
+  `reward` tier sets the script's `RewardAmountGlobal` and its `Actual`, which the card shows; never the
+  stage's QRCR, or it pays twice. No tier keeps the base's (`duo_reward_creds_easy`).
+- **The place is always a request.** MB28a's `TargetLocation` is one already, so `place.remote` is refused;
+  the lint measures the pool against what a request can place, as for a remote Delve, with no parsec limit
+  (the board picks the system).
+- **`PrimaryRef` is beat 1's marker.** The board's system and planet aliases resolve FROM it, so it stays,
+  its ref type rewritten to the first fight's `at`; its base death hook goes. The driver's `EnemyType` goes.
+- **Fights only**: `defeat`, `clear`, `hold` (`allows` in the row). The base has no object slot, no player
+  alias and no approach stage, so anything needing one is refused by name.
+- **`deal` names a board node** (`_duo_MB_MissionNode_test` for the first). The proof recipe is
+  `duo_delve_missionboard01a`, remote05a's gameplay; ids take the form `duo_delve_missionboardNNa` (his).
 
 ## Not yet
 

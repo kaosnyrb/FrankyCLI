@@ -110,9 +110,34 @@ namespace FrankyCLI
             /// 2026-10-14: "I got sick of travelling", so a Delve whose whole site is requested on another planet.
             /// </summary>
             public string? remotePlaceFrom { get; set; }
+            /// <summary>
+            /// beats and board: the stage the mission BEGINS on, where step one spawns, shows its objective, resets its
+            /// counters and speaks its broadcast. 0 = run on start (a slate Delve starts when it is dealt). A board quest
+            /// starts when the board refreshes, long before it is taken, so its entry is the board's AcceptStage (10).
+            /// </summary>
+            public int entryStage { get; set; }
+            /// <summary>
+            /// board: the quest-level script that replaces the removed driver (vanilla's MissionQuestScript, which the
+            /// board talks to), carrying the driver's properties named in questScriptKeeps. Null = the beats kind's
+            /// own turn-down handler. Set, the last stage pays through it (MissionComplete) rather than CompleteQuest.
+            /// </summary>
+            public string? questScript { get; set; }
+            public List<string> questScriptKeeps { get; set; } = new();
+            /// <summary>board: the beat types this base can build. Empty = every type the beats kind knows.</summary>
+            public List<string> allows { get; set; } = new();
+            /// <summary>
+            /// board: with no beatSlots, the ref alias each beat's marker is copied from. Removed after the build, once
+            /// nothing names it (questScript's PrimaryRef is repointed at beat 1's marker first). -1 = beatSlots[0]'s.
+            /// </summary>
+            public int markerSource { get; set; } = -1;
+            /// <summary>board: the removed driver's own aliases, named by nothing once it goes, removed with it.</summary>
+            public List<int> driverAliases { get; set; } = new();
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
+        /// <summary>The kinds the beats build runs: a slate Delve, and a mission-board one on the same machinery.</summary>
+        private static bool IsBeats(Template t) => t.kind == "beats" || t.kind == "board";
+        private static bool IsBoard(Template t) => t.kind == "board";
         private sealed class BeatSlot
         {
             public int markerAlias { get; set; }
@@ -299,7 +324,8 @@ namespace FrankyCLI
         private sealed class Who { public string? kind { get; set; } public string? list { get; set; } public int min { get; set; } public int max { get; set; } public int? beat { get; set; } }
         private static readonly string[] WhoKinds = { "infested", "workers", "spacers" };
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
-        private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } }
+        /// <summary>card: board only, REQUIRED there, the mission board's description (the card he reads before taking the job).</summary>
+        private sealed class Prose { public string? name { get; set; } public string? briefing { get; set; } public string? card { get; set; } }
         private sealed class Beat
         {
             public string at { get; set; } = "";
@@ -1000,12 +1026,25 @@ namespace FrankyCLI
             // driver to display one -- writing the string anyway would put prose in the record that
             // no player can ever see, which is worse than refusing it.
             bool choice = t.kind == "choice";
-            bool beats = t.kind == "beats";
+            bool beats = IsBeats(t);
             if (beats) GradeBeats(r, t, env, Fatal, Warn);
             else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null
                                       || b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.say != null) || r.approach != null
                      || r.speaker != null || r.broadcast != null)
                 Fatal($"a beat sets type, group, item, model, name, replace, returnTo or a hold's fields, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            if (IsBoard(t))
+            {
+                // The board's own shape, refused rather than half-built: its base has only a place and a marker to give.
+                for (int i = 0; i < r.beats.Count; i++)
+                    if (t.allows.Count > 0 && !t.allows.Contains(r.beats[i].type ?? ""))
+                        Fatal($"beat {i + 1} is a '{r.beats[i].type}' and template '{t.id}' builds only {string.Join(", ", t.allows)}. What it cannot do: {string.Join("; ", t.cannot)}");
+                if (r.place.remote != null)
+                    Fatal($"place.remote is set; a board mission's place is ALWAYS a request (template '{t.id}'s base carries one), so leave it out.");
+                if (string.IsNullOrWhiteSpace(r.prose.card))
+                    Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
+            }
+            else if (r.prose.card != null)
+                Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
             if (!beats && r.recap != null)
@@ -1323,14 +1362,15 @@ namespace FrankyCLI
                 Warn("place.third is set and no beat is at the third place, so it is never written");
             if (!anySecond && r.place.second != null)
                 Warn("place.second is set and no beat is at the second place, so it is never written");
-            if (t.kind != "beats" && r.offer?.say != null)
+            if (!IsBeats(t) && r.offer?.say != null)
                 Fatal($"offer.say is set and template '{t.id}' is a {t.kind} Delve; only the beats kind speaks, so it would be silently ignored.");
-            if (t.kind != "beats" && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.who != null))
+            if (!IsBeats(t) && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.who != null))
                 Fatal($"a place sets who, and template '{t.id}' is a {t.kind} Delve; only the beats kind places anyone, so it would be silently ignored.");
-            bool remote = r.place.remote == true;
+            // A board mission's place is a request already (the base's own), so it is graded as a remote one is.
+            bool remote = r.place.remote == true || IsBoard(t);
             if (r.place.second?.remote != null || r.place.third?.remote != null)
                 Fatal("remote is set on place.second or place.third; only the MAIN place can be requested.");
-            if (remote && t.remotePlaceFrom == null)
+            if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
             if (remote && (anySecond || anyThird || r.place.second != null || r.place.third != null))
                 Fatal("place.remote is set and the recipe has a second or third place. A remote Delve is ONE requested site "
@@ -1347,7 +1387,9 @@ namespace FrankyCLI
                 var reqPool = remote ? PcmRequestPool(env) : null;
                 if (remote)
                     Console.WriteLine($"  corpus: {reqPool!.Count} place(s) a PCM_QuestGeneral request can put down (gen_delve pcmpool {PcmGeneralNode}), "
-                                      + "on a planet within duo_distanceformission parsecs. ⚠ Branch conditions are not evaluated: a humanless system reaches fewer");
+                                      + (IsBoard(t) ? "read as the board base's own request (no PCM type keyword, so tested by no node, as QuestGeneral is), with no parsec limit: the board picks the system. "
+                                                    : "on a planet within duo_distanceformission parsecs. ")
+                                      + "⚠ Branch conditions are not evaluated: a humanless system reaches fewer");
                 else
                     Console.WriteLine($"  corpus: {drawPool.Count} location(s) a place can draw (the POI pool plus every location carrying LocDungeonBossLocRef)");
                 var drawn = new Dictionary<int, HashSet<string>>();
@@ -1421,8 +1463,10 @@ namespace FrankyCLI
                 // ("It's mainly caves and natural locations atm"). The drop stays; it is never silent.
                 var baseQ = env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.@base);
                 // A remote main place is the remotePlaceFrom quest's alias, so what it would drop is THAT alias's.
-                var remoteQ = remote ? env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.remotePlaceFrom) : null;
-                if (remote && remoteQ == null) Fatal($"remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in this load order.");
+                // A board place is the base's own request, so the base is what it drops from.
+                bool copied = r.place.remote == true;
+                var remoteQ = copied ? env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.remotePlaceFrom) : null;
+                if (copied && remoteQ == null) Fatal($"remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in this load order.");
                 if (baseQ?.Aliases != null)
                     foreach (int pi in PlacesUsed(r))
                     {
@@ -2635,7 +2679,7 @@ namespace FrankyCLI
             }
 
             var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
-            if (t.kind == "beats")
+            if (IsBeats(t))
             {
                 // A choose ending's person is resolved here, where the load order is, own-or-master (never the
                 // winner by name: see the choice branch below for the master it once added).
@@ -2811,11 +2855,11 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            int v = t.kind != "beats" ? Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore)
+            int v = !IsBeats(t) ? Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore)
                                       : VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
             v += VerifyDeal(modFile, readParams, r);
             // The audio last, and only over a verified plugin: its file names are the written topics' ids.
-            return t.kind == "beats" && v == 0 ? DeployVoice(r, t, madeBeats) : v;
+            return IsBeats(t) && v == 0 ? DeployVoice(r, t, madeBeats) : v;
         }
 
         /// <summary>
@@ -3432,6 +3476,11 @@ namespace FrankyCLI
             if (e == null) { Console.WriteLine("REFUSED: no log entry on briefing stage " + t.briefingStage + "."); return 1; }
             e.Entry = Expand(r.prose.briefing!, t);
             Console.WriteLine("  prose    : name + briefing at stage " + t.briefingStage);
+            if (IsBoard(t))
+            {
+                clone.MissionBoardDescription = Expand(r.prose.card!, t);
+                Console.WriteLine("  card     : the board's description");
+            }
             return 0;
         }
 
