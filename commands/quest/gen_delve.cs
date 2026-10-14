@@ -104,6 +104,12 @@ namespace FrankyCLI
             public ThirdPlace? thirdPlace { get; set; }
             /// <summary>choice: the stage the offer's journal line lands on, between the find and the endings.</summary>
             public int offerStage { get; set; } = -1;
+            /// <summary>
+            /// beats: a quest in the same mod whose place alias (the same ID as placeAlias) is a REMOTE request, copied
+            /// over the main place when a recipe sets place.remote. Null = this template cannot go remote. His
+            /// 2026-10-14: "I got sick of travelling", so a Delve whose whole site is requested on another planet.
+            /// </summary>
+            public string? remotePlaceFrom { get; set; }
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
@@ -268,6 +274,13 @@ namespace FrankyCLI
             public Place? third { get; set; }
             /// <summary>RETIRED with the delve4 kind, 2026-10-09: kept only so the lint can refuse it (a beats Delve writes approach.civilians).</summary>
             public bool? civilians { get; set; }
+            /// <summary>
+            /// OPTIONAL, main place only: true = the place is REQUESTED (a PCM request, PCM_QuestGeneral, the template's
+            /// remotePlaceFrom alias copied verbatim), so the planet content manager places a NEW site on another planet with
+            /// its own landing marker, rather than the mission finding one near the player. Every beat is at that one place
+            /// (his 2026-10-14 pick, "a": no driving). Its pool is gen_delve pcmpool's, not the POI census.
+            /// </summary>
+            public bool? remote { get; set; }
             /// <summary>
             /// OPTIONAL: who is at THIS place (his dial, 2026-10-11, office/projects/delves/backlog.md "Who's there").
             /// Absent = empty, the default. infested, workers and spacers are built; any other kind is refused by
@@ -1184,10 +1197,12 @@ namespace FrankyCLI
                 {
                     Console.WriteLine($"  deal: {node.EditorID} [{node.FormKey}], {node.Quests.Count} quest(s), {node.Flags} / {node.QuestFlags}");
                     // Structural, not by name: a pool that never dealt this template's base quest is a pool the
-                    // base was not built to be started from (another event, other event data).
-                    var baseQ = OwnOrMaster<IQuestGetter>(new HashSet<ModKey> { own }, env, t.@base);
+                    // base was not built to be started from (another event, other event data). A remote Delve's
+                    // place is remotePlaceFrom's, so that is the quest its pool should already deal.
+                    string refQ = r.place.remote == true && t.remotePlaceFrom != null ? t.remotePlaceFrom : t.@base;
+                    var baseQ = OwnOrMaster<IQuestGetter>(new HashSet<ModKey> { own }, env, refQ);
                     if (baseQ != null && !node.Quests.Any(e => e.Quest.FormKey == baseQ.FormKey))
-                        Warn($"deal '{node.EditorID}' does not deal this template's base quest ({t.@base}); check the pool's event and conditions suit a Delve built on that base.");
+                        Warn($"deal '{node.EditorID}' does not deal {refQ}, the quest this Delve's place is built on; check the pool's event and conditions suit it.");
                 }
             }
 
@@ -1298,17 +1313,33 @@ namespace FrankyCLI
                 Fatal($"offer.say is set and template '{t.id}' is a {t.kind} Delve; only the beats kind speaks, so it would be silently ignored.");
             if (t.kind != "beats" && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.who != null))
                 Fatal($"a place sets who, and template '{t.id}' is a {t.kind} Delve; only the beats kind places anyone, so it would be silently ignored.");
+            bool remote = r.place.remote == true;
+            if (r.place.second?.remote != null || r.place.third?.remote != null)
+                Fatal("remote is set on place.second or place.third; only the MAIN place can be requested.");
+            if (remote && t.remotePlaceFrom == null)
+                Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
+            if (remote && (anySecond || anyThird || r.place.second != null || r.place.third != null))
+                Fatal("place.remote is set and the recipe has a second or third place. A remote Delve is ONE requested site "
+                      + "(his 2026-10-14 pick); every beat happens there.");
+            if (remote && r.place.reach != null)
+                Fatal("place.reach is set on a remote Delve; it holds other places near the main one and there are none.");
 
             // --- the pool, PER PLACE, which is the number the design sits on ---------------------
             // ⭐ Each place alias is drawn on its OWN conditions, so each gets its own pool figure: the
             // markers of the beats that happen there, the map marker, and that place's theme.
             if (!issues.Any(i => i.Fatal))
             {
-                var pool = DrawPopulation(env);
-                Console.WriteLine($"  corpus: {pool.Count} location(s) a place can draw (the POI pool plus every location carrying LocDungeonBossLocRef)");
+                var drawPool = DrawPopulation(env);
+                var reqPool = remote ? PcmRequestPool(env) : null;
+                if (remote)
+                    Console.WriteLine($"  corpus: {reqPool!.Count} place(s) a PCM_QuestGeneral request can put down (gen_delve pcmpool {PcmGeneralNode}), "
+                                      + "on a planet within duo_distanceformission parsecs. ⚠ Branch conditions are not evaluated: a humanless system reaches fewer");
+                else
+                    Console.WriteLine($"  corpus: {drawPool.Count} location(s) a place can draw (the POI pool plus every location carrying LocDungeonBossLocRef)");
                 var drawn = new Dictionary<int, HashSet<string>>();
                 foreach (int pi in PlacesUsed(r))
                 {
+                    var pool = pi == 0 && remote ? reqPool! : drawPool;
                     var here = MarkersAt(r, keys, pi);
                     var theme = ThemeOf(r, pi);
                     Console.WriteLine($"  -- the {PlaceLabel(pi)} place (alias "
@@ -1375,13 +1406,17 @@ namespace FrankyCLI
                 // exclusions, so the Delves drew exactly the places his quest refused. His eye found it
                 // ("It's mainly caves and natural locations atm"). The drop stays; it is never silent.
                 var baseQ = env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.@base);
+                // A remote main place is the remotePlaceFrom quest's alias, so what it would drop is THAT alias's.
+                var remoteQ = remote ? env.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>().FirstOrDefault(q => q.EditorID == t.remotePlaceFrom) : null;
+                if (remote && remoteQ == null) Fatal($"remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in this load order.");
                 if (baseQ?.Aliases != null)
                     foreach (int pi in PlacesUsed(r))
                     {
+                        var fromQ = pi == 0 && remoteQ != null ? remoteQ : baseQ;
                         // The third place is a clone, so what it would inherit and drop is its source's.
                         int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : PlaceAliasOf(t, pi, -1);
                         var theme = ThemeOf(r, pi);
-                        var la = baseQ.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
+                        var la = fromQ.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
                         foreach (var c in la?.Conditions ?? Enumerable.Empty<IConditionGetter>())
                         {
                             if (c.Data is not ILocationHasKeywordConditionDataGetter kd) continue;
@@ -2109,9 +2144,7 @@ namespace FrankyCLI
                 need.Add((n, rt.FormKey));
             }
 
-            var kids = branches.GroupBy(b => b.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList());
-            var leaves = env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerContentNodeGetter>()
-                .GroupBy(c => c.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList());
+            var (kids, leaves) = PcmTree(env);
 
             int total = 0, noWs = 0, noLoc = 0, joint = 0;
             var perNeed = new int[need.Count];
@@ -2129,9 +2162,7 @@ namespace FrankyCLI
                         { noWs++; Console.WriteLine($"    ? {leaf.EditorID}: content {leaf.Content.FormKey} is not a worldspace"); continue; }
                         if (ws.Location.IsNull || !env.LinkCache.TryResolve<ILocationGetter>(ws.Location.FormKey, out var loc))
                         { noLoc++; Console.WriteLine($"    ? {ws.EditorID}: worldspace has no Location"); continue; }
-                        var rts = new HashSet<FormKey>();
-                        foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
-                        { if (g == null) continue; foreach (var e in g) if (!e.LocationRefType.IsNull) rts.Add(e.LocationRefType.FormKey); }
+                        var rts = PoiOf(loc).RefTypes;
                         bool all = true;
                         var marks = new List<string>();
                         for (int i = 0; i < need.Count; i++)
@@ -2164,6 +2195,58 @@ namespace FrankyCLI
             for (int i = 0; i < need.Count; i++) Console.WriteLine($"    {need[i].name}: {perNeed[i]}");
             if (need.Count > 0) Console.WriteLine($"  carrying ALL {need.Count} named: {joint}");
             return 0;
+        }
+
+        /// <summary>The PCM tree as the game builds it: children grouped by their ParentNode, winning overrides.</summary>
+        private static (Dictionary<FormKey, List<IPlanetContentManagerBranchNodeGetter>> kids,
+                        Dictionary<FormKey, List<IPlanetContentManagerContentNodeGetter>> leaves)
+            PcmTree(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+            => (env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerBranchNodeGetter>()
+                    .GroupBy(b => b.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList()),
+                env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerContentNodeGetter>()
+                    .GroupBy(c => c.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList()));
+
+        /// <summary>A location's ref types (BOTH special-reference lists) and keywords, as the pool census reads them.</summary>
+        private static Poi PoiOf(ILocationGetter loc)
+        {
+            var p = new Poi { Edid = loc.EditorID ?? "" };
+            foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+            { if (g == null) continue; foreach (var e in g) if (!e.LocationRefType.IsNull) p.RefTypes.Add(e.LocationRefType.FormKey); }
+            if (loc.Keywords != null) foreach (var k in loc.Keywords) p.Keywords.Add(k.FormKey);
+            p.Vanilla = loc.FormKey.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase);
+            return p;
+        }
+
+        /// <summary>The PCM branch a PCM_QuestGeneral request places from (measured 2026-10-14: no node tests that keyword,
+        /// and every _Special node demands its own forced-location keyword).</summary>
+        private const string PcmGeneralNode = "PCM_LocationRequest_General";
+
+        /// <summary>
+        /// THE REMOTE PLACE'S CORPUS: every place a PCM_QuestGeneral request can put down, one Poi per distinct
+        /// worldspace's Location under PcmGeneralNode. Same walk as `gen_delve pcmpool`. Leaves with no Location are
+        /// unreadable and left out (7 on Defiant, 2026-10-14); branch conditions are not evaluated.
+        /// </summary>
+        private static List<Poi> PcmRequestPool(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+        {
+            var root = env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerBranchNodeGetter>()
+                .FirstOrDefault(b => b.EditorID == PcmGeneralNode);
+            var outp = new List<Poi>();
+            if (root == null) return outp;
+            var (kids, leaves) = PcmTree(env);
+            var seen = new HashSet<FormKey>();
+            var stack = new Stack<FormKey>(new[] { root.FormKey });
+            while (stack.Count > 0)
+            {
+                var fk = stack.Pop();
+                if (leaves.TryGetValue(fk, out var ls))
+                    foreach (var leaf in ls)
+                        if (seen.Add(leaf.Content.FormKey)
+                            && env.LinkCache.TryResolve<IWorldspaceGetter>(leaf.Content.FormKey, out var ws)
+                            && !ws.Location.IsNull && env.LinkCache.TryResolve<ILocationGetter>(ws.Location.FormKey, out var loc))
+                            outp.Add(PoiOf(loc));
+                if (kids.TryGetValue(fk, out var ks)) foreach (var k in ks) stack.Push(k.FormKey);
+            }
+            return outp;
         }
 
         private static int PoolKeywords(List<string> narrow)
@@ -2522,6 +2605,7 @@ namespace FrankyCLI
             int fail = 0;
             var made4 = new BuildMade();
             var madeBeats = new BeatsMade();
+            if (r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t);
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
                 made4.ThirdPlaceAlias = CreateThirdPlace(clone, t);
@@ -3070,6 +3154,33 @@ namespace FrankyCLI
         /// That is why an author cannot desynchronise the selection from the beats: there is no field
         /// in which to say something different.
         /// </summary>
+        /// <summary>
+        /// A REMOTE main place (place.remote): the clone's place alias is REPLACED by a deep copy of the template's
+        /// remotePlaceFrom quest's alias of the same ID, in the same list position, so the request (ALPS,
+        /// PCM_QuestGeneral and its planet condition), its flags and its GetDistanceGalacticParsec limit all come
+        /// from a quest that already ships remote, and nothing is constructed. The local base's GetDistance leash
+        /// to the player goes with the old alias, which is the point: a remote site is not near him.
+        /// WritePlaceConditions then re-emits markers and theme over it like any other place.
+        /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
+        /// link into it adds the esp to the esm's masters: 2026-10-08).
+        /// </summary>
+        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t)
+        {
+            var src = myMod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom);
+            if (src == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in {t.mod}."); return 1; }
+            var from = src.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+            if (from?.ALPS == null) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is not a PCM request (no ALPS)."); return 1; }
+            int at = clone.Aliases!.FindIndex(a => a is QuestLocationAlias l && l.ID == (uint)t.placeAlias);
+            if (at < 0) { Console.WriteLine($"REFUSED: the clone has no place alias {t.placeAlias}."); return 1; }
+            var old = (QuestLocationAlias)clone.Aliases[at];
+            var copy = from.DeepCopy();
+            if (copy.Name != old.Name) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is '{copy.Name}' and the base's is '{old.Name}'; the <Place> token would bind to a different name."); return 1; }
+            clone.Aliases[at] = copy;
+            Console.WriteLine($"  remote   : place alias {t.placeAlias} {copy.Name} is now {src.EditorID}'s PCM request "
+                              + $"({(copy.ALPS!.PcmTypeKeyword.IsNull ? "no type" : copy.ALPS.PcmTypeKeyword.FormKey.ToString())}), flags {copy.Flags}");
+            return 0;
+        }
+
         private static int WritePlaceConditions(Quest clone, int placeAlias,
                                                 Dictionary<string, FormKey> markers,
                                                 List<FormKey> require, List<FormKey> exclude)

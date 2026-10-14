@@ -181,6 +181,8 @@
       "collapsedPlaceAliases": [],
       "secondPlaceAlias": 10,
       "thirdPlace": { "cloneOf": 0, "name": "ThirdLocation" },
+      "remotePlaceFrom": "duo_artifact_remote_planet_qst01a",
+      "_remotePlaceFrom": "place.remote: true copies THIS quest's DungeonLocation (alias 0, a PCM_QuestGeneral request) over the base's, so the site is placed on another planet. Its alias layout matches the base's 0-5 (read 2026-10-14). One place only.",
       "cannot": [
         "dialogue -- the people stand there, his ruling",
         "a choose beat -- not yet; 06 keeps its driver until it exists and plays the same",
