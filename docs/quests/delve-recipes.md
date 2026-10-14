@@ -318,6 +318,13 @@ script that sets the beat's stage once the previous step's stage is done, plus a
 fragment script the build generates (`papyrus/gen/duo_qf_<id>.psc`, gitignored, never hand-edited) for
 the half that is Papyrus-only: objectives, the counter, taking delivered items, a message box.
 
+**One quest script, and only for a TURNED-DOWN mission** (2026-10-14, his catch: a rejected Delve could
+not be restarted). The removed driver was the only `OnQuestRejected` handler, and a fragment script is
+not attached to the quest, so the event cannot land there. Every beats Delve carries
+`papyrus/duo_delve_quest.psc`, which hides every objective the build wrote (`Objectives`, filled by the
+build) and calls `Stop()`, vanilla's shape (`SQ_TreasureMapQuestScript`). Its `.pex` is deployed once,
+shared by every Delve; the build's read-back checks it is the only quest script and carries every objective.
+
 | `type` | the player | stock hook | fragment |
 |---|---|---|---|
 | `use` | activates it; the prompt goes | `DefaultAliasOnActivate` | objective done, next shown |

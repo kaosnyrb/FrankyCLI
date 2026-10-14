@@ -597,6 +597,9 @@ namespace FrankyCLI
         private static string FragmentFunction(int stage) => $"Fragment_Stage_{stage:D4}_Item_00";
 
         /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
+        /// <summary>The quest-level script every beats Delve carries: OnQuestRejected only (papyrus/duo_delve_quest.psc).</summary>
+        private const string RejectScript = "duo_delve_quest";
+
         private sealed class BeatsMade
         {
             public string Script = "";
@@ -612,6 +615,7 @@ namespace FrankyCLI
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
             public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
+            public List<int> RejectObjectives = new();    // what duo_delve_quest hides when the mission is turned down
             public List<(int marker, int activator)> DroppedSlots = new();   // the base's object slots no beat took, removed
             public (int stage, List<string> lines)? HandBack;   // the talk that ends the Delve: its stage and the RemoveItem lines it must run
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
@@ -769,6 +773,11 @@ namespace FrankyCLI
             if (vma.Scripts.Count != 0)
             { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
             Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED; the stages are the state machine");
+            // The driver was also the only OnQuestRejected handler, so one small quest script takes that job alone
+            // (his 2026-10-14: a turned-down Delve could not be restarted). Its Objectives are filled at the end of
+            // the build, once every objective is written (RejectScript).
+            vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
+            Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
 
             var steps = StepsOf(r);
             var beatStage = StagesOf(steps, t.completeStage);
@@ -1732,6 +1741,18 @@ namespace FrankyCLI
             bm.Script = name;
             bm.FragStages = code.Keys.ToList();
 
+            // The reject script's Objectives: every objective the quest now carries, so a turned-down Delve leaves
+            // nothing on screen whichever step was showing.
+            var reject = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript);
+            if (reject == null) { Console.WriteLine($"REFUSED: {RejectScript} is not on the quest."); return 1; }
+            var objs = clone.Objectives.Select(o => (int)o.Index).OrderBy(i => i).ToList();
+            if (objs.Count == 0) { Console.WriteLine("REFUSED: the quest has no objectives for the reject script to hide."); return 1; }
+            reject.Properties.Clear();
+            var ol = new ScriptIntListProperty { Name = "Objectives", Flags = ScriptProperty.Flag.Edited };
+            ol.Data.AddRange(objs);
+            reject.Properties.Add(ol);
+            bm.RejectObjectives = objs;
+
             string dir = Path.Combine(PapyrusDir(), "gen");
             Directory.CreateDirectory(dir);
             bm.PscPath = Path.Combine(dir, name + ".psc");
@@ -2024,7 +2045,13 @@ namespace FrankyCLI
             var q = m.Quests.FirstOrDefault(x => x.EditorID == r.id);
             if (q?.VirtualMachineAdapter == null) { Console.WriteLine("    FAIL: the quest or its VMAD is not in the written file."); return 1; }
             var vma = q.VirtualMachineAdapter;
-            fail += Check("no quest-level script (no driver)", vma.Scripts.Count.ToString(), "0");
+            // No driver: the only quest-level script is the reject handler, carrying every objective.
+            fail += Check("quest-level scripts (no driver, the reject handler only)", string.Join(",", vma.Scripts.Select(s => s.Name)), RejectScript);
+            var rj = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript)?.Properties.OfType<IScriptIntListPropertyGetter>()
+                .FirstOrDefault(p => p.Name == "Objectives");
+            fail += Check("the reject handler hides every objective",
+                          rj == null ? "no Objectives" : string.Join(",", rj.Data),
+                          string.Join(",", q.Objectives.Select(o => (int)o.Index).OrderBy(i => i)));
             fail += Check("fragment script", vma.Script?.Name ?? "none", bm.Script);
             fail += Check("fragment stages", string.Join(",", vma.Fragments.Select(f => f.Stage).OrderBy(x => x)), string.Join(",", bm.FragStages));
             foreach (var f in vma.Fragments)
