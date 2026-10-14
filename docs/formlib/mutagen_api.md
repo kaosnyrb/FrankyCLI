@@ -274,18 +274,29 @@ Both appear in `QuestLocationAlias.Conditions` as well as `IQuestReferenceAlias.
 
 ## Scene.Index and Scene.SCPI — top-level topic ordering
 
-For interactive dialogue scenes (flag `0x2000` Top Level), Starfield orders menu options by `Scene.Index` and `Scene.SCPI`. Both must be set.
+> **⚠ CORRECTED 2026-10-14: the sort key is NOT established, and this section used to say it was.**
+> Measured against the game: a Delve talk (`duo_delve_missionboard02a`, his filmed plays 2026-10-14) put
+> its quest-moving choice LAST with Index 0/10/20/30 and again with Index 1/2/3/4, every scene at SCPI 100;
+> its three side questions showed in creation order. So **lower Index = higher in the menu is refuted**,
+> and SCPI was never varied. Vanilla's `Sandra_QuestStart / _Stage10 / _QuestEnd` read as Index 1/2/3 with
+> **SCPI 60 on all three**, so SCPI does not separate them either; and those three are likely gated on
+> different stages, so they may never share a menu at all. **Still unseparated:** creation order (the
+> quest-moving scene was created first, lowest FormID, first in the quest's scene list) and its reply
+> setting a stage (`SetParentQuestStage`). The conventions below are what `NPCDialogueNoun` DOES, not
+> what the game has been watched doing.
+
+For interactive dialogue scenes (flag `0x2000` Top Level), `NPCDialogueNoun` sets both `Scene.Index` and `Scene.SCPI` (see the warning above for what is actually known).
 
 | Field | Mutagen type | Notes |
 |---|---|---|
-| `Scene.Index` | `uint?` | Menu sort order — lower = higher in menu |
+| `Scene.Index` | `uint?` | Vanilla numbers an ordered conversation from 1. "Lower = higher in menu" is REFUTED (see above) |
 | `Scene.SCPI` | `MemorySlice<byte>?` | **2 bytes (ushort) only** — runtime error if 4 bytes written |
 
-**Priority convention (confirmed in NPCDialogueNoun):**
+**Priority convention (what NPCDialogueNoun sets; NOT shown to order the menu in game):**
 - Mainline progression scenes: `SCPI = BitConverter.GetBytes((ushort)100)` — shown first
 - Color/side scenes: `SCPI = BitConverter.GetBytes((ushort)0)` — shown after
 
-**Index convention:** assign in increments of 10 starting at 0 across all topic scenes in the quest:
+**Index convention (NPCDialogueNoun's; vanilla numbers from 1 and leaves unordered scenes at 0):** assign in increments of 10 starting at 0 across all topic scenes in the quest:
 ```csharp
 topicScene.Index = (uint)(i * 10);
 topicScene.SCPI  = BitConverter.GetBytes((ushort)100);

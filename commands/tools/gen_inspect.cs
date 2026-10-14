@@ -1140,6 +1140,8 @@ namespace FrankyCLI
             Console.WriteLine($"  Flags:    {scene.Flags}  (0x{(uint)scene.Flags:X8})");
             // The conversation menu's order key is in question (his missionboard02a play, 2026-10-14): print it.
             Console.WriteLine($"  Index:    {(scene.Index.HasValue ? scene.Index.Value.ToString() : "null")}");
+            // SCPI, the other candidate (docs/formlib/mutagen_api.md calls it a priority, from our own builder, not from the game).
+            Console.WriteLine($"  SCPI:     {(scene.SCPI.HasValue ? BitConverter.ToString(scene.SCPI.Value.ToArray()) + (scene.SCPI.Value.Length == 2 ? $" (ushort {BitConverter.ToUInt16(scene.SCPI.Value.ToArray(), 0)})" : "") : "null")}");
             Console.WriteLine($"  VNAM:     {(scene.VNAM.HasValue ? BitConverter.ToString(scene.VNAM.Value.ToArray()) : "null")}");
             Console.WriteLine($"  Notes:    {scene.Notes}");
             if (scene.Actors != null && scene.Actors.Count > 0)
