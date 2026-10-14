@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "id": "duo_delve_remote02a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
+  "_deal": "The remote planet pool, as remote01a (his 2026-10-14).",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/backlog.md, new candidates: retrieve under fire (carry it out while they come)",
+  "_note": [
+    "EXTRACTION, a new type, written 2026-10-12 on his \"First we need 01a and 02a\" and his pick of the",
+    "retrieve-under-fire verb the same hour.",
+    "Shape: pick up the case, the site wakes and three waves come (09a's hold, with its wave plumbing unchanged),",
+    "then carry the case out to the crew's beacon. 09a is pickup, deliver, hold; this is pickup, hold, deliver,",
+    "so the thing you defend is in your pack and the walk out is the last beat.",
+    "No message boxes: this is an action type (his 2026-10-08 ruling for holds). The turn is told by the hold's",
+    "say line, so it is heard in play rather than read in the journal.",
+    "The pickup carries no journal on purpose: the hold's stage is set the same instant and the log shows only the",
+    "newest line.",
+    "Wave sizes and styles copy 09a, which are ELIZA'S PLACEHOLDER escalation. The words are Jessica's.",
+    "MODEL NOT ON THE APPROVED LIST, his eye first: Satellite_Beacon.nif (vanilla's Satellite_Beacon static) as the",
+    "crew's drop beacon. The sample case is the approved freight crate.",
+    "Pay: a combat job, and a tier above 07a's would suit it; whether a single-ending beats Delve can set its own tier",
+    "is Eliza's open question (type 8's page), so it pays the base's stage 100 for now."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "No natural or cave sites: his 09a ruling 2026-10-12 once waves spawn close behind the player, and the base's own exclusions.",
+    "remote": true,
+    "_remote": "REMOTE COPY OF duo_delve02a, made 2026-10-14 by Eliza on his plan: 'create the json for the remotes but then I'm going to get Jessica to rewrite them so they are unique'. The STRUCTURE is 02a's (beats, markers, theme), the site requested on another planet. THE WORDS ARE STILL 02a'S AND ARE PLACEHOLDERS: Jessica's to rewrite before this is built. LocTypeTest excluded as the remote base does."
+  },
+  "prose": {
+    "name": "Extraction: Core Samples on <Planet>",
+    "briefing": "A mining crew was run off the <Place> and had to leave a case of core samples behind. They want it back, and whoever ran them off may not have gone far."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "say": "They're coming back for it. Hang on to that case.",
+      "_say": "Moved here from the hold beat 2026-10-12 (Eliza): a beat's say plays when its stage is SET, and the hold's is set when the third wave dies, so the warning would have come after the danger. Beat 1's stage is where wave 1 spawns, as 09a's \"Keep an eye out\" sits on the beat before its hold. Words unchanged.",
+      "at": "RETravelA1LocRef",
+      "objective": "Recover the core sample case at the <Place>",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Abandoned Sample Case",
+      "item": "Core Sample Case"
+    },
+    {
+      "type": "hold",
+      "at": "RETravelB1LocRef",
+      "objective": "Hold off the attackers",
+      "journal": "As soon as I lifted the sample case, the people who ran the crew off came back for it. I have to deal with them before I can get it out.",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "revealObjective": "Stop the attackers"
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "objective": "Take the samples to the crew's drop beacon",
+      "journal": "I got the crew's core samples out of the <Place> under fire and left them at their drop beacon for pickup.",
+      "model": "Meshes\\ccs\\commsmast01.nif",
+      "name": "Crew Drop Beacon",
+      "say": "Got it. That's a whole season's work. Thank you."
+    }
+  ],
+  "speaker": {
+    "name": "Dig Boss",
+    "voice": "GenericMale01",
+    "elevenlabs": "iP95p4xoKVk53GoZ742B"
+  },
+  "broadcast": "We had to leave our samples behind when we got run off. Bring them out and you'll be paid. Watch yourself, they didn't go far.",
+  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Chris, Charming, Down-to-Earth', NOT yet heard in game (voices.md); his ear decides."
+}

@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "id": "duo_delve_remote03a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
+  "_deal": "The remote planet pool, as remote01a (his 2026-10-14).",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/v2-mission-types.md, type 1 (the fix-up); office/projects/delves/stages-not-a-driver.md",
+  "_note": [
+    "TYPE 1, THE FIX-UP, the first beats Delve: three broken things at a peopled POI, repaired in ANY ORDER",
+    "behind one counted objective. Built by Eliza 2026-10-08 on his \"yeah build that now\"; every player-facing",
+    "word is Jessica's, written 2026-10-08 on his \"yeah 2\". Each repair sets its OWN stage, in whatever order",
+    "the player does them, so no journal line may say first, next or last. His play 17:4x: it completes; the",
+    "repaired ones showed their markers again (Eliza's).",
+    "2026-10-09: each repair now clears its own marker, and 'recap' is stage 100's line, the last thing the",
+    "player reads. The recap is Jessica's, written 2026-10-09 (907232d); this note said placeholder until 2026-10-10."
+  ],
+  "recap": "The crew at the <Place> had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Peopled, so somebody is there to have the broken kit (type 1's row: 'three broken things at a peopled POI'). Keeps the base's own exclusions (no natural sites, no caves).",
+    "remote": true,
+    "_remote": "REMOTE COPY OF duo_delve07a, made 2026-10-14 by Eliza on his plan: 'create the json for the remotes but then I'm going to get Jessica to rewrite them so they are unique'. The STRUCTURE is 07a's (beats, markers, theme), the site requested on another planet. THE WORDS ARE STILL 07a'S AND ARE PLACEHOLDERS: Jessica's to rewrite before this is built. LocTypeTest excluded as the remote base does."
+  },
+  "prose": {
+    "name": "Repairs: Water Reclaimers on <Planet>",
+    "briefing": "The crew at the <Place> have three water reclaimers down and nobody spare to look at them. I said I'd go and get them running."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "fix",
+      "at": "RECenterLocRef",
+      "objective": "Repair the water reclaimers at the <Place>",
+      "journal": "The faulty reclaimer had a clogged intake filter. I've swapped in a clean one and it's drawing water again.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Faulty Water Reclaimer"
+    },
+    {
+      "type": "use",
+      "group": "fix",
+      "at": "RETravelA1LocRef",
+      "journal": "The leaking reclaimer only needed its hose clamps tightened. It's holding pressure now.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Leaking Water Reclaimer"
+    },
+    {
+      "type": "use",
+      "group": "fix",
+      "at": "RETravelB1LocRef",
+      "journal": "The stalled reclaimer had a seized pump. I've freed it, reset the breaker, and it's running.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Stalled Water Reclaimer"
+    }
+  ],
+  "speaker": {
+    "name": "Crew Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": "Three reclaimers down and nobody spare to look at them. If you can get them running, there's pay in it.",
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides.",
+  "approach": {
+    "to": 1,
+    "civilians": true,
+    "_approach": "His fact 2026-10-11: LocTypeOE_NonHostile POIs mostly have nobody unless a quest is there, so the crew the briefing names must be placed. Civilians appear round the first reclaimer on first approach."
+  }
+}
