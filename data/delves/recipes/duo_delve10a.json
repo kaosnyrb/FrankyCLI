@@ -47,7 +47,8 @@
       "objective": "Check the camp beacon at the <Place>",
       "journal": "The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.",
       "model": "Meshes\\ccs\\commsmast01.nif",
-      "name": "Abandoned Camp Beacon"
+      "name": "Abandoned Camp Beacon",
+      "say": "To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it."
     },
     {
       "type": "pickup",
@@ -79,6 +80,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
-  "broadcast": "To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it.",
+  "_broadcast": "Moved onto the beacon 2026-10-14 22:4x, his play: the start broadcast then the beacon told the same thing twice (\"Either the first recording should be after the beacon or we need another thing between beacon and package\"). The beacon IS the recording now; Jessica's words unchanged.",
   "_speech": "Radio rules: no names, no places, one clause where it can be. The broadcast gives the reason before the place; the beacon gives the place. Voice: Clara, as 07a's Crew Lead; not yet heard in game."
 }
