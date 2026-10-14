@@ -5,17 +5,19 @@
   "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
   "_deal": "The remote planet pool, as remote01a (his 2026-10-14).",
   "author": "jessica",
-  "source": "home-office office/projects/delves/v2-mission-types.md, type 1 (the fix-up); office/projects/delves/stages-not-a-driver.md",
+  "source": "Structure from duo_delve07a (the fix-up); story and words new, Jessica 2026-10-14",
   "_note": [
-    "TYPE 1, THE FIX-UP, the first beats Delve: three broken things at a peopled POI, repaired in ANY ORDER",
-    "behind one counted objective. Built by Eliza 2026-10-08 on his \"yeah build that now\"; every player-facing",
-    "word is Jessica's, written 2026-10-08 on his \"yeah 2\". Each repair sets its OWN stage, in whatever order",
-    "the player does them, so no journal line may say first, next or last. His play 17:4x: it completes; the",
-    "repaired ones showed their markers again (Eliza's).",
-    "2026-10-09: each repair now clears its own marker, and 'recap' is stage 100's line, the last thing the",
-    "player reads. The recap is Jessica's, written 2026-10-09 (907232d); this note said placeholder until 2026-10-10."
+    "REPAIRS, REMOTE: the landing beacons. Written by Jessica 2026-10-14 on his 'make them unique', over Eliza's",
+    "remote copy of 07a. Structure unchanged: three repairs in ANY ORDER behind one counted objective, civilians",
+    "on first approach, recap on stage 100. Each repair sets its own stage in whatever order, so no journal line",
+    "says first, next or last.",
+    "Why it is remote, in the fiction: the beacons send the supply ships past, and any tech the crew could call is on one of them.",
+    "The beacon model is lit and blinking whatever state it is in, so no fault says 'dark': each is wrong, not off.",
+    "No say on the group: members fire in any order, so a line on one of them would not be the last.",
+    "MODEL NOT ON THE APPROVED LIST, his eye first: Beacon01 (vanilla outpost beacon, STANDS, 4.9 m, measured",
+    "2026-10-14). It is the beacon players build for their own outposts, which is why it reads as somebody's pad."
   ],
-  "recap": "The crew at the <Place> had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
+  "recap": "The crew at the <Place> had supply ships flying straight past them. I got all three landing beacons broadcasting properly, so the runs can find the pad again.",
   "place": {
     "theme": {
       "require": [
@@ -27,51 +29,51 @@
         "LocTypeTest"
       ]
     },
-    "_theme": "Peopled, so somebody is there to have the broken kit (type 1's row: 'three broken things at a peopled POI'). Keeps the base's own exclusions (no natural sites, no caves).",
+    "_theme": "Peopled, so somebody is there to own the pad. Keeps the base's own exclusions (no natural sites, no caves).",
     "remote": true,
-    "_remote": "REMOTE COPY OF duo_delve07a, made 2026-10-14 by Eliza on his plan: 'create the json for the remotes but then I'm going to get Jessica to rewrite them so they are unique'. The STRUCTURE is 07a's (beats, markers, theme), the site requested on another planet. THE WORDS ARE STILL 07a'S AND ARE PLACEHOLDERS: Jessica's to rewrite before this is built. LocTypeTest excluded as the remote base does."
+    "_remote": "REMOTE (place.remote), made 2026-10-14 by Eliza from 07a's structure on his plan; story and words rewritten by Jessica the same morning, so nothing here is a placeholder any more. LocTypeTest excluded as the remote base does."
   },
   "prose": {
-    "name": "Repairs: Water Reclaimers on <Planet>",
-    "briefing": "The crew at the <Place> have three water reclaimers down and nobody spare to look at them. I said I'd go and get them running."
+    "name": "Repairs: Landing Beacons on <Planet>",
+    "briefing": "The crew at the <Place> have three landing beacons sending the wrong signal, and supply ships keep flying past. Any tech they could call is on one of those ships, so I said I'd go."
   },
   "beats": [
     {
       "type": "use",
       "group": "fix",
       "at": "RECenterLocRef",
-      "objective": "Repair the water reclaimers at the <Place>",
-      "journal": "The faulty reclaimer had a clogged intake filter. I've swapped in a clean one and it's drawing water again.",
-      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
-      "name": "Faulty Water Reclaimer"
+      "objective": "Fix the landing beacons at the <Place>",
+      "journal": "This beacon was still broadcasting the last owners' landing code. I cleared it and loaded the crew's.",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Misconfigured Landing Beacon"
     },
     {
       "type": "use",
       "group": "fix",
       "at": "RETravelA1LocRef",
-      "journal": "The leaking reclaimer only needed its hose clamps tightened. It's holding pressure now.",
-      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
-      "name": "Leaking Water Reclaimer"
+      "journal": "This beacon's antenna feed was cracked, so it only reached a few hundred metres. I patched it and it's carrying again.",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Weak Landing Beacon"
     },
     {
       "type": "use",
       "group": "fix",
       "at": "RETravelB1LocRef",
-      "journal": "The stalled reclaimer had a seized pump. I've freed it, reset the breaker, and it's running.",
-      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
-      "name": "Stalled Water Reclaimer"
+      "journal": "A power surge had left this beacon repeating one burst over and over. I reset it and it's back on its proper cycle.",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Looping Landing Beacon"
     }
   ],
   "speaker": {
-    "name": "Crew Lead",
-    "voice": "GenericFemale01",
-    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+    "name": "Outpost Lead",
+    "voice": "GenericMale01",
+    "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
   },
-  "broadcast": "Three reclaimers down and nobody spare to look at them. If you can get them running, there's pay in it.",
-  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides.",
+  "broadcast": "Our landing beacons are sending the wrong signal and the supply ships keep flying past. We can't get a tech down here. Fix them and there's pay in it.",
+  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Killian' (Irish, calm), NOT yet heard in game (voices.md); his ear decides.",
   "approach": {
     "to": 1,
     "civilians": true,
-    "_approach": "His fact 2026-10-11: LocTypeOE_NonHostile POIs mostly have nobody unless a quest is there, so the crew the briefing names must be placed. Civilians appear round the first reclaimer on first approach."
+    "_approach": "His fact 2026-10-11: LocTypeOE_NonHostile POIs mostly have nobody unless a quest is there, so the crew the briefing names must be placed. Civilians appear round the first beacon on first approach."
   }
 }

@@ -5,17 +5,16 @@
   "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
   "_deal": "The remote planet pool, as remote01a (his 2026-10-14).",
   "author": "jessica",
-  "source": "home-office office/projects/delves/type-06-hold-the-point.md, variant a (the relay alignment)",
+  "source": "Structure from duo_delve09a (hold the point); story and words new, Jessica 2026-10-14",
   "_note": [
-    "TYPE 6, HOLD THE POINT, the first hold: bring the relay, start it, hold three waves. Built by Eliza",
-    "2026-10-09 on his \"lets try it without the talking first, just the gameplay\": no relay voice, no",
-    "message boxes (his 2026-10-08 ruling for this type). The design's beats 1 and 2 (bring, start) are",
-    "folded into one deliver at the dish for this first test; fitting the part IS starting it.",
-    "Jessica's words: the deliver and hold objectives, the deliver journal, and the hold journal (her recap).",
-    "2026-10-10: prose.name, prose.briefing and the pickup's objective are now Jessica's; the item name (Eliza's) is kept on purpose, plain and new.",
-    "2026-10-09: speech, his pick of voice (ElevenLabs CwhRBWXzGAHq8TQ4Fs17) and speaker (\"relay control yeah\"). The broadcast is Jessica's since 2026-10-10 (radio rules: no names, no places).",
-    "2026-10-09: the deliver and hold beats' say lines are HIS words (\"Great that's aligning now, keep an eye out\", \"Link is online, thanks for your help\"), punctuated.",
-    "2026-10-10: wave styles, his asks (\"spawning the enemies at points the player isnt looking at\", \"horde vs squad\"). squad, squad, horde is ELIZA'S PLACEHOLDER escalation; the shape is Jessica's."
+    "DEFENSE, REMOTE: the data recovery. Written by Jessica 2026-10-14 on his 'make them unique', over Eliza's",
+    "remote copy of 09a. Structure unchanged: pickup, deliver, hold (defend the deliver beat), no message boxes.",
+    "Waves are ELIZA'S PLACEHOLDER escalation. What is new: the thing you hold is a download, not a machine",
+    "aligning, and the client is off-world, which is the remote fiction: they cannot reach the files until the",
+    "terminal has power, and then they copy them across themselves while you keep people off it.",
+    "MODELS NOT ON THE APPROVED LIST, his eye first: Power_Cell_Static_PackinOnly (vanilla, STANDS, 0.57 m, small",
+    "on the ground) as the spare cell; MobileTerminal_01 (vanilla wheeled field terminal, STANDS, 1.5 m; Kim's",
+    "pick for 05a's console) as the research terminal. Both measured with gen_inspect bounds 2026-10-14."
   ],
   "place": {
     "theme": {
@@ -28,42 +27,42 @@
     },
     "_theme": "No natural or cave sites, his ruling 2026-10-12 (\"set this one to not use natural and cave pois\"), once the waves spawn close behind him. Before that, 2026-10-09 to 10-12: no theme demand at all, his ruling after the first good play (drop LocTypeOE_NonHostile and the base's own natural and cave exclusions).",
     "remote": true,
-    "_remote": "REMOTE COPY OF duo_delve09a, made 2026-10-14 by Eliza on his plan: 'create the json for the remotes but then I'm going to get Jessica to rewrite them so they are unique'. The STRUCTURE is 09a's (beats, markers, theme), the site requested on another planet. THE WORDS ARE STILL 09a'S AND ARE PLACEHOLDERS: Jessica's to rewrite before this is built. LocTypeTest excluded as the remote base does."
+    "_remote": "REMOTE (place.remote), made 2026-10-14 by Eliza from 09a's structure on his plan; story and words rewritten by Jessica the same morning, so nothing here is a placeholder any more. LocTypeTest excluded as the remote base does."
   },
   "prose": {
-    "name": "Defense: Relay Alignment on <Planet>",
-    "briefing": "The relay at the <Place> has lost its transmitter, and a replacement was dropped at the site. Fitting it will make noise, and noise out here brings company."
+    "name": "Defense: Data Recovery on <Planet>",
+    "briefing": "A research team pulled out of the <Place> and left their data behind. The terminal still has it, but it has no power, and copying it off will take time."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
-      "objective": "Find the relay transmitter at the <Place>",
-      "model": "Meshes\\ccs\\transmittercrate01.nif",
-      "name": "Transmitter Crate",
-      "item": "Relay Transmitter Unit"
+      "objective": "Find the team's spare power cell at the <Place>",
+      "model": "Meshes\\SetDressing\\PowerCell\\PowerCell01.nif",
+      "name": "Spare Power Cell",
+      "item": "Research Terminal Cell"
     },
     {
       "type": "deliver",
       "at": "RECenterLocRef",
-      "objective": "Start the relay alignment",
-      "journal": "The relay dish is fitted, but it has to align before it can lock on, and the noise has drawn attention. I need to hold until it's done.",
-      "model": "Meshes\\ccs\\relaydish01.nif",
-      "name": "Relay Dish",
-      "say": "Great, that's aligning now. Keep an eye out."
+      "objective": "Power the research terminal",
+      "journal": "The terminal is powered and the team is copying their files off-world. The uplink lit up every receiver nearby, and somebody is coming to see. I need to hold until the copy finishes.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Research Terminal",
+      "say": "We've got a connection. Copying now. Keep them off it."
     },
     {
       "type": "hold",
       "at": "RETravelB1LocRef",
-      "objective": "Defend the relay",
-      "journal": "I fitted the relay at the <Place> and held off three waves of attackers while it aligned. The relay is live.",
+      "objective": "Defend the terminal",
+      "journal": "I powered the research terminal at the <Place> and held it while the team copied their data off-world. They have all of it.",
       "waves": 3,
       "size": [
         3,
         5
       ],
       "defend": 2,
-      "say": "Link is online. Thanks for your help.",
+      "say": "That's the last file. All of it. Thank you.",
       "style": [
         "squad",
         "squad",
@@ -72,9 +71,10 @@
     }
   ],
   "speaker": {
-    "name": "Relay Control",
-    "voice": "GenericMale01",
-    "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
+    "name": "Research Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "Xb7hH8MSUJpSbSDYk0k2"
   },
-  "broadcast": "We've lost a relay down there. The replacement transmitter is at the site. Fit it to the dish and stay with it while it aligns. It will be loud, and loud draws company."
+  "broadcast": "We had to leave our data behind. The terminal still has it, it just needs power. Get it running and keep it running until we've copied everything.",
+  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Alice, Clear, Engaging Educator' (British), NOT yet heard in game (voices.md); his ear decides."
 }
