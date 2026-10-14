@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "id": "duo_delve_missionboard02a",
+  "template": "board",
+  "_note": [
+    "CARGO RUN, REMOTE TO REMOTE, ON THE BOARD. His 2026-10-14 14:33: 'thinking we should have a cargo run mission,",
+    "remote to remote. Talking on both ends', then 14:53 'it'll be both types eventually, but let's start missionboard'",
+    "and 'This is peak dad game'. Design and words are Jessica's.",
+    "The shape is 15a's (talk, pickup, talk; a hand-back talk takes the cargo, as 11a's), with a planet jump between",
+    "the two talks. The two ends know each other and the player is the only thing travelling between them: each",
+    "tells you something about the other, and the far end answers what the near end said.",
+    "THE LINT FAILS ON PURPOSE: this is the request to Eliza, as 10a's red lint was. The board template today takes",
+    "fights only (defeat, clear, hold), one place, and no <SecondPlace> or <SecondPlanet> token. This needs: talk and",
+    "pickup on the board, a second place that is its own remote request (another planet), and the two tokens. The",
+    "same second-place work unblocks 10a. How 'second' is spelled on a board recipe is hers; written here as on beats.",
+    "Pay: med on the hand-back (it crosses planets, README rule 3).",
+    "MODEL: AK_Toolbox_01_Closed, vanilla, STANDS (gen_inspect bounds 2026-10-14), already Overtime's own cargo-run",
+    "pickup on MB26 and MB27, so not new to the mod. Not on the Delve approved list yet. Small, about half a metre.",
+    "Voices: not yet heard in game; his ear decides. No names or places in any voiced line."
+  ],
+  "author": "jessica",
+  "source": "home-office office/projects/delves (his 2026-10-14 ask); shape from duo_delve15a",
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
+      }
+    },
+    "_theme": "Both ends are working sites with an engineer at them, so no natural landmarks and no caves."
+  },
+  "prose": {
+    "name": "Cargo Run: Engineer's Toolbox to <SecondPlanet>",
+    "briefing": "A retiring engineer at the <Place> wants her toolbox taken to the apprentice she trained, who runs his own site at the <SecondPlace> now.",
+    "card": "Private cargo run. Collect one toolbox from the <Place>, <Planet> and deliver it to the <SecondPlace>, <SecondPlanet>. Handle with care. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the engineer at the <Place>",
+      "journal": "The engineer is retiring and wants her toolbox to go to the apprentice she trained. She says he'll pretend he doesn't need it.",
+      "person": {
+        "name": "Odile Rasmussen",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "voice": "GenericFemale01",
+        "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
+      },
+      "greeting": "You're the hauler? Good. It's only one box, but it's the one that matters.",
+      "exchanges": [
+        {
+          "prompt": "Where's the box going?",
+          "reply": "To the lad I trained. He runs his own site now, off-world. It's by the door. Don't let him tell you he doesn't need it."
+        },
+        {
+          "prompt": "Why send it now?",
+          "reply": "Because I'm done. Forty years of fixing other people's mistakes. My knees decided before I did."
+        },
+        {
+          "prompt": "What's in it?",
+          "reply": "Every tool I ever trusted. Half of them I made. The big wrench was my mother's, so tell him to mind it."
+        },
+        {
+          "prompt": "Was he a good apprentice?",
+          "reply": "The worst. Asked why about everything. Took me a year to see that was the point."
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets this beat's stage; the rest loop back in any order. Voice is ElevenLabs' 'Lily, Velvety Actress' (British, middle aged)."
+    },
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "objective": "Collect the toolbox",
+      "journal": "It's heavier than it looks. Every tool in it has been cleaned and oiled, and the big wrench is wrapped in a cloth on its own.",
+      "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
+      "name": "Engineer's Toolbox",
+      "item": "Retired Engineer's Toolbox"
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the toolbox to the engineer at the <SecondPlace>",
+      "journal": "I delivered the toolbox. He opened it, found the wrench in its cloth, and didn't say anything for a while.",
+      "reward": "med",
+      "person": {
+        "name": "Kit Navarro",
+        "template": "UC_NA_MASTWorkerMale02",
+        "voice": "GenericMale01",
+        "elevenlabs": "inKOuEy40NdNVHxcqekZ"
+      },
+      "greeting": "That's her box. I'd know it anywhere. She actually sent it.",
+      "exchanges": [
+        {
+          "prompt": "She wanted you to have it.",
+          "reply": "She told me I'd never be ready for this box. I suppose that means I am. I'll call her tonight. Thank you."
+        },
+        {
+          "prompt": "She said you'd pretend you didn't need it.",
+          "reply": "Ha. I've been borrowing a wrench off the cook for a month. Don't tell her that."
+        },
+        {
+          "prompt": "What was she like to work for?",
+          "reply": "Hard. Fair. She'd make you redo a weld three times and then buy you dinner."
+        },
+        {
+          "prompt": "She said you asked why about everything.",
+          "reply": "Still do. She's the reason I know any of the answers."
+        }
+      ],
+      "_talk": "The HAND-BACK: the whole last step, so its stage is 100 and it takes the toolbox. Each prompt answers something she said at the first site. Voice is ElevenLabs' 'Hunter' (Canadian, chill, young)."
+    }
+  ]
+}
