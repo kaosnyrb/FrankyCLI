@@ -1,7 +1,9 @@
 {
   "schema": 1,
-  "id": "duo_delve01b",
+  "id": "duo_delve_remote01a",
   "template": "beats",
+  "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
+  "_deal": "The remote planet pool, his 2026-10-14: 'this will be in the remote quest pool'.",
   "author": "jessica",
   "source": "home-office office/projects/delves/backlog.md, new candidates: survey (scan N things at a site)",
   "_note": [
@@ -27,7 +29,7 @@
     },
     "_theme": "Keeps the base's own exclusions (no natural sites, no caves). A ground survey before somebody builds reads right at a worked site.",
     "remote": true,
-    "_remote": "THE FIRST REMOTE DELVE, a TEST (Eliza, 2026-10-14, his pick 'a' after 'I got sick of travelling'): 01a's recipe and Jessica's words unchanged, with the site REQUESTED on another planet. LocTypeTest excluded as the remote base's own alias does. Not dealt: startquest duo_delve01b to try it. What it proves: the request places a site carrying the four beat markers and the mission starts."
+    "_remote": "THE FIRST REMOTE DELVE (Eliza, 2026-10-14, his pick 'a' after 'I got sick of travelling'): 01a's recipe and Jessica's words unchanged, with the site REQUESTED on another planet. Built as duo_delve01b and played at his glass 09:10, 'worked perfectly'; renamed the same morning on his word because a letter means same content, different lore, and this is the same lore by another route. Remote Delves number in their own series, duo_delve_remoteNNx, as his quests carry the route in the name. LocTypeTest excluded as the remote base does."
   },
   "prose": {
     "name": "Survey: Seismic Sensors on <Planet>",
