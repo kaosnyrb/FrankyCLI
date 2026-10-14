@@ -475,6 +475,12 @@ properties the driver set (`questScriptKeeps` in the row). What changes from a s
   anyone takes it, so step one's spawn, its objective, its counters and its `broadcast` all go on the accept
   stage (`entryStage`), and the first step's hooks wait for it. Beat stages number from 20. Verify refuses a
   stage that runs on start and any fragment below 10.
+- **The call waits for him at the site.** A board mission is a posting (his 2026-10-14: *"You shouldn't rechieve radio
+  messages just after picking up a missionboard mission"*), so `broadcast` plays on `arrivalStage` 15, set by a stock
+  distance hook on step one's marker within 250 m of the player, armed only after the accept. The base has no player
+  alias, so the slate base's (32) is copied in.
+- **Every link to the base is remapped**, conditions included: MB28a's stage 100 chooses its completing entry on
+  `GetStageDone(<itself>, 10)`, and a clone still testing MB28a never finished (his first play).
 - **It pays through the board.** The last stage waits for its radio line and calls `MissionComplete()`
   (vanilla's own stage-100 fragment, autocast and all), never `CompleteQuest()` and `Stop()`. A beat's
   `reward` tier sets the script's `RewardAmountGlobal` and its `Actual`, which the card shows; never the
