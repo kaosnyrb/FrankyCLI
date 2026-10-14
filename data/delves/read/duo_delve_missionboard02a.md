@@ -15,12 +15,12 @@
 
 🗣️ **Odile Rasmussen**
 
-> You're the hauler? Good. It's only one box, but it's the one that matters.
+> You're the hauler? Good. I'm retiring, and my toolbox goes to the lad I trained. It's only one box, but it's the one that matters.
 
 **▸ Where's the box going?** *(ends the talk)*
-> To the lad I trained. He runs his own site now, off-world. It's by the door. Don't let him tell you he doesn't need it.
+> He runs his own site now, off-world. The box is by the door. Don't let him tell you he doesn't need it.
 
-**▸ Why send it now?**
+**▸ Why retire now?**
 > Because I'm done. Forty years of fixing other people's mistakes. My knees decided before I did.
 
 **▸ What's in it?**
@@ -61,8 +61,8 @@
 **▸ What was she like to work for?**
 > Hard. Fair. She'd make you redo a weld three times and then buy you dinner.
 
-**▸ She said you asked why about everything.**
-> Still do. She's the reason I know any of the answers.
+**▸ What did she teach you?**
+> To ask why. Every time. She called me the worst apprentice she ever had for it. She's the reason I know any of the answers.
 
 📓 *Journal:* I delivered the toolbox. He opened it, found the wrench in its cloth, and didn't say anything for a while.
 
