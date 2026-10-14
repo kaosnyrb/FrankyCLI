@@ -392,7 +392,21 @@ namespace FrankyCLI
             /// (docs/specs/npc_dialogue.md, the Completion and Regular topic shapes).
             /// </summary>
             public List<Exchange>? exchanges { get; set; }
+            /// <summary>
+            /// defeat, REQUIRED there: the actor base (Npc or LeveledNpc, own mod or a master) who appears at `at` when the
+            /// step begins; the step is done when he dies (the Bounty driver's boss, spike 2026-10-14-defeat-and-clear-beats).
+            /// </summary>
+            public string? target { get; set; }
+            /// <summary>defeat, OPTIONAL: who stands with the target, a mix drawn from list. They need not die.</summary>
+            public Crowd? gang { get; set; }
+            /// <summary>clear, REQUIRED there: who appears at `at` when the step begins; the step is done when every one is dead (the Hunt driver).</summary>
+            public Crowd? enemies { get; set; }
+            /// <summary>defeat and clear, OPTIONAL: each enemy carries one thing from list, each with chance percent (the drivers: artifacts, 25).</summary>
+            public Loot? loot { get; set; }
         }
+        /// <summary>A crowd drawn from a FormList: min..max of them; species "one" = a single entry for all (the Hunt driver), "mix" = drawn per enemy.</summary>
+        private sealed class Crowd { public string? list { get; set; } public int min { get; set; } public int max { get; set; } public string? species { get; set; } }
+        private sealed class Loot { public string? list { get; set; } public int chance { get; set; } }
         private sealed class BeatMessage { public string? title { get; set; } public string? text { get; set; } }
 
         private static readonly JsonSerializerOptions JsonOpts = new()
@@ -2660,7 +2674,7 @@ namespace FrankyCLI
                 // Read off Starfield.esm itself, never a winning override.
                 IQuestCollectionAliasGetter? waveSrc = null;
                 IPackageGetter? travelSrc = null;
-                if (fail == 0 && r.beats.Any(b => b.type == "hold"))
+                if (fail == 0 && r.beats.Any(b => b.type == "hold" || b.type == "clear"))
                 {
                     var sfm = env.LoadOrder[0].Mod;
                     var uc08 = sfm == null || sfm.ModKey.FileName != "Starfield.esm" ? null
@@ -2692,7 +2706,29 @@ namespace FrankyCLI
                     if (f == null) { Console.WriteLine($"REFUSED: FormList '{w.list}' ({PlaceKey[p]}.who.list) is not in {t.mod} or one of its masters."); fail++; continue; }
                     whoLists[p] = f.FormKey;
                 }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists);
+                // A fight's forms (defeat / clear), own-or-master as a who list is: the target, and each list it draws from.
+                var fights = new Dictionary<int, FightForms>();
+                for (int i = 0; i < r.beats.Count && fail == 0; i++)
+                {
+                    var fb = r.beats[i];
+                    if (fb.type != "defeat" && fb.type != "clear") continue;
+                    var ff = new FightForms();
+                    if (fb.target != null)
+                    {
+                        ff.Target = OwnOrMaster<INpcGetter>(myMod, env, fb.target)?.FormKey ?? OwnOrMaster<ILeveledNpcGetter>(myMod, env, fb.target)?.FormKey;
+                        if (ff.Target == null) { Console.WriteLine($"REFUSED: beat {i + 1} target '{fb.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters."); fail++; continue; }
+                    }
+                    foreach (var (what, name, set) in new (string, string?, Action<FormKey>)[] {
+                                 ("gang", fb.gang?.list, k => ff.Gang = k), ("enemies", fb.enemies?.list, k => ff.Enemies = k), ("loot", fb.loot?.list, k => ff.Loot = k) })
+                    {
+                        if (name == null) continue;
+                        var fl = OwnOrMaster<IFormListGetter>(myMod, env, name);
+                        if (fl == null) { Console.WriteLine($"REFUSED: beat {i + 1} {what}.list '{name}' is not a FormList in {t.mod} or one of its masters."); fail++; break; }
+                        set(fl.FormKey);
+                    }
+                    fights[i] = ff;
+                }
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists, fights);
                 FormKey? reach = null;
                 if (r.place.reach != null)
                 {

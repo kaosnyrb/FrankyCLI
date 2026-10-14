@@ -100,6 +100,21 @@ def render(recipe, notes):
             say(f"🧱 Object: {' · '.join(obj)}")
         if beat.get("item") or obj:
             say("")
+        # A fight beat (defeat / clear): who is fought is the beat's whole content, so the reader sees it.
+        fight = []
+        if beat.get("target"):
+            fight.append(f"⚔️ Target: **{beat['target']}** (the step ends when he dies)")
+        for key, label in (("gang", "with a gang"), ("enemies", "every one must die")):
+            c = beat.get(key)
+            if c:
+                kind_of = "one species" if c.get("species") == "one" else "a mix"
+                fight.append(f"⚔️ {key.capitalize()}: {c.get('min')}-{c.get('max')}, {kind_of} from {c.get('list')} ({label})")
+        if beat.get("loot"):
+            fight.append(f"💰 Loot: {beat['loot'].get('chance')}% each from {beat['loot'].get('list')}")
+        for line in fight:
+            say(line)
+        if fight:
+            say("")
 
         person = beat.get("person")
         if person:

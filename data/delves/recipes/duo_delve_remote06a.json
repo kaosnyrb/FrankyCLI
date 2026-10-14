@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "id": "duo_delve_remote06a",
+  "template": "beats",
+  "_note": "PROOF RECIPE for the clear beat (spike office/spikes/2026-10-14-defeat-and-clear-beats.md), Eliza 2026-10-14 on his scope. Gameplay of duo_artifact_remote_planet_qst02a as a Delve beat, remote. Journal and objective are duo_artifact_remote_planet_qst02a's own words; the radio lines are Eliza's PLACEHOLDERS. Jessica's to rewrite once it plays.",
+  "author": "eliza",
+  "source": "Overtime duo_artifact_remote_planet_qst02a (Hunt), its driver dou_artifact_ground_hunt_quest",
+  "place": {
+    "remote": true,
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    }
+  },
+  "prose": {
+    "name": "Hunt: Escaped Test Subjects on <Planet>",
+    "briefing": "A science facility on <Planet> has lost its test subjects, and the slate got off the planet before the news did. They are loose at the <Place> and nobody left there is going to handle it. I need to fly out and put them down."
+  },
+  "speaker": {
+    "name": "Facility Security",
+    "voice": "GenericFemale01",
+    "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
+  },
+  "broadcast": "The containment pens are open and the subjects are out. Nobody here can stop them. If you can hear this, we need help.",
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_PreditorMegalist_A",
+        "min": 4,
+        "max": 6,
+        "species": "one"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Put down the test subjects at the <Place>",
+      "journal": "Every one of the escaped test subjects at the <Place> is dead.",
+      "say": "That's the last of them. We're safe. Thank you."
+    }
+  ]
+}

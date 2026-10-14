@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "id": "duo_delve_remote05a",
+  "template": "beats",
+  "_note": "PROOF RECIPE for the defeat beat (spike office/spikes/2026-10-14-defeat-and-clear-beats.md), Eliza 2026-10-14 on his scope. Gameplay of duo_artifact_remote_planet_qst01a as a Delve beat, remote. Journal and objective are duo_artifact_remote_planet_qst01a's own words; the radio lines are Eliza's PLACEHOLDERS. Jessica's to rewrite once it plays.",
+  "author": "eliza",
+  "source": "Overtime duo_artifact_remote_planet_qst01a (Bounty), its driver dou_artifact_ground_bounty_quest",
+  "place": {
+    "remote": true,
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeInfrastructureKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    }
+  },
+  "prose": {
+    "name": "Bounty: Crimson Fleet Raiders on <Planet>",
+    "briefing": "Crimson Fleet are on the ground at the <Place> on <Planet> and they are not being quiet about it. There are people living there who have nowhere else to be. I need to get down and push them back off it."
+  },
+  "speaker": {
+    "name": "Settlement Watch",
+    "voice": "GenericMale01",
+    "elevenlabs": "iP95p4xoKVk53GoZ742B"
+  },
+  "broadcast": "Crimson Fleet came down on us an hour ago. Their leader is running the whole thing. Take him out and the rest will scatter.",
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REWoundedMarkerLocRef",
+      "target": "duo_boss_CrimsonFleet_Boss_Aggro_NoScript",
+      "gang": {
+        "list": "duo_GangMembersList_Crimson",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the raid leader at the <Place>",
+      "journal": "The raid leader is dead and the rest of his crew are pulling out of the <Place>.",
+      "say": "That's their leader down. The rest are running. Thank you."
+    }
+  ]
+}

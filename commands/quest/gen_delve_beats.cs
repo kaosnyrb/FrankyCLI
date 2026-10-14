@@ -56,7 +56,11 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_delve
     {
-        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold", "talk" };
+        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold", "talk", "defeat", "clear" };
+        /// <summary>The fight beats (spike 2026-10-14-defeat-and-clear-beats): enemies appear at a marker when the step begins and
+        /// the step is done by a death, the Bounty driver's (defeat: the target) or the Hunt driver's (clear: every one).</summary>
+        private static bool IsFight(Beat b) => b.type == "defeat" || b.type == "clear";
+        private static readonly string[] SpeciesModes = { "one", "mix" };
         // A hold wave's style -> duo_delve_lib.SpawnWave's origins: 1 anywhere but in front, 2 his left and his right.
         // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
         private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 2 };
@@ -241,6 +245,60 @@ namespace FrankyCLI
                 }
         }
 
+        /// <summary>
+        /// A fight beat: defeat (a target, and an optional gang who need not die) or clear (enemies, every one must die).
+        /// Everything is named in the recipe (his 2026-10-14: lists from the recipe, not off a removed driver), and every
+        /// list must resolve and hold something, or the step would spawn nobody and could never end.
+        /// </summary>
+        private static void GradeFight(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
+                                       Action<string> Fatal, Action<string> Warn)
+        {
+            string at = $"beat {i + 1} ({b.type})";
+            if (b.model != null || b.name != null || b.replace || b.item != null || b.returnTo != null || b.group != null || b.choose != null)
+                Fatal($"{at} sets model, name, replace, item, returnTo, group or choose; a fight has no object of its own (the enemies are its object), so they would be silently ignored.");
+            void List(string where, string? edid, bool actors)
+            {
+                var fl = OwnOrMaster<IFormListGetter>(Allowed(env, t), env, edid ?? "");
+                if (fl == null) Fatal($"{at} {where}.list '{edid}' is not a FormList in {t.mod} or one of its masters.");
+                else if (fl.Items.Count == 0) Fatal($"{at} {where}.list '{edid}' is EMPTY, so it would spawn nothing.");
+                else Console.WriteLine($"  {at} {where}: {fl.EditorID} ({fl.Items.Count} entries)");
+            }
+            void Range(string where, Crowd c, int lo)
+            {
+                if (c.min < lo || c.max < c.min) Fatal($"{at} {where} needs {lo} <= min <= max; it has {c.min}-{c.max}.");
+                else if (c.max > 12) Warn($"{at} {where}.max is {c.max}; more than 12 at one marker is a crowd the navmesh may not seat.");
+                if (c.species != null && !SpeciesModes.Contains(c.species))
+                    Fatal($"{at} {where}.species is '{c.species}'; it is \"one\" (a single entry from the list for all) or \"mix\".");
+            }
+            if (b.type == "defeat")
+            {
+                if (b.enemies != null) Fatal($"{at} sets enemies; a defeat has a target and a gang (enemies is a clear's).");
+                if (string.IsNullOrWhiteSpace(b.target)) Fatal($"{at} has no target: nobody whose death ends the step.");
+                else if (OwnOrMaster<INpcGetter>(Allowed(env, t), env, b.target!) == null && OwnOrMaster<ILeveledNpcGetter>(Allowed(env, t), env, b.target!) == null)
+                    Fatal($"{at} target '{b.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters.");
+                if (b.gang != null)
+                {
+                    List("gang", b.gang.list, true);
+                    Range("gang", b.gang, 0);
+                }
+            }
+            else
+            {
+                if (b.target != null || b.gang != null) Fatal($"{at} sets target or gang; a clear has enemies, every one of whom must die (target and gang are a defeat's).");
+                if (b.enemies == null) Fatal($"{at} has no enemies: nobody to clear, so the step could never end.");
+                else
+                {
+                    List("enemies", b.enemies.list, true);
+                    Range("enemies", b.enemies, 1);
+                }
+            }
+            if (b.loot != null)
+            {
+                List("loot", b.loot.list, false);
+                if (b.loot.chance < 1 || b.loot.chance > 100) Fatal($"{at} loot.chance is {b.loot.chance}; a percent from 1 to 100.");
+            }
+        }
+
         /// <summary>The lint's beats-only half. Called from Grade; Fatal/Warn are Grade's.</summary>
         private static void GradeBeats(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                        Action<string> Fatal, Action<string> Warn)
@@ -316,13 +374,16 @@ namespace FrankyCLI
                         else
                         {
                             var dt = r.beats[d - 1];
-                            if (dt.type == "pickup" || dt.type == "recover" || dt.type == "hold")
+                            if (dt.type == "pickup" || dt.type == "recover" || dt.type == "hold" || IsFight(dt))
                                 Fatal($"beat {i + 1} defends beat {d}, a {dt.type}, which leaves no object standing to defend; defend a use or a deliver.");
                         }
                     }
                 }
                 else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null)
                     Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal or revealObjective and is not a hold, so they would be silently ignored.");
+                if (IsFight(b)) GradeFight(b, i, t, env, Fatal, Warn);
+                else if (b.target != null || b.gang != null || b.enemies != null || b.loot != null)
+                    Fatal($"beat {i + 1} sets target, gang, enemies or loot and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))
@@ -385,7 +446,7 @@ namespace FrankyCLI
                 else
                 {
                     var tb = r.beats[ap.to - 1];
-                    if (tb.type == "recover" || tb.type == "hold" || tb.returnTo != null)
+                    if (tb.type == "recover" || tb.type == "hold" || IsFight(tb) || tb.returnTo != null)
                         Fatal($"approach.to is beat {ap.to}, a {(tb.returnTo != null ? "return" : tb.type)}, which has no object of its own to approach.");
                     if (ap.lose is int l)
                     {
@@ -600,8 +661,12 @@ namespace FrankyCLI
         /// <summary>The quest-level script every beats Delve carries: OnQuestRejected only (papyrus/duo_delve_quest.psc).</summary>
         private const string RejectScript = "duo_delve_quest";
 
+        /// <summary>A fight beat's forms, resolved own-or-master in Build where the load order is.</summary>
+        private sealed class FightForms { public FormKey? Target, Gang, Enemies, Loot; }
+
         private sealed class BeatsMade
         {
+            public List<int> ClearGroups = new();   // clear beats' collections: empty, Optional, and wearing NO package (they hold the site)
             public string Script = "";
             public List<int> FragStages = new();
             public List<(int alias, string script, int set, int prereq)> Hooks = new();
@@ -701,7 +766,8 @@ namespace FrankyCLI
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
                                       Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)> persons,
                                       IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc,
-                                      (INpcGetter tmpl, FormKey voice)? speakerSrc, Dictionary<int, FormKey> whoLists)
+                                      (INpcGetter tmpl, FormKey voice)? speakerSrc, Dictionary<int, FormKey> whoLists,
+                                      Dictionary<int, FightForms> fights)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -727,6 +793,8 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
             if (r.beats.Any(b => b.type == "hold") && gangKey == null)
             { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
+            if (r.beats.Any(b => b.type == "clear") && waveSrc == null)
+            { Console.WriteLine("REFUSED: a clear's enemies fill a collection copied from vanilla's ActiveHostiles, and none was handed in."); return 1; }
             if (r.beats.Any(b => b.type == "hold") && (waveSrc == null || travelSrc == null))
             { Console.WriteLine("REFUSED: a hold needs a source collection alias and a source package to copy its waves from, and one was not handed in."); return 1; }
 
@@ -828,6 +896,45 @@ namespace FrankyCLI
                         bm.Waves.Add((int)cid);
                     }
                     Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
+                    continue;
+                }
+                if (r.beats[i].type == "defeat")
+                {
+                    // recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into
+                    // when the step begins, which the objective targets and the death hook sits on.
+                    uint did = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    var dm = srcMarker.DeepCopy(); dm.ID = did; dm.Name = "DelveBeat" + (i + 1) + "Marker";
+                    var dt = srcMarker.DeepCopy(); dt.ID = did + 1; dt.Name = "DelveBeat" + (i + 1) + "Target";
+                    dt.Location = null;
+                    dt.Flags = QuestReferenceAlias.Flag.Optional;
+                    clone.Aliases.Add(dm);
+                    clone.Aliases.Add(dt);
+                    slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = beatStage[i] };
+                    bm.Holders.Add((int)dt.ID);
+                    Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn)");
+                    continue;
+                }
+                if (r.beats[i].type == "clear")
+                {
+                    // ONE hold wave at the site: a marker, and an EMPTY collection (a copy of vanilla's ActiveHostiles)
+                    // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
+                    uint cid0 = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    var cm = srcMarker.DeepCopy(); cm.ID = cid0; cm.Name = "DelveBeat" + (i + 1) + "Spawn";
+                    clone.Aliases.Add(cm);
+                    uint cid = cid0 + 1;
+                    var col = waveSrc!.DeepCopy();
+                    var centry = col.Collection[0];
+                    var cra = centry.ReferenceAlias!;
+                    if (cra.Location != null || !cra.ForcedReference.IsNull || !cra.UniqueActor.IsNull || cra.CreateReferenceToObject != null)
+                    { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
+                    if (centry.ID == cra.ID) centry.ID = cid;
+                    cra.ID = cid;
+                    cra.Name = $"DelveBeat{i + 1}Enemies";
+                    cra.PackageData.Clear();
+                    clone.Aliases.Add(col);
+                    slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = beatStage[i] };
+                    bm.ClearGroups.Add((int)cid);
+                    Console.WriteLine($"  +slot    : beat {i + 1} (clear) -- spawn marker alias {cm.ID}, enemies collection {cid} (EMPTY, a copy of ActiveHostiles, no package)");
                     continue;
                 }
                 if (r.beats[i].type == "talk")
@@ -1129,6 +1236,20 @@ namespace FrankyCLI
             clone.Objectives.Clear();
             clone.Objectives.AddRange(sortedObs);
 
+            // The unused object slots go FIRST (2026-10-14, the first Delves with no object beat at all, a lone defeat or
+            // clear): base slot 2's marker fills inside the second place, so while it stands the second place is still
+            // "named" and its own removal below refuses.
+            foreach (var us in unusedSlots)
+            {
+                var pair = new[] { us.markerAlias, us.activatorAlias };
+                var gone = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => pair.Contains((int)a.ID)).ToList();
+                if (gone.Count != 2) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
+                var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
+                if (users.Count > 0) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is still named by {string.Join(", ", users)}."); return 1; }
+                foreach (var a in gone) clone.Aliases!.Remove(a);
+                bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
+                Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
+            }
             // A ONE-PLACE Delve drops the base's second place. Left in, it is a non-Optional location alias that
             // still draws a SECOND POI the quest never visits, so the quest only starts where two qualifying POIs
             // are in range, and the base's text about it lingers (his catch on duo_delve09, 2026-10-09: "we have
@@ -1156,17 +1277,6 @@ namespace FrankyCLI
                 clone.Aliases!.Remove(second);
                 bm.DroppedPlace = (t.secondPlaceAlias, second.Name!);
                 Console.WriteLine($"  -place   : {second.Name} (alias {t.secondPlaceAlias}) removed: every beat is at the main place, so it would draw a second POI for nothing");
-            }
-            foreach (var us in unusedSlots)
-            {
-                var pair = new[] { us.markerAlias, us.activatorAlias };
-                var gone = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => pair.Contains((int)a.ID)).ToList();
-                if (gone.Count != 2) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
-                var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
-                if (users.Count > 0) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is still named by {string.Join(", ", users)}."); return 1; }
-                foreach (var a in gone) clone.Aliases!.Remove(a);
-                bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
-                Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
             }
 
 
@@ -1275,6 +1385,25 @@ namespace FrankyCLI
                             bm.Hooks.Add((col, hs.Name, ws[w], pre));
                             Console.WriteLine($"  +hook    : beat {b + 1} (hold) wave {w + 1} collection {col} {hs.Name} sets {ws[w]} after {pre}");
                         }
+                        continue;
+                    }
+                    if (IsFight(beat))
+                    {
+                        // The step ends on a death: the target's (defeat), or the last of the collection's (clear). Stock hooks;
+                        // TurnOffStageDone on the collection's, as each hold wave's, so a late kill cannot set it twice.
+                        bool isClear = beat.type == "clear";
+                        int on = slotOf[b].targetAlias;
+                        var fs = new ScriptEntry { Name = isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath" };
+                        fs.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
+                        fs.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
+                        if (isClear) fs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
+                        var fe = new QuestFragmentAlias();
+                        fe.Property.Object.SetTo(clone.FormKey);
+                        fe.Property.Alias = (short)on;
+                        fe.Scripts.Add(fs);
+                        vma.Aliases.Add(fe);
+                        bm.Hooks.Add((on, fs.Name, beatStage[b], prereq));
+                        Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {on} {fs.Name} sets {beatStage[b]} after {prereq}");
                         continue;
                     }
                     int hookAlias; string script;
@@ -1485,6 +1614,36 @@ namespace FrankyCLI
             {
                 foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "hold"))
                     SpawnWave(b, 0, stage);
+                foreach (var b in steps[k].Beats.Where(b => IsFight(r.beats[b])))
+                {
+                    var fb = r.beats[b];
+                    var ff = fights[b];
+                    string lootArgs = "None, 0";
+                    if (ff.Loot is FormKey lk) { props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
+                    if (fb.type == "defeat")
+                    {
+                        string mk = $"Alias_Beat{b + 1}Marker", tg = $"Alias_Beat{b + 1}Target";
+                        props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                        props.Add(("ReferenceAlias", tg, clone.FormKey, slotOf[b].targetAlias));
+                        props.Add(("Form", $"Target{b + 1}", ff.Target!.Value, -1));
+                        string gangArgs = "None, 0, 0, False";
+                        if (ff.Gang is FormKey gk)
+                        {
+                            props.Add(("FormList", $"Gang{b + 1}", gk, -1));
+                            gangArgs = $"Gang{b + 1}, {fb.gang!.min}, {fb.gang.max}, {(fb.gang.species == "one" ? "True" : "False")}";
+                        }
+                        Add(stage, $"duo_delve_lib.SpawnTarget({mk}, {tg}, Target{b + 1}, {gangArgs}, {lootArgs})");
+                    }
+                    else
+                    {
+                        string mk = $"Alias_Beat{b + 1}Spawn", en = $"Alias_Beat{b + 1}Enemies";
+                        props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                        props.Add(("RefCollectionAlias", en, clone.FormKey, slotOf[b].targetAlias));
+                        props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
+                        var e = fb.enemies!;
+                        Add(stage, $"duo_delve_lib.SpawnGroup({mk}, {en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
+                    }
+                }
                 foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "recover"))
                 {
                     string mk = $"Alias_Beat{b + 1}Marker", hd = $"Alias_Beat{b + 1}Holder";
@@ -2119,6 +2278,14 @@ namespace FrankyCLI
                               "fill none, optional True");
                 fail += Check($"wave collection {wv} wears the wave package", wa == null ? "missing"
                               : string.Join(",", wa.PackageData.Select(p => p.FormKey)), bm.WavePackage.ToString());
+            }
+            foreach (var cg in bm.ClearGroups)
+            {
+                var ca = q.Aliases.OfType<IQuestCollectionAliasGetter>()
+                    .Select(c => c.Collection.FirstOrDefault()?.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)cg);
+                fail += Check($"clear collection {cg} is empty, Optional and wears no package", ca == null ? "missing"
+                              : $"fill {(ca.Location == null && ca.ForcedReference.IsNull && ca.UniqueActor.IsNull && ca.CreateReferenceToObject == null ? "none" : "SET")}, optional {ca.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}, packages {ca.PackageData.Count}",
+                              "fill none, optional True, packages 0");
             }
             if (bm.Waves.Count > 0)
             {

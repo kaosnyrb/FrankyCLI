@@ -321,3 +321,54 @@ Function PlaceCrew(ReferenceAlias akCentre, FormList akGang, Int aiMin, Int aiMa
         n -= 1
     EndWhile
 EndFunction
+
+; THE DEFEAT BEAT (spike 2026-10-14-defeat-and-clear-beats; the Bounty driver's shape). The target appears at the
+; marker INTO akTarget, the alias the objective follows and a stock DefaultAliasOnDeath sits on, so his death sets
+; the step's stage and nothing here watches anything. A gang (optional: akGang None) stands with him and need not
+; die; abOneSpecies picks ONE entry for the whole gang. Each enemy, the target too, carries one thing from akLoot
+; with aiChance percent (the drivers: artifacts, 25). Suspicious 2 / Aggression 2, the shipped drivers' values: a
+; site fight does not cross open ground, which is what made the waves drop to 1.
+Function SpawnTarget(ReferenceAlias akMarker, ReferenceAlias akTarget, Form akBase, FormList akGang, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
+    ObjectReference marker = akMarker.GetRef()
+    Actor target = marker.PlaceAtMe(akBase, 1, True, False, True, None, akTarget, True) as Actor
+    Alert(target, akLoot, aiChance)
+    If akGang != None
+        PlaceGroup(marker, None, akGang, aiMin, aiMax, abOneSpecies, akLoot, aiChance)
+    EndIf
+EndFunction
+
+; THE CLEAR BEAT (the Hunt driver's shape). aiMin to aiMax enemies at the marker, each INTO akGroup, a collection with
+; no package (they hold the site), and a stock DefaultCollectionAliasOnDeath on it sets the step's stage when every
+; one is dead. abOneSpecies (the Hunt's way) picks one entry from akList for them all.
+Function SpawnGroup(ReferenceAlias akMarker, RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
+    PlaceGroup(akMarker.GetRef(), akGroup, akList, aiMin, aiMax, abOneSpecies, akLoot, aiChance)
+EndFunction
+
+; Shared by the two above: scatter within 50 m of the marker (the drivers' spread), into akGroup when one is given.
+Function PlaceGroup(ObjectReference akCentre, RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
+    Form one = akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
+    Float[] pos = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        pos[0] = Utility.RandomFloat(-50, 50)
+        pos[1] = Utility.RandomFloat(-50, 50)
+        pos[2] = 0
+        Form who = one
+        If !abOneSpecies
+            who = akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
+        EndIf
+        Actor enemy = akCentre.PlaceAtMe(who, 1, True, False, True, pos, akGroup, True) as Actor
+        Alert(enemy, akLoot, aiChance)
+        n -= 1
+    EndWhile
+EndFunction
+
+Function Alert(Actor akEnemy, FormList akLoot, Int aiChance) Global
+    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
+    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
+    akEnemy.SetValue(Suspicious, 2.0) ; DetectedActor
+    akEnemy.SetValue(Aggression, 2.0) ; VeryAggressive
+    If akLoot != None && Utility.RandomInt(1, 100) <= aiChance
+        akEnemy.AddItem(akLoot.GetAt(Utility.RandomInt(0, akLoot.GetSize() - 1)), 1, False)
+    EndIf
+EndFunction
