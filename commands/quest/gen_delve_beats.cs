@@ -1056,6 +1056,18 @@ namespace FrankyCLI
                 var ps = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)t.markerSource);
                 if (!markers.TryGetValue("MapMarkerRefType", out var mm)) { Console.WriteLine("REFUSED: the lint handed in no MapMarkerRefType to point the marker source at."); return 1; }
                 ps.Location!.RefType.SetTo(mm);
+                // ⛔ AND IT SHARES THAT REFERENCE: the board's own MapMarker alias fills from the same one map marker, and an
+                // alias cannot take a reference another alias of the quest already holds unless it allows reuse. Without
+                // this flag PrimaryRef (not Optional) could not fill and the quest never started, so missionboard02a never
+                // listed (his play, 2026-10-14). Vanilla's flag for exactly this: MB_Cargo01Far's DestinationCargo.
+                // The flag belongs on whichever of them fills SECOND, and the alias order is the build's to change, so every
+                // alias sharing the reference carries it (the contention check's bite caught it on the wrong one first).
+                foreach (var sh in clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location != null && a.CreateReferenceToObject == null
+                             && a.Location.AliasID == ps.Location.AliasID && a.Location.RefType.FormKey == mm))
+                {
+                    sh.Flags = (sh.Flags ?? 0) | QuestReferenceAlias.Flag.AllowReuseInQuest;   // a null flag set |= stays null
+                    Console.WriteLine($"  reuse    : alias {sh.ID} {sh.Name} may share the place's map marker (AllowReuseInQuest)");
+                }
                 bm.MarkerSourceAtMap = true;
                 Console.WriteLine($"  source   : alias {t.markerSource} {ps.Name} took no fight, so it fills from the place's map marker (no ref type demanded)");
             }
@@ -2407,6 +2419,17 @@ namespace FrankyCLI
                     .Select(a => $"location alias {a.ID} parents to {a.ParentSystemLocationAliasID}"))
                 .ToList();
             fail += Check("every alias link resolves to an alias the quest has", dangling.Count == 0 ? "all resolve" : string.Join("; ", dangling), "all resolve");
+            // No two aliases CONTEND for one reference: those filling from the same place and the same ref type pick the same
+            // ref where the site has one (a map marker always), and a later one that neither allows reuse nor is Optional
+            // cannot fill, so the quest never starts (missionboard02a's PrimaryRef against MapMarker, 2026-10-14).
+            var contend = q.Aliases.OfType<IQuestReferenceAliasGetter>()
+                .Where(a => a.Location != null && a.CreateReferenceToObject == null)
+                .GroupBy(a => (a.Location!.AliasID, a.Location.RefType.FormKey))
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g.Skip(1).Where(a => !(a.Flags ?? 0).HasFlag(QuestReferenceAlias.Flag.AllowReuseInQuest) && !(a.Flags ?? 0).HasFlag(QuestReferenceAlias.Flag.Optional))
+                                  .Select(a => $"alias {a.ID} {a.Name} wants alias {g.First().ID} {g.First().Name}'s reference"))
+                .ToList();
+            fail += Check("no two aliases contend for one reference", contend.Count == 0 ? "none" : string.Join("; ", contend), "none");
             if (bm.SecondPlanet is int spId)
             {
                 var sp = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)spId);
