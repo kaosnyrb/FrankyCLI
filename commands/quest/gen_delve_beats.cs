@@ -2129,11 +2129,10 @@ namespace FrankyCLI
         /// exchanges[0] is the Completion topic (0x2810): its reply sets the beat's stage when it ENDS (the INFO's
         /// own SetParentQuestStage, as NPCDialogueNoun does), and the talk closes. The rest are Regular topics
         /// (0x2814, TopLevelTopicsOnEnd): asked in any order, each loops back to the menu.
-        /// ⭐ THE MENU ORDER IS THE SCENE INDEX, ascending FROM 1, as vanilla numbers its own (Sandra 1 QuestStart, 2 Stage10,
-        /// 3 QuestEnd; 3,057 vanilla Top Level scenes read, 2026-10-14). Index 0 is "unordered" (1,902 vanilla scenes) and
-        /// sorts AFTER the numbered ones, which is how the completion, at 0, sank under 10/20/30 in his play of
-        /// missionboard02a, filmed twice. His rule: "the top dialog choice is the one that progresses the quest, the lower
-        /// ones are fleshing out details". (A flag change was tried first, on the wrong hypothesis, and came out.)
+        /// ⛔ OPEN: the completion shows LAST in the menu and his rule is that it goes FIRST ("the top dialog choice is the
+        /// one that progresses the quest, the lower ones are fleshing out details"). Neither its flag (0x2810 -> 0x2814,
+        /// reverted) nor Index (0/10/20/30 -> 1/2/3/4, kept: it is vanilla's numbering) moved it in his filmed plays of
+        /// missionboard02a, 2026-10-14. Untested: creating it LAST (it is created first, lowest FormID); it alone sets a stage.
         /// Every scene is gated on this person (GetIsID) and on the step being open: the beat's stage not done,
         /// and, past the first step, the stage that opens it done. So he speaks only while the talk is live.
         /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
@@ -2222,7 +2221,7 @@ namespace FrankyCLI
                 var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                 if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
                 var sc = NewScene($"{tag}_topic{x + 1}_scene", x == 0 ? 0x00002810u : 0x00002814u);
-                sc.Index = (uint)(x + 1);   // the menu's order, from 1 as vanilla's: 0 sorts last
+                sc.Index = (uint)(x + 1);   // vanilla's numbering, from 1; NOT shown to be the menu's sort key (see above)
                 sc.SCPI = BitConverter.GetBytes((ushort)100);
                 sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
                 sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
