@@ -1387,8 +1387,9 @@ namespace FrankyCLI
             // A board mission's place is a request already (the base's own), so it is graded as a remote one is.
             bool remote = r.place.remote == true || IsBoard(t);
             // A remote SECOND place (his 2026-10-14, missionboard02a and 10a: a cargo run remote to remote) is a second
-            // request beside the main one. NO SHIPPED QUEST DOES THIS (556 vanilla requesting quests and Overtime's 140, none
-            // with two: manual), so it is warned on every build until his play proves it.
+            // request beside the main one. No shipped quest does this (556 vanilla requesting quests and Overtime's 140, none
+            // with two: manual). PROVEN in his play the same day on duo_delve_twosite01a: "two different POIs on two
+            // different Planets". The planets differing is ONE play, and nothing in the request forces it.
             bool secondRemote = r.place.second?.remote == true;
             if (r.place.third?.remote != null)
                 Fatal("remote is set on place.third; only the main and the second place can be requested.");
@@ -1397,7 +1398,7 @@ namespace FrankyCLI
             if (secondRemote && r.place.remote != true && !IsBoard(t))
                 Fatal("place.second.remote is set and the main place is not remote; a requested second site rides on a requested first (set place.remote).");
             if (secondRemote)
-                Warn("place.second is a SECOND REQUEST. No shipped quest requests two sites (manual, 2026-10-14); this shape is unproven until his play shows two new sites.");
+                Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play; nothing forces the planets to differ)");
             if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
             if (remote && (anyThird || r.place.third != null || (!secondRemote && (anySecond || r.place.second != null))))
