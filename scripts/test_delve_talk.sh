@@ -24,6 +24,11 @@ case('long',     lambda x: x['beats'][0]['exchanges'][2].__setitem__('prompt', '
 case('box',      lambda x: x['beats'][0].__setitem__('message', {'title': 'T', 'text': 'x'}))
 case('noask',    lambda x: x['beats'][0].__setitem__('exchanges', []))
 case('stray',    lambda x: x['beats'][1].__setitem__('greeting', 'hello'))
+# exchange perks, a [Background] / [Skill] / [Trait] choice (his ask 2026-10-14: "make recipes support this")
+case('perkok',   lambda x: x['beats'][0]['exchanges'][1].__setitem__('perk', 'BackgroundDiplomat'))
+case('perkzero', lambda x: x['beats'][0]['exchanges'][0].__setitem__('perk', 'Skill_Medicine'))
+case('perkbad',  lambda x: x['beats'][0]['exchanges'][1].__setitem__('perk', 'BackgroundNoSuchThing'))
+case('perkodd',  lambda x: x['beats'][0]['exchanges'][1].__setitem__('perk', 'CREW_Ship_Shields'))
 EOF
 
 run() { # run WANT case needle
@@ -40,5 +45,9 @@ run REFUSE long     'characters; the limit is 60'
 run REFUSE box      'a talk beat has none of them'
 run REFUSE noask    'has no exchanges'
 run REFUSE stray    'only a talk beat has a conversation'
+run PASS   perkok   'LINT PASSES'
+run REFUSE perkzero 'it is the choice that moves the quest'
+run REFUSE perkbad  "is not a Perk in"
+run PASS   perkodd  'is not a background, trait, skill or faction perk'
 echo "failing: $fails"
 [ $fails -eq 0 ]

@@ -219,7 +219,11 @@ namespace FrankyCLI
         /// player can ask. exchanges[0] closes the conversation and sets the beat's stage. It has no object, no box
         /// and no radio line: the person is the object and his voice is the line (his "either or").
         /// </summary>
-        private static void GradeTalk(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Action<string> Fatal)
+        /// <summary>The perk families vanilla tags a dialogue choice with (INFO.Perk census, 2026-10-14).</summary>
+        private static readonly string[] CheckPerkFamilies = { "Background", "TRAIT_", "Skill_", "Faction" };
+
+        private static void GradeTalk(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
+                                      Action<string> Fatal, Action<string> Warn)
         {
             string at = $"beat {i + 1} (talk)";
             if (b.model != null || b.name != null || b.replace || b.message != null || b.say != null || b.returnTo != null
@@ -251,6 +255,18 @@ namespace FrankyCLI
                 {
                     Spoken($"exchanges[{x}].prompt", b.exchanges[x].prompt, TalkPromptMax);
                     Spoken($"exchanges[{x}].reply", b.exchanges[x].reply, TalkReplyMax);
+                    if (b.exchanges[x].perk is not string pn) continue;
+                    if (x == 0)
+                    {
+                        Fatal($"{at} exchanges[0] has a perk; it is the choice that moves the quest, so a player without '{pn}' could never finish. Put the perk on a side question.");
+                        continue;
+                    }
+                    var allowed = Allowed(env, t);
+                    var perk = env.LoadOrder.PriorityOrder.WinningOverrides<IPerkGetter>()
+                        .FirstOrDefault(p => allowed.Contains(p.FormKey.ModKey) && string.Equals(p.EditorID, pn, StringComparison.OrdinalIgnoreCase));
+                    if (perk == null) Fatal($"{at} exchanges[{x}].perk '{pn}' is not a Perk in {t.mod} or one of its masters.");
+                    else if (!CheckPerkFamilies.Any(f => perk.EditorID!.StartsWith(f, StringComparison.OrdinalIgnoreCase)))
+                        Warn($"{at} exchanges[{x}].perk '{pn}' is not a background, trait, skill or faction perk; vanilla tags choices only with those, so how the game shows it is unknown.");
                 }
         }
 
@@ -323,7 +339,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} names an item and is not a pickup or a recover, so it would be silently ignored.");
                 if (b.type == "recover" && (b.model != null || b.name != null || b.replace))
                     Fatal($"beat {i + 1} is a recover: it has no object of its own (the holder carries the item), so model, name and replace would be ignored.");
-                if (b.type == "talk") GradeTalk(b, i, t, env, Fatal);
+                if (b.type == "talk") GradeTalk(b, i, t, env, Fatal, Warn);
                 else if (b.greeting != null || b.exchanges != null)
                     Fatal($"beat {i + 1} has a greeting or exchanges and is a {b.type}; only a talk beat has a conversation, so they would be silently ignored.");
                 if (b.returnTo is int back)
@@ -786,7 +802,7 @@ namespace FrankyCLI
                                       Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)> persons,
                                       IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc,
                                       (INpcGetter tmpl, FormKey voice)? speakerSrc, Dictionary<int, FormKey> whoLists,
-                                      Dictionary<int, FightForms> fights)
+                                      Dictionary<int, FightForms> fights, Dictionary<(int beat, int ex), FormKey> talkPerks)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -1482,7 +1498,7 @@ namespace FrankyCLI
 
             foreach (var b in talkAlias.Keys)
                 BuildTalk(myMod, clone, r, b, steps, beatStage, t.entryStage, slotOf[b].targetAlias, npcOf[b],
-                          myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm);
+                          myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm, talkPerks);
 
             // --- 9. the events: one stock hook per beat --------------------------------------------------
             int recovers = 0;
@@ -2138,7 +2154,8 @@ namespace FrankyCLI
         /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
         /// </summary>
         private static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
-                                      Dictionary<int, int> beatStage, int entryStage, int personAlias, FormKey npc, bool female, BeatsMade bm)
+                                      Dictionary<int, int> beatStage, int entryStage, int personAlias, FormKey npc, bool female, BeatsMade bm,
+                                      Dictionary<(int beat, int ex), FormKey> talkPerks)
         {
             var tb = r.beats[b];
             int stage = beatStage[b];
@@ -2217,7 +2234,9 @@ namespace FrankyCLI
             for (int x = 0; x < tb.exchanges!.Count; x++)
             {
                 var ex = tb.exchanges[x];
-                var (pt, _) = Line($"{tag}_ask{x + 1}", ex.prompt!, false);
+                var (pt, pi) = Line($"{tag}_ask{x + 1}", ex.prompt!, false);
+                // A [Background] / [Skill] / [Trait] choice: vanilla's INFO.Perk on the PLAYER's line, no condition with it.
+                if (talkPerks.TryGetValue((b, x), out var perkKey)) pi.Perk.SetTo(perkKey);
                 var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                 if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
                 var sc = NewScene($"{tag}_topic{x + 1}_scene", x == 0 ? 0x00002810u : 0x00002814u);
@@ -2230,7 +2249,8 @@ namespace FrankyCLI
                 var na = new DialogueSceneAction { Index = 4, AliasID = personAlias, StartPhase = 1, EndPhase = 1 };
                 na.Topic.SetTo(nt.FormKey);
                 sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
-                Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (closes the talk, sets {stage} when the reply ends)" : "  (loops to the menu)"));
+                Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (closes the talk, sets {stage} when the reply ends)" : "  (loops to the menu)")
+                                  + (ex.perk != null ? $"  [{ex.perk}]" : ""));
             }
             bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));
         }

@@ -278,7 +278,16 @@ namespace FrankyCLI
             public string? elevenlabs { get; set; }
         }
         /// <summary>talk: one question the player can ask and the person's answer. Prompt is silent menu text, reply is voiced.</summary>
-        private sealed class Exchange { public string? prompt { get; set; } public string? reply { get; set; } }
+        private sealed class Exchange
+        {
+            public string? prompt { get; set; }
+            public string? reply { get; set; }
+            /// <summary>talk, optional: a vanilla perk's EditorID (BackgroundDiplomat, Skill_Medicine, TRAIT_Empath,
+            /// FactionCrimsonFleetPerk...). Set on the PLAYER's line as vanilla's own INFO.Perk field, which is how the game
+            /// tags the choice [Diplomat] and offers it only to a player with the perk (manual hub Inbox, 2026-10-14: 1,027
+            /// vanilla lines, mostly with no condition). Never on exchanges[0]: a perk-less player could not finish.</summary>
+            public string? perk { get; set; }
+        }
         /// <summary>A FormList of actor bases (Overtime's duo_GangMembersList_Civ_* are the friendly ones) and a count range.</summary>
         private sealed class Company { public string? list { get; set; } public int min { get; set; } public int max { get; set; } }
         /// <summary>
@@ -2846,7 +2855,21 @@ namespace FrankyCLI
                     }
                     fights[i] = ff;
                 }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists, fights);
+                // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
+                var talkPerks = new Dictionary<(int beat, int ex), FormKey>();
+                for (int i = 0; i < r.beats.Count && fail == 0; i++)
+                {
+                    var tb = r.beats[i];
+                    if (tb.type != "talk" || tb.exchanges == null) continue;
+                    for (int x = 0; x < tb.exchanges.Count; x++)
+                    {
+                        if (tb.exchanges[x].perk is not string pn) continue;
+                        var pk = OwnOrMaster<IPerkGetter>(myMod, env, pn);
+                        if (pk == null) { Console.WriteLine($"REFUSED: beat {i + 1} exchanges[{x}].perk '{pn}' is not a Perk in {t.mod} or one of its masters."); fail++; continue; }
+                        talkPerks[(i, x)] = pk.FormKey;
+                    }
+                }
+                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists, fights, talkPerks);
                 FormKey? reach = null;
                 if (r.place.reach != null)
                 {
