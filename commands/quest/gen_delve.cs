@@ -132,6 +132,17 @@ namespace FrankyCLI
             public int markerSource { get; set; } = -1;
             /// <summary>board: the removed driver's own aliases, named by nothing once it goes, removed with it.</summary>
             public List<int> driverAliases { get; set; } = new();
+            /// <summary>
+            /// board: a quest in the same mod whose alias playerAlias (the player, a unique-actor fill) is copied in, because
+            /// the base has none and the arrival hook measures to him. Null = the base carries its own player alias.
+            /// </summary>
+            public string? playerAliasFrom { get; set; }
+            /// <summary>
+            /// board: the stage set when the player first comes near step one's marker, after the accept. The broadcast plays
+            /// there, not on the accept: his 2026-10-14, "You shouldn't recieve radio messages just after picking up a
+            /// missionboard mission. It's a posting someone has made." -1 = the broadcast plays on entryStage.
+            /// </summary>
+            public int arrivalStage { get; set; } = -1;
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
@@ -2659,6 +2670,13 @@ namespace FrankyCLI
             int repointed = gen_delvegatetest.RepointSelfLinks(clone.VirtualMachineAdapter, source.FormKey, clone.FormKey);
             Console.WriteLine("  clone    : " + r.id + " " + clone.FormKey + "  self-links repointed: " + repointed);
             if (repointed == 0) { Console.WriteLine("REFUSED: expected at least one self-reference and found none."); return 1; }
+            // ⛔ AND EVERY OTHER LINK TO THE BASE, not only the scripts'. A condition is a link too: MB28a's stage 100 picks
+            // its completing log entry on GetStageDone(<itself>, 10), and the copy kept testing MB28a, which never runs, so
+            // the boss died, stage 100 took the entry that completes nothing, and the board mission never finished (his
+            // play of duo_delve_missionboard01a, 2026-10-14). The slate base carried no such condition, so it never showed.
+            int stray = clone.EnumerateFormLinks().Count(l => l.FormKey == source.FormKey);
+            clone.RemapLinks(new Dictionary<FormKey, FormKey> { [source.FormKey] = clone.FormKey });
+            Console.WriteLine($"  self     : {stray} further link(s) to the base (conditions) now point at the clone");
 
             int fail = 0;
             var made4 = new BuildMade();

@@ -692,6 +692,7 @@ namespace FrankyCLI
             public List<int> RejectObjectives = new();    // what duo_delve_quest hides when the mission is turned down
             public List<(int marker, int activator)> DroppedSlots = new();   // the base's object slots no beat took, removed
             public List<int> DroppedDriverAliases = new();   // board: the removed driver's own aliases, removed with it
+            public (int on, int to)? Arrival;   // board: the arrival hook's alias (step one's marker) and the alias it measures to (the player)
             public (int stage, List<string> lines)? HandBack;   // the talk that ends the Delve: its stage and the RemoveItem lines it must run
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
             public List<(int stage, uint wem, string text, FormKey scene)> Lines = new();   // each spoken line, by the stage that plays it
@@ -874,6 +875,18 @@ namespace FrankyCLI
                 vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
                 Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
             }
+            // A base with no player alias borrows one (the slate base's: the player as a unique actor), with its own ID.
+            if (t.playerAliasFrom != null)
+            {
+                var pq = myMod.Quests.FirstOrDefault(q => q.EditorID == t.playerAliasFrom);
+                var pa = pq?.Aliases.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.playerAlias);
+                if (pa == null || pa.UniqueActor.IsNull)
+                { Console.WriteLine($"REFUSED: {t.playerAliasFrom} carries no alias {t.playerAlias} filled with a unique actor to copy as the player."); return 1; }
+                if (clone.Aliases!.SelectMany(Flatten).Any(x => x.id == (uint)t.playerAlias))
+                { Console.WriteLine($"REFUSED: alias {t.playerAlias} is already taken on this base; the player alias cannot keep its ID."); return 1; }
+                clone.Aliases!.Add(pa.DeepCopy());
+                Console.WriteLine($"  +player  : alias {t.playerAlias} {pa.Name}, copied from {t.playerAliasFrom} (this base has none)");
+            }
             // The base's own alias hooks on the alias the beats take over as a marker went with its driver's design
             // (MB28a's DefaultAliasOnDeath on PrimaryRef sets 100 with no prereq; a marker never dies).
             if (t.markerSource >= 0)
@@ -885,6 +898,8 @@ namespace FrankyCLI
 
             var steps = StepsOf(r);
             var beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
+            // A board's broadcast waits for his arrival at the site (arrivalStage), set by a distance hook below.
+            bool arrival = t.arrivalStage >= 0 && r.broadcast != null;
 
             // --- 2. one marker + activator per beat -------------------------------------------------------
             // Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the
@@ -1085,7 +1100,8 @@ namespace FrankyCLI
                 }
             var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                 .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
-                .Concat(personStage.Values).Concat(whoStage.Values).Distinct().OrderBy(x => x).ToList();
+                .Concat(personStage.Values).Concat(whoStage.Values)
+                .Concat(arrival ? new[] { t.arrivalStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
             foreach (var st in allStages)
             {
                 if (clone.Stages!.Any(s => s.Index == st)) continue;
@@ -1614,6 +1630,35 @@ namespace FrankyCLI
                 Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
             }
 
+            // Arrival (board): a stock distance hook on step one's MARKER, measuring to the player, armed only once the
+            // board's accept has set entryStage, so the poster's call comes when he reaches the site and never on the
+            // accept (his 2026-10-14: "you should get the radio message when you are near the POI").
+            if (arrival)
+            {
+                int at = slotOf[steps[0].Beats[0]].markerAlias;
+                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
+                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
+                ta.Object.SetTo(clone.FormKey);
+                ta.Alias = (short)t.playerAlias;
+                sc.Properties.Add(ta);
+                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = t.arrivalStage, Flags = ScriptProperty.Flag.Edited });
+                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = t.entryStage, Flags = ScriptProperty.Flag.Edited });
+                var entry = vma.Aliases.FirstOrDefault(x => x.Property.Alias == at);
+                if (entry == null)
+                {
+                    entry = new QuestFragmentAlias();
+                    entry.Property.Object.SetTo(clone.FormKey);
+                    entry.Property.Alias = (short)at;
+                    vma.Aliases.Add(entry);
+                }
+                if (entry.Scripts.Any(x => x.Name == sc.Name)) { Console.WriteLine($"REFUSED: alias {at} already carries {sc.Name}; the arrival cannot hook it twice."); return 1; }
+                entry.Scripts.Add(sc);
+                bm.Hooks.Add((at, sc.Name, t.arrivalStage, t.entryStage));
+                bm.Arrival = (at, t.playerAlias);
+                Console.WriteLine($"  +hook    : arrival within {ApproachDistance} of step one's marker (alias {at}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
+            }
+
             // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
             if (r.approach is Approach apr)
             {
@@ -1817,7 +1862,7 @@ namespace FrankyCLI
             if (speakerSrc != null)
             {
                 var lines = new List<(int stage, string text)>();
-                if (r.broadcast != null) lines.Add((t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
+                if (r.broadcast != null) lines.Add((arrival ? t.arrivalStage : t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
                 for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
                 // The offer's line plays on the stage that opens the choice as a TAIL, after every other line of that
                 // stage, so it starts once the find's box is closed (Message.Show waits). Added like a beat's line it
@@ -2325,6 +2370,10 @@ namespace FrankyCLI
             var q = m.Quests.FirstOrDefault(x => x.EditorID == r.id);
             if (q?.VirtualMachineAdapter == null) { Console.WriteLine("    FAIL: the quest or its VMAD is not in the written file."); return 1; }
             var vma = q.VirtualMachineAdapter;
+            // A clone drives ITSELF: nothing in it, script or condition, may still point at the quest it was copied from.
+            var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
+            fail += Check($"nothing in the quest points at its base {t.@base}",
+                          baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
             if (t.questScript == null)
             {
                 // No driver: the only quest-level script is the reject handler, carrying every objective.
@@ -2403,6 +2452,16 @@ namespace FrankyCLI
             }
             foreach (var kv in bm.ObjectiveText)
                 fail += Check($"objective {kv.Key}", q.Objectives.FirstOrDefault(o => o.Index == kv.Key)?.DisplayText?.String ?? "missing", kv.Value);
+            if (bm.Arrival is (int von, int vto))
+            {
+                var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == von)?.Scripts.FirstOrDefault(x => x.Name == "DefaultAliasOnDistanceLessThan");
+                var tp = dsc?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == "TargetAlias");
+                var dp = dsc?.Properties.OfType<IScriptFloatPropertyGetter>().FirstOrDefault(x => x.Name == "TargetDistance");
+                fail += Check("arrival measures from step one's marker to the player", tp == null ? "missing" : $"{tp.Object.FormKey} alias {tp.Alias} within {dp?.Data}",
+                              $"{q.FormKey} alias {vto} within {ApproachDistance}");
+                var pl = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)vto);
+                fail += Check($"alias {vto} is the player", pl == null ? "missing" : pl.UniqueActor.FormKey.ToString(), "000007:Starfield.esm");   // the Player NPC, as the slate base fills it
+            }
             if (bm.ApproachTarget is (int aon, int ato))
             {
                 var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == aon)?.Scripts.FirstOrDefault(x => x.Name == "DefaultAliasOnDistanceLessThan");
