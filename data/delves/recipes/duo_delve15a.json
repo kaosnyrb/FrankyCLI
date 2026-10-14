@@ -20,13 +20,23 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "second": {
       "theme": {
-        "require": ["LocTypeOE_NonHostile"],
-        "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
       }
     },
     "_theme": "Two worked sites, one person at each, both placed. Not natural and not a cave: these are people who work somewhere."
@@ -62,8 +72,8 @@
           "reply": "Real coffee. Not the stuff we get out here. She said once she missed it. I don't think she knows I heard."
         },
         {
-          "prompt": "Does she know how you feel?",
-          "reply": "If she does, she's been very polite about it."
+          "prompt": "Why are you nervous?",
+          "reply": "Because it's for her. And if she knows how I feel, she's been very polite about it."
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the pickup's stage. Voice: the 13a nervous man ('Will, Relaxed Optimist'), reused; his ear decides."

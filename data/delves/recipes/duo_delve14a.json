@@ -21,13 +21,28 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "second": {
       "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
-      "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_ArgosMiner", "min": 2, "max": 4},
-      "theme": { "require": [], "exclude": ["LocTypeOE_ThemeCaveKeyword"] }
+      "who": {
+        "kind": "workers",
+        "list": "duo_GangMembersList_Civ_ArgosMiner",
+        "min": 2,
+        "max": 4
+      },
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
     },
     "_theme": "A quiet worked site for the site hand to be at (he is placed by the talk beat; NonHostile mostly has nobody). The drop is anywhere that is not a cave."
   },
@@ -58,7 +73,7 @@
           "reply": "Eleven years, on and off. Most weeks nobody comes out at all. You're the third this week."
         },
         {
-          "prompt": "Why did the crew leave so fast?",
+          "prompt": "Why did the crew leave?",
           "reply": "A recall came in from their office and they were packed in an hour. Nothing bad. They were nice enough. Loud, but nice."
         },
         {
