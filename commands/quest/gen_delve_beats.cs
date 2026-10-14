@@ -2126,9 +2126,12 @@ namespace FrankyCLI
         /// A talk beat's conversation, built INSIDE the Delve's own quest on the scene shapes of
         /// docs/specs/npc_dialogue.md (atbb_mq01, tested in game; NPCDialogueNoun builds the same records for a quest
         /// of its own): a Greeting scene (0x1834) the person opens with, then one Top Level scene per exchange.
-        /// exchanges[0] is the Completion topic (0x2810): its reply sets the beat's stage when it ENDS (the INFO's
-        /// own SetParentQuestStage, as NPCDialogueNoun does), and the talk closes. The rest are Regular topics
-        /// (0x2814, TopLevelTopicsOnEnd): asked in any order, each loops back to the menu.
+        /// exchanges[0] is the Completion topic: its reply sets the beat's stage when it ENDS (the INFO's own
+        /// SetParentQuestStage, as NPCDialogueNoun does). Every exchange, the completion too, is a 0x2814 scene (Top Level
+        /// + TopLevelTopicsOnEnd): the completion closes the talk because its stage hides every scene of the talk, not by a
+        /// flag. ⛔ It WAS 0x2810 (no TopLevelTopicsOnEnd), and the game sinks such a scene to the BOTTOM of the menu: his
+        /// play of missionboard02a, 2026-10-14, filmed: the three others in recipe order, "Where's the box going?" last.
+        /// His rule: "the top dialog choice is the one that progresses the quest, the lower ones are fleshing out details".
         /// Every scene is gated on this person (GetIsID) and on the step being open: the beat's stage not done,
         /// and, past the first step, the stage that opens it done. So he speaks only while the talk is live.
         /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
@@ -2216,7 +2219,7 @@ namespace FrankyCLI
                 var (pt, _) = Line($"{tag}_ask{x + 1}", ex.prompt!, false);
                 var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                 if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
-                var sc = NewScene($"{tag}_topic{x + 1}_scene", x == 0 ? 0x00002810u : 0x00002814u);
+                var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u);   // every exchange loops; the stage closes the talk
                 sc.Index = (uint)(x * 10);
                 sc.SCPI = BitConverter.GetBytes((ushort)100);
                 sc.Phases.Add(new ScenePhase { Name = "", EditorWidth = 350 });
