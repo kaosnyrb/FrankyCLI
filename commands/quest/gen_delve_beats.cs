@@ -65,6 +65,15 @@ namespace FrankyCLI
         // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
         private static readonly Dictionary<string, int> WaveStyles = new() { ["squad"] = 1, ["horde"] = 2 };
 
+        /// <summary>
+        /// The stock death hook's own switch: each member leaves the collection as it dies, so an objective
+        /// targeting the collection marks only the living (his play, 2026-10-14: the markers showed the dead too).
+        /// Completion still holds: the removal runs BEFORE DefaultCollectionAliasParent's all-dead check, which
+        /// counts against the collection's CURRENT size, so the last death leaves it empty and 0 >= 0 sets the stage.
+        /// </summary>
+        private static ScriptBoolProperty RemoveDeadFromCollection() =>
+            new() { Name = "RemoveFromRefCollection", Data = true, Flags = ScriptProperty.Flag.Edited };
+
         /// <summary>The stuck-enemy guard's default, in seconds: his infestation driver's pity timer.</summary>
         private const int DefaultStuckSeconds = 180;
         /// <summary>A hold's reveal default, in seconds (his "after like 20 seconds"), and its words (Eliza's placeholder).</summary>
@@ -1377,6 +1386,7 @@ namespace FrankyCLI
                             hs.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = ws[w], Flags = ScriptProperty.Flag.Edited });
                             hs.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = pre, Flags = ScriptProperty.Flag.Edited });
                             hs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = ws[w], Flags = ScriptProperty.Flag.Edited });
+                            hs.Properties.Add(RemoveDeadFromCollection());
                             var he = new QuestFragmentAlias();
                             he.Property.Object.SetTo(clone.FormKey);
                             he.Property.Alias = (short)col;
@@ -1396,7 +1406,11 @@ namespace FrankyCLI
                         var fs = new ScriptEntry { Name = isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath" };
                         fs.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
                         fs.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
-                        if (isClear) fs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
+                        if (isClear)
+                        {
+                            fs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
+                            fs.Properties.Add(RemoveDeadFromCollection());
+                        }
                         var fe = new QuestFragmentAlias();
                         fe.Property.Object.SetTo(clone.FormKey);
                         fe.Property.Alias = (short)on;
@@ -2222,6 +2236,9 @@ namespace FrankyCLI
                 var sc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == h.alias)?.Scripts.FirstOrDefault(s => s.Name == h.script);
                 int? I(string n) => sc?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(p => p.Name == n)?.Data;
                 fail += Check($"alias {h.alias} {h.script}", $"sets {I("StageToSet")} after {I("PrereqStage")}", $"sets {h.set} after {h.prereq}");
+                if (h.script == "DefaultCollectionAliasOnDeath")
+                    fail += Check($"alias {h.alias} drops its dead (the marker shows only the living)",
+                                  (sc?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "RemoveFromRefCollection")?.Data ?? false).ToString(), "True");
             }
             foreach (var g in bm.Globals)
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
