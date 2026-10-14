@@ -1137,7 +1137,9 @@ namespace FrankyCLI
             Console.WriteLine($"  FormKey:  {scene.FormKey}");
             Console.WriteLine($"  EditorID: {scene.EditorID}");
             Console.WriteLine($"  Quest:    {(scene.Quest.IsNull ? "null" : scene.Quest.FormKey.ToString())}");
-            Console.WriteLine($"  Flags:    {scene.Flags}");
+            Console.WriteLine($"  Flags:    {scene.Flags}  (0x{(uint)scene.Flags:X8})");
+            // The conversation menu's order key is in question (his missionboard02a play, 2026-10-14): print it.
+            Console.WriteLine($"  Index:    {(scene.Index.HasValue ? scene.Index.Value.ToString() : "null")}");
             Console.WriteLine($"  VNAM:     {(scene.VNAM.HasValue ? BitConverter.ToString(scene.VNAM.Value.ToArray()) : "null")}");
             Console.WriteLine($"  Notes:    {scene.Notes}");
             if (scene.Actors != null && scene.Actors.Count > 0)
