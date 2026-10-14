@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "id": "duo_delve_remote06b",
+  "template": "beats",
+  "_note": "LETTER VARIANT of remote06a, written by Jessica 2026-10-14 on his 'do one of each for now' and his example, 'cave creatures'. Caves only. Same beat, marker and numbers as 06a; the creature list is PreditorMegalist_B where 06a has _A, picked so the two do not draw the same pool, and I have NOT read what _B holds, so the words never name a species. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is the survey crew who got out.",
+  "author": "jessica",
+  "source": "Structure from duo_delve_remote06a (Eliza's clear proof)",
+  "place": {
+    "remote": true,
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    }
+  },
+  "prose": {
+    "name": "Hunt: Cave Breach on <Planet>",
+    "briefing": "A survey crew broke through into the cave at the <Place> and something came up out of it. They got out and left their gear behind. Whatever lives down there has to be cleared before anyone goes back."
+  },
+  "speaker": {
+    "name": "Survey Crew",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": "We broke into a cave and something came up out of it. We got out, but our gear's still down there. Clear it out and you'll be paid.",
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_PreditorMegalist_B",
+        "min": 4,
+        "max": 6,
+        "species": "one"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the creatures out of the <Place>",
+      "journal": "Everything that came up out of the cave at the <Place> is dead. The survey crew can go back for their gear.",
+      "say": "That's the last of them. We can go back down. Thank you."
+    }
+  ],
+  "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Lucy, Fresh and Casual' (British), NOT yet heard in game (voices.md); his ear decides."
+}
