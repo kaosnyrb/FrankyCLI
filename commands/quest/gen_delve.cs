@@ -1636,6 +1636,7 @@ namespace FrankyCLI
         {
             yield return ("prose.name", r.prose.name ?? "");
             yield return ("prose.briefing", r.prose.briefing ?? "");
+            if (r.prose.card != null) yield return ("prose.card", r.prose.card);   // Jessica's catch on missionboard02a: the card was never token-checked
             for (int i = 0; i < r.beats.Count; i++)
             {
                 yield return ($"beat {i + 1} objective", r.beats[i].objective ?? "");
