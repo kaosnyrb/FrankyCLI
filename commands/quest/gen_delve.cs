@@ -417,6 +417,7 @@ namespace FrankyCLI
                 case "bases": return MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "footprint": return Footprint();
                 case "keywords": return PoolKeywords(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
+                case "pcmpool": return PcmPool(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
@@ -432,6 +433,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
                     Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
                     Console.WriteLine("       gen_delve nodeflag <node> runone on|off [--dry]   one quest per event (NumQuestsToRun, max 1)");
+                    Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
                     return 1;
             }
         }
@@ -2066,6 +2068,104 @@ namespace FrankyCLI
         /// LocTypeOE_NonHostile and must draw from DISJOINT pools, so the question is which theme
         /// splits the peopled pool, not which themes the whole pool has.
         /// </summary>
+        /// <summary>
+        /// `gen_delve pcmpool <pcmBranchNode> [refType ...]`: the places a PCM request resolving under that node can
+        /// put down, and how many of them carry EVERY named ref type. A remote Delve's place fills by PCM request
+        /// (ALPS), which gen_aliaslint can only call UNKNOWN; this is the read that turns it into a number.
+        /// His 2026-10-13 idea: remote missions on the item/terminal markers "so they'll always work". That holds
+        /// only if the content a request can place carries them, so this answers it.
+        ///
+        /// Reads WINNING overrides; the tree is built from each child's ParentNode (the game ignores Nodes, his
+        /// docs/formlib/pcm.md). A leaf whose content is not a worldspace, or a worldspace with no Location, is
+        /// counted and named, never dropped. ⚠ Branch conditions (a GetRandomPercent, a system keyword) are
+        /// PRINTED and NOT evaluated: the pool is what CAN be placed, not what a given roll will place.
+        /// ⚠ Ref types are read off the worldspace's own Location (both special-reference lists); whether a
+        /// condition walks the location hierarchy is unread (manual 32).
+        /// </summary>
+        private static int PcmPool(List<string> pos)
+        {
+            if (pos.Count < 1) { Console.WriteLine("REFUSED: gen_delve pcmpool <pcmBranchNode> [refType ...]"); return 1; }
+            using var env = GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            var branches = env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerBranchNodeGetter>().ToList();
+            var root = branches.FirstOrDefault(b => string.Equals(b.EditorID, pos[0], StringComparison.OrdinalIgnoreCase));
+            FormKey rootFk;
+            if (root != null) rootFk = root.FormKey;
+            else
+            {
+                // A tree record (PCM_QuestRequest) is a valid root too: branch nodes parent straight to it.
+                var tree = env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerTreeGetter>()
+                    .FirstOrDefault(t => string.Equals(t.EditorID, pos[0], StringComparison.OrdinalIgnoreCase));
+                if (tree == null) { Console.WriteLine($"REFUSED: no PCM branch node or tree named '{pos[0]}'"); return 1; }
+                rootFk = tree.FormKey;
+            }
+
+            var need = new List<(string name, FormKey fk)>();
+            foreach (var n in pos.Skip(1))
+            {
+                var rt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
+                    .FirstOrDefault(x => string.Equals(x.EditorID, n, StringComparison.OrdinalIgnoreCase));
+                if (rt == null) { Console.WriteLine($"REFUSED: '{n}' is not a location ref type"); return 1; }
+                need.Add((n, rt.FormKey));
+            }
+
+            var kids = branches.GroupBy(b => b.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList());
+            var leaves = env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerContentNodeGetter>()
+                .GroupBy(c => c.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList());
+
+            int total = 0, noWs = 0, noLoc = 0, joint = 0;
+            var perNeed = new int[need.Count];
+            var seenContent = new HashSet<FormKey>();
+            void Walk(FormKey fk, string path, int depth)
+            {
+                if (leaves.TryGetValue(fk, out var ls))
+                {
+                    int here = 0, hereJoint = 0;
+                    foreach (var leaf in ls)
+                    {
+                        if (!seenContent.Add(leaf.Content.FormKey)) continue;
+                        here++; total++;
+                        if (!env.LinkCache.TryResolve<IWorldspaceGetter>(leaf.Content.FormKey, out var ws))
+                        { noWs++; Console.WriteLine($"    ? {leaf.EditorID}: content {leaf.Content.FormKey} is not a worldspace"); continue; }
+                        if (ws.Location.IsNull || !env.LinkCache.TryResolve<ILocationGetter>(ws.Location.FormKey, out var loc))
+                        { noLoc++; Console.WriteLine($"    ? {ws.EditorID}: worldspace has no Location"); continue; }
+                        var rts = new HashSet<FormKey>();
+                        foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
+                        { if (g == null) continue; foreach (var e in g) if (!e.LocationRefType.IsNull) rts.Add(e.LocationRefType.FormKey); }
+                        bool all = true;
+                        var marks = new List<string>();
+                        for (int i = 0; i < need.Count; i++)
+                        {
+                            bool has = rts.Contains(need[i].fk);
+                            if (has) perNeed[i]++;
+                            marks.Add(has ? "Y" : ".");
+                            all &= has;
+                        }
+                        if (all) { joint++; hereJoint++; }
+                        if (need.Count > 0 && marks.Any(m => m == "Y"))
+                            Console.WriteLine($"    {string.Join("", marks)} {ws.EditorID} -> {loc.EditorID}");
+                    }
+                    Console.WriteLine($"{new string(' ', depth * 2)}  leaves {here}, carrying all named: {hereJoint}   ({path})");
+                }
+                if (!kids.TryGetValue(fk, out var ks)) return;
+                foreach (var k in ks)
+                {
+                    string conds = k.Conditions == null || k.Conditions.Count == 0 ? "" :
+                        "  IF " + string.Join("; ", k.Conditions.Select(c => c.Data?.GetType().Name
+                            .Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "") ?? "?"));
+                    Console.WriteLine($"{new string(' ', depth * 2)}[{k.NodeType}] {k.EditorID}{conds}");
+                    Walk(k.FormKey, path + " > " + k.EditorID, depth + 1);
+                }
+            }
+            Walk(rootFk, pos[0], 0);
+
+            Console.WriteLine($"\n  distinct places under {pos[0]}: {total}" +
+                              (noWs + noLoc > 0 ? $"  (unreadable: {noWs} not a worldspace, {noLoc} no Location)" : ""));
+            for (int i = 0; i < need.Count; i++) Console.WriteLine($"    {need[i].name}: {perNeed[i]}");
+            if (need.Count > 0) Console.WriteLine($"  carrying ALL {need.Count} named: {joint}");
+            return 0;
+        }
+
         private static int PoolKeywords(List<string> narrow)
         {
             using var env = GameEnvironment.Typical

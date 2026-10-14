@@ -568,7 +568,7 @@ namespace FrankyCLI
                 case "pcmbranchnode":
                     foreach (var rec in mod.PlanetContentManagerBranchNodes)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { DumpPcmBranchNode(rec); found++; }
+                        { DumpPcmBranchNode(rec, allMods); found++; }
                     break;
                 case "pcmcontentnode":
                     foreach (var rec in mod.PlanetContentManagerContentNodes)
@@ -1004,7 +1004,7 @@ namespace FrankyCLI
             Console.WriteLine();
         }
 
-        private static void DumpPcmBranchNode(IPlanetContentManagerBranchNodeGetter node)
+        private static void DumpPcmBranchNode(IPlanetContentManagerBranchNodeGetter node, List<IStarfieldModGetter>? allMods)
         {
             Console.WriteLine($"--- PcmBranchNode ---");
             Console.WriteLine($"  FormKey:  {node.FormKey}");
@@ -1040,8 +1040,11 @@ namespace FrankyCLI
             if (node.Conditions != null && node.Conditions.Count > 0)
             {
                 Console.WriteLine($"  Conditions [{node.Conditions.Count}]:");
+                // Through the shared printer: `{cond}` printed only the overlay's type name, so every
+                // PCM node's conditions read as present-but-empty (2026-10-14, reading what a
+                // PCM_QuestGeneral request can place).
                 foreach (var cond in node.Conditions)
-                    Console.WriteLine($"    {cond}");
+                    DumpConditionFull(cond, "    ", allMods);
             }
             Console.WriteLine();
         }
@@ -3329,6 +3332,15 @@ namespace FrankyCLI
                     if (pi.GetIndexParameters().Length > 0 || pi.Name == "PcmTypeKeyword") continue;
                     object? v; try { v = pi.GetValue(a.ALPS); } catch { continue; }
                     if (v == null) continue;
+                    // The request's own conditions go through the shared printer: DescribeValue stops at a
+                    // depth and printed "IsTrueForConditionForm, not expanded at this depth" (2026-10-14).
+                    if (v is System.Collections.IEnumerable conds && v is not string
+                        && conds.Cast<object>().ToList() is var cl && cl.Count > 0 && cl.All(c => c is IConditionGetter))
+                    {
+                        Console.WriteLine($"{pad}    {pi.Name} [{cl.Count}]:");
+                        foreach (IConditionGetter c in cl) DumpConditionFull(c, pad + "      ", allMods);
+                        continue;
+                    }
                     // Was `v.ToString()` truncated to 60 chars, which on the ALPS Conditions list
                     // printed `Mutagen...BinaryOverlayList+Bi…` -- a CLASS NAME, cut in half, under
                     // a heading promising the PCM request. Same defect as the three fills above and
