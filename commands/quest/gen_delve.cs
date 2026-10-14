@@ -133,10 +133,21 @@ namespace FrankyCLI
             /// <summary>board: the removed driver's own aliases, named by nothing once it goes, removed with it.</summary>
             public List<int> driverAliases { get; set; } = new();
             /// <summary>
-            /// board: a quest in the same mod whose alias playerAlias (the player, a unique-actor fill) is copied in, because
-            /// the base has none and the arrival hook measures to him. Null = the base carries its own player alias.
+            /// board: a quest in the same mod whose aliases are COPIED IN, renumbered (borrowAliases), because the base has
+            /// none of its own: the player (the arrival hook and a recover measure to him), the object slots a talk, pickup,
+            /// use or deliver needs, and a second place. Every alias link inside a copy is remapped through the list, and the
+            /// source's main place (borrowPlaceAlias) becomes this template's placeAlias; any other link is refused.
             /// </summary>
-            public string? playerAliasFrom { get; set; }
+            public string? borrowFrom { get; set; }
+            public List<BorrowAlias> borrowAliases { get; set; } = new();
+            public int borrowPlaceAlias { get; set; } = -1;
+            /// <summary>board: the MiscItem a pickup's item is cloned from when the removed driver carries no CargoObject.</summary>
+            public string? itemSource { get; set; }
+            /// <summary>
+            /// The second place's PLANET, CREATED when a beat is at the second place: a copy of the base's planet alias whose
+            /// parent is the second place, so &lt;SecondPlanet&gt; names where he flies. Null = this template has none.
+            /// </summary>
+            public SecondPlanet? secondPlanet { get; set; }
             /// <summary>
             /// board: the stage set when the player first comes near step one's marker, after the accept. The broadcast plays
             /// there, not on the accept: his 2026-10-14, "You shouldn't recieve radio messages just after picking up a
@@ -149,6 +160,8 @@ namespace FrankyCLI
         /// <summary>The kinds the beats build runs: a slate Delve, and a mission-board one on the same machinery.</summary>
         private static bool IsBeats(Template t) => t.kind == "beats" || t.kind == "board";
         private static bool IsBoard(Template t) => t.kind == "board";
+        private sealed class BorrowAlias { public int from { get; set; } public int to { get; set; } }
+        private sealed class SecondPlanet { public int cloneOf { get; set; } public int id { get; set; } public string name { get; set; } = ""; }
         private sealed class BeatSlot
         {
             public int markerAlias { get; set; }
@@ -1060,6 +1073,10 @@ namespace FrankyCLI
                     Fatal($"place.remote is set; a board mission's place is ALWAYS a request (template '{t.id}'s base carries one), so leave it out.");
                 if (string.IsNullOrWhiteSpace(r.prose.card))
                     Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
+                // The board's second place is borrowed bare: nothing on it holds it near the first, so a FOUND second place
+                // could be anywhere in the galaxy. A requested one is its own new site (proven 2026-10-14), so that is the shape.
+                if (r.beats.Any(b => b.PlaceIndex == 1) && r.place.second?.remote != true)
+                    Fatal("a beat is at the second place and place.second.remote is not set; a board mission's second place must be a request (nothing would hold a found one near the first).");
             }
             else if (r.prose.card != null)
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
@@ -1331,6 +1348,14 @@ namespace FrankyCLI
                               + string.Join(", ", t.tokens.Keys.Select(k => "<" + k + ">")));
             }
 
+            // --- a second-place token with no second place --------------------------------------------
+            // The second place (and its planet) exist only when a beat is there; a token naming them otherwise binds to an
+            // alias the build removes or never makes, and prints to the player literally.
+            if (!r.beats.Any(b => b.PlaceIndex == 1))
+                foreach (var (where, text) in ProseStrings(r))
+                    foreach (var tok in Tokens(text).Where(x => x == "SecondPlace" || x == "SecondPlanet").Distinct())
+                        Fatal($"{where}: <{tok}> names the second place and no beat is there, so it would print to the player literally.");
+
             // --- an objective names the place its marker is at -------------------------------------
             // The objective is the line the player follows to the marker, so if it names a place it must name THIS
             // beat's place. His play, 2026-10-13: 03a's crate moved to the second POI and its objective still said
@@ -1398,7 +1423,7 @@ namespace FrankyCLI
             if (secondRemote && r.place.remote != true && !IsBoard(t))
                 Fatal("place.second.remote is set and the main place is not remote; a requested second site rides on a requested first (set place.remote).");
             if (secondRemote)
-                Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play; nothing forces the planets to differ)");
+                Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); the build guards it off the first site's planet (the guard is not yet played)");
             if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
             if (remote && (anyThird || r.place.third != null || (!secondRemote && (anySecond || r.place.second != null))))
@@ -1473,7 +1498,7 @@ namespace FrankyCLI
                 // not established (part 32), so the overlap is measured and named rather than trusted.
                 if (beats)
                     foreach (var (a, b) in new[] { (0, 1), (0, 2), (1, 2) })
-                        if (drawn.ContainsKey(a) && drawn.ContainsKey(b))
+                        if (drawn.ContainsKey(a) && drawn.ContainsKey(b) && !(a == 0 && b == 1 && remote && secondRemote))   // two REQUESTS each make a new site: no shared POI to draw
                         {
                             int both = drawn[a].Intersect(drawn[b], StringComparer.OrdinalIgnoreCase).Count();
                             // Two ENDINGS must be two places (the choice kind's rule above, carried over): a refusal.
@@ -2701,8 +2726,18 @@ namespace FrankyCLI
             int fail = 0;
             var made4 = new BuildMade();
             var madeBeats = new BeatsMade();
-            if (r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias);
-            if (r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias);
+            if (t.borrowFrom != null) fail += BorrowAliases(myMod, clone, t);
+            if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias);
+            if (fail == 0 && r.place.second?.remote == true)
+            {
+                fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias);
+                if (fail == 0) fail += GuardOtherPlanet(clone, t, env);
+            }
+            if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1))
+            {
+                fail += MakeSecondPlanet(clone, t);
+                madeBeats.SecondPlanet = t.secondPlanet.id;
+            }
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
                 made4.ThirdPlaceAlias = CreateThirdPlace(clone, t);
@@ -3283,12 +3318,104 @@ namespace FrankyCLI
         /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
         /// link into it adds the esp to the esm's masters: 2026-10-08).
         /// </summary>
+        /// <summary>
+        /// Copy the template's borrowAliases in from borrowFrom, renumbered, every alias link inside each copy remapped: through
+        /// the list, or the source's main place to this template's. A link to anything else is refused rather than left
+        /// pointing at whatever this base happens to number the same (the board's 2 is a planet; the slate's 2 an activator).
+        /// </summary>
+        private static int BorrowAliases(StarfieldMod myMod, Quest clone, Template t)
+        {
+            var src = myMod.Quests.FirstOrDefault(q => q.EditorID == t.borrowFrom);
+            if (src?.Aliases == null) { Console.WriteLine($"REFUSED: borrowFrom '{t.borrowFrom}' is not a quest in {t.mod}."); return 1; }
+            var map = t.borrowAliases.ToDictionary(b => b.from, b => b.to);
+            if (t.borrowPlaceAlias >= 0) map[t.borrowPlaceAlias] = t.placeAlias;
+            int? Map(int from) => map.TryGetValue(from, out var to) ? to : null;
+            foreach (var b in t.borrowAliases)
+            {
+                if (clone.Aliases!.SelectMany(Flatten).Any(x => x.id == (uint)b.to))
+                { Console.WriteLine($"REFUSED: alias {b.to} is already taken on this base; borrowed alias {b.from} cannot land there."); return 1; }
+                AQuestAlias copy;
+                string links = "";
+                string name;
+                if (src.Aliases.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)b.from) is QuestReferenceAlias ra)
+                {
+                    var c = ra.DeepCopy(); c.ID = (uint)b.to; name = c.Name ?? "";
+                    if (c.Location != null)
+                    {
+                        if (c.Location.AliasID is not int lid || Map(lid) is not int to) { Console.WriteLine($"REFUSED: borrowed alias {b.from} fills from alias {c.Location.AliasID}, which nothing maps."); return 1; }
+                        links += $" fills from {c.Location.AliasID}->{to}"; c.Location.AliasID = to;
+                    }
+                    if (c.CreateReferenceToObject != null)
+                    {
+                        if (Map(c.CreateReferenceToObject.AliasID) is not int to) { Console.WriteLine($"REFUSED: borrowed alias {b.from} is created at alias {c.CreateReferenceToObject.AliasID}, which nothing maps."); return 1; }
+                        links += $" created at {c.CreateReferenceToObject.AliasID}->{to}"; c.CreateReferenceToObject.AliasID = (short)to;
+                    }
+                    copy = c;
+                }
+                else if (src.Aliases.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)b.from) is QuestLocationAlias la)
+                {
+                    var c = la.DeepCopy(); c.ID = (uint)b.to; name = c.Name ?? "";
+                    foreach (var cd in c.Conditions)
+                        if (cd.Data is GetDistanceConditionData gd && gd.UseAliases)
+                        {
+                            if (Map((int)gd.FirstParameter.Index) is not int to) { Console.WriteLine($"REFUSED: borrowed alias {b.from}'s leash measures to alias {gd.FirstParameter.Index}, which nothing maps."); return 1; }
+                            links += $" leash {gd.FirstParameter.Index}->{to}"; gd.FirstParameter.Index = (uint)to;
+                        }
+                    copy = c;
+                }
+                else { Console.WriteLine($"REFUSED: {src.EditorID} has no ref or location alias {b.from} to borrow."); return 1; }
+                clone.Aliases!.Add(copy);
+                Console.WriteLine($"  +borrow  : alias {b.from} -> {b.to} {name} from {src.EditorID}{links}");
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// The second place's planet: a copy of the base's planet alias (secondPlanet.cloneOf) with the second place as its
+        /// parent, as every vanilla MB_Cargo resolves its planets (ParentSystemLocationAliasID on a location alias).
+        /// </summary>
+        private static int MakeSecondPlanet(Quest clone, Template t)
+        {
+            var sp = t.secondPlanet!;
+            var from = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)sp.cloneOf);
+            if (from == null) { Console.WriteLine($"REFUSED: the base has no planet alias {sp.cloneOf} to copy the second planet from."); return 1; }
+            if (clone.Aliases!.SelectMany(Flatten).Any(x => x.id == (uint)sp.id)) { Console.WriteLine($"REFUSED: alias {sp.id} is already taken; the second planet cannot land there."); return 1; }
+            var c = from.DeepCopy(); c.ID = (uint)sp.id; c.Name = sp.name; c.ParentSystemLocationAliasID = t.secondPlaceAlias;
+            clone.Aliases.Add(c);
+            Console.WriteLine($"  +planet  : alias {sp.id} {sp.name}, the planet of the second place (alias {t.secondPlaceAlias}), a copy of {from.Name}");
+            return 0;
+        }
+
+        /// <summary>
+        /// A requested second site must not land on the first site's planet (a cargo run crosses planets). Vanilla's own shape for
+        /// "the same place as that alias" on a location alias is IsInSameCurrentLocationAsAlias with a location-type keyword
+        /// (MB_Cargo01Far's TargetSystemLocation, read 2026-10-14); here it is the first site's map marker, at the planet level,
+        /// and FALSE. Whether a PCM request honours it is his play's to show: one probe landed apart with no guard at all.
+        /// </summary>
+        private static int GuardOtherPlanet(Quest clone, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+        {
+            var second = clone.Aliases!.OfType<QuestLocationAlias>().First(a => a.ID == (uint)t.secondPlaceAlias);
+            int mPos = clone.Aliases.FindIndex(a => a is QuestReferenceAlias x && x.ID == (uint)t.mapMarkerAlias);
+            int sPos = clone.Aliases.IndexOf(second);
+            if (mPos < 0 || mPos > sPos) { Console.WriteLine($"REFUSED: the main place's map marker (alias {t.mapMarkerAlias}) is not listed before the second place, so the guard would read it empty."); return 1; }
+            var orbital = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>().FirstOrDefault(k => k.EditorID == "LocTypeMajorOrbital" && k.FormKey.ModKey.FileName == "Starfield.esm");
+            if (orbital == null) { Console.WriteLine("REFUSED: LocTypeMajorOrbital is not in Starfield.esm."); return 1; }
+            var d = new IsInSameCurrentLocationAsAliasConditionData { RunOnType = Condition.RunOnType.Subject };
+            d.FirstParameter = t.mapMarkerAlias;
+            d.SecondParameter.Link.SetTo(orbital.FormKey);
+            second.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f });
+            Console.WriteLine($"  guard    : the second place is NOT on the planet of alias {t.mapMarkerAlias} (the first site's map marker): IsInSameCurrentLocationAsAlias, LocTypeMajorOrbital, == 0");
+            return 0;
+        }
+
         private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target)
         {
             // The request is always the source's MAIN place alias; a second request is that same alias copied over the
             // second place, keeping the second place's ID and name so <SecondPlace> and everything filled from it still bind.
-            var src = myMod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom);
-            if (src == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in {t.mod}."); return 1; }
+            // A board's own main place IS a request (MB28a's), so its second request copies that, off the clone itself.
+            Quest? src = t.remotePlaceFrom != null ? myMod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom)
+                       : IsBoard(t) ? clone : null;
+            if (src == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in {t.mod}, and this is not a board (whose own place is a request)."); return 1; }
             var from = src.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
             if (from?.ALPS == null) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is not a PCM request (no ALPS)."); return 1; }
             int at = clone.Aliases!.FindIndex(a => a is QuestLocationAlias l && l.ID == (uint)target);

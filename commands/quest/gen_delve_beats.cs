@@ -695,6 +695,8 @@ namespace FrankyCLI
             public List<int> RejectObjectives = new();    // what duo_delve_quest hides when the mission is turned down
             public List<(int marker, int activator)> DroppedSlots = new();   // the base's object slots no beat took, removed
             public List<int> DroppedDriverAliases = new();   // board: the removed driver's own aliases, removed with it
+            public bool MarkerSourceAtMap;
+            public int? SecondPlanet;   // the created second planet's alias, when a beat is at the second place   // board: the marker source took no fight and fills from the map marker
             public (int on, int to)? Arrival;   // board: the arrival hook's alias (step one's marker) and the alias it measures to (the player)
             public (int stage, List<string> lines)? HandBack;   // the talk that ends the Delve: its stage and the RemoveItem lines it must run
             public FormKey Speaker;                        // the cloned NPC whose name and voice type the lines carry
@@ -794,7 +796,8 @@ namespace FrankyCLI
             if (old == null) { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' to remove."); return 1; }
             var cargo = old.Properties.OfType<ScriptObjectProperty>()
                 .FirstOrDefault(p => string.Equals(p.Name, "CargoObject", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
-            var itemSrc = cargo == null ? null : myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
+            var itemSrc = cargo != null ? myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value)
+                        : t.itemSource != null ? myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource) : null;
             // recover: the holder and his gang are drawn from the removed driver's own list, as delve4's were.
             var gangKey = old.Properties.OfType<ScriptObjectProperty>()
                 .FirstOrDefault(p => string.Equals(p.Name, "GangMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
@@ -881,25 +884,13 @@ namespace FrankyCLI
                 vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
                 Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
             }
-            // A base with no player alias borrows one (the slate base's: the player as a unique actor), with its own ID.
-            if (t.playerAliasFrom != null)
-            {
-                var pq = myMod.Quests.FirstOrDefault(q => q.EditorID == t.playerAliasFrom);
-                var pa = pq?.Aliases.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.playerAlias);
-                if (pa == null || pa.UniqueActor.IsNull)
-                { Console.WriteLine($"REFUSED: {t.playerAliasFrom} carries no alias {t.playerAlias} filled with a unique actor to copy as the player."); return 1; }
-                if (clone.Aliases!.SelectMany(Flatten).Any(x => x.id == (uint)t.playerAlias))
-                { Console.WriteLine($"REFUSED: alias {t.playerAlias} is already taken on this base; the player alias cannot keep its ID."); return 1; }
-                clone.Aliases!.Add(pa.DeepCopy());
-                Console.WriteLine($"  +player  : alias {t.playerAlias} {pa.Name}, copied from {t.playerAliasFrom} (this base has none)");
-            }
             // The base's own alias hooks on the alias the beats take over as a marker went with its driver's design
             // (MB28a's DefaultAliasOnDeath on PrimaryRef sets 100 with no prereq; a marker never dies).
             if (t.markerSource >= 0)
                 foreach (var e in vma.Aliases.Where(a => a.Property.Alias == t.markerSource).ToList())
                 {
                     vma.Aliases.Remove(e);
-                    Console.WriteLine($"  -hook    : the base's {string.Join(", ", e.Scripts.Select(s => s.Name))} on alias {t.markerSource} (it is beat 1's marker now)");
+                    Console.WriteLine($"  -hook    : the base's {string.Join(", ", e.Scripts.Select(s => s.Name))} on alias {t.markerSource} (the driver's kill; the beats own this alias now)");
                 }
 
             var steps = StepsOf(r);
@@ -922,7 +913,7 @@ namespace FrankyCLI
             srcMarker = srcMarker.DeepCopy();   // the pattern, taken before beat 1 may rewrite the alias itself
             // A slotless base's marker alias IS the first fight's marker (on the board, the system and planet resolve
             // from it, so it stays); every later marker is a copy of it.
-            bool sourceTaken = !slotless;
+            bool sourceTaken = t.markerSource < 0;
             QuestReferenceAlias NewMarker(int i, string suffix)
             {
                 if (!sourceTaken)
@@ -1056,6 +1047,17 @@ namespace FrankyCLI
                 clone.Aliases.Add(a);
                 slotOf[i] = new BeatSlot { markerAlias = (int)m.ID, activatorAlias = (int)a.ID, journalStage = beatStage[i] };
                 Console.WriteLine($"  +slot    : beat {i + 1} -- marker alias {m.ID}, activator {a.ID}");
+            }
+            // A marker source no fight took (a board mission that opens with a talk or a pickup) is still the board's PrimaryRef,
+            // which the system and planet resolve from, so it stays; it is pointed at the place's MAP MARKER, which every
+            // requested site carries and the lint always demands, so it never asks the site for a ref type no beat named.
+            if (!sourceTaken)
+            {
+                var ps = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)t.markerSource);
+                if (!markers.TryGetValue("MapMarkerRefType", out var mm)) { Console.WriteLine("REFUSED: the lint handed in no MapMarkerRefType to point the marker source at."); return 1; }
+                ps.Location!.RefType.SetTo(mm);
+                bm.MarkerSourceAtMap = true;
+                Console.WriteLine($"  source   : alias {t.markerSource} {ps.Name} took no fight, so it fills from the place's map marker (no ref type demanded)");
             }
             // A return is the earlier beat's own object visited again: same aliases, its own stage and journal.
             for (int i = 0; i < r.beats.Count; i++)
@@ -1467,7 +1469,7 @@ namespace FrankyCLI
             }
 
             foreach (var b in talkAlias.Keys)
-                BuildTalk(myMod, clone, r, b, steps, beatStage, slotOf[b].targetAlias, npcOf[b],
+                BuildTalk(myMod, clone, r, b, steps, beatStage, t.entryStage, slotOf[b].targetAlias, npcOf[b],
                           myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm);
 
             // --- 9. the events: one stock hook per beat --------------------------------------------------
@@ -2120,12 +2122,12 @@ namespace FrankyCLI
         /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
         /// </summary>
         private static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
-                                      Dictionary<int, int> beatStage, int personAlias, FormKey npc, bool female, BeatsMade bm)
+                                      Dictionary<int, int> beatStage, int entryStage, int personAlias, FormKey npc, bool female, BeatsMade bm)
         {
             var tb = r.beats[b];
             int stage = beatStage[b];
             int k = steps.FindIndex(s => s.Beats.Contains(b));
-            int enter = k == 0 ? 0 : steps[k - 1].DoneStage;   // a talk is slate-only (the board allows fights), so its entry is 0
+            int enter = k == 0 ? entryStage : steps[k - 1].DoneStage;   // step one opens on the entry stage: 0 on a slate, the board's accept (10)
             string tag = $"{r.id}_talk{b + 1}";
             string vt = tb.person!.voice!, vid = tb.person.elevenlabs!;
 
@@ -2389,6 +2391,42 @@ namespace FrankyCLI
                 var pl = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
                 fail += Check($"place alias {label} is a PCM request (a new site, placed by the planet content manager)",
                               pl == null ? "missing" : (pl.ALPS != null).ToString(), "True");
+            }
+            // EVERY alias link resolves: nothing fills from, is created at, or parents to an alias the quest does not have. A
+            // renumbering (the board's borrowed slots) or a removal (an unused slot, a dropped place) that left one dangling
+            // fails here rather than in his game.
+            var ids = new HashSet<uint>(q.Aliases.OfType<IQuestReferenceAliasGetter>().Select(a => a.ID)
+                .Concat(q.Aliases.OfType<IQuestLocationAliasGetter>().Select(a => a.ID))
+                .Concat(q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection.Where(e => e.ReferenceAlias != null).Select(e => e.ReferenceAlias!.ID))));
+            var dangling = q.Aliases.OfType<IQuestReferenceAliasGetter>()
+                .SelectMany(a => new[] { (a.ID, "fills from", a.Location?.AliasID), (a.ID, "is created at", (int?)a.CreateReferenceToObject?.AliasID) })
+                .Where(x => x.Item3 is int v && v >= 0 && !ids.Contains((uint)v))
+                .Select(x => $"alias {x.Item1} {x.Item2} {x.Item3}")
+                .Concat(q.Aliases.OfType<IQuestLocationAliasGetter>()
+                    .Where(a => a.ParentSystemLocationAliasID is int v && v >= 0 && !ids.Contains((uint)v))
+                    .Select(a => $"location alias {a.ID} parents to {a.ParentSystemLocationAliasID}"))
+                .ToList();
+            fail += Check("every alias link resolves to an alias the quest has", dangling.Count == 0 ? "all resolve" : string.Join("; ", dangling), "all resolve");
+            if (bm.SecondPlanet is int spId)
+            {
+                var sp = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)spId);
+                fail += Check($"the second planet (alias {spId}) is the planet of the second place",
+                              sp == null ? "missing" : $"parent {sp.ParentSystemLocationAliasID}", $"parent {t.secondPlaceAlias}");
+            }
+            if (bm.MarkerSourceAtMap)
+            {
+                var ms = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.markerSource);
+                fail += Check($"alias {t.markerSource} took no fight and fills from the place's map marker",
+                              ms?.Location == null ? "missing" : $"{ms.Location.AliasID} {ms.Location.RefType.FormKey}", $"{t.placeAlias} 02271F:Starfield.esm");
+            }
+            if (r.place.second?.remote == true)
+            {
+                var g = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
+                    .Conditions.FirstOrDefault(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter);
+                var gd = g?.Data as IIsInSameCurrentLocationAsAliasConditionDataGetter;
+                fail += Check("the second request is guarded off the first site's planet",
+                              gd == null ? "no guard" : $"alias {gd.FirstParameter}, {gd.SecondParameter.Link.FormKey}, == {(g as IConditionFloatGetter)?.ComparisonValue}",
+                              $"alias {t.mapMarkerAlias}, 070A54:Starfield.esm, == 0");
             }
             if (r.place.second?.remote == true)
                 fail += Check("the second request carries no drive leash to the first (it is meant for another planet)",

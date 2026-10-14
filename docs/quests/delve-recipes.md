@@ -92,7 +92,7 @@ lettered recipes until they come out. `duo_delve09` was the first, the same day.
 | `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
 | `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06a`, `06b`) |
 | `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03a`-`09a`). See *Beats* below |
-| `board` | board | 1 to 9, fights only | **a mission-board mission on the beats machinery** (his 2026-10-14). The base is `duo_MB28a_qst`; its driver comes off and vanilla's `MissionQuestScript` goes on, so the BOARD starts it, takes it and pays it. `defeat`, `clear` and `hold` only. See *Board* below |
+| `board` | board | 1 to 9 | **a mission-board mission on the beats machinery** (his 2026-10-14). The base is `duo_MB28a_qst`; its driver comes off and vanilla's `MissionQuestScript` goes on, so the BOARD starts it, takes it and pays it. fights, and since missionboard02a `use`, `pickup`, `deliver` and `talk`, with a requested second place on another planet. See *Board* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
 onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
@@ -105,7 +105,7 @@ onto `beats` and played the same in his hands the same morning; the old shape is
 | two-beat-one-place | `<Place>`, `<Planet>` |
 | find-owner-or-buyer | `<FindPlace>`, `<OwnerPlace>`, `<BuyerPlace>`, `<Planet>` |
 | beats | `<Place>` (main), `<SecondPlace>`, `<ThirdPlace>`, `<Planet>` |
-| board | `<Place>`, `<Planet>`, `<System>` |
+| board | `<Place>`, `<Planet>`, `<System>`, `<SecondPlace>`, `<SecondPlanet>` (the last two only with a beat at the second place) |
 
 An unknown token is refused (it would print to the player literally). Names (items, delivery points,
 NPCs) take **no** tokens.
@@ -491,8 +491,19 @@ properties the driver set (`questScriptKeeps` in the row). What changes from a s
   (the board picks the system).
 - **`PrimaryRef` is beat 1's marker.** The board's system and planet aliases resolve FROM it, so it stays,
   its ref type rewritten to the first fight's `at`; its base death hook goes. The driver's `EnemyType` goes.
-- **Fights only**: `defeat`, `clear`, `hold` (`allows` in the row). The base has no object slot, no player
-  alias and no approach stage, so anything needing one is refused by name.
+- **Borrowed from the slate base** (`borrowFrom`, `borrowAliases`; missionboard02a, 2026-10-14): MB28a has no player,
+  no object slot and no second place, so the slate base's are copied in renumbered (player 32; slots 1/2 and 11/12 as
+  20/21 and 23/24; second place 10 as 22), every link inside remapped and anything unmapped refused. A pickup clones
+  `itemSource` (the board driver carries no cargo). So `use`, `pickup`, `deliver` and `talk` build beside the fights;
+  `recover` and `choose` are still refused. A talk opens on the entry stage (10), never stage 0, which a board never sets.
+- **`PrimaryRef` never demands a marker no beat named.** It is a fight's marker when step one is a fight, and otherwise
+  fills from the place's map marker (every requested site has one); verify reads which.
+- **A second place is always a request** (`place.second.remote: true`; a found one is refused, nothing would hold it
+  near the first). It is a copy of the board's own request, GUARDED off the first site's planet
+  (`IsInSameCurrentLocationAsAlias` on the first site's map marker, `LocTypeMajorOrbital`, == 0: vanilla MB_Cargo's
+  shape), and gets its own planet alias (`secondPlanet`, parent the second place) for `<SecondPlanet>`. Two requests
+  are proven (duo_delve_twosite01a, two POIs on two planets); the guard is not yet played.
+- **Verify, every Delve:** every alias link (fills from, created at, parent) resolves to an alias the quest has.
 - **`deal` names a board node** (`_duo_MB_MissionNode_test` for the first). The proof recipe is
   `duo_delve_missionboard01a`, remote05a's gameplay; ids take the form `duo_delve_missionboardNNa` (his).
 

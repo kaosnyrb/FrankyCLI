@@ -213,8 +213,19 @@
       ],
       "_questScript": "THE MISSION BOARD TALKS TO ONE SCRIPT, vanilla's MissionQuestScript (Data/Scripts/Source): OnQuestStarted sets ReadyStage 5, the board's accept sets AcceptStage 10, MissionComplete() pays through MissionParent and sets CompleteStage 100, a turn-down sets FailStage 200. Vanilla attaches it BARE, with no driver, on MB_Bounty03_FCR02, MB_Bounty04_FCR04 and MB_Bounty05_UC (read 2026-10-14), and duo_MB28a_qst is that skeleton plus duo_bountyscript. So the driver goes and the base class goes on in its place, carrying the ten properties the driver set that MissionQuestScript declares; the driver's own six (GangMembers, Min/MaxGangMembers, targetNPC, EnemyType, artifactlist) go with it, the recipe naming its lists instead.",
       "playerAlias": 32,
-      "playerAliasFrom": "duo_artifact_localcargo_qst09a",
-      "_playerAlias": "MB28a has no player alias, and the arrival hook measures to him, so the slate base's (MBRIR02Player, unique actor Player) is copied in with its own ID.",
+      "borrowFrom": "duo_artifact_localcargo_qst09a",
+      "borrowAliases": [
+        { "from": 32, "to": 32 },
+        { "from": 1, "to": 20 },
+        { "from": 2, "to": 21 },
+        { "from": 10, "to": 22 },
+        { "from": 11, "to": 23 },
+        { "from": 12, "to": 24 }
+      ],
+      "borrowPlaceAlias": 0,
+      "_borrow": "MB28a has no player, no object slot and no second place, so the slate base's are copied in and renumbered (its 2 is MB28a's planet, its 11 MB28a's map marker): the player (32, unique actor Player; the arrival hook and a recover measure to him), its two marker+activator slots (1/2 -> 20/21 at the main place, 11/12 -> 23/24 at the second) and its second place (10 -> 22, FinalLocation). Every link inside is remapped, the slate's place 0 becoming 5; a link to anything else is refused. Read off the record 2026-10-14 (missionboard02a).",
+      "itemSource": "duo_Artifact09_item01",
+      "_itemSource": "A pickup clones its item off the removed driver's CargoObject, and duo_bountyscript carries none: the slate base's cargo item instead.",
       "approachStage": -1,
       "entryStage": 10,
       "arrivalStage": 15,
@@ -225,15 +236,23 @@
       "allows": [
         "defeat",
         "clear",
-        "hold"
+        "hold",
+        "use",
+        "pickup",
+        "deliver",
+        "talk"
       ],
-      "_allows": "The fights only. This base has no marker+activator pair to give an object beat, no player alias for a recover's hook, and no approach stage.",
+      "_allows": "The fights from the first board build; use, pickup, deliver and talk since the borrowed slots (2026-10-14, missionboard02a). Not recover (untested here) and not choose (the board ends through MissionComplete, and a choice's endings complete the quest themselves).",
       "carriesItem": false,
       "placeAlias": 5,
       "mapMarkerAlias": 11,
       "briefingStage": 10,
       "completeStage": 100,
-      "beatSlots": [],
+      "beatSlots": [
+        { "markerAlias": 20, "activatorAlias": 21, "objective": 10, "journalStage": 20 },
+        { "markerAlias": 23, "activatorAlias": 24, "objective": 20, "journalStage": 30 }
+      ],
+      "_beatSlots": "The borrowed slate slots, renumbered. Stages and objectives are numbered by the build from the recipe, not from this table.",
       "markerSource": 3,
       "_markerSource": "PrimaryRef (alias 3): a ref alias filled from the place (ALLA from alias 5). It IS beat 1's marker, its ref type rewritten to the recipe's at, and later beats' markers are copies of it. Never removed: TargetSystemLocation and TargetPlanetLocation resolve FROM it (their system and parent aliases are 3), and MissionQuestScript.PrimaryRef names it. Its base DefaultAliasOnDeath (the driver's kill, no prereq) is removed: a marker never dies.",
       "driverAliases": [
@@ -243,16 +262,19 @@
       "tokens": {
         "Place": "TargetLocation",
         "Planet": "TargetPlanetLocation",
-        "System": "TargetSystemLocation"
+        "System": "TargetSystemLocation",
+        "SecondPlace": "FinalLocation",
+        "SecondPlanet": "SecondPlanetLocation"
       },
       "collapsedPlaceAliases": [],
-      "secondPlaceAlias": -1,
+      "secondPlaceAlias": 22,
+      "secondPlanet": { "cloneOf": 2, "id": 25, "name": "SecondPlanetLocation" },
+      "_second": "The borrowed second place (22) is always a REQUEST on a board (the lint refuses a found one: nothing holds it near the first), guarded off the first site's planet. Its planet (25) is a copy of TargetPlanetLocation whose parent is 22, as vanilla MB_Cargo resolves its planets. A second request is proven (2026-10-14, duo_delve_twosite01a, two POIs on two planets); the guard is not yet played.",
       "_place": "The place is ALREADY a request (ALPS, PcmTypeKeyword none, with MB_IsPlayerLevelAppropriate and a habitability condition), dealt by the board in Overtime, so a recipe never sets place.remote: the lint measures it against the request pool as it does a remote place.",
       "cannot": [
-        "an object beat (use, pickup, deliver, talk) or a recover -- see allows",
-        "a second or third place",
-        "an approach, a who, a person at an ending",
-        "a choose"
+        "a recover or a choose -- see allows",
+        "a found second place (only a requested one) or a third place",
+        "an approach, a who, a person at an ending"
       ],
       "verifiedFrom": "gen_inspect qall duo_MB28a_qst and MB_Bounty05_UC, Defiant, 2026-10-14; MissionQuestScript.psc read whole"
     }

@@ -2,6 +2,8 @@
   "schema": 1,
   "id": "duo_delve_missionboard02a",
   "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, as missionboard01a (his 2026-10-14 pick for the board proofs). A board quest started by hand never gets the board's accept, so stage 10 would never be set.",
   "_note": [
     "CARGO RUN, REMOTE TO REMOTE, ON THE BOARD. His 2026-10-14 14:33: 'thinking we should have a cargo run mission,",
     "remote to remote. Talking on both ends', then 14:53 'it'll be both types eventually, but let's start missionboard'",
@@ -30,6 +32,8 @@
       ]
     },
     "second": {
+      "remote": true,
+      "_remote": "A second REQUEST on another planet (Eliza, 2026-10-14, on his go): proven by duo_delve_twosite01a, two POIs on two planets; the build also guards it off the first site's planet.",
       "theme": {
         "require": [],
         "exclude": [
