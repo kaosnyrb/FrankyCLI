@@ -16,6 +16,7 @@
     "player reads. The recap is Jessica's, written 2026-10-09 (907232d); this note said placeholder until 2026-10-10."
   ],
   "recap": "The crew at the <Place> had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
+  "recapSay": "All three are running. You've saved us a very long week.",
   "place": {
     "theme": {
       "require": [
