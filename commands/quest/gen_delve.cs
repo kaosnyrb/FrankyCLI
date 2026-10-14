@@ -1460,7 +1460,8 @@ namespace FrankyCLI
             if (r.place.second?.remote == false)
                 Fatal("place.second.remote is false; leave it out for a found second place.");
             // A LOCAL main place with a requested second (10a, his 2026-10-14 "build 10a": here, then another planet) is
-            // allowed: the main keeps its leash to the player, the second its guard off the main's planet and no leash.
+            // allowed: the main keeps its leash to the player; the second has no leash and NO planet guard (it crashed the
+            // game on startquest behind a local first site), so nothing forces it onto another planet.
             // A third place would be leashed to a second that is on another planet, so it is refused beside a request.
             if (secondRemote && (anyThird || r.place.third != null))
                 Fatal("place.second.remote is set and the recipe has a third place; a third place is held within a drive of the second, which is on another planet.");
@@ -1469,7 +1470,9 @@ namespace FrankyCLI
                     if (Tokens(text).Contains("SecondPlanet"))
                         Fatal($"{where}: <SecondPlanet> needs place.second.remote; a found second place is on the main place's planet and gets no planet alias of its own.");
             if (secondRemote)
-                Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); the build guards it off the first site's planet (the guard is not yet played)");
+                Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); "
+                                  + (r.place.remote == true || IsBoard(t) ? "the build guards it off the first site's planet"
+                                     : "NO planet guard behind a local first site (it crashed the game, 10a 2026-10-14), so nothing forces another planet"));
             if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
             if (remote && (anyThird || r.place.third != null || (!secondRemote && (anySecond || r.place.second != null))))
@@ -2777,7 +2780,10 @@ namespace FrankyCLI
             if (fail == 0 && r.place.second?.remote == true)
             {
                 fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias);
-                if (fail == 0) fail += GuardOtherPlanet(clone, t, env);
+                // ⛔ Only behind a REQUESTED first site (a board, or place.remote). Behind a LOCAL first site the guard
+                // (IsInSameCurrentLocationAsAlias on its map marker) CRASHED the game on startquest, twice, his play of
+                // duo_delve10a 2026-10-14 22:2x; the same build with the guard out started and played end to end.
+                if (fail == 0 && (IsBoard(t) || r.place.remote == true)) fail += GuardOtherPlanet(clone, t, env);
             }
             if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1) && (IsBoard(t) || r.place.second?.remote == true))
             {

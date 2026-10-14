@@ -2468,9 +2468,9 @@ namespace FrankyCLI
                 fail += Check($"alias {t.markerSource} took no fight and fills from the place's map marker",
                               ms?.Location == null ? "missing" : $"{ms.Location.AliasID} {ms.Location.RefType.FormKey}", $"{t.placeAlias} 02271F:Starfield.esm");
             }
-            if (r.place.second?.remote == true)
+            if (r.place.second?.remote == true && (IsBoard(t) || r.place.remote == true))
             {
-                var g = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
+                var g =q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
                     .Conditions.FirstOrDefault(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter);
                 var gd = g?.Data as IIsInSameCurrentLocationAsAliasConditionDataGetter;
                 fail += Check("the second request is guarded off the first site's planet",
