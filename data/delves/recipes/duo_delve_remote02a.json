@@ -40,7 +40,7 @@
       "type": "pickup",
       "say": "Its tracker just came back on. If anyone's watching for it, they know too. Be careful.",
       "_say": "On the pickup because a beat's say plays when its stage is SET, and wave 1 spawns on this stage (Eliza's move on 02a, 2026-10-12). The speaker is off-world and can only see the tracker, so the warning is about the tracker.",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "objective": "Recover the culture canister at the <Place>",
       "model": "Meshes\\SetDressing\\Container\\BioHazardCanister_01.nif",
       "name": "Dropped Culture Canister",

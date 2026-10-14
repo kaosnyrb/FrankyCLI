@@ -80,7 +80,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "item": "Wrapped Package",
       "objective": "Collect the package",
       "model": "Meshes\\ccs\\wrappedpackage01.nif",

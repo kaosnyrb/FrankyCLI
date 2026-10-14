@@ -85,7 +85,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "objective": "Collect the toolbox",
       "journal": "It's heavier than it looks. Every tool in it has been cleaned and oiled, and the big wrench is wrapped in a cloth on its own.",
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",

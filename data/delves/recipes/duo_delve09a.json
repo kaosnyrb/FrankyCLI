@@ -32,6 +32,7 @@
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
+      "ring": "large-cargo",
       "objective": "Find the relay transmitter at the <Place>",
       "model": "Meshes\\ccs\\transmittercrate01.nif",
       "name": "Transmitter Crate",

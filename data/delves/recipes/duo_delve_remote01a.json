@@ -40,6 +40,7 @@
       "type": "use",
       "group": "read",
       "at": "RETravelA1LocRef",
+      "ring": "infrastructure",
       "objective": "Read the seismic sensors at the <Place>",
       "journal": "This sensor had been knocked off true. I set it level again and pulled its readings.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
@@ -49,6 +50,7 @@
       "type": "use",
       "group": "read",
       "at": "RETravelB1LocRef",
+      "ring": "infrastructure",
       "journal": "Dust had drifted over this sensor up to the lid. I dug it out and the readings were still there.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Half-Buried Seismic Sensor"

@@ -36,7 +36,7 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerSmallImportantLocRef",
       "item": "Ring Box (1 of 2)",
       "objective": "Find the courier drop at the <Place>",
       "model": "Meshes\\ccs\\ringbox01.nif",
@@ -48,7 +48,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelB1LocRef",
+      "at": "REMarkerMediumLocRef",
       "item": "Picnic Hamper (2 of 2)",
       "objective": "Find the picnic hamper",
       "model": "Meshes\\ccs\\hamper01.nif",

@@ -51,7 +51,7 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "place": "second",
       "objective": "Recover the medal from <SecondPlace>",
       "message": {

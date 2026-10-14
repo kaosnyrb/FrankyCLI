@@ -385,6 +385,14 @@ namespace FrankyCLI
             public BeatMessage? message { get; set; }
             /// <summary>beats: "use", "pickup" or "deliver". Absent on every other kind.</summary>
             public string? type { get; set; }
+            /// <summary>
+            /// OPTIONAL, and REQUIRED on an object beat whose marker is a travel ring: why the thing may sit at the POI's
+            /// edge. His rule, 2026-10-14: "Items that are important to someone shouldn't be on travel ring. Infrastructure,
+            /// Large cargo and hostiles can be on the travel ring". "infrastructure" or "large-cargo"; fights and recovers
+            /// (a thief holds the thing) are the hostiles and need no declaration. Anything important to someone goes on
+            /// REMarkerMediumLocRef instead, or REMarkerSmallImportantLocRef for a second, small one at the same place.
+            /// </summary>
+            public string? ring { get; set; }
             /// <summary>beats: consecutive use beats sharing a group name are done in ANY order, with one counted objective.</summary>
             public string? group { get; set; }
             /// <summary>beats, pickup only: the inventory name of what this beat hands the player (a cloned item).</summary>
@@ -1324,6 +1332,28 @@ namespace FrankyCLI
                 int words = o.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
                 if (words > 12) Warn($"beat {i + 1} objective is {words} words; vanilla objectives run a median of 4 and never past 12.");
                 if (".!?".Contains(o.TrimEnd()[^1])) Warn($"beat {i + 1} objective ends in punctuation; vanilla objectives never do.");
+            }
+
+            // --- what may sit on a travel ring --------------------------------------------------------------
+            // His rule, 2026-10-14: "Items that are important to someone shouldn't be on travel ring. Infrastructure,
+            // Large cargo and hostiles can be on the travel ring". A ring marker is outside and a median 70 m from the
+            // centre (card 20261013-113809), so an object there reads as the POI's edge. Only the recipe knows what an
+            // object means to someone, so an object beat on a ring must SAY which allowed class it is; fights are the
+            // hostiles and are exempt by type. A declaration off the ring is refused too: it would claim nothing.
+            string[] ringClasses = { "infrastructure", "large-cargo" };
+            foreach (var (b, i) in r.beats.Select((b, i) => (b, i)))
+            {
+                bool onRing = b.at.StartsWith("RETravel", StringComparison.OrdinalIgnoreCase);
+                bool fight = b.type is "hold" or "defeat" or "clear" or "recover";   // recover: the thing is held by a thief
+                bool talk = b.type == "talk";
+                if (b.ring != null && !ringClasses.Contains(b.ring))
+                    Fatal($"beat {i + 1}'s ring is \"{b.ring}\"; it is one of: {string.Join(", ", ringClasses)}.");
+                else if (b.ring != null && (!onRing || fight || talk))
+                    Fatal($"beat {i + 1} declares ring \"{b.ring}\" but {(onRing ? "is a " + b.type + " beat, which needs none" : "is not on a travel ring (" + b.at + ")")}. Take it out.");
+                else if (onRing && !fight && !talk && b.ring == null)
+                    Fatal($"beat {i + 1} ({b.type ?? "object"}{(b.name != null ? ", " + b.name : "")}) sits on the travel ring {b.at}, the POI's edge. "
+                          + "If it matters to someone, put it on REMarkerMediumLocRef; if it is infrastructure or large cargo, "
+                          + "say so with \"ring\": \"infrastructure\" or \"large-cargo\".");
             }
 
             // --- two beats on top of each other ------------------------------------------------------------

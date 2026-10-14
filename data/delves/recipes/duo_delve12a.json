@@ -47,6 +47,7 @@
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
+      "ring": "large-cargo",
       "item": "Freighter Consignment",
       "objective": "Recover the freighter's crate at the <Place>",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",

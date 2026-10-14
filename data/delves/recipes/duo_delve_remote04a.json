@@ -36,7 +36,7 @@
   "beats": [
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "objective": "Find the team's spare power cell at the <Place>",
       "model": "Meshes\\SetDressing\\PowerCell\\PowerCell01.nif",
       "name": "Spare Power Cell",

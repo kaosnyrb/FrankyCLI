@@ -47,6 +47,7 @@
     {
       "type": "pickup",
       "at": "RETravelA1LocRef",
+      "ring": "large-cargo",
       "item": "Misdelivered Supply Crate",
       "objective": "Collect the crew's supply crate",
       "message": {

@@ -69,7 +69,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "item": "Cool Box (1 of 2)",
       "objective": "Find the cool box",
       "model": "Meshes\\ccs\\coolbox01.nif",
@@ -81,7 +81,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelB1LocRef",
+      "at": "REMarkerSmallImportantLocRef",
       "item": "Bag of Cups (2 of 2)",
       "objective": "Find the bag of cups",
       "model": "Meshes\\ccs\\bagofcups01.nif",

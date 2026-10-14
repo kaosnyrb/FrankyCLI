@@ -47,6 +47,7 @@
       "type": "use",
       "group": "fix",
       "at": "RETravelA1LocRef",
+      "ring": "infrastructure",
       "journal": "The leaking reclaimer only needed its hose clamps tightened. It's holding pressure now.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Leaking Water Reclaimer"
@@ -55,6 +56,7 @@
       "type": "use",
       "group": "fix",
       "at": "RETravelB1LocRef",
+      "ring": "infrastructure",
       "journal": "The stalled reclaimer had a seized pump. I've freed it, reset the breaker, and it's running.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Stalled Water Reclaimer"

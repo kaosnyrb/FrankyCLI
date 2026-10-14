@@ -192,6 +192,7 @@ pool): `LocTypeOE_NonHostile` (nobody hostile, 62 POIs with a centre and map mar
 | field | what it is |
 |---|---|
 | `at` | the marker the beat sits on, a `LocationReferenceType`. The workhorses: `RECenterLocRef`, `RETravelA1LocRef`, `RETravelB1LocRef`, `REMarkerMediumLocRef`, `REContainerLocRef`. ⚠ Two beats on the same travel ring (A1/A2/A3 or B1/B2/B3) land 7 to 14 m apart |
+| `ring` | **required on an object beat (`use`, `pickup`, `deliver`) whose `at` is a travel ring**, refused anywhere else. His rule, 2026-10-14: *"Items that are important to someone shouldn't be on travel ring. Infrastructure, Large cargo and hostiles can be on the travel ring"*. So it is `"infrastructure"` (sensors, reclaimers, beacons) or `"large-cargo"` (supply and wreck crates); fights and `recover` (a thief holds it) are the hostiles and need none. Anything that matters to someone goes on `REMarkerMediumLocRef`, and a second small one at the same place on `REMarkerSmallImportantLocRef` (his: for things on tables). The ring is outside and a median 70 m from the centre, so an object there reads as the POI's edge |
 | `place` | `"main"` (default), `"second"`, or `"third"` (choice) |
 | `objective` | the on-screen objective. Imperative, short (vanilla median 4 words, never past 12), no end punctuation |
 | `journal` | the journal line this beat sets. ⚠ **The log shows only the newest stage's line:** on a choice, beat 1's line is overwritten by the offer in the same instant, so put what the player must read in `offer.journal` |

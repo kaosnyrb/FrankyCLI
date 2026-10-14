@@ -89,7 +89,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelA1LocRef",
+      "at": "REMarkerMediumLocRef",
       "item": "Relay Power Cell (1 of 2)",
       "objective": "Collect the first power cell",
       "model": "Meshes\\setdressing\\powercell\\powercell01.nif",
@@ -101,7 +101,7 @@
     },
     {
       "type": "pickup",
-      "at": "RETravelB1LocRef",
+      "at": "REMarkerSmallImportantLocRef",
       "item": "Relay Power Cell (2 of 2)",
       "objective": "Collect the second power cell",
       "model": "Meshes\\setdressing\\powercell\\powercell01.nif",

@@ -52,6 +52,7 @@
       "type": "use",
       "group": "fix",
       "at": "RETravelA1LocRef",
+      "ring": "infrastructure",
       "journal": "This beacon's antenna feed was cracked, so it only reached a few hundred metres. I patched it and it's carrying again.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Weak Landing Beacon"
@@ -60,6 +61,7 @@
       "type": "use",
       "group": "fix",
       "at": "RETravelB1LocRef",
+      "ring": "infrastructure",
       "journal": "A power surge had left this beacon repeating one burst over and over. I reset it and it's back on its proper cycle.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Looping Landing Beacon"
