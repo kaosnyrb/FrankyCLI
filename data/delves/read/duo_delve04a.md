@@ -11,12 +11,12 @@
 
 ---
 
-## 1. PICKUP · out at the edge of the site, at the second place
+## 1. PICKUP · REMarkerMediumLocRef, at the second place
 
 🎯 Find the Reclaimer Housing at the <SecondPlace>
 
 📦 Item: **Reclaimer Housing (1 of 2)**
-🧱 Object: Housing Crate · CrateStackableA_01.nif
+🧱 Object: Housing Crate · housingcrate01.nif
 
 🪧 **Box: Manifest**
 > The manifest lists two crates for the <Place>: this one, the reclaimer housing, and a filter core sent on ahead. Signed out, never signed in.

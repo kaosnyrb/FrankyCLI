@@ -16,7 +16,7 @@
 🎯 Recover the freighter's crate at the <Place>
 
 📦 Item: **Freighter Consignment**
-🧱 Object: Wreck Cargo Crate · CrateStackableA_01.nif
+🧱 Object: Wreck Cargo Crate · wreckcargocrate01.nif
 
 🪧 **Box: Wreck Cargo Crate**
 > The crate came through the crash in better shape than the ship did. The seals are scorched, but they held.

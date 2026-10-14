@@ -18,7 +18,7 @@
 🎯 Recover the core sample case at the <Place>
 
 📦 Item: **Core Sample Case**
-🧱 Object: Abandoned Sample Case · CrateStackableA_01.nif
+🧱 Object: Abandoned Sample Case · SecureBreifcase.nif
 
 🔊 **Dig Boss:**
 > They're coming back for it. Hang on to that case.
@@ -37,7 +37,7 @@
 
 🎯 Take the samples to the crew's drop beacon
 
-🧱 Object: Crew Drop Beacon · Satellite_Beacon.nif
+🧱 Object: Crew Drop Beacon · commsmast01.nif
 
 🔊 **Dig Boss:**
 > Got it. That's a whole season's work. Thank you.

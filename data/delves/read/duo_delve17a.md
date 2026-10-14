@@ -42,7 +42,7 @@
 🎯 Find the cool box
 
 📦 Item: **Cool Box (1 of 2)**
-🧱 Object: Cool Box · CrateStackableA_01.nif
+🧱 Object: Cool Box · coolbox01.nif
 
 🪧 **Box: Cool Box**
 > Upside down, latch still shut. It sloshes a bit. That's probably the ice. It is not blue.
@@ -54,7 +54,7 @@
 🎯 Find the bag of cups
 
 📦 Item: **Bag of Cups (2 of 2)**
-🧱 Object: Bag of Cups · CrateStackableA_01.nif
+🧱 Object: Bag of Cups · bagofcups01.nif
 
 🪧 **Box: Bag of Cups**
 > Paper cups and a roll of napkins. Someone has written FRIDAY on the bag and drawn a sun with a face.

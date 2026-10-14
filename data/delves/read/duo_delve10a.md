@@ -29,7 +29,7 @@
 🎯 Collect the crew's supply crate
 
 📦 Item: **Misdelivered Supply Crate**
-🧱 Object: Supply Crate · CrateStackableA_01.nif
+🧱 Object: Supply Crate · supplycrate01.nif
 
 🪧 **Box: Supply Crate**
 > Still sealed. The label has the old camp crossed out, and the new site written underneath in marker, twice, in case the first one was missed.

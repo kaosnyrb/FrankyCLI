@@ -35,12 +35,12 @@
 
 ---
 
-## 2. PICKUP · out at the edge of the site
+## 2. PICKUP · REMarkerMediumLocRef
 
 🎯 Collect the survey crate
 
 📦 Item: **Sealed Survey Crate**
-🧱 Object: Marked Survey Crate · CrateStackableA_01.nif
+🧱 Object: Marked Survey Crate · surveycratemarked01.nif
 
 🪧 **Box: Survey Crate**
 > The crate is sealed and stencilled with a survey mark. Someone has written LUNCH on the lid in marker and crossed it out.

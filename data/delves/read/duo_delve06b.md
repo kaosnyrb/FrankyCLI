@@ -16,7 +16,7 @@
 🎯 Recover the clasp from the <SecondPlace>
 
 📦 Item: **Militia Long Service Clasp**
-🧱 Object: Buried Stash · CrateStackableA_01.nif
+🧱 Object: Buried Stash · buriedstash01.nif
 
 🪧 **Box: Militia Clasp**
 > The stash is under the nest debris, intact. The name on the clasp is scratched away, but the militia number is not, and the roster lists a brother at the <Place>.

@@ -18,7 +18,7 @@
 🎯 Find the courier drop at the <Place>
 
 📦 Item: **Ring Box (1 of 2)**
-🧱 Object: Split Courier Crate · CrateStackableA_01.nif
+🧱 Object: Split Courier Crate · ringbox01.nif
 
 🪧 **Box: Split Courier Crate**
 > The crate split open on landing. A small ring box has a note taped to it: DO NOT OPEN. Underneath, smaller: sorry.
@@ -30,7 +30,7 @@
 🎯 Find the picnic hamper
 
 📦 Item: **Picnic Hamper (2 of 2)**
-🧱 Object: Courier Hamper · CrateStackableA_01.nif
+🧱 Object: Courier Hamper · hamper01.nif
 
 🪧 **Box: Courier Hamper**
 > The hamper bounced further than the ring did. The bottle inside survived. Both glasses did not.
@@ -41,7 +41,7 @@
 
 🎯 Set out the picnic
 
-🧱 Object: Picnic Spot · BeachBlanket01.nif
+🧱 Object: Picnic Spot · picnicpallet01.nif
 
 🔊 **Courier Customer:**
 > It's all there? Okay. Okay. I can do this. Thank you.

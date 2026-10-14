@@ -30,6 +30,7 @@ THEMES = {
     "LocTypeOE_NonHostile": "a quiet, non-hostile site",
     "LocTypeOE_ThemeNaturalKeyword": "natural landmarks",
     "LocTypeOE_ThemeCaveKeyword": "caves",
+    "LocTypeTest": "test locations",
 }
 
 
@@ -64,8 +65,11 @@ def render(recipe, notes):
 
     place = recipe.get("place", {})
     if place:
-        kind = "the dungeon pool" if place.get("kind") == "dungeon" else theme_line(place.get("theme", {}))
-        say(f"**Where:** {kind}.")
+        where = theme_line(place.get("theme", {}))
+        if place.get("remote"):
+            # place.remote: the site is REQUESTED on another planet (gen_delve, 2026-10-14), so say so first.
+            where = "a new site on another planet, requested when the mission starts; " + where
+        say(f"**Where:** {where}.")
         if "second" in place:
             say(f"**Then:** a second place, {theme_line(place['second'].get('theme', {}))}.")
         say("")

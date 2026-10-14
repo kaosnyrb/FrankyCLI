@@ -18,7 +18,7 @@
 🎯 Find the relay transmitter at the <Place>
 
 📦 Item: **Relay Transmitter Unit**
-🧱 Object: Transmitter Crate · CrateStackableA_01.nif
+🧱 Object: Transmitter Crate · transmittercrate01.nif
 
 ---
 

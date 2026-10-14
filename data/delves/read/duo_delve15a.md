@@ -43,7 +43,7 @@
 🎯 Collect the package
 
 📦 Item: **Wrapped Package**
-🧱 Object: Wrapped Package · CrateStackableA_01.nif
+🧱 Object: Wrapped Package · wrappedpackage01.nif
 
 🪧 **Box: Wrapped Package**
 > A freight crate with a ribbon tied round it, badly, and then again, better. A card is tucked under the ribbon. It isn't addressed to me.

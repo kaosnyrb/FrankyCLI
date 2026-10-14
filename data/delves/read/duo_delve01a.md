@@ -43,7 +43,7 @@
 
 🎯 Send the readings from the survey beacon
 
-🧱 Object: Survey Uplink Beacon · Satellite_Beacon.nif
+🧱 Object: Survey Uplink Beacon · commsmast01.nif
 
 🔊 **Survey Office:**
 > That's all three. Data's coming through. Thank you.

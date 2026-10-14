@@ -6,19 +6,20 @@
 
 **Briefing:** A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped.
 
-**Where:** anywhere.
+**Where:** anywhere, never natural landmarks or caves.
+**Then:** a second place, natural landmarks, never caves.
 
 📻 **Dispatch, on the radio:**
 > This is dispatch. A load went out from here and never got where it was going. Nobody's been out to look. Find where it stopped.
 
 ---
 
-## 1. PICKUP · out at the edge of the site
+## 1. PICKUP · REMarkerMediumLocRef, at the second place
 
-🎯 Find the load at the <Place>
+🎯 Find the load at the <SecondPlace>
 
 📦 Item: **Signed-Out Consignment (1 of 2)**
-🧱 Object: Consignment Crate · CrateStackableA_01.nif
+🧱 Object: Consignment Crate · consignmentcrate01.nif
 
 🔊 **Dispatch:**
 > That's it. Finish the run for them and take it where it was going.

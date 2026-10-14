@@ -16,7 +16,7 @@
 🎯 Recover the medal from <SecondPlace>
 
 📦 Item: **Colony War Service Medal**
-🧱 Object: Salvager's Stash · CrateStackableA_01.nif
+🧱 Object: Salvager's Stash · salvagerstash01.nif
 
 🪧 **Box: Service Medal**
 > The name on the back is worn past reading. The service number under it is not, and the record lists next of kin at the <Place>.

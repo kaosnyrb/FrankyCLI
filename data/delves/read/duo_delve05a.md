@@ -6,17 +6,17 @@
 
 **Briefing:** The <Place> has been without a comms relay for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.
 
-**Where:** a quiet, non-hostile site.
+**Where:** a quiet, non-hostile site, never natural landmarks or caves.
 **Then:** a second place, anywhere.
 
 ---
 
-## 1. PICKUP · out at the edge of the site, at the second place
+## 1. PICKUP · REMarkerMediumLocRef, at the second place
 
 🎯 Find the Relay Dish at the <SecondPlace>
 
 📦 Item: **Relay Dish (1 of 2)**
-🧱 Object: Relay Dish Crate · CrateStackableA_01.nif
+🧱 Object: Relay Dish Crate · relaydishcrate01.nif
 
 🪧 **Box: Shipping Tag**
 > The crate's shipping tag is addressed to the <Place>. Relay dish, 1 of 2. The transmitter was shipped separately.

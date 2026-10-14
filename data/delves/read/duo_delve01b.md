@@ -6,7 +6,7 @@
 
 **Briefing:** A survey team set three seismic sensors at the <Place> and left before anyone came back to read them. The survey office will pay for the data.
 
-**Where:** anywhere, never natural landmarks or caves or LocTypeTest.
+**Where:** a new site on another planet, requested when the mission starts; anywhere, never natural landmarks or caves or test locations.
 
 📻 **Survey Office, on the radio:**
 > Three sensors went in down there and nobody came back to read them. Send us the data and the job's paid.
