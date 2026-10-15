@@ -149,6 +149,8 @@
       "id": "beats",
       "kind": "beats",
       "base": "duo_artifact_localcargo_qst09a",
+      "shell": "shells/beats.json",
+      "_shell": "TRUE CONSTRUCTION (his ruling 2026-10-15): the build makes the quest with new from this file and never reads the base. Written once by `gen_delve shell beats` from the base above; ours from then on. The lint still reads the base (open).",
       "mod": "du_overtime",
       "driver": "",
       "replacesDriver": "dou_artifact_ground_dualact_local_qst",

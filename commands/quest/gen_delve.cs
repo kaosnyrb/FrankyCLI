@@ -68,6 +68,13 @@ namespace FrankyCLI
             /// </summary>
             public string kind { get; set; } = "dualactivator";
             public string @base { get; set; } = "";
+            /// <summary>
+            /// TRUE CONSTRUCTION (his ruling, 2026-10-15): the quest a build starts from, as a model file under
+            /// data/delves (gen_questmodel's format), written once by `gen_delve shell` and owned from then on. With it the
+            /// build makes its quest with `new` from this file and never copies the base quest; `base` then names only
+            /// where the shell came from (and what the lint still reads, named as open). Without it, the old clone.
+            /// </summary>
+            public string? shell { get; set; }
             public string mod { get; set; } = "";
             public string driver { get; set; } = "";
             /// <summary>choice and beats: the base's script entry that is replaced or removed, and whose values are taken off it.</summary>
@@ -522,7 +529,17 @@ namespace FrankyCLI
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
-                case "build": return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry));
+                case "build":
+                {
+                    int ei = Array.FindIndex(args, a => a.Equals("--emit", StringComparison.OrdinalIgnoreCase));
+                    var opts = new BuildOptions(
+                        FromBase: args.Any(a => a.Equals("--from-base", StringComparison.OrdinalIgnoreCase)),
+                        EmitDir: ei >= 0 && ei + 1 < args.Length ? args[ei + 1] : null,
+                        DataDir: dataDir);
+                    if (opts.EmitDir != null && !dry) { Console.WriteLine("REFUSED: --emit is a dry-run output; add --dry."); return 1; }
+                    return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry, opts));
+                }
+                case "shell": return MakeShell(path, dataDir, templates);
                 case "unbuild": return Unbuild(path, templates, dry);
                 case "testnode": return TestNode(args, templates, dry);
                 case "nodeflag": return NodeFlag(args, templates, dry);
@@ -531,6 +548,9 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId>");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
+                    Console.WriteLine("       gen_delve build <recipe> --dry --emit <dir>   write the would-be plugin and the emitted model to <dir>, never the live plugin");
+                    Console.WriteLine("       gen_delve build <recipe> --from-base   start from the base quest's clone, not the template's shell (the A/B proof)");
+                    Console.WriteLine("       gen_delve shell <templateId>   write the template's shell model from its base quest, once");
                     Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
                     Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
                     Console.WriteLine("       gen_delve nodeflag <node> runone on|off [--dry]   one quest per event (NumQuestsToRun, max 1)");
@@ -2691,7 +2711,83 @@ namespace FrankyCLI
             return File.Exists(Path.Combine(dataDir, path)) ? "loose" : "";
         }
 
-        private static int Build(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool dry)
+        /// <summary>FromBase: start from the base quest's clone even when the template has a shell (the A/B proof's A side;
+        /// its exit is every template having a shell that has passed the A/B). EmitDir: with --dry, write the would-be
+        /// plugin and the emitted model there instead of nowhere.</summary>
+        private sealed record BuildOptions(bool FromBase, string? EmitDir, string DataDir);
+
+        /// <summary>
+        /// THE RECIPE EMITS THE MODEL. Once every rule has run, the built quest is read into gen_questmodel's model (a
+        /// field the model cannot hold refuses the build, by name), the model is written to data/delves/models/&lt;id&gt;.json
+        /// beside its recipe, and the quest that goes into the plugin is WRITTEN FROM THAT FILE'S TEXT, every object new.
+        /// So the model is the build's output and the record is a function of it, the same way the fragment script's
+        /// source is committed under papyrus/gen. A dry run writes no model unless --emit names a folder.
+        /// </summary>
+        /// <summary>
+        /// gen_delve shell &lt;template&gt;: the ONE time the base quest is read for a template. Its model, cut to the fields a
+        /// build ever took off it (gen_questmodel.ShellFields), goes to data/delves/shells/&lt;template&gt;.json; from then on
+        /// the file is ours and the build reads it instead. A refusal inside those fields refuses the shell; one outside
+        /// them (a field the build never took) is printed and left behind, because the build never wrote it either.
+        /// </summary>
+        private static int MakeShell(string? id, string dataDir, List<Template> templates)
+        {
+            var t = templates.FirstOrDefault(x => x.id == id);
+            if (t == null) { Console.WriteLine($"REFUSED: no template '{id}'. gen_delve templates lists them."); return 1; }
+            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            string modFile = Path.Combine(env.DataFolderPath, t.mod + ".esm");
+            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+            using var mod = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            var b = mod.Quests.FirstOrDefault(q => q.EditorID == t.@base);
+            if (b == null) { Console.WriteLine($"REFUSED: no base quest '{t.@base}' in {modFile}"); return 1; }
+            var full = gen_questmodel.ReadModel(b, out var refusals);
+            var inside = refusals.Where(gen_questmodel.InShell).ToList();
+            foreach (var x in refusals.Except(inside)) Console.WriteLine("  left out: " + x + "  (outside the shell's fields; the build never took it)");
+            if (inside.Count > 0)
+            {
+                foreach (var x in inside) Console.WriteLine("REFUSED: " + x);
+                return 1;
+            }
+            string dir = Path.Combine(dataDir, "shells");
+            Directory.CreateDirectory(dir);
+            string file = Path.Combine(dir, t.id + ".json");
+            File.WriteAllText(file, gen_questmodel.ToJson(gen_questmodel.ShellOf(full)));
+            Console.WriteLine($"  shell    : {file} from {t.@base} [{b.FormKey}]; set the template row's \"shell\": \"shells/{t.id}.json\"");
+            return 0;
+        }
+
+        private static int EmitModel(StarfieldMod myMod, ref Quest quest, Recipe r, BuildOptions opts, bool dry)
+        {
+            var model = gen_questmodel.ReadModel(quest, out var refusals);
+            if (refusals.Count > 0)
+            {
+                foreach (var x in refusals) Console.WriteLine("REFUSED: the built quest has a field the model cannot hold: " + x);
+                return refusals.Count;
+            }
+            string json = gen_questmodel.ToJson(model);
+            if (!dry || opts.EmitDir != null)
+            {
+                string dir = opts.EmitDir ?? Path.Combine(opts.DataDir, "models");
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, r.id + ".json"), json);
+            }
+            var built = gen_questmodel.WriteModel(gen_questmodel.FromJson(json));
+            if (opts.EmitDir != null)
+            {
+                // The in-run proof: the quest the rules built and the one written from the model's text must be the same bytes.
+                bool same = gen_questmodel.SameBytes(quest, built, out int la, out int lb);
+                Console.WriteLine(same ? $"  emit     : the quest written from the model is byte-identical to the one the rules built ({la:N0} B)"
+                                       : $"REFUSED: the quest written from the model differs from the one the rules built ({la:N0} B vs {lb:N0} B)");
+                if (!same) return 1;
+            }
+            myMod.Quests.Remove(quest.FormKey);
+            myMod.Quests.Add(built);
+            quest = built;
+            Console.WriteLine($"  model    : emitted, {model.Stages.Count} stages, {model.Aliases.Count} aliases, {model.Children?.Scenes.Count ?? 0} scenes, " +
+                              $"{model.Children?.Topics.Count ?? 0} topics; the quest written is built from it");
+            return 0;
+        }
+
+        private static int Build(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool dry, BuildOptions opts)
         {
             var markers = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
             if (!Grade(r, t, env, markers))
@@ -2709,33 +2805,55 @@ namespace FrankyCLI
             gen_quest_main.FixNextFormId(myMod);
             var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
 
-            var source = myMod.Quests.FirstOrDefault(q => q.EditorID == t.@base);
-            if (source == null) { Console.WriteLine("REFUSED: no base quest '" + t.@base + "' in " + t.mod); return 1; }
+            // ⭐ TRUE CONSTRUCTION (his ruling, 2026-10-15): with a shell, the quest is made with `new` from the template's
+            // shell model and the base quest is never read here. Without one (or with --from-base, the A/B proof), the old
+            // clone. Either way `sourceKey` is the base's FormKey, which the starting quest's self-links still point at.
+            QModel? shell = null;
+            if (t.shell != null && !opts.FromBase)
+            {
+                string shellPath = Path.Combine(opts.DataDir, t.shell);
+                if (!File.Exists(shellPath)) { Console.WriteLine($"REFUSED: the template's shell {shellPath} does not exist; `gen_delve shell {t.id}` writes it."); return 1; }
+                shell = gen_questmodel.FromJson(File.ReadAllText(shellPath));
+            }
+            var source = shell == null ? myMod.Quests.FirstOrDefault(q => q.EditorID == t.@base) : null;
+            if (shell == null && source == null) { Console.WriteLine("REFUSED: no base quest '" + t.@base + "' in " + t.mod); return 1; }
+            FormKey sourceKey = shell != null ? FormKey.Factory(shell.FormKey) : source!.FormKey;
 
             var stale = myMod.Quests.Where(q => q.EditorID == r.id).Select(q => q.FormKey).ToList();
             foreach (var k in stale) myMod.Quests.Remove(k);
             if (stale.Count > 0) Console.WriteLine("  cleaned  : " + stale.Count + " previous " + r.id);
 
-            var copy = source.DeepCopy();
-            var clone = new Quest(myMod)
+            Quest clone;
+            if (shell != null)
             {
-                EditorID = r.id,
-                Name = copy.Name,
-                Aliases = copy.Aliases,
-                Components = copy.Components,
-                Data = copy.Data,
-                Keywords = copy.Keywords,
-                Location = copy.Location,
-                MajorFlags = copy.MajorFlags,
-                Objectives = copy.Objectives,
-                MissionTypeKeyword = copy.MissionTypeKeyword,
-                QuestType = copy.QuestType,
-                Stages = copy.Stages,
-                Summary = copy.Summary,
-                VirtualMachineAdapter = copy.VirtualMachineAdapter,
-                MissionBoardDescription = copy.MissionBoardDescription,
-                MissionBoardInfoPanels = copy.MissionBoardInfoPanels,
-            };
+                clone = new Quest(myMod) { EditorID = r.id };
+                gen_questmodel.ApplyShell(clone, shell);
+                Console.WriteLine($"  shell    : {t.shell} (from {shell.EditorID}), built with new; the base quest is not read");
+            }
+            else
+            {
+                var copy = source!.DeepCopy();
+                clone = new Quest(myMod)
+                {
+                    EditorID = r.id,
+                    Name = copy.Name,
+                    Aliases = copy.Aliases,
+                    Components = copy.Components,
+                    Data = copy.Data,
+                    Keywords = copy.Keywords,
+                    Location = copy.Location,
+                    MajorFlags = copy.MajorFlags,
+                    Objectives = copy.Objectives,
+                    MissionTypeKeyword = copy.MissionTypeKeyword,
+                    QuestType = copy.QuestType,
+                    Stages = copy.Stages,
+                    Summary = copy.Summary,
+                    VirtualMachineAdapter = copy.VirtualMachineAdapter,
+                    MissionBoardDescription = copy.MissionBoardDescription,
+                    MissionBoardInfoPanels = copy.MissionBoardInfoPanels,
+                };
+                Console.WriteLine($"  clone    : of the base quest {t.@base}" + (t.shell != null ? " (--from-base)" : ""));
+            }
             myMod.Quests.Add(clone);
 
             // POOLS. The previous build's quest was just removed, so any node entry pointing at it would dangle:
@@ -2761,15 +2879,15 @@ namespace FrankyCLI
             // silently, and looks correct in every dump. On a driver whose activator targets are
             // alias properties this is the difference between a new mission and a second copy of
             // the old one. A count of zero is a refusal, not a shrug.
-            int repointed = gen_delvegatetest.RepointSelfLinks(clone.VirtualMachineAdapter, source.FormKey, clone.FormKey);
+            int repointed = gen_delvegatetest.RepointSelfLinks(clone.VirtualMachineAdapter, sourceKey, clone.FormKey);
             Console.WriteLine("  clone    : " + r.id + " " + clone.FormKey + "  self-links repointed: " + repointed);
             if (repointed == 0) { Console.WriteLine("REFUSED: expected at least one self-reference and found none."); return 1; }
             // ⛔ AND EVERY OTHER LINK TO THE BASE, not only the scripts'. A condition is a link too: MB28a's stage 100 picks
             // its completing log entry on GetStageDone(<itself>, 10), and the copy kept testing MB28a, which never runs, so
             // the boss died, stage 100 took the entry that completes nothing, and the board mission never finished (his
             // play of duo_delve_missionboard01a, 2026-10-14). The slate base carried no such condition, so it never showed.
-            int stray = clone.EnumerateFormLinks().Count(l => l.FormKey == source.FormKey);
-            clone.RemapLinks(new Dictionary<FormKey, FormKey> { [source.FormKey] = clone.FormKey });
+            int stray = clone.EnumerateFormLinks().Count(l => l.FormKey == sourceKey);
+            clone.RemapLinks(new Dictionary<FormKey, FormKey> { [sourceKey] = clone.FormKey });
             Console.WriteLine($"  self     : {stray} further link(s) to the base (conditions) now point at the clone");
 
             int fail = 0;
@@ -2986,8 +3104,19 @@ namespace FrankyCLI
             fail += WriteProse(clone, t, r);
             SortStages(clone);
             fail += OrderAliases(clone);
+            if (fail == 0) fail += EmitModel(myMod, ref clone, r, opts, dry);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
+            if (dry && opts.EmitDir != null)
+            {
+                // The A/B proof's output: the plugin exactly as this build would write it, to a folder that is never the
+                // game's. Two builds from the same plugin state allocate the same FormKeys, so their files compare by bytes.
+                foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+                string outEsm = Path.Combine(opts.EmitDir, t.mod + ".esm");
+                myMod.WriteToBinary(outEsm, gen_quest_main.BuildWriteParams());
+                Console.WriteLine($"\n  --dry --emit: wrote {outEsm} ({new FileInfo(outEsm).Length:N0} B) and the model; the live plugin is untouched.");
+                return 0;
+            }
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
 
             foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
