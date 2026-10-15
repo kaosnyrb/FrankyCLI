@@ -122,12 +122,17 @@ namespace FrankyCLI
                     Timestamp = q.Timestamp, Unknown = q.Unknown,
                     Keywords = q.Keywords?.Select(k => k.FormKey.ToString()).ToList(),
                     TextDisplayGlobals = q.TextDisplayGlobals.Select(k => k.FormKey.ToString()).ToList(),
+                    MissionBoardInfoPanels = q.MissionBoardInfoPanels?.Select((x, i) =>
+                    {
+                        Guard(x, typeof(IQuestMissionBoardPanelGetter), $"MissionBoardInfoPanels[{i}]", "Header", "Line1", "Line2");
+                        return new QPanel { Header = Str(x.Header), Line1 = Str(x.Line1), Line2 = Str(x.Line2) };
+                    }).ToList(),
                 };
                 Guard(q.Data, typeof(IQuestDataGetter), "Data", "Flags", "Priority", "Type", "Unused");
                 Guard(q, typeof(IQuestGetter), "Quest", "Name", "Data", "Event", "QuestType", "QuestFaction", "QuestGroup", "Location",
                       "QuestTimeLimit", "SourceQuest", "MissionTypeKeyword", "MissionBoardDescription", "Filter", "Summary", "SwfFile",
                       "ScriptComment", "Timestamp", "Unknown", "Keywords", "TextDisplayGlobals", "Stages", "Objectives", "Aliases",
-                      "VirtualMachineAdapter", "Scenes", "DialogTopics", "DialogBranches");
+                      "VirtualMachineAdapter", "Scenes", "DialogTopics", "DialogBranches", "MissionBoardInfoPanels");
                 // ⚠ CHILD RECORDS ARE OUT OF SCOPE FOR NOW, AND SAID SO: a quest's scenes, topics and branches are records of
                 // their own in the quest's group, not fields of the QUST record. Counted here so the scope is printed, never
                 // dropped in silence; check strips them from BOTH sides and names that it did.
@@ -205,6 +210,7 @@ namespace FrankyCLI
                             ReferenceCollectionAliasID = r.ReferenceCollectionAliasID,
                             Keywords = r.Keywords?.Select(k => k.FormKey.ToString()).ToList(),
                             DeathItem = Fk(r.DeathItem), ForcedVoice = Fk(r.ForcedVoice), VoiceTypes = Fk(r.VoiceTypes),
+                            PackageData = r.PackageData is { Count: > 0 } pk ? pk.Select(k => k.FormKey.ToString()).ToList() : null,
                             Conditions = r.Conditions == null ? null : Conditions(r.Conditions, path + ".Conditions"),
                         };
                         if (r.Location is { } l)
@@ -224,7 +230,7 @@ namespace FrankyCLI
                         }
                         Guard(r, typeof(IQuestReferenceAliasGetter), path, "ID", "Name", "Flags", "ALFG", "AliasIDToForceIntoWhenFilled",
                               "ClosestToAlias", "DisplayName", "LegendaryRank", "ForcedReference", "UniqueActor", "UniqueBaseForm",
-                              "ReferenceCollectionAliasID", "Keywords", "DeathItem", "ForcedVoice", "VoiceTypes", "Conditions", "Location",
+                              "ReferenceCollectionAliasID", "Keywords", "DeathItem", "ForcedVoice", "VoiceTypes", "PackageData", "Conditions", "Location",
                               "CreateReferenceToObject", "External");
                         return m;
                     }
@@ -239,9 +245,35 @@ namespace FrankyCLI
                             ParentSystemLocationAliasID = l.ParentSystemLocationAliasID,
                             Conditions = l.Conditions == null ? null : Conditions(l.Conditions, path + ".Conditions"),
                         };
+                        if (l.ALPS is { } alps)
+                        {
+                            m.Alps = new QAlps
+                            {
+                                Conditions = alps.Conditions == null ? null : Conditions(alps.Conditions, path + ".ALPS.Conditions"),
+                                PcmTypeKeyword = Fk(alps.PcmTypeKeyword),
+                            };
+                            Guard(alps, typeof(IQuestLocationAliasALPSGetter), path + ".ALPS", "Conditions", "PcmTypeKeyword");
+                        }
                         Guard(l, typeof(IQuestLocationAliasGetter), path, "ID", "Name", "Flags", "ALFG", "AliasIDToForceIntoWhenFilled",
                               "ClosestToAlias", "DisplayName", "SpecificLocation", "LocationTypeKeyword", "SystemLocationAliasID",
-                              "ParentSystemLocationAliasID", "Conditions");
+                              "ParentSystemLocationAliasID", "Conditions", "ALPS");
+                        return m;
+                    }
+                    case IQuestCollectionAliasGetter c:
+                    {
+                        // A collection has no ID of its own; each member carries one and wraps a whole ref alias.
+                        var m = new QAlias { Kind = "coll", Collection = new() };
+                        for (int i = 0; i < c.Collection.Count; i++)
+                        {
+                            var mem = c.Collection[i]; string p = $"{path}.Collection[{i}]";
+                            m.Collection.Add(new QCollectionMember
+                            {
+                                ID = mem.ID, MaxInitialFillCount = mem.MaxInitialFillCount, ALAM = mem.ALAM,
+                                ReferenceAlias = mem.ReferenceAlias is { } ra ? Alias(ra, p + ".ReferenceAlias") : null,
+                            });
+                            Guard(mem, typeof(ICollectionAliasGetter), p, "ID", "MaxInitialFillCount", "ALAM", "ReferenceAlias");
+                        }
+                        Guard(c, typeof(IQuestCollectionAliasGetter), path, "Collection");
                         return m;
                     }
                     default:

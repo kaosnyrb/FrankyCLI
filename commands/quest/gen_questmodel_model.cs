@@ -33,6 +33,7 @@ namespace FrankyCLI
         public int Unknown { get; set; }
         public List<string>? Keywords { get; set; }
         public List<string> TextDisplayGlobals { get; set; } = new();
+        public List<QPanel>? MissionBoardInfoPanels { get; set; }
         public List<QStage> Stages { get; set; } = new();
         public List<QObjective> Objectives { get; set; } = new();
         public List<QAlias> Aliases { get; set; } = new();
@@ -134,12 +135,30 @@ namespace FrankyCLI
         public string? ForcedVoice { get; set; }
         /// VTCK. Every Delve ref alias carries it present-and-zero, so "absent" and "zero" are different records here.
         public string? VoiceTypes { get; set; }
+        /// The packages a ref alias puts on whatever fills it (a wave's travel package rides on the collection member).
+        public List<string>? PackageData { get; set; }
         // loc
         public string? SpecificLocation { get; set; }
         public string? LocationTypeKeyword { get; set; }
         public int? SystemLocationAliasID { get; set; }
         public int? ParentSystemLocationAliasID { get; set; }
+        /// A PCM request (a place made for the quest rather than found): its own conditions and the content keyword.
+        public QAlps? Alps { get; set; }
+        // coll: a collection alias is a list of members, each wrapping a ref alias of its own
+        public List<QCollectionMember>? Collection { get; set; }
     }
+
+    public sealed class QAlps { public List<QCondition>? Conditions { get; set; } public string? PcmTypeKeyword { get; set; } }
+
+    public sealed class QCollectionMember
+    {
+        public uint? ID { get; set; }
+        public byte MaxInitialFillCount { get; set; }
+        public int? ALAM { get; set; }
+        public QAlias? ReferenceAlias { get; set; }
+    }
+
+    public sealed class QPanel { public string? Header { get; set; } public string? Line1 { get; set; } public string? Line2 { get; set; } }
 
     public sealed class QInLocation { public int? AliasID { get; set; } public string? Keyword { get; set; } public string? RefType { get; set; } }
     public sealed class QCreate { public string Object { get; set; } = ""; public short AliasID { get; set; } public int Create { get; set; } public int Level { get; set; } }
@@ -167,6 +186,11 @@ namespace FrankyCLI
         public string? FirstUnusedString { get; set; }
         public int SecondParameter { get; set; }
         public string? SecondUnusedString { get; set; }
+        /// Functions whose FIRST parameter is a plain int and whose SECOND is the link-or-index
+        /// (IsInSameCurrentLocationAsAlias): FirstInt carries the first, SecondLink/SecondIndex the second.
+        public int? FirstInt { get; set; }
+        public string? SecondLink { get; set; }
+        public uint? SecondIndex { get; set; }
     }
 
     public sealed class QVmad

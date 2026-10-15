@@ -51,6 +51,15 @@ namespace FrankyCLI
             q.Unknown = m.Unknown;
             if (m.Name != null) q.Name = m.Name;
             if (m.MissionBoardDescription != null) q.MissionBoardDescription = m.MissionBoardDescription;
+            if (m.MissionBoardInfoPanels != null)
+                foreach (var p in m.MissionBoardInfoPanels)
+                {
+                    var panel = new QuestMissionBoardPanel();
+                    if (p.Header != null) panel.Header = p.Header;
+                    if (p.Line1 != null) panel.Line1 = p.Line1;
+                    if (p.Line2 != null) panel.Line2 = p.Line2;
+                    q.MissionBoardInfoPanels.Add(panel);
+                }
             Link(q.QuestType, m.QuestType); Link(q.QuestFaction, m.QuestFaction); Link(q.QuestGroup, m.QuestGroup);
             Link(q.Location, m.Location); Link(q.QuestTimeLimit, m.QuestTimeLimit); Link(q.SourceQuest, m.SourceQuest);
             Link(q.MissionTypeKeyword, m.MissionTypeKeyword);
@@ -128,6 +137,7 @@ namespace FrankyCLI
                     Conditions = a.Conditions == null ? null : new ExtendedList<Condition>(a.Conditions.Select(WriteCondition)),
                     Keywords = a.Keywords == null ? null : new ExtendedList<IFormLinkGetter<IKeywordGetter>>(a.Keywords.Select(k => (IFormLinkGetter<IKeywordGetter>)new FormLink<IKeywordGetter>(Key(k)))),
                 };
+                if (a.PackageData != null) r.PackageData.AddRange(a.PackageData.Select(k => (IFormLinkGetter<IPackageGetter>)new FormLink<IPackageGetter>(Key(k))));
                 Link(r.ForcedReference, a.ForcedReference); Link(r.UniqueActor, a.UniqueActor); Link(r.UniqueBaseForm, a.UniqueBaseForm);
                 Link(r.DisplayName, a.DisplayName); Link(r.DeathItem, a.DeathItem); Link(r.ForcedVoice, a.ForcedVoice); Link(r.VoiceTypes, a.VoiceTypes);
                 if (a.InLocation is { } l)
@@ -161,7 +171,27 @@ namespace FrankyCLI
                     Conditions = a.Conditions == null ? null : new ExtendedList<Condition>(a.Conditions.Select(WriteCondition)),
                 };
                 Link(l.SpecificLocation, a.SpecificLocation); Link(l.LocationTypeKeyword, a.LocationTypeKeyword); Link(l.DisplayName, a.DisplayName);
+                if (a.Alps is { } alps)
+                {
+                    var ap = new QuestLocationAliasALPS
+                    {
+                        Conditions = alps.Conditions == null ? null : new ExtendedList<Condition>(alps.Conditions.Select(WriteCondition)),
+                    };
+                    Link(ap.PcmTypeKeyword, alps.PcmTypeKeyword);
+                    l.ALPS = ap;
+                }
                 return l;
+            }
+            if (a.Kind == "coll")
+            {
+                var c = new QuestCollectionAlias();
+                foreach (var mem in a.Collection!)
+                    c.Collection.Add(new CollectionAlias
+                    {
+                        ID = mem.ID, MaxInitialFillCount = mem.MaxInitialFillCount, ALAM = mem.ALAM,
+                        ReferenceAlias = mem.ReferenceAlias == null ? null! : (QuestReferenceAlias)WriteAlias(mem.ReferenceAlias),
+                    });
+                return c;
             }
             throw new InvalidOperationException($"alias {a.ID}: kind '{a.Kind}' cannot be written");
         }
@@ -205,9 +235,31 @@ namespace FrankyCLI
             else if (m.FirstLink != null) p.Link.SetTo(Key(m.FirstLink));
         }
 
+        private static void ReadSecond<T>(IFormLinkOrIndexGetter<T> p, QCondition m) where T : class, IMajorRecordGetter
+        {
+            if (m.UseAliases || m.UsePackageData) m.SecondIndex = p.Index;
+            else m.SecondLink = p.Link.IsNull ? null : p.Link.FormKey.ToString();
+        }
+
+        private static void WriteSecond<T>(IFormLinkOrIndex<T> p, QCondition m) where T : class, IMajorRecordGetter
+        {
+            if (m.UseAliases || m.UsePackageData) p.Index = m.SecondIndex;
+            else if (m.SecondLink != null) p.Link.SetTo(Key(m.SecondLink));
+        }
+
         /// ⭐ THE CLOSED SET. Adding a condition function is one row here; a function not here is refused on read.
         private static readonly Dictionary<string, Fn> ConditionFunctions = new()
         {
+            ["GetDistanceGalacticParsec"] = new(typeof(IGetDistanceGalacticParsecConditionDataGetter), () => new GetDistanceGalacticParsecConditionData(),
+                (g, m) => { var x = (IGetDistanceGalacticParsecConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (GetDistanceGalacticParsecConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            ["IsTrueForConditionForm"] = new(typeof(IIsTrueForConditionFormConditionDataGetter), () => new IsTrueForConditionFormConditionData(),
+                (g, m) => { var x = (IIsTrueForConditionFormConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (IsTrueForConditionFormConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            // The odd shape: the FIRST parameter is a plain int (an alias number), the SECOND is the link-or-index.
+            ["IsInSameCurrentLocationAsAlias"] = new(typeof(IIsInSameCurrentLocationAsAliasConditionDataGetter), () => new IsInSameCurrentLocationAsAliasConditionData(),
+                (g, m) => { var x = (IIsInSameCurrentLocationAsAliasConditionDataGetter)g; m.FirstInt = x.FirstParameter; m.FirstUnusedString = x.FirstUnusedStringParameter; ReadSecond(x.SecondParameter, m); m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (IsInSameCurrentLocationAsAliasConditionData)d; x.FirstParameter = m.FirstInt ?? 0; x.FirstUnusedStringParameter = m.FirstUnusedString; WriteSecond(x.SecondParameter, m); x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             ["LocationHasRefType"] = new(typeof(ILocationHasRefTypeConditionDataGetter), () => new LocationHasRefTypeConditionData(),
                 (g, m) => { var x = (ILocationHasRefTypeConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (LocationHasRefTypeConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
