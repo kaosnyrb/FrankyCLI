@@ -259,7 +259,7 @@ namespace FrankyCLI
             ["GetIsID"] = new(typeof(IGetIsIDConditionDataGetter), () => new GetIsIDConditionData(),
                 (g, m) => { var x = (IGetIsIDConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetIsIDConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
-            ["IsTrueForConditionForm"] =new(typeof(IIsTrueForConditionFormConditionDataGetter), () => new IsTrueForConditionFormConditionData(),
+            ["IsTrueForConditionForm"] = new(typeof(IIsTrueForConditionFormConditionDataGetter), () => new IsTrueForConditionFormConditionData(),
                 (g, m) => { var x = (IIsTrueForConditionFormConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (IsTrueForConditionFormConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             // The odd shape: the FIRST parameter is a plain int (an alias number), the SECOND is the link-or-index.
