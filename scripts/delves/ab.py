@@ -136,9 +136,11 @@ def emit(args):
     return 1 if bad else 0
 
 
-def normalised_log(root, label, manifest, rid):
+def normalised_log(root, label, manifest, rid, repo_too):
     """(text, labels replaced) for one recipe's build log, or (None, 0) when there is none. Only the exact emit
-    folder string is replaced, never a bare label, which could sit inside any other word."""
+    folder string is replaced, never a bare label, which could sit inside any other word. repo_too: normalise the
+    repo path as well, which compare asks for only when BOTH labels recorded one; normalising one side alone made
+    every log differ on its data line (step3g-aliasids, emitted before labels recorded a repo, 2026-10-15)."""
     p = os.path.join(root, label, rid, "build.log")
     if not os.path.exists(p):
         return None, 0
@@ -149,7 +151,7 @@ def normalised_log(root, label, manifest, rid):
         n += text.count(folder)
         text = text.replace(folder, "<LABEL>")
     repo = manifest.get("repo")
-    if repo:
+    if repo_too and repo:
         for form in {repo, repo.replace("\\", "/")}:
             text = text.replace(form, "<REPO>")
     return text, n
@@ -201,8 +203,9 @@ def compare_dirs(root, a, b, allow_same_code=False, expect_changed=(), expect_lo
             if ba != bb:
                 at = next((i for i, (x, y) in enumerate(zip(ba, bb)) if x != y), min(len(ba), len(bb)))
                 differ.append(f"{rid}/{name}: DIFFER, {len(ba):,} B vs {len(bb):,} B, first difference at byte {at:,}")
-        la, na = normalised_log(root, a, ma, rid)
-        lb, nb = normalised_log(root, b, mb, rid)
+        both_repos = bool(ma.get("repo")) and bool(mb.get("repo"))
+        la, na = normalised_log(root, a, ma, rid, both_repos)
+        lb, nb = normalised_log(root, b, mb, rid, both_repos)
         log_state = "log ?"
         if la is None or lb is None:
             refusals.append(f"{rid} has no build.log on one side")
@@ -311,6 +314,8 @@ def selftest(_args):
          extra={"repo": "C:\\Git\\FrankyCLI"})
     case("CONTROL: the same repo difference with no repo recorded", 1,
          before={"log": lambda r, l, i: emit_log(r, l, i, repo="C:\\tmp\\wt")})
+    case("same repo, recorded on ONE side only (a label from before repo was recorded)", 0,
+         extra={"repo": "C:\\Git\\FrankyCLI"})
     case("a declared log change, logs differ", 0, log_change=True,
          log=lambda r, l, i: emit_log(r, l, i, extra="  +hook    : one more\n"))
     case("a declared log change that did not happen", 2, log_change=True)
