@@ -57,7 +57,7 @@ namespace FrankyCLI
             internal override int Hook(BeatsBuild build, int b, int prereq)
             {
                 int hookAlias = build.t.playerAlias;
-                string script = "DefaultAliasOnItemAddedScript" + (build.recoversHooked == 0 ? "" : ((char)('A' + build.recoversHooked - 1)).ToString());
+                string script = ItemAddedScript(build.recoversHooked);
                 build.recoversHooked++;
                 var sc = StageHook(script, build.beatStage[b], prereq);
                 var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
@@ -65,6 +65,13 @@ namespace FrankyCLI
                 sc.Properties.Add(fp);
                 return build.AttachBeatHook(b, hookAlias, script, sc, prereq);
             }
+
+            /// <summary>
+            /// The OnItemAdded hook for the n-th recover the player alias carries (0-based): the base script, then its four
+            /// duplicates A-D (the lint allows five recovers). Pure, so `gen_delve selftest` pins it: no recipe has two
+            /// recovers, so no build has ever taken a suffix.
+            /// </summary>
+            internal static string ItemAddedScript(int n) => "DefaultAliasOnItemAddedScript" + (n == 0 ? "" : ((char)('A' + n - 1)).ToString());
 
             internal override int EnterRank => 2;
 

@@ -60,6 +60,13 @@ namespace FrankyCLI
             var unknown = BeatKinds.Keys.Where(k => !BeatTypes.Contains(k)).ToList();
             Check("every beat kind is a type BeatTypes knows", unknown.Count == 0, unknown.Count == 0 ? $"{BeatKinds.Count} kinds: {string.Join(", ", BeatKinds.Keys)}" : string.Join(", ", unknown));
 
+            // recover's OnItemAdded hook per recover on the player alias: the base, then A-D. No recipe has two recovers,
+            // so no build has taken a suffix (split step (d2) named it; pinned at (d3)).
+            string[] itemAdded = { "DefaultAliasOnItemAddedScript", "DefaultAliasOnItemAddedScriptA", "DefaultAliasOnItemAddedScriptB",
+                                   "DefaultAliasOnItemAddedScriptC", "DefaultAliasOnItemAddedScriptD" };
+            for (int n = 0; n < itemAdded.Length; n++)
+                Check($"recover {n + 1}'s hook is {itemAdded[n]}", RecoverBeat.ItemAddedScript(n) == itemAdded[n], RecoverBeat.ItemAddedScript(n));
+
             Console.WriteLine(fail == 0 ? "selftest: all passed" : $"selftest: {fail} FAILED");
             return fail == 0 ? 0 : 1;
         }

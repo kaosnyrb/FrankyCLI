@@ -30,8 +30,21 @@ namespace FrankyCLI
             /// <summary>A precondition on the whole build, checked in NoDriver before anything is changed. Non-zero refuses.</summary>
             internal virtual int Preflight(BeatsBuild build) => 0;
 
+            /// <summary>
+            /// A build action of the kind's own, once per build that uses it (first-use order), in NoDriver after every
+            /// precondition has passed and before the driver is removed: a hold clones its waves' package. Non-zero refuses.
+            /// </summary>
+            internal virtual int Prepare(BeatsBuild build) => 0;
+
             /// <summary>The beat's aliases, in the Slots pass (beat order). Non-zero refuses.</summary>
             internal abstract int Slot(BeatsBuild build, int i);
+
+            /// <summary>
+            /// The beat's own objectives beyond its step's one, in the Objectives pass once every step's objective is
+            /// written and before they are sorted (step order, then beat order): a hold's revealed waves. `source` is the
+            /// objective each new one is copied from. Non-zero refuses.
+            /// </summary>
+            internal virtual int Objectives(BeatsBuild build, int k, int b, QuestObjective source) => 0;
 
             /// <summary>The beat's stock hook, in the Hooks pass (step order, then beat order). Non-zero refuses.</summary>
             internal abstract int Hook(BeatsBuild build, int b, int prereq);
@@ -44,6 +57,13 @@ namespace FrankyCLI
 
             /// <summary>What appears when the beat's step begins, as fragment lines on `stage`.</summary>
             internal virtual void Enter(BeatsBuild build, int b, int stage) { }
+
+            /// <summary>
+            /// The beat's own fragment lines on its own stages, in the Fragment pass's walk of the steps (step order, then
+            /// beat order; after the beat's message, the items it hands over and an ending's lines, before a group's
+            /// counter): a hold's counter tick and next wave on each wave's stage. `k` is the beat's step.
+            /// </summary>
+            internal virtual void StageLines(BeatsBuild build, int k, int b) { }
         }
 
         /// <summary>
@@ -51,7 +71,7 @@ namespace FrankyCLI
         /// the lint's vocabulary and the sections still branch on the rest by name; the step that moves the last one
         /// deletes BeatTypes. `gen_delve selftest` holds every kind to a name BeatTypes knows.
         /// </summary>
-        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat() }
+        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat(), new HoldBeat() }
             .ToDictionary(k => k.Name);
 
         /// <summary>The beat's kind, or null for a type that has none yet (or none at all: the lint refuses that).</summary>
