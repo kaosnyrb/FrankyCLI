@@ -314,9 +314,20 @@ namespace FrankyCLI
             return d;
         }
 
+        /// The alias IDs a place MEASURES FROM: a GetDistance on the candidate whose parameter is an alias
+        /// number (R5's subject). The leash is read when the place fills, so its anchor is a fill dependency
+        /// exactly as an in-location alias is (his ruling, 2026-10-15, on 18a: a recover beat's new marker is
+        /// appended below the third place that must be held near it, and ordering did not know).
+        public static List<uint> LeashDepsOf(IQuestLocationAliasGetter l) =>
+            (l.Conditions ?? new List<IConditionGetter>())
+                .Select(c => c.Data).OfType<IGetDistanceConditionDataGetter>()
+                .Where(d => d.UseAliases && IsSubject(d) && d.FirstParameter.Index is uint)
+                .Select(d => (uint)d.FirstParameter.Index!).ToList();
+
         private static List<uint> EntryDeps(IAQuestAliasGetter a) => a switch
         {
             IQuestReferenceAliasGetter r => DepsOf(r),
+            IQuestLocationAliasGetter l => LeashDepsOf(l),
             IQuestCollectionAliasGetter c => c.Collection?.Where(m => m.ReferenceAlias != null)
                                                  .SelectMany(m => DepsOf(m.ReferenceAlias!)).ToList() ?? new List<uint>(),
             _ => new List<uint>(),

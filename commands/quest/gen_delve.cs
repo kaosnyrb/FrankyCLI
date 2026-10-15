@@ -3615,6 +3615,8 @@ namespace FrankyCLI
         /// PUT EVERY ALIAS BELOW EVERYTHING IT FILLS FROM. The engine fills aliases in list order
         /// (vanilla: 7,731 dependencies across 2,092 quests, ZERO pointing down the list), and a
         /// second place re-opened for beat one sits BELOW beat one's marker in the base's list.
+        /// A place's leash anchor counts too (gen_aliaslint.LeashDepsOf): an anchor that fills inside the
+        /// place it leashes is a cycle, so that build is refused rather than written.
         /// Stable: nothing moves unless it has to. Refuses on a cycle rather than guessing.
         /// </summary>
         private static int OrderAliases(Quest q)
@@ -3780,7 +3782,7 @@ namespace FrankyCLI
             // ⛔ FILL ORDER, off disk: an alias listed above the place it fills inside cannot fill, and
             // the quest silently never starts. duo_delve04 shipped that way on 2026-09-24.
             var fwd = gen_aliaslint.ForwardRefs(q.Aliases?.ToList() ?? new List<IAQuestAliasGetter>());
-            fail += Check("no alias is listed above an alias it fills from (gen_aliaslint R1)",
+            fail += Check("no alias is listed above an alias it fills from or a place above its leash anchor (gen_aliaslint R1, R5)",
                           fwd.Count == 0 ? "none" : string.Join(", ", fwd.Select(f => $"{f.alias}->{f.dep}")), "none");
             // Each place demands exactly ITS beats' markers plus the map marker: a place that also
             // demanded the other place's markers would shrink its pool for nothing.

@@ -742,7 +742,7 @@ namespace FrankyCLI
         /// filling inside place 0 on MapMarkerRefType, which every Delve demands); the third place to that marker AND
         /// to a marker filling inside the second place, so all three are within one drive of each other pairwise.
         /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
-        /// constructed one. Refuses if an anchor is missing or is listed after the place it anchors (fill order).
+        /// constructed one. Refuses if an anchor is missing; its POSITION is OrderAliases' (a leash is a fill dependency).
         /// </summary>
         private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false)
         {
@@ -770,8 +770,10 @@ namespace FrankyCLI
 
             int Anchor(QuestLocationAlias place, ConditionGlobal c, QuestReferenceAlias to, string why)
             {
-                if (Pos(to.ID) < 0 || Pos(to.ID) > Pos(place.ID))
-                { Console.WriteLine($"REFUSED: {place.Name}'s leash anchor alias {to.ID} is listed after it, so it would not be filled when the leash is read."); return 1; }
+                // Position is OrderAliases' job: a leash anchor is a fill dependency (gen_aliaslint.LeashDepsOf),
+                // so the place is moved below it, and no order existing (the anchor fills inside the place) is refused there.
+                if (Pos(to.ID) < 0)
+                { Console.WriteLine($"REFUSED: {place.Name}'s leash anchor alias {to.ID} is not in the quest."); return 1; }
                 var d = (GetDistanceConditionData)c.Data;
                 if (!d.UseAliases) { Console.WriteLine($"REFUSED: {place.Name}'s leash does not take an alias parameter; nothing here has been proven for that shape."); return 1; }
                 d.FirstParameter.Index = to.ID;
