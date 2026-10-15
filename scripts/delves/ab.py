@@ -6,7 +6,8 @@ them again, and compare every output by bytes.
     python scripts/delves/ab.py selftest                  bite compare's refusals on planted states, no game needed
 
 With no ids, emit builds COVERAGE: the 8 recipes his 2026-10-15 ruling set per step, plus missionboard02a so the
-board template's path is in the net too. Each recipe takes about 75 s (one game-data load each).
+board template's path is in the net too, plus remote05a because none of the others builds a defeat beat (his
+"yeah", 2026-10-15 14:3x). Each recipe takes about 75 s (one game-data load each).
 
 What a recipe's outputs are, all of them on disk: the would-be plugin and the emitted model (gen_delve --emit
 writes both), AND the fragment script source, which a dry build still writes into papyrus/gen/ in this repo. The
@@ -35,7 +36,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 DEFAULT_ROOT = "C:/tmp/delve_ab"
 DEFAULT_PLUGIN = "C:/Program Files (x86)/Steam/steamapps/common/Starfield/Data/du_overtime.esm"
 COVERAGE = ["duo_delve07a", "duo_delve02a", "duo_delve03a", "duo_delve06a", "duo_delve08a", "duo_delve10a",
-            "duo_delve11a", "duo_delve_remote06a", "duo_delve_missionboard02a"]
+            "duo_delve11a", "duo_delve_remote06a", "duo_delve_missionboard02a", "duo_delve_remote05a"]
 OUR_DLLS = ["FrankyCLI.dll", "Retrograde.dll"]
 MANIFEST = "manifest.json"
 NOT_OUTPUT = {"build.log"}
