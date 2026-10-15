@@ -73,15 +73,25 @@ namespace FrankyCLI
         }
 
         /// <summary>
-        /// The beat types that are kinds. ⚠ MID-MIGRATION: until every type in BeatTypes has a kind here, BeatTypes stays
-        /// the lint's vocabulary and the sections still branch on the rest by name; the step that moves the last one
-        /// deletes BeatTypes. `gen_delve selftest` holds every kind to a name BeatTypes knows.
+        /// The beat types, as kinds: every type in BeatTypes has one since split step (d5). ⚠ STILL MID-MIGRATION: BeatTypes
+        /// stays the lint's vocabulary, and the rules over SETS of types still name them, until the last step turns those
+        /// into kind properties and deletes BeatTypes. `gen_delve selftest` holds the two lists equal, both ways.
         /// </summary>
-        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat(), new HoldBeat(), new TalkBeat() }
+        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat(), new HoldBeat(), new TalkBeat(),
+                                                                                       new ObjectBeat("use", givesItem: false), new ObjectBeat("pickup", givesItem: true),
+                                                                                       new ObjectBeat("deliver", givesItem: false) }
             .ToDictionary(k => k.Name);
 
-        /// <summary>The beat's kind, or null for a type that has none yet (or none at all: the lint refuses that).</summary>
+        /// <summary>The beat's kind, or null for a type that has none (the lint refuses that).</summary>
         private static BeatKind? KindOf(Beat b) => b.type != null && BeatKinds.TryGetValue(b.type, out var k) ? k : null;
+
+        /// <summary>
+        /// The beat's kind in a build, where the lint has already refused an unknown type: a beat with none here is a bug,
+        /// so it throws rather than letting a pass skip the beat silently (Slots and Hooks had a default branch that took
+        /// every non-kind beat until the object kinds, split step (d5)).
+        /// </summary>
+        private static BeatKind KindOrThrow(Beat b, int i) =>
+            KindOf(b) ?? throw new InvalidOperationException($"beat {i + 1}'s type '{b.type}' passed the lint and has no kind");
 
         /// <summary>The kinds a recipe uses, each once, in the order its beats first use them.</summary>
         private static IEnumerable<BeatKind> KindsIn(Recipe r) => r.beats.Select(KindOf).OfType<BeatKind>().Distinct();

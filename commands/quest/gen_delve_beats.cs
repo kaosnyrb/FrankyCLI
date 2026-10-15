@@ -23,15 +23,8 @@ namespace FrankyCLI
     ///   - a FRAGMENT: a few lines in one generated fragment script, bound to that stage, doing the half
     ///     that is Papyrus-only (objectives, the counter, taking delivered items, a message box).
     ///
-    ///   use      DefaultAliasOnActivate          hides its prompt after use
-    ///   pickup   DefaultAliasOnActivateGiveItem  gives the beat's item, disables the object
-    ///   deliver  DefaultAliasOnActivate          the fragment takes every item picked up so far
-    ///
-    /// ⛔ DELIVER IS NOT DefaultAliasOnActivateRemoveItems, and it looks like it should be. That script's
-    /// parent SETS THE STAGE FIRST and only then runs the item check (DefaultAlias.
-    /// CheckAndSetStageAndCallDoSpecificThing: SafeSetStage, then DoSpecificThing), so as a gate it would
-    /// complete the beat empty-handed and merely show a message. The gate here is STAGE ORDER: deliver's
-    /// prereq is a stage only a pickup can set.
+    /// Each type is a kind with its own file in delve_beats/ (beat_kind.cs is the interface): use, pickup and deliver
+    /// are one object beat (object.cs), and its note on why deliver is NOT DefaultAliasOnActivateRemoveItems lives there.
     ///
     /// A HOLD is waves of enemies at a marker, one after another, each when the last is down (Jessica's Type 6):
     /// N stages and N stock death hooks, no driver. Its whole design is in delve_beats/hold.cs.
@@ -701,6 +694,9 @@ namespace FrankyCLI
             /// <summary>Hold beat to its wave collections, in order. Set in section 2 (the hold kind's Slot); read in 7, 9, 10 (the kind's
             /// Objectives, Hook and fragment lines).</summary>
             internal Dictionary<int, List<int>> waveAliases = null!;
+            /// <summary>How many of the base's own marker and activator pairs the object beats have taken, in beat order. Set in
+            /// section 2 (the object kind's Slot); read in 2 (unusedSlots).</summary>
+            internal int baseNext;
             /// <summary>The base's marker and activator pairs no beat took. Set in section 2; read in 7.</summary>
             internal List<BeatSlot> unusedSlots = null!;
             /// <summary>An ending person's beat to the stage that meets them. Set in section 3; read in 9, 10.</summary>
@@ -861,9 +857,9 @@ namespace FrankyCLI
             // --- 2. one marker + activator per beat -------------------------------------------------------
             internal int Slots()
             {
-                // Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the
-                // same argument as AddBeatSlot: a slot that works brings every field this tool does not know).
-                // A base with no slots (the board) names a marker alias instead, and has no activator to give.
+                // Each beat's kind makes its slot, in beat order (an object beat takes the base's own pairs first, then
+                // clones the first: ObjectBeat.Slot); then a return shares its earlier beat's, and a hold its defended one's.
+                // A base with no slots names a marker alias instead, and has no activator to give.
                 slotOf = new Dictionary<int, BeatSlot>();
                 bool slotless = t.beatSlots.Count == 0;
                 int srcMarkerId = slotless ? t.markerSource : t.beatSlots[0].markerAlias;
@@ -879,32 +875,13 @@ namespace FrankyCLI
                 activatorPattern = srcAct;
                 markerSourceId = srcMarkerId;
                 markerSourceTaken = t.markerSource < 0;
-                int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
+                baseNext = 0;
                 talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
                 waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
                 for (int i = 0; i < r.beats.Count; i++)
                 {
                     if (r.beats[i].returnTo != null) continue;   // shares an earlier beat's object; filled in below
-                    if (KindOf(r.beats[i]) is BeatKind kind)
-                    {
-                        if (kind.Slot(this, i) != 0) return 1;
-                        continue;
-                    }
-                    if (baseNext < t.beatSlots.Count)
-                    {
-                        slotOf[i] = new BeatSlot { markerAlias = t.beatSlots[baseNext].markerAlias, activatorAlias = t.beatSlots[baseNext].activatorAlias,
-                                                   journalStage = beatStage[i] };
-                        baseNext++;
-                        continue;
-                    }
-                    uint next = NextAliasId(clone);
-                    var m = srcMarker.DeepCopy(); m.ID = next; m.Name = "DelveBeat" + (i + 1) + "Marker";
-                    var a = srcAct!.DeepCopy(); a.ID = next + 1; a.Name = "DelveBeat" + (i + 1) + "Target";
-                    a.CreateReferenceToObject!.AliasID = (short)m.ID;
-                    clone.Aliases.Add(m);
-                    clone.Aliases.Add(a);
-                    slotOf[i] = new BeatSlot { markerAlias = (int)m.ID, activatorAlias = (int)a.ID, journalStage = beatStage[i] };
-                    Console.WriteLine($"  +slot    : beat {i + 1} -- marker alias {m.ID}, activator {a.ID}");
+                    if (KindOrThrow(r.beats[i], i).Slot(this, i) != 0) return 1;
                 }
                 // A marker source no fight took (a board mission that opens with a talk or a pickup) is still the board's PrimaryRef,
                 // which the system and planet resolve from, so it stays; it is pointed at the place's MAP MARKER, which every
@@ -1348,39 +1325,7 @@ namespace FrankyCLI
                     int prereq = k == 0 ? t.entryStage : steps[k - 1].DoneStage;
                     foreach (var b in steps[k].Beats)
                     {
-                        var beat = r.beats[b];
-                        if (KindOf(beat) is BeatKind kind)
-                        {
-                            if (kind.Hook(this, b, prereq) != 0) return 1;
-                            continue;
-                        }
-                        int hookAlias; string script;
-                        if (beat.returnTo != null)
-                        {
-                            // The same object a second time: the stock hook's one duplicate, on the same alias.
-                            hookAlias = slotOf[b].activatorAlias;
-                            script = "DefaultAliasOnActivateA";
-                        }
-                        else
-                        {
-                            hookAlias = slotOf[b].activatorAlias;
-                            script = beat.type == "pickup" ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
-                        }
-                        var sc = StageHook(script, beatStage[b], prereq);
-                        if (beat.type == "pickup")
-                        {
-                            var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
-                            ip.Object.SetTo(itemOf[b]);
-                            sc.Properties.Add(ip);
-                            sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldDisableAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
-                        }
-                        else
-                        {
-                            // An object a later beat comes back to keeps its prompt, or the return could never fire.
-                            bool comesBack = r.beats.Any(x => x.returnTo == b + 1);
-                            sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
-                        }
-                        if (AttachBeatHook(b, hookAlias, script, sc, prereq) != 0) return 1;
+                        if (KindOrThrow(r.beats[b], b).Hook(this, b, prereq) != 0) return 1;
                     }
                 }
 
