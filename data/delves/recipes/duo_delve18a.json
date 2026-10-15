@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "id": "duo_delve18a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as 11a.",
+  "author": "jessica",
+  "source": "his 2026-10-15 06:33: \"Talk to someone, there cargo was taken, get it back from dungeon and deliver ig\"",
+  "_note": [
+    "THE HIJACKED RUN: you meet a hauler first, raiders took her cargo into a dungeon, you take it back and FINISH HER",
+    "RUN, delivering it where it was going rather than back to her. That is his Delve shape exactly: an unfinished job",
+    "somebody else started (2026-09-23). His idea; words Jessica's.",
+    "A PURE VARIANT by his rule (prove the verbs, then vary cheaply): talk first is 14a's, recover off the dungeon boss",
+    "is 11a's, the delivery is 14a's, three places is 08a's. If the lint passes, nothing here is new machinery.",
+    "Order: talk at the main place (quiet, peopled by her), the dungeon second, the drop third. Three disjoint pools as",
+    "08a, so no two beats can share a site.",
+    "Pay: reward on the delivery, the single ending. 'hard' is a placeholder; the tier is his."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeNaturalKeyword"
+        ]
+      }
+    },
+    "third": {
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    },
+    "_themes": "THREE DISJOINT POOLS, as 08a: her out in the wild by her landed ship (natural, not a quiet site), the raiders at a built hostile site (no natural, no quiet), the drop at a quiet built site, where people are waiting. Quiet AND natural is an empty pool (measured 2026-10-15), so the wild end is hers."
+  },
+  "prose": {
+    "name": "Recovery: Hijacked Filters on <Planet>",
+    "briefing": "A hauler set down near the <Place> was jumped on her run. The raiders left her the ship and took the cargo, a crate of water filters somebody is waiting for."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the hauler at the <Place>",
+      "journal": "Raiders jumped a hauler and took her cargo, a crate of water filters, to the <SecondPlace>. She asked me to finish her run and take them to the <ThirdPlace>.",
+      "person": {
+        "name": "Rhea Dunmore",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+      },
+      "greeting": "You're not one of them, are you? Good. Then you can help, if you want to.",
+      "exchanges": [
+        {
+          "prompt": "I'll get your cargo back.",
+          "reply": "Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going."
+        },
+        {
+          "prompt": "What happened?",
+          "reply": "Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."
+        },
+        {
+          "prompt": "Did you report it?",
+          "reply": "I did. Someone's going to look into it next month. The filters were due last week."
+        },
+        {
+          "prompt": "Describe the one in charge.",
+          "perk": "BackgroundBountyHunter",
+          "reply": "Tall, a scar through one eyebrow, laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him."
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets the recover's stage. Exchange 3 is a [Bounty Hunter] line (his 2026-10-14 RP feature): only a hunter asks for a description. Voiced lines: no names, no places, no factions, no currency."
+    },
+    {
+      "type": "recover",
+      "place": "second",
+      "at": "LocDungeonBossLocRef",
+      "item": "Crate of Water Filters",
+      "objective": "Recover the filter crate from the <SecondPlace>",
+      "journal": "The raiders' leader at the <SecondPlace> had the crate of water filters. I took it back. It still needs to reach the <ThirdPlace>."
+    },
+    {
+      "type": "deliver",
+      "place": "third",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the water filters to the <ThirdPlace>",
+      "journal": "A hauler was jumped on her run and lost a crate of water filters to raiders at the <SecondPlace>. I got them back and finished the run to the <ThirdPlace>.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Supply Drop Locker",
+      "message": {
+        "title": "Delivered",
+        "text": "The crate goes into the locker. Somebody has taped a note inside the lid: FILTERS?? with three question marks."
+      },
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Hauler",
+    "voice": "GenericFemale01",
+    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+  },
+  "broadcast": "I've been jumped. I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it.",
+  "_speech": "Her voice on the radio first, then in person. Voice is 05a's (wCizWKvnaS3LOIUwHo98), used once so far, so this is not Isla; his ear decides. No names, no places, no currency."
+}
