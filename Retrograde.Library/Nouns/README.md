@@ -12,6 +12,7 @@ Self-contained record builders — each Noun knows how to create one type of Sta
 - **Messages/** — MESSAGE record builder
 - **NPCs/** — Base outlaw NPC builder
 - **Quests/** — Quest record (QUST) builder
+- **QuestAuthoring/** - reusable pieces any quest command builds with (the gen_delve split, 2026-10-15): `AliasGraph` (which alias fills from which, and the list order that lets every one fill). These pieces return what they found and never print or return exit codes, because a UI as well as the CLI calls them; that is a rule for this folder, not the library's existing convention
 - **Ships/** — Encounter ship (GBFM) builder
 - **SpaceCells/** — Space cell noun + palette
 - **Stations/** — Space station noun

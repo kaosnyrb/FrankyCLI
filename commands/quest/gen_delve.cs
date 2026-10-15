@@ -5,6 +5,7 @@ using Mutagen.Bethesda.Plugins.Aspects;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
+using Retrograde.Nouns.QuestAuthoring;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -3342,23 +3343,28 @@ namespace FrankyCLI
         /// PUT EVERY ALIAS BELOW EVERYTHING IT FILLS FROM. The engine fills aliases in list order
         /// (vanilla: 7,731 dependencies across 2,092 quests, ZERO pointing down the list), and a
         /// second place re-opened for beat one sits BELOW beat one's marker in the base's list.
-        /// A place's leash anchor counts too (gen_aliaslint.LeashDepsOf): an anchor that fills inside the
+        /// A place's leash anchor counts too (AliasGraph.LeashDepsOf): an anchor that fills inside the
         /// place it leashes is a cycle, so that build is refused rather than written.
-        /// Stable: nothing moves unless it has to. Refuses on a cycle rather than guessing.
+        /// Stable: nothing moves unless it has to. Refuses on a cycle rather than guessing, naming the aliases.
         /// </summary>
         private static int OrderAliases(Quest q)
         {
             if (q.Aliases == null) return 0;
             var before = q.Aliases.ToList();
-            var fwd = gen_aliaslint.ForwardRefs(before);
-            var order = gen_aliaslint.DependencyOrder(before);
-            if (order == null) { Console.WriteLine("REFUSED: the aliases depend on each other in a cycle; no fill order exists."); return 1; }
+            var fwd = AliasGraph.ForwardRefs(before);
+            var result = AliasGraph.DependencyOrder(before);
+            if (result.Order is not { } order)
+            {
+                Console.WriteLine($"REFUSED: aliases {string.Join(", ", result.Unplaced)} could not be placed: a cycle of "
+                                  + "fill dependencies is among them, so no fill order exists.");
+                return 1;
+            }
             int moved = before.Where((a, i) => !ReferenceEquals(order[i], a)).Count();
             q.Aliases.Clear();
             q.Aliases.AddRange(order);
             Console.WriteLine($"  alias order: {fwd.Count} forward reference(s) before, {moved} list position(s) changed"
                               + (fwd.Count > 0 ? "  (" + string.Join(", ", fwd.Select(f => $"{f.alias}->{f.dep}")) + ")" : ""));
-            return gen_aliaslint.ForwardRefs(q.Aliases.ToList()).Count == 0 ? 0 : 1;
+            return AliasGraph.ForwardRefs(q.Aliases.ToList()).Count == 0 ? 0 : 1;
         }
 
         private static IEnumerable<(uint id, string name)> Flatten(IAQuestAliasGetter a)

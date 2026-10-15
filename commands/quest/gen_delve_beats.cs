@@ -770,7 +770,7 @@ namespace FrankyCLI
 
             int Anchor(QuestLocationAlias place, ConditionGlobal c, QuestReferenceAlias to, string why)
             {
-                // Position is OrderAliases' job: a leash anchor is a fill dependency (gen_aliaslint.LeashDepsOf),
+                // Position is OrderAliases' job: a leash anchor is a fill dependency (AliasGraph.LeashDepsOf),
                 // so the place is moved below it, and no order existing (the anchor fills inside the place) is refused there.
                 if (Pos(to.ID) < 0)
                 { Console.WriteLine($"REFUSED: {place.Name}'s leash anchor alias {to.ID} is not in the quest."); return 1; }

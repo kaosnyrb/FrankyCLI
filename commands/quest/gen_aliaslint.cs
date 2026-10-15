@@ -3,6 +3,7 @@ using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
+using Retrograde.Nouns.QuestAuthoring;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,10 @@ namespace FrankyCLI
     /// ⚠ STATED LIMIT: whether conditions evaluate up the location hierarchy (ParentLocation) is NOT
     /// established (manual part 32). Pools here count a location's OWN references and keywords, so a
     /// zero pool is a zero under that reading.
+    ///
+    /// "Depends on" itself lives in Retrograde.Library's AliasGraph (split step 3, 2026-10-15), shared with
+    /// gen_delve's ordering; this command owns the load-order read, the five rules and the words.
+    /// gen_aliaslint selftest grades AliasGraph with no plugin loaded and exits 1 on any failure.
     /// </summary>
     public static class gen_aliaslint
     {
@@ -68,8 +73,12 @@ namespace FrankyCLI
             {
                 Console.WriteLine("Usage: gen_aliaslint <questEditorIdSubstring> [--quiet]");
                 Console.WriteLine("       --quiet prints one verdict line per quest (for sweeps).");
+                Console.WriteLine("       gen_aliaslint selftest   grades AliasGraph, no plugin loaded, exit 1 on failure.");
                 return 1;
             }
+            // Before the environment: it needs no plugin, and booting the load order to check a graph
+            // would make nobody run it.
+            if (search.Equals("selftest", StringComparison.OrdinalIgnoreCase)) return SelfTest();
 
             using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
 
@@ -163,11 +172,9 @@ namespace FrankyCLI
                     if (!inPlace.TryGetValue((uint)a.Location.AliasID, out var lst)) inPlace[(uint)a.Location.AliasID] = lst = new();
                     lst.Add((a.ID, a.Location.RefType.FormKey, optional));
                 }
-                var deps = DepsWithHow(a);
-
-                foreach (var (dep, how) in deps)
+                foreach (var (dep, how) in AliasGraph.DepsOf(a))
                 {
-                    string line = $"alias {Label(a.ID)} {how} alias {dep}";
+                    string line = $"alias {Label(a.ID)} {Words(how)} alias {dep}";
                     if (!pos.ContainsKey(dep))
                     {
                         (optional ? unknown : cannot).Add($"R2 {line}, and no alias {dep} exists{(optional ? " (the alias is Optional)" : "")}");
@@ -190,7 +197,7 @@ namespace FrankyCLI
             foreach (var la in aliases.OfType<IQuestLocationAliasGetter>())
                 foreach (var c in la.Conditions ?? new List<IConditionGetter>())
                 {
-                    if (c.Data is not IGetDistanceConditionDataGetter d || !d.UseAliases || !IsSubject(d)) continue;
+                    if (c.Data is not IGetDistanceConditionDataGetter d || !d.UseAliases || !AliasGraph.IsSubject(d)) continue;
                     if (d.FirstParameter.Index is not uint anchor) { unknown.Add($"R5 place {Label(la.ID)}'s GetDistance takes an alias parameter and carries no alias number"); continue; }
                     string line = $"R5 place {Label(la.ID)}'s GetDistance measures from alias {anchor}";
                     if (!byId.TryGetValue(anchor, out var an)) unknown.Add($"{line}, which does not exist");
@@ -227,13 +234,13 @@ namespace FrankyCLI
                     bool eqOp = c.CompareOperator == CompareOperator.EqualTo;
                     switch (c.Data)
                     {
-                        case ILocationHasRefTypeConditionDataGetter d when eqOp && (want == 1f || want == 0f) && IsSubject(d):
+                        case ILocationHasRefTypeConditionDataGetter d when eqOp && (want == 1f || want == 0f) && AliasGraph.IsSubject(d):
                         {
                             var fk = d.FirstParameter.Link.FormKey; bool has = want == 1f;
                             req.Add(($"{(has ? "" : "NOT ")}ref type {Name(fk, env)}", l => l.RefTypes.Contains(fk) == has));
                             break;
                         }
-                        case ILocationHasKeywordConditionDataGetter d when eqOp && (want == 1f || want == 0f) && IsSubject(d):
+                        case ILocationHasKeywordConditionDataGetter d when eqOp && (want == 1f || want == 0f) && AliasGraph.IsSubject(d):
                         {
                             var fk = d.FirstParameter.Link.FormKey; bool has = want == 1f;
                             req.Add(($"{(has ? "" : "NOT ")}keyword {Name(fk, env)}", l => l.Keywords.Contains(fk) == has));
@@ -287,95 +294,82 @@ namespace FrankyCLI
             return v;
         }
 
-        // ---------------------------------------------------------------- shared with gen_delve
-        // ONE definition of "depends on", used by the linter's R1 and by the generator's ordering, so
-        // the two cannot drift: a second copy of a working check is a banked scar.
-
-        /// The alias IDs a list ENTRY carries: one for a ref or location alias, one per member for a
-        /// collection (which has no ID of its own).
-        public static List<uint> IdsOf(IAQuestAliasGetter a) => a switch
+        /// The CLI's words for a dependency; AliasGraph hands back the kind, never a sentence.
+        private static string Words(FillFrom how) => how switch
         {
-            IQuestReferenceAliasGetter r => new List<uint> { r.ID },
-            IQuestLocationAliasGetter l => new List<uint> { l.ID },
-            IQuestCollectionAliasGetter c => c.Collection?.Where(m => m.ReferenceAlias != null)
-                                                 .Select(m => m.ReferenceAlias!.ID).ToList() ?? new List<uint>(),
-            _ => new List<uint>(),
+            FillFrom.Inside => "fills inside",
+            FillFrom.CreatedAt => "is created at",
+            FillFrom.FromCollection => "fills from the collection of",
+            FillFrom.Leash => "measures its leash from",
+            _ => throw new ArgumentOutOfRangeException(nameof(how), how, "a FillFrom with no words"),
         };
 
-        /// The alias IDs one ref alias fills FROM: in-location (ALLA), create-at (ALCA), from-collection.
-        public static List<uint> DepsOf(IQuestReferenceAliasGetter a) => DepsWithHow(a).Select(d => d.dep).ToList();
-
-        private static List<(uint dep, string how)> DepsWithHow(IQuestReferenceAliasGetter a)
+        /// <summary>
+        /// gen_aliaslint selftest: AliasGraph graded on hand-built aliases, no plugin loaded. Each case is
+        /// the shape of a real build: a marker listed above the place it fills inside (duo_delve04), a place
+        /// leashed from a marker that fills inside it (18a, his 2026-10-15 ruling), and controls that must
+        /// NOT move or refuse. Exit 1 on any failure, so it can gate.
+        /// </summary>
+        private static int SelfTest()
         {
-            var d = new List<(uint, string)>();
-            if (a.Location != null) d.Add(((uint)a.Location.AliasID, "fills inside"));
-            if (a.CreateReferenceToObject != null) d.Add(((uint)a.CreateReferenceToObject.AliasID, "is created at"));
-            if (a.ReferenceCollectionAliasID != null) d.Add(((uint)a.ReferenceCollectionAliasID.Value, "fills from the collection of"));
-            return d;
-        }
-
-        /// The alias IDs a place MEASURES FROM: a GetDistance on the candidate whose parameter is an alias
-        /// number (R5's subject). The leash is read when the place fills, so its anchor is a fill dependency
-        /// exactly as an in-location alias is (his ruling, 2026-10-15, on 18a: a recover beat's new marker is
-        /// appended below the third place that must be held near it, and ordering did not know).
-        public static List<uint> LeashDepsOf(IQuestLocationAliasGetter l) =>
-            (l.Conditions ?? new List<IConditionGetter>())
-                .Select(c => c.Data).OfType<IGetDistanceConditionDataGetter>()
-                .Where(d => d.UseAliases && IsSubject(d) && d.FirstParameter.Index is uint)
-                .Select(d => (uint)d.FirstParameter.Index!).ToList();
-
-        private static List<uint> EntryDeps(IAQuestAliasGetter a) => a switch
-        {
-            IQuestReferenceAliasGetter r => DepsOf(r),
-            IQuestLocationAliasGetter l => LeashDepsOf(l),
-            IQuestCollectionAliasGetter c => c.Collection?.Where(m => m.ReferenceAlias != null)
-                                                 .SelectMany(m => DepsOf(m.ReferenceAlias!)).ToList() ?? new List<uint>(),
-            _ => new List<uint>(),
-        };
-
-        /// R1 alone, as data: every (alias, depends-on) pair where the dependency is listed BELOW.
-        public static List<(uint alias, uint dep)> ForwardRefs(IReadOnlyList<IAQuestAliasGetter> list)
-        {
-            var pos = new Dictionary<uint, int>();
-            for (int i = 0; i < list.Count; i++) foreach (var id in IdsOf(list[i])) pos[id] = i;
-            var outp = new List<(uint, uint)>();
-            for (int i = 0; i < list.Count; i++)
-                foreach (var dep in EntryDeps(list[i]))
-                    if (pos.TryGetValue(dep, out var p) && p > i)
-                        foreach (var id in IdsOf(list[i])) outp.Add((id, dep));
-            return outp;
-        }
-
-        /// A STABLE topological order: every entry after everything it fills from, and otherwise the
-        /// original order untouched. Returns null on a cycle rather than guessing a way out of one.
-        /// Only POSITION changes; IDs are what stages, objectives and script properties reference.
-        public static List<T>? DependencyOrder<T>(IReadOnlyList<T> list) where T : IAQuestAliasGetter
-        {
-            var present = list.SelectMany(a => IdsOf(a)).ToHashSet();
-            var placed = new HashSet<uint>();
-            var remaining = list.ToList();
-            var outp = new List<T>();
-            while (remaining.Count > 0)
+            int fail = 0;
+            void Check(string label, bool ok, string detail)
             {
-                int k = remaining.FindIndex(a =>
-                {
-                    var own = IdsOf(a);
-                    return EntryDeps(a).All(d => !present.Contains(d) || placed.Contains(d) || own.Contains(d));
-                });
-                if (k < 0) return null;
-                foreach (var id in IdsOf(remaining[k])) placed.Add(id);
-                outp.Add(remaining[k]);
-                remaining.RemoveAt(k);
+                Console.WriteLine((ok ? "  PASS  " : "  FAIL  ") + label + "   " + detail);
+                if (!ok) fail++;
             }
-            return outp;
-        }
+            string Ids(IEnumerable<IAQuestAliasGetter>? xs) => xs == null ? "null" : string.Join(",", xs.SelectMany(AliasGraph.IdsOf));
 
-        private static bool IsSubject(object data)
-        {
-            // WHOSE location is tested. On a location alias the subject is the candidate; any other
-            // RunOn is a different question and is left to runtime rather than graded as this one.
-            var p = data.GetType().GetProperty("RunOnType");
-            return p == null || (p.GetValue(data)?.ToString() ?? "Subject") == "Subject";
+            QuestReferenceAlias MarkerIn(uint id, uint place) => new() { ID = id, Location = new LocationAliasReference { AliasID = (int)place } };
+            QuestLocationAlias Place(uint id, uint? leashFrom = null, bool subject = true)
+            {
+                var l = new QuestLocationAlias { ID = id, Conditions = new Noggog.ExtendedList<Condition>() };
+                if (leashFrom is uint anchor)
+                {
+                    var d = new GetDistanceConditionData();
+                    d.UseAliases = true;
+                    d.FirstParameter.Index = anchor;
+                    if (!subject) d.RunOnType = Condition.RunOnType.Reference;
+                    l.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.LessThan, ComparisonValue = 100f });
+                }
+                return l;
+            }
+
+            // 1. A marker listed ABOVE the place it fills inside: one forward reference, and the order moves the place up.
+            var fwd = new List<IAQuestAliasGetter> { MarkerIn(1, 2), Place(2) };
+            var f1 = AliasGraph.ForwardRefs(fwd);
+            Check("forward ref is found", f1.Count == 1 && f1[0] == (1u, 2u), string.Join(" ", f1.Select(x => $"{x.alias}->{x.dep}")));
+            var o1 = AliasGraph.DependencyOrder(fwd);
+            Check("forward ref is reordered", !o1.Cycle && Ids(o1.Order) == "2,1" && o1.Unplaced.Count == 0, $"order {Ids(o1.Order)}");
+
+            // 2. CONTROL: already in order. Nothing forward, nothing moves, the same objects come back.
+            var ok = new List<IAQuestAliasGetter> { Place(2), MarkerIn(1, 2) };
+            var o2 = AliasGraph.DependencyOrder(ok);
+            Check("ordered list is untouched", AliasGraph.ForwardRefs(ok).Count == 0 && !o2.Cycle
+                  && o2.Order!.Select((a, i) => ReferenceEquals(a, ok[i])).All(x => x), $"order {Ids(o2.Order)}");
+
+            // 3. A place leashed from the marker that fills inside it: no order exists, and both are named.
+            var cyc = new List<IAQuestAliasGetter> { Place(2, leashFrom: 1), MarkerIn(1, 2), Place(5) };
+            var o3 = AliasGraph.DependencyOrder(cyc);
+            Check("leash cycle refuses", o3.Cycle && o3.Order == null, o3.Cycle ? "refused" : $"ORDERED {Ids(o3.Order)}");
+            Check("leash cycle names its aliases", o3.Unplaced.OrderBy(x => x).SequenceEqual(new uint[] { 1, 2 }),
+                  "unplaced " + string.Join(",", o3.Unplaced));
+
+            // 4. CONTROL on IsSubject: the same leash run on a REFERENCE, not the candidate, is not a fill dependency.
+            var off = new List<IAQuestAliasGetter> { Place(2, leashFrom: 1, subject: false), MarkerIn(1, 2) };
+            var o4 = AliasGraph.DependencyOrder(off);
+            Check("non-subject leash is not a dependency", !o4.Cycle && Ids(o4.Order) == "2,1", $"order {Ids(o4.Order)}");
+
+            // 5. Each kind comes back as a kind, never as words.
+            var made = new QuestReferenceAlias { ID = 7, Location = new LocationAliasReference { AliasID = 2 },
+                                                 CreateReferenceToObject = new CreateReferenceToObject { AliasID = 3 },
+                                                 ReferenceCollectionAliasID = 4 };
+            var kinds = AliasGraph.DepsOf(made);
+            Check("DepsOf returns every kind", kinds.SequenceEqual(new[] { (2u, FillFrom.Inside), (3u, FillFrom.CreatedAt), (4u, FillFrom.FromCollection) }),
+                  string.Join(" ", kinds.Select(k => $"{k.dep}:{k.how}")));
+
+            Console.WriteLine(fail == 0 ? "  selftest: all passed" : $"  selftest: {fail} FAILED");
+            return fail == 0 ? 0 : 1;
         }
 
         private static string AliasName(IAQuestAliasGetter a) => a switch
