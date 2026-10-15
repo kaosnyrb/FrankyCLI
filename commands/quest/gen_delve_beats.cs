@@ -796,1218 +796,1345 @@ namespace FrankyCLI
             return fail;
         }
 
+        /// <summary>
+        /// The beats build: BeatsBuild's ten sections, run in order until one refuses (split step 3's (c), 2026-10-15).
+        /// </summary>
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
                                       Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm, DelveInputs inputs)
         {
-            var vma = clone.VirtualMachineAdapter;
-            if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
+            var b = new BeatsBuild(myMod, clone, t, r, markers, made, bm, inputs);
+            foreach (var section in new Func<int>[] { b.NoDriver, b.Slots, b.Stages, b.Fills, b.Items, b.Counters,
+                                                      b.Objectives, b.Messages, b.Hooks, b.Fragment })
+            {
+                int f = section();
+                if (f != 0) return f;
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// ONE RUN OF BuildBeats, as a class (split step 3's (c), 2026-10-15, his "B sounds good"): what it is handed,
+        /// the values its sections hand each other, and the ten sections as methods. They moved verbatim out of one
+        /// 1,240-line function; the only changes are that a value one section writes and a later one reads is a field
+        /// here rather than a local, and that each section ends in its own `return 0`. Every refusal was already an
+        /// early `return 1`, so stopping at the first section that refuses is the old control flow exactly.
+        /// </summary>
+        private sealed class BeatsBuild
+        {
+            private readonly StarfieldMod myMod;
+            private readonly Quest clone;
+            private readonly Template t;
+            private readonly Recipe r;
+            private readonly Dictionary<string, FormKey> markers;
+            private readonly BuildMade made;
+            private readonly BeatsMade bm;
+            private readonly DelveInputs inputs;
+
+            internal BeatsBuild(StarfieldMod myMod, Quest clone, Template t, Recipe r, Dictionary<string, FormKey> markers,
+                                BuildMade made, BeatsMade bm, DelveInputs inputs)
+            {
+                this.myMod = myMod; this.clone = clone; this.t = t; this.r = r;
+                this.markers = markers; this.made = made; this.bm = bm; this.inputs = inputs;
+            }
+
+            // WHAT THE SECTIONS HAND EACH OTHER. Each is set by exactly one section and read only by later ones. The
+            // references start `null!`, so a reader that ran too early would fail loudly; the value types (arrival,
+            // travelPkg, offerMsg, the nullable keys) would read a default, and only the section order prevents that.
+            /// <summary>The quest's script adapter, refused if absent. Set in section 1 (its head); read in 1, 4, 7, 9, 10.</summary>
+            private QuestAdapter vma = null!;
+            /// <summary>The misc item a pickup is cloned from (the driver's CargoObject, else the template's). Set in section 1; read in 5.</summary>
+            private MiscItem? itemSrc;
+            /// <summary>The removed driver's GangMembers list. Set in section 1; read in 10.</summary>
+            private FormKey? gangKey;
+            /// <summary>The removed driver's MaxGangMembers. Set in section 1; read in 10.</summary>
+            private int? gangMax;
+            /// <summary>The removed driver's TargetCivListMembers list. Set in section 1; read in 10.</summary>
+            private FormKey? civsKey;
+            /// <summary>The package a hold's waves run, cloned in section 1. Set in section 1; read in 2.</summary>
+            private FormKey travelPkg;
+            /// <summary>The recipe's beats grouped into steps. Set in section 1; read in 2, 3, 4, 6, 7, 8, 9, 10.</summary>
+            private List<Step> steps = null!;
+            /// <summary>Beat index to the stage it sets. Set in section 1; read in 2, 3, 4, 7, 8, 9, 10.</summary>
+            private Dictionary<int, int> beatStage = null!;
+            /// <summary>Whether the Delve has an arrival broadcast. Set in section 1; read in 3, 9, 10.</summary>
+            private bool arrival;
+            /// <summary>Beat index to its marker, activator and target aliases. Set in section 2; read in 4, 7, 8, 9, 10.</summary>
+            private Dictionary<int, BeatSlot> slotOf = null!;
+            /// <summary>Talk beat to the alias that creates its person. Set in section 2; read in 8.</summary>
+            private Dictionary<int, QuestReferenceAlias> talkAlias = null!;
+            /// <summary>Hold beat to its wave collections, in order. Set in section 2; read in 7, 9, 10.</summary>
+            private Dictionary<int, List<int>> waveAliases = null!;
+            /// <summary>The base's marker and activator pairs no beat took. Set in section 2; read in 7.</summary>
+            private List<BeatSlot> unusedSlots = null!;
+            /// <summary>An ending person's beat to the stage that meets them. Set in section 3; read in 9, 10.</summary>
+            private Dictionary<int, int> personStage = null!;
+            /// <summary>Who is at each place. Set in section 3; read in 9, 10.</summary>
+            private List<(int place, Who who, int anchor)> whos = null!;
+            /// <summary>A who's place to its stage. Set in section 3; read in 9, 10.</summary>
+            private Dictionary<int, int> whoStage = null!;
+            /// <summary>Every stage the build made, sorted. Set in section 3; read in 7.</summary>
+            private List<int> allStages = null!;
+            /// <summary>Pickup beat to its cloned item. Set in section 5; read in 9, 10.</summary>
+            private Dictionary<int, FormKey> itemOf = null!;
+            /// <summary>Step index to its counter global. Set in section 6; read in 7, 10.</summary>
+            private Dictionary<int, (FormKey key, string edid)> counterOf = null!;
+            /// <summary>Beat index to its message box. Set in section 8; read in 10.</summary>
+            private Dictionary<int, FormKey> msgOf = null!;
+            /// <summary>The offer's message box. Set in section 8; read in 10.</summary>
+            private FormKey offerMsg;
+            /// <summary>A beat's person to its cloned NPC. Set in section 8; read in 10.</summary>
+            private Dictionary<int, FormKey> npcOf = null!;
+
+            /// <summary>A beat's objective index: a choose step's beats take one each, ten apart; any other step shares one.
+            /// Used by sections 7 and 10 (a local function of section 7 until they became methods).</summary>
+            private static int ObjOf(Step st, int b) => st.IsChoose ? st.Objective + 10 * st.Beats.IndexOf(b) : st.Objective;
 
             // --- 1. no driver ---------------------------------------------------------------------------
-            var old = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
-            if (old == null) { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' to remove."); return 1; }
-            var cargo = old.Properties.OfType<ScriptObjectProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, "CargoObject", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
-            var itemSrc = cargo != null ? myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value)
-                        : t.itemSource != null ? myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource) : null;
-            // recover: the holder and his gang are drawn from the removed driver's own list, as delve4's were.
-            var gangKey = old.Properties.OfType<ScriptObjectProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, "GangMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
-            int? gangMax = old.Properties.OfType<ScriptIntProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, "MaxGangMembers", StringComparison.OrdinalIgnoreCase))?.Data;
-            var civsKey = old.Properties.OfType<ScriptObjectProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, "TargetCivListMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
-            if (r.approach?.civilians == true && civsKey == null)
-            { Console.WriteLine($"REFUSED: approach.civilians needs the removed driver's TargetCivListMembers, and '{t.replacesDriver}' lacks it."); return 1; }
-            if (r.approach?.lose != null && gangKey == null)
-            { Console.WriteLine($"REFUSED: approach.lose places its helper from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
-            if (r.beats.Any(b => b.type == "recover") && (gangKey == null || gangMax == null))
-            { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
-            if (r.beats.Any(b => b.type == "hold") && gangKey == null)
-            { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
-            if (r.beats.Any(b => b.type == "clear") && inputs.WaveSrc == null)
-            { Console.WriteLine("REFUSED: a clear's enemies fill a collection copied from vanilla's ActiveHostiles, and none was handed in."); return 1; }
-            if (r.beats.Any(b => b.type == "hold") && (inputs.WaveSrc == null || inputs.TravelSrc == null))
-            { Console.WriteLine("REFUSED: a hold needs a source collection alias and a source package to copy its waves from, and one was not handed in."); return 1; }
+            internal int NoDriver()
+            {
+                vma = clone.VirtualMachineAdapter!;
+                if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
 
-            // A hold's waves come FOR the player: one package per Delve, a copy of the bounty hunters' Travel
-            // (jog, weapon drawn, to PlayerRef), worn by every wave collection, so every member runs it. The
-            // copy keeps the two GetDistance conditions (travel while the player is 9 to 1000 m away; closer
-            // than that they are in combat) and drops what belongs to the bounty quest: its two GetStageDone
-            // conditions, its fragment scripts and its dialogue on begin/end/change.
-            FormKey travelPkg = default;
-            RemovePrevious(myMod.Packages, e => e.StartsWith(r.id + "_wavepkg"));
-            if (r.beats.Any(b => b.type == "hold"))
-            {
-                var pk = myMod.Packages.DuplicateInAsNewRecord(inputs.TravelSrc!);
-                pk.EditorID = r.id + "_wavepkg";
-                pk.VirtualMachineAdapter = null;
-                pk.OwnerQuest.SetTo(clone.FormKey);
-                // ⛔ THE BEGIN/END/CHANGE EVENTS ARE COPIED UNTOUCHED. Each carries ONE TopicReference that is
-                // an EMPTY placeholder (no topic set), so there is no dialogue to strip; the first build
-                // cleared the list "to drop the bounty hunters' lines", changed the record's shape for
-                // nothing, and his next play crashed to desktop (2026-10-09; the leading suspect, not proven).
-                // Read a field before removing it.
-                // NOT a suspect, measured: the copy's inputs are written sorted (1,3,5,7,8 where the source
-                // stores 1,3,5,8,7), because Mutagen's writer sorts them whatever order they are given, and
-                // Starfield.esm ships BOTH orders on Travel packages (248 sorted, 214 not).
-                bm.WavePackageShape = $"topics {string.Join("/", new[] { inputs.TravelSrc!.OnBegin, inputs.TravelSrc.OnEnd, inputs.TravelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
-                pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
-                foreach (var c in pk.Conditions)
-                {
-                    var gd = (GetDistanceConditionData)c.Data;
-                    if (gd.FirstParameter.Link.FormKey.ID != 0x14)
-                    { Console.WriteLine($"REFUSED: the copied package's distance condition measures to {gd.FirstParameter.Link.FormKey}, not PlayerRef."); return 1; }
-                }
-                // RUN, not the bounty hunters' jog (his play of 09, 2026-10-10: "They are slowish, so you spend a lot
-                // of time looking around for them"). A StartCombat at spawn was tried first and dropped: they could not
-                // detect him from 40 m+ out of sight, combat lapsed, and they stopped short (his next play).
-                var wasSpeed = pk.PreferredSpeed;
-                pk.PreferredSpeed = Package.Speed.Run;
-                travelPkg = pk.FormKey;
-                bm.WavePackage = pk.FormKey;
-                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {inputs.TravelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
-            }
-            vma.Scripts.Remove(old);
-            if (vma.Scripts.Count != 0)
-            { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
-            Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED; the stages are the state machine");
-            if (t.questScript != null)
-            {
-                // A board mission: the base class the board talks to goes on in the driver's place, carrying the driver's
-                // values for the properties it declares. It handles a turn-down itself (OnQuestRejected -> FailStage).
-                var qs = new ScriptEntry { Name = t.questScript };
-                foreach (var keep in t.questScriptKeeps)
-                {
-                    var p = old.Properties.FirstOrDefault(x => string.Equals(x.Name, keep, StringComparison.OrdinalIgnoreCase));
-                    if (p == null) { Console.WriteLine($"REFUSED: the removed driver carries no '{keep}' for {t.questScript} to keep."); return 1; }
-                    qs.Properties.Add(p.DeepCopy());
-                }
-                vma.Scripts.Add(qs);
-                var gone = old.Properties.Select(x => x.Name).Where(n => !t.questScriptKeeps.Contains(n, StringComparer.OrdinalIgnoreCase)).ToList();
-                Console.WriteLine($"  script   : {t.questScript} attached with the driver's {qs.Properties.Count} board properties; dropped its own: {string.Join(", ", gone)}");
-            }
-            else
-            {
-                // The driver was also the only OnQuestRejected handler, so one small quest script takes that job alone
-                // (his 2026-10-14: a turned-down Delve could not be restarted). Its Objectives are filled at the end of
-                // the build, once every objective is written (RejectScript).
-                vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
-                Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
-            }
-            // The base's own alias hooks on the alias the beats take over as a marker went with its driver's design
-            // (MB28a's DefaultAliasOnDeath on PrimaryRef sets 100 with no prereq; a marker never dies).
-            if (t.markerSource >= 0)
-                foreach (var e in vma.Aliases.Where(a => a.Property.Alias == t.markerSource).ToList())
-                {
-                    vma.Aliases.Remove(e);
-                    Console.WriteLine($"  -hook    : the base's {string.Join(", ", e.Scripts.Select(s => s.Name))} on alias {t.markerSource} (the driver's kill; the beats own this alias now)");
-                }
+                var old = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
+                if (old == null) { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' to remove."); return 1; }
+                var cargo = old.Properties.OfType<ScriptObjectProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, "CargoObject", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+                itemSrc = cargo != null ? myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value)
+                            : t.itemSource != null ? myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource) : null;
+                // recover: the holder and his gang are drawn from the removed driver's own list, as delve4's were.
+                gangKey = old.Properties.OfType<ScriptObjectProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, "GangMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+                gangMax = old.Properties.OfType<ScriptIntProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, "MaxGangMembers", StringComparison.OrdinalIgnoreCase))?.Data;
+                civsKey = old.Properties.OfType<ScriptObjectProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, "TargetCivListMembers", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
+                if (r.approach?.civilians == true && civsKey == null)
+                { Console.WriteLine($"REFUSED: approach.civilians needs the removed driver's TargetCivListMembers, and '{t.replacesDriver}' lacks it."); return 1; }
+                if (r.approach?.lose != null && gangKey == null)
+                { Console.WriteLine($"REFUSED: approach.lose places its helper from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
+                if (r.beats.Any(b => b.type == "recover") && (gangKey == null || gangMax == null))
+                { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
+                if (r.beats.Any(b => b.type == "hold") && gangKey == null)
+                { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
+                if (r.beats.Any(b => b.type == "clear") && inputs.WaveSrc == null)
+                { Console.WriteLine("REFUSED: a clear's enemies fill a collection copied from vanilla's ActiveHostiles, and none was handed in."); return 1; }
+                if (r.beats.Any(b => b.type == "hold") && (inputs.WaveSrc == null || inputs.TravelSrc == null))
+                { Console.WriteLine("REFUSED: a hold needs a source collection alias and a source package to copy its waves from, and one was not handed in."); return 1; }
 
-            var steps = StepsOf(r);
-            var beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
-            // A board's broadcast waits for his arrival at the site (arrivalStage), set by a distance hook below.
-            bool arrival = t.arrivalStage >= 0 && r.broadcast != null;
-
-            // --- 2. one marker + activator per beat -------------------------------------------------------
-            // Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the
-            // same argument as AddBeatSlot: a slot that works brings every field this tool does not know).
-            // A base with no slots (the board) names a marker alias instead, and has no activator to give.
-            var slotOf = new Dictionary<int, BeatSlot>();
-            bool slotless = t.beatSlots.Count == 0;
-            int srcMarkerId = slotless ? t.markerSource : t.beatSlots[0].markerAlias;
-            var srcMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)srcMarkerId);
-            var srcAct = slotless ? null : clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].activatorAlias);
-            if (srcMarker?.Location == null || (!slotless && srcAct?.CreateReferenceToObject == null))
-            { Console.WriteLine(slotless ? $"REFUSED: markerSource alias {srcMarkerId} is not a ref alias filled from a place on this base."
-                                         : "REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
-            srcMarker = srcMarker.DeepCopy();   // the pattern, taken before beat 1 may rewrite the alias itself
-            // A slotless base's marker alias IS the first fight's marker (on the board, the system and planet resolve
-            // from it, so it stays); every later marker is a copy of it.
-            bool sourceTaken = t.markerSource < 0;
-            QuestReferenceAlias NewMarker(int i, string suffix)
-            {
-                if (!sourceTaken)
+                // A hold's waves come FOR the player: one package per Delve, a copy of the bounty hunters' Travel
+                // (jog, weapon drawn, to PlayerRef), worn by every wave collection, so every member runs it. The
+                // copy keeps the two GetDistance conditions (travel while the player is 9 to 1000 m away; closer
+                // than that they are in combat) and drops what belongs to the bounty quest: its two GetStageDone
+                // conditions, its fragment scripts and its dialogue on begin/end/change.
+                travelPkg = default;
+                RemovePrevious(myMod.Packages, e => e.StartsWith(r.id + "_wavepkg"));
+                if (r.beats.Any(b => b.type == "hold"))
                 {
-                    sourceTaken = true;
-                    return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)srcMarkerId);
-                }
-                uint id = NextAliasId(clone);
-                var m = srcMarker.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
-                clone.Aliases.Add(m);
-                return m;
-            }
-            int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
-            var talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
-            var waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
-            for (int i = 0; i < r.beats.Count; i++)
-            {
-                if (r.beats[i].returnTo != null) continue;   // shares an earlier beat's object; filled in below
-                if (r.beats[i].type == "hold")
-                {
-                    // A marker the waves spawn at, and one EMPTY collection per wave, each a copy of vanilla's
-                    // ActiveHostiles (Optional, AllowDisabled, no fill), renamed and renumbered. Filled at
-                    // runtime by PlaceAtMe's akAliasToFill, as vanilla's MissionBoardCargoContainerScript does.
-                    var hm = NewMarker(i, "Spawn");
-                    slotOf[i] = new BeatSlot { markerAlias = (int)hm.ID, activatorAlias = -1, journalStage = beatStage[i] };
-                    waveAliases[i] = new List<int>();
-                    int nw = steps.First(s => s.Beats.Contains(i)).Waves;
-                    for (int w = 0; w < nw; w++)
+                    var pk = myMod.Packages.DuplicateInAsNewRecord(inputs.TravelSrc!);
+                    pk.EditorID = r.id + "_wavepkg";
+                    pk.VirtualMachineAdapter = null;
+                    pk.OwnerQuest.SetTo(clone.FormKey);
+                    // ⛔ THE BEGIN/END/CHANGE EVENTS ARE COPIED UNTOUCHED. Each carries ONE TopicReference that is
+                    // an EMPTY placeholder (no topic set), so there is no dialogue to strip; the first build
+                    // cleared the list "to drop the bounty hunters' lines", changed the record's shape for
+                    // nothing, and his next play crashed to desktop (2026-10-09; the leading suspect, not proven).
+                    // Read a field before removing it.
+                    // NOT a suspect, measured: the copy's inputs are written sorted (1,3,5,7,8 where the source
+                    // stores 1,3,5,8,7), because Mutagen's writer sorts them whatever order they are given, and
+                    // Starfield.esm ships BOTH orders on Travel packages (248 sorted, 214 not).
+                    bm.WavePackageShape = $"topics {string.Join("/", new[] { inputs.TravelSrc!.OnBegin, inputs.TravelSrc.OnEnd, inputs.TravelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
+                    pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
+                    foreach (var c in pk.Conditions)
                     {
-                        uint cid = NextAliasId(clone);
-                        var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Wave{w + 1}");
-                        if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a wave must start empty."); return 1; }
-                        col.Collection[0].ReferenceAlias!.PackageData.Add(travelPkg.ToLink<IPackageGetter>());
-                        clone.Aliases.Add(col);
-                        waveAliases[i].Add((int)cid);
-                        bm.Waves.Add((int)cid);
+                        var gd = (GetDistanceConditionData)c.Data;
+                        if (gd.FirstParameter.Link.FormKey.ID != 0x14)
+                        { Console.WriteLine($"REFUSED: the copied package's distance condition measures to {gd.FirstParameter.Link.FormKey}, not PlayerRef."); return 1; }
                     }
-                    Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
-                    continue;
+                    // RUN, not the bounty hunters' jog (his play of 09, 2026-10-10: "They are slowish, so you spend a lot
+                    // of time looking around for them"). A StartCombat at spawn was tried first and dropped: they could not
+                    // detect him from 40 m+ out of sight, combat lapsed, and they stopped short (his next play).
+                    var wasSpeed = pk.PreferredSpeed;
+                    pk.PreferredSpeed = Package.Speed.Run;
+                    travelPkg = pk.FormKey;
+                    bm.WavePackage = pk.FormKey;
+                    Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {inputs.TravelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
                 }
-                if (r.beats[i].type == "defeat")
+                vma.Scripts.Remove(old);
+                if (vma.Scripts.Count != 0)
+                { Console.WriteLine("REFUSED: the base carries other quest scripts: " + string.Join(", ", vma.Scripts.Select(s => s.Name))); return 1; }
+                Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED; the stages are the state machine");
+                if (t.questScript != null)
                 {
-                    // recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into
-                    // when the step begins, which the objective targets and the death hook sits on.
-                    var dm = NewMarker(i, "Marker");
-                    uint did = NextAliasId(clone);
-                    var dt = srcMarker.DeepCopy(); dt.ID = did; dt.Name = "DelveBeat" + (i + 1) + "Target";
-                    dt.Location = null;
-                    dt.Flags = QuestReferenceAlias.Flag.Optional;
-                    clone.Aliases.Add(dt);
-                    slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = beatStage[i] };
-                    bm.Holders.Add((int)dt.ID);
-                    Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn)");
-                    continue;
-                }
-                if (r.beats[i].type == "clear")
-                {
-                    // ONE hold wave at the site: a marker, and an EMPTY collection (a copy of vanilla's ActiveHostiles)
-                    // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
-                    var cm = NewMarker(i, "Spawn");
-                    uint cid = NextAliasId(clone);
-                    var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Enemies");
-                    if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
-                    clone.Aliases.Add(col);
-                    slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = beatStage[i] };
-                    bm.ClearGroups.Add((int)cid);
-                    Console.WriteLine($"  +slot    : beat {i + 1} (clear) -- spawn marker alias {cm.ID}, enemies collection {cid} (EMPTY, a copy of ActiveHostiles, no package)");
-                    continue;
-                }
-                if (r.beats[i].type == "talk")
-                {
-                    // A marker, and an alias that CREATES the person there at quest start: a copy of the base's own
-                    // activator alias with the cloned NPC as its object (set once he is cloned, below). So he stands at
-                    // his marker before the player arrives and the objective can point at him from anywhere.
-                    uint tid = NextAliasId(clone);
-                    var tm = srcMarker.DeepCopy(); tm.ID = tid; tm.Name = "DelveBeat" + (i + 1) + "Marker";
-                    var tp = srcAct!.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
-                    tp.CreateReferenceToObject!.AliasID = (short)tm.ID;
-                    clone.Aliases.Add(tm);
-                    clone.Aliases.Add(tp);
-                    slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = beatStage[i] };
-                    talkAlias[i] = tp;
-                    Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)");
-                    continue;
-                }
-                if (r.beats[i].type == "recover")
-                {
-                    // A marker where the holder appears, and an EMPTY Optional alias he is placed into, which the
-                    // objective targets so it follows him (delve4's shape: a non-optional alias with no fill
-                    // makes the whole quest silently not start).
-                    uint rid = NextAliasId(clone);
-                    var rm = srcMarker.DeepCopy(); rm.ID = rid; rm.Name = "DelveBeat" + (i + 1) + "Marker";
-                    var rh = srcMarker.DeepCopy(); rh.ID = rid + 1; rh.Name = "DelveBeat" + (i + 1) + "Holder";
-                    rh.Location = null;
-                    rh.Flags = QuestReferenceAlias.Flag.Optional;
-                    clone.Aliases.Add(rm);
-                    clone.Aliases.Add(rh);
-                    slotOf[i] = new BeatSlot { markerAlias = (int)rm.ID, activatorAlias = -1, targetAlias = (int)rh.ID, journalStage = beatStage[i] };
-                    bm.Holders.Add((int)rh.ID);
-                    Console.WriteLine($"  +slot    : beat {i + 1} (recover) -- marker alias {rm.ID}, holder {rh.ID} (EMPTY, Optional; filled on spawn)");
-                    continue;
-                }
-                if (baseNext < t.beatSlots.Count)
-                {
-                    slotOf[i] = new BeatSlot { markerAlias = t.beatSlots[baseNext].markerAlias, activatorAlias = t.beatSlots[baseNext].activatorAlias,
-                                               journalStage = beatStage[i] };
-                    baseNext++;
-                    continue;
-                }
-                uint next = NextAliasId(clone);
-                var m = srcMarker.DeepCopy(); m.ID = next; m.Name = "DelveBeat" + (i + 1) + "Marker";
-                var a = srcAct!.DeepCopy(); a.ID = next + 1; a.Name = "DelveBeat" + (i + 1) + "Target";
-                a.CreateReferenceToObject!.AliasID = (short)m.ID;
-                clone.Aliases.Add(m);
-                clone.Aliases.Add(a);
-                slotOf[i] = new BeatSlot { markerAlias = (int)m.ID, activatorAlias = (int)a.ID, journalStage = beatStage[i] };
-                Console.WriteLine($"  +slot    : beat {i + 1} -- marker alias {m.ID}, activator {a.ID}");
-            }
-            // A marker source no fight took (a board mission that opens with a talk or a pickup) is still the board's PrimaryRef,
-            // which the system and planet resolve from, so it stays; it is pointed at the place's MAP MARKER, which every
-            // requested site carries and the lint always demands, so it never asks the site for a ref type no beat named.
-            if (!sourceTaken)
-            {
-                var ps = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)t.markerSource);
-                if (!markers.TryGetValue("MapMarkerRefType", out var mm)) { Console.WriteLine("REFUSED: the lint handed in no MapMarkerRefType to point the marker source at."); return 1; }
-                ps.Location!.RefType.SetTo(mm);
-                // ⛔ AND IT SHARES THAT REFERENCE: the board's own MapMarker alias fills from the same one map marker, and an
-                // alias cannot take a reference another alias of the quest already holds unless it allows reuse. Without
-                // this flag PrimaryRef (not Optional) could not fill and the quest never started, so missionboard02a never
-                // listed (his play, 2026-10-14). Vanilla's flag for exactly this: MB_Cargo01Far's DestinationCargo.
-                // The flag belongs on whichever of them fills SECOND, and the alias order is the build's to change, so every
-                // alias sharing the reference carries it (the contention check's bite caught it on the wrong one first).
-                foreach (var sh in clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location != null && a.CreateReferenceToObject == null
-                             && a.Location.AliasID == ps.Location.AliasID && a.Location.RefType.FormKey == mm))
-                {
-                    sh.Flags = (sh.Flags ?? 0) | QuestReferenceAlias.Flag.AllowReuseInQuest;   // a null flag set |= stays null
-                    Console.WriteLine($"  reuse    : alias {sh.ID} {sh.Name} may share the place's map marker (AllowReuseInQuest)");
-                }
-                bm.MarkerSourceAtMap = true;
-                Console.WriteLine($"  source   : alias {t.markerSource} {ps.Name} took no fight, so it fills from the place's map marker (no ref type demanded)");
-            }
-            // A return is the earlier beat's own object visited again: same aliases, its own stage and journal.
-            for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].returnTo is int back)
-                {
-                    var o = slotOf[back - 1];
-                    slotOf[i] = new BeatSlot { markerAlias = o.markerAlias, activatorAlias = o.activatorAlias, journalStage = beatStage[i] };
-                    Console.WriteLine($"  slot     : beat {i + 1} returns to beat {back}'s object (alias {o.activatorAlias})");
-                }
-            // The base's object slots no beat took (11a, 2026-10-13: a recover and a talk, neither with an object of its
-            // own). Each is removed after the objectives are rebuilt, below, as the one-place Delve's second place is: a
-            // non-Optional marker alias left in still demands its marker at the place, which a dungeon does not carry, so
-            // the whole quest would silently never start.
-            var unusedSlots = t.beatSlots.Skip(baseNext).ToList();
-            // A hold's objective points at what is being defended, when it names one (a return shares its
-            // original's object, so this runs after the returns are filled).
-            for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].type == "hold" && r.beats[i].defend is int d)
-                {
-                    slotOf[i].targetAlias = slotOf[d - 1].activatorAlias;
-                    Console.WriteLine($"  slot     : beat {i + 1} (hold) defends beat {d}'s object (alias {slotOf[i].targetAlias})");
-                }
-
-            // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
-            // An ending's person is placed on its own stage, numbered after the approach's.
-            var personStage = new Dictionary<int, int>();
-            foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null && r.beats[b].type != "talk"))
-                personStage[b] = t.approachStage + 1 + personStage.Count;
-            // A place's occupants, after the people: their own stage, set by a distance hook on the object they surround.
-            var whos = WhoOf(r);
-            var whoStage = new Dictionary<int, int>();
-            foreach (var (p, _, _) in whos) whoStage[p] = t.approachStage + 1 + personStage.Count + whoStage.Count;
-            // A second ending completes the quest the same way as the first: a COPY of the completing stage
-            // (its CompleteQuest flag and its reward entry), never a plain stage, which completes nothing.
-            foreach (var cs in steps.Where(s => s.IsChoose))
-                for (int j = 1; j < cs.Beats.Count; j++)
-                {
-                    int st = beatStage[cs.Beats[j]];
-                    if (clone.Stages!.Any(x => x.Index == st)) { Console.WriteLine($"REFUSED: stage {st} already exists on this base."); return 1; }
-                    var done = clone.Stages.FirstOrDefault(x => x.Index == t.completeStage);
-                    if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
-                    { Console.WriteLine($"REFUSED: stage {t.completeStage} is not a single-entry completing stage to copy an ending from."); return 1; }
-                    var copy = done.DeepCopy();
-                    copy.Index = (ushort)st;
-                    copy.LogEntries[0].Entry = null;
-                    clone.Stages.Add(copy);
-                    Console.WriteLine($"  +stage   : {st} (ending {j + 1} of choose '{cs.Choose}', a copy of completing stage {t.completeStage})");
-                }
-            var allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
-                .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
-                .Concat(personStage.Values).Concat(whoStage.Values)
-                .Concat(arrival ? new[] { t.arrivalStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
-            foreach (var st in allStages)
-            {
-                if (clone.Stages!.Any(s => s.Index == st)) continue;
-                var ns = CloneStage(clone, st);
-                if (ns == null) return 1;
-                clone.Stages.Add(ns);
-                Console.WriteLine($"  +stage   : {st}");
-            }
-            // Reused stages (the base's 50) carry the base's journal line; clear it unless a beat writes one.
-            foreach (var st in clone.Stages!.Where(s => allStages.Contains(s.Index) && s.Index != t.completeStage))
-                if (st.LogEntries.FirstOrDefault() is QuestLogEntry e) e.Entry = null;
-            // Ending on a group, the completing stage's line is the recipe's recap (the lint requires it).
-            if (steps[^1].IsGroup)
-            {
-                var cs = clone.Stages.FirstOrDefault(s => s.Index == t.completeStage);
-                if (cs?.LogEntries.FirstOrDefault() is not QuestLogEntry ce)
-                { Console.WriteLine($"REFUSED: the base's completing stage {t.completeStage} has no log entry to carry the recap."); return 1; }
-                bm.Recap = Expand(r.recap!, t);
-                ce.Entry = bm.Recap;
-                Console.WriteLine($"  recap    : stage {t.completeStage} \"{bm.Recap}\"");
-            }
-            if (t.entryStage == 0)
-            {
-                var s0 = clone.Stages.FirstOrDefault(s => s.Index == 0);
-                if (s0 == null) { Console.WriteLine("REFUSED: the base has no stage 0 to run on start."); return 1; }
-                s0.Flags |= QuestStage.Flag.RunOnStart;
-            }
-            else
-            {
-                // Set by something outside the quest (the board's accept), never on start: on start is the board refresh.
-                var se = clone.Stages.FirstOrDefault(s => s.Index == t.entryStage);
-                if (se == null) { Console.WriteLine($"REFUSED: the base has no entry stage {t.entryStage}."); return 1; }
-                if (se.Flags.HasFlag(QuestStage.Flag.RunOnStart)) { Console.WriteLine($"REFUSED: entry stage {t.entryStage} runs on start; the mission would begin before it is taken."); return 1; }
-                Console.WriteLine($"  entry    : stage {t.entryStage} (set by the board's accept); step one spawns and shows there, not on start");
-            }
-
-            // --- 4. fills, journals, reskins ---------------------------------------------------------
-            for (int i = 0; i < r.beats.Count; i++)
-            {
-                if (r.beats[i].returnTo != null)
-                {
-                    // The fill is the earlier beat's; only this beat's journal is its own.
-                    if (r.beats[i].journal != null)
+                    // A board mission: the base class the board talks to goes on in the driver's place, carrying the driver's
+                    // values for the properties it declares. It handles a turn-down itself (OnQuestRejected -> FailStage).
+                    var qs = new ScriptEntry { Name = t.questScript };
+                    foreach (var keep in t.questScriptKeeps)
                     {
-                        var je = clone.Stages.FirstOrDefault(s => s.Index == beatStage[i])?.LogEntries.FirstOrDefault();
-                        if (je == null) { Console.WriteLine($"REFUSED: stage {beatStage[i]} has no log entry for beat {i + 1}'s journal."); return 1; }
-                        je.Entry = Expand(r.beats[i].journal!, t);
+                        var p = old.Properties.FirstOrDefault(x => string.Equals(x.Name, keep, StringComparison.OrdinalIgnoreCase));
+                        if (p == null) { Console.WriteLine($"REFUSED: the removed driver carries no '{keep}' for {t.questScript} to keep."); return 1; }
+                        qs.Properties.Add(p.DeepCopy());
                     }
-                    continue;
-                }
-                int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
-                if (f > 0) return f;
-                if (slotOf[i].activatorAlias >= 0
-                    && ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
-            }
-
-            // The endings' pay, ON THE STAGE: QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas,
-            // BonusCredits (QRCR) and XpAwarded (QRXP), pointed at the tier's two globals. Written for every
-            // ending, the first one too, rather than trusting what the copy inherited.
-            // A single-beat last step with a tier is an ending too: it sets the completing stage, so its tier
-            // replaces the base's own pay there (the lint holds reward to these two places).
-            var paid = steps.Where(s => s.IsChoose).SelectMany(s => s.Beats)
-                .Concat(steps[^1].IsChoose || steps[^1].IsGroup || r.beats[steps[^1].Beats[0]].reward == null
-                        ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] }).ToList();
-            if (t.questScript != null)
-            {
-                // A board mission pays through the board (MissionComplete -> MissionParent), off the script's reward
-                // globals, which the card also shows: so a tier goes THERE, and never onto the stage, or it pays twice.
-                // Absent, the base's own globals stand (MB28a: duo_reward_creds_easy), as a slate Delve keeps its base's stage pay.
-                var qs = vma.Scripts.First(s => s.Name == t.questScript);
-                foreach (var b in paid)
-                {
-                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
-                    if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward}."); return 1; }
-                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
-                    {
-                        var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
-                        if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
-                        rp.Object.SetTo(cg.FormKey);
-                    }
-                    Console.WriteLine($"  reward   : the board pays {cg.EditorID} (RewardAmountGlobal and its Actual)");
-                }
-                paid.Clear();
-            }
-            foreach (var b in paid)
-            {
-                var st = clone.Stages.First(x => x.Index == beatStage[b]);
-                var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
-                if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
-                var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
-                var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{r.beats[b].reward}");
-                if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward} / duo_reward_xp_{r.beats[b].reward}."); return 1; }
-                rds[0].BonusCredits.SetTo(cg.FormKey);
-                rds[0].XpAwarded.SetTo(xg.FormKey);
-                bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
-                Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
-            }
-            // The offer: the line the player reads at the find, on the stage that enters the choice.
-            if (r.offer?.journal != null)
-            {
-                int enter = steps[steps.FindIndex(s => s.IsChoose) - 1].DoneStage;
-                var oe = clone.Stages.FirstOrDefault(x => x.Index == enter)?.LogEntries.FirstOrDefault();
-                if (oe == null) { Console.WriteLine($"REFUSED: stage {enter} has no log entry for the offer's journal."); return 1; }
-                oe.Entry = Expand(r.offer.journal, t);
-                bm.OfferJournal = (enter, oe.Entry.String!);
-                Console.WriteLine($"  offer    : journal on stage {enter}");
-            }
-
-            // --- 5. items, one clone per pickup -----------------------------------------------------------
-            RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
-            var itemOf = new Dictionary<int, FormKey>();
-            for (int i = 0; i < r.beats.Count; i++)
-            {
-                if (r.beats[i].type != "pickup" && r.beats[i].type != "recover") continue;
-                if (itemSrc == null) { Console.WriteLine($"REFUSED: the removed driver's CargoObject is not a MiscItem in {t.mod} to clone."); return 1; }
-                var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
-                mi.EditorID = $"{r.id}_item{i + 1}";
-                mi.Name = r.beats[i].item!;
-                itemOf[i] = mi.FormKey;
-                Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID})");
-            }
-
-            // --- 6. counters: one global per group, cloned, listed for <Global=> in the objective text -------
-            RemovePrevious(myMod.Globals, e => e.StartsWith(r.id + "_count"));
-            var globalSrc = myMod.Globals.FirstOrDefault(g => g.EditorID == "duo_reward_xp_easy");
-            var counterOf = new Dictionary<int, (FormKey key, string edid)>();   // step index -> counter
-            for (int k = 0; k < steps.Count; k++)
-            {
-                if (!steps[k].IsGroup && !steps[k].IsHold) continue;
-                if (globalSrc == null) { Console.WriteLine($"REFUSED: no global duo_reward_xp_easy in {t.mod} to clone a counter from."); return 1; }
-                var g = (Global)myMod.Globals.DuplicateInAsNewRecord(globalSrc);
-                g.EditorID = $"{r.id}_count{k + 1}";
-                SetGlobalZero(g);
-                counterOf[k] = (g.FormKey, g.EditorID);
-                // Init-only and pre-constructed on Quest (part 13): append, never assign.
-                clone.TextDisplayGlobals.Add(g.ToLink<IGlobalGetter>());
-                bm.Globals.Add(g.FormKey);
-                Console.WriteLine($"  +counter : {g.EditorID} {g.FormKey} ({g.GetType().Name}, clone of {globalSrc.EditorID}), on the quest's text-display globals");
-            }
-
-            // --- 7. objectives: one per step, targets = its beats' activators --------------------------------
-            var lastOb = clone.Objectives?.OrderBy(o => o.Index).LastOrDefault();
-            if (lastOb?.Targets == null || lastOb.Targets.Count != 1)
-            { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
-            var obSrc = lastOb.DeepCopy();
-            int ObjOf(Step st, int b) => st.IsChoose ? st.Objective + 10 * st.Beats.IndexOf(b) : st.Objective;
-            var obIdx = steps.SelectMany(st => st.Beats.Select(b => ObjOf(st, b))).ToHashSet();
-            clone.Objectives!.RemoveAll(o => !obIdx.Contains(o.Index));
-            for (int k = 0; k < steps.Count; k++)
-            {
-                var s = steps[k];
-                if (s.IsChoose)
-                {
-                    // One objective per ending, each pointing at its own delivery point.
-                    foreach (var b in s.Beats)
-                    {
-                        int oi = ObjOf(s, b);
-                        var eo = clone.Objectives.FirstOrDefault(o => o.Index == oi);
-                        if (eo == null) { eo = obSrc.DeepCopy(); eo.Index = (ushort)oi; clone.Objectives.Add(eo); }
-                        var et = eo.Targets![0].DeepCopy();
-                        et.AliasID = slotOf[b].ObjectiveTarget;
-                        eo.Targets.Clear();
-                        eo.Targets.Add(et);
-                        string etext = Expand(r.beats[b].objective!, t);
-                        eo.DisplayText = etext;
-                        bm.ObjectiveText[oi] = etext;
-                        Console.WriteLine($"  objective: {oi} \"{etext}\" -> alias {slotOf[b].ObjectiveTarget} (ending of '{s.Choose}')");
-                    }
-                    continue;
-                }
-                var ob = clone.Objectives.FirstOrDefault(o => o.Index == s.Objective);
-                if (ob == null) { ob = obSrc.DeepCopy(); ob.Index = (ushort)s.Objective; clone.Objectives.Add(ob); }
-                var tgt = ob.Targets![0].DeepCopy();
-                ob.Targets.Clear();
-                foreach (var b in s.Beats)
-                {
-                    var tt = tgt.DeepCopy();
-                    tt.AliasID = slotOf[b].ObjectiveTarget;
-                    if (s.IsGroup)
-                    {
-                        // A group's ONE objective targets every member and stays up until all are done, so
-                        // each member's marker must go out on its own: lit while its stage is NOT done.
-                        // Vanilla's way (1,006 of Starfield.esm's 2,968 targets are conditioned, 694 by
-                        // GetStageDone; shape copied off SFTA06 obj 1135). Clearing the alias in the
-                        // fragment was tried first and does NOT drop the marker (his play, 2026-10-09).
-                        var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = beatStage[b] };
-                        d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
-                        tt.Conditions.Clear();
-                        tt.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f });
-                        bm.TargetGates.Add((s.Objective, slotOf[b].ObjectiveTarget, beatStage[b]));
-                    }
-                    ob.Targets.Add(tt);
-                }
-                string text = Expand(r.beats[s.Beats[0]].objective!, t);
-                if (s.IsGroup) text += $" (<Global={counterOf[k].edid}>/{s.Beats.Count})";
-                if (s.IsHold) text += $" (<Global={counterOf[k].edid}>/{s.Waves})";
-                ob.DisplayText = text;
-                bm.ObjectiveText[s.Objective] = text;
-                Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].ObjectiveTarget))}");
-            }
-            // A hold's revealed waves (his ask 2026-10-12): one objective per wave, index hold objective + 1 + w,
-            // targeting that wave's own collection. Not shown at the start: the fragment shows it when the reveal
-            // timer fires and hides it when the wave is down, so a cleared wave's bodies never keep a marker.
-            for (int k = 0; k < steps.Count; k++)
-            {
-                if (!steps[k].IsHold) continue;
-                int hb = steps[k].Beats[0];
-                if ((r.beats[hb].reveal ?? DefaultRevealSeconds) == 0) continue;
-                string rtext = r.beats[hb].revealObjective ?? DefaultRevealObjective;
-                for (int w = 0; w < waveAliases[hb].Count; w++)
-                {
-                    int ri = steps[k].Objective + 1 + w;
-                    if (clone.Objectives.Any(o => o.Index == ri)) { Console.WriteLine($"REFUSED: objective {ri} for wave {w + 1}'s reveal is already in use."); return 1; }
-                    var ro = obSrc.DeepCopy(); ro.Index = (ushort)ri;
-                    var rt = ro.Targets![0].DeepCopy();
-                    rt.AliasID = waveAliases[hb][w];
-                    rt.Conditions.Clear();
-                    ro.Targets.Clear();
-                    ro.Targets.Add(rt);
-                    ro.DisplayText = rtext;
-                    clone.Objectives.Add(ro);
-                    bm.ObjectiveText[ri] = rtext;
-                    Console.WriteLine($"  objective: {ri} \"{rtext}\" -> wave {w + 1}'s collection {waveAliases[hb][w]} (shown {r.beats[hb].reveal ?? DefaultRevealSeconds} s after it spawns)");
-                }
-            }
-            var sortedObs = clone.Objectives.OrderBy(o => o.Index).ToList();
-            clone.Objectives.Clear();
-            clone.Objectives.AddRange(sortedObs);
-
-            // The unused object slots go FIRST (2026-10-14, the first Delves with no object beat at all, a lone defeat or
-            // clear): base slot 2's marker fills inside the second place, so while it stands the second place is still
-            // "named" and its own removal below refuses.
-            foreach (var us in unusedSlots)
-            {
-                var pair = new[] { us.markerAlias, us.activatorAlias };
-                var gone = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => pair.Contains((int)a.ID)).ToList();
-                if (gone.Count != 2) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
-                var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
-                if (users.Count > 0) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is still named by {string.Join(", ", users)}."); return 1; }
-                foreach (var a in gone) clone.Aliases!.Remove(a);
-                bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
-                Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
-            }
-            // The removed driver's own aliases (the board's EnemyType), named by nothing once it is gone.
-            foreach (int da in t.driverAliases)
-            {
-                var gone = clone.Aliases!.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)da);
-                if (gone == null) { Console.WriteLine($"REFUSED: the template names driver alias {da} and the base has none."); return 1; }
-                var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), new[] { da });
-                string token = $"<Alias={gone.Name}>";
-                if (clone.MissionBoardDescription?.String?.Contains(token) == true || clone.Name?.String?.Contains(token) == true) users.Add("the quest's name or card");
-                if (users.Count > 0) { Console.WriteLine($"REFUSED: driver alias {da} ({gone.Name}) is still named by {string.Join(", ", users)}."); return 1; }
-                clone.Aliases!.Remove(gone);
-                bm.DroppedDriverAliases.Add(da);
-                Console.WriteLine($"  -alias   : {gone.Name} (alias {da}) removed: the driver's, and the driver is gone");
-            }
-            // A ONE-PLACE Delve drops the base's second place. Left in, it is a non-Optional location alias that
-            // still draws a SECOND POI the quest never visits, so the quest only starts where two qualifying POIs
-            // are in range, and the base's text about it lingers (his catch on duo_delve09, 2026-10-09: "we have
-            // DungeonLocation and FinalLocation but the quest takes part in one POI"). Refused, writing nothing,
-            // if anything the player can read or any alias still depends on it.
-            if (t.secondPlaceAlias >= 0 && !r.beats.Any(b => b.PlaceIndex == 1))
-            {
-                var second = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias);
-                if (second == null) { Console.WriteLine($"REFUSED: the template names second place alias {t.secondPlaceAlias} and the base has none."); return 1; }
-                string token = $"<Alias={second.Name}>";
-                var users = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location?.AliasID == t.secondPlaceAlias).Select(a => $"ref alias {a.ID}")
-                    .Concat(clone.Aliases!.OfType<QuestLocationAlias>().Where(a => a.ParentSystemLocationAliasID == t.secondPlaceAlias).Select(a => $"location alias {a.ID}"))
-                    .Concat(clone.Objectives!.Where(o => o.DisplayText?.String?.Contains(token) == true).Select(o => $"objective {o.Index}"))
-                    .Concat(clone.Stages!.Where(s => allStages.Contains(s.Index))   // stage 0's briefing is the recipe's, written after this and graded off disk
-                        .Where(s => s.LogEntries.Any(e => e.Entry?.String?.Contains(token) == true)).Select(s => $"stage {s.Index}'s journal"))
-                    .ToList();
-                if (users.Count > 0) { Console.WriteLine($"REFUSED: the unused second place {second.Name} is still named by {string.Join(", ", users)}."); return 1; }
-                // A base stage this Delve never sets can still carry the base's line about it: clear the line.
-                foreach (var s in clone.Stages!.Where(s => !allStages.Contains(s.Index) && s.Index != 0))
-                    foreach (var e in s.LogEntries.Where(e => e.Entry?.String?.Contains(token) == true))
-                    {
-                        e.Entry = null;
-                        Console.WriteLine($"  unused   : stage {s.Index} (never set here) loses the base's line naming {second.Name}");
-                    }
-                clone.Aliases!.Remove(second);
-                bm.DroppedPlace = (t.secondPlaceAlias, second.Name!);
-                Console.WriteLine($"  -place   : {second.Name} (alias {t.secondPlaceAlias}) removed: every beat is at the main place, so it would draw a second POI for nothing");
-            }
-
-
-            // --- 8. message boxes ---------------------------------------------------------------------
-            RemovePrevious(myMod.Messages, e => e.StartsWith(r.id + "_msg"));
-            var msgOf = new Dictionary<int, FormKey>();
-            var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
-            for (int i = 0; i < r.beats.Count; i++)
-            {
-                var bmsg = r.beats[i].message;
-                if (bmsg == null) continue;
-                if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
-                var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
-                msg.EditorID = $"{r.id}_msg{i + 1}";
-                msg.Name = Expand(bmsg.title!, t);
-                msg.Description = Expand(bmsg.text!, t);
-                msg.OwnerQuest.SetTo(clone.FormKey);
-                msgOf[i] = msg.FormKey;
-                Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"");
-            }
-
-            FormKey offerMsg = default;
-            if (r.offer?.message != null)
-            {
-                if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
-                var om = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
-                om.EditorID = $"{r.id}_msgOffer";
-                om.Name = Expand(r.offer.message.title!, t);
-                om.Description = Expand(r.offer.message.text!, t);
-                om.OwnerQuest.SetTo(clone.FormKey);
-                offerMsg = om.FormKey;
-                Console.WriteLine($"  +message : {om.EditorID} {om.FormKey}  \"{om.Name}\"  (the offer)");
-            }
-
-            // --- the people at the endings: named NPCs cloned from a friendly vanilla template -------------
-            // NPCTools.CloneNPC copies the body field by field and NOT the name or the voice, so both are
-            // written here; unaggressive, average confidence, dressed from the recipe (his 2026-10-08 asks).
-            var npcOf = new Dictionary<int, FormKey>();
-            RemovePrevious(myMod.Npcs, e => e.StartsWith(r.id + "_person"));
-            foreach (var (b, pr) in inputs.Persons)
-            {
-                var pp = r.beats[b].person!;
-                var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, pr.tmpl.DeepCopy());
-                npc.EditorID = $"{r.id}_person{b + 1}";
-                npc.Name = pp.name!;
-                npc.Voice.SetTo(pr.voice ?? pr.tmpl.Voice.FormKey);
-                npc.Aggression = Npc.AggressionType.Unaggressive;
-                npc.Confidence = Npc.ConfidenceType.Average;
-                if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
-                myMod.Npcs.Add(npc);
-                npcOf[b] = npc.FormKey;
-                if (talkAlias.TryGetValue(b, out var tpa)) tpa.CreateReferenceToObject!.Object.SetTo(npc.FormKey);
-                bm.People[b] = (npc.FormKey, pp.name!);
-                Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
-            }
-
-            // --- the speaker: an NPC that is never placed, carrying the subtitle's NAME and the VOICE TYPE whose
-            // folder the audio is looked up in (gen_dlgtest's shape: clone, then set Voice) ----------------------
-            RemovePrevious(myMod.Npcs, e => e == r.id + "_speaker");
-            if (inputs.Speaker is (INpcGetter stmpl, FormKey svoice))
-            {
-                var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
-                sp.EditorID = r.id + "_speaker";
-                sp.Name = r.speaker!.name!;
-                sp.Voice.SetTo(svoice);
-                myMod.Npcs.Add(sp);
-                bm.Speaker = sp.FormKey;
-                Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
-            }
-
-            foreach (var b in talkAlias.Keys)
-                BuildTalk(myMod, clone, r, b, steps, beatStage, t.entryStage, slotOf[b].targetAlias, npcOf[b],
-                          myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm, inputs.TalkPerks);
-
-            // --- 9. the events: one stock hook per beat --------------------------------------------------
-            int recovers = 0;
-            for (int k = 0; k < steps.Count; k++)
-            {
-                int prereq = k == 0 ? t.entryStage : steps[k - 1].DoneStage;
-                foreach (var b in steps[k].Beats)
-                {
-                    var beat = r.beats[b];
-                    if (beat.type == "talk") continue;   // set by the conversation's closing reply, not a hook (BuildTalk)
-                    if (beat.type == "hold")
-                    {
-                        // One stock death hook per wave, on that wave's collection: when every member is dead
-                        // it sets the wave's stage, armed only once the wave before it is down. TurnOffStageDone
-                        // is the wave's own stage, so a kill after the stuck guard moved on cannot set it twice.
-                        var ws = steps[k].WaveStages;
-                        for (int w = 0; w < ws.Count; w++)
-                        {
-                            int col = waveAliases[b][w];
-                            int pre = w == 0 ? prereq : ws[w - 1];
-                            var hs = StageHook("DefaultCollectionAliasOnDeath", ws[w], pre,
-                                               new ScriptIntProperty { Name = "TurnOffStageDone", Data = ws[w], Flags = ScriptProperty.Flag.Edited },
-                                               RemoveDeadFromCollection());
-                            AttachHook(vma, clone.FormKey, col, hs, HookEntry.New, false, bm, ws[w], pre);
-                            Console.WriteLine($"  +hook    : beat {b + 1} (hold) wave {w + 1} collection {col} {hs.Name} sets {ws[w]} after {pre}");
-                        }
-                        continue;
-                    }
-                    if (IsFight(beat))
-                    {
-                        // The step ends on a death: the target's (defeat), or the last of the collection's (clear). Stock hooks;
-                        // TurnOffStageDone on the collection's, as each hold wave's, so a late kill cannot set it twice.
-                        bool isClear = beat.type == "clear";
-                        int on = slotOf[b].targetAlias;
-                        var fs = StageHook(isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath", beatStage[b], prereq,
-                                           isClear ? new ScriptProperty[] { new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited },
-                                                                            RemoveDeadFromCollection() }
-                                                   : Array.Empty<ScriptProperty>());
-                        AttachHook(vma, clone.FormKey, on, fs, HookEntry.New, false, bm, beatStage[b], prereq);
-                        Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {on} {fs.Name} sets {beatStage[b]} after {prereq}");
-                        continue;
-                    }
-                    int hookAlias; string script;
-                    if (beat.type == "recover")
-                    {
-                        // On the PLAYER: the stage is set however the item reaches the pack (looted, picked up,
-                        // handed over). The A-D duplicates exist so one alias can carry the hook several times.
-                        hookAlias = t.playerAlias;
-                        script = "DefaultAliasOnItemAddedScript" + (recovers == 0 ? "" : ((char)('A' + recovers - 1)).ToString());
-                        recovers++;
-                    }
-                    else if (beat.returnTo != null)
-                    {
-                        // The same object a second time: the stock hook's one duplicate, on the same alias.
-                        hookAlias = slotOf[b].activatorAlias;
-                        script = "DefaultAliasOnActivateA";
-                    }
-                    else
-                    {
-                        hookAlias = slotOf[b].activatorAlias;
-                        script = beat.type == "pickup" ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
-                    }
-                    var sc = StageHook(script, beatStage[b], prereq);
-                    if (beat.type == "pickup")
-                    {
-                        var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
-                        ip.Object.SetTo(itemOf[b]);
-                        sc.Properties.Add(ip);
-                        sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldDisableAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
-                    }
-                    else if (beat.type == "recover")
-                    {
-                        var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
-                        fp.Object.SetTo(itemOf[b]);
-                        sc.Properties.Add(fp);
-                    }
-                    else
-                    {
-                        // An object a later beat comes back to keeps its prompt, or the return could never fire.
-                        bool comesBack = r.beats.Any(x => x.returnTo == b + 1);
-                        sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
-                    }
-                    if (AttachHook(vma, clone.FormKey, hookAlias, sc, HookEntry.FindOrCreate, true, bm, beatStage[b], prereq) == Hooked.AlreadyCarries)
-                    { Console.WriteLine($"REFUSED: alias {hookAlias} already carries {script}; a beat cannot hook it twice."); return 1; }
-                    Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {hookAlias} {script} sets {beatStage[b]} after {prereq}");
-                }
-            }
-
-            // An ending's person: a stock distance hook on the ending's OWN object, measuring to the player,
-            // armed only once the choice is open (PrereqStage = the stage that enters it), as the choice
-            // driver registered its distance events at the find.
-            foreach (var (b, pst) in personStage)
-            {
-                int own = slotOf[b].activatorAlias;
-                int enter = steps[steps.FindIndex(s => s.Beats.Contains(b)) - 1].DoneStage;
-                if (AttachHook(vma, clone.FormKey, own, DistanceHook(clone.FormKey, t.playerAlias, pst, enter), HookEntry.MustExist, false, bm, pst, enter) == Hooked.NoEntry)
-                { Console.WriteLine($"REFUSED: ending alias {own} carries no hook entry to add the approach to."); return 1; }
-                bm.PersonApproach.Add((own, t.playerAlias));
-                Console.WriteLine($"  +hook    : beat {b + 1}'s person, within {ApproachDistance} of its object (alias {own}) after {enter}, sets {pst}");
-            }
-
-            // A nest: a stock distance hook on the object it surrounds, measuring to the player, at any stage (no
-            // PrereqStage), as a person's is on its ending: 250 m out, so the creatures are there before he is.
-            foreach (var (p, w, a) in whos)
-            {
-                int own = slotOf[a].activatorAlias;
-                var sc = DistanceHook(clone.FormKey, t.playerAlias, whoStage[p], -1);
-                if (AttachHook(vma, clone.FormKey, own, sc, HookEntry.FindOrCreate, true, bm, whoStage[p], -1) == Hooked.AlreadyCarries)
-                { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the {w.kind} at {PlaceKey[p]} cannot hook it twice."); return 1; }
-                Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
-            }
-
-            // Arrival (board): a stock distance hook on step one's MARKER, measuring to the player, armed only once the
-            // board's accept has set entryStage, so the poster's call comes when he reaches the site and never on the
-            // accept (his 2026-10-14: "you should get the radio message when you are near the POI").
-            if (arrival)
-            {
-                int at = slotOf[steps[0].Beats[0]].markerAlias;
-                var sc = DistanceHook(clone.FormKey, t.playerAlias, t.arrivalStage, t.entryStage);
-                if (AttachHook(vma, clone.FormKey, at, sc, HookEntry.FindOrCreate, true, bm, t.arrivalStage, t.entryStage) == Hooked.AlreadyCarries)
-                { Console.WriteLine($"REFUSED: alias {at} already carries {sc.Name}; the arrival cannot hook it twice."); return 1; }
-                bm.Arrival = (at, t.playerAlias);
-                Console.WriteLine($"  +hook    : arrival within {ApproachDistance} of step one's marker (alias {at}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
-            }
-
-            // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
-            if (r.approach is Approach apr)
-            {
-                int toAlias = slotOf[apr.to - 1].activatorAlias;
-                var sc = DistanceHook(clone.FormKey, toAlias, t.approachStage, -1);
-                AttachHook(vma, clone.FormKey, t.playerAlias, sc, HookEntry.FindOrCreate, false, bm, t.approachStage, -1);
-                bm.ApproachTarget = (t.playerAlias, toAlias);
-                Console.WriteLine($"  +hook    : approach within {ApproachDistance} of beat {apr.to}'s object (alias {toAlias}) sets {t.approachStage}");
-            }
-
-            // --- 10. the fragment script: generated, bound per stage -----------------------------------------
-            string name = FragmentScriptName(r);
-            var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
-            var code = new SortedDictionary<int, List<string>>();
-            void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
-
-            foreach (var kv in counterOf)
-            {
-                string p = $"Counter{kv.Key + 1}";
-                props.Add(("GlobalVariable", p, kv.Value.key, -1));
-                Add(t.entryStage, $"{p}.SetValue(0)");
-                Add(t.entryStage, $"UpdateCurrentInstanceGlobal({p})");
-            }
-            // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
-            // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.
-            for (int b = 0; b < r.beats.Count; b++)
-            {
-                if (!r.beats[b].replace) continue;
-                string an = $"Alias_Beat{b + 1}Marker";
-                props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].markerAlias));
-                bm.Replaced.Add((an, slotOf[b].markerAlias));
-                Add(t.entryStage, $"{an}.GetRef().Disable(False)");
-            }
-            // A hold's wave w (0-based) appears round him, INTO its own collection. Then the spawning fragment
-            // WAITS, at its very end (a tail, after every other line of that stage): the reveal after `reveal`
-            // seconds, the stuck guard after `stuck`, each only while the wave is still up. Utility.Wait is
-            // latent, so the script is free for the next stage while it sleeps; stage 100 already waits on its
-            // radio line this way, and he has heard that one finish.
-            var tails = new Dictionary<int, List<string>>();
-            void Tail(int st, string line) { if (!tails.ContainsKey(st)) tails[st] = new(); tails[st].Add(line); }
-            void SpawnWave(int b, int w, int stage)
-            {
-                var ws = steps.First(s => s.Beats.Contains(b)).WaveStages;
-                string mk = $"Alias_Beat{b + 1}Spawn", wv = $"Alias_Beat{b + 1}Wave{w + 1}";
-                props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
-                props.Add(("RefCollectionAlias", wv, clone.FormKey, waveAliases[b][w]));
-                props.Add(("FormList", "Gang", gangKey!.Value, -1));
-                var sz = r.beats[b].size!;
-                int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
-                Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]}, {origins})");
-                int stuck = r.beats[b].stuck ?? DefaultStuckSeconds;
-                int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
-                Tail(stage, $"; wave {w + 1}: {(rv > 0 ? $"pointed out after {rv} s, " : "")}let go after {stuck} s if it is still up");
-                if (rv > 0)
-                {
-                    var hs = steps.First(s => s.Beats.Contains(b));
-                    int robj = hs.Objective + 1 + w;
-                    Add(ws[w], $"SetObjectiveDisplayed({robj}, False)   ; wave {w + 1} is down: its marker goes");
-                    Tail(stage, $"Utility.Wait({rv}.0)");
-                    Tail(stage, $"If !GetStageDone({ws[w]})");
-                    Tail(stage, $"    SetObjectiveDisplayed({robj})");
-                    Tail(stage, $"    Utility.Wait({stuck - rv}.0)");
-                    Tail(stage, $"    If !GetStageDone({ws[w]})");
-                    Tail(stage, $"        SetStage({ws[w]})");
-                    Tail(stage, "    EndIf");
-                    Tail(stage, "EndIf");
-                    bm.Reveals.Add((robj, waveAliases[b][w], rv, ws[w]));
+                    vma.Scripts.Add(qs);
+                    var gone = old.Properties.Select(x => x.Name).Where(n => !t.questScriptKeeps.Contains(n, StringComparer.OrdinalIgnoreCase)).ToList();
+                    Console.WriteLine($"  script   : {t.questScript} attached with the driver's {qs.Properties.Count} board properties; dropped its own: {string.Join(", ", gone)}");
                 }
                 else
                 {
-                    Tail(stage, $"Utility.Wait({stuck}.0)");
-                    Tail(stage, $"If !GetStageDone({ws[w]})");
-                    Tail(stage, $"    SetStage({ws[w]})");
-                    Tail(stage, "EndIf");
+                    // The driver was also the only OnQuestRejected handler, so one small quest script takes that job alone
+                    // (his 2026-10-14: a turned-down Delve could not be restarted). Its Objectives are filled at the end of
+                    // the build, once every objective is written (RejectScript).
+                    vma.Scripts.Add(new ScriptEntry { Name = RejectScript });
+                    Console.WriteLine($"  reject   : {RejectScript} attached (a turned-down mission hides its objectives and stops)");
                 }
-                bm.StuckWaits.Add(ws[w]);
-            }
-            // Entering a step: a recover beat's holder appears (and fills the alias the objective targets)
-            // BEFORE the objective is shown, so it never shows with nothing to point at.
-            void Enter(int k, int stage)
-            {
-                foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "hold"))
-                    SpawnWave(b, 0, stage);
-                foreach (var b in steps[k].Beats.Where(b => IsFight(r.beats[b])))
-                {
-                    var fb = r.beats[b];
-                    var ff = inputs.Fights[b];
-                    string lootArgs = "None, 0";
-                    if (ff.Loot is FormKey lk) { props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
-                    if (fb.type == "defeat")
+                // The base's own alias hooks on the alias the beats take over as a marker went with its driver's design
+                // (MB28a's DefaultAliasOnDeath on PrimaryRef sets 100 with no prereq; a marker never dies).
+                if (t.markerSource >= 0)
+                    foreach (var e in vma.Aliases.Where(a => a.Property.Alias == t.markerSource).ToList())
                     {
-                        string mk = $"Alias_Beat{b + 1}Marker", tg = $"Alias_Beat{b + 1}Target";
-                        props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
-                        props.Add(("ReferenceAlias", tg, clone.FormKey, slotOf[b].targetAlias));
-                        props.Add(("Form", $"Target{b + 1}", ff.Target!.Value, -1));
-                        string gangArgs = "None, 0, 0, False";
-                        if (ff.Gang is FormKey gk)
+                        vma.Aliases.Remove(e);
+                        Console.WriteLine($"  -hook    : the base's {string.Join(", ", e.Scripts.Select(s => s.Name))} on alias {t.markerSource} (the driver's kill; the beats own this alias now)");
+                    }
+
+                steps = StepsOf(r);
+                beatStage = StagesOf(steps, t.completeStage, t.entryStage + 10);
+                // A board's broadcast waits for his arrival at the site (arrivalStage), set by a distance hook below.
+                arrival = t.arrivalStage >= 0 && r.broadcast != null;
+                return 0;
+            }
+
+            // --- 2. one marker + activator per beat -------------------------------------------------------
+            internal int Slots()
+            {
+                // Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the
+                // same argument as AddBeatSlot: a slot that works brings every field this tool does not know).
+                // A base with no slots (the board) names a marker alias instead, and has no activator to give.
+                slotOf = new Dictionary<int, BeatSlot>();
+                bool slotless = t.beatSlots.Count == 0;
+                int srcMarkerId = slotless ? t.markerSource : t.beatSlots[0].markerAlias;
+                var srcMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)srcMarkerId);
+                var srcAct = slotless ? null : clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.beatSlots[0].activatorAlias);
+                if (srcMarker?.Location == null || (!slotless && srcAct?.CreateReferenceToObject == null))
+                { Console.WriteLine(slotless ? $"REFUSED: markerSource alias {srcMarkerId} is not a ref alias filled from a place on this base."
+                                             : "REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
+                srcMarker = srcMarker.DeepCopy();   // the pattern, taken before beat 1 may rewrite the alias itself
+                // A slotless base's marker alias IS the first fight's marker (on the board, the system and planet resolve
+                // from it, so it stays); every later marker is a copy of it.
+                bool sourceTaken = t.markerSource < 0;
+                QuestReferenceAlias NewMarker(int i, string suffix)
+                {
+                    if (!sourceTaken)
+                    {
+                        sourceTaken = true;
+                        return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)srcMarkerId);
+                    }
+                    uint id = NextAliasId(clone);
+                    var m = srcMarker.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
+                    clone.Aliases.Add(m);
+                    return m;
+                }
+                int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
+                talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
+                waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    if (r.beats[i].returnTo != null) continue;   // shares an earlier beat's object; filled in below
+                    if (r.beats[i].type == "hold")
+                    {
+                        // A marker the waves spawn at, and one EMPTY collection per wave, each a copy of vanilla's
+                        // ActiveHostiles (Optional, AllowDisabled, no fill), renamed and renumbered. Filled at
+                        // runtime by PlaceAtMe's akAliasToFill, as vanilla's MissionBoardCargoContainerScript does.
+                        var hm = NewMarker(i, "Spawn");
+                        slotOf[i] = new BeatSlot { markerAlias = (int)hm.ID, activatorAlias = -1, journalStage = beatStage[i] };
+                        waveAliases[i] = new List<int>();
+                        int nw = steps.First(s => s.Beats.Contains(i)).Waves;
+                        for (int w = 0; w < nw; w++)
                         {
-                            props.Add(("FormList", $"Gang{b + 1}", gk, -1));
-                            gangArgs = $"Gang{b + 1}, {fb.gang!.min}, {fb.gang.max}, {(fb.gang.species == "one" ? "True" : "False")}";
+                            uint cid = NextAliasId(clone);
+                            var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Wave{w + 1}");
+                            if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a wave must start empty."); return 1; }
+                            col.Collection[0].ReferenceAlias!.PackageData.Add(travelPkg.ToLink<IPackageGetter>());
+                            clone.Aliases.Add(col);
+                            waveAliases[i].Add((int)cid);
+                            bm.Waves.Add((int)cid);
                         }
-                        Add(stage, $"duo_delve_lib.SpawnTarget({mk}, {tg}, Target{b + 1}, {gangArgs}, {lootArgs})");
+                        Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
+                        continue;
+                    }
+                    if (r.beats[i].type == "defeat")
+                    {
+                        // recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into
+                        // when the step begins, which the objective targets and the death hook sits on.
+                        var dm = NewMarker(i, "Marker");
+                        uint did = NextAliasId(clone);
+                        var dt = srcMarker.DeepCopy(); dt.ID = did; dt.Name = "DelveBeat" + (i + 1) + "Target";
+                        dt.Location = null;
+                        dt.Flags = QuestReferenceAlias.Flag.Optional;
+                        clone.Aliases.Add(dt);
+                        slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = beatStage[i] };
+                        bm.Holders.Add((int)dt.ID);
+                        Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn)");
+                        continue;
+                    }
+                    if (r.beats[i].type == "clear")
+                    {
+                        // ONE hold wave at the site: a marker, and an EMPTY collection (a copy of vanilla's ActiveHostiles)
+                        // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
+                        var cm = NewMarker(i, "Spawn");
+                        uint cid = NextAliasId(clone);
+                        var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Enemies");
+                        if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
+                        clone.Aliases.Add(col);
+                        slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = beatStage[i] };
+                        bm.ClearGroups.Add((int)cid);
+                        Console.WriteLine($"  +slot    : beat {i + 1} (clear) -- spawn marker alias {cm.ID}, enemies collection {cid} (EMPTY, a copy of ActiveHostiles, no package)");
+                        continue;
+                    }
+                    if (r.beats[i].type == "talk")
+                    {
+                        // A marker, and an alias that CREATES the person there at quest start: a copy of the base's own
+                        // activator alias with the cloned NPC as its object (set once he is cloned, below). So he stands at
+                        // his marker before the player arrives and the objective can point at him from anywhere.
+                        uint tid = NextAliasId(clone);
+                        var tm = srcMarker.DeepCopy(); tm.ID = tid; tm.Name = "DelveBeat" + (i + 1) + "Marker";
+                        var tp = srcAct!.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
+                        tp.CreateReferenceToObject!.AliasID = (short)tm.ID;
+                        clone.Aliases.Add(tm);
+                        clone.Aliases.Add(tp);
+                        slotOf[i] = new BeatSlot { markerAlias = (int)tm.ID, activatorAlias = -1, targetAlias = (int)tp.ID, journalStage = beatStage[i] };
+                        talkAlias[i] = tp;
+                        Console.WriteLine($"  +slot    : beat {i + 1} (talk) -- marker alias {tm.ID}, person {tp.ID} (created at the marker on quest start)");
+                        continue;
+                    }
+                    if (r.beats[i].type == "recover")
+                    {
+                        // A marker where the holder appears, and an EMPTY Optional alias he is placed into, which the
+                        // objective targets so it follows him (delve4's shape: a non-optional alias with no fill
+                        // makes the whole quest silently not start).
+                        uint rid = NextAliasId(clone);
+                        var rm = srcMarker.DeepCopy(); rm.ID = rid; rm.Name = "DelveBeat" + (i + 1) + "Marker";
+                        var rh = srcMarker.DeepCopy(); rh.ID = rid + 1; rh.Name = "DelveBeat" + (i + 1) + "Holder";
+                        rh.Location = null;
+                        rh.Flags = QuestReferenceAlias.Flag.Optional;
+                        clone.Aliases.Add(rm);
+                        clone.Aliases.Add(rh);
+                        slotOf[i] = new BeatSlot { markerAlias = (int)rm.ID, activatorAlias = -1, targetAlias = (int)rh.ID, journalStage = beatStage[i] };
+                        bm.Holders.Add((int)rh.ID);
+                        Console.WriteLine($"  +slot    : beat {i + 1} (recover) -- marker alias {rm.ID}, holder {rh.ID} (EMPTY, Optional; filled on spawn)");
+                        continue;
+                    }
+                    if (baseNext < t.beatSlots.Count)
+                    {
+                        slotOf[i] = new BeatSlot { markerAlias = t.beatSlots[baseNext].markerAlias, activatorAlias = t.beatSlots[baseNext].activatorAlias,
+                                                   journalStage = beatStage[i] };
+                        baseNext++;
+                        continue;
+                    }
+                    uint next = NextAliasId(clone);
+                    var m = srcMarker.DeepCopy(); m.ID = next; m.Name = "DelveBeat" + (i + 1) + "Marker";
+                    var a = srcAct!.DeepCopy(); a.ID = next + 1; a.Name = "DelveBeat" + (i + 1) + "Target";
+                    a.CreateReferenceToObject!.AliasID = (short)m.ID;
+                    clone.Aliases.Add(m);
+                    clone.Aliases.Add(a);
+                    slotOf[i] = new BeatSlot { markerAlias = (int)m.ID, activatorAlias = (int)a.ID, journalStage = beatStage[i] };
+                    Console.WriteLine($"  +slot    : beat {i + 1} -- marker alias {m.ID}, activator {a.ID}");
+                }
+                // A marker source no fight took (a board mission that opens with a talk or a pickup) is still the board's PrimaryRef,
+                // which the system and planet resolve from, so it stays; it is pointed at the place's MAP MARKER, which every
+                // requested site carries and the lint always demands, so it never asks the site for a ref type no beat named.
+                if (!sourceTaken)
+                {
+                    var ps = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)t.markerSource);
+                    if (!markers.TryGetValue("MapMarkerRefType", out var mm)) { Console.WriteLine("REFUSED: the lint handed in no MapMarkerRefType to point the marker source at."); return 1; }
+                    ps.Location!.RefType.SetTo(mm);
+                    // ⛔ AND IT SHARES THAT REFERENCE: the board's own MapMarker alias fills from the same one map marker, and an
+                    // alias cannot take a reference another alias of the quest already holds unless it allows reuse. Without
+                    // this flag PrimaryRef (not Optional) could not fill and the quest never started, so missionboard02a never
+                    // listed (his play, 2026-10-14). Vanilla's flag for exactly this: MB_Cargo01Far's DestinationCargo.
+                    // The flag belongs on whichever of them fills SECOND, and the alias order is the build's to change, so every
+                    // alias sharing the reference carries it (the contention check's bite caught it on the wrong one first).
+                    foreach (var sh in clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location != null && a.CreateReferenceToObject == null
+                                 && a.Location.AliasID == ps.Location.AliasID && a.Location.RefType.FormKey == mm))
+                    {
+                        sh.Flags = (sh.Flags ?? 0) | QuestReferenceAlias.Flag.AllowReuseInQuest;   // a null flag set |= stays null
+                        Console.WriteLine($"  reuse    : alias {sh.ID} {sh.Name} may share the place's map marker (AllowReuseInQuest)");
+                    }
+                    bm.MarkerSourceAtMap = true;
+                    Console.WriteLine($"  source   : alias {t.markerSource} {ps.Name} took no fight, so it fills from the place's map marker (no ref type demanded)");
+                }
+                // A return is the earlier beat's own object visited again: same aliases, its own stage and journal.
+                for (int i = 0; i < r.beats.Count; i++)
+                    if (r.beats[i].returnTo is int back)
+                    {
+                        var o = slotOf[back - 1];
+                        slotOf[i] = new BeatSlot { markerAlias = o.markerAlias, activatorAlias = o.activatorAlias, journalStage = beatStage[i] };
+                        Console.WriteLine($"  slot     : beat {i + 1} returns to beat {back}'s object (alias {o.activatorAlias})");
+                    }
+                // The base's object slots no beat took (11a, 2026-10-13: a recover and a talk, neither with an object of its
+                // own). Each is removed after the objectives are rebuilt, below, as the one-place Delve's second place is: a
+                // non-Optional marker alias left in still demands its marker at the place, which a dungeon does not carry, so
+                // the whole quest would silently never start.
+                unusedSlots = t.beatSlots.Skip(baseNext).ToList();
+                // A hold's objective points at what is being defended, when it names one (a return shares its
+                // original's object, so this runs after the returns are filled).
+                for (int i = 0; i < r.beats.Count; i++)
+                    if (r.beats[i].type == "hold" && r.beats[i].defend is int d)
+                    {
+                        slotOf[i].targetAlias = slotOf[d - 1].activatorAlias;
+                        Console.WriteLine($"  slot     : beat {i + 1} (hold) defends beat {d}'s object (alias {slotOf[i].targetAlias})");
+                    }
+                return 0;
+            }
+
+            // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
+            internal int Stages()
+            {
+                // An ending's person is placed on its own stage, numbered after the approach's.
+                personStage = new Dictionary<int, int>();
+                foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null && r.beats[b].type != "talk"))
+                    personStage[b] = t.approachStage + 1 + personStage.Count;
+                // A place's occupants, after the people: their own stage, set by a distance hook on the object they surround.
+                whos = WhoOf(r);
+                whoStage = new Dictionary<int, int>();
+                foreach (var (p, _, _) in whos) whoStage[p] = t.approachStage + 1 + personStage.Count + whoStage.Count;
+                // A second ending completes the quest the same way as the first: a COPY of the completing stage
+                // (its CompleteQuest flag and its reward entry), never a plain stage, which completes nothing.
+                foreach (var cs in steps.Where(s => s.IsChoose))
+                    for (int j = 1; j < cs.Beats.Count; j++)
+                    {
+                        int st = beatStage[cs.Beats[j]];
+                        if (clone.Stages!.Any(x => x.Index == st)) { Console.WriteLine($"REFUSED: stage {st} already exists on this base."); return 1; }
+                        var done = clone.Stages.FirstOrDefault(x => x.Index == t.completeStage);
+                        if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
+                        { Console.WriteLine($"REFUSED: stage {t.completeStage} is not a single-entry completing stage to copy an ending from."); return 1; }
+                        var copy = done.DeepCopy();
+                        copy.Index = (ushort)st;
+                        copy.LogEntries[0].Entry = null;
+                        clone.Stages.Add(copy);
+                        Console.WriteLine($"  +stage   : {st} (ending {j + 1} of choose '{cs.Choose}', a copy of completing stage {t.completeStage})");
+                    }
+                allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
+                    .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
+                    .Concat(personStage.Values).Concat(whoStage.Values)
+                    .Concat(arrival ? new[] { t.arrivalStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
+                foreach (var st in allStages)
+                {
+                    if (clone.Stages!.Any(s => s.Index == st)) continue;
+                    var ns = CloneStage(clone, st);
+                    if (ns == null) return 1;
+                    clone.Stages.Add(ns);
+                    Console.WriteLine($"  +stage   : {st}");
+                }
+                // Reused stages (the base's 50) carry the base's journal line; clear it unless a beat writes one.
+                foreach (var st in clone.Stages!.Where(s => allStages.Contains(s.Index) && s.Index != t.completeStage))
+                    if (st.LogEntries.FirstOrDefault() is QuestLogEntry e) e.Entry = null;
+                // Ending on a group, the completing stage's line is the recipe's recap (the lint requires it).
+                if (steps[^1].IsGroup)
+                {
+                    var cs = clone.Stages.FirstOrDefault(s => s.Index == t.completeStage);
+                    if (cs?.LogEntries.FirstOrDefault() is not QuestLogEntry ce)
+                    { Console.WriteLine($"REFUSED: the base's completing stage {t.completeStage} has no log entry to carry the recap."); return 1; }
+                    bm.Recap = Expand(r.recap!, t);
+                    ce.Entry = bm.Recap;
+                    Console.WriteLine($"  recap    : stage {t.completeStage} \"{bm.Recap}\"");
+                }
+                if (t.entryStage == 0)
+                {
+                    var s0 = clone.Stages.FirstOrDefault(s => s.Index == 0);
+                    if (s0 == null) { Console.WriteLine("REFUSED: the base has no stage 0 to run on start."); return 1; }
+                    s0.Flags |= QuestStage.Flag.RunOnStart;
+                }
+                else
+                {
+                    // Set by something outside the quest (the board's accept), never on start: on start is the board refresh.
+                    var se = clone.Stages.FirstOrDefault(s => s.Index == t.entryStage);
+                    if (se == null) { Console.WriteLine($"REFUSED: the base has no entry stage {t.entryStage}."); return 1; }
+                    if (se.Flags.HasFlag(QuestStage.Flag.RunOnStart)) { Console.WriteLine($"REFUSED: entry stage {t.entryStage} runs on start; the mission would begin before it is taken."); return 1; }
+                    Console.WriteLine($"  entry    : stage {t.entryStage} (set by the board's accept); step one spawns and shows there, not on start");
+                }
+                return 0;
+            }
+
+            // --- 4. fills, journals, reskins ---------------------------------------------------------
+            internal int Fills()
+            {
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    if (r.beats[i].returnTo != null)
+                    {
+                        // The fill is the earlier beat's; only this beat's journal is its own.
+                        if (r.beats[i].journal != null)
+                        {
+                            var je = clone.Stages.FirstOrDefault(s => s.Index == beatStage[i])?.LogEntries.FirstOrDefault();
+                            if (je == null) { Console.WriteLine($"REFUSED: stage {beatStage[i]} has no log entry for beat {i + 1}'s journal."); return 1; }
+                            je.Entry = Expand(r.beats[i].journal!, t);
+                        }
+                        continue;
+                    }
+                    int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
+                    if (f > 0) return f;
+                    if (slotOf[i].activatorAlias >= 0
+                        && ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
+                }
+
+                // The endings' pay, ON THE STAGE: QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas,
+                // BonusCredits (QRCR) and XpAwarded (QRXP), pointed at the tier's two globals. Written for every
+                // ending, the first one too, rather than trusting what the copy inherited.
+                // A single-beat last step with a tier is an ending too: it sets the completing stage, so its tier
+                // replaces the base's own pay there (the lint holds reward to these two places).
+                var paid = steps.Where(s => s.IsChoose).SelectMany(s => s.Beats)
+                    .Concat(steps[^1].IsChoose || steps[^1].IsGroup || r.beats[steps[^1].Beats[0]].reward == null
+                            ? Enumerable.Empty<int>() : new[] { steps[^1].Beats[0] }).ToList();
+                if (t.questScript != null)
+                {
+                    // A board mission pays through the board (MissionComplete -> MissionParent), off the script's reward
+                    // globals, which the card also shows: so a tier goes THERE, and never onto the stage, or it pays twice.
+                    // Absent, the base's own globals stand (MB28a: duo_reward_creds_easy), as a slate Delve keeps its base's stage pay.
+                    var qs = vma.Scripts.First(s => s.Name == t.questScript);
+                    foreach (var b in paid)
+                    {
+                        var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
+                        if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward}."); return 1; }
+                        foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
+                        {
+                            var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
+                            if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
+                            rp.Object.SetTo(cg.FormKey);
+                        }
+                        Console.WriteLine($"  reward   : the board pays {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                    }
+                    paid.Clear();
+                }
+                foreach (var b in paid)
+                {
+                    var st = clone.Stages.First(x => x.Index == beatStage[b]);
+                    var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                    if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
+                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{r.beats[b].reward}");
+                    var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{r.beats[b].reward}");
+                    if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{r.beats[b].reward} / duo_reward_xp_{r.beats[b].reward}."); return 1; }
+                    rds[0].BonusCredits.SetTo(cg.FormKey);
+                    rds[0].XpAwarded.SetTo(xg.FormKey);
+                    bm.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
+                    Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
+                }
+                // The offer: the line the player reads at the find, on the stage that enters the choice.
+                if (r.offer?.journal != null)
+                {
+                    int enter = steps[steps.FindIndex(s => s.IsChoose) - 1].DoneStage;
+                    var oe = clone.Stages.FirstOrDefault(x => x.Index == enter)?.LogEntries.FirstOrDefault();
+                    if (oe == null) { Console.WriteLine($"REFUSED: stage {enter} has no log entry for the offer's journal."); return 1; }
+                    oe.Entry = Expand(r.offer.journal, t);
+                    bm.OfferJournal = (enter, oe.Entry.String!);
+                    Console.WriteLine($"  offer    : journal on stage {enter}");
+                }
+                return 0;
+            }
+
+            // --- 5. items, one clone per pickup -----------------------------------------------------------
+            internal int Items()
+            {
+                RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
+                itemOf = new Dictionary<int, FormKey>();
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    if (r.beats[i].type != "pickup" && r.beats[i].type != "recover") continue;
+                    if (itemSrc == null) { Console.WriteLine($"REFUSED: the removed driver's CargoObject is not a MiscItem in {t.mod} to clone."); return 1; }
+                    var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
+                    mi.EditorID = $"{r.id}_item{i + 1}";
+                    mi.Name = r.beats[i].item!;
+                    itemOf[i] = mi.FormKey;
+                    Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID})");
+                }
+                return 0;
+            }
+
+            // --- 6. counters: one global per group, cloned, listed for <Global=> in the objective text -------
+            internal int Counters()
+            {
+                RemovePrevious(myMod.Globals, e => e.StartsWith(r.id + "_count"));
+                var globalSrc = myMod.Globals.FirstOrDefault(g => g.EditorID == "duo_reward_xp_easy");
+                counterOf = new Dictionary<int, (FormKey key, string edid)>();   // step index -> counter
+                for (int k = 0; k < steps.Count; k++)
+                {
+                    if (!steps[k].IsGroup && !steps[k].IsHold) continue;
+                    if (globalSrc == null) { Console.WriteLine($"REFUSED: no global duo_reward_xp_easy in {t.mod} to clone a counter from."); return 1; }
+                    var g = (Global)myMod.Globals.DuplicateInAsNewRecord(globalSrc);
+                    g.EditorID = $"{r.id}_count{k + 1}";
+                    SetGlobalZero(g);
+                    counterOf[k] = (g.FormKey, g.EditorID);
+                    // Init-only and pre-constructed on Quest (part 13): append, never assign.
+                    clone.TextDisplayGlobals.Add(g.ToLink<IGlobalGetter>());
+                    bm.Globals.Add(g.FormKey);
+                    Console.WriteLine($"  +counter : {g.EditorID} {g.FormKey} ({g.GetType().Name}, clone of {globalSrc.EditorID}), on the quest's text-display globals");
+                }
+                return 0;
+            }
+
+            // --- 7. objectives: one per step, targets = its beats' activators --------------------------------
+            internal int Objectives()
+            {
+                var lastOb = clone.Objectives?.OrderBy(o => o.Index).LastOrDefault();
+                if (lastOb?.Targets == null || lastOb.Targets.Count != 1)
+                { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
+                var obSrc = lastOb.DeepCopy();
+                var obIdx =steps.SelectMany(st => st.Beats.Select(b => ObjOf(st, b))).ToHashSet();
+                clone.Objectives!.RemoveAll(o => !obIdx.Contains(o.Index));
+                for (int k = 0; k < steps.Count; k++)
+                {
+                    var s = steps[k];
+                    if (s.IsChoose)
+                    {
+                        // One objective per ending, each pointing at its own delivery point.
+                        foreach (var b in s.Beats)
+                        {
+                            int oi = ObjOf(s, b);
+                            var eo = clone.Objectives.FirstOrDefault(o => o.Index == oi);
+                            if (eo == null) { eo = obSrc.DeepCopy(); eo.Index = (ushort)oi; clone.Objectives.Add(eo); }
+                            var et = eo.Targets![0].DeepCopy();
+                            et.AliasID = slotOf[b].ObjectiveTarget;
+                            eo.Targets.Clear();
+                            eo.Targets.Add(et);
+                            string etext = Expand(r.beats[b].objective!, t);
+                            eo.DisplayText = etext;
+                            bm.ObjectiveText[oi] = etext;
+                            Console.WriteLine($"  objective: {oi} \"{etext}\" -> alias {slotOf[b].ObjectiveTarget} (ending of '{s.Choose}')");
+                        }
+                        continue;
+                    }
+                    var ob = clone.Objectives.FirstOrDefault(o => o.Index == s.Objective);
+                    if (ob == null) { ob = obSrc.DeepCopy(); ob.Index = (ushort)s.Objective; clone.Objectives.Add(ob); }
+                    var tgt = ob.Targets![0].DeepCopy();
+                    ob.Targets.Clear();
+                    foreach (var b in s.Beats)
+                    {
+                        var tt = tgt.DeepCopy();
+                        tt.AliasID = slotOf[b].ObjectiveTarget;
+                        if (s.IsGroup)
+                        {
+                            // A group's ONE objective targets every member and stays up until all are done, so
+                            // each member's marker must go out on its own: lit while its stage is NOT done.
+                            // Vanilla's way (1,006 of Starfield.esm's 2,968 targets are conditioned, 694 by
+                            // GetStageDone; shape copied off SFTA06 obj 1135). Clearing the alias in the
+                            // fragment was tried first and does NOT drop the marker (his play, 2026-10-09).
+                            var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = beatStage[b] };
+                            d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
+                            tt.Conditions.Clear();
+                            tt.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f });
+                            bm.TargetGates.Add((s.Objective, slotOf[b].ObjectiveTarget, beatStage[b]));
+                        }
+                        ob.Targets.Add(tt);
+                    }
+                    string text = Expand(r.beats[s.Beats[0]].objective!, t);
+                    if (s.IsGroup) text += $" (<Global={counterOf[k].edid}>/{s.Beats.Count})";
+                    if (s.IsHold) text += $" (<Global={counterOf[k].edid}>/{s.Waves})";
+                    ob.DisplayText = text;
+                    bm.ObjectiveText[s.Objective] = text;
+                    Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].ObjectiveTarget))}");
+                }
+                // A hold's revealed waves (his ask 2026-10-12): one objective per wave, index hold objective + 1 + w,
+                // targeting that wave's own collection. Not shown at the start: the fragment shows it when the reveal
+                // timer fires and hides it when the wave is down, so a cleared wave's bodies never keep a marker.
+                for (int k = 0; k < steps.Count; k++)
+                {
+                    if (!steps[k].IsHold) continue;
+                    int hb = steps[k].Beats[0];
+                    if ((r.beats[hb].reveal ?? DefaultRevealSeconds) == 0) continue;
+                    string rtext = r.beats[hb].revealObjective ?? DefaultRevealObjective;
+                    for (int w = 0; w < waveAliases[hb].Count; w++)
+                    {
+                        int ri = steps[k].Objective + 1 + w;
+                        if (clone.Objectives.Any(o => o.Index == ri)) { Console.WriteLine($"REFUSED: objective {ri} for wave {w + 1}'s reveal is already in use."); return 1; }
+                        var ro = obSrc.DeepCopy(); ro.Index = (ushort)ri;
+                        var rt = ro.Targets![0].DeepCopy();
+                        rt.AliasID = waveAliases[hb][w];
+                        rt.Conditions.Clear();
+                        ro.Targets.Clear();
+                        ro.Targets.Add(rt);
+                        ro.DisplayText = rtext;
+                        clone.Objectives.Add(ro);
+                        bm.ObjectiveText[ri] = rtext;
+                        Console.WriteLine($"  objective: {ri} \"{rtext}\" -> wave {w + 1}'s collection {waveAliases[hb][w]} (shown {r.beats[hb].reveal ?? DefaultRevealSeconds} s after it spawns)");
+                    }
+                }
+                var sortedObs = clone.Objectives.OrderBy(o => o.Index).ToList();
+                clone.Objectives.Clear();
+                clone.Objectives.AddRange(sortedObs);
+
+                // The unused object slots go FIRST (2026-10-14, the first Delves with no object beat at all, a lone defeat or
+                // clear): base slot 2's marker fills inside the second place, so while it stands the second place is still
+                // "named" and its own removal below refuses.
+                foreach (var us in unusedSlots)
+                {
+                    var pair = new[] { us.markerAlias, us.activatorAlias };
+                    var gone = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => pair.Contains((int)a.ID)).ToList();
+                    if (gone.Count != 2) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
+                    var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
+                    if (users.Count > 0) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is still named by {string.Join(", ", users)}."); return 1; }
+                    foreach (var a in gone) clone.Aliases!.Remove(a);
+                    bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
+                    Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
+                }
+                // The removed driver's own aliases (the board's EnemyType), named by nothing once it is gone.
+                foreach (int da in t.driverAliases)
+                {
+                    var gone = clone.Aliases!.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)da);
+                    if (gone == null) { Console.WriteLine($"REFUSED: the template names driver alias {da} and the base has none."); return 1; }
+                    var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), new[] { da });
+                    string token = $"<Alias={gone.Name}>";
+                    if (clone.MissionBoardDescription?.String?.Contains(token) == true || clone.Name?.String?.Contains(token) == true) users.Add("the quest's name or card");
+                    if (users.Count > 0) { Console.WriteLine($"REFUSED: driver alias {da} ({gone.Name}) is still named by {string.Join(", ", users)}."); return 1; }
+                    clone.Aliases!.Remove(gone);
+                    bm.DroppedDriverAliases.Add(da);
+                    Console.WriteLine($"  -alias   : {gone.Name} (alias {da}) removed: the driver's, and the driver is gone");
+                }
+                // A ONE-PLACE Delve drops the base's second place. Left in, it is a non-Optional location alias that
+                // still draws a SECOND POI the quest never visits, so the quest only starts where two qualifying POIs
+                // are in range, and the base's text about it lingers (his catch on duo_delve09, 2026-10-09: "we have
+                // DungeonLocation and FinalLocation but the quest takes part in one POI"). Refused, writing nothing,
+                // if anything the player can read or any alias still depends on it.
+                if (t.secondPlaceAlias >= 0 && !r.beats.Any(b => b.PlaceIndex == 1))
+                {
+                    var second = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias);
+                    if (second == null) { Console.WriteLine($"REFUSED: the template names second place alias {t.secondPlaceAlias} and the base has none."); return 1; }
+                    string token = $"<Alias={second.Name}>";
+                    var users = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location?.AliasID == t.secondPlaceAlias).Select(a => $"ref alias {a.ID}")
+                        .Concat(clone.Aliases!.OfType<QuestLocationAlias>().Where(a => a.ParentSystemLocationAliasID == t.secondPlaceAlias).Select(a => $"location alias {a.ID}"))
+                        .Concat(clone.Objectives!.Where(o => o.DisplayText?.String?.Contains(token) == true).Select(o => $"objective {o.Index}"))
+                        .Concat(clone.Stages!.Where(s => allStages.Contains(s.Index))   // stage 0's briefing is the recipe's, written after this and graded off disk
+                            .Where(s => s.LogEntries.Any(e => e.Entry?.String?.Contains(token) == true)).Select(s => $"stage {s.Index}'s journal"))
+                        .ToList();
+                    if (users.Count > 0) { Console.WriteLine($"REFUSED: the unused second place {second.Name} is still named by {string.Join(", ", users)}."); return 1; }
+                    // A base stage this Delve never sets can still carry the base's line about it: clear the line.
+                    foreach (var s in clone.Stages!.Where(s => !allStages.Contains(s.Index) && s.Index != 0))
+                        foreach (var e in s.LogEntries.Where(e => e.Entry?.String?.Contains(token) == true))
+                        {
+                            e.Entry = null;
+                            Console.WriteLine($"  unused   : stage {s.Index} (never set here) loses the base's line naming {second.Name}");
+                        }
+                    clone.Aliases!.Remove(second);
+                    bm.DroppedPlace = (t.secondPlaceAlias, second.Name!);
+                    Console.WriteLine($"  -place   : {second.Name} (alias {t.secondPlaceAlias}) removed: every beat is at the main place, so it would draw a second POI for nothing");
+                }
+                return 0;
+            }
+
+            // --- 8. message boxes ---------------------------------------------------------------------
+            internal int Messages()
+            {
+                RemovePrevious(myMod.Messages, e => e.StartsWith(r.id + "_msg"));
+                msgOf = new Dictionary<int, FormKey>();
+                var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    var bmsg = r.beats[i].message;
+                    if (bmsg == null) continue;
+                    if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                    var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                    msg.EditorID = $"{r.id}_msg{i + 1}";
+                    msg.Name = Expand(bmsg.title!, t);
+                    msg.Description = Expand(bmsg.text!, t);
+                    msg.OwnerQuest.SetTo(clone.FormKey);
+                    msgOf[i] = msg.FormKey;
+                    Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"");
+                }
+
+                offerMsg = default;
+                if (r.offer?.message != null)
+                {
+                    if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                    var om = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                    om.EditorID = $"{r.id}_msgOffer";
+                    om.Name = Expand(r.offer.message.title!, t);
+                    om.Description = Expand(r.offer.message.text!, t);
+                    om.OwnerQuest.SetTo(clone.FormKey);
+                    offerMsg = om.FormKey;
+                    Console.WriteLine($"  +message : {om.EditorID} {om.FormKey}  \"{om.Name}\"  (the offer)");
+                }
+
+                // --- the people at the endings: named NPCs cloned from a friendly vanilla template -------------
+                // NPCTools.CloneNPC copies the body field by field and NOT the name or the voice, so both are
+                // written here; unaggressive, average confidence, dressed from the recipe (his 2026-10-08 asks).
+                npcOf = new Dictionary<int, FormKey>();
+                RemovePrevious(myMod.Npcs, e => e.StartsWith(r.id + "_person"));
+                foreach (var (b, pr) in inputs.Persons)
+                {
+                    var pp = r.beats[b].person!;
+                    var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, pr.tmpl.DeepCopy());
+                    npc.EditorID = $"{r.id}_person{b + 1}";
+                    npc.Name = pp.name!;
+                    npc.Voice.SetTo(pr.voice ?? pr.tmpl.Voice.FormKey);
+                    npc.Aggression = Npc.AggressionType.Unaggressive;
+                    npc.Confidence = Npc.ConfidenceType.Average;
+                    if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
+                    myMod.Npcs.Add(npc);
+                    npcOf[b] = npc.FormKey;
+                    if (talkAlias.TryGetValue(b, out var tpa)) tpa.CreateReferenceToObject!.Object.SetTo(npc.FormKey);
+                    bm.People[b] = (npc.FormKey, pp.name!);
+                    Console.WriteLine($"  +npc     : {npc.EditorID} {npc.FormKey}  \"{pp.name}\"  (clone of {pr.tmpl.EditorID})" + (pp.outfit != null ? $"  outfit {pp.outfit}" : ""));
+                }
+
+                // --- the speaker: an NPC that is never placed, carrying the subtitle's NAME and the VOICE TYPE whose
+                // folder the audio is looked up in (gen_dlgtest's shape: clone, then set Voice) ----------------------
+                RemovePrevious(myMod.Npcs, e => e == r.id + "_speaker");
+                if (inputs.Speaker is (INpcGetter stmpl, FormKey svoice))
+                {
+                    var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
+                    sp.EditorID = r.id + "_speaker";
+                    sp.Name = r.speaker!.name!;
+                    sp.Voice.SetTo(svoice);
+                    myMod.Npcs.Add(sp);
+                    bm.Speaker = sp.FormKey;
+                    Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
+                }
+
+                foreach (var b in talkAlias.Keys)
+                    BuildTalk(myMod, clone, r, b, steps, beatStage, t.entryStage, slotOf[b].targetAlias, npcOf[b],
+                              myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm, inputs.TalkPerks);
+                return 0;
+            }
+
+            // --- 9. the events: one stock hook per beat --------------------------------------------------
+            internal int Hooks()
+            {
+                int recovers = 0;
+                for (int k = 0; k < steps.Count; k++)
+                {
+                    int prereq = k == 0 ? t.entryStage : steps[k - 1].DoneStage;
+                    foreach (var b in steps[k].Beats)
+                    {
+                        var beat = r.beats[b];
+                        if (beat.type == "talk") continue;   // set by the conversation's closing reply, not a hook (BuildTalk)
+                        if (beat.type == "hold")
+                        {
+                            // One stock death hook per wave, on that wave's collection: when every member is dead
+                            // it sets the wave's stage, armed only once the wave before it is down. TurnOffStageDone
+                            // is the wave's own stage, so a kill after the stuck guard moved on cannot set it twice.
+                            var ws = steps[k].WaveStages;
+                            for (int w = 0; w < ws.Count; w++)
+                            {
+                                int col = waveAliases[b][w];
+                                int pre = w == 0 ? prereq : ws[w - 1];
+                                var hs = StageHook("DefaultCollectionAliasOnDeath", ws[w], pre,
+                                                   new ScriptIntProperty { Name = "TurnOffStageDone", Data = ws[w], Flags = ScriptProperty.Flag.Edited },
+                                                   RemoveDeadFromCollection());
+                                AttachHook(vma, clone.FormKey, col, hs, HookEntry.New, false, bm, ws[w], pre);
+                                Console.WriteLine($"  +hook    : beat {b + 1} (hold) wave {w + 1} collection {col} {hs.Name} sets {ws[w]} after {pre}");
+                            }
+                            continue;
+                        }
+                        if (IsFight(beat))
+                        {
+                            // The step ends on a death: the target's (defeat), or the last of the collection's (clear). Stock hooks;
+                            // TurnOffStageDone on the collection's, as each hold wave's, so a late kill cannot set it twice.
+                            bool isClear = beat.type == "clear";
+                            int on = slotOf[b].targetAlias;
+                            var fs = StageHook(isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath", beatStage[b], prereq,
+                                               isClear ? new ScriptProperty[] { new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited },
+                                                                                RemoveDeadFromCollection() }
+                                                       : Array.Empty<ScriptProperty>());
+                            AttachHook(vma, clone.FormKey, on, fs, HookEntry.New, false, bm, beatStage[b], prereq);
+                            Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {on} {fs.Name} sets {beatStage[b]} after {prereq}");
+                            continue;
+                        }
+                        int hookAlias; string script;
+                        if (beat.type == "recover")
+                        {
+                            // On the PLAYER: the stage is set however the item reaches the pack (looted, picked up,
+                            // handed over). The A-D duplicates exist so one alias can carry the hook several times.
+                            hookAlias = t.playerAlias;
+                            script = "DefaultAliasOnItemAddedScript" + (recovers == 0 ? "" : ((char)('A' + recovers - 1)).ToString());
+                            recovers++;
+                        }
+                        else if (beat.returnTo != null)
+                        {
+                            // The same object a second time: the stock hook's one duplicate, on the same alias.
+                            hookAlias = slotOf[b].activatorAlias;
+                            script = "DefaultAliasOnActivateA";
+                        }
+                        else
+                        {
+                            hookAlias = slotOf[b].activatorAlias;
+                            script = beat.type == "pickup" ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
+                        }
+                        var sc = StageHook(script, beatStage[b], prereq);
+                        if (beat.type == "pickup")
+                        {
+                            var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
+                            ip.Object.SetTo(itemOf[b]);
+                            sc.Properties.Add(ip);
+                            sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldDisableAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                        }
+                        else if (beat.type == "recover")
+                        {
+                            var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
+                            fp.Object.SetTo(itemOf[b]);
+                            sc.Properties.Add(fp);
+                        }
+                        else
+                        {
+                            // An object a later beat comes back to keeps its prompt, or the return could never fire.
+                            bool comesBack = r.beats.Any(x => x.returnTo == b + 1);
+                            sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
+                        }
+                        if (AttachHook(vma, clone.FormKey, hookAlias, sc, HookEntry.FindOrCreate, true, bm, beatStage[b], prereq) == Hooked.AlreadyCarries)
+                        { Console.WriteLine($"REFUSED: alias {hookAlias} already carries {script}; a beat cannot hook it twice."); return 1; }
+                        Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {hookAlias} {script} sets {beatStage[b]} after {prereq}");
+                    }
+                }
+
+                // An ending's person: a stock distance hook on the ending's OWN object, measuring to the player,
+                // armed only once the choice is open (PrereqStage = the stage that enters it), as the choice
+                // driver registered its distance events at the find.
+                foreach (var (b, pst) in personStage)
+                {
+                    int own = slotOf[b].activatorAlias;
+                    int enter = steps[steps.FindIndex(s => s.Beats.Contains(b)) - 1].DoneStage;
+                    if (AttachHook(vma, clone.FormKey, own, DistanceHook(clone.FormKey, t.playerAlias, pst, enter), HookEntry.MustExist, false, bm, pst, enter) == Hooked.NoEntry)
+                    { Console.WriteLine($"REFUSED: ending alias {own} carries no hook entry to add the approach to."); return 1; }
+                    bm.PersonApproach.Add((own, t.playerAlias));
+                    Console.WriteLine($"  +hook    : beat {b + 1}'s person, within {ApproachDistance} of its object (alias {own}) after {enter}, sets {pst}");
+                }
+
+                // A nest: a stock distance hook on the object it surrounds, measuring to the player, at any stage (no
+                // PrereqStage), as a person's is on its ending: 250 m out, so the creatures are there before he is.
+                foreach (var (p, w, a) in whos)
+                {
+                    int own = slotOf[a].activatorAlias;
+                    var sc = DistanceHook(clone.FormKey, t.playerAlias, whoStage[p], -1);
+                    if (AttachHook(vma, clone.FormKey, own, sc, HookEntry.FindOrCreate, true, bm, whoStage[p], -1) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the {w.kind} at {PlaceKey[p]} cannot hook it twice."); return 1; }
+                    Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
+                }
+
+                // Arrival (board): a stock distance hook on step one's MARKER, measuring to the player, armed only once the
+                // board's accept has set entryStage, so the poster's call comes when he reaches the site and never on the
+                // accept (his 2026-10-14: "you should get the radio message when you are near the POI").
+                if (arrival)
+                {
+                    int at = slotOf[steps[0].Beats[0]].markerAlias;
+                    var sc = DistanceHook(clone.FormKey, t.playerAlias, t.arrivalStage, t.entryStage);
+                    if (AttachHook(vma, clone.FormKey, at, sc, HookEntry.FindOrCreate, true, bm, t.arrivalStage, t.entryStage) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {at} already carries {sc.Name}; the arrival cannot hook it twice."); return 1; }
+                    bm.Arrival = (at, t.playerAlias);
+                    Console.WriteLine($"  +hook    : arrival within {ApproachDistance} of step one's marker (alias {at}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
+                }
+
+                // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
+                if (r.approach is Approach apr)
+                {
+                    int toAlias = slotOf[apr.to - 1].activatorAlias;
+                    var sc = DistanceHook(clone.FormKey, toAlias, t.approachStage, -1);
+                    AttachHook(vma, clone.FormKey, t.playerAlias, sc, HookEntry.FindOrCreate, false, bm, t.approachStage, -1);
+                    bm.ApproachTarget = (t.playerAlias, toAlias);
+                    Console.WriteLine($"  +hook    : approach within {ApproachDistance} of beat {apr.to}'s object (alias {toAlias}) sets {t.approachStage}");
+                }
+                return 0;
+            }
+
+            // --- 10. the fragment script: generated, bound per stage -----------------------------------------
+            internal int Fragment()
+            {
+                string name = FragmentScriptName(r);
+                var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
+                var code = new SortedDictionary<int, List<string>>();
+                void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
+
+                foreach (var kv in counterOf)
+                {
+                    string p = $"Counter{kv.Key + 1}";
+                    props.Add(("GlobalVariable", p, kv.Value.key, -1));
+                    Add(t.entryStage, $"{p}.SetValue(0)");
+                    Add(t.entryStage, $"UpdateCurrentInstanceGlobal({p})");
+                }
+                // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
+                // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.
+                for (int b = 0; b < r.beats.Count; b++)
+                {
+                    if (!r.beats[b].replace) continue;
+                    string an = $"Alias_Beat{b + 1}Marker";
+                    props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].markerAlias));
+                    bm.Replaced.Add((an, slotOf[b].markerAlias));
+                    Add(t.entryStage, $"{an}.GetRef().Disable(False)");
+                }
+                // A hold's wave w (0-based) appears round him, INTO its own collection. Then the spawning fragment
+                // WAITS, at its very end (a tail, after every other line of that stage): the reveal after `reveal`
+                // seconds, the stuck guard after `stuck`, each only while the wave is still up. Utility.Wait is
+                // latent, so the script is free for the next stage while it sleeps; stage 100 already waits on its
+                // radio line this way, and he has heard that one finish.
+                var tails = new Dictionary<int, List<string>>();
+                void Tail(int st, string line) { if (!tails.ContainsKey(st)) tails[st] = new(); tails[st].Add(line); }
+                void SpawnWave(int b, int w, int stage)
+                {
+                    var ws = steps.First(s => s.Beats.Contains(b)).WaveStages;
+                    string mk = $"Alias_Beat{b + 1}Spawn", wv = $"Alias_Beat{b + 1}Wave{w + 1}";
+                    props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                    props.Add(("RefCollectionAlias", wv, clone.FormKey, waveAliases[b][w]));
+                    props.Add(("FormList", "Gang", gangKey!.Value, -1));
+                    var sz = r.beats[b].size!;
+                    int origins = WaveStyles[r.beats[b].style?[w] ?? "squad"];
+                    Add(stage, $"duo_delve_lib.SpawnWave({mk}, {wv}, Gang, {sz[0]}, {sz[1]}, {origins})");
+                    int stuck = r.beats[b].stuck ?? DefaultStuckSeconds;
+                    int rv = r.beats[b].reveal ?? DefaultRevealSeconds;
+                    Tail(stage, $"; wave {w + 1}: {(rv > 0 ? $"pointed out after {rv} s, " : "")}let go after {stuck} s if it is still up");
+                    if (rv > 0)
+                    {
+                        var hs = steps.First(s => s.Beats.Contains(b));
+                        int robj = hs.Objective + 1 + w;
+                        Add(ws[w], $"SetObjectiveDisplayed({robj}, False)   ; wave {w + 1} is down: its marker goes");
+                        Tail(stage, $"Utility.Wait({rv}.0)");
+                        Tail(stage, $"If !GetStageDone({ws[w]})");
+                        Tail(stage, $"    SetObjectiveDisplayed({robj})");
+                        Tail(stage, $"    Utility.Wait({stuck - rv}.0)");
+                        Tail(stage, $"    If !GetStageDone({ws[w]})");
+                        Tail(stage, $"        SetStage({ws[w]})");
+                        Tail(stage, "    EndIf");
+                        Tail(stage, "EndIf");
+                        bm.Reveals.Add((robj, waveAliases[b][w], rv, ws[w]));
                     }
                     else
                     {
-                        string mk = $"Alias_Beat{b + 1}Spawn", en = $"Alias_Beat{b + 1}Enemies";
+                        Tail(stage, $"Utility.Wait({stuck}.0)");
+                        Tail(stage, $"If !GetStageDone({ws[w]})");
+                        Tail(stage, $"    SetStage({ws[w]})");
+                        Tail(stage, "EndIf");
+                    }
+                    bm.StuckWaits.Add(ws[w]);
+                }
+                // Entering a step: a recover beat's holder appears (and fills the alias the objective targets)
+                // BEFORE the objective is shown, so it never shows with nothing to point at.
+                void Enter(int k, int stage)
+                {
+                    foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "hold"))
+                        SpawnWave(b, 0, stage);
+                    foreach (var b in steps[k].Beats.Where(b => IsFight(r.beats[b])))
+                    {
+                        var fb = r.beats[b];
+                        var ff = inputs.Fights[b];
+                        string lootArgs = "None, 0";
+                        if (ff.Loot is FormKey lk) { props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
+                        if (fb.type == "defeat")
+                        {
+                            string mk = $"Alias_Beat{b + 1}Marker", tg = $"Alias_Beat{b + 1}Target";
+                            props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                            props.Add(("ReferenceAlias", tg, clone.FormKey, slotOf[b].targetAlias));
+                            props.Add(("Form", $"Target{b + 1}", ff.Target!.Value, -1));
+                            string gangArgs = "None, 0, 0, False";
+                            if (ff.Gang is FormKey gk)
+                            {
+                                props.Add(("FormList", $"Gang{b + 1}", gk, -1));
+                                gangArgs = $"Gang{b + 1}, {fb.gang!.min}, {fb.gang.max}, {(fb.gang.species == "one" ? "True" : "False")}";
+                            }
+                            Add(stage, $"duo_delve_lib.SpawnTarget({mk}, {tg}, Target{b + 1}, {gangArgs}, {lootArgs})");
+                        }
+                        else
+                        {
+                            string mk = $"Alias_Beat{b + 1}Spawn", en = $"Alias_Beat{b + 1}Enemies";
+                            props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
+                            props.Add(("RefCollectionAlias", en, clone.FormKey, slotOf[b].targetAlias));
+                            props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
+                            var e = fb.enemies!;
+                            Add(stage, $"duo_delve_lib.SpawnGroup({mk}, {en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
+                        }
+                    }
+                    foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "recover"))
+                    {
+                        string mk = $"Alias_Beat{b + 1}Marker", hd = $"Alias_Beat{b + 1}Holder";
                         props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
-                        props.Add(("RefCollectionAlias", en, clone.FormKey, slotOf[b].targetAlias));
-                        props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
-                        var e = fb.enemies!;
-                        Add(stage, $"duo_delve_lib.SpawnGroup({mk}, {en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
+                        props.Add(("ReferenceAlias", hd, clone.FormKey, slotOf[b].targetAlias));
+                        props.Add(("FormList", "Gang", gangKey!.Value, -1));
+                        props.Add(("Form", $"Item{b + 1}", itemOf[b], -1));
+                        Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {t.gangMin}, {gangMax})");
+                    }
+                    if (steps[k].IsChoose)
+                    {
+                        if (!offerMsg.IsNull) { props.Add(("Message", "OfferMessage", offerMsg, -1)); Add(stage, "OfferMessage.Show()"); }
+                        foreach (var b in steps[k].Beats) Add(stage, $"SetObjectiveDisplayed({ObjOf(steps[k], b)})");
+                    }
+                    else Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
+                }
+                Enter(0, t.entryStage);
+                foreach (var (b, pst) in personStage)
+                {
+                    string ta = $"Alias_Beat{b + 1}Target", pn = $"Person{b + 1}";
+                    props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[b].activatorAlias));
+                    props.Add(("ActorBase", pn, npcOf[b], -1));
+                    Add(pst, $"duo_delve_lib.PlacePerson({ta}, {pn}, 1.5)");
+                    var pc = r.beats[b].person!.company;
+                    if (pc != null && inputs.Persons[b].company is FormKey cfk)
+                    {
+                        props.Add(("FormList", $"Company{b + 1}", cfk, -1));
+                        Add(pst, $"duo_delve_lib.PlaceCompany({ta}, Company{b + 1}, {pc.min}, {pc.max}, 8.0)");
                     }
                 }
-                foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "recover"))
+                foreach (var (p, w, a) in whos)
                 {
-                    string mk = $"Alias_Beat{b + 1}Marker", hd = $"Alias_Beat{b + 1}Holder";
-                    props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
-                    props.Add(("ReferenceAlias", hd, clone.FormKey, slotOf[b].targetAlias));
-                    props.Add(("FormList", "Gang", gangKey!.Value, -1));
-                    props.Add(("Form", $"Item{b + 1}", itemOf[b], -1));
-                    Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {t.gangMin}, {gangMax})");
-                }
-                if (steps[k].IsChoose)
-                {
-                    if (!offerMsg.IsNull) { props.Add(("Message", "OfferMessage", offerMsg, -1)); Add(stage, "OfferMessage.Show()"); }
-                    foreach (var b in steps[k].Beats) Add(stage, $"SetObjectiveDisplayed({ObjOf(steps[k], b)})");
-                }
-                else Add(stage, $"SetObjectiveDisplayed({steps[k].Objective})");
-            }
-            Enter(0, t.entryStage);
-            foreach (var (b, pst) in personStage)
-            {
-                string ta = $"Alias_Beat{b + 1}Target", pn = $"Person{b + 1}";
-                props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[b].activatorAlias));
-                props.Add(("ActorBase", pn, npcOf[b], -1));
-                Add(pst, $"duo_delve_lib.PlacePerson({ta}, {pn}, 1.5)");
-                var pc = r.beats[b].person!.company;
-                if (pc != null && inputs.Persons[b].company is FormKey cfk)
-                {
-                    props.Add(("FormList", $"Company{b + 1}", cfk, -1));
-                    Add(pst, $"duo_delve_lib.PlaceCompany({ta}, Company{b + 1}, {pc.min}, {pc.max}, 8.0)");
-                }
-            }
-            foreach (var (p, w, a) in whos)
-            {
-                string ta = $"Alias_Beat{a + 1}Target", nl2 = $"Who{p + 1}";
-                props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[a].activatorAlias));
-                props.Add(("FormList", nl2, inputs.WhoLists[p], -1));
-                // One placer per kind, all in duo_delve_lib: a nest is one species and attacks, workers are a
-                // friendly mix stood round the object, spacers a hostile mix that holds it.
-                string call = w.kind switch
-                {
-                    "infested" => $"duo_delve_lib.PlaceNest({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})",
-                    "workers"  => $"duo_delve_lib.PlaceCompany({ta}, {nl2}, {w.min}, {w.max}, {WorkersRadius:0.0})",
-                    "spacers"  => $"duo_delve_lib.PlaceCrew({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})",
-                    _ => throw new InvalidOperationException($"who.kind '{w.kind}' passed the lint and has no placer")
-                };
-                Add(whoStage[p], call);
-            }
-            if (r.approach is Approach af)
-            {
-                // Civilians first, then the crate, as the driver did.
-                string ta = $"Alias_Beat{af.to}Target";
-                props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[af.to - 1].activatorAlias));
-                if (af.civilians)
-                {
-                    props.Add(("FormList", "Civilians", civsKey!.Value, -1));
-                    Add(t.approachStage, $"duo_delve_lib.PlaceCivilians({ta}, Civilians, 1, 5)");
-                }
-                if (af.lose is int l)
-                {
-                    string la = $"Alias_Beat{l}Target";
-                    props.Add(("ReferenceAlias", la, clone.FormKey, slotOf[l - 1].activatorAlias));
-                    props.Add(("FormList", "Gang", gangKey!.Value, -1));
-                    Add(t.approachStage, $"If !GetStageDone({beatStage[l - 1]})   ; lose the crate only while it is still there");
-                    Add(t.approachStage, $"    duo_delve_lib.LoseTheLoad({la}, {ta}, Gang.GetAt(0))");
-                    Add(t.approachStage, "EndIf");
-                }
-            }
-            // Speech: each line is a RADIO scene (no actor in the world: AliasID -4, the vanilla audio-log shape,
-            // FrankyCLI docs/formlib/book_audio.md) holding one topic and one response the speaker says, started
-            // by the fragment of the stage it belongs to. The response's WEMFile is the topic's own id, and
-            // the game looks the audio up as Sound\Voice\<plugin>\<voice type>\<that id, 8 hex>.wem.
-            var spokenAt = new List<(int stage, int n)>();   // fragment-started lines, by stage
-            if (inputs.Speaker != null)
-            {
-                var lines = new List<(int stage, string text)>();
-                if (r.broadcast != null) lines.Add((arrival ? t.arrivalStage : t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
-                for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
-                // A group ending's closing call: on the completing stage, which every member's last fix sets whatever the order.
-                if (r.recapSay != null) lines.Add((steps[^1].DoneStage, r.recapSay));
-                // The offer's line plays on the stage that opens the choice as a TAIL, after every other line of that
-                // stage, so it starts once the find's box is closed (Message.Show waits). Added like a beat's line it
-                // landed BEFORE the box (the speech lines are emitted ahead of the boxes), so the radio played under
-                // an open box: the clash his "either or" exists for. Caught reading 06b's fragment, 2026-10-12.
-                int offerLine = -1;
-                if (r.offer?.say != null)
-                {
-                    var cs = steps.First(s => s.IsChoose);
-                    offerLine = lines.Count;
-                    lines.Add((steps[steps.IndexOf(cs) - 1].DoneStage, r.offer.say));
-                }
-                for (int n = 0; n < lines.Count; n++)
-                {
-                    var (lst, ltext) = lines[n];
-                    string tag = $"{r.id}_say{n + 1}";
-                    var topic = new DialogTopic(myMod)
+                    string ta = $"Alias_Beat{a + 1}Target", nl2 = $"Who{p + 1}";
+                    props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[a].activatorAlias));
+                    props.Add(("FormList", nl2, inputs.WhoLists[p], -1));
+                    // One placer per kind, all in duo_delve_lib: a nest is one species and attacks, workers are a
+                    // friendly mix stood round the object, spacers a hostile mix that holds it.
+                    string call = w.kind switch
                     {
-                        EditorID = tag + "_topic",
-                        Category = DialogTopic.CategoryEnum.Scene,
-                        Subtype = DialogTopic.SubtypeEnum.CustomScene,
-                        SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+                        "infested" => $"duo_delve_lib.PlaceNest({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})",
+                        "workers"  => $"duo_delve_lib.PlaceCompany({ta}, {nl2}, {w.min}, {w.max}, {WorkersRadius:0.0})",
+                        "spacers"  => $"duo_delve_lib.PlaceCrew({ta}, {nl2}, {w.min}, {w.max}, {NestRadius:0.0})",
+                        _ => throw new InvalidOperationException($"who.kind '{w.kind}' passed the lint and has no placer")
                     };
-                    topic.Quest.SetTo(clone.FormKey);
-                    var info = new DialogResponses(myMod) { EditorID = tag + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
-                    info.Speaker.SetTo(bm.Speaker);
-                    info.Responses.Add(new DialogResponse
-                    {
-                        ResponseText = ltext,
-                        WEMFile = topic.FormKey.ID,
-                        TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(ltext))[..4],
-                    });
-                    topic.Responses.Add(info);
-                    // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
-                    topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
-                    clone.DialogTopics.Add(topic);
-
-                    var action = new RadioSceneAction { Name = "Say", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0 };
-                    action.Topic.SetTo(topic.FormKey);
-                    // ⛔ THE BROADCAST CANNOT BE STARTED FROM STAGE 0's FRAGMENT: that runs while the quest is still
-                    // starting, and Start() then does nothing at all. Measured in his play, 2026-10-09, with an
-                    // on-screen probe: stage 0 "playing = FALSE", the same scene started again at stage 10 played,
-                    // voice and subtitle. So a stage-0 line is started by the ENGINE, with the scene's own
-                    // BeginOnQuestStart flag, and every later stage's line by its fragment.
-                    bool atStart = lst == 0;
-                    var scene = new Scene(myMod)
-                    {
-                        EditorID = tag + "_scene",
-                        // 0x80 is on every vanilla audio-log scene; undocumented (book_audio.md)
-                        Flags = (Scene.Flag)0x80 | (atStart ? Scene.Flag.BeginOnQuestStart : 0),
-                        VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
-                    };
-                    scene.Quest.SetTo(clone.FormKey);
-                    scene.Actors.Add(new SceneActor { ID = unchecked((uint)-4), Flags = SceneActor.Flag.NoCommandState, BehaviorFlags = 0 });
-                    scene.Phases.Add(new ScenePhase { Name = "SayPhase", EditorWidth = 500 });
-                    scene.Actions = new Noggog.ExtendedList<ASceneAction> { action };
-                    clone.Scenes.Add(scene);
-
-                    string sv = $"Say{n + 1}";
-                    if (!atStart)
-                    {
-                        props.Add(("Scene", sv, scene.FormKey, -1));
-                        if (n == offerLine) Tail(lst, $"{sv}.Start()   ; the offer's call, after the find's box is closed");
-                        else Add(lst, $"{sv}.Start()");
-                        spokenAt.Add((lst, n + 1));
-                    }
-                    bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));
-                    Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
+                    Add(whoStage[p], call);
                 }
-            }
-            // A quest's scenes stop with it, so a line on the stage that ENDS the quest would be cut off by the
-            // Stop() after it ("Link is online", 2026-10-09). There, wait for the line to finish first: a second
-            // for the scene to begin, then while it plays, capped at 30 s so a scene that never reports done
-            // cannot hold the quest open.
-            void StopQuest(int st)
-            {
-                WaitForLines(st);
-                Add(st, "Stop()");
-            }
-            // A board mission ends through the script the board talks to: MissionComplete() pays through MissionParent,
-            // completes every objective, sets CompleteStage and shuts the quest down. Vanilla's own stage-100 fragment
-            // (QF_MB_Bounty05_UC_003303A5) is exactly this autocast and call.
-            void CompleteMission(int st)
-            {
-                WaitForLines(st);
-                Add(st, "Quest __temp = Self as Quest");
-                Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
-                Add(st, "kmyQuest.MissionComplete()");
-            }
-            void WaitForLines(int st)
-            {
-                foreach (var (_, n) in spokenAt.Where(x => x.stage == st))
+                if (r.approach is Approach af)
                 {
-                    Add(st, $"Utility.Wait(1.0)   ; let Say{n} begin before asking whether it plays");
-                    Add(st, $"Int waited{n} = 0");
-                    Add(st, $"While Say{n}.IsPlaying() && waited{n} < 30");
-                    Add(st, "    Utility.Wait(1.0)");
-                    Add(st, $"    waited{n} += 1");
-                    Add(st, "EndWhile");
+                    // Civilians first, then the crate, as the driver did.
+                    string ta = $"Alias_Beat{af.to}Target";
+                    props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[af.to - 1].activatorAlias));
+                    if (af.civilians)
+                    {
+                        props.Add(("FormList", "Civilians", civsKey!.Value, -1));
+                        Add(t.approachStage, $"duo_delve_lib.PlaceCivilians({ta}, Civilians, 1, 5)");
+                    }
+                    if (af.lose is int l)
+                    {
+                        string la = $"Alias_Beat{l}Target";
+                        props.Add(("ReferenceAlias", la, clone.FormKey, slotOf[l - 1].activatorAlias));
+                        props.Add(("FormList", "Gang", gangKey!.Value, -1));
+                        Add(t.approachStage, $"If !GetStageDone({beatStage[l - 1]})   ; lose the crate only while it is still there");
+                        Add(t.approachStage, $"    duo_delve_lib.LoseTheLoad({la}, {ta}, Gang.GetAt(0))");
+                        Add(t.approachStage, "EndIf");
+                    }
                 }
-            }
-            var held = new List<int>();   // pickups and recovered items not yet delivered
-            int handBack = HandBackTalk(r, steps);
-            for (int k = 0; k < steps.Count; k++)
-            {
-                var s = steps[k];
-                bool last = k == steps.Count - 1;
-                foreach (var b in s.Beats)
+                // Speech: each line is a RADIO scene (no actor in the world: AliasID -4, the vanilla audio-log shape,
+                // FrankyCLI docs/formlib/book_audio.md) holding one topic and one response the speaker says, started
+                // by the fragment of the stage it belongs to. The response's WEMFile is the topic's own id, and
+                // the game looks the audio up as Sound\Voice\<plugin>\<voice type>\<that id, 8 hex>.wem.
+                var spokenAt = new List<(int stage, int n)>();   // fragment-started lines, by stage
+                if (inputs.Speaker != null)
                 {
-                    int st = beatStage[b];
-                    if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
-                    if (r.beats[b].type == "pickup" || r.beats[b].type == "recover") held.Add(b);
-                    if (r.beats[b].type == "deliver" || b == handBack)
+                    var lines = new List<(int stage, string text)>();
+                    if (r.broadcast != null) lines.Add((arrival ? t.arrivalStage : t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
+                    for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
+                    // A group ending's closing call: on the completing stage, which every member's last fix sets whatever the order.
+                    if (r.recapSay != null) lines.Add((steps[^1].DoneStage, r.recapSay));
+                    // The offer's line plays on the stage that opens the choice as a TAIL, after every other line of that
+                    // stage, so it starts once the find's box is closed (Message.Show waits). Added like a beat's line it
+                    // landed BEFORE the box (the speech lines are emitted ahead of the boxes), so the radio played under
+                    // an open box: the clash his "either or" exists for. Caught reading 06b's fragment, 2026-10-12.
+                    int offerLine = -1;
+                    if (r.offer?.say != null)
                     {
-                        foreach (var h in held)
+                        var cs = steps.First(s => s.IsChoose);
+                        offerLine = lines.Count;
+                        lines.Add((steps[steps.IndexOf(cs) - 1].DoneStage, r.offer.say));
+                    }
+                    for (int n = 0; n < lines.Count; n++)
+                    {
+                        var (lst, ltext) = lines[n];
+                        string tag = $"{r.id}_say{n + 1}";
+                        var topic = new DialogTopic(myMod)
                         {
-                            props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
-                            Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
-                        }
-                        if (b == handBack) bm.HandBack = (st, held.Select(h => $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)").ToList());
-                        if (!s.IsChoose) held.Clear();   // every ending takes the same things
-                    }
-                    if (s.IsChoose)
-                    {
-                        // Whichever ending the player walked to: every ending's prompt goes, the others' objectives
-                        // are HIDDEN (never failed: neither side is the villain), and the quest ends here.
-                        int own = ObjOf(s, b);
-                        foreach (var e in s.Beats)
+                            EditorID = tag + "_topic",
+                            Category = DialogTopic.CategoryEnum.Scene,
+                            Subtype = DialogTopic.SubtypeEnum.CustomScene,
+                            SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+                        };
+                        topic.Quest.SetTo(clone.FormKey);
+                        var info = new DialogResponses(myMod) { EditorID = tag + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+                        info.Speaker.SetTo(bm.Speaker);
+                        info.Responses.Add(new DialogResponse
                         {
-                            string ea = $"Alias_Beat{e + 1}Target";
-                            props.Add(("ReferenceAlias", ea, clone.FormKey, slotOf[e].activatorAlias));
-                            Add(st, $"{ea}.GetRef().BlockActivation(True, True)");
-                            if (e != b) Add(st, $"SetObjectiveDisplayed({ObjOf(s, e)}, False)");
-                        }
-                        Add(st, $"SetObjectiveCompleted({own})");
-                        Add(st, "CompleteQuest()");
-                        StopQuest(st);
-                    }
-                    if (s.IsHold)
-                    {
-                        // Each wave down: the counter ticks (and redisplays the objective, which is the player's
-                        // only feedback: no message boxes in this type, his ruling), then the next wave comes.
-                        for (int w = 0; w < s.WaveStages.Count; w++)
-                        {
-                            Add(s.WaveStages[w], $"ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Waves}.0)");
-                            if (w + 1 < s.WaveStages.Count) SpawnWave(b, w + 1, s.WaveStages[w]);
-                        }
-                    }
-                    if (s.IsGroup)
-                    {
-                        Add(st,$"If ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Beats.Count}.0)");
-                        Add(st, $"    SetStage({s.DoneStage})");
-                        Add(st, "EndIf");
-                    }
-                }
-                int done = s.DoneStage;
-                if (!s.IsGroup && !s.IsChoose) Add(done, $"SetObjectiveCompleted({s.Objective})");
-                if (last)
-                {
-                    if (!s.IsChoose && t.questScript != null) CompleteMission(done);
-                    else if (!s.IsChoose) { Add(done, "CompleteQuest()"); StopQuest(done); }
-                }
-                else Enter(k + 1, done);
-            }
+                            ResponseText = ltext,
+                            WEMFile = topic.FormKey.ID,
+                            TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(ltext))[..4],
+                        });
+                        topic.Responses.Add(info);
+                        // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
+                        topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
+                        clone.DialogTopics.Add(topic);
 
-            var psc = new StringBuilder();
-            psc.AppendLine($"Scriptname {name} Extends Quest Hidden Const");
-            psc.AppendLine($"{{GENERATED by FrankyCLI gen_delve from data/delves/recipes/{r.id}.json. Do not edit: change the recipe");
-            psc.AppendLine("and rebuild. The stage fragments of a beats Delve: the stages are the state machine, stock alias");
-            psc.AppendLine("scripts set them, and these functions do the Papyrus-only half (objectives, counters, items).}");
-            psc.AppendLine();
-            foreach (var kv in code)
-            {
-                psc.AppendLine($"Function {FragmentFunction(kv.Key)}()");
-                foreach (var line in kv.Value) psc.AppendLine("    " + line);
-                if (tails.TryGetValue(kv.Key, out var tail))
-                    foreach (var line in tail) psc.AppendLine("    " + line);
-                psc.AppendLine("EndFunction");
+                        var action = new RadioSceneAction { Name = "Say", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0 };
+                        action.Topic.SetTo(topic.FormKey);
+                        // ⛔ THE BROADCAST CANNOT BE STARTED FROM STAGE 0's FRAGMENT: that runs while the quest is still
+                        // starting, and Start() then does nothing at all. Measured in his play, 2026-10-09, with an
+                        // on-screen probe: stage 0 "playing = FALSE", the same scene started again at stage 10 played,
+                        // voice and subtitle. So a stage-0 line is started by the ENGINE, with the scene's own
+                        // BeginOnQuestStart flag, and every later stage's line by its fragment.
+                        bool atStart = lst == 0;
+                        var scene = new Scene(myMod)
+                        {
+                            EditorID = tag + "_scene",
+                            // 0x80 is on every vanilla audio-log scene; undocumented (book_audio.md)
+                            Flags = (Scene.Flag)0x80 | (atStart ? Scene.Flag.BeginOnQuestStart : 0),
+                            VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
+                        };
+                        scene.Quest.SetTo(clone.FormKey);
+                        scene.Actors.Add(new SceneActor { ID = unchecked((uint)-4), Flags = SceneActor.Flag.NoCommandState, BehaviorFlags = 0 });
+                        scene.Phases.Add(new ScenePhase { Name = "SayPhase", EditorWidth = 500 });
+                        scene.Actions = new Noggog.ExtendedList<ASceneAction> { action };
+                        clone.Scenes.Add(scene);
+
+                        string sv = $"Say{n + 1}";
+                        if (!atStart)
+                        {
+                            props.Add(("Scene", sv, scene.FormKey, -1));
+                            if (n == offerLine) Tail(lst, $"{sv}.Start()   ; the offer's call, after the find's box is closed");
+                            else Add(lst, $"{sv}.Start()");
+                            spokenAt.Add((lst, n + 1));
+                        }
+                        bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));
+                        Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
+                    }
+                }
+                // A quest's scenes stop with it, so a line on the stage that ENDS the quest would be cut off by the
+                // Stop() after it ("Link is online", 2026-10-09). There, wait for the line to finish first: a second
+                // for the scene to begin, then while it plays, capped at 30 s so a scene that never reports done
+                // cannot hold the quest open.
+                void StopQuest(int st)
+                {
+                    WaitForLines(st);
+                    Add(st, "Stop()");
+                }
+                // A board mission ends through the script the board talks to: MissionComplete() pays through MissionParent,
+                // completes every objective, sets CompleteStage and shuts the quest down. Vanilla's own stage-100 fragment
+                // (QF_MB_Bounty05_UC_003303A5) is exactly this autocast and call.
+                void CompleteMission(int st)
+                {
+                    WaitForLines(st);
+                    Add(st, "Quest __temp = Self as Quest");
+                    Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
+                    Add(st, "kmyQuest.MissionComplete()");
+                }
+                void WaitForLines(int st)
+                {
+                    foreach (var (_, n) in spokenAt.Where(x => x.stage == st))
+                    {
+                        Add(st, $"Utility.Wait(1.0)   ; let Say{n} begin before asking whether it plays");
+                        Add(st, $"Int waited{n} = 0");
+                        Add(st, $"While Say{n}.IsPlaying() && waited{n} < 30");
+                        Add(st, "    Utility.Wait(1.0)");
+                        Add(st, $"    waited{n} += 1");
+                        Add(st, "EndWhile");
+                    }
+                }
+                var held = new List<int>();   // pickups and recovered items not yet delivered
+                int handBack = HandBackTalk(r, steps);
+                for (int k = 0; k < steps.Count; k++)
+                {
+                    var s = steps[k];
+                    bool last = k == steps.Count - 1;
+                    foreach (var b in s.Beats)
+                    {
+                        int st = beatStage[b];
+                        if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
+                        if (r.beats[b].type == "pickup" || r.beats[b].type == "recover") held.Add(b);
+                        if (r.beats[b].type == "deliver" || b == handBack)
+                        {
+                            foreach (var h in held)
+                            {
+                                props.Add(("Form", $"Item{h + 1}", itemOf[h], -1));
+                                Add(st, $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)");
+                            }
+                            if (b == handBack) bm.HandBack = (st, held.Select(h => $"Game.GetPlayer().RemoveItem(Item{h + 1}, 1)").ToList());
+                            if (!s.IsChoose) held.Clear();   // every ending takes the same things
+                        }
+                        if (s.IsChoose)
+                        {
+                            // Whichever ending the player walked to: every ending's prompt goes, the others' objectives
+                            // are HIDDEN (never failed: neither side is the villain), and the quest ends here.
+                            int own = ObjOf(s, b);
+                            foreach (var e in s.Beats)
+                            {
+                                string ea = $"Alias_Beat{e + 1}Target";
+                                props.Add(("ReferenceAlias", ea, clone.FormKey, slotOf[e].activatorAlias));
+                                Add(st, $"{ea}.GetRef().BlockActivation(True, True)");
+                                if (e != b) Add(st, $"SetObjectiveDisplayed({ObjOf(s, e)}, False)");
+                            }
+                            Add(st, $"SetObjectiveCompleted({own})");
+                            Add(st, "CompleteQuest()");
+                            StopQuest(st);
+                        }
+                        if (s.IsHold)
+                        {
+                            // Each wave down: the counter ticks (and redisplays the objective, which is the player's
+                            // only feedback: no message boxes in this type, his ruling), then the next wave comes.
+                            for (int w = 0; w < s.WaveStages.Count; w++)
+                            {
+                                Add(s.WaveStages[w], $"ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Waves}.0)");
+                                if (w + 1 < s.WaveStages.Count) SpawnWave(b, w + 1, s.WaveStages[w]);
+                            }
+                        }
+                        if (s.IsGroup)
+                        {
+                            Add(st,$"If ModObjectiveGlobal(1.0, Counter{k + 1}, {s.Objective}, {s.Beats.Count}.0)");
+                            Add(st, $"    SetStage({s.DoneStage})");
+                            Add(st, "EndIf");
+                        }
+                    }
+                    int done = s.DoneStage;
+                    if (!s.IsGroup && !s.IsChoose) Add(done, $"SetObjectiveCompleted({s.Objective})");
+                    if (last)
+                    {
+                        if (!s.IsChoose && t.questScript != null) CompleteMission(done);
+                        else if (!s.IsChoose) { Add(done, "CompleteQuest()"); StopQuest(done); }
+                    }
+                    else Enter(k + 1, done);
+                }
+
+                var psc = new StringBuilder();
+                psc.AppendLine($"Scriptname {name} Extends Quest Hidden Const");
+                psc.AppendLine($"{{GENERATED by FrankyCLI gen_delve from data/delves/recipes/{r.id}.json. Do not edit: change the recipe");
+                psc.AppendLine("and rebuild. The stage fragments of a beats Delve: the stages are the state machine, stock alias");
+                psc.AppendLine("scripts set them, and these functions do the Papyrus-only half (objectives, counters, items).}");
                 psc.AppendLine();
-            }
-            foreach (var p in props.DistinctBy(p => p.pname))
-                psc.AppendLine($"{p.type} Property {p.pname} Auto Const Mandatory");
+                foreach (var kv in code)
+                {
+                    psc.AppendLine($"Function {FragmentFunction(kv.Key)}()");
+                    foreach (var line in kv.Value) psc.AppendLine("    " + line);
+                    if (tails.TryGetValue(kv.Key, out var tail))
+                        foreach (var line in tail) psc.AppendLine("    " + line);
+                    psc.AppendLine("EndFunction");
+                    psc.AppendLine();
+                }
+                foreach (var p in props.DistinctBy(p => p.pname))
+                    psc.AppendLine($"{p.type} Property {p.pname} Auto Const Mandatory");
 
-            vma.Script ??= new ScriptEntry();
-            vma.Script.Name = name;
-            vma.Script.Properties.Clear();
-            foreach (var p in props.DistinctBy(p => p.pname))
-            {
-                var op = new ScriptObjectProperty { Name = p.pname, Flags = ScriptProperty.Flag.Edited };
-                op.Object.SetTo(p.key);
-                if (p.alias >= 0) op.Alias = (short)p.alias;   // a ReferenceAlias: the quest plus its alias id
-                vma.Script.Properties.Add(op);
-            }
-            vma.Fragments.Clear();
-            foreach (var st in code.Keys)
-                vma.Fragments.Add(new QuestScriptFragment { Stage = (ushort)st, StageIndex = 0, ScriptName = name, FragmentName = FragmentFunction(st) });
-            bm.Script = name;
-            bm.FragStages = code.Keys.ToList();
+                vma.Script ??= new ScriptEntry();
+                vma.Script.Name = name;
+                vma.Script.Properties.Clear();
+                foreach (var p in props.DistinctBy(p => p.pname))
+                {
+                    var op = new ScriptObjectProperty { Name = p.pname, Flags = ScriptProperty.Flag.Edited };
+                    op.Object.SetTo(p.key);
+                    if (p.alias >= 0) op.Alias = (short)p.alias;   // a ReferenceAlias: the quest plus its alias id
+                    vma.Script.Properties.Add(op);
+                }
+                vma.Fragments.Clear();
+                foreach (var st in code.Keys)
+                    vma.Fragments.Add(new QuestScriptFragment { Stage = (ushort)st, StageIndex = 0, ScriptName = name, FragmentName = FragmentFunction(st) });
+                bm.Script = name;
+                bm.FragStages = code.Keys.ToList();
 
-            // The reject script's Objectives: every objective the quest now carries, so a turned-down Delve leaves
-            // nothing on screen whichever step was showing.
-            // (A board mission has no reject script: the board's own handles a turn-down.)
-            if (t.questScript == null)
-            {
-                var reject = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript);
-                if (reject == null) { Console.WriteLine($"REFUSED: {RejectScript} is not on the quest."); return 1; }
-                var objs = clone.Objectives.Select(o => (int)o.Index).OrderBy(i => i).ToList();
-                if (objs.Count == 0) { Console.WriteLine("REFUSED: the quest has no objectives for the reject script to hide."); return 1; }
-                reject.Properties.Clear();
-                var ol = new ScriptIntListProperty { Name = "Objectives", Flags = ScriptProperty.Flag.Edited };
-                ol.Data.AddRange(objs);
-                reject.Properties.Add(ol);
-                bm.RejectObjectives = objs;
-            }
+                // The reject script's Objectives: every objective the quest now carries, so a turned-down Delve leaves
+                // nothing on screen whichever step was showing.
+                // (A board mission has no reject script: the board's own handles a turn-down.)
+                if (t.questScript == null)
+                {
+                    var reject = vma.Scripts.FirstOrDefault(s => s.Name == RejectScript);
+                    if (reject == null) { Console.WriteLine($"REFUSED: {RejectScript} is not on the quest."); return 1; }
+                    var objs = clone.Objectives.Select(o => (int)o.Index).OrderBy(i => i).ToList();
+                    if (objs.Count == 0) { Console.WriteLine("REFUSED: the quest has no objectives for the reject script to hide."); return 1; }
+                    reject.Properties.Clear();
+                    var ol = new ScriptIntListProperty { Name = "Objectives", Flags = ScriptProperty.Flag.Edited };
+                    ol.Data.AddRange(objs);
+                    reject.Properties.Add(ol);
+                    bm.RejectObjectives = objs;
+                }
 
-            string dir = Path.Combine(PapyrusDir(), "gen");
-            Directory.CreateDirectory(dir);
-            bm.PscPath = Path.Combine(dir, name + ".psc");
-            File.WriteAllText(bm.PscPath, psc.ToString().Replace("\r\n", "\n"));
-            Console.WriteLine($"  fragments: {name} on stages [{string.Join(", ", code.Keys)}], {props.DistinctBy(p => p.pname).Count()} propert(ies); source {bm.PscPath}");
-            return 0;
+                string dir = Path.Combine(PapyrusDir(), "gen");
+                Directory.CreateDirectory(dir);
+                bm.PscPath = Path.Combine(dir, name + ".psc");
+                File.WriteAllText(bm.PscPath, psc.ToString().Replace("\r\n", "\n"));
+                Console.WriteLine($"  fragments: {name} on stages [{string.Join(", ", code.Keys)}], {props.DistinctBy(p => p.pname).Count()} propert(ies); source {bm.PscPath}");
+                return 0;
+            }
         }
 
         /// <summary>
