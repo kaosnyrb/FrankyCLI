@@ -51,7 +51,7 @@ namespace FrankyCLI
         /// the lint's vocabulary and the sections still branch on the rest by name; the step that moves the last one
         /// deletes BeatTypes. `gen_delve selftest` holds every kind to a name BeatTypes knows.
         /// </summary>
-        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat() }
+        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat() }
             .ToDictionary(k => k.Name);
 
         /// <summary>The beat's kind, or null for a type that has none yet (or none at all: the lint refuses that).</summary>
