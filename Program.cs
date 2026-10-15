@@ -165,6 +165,10 @@ switch (mode)
         // BUILT record: fill order, dependencies, static place pools and the joint pool per place.
         return gen_aliaslint.Run(args);
 
+    case "gen_questmodel":
+        // gen_questmodel shape | ...  -- true construction of a QUST record from a model we own
+        return gen_questmodel.Run(args);
+
     case "gen_delve":
         // gen_delve templates | lint <recipe> | lint --all | build <recipe> [--dry] | keywords [filter...]
         // Reference: docs/quests/delve-recipes.md
