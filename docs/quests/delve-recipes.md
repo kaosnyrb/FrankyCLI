@@ -24,7 +24,17 @@ dotnet run -- gen_delve lint --all     grade every recipe (about a minute, one l
 dotnet run -- gen_delve lint <id>      one recipe's full report
 dotnet run -- gen_delve build <id> --dry   lint, then build in memory, write nothing
 dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, then verify off disk
+dotnet run -- gen_delve build <id> --dry --emit <dir>   the would-be plugin and the emitted model, to <dir> only
 ```
+
+**True construction (his ruling, 2026-10-15).** A template with a `shell` builds its quest with `new` from
+`data/delves/shells/<template>.json` (the quest the template starts from, as a `gen_questmodel` model) and never
+reads the base quest. Every build then **emits the quest's model** to `data/delves/models/<id>.json` beside the
+recipe, and the quest written into the plugin is built from that file's text. The model is the build's output:
+read it to see exactly what a Delve's quest holds. `gen_delve shell <template>` writes a shell once from the base;
+the file is ours after that. `--from-base` starts from the old clone instead, for the A/B proof (`--dry --emit` both
+ways, compare the two plugins by bytes). **Open:** the lint still reads the base quest, a remote place still
+copies `remotePlaceFrom`'s alias, and the board template has no shell yet.
 
 **A clean lint means the build will take it.** The lint writes nothing and is safe to run any time.
 

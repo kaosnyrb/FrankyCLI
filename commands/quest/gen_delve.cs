@@ -20,7 +20,9 @@ namespace FrankyCLI
     ///   gen_delve templates                     list the registry
     ///   gen_delve lint  <recipe.json | id>      grade a recipe without writing anything
     ///   gen_delve lint  --all                   grade every recipe, one load-order index, one line each
-    ///   gen_delve build <recipe.json | id> [--dry]   lint, then clone + rewire + verify OFF DISK
+    ///   gen_delve build <recipe.json | id> [--dry]   lint, then construct + rewire + EMIT THE MODEL + verify OFF DISK
+    ///   gen_delve build <id> --dry --emit <dir> [--from-base]   the A/B proof's output: plugin and model to <dir>
+    ///   gen_delve shell <template>              write a template's shell model from its base quest, once
     ///   gen_delve keywords [filter ...]         theme tally inside a narrowed POI pool
     ///
     /// ⭐ THE FORMAT, EVERY FIELD AND EVERY RULE: docs/quests/delve-recipes.md. Three template kinds:
