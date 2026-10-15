@@ -46,6 +46,12 @@ namespace FrankyCLI
             /// </summary>
             internal virtual int Objectives(BeatsBuild build, int k, int b, QuestObjective source) => 0;
 
+            /// <summary>
+            /// The beat's own dialogue records, at the end of the Messages pass once every person's NPC is cloned (beat
+            /// order): a talk points its person's alias at his NPC and builds its conversation.
+            /// </summary>
+            internal virtual void Dialogue(BeatsBuild build, int b) { }
+
             /// <summary>The beat's stock hook, in the Hooks pass (step order, then beat order). Non-zero refuses.</summary>
             internal abstract int Hook(BeatsBuild build, int b, int prereq);
 
@@ -71,7 +77,7 @@ namespace FrankyCLI
         /// the lint's vocabulary and the sections still branch on the rest by name; the step that moves the last one
         /// deletes BeatTypes. `gen_delve selftest` holds every kind to a name BeatTypes knows.
         /// </summary>
-        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat(), new HoldBeat() }
+        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat(), new HoldBeat(), new TalkBeat() }
             .ToDictionary(k => k.Name);
 
         /// <summary>The beat's kind, or null for a type that has none yet (or none at all: the lint refuses that).</summary>
