@@ -41,6 +41,8 @@ namespace FrankyCLI
         public List<QObjective> Objectives { get; set; } = new();
         public List<QAlias> Aliases { get; set; } = new();
         public QVmad? Vmad { get; set; }
+        /// The quest's own child records (scenes, topics with their INFOs), written in the quest's group.
+        public QChildren? Children { get; set; }
     }
 
     /// The record header: the engine reads FormVersion to know how to parse the record, so it is data, not noise.

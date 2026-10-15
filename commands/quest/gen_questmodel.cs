@@ -43,6 +43,7 @@ namespace FrankyCLI
                     return Shape();
                 case "read": return ReadVerb(args.Skip(2).ToList());
                 case "check": return CheckVerb(args.Skip(2).ToList());
+                case "dump": return DumpVerb(args.Skip(2).ToList());
                 default:
                     Console.WriteLine("usage: gen_questmodel shape [Type ...] | read <editorId> [--out file.json] | check <editorId | prefix*> [--mod name]");
                     return 1;

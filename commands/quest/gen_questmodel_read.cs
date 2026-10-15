@@ -22,10 +22,12 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_questmodel
     {
-        private sealed class Reader
+        private sealed partial class Reader
         {
             public readonly List<string> Refusals = new();
             public string Children = "";
+            /// --no-children: compare the QUST record alone, the way the first version of check did.
+            public bool SkipChildren;
 
             /// Fields every level may carry without the model holding them: identity and Mutagen's own plumbing.
             private static readonly HashSet<string> Plumbing = new()
@@ -100,7 +102,7 @@ namespace FrankyCLI
             /// present-and-zero is FormKey.Null's own spelling, never a sentinel invented here.
             private static string? Fk(IFormLinkGetter l) => NullableKey(l) is (true, var k)
                 ? (k is FormKey f ? f.ToString() : null)
-                : (l.IsNull ? null : l.FormKey.ToString());
+                : (l.FormKey == FormKey.Null ? null : l.FormKey.ToString());   // IsNull is also true for 0xFFFFFFFF (TRDA emotion), which is NOT FormKey.Null
 
             /// (isNullable, its FormKey?) off the link's own FormKeyNullable. There is no non-generic interface that
             /// carries it, so it is read off the concrete link; a link without it is a plain two-state link.
@@ -153,6 +155,7 @@ namespace FrankyCLI
                 for (int i = 0; i < q.Objectives.Count; i++) m.Objectives.Add(Objective(q.Objectives[i], $"Objectives[{i}]"));
                 for (int i = 0; i < q.Aliases.Count; i++) m.Aliases.Add(Alias(q.Aliases[i], $"Aliases[{i}]"));
                 if (q.VirtualMachineAdapter is { } vma) m.Vmad = Vmad(vma, "VMAD");
+                m.Children = SkipChildren ? null : ReadChildren(q);
                 return m;
             }
 

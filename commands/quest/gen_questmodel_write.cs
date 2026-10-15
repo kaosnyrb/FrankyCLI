@@ -71,6 +71,7 @@ namespace FrankyCLI
             q.Objectives.AddRange(m.Objectives.Select(WriteObjective));
             q.Aliases = new ExtendedList<AQuestAlias>(m.Aliases.Select(WriteAlias));   // null on a new Quest, unlike Stages (manual part 13)
             if (m.Vmad != null) q.VirtualMachineAdapter = WriteVmad(m.Vmad);
+            if (m.Children != null) WriteChildren(q, m.Children);
             return q;
         }
 
@@ -255,7 +256,10 @@ namespace FrankyCLI
             ["GetDistanceGalacticParsec"] = new(typeof(IGetDistanceGalacticParsecConditionDataGetter), () => new GetDistanceGalacticParsecConditionData(),
                 (g, m) => { var x = (IGetDistanceGalacticParsecConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetDistanceGalacticParsecConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
-            ["IsTrueForConditionForm"] = new(typeof(IIsTrueForConditionFormConditionDataGetter), () => new IsTrueForConditionFormConditionData(),
+            ["GetIsID"] = new(typeof(IGetIsIDConditionDataGetter), () => new GetIsIDConditionData(),
+                (g, m) => { var x = (IGetIsIDConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (GetIsIDConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            ["IsTrueForConditionForm"] =new(typeof(IIsTrueForConditionFormConditionDataGetter), () => new IsTrueForConditionFormConditionData(),
                 (g, m) => { var x = (IIsTrueForConditionFormConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (IsTrueForConditionFormConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             // The odd shape: the FIRST parameter is a plain int (an alias number), the SECOND is the link-or-index.

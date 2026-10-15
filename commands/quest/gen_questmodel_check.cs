@@ -62,6 +62,7 @@ namespace FrankyCLI
             if (pos.Count != 1) { Console.WriteLine("REFUSED: gen_questmodel check <editorId | prefix*> [--mod name]"); return 1; }
             string pat = pos[0];
             bool bite = a.Contains("--bite");
+            bool noChildren = a.Contains("--no-children");
             // --tally: a census. Per-quest lines off; refusals grouped by KIND (indices and values stripped), counted
             // in quests; and every DIFFER named, because a DIFFER is a record that passed the reader and still came
             // out wrong, which is a blind spot in the model rather than a gap it admits.
@@ -79,8 +80,11 @@ namespace FrankyCLI
             int same = 0, refused = 0, differ = 0;
             foreach (var q in quests)
             {
-                var rd = new Reader();
-                var model = rd.Quest(q);
+                var rd = new Reader { SkipChildren = noChildren };
+                QModel model;
+                // A reader that throws on one record is a refusal for THAT record, named, never the end of a census.
+                try { model = rd.Quest(q); }
+                catch (Exception e) { model = new QModel(); rd.Refusals.Add($"reader threw {e.GetType().Name} at {e.StackTrace?.Split(Environment.NewLine).FirstOrDefault()?.Trim()}"); }
                 if (rd.Refusals.Count > 0)
                 {
                     refused++;
@@ -116,10 +120,10 @@ namespace FrankyCLI
 
                 // The ORACLE side only: the real record copied into a plugin of its own. Never on the write path.
                 var oracle = (Quest)q.DeepCopy();
-                oracle.Scenes.Clear(); oracle.DialogTopics.Clear(); oracle.DialogBranches.Clear();
+                if (noChildren) { oracle.Scenes.Clear(); oracle.DialogTopics.Clear(); oracle.DialogBranches.Clear(); }
                 byte[] want = Standalone(oracle, "oracle");
                 byte[] got = Standalone(built, "built");
-                if (want.SequenceEqual(got)) { same++; if (!tally) Console.WriteLine($"  IDENTICAL {q.EditorID}  ({got.Length:N0} B plugin, byte for byte; children not in scope: {rd.Children})"); continue; }
+                if (want.SequenceEqual(got)) { same++; if (!tally) Console.WriteLine($"  IDENTICAL {q.EditorID}  ({got.Length:N0} B plugin, byte for byte; {(noChildren ? "children not in scope: " : "with its children: ")}{rd.Children})"); continue; }
 
                 differ++;
                 int n = Math.Min(want.Length, got.Length), at = n;
