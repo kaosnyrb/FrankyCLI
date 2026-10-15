@@ -99,21 +99,22 @@ lettered recipes until they come out. `duo_delve09` was the first, the same day.
 
 | template | kind | beats | the shape |
 |---|---|---|---|
-| `two-beat-one-place` | dualactivator | 2 to 8 | pick a thing up, carry it, hand it over; extra beats in between are journal-only |
-| `find-owner-or-buyer` | choice | exactly 3 | find a thing with a name on it, then return it to its owner OR sell it to a buyer, at two different places; walking to one ends it (Type 2; `duo_delve06a`, `06b`) |
 | `beats` | beats | 1 to 9 | **no driver: the stages are the state machine.** Each beat has a `type`; any order behind a counter with `group`; a thief to `recover` from; a `returnTo` an earlier object; an `approach`; endings to `choose` between; waves to `hold` off (`duo_delve03a`-`09a`). See *Beats* below |
 | `board` | board | 1 to 9 | **a mission-board mission on the beats machinery** (his 2026-10-14). The base is `duo_MB28a_qst`; its driver comes off and vanilla's `MissionQuestScript` goes on, so the BOARD starts it, takes it and pays it. fights, and since missionboard02a `use`, `pickup`, `deliver` and `talk`, with a requested second place on another planet. See *Board* below |
 
 *Retired 2026-10-09: `carry-absence-recover-return` (kind `delve4`, `duo_delve_driver.psc`). 03 to 05 moved
 onto `beats` and played the same in his hands the same morning; the old shape is now `pickup` / `use` /
 `recover` / `deliver` with `returnTo: 2` and, on 03, an `approach`.*
+*Retired 2026-10-15 (his "yup" to deleting them first in the gen_delve split): `two-beat-one-place` (kind
+`dualactivator`) and `find-owner-or-buyer` (kind `choice`, `papyrus/duo_delve_choice.psc`), with no recipe on
+either since 10-09. The choice became `choose` endings on `beats` (`duo_delve06a`, `06b`). A row of a retired
+kind is refused when the registry loads, and a recipe still carrying `items`, `reward` or `people` is refused
+as an unknown key.*
 
 **Tokens** an author writes in prose, mapped by the template onto its real aliases:
 
 | template | tokens |
 |---|---|
-| two-beat-one-place | `<Place>`, `<Planet>` |
-| find-owner-or-buyer | `<FindPlace>`, `<OwnerPlace>`, `<BuyerPlace>`, `<Planet>` |
 | beats | `<Place>` (main), `<SecondPlace>`, `<ThirdPlace>`, `<Planet>`, `<SecondPlanet>` (only with `place.second.remote`: a found second place is on the main place's planet) |
 | board | `<Place>`, `<Planet>`, `<System>`, `<SecondPlace>`, `<SecondPlanet>` (the last two only with a beat at the second place) |
 
@@ -138,11 +139,8 @@ refused rather than silently ignored.
 | `author`, `source` | string | no | none | provenance; not written into the game |
 | `place` | object | yes | all | where the mission happens (below) |
 | `prose` | object | yes | all | `name` (the quest title) and `briefing` (the journal's opening line); on a `board` mission also **`card`, required there and refused elsewhere**: the board's description, what he reads before taking the job |
-| `items` | object | choice | choice | what is carried and what the objects look like (below) |
 | `beats` | list | yes | all | one entry per beat (below) |
-| `offer` | object | choice: yes | choice, beats ending on a `choose` | the surprise between the find and the endings: `journal` lands on the stage that opens the choice, `message` shows after the find's box |
-| `reward` | object | choice: yes | choice | the pay tier per ending |
-| `people` | object | no | choice | named NPCs at each ending, with outfits and company |
+| `offer` | object | no; refused unless a step is a `choose` | beats ending on a `choose` | the surprise between the find and the endings: `journal` lands on the stage that opens the choice, then `message` (a box, after the find's) OR `say` (a radio line), never both |
 | `recap` | string | beats ending on a `group`: yes; otherwise refused | beats | stage 100's journal line, the last thing the player reads (see *Beats*) |
 | `recapSay` | string | no; refused unless the Delve ends on a `group` | beats | the speaker's closing line, `recap`'s spoken twin, on the completing stage. A group's members fire in any order, so no member's `say` can be the last line heard (Jessica, remote03a); a single-beat ending's own `say` already is. His play of remote03a, 2026-10-14: *"first radio message played but nothing at the end?"* Needs a `speaker` |
 | `approach` | object | no | beats | what happens the first time the player comes near one beat's object (see *Beats*) |
@@ -183,7 +181,7 @@ new missions read as one board. A new Delve type gets its word on the day it is 
 |---|---|
 | `theme.require` / `theme.exclude` | location keywords the MAIN place must / must not carry. The place must also carry every marker its beats sit on, plus a map marker; the build derives those, you never write them |
 | `second` | the second POI's own theme (a beat with `"place": "second"`). **On a beats Delve with no beat at `second`, the build REMOVES the base's second place alias** (FinalLocation), which otherwise draws a second POI the quest never visits and only lets it start where two qualify (his catch on `duo_delve09`). It refuses if anything the player reads still names it |
-| `third` | choice only: the third POI's own theme (a beat with `"place": "third"`) |
+| `third` | the third POI's own theme (a beat with `"place": "third"`); the place is CREATED at build, a clone of the template's `thirdPlace.cloneOf` |
 | `remote` | optional, main place only, **written**: `true` = the place is REQUESTED on another planet rather than found near the player (his 2026-10-14: *"I got sick of travelling"*). The build copies the template's `remotePlaceFrom` quest's place alias over the base's (beats: `duo_artifact_remote_planet_qst01a`'s `DungeonLocation`, a `PCM_QuestGeneral` request with its planet condition and its `GetDistanceGalacticParsec < duo_distanceformission` limit); markers and theme are then written as for any place, and the local leash to the player goes. The lint measures the pool against what a request can place (`gen_delve pcmpool PCM_LocationRequest_General`, 214 readable places on Defiant), not the POI census. **Every beat is at that one place**, unless `second` is requested too: a third place, `reach`, or `remote` on `third` is refused. **`second.remote: true`** (2026-10-14, for missionboard02a and 10a) copies the same request over the second place, keeping its name, with no drive leash to the first; no shipped quest requests two sites (556 vanilla requesting quests, Overtime's 140, none with two), and his play of the probe `duo_delve_twosite01a` PROVED it the same day: *"two different POIs on two different Planets"*. The planets differing is one play; nothing in the request forces it. **Behind a LOCAL main place too** (2026-10-14, 10a, his *"build 10a"*): the main keeps its leash to the player and the second has no leash and **NO planet guard** (the guard behind a local first site CRASHED the game on `startquest`, twice; out, it started and played end to end, his 22:3x), so nothing forces another planet, and the beats template makes alias 60 `SecondPlanetLocation` (a copy of `targetPlanet`, parent the second place) for `<SecondPlanet>`. A third place beside a second request is refused. Not yet played. Deal it from `duo_MS_ArtifactMap_RemotePlanetNode` (the lint warns on a pool that never dealt the remote base) |
 | `reach` | optional, **written**: the Global every second and third place is held within, of the main place's map marker and of each other. Absent = `duo_longdrivedistance` (7,500). `duo_shortdrivedistance` (4,000) when the places must be close (08a, his 2026-10-13: the long drive spread a trail over *"most of the worldspace"*). Tighter = more slates find no fit and fall through to remote. Refused if it is not a Global, or the recipe has no second or third place |
 | `leash` | **advisory, not written.** ⭐ **What IS written (2026-10-13, his "make all points within 7500"): every second and third place is held within `duo_longdrivedistance` (7,500) of the main place's map marker, and a third place also of a marker in the second, so all a Delve's POIs are within one drive of each other.** The main place keeps the base's own limit, `duo_samemapdistance` (20,000) from the player. The base's leashes take an ALIAS number (`UseAliases`), and before this a beat at the second place moved that anchor into the second place itself, so the leash measured from its own marker (six Delves) or from a removed alias (11a). `gen_aliaslint` R5 now names that shape. ⭐ **A leash anchor is a FILL DEPENDENCY (his ruling, 2026-10-15): the place is filled, and its leash read, in list order, so the alias ordering puts a place below the alias it measures from exactly as it puts a marker below its place, and a build where no order exists (an anchor filling inside the place it leashes) is REFUSED, never written.** Found on 18a, the first Delve whose second-place beat is a `recover`: its new marker is appended below the third place that must be held near it. |
@@ -203,26 +201,10 @@ pool): `LocTypeOE_NonHostile` (nobody hostile, 62 POIs with a centre and map mar
 |---|---|
 | `at` | the marker the beat sits on, a `LocationReferenceType`. The workhorses: `RECenterLocRef`, `RETravelA1LocRef`, `RETravelB1LocRef`, `REMarkerMediumLocRef`, `REContainerLocRef`. ⚠ Two beats on the same travel ring (A1/A2/A3 or B1/B2/B3) land 7 to 14 m apart |
 | `ring` | **required on an object beat (`use`, `pickup`, `deliver`) whose `at` is a travel ring**, refused anywhere else. His rule, 2026-10-14: *"Items that are important to someone shouldn't be on travel ring. Infrastructure, Large cargo and hostiles can be on the travel ring"*. So it is `"infrastructure"` (sensors, reclaimers, beacons) or `"large-cargo"` (supply and wreck crates); fights and `recover` (a thief holds it) are the hostiles and need none. Anything that matters to someone goes on `REMarkerMediumLocRef`, and a second small one at the same place on `REMarkerSmallImportantLocRef` (his: for things on tables). The ring is outside and a median 70 m from the centre, so an object there reads as the POI's edge |
-| `place` | `"main"` (default), `"second"`, or `"third"` (choice) |
+| `place` | `"main"` (default), `"second"`, or `"third"` |
 | `objective` | the on-screen objective. Imperative, short (vanilla median 4 words, never past 12), no end punctuation |
-| `journal` | the journal line this beat sets. ⚠ **The log shows only the newest stage's line:** on a choice, beat 1's line is overwritten by the offer in the same instant, so put what the player must read in `offer.journal` |
+| `journal` | the journal line this beat sets. ⚠ **The log shows only the newest stage's line:** on a Delve with an `offer`, the beat before the endings must carry none, because the offer's journal lands on the same stage in the same instant and overwrites it (refused); put what the player must read in `offer.journal` |
 | `message` | optional pausing box: `{ "title": "...", "text": "..." }`, from the player's point of view. Plain ASCII |
-
-**Per template:**
-- **two-beat-one-place:** beats 1 and last are the driver's (objective required); beats in between are
-  created, carry a `journal` and **no** `objective`.
-- **find-owner-or-buyer:** exactly 3, in this order: the find at `second`, the owner at `main`, the
-  buyer at `third`.
-
-### `items`
-
-| field | template | what it is |
-|---|---|---|
-| `load` | choice | the carried thing's inventory name (a clone; never the base's item) |
-| `missing` | refused | (was delve4's other half; on beats it is a `recover` beat's `item`) |
-| `crateModel` | choice | the NIF the found thing wears, `Meshes\…` |
-| `centreModel`, `centreName` | choice | the OWNER's delivery point's NIF and its activate prompt |
-| `buyerModel`, `buyerName` | choice only, required | the buyer's delivery point |
 
 **A model must sit on the ground.** The lint grades each against the vanilla Static that owns the mesh
 and warns if it sinks, hangs or floats. A brand new kitbash has no Static to read, so check it by eye.
@@ -230,46 +212,20 @@ Shop furniture reads wrong standing alone in a POI (his: *"Prob be a chest"*). *
 item or NPC name already in the game, or used by another recipe, is refused, so **copying a recipe means
 renaming its things.**
 
-### `offer` (choice)
+### `offer`
 
 ```json
 "offer": { "journal": "…the line the player reads after the find…",
            "message": { "title": "Incoming Message", "text": "…" } }
 ```
 
-### `reward` (choice)
-
-```json
-"reward": { "owner": "easy", "buyer": "med" }
-```
-
-A **tier**, not a number: Overtime's ladder, written onto each ending's completing stage. `easy` 1,250
-credits / 250 XP · `med` 2,800 / 500 · `hard` 7,500 / 1,500. The design has the buyer paying more; the
-lint warns if not. The driver pays nothing itself.
-
-### `people` (choice)
-
-```json
-"people": {
-  "owner": { "name": "Maren Vale", "template": "UC_NA_MASTWorkerFemale01",
-             "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
-             "company": { "list": "duo_GangMembersList_Civ_LIST", "min": 2, "max": 4 } },
-  "buyer": { … }
-}
-```
-
-| field | what it is |
-|---|---|
-| `name` | the NPC's name, no tokens. **A message box that describes a person needs this person.** |
-| `template` | a vanilla NPC to clone, by EditorID. The friendly, talkable set: `UC_NA_MASTWorkerFemale01`…`05`, `UC_NA_MASTWorkerMale01`…`05` |
-| `outfit` | optional, an Outfit EditorID (596 in Starfield.esm, e.g. `Outfit_Clothes_Formal_ShirtSlacks_Vest`, `Outfit_Clothes_Colonist_…`, `Outfit_Scientist_…`). Absent = the template's own |
-| `company` | optional: nameless friendly NPCs placed within 8 m of the delivery point. `list` is a FormList of actors (Overtime's friendly ones are `duo_GangMembersList_Civ_*`: `Civ_LIST` colonists, `Civ_Medics`, `Civ_Construx`, `Civ_ArcMight`, `Civ_DeimosMiner`, `Civ_ArgosMiner`, `Civ_UnitedTransport`, `Civ_StrongArm`); `min`/`max` the count (more than 8 warns) |
-
-The person and their company appear the first time the player comes within 250 m of the point.
+Only on a Delve whose last step is a `choose`. `message` or `say` (a radio line in the recipe's `speaker`'s
+voice), never both: his "either or". The endings' pay and people ride each ending beat (`reward`,
+`person`): see *Beats*.
 
 ---
 
-## The choice's endings
+## Two endings (`choose`)
 
 The two delivery places **must never be able to draw the same POI.** The lint measures the two pools
 and refuses any overlap; the shipped way to separate them is the theme: one requires a keyword the other
@@ -290,8 +246,8 @@ run in parallel. A variant is not only new lore; it is another copy that can be 
 **Full recipes** (his ruling, 2026-10-08). `duo_delve07a`, `duo_delve07b`: same structure, new names
 and words. `lint --all` compares siblings that share a number and names any drift in template, beats
 (each beat's place, type, group, choose, `returnTo`, `replace`, a hold's numbers, and WHETHER it
-carries a person, box, line or item, never their words), themes or reward tier (top-level on the choice
-kind, per ending on beats), so a fix made in `a` and forgotten in `b` shows up. Until 2026-10-11 the
+carries a person, box, line or item, never their words), themes or reward tier (per ending), so a fix
+made in `a` and forgotten in `b` shows up. Until 2026-10-11 the
 beats and reward legs read only the choice kind's fields and compared nothing on a beats recipe
 (Jessica's find). Siblings **may** share a
 delivery model, and so may different missions (his, 2026-10-11: *"two missions sharing a model isnt really an issue"*). A variant that needs different structure is a
@@ -302,24 +258,23 @@ new number.
 ## What the lint checks
 
 **Refused:** not JSON · an unknown key · an id that is not its file name · a template that does not
-exist · a field the template never reads · the wrong beat count or shape for the template · a missing
-objective on a driven beat, or an objective on an extra beat · a marker, keyword, outfit, company list,
+exist, or a template row of a retired kind · a field the template never reads · the wrong beat count or
+shape for the template · a marker, keyword, outfit, company list,
 NPC template, model or reward tier that does not exist where `du_overtime` can reach it (the mod and its
-masters, never the CK bridge `du_overtime.esp`) · a place whose pool is zero · a choice whose two endings
+masters, never the CK bridge `du_overtime.esp`) · a place whose pool is zero · two `choose` endings that
 can be the same POI · a token in a name · an item or NPC name already in the game, or used by two
-recipes (the choice kind's `items`/`people` and each beat's `item`/`person.name`) · an empty message box · a `deal` that is not a Story Manager quest node in the template's own mod (the refusal lists the mod's nodes).
+recipes (each beat's `item` / `person.name`) · an empty message box · a journal the offer would overwrite · a `deal` that is not a Story Manager quest node in the template's own mod (the refusal lists the mod's nodes).
 
 **Warned:** a first objective that names no place (his, 2026-10-11: *"the first objective name should
 have a POI name in it. It helps to know what POI your looking for"*) · an object beat (a use, pickup or deliver that is not a `returnTo`) with no `model` or no
 `name`, because absent means the base's boss crate and generic prompt (his, 2026-10-11: *"we dont really
-want defaults"*) · a pool under 40 · a model that sinks, hangs or floats, or that no Static owns · a journal
-line the log will never show · an objective over 12 words or ending in punctuation · any em dash or
+want defaults"*) · a pool under 40 · a model that sinks, hangs or floats, or that no Static owns · an
+objective over 12 words or ending in punctuation · any em dash or
 non-ASCII character · two beats on one marker or one travel ring · a base exclusion the recipe drops ·
-letter siblings that differ in structure · a `deal` pool that never dealt the template's base quest · the buyer not
-paying more than the owner.
+letter siblings that differ in structure · a `deal` pool that never dealt the template's base quest.
 
 **The build adds, off disk:** every alias fills below what it fills from (the order the engine needs),
-every place demands exactly its markers, the plugin's masters are unchanged, and every driver property,
+every place demands exactly its markers, the plugin's masters are unchanged, and every script property,
 objective target, journal, stage reward and NPC field reads back as written, the quest sits in exactly the node its `deal` names (or none), and no node points at a quest the plugin no longer has.
 
 ---
@@ -521,5 +476,6 @@ properties the driver set (`questScriptKeeps` in the row). What changes from a s
 ## Not yet
 
 - ~~**An entry item.**~~ Every Delve is dealt from a dataslate pool by its `deal` (2026-10-12); `startquest` still works for a test.
-- **A third place outside the choice template**, and a choice with more than two endings.
+- ~~**A third place outside the choice template**~~ (the beats template creates one), and `choose` with
+  more than two endings.
 - ~~**Dialogue.**~~ The `talk` beat (2026-10-12). Choose endings' people still stand and do not talk.

@@ -25,21 +25,21 @@ namespace FrankyCLI
     ///   gen_delve shell <template>              write a template's shell model from its base quest, once
     ///   gen_delve keywords [filter ...]         theme tally inside a narrowed POI pool
     ///
-    /// ⭐ THE FORMAT, EVERY FIELD AND EVERY RULE: docs/quests/delve-recipes.md. Three template kinds:
-    /// dualactivator (two-beat-one-place), choice (find-owner-or-buyer, which CREATES a third place), and
-    /// beats (no driver; gen_delve_beats.cs). The delve4 kind (carry-absence-recover-return) was retired
-    /// 2026-10-09 when 03 to 05 played the same on beats.
+    /// ⭐ THE FORMAT, EVERY FIELD AND EVERY RULE: docs/quests/delve-recipes.md. Two template kinds, both built by
+    /// gen_delve_beats.cs with no driver: beats (a slate Delve) and board (a mission-board one). Retired: delve4
+    /// (carry-absence-recover-return) on 2026-10-09, when 03 to 05 played the same on beats; dualactivator
+    /// (two-beat-one-place) and choice (find-owner-or-buyer) on 2026-10-15, with no recipe on either since 10-09.
     ///
     /// ⭐ THE DIVISION IS HIS AND IT IS THE POINT: the recipe is content and belongs to whoever
     /// writes the mission; the template is mechanism and belongs to whoever reads records. Adding a
     /// hundred Delves adds a hundred recipes and no code. Adding a new KIND of beat adds a template
     /// row and, usually, nothing else either.
     ///
-    /// ⛔ WHY A TEMPLATE IS NEEDED AT ALL, because it looks like ceremony until you hit it: the
-    /// objective layer is PAPYRUS-ONLY. Of 245 vanilla Default* scripts exactly one calls
-    /// SetObjectiveDisplayed. The stage graph is fully authorable from records through stock hooks,
-    /// and the thing the player actually reads is not. So a multi-beat mission has to be driven by a
-    /// script that already displays its objectives, and `driver` on the template row names it.
+    /// ⛔ WHY A TEMPLATE IS NEEDED AT ALL, because it looks like ceremony until you hit it: a Delve is built
+    /// from a shipped quest's SHAPE (its shell: aliases, stages, the place and marker slots), and the row says
+    /// where each moving part is in it, read off the record. The objective layer is PAPYRUS-ONLY (of 245
+    /// vanilla Default* scripts exactly one calls SetObjectiveDisplayed); since 2026-10-09 that half is a
+    /// fragment script this tool writes per Delve, not a driver a row names, so no row carries one.
     ///
     /// ⭐ THE SELECTION CONDITIONS ARE DERIVED, NEVER AUTHORED. A recipe says which marker each beat
     /// sits on. The place's LocationHasRefType conditions are then the UNION of those markers plus
@@ -64,11 +64,10 @@ namespace FrankyCLI
         {
             public string id { get; set; } = "";
             /// <summary>
-            /// Which build path the row takes. "dualactivator" is the first row's: the base's own
-            /// driver runs the mission and extra beats are journal-only. "choice" REPLACES the base's
-            /// driver with one of ours from FrankyCLI/papyrus; "beats" removes it and has none.
+            /// "beats" or "board": both remove the base's driver and have none. Anything else is refused when the
+            /// registry loads, never defaulted, since the kinds that once took other build paths are gone.
             /// </summary>
-            public string kind { get; set; } = "dualactivator";
+            public string kind { get; set; } = "";
             public string @base { get; set; } = "";
             /// <summary>
             /// TRUE CONSTRUCTION (his ruling, 2026-10-15): the quest a build starts from, as a model file under
@@ -79,7 +78,7 @@ namespace FrankyCLI
             public string? shell { get; set; }
             public string mod { get; set; } = "";
             public string driver { get; set; } = "";
-            /// <summary>choice and beats: the base's script entry that is replaced or removed, and whose values are taken off it.</summary>
+            /// <summary>The base's script entry that is removed, and whose values are taken off it.</summary>
             public string? replacesDriver { get; set; }
             /// <summary>beats: fewest who stand with a recover beat's holder. The most is taken off the base's driver.</summary>
             public int gangMin { get; set; }
@@ -95,10 +94,7 @@ namespace FrankyCLI
             public int completeStage { get; set; }
             public List<BeatSlot> beatSlots { get; set; } = new();
             public int maxBeats { get; set; }
-            public int extraBeatStageBase { get; set; }
-            public int extraBeatStageStep { get; set; }
             public Dictionary<string, string> tokens { get; set; } = new();
-            public List<int> collapsedPlaceAliases { get; set; } = new();
             /// <summary>
             /// The base's OTHER place alias, which a beat may name with "place": "second" to happen at a
             /// different POI. -1 = this template has none. His ruling 2026-09-24 on duo_delve03: the load
@@ -106,13 +102,11 @@ namespace FrankyCLI
             /// </summary>
             public int secondPlaceAlias { get; set; } = -1;
             /// <summary>
-            /// choice: a THIRD place the base does not have, CREATED by cloning one of its location
-            /// aliases. Null = this template has none. His ruling 2026-10-08, "third place, time to
-            /// learn": the medal's owner and buyer are two different peopled sites.
+            /// A THIRD place the base does not have, CREATED by cloning one of its location aliases. Null = this
+            /// template has none. His ruling 2026-10-08, "third place, time to learn": the medal's owner and buyer
+            /// are two different peopled sites.
             /// </summary>
             public ThirdPlace? thirdPlace { get; set; }
-            /// <summary>choice: the stage the offer's journal line lands on, between the find and the endings.</summary>
-            public int offerStage { get; set; } = -1;
             /// <summary>
             /// beats: a quest in the same mod whose place alias (the same ID as placeAlias) is a REMOTE request, copied
             /// over the main place when a recipe sets place.remote. Null = this template cannot go remote. His
@@ -166,8 +160,8 @@ namespace FrankyCLI
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
-        /// <summary>The kinds the beats build runs: a slate Delve, and a mission-board one on the same machinery.</summary>
-        private static bool IsBeats(Template t) => t.kind == "beats" || t.kind == "board";
+        /// <summary>The two kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery.</summary>
+        private static readonly string[] Kinds = { "beats", "board" };
         private static bool IsBoard(Template t) => t.kind == "board";
         private sealed class BorrowAlias { public int from { get; set; } public int to { get; set; } }
         private sealed class SecondPlanet { public int cloneOf { get; set; } public int id { get; set; } public string name { get; set; } = ""; }
@@ -202,17 +196,9 @@ namespace FrankyCLI
             public string source { get; set; } = "";
             public Place place { get; set; } = new();
             public Prose prose { get; set; } = new();
-            public Items? items { get; set; }
             public List<Beat> beats { get; set; } = new();
-            /// <summary>choice: the surprise between the find and the endings (journal + optional box).</summary>
+            /// <summary>OPTIONAL: the surprise between the find and the choose endings (journal, and a box or a spoken line).</summary>
             public Offer? offer { get; set; }
-            /// <summary>
-            /// choice: Overtime's reward TIER per ending ("easy", "med", "hard"), written onto that ending's
-            /// completing stage as the duo_reward_creds_TIER / duo_reward_xp_TIER globals. His ladder.
-            /// </summary>
-            public Reward? reward { get; set; }
-            /// <summary>choice, OPTIONAL: who stands at each ending. Absent = nobody is placed.</summary>
-            public People? people { get; set; }
             /// <summary>
             /// beats, REQUIRED when the last step is a group (and refused otherwise): the completing stage's
             /// journal line. The group's last member sets its own stage and then the completing stage in the
@@ -271,7 +257,6 @@ namespace FrankyCLI
             /// <summary>OPTIONAL: a pickup beat (1-based) at the same place whose crate is moved out past the site's edge, if not yet taken.</summary>
             public int? lose { get; set; }
         }
-        private sealed class People { public Person? owner { get; set; } public Person? buyer { get; set; } }
         /// <summary>A named NPC cloned from a vanilla template by EditorID (NPCTools' friendly set is the menu).</summary>
         private sealed class Person
         {
@@ -306,32 +291,6 @@ namespace FrankyCLI
         /// 2026-10-12 on 06b: "the call from the guy to buy is a textbox and not a radio messsage".
         /// </summary>
         private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } public string? say { get; set; } }
-        private sealed class Reward { public string? owner { get; set; } public string? buyer { get; set; } }
-        /// <summary>choice: the carried item's inventory name and the delivery points' models and names. The item is CLONED, never the base's.</summary>
-        private sealed class Items
-        {
-            public string? load { get; set; }
-            public string? missing { get; set; }
-            /// <summary>
-            /// OPTIONAL: the NIF the beat-1 crate wears. Absent = the base activator's own model. His eye,
-            /// 2026-09-24: the base's is a BOSS container, so the load read as end-of-dungeon loot.
-            /// </summary>
-            public string? crateModel { get; set; }
-            /// <summary>
-            /// OPTIONAL: the NIF the delivery point (beat 2's centre activator) wears. Absent = the base's.
-            /// His ask, 2026-09-24: "change the delivery point to like a machine? it's the water plant thing".
-            /// </summary>
-            public string? centreModel { get; set; }
-            /// <summary>OPTIONAL: the delivery point's display name, i.e. its activate prompt. Absent = the base's.</summary>
-            public string? centreName { get; set; }
-            /// <summary>
-            /// choice, REQUIRED there: the buyer's delivery point, a second clone of the base activator. Required
-            /// because the buyer's slot is cloned from the owner's, so without its own model and name the buyer
-            /// would wear the owner's prompt.
-            /// </summary>
-            public string? buyerModel { get; set; }
-            public string? buyerName { get; set; }
-        }
         private sealed class Place
         {
             public Theme theme { get; set; } = new();
@@ -344,7 +303,7 @@ namespace FrankyCLI
             public string? reach { get; set; }
             /// <summary>The second POI's own theme, for beats with place "second". Absent = no theme.</summary>
             public Place? second { get; set; }
-            /// <summary>choice: the third POI's own theme, for beats with place "third". Absent = no theme.</summary>
+            /// <summary>The third POI's own theme, for beats with place "third". Absent = no theme.</summary>
             public Place? third { get; set; }
             /// <summary>RETIRED with the delve4 kind, 2026-10-09: kept only so the lint can refuse it (a beats Delve writes approach.civilians).</summary>
             public bool? civilians { get; set; }
@@ -948,10 +907,8 @@ namespace FrankyCLI
                 if (r != null) loaded.Add(r);
                 if (r != null)
                 {
-                    // Both kinds: the choice kind names its things at the top level, the beats kind per beat.
-                    // Reading only the first left the check comparing nothing on every beats recipe (Jessica, 2026-10-11).
-                    var named = new List<(string field, string? name)> { ("items.load", r.items?.load), ("items.missing", r.items?.missing),
-                                                                       ("people.owner.name", r.people?.owner?.name), ("people.buyer.name", r.people?.buyer?.name) };
+                    // Named per beat. (Read only at the top level once, which compared nothing on every beats recipe: Jessica, 2026-10-11.)
+                    var named = new List<(string field, string? name)>();
                     for (int i = 0; i < r.beats.Count; i++)
                     {
                         named.Add(($"beats[{i + 1}].item", r.beats[i].item));
@@ -988,8 +945,8 @@ namespace FrankyCLI
                                     b.item == null ? null : "+item" }.Where(s => s != null)))),
                     "themes" => string.Join(" | ", new[] { x.place.theme, x.place.second?.theme, x.place.third?.theme }
                                     .Select(th => th == null ? "-" : "+" + string.Join(",", th.require.OrderBy(k => k)) + " -" + string.Join(",", th.exclude.OrderBy(k => k)))),
-                    // The choice kind's tiers are top-level; the beats kind's ride each ending. Read both.
-                    "reward" => $"{x.reward?.owner}/{x.reward?.buyer}" + string.Concat(x.beats.Select((b, i) => b.reward == null ? "" : $" beat{i + 1}:{b.reward}")),
+                    // The tiers ride each choose ending.
+                    "reward" => string.Concat(x.beats.Select((b, i) => b.reward == null ? "" : $" beat{i + 1}:{b.reward}")),
                     _ => ""
                 };
                 // Who is at each place is NOT drift: a letter that changes it does so on purpose (his 06b, the medal
@@ -1091,17 +1048,7 @@ namespace FrankyCLI
             else if (r.beats.Count > maxBeats)
                 Fatal($"recipe has {r.beats.Count} beat(s); template '{t.id}' tops out at {maxBeats}.");
 
-            // The driver's own slots are the FIRST and LAST beat. Everything between them is an
-            // extra slot this tool creates, and an extra beat has no objective because there is no
-            // driver to display one -- writing the string anyway would put prose in the record that
-            // no player can ever see, which is worse than refusing it.
-            bool choice = t.kind == "choice";
-            bool beats = IsBeats(t);
-            if (beats) GradeBeats(r, t, env, Fatal, Warn);
-            else if (r.beats.Any(b => b.type != null || b.group != null || (b.item != null) || b.model != null || b.name != null || b.replace || b.returnTo != null || b.choose != null || b.reward != null || b.person != null
-                                      || b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.say != null) || r.approach != null
-                     || r.speaker != null || r.broadcast != null || r.recapSay != null)
-                Fatal($"a beat sets type, group, item, model, name, replace, returnTo or a hold's fields, or the recipe sets approach, and template '{t.id}' ({t.kind}) is not a beats Delve, so they would be silently ignored.");
+            GradeBeats(r, t, env, Fatal, Warn);
             if (IsBoard(t))
             {
                 // The board's own shape, refused rather than half-built: its base has only a place and a marker to give.
@@ -1121,191 +1068,6 @@ namespace FrankyCLI
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
-            if (!beats && r.recap != null)
-                Fatal($"the recipe has a recap, and template '{t.id}' ({t.kind}) is not a beats Delve, so it would be silently ignored.");
-            if (choice)
-            {
-                // ⭐ THE SHAPE IS THE DESIGN: found at one place, owned at a second, wanted at a third.
-                // Each place is a different POI by construction (and the pool check below proves the two
-                // endings cannot coincide), so the choice is made by where the player walks.
-                if (r.beats.Count == 3)
-                {
-                    var want = new[] { 1, 0, 2 };
-                    var role = new[] { "the find", "the owner", "the buyer" };
-                    for (int i = 0; i < 3; i++)
-                        if (r.beats[i].PlaceIndex != want[i])
-                            Fatal($"beat {i + 1} is {role[i]} and must be at the {PlaceLabel(want[i]).ToLowerInvariant()} place; it names '{r.beats[i].place ?? "main"}'.");
-                }
-                if (string.IsNullOrWhiteSpace(r.items?.load))
-                    Fatal("items.load is required: it is the thing the player carries to whichever ending, and an item with no name shows as a blank line.");
-                if (!string.IsNullOrWhiteSpace(r.items?.missing))
-                    Fatal("items.missing is set; a choice Delve carries ONE thing, so it would never be used.");
-                foreach (var (f, v) in new[] { ("centreModel", r.items?.centreModel), ("centreName", r.items?.centreName),
-                                                ("buyerModel", r.items?.buyerModel), ("buyerName", r.items?.buyerName) })
-                    if (string.IsNullOrWhiteSpace(v))
-                        Fatal($"items.{f} is required on a choice Delve: the buyer's delivery point is cloned from the owner's, "
-                              + "so each needs its own model and name or one wears the other's prompt.");
-                if (string.IsNullOrWhiteSpace(r.offer?.journal))
-                    Fatal("offer.journal is required: the offer is the beat that makes it a choice, and it must reach the journal.");
-                foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
-                {
-                    if (pp == null) { Warn($"people.{who} is absent, so nobody stands at that ending and a box that talks about a person talks about nobody."); continue; }
-                    if (string.IsNullOrWhiteSpace(pp.name) || string.IsNullOrWhiteSpace(pp.template))
-                    { Fatal($"people.{who} needs both a name and a template."); continue; }
-                    if (Tokens(pp.name).Any()) Fatal($"people.{who}.name carries a <Token>; an NPC name is not an alias context.");
-                    var tn = OwnOrMaster<INpcGetter>(Allowed(env, t), env, pp.template);
-                    if (tn == null) Fatal($"people.{who}.template '{pp.template}' is not an NPC in {t.mod} or one of its masters.");
-                    else Console.WriteLine($"  people.{who}: \"{pp.name}\" from {tn.EditorID} [{tn.FormKey}]");
-                    if (!string.IsNullOrWhiteSpace(pp.outfit))
-                    {
-                        var of = OwnOrMaster<IOutfitGetter>(Allowed(env, t), env, pp.outfit);
-                        if (of == null) Fatal($"people.{who}.outfit '{pp.outfit}' is not an Outfit in {t.mod} or one of its masters.");
-                        else Console.WriteLine($"  people.{who}.outfit: {of.EditorID} [{of.FormKey}]");
-                    }
-                    if (pp.company != null)
-                    {
-                        var fl = OwnOrMaster<IFormListGetter>(Allowed(env, t), env, pp.company.list ?? "");
-                        if (fl == null) Fatal($"people.{who}.company.list '{pp.company.list}' is not a FormList in {t.mod} or one of its masters.");
-                        else if (fl.Items.Count == 0) Fatal($"people.{who}.company.list '{pp.company.list}' is EMPTY, so nobody would ever be placed.");
-                        else Console.WriteLine($"  people.{who}.company: {pp.company.min}-{pp.company.max} from {fl.EditorID} ({fl.Items.Count} entries)");
-                        if (pp.company.min < 0 || pp.company.max < pp.company.min)
-                            Fatal($"people.{who}.company needs 0 <= min <= max; it has {pp.company.min}-{pp.company.max}.");
-                        else if (pp.company.max > 8)
-                            Warn($"people.{who}.company.max is {pp.company.max}; more than 8 at one delivery point is a crowd.");
-                    }
-                }
-                // THE PAY IS ON THE STAGE, never in the driver. Each ending's completing stage names a credits
-                // global and an xp global (QRCR / QRXP), and Overtime ships a ladder of them. The driver paid
-                // on top of the inherited stage reward once, and the buyer's ending paid twice (his first play).
-                var tierCredits = new Dictionary<string, float>();
-                foreach (var (who, tier) in new[] { ("owner", r.reward?.owner), ("buyer", r.reward?.buyer) })
-                {
-                    if (string.IsNullOrWhiteSpace(tier)) { Fatal($"reward.{who} is required: a tier, e.g. easy / med / hard."); continue; }
-                    foreach (var kind in new[] { "creds", "xp" })
-                    {
-                        var g = env.LoadOrder.PriorityOrder.WinningOverrides<IGlobalGetter>()
-                            .FirstOrDefault(x => string.Equals(x.EditorID, $"duo_reward_{kind}_{tier}", StringComparison.OrdinalIgnoreCase));
-                        if (g == null) { Fatal($"reward.{who} '{tier}': no global duo_reward_{kind}_{tier} in the load order."); continue; }
-                        float v = (float)(g.Data ?? 0f);
-                        Console.WriteLine($"  reward.{who}: {g.EditorID} = {v:G}");
-                        if (kind == "creds") tierCredits[who] = v;
-                    }
-                }
-                if (tierCredits.Count == 2 && tierCredits["buyer"] <= tierCredits["owner"])
-                    Warn($"the buyer's tier pays {tierCredits["buyer"]:G} and the owner's {tierCredits["owner"]:G}; the design has the buyer paying more.");
-            }
-            if (choice)
-            {
-                // Our driver displays every beat's objective, so every beat is driven, and the beat
-                // count is the state machine's shape rather than a ceiling.
-                if (r.beats.Count != t.beatSlots.Count)
-                    Fatal($"template '{t.id}' is exactly {t.beatSlots.Count} beats; the recipe has {r.beats.Count}.");
-                if (string.IsNullOrWhiteSpace(t.replacesDriver)) Fatal($"template '{t.id}' names no replacesDriver");
-                var itemNames = new[] { r.items?.load, r.items?.missing }.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n!).ToList();
-                if (itemNames.SelectMany(Tokens).Any())
-                    Fatal("an item name carries a <Token>. Item names are not alias contexts, so it would print literally in the inventory.");
-                else if (itemNames.Count > 0) ItemNameCollisions(env, r, itemNames, Fatal);
-                foreach (var (f, v) in new[] { ("centreName", r.items?.centreName), ("buyerName", r.items?.buyerName) })
-                    if (v != null && Tokens(v).Any())
-                        Fatal($"items.{f} carries a <Token>. An activator name is not an alias context, so it would print literally.");
-                if (r.items?.centreName != null && string.IsNullOrEmpty(r.items.centreModel))
-                    Warn("items.centreName is set with no centreModel; a name only goes onto the clone, so it is not written.");
-                foreach (var (field, path) in new[] { ("crateModel", r.items?.crateModel), ("centreModel", r.items?.centreModel),
-                                                      ("buyerModel", r.items?.buyerModel) })
-                {
-                    if (string.IsNullOrWhiteSpace(path)) continue;
-                    int uses = 0;
-                    string? stands = null;
-                    // ⭐ RULE 1 OF EVERY DELVE (2026-10-08, the tripod dish 2 m underground): read a mesh's lowest z
-                    // before it becomes a placed activator, graded off a STATIC that owns the mesh (the index does it).
-                    foreach (var u in IndexOf(env).ByModel.GetValueOrDefault(path!) ?? new List<(string? edid, string? stands)>())
-                    {
-                        if ((u.edid ?? "").StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase)) continue; // our own last build
-                        uses++;
-                        stands ??= u.stands;
-                    }
-                    Console.WriteLine($"  {field}: {path} is used by {uses} record(s) in the load order"
-                                      + (stands != null ? $"; {stands}" : ""));
-                    if (stands != null && !stands.StartsWith("STANDS"))
-                        Warn($"items.{field} {stands}: a placed activator stands its origin on the marker, so it will not sit on the ground.");
-                    else if (stands == null && uses > 0)
-                        Warn($"items.{field}: no Static owns this mesh, so whether it stands cannot be read off the records; look at it (gen_inspect bounds, or his NifSkope).");
-                    if (uses == 0)
-                    {
-                        // "Used by a record" was standing in for "the file exists", and the two part
-                        // company exactly when the model is NEW (2026-10-08: the office's first kitbash,
-                        // relaydish01, refused). So ask the real question: is the FILE there, loose in
-                        // Data or inside this mod's own archives? Nowhere still fails, unchanged.
-                        string where = FindAsset(env.DataFolderPath.Path, t.mod, path!);
-                        if (where == "")
-                            Fatal($"items.{field} '{path}' is used by no record in the load order AND is not in Data "
-                                  + $"loose or in any '{t.mod} - *.ba2'. A path that resolves to nothing builds clean "
-                                  + "and renders nothing; use one the game already ships.");
-                        else if (where == "loose")
-                            Warn($"items.{field} '{path}' is a NEW asset (no record uses it) and exists LOOSE ONLY. "
-                                 + "It renders on this machine and on NO player's: pack it into the mod's archives before a release.");
-                        else
-                            Warn($"items.{field} '{path}' is a NEW asset (no record uses it), found in {where}.");
-                    }
-                }
-                var boxes = r.beats.Select((b, i) => ($"beat {i + 1}", b.message)).ToList();
-                if (r.offer?.message != null) boxes.Add(("the offer", r.offer.message));
-                foreach (var (who, m) in boxes)
-                {
-                    if (m == null) continue;
-                    if (string.IsNullOrWhiteSpace(m.text)) Fatal($"{who} has a message with no text: an empty pausing box.");
-                    if (string.IsNullOrWhiteSpace(m.title)) Fatal($"{who} has a message with no title.");
-                    foreach (var (what, str) in new[] { ("title", m.title ?? ""), ("text", m.text ?? "") })
-                        if (str.Any(ch => ch > 126 || (ch < 32 && ch != '\n')))
-                            Warn($"{who} message {what} carries a non-ASCII or control character; the lane writes plain ASCII.");
-                }
-            }
-            for (int i = 0; i < r.beats.Count && !beats; i++)
-            {
-                bool driven = choice || i == 0 || i == r.beats.Count - 1;
-                if (string.IsNullOrWhiteSpace(r.beats[i].at)) Fatal($"beat {i + 1} names no marker");
-                if (driven && string.IsNullOrWhiteSpace(r.beats[i].objective))
-                    Fatal($"beat {i + 1} is one of the driver's own slots and has no objective text");
-                if (!driven && !string.IsNullOrWhiteSpace(r.beats[i].objective))
-                    Fatal($"beat {i + 1} is an EXTRA beat and carries an objective. The driver displays "
-                          + $"objectives {string.Join(" and ", t.beatSlots.Select(s => s.objective))} and no others, "
-                          + "so this text would never reach a player. Give it a journal line instead.");
-                if (!driven && string.IsNullOrWhiteSpace(r.beats[i].journal))
-                    Fatal($"beat {i + 1} is an EXTRA beat with no journal line, so nothing about it would "
-                          + "reach the player at all.");
-            }
-            int extras = beats ? 0 : Math.Max(0, r.beats.Count - t.beatSlots.Count);
-            if (extras > 0)
-            {
-                int last = t.extraBeatStageBase + t.extraBeatStageStep * (extras - 1);
-                if (t.extraBeatStageBase <= 0 || t.extraBeatStageStep <= 0)
-                    Fatal($"template '{t.id}' declares no extra-beat stage numbering, so it cannot take extras");
-                else if (last >= t.completeStage)
-                    Fatal($"{extras} extra beat(s) would number stages up to {last}, at or past the "
-                          + $"completing stage {t.completeStage}");
-                else
-                    Warn($"{extras} extra beat(s) will be CREATED: a marker alias, an activator, a stage and a "
-                         + $"stock hook each, numbered {t.extraBeatStageBase} to {last}. Journal only, no objective.");
-            }
-            // ⛔ A FIELD THE TEMPLATE NEVER READS IS SILENTLY DROPPED, which reads to an author exactly like it
-            // worked. Each kind names what it writes; anything else set on the recipe is refused.
-            var unused = new List<string>();
-            if (!choice)
-            {
-                if (r.offer != null && !beats) unused.Add("offer");
-                if (r.reward != null) unused.Add("reward");
-                if (r.people != null) unused.Add("people");
-                if (r.place.third != null && !beats) unused.Add("place.third");
-                if (r.items?.buyerModel != null) unused.Add("items.buyerModel");
-                if (r.items?.buyerName != null) unused.Add("items.buyerName");
-            }
-            if (!choice)
-            {
-                if (r.items != null) unused.Add("items");
-                if (!beats && r.beats.Any(b => b.message != null)) unused.Add("beats[].message");
-            }
-            foreach (var u in unused)
-                Fatal($"{u} is set, and template '{t.id}' ({t.kind}) never reads it, so it would be silently ignored.");
 
             // --- deal: which slate pool hands this Delve out (2026-10-11) ------------------------------------
             // Only a node in the template's OWN mod: the build appends to it, and appending to a master's node
@@ -1332,12 +1094,6 @@ namespace FrankyCLI
                         Warn($"deal '{node.EditorID}' does not deal {refQ}, the quest this Delve's place is built on; check the pool's event and conditions suit it.");
                 }
             }
-
-            // ⛔ THE QUEST LOG SHOWS ONLY THE NEWEST STAGE'S LINE (his play, 2026-10-08: "I think the family
-            // delivery one is skipped"). On a choice, beat 1's stage and the offer's are set in one instant.
-            if (choice && !string.IsNullOrWhiteSpace(r.beats.FirstOrDefault()?.journal))
-                Warn("beat 1's journal is NEVER SHOWN on this template: its stage and the offer's are set in the same instant and "
-                     + "the log shows only the newest line. Put what the player must read in offer.journal.");
 
             // --- prose, against the style guide (part 33) and the house rule -------------------------------
             foreach (var (where, text) in ProseStrings(r))
@@ -1466,10 +1222,6 @@ namespace FrankyCLI
                 Warn("place.third is set and no beat is at the third place, so it is never written");
             if (!anySecond && r.place.second != null)
                 Warn("place.second is set and no beat is at the second place, so it is never written");
-            if (!IsBeats(t) && r.offer?.say != null)
-                Fatal($"offer.say is set and template '{t.id}' is a {t.kind} Delve; only the beats kind speaks, so it would be silently ignored.");
-            if (!IsBeats(t) && new[] { r.place, r.place.second, r.place.third }.Any(p => p?.who != null))
-                Fatal($"a place sets who, and template '{t.id}' is a {t.kind} Delve; only the beats kind places anyone, so it would be silently ignored.");
             // A board mission's place is a request already (the base's own), so it is graded as a remote one is.
             bool remote = r.place.remote == true || IsBoard(t);
             // A remote SECOND place (his 2026-10-14, missionboard02a and 10a: a cargo run remote to remote) is a second
@@ -1550,36 +1302,23 @@ namespace FrankyCLI
                     else if (all < 40) Warn($"{which}'s draw pool is {all}. Narrow -- the narrowest anything in Overtime leans on is 44.");
                 }
 
-                // ⛔ TWO ENDINGS MUST BE TWO PLACES. Whether the engine de-duplicates two location aliases
-                // of one quest is NOT established (part 32: eight shipped cargo quests draw pickup and
-                // delivery from an identical pool, untested). The shipped separation mechanism is the
-                // THEME PREDICATE, disjoint by construction, so the choice's two delivery pools must not
-                // share a single POI. Measured here, not trusted to the author's keywords.
-                if (t.kind == "choice" && drawn.ContainsKey(0) && drawn.ContainsKey(2))
-                {
-                    var both = drawn[0].Intersect(drawn[2], StringComparer.OrdinalIgnoreCase).ToList();
-                    Console.WriteLine($"  owner (main) and buyer (third) pools overlap on {both.Count} POI(s)");
-                    if (both.Count > 0)
-                        Fatal($"the owner's and the buyer's places can draw the SAME POI ({both.Count}: {string.Join(", ", both.Take(5))}). "
-                              + "Make their themes disjoint: one requires a keyword the other excludes.");
-                }
-
-                // A beats Delve has no ending to keep apart, but two of its places drawing ONE POI would put
-                // two legs of a trail on the same site. Whether the engine de-duplicates location aliases is
-                // not established (part 32), so the overlap is measured and named rather than trusted.
-                if (beats)
-                    foreach (var (a, b) in new[] { (0, 1), (0, 2), (1, 2) })
-                        if (drawn.ContainsKey(a) && drawn.ContainsKey(b) && !(a == 0 && b == 1 && secondRemote))   // a second REQUEST makes a new site on another planet: no shared POI to draw
-                        {
-                            int both = drawn[a].Intersect(drawn[b], StringComparer.OrdinalIgnoreCase).Count();
-                            // Two ENDINGS must be two places (the choice kind's rule above, carried over): a refusal.
-                            bool endings = r.beats.Any(x => x.choose != null && x.PlaceIndex == a) && r.beats.Any(x => x.choose != null && x.PlaceIndex == b);
-                            if (endings) Console.WriteLine($"  {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} (two endings) overlap on {both} POI(s)");
-                            if (both > 0 && endings)
-                                Fatal($"two endings' places, {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()}, can draw the SAME POI ({both}). "
-                                      + "Make their themes disjoint: one requires a keyword the other excludes.");
-                            else if (both > 0) Warn($"the {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} places can draw the same POI ({both} in common); give one a theme the other excludes if they must differ.");
-                        }
+                // Two of a Delve's places drawing ONE POI would put two legs of a trail on the same site. Whether the engine
+                // de-duplicates location aliases is not established (part 32: eight shipped cargo quests draw pickup and
+                // delivery from an identical pool, untested), so the overlap is measured and named rather than trusted.
+                // ⛔ TWO ENDINGS MUST BE TWO PLACES, a refusal: the shipped separation mechanism is the THEME PREDICATE,
+                // disjoint by construction, so two endings' pools must not share a single POI (the retired choice kind's
+                // rule, carried over to choose endings).
+                foreach (var (a, b) in new[] { (0, 1), (0, 2), (1, 2) })
+                    if (drawn.ContainsKey(a) && drawn.ContainsKey(b) && !(a == 0 && b == 1 && secondRemote))   // a second REQUEST makes a new site on another planet: no shared POI to draw
+                    {
+                        int both = drawn[a].Intersect(drawn[b], StringComparer.OrdinalIgnoreCase).Count();
+                        bool endings = r.beats.Any(x => x.choose != null && x.PlaceIndex == a) && r.beats.Any(x => x.choose != null && x.PlaceIndex == b);
+                        if (endings) Console.WriteLine($"  {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} (two endings) overlap on {both} POI(s)");
+                        if (both > 0 && endings)
+                            Fatal($"two endings' places, {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()}, can draw the SAME POI ({both}). "
+                                  + "Make their themes disjoint: one requires a keyword the other excludes.");
+                        else if (both > 0) Warn($"the {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} places can draw the same POI ({both} in common); give one a theme the other excludes if they must differ.");
+                    }
 
                 // --- what the build will DROP from the base --------------------------------------------
                 // ⛔ WHY THIS EXISTS: the build rebuilds every keyword condition from the recipe, which is
@@ -2924,185 +2663,122 @@ namespace FrankyCLI
                                              ResolveKeywords(env, theme.exclude, _ => { }));
             }
 
-            var plan = new List<(BeatSlot slot, Beat beat, bool created)>();
-            if (IsBeats(t))
+            // A choose ending's person is resolved here, where the load order is, OWN-OR-MASTER, NEVER "WHATEVER WINS".
+            // du_overtime.esp (the CK bridge) carries a copy of every duo_ record under its own ModKey and loads later, so a
+            // winning-override lookup by EditorID found duo_GangMembersList_Civ_LIST in the ESP, the write linked to it, and
+            // Mutagen ADDED du_overtime.esp TO THE ESM'S MASTERS (2026-10-08, caught before he played).
+            var persons = new Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)>();
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
             {
-                // A choose ending's person is resolved here, where the load order is, own-or-master (never the
-                // winner by name: see the choice branch below for the master it once added).
-                var persons = new Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)>();
-                for (int i = 0; i < r.beats.Count && fail == 0; i++)
+                var pp = r.beats[i].person;
+                if (pp == null) continue;
+                var n = OwnOrMaster<INpcGetter>(myMod, env, pp.template ?? "");
+                if (n == null) { Console.WriteLine($"REFUSED: NPC '{pp.template}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                FormKey? of = null, co = null;
+                if (!string.IsNullOrWhiteSpace(pp.outfit))
                 {
-                    var pp = r.beats[i].person;
-                    if (pp == null) continue;
-                    var n = OwnOrMaster<INpcGetter>(myMod, env, pp.template ?? "");
-                    if (n == null) { Console.WriteLine($"REFUSED: NPC '{pp.template}' is not in {t.mod} or one of its masters."); fail++; continue; }
-                    FormKey? of = null, co = null;
-                    if (!string.IsNullOrWhiteSpace(pp.outfit))
-                    {
-                        var o = OwnOrMaster<IOutfitGetter>(myMod, env, pp.outfit!);
-                        if (o == null) { Console.WriteLine($"REFUSED: Outfit '{pp.outfit}' is not in {t.mod} or one of its masters."); fail++; continue; }
-                        of = o.FormKey;
-                    }
-                    if (pp.company != null)
-                    {
-                        var f = OwnOrMaster<IFormListGetter>(myMod, env, pp.company.list ?? "");
-                        if (f == null) { Console.WriteLine($"REFUSED: FormList '{pp.company.list}' is not in {t.mod} or one of its masters."); fail++; continue; }
-                        co = f.FormKey;
-                    }
-                    FormKey? vo = null;
-                    if (!string.IsNullOrWhiteSpace(pp.voice))
-                    {
-                        var vty = OwnOrMaster<IVoiceTypeGetter>(myMod, env, pp.voice!);
-                        if (vty == null) { Console.WriteLine($"REFUSED: VoiceType '{pp.voice}' is not in {t.mod} or one of its masters."); fail++; continue; }
-                        vo = vty.FormKey;
-                    }
-                    persons[i] = (n, of, co, vo);
+                    var o = OwnOrMaster<IOutfitGetter>(myMod, env, pp.outfit!);
+                    if (o == null) { Console.WriteLine($"REFUSED: Outfit '{pp.outfit}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                    of = o.FormKey;
                 }
-                // A hold's waves are empty RefCollection aliases filled at runtime. None of our bases carries
-                // one, so each is a copy of vanilla's own: UC08_QueenBattle's ActiveHostiles, an empty
-                // collection its wave scripts fill as hostiles go live (Optional, AllowDisabled, no fill).
-                // Read off Starfield.esm itself, never a winning override.
-                IQuestCollectionAliasGetter? waveSrc = null;
-                IPackageGetter? travelSrc = null;
-                if (fail == 0 && r.beats.Any(b => b.type == "hold" || b.type == "clear"))
+                if (pp.company != null)
                 {
-                    var sfm = env.LoadOrder[0].Mod;
-                    var uc08 = sfm == null || sfm.ModKey.FileName != "Starfield.esm" ? null
-                        : sfm.Quests.FirstOrDefault(q => q.FormKey.ID == 0x03E832);
-                    waveSrc = uc08?.Aliases.OfType<IQuestCollectionAliasGetter>()
-                        .FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == "ActiveHostiles");
-                    if (waveSrc == null) { Console.WriteLine("REFUSED: a hold copies its wave collections from UC08_QueenBattle's ActiveHostiles [03E832:Starfield.esm], and it is not there."); fail++; }
-                    // And the waves come FOR the player (his ask, after the first play: "there's AI packages in
-                    // the game which control enemies, would be good to have them attack the player"): a copy of
-                    // the Wanted trait's bounty hunters' Travel package, jog, weapon drawn, to PlayerRef.
-                    travelSrc = sfm?.Packages.FirstOrDefault(p => p.EditorID == "Trait_Wanted_TravelToPlayer");
-                    if (travelSrc == null) { Console.WriteLine("REFUSED: a hold copies its waves' package from Trait_Wanted_TravelToPlayer [0E830B:Starfield.esm], and it is not there."); fail++; }
+                    var f = OwnOrMaster<IFormListGetter>(myMod, env, pp.company.list ?? "");
+                    if (f == null) { Console.WriteLine($"REFUSED: FormList '{pp.company.list}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                    co = f.FormKey;
                 }
-                // The speaker of a Delve's spoken lines: a friendly MAST worker cloned only to carry a NAME and a
-                // VOICE TYPE (the voice folder the audio is looked up in). Never placed: the lines are radio.
-                (INpcGetter tmpl, FormKey voice)? speakerSrc = null;
-                if (fail == 0 && r.speaker != null)
+                FormKey? vo = null;
+                if (!string.IsNullOrWhiteSpace(pp.voice))
                 {
-                    var st = OwnOrMaster<INpcGetter>(myMod, env, "UC_NA_MASTWorkerMale01");
-                    var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, r.speaker.voice ?? "");
-                    if (st == null || vt == null) { Console.WriteLine($"REFUSED: the speaker needs UC_NA_MASTWorkerMale01 and VoiceType '{r.speaker.voice}' in {t.mod} or a master."); fail++; }
-                    else speakerSrc = (st, vt.FormKey);
+                    var vty = OwnOrMaster<IVoiceTypeGetter>(myMod, env, pp.voice!);
+                    if (vty == null) { Console.WriteLine($"REFUSED: VoiceType '{pp.voice}' is not in {t.mod} or one of its masters."); fail++; continue; }
+                    vo = vty.FormKey;
                 }
-                // Who is at each place: its creature list, own-or-master, as a person's company list is.
-                var whoLists = new Dictionary<int, FormKey>();
-                foreach (var (p, w, _) in WhoOf(r))
-                {
-                    var f = OwnOrMaster<IFormListGetter>(myMod, env, w.list ?? "");
-                    if (f == null) { Console.WriteLine($"REFUSED: FormList '{w.list}' ({PlaceKey[p]}.who.list) is not in {t.mod} or one of its masters."); fail++; continue; }
-                    whoLists[p] = f.FormKey;
-                }
-                // A fight's forms (defeat / clear), own-or-master as a who list is: the target, and each list it draws from.
-                var fights = new Dictionary<int, FightForms>();
-                for (int i = 0; i < r.beats.Count && fail == 0; i++)
-                {
-                    var fb = r.beats[i];
-                    if (fb.type != "defeat" && fb.type != "clear") continue;
-                    var ff = new FightForms();
-                    if (fb.target != null)
-                    {
-                        ff.Target = OwnOrMaster<INpcGetter>(myMod, env, fb.target)?.FormKey ?? OwnOrMaster<ILeveledNpcGetter>(myMod, env, fb.target)?.FormKey;
-                        if (ff.Target == null) { Console.WriteLine($"REFUSED: beat {i + 1} target '{fb.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters."); fail++; continue; }
-                    }
-                    foreach (var (what, name, set) in new (string, string?, Action<FormKey>)[] {
-                                 ("gang", fb.gang?.list, k => ff.Gang = k), ("enemies", fb.enemies?.list, k => ff.Enemies = k), ("loot", fb.loot?.list, k => ff.Loot = k) })
-                    {
-                        if (name == null) continue;
-                        var fl = OwnOrMaster<IFormListGetter>(myMod, env, name);
-                        if (fl == null) { Console.WriteLine($"REFUSED: beat {i + 1} {what}.list '{name}' is not a FormList in {t.mod} or one of its masters."); fail++; break; }
-                        set(fl.FormKey);
-                    }
-                    fights[i] = ff;
-                }
-                // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
-                var talkPerks = new Dictionary<(int beat, int ex), FormKey>();
-                for (int i = 0; i < r.beats.Count && fail == 0; i++)
-                {
-                    var tb = r.beats[i];
-                    if (tb.type != "talk" || tb.exchanges == null) continue;
-                    for (int x = 0; x < tb.exchanges.Count; x++)
-                    {
-                        if (tb.exchanges[x].perk is not string pn) continue;
-                        var pk = OwnOrMaster<IPerkGetter>(myMod, env, pn);
-                        if (pk == null) { Console.WriteLine($"REFUSED: beat {i + 1} exchanges[{x}].perk '{pn}' is not a Perk in {t.mod} or one of its masters."); fail++; continue; }
-                        talkPerks[(i, x)] = pk.FormKey;
-                    }
-                }
-                if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists, fights, talkPerks);
-                FormKey? reach = null;
-                if (r.place.reach != null)
-                {
-                    var rg = OwnOrMaster<IGlobalGetter>(myMod, env, r.place.reach);
-                    if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
-                    else reach = rg.FormKey;
-                }
-                if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true);
+                persons[i] = (n, of, co, vo);
             }
-            else if (t.kind == "choice")
+            // A hold's waves are empty RefCollection aliases filled at runtime. None of our bases carries
+            // one, so each is a copy of vanilla's own: UC08_QueenBattle's ActiveHostiles, an empty
+            // collection its wave scripts fill as hostiles go live (Optional, AllowDisabled, no fill).
+            // Read off Starfield.esm itself, never a winning override.
+            IQuestCollectionAliasGetter? waveSrc = null;
+            IPackageGetter? travelSrc = null;
+            if (fail == 0 && r.beats.Any(b => b.type == "hold" || b.type == "clear"))
             {
-                if (fail == 0)
+                var sfm = env.LoadOrder[0].Mod;
+                var uc08 = sfm == null || sfm.ModKey.FileName != "Starfield.esm" ? null
+                    : sfm.Quests.FirstOrDefault(q => q.FormKey.ID == 0x03E832);
+                waveSrc = uc08?.Aliases.OfType<IQuestCollectionAliasGetter>()
+                    .FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == "ActiveHostiles");
+                if (waveSrc == null) { Console.WriteLine("REFUSED: a hold copies its wave collections from UC08_QueenBattle's ActiveHostiles [03E832:Starfield.esm], and it is not there."); fail++; }
+                // And the waves come FOR the player (his ask, after the first play: "there's AI packages in
+                // the game which control enemies, would be good to have them attack the player"): a copy of
+                // the Wanted trait's bounty hunters' Travel package, jog, weapon drawn, to PlayerRef.
+                travelSrc = sfm?.Packages.FirstOrDefault(p => p.EditorID == "Trait_Wanted_TravelToPlayer");
+                if (travelSrc == null) { Console.WriteLine("REFUSED: a hold copies its waves' package from Trait_Wanted_TravelToPlayer [0E830B:Starfield.esm], and it is not there."); fail++; }
+            }
+            // The speaker of a Delve's spoken lines: a friendly MAST worker cloned only to carry a NAME and a
+            // VOICE TYPE (the voice folder the audio is looked up in). Never placed: the lines are radio.
+            (INpcGetter tmpl, FormKey voice)? speakerSrc = null;
+            if (fail == 0 && r.speaker != null)
+            {
+                var st = OwnOrMaster<INpcGetter>(myMod, env, "UC_NA_MASTWorkerMale01");
+                var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, r.speaker.voice ?? "");
+                if (st == null || vt == null) { Console.WriteLine($"REFUSED: the speaker needs UC_NA_MASTWorkerMale01 and VoiceType '{r.speaker.voice}' in {t.mod} or a master."); fail++; }
+                else speakerSrc = (st, vt.FormKey);
+            }
+            // Who is at each place: its creature list, own-or-master, as a person's company list is.
+            var whoLists = new Dictionary<int, FormKey>();
+            foreach (var (p, w, _) in WhoOf(r))
+            {
+                var f = OwnOrMaster<IFormListGetter>(myMod, env, w.list ?? "");
+                if (f == null) { Console.WriteLine($"REFUSED: FormList '{w.list}' ({PlaceKey[p]}.who.list) is not in {t.mod} or one of its masters."); fail++; continue; }
+                whoLists[p] = f.FormKey;
+            }
+            // A fight's forms (defeat / clear), own-or-master as a who list is: the target, and each list it draws from.
+            var fights = new Dictionary<int, FightForms>();
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
+            {
+                var fb = r.beats[i];
+                if (fb.type != "defeat" && fb.type != "clear") continue;
+                var ff = new FightForms();
+                if (fb.target != null)
                 {
-                    // ⛔ OWN-OR-MASTER, NEVER "WHATEVER WINS". du_overtime.esp (the CK bridge) carries a copy of
-                    // every duo_ record under its own ModKey and loads later, so a winning-override lookup by
-                    // EditorID found duo_GangMembersList_Civ_LIST in the ESP, the write linked to it, and
-                    // Mutagen ADDED du_overtime.esp TO THE ESM'S MASTERS (2026-10-08, caught before he played).
-                    var templates = new Dictionary<string, INpcGetter>();
-                    var outfits = new Dictionary<string, FormKey>();
-                    var companies = new Dictionary<string, FormKey>();
-                    foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
-                    {
-                        if (pp?.template != null)
-                        {
-                            var n = OwnOrMaster<INpcGetter>(myMod, env, pp.template);
-                            if (n == null) { Console.WriteLine($"REFUSED: NPC '{pp.template}' is not in {t.mod} or one of its masters."); fail++; }
-                            else templates[who] = n;
-                        }
-                        if (!string.IsNullOrWhiteSpace(pp?.outfit))
-                        {
-                            var o = OwnOrMaster<IOutfitGetter>(myMod, env, pp!.outfit!);
-                            if (o == null) { Console.WriteLine($"REFUSED: Outfit '{pp.outfit}' is not in {t.mod} or one of its masters."); fail++; }
-                            else outfits[who] = o.FormKey;
-                        }
-                        if (pp?.company != null)
-                        {
-                            var f = OwnOrMaster<IFormListGetter>(myMod, env, pp.company.list!);
-                            if (f == null) { Console.WriteLine($"REFUSED: FormList '{pp.company.list}' is not in {t.mod} or one of its masters."); fail++; }
-                            else companies[who] = f.FormKey;
-                        }
-                    }
-                    if (fail == 0) fail += BuildChoice(myMod, clone, t, r, markers, plan, made4, templates, outfits, companies);
+                    ff.Target = OwnOrMaster<INpcGetter>(myMod, env, fb.target)?.FormKey ?? OwnOrMaster<ILeveledNpcGetter>(myMod, env, fb.target)?.FormKey;
+                    if (ff.Target == null) { Console.WriteLine($"REFUSED: beat {i + 1} target '{fb.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters."); fail++; continue; }
+                }
+                foreach (var (what, name, set) in new (string, string?, Action<FormKey>)[] {
+                             ("gang", fb.gang?.list, k => ff.Gang = k), ("enemies", fb.enemies?.list, k => ff.Enemies = k), ("loot", fb.loot?.list, k => ff.Loot = k) })
+                {
+                    if (name == null) continue;
+                    var fl = OwnOrMaster<IFormListGetter>(myMod, env, name);
+                    if (fl == null) { Console.WriteLine($"REFUSED: beat {i + 1} {what}.list '{name}' is not a FormList in {t.mod} or one of its masters."); fail++; break; }
+                    set(fl.FormKey);
+                }
+                fights[i] = ff;
+            }
+            // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
+            var talkPerks = new Dictionary<(int beat, int ex), FormKey>();
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
+            {
+                var tb = r.beats[i];
+                if (tb.type != "talk" || tb.exchanges == null) continue;
+                for (int x = 0; x < tb.exchanges.Count; x++)
+                {
+                    if (tb.exchanges[x].perk is not string pn) continue;
+                    var pk = OwnOrMaster<IPerkGetter>(myMod, env, pn);
+                    if (pk == null) { Console.WriteLine($"REFUSED: beat {i + 1} exchanges[{x}].perk '{pn}' is not a Perk in {t.mod} or one of its masters."); fail++; continue; }
+                    talkPerks[(i, x)] = pk.FormKey;
                 }
             }
-            else
+            if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, persons, waveSrc, travelSrc, speakerSrc, whoLists, fights, talkPerks);
+            FormKey? reach = null;
+            if (r.place.reach != null)
             {
-                // The driver's own slots are the FIRST and LAST beat; extras are created between them.
-                int nb = r.beats.Count;
-                plan.Add((t.beatSlots[0], r.beats[0], false));
-                for (int i = 1; i < nb - 1; i++)
-                {
-                    var made = AddBeatSlot(clone, t, i, t.extraBeatStageBase + t.extraBeatStageStep * (i - 1));
-                    if (made == null) { fail++; break; }
-                    plan.Add((made, r.beats[i], true));
-                }
-                plan.Add((t.beatSlots[^1], r.beats[^1], false));
-
-                for (int i = 0; i < plan.Count && fail == 0; i++)
-                    fail += WriteBeat(clone, t, plan[i].slot, plan[i].beat, markers, plan[i].created, PlaceAliasOf(t, plan[i].beat.PlaceIndex, -1));
-
-                // An extra beat fires on a stock DefaultAliasOnActivate gated on the PREVIOUS beat's
-                // stage, so the chain sequences itself with no state variable. The first extra gates on
-                // the driver's own stage-50, which it sets on the first activation.
-                for (int i = 1; i < nb - 1 && fail == 0; i++)
-                {
-                    var slot = plan[i].slot;
-                    int prereq = i == 1 ? t.beatSlots[0].journalStage : plan[i - 1].slot.journalStage;
-                    fail += HookActivator(clone, slot.activatorAlias, slot.journalStage, prereq);
-                }
+                var rg = OwnOrMaster<IGlobalGetter>(myMod, env, r.place.reach);
+                if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
+                else reach = rg.FormKey;
             }
+            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true);
             fail += WriteProse(clone, t, r);
             SortStages(clone);
             fail += OrderAliases(clone);
@@ -3126,11 +2802,10 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
-            int v = !IsBeats(t) ? Verify(modFile, readParams, t, r, markers, plan, made4, mastersBefore)
-                                      : VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
+            int v = VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
             v += VerifyDeal(modFile, readParams, r);
             // The audio last, and only over a verified plugin: its file names are the written topics' ids.
-            return IsBeats(t) && v == 0 ? DeployVoice(r, t, madeBeats) : v;
+            return v == 0 ? DeployVoice(r, t, madeBeats) : v;
         }
 
         /// <summary>
@@ -3156,28 +2831,16 @@ namespace FrankyCLI
             return fail;
         }
 
-        // ------------------------------------------------------------------ shared by the choice and beats builds
+        // ------------------------------------------------------------------ build helpers
 
-        /// <summary>What a build created (choice, and the beats kind's third place), handed to Verify rather than re-derived there.</summary>
+        /// <summary>
+        /// What the build created before BuildBeats runs: only the third place now. (It carried the retired choice
+        /// kind's buyer, people and reward too; what is left is one field, and the split moves it onto the model.)
+        /// </summary>
         private sealed class BuildMade
         {
             /// <summary>The created third place's alias id, -1 when the recipe has none.</summary>
             public int ThirdPlaceAlias = -1;
-            /// <summary>choice: the buyer's created marker and activator aliases.</summary>
-            public uint BuyerMarkerAlias, BuyerAlias;
-            public FormKey OfferMessage;
-            /// <summary>choice: "owner"/"buyer" to the NPC placed at that ending.</summary>
-            public Dictionary<string, FormKey> People = new();
-            /// <summary>choice: "owner"/"buyer" to the Outfit written as that person's DefaultOutfit.</summary>
-            public Dictionary<string, FormKey> Outfits = new();
-            /// <summary>choice: stage index to the (credits, xp) globals its reward entry was pointed at.</summary>
-            public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
-            public FormKey LoadItem;
-            public Dictionary<string, (FormKey obj, short alias)> Props = new();
-            public Dictionary<string, int> IntProps = new();
-            public Dictionary<string, bool> BoolProps = new();
-            /// <summary>Beat index (0-based) to the message box built for it.</summary>
-            public Dictionary<int, FormKey> Messages = new();
         }
 
         /// <summary>
@@ -3215,8 +2878,6 @@ namespace FrankyCLI
         /// (patch 04, 2026-07-31), so its flags are ones the game demonstrably shows.
         /// </summary>
         private const string MessageTemplate = "duo_alocal01_msg03";
-
-        // ------------------------------------------------------------------ choice
 
         /// <summary>
         /// A record this plugin may LINK to: one in the plugin itself or in one of its masters, found by
@@ -3273,248 +2934,6 @@ namespace FrankyCLI
             return (int)id;
         }
 
-        /// <summary>
-        /// THE CHOICE DELVE: find a thing with a name on it, then deliver it to its owner OR sell it to a
-        /// buyer, at two different places; walking to one ends the mission. Jessica's Type 2.
-        ///
-        /// The base's driver is REPLACED by ours
-        /// (FrankyCLI/papyrus/duo_delve_choice.psc), the cargo item is CLONED never edited, every activator
-        /// that changes model is a clone, every new stage and box is a clone of one that works.
-        ///
-        /// ⭐ WHAT IS NEW: the buyer's delivery point is a COPY OF THE OWNER'S SLOT (marker + activator)
-        /// moved to the third place, and the buyer's ending is stage 100 cloned to 110, so it carries the
-        /// CompleteQuest flag on its log entry exactly as the owner's does. Two completing stages, one
-        /// recap each: the branching lives in which stage the driver sets, not in any conditional text.
-        /// </summary>
-        private static int BuildChoice(StarfieldMod myMod, Quest clone, Template t, Recipe r,
-                                       Dictionary<string, FormKey> markers,
-                                       List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made,
-                                       Dictionary<string, INpcGetter> personTemplates,
-                                       Dictionary<string, FormKey> outfits, Dictionary<string, FormKey> companies)
-        {
-            var vma = clone.VirtualMachineAdapter;
-            var old = vma?.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
-            if (vma == null || old == null)
-            { Console.WriteLine($"REFUSED: the base carries no '{t.replacesDriver}' script entry to replace."); return 1; }
-            var cargo = old.Properties.OfType<ScriptObjectProperty>()
-                .FirstOrDefault(p => string.Equals(p.Name, "CargoObject", StringComparison.OrdinalIgnoreCase))?.Object.FormKey;
-            var src = cargo == null ? null : myMod.MiscItems.FirstOrDefault(m => m.FormKey == cargo.Value);
-            if (src == null)
-            { Console.WriteLine($"REFUSED: the replaced driver's CargoObject is not a MiscItem in {t.mod}; this tool clones only its own mod's items."); return 1; }
-
-            // --- the one thing carried, cloned -------------------------------------------------------
-            string itemEdid = r.id + "_Item";
-            foreach (var k in myMod.MiscItems.Where(m => m.EditorID == itemEdid).Select(m => m.FormKey).ToList())
-                myMod.MiscItems.Remove(k);
-            var mi = myMod.MiscItems.DuplicateInAsNewRecord(src);
-            mi.EditorID = itemEdid;
-            mi.Name = r.items!.load!;
-            made.LoadItem = mi.FormKey;
-            Console.WriteLine($"  +item    : {itemEdid} {mi.FormKey}  \"{mi.Name}\"  (clone of {src.EditorID})");
-
-            // --- the buyer's slot: the owner's marker + activator, copied, moved to the third place --------
-            var ownerSlot = t.beatSlots[1];
-            var ownerMarker = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)ownerSlot.markerAlias);
-            var ownerAct = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)ownerSlot.activatorAlias);
-            if (ownerMarker?.Location == null || ownerAct?.CreateReferenceToObject == null)
-            { Console.WriteLine("REFUSED: the template's owner slot is not a marker+activator pair on this base."); return 1; }
-            uint next = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-            var bm = ownerMarker.DeepCopy(); bm.ID = next; bm.Name = "DelveBuyerMarker";
-            var ba = ownerAct.DeepCopy(); ba.ID = next + 1; ba.Name = "DelveBuyerTarget";
-            ba.CreateReferenceToObject!.AliasID = (short)bm.ID;
-            clone.Aliases.Add(bm);
-            clone.Aliases.Add(ba);
-            made.BuyerMarkerAlias = bm.ID;
-            made.BuyerAlias = ba.ID;
-            Console.WriteLine($"  +alias   : buyer marker {bm.ID} + activator {ba.ID} (cloned from the owner's {ownerSlot.markerAlias}/{ownerSlot.activatorAlias})");
-
-            // --- three activators, each a clone wearing its own model -------------------------------------
-            if (ReskinActivator(myMod, clone, t, r.id + "_crate", t.beatSlots[0].activatorAlias, r.items.crateModel, null) != 0) return 1;
-            if (ReskinActivator(myMod, clone, t, r.id + "_centre", ownerSlot.activatorAlias, r.items.centreModel, r.items.centreName) != 0) return 1;
-            if (ReskinActivator(myMod, clone, t, r.id + "_buyer", (int)ba.ID, r.items.buyerModel, r.items.buyerName) != 0) return 1;
-
-            // --- message boxes, cloned from a shipped pausing box, owned by the quest ----------------------
-            foreach (var k in myMod.Messages.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_msg")).Select(m => m.FormKey).ToList())
-                myMod.Messages.Remove(k);
-            var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
-            if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
-            FormKey Box(string suffix, BeatMessage m)
-            {
-                var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
-                msg.EditorID = $"{r.id}_msg{suffix}";
-                msg.Name = Expand(m.title!, t);
-                msg.Description = Expand(m.text!, t);
-                msg.OwnerQuest.SetTo(clone.FormKey);
-                Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"  (clone of {MessageTemplate})");
-                return msg.FormKey;
-            }
-            for (int i = 0; i < r.beats.Count; i++)
-                if (r.beats[i].message != null) made.Messages[i] = Box((i + 1).ToString(), r.beats[i].message!);
-            if (r.offer?.message != null) made.OfferMessage = Box("Offer", r.offer.message);
-
-            // --- stages: the offer and the buyer's ending -------------------------------------------------
-            if (clone.Stages!.Any(s => s.Index == t.offerStage) || clone.Stages.Any(s => s.Index == t.beatSlots[2].journalStage))
-            { Console.WriteLine($"REFUSED: stage {t.offerStage} or {t.beatSlots[2].journalStage} already exists on this base."); return 1; }
-            var offerSt = CloneStage(clone, t.offerStage);
-            if (offerSt == null) return 1;
-            offerSt.LogEntries[0].Entry = Expand(r.offer!.journal!, t);
-            clone.Stages.Add(offerSt);
-            Console.WriteLine($"  +stage   : {t.offerStage} (the offer, cloned from a plain journal stage)");
-            // The buyer's ending is the OWNER'S completing stage copied, so it ends the quest the same way.
-            var done = clone.Stages.FirstOrDefault(s => s.Index == ownerSlot.journalStage);
-            if (done == null || done.LogEntries.Count != 1 || done.LogEntries[0].Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) != true)
-            { Console.WriteLine($"REFUSED: stage {ownerSlot.journalStage} is not a single-entry completing stage to clone the buyer's ending from."); return 1; }
-            var buyerSt = done.DeepCopy();
-            buyerSt.Index = (ushort)t.beatSlots[2].journalStage;
-            buyerSt.LogEntries[0].Entry = null;
-            clone.Stages.Add(buyerSt);
-            Console.WriteLine($"  +stage   : {buyerSt.Index} (the buyer's ending, a clone of completing stage {ownerSlot.journalStage})");
-
-            // --- the pay, ON THE STAGE: each ending's completing stage names its tier's two globals ----------
-            // QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas: BonusCredits (QRCR), XpAwarded (QRXP).
-            // The base's stage 100 carries one reward entry pointing at the easy tier, and the clone copied
-            // it, so both stages are written here rather than either being trusted.
-            foreach (var (st, tier) in new[] { (done, r.reward!.owner!), (buyerSt, r.reward.buyer!) })
-            {
-                var rds = st.LogEntries[0].StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
-                if (rds.Count != 1) { Console.WriteLine($"REFUSED: stage {st.Index} carries {rds.Count} reward entries; this tool writes exactly one."); return 1; }
-                var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
-                var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
-                if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
-                rds[0].BonusCredits.SetTo(cg.FormKey);
-                rds[0].XpAwarded.SetTo(xg.FormKey);
-                made.StageReward[st.Index] = (cg.FormKey, xg.FormKey);
-                Console.WriteLine($"  reward   : stage {st.Index} pays {cg.EditorID} + {xg.EditorID}");
-            }
-
-            // --- objectives: the base has 10 and 20; 30 is the buyer's ---------------------------------------
-            var slots = new List<BeatSlot>
-            {
-                t.beatSlots[0],
-                ownerSlot,
-                new BeatSlot { markerAlias = (int)bm.ID, activatorAlias = (int)ba.ID, objective = t.beatSlots[2].objective,
-                               journalStage = t.beatSlots[2].journalStage },
-            };
-            var lastOb = clone.Objectives?.OrderBy(o => o.Index).LastOrDefault();
-            if (lastOb == null || lastOb.Targets == null || lastOb.Targets.Count != 1)
-            { Console.WriteLine("REFUSED: the base's last objective is not a single-target objective to clone."); return 1; }
-            foreach (var s in slots)
-            {
-                if (clone.Objectives!.Any(o => o.Index == s.objective)) continue;
-                var ob = lastOb.DeepCopy();
-                ob.Index = (ushort)s.objective;
-                clone.Objectives.Add(ob);
-                Console.WriteLine($"  +obj     : {s.objective}");
-            }
-            foreach (var s in slots)
-            {
-                var ob = clone.Objectives!.First(o => o.Index == s.objective);
-                if (ob.Targets == null || ob.Targets.Count != 1) { Console.WriteLine($"REFUSED: objective {s.objective} has no single target."); return 1; }
-                ob.Targets[0].AliasID = s.ObjectiveTarget;
-            }
-
-            // --- beats: fills, objective text, journals -------------------------------------------------
-            for (int i = 0; i < slots.Count; i++)
-            {
-                plan.Add((slots[i], r.beats[i], false));
-                int f = WriteBeat(clone, t, slots[i], r.beats[i], markers, false, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
-                if (f > 0) return f;
-            }
-
-            // --- the driver swap ------------------------------------------------------------------------
-            vma.Scripts.Remove(old);
-            var sc = new ScriptEntry { Name = t.driver };
-            void Alias(string n, int aliasId)
-            {
-                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
-                p.Object.SetTo(clone.FormKey);
-                p.Alias = (short)aliasId;
-                sc.Properties.Add(p);
-                made.Props[n] = (clone.FormKey, (short)aliasId);
-            }
-            void Obj(string n, FormKey k)
-            {
-                var p = new ScriptObjectProperty { Name = n, Flags = ScriptProperty.Flag.Edited };
-                p.Object.SetTo(k);
-                sc.Properties.Add(p);
-                made.Props[n] = (k, (short)-1);
-            }
-            void Int(string n, int v)
-            {
-                sc.Properties.Add(new ScriptIntProperty { Name = n, Data = v, Flags = ScriptProperty.Flag.Edited });
-                made.IntProps[n] = v;
-            }
-            Alias("FindTarget", slots[0].activatorAlias);
-            Alias("OwnerTarget", slots[1].activatorAlias);
-            Alias("BuyerTarget", slots[2].activatorAlias);
-            Obj("Item", made.LoadItem);
-            foreach (var kv in made.Messages) Obj($"Beat{kv.Key + 1}Message", kv.Value);
-            if (!made.OfferMessage.IsNull) Obj("OfferMessage", made.OfferMessage);
-
-            // --- the people at each ending: named NPCs cloned from a friendly vanilla template ------------
-            // NPCTools.CloneNPC copies the body field by field and NOT the name or the voice (gen_dlgtest
-            // sets the voice after it for the same reason), so both are written here. Unaggressive and
-            // Average confidence, as NPCTools.CreateRandomNpc does for a friendly NPC.
-            foreach (var who in new[] { "owner", "buyer" })
-            {
-                string edid = $"{r.id}_{who}_npc";
-                foreach (var k in myMod.Npcs.Where(n => n.EditorID == edid).Select(n => n.FormKey).ToList())
-                    myMod.Npcs.Remove(k);
-                var pp = who == "owner" ? r.people?.owner : r.people?.buyer;
-                if (pp == null || !personTemplates.TryGetValue(who, out var tmpl)) continue;
-                var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, tmpl.DeepCopy());
-                npc.EditorID = edid;
-                npc.Name = pp.name!;
-                npc.Voice.SetTo(tmpl.Voice.FormKey);
-                npc.Aggression = Npc.AggressionType.Unaggressive;
-                npc.Confidence = Npc.ConfidenceType.Average;
-                // ⭐ DRESSED FROM THE RECIPE (his ask, 2026-10-08: "can we set there outfit in the json"). Only
-                // DefaultOutfit is written; the template's SpaceOutfit stands, so a hazard world still suits them.
-                if (outfits.TryGetValue(who, out var outfit))
-                {
-                    npc.DefaultOutfit.SetTo(outfit);
-                    made.Outfits[who] = outfit;
-                }
-                myMod.Npcs.Add(npc);
-                made.People[who] = npc.FormKey;
-                string role = who == "owner" ? "Owner" : "Buyer";
-                Obj(role + "Person", npc.FormKey);
-                Console.WriteLine($"  +npc     : {edid} {npc.FormKey}  \"{pp.name}\"  (clone of {tmpl.EditorID})"
-                                  + (outfits.ContainsKey(who) ? $"  outfit {pp.outfit}" : ""));
-                if (pp.company != null && companies.TryGetValue(who, out var list))
-                {
-                    Obj(role + "Company", list);
-                    Int(role + "CompanyMin", pp.company.min);
-                    Int(role + "CompanyMax", pp.company.max);
-                    Console.WriteLine($"  company  : {who} gets {pp.company.min}-{pp.company.max} from {pp.company.list}");
-                }
-            }
-            vma.Scripts.Add(sc);
-            Console.WriteLine($"  driver   : {t.replacesDriver} REMOVED, {t.driver} in its place with {sc.Properties.Count} properties");
-            return 0;
-        }
-
-        /// <summary>
-        /// The place's conditions are REBUILT from the recipe, never patched.
-        ///
-        /// ⭐ Every LocationHasRefType and LocationHasKeyword is dropped and re-emitted from the beat
-        /// markers and the theme predicate. Everything else on the list -- in practice the base's
-        /// GetDistance leash -- is preserved verbatim, because it is the one condition type this tool
-        /// has not proven it can construct.
-        ///
-        /// That is why an author cannot desynchronise the selection from the beats: there is no field
-        /// in which to say something different.
-        /// </summary>
-        /// <summary>
-        /// A REMOTE main place (place.remote): the clone's place alias is REPLACED by a deep copy of the template's
-        /// remotePlaceFrom quest's alias of the same ID, in the same list position, so the request (ALPS,
-        /// PCM_QuestGeneral and its planet condition), its flags and its GetDistanceGalacticParsec limit all come
-        /// from a quest that already ships remote, and nothing is constructed. The local base's GetDistance leash
-        /// to the player goes with the old alias, which is the point: a remote site is not near him.
-        /// WritePlaceConditions then re-emits markers and theme over it like any other place.
-        /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
-        /// link into it adds the esp to the esm's masters: 2026-10-08).
-        /// </summary>
         /// <summary>
         /// Copy the template's borrowAliases in from borrowFrom, renumbered, every alias link inside each copy remapped: through
         /// the list, or the source's main place to this template's. A link to anything else is refused rather than left
@@ -3605,6 +3024,16 @@ namespace FrankyCLI
             return 0;
         }
 
+        /// <summary>
+        /// A REMOTE main place (place.remote): the clone's place alias is REPLACED by a deep copy of the template's
+        /// remotePlaceFrom quest's alias of the same ID, in the same list position, so the request (ALPS,
+        /// PCM_QuestGeneral and its planet condition), its flags and its GetDistanceGalacticParsec limit all come
+        /// from a quest that already ships remote, and nothing is constructed. The local base's GetDistance leash
+        /// to the player goes with the old alias, which is the point: a remote site is not near him.
+        /// WritePlaceConditions then re-emits markers and theme over it like any other place.
+        /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
+        /// link into it adds the esp to the esm's masters: 2026-10-08).
+        /// </summary>
         private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target)
         {
             // The request is always the source's MAIN place alias; a second request is that same alias copied over the
@@ -3628,6 +3057,17 @@ namespace FrankyCLI
             return 0;
         }
 
+        /// <summary>
+        /// The place's conditions are REBUILT from the recipe, never patched.
+        ///
+        /// ⭐ Every LocationHasRefType and LocationHasKeyword is dropped and re-emitted from the beat
+        /// markers and the theme predicate. Everything else on the list -- in practice the base's
+        /// GetDistance leash -- is preserved verbatim, because it is the one condition type this tool
+        /// has not proven it can construct.
+        ///
+        /// That is why an author cannot desynchronise the selection from the beats: there is no field
+        /// in which to say something different.
+        /// </summary>
         private static int WritePlaceConditions(Quest clone, int placeAlias,
                                                 Dictionary<string, FormKey> markers,
                                                 List<FormKey> require, List<FormKey> exclude)
@@ -3775,29 +3215,6 @@ namespace FrankyCLI
         }
 
         /// <summary>
-        /// Attach a stock DefaultAliasOnActivate to a created activator: gate it on the previous
-        /// beat's stage, set its own. PrereqStage + StageToSet IS the sequencing mechanism, with no
-        /// state variable and no Papyrus.
-        /// ⛔ The gate is GetStageDone(PrereqStage), so a prereq nothing sets blocks the hook FOR
-        /// EVER and in total silence. That cost an in-game run earlier today.
-        /// </summary>
-        private static int HookActivator(Quest q, int aliasId, int stageToSet, int prereq)
-        {
-            var vma = q.VirtualMachineAdapter;
-            if (vma == null) { Console.WriteLine("REFUSED: quest has no VirtualMachineAdapter to hang a hook on."); return 1; }
-            var entry = new QuestFragmentAlias();
-            entry.Property.Object.SetTo(q.FormKey);
-            entry.Property.Alias = (short)aliasId;
-            var sc = new ScriptEntry { Name = "DefaultAliasOnActivate" };
-            sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = stageToSet, Flags = ScriptProperty.Flag.Edited });
-            sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
-            entry.Scripts.Add(sc);
-            vma.Aliases.Add(entry);
-            Console.WriteLine($"  +hook    : alias {aliasId} DefaultAliasOnActivate  sets {stageToSet} after {prereq}");
-            return 0;
-        }
-
-        /// <summary>
         /// Point one beat's marker alias at the place, and give the beat its objective and journal.
         /// ⚠ BOTH HALVES OF THE FILL ARE SET EVERY TIME, including the half that is not changing.
         /// "Which marker, inside which drawn place" is one fact; writing only the half that moved is
@@ -3862,260 +3279,6 @@ namespace FrankyCLI
 
         // ------------------------------------------------------------------ verification
 
-        /// <summary>
-        /// Read the written file back OFF DISK and grade it. An assertion over the objects just
-        /// built in memory cannot fail, and what landed in the file is the only thing that matters.
-        /// </summary>
-        private static int Verify(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
-                                  Template t, Recipe r, Dictionary<string, FormKey> markers,
-                                  List<(BeatSlot slot, Beat beat, bool created)> plan, BuildMade made4, string mastersBefore)
-        {
-            Console.WriteLine();
-            Console.WriteLine("  verification, re-read from disk:");
-            var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
-            var q = reread.Quests.FirstOrDefault(x => x.EditorID == r.id);
-            if (q == null) { Console.WriteLine("    FAIL: the quest is not in the written file."); return 1; }
-
-            int fail = 0;
-            // ⛔ A BUILD MUST NEVER CHANGE WHAT THE PLUGIN DEPENDS ON. A link to a record in a plugin that is not
-            // a master silently ADDS that plugin as a master, and a player without it cannot load the mod. It
-            // happened once (du_overtime.esp, 2026-10-08) and the property checks passed over it, because they
-            // compared the link against the same wrong lookup that made it. This one compares against the file.
-            fail += Check("the plugin's masters are unchanged by the build",
-                          string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String)), mastersBefore);
-            foreach (var (label, suffix, aliasId, path) in new[] {
-                         ("crate", "_crate", t.beatSlots[0].activatorAlias, r.items?.crateModel),
-                         ("delivery point", "_centre", t.beatSlots[1].activatorAlias, r.items?.centreModel) })
-            {
-                if (string.IsNullOrWhiteSpace(path)) continue;
-                var act = reread.Activators.FirstOrDefault(a => a.EditorID == r.id + suffix);
-                fail += Check($"{label} model", act?.Model?.File?.DataRelativePath.Path ?? "missing", path!);
-                if (suffix == "_centre" && !string.IsNullOrWhiteSpace(r.items?.centreName))
-                    fail += Check("delivery point name", act?.Name?.String ?? "missing", r.items!.centreName!);
-                var la = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)aliasId);
-                fail += Check($"alias {aliasId} creates the {label} clone", la?.CreateReferenceToObject?.Object.FormKey.ToString() ?? "unset",
-                              act?.FormKey.ToString() ?? "no clone");
-            }
-            for (int i = 0; i < r.beats.Count; i++)
-            {
-                var bm = r.beats[i].message;
-                string edid = $"{r.id}_msg{i + 1}";
-                var m = reread.Messages.FirstOrDefault(x => x.EditorID == edid);
-                if (bm == null) { fail += Check($"beat {i + 1} has no message box", m == null ? "none" : edid, "none"); continue; }
-                if (m == null) { fail += Check($"beat {i + 1} message {edid} written", "missing", "present"); continue; }
-                fail += Check($"beat {i + 1} message text", m.Description?.String ?? "", Expand(bm.text!, t));
-                fail += Check($"beat {i + 1} message owned by the quest (OwnerQuest)", m.OwnerQuest.FormKey.ToString(), q.FormKey.ToString());
-                fail += Check($"beat {i + 1} message is a pausing box", m.Flags.ToString(), "MessageBox");
-                var prop = q.VirtualMachineAdapter?.Scripts.SelectMany(sc => sc.Properties).OfType<IScriptObjectPropertyGetter>()
-                    .FirstOrDefault(pp => pp.Name == $"Beat{i + 1}Message");
-                fail += Check($"driver property Beat{i + 1}Message points at it", prop?.Object.FormKey.ToString() ?? "unset", m.FormKey.ToString());
-            }
-            // ⛔ FILL ORDER, off disk: an alias listed above the place it fills inside cannot fill, and
-            // the quest silently never starts. duo_delve04 shipped that way on 2026-09-24.
-            var fwd = gen_aliaslint.ForwardRefs(q.Aliases?.ToList() ?? new List<IAQuestAliasGetter>());
-            fail += Check("no alias is listed above an alias it fills from or a place above its leash anchor (gen_aliaslint R1, R5)",
-                          fwd.Count == 0 ? "none" : string.Join(", ", fwd.Select(f => $"{f.alias}->{f.dep}")), "none");
-            // Each place demands exactly ITS beats' markers plus the map marker: a place that also
-            // demanded the other place's markers would shrink its pool for nothing.
-            bool twoPlaces = r.beats.Any(b => b.Second);
-            foreach (int pi in PlacesUsed(r))
-            {
-                int aid = PlaceAliasOf(t, pi, made4.ThirdPlaceAlias);
-                var want = MarkersAt(r, markers, pi);
-                var loc = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)aid);
-                var condMarkers = loc?.Conditions?
-                    .Select(c => c.Data).OfType<ILocationHasRefTypeConditionDataGetter>()
-                    .Select(h => h.FirstParameter.Link.FormKey).ToHashSet() ?? new HashSet<FormKey>();
-                fail += Check($"place {aid} demands its beats' markers + the map marker",
-                              want.Values.All(k => condMarkers.Contains(k)) ? "yes" : "no", "yes");
-                fail += Check($"place {aid} demands NOTHING ELSE", condMarkers.Count.ToString(), want.Count.ToString());
-            }
-
-            // ⛔ THE PLAN IS HANDED IN, NEVER RE-DERIVED. The first version of this loop walked the
-            // TEMPLATE's slots against the recipe's beats positionally, which is correct only while
-            // the two have the same length. On the first three-beat build it compared the middle
-            // beat against the last slot and then threw on a null objective, AFTER the file had been
-            // written. Two loops over the same mapping will diverge; there is now one.
-            for (int i = 0; i < plan.Count; i++)
-            {
-                var (slot, beat, created) = plan[i];
-                string tag = $"beat {i + 1}{(created ? " (created)" : "")}";
-                var al = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
-                fail += Check($"{tag} fills from {beat.at}",
-                              al?.Location?.RefType.FormKey == markers[beat.at] ? "yes" : "no", "yes");
-                fail += Check($"{tag} searches the {PlaceLabel(beat.PlaceIndex)} place alias",
-                              (al?.Location?.AliasID)?.ToString() ?? "unset", PlaceAliasOf(t, beat.PlaceIndex, made4.ThirdPlaceAlias).ToString());
-
-                if (created)
-                {
-                    // A created slot's whole value is that the player sees it, and the two ways it
-                    // can silently fail to are an activator that create-objs nowhere and a stage
-                    // whose log entry never got its text.
-                    var act = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
-                    fail += Check($"{tag} activator create-objs AT its own marker",
-                                  (act?.CreateReferenceToObject?.AliasID)?.ToString() ?? "unset", slot.markerAlias.ToString());
-                    fail += Check($"{tag} activator has an object to place",
-                                  act?.CreateReferenceToObject?.Object.IsNull == false ? "yes" : "no", "yes");
-                    var st = q.Stages?.FirstOrDefault(s => s.Index == slot.journalStage);
-                    fail += Check($"{tag} journal landed on stage {slot.journalStage}",
-                                  (st?.LogEntries?.FirstOrDefault()?.Entry?.String ?? "") == Expand(beat.journal ?? "", t) ? "yes" : "no", "yes");
-                    bool hooked = q.VirtualMachineAdapter?.Aliases?
-                        .Any(fa => fa.Property.Alias == slot.activatorAlias
-                                   && fa.Scripts.Any(s => s.Name == "DefaultAliasOnActivate"
-                                                          && s.Properties.OfType<IScriptIntPropertyGetter>()
-                                                              .Any(p => p.Name == "StageToSet" && p.Data == slot.journalStage))) ?? false;
-                    fail += Check($"{tag} hook sets stage {slot.journalStage}", hooked ? "yes" : "no", "yes");
-                }
-                else
-                {
-                    var ob = q.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
-                    fail += Check($"{tag} objective rewritten",
-                                  (ob?.DisplayText?.String ?? "") == Expand(beat.objective ?? "", t) ? "yes" : "no", "yes");
-                }
-            }
-            fail += Check("name rewritten", (q.Name?.String ?? "") == Expand(r.prose.name!, t) ? "yes" : "no", "yes");
-            // The two defects his xEdit found and every check above passed over: a stage whose log
-            // entry has no flags (no QSDT on disk) and stages out of index order.
-            var idx = q.Stages?.Select(x => (int)x.Index).ToList() ?? new List<int>();
-            fail += Check("stages in ascending order", string.Join(",", idx), string.Join(",", idx.OrderBy(x => x)));
-            var bare = q.Stages?.Where(x => x.LogEntries.Any(le => le.Flags == null)).Select(x => x.Index.ToString()).ToList() ?? new List<string>();
-            fail += Check("every stage's log entry has flags (QSDT)", bare.Count == 0 ? "yes" : "no: " + string.Join(",", bare), "yes");
-
-            if (t.kind == "choice")
-            {
-                // ⭐ THE THIRD PLACE, OFF DISK: it exists, it is a location alias, and the buyer's marker
-                // searches inside it. A created alias that did not land is an unfillable reference and the
-                // quest silently never starts, so this is the check that matters most on this kind.
-                var third = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)made4.ThirdPlaceAlias);
-                fail += Check($"third place alias {made4.ThirdPlaceAlias} is a location alias named {t.thirdPlace?.name}",
-                              third?.Name ?? "missing", t.thirdPlace?.name ?? "");
-                var src = q.Aliases?.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)(t.thirdPlace?.cloneOf ?? -1));
-                string Leash(IQuestLocationAliasGetter? l) => string.Join(" | ", (l?.Conditions ?? new List<IConditionGetter>())
-                    .Where(c => c.Data is not ILocationHasRefTypeConditionDataGetter && c.Data is not ILocationHasKeywordConditionDataGetter)
-                    .Select(c => c.Data.GetType().Name + " " + c.CompareOperator + " " + (c is IConditionGlobalGetter g ? g.ComparisonValue.FormKey.ToString() : c is IConditionFloatGetter f ? f.ComparisonValue.ToString() : "?")));
-                fail += Check("third place carries the same leash as the owner's place", Leash(third), Leash(src));
-                var bmk = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == made4.BuyerMarkerAlias);
-                fail += Check("buyer marker searches the third place", (bmk?.Location?.AliasID)?.ToString() ?? "unset", made4.ThirdPlaceAlias.ToString());
-                var bact = q.Aliases?.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == made4.BuyerAlias);
-                fail += Check("buyer activator create-objs AT the buyer marker", (bact?.CreateReferenceToObject?.AliasID)?.ToString() ?? "unset", made4.BuyerMarkerAlias.ToString());
-                var buyerClone = reread.Activators.FirstOrDefault(a => a.EditorID == r.id + "_buyer");
-                fail += Check("buyer activator creates the _buyer clone", bact?.CreateReferenceToObject?.Object.FormKey.ToString() ?? "unset", buyerClone?.FormKey.ToString() ?? "no clone");
-                fail += Check("buyer model", buyerClone?.Model?.File?.DataRelativePath.Path ?? "missing", r.items!.buyerModel!);
-                fail += Check("buyer name", buyerClone?.Name?.String ?? "missing", r.items.buyerName!);
-                // Two endings, each a completing stage with its own recap.
-                foreach (var st in new[] { t.beatSlots[1].journalStage, t.beatSlots[2].journalStage })
-                {
-                    var e = q.Stages?.FirstOrDefault(x => x.Index == st)?.LogEntries.FirstOrDefault();
-                    fail += Check($"stage {st} ends the quest (entryFlags CompleteQuest)",
-                                  e?.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) == true ? "yes" : "no", "yes");
-                }
-                var offer = q.Stages?.FirstOrDefault(x => x.Index == t.offerStage)?.LogEntries.FirstOrDefault();
-                fail += Check($"offer journal on stage {t.offerStage}", offer?.Entry?.String ?? "missing", Expand(r.offer!.journal!, t));
-                fail += Check($"stage {t.offerStage} does NOT end the quest",
-                              offer?.Flags?.HasFlag(QuestLogEntry.Flag.CompleteQuest) == true ? "ends" : "no", "no");
-                if (r.offer.message != null)
-                {
-                    var om = reread.Messages.FirstOrDefault(x => x.EditorID == r.id + "_msgOffer");
-                    fail += Check("offer message text", om?.Description?.String ?? "missing", Expand(r.offer.message.text!, t));
-                    fail += Check("offer message owned by the quest", om?.OwnerQuest.FormKey.ToString() ?? "missing", q.FormKey.ToString());
-                }
-                foreach (var (who, pp) in new[] { ("owner", r.people?.owner), ("buyer", r.people?.buyer) })
-                {
-                    if (pp == null) continue;
-                    var npc = reread.Npcs.FirstOrDefault(n => n.EditorID == $"{r.id}_{who}_npc");
-                    fail += Check($"{who} person named", npc?.Name?.String ?? "missing", pp.name!);
-                    fail += Check($"{who} person is unaggressive", npc?.Aggression.ToString() ?? "missing", "Unaggressive");
-                    fail += Check($"{who} person has a voice", npc == null || npc.Voice.IsNull ? "no" : "yes", "yes");
-                    if (made4.Outfits.TryGetValue(who, out var of))
-                        fail += Check($"{who} person wears the recipe's outfit", npc?.DefaultOutfit.FormKey.ToString() ?? "missing", of.ToString());
-                }
-                foreach (var kv in made4.StageReward)
-                {
-                    var rds = q.Stages?.FirstOrDefault(x => x.Index == kv.Key)?.LogEntries.FirstOrDefault()?
-                        .StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList() ?? new List<IQuestStageRewardDataGetter>();
-                    fail += Check($"stage {kv.Key} carries ONE reward entry", rds.Count.ToString(), "1");
-                    fail += Check($"stage {kv.Key} pays credits global", rds.FirstOrDefault()?.BonusCredits.FormKey.ToString() ?? "none", kv.Value.creds.ToString());
-                    fail += Check($"stage {kv.Key} pays xp global", rds.FirstOrDefault()?.XpAwarded.FormKey.ToString() ?? "none", kv.Value.xp.ToString());
-                }
-                var drvc = q.VirtualMachineAdapter?.Scripts.FirstOrDefault(sx => sx.Name == t.driver);
-                fail += Check("the driver pays nothing (no Credits / OwnerReward / BuyerReward property)",
-                              drvc?.Properties.Any(pp => pp.Name is "Credits" or "OwnerReward" or "BuyerReward") == true ? "pays" : "nothing", "nothing");
-                var it = reread.MiscItems.FirstOrDefault(m => m.FormKey == made4.LoadItem);
-                fail += Check($"item {made4.LoadItem} named", it?.Name?.String ?? "missing", r.items.load!);
-            }
-
-            if (t.kind == "choice")
-            {
-                // The driver swap, every property, every objective's TARGET and every journal. The
-                // off-disk read is the point: these are the fields a half-applied write would get
-                // wrong while the in-memory objects looked perfect.
-                var scripts = q.VirtualMachineAdapter?.Scripts ?? new List<IScriptEntryGetter>();
-                fail += Check($"old driver {t.replacesDriver} gone",
-                              scripts.Any(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase)) ? "present" : "gone", "gone");
-                var drv = scripts.FirstOrDefault(s => s.Name == t.driver);
-                fail += Check($"driver {t.driver} attached", drv != null ? "yes" : "no", "yes");
-                foreach (var kv in made4.Props)
-                {
-                    var p = drv?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
-                    string got = p == null ? "missing" : p.Object.FormKey + (kv.Value.alias >= 0 ? " alias " + p.Alias : "");
-                    string want = kv.Value.obj + (kv.Value.alias >= 0 ? " alias " + kv.Value.alias : "");
-                    fail += Check($"property {kv.Key}", got, want);
-                }
-                foreach (var kv in made4.BoolProps)
-                {
-                    var p = drv?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
-                    fail += Check($"property {kv.Key}", p?.Data.ToString() ?? "missing", kv.Value.ToString());
-                }
-                foreach (var kv in made4.IntProps)
-                {
-                    var p = drv?.Properties.OfType<IScriptIntPropertyGetter>().FirstOrDefault(x => x.Name == kv.Key);
-                    fail += Check($"property {kv.Key}", p?.Data.ToString() ?? "missing", kv.Value.ToString());
-                }
-                for (int i = 0; i < plan.Count; i++)
-                {
-                    var (slot, beat, _) = plan[i];
-                    var ob = q.Objectives?.FirstOrDefault(o => o.Index == slot.objective);
-                    int wantAlias = slot.ObjectiveTarget;
-                    fail += Check($"objective {slot.objective} targets alias {wantAlias}",
-                                  (ob?.Targets?.FirstOrDefault()?.AliasID)?.ToString() ?? "none", wantAlias.ToString());
-                    if (beat.journal != null)
-                    {
-                        var st = q.Stages?.FirstOrDefault(s => s.Index == slot.journalStage);
-                        fail += Check($"beat {i + 1} journal on stage {slot.journalStage}",
-                                      (st?.LogEntries?.FirstOrDefault()?.Entry?.String ?? "") == Expand(beat.journal, t) ? "yes" : "no", "yes");
-                    }
-                }
-            }
-
-            // NEGATIVE CONTROL. Every check above passes trivially if the collapse never happened --
-            // an alias still pointing at the base's SECOND place would satisfy "fills from X" while
-            // the mission quietly spanned two POIs. So assert the thing that must have MOVED.
-            Console.WriteLine();
-            Console.WriteLine("  negative control:");
-            // A beat DECLARED at the second place is meant to search it; anything else searching a
-            // collapsed place is a stray, and the second place is only exempt when a beat claims it.
-            var claimed = plan.Where(p => p.beat.Second).Select(p => (uint)p.slot.markerAlias).ToHashSet();
-            var strays = q.Aliases?.OfType<IQuestReferenceAliasGetter>()
-                .Where(a => a.Location != null && t.collapsedPlaceAliases.Contains(a.Location.AliasID ?? -1)
-                            && !claimed.Contains(a.ID))
-                .Select(a => a.ID).ToList() ?? new List<uint>();
-            Console.WriteLine("    ref aliases still searching a collapsed place: "
-                              + (strays.Count == 0 ? "none" : string.Join(", ", strays)));
-            if (strays.Count > 0) { Console.WriteLine("    FAIL: the collapse was partial, so this spans two POIs."); fail++; }
-            else Console.WriteLine(twoPlaces
-                ? "    control behaved: only the beat(s) declared at the second place search it."
-                : "    control behaved: every beat resolves inside ONE drawn POI.");
-
-            Console.WriteLine();
-            if (fail > 0) { Console.WriteLine("=== WRITTEN, BUT " + fail + " VERIFICATION FAILURE(S). Do not test yet. ==="); return 1; }
-
-            Console.WriteLine("=== " + r.id + " IS IN. The template's driver owns the stage graph; nothing else to wire. ===");
-            Console.WriteLine();
-            Console.WriteLine("  In game, on a throwaway save:   help " + r.id + " 0   then   startquest <id>");
-            foreach (var c in t.cannot) Console.WriteLine("  ⚠ this template cannot express: " + c);
-            return 0;
-        }
-
         private static int Check(string label, string actual, string expected)
         {
             bool ok = string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase);
@@ -4151,6 +3314,9 @@ namespace FrankyCLI
                 var tf = JsonSerializer.Deserialize<TemplateFile>(File.ReadAllText(f), JsonOpts);
                 if (tf == null || tf.templates.Count == 0) { err = f + " holds no templates"; return null; }
                 if (tf.schema != 1) { err = $"templates.json schema is {tf.schema}, this tool speaks 1"; return null; }
+                // A row of a retired kind (dualactivator, choice, delve4) is refused by name, never built down a default path.
+                var bad = tf.templates.Where(x => !Kinds.Contains(x.kind)).Select(x => $"{x.id} ('{x.kind}')").ToList();
+                if (bad.Count > 0) { err = $"templates.json row(s) of a kind this tool does not build: {string.Join(", ", bad)}. The kinds are {string.Join(", ", Kinds)}."; return null; }
                 return tf.templates;
             }
             catch (JsonException ex) { err = "templates.json is not valid JSON -- " + ex.Message; return null; }

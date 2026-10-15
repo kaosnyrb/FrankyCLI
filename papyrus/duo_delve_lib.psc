@@ -249,7 +249,7 @@ EndFunction
 ; THE PEOPLE AT AN ENDING (a choose beat's person, on the first approach to its delivery point after the
 ; find). His playtest 2026-10-08: "Returning the medal talks about a person who isn't there." A ref placed
 ; at a site the world has not loaded has no ground to stand on, so this runs on the approach. Lifted from
-; duo_delve_choice.PlacePerson / PlaceCompany.
+; the retired choice driver's PlacePerson / PlaceCompany (duo_delve_choice.psc, removed 2026-10-15; in git).
 Function PlacePerson(ReferenceAlias akTarget, ActorBase akPerson, Float afOffset) Global
     Float[] pos = new Float[6]
     pos[0] = afOffset
