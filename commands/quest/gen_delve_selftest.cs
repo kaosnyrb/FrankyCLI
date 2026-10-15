@@ -55,6 +55,11 @@ namespace FrankyCLI
             Check("an id a null-named alias holds is taken", AliasTaken(nullRef, 9), "id 9");
             Check("control: a free id is not taken", !AliasTaken(nullRef, 6), "id 6");
 
+            // The beat kinds, mid-migration (delve_beats/beat_kind.cs): every kind answers to a type the lint knows. (Two
+            // kinds with one name need no check here: BeatKinds is built by ToDictionary, which throws on load.)
+            var unknown = BeatKinds.Keys.Where(k => !BeatTypes.Contains(k)).ToList();
+            Check("every beat kind is a type BeatTypes knows", unknown.Count == 0, unknown.Count == 0 ? $"{BeatKinds.Count} kinds: {string.Join(", ", BeatKinds.Keys)}" : string.Join(", ", unknown));
+
             Console.WriteLine(fail == 0 ? "selftest: all passed" : $"selftest: {fail} FAILED");
             return fail == 0 ? 0 : 1;
         }

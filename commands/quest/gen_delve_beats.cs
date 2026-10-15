@@ -56,10 +56,8 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_delve
     {
+        /// <summary>The lint's vocabulary of beat types, until every one has a kind (delve_beats/beat_kind.cs); then it goes.</summary>
         private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold", "talk", "defeat", "clear" };
-        /// <summary>The fight beats (spike 2026-10-14-defeat-and-clear-beats): enemies appear at a marker when the step begins and
-        /// the step is done by a death, the Bounty driver's (defeat: the target) or the Hunt driver's (clear: every one).</summary>
-        private static bool IsFight(Beat b) => b.type == "defeat" || b.type == "clear";
         private static readonly string[] SpeciesModes = { "one", "mix" };
         // A hold wave's style -> duo_delve_lib.SpawnWave's origins: 1 anywhere but in front, 2 his left and his right.
         // Exact-case keys on purpose: the lint refuses "Horde" rather than reading it as a squad.
@@ -270,60 +268,6 @@ namespace FrankyCLI
                 }
         }
 
-        /// <summary>
-        /// A fight beat: defeat (a target, and an optional gang who need not die) or clear (enemies, every one must die).
-        /// Everything is named in the recipe (his 2026-10-14: lists from the recipe, not off a removed driver), and every
-        /// list must resolve and hold something, or the step would spawn nobody and could never end.
-        /// </summary>
-        private static void GradeFight(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
-                                       Action<string> Fatal, Action<string> Warn)
-        {
-            string at = $"beat {i + 1} ({b.type})";
-            if (b.model != null || b.name != null || b.replace || b.item != null || b.returnTo != null || b.group != null || b.choose != null)
-                Fatal($"{at} sets model, name, replace, item, returnTo, group or choose; a fight has no object of its own (the enemies are its object), so they would be silently ignored.");
-            void List(string where, string? edid, bool actors)
-            {
-                var fl = OwnOrMaster<IFormListGetter>(Allowed(env, t), env, edid ?? "");
-                if (fl == null) Fatal($"{at} {where}.list '{edid}' is not a FormList in {t.mod} or one of its masters.");
-                else if (fl.Items.Count == 0) Fatal($"{at} {where}.list '{edid}' is EMPTY, so it would spawn nothing.");
-                else Console.WriteLine($"  {at} {where}: {fl.EditorID} ({fl.Items.Count} entries)");
-            }
-            void Range(string where, Crowd c, int lo)
-            {
-                if (c.min < lo || c.max < c.min) Fatal($"{at} {where} needs {lo} <= min <= max; it has {c.min}-{c.max}.");
-                else if (c.max > 12) Warn($"{at} {where}.max is {c.max}; more than 12 at one marker is a crowd the navmesh may not seat.");
-                if (c.species != null && !SpeciesModes.Contains(c.species))
-                    Fatal($"{at} {where}.species is '{c.species}'; it is \"one\" (a single entry from the list for all) or \"mix\".");
-            }
-            if (b.type == "defeat")
-            {
-                if (b.enemies != null) Fatal($"{at} sets enemies; a defeat has a target and a gang (enemies is a clear's).");
-                if (string.IsNullOrWhiteSpace(b.target)) Fatal($"{at} has no target: nobody whose death ends the step.");
-                else if (OwnOrMaster<INpcGetter>(Allowed(env, t), env, b.target!) == null && OwnOrMaster<ILeveledNpcGetter>(Allowed(env, t), env, b.target!) == null)
-                    Fatal($"{at} target '{b.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters.");
-                if (b.gang != null)
-                {
-                    List("gang", b.gang.list, true);
-                    Range("gang", b.gang, 0);
-                }
-            }
-            else
-            {
-                if (b.target != null || b.gang != null) Fatal($"{at} sets target or gang; a clear has enemies, every one of whom must die (target and gang are a defeat's).");
-                if (b.enemies == null) Fatal($"{at} has no enemies: nobody to clear, so the step could never end.");
-                else
-                {
-                    List("enemies", b.enemies.list, true);
-                    Range("enemies", b.enemies, 1);
-                }
-            }
-            if (b.loot != null)
-            {
-                List("loot", b.loot.list, false);
-                if (b.loot.chance < 1 || b.loot.chance > 100) Fatal($"{at} loot.chance is {b.loot.chance}; a percent from 1 to 100.");
-            }
-        }
-
         /// <summary>The lint's beats-only half. Called from Grade; Fatal/Warn are Grade's.</summary>
         private static void GradeBeats(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                        Action<string> Fatal, Action<string> Warn)
@@ -406,8 +350,8 @@ namespace FrankyCLI
                 }
                 else if (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null)
                     Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal or revealObjective and is not a hold, so they would be silently ignored.");
-                if (IsFight(b)) GradeFight(b, i, t, env, Fatal, Warn);
-                else if (b.target != null || b.gang != null || b.enemies != null || b.loot != null)
+                KindOf(b)?.GradeBeat(b, i, t, env, Fatal, Warn);
+                if (!IsFight(b) && (b.target != null || b.gang != null || b.enemies != null || b.loot != null))
                     Fatal($"beat {i + 1} sets target, gang, enemies or loot and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
@@ -821,14 +765,14 @@ namespace FrankyCLI
         /// </summary>
         private sealed class BeatsBuild
         {
-            private readonly StarfieldMod myMod;
-            private readonly Quest clone;
-            private readonly Template t;
-            private readonly Recipe r;
-            private readonly Dictionary<string, FormKey> markers;
-            private readonly BuildMade made;
-            private readonly BeatsMade bm;
-            private readonly DelveInputs inputs;
+            internal readonly StarfieldMod myMod;
+            internal readonly Quest clone;
+            internal readonly Template t;
+            internal readonly Recipe r;
+            internal readonly Dictionary<string, FormKey> markers;
+            internal readonly BuildMade made;
+            internal readonly BeatsMade bm;
+            internal readonly DelveInputs inputs;
 
             internal BeatsBuild(StarfieldMod myMod, Quest clone, Template t, Recipe r, Dictionary<string, FormKey> markers,
                                 BuildMade made, BeatsMade bm, DelveInputs inputs)
@@ -841,49 +785,81 @@ namespace FrankyCLI
             // references start `null!`, so a reader that ran too early would fail loudly; the value types (arrival,
             // travelPkg, offerMsg, the nullable keys) would read a default, and only the section order prevents that.
             /// <summary>The quest's script adapter, refused if absent. Set in section 1 (its head); read in 1, 4, 7, 9, 10.</summary>
-            private QuestAdapter vma = null!;
+            internal QuestAdapter vma = null!;
             /// <summary>The misc item a pickup is cloned from (the driver's CargoObject, else the template's). Set in section 1; read in 5.</summary>
-            private MiscItem? itemSrc;
+            internal MiscItem? itemSrc;
             /// <summary>The removed driver's GangMembers list. Set in section 1; read in 10.</summary>
-            private FormKey? gangKey;
+            internal FormKey? gangKey;
             /// <summary>The removed driver's MaxGangMembers. Set in section 1; read in 10.</summary>
-            private int? gangMax;
+            internal int? gangMax;
             /// <summary>The removed driver's TargetCivListMembers list. Set in section 1; read in 10.</summary>
-            private FormKey? civsKey;
+            internal FormKey? civsKey;
             /// <summary>The package a hold's waves run, cloned in section 1. Set in section 1; read in 2.</summary>
-            private FormKey travelPkg;
+            internal FormKey travelPkg;
             /// <summary>The recipe's beats grouped into steps. Set in section 1; read in 2, 3, 4, 6, 7, 8, 9, 10.</summary>
-            private List<Step> steps = null!;
+            internal List<Step> steps = null!;
             /// <summary>Beat index to the stage it sets. Set in section 1; read in 2, 3, 4, 7, 8, 9, 10.</summary>
-            private Dictionary<int, int> beatStage = null!;
+            internal Dictionary<int, int> beatStage = null!;
             /// <summary>Whether the Delve has an arrival broadcast. Set in section 1; read in 3, 9, 10.</summary>
-            private bool arrival;
+            internal bool arrival;
             /// <summary>Beat index to its marker, activator and target aliases. Set in section 2; read in 4, 7, 8, 9, 10.</summary>
-            private Dictionary<int, BeatSlot> slotOf = null!;
+            internal Dictionary<int, BeatSlot> slotOf = null!;
             /// <summary>Talk beat to the alias that creates its person. Set in section 2; read in 8.</summary>
-            private Dictionary<int, QuestReferenceAlias> talkAlias = null!;
+            internal Dictionary<int, QuestReferenceAlias> talkAlias = null!;
             /// <summary>Hold beat to its wave collections, in order. Set in section 2; read in 7, 9, 10.</summary>
-            private Dictionary<int, List<int>> waveAliases = null!;
+            internal Dictionary<int, List<int>> waveAliases = null!;
             /// <summary>The base's marker and activator pairs no beat took. Set in section 2; read in 7.</summary>
-            private List<BeatSlot> unusedSlots = null!;
+            internal List<BeatSlot> unusedSlots = null!;
             /// <summary>An ending person's beat to the stage that meets them. Set in section 3; read in 9, 10.</summary>
-            private Dictionary<int, int> personStage = null!;
+            internal Dictionary<int, int> personStage = null!;
             /// <summary>Who is at each place. Set in section 3; read in 9, 10.</summary>
-            private List<(int place, Who who, int anchor)> whos = null!;
+            internal List<(int place, Who who, int anchor)> whos = null!;
             /// <summary>A who's place to its stage. Set in section 3; read in 9, 10.</summary>
-            private Dictionary<int, int> whoStage = null!;
+            internal Dictionary<int, int> whoStage = null!;
             /// <summary>Every stage the build made, sorted. Set in section 3; read in 7.</summary>
-            private List<int> allStages = null!;
+            internal List<int> allStages = null!;
             /// <summary>Pickup beat to its cloned item. Set in section 5; read in 9, 10.</summary>
-            private Dictionary<int, FormKey> itemOf = null!;
+            internal Dictionary<int, FormKey> itemOf = null!;
             /// <summary>Step index to its counter global. Set in section 6; read in 7, 10.</summary>
-            private Dictionary<int, (FormKey key, string edid)> counterOf = null!;
+            internal Dictionary<int, (FormKey key, string edid)> counterOf = null!;
             /// <summary>Beat index to its message box. Set in section 8; read in 10.</summary>
-            private Dictionary<int, FormKey> msgOf = null!;
+            internal Dictionary<int, FormKey> msgOf = null!;
             /// <summary>The offer's message box. Set in section 8; read in 10.</summary>
-            private FormKey offerMsg;
+            internal FormKey offerMsg;
             /// <summary>A beat's person to its cloned NPC. Set in section 8; read in 10.</summary>
-            private Dictionary<int, FormKey> npcOf = null!;
+            internal Dictionary<int, FormKey> npcOf = null!;
+
+            // WHAT THE BEAT KINDS USE (split step (d), 2026-10-15): the marker maker Slots sets up, and the fragment's
+            // property list and line table Fragment fills. Set in their section; used by it and by the kinds it calls.
+            /// <summary>The marker pattern: the template's marker source, copied before beat 1 may rewrite it. Set in section 2.</summary>
+            internal QuestReferenceAlias markerPattern = null!;
+            /// <summary>The marker source's alias id, and whether a beat has taken it yet. Set in section 2.</summary>
+            internal int markerSourceId;
+            internal bool markerSourceTaken;
+            /// <summary>The fragment script's properties (alias -1 = a plain form) and its lines per stage. Set in section 10.</summary>
+            internal List<(string type, string pname, FormKey key, int alias)> props = null!;
+            internal SortedDictionary<int, List<string>> code = null!;
+
+            /// <summary>
+            /// A beat's marker alias. A slotless base's marker alias IS the first fight's marker (on the board, the system
+            /// and planet resolve from it, so it stays), so the first call takes it; every later one is a copy of the pattern.
+            /// A local function of section 2 until the kinds needed it.
+            /// </summary>
+            internal QuestReferenceAlias NewMarker(int i, string suffix)
+            {
+                if (!markerSourceTaken)
+                {
+                    markerSourceTaken = true;
+                    return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)markerSourceId);
+                }
+                uint id = NextAliasId(clone);
+                var m = markerPattern.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
+                clone.Aliases.Add(m);
+                return m;
+            }
+
+            /// <summary>One line of the fragment script, on a stage. A local function of section 10 until the kinds needed it.</summary>
+            internal void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
 
             /// <summary>A beat's objective index: a choose step's beats take one each, ten apart; any other step shares one.
             /// Used by sections 7 and 10 (a local function of section 7 until they became methods).</summary>
@@ -916,8 +892,7 @@ namespace FrankyCLI
                 { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
                 if (r.beats.Any(b => b.type == "hold") && gangKey == null)
                 { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
-                if (r.beats.Any(b => b.type == "clear") && inputs.WaveSrc == null)
-                { Console.WriteLine("REFUSED: a clear's enemies fill a collection copied from vanilla's ActiveHostiles, and none was handed in."); return 1; }
+                foreach (var kind in KindsIn(r)) if (kind.Preflight(this) != 0) return 1;
                 if (r.beats.Any(b => b.type == "hold") && (inputs.WaveSrc == null || inputs.TravelSrc == null))
                 { Console.WriteLine("REFUSED: a hold needs a source collection alias and a source package to copy its waves from, and one was not handed in."); return 1; }
 
@@ -1018,20 +993,10 @@ namespace FrankyCLI
                                              : "REFUSED: template slot 0 is not a marker+activator pair on this base."); return 1; }
                 srcMarker = srcMarker.DeepCopy();   // the pattern, taken before beat 1 may rewrite the alias itself
                 // A slotless base's marker alias IS the first fight's marker (on the board, the system and planet resolve
-                // from it, so it stays); every later marker is a copy of it.
-                bool sourceTaken = t.markerSource < 0;
-                QuestReferenceAlias NewMarker(int i, string suffix)
-                {
-                    if (!sourceTaken)
-                    {
-                        sourceTaken = true;
-                        return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)srcMarkerId);
-                    }
-                    uint id = NextAliasId(clone);
-                    var m = srcMarker.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
-                    clone.Aliases.Add(m);
-                    return m;
-                }
+                // from it, so it stays); every later marker is a copy of it. NewMarker does both, for this pass and the kinds.
+                markerPattern = srcMarker;
+                markerSourceId = srcMarkerId;
+                markerSourceTaken = t.markerSource < 0;
                 int baseNext = 0;   // the base's own marker+activator pairs, handed to object-bearing beats in order
                 talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
                 waveAliases = new Dictionary<int, List<int>>();   // hold beat -> its wave collections, in order
@@ -1060,33 +1025,9 @@ namespace FrankyCLI
                         Console.WriteLine($"  +slot    : beat {i + 1} (hold) -- spawn marker alias {hm.ID}, wave collections {string.Join(", ", waveAliases[i])} (EMPTY, copies of ActiveHostiles)");
                         continue;
                     }
-                    if (r.beats[i].type == "defeat")
+                    if (KindOf(r.beats[i]) is BeatKind kind)
                     {
-                        // recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into
-                        // when the step begins, which the objective targets and the death hook sits on.
-                        var dm = NewMarker(i, "Marker");
-                        uint did = NextAliasId(clone);
-                        var dt = srcMarker.DeepCopy(); dt.ID = did; dt.Name = "DelveBeat" + (i + 1) + "Target";
-                        dt.Location = null;
-                        dt.Flags = QuestReferenceAlias.Flag.Optional;
-                        clone.Aliases.Add(dt);
-                        slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = beatStage[i] };
-                        bm.Holders.Add((int)dt.ID);
-                        Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn)");
-                        continue;
-                    }
-                    if (r.beats[i].type == "clear")
-                    {
-                        // ONE hold wave at the site: a marker, and an EMPTY collection (a copy of vanilla's ActiveHostiles)
-                        // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
-                        var cm = NewMarker(i, "Spawn");
-                        uint cid = NextAliasId(clone);
-                        var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Enemies");
-                        if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
-                        clone.Aliases.Add(col);
-                        slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = beatStage[i] };
-                        bm.ClearGroups.Add((int)cid);
-                        Console.WriteLine($"  +slot    : beat {i + 1} (clear) -- spawn marker alias {cm.ID}, enemies collection {cid} (EMPTY, a copy of ActiveHostiles, no package)");
+                        if (kind.Slot(this, i) != 0) return 1;
                         continue;
                     }
                     if (r.beats[i].type == "talk")
@@ -1141,7 +1082,7 @@ namespace FrankyCLI
                 // A marker source no fight took (a board mission that opens with a talk or a pickup) is still the board's PrimaryRef,
                 // which the system and planet resolve from, so it stays; it is pointed at the place's MAP MARKER, which every
                 // requested site carries and the lint always demands, so it never asks the site for a ref type no beat named.
-                if (!sourceTaken)
+                if (!markerSourceTaken)
                 {
                     var ps = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)t.markerSource);
                     if (!markers.TryGetValue("MapMarkerRefType", out var mm)) { Console.WriteLine("REFUSED: the lint handed in no MapMarkerRefType to point the marker source at."); return 1; }
@@ -1622,18 +1563,9 @@ namespace FrankyCLI
                             }
                             continue;
                         }
-                        if (IsFight(beat))
+                        if (KindOf(beat) is BeatKind kind)
                         {
-                            // The step ends on a death: the target's (defeat), or the last of the collection's (clear). Stock hooks;
-                            // TurnOffStageDone on the collection's, as each hold wave's, so a late kill cannot set it twice.
-                            bool isClear = beat.type == "clear";
-                            int on = slotOf[b].targetAlias;
-                            var fs = StageHook(isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath", beatStage[b], prereq,
-                                               isClear ? new ScriptProperty[] { new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited },
-                                                                                RemoveDeadFromCollection() }
-                                                       : Array.Empty<ScriptProperty>());
-                            AttachHook(vma, clone.FormKey, on, fs, HookEntry.New, false, bm, beatStage[b], prereq);
-                            Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {on} {fs.Name} sets {beatStage[b]} after {prereq}");
+                            if (kind.Hook(this, b, prereq) != 0) return 1;
                             continue;
                         }
                         int hookAlias; string script;
@@ -1735,9 +1667,8 @@ namespace FrankyCLI
             internal int Fragment()
             {
                 string name = FragmentScriptName(r);
-                var props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
-                var code = new SortedDictionary<int, List<string>>();
-                void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
+                props = new List<(string type, string pname, FormKey key, int alias)>();   // alias -1 = a plain form
+                code = new SortedDictionary<int, List<string>>();
 
                 foreach (var kv in counterOf)
                 {
@@ -1806,36 +1737,9 @@ namespace FrankyCLI
                 {
                     foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "hold"))
                         SpawnWave(b, 0, stage);
-                    foreach (var b in steps[k].Beats.Where(b => IsFight(r.beats[b])))
-                    {
-                        var fb = r.beats[b];
-                        var ff = inputs.Fights[b];
-                        string lootArgs = "None, 0";
-                        if (ff.Loot is FormKey lk) { props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
-                        if (fb.type == "defeat")
-                        {
-                            string mk = $"Alias_Beat{b + 1}Marker", tg = $"Alias_Beat{b + 1}Target";
-                            props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
-                            props.Add(("ReferenceAlias", tg, clone.FormKey, slotOf[b].targetAlias));
-                            props.Add(("Form", $"Target{b + 1}", ff.Target!.Value, -1));
-                            string gangArgs = "None, 0, 0, False";
-                            if (ff.Gang is FormKey gk)
-                            {
-                                props.Add(("FormList", $"Gang{b + 1}", gk, -1));
-                                gangArgs = $"Gang{b + 1}, {fb.gang!.min}, {fb.gang.max}, {(fb.gang.species == "one" ? "True" : "False")}";
-                            }
-                            Add(stage, $"duo_delve_lib.SpawnTarget({mk}, {tg}, Target{b + 1}, {gangArgs}, {lootArgs})");
-                        }
-                        else
-                        {
-                            string mk = $"Alias_Beat{b + 1}Spawn", en = $"Alias_Beat{b + 1}Enemies";
-                            props.Add(("ReferenceAlias", mk, clone.FormKey, slotOf[b].markerAlias));
-                            props.Add(("RefCollectionAlias", en, clone.FormKey, slotOf[b].targetAlias));
-                            props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
-                            var e = fb.enemies!;
-                            Add(stage, $"duo_delve_lib.SpawnGroup({mk}, {en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
-                        }
-                    }
+                    // The kinds' entry pass: EnterRank 1, the fights (defeat and clear together, in beat order).
+                    foreach (var b in steps[k].Beats.Where(b => KindOf(r.beats[b])?.EnterRank == 1))
+                        KindOf(r.beats[b])!.Enter(this, b, stage);
                     foreach (var b in steps[k].Beats.Where(b => r.beats[b].type == "recover"))
                     {
                         string mk = $"Alias_Beat{b + 1}Marker", hd = $"Alias_Beat{b + 1}Holder";
