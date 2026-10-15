@@ -229,8 +229,11 @@ namespace FrankyCLI
                     if (d < 1 || d > i) Fatal($"beat {i + 1} defends beat {d}, which is not an earlier beat.");
                     else
                     {
+                        // Only a use or a deliver leaves an object standing (a pickup's is disabled). Said as the two it
+                        // allows: listing the types it refused let a talk through, whose objective then fell back to
+                        // the hold's own spawn marker (2026-10-15).
                         var dt = r.beats[d - 1];
-                        if (dt.type == "pickup" || dt.type == "recover" || dt.type == "hold" || IsFight(dt))
+                        if (dt.type != "use" && dt.type != "deliver")
                             Fatal($"beat {i + 1} defends beat {d}, a {dt.type}, which leaves no object standing to defend; defend a use or a deliver.");
                     }
                 }
@@ -300,7 +303,9 @@ namespace FrankyCLI
                 else
                 {
                     var tb = r.beats[ap.to - 1];
-                    if (tb.type == "recover" || tb.type == "hold" || IsFight(tb) || tb.returnTo != null)
+                    // Only an object beat's own object can be approached. Said as what it allows: listing the types it
+                    // refused let a talk through, whose distance hook then measured to alias -1 (2026-10-15).
+                    if (!IsObject(tb) || tb.returnTo != null)
                         Fatal($"approach.to is beat {ap.to}, a {(tb.returnTo != null ? "return" : tb.type)}, which has no object of its own to approach.");
                     if (ap.lose is int l)
                     {
