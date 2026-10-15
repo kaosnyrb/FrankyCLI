@@ -576,11 +576,9 @@ namespace FrankyCLI
             string nodeName = pos[0]; bool on = pos[2] == "on";
             var mods = templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             if (mods.Count != 1) { Console.WriteLine("REFUSED: the templates name " + mods.Count + " mods; nodeflag knows which plugin only when they agree."); return 1; }
-            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            string modFile = Path.Combine(env.DataFolderPath, mods[0] + ".esm");
-            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
-            var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
-            gen_quest_main.FixNextFormId(myMod);
+            using var session = PluginSession.Open(mods[0]);
+            if (session == null) return 1;
+            var myMod = session.Mod;
             var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
             var node = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, nodeName, StringComparison.OrdinalIgnoreCase));
             if (node == null) { Console.WriteLine($"REFUSED: no Story Manager quest node '{nodeName}' in {mods[0]}.esm."); return 1; }
@@ -595,11 +593,10 @@ namespace FrankyCLI
             Console.WriteLine($"  after : QuestFlags = {node.QuestFlags}, MaxNumQuestsToRun = {node.MaxNumQuestsToRun?.ToString() ?? "(none)"}");
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
 
-            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
-            env.Dispose();
-            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
-            Console.WriteLine("  wrote " + modFile);
-            using var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            session.Close();
+            session.Write();
+            Console.WriteLine("  wrote " + session.PluginPath);
+            using var reread = StarfieldMod.CreateFromBinaryOverlay(session.PluginPath, StarfieldRelease.Starfield, session.ReadParams);
             var n2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == node.FormKey);
             bool ok = n2.QuestFlags.HasFlag(StoryManagerQuestNode.QuestFlag.NumQuestsToRun) == on && (on ? n2.MaxNumQuestsToRun == 1 : n2.MaxNumQuestsToRun == null);
             var mastersAfter = string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
@@ -645,11 +642,9 @@ namespace FrankyCLI
 
             var mods = templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             if (mods.Count != 1) { Console.WriteLine("REFUSED: the templates name " + mods.Count + " mods; testnode knows which plugin only when they agree."); return 1; }
-            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            string modFile = Path.Combine(env.DataFolderPath, mods[0] + ".esm");
-            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
-            var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
-            gen_quest_main.FixNextFormId(myMod);
+            using var session = PluginSession.Open(mods[0]);
+            if (session == null) return 1;
+            var myMod = session.Mod;
             var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
 
             var test = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, testName, StringComparison.OrdinalIgnoreCase));
@@ -706,12 +701,11 @@ namespace FrankyCLI
             Console.WriteLine($"  {test.EditorID} now deals: " + string.Join(", ", test.Quests.Select(e => myMod.Quests.FirstOrDefault(q => q.FormKey == e.Quest.FormKey)?.EditorID ?? e.Quest.FormKey.ToString())));
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
 
-            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
-            env.Dispose();
-            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
-            Console.WriteLine("  wrote " + modFile);
+            session.Close();
+            session.Write();
+            Console.WriteLine("  wrote " + session.PluginPath);
 
-            using var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            using var reread = StarfieldMod.CreateFromBinaryOverlay(session.PluginPath, StarfieldRelease.Starfield, session.ReadParams);
             var t2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == test.FormKey);
             var r2 = reread.StoryManagerQuestNodes.First(n => n.FormKey == real.FormKey);
             int tp = t2.Conditions.Count(IsPark), rp = r2.Conditions.Count(IsPark);
@@ -757,12 +751,12 @@ namespace FrankyCLI
             if (mods.Count != 1) { Console.WriteLine("REFUSED: the templates name " + mods.Count + " mods (" + string.Join(", ", mods) + "); unbuild knows which plugin only when they agree."); return 1; }
             string mod = mods[0];
 
-            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            string modFile = Path.Combine(env.DataFolderPath, mod + ".esm");
-            if (!File.Exists(modFile)) { Console.WriteLine("REFUSED: " + modFile + " does not exist."); return 1; }
-            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
-            var myMod = StarfieldMod.CreateFromBinary(modFile, StarfieldRelease.Starfield, readParams);
-            gen_quest_main.FixNextFormId(myMod);
+            // The session refuses a plugin that is not in the load order (which this used to let through on
+            // File.Exists alone); one it lists but cannot find is refused here, as before.
+            using var session = PluginSession.Open(mod);
+            if (session == null) return 1;
+            if (!File.Exists(session.PluginPath)) { Console.WriteLine("REFUSED: " + session.PluginPath + " does not exist."); return 1; }
+            var myMod = session.Mod;
             var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
             var modKey = myMod.ModKey;
 
@@ -823,13 +817,12 @@ namespace FrankyCLI
             }
             Console.WriteLine($"  inbound guard: 0 surviving links into {gone.Count} removed record(s)");
 
-            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
-            env.Dispose();   // release the memory-mapped load order before overwriting one of its files
-            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
-            Console.WriteLine("  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
+            session.Close();
+            session.Write();
+            Console.WriteLine("  wrote " + session.PluginPath + " (" + new FileInfo(session.PluginPath).Length.ToString("N0") + " B)");
 
             // Off disk: nothing of the id is left, and the masters did not move.
-            using var reread = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            using var reread = StarfieldMod.CreateFromBinaryOverlay(session.PluginPath, StarfieldRelease.Starfield, session.ReadParams);
             int left = reread.EnumerateMajorRecords().Count(Ours);
             var mastersAfter = string.Join(", ", reread.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
             bool ok = left == 0 && mastersAfter == mastersBefore;

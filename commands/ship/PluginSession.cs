@@ -1,6 +1,7 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -31,15 +32,19 @@ namespace FrankyCLI
             ?? throw new InvalidOperationException("PluginSession: the LinkCache is gone once the session is closed");
         public ModKey SfKey { get; }
         public string ModName { get; }
+        /// <summary>The read parameters the plugin was opened with: a snapshot of the load order's master
+        /// styles, so it outlives Close() and a caller re-reads its own output with exactly these.</summary>
+        public BinaryReadParameters ReadParams { get; }
         private readonly string _dataPath;
         private IGameEnvironment<IStarfieldMod, IStarfieldModGetter>? _env;
 
         private PluginSession(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, StarfieldMod mod,
-                              string modname)
+                              string modname, BinaryReadParameters readParams)
         {
             _env = env;
             Mod = mod;
             ModName = modname;
+            ReadParams = readParams;
             _dataPath = env.DataFolderPath;
             SfKey = env.LoadOrder[0].ModKey;
         }
@@ -60,9 +65,10 @@ namespace FrankyCLI
                 return null;
             }
             ModPath modPath = System.IO.Path.Combine(env.DataFolderPath, modname + ".esm");
-            var mod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, gen_quest_main.BuildReadParams(env.LoadOrder));
+            var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+            var mod = StarfieldMod.CreateFromBinary(modPath, StarfieldRelease.Starfield, readParams);
             gen_quest_main.FixNextFormId(mod);
-            return new PluginSession(env, mod, modname);
+            return new PluginSession(env, mod, modname, readParams);
         }
 
         /// <summary>Release the load order (and the file handle on the plugin). Idempotent.</summary>
