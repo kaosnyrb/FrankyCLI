@@ -14,10 +14,10 @@ python - "$TMP" <<'EOF' || exit 1
 import json, sys, copy, os
 T = sys.argv[1]
 d = json.load(open('data/delves/recipes/duo_delve06b.json', encoding='utf-8'))
-def case(name, f):
-    x = copy.deepcopy(d); f(x)
+def case(name, f, src='duo_delve06b'):
+    x = copy.deepcopy(d if src == 'duo_delve06b' else json.load(open(f'data/delves/recipes/{src}.json', encoding='utf-8'))); f(x)
     os.makedirs(f"{T}/{name}", exist_ok=True)
-    json.dump(x, open(f"{T}/{name}/duo_delve06b.json", 'w', encoding='utf-8'), indent=1)
+    json.dump(x, open(f"{T}/{name}/{src}.json", 'w', encoding='utf-8'), indent=1)
 case('clean',  lambda x: None)
 case('kind',   lambda x: x['place']['second']['who'].__setitem__('kind', 'the dead'))
 # workers and spacers (2026-10-13, his 'crowds driven from the json'): the same place, the same object.
@@ -31,10 +31,19 @@ case('anchor', lambda x: x['place'].__setitem__('who', {'kind': 'infested', 'lis
 case('count',  lambda x: x['place']['second']['who'].__setitem__('min', 0))
 # offer.say (2026-10-12) rides the same recipe: a box AND a line on the offer is his "either or".
 case('offerboth', lambda x: x['offer'].__setitem__('message', {'title': 'Incoming Message', 'text': 'x'}))
+# On a BOARD (2026-10-15, duo_delve12a, his "teach board who"): numbered after the arrival, armed after the accept.
+# missionboard02a's beat 2 is the pickup at the main place.
+mb = 'duo_delve_missionboard02a'
+case('boardwho',  lambda x: x['place'].__setitem__('who', {'kind': 'spacers', 'list': 'duo_GangMembersList_Spacer', 'min': 3, 'max': 5, 'beat': 2}), mb)
+# place.second.planet (same night, his "same planet"): only on the second, only "same"/"other", only behind a requested first site.
+case('planetsame',  lambda x: x['place']['second'].__setitem__('planet', 'same'), mb)
+case('planetbad',   lambda x: x['place']['second'].__setitem__('planet', 'moon'), mb)
+case('planetmain',  lambda x: x['place'].__setitem__('planet', 'same'), mb)
+case('planetlocal', lambda x: x['place']['second'].__setitem__('planet', 'same'), 'duo_delve10a')
 EOF
 
 run() { # run WANT case needle
-  out=$(timeout 900 ./bin/Debug/net8.0/FrankyCLI.exe gen_delve lint "$TMP/$2/duo_delve06b.json" 2>&1); code=$?
+  out=$(timeout 900 ./bin/Debug/net8.0/FrankyCLI.exe gen_delve lint "$(ls "$TMP/$2"/*.json)" 2>&1); code=$?
   got=UNCLEAR
   [ "$1" = REFUSE ] && [ $code -ne 0 ] && echo "$out" | grep -qF "$3" && got=REFUSE
   [ "$1" = PASS ]   && [ $code -eq 0 ] && echo "$out" | grep -qF "$3" && got=PASS
@@ -50,5 +59,10 @@ run REFUSE list   'is not a FormList'
 run REFUSE anchor "already hooks that object's distance"
 run REFUSE count  'needs 1 <= min <= max'
 run REFUSE offerboth 'offer has both a message and a say'
+run PASS   boardwho    "place.who: spacers, 3-5 placed around beat 2's object"
+run PASS   planetsame  "guards it ONTO the first site's planet"
+run REFUSE planetbad   "place.second.planet is 'moon'"
+run REFUSE planetmain  'place.planet is set'
+run REFUSE planetlocal 'behind a LOCAL first site'
 echo "failing: $fails"
 [ $fails -eq 0 ]

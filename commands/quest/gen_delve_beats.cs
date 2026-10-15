@@ -383,10 +383,11 @@ namespace FrankyCLI
             }
             // The people the approach places at the endings; a talk beat's person is created by its alias instead.
             int personCount = r.beats.Count(b => b.person != null && b.type != "talk");
+            int occBase = OccupantBase(t), firstBeat = t.entryStage + 10;
             if (personCount > 0)
             {
-                if (t.approachStage < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or playerAlias for an ending's person.");
-                else if (t.approachStage + personCount >= 10) Fatal($"{personCount} people need stages {t.approachStage + 1} to {t.approachStage + personCount}, which reach the first beat's 10.");
+                if (occBase < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or arrivalStage, or no playerAlias, for an ending's person.");
+                else if (occBase + personCount >= firstBeat) Fatal($"{personCount} people need stages {occBase + 1} to {occBase + personCount}, which reach the first beat's {firstBeat}.");
             }
 
             // --- who is there (his dial, 2026-10-11) --------------------------------------------------------
@@ -416,9 +417,9 @@ namespace FrankyCLI
             }
             if (whos.Count > 0)
             {
-                if (t.approachStage < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or playerAlias for a nest's stage and hook.");
-                else if (t.approachStage + personCount + whos.Count >= 10)
-                    Fatal($"{personCount} people and {whos.Count} nest(s) need stages {t.approachStage + 1} to {t.approachStage + personCount + whos.Count}, which reach the first beat's 10.");
+                if (occBase < 0 || t.playerAlias < 0) Fatal($"template '{t.id}' names no approachStage or arrivalStage, or no playerAlias, for a nest's stage and hook.");
+                else if (occBase + personCount + whos.Count >= firstBeat)
+                    Fatal($"{personCount} people and {whos.Count} nest(s) need stages {occBase + 1} to {occBase + personCount + whos.Count}, which reach the first beat's {firstBeat}.");
             }
 
             int recoverCount = r.beats.Count(b => b.type == "recover");
@@ -939,11 +940,11 @@ namespace FrankyCLI
                 // An ending's person is placed on its own stage, numbered after the approach's.
                 personStage = new Dictionary<int, int>();
                 foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null && r.beats[b].type != "talk"))
-                    personStage[b] = t.approachStage + 1 + personStage.Count;
+                    personStage[b] = OccupantBase(t) + 1 + personStage.Count;
                 // A place's occupants, after the people: their own stage, set by a distance hook on the object they surround.
                 whos = WhoOf(r);
                 whoStage = new Dictionary<int, int>();
-                foreach (var (p, _, _) in whos) whoStage[p] = t.approachStage + 1 + personStage.Count + whoStage.Count;
+                foreach (var (p, _, _) in whos) whoStage[p] = OccupantBase(t) + 1 + personStage.Count + whoStage.Count;
                 // A second ending completes the quest the same way as the first: a COPY of the completing stage
                 // (its CompleteQuest flag and its reward entry), never a plain stage, which completes nothing.
                 foreach (var cs in steps.Where(s => s.IsChoose))
@@ -1345,15 +1346,19 @@ namespace FrankyCLI
                     Console.WriteLine($"  +hook    : beat {b + 1}'s person, within {ApproachDistance} of its object (alias {own}) after {enter}, sets {pst}");
                 }
 
-                // A nest: a stock distance hook on the object it surrounds, measuring to the player, at any stage (no
-                // PrereqStage), as a person's is on its ending: 250 m out, so the creatures are there before he is.
+                // A nest: a stock distance hook on the object it surrounds, measuring to the player, as a person's is on
+                // its ending: 250 m out, so they are there before he is. At any stage on a slate (no PrereqStage); on a
+                // board only after the accept (entryStage), because a board quest runs from the refresh and its site
+                // exists before anyone has taken the job.
+                int whoPrereq = t.entryStage > 0 ? t.entryStage : -1;
                 foreach (var (p, w, a) in whos)
                 {
                     int own = slotOf[a].activatorAlias;
-                    var sc = DistanceHook(clone.FormKey, t.playerAlias, whoStage[p], -1);
-                    if (AttachHook(vma, clone.FormKey, own, sc, HookEntry.FindOrCreate, true, bm, whoStage[p], -1) == Hooked.AlreadyCarries)
+                    var sc = DistanceHook(clone.FormKey, t.playerAlias, whoStage[p], whoPrereq);
+                    if (AttachHook(vma, clone.FormKey, own, sc, HookEntry.FindOrCreate, true, bm, whoStage[p], whoPrereq) == Hooked.AlreadyCarries)
                     { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the {w.kind} at {PlaceKey[p]} cannot hook it twice."); return 1; }
-                    Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
+                    Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}"
+                                      + (whoPrereq >= 0 ? $" after {whoPrereq}" : ""));
                 }
 
                 // Arrival (board): a stock distance hook on step one's MARKER, measuring to the player, armed only once the
@@ -1928,12 +1933,15 @@ namespace FrankyCLI
                 var g =q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
                     .Conditions.FirstOrDefault(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter);
                 var gd = g?.Data as IIsInSameCurrentLocationAsAliasConditionDataGetter;
-                fail += Check("the second request is guarded off the first site's planet",
+                bool same = SecondSamePlanet(r);
+                fail += Check($"the second request is guarded {(same ? "onto" : "off")} the first site's planet",
                               gd == null ? "no guard" : $"alias {gd.FirstParameter}, {gd.SecondParameter.Link.FormKey}, == {(g as IConditionFloatGetter)?.ComparisonValue}",
-                              $"alias {t.mapMarkerAlias}, 070A54:Starfield.esm, == 0");
+                              $"alias {t.mapMarkerAlias}, 070A54:Starfield.esm, == {(same ? 1 : 0)}");
             }
             if (r.place.second?.remote == true)
-                fail += Check("the second request carries no drive leash to the first (it is meant for another planet)",
+                fail += Check(SecondSamePlanet(r)
+                                  ? "the second request carries no drive leash to the first (the planet content manager places it, not a drive)"
+                                  : "the second request carries no drive leash to the first (it is meant for another planet)",
                               q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
                                   .Conditions.Any(c => c.Data is IGetDistanceConditionDataGetter g && g.UseAliases).ToString() ?? "missing", "False");
             if (t.questScript == null)

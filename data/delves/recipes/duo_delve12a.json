@@ -1,15 +1,16 @@
 {
   "schema": 1,
   "id": "duo_delve12a",
-  "template": "beats",
+  "template": "board",
   "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The mission board's test node (under vanilla's MissionBranch): no conditions, SharesEvent, NumQuestsToRun 1. ELIZA: the beats base is a SLATE quest, so a board Delve needs a board base (posting title + body) before this node can deal it.",
+  "_deal": "The mission board's test node (under vanilla's MissionBranch): no conditions, SharesEvent, NumQuestsToRun 1. ELIZA 2026-10-15: on the board template since it exists (2026-10-14, missionboard01a/02a).",
   "author": "jessica",
   "source": "his 2026-10-12 14:16: \"Missonboard quest where a crate was onboard a ship that crashed. Go to the crash site, get the crate which is gaurded by spacers and return it to a POI local to the crashed ship.\"",
   "_note": [
     "THE CRASH SITE CARGO, his design, words Jessica's. Entry: the MISSION BOARD (his \"I'm looking for work\"),",
     "so the opening voice is the issuer's posting (style guide 33 s4: we, payer on line one, flat, stock closer).",
-    "TWO PIECES ARE NOT BUILT, and this recipe is the request:",
+    "TWO PIECES WERE NOT BUILT, and this recipe was the request (ELIZA 2026-10-15: both are now, the board template and",
+    "place.who on a board; his picks that evening: guards as Jessica designed them, and the drop on the WRECK'S planet):",
     "1. A BOARD posting: written below as board.title / board.body, PROPOSED fields. The beats base is a slate quest.",
     "2. GUARDS on a pickup: spacers placed round the crate when the player first comes near, PROPOSED as the pickup's",
     "   guard block (a hostile twin of approach.civilians). The built fallback is a recover beat, but that takes the",
@@ -21,27 +22,29 @@
     "Message box on the pickup only, after the fight: a calm moment (his 2026-10-08 rule). Either or: no say there.",
     "Pay: a guarded pickup; suggest med."
   ],
-  "board": {
-    "title": "Recovery: Crash Site Cargo on <Planet>",
-    "body": "Local Contract. Our freighter came down on <Planet> with a consignment still aboard, and spacers have found the wreck. Recover the crate from the <Place> and deliver it to the <SecondPlace>. Payment on delivery.",
-    "_board": "PROPOSED. Style guide 33 s4: the issuer's we, payer on line one, flat, stock closer."
-  },
   "place": {
     "theme": {
       "require": ["LocTypeOE_ThemeShipwreckKeyword"],
       "exclude": ["LocTypeOE_ThemeCaveKeyword"]
     },
+    "who": { "kind": "spacers", "list": "duo_GangMembersList_Spacer", "min": 3, "max": 5, "beat": 1 },
+    "_who": "Jessica's proposed pickup guard, as the built field (ELIZA 2026-10-15): spacers round the crate when he first comes within 250 m, after the accept. Overtime's Spacer gang list (9 entries).",
     "second": {
+      "remote": true,
+      "planet": "same",
+      "_remote": "On a board the second place is always a request (ELIZA 2026-10-15). His pick: on the WRECK'S planet, so the drop is a short hop; nothing holds it near, and his play shows how far.",
       "theme": {
         "require": [],
         "exclude": ["LocTypeOE_ThemeShipwreckKeyword", "LocTypeOE_ThemeCaveKeyword"]
       }
     },
-    "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn)."
+    "_theme": "A wreck here; the delivery site must never be a wreck itself (two places that could draw one POI warn). ELIZA 2026-10-15, measured: a request can put down 3 wreck sites of 214, so every crash site is one of three; the board places it, so it always starts."
   },
   "prose": {
     "name": "Recovery: Crash Site Cargo on <Planet>",
-    "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate delivered to the <SecondPlace>."
+    "briefing": "A freighter came down at the <Place> with a consignment still aboard. Spacers got to the wreck first. The shipping firm wants its crate delivered to the <SecondPlace>.",
+    "card": "Local Contract. Our freighter came down on <Planet> with a consignment still aboard, and spacers have found the wreck. Recover the crate from the <Place> and deliver it to the <SecondPlace>. Payment on delivery.",
+    "_card": "Jessica's board.body verbatim, moved into the built field (ELIZA 2026-10-15). Style guide 33 s4: the issuer's we, payer on line one, flat, stock closer. Her board.title was prose.name already."
   },
   "beats": [
     {
@@ -52,8 +55,6 @@
       "objective": "Recover the freighter's crate at the <Place>",
       "model": "Meshes\\ccs\\wreckcargocrate01.nif",
       "name": "Wreck Cargo Crate",
-      "guard": { "faction": "spacers", "min": 3, "max": 5, "near": 250 },
-      "_guard": "PROPOSED: spacers placed round the crate on first approach, from Overtime's hostile gang list. Absent support, nothing guards it.",
       "message": {
         "title": "Wreck Cargo Crate",
         "text": "The crate came through the crash in better shape than the ship did. The seals are scorched, but they held."
@@ -66,7 +67,9 @@
       "objective": "Deliver the crate to the <SecondPlace>",
       "journal": "A freighter went down at the <Place> and spacers were picking over the wreck. I took the consignment off them and delivered it to the <SecondPlace>, where it was meant to go.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Consignee Drop"
+      "name": "Consignee Drop",
+      "reward": "med",
+      "_reward": "Jessica's suggestion (a guarded pickup); the tier is his."
     }
   ]
 }

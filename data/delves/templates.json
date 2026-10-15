@@ -152,8 +152,9 @@
       "cannot": [
         "a recover or a choose -- see allows",
         "a found second place (only a requested one) or a third place",
-        "an approach, a who, a person at an ending"
+        "an approach, a person at an ending"
       ],
+      "_who": "A who BUILDS on a board since 2026-10-15 (duo_delve12a, his 'teach board who'): its stage numbered after arrivalStage (16 to 19, below the first beat's 20) and its distance hook armed only after entryStage, so nothing stands at a posting's site until the job is taken.",
       "verifiedFrom": "gen_inspect qall duo_MB28a_qst and MB_Bounty05_UC, Defiant, 2026-10-14; MissionQuestScript.psc read whole"
     }
   ]
