@@ -21,6 +21,13 @@ compare refuses, rather than reporting IDENTICAL, when the result could not mean
   - a recipe is missing on one side, failed to build, or has no files: the count of files compared is printed and
     a recipe with none is a refusal, never a pass.
 Exit 0 only when every file of every recipe is identical and none of the refusals fired.
+
+The BUILD LOGS are compared too (2026-10-15, his go, after the hand-rolled version missed three times in a day): they
+carry what the build printed, the lint's census figures included. Each log names its own emit folder, <root>/<label>,
+so that exact string is replaced on both sides (and a combined label's source labels, its manifest's merged_from), as
+is the repo path when the manifest records one (a baseline emitted in a worktree). A log in which the label matched
+NOTHING is a refusal: the normaliser cannot have run, and a log compare that normalised nothing is not one. A step
+that changes the prints on purpose says so with --expect-log-change; one that says so and changes none is refused.
 """
 import argparse
 import hashlib
@@ -95,7 +102,7 @@ def emit(args):
     bindir = os.path.join(REPO, "bin", "Debug", "net8.0")
     exe = os.path.join(bindir, "FrankyCLI.exe")
     manifest = {"label": args.label, "ids": ids, "code": code_fingerprint(bindir),
-                "inputs": input_fingerprint(args.plugin), "results": {}}
+                "inputs": input_fingerprint(args.plugin), "repo": REPO, "results": {}}
     os.makedirs(dest)
     for i, rid in enumerate(ids, 1):
         out = os.path.join(dest, rid)
@@ -129,10 +136,30 @@ def emit(args):
     return 1 if bad else 0
 
 
-def compare_dirs(root, a, b, allow_same_code=False, expect_changed=()):
+def normalised_log(root, label, manifest, rid):
+    """(text, labels replaced) for one recipe's build log, or (None, 0) when there is none. Only the exact emit
+    folder string is replaced, never a bare label, which could sit inside any other word."""
+    p = os.path.join(root, label, rid, "build.log")
+    if not os.path.exists(p):
+        return None, 0
+    text = open(p, encoding="utf-8").read()
+    n = 0
+    for name in [label] + manifest.get("merged_from", []):
+        folder = os.path.join(root, name)
+        n += text.count(folder)
+        text = text.replace(folder, "<LABEL>")
+    repo = manifest.get("repo")
+    if repo:
+        for form in {repo, repo.replace("\\", "/")}:
+            text = text.replace(form, "<REPO>")
+    return text, n
+
+
+def compare_dirs(root, a, b, allow_same_code=False, expect_changed=(), expect_log_change=False):
     """Returns (exit code, lines). Pure, so selftest can drive it on planted folders.
     expect_changed: input keys the step changes ON PURPOSE (a template row deleted with its kind). Each is named in
-    the verdict, and one named but NOT changed is a refusal too: an exemption that exempts nothing is a typo."""
+    the verdict, and one named but NOT changed is a refusal too: an exemption that exempts nothing is a typo.
+    expect_log_change: the step changes what the build prints on purpose; log differences are listed, not failed."""
     lines = []
     ma = json.load(open(os.path.join(root, a, MANIFEST), encoding="utf-8"))
     mb = json.load(open(os.path.join(root, b, MANIFEST), encoding="utf-8"))
@@ -153,7 +180,7 @@ def compare_dirs(root, a, b, allow_same_code=False, expect_changed=()):
             lines.append(f"  input changed ON PURPOSE (declared): {k}")
     if sorted(ma["ids"]) != sorted(mb["ids"]):
         refusals.append(f"different recipe sets: {sorted(set(ma['ids']) ^ set(mb['ids']))}")
-    differ, files_compared = [], 0
+    differ, files_compared, log_diffs, logs_compared = [], 0, [], 0
     for rid in sorted(set(ma["ids"]) & set(mb["ids"])):
         for m in (ma, mb):
             r = m["results"].get(rid, {})
@@ -174,23 +201,48 @@ def compare_dirs(root, a, b, allow_same_code=False, expect_changed=()):
             if ba != bb:
                 at = next((i for i, (x, y) in enumerate(zip(ba, bb)) if x != y), min(len(ba), len(bb)))
                 differ.append(f"{rid}/{name}: DIFFER, {len(ba):,} B vs {len(bb):,} B, first difference at byte {at:,}")
-        lines.append(f"  {rid}: {len(set(fa) & set(fb))} file(s) compared")
-    lines.append(f"files compared: {files_compared} across {len(set(ma['ids']) & set(mb['ids']))} recipe(s)")
-    for d in differ:
+        la, na = normalised_log(root, a, ma, rid)
+        lb, nb = normalised_log(root, b, mb, rid)
+        log_state = "log ?"
+        if la is None or lb is None:
+            refusals.append(f"{rid} has no build.log on one side")
+        elif na == 0 or nb == 0:
+            refusals.append(f"{rid}: a build log names no emit folder of its label ({na} / {nb} replaced), so it could not be normalised")
+        else:
+            logs_compared += 1
+            log_state = "log same"
+            if la != lb:
+                xa, xb = la.splitlines(), lb.splitlines()
+                i = next((i for i, (x, y) in enumerate(zip(xa, xb)) if x != y), min(len(xa), len(xb)))
+                shown = lambda xs: xs[i][:160] if i < len(xs) else "(end of log)"
+                log_diffs.append(f"{rid}/build.log: DIFFER at line {i + 1}\n      {shown(xa)}\n      {shown(xb)}")
+                log_state = "log DIFFERS"
+        lines.append(f"  {rid}: {len(set(fa) & set(fb))} file(s) compared, {log_state}")
+    lines.append(f"files compared: {files_compared} across {len(set(ma['ids']) & set(mb['ids']))} recipe(s); "
+                 f"build logs compared: {logs_compared}")
+    for d in differ + log_diffs:
         lines.append("  " + d)
+    if expect_log_change:
+        if not log_diffs:
+            refusals.append("--expect-log-change was declared and no build log changed")
+        else:
+            lines.append(f"  build logs changed ON PURPOSE (declared): {len(log_diffs)}")
     for r in refusals:
         lines.append("REFUSED: " + r)
     if refusals:
         return 2, lines
-    if differ:
-        lines.append(f"DIFFER: {len(differ)} file(s)")
+    failing = differ + ([] if expect_log_change else log_diffs)
+    if failing:
+        lines.append(f"DIFFER: {len(failing)} file(s)")
         return 1, lines
-    lines.append("IDENTICAL: every output of every recipe, byte for byte")
+    lines.append("IDENTICAL: every output of every recipe, byte for byte, "
+                 + ("the build logs changed as declared" if expect_log_change else "and every build log"))
     return 0, lines
 
 
 def compare(args):
-    code, lines = compare_dirs(args.root, args.before, args.after, args.allow_same_code, args.expect_input_change)
+    code, lines = compare_dirs(args.root, args.before, args.after, args.allow_same_code, args.expect_input_change,
+                               args.expect_log_change)
     print("\n".join(lines))
     return code
 
@@ -200,7 +252,13 @@ def selftest(_args):
     watched compare fail would be the same blind net it exists to prevent."""
     fails = 0
 
-    def plant(root, label, code="c1", inputs=None, files=None, ok=True, ids=("r1", "r2")):
+    def emit_log(root, label, rid, repo="C:\\Git\\FrankyCLI", extra=""):
+        """What a real build.log carries that the compare must see through: the data path under the repo, and the
+        emit folder under the label."""
+        return (f"  data: {repo}\\data\\delves\n  census: 87 places\n{extra}"
+                f"  --dry --emit: wrote {os.path.join(root, label, rid)}\\du_overtime.esm (3 B)\n")
+
+    def plant(root, label, code="c1", inputs=None, files=None, ok=True, ids=("r1", "r2"), log=None, extra=None):
         d = os.path.join(root, label)
         os.makedirs(d)
         files = files if files is not None else {"du_overtime.esm": b"\x01\x02\x03", "r.json": b"{}", "s.psc": b"x"}
@@ -208,18 +266,20 @@ def selftest(_args):
             os.makedirs(os.path.join(d, rid))
             for n, data in files.items():
                 open(os.path.join(d, rid, n), "wb").write(data)
-            open(os.path.join(d, rid, "build.log"), "w").write(label)
+            text = log(root, label, rid) if log else emit_log(root, label, rid)
+            open(os.path.join(d, rid, "build.log"), "w", encoding="utf-8").write(text)
         m = {"label": label, "ids": list(ids), "code": {"FrankyCLI.dll": code},
              "inputs": inputs or {"plugin": "p1"}, "results": {r: {"exit": 0 if ok else 1, "emitted": ok} for r in ids}}
+        m.update(extra or {})
         json.dump(m, open(os.path.join(d, MANIFEST), "w"))
 
-    def case(name, want, expect=(), **after):
+    def case(name, want, expect=(), before=None, log_change=False, **after):
         nonlocal fails
         root = tempfile.mkdtemp()
         try:
-            plant(root, "a")
+            plant(root, "a", **(before or {}))
             plant(root, "b", **({"code": "c2"} | after))
-            got, lines = compare_dirs(root, "a", "b", expect_changed=expect)
+            got, lines = compare_dirs(root, "a", "b", expect_changed=expect, expect_log_change=log_change)
             ok = got == want
             fails += 0 if ok else 1
             print(f"  {'ok ' if ok else 'BAD'} {name}: exit {got}, wanted {want}  ({lines[-1]})")
@@ -239,6 +299,21 @@ def selftest(_args):
     case("a recipe failed to build", 2, ok=False)
     case("a recipe missing from one label", 2, ids=("r1",))
     case("a recipe with no output files", 2, files={})
+    # The build logs.
+    case("a build log differs beyond its label", 1, log=lambda r, l, i: emit_log(r, l, i, extra="  +hook    : one more\n"))
+    case("a build log names no emit folder", 2, log=lambda r, l, i: "  data: C:\\Git\\FrankyCLI\\data\\delves\n")
+    case("a combined label's logs name its source labels", 0,
+         before={"log": lambda r, l, i: emit_log(r, "src", i), "extra": {"merged_from": ["src"]}})
+    case("CONTROL: the same combined label without merged_from is refused", 2,
+         before={"log": lambda r, l, i: emit_log(r, "src", i)})
+    case("logs differing only in a RECORDED repo path", 0,
+         before={"log": lambda r, l, i: emit_log(r, l, i, repo="C:\\tmp\\wt"), "extra": {"repo": "C:\\tmp\\wt"}},
+         extra={"repo": "C:\\Git\\FrankyCLI"})
+    case("CONTROL: the same repo difference with no repo recorded", 1,
+         before={"log": lambda r, l, i: emit_log(r, l, i, repo="C:\\tmp\\wt")})
+    case("a declared log change, logs differ", 0, log_change=True,
+         log=lambda r, l, i: emit_log(r, l, i, extra="  +hook    : one more\n"))
+    case("a declared log change that did not happen", 2, log_change=True)
     # The JSON fingerprint: blind to line endings, never to content.
     d = tempfile.mkdtemp()
     try:
@@ -272,6 +347,8 @@ def main():
                    help="the determinism control only: the same binary twice must be identical")
     c.add_argument("--expect-input-change", action="append", default=[], metavar="KEY",
                    help="an input the step changes on purpose (e.g. templates.json when a template row leaves); repeatable")
+    c.add_argument("--expect-log-change", action="store_true",
+                   help="the step changes what the build prints on purpose: log differences are listed, not failed")
     sub.add_parser("selftest")
     args = ap.parse_args()
     return {"emit": emit, "compare": compare, "selftest": selftest}[args.cmd](args)
