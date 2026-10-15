@@ -685,13 +685,10 @@ namespace FrankyCLI
 
         private static string FragmentFunction(int stage) => $"Fragment_Stage_{stage:D4}_Item_00";
 
-        /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
         /// <summary>The quest-level script every beats Delve carries: OnQuestRejected only (papyrus/duo_delve_quest.psc).</summary>
         private const string RejectScript = "duo_delve_quest";
 
-        /// <summary>A fight beat's forms, resolved own-or-master in Build where the load order is.</summary>
-        private sealed class FightForms { public FormKey? Target, Gang, Enemies, Loot; }
-
+        /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
         private sealed class BeatsMade
         {
             public List<int> ClearGroups = new();   // clear beats' collections: empty, Optional, and wearing NO package (they hold the site)
@@ -800,11 +797,7 @@ namespace FrankyCLI
         }
 
         private static int BuildBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r,
-                                      Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm,
-                                      Dictionary<int, (INpcGetter tmpl, FormKey? outfit, FormKey? company, FormKey? voice)> persons,
-                                      IQuestCollectionAliasGetter? waveSrc, IPackageGetter? travelSrc,
-                                      (INpcGetter tmpl, FormKey voice)? speakerSrc, Dictionary<int, FormKey> whoLists,
-                                      Dictionary<int, FightForms> fights, Dictionary<(int beat, int ex), FormKey> talkPerks)
+                                      Dictionary<string, FormKey> markers, BuildMade made, BeatsMade bm, DelveInputs inputs)
         {
             var vma = clone.VirtualMachineAdapter;
             if (vma == null) { Console.WriteLine("REFUSED: the base has no VMAD."); return 1; }
@@ -831,9 +824,9 @@ namespace FrankyCLI
             { Console.WriteLine($"REFUSED: a recover beat needs the removed driver's GangMembers and MaxGangMembers, and '{t.replacesDriver}' lacks one."); return 1; }
             if (r.beats.Any(b => b.type == "hold") && gangKey == null)
             { Console.WriteLine($"REFUSED: a hold's waves are drawn from the removed driver's GangMembers, and '{t.replacesDriver}' lacks it."); return 1; }
-            if (r.beats.Any(b => b.type == "clear") && waveSrc == null)
+            if (r.beats.Any(b => b.type == "clear") && inputs.WaveSrc == null)
             { Console.WriteLine("REFUSED: a clear's enemies fill a collection copied from vanilla's ActiveHostiles, and none was handed in."); return 1; }
-            if (r.beats.Any(b => b.type == "hold") && (waveSrc == null || travelSrc == null))
+            if (r.beats.Any(b => b.type == "hold") && (inputs.WaveSrc == null || inputs.TravelSrc == null))
             { Console.WriteLine("REFUSED: a hold needs a source collection alias and a source package to copy its waves from, and one was not handed in."); return 1; }
 
             // A hold's waves come FOR the player: one package per Delve, a copy of the bounty hunters' Travel
@@ -845,7 +838,7 @@ namespace FrankyCLI
             RemovePrevious(myMod.Packages, e => e.StartsWith(r.id + "_wavepkg"));
             if (r.beats.Any(b => b.type == "hold"))
             {
-                var pk = myMod.Packages.DuplicateInAsNewRecord(travelSrc!);
+                var pk = myMod.Packages.DuplicateInAsNewRecord(inputs.TravelSrc!);
                 pk.EditorID = r.id + "_wavepkg";
                 pk.VirtualMachineAdapter = null;
                 pk.OwnerQuest.SetTo(clone.FormKey);
@@ -857,7 +850,7 @@ namespace FrankyCLI
                 // NOT a suspect, measured: the copy's inputs are written sorted (1,3,5,7,8 where the source
                 // stores 1,3,5,8,7), because Mutagen's writer sorts them whatever order they are given, and
                 // Starfield.esm ships BOTH orders on Travel packages (248 sorted, 214 not).
-                bm.WavePackageShape = $"topics {string.Join("/", new[] { travelSrc!.OnBegin, travelSrc.OnEnd, travelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
+                bm.WavePackageShape = $"topics {string.Join("/", new[] { inputs.TravelSrc!.OnBegin, inputs.TravelSrc.OnEnd, inputs.TravelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
                 pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
                 foreach (var c in pk.Conditions)
                 {
@@ -872,7 +865,7 @@ namespace FrankyCLI
                 pk.PreferredSpeed = Package.Speed.Run;
                 travelPkg = pk.FormKey;
                 bm.WavePackage = pk.FormKey;
-                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {travelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
+                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {inputs.TravelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
             }
             vma.Scripts.Remove(old);
             if (vma.Scripts.Count != 0)
@@ -961,7 +954,7 @@ namespace FrankyCLI
                     for (int w = 0; w < nw; w++)
                     {
                         uint cid = NextAliasId(clone);
-                        var col = EmptyCollection(waveSrc!, cid, $"DelveBeat{i + 1}Wave{w + 1}");
+                        var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Wave{w + 1}");
                         if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a wave must start empty."); return 1; }
                         col.Collection[0].ReferenceAlias!.PackageData.Add(travelPkg.ToLink<IPackageGetter>());
                         clone.Aliases.Add(col);
@@ -992,7 +985,7 @@ namespace FrankyCLI
                     // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
                     var cm = NewMarker(i, "Spawn");
                     uint cid = NextAliasId(clone);
-                    var col = EmptyCollection(waveSrc!, cid, $"DelveBeat{i + 1}Enemies");
+                    var col = EmptyCollection(inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Enemies");
                     if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
                     clone.Aliases.Add(col);
                     slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = beatStage[i] };
@@ -1445,7 +1438,7 @@ namespace FrankyCLI
             // written here; unaggressive, average confidence, dressed from the recipe (his 2026-10-08 asks).
             var npcOf = new Dictionary<int, FormKey>();
             RemovePrevious(myMod.Npcs, e => e.StartsWith(r.id + "_person"));
-            foreach (var (b, pr) in persons)
+            foreach (var (b, pr) in inputs.Persons)
             {
                 var pp = r.beats[b].person!;
                 var npc = Retrograde.Utils.NPCTools.CloneNPC(myMod, pr.tmpl.DeepCopy());
@@ -1465,7 +1458,7 @@ namespace FrankyCLI
             // --- the speaker: an NPC that is never placed, carrying the subtitle's NAME and the VOICE TYPE whose
             // folder the audio is looked up in (gen_dlgtest's shape: clone, then set Voice) ----------------------
             RemovePrevious(myMod.Npcs, e => e == r.id + "_speaker");
-            if (speakerSrc is (INpcGetter stmpl, FormKey svoice))
+            if (inputs.Speaker is (INpcGetter stmpl, FormKey svoice))
             {
                 var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
                 sp.EditorID = r.id + "_speaker";
@@ -1478,7 +1471,7 @@ namespace FrankyCLI
 
             foreach (var b in talkAlias.Keys)
                 BuildTalk(myMod, clone, r, b, steps, beatStage, t.entryStage, slotOf[b].targetAlias, npcOf[b],
-                          myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm, talkPerks);
+                          myMod.Npcs.First(n => n.FormKey == npcOf[b]).Flags.HasFlag(Npc.Flag.Female), bm, inputs.TalkPerks);
 
             // --- 9. the events: one stock hook per beat --------------------------------------------------
             int recovers = 0;
@@ -1690,7 +1683,7 @@ namespace FrankyCLI
                 foreach (var b in steps[k].Beats.Where(b => IsFight(r.beats[b])))
                 {
                     var fb = r.beats[b];
-                    var ff = fights[b];
+                    var ff = inputs.Fights[b];
                     string lootArgs = "None, 0";
                     if (ff.Loot is FormKey lk) { props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
                     if (fb.type == "defeat")
@@ -1741,7 +1734,7 @@ namespace FrankyCLI
                 props.Add(("ActorBase", pn, npcOf[b], -1));
                 Add(pst, $"duo_delve_lib.PlacePerson({ta}, {pn}, 1.5)");
                 var pc = r.beats[b].person!.company;
-                if (pc != null && persons[b].company is FormKey cfk)
+                if (pc != null && inputs.Persons[b].company is FormKey cfk)
                 {
                     props.Add(("FormList", $"Company{b + 1}", cfk, -1));
                     Add(pst, $"duo_delve_lib.PlaceCompany({ta}, Company{b + 1}, {pc.min}, {pc.max}, 8.0)");
@@ -1751,7 +1744,7 @@ namespace FrankyCLI
             {
                 string ta = $"Alias_Beat{a + 1}Target", nl2 = $"Who{p + 1}";
                 props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[a].activatorAlias));
-                props.Add(("FormList", nl2, whoLists[p], -1));
+                props.Add(("FormList", nl2, inputs.WhoLists[p], -1));
                 // One placer per kind, all in duo_delve_lib: a nest is one species and attacks, workers are a
                 // friendly mix stood round the object, spacers a hostile mix that holds it.
                 string call = w.kind switch
@@ -1788,7 +1781,7 @@ namespace FrankyCLI
             // by the fragment of the stage it belongs to. The response's WEMFile is the topic's own id, and
             // the game looks the audio up as Sound\Voice\<plugin>\<voice type>\<that id, 8 hex>.wem.
             var spokenAt = new List<(int stage, int n)>();   // fragment-started lines, by stage
-            if (speakerSrc != null)
+            if (inputs.Speaker != null)
             {
                 var lines = new List<(int stage, string text)>();
                 if (r.broadcast != null) lines.Add((arrival ? t.arrivalStage : t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
