@@ -499,6 +499,8 @@ namespace FrankyCLI
             string verb = args.Length > 1 ? args[1].ToLowerInvariant() : "";
             bool dry = args.Any(a => a.Equals("--dry", StringComparison.OrdinalIgnoreCase));
             string? path = args.Skip(2).FirstOrDefault(a => !a.StartsWith("--"));
+            // Before the data folder and the environment: it needs neither (gen_delve_selftest.cs).
+            if (verb == "selftest") return SelfTest();
 
             string? dataDir = ResolveDataDir();
             if (dataDir == null)
@@ -553,6 +555,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
                     Console.WriteLine("       gen_delve nodeflag <node> runone on|off [--dry]   one quest per event (NumQuestsToRun, max 1)");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
+                    Console.WriteLine("       gen_delve selftest   the build's pure helpers, no plugin or game data loaded, exit 1 on failure");
                     return 1;
             }
         }
@@ -2110,7 +2113,7 @@ namespace FrankyCLI
             int? Map(int from) => map.TryGetValue(from, out var to) ? to : null;
             foreach (var b in t.borrowAliases)
             {
-                if (clone.Aliases!.SelectMany(Flatten).Any(x => x.id == (uint)b.to))
+                if (AliasTaken(clone, (uint)b.to))
                 { Console.WriteLine($"REFUSED: alias {b.to} is already taken on this base; borrowed alias {b.from} cannot land there."); return 1; }
                 AQuestAlias copy;
                 string links = "";
@@ -2157,7 +2160,7 @@ namespace FrankyCLI
             var sp = t.secondPlanet!;
             var from = clone.Aliases!.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)sp.cloneOf);
             if (from == null) { Console.WriteLine($"REFUSED: the base has no planet alias {sp.cloneOf} to copy the second planet from."); return 1; }
-            if (clone.Aliases!.SelectMany(Flatten).Any(x => x.id == (uint)sp.id)) { Console.WriteLine($"REFUSED: alias {sp.id} is already taken; the second planet cannot land there."); return 1; }
+            if (AliasTaken(clone, (uint)sp.id)) { Console.WriteLine($"REFUSED: alias {sp.id} is already taken; the second planet cannot land there."); return 1; }
             var c = from.DeepCopy(); c.ID = (uint)sp.id; c.Name = sp.name; c.ParentSystemLocationAliasID = t.secondPlaceAlias;
             clone.Aliases.Add(c);
             Console.WriteLine($"  +planet  : alias {sp.id} {sp.name}, the planet of the second place (alias {t.secondPlaceAlias}), a copy of {from.Name}");
@@ -2386,22 +2389,19 @@ namespace FrankyCLI
             return AliasGraph.ForwardRefs(q.Aliases.ToList()).Count == 0 ? 0 : 1;
         }
 
-        private static IEnumerable<(uint id, string name)> Flatten(IAQuestAliasGetter a)
-        {
-            if (a is IQuestReferenceAliasGetter r && r.Name != null) yield return (r.ID, r.Name);
-            if (a is IQuestLocationAliasGetter l && l.Name != null) yield return (l.ID, l.Name);
-            if (a is IQuestCollectionAliasGetter c)
-                foreach (var m in c.Collection)
-                    if (m.ReferenceAlias?.Name != null) yield return (m.ReferenceAlias.ID, m.ReferenceAlias.Name!);
-        }
-
         /// <summary>
         /// The id a new alias takes: one past the highest the quest carries. ONE copy (split step 3e, 2026-10-15; it
-        /// was spelled nine times). ⚠ FOUND, NOT FIXED: it reads ids through Flatten, which skips an alias with no
-        /// name, so an unnamed alias above the rest would be handed out twice. Kept exactly as it was, because this
-        /// commit changes no output; fixing it is a behaviour change to make on its own.
+        /// was spelled nine times). Every alias counts, whatever its name (AliasGraph.IdsOf). Until 2026-10-15 it read
+        /// through a Flatten that skipped an alias whose Name was NULL. Mutagen reads a missing name as empty, never
+        /// null, so no alias read off a plugin was ever skipped; only code, or a model JSON carrying "Name": null
+        /// (gen_questmodel's writer copies it across), could make one. Whether an id is taken has nothing to do with a
+        /// name, so the filter went. No output changed (both shells, both parts files and ten built quests measured,
+        /// none with a null name); `gen_delve selftest` plants the case.
         /// </summary>
-        private static uint NextAliasId(Quest q) => 1 + q.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+        private static uint NextAliasId(Quest q) => 1 + q.Aliases!.SelectMany(AliasGraph.IdsOf).DefaultIfEmpty(0u).Max();
+
+        /// <summary>Whether an alias of the quest already holds this id, named or not (the same reading as NextAliasId).</summary>
+        private static bool AliasTaken(Quest q, uint id) => q.Aliases!.SelectMany(AliasGraph.IdsOf).Contains(id);
 
         /// <summary>Remove the previous build's records of one group, by their EditorID, before minting this build's: a
         /// rebuild replaces, it never accumulates. ONE copy of what six sites spelled (split step 3e).</summary>
