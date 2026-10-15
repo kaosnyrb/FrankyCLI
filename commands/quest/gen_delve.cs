@@ -1297,10 +1297,10 @@ namespace FrankyCLI
             // markers of the beats that happen there, the map marker, and that place's theme.
             if (!issues.Any(i => i.Fatal))
             {
-                var drawPool = DrawPopulation(env);
-                var reqPool = remote || secondRemote ? PcmRequestPool(env) : null;
+                var drawPool = CensusOf(env).Draw;
+                var reqPool = remote || secondRemote ? CensusOf(env).PcmRequestPool() : null;
                 if (remote)
-                    Console.WriteLine($"  corpus: {reqPool!.Count} place(s) a PCM_QuestGeneral request can put down (gen_delve pcmpool {PcmGeneralNode}), "
+                    Console.WriteLine($"  corpus: {reqPool!.Count} place(s) a PCM_QuestGeneral request can put down (gen_delve pcmpool {PoiCensus.PcmGeneralNode}), "
                                       + (IsBoard(t) ? "read as the board base's own request (no PCM type keyword, so tested by no node, as QuestGeneral is), with no parsec limit: the board picks the system. "
                                                     : "on a planet within duo_distanceformission parsecs. ")
                                       + "⚠ Branch conditions are not evaluated: a humanless system reaches fewer");
@@ -1419,11 +1419,11 @@ namespace FrankyCLI
                 }
                 foreach (var (label, a, b) in want)
                 {
-                    var v = Separations(env, a, b);
+                    var v = CensusOf(env).Separations(a, b);
                     if (v.Count == 0) { Console.WriteLine($"    {label,-30} {a} <-> {b}: no POI carries both"); continue; }
                     v.Sort();
-                    Console.WriteLine($"    {label,-30} n={v.Count,4}  min {v[0],6:F0}  p25 {Pct(v, .25),6:F0}"
-                                      + $"  med {Pct(v, .5),6:F0}  p75 {Pct(v, .75),6:F0}  max {v[^1],6:F0}   ({a} <-> {b})");
+                    Console.WriteLine($"    {label,-30} n={v.Count,4}  min {v[0],6:F0}  p25 {PoiCensus.Pct(v, .25),6:F0}"
+                                      + $"  med {PoiCensus.Pct(v, .5),6:F0}  p75 {PoiCensus.Pct(v, .75),6:F0}  max {v[^1],6:F0}   ({a} <-> {b})");
                 }
                 Console.WriteLine("    ⚠ Two markers from the SAME travel ring (A1/A2/A3, or B1/B2/B3) sit on top of each");
                 Console.WriteLine("      other: median 7 to 14 units. An A marker paired with a B marker is the widest");
@@ -1565,15 +1565,13 @@ namespace FrankyCLI
 
         // ------------------------------------------------------------------ the census
 
-        private sealed class Poi
-        {
-            public HashSet<FormKey> RefTypes = new();
-            public HashSet<FormKey> Keywords = new();
-            public bool Vanilla;
-            public bool ByKeyword;
-            public bool ByCentre;
-            public string Edid = "";
-        }
+        // The census itself (the pools, the PCM tree, marker separations, positions) is Retrograde.Library's
+        // PoiCensus (split step 3, 2026-10-15). These verbs read it and print; CensusOf holds one per environment.
+
+        private static PoiCensus? _census;
+
+        private static PoiCensus CensusOf(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
+            => _census != null && _census.Reads(env) ? _census : (_census = new PoiCensus(env));
 
         /// <summary>
         /// THE CENSUS'S OWN CONTROL. It prints the two halves of the pool union and the same figures
@@ -1610,6 +1608,7 @@ namespace FrankyCLI
             }
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            var census = CensusOf(env);
 
             var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
                 .Where(x => x.EditorID != null)
@@ -1673,7 +1672,7 @@ namespace FrankyCLI
                 {
                     if (!rt.TryGetValue(kv.Value, out var refs) || refs.Count == 0) continue;
                     if (cellOf.TryGetValue(refs[0], out var c)) cell[kv.Key] = c;
-                    if (TryPos(env, refs[0], out var p)) pos[kv.Key] = p;
+                    if (census.TryPos(refs[0], out var p)) pos[kv.Key] = p;
                     else unresolvable++;
                 }
                 if (pos.Count < 2) continue;
@@ -1688,7 +1687,7 @@ namespace FrankyCLI
                     // pairs are COUNTED and EXCLUDED rather than quietly averaged in.
                     bool same = cell.TryGetValue(half[0], out var c1) && cell.TryGetValue(half[1], out var c2) && c1 == c2;
                     if (same) sameCell++; else { crossCell++; continue; }
-                    samples[pair].Add(Dist(p1, p2));
+                    samples[pair].Add(PoiCensus.Dist(p1, p2));
                 }
             }
 
@@ -1713,60 +1712,16 @@ namespace FrankyCLI
             // single-POI Delve can ever have, by construction.
             Console.WriteLine("  distance between beats, METRES (1 unit = 1 m, read off his HUD 2026-09-24)");
             Console.WriteLine($"  {"pair",-52} {"n",5} {"min",9} {"p25",9} {"med",9} {"p75",9} {"max",9}");
-            foreach (var kv in samples.OrderByDescending(s => Median(s.Value)))
+            foreach (var kv in samples.OrderByDescending(s => PoiCensus.Median(s.Value)))
             {
                 var v = kv.Value.OrderBy(x => x).ToList();
                 if (v.Count == 0) { Console.WriteLine($"  {kv.Key,-52} {0,5}   (no POI carries both)"); continue; }
-                Console.WriteLine($"  {kv.Key,-52} {v.Count,5} {v[0],9:F0} {Pct(v, .25),9:F0} {Pct(v, .5),9:F0} {Pct(v, .75),9:F0} {v[^1],9:F0}");
+                Console.WriteLine($"  {kv.Key,-52} {v.Count,5} {v[0],9:F0} {PoiCensus.Pct(v, .25),9:F0} {PoiCensus.Pct(v, .5),9:F0} {PoiCensus.Pct(v, .75),9:F0} {v[^1],9:F0}");
             }
             Console.WriteLine();
             Console.WriteLine("  ⚠ A MEDIAN IS NOT A GUARANTEE. The draw is random, so a recipe picking the widest pair");
             Console.WriteLine("    still lands on its own p25 a quarter of the time. Read the SPREAD, not the middle.");
             return 0;
-        }
-
-        /// <summary>
-        /// Distance between one marker of each named type, per POI. Shared by `spread` and the lint
-        /// so the two can never report different numbers for the same question.
-        /// ⚠ A POI can carry several refs of one type and the FIRST is taken. Stated rather than
-        /// left to be assumed: this is not the nearest pair, nor the farthest, nor a mean.
-        /// </summary>
-        private static List<double> Separations(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, string a, string b)
-        {
-            var outp = new List<double>();
-            var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
-                .Where(x => x.EditorID != null)
-                .GroupBy(x => x.EditorID!, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().FormKey, StringComparer.OrdinalIgnoreCase);
-            if (!lcrt.TryGetValue(a, out var ka) || !lcrt.TryGetValue(b, out var kb)) return outp;
-
-            var oeK = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
-                .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;
-            var ctr = lcrt.TryGetValue("RECenterLocRef", out var ck) ? ck : (FormKey?)null;
-
-            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
-            {
-                FormKey? ma = null, mb = null;
-                bool hasCentre = false;
-                var kw = new HashSet<FormKey>();
-                if (loc.Keywords != null) foreach (var k in loc.Keywords) kw.Add(k.FormKey);
-                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
-                {
-                    if (g == null) continue;
-                    foreach (var e in g)
-                    {
-                        if (e.LocationRefType.IsNull || e.Marker.IsNull) continue;
-                        var t = e.LocationRefType.FormKey;
-                        if (ctr != null && t == ctr.Value) hasCentre = true;
-                        if (t == ka && ma == null) ma = e.Marker.FormKey;
-                        if (t == kb && mb == null) mb = e.Marker.FormKey;
-                    }
-                }
-                bool isPoi = (oeK != null && kw.Contains(oeK.Value)) || hasCentre;
-                if (!isPoi || ma == null || mb == null) continue;
-                if (TryPos(env, ma.Value, out var pa) && TryPos(env, mb.Value, out var pb)) outp.Add(Dist(pa, pb));
-            }
-            return outp;
         }
 
         /// <summary>
@@ -1890,7 +1845,7 @@ namespace FrankyCLI
                 if (!lcrt.TryGetValue(n, out var k)) { Console.WriteLine("REFUSED: '" + n + "' is not a LocationReferenceType."); return 1; }
                 want[k] = n;
             }
-            var pool = PoolCensus(env).Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var pool = CensusOf(env).Pool.Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var tally = new Dictionary<string, Dictionary<FormKey, int>>();
             foreach (var n in typeNames) tally[n] = new();
@@ -1989,7 +1944,8 @@ namespace FrankyCLI
             var lcrt = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
                 .Where(x => x.EditorID != null)
                 .ToDictionary(x => x.FormKey, x => x.EditorID!);
-            var pool = PoolCensus(env).Where(p => p.Vanilla).Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var census = CensusOf(env);
+            var pool = census.Pool.Where(p => p.Vanilla).Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var sizes = new Dictionary<string, int>();
             int sqOe = 0, rectOe = 0, sqFull = 0;
@@ -2033,7 +1989,7 @@ namespace FrankyCLI
                 // the travel markers' reach against the grid, so the cell size falls out
                 float reach = 0;
                 foreach (var k in markerKeys)
-                    if (TryPos(env, k, out var p)) reach = Math.Max(reach, Math.Max(Math.Abs(p.X), Math.Abs(p.Y)));
+                    if (census.TryPos(k, out var p)) reach = Math.Max(reach, Math.Max(Math.Abs(p.X), Math.Abs(p.Y)));
                 var cur = perN.GetValueOrDefault(w);
                 perN[w] = (Math.Max(cur.maxCoord, reach), cur.n + 1);
             }
@@ -2105,7 +2061,7 @@ namespace FrankyCLI
                 need.Add((n, rt.FormKey));
             }
 
-            var (kids, leaves) = PcmTree(env);
+            var (kids, leaves) = CensusOf(env).PcmTree();
 
             int total = 0, noWs = 0, noLoc = 0, joint = 0;
             var perNeed = new int[need.Count];
@@ -2123,7 +2079,7 @@ namespace FrankyCLI
                         { noWs++; Console.WriteLine($"    ? {leaf.EditorID}: content {leaf.Content.FormKey} is not a worldspace"); continue; }
                         if (ws.Location.IsNull || !env.LinkCache.TryResolve<ILocationGetter>(ws.Location.FormKey, out var loc))
                         { noLoc++; Console.WriteLine($"    ? {ws.EditorID}: worldspace has no Location"); continue; }
-                        var rts = PoiOf(loc).RefTypes;
+                        var rts = PoiCensus.PoiOf(loc).RefTypes;
                         bool all = true;
                         var marks = new List<string>();
                         for (int i = 0; i < need.Count; i++)
@@ -2158,63 +2114,11 @@ namespace FrankyCLI
             return 0;
         }
 
-        /// <summary>The PCM tree as the game builds it: children grouped by their ParentNode, winning overrides.</summary>
-        private static (Dictionary<FormKey, List<IPlanetContentManagerBranchNodeGetter>> kids,
-                        Dictionary<FormKey, List<IPlanetContentManagerContentNodeGetter>> leaves)
-            PcmTree(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-            => (env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerBranchNodeGetter>()
-                    .GroupBy(b => b.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList()),
-                env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerContentNodeGetter>()
-                    .GroupBy(c => c.ParentNode.FormKey).ToDictionary(g => g.Key, g => g.ToList()));
-
-        /// <summary>A location's ref types (BOTH special-reference lists) and keywords, as the pool census reads them.</summary>
-        private static Poi PoiOf(ILocationGetter loc)
-        {
-            var p = new Poi { Edid = loc.EditorID ?? "" };
-            foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
-            { if (g == null) continue; foreach (var e in g) if (!e.LocationRefType.IsNull) p.RefTypes.Add(e.LocationRefType.FormKey); }
-            if (loc.Keywords != null) foreach (var k in loc.Keywords) p.Keywords.Add(k.FormKey);
-            p.Vanilla = loc.FormKey.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase);
-            return p;
-        }
-
-        /// <summary>The PCM branch a PCM_QuestGeneral request places from (measured 2026-10-14: no node tests that keyword,
-        /// and every _Special node demands its own forced-location keyword).</summary>
-        private const string PcmGeneralNode = "PCM_LocationRequest_General";
-
-        /// <summary>
-        /// THE REMOTE PLACE'S CORPUS: every place a PCM_QuestGeneral request can put down, one Poi per distinct
-        /// worldspace's Location under PcmGeneralNode. Same walk as `gen_delve pcmpool`. Leaves with no Location are
-        /// unreadable and left out (7 on Defiant, 2026-10-14); branch conditions are not evaluated.
-        /// </summary>
-        private static List<Poi> PcmRequestPool(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-        {
-            var root = env.LoadOrder.PriorityOrder.WinningOverrides<IPlanetContentManagerBranchNodeGetter>()
-                .FirstOrDefault(b => b.EditorID == PcmGeneralNode);
-            var outp = new List<Poi>();
-            if (root == null) return outp;
-            var (kids, leaves) = PcmTree(env);
-            var seen = new HashSet<FormKey>();
-            var stack = new Stack<FormKey>(new[] { root.FormKey });
-            while (stack.Count > 0)
-            {
-                var fk = stack.Pop();
-                if (leaves.TryGetValue(fk, out var ls))
-                    foreach (var leaf in ls)
-                        if (seen.Add(leaf.Content.FormKey)
-                            && env.LinkCache.TryResolve<IWorldspaceGetter>(leaf.Content.FormKey, out var ws)
-                            && !ws.Location.IsNull && env.LinkCache.TryResolve<ILocationGetter>(ws.Location.FormKey, out var loc))
-                            outp.Add(PoiOf(loc));
-                if (kids.TryGetValue(fk, out var ks)) foreach (var k in ks) stack.Push(k.FormKey);
-            }
-            return outp;
-        }
-
         private static int PoolKeywords(List<string> narrow)
         {
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            var pool = PoolCensus(env);
+            var pool = CensusOf(env).Pool;
             foreach (var n in narrow)
             {
                 var kw = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
@@ -2237,39 +2141,17 @@ namespace FrankyCLI
             return 0;
         }
 
-        private readonly record struct P3(float X, float Y, float Z);
-
-        private static bool TryPos(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, FormKey k, out P3 p)
-        {
-            p = default;
-            // Position sits directly on the placed record, not under a Placement sub-object.
-            // Read off gen_moveref, which moves these for real, rather than guessed from the name.
-            if (env.LinkCache.TryResolve<IPlacedObjectGetter>(k, out var po))
-            { p = new P3(po.Position.X, po.Position.Y, po.Position.Z); return true; }
-            return false;
-        }
-
-        private static double Dist(P3 a, P3 b)
-        {
-            double dx = a.X - b.X, dy = a.Y - b.Y, dz = a.Z - b.Z;
-            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
-        }
-
-        private static double Median(List<double> v) => v.Count == 0 ? -1 : Pct(v.OrderBy(x => x).ToList(), .5);
-        private static double Pct(List<double> sorted, double q)
-            => sorted.Count == 0 ? 0 : sorted[Math.Min(sorted.Count - 1, (int)(q * sorted.Count))];
-
         private static (int, int, int, int) OriginCensus = (-1, -1, -1, -1);
 
         private static int Census(bool vanillaOnly)
         {
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            var all = PoolCensus(env);
+            var all = CensusOf(env).Pool;
             var pool = vanillaOnly ? all.Where(p => p.Vanilla).ToList() : all;
 
             // ⛔ THE ORIGIN-VERSUS-WINNER SPLIT, and it is the thing that explains a uniform offset.
-            // PoolCensus reads the WINNING record, which is what the game evaluates. The manual's
+            // PoiCensus.Pool reads the WINNING record, which is what the game evaluates. The manual's
             // published census was taken off Starfield.esm's own records. A vanilla POI that a later
             // plugin overrides keeps its vanilla FormKey, so it still reads as "vanilla" while the
             // record actually being graded is somebody else's. Counted here rather than reasoned:
@@ -2346,29 +2228,16 @@ namespace FrankyCLI
         }
 
         /// <summary>
-        /// The POI working pool and what each one carries.
-        ///
-        /// ⛔ BOTH SPECIAL-REFERENCE LISTS ARE UNIONED. A Location carries MasterSpecialReferences
-        /// and a sibling AddedSpecialReferences for entries added after the master set; reading only
-        /// the first under-reports, silently and in the direction that makes a pool look smaller.
-        ///
-        /// ⛔ AND THE POOL IS A UNION, NOT AN INTERSECTION: 260 locations carry LocTypeOE_Keyword and
-        /// 282 carry RECenterLocRef, and the intersection is 259. Keying on either alone loses real
-        /// places. Measured 2026-09-23; part 32 of the manual carries the working.
-        /// </summary>
-        /// <summary>
         /// ONE PASS OVER THE LOAD ORDER, KEPT FOR THE LIFE OF THE ENVIRONMENT. lint --all took six minutes for
         /// four recipes because every recipe re-walked ~1.08M records for the item names and once per model
-        /// field, and re-ran the location census. Same answers, read once. Keyed on the environment object,
-        /// so a different load order is a different index.
+        /// field. Same answers, read once. Keyed on the environment object, so a different load order is a
+        /// different index. (The location census it also cached is PoiCensus now, held by CensusOf.)
         /// </summary>
         private sealed class LoadIndex
         {
             public object Env = null!;
             public List<(string name, string? edid, FormKey fk)> Named = new();
             public Dictionary<string, List<(string? edid, string? stands)>> ByModel = new(StringComparer.OrdinalIgnoreCase);
-            public List<Poi>? Pool;
-            public List<Poi>? Draw;
         }
         private static LoadIndex? _index;
 
@@ -2390,74 +2259,6 @@ namespace FrankyCLI
                 }
             }
             return _index = ix;
-        }
-
-        private static List<Poi> PoolCensus(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-            => IndexOf(env).Pool ??= PoolCensusUncached(env);
-
-        private static List<Poi> PoolCensusUncached(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-        {
-            var oeKeyword = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
-                .FirstOrDefault(x => string.Equals(x.EditorID, "LocTypeOE_Keyword", StringComparison.OrdinalIgnoreCase))?.FormKey;
-            var centre = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
-                .FirstOrDefault(x => string.Equals(x.EditorID, "RECenterLocRef", StringComparison.OrdinalIgnoreCase))?.FormKey;
-
-            var outp = new List<Poi>();
-            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
-            {
-                var p = new Poi();
-                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
-                {
-                    if (g == null) continue;
-                    foreach (var e in g)
-                        if (!e.LocationRefType.IsNull) p.RefTypes.Add(e.LocationRefType.FormKey);
-                }
-                if (loc.Keywords != null) foreach (var k in loc.Keywords) p.Keywords.Add(k.FormKey);
-
-                p.ByKeyword = oeKeyword != null && p.Keywords.Contains(oeKeyword.Value);
-                p.ByCentre = centre != null && p.RefTypes.Contains(centre.Value);
-                p.Vanilla = loc.FormKey.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase);
-                p.Edid = loc.EditorID ?? "";
-                if (p.ByKeyword || p.ByCentre) outp.Add(p);
-            }
-            return outp;
-        }
-
-        /// <summary>
-        /// WHAT A PLACE CAN DRAW: the POI pool plus every location carrying LocDungeonBossLocRef. The marker conditions
-        /// do the selecting, so the lint must count every location the game could select, not only the POI pool.
-        /// ⛔ WHY IT IS A UNION, his 2026-10-13: "loads of pois have mapmarkers and boss markers". Part 32 held the
-        /// two populations disjoint off a Starfield.esm census; on Defiant 106 of the 491 POIs carry the boss marker,
-        /// and vanilla's MB_Bounty01Far asks a place for that one marker and nothing else. A first cut of this change
-        /// (a place "kind" switching between two populations) encoded the split and was deleted before it shipped.
-        /// </summary>
-        private static List<Poi> DrawPopulation(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-            => IndexOf(env).Draw ??= DrawPopulationUncached(env);
-
-        private static List<Poi> DrawPopulationUncached(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-        {
-            var boss = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
-                .FirstOrDefault(x => string.Equals(x.EditorID, "LocDungeonBossLocRef", StringComparison.OrdinalIgnoreCase))?.FormKey;
-            var outp = PoolCensus(env).ToList();
-            var seen = outp.Select(p => p.Edid).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            if (boss == null) return outp;
-            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
-            {
-                if (seen.Contains(loc.EditorID ?? "")) continue;
-                var p = new Poi();
-                foreach (var g in new[] { loc.MasterSpecialReferences, loc.AddedSpecialReferences })
-                {
-                    if (g == null) continue;
-                    foreach (var e in g)
-                        if (!e.LocationRefType.IsNull) p.RefTypes.Add(e.LocationRefType.FormKey);
-                }
-                if (!p.RefTypes.Contains(boss.Value)) continue;
-                if (loc.Keywords != null) foreach (var k in loc.Keywords) p.Keywords.Add(k.FormKey);
-                p.Vanilla = loc.FormKey.ModKey.FileName.String.Equals("Starfield.esm", StringComparison.OrdinalIgnoreCase);
-                p.Edid = loc.EditorID ?? "";
-                outp.Add(p);
-            }
-            return outp;
         }
 
         // ------------------------------------------------------------------ the build

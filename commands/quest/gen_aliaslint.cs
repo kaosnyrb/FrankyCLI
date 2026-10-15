@@ -87,7 +87,7 @@ namespace FrankyCLI
             {
                 var x = new Loc { Edid = l.EditorID ?? l.FormKey.ToString() };
                 // ⛔ BOTH special-reference lists, unioned: reading only the master list under-reports,
-                // in the direction that makes a pool look smaller (gen_delve's PoolCensus, same rule).
+                // in the direction that makes a pool look smaller (Retrograde.Library's PoiCensus.Pool, same rule).
                 foreach (var g in new[] { l.MasterSpecialReferences, l.AddedSpecialReferences })
                 {
                     if (g == null) continue;
