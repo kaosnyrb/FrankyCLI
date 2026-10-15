@@ -45,9 +45,15 @@ namespace FrankyCLI
                     if (p.GetIndexParameters().Length > 0) continue;
                     object? v;
                     try { v = p.GetValue(o); } catch (Exception e) { Refusals.Add($"{path}.{p.Name}: unreadable ({e.GetType().Name})"); continue; }
-                    if (!IsEmpty(v)) Refusals.Add($"{path}.{p.Name} = {Show(v)}  (no field in the model)");
+                    // ⛔ A NULLABLE LIST HAS THREE STATES TOO: absent, present-and-EMPTY, and items. Vanilla writes a bare NEXT
+                    // marker for an empty UnusedConditions, and reading empty as absent made 342 Starfield quests 6 bytes
+                    // short with nothing refused. So a present list on a property declared nullable is never "empty" here.
+                    bool presentNullableList = v is IEnumerable and not string && Nullability.Create(p).ReadState == NullabilityState.Nullable;
+                    if (presentNullableList || !IsEmpty(v)) Refusals.Add($"{path}.{p.Name} = {Show(v)}  (no field in the model)");
                 }
             }
+
+            private static readonly NullabilityInfoContext Nullability = new();
 
             private static bool IsMajor(Type iface) => typeof(IMajorRecordGetter).IsAssignableFrom(iface);
 
@@ -102,7 +108,9 @@ namespace FrankyCLI
                 l.GetType().GetProperty("FormKeyNullable") is { } p ? (true, (FormKey?)p.GetValue(l)) : (false, null);
             private static string Hex(ReadOnlyMemorySlice<byte> m) => Convert.ToHexString(m.ToArray());
             private static string Hex(ReadOnlyMemorySlice<byte>? m) => m is { } x ? Convert.ToHexString(x.ToArray()) : "";
-            private static string? Str(ITranslatedStringGetter? t) => t?.String;
+            /// Three states again: no subrecord (null), present and empty (""), text. An overlay hands an empty NNAM back
+            /// as a string object whose String is null, which read as absent and dropped a 1-byte subrecord on 3 vanilla quests.
+            private static string? Str(ITranslatedStringGetter? t) => t == null ? null : (t.String ?? "");
 
             // ------------------------------------------------------------ the quest
             public QModel Quest(IQuestGetter q)
@@ -132,7 +140,10 @@ namespace FrankyCLI
                 Guard(q, typeof(IQuestGetter), "Quest", "Name", "Data", "Event", "QuestType", "QuestFaction", "QuestGroup", "Location",
                       "QuestTimeLimit", "SourceQuest", "MissionTypeKeyword", "MissionBoardDescription", "Filter", "Summary", "SwfFile",
                       "ScriptComment", "Timestamp", "Unknown", "Keywords", "TextDisplayGlobals", "Stages", "Objectives", "Aliases",
-                      "VirtualMachineAdapter", "Scenes", "DialogTopics", "DialogBranches", "MissionBoardInfoPanels");
+                      "VirtualMachineAdapter", "Scenes", "DialogTopics", "DialogBranches", "MissionBoardInfoPanels",
+                      "DialogConditions", "UnusedConditions");
+                m.DialogConditions = q.DialogConditions == null ? null : Conditions(q.DialogConditions, "DialogConditions");
+                m.UnusedConditions = q.UnusedConditions == null ? null : Conditions(q.UnusedConditions, "UnusedConditions");
                 // ⚠ CHILD RECORDS ARE OUT OF SCOPE FOR NOW, AND SAID SO: a quest's scenes, topics and branches are records of
                 // their own in the quest's group, not fields of the QUST record. Counted here so the scope is printed, never
                 // dropped in silence; check strips them from BOTH sides and names that it did.

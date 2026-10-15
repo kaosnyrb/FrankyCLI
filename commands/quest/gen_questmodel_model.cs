@@ -34,6 +34,9 @@ namespace FrankyCLI
         public List<string>? Keywords { get; set; }
         public List<string> TextDisplayGlobals { get; set; } = new();
         public List<QPanel>? MissionBoardInfoPanels { get; set; }
+        /// Present-but-empty is real here: vanilla writes a bare NEXT marker for an empty UnusedConditions.
+        public List<QCondition>? DialogConditions { get; set; }
+        public List<QCondition>? UnusedConditions { get; set; }
         public List<QStage> Stages { get; set; } = new();
         public List<QObjective> Objectives { get; set; } = new();
         public List<QAlias> Aliases { get; set; } = new();

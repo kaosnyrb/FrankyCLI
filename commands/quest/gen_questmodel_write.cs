@@ -34,6 +34,7 @@ namespace FrankyCLI
                 FormVersion = m.Header.FormVersion,
                 Version2 = m.Header.Version2,
                 VersionControl = m.Header.VersionControl,
+                DialogConditions = m.DialogConditions == null ? null : new ExtendedList<Condition>(m.DialogConditions.Select(WriteCondition)),   // init-only
                 Data = new QuestData
                 {
                     Flags = En<Quest.Flag>(m.Data.Flags),
@@ -51,6 +52,7 @@ namespace FrankyCLI
             q.Unknown = m.Unknown;
             if (m.Name != null) q.Name = m.Name;
             if (m.MissionBoardDescription != null) q.MissionBoardDescription = m.MissionBoardDescription;
+            if (m.UnusedConditions != null) q.UnusedConditions = new ExtendedList<Condition>(m.UnusedConditions.Select(WriteCondition));
             if (m.MissionBoardInfoPanels != null)
                 foreach (var p in m.MissionBoardInfoPanels)
                 {

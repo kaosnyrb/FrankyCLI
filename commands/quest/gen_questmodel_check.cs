@@ -62,6 +62,12 @@ namespace FrankyCLI
             if (pos.Count != 1) { Console.WriteLine("REFUSED: gen_questmodel check <editorId | prefix*> [--mod name]"); return 1; }
             string pat = pos[0];
             bool bite = a.Contains("--bite");
+            // --tally: a census. Per-quest lines off; refusals grouped by KIND (indices and values stripped), counted
+            // in quests; and every DIFFER named, because a DIFFER is a record that passed the reader and still came
+            // out wrong, which is a blind spot in the model rather than a gap it admits.
+            bool tally = a.Contains("--tally");
+            var kinds = new Dictionary<string, int>();
+            var differs = new List<string>();
             using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
             var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
             string modFile = Path.Combine(env.DataFolderPath, Opt(a, "--mod", "du_overtime") + ".esm");
@@ -78,6 +84,11 @@ namespace FrankyCLI
                 if (rd.Refusals.Count > 0)
                 {
                     refused++;
+                    if (tally)
+                    {
+                        foreach (var k in rd.Refusals.Select(Kind).Distinct()) kinds[k] = kinds.GetValueOrDefault(k) + 1;
+                        continue;
+                    }
                     Console.WriteLine($"  REFUSED  {q.EditorID}: {rd.Refusals.Count} field(s) outside the model");
                     foreach (var r in rd.Refusals.Take(quests.Count == 1 ? 50 : 4)) Console.WriteLine("             " + r);
                     continue;
@@ -96,18 +107,25 @@ namespace FrankyCLI
                 }
                 Quest built;
                 try { built = WriteQuest(fromDisk); }
-                catch (Exception e) { differ++; Console.WriteLine($"  WRITE    {q.EditorID}: {e}"); continue; }
+                catch (Exception e)
+                {
+                    differ++; differs.Add($"{q.EditorID}: WRITE threw {e.GetType().Name}: {e.Message}");
+                    if (!tally) Console.WriteLine($"  WRITE    {q.EditorID}: {e}");
+                    continue;
+                }
 
                 // The ORACLE side only: the real record copied into a plugin of its own. Never on the write path.
                 var oracle = (Quest)q.DeepCopy();
                 oracle.Scenes.Clear(); oracle.DialogTopics.Clear(); oracle.DialogBranches.Clear();
                 byte[] want = Standalone(oracle, "oracle");
                 byte[] got = Standalone(built, "built");
-                if (want.SequenceEqual(got)) { same++; Console.WriteLine($"  IDENTICAL {q.EditorID}  ({got.Length:N0} B plugin, byte for byte; children not in scope: {rd.Children})"); continue; }
+                if (want.SequenceEqual(got)) { same++; if (!tally) Console.WriteLine($"  IDENTICAL {q.EditorID}  ({got.Length:N0} B plugin, byte for byte; children not in scope: {rd.Children})"); continue; }
 
                 differ++;
                 int n = Math.Min(want.Length, got.Length), at = n;
                 for (int i = 0; i < n; i++) if (want[i] != got[i]) { at = i; break; }
+                differs.Add($"{q.EditorID}: real {want.Length:N0} B, built {got.Length:N0} B, first difference at byte {at}");
+                if (tally) continue;
                 Console.WriteLine($"  DIFFER   {q.EditorID}: real {want.Length:N0} B, built {got.Length:N0} B, first difference at byte {at}");
                 using var back = StarfieldMod.CreateFromBinaryOverlay(Path.Combine(ScratchDir(), "built", "qm_check.esm"), StarfieldRelease.Starfield, readParams);
                 var m2 = new Reader().Quest(back.Quests.First());
@@ -124,6 +142,13 @@ namespace FrankyCLI
                 }
                 if (shown == 0) Console.WriteLine("      the two MODELS agree, so the difference is in a field the reader cannot see: widen the model");
             }
+            if (tally)
+            {
+                Console.WriteLine($"\n  REFUSAL KINDS, counted in quests ({kinds.Count} kind(s)):");
+                foreach (var kv in kinds.OrderByDescending(x => x.Value).ThenBy(x => x.Key)) Console.WriteLine($"    {kv.Value,6}  {kv.Key}");
+                Console.WriteLine($"\n  DIFFER ({differs.Count}): passed the reader and still came out wrong, a blind spot in the model");
+                foreach (var d in differs.Take(40)) Console.WriteLine("    " + d);
+            }
             Console.WriteLine($"\n  {quests.Count} quest(s): {same} identical, {differ} differ, {refused} refused");
             if (bite)
             {
@@ -132,6 +157,14 @@ namespace FrankyCLI
                 return caught ? 0 : 1;
             }
             return same == quests.Count ? 0 : 1;
+        }
+
+        /// A refusal's KIND: list positions and values stripped, so a hundred quests missing the same field are one row.
+        private static string Kind(string refusal)
+        {
+            string k = System.Text.RegularExpressions.Regex.Replace(refusal, @"\[\d+\]", "[]");
+            int eq = k.IndexOf(" = ", StringComparison.Ordinal);
+            return eq > 0 ? k[..eq] : k;
         }
 
         /// One record in a plugin of its own, written with the office's write parameters; the file's bytes back.

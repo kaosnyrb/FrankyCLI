@@ -1,5 +1,11 @@
 # Quest From Scratch — Design Spec
 
+> **SUPERSEDED 2026-10-15 by `gen_questmodel`** (`commands/quest/gen_questmodel*.cs`, branch `true-construction`).
+> The `QuestFromScratch` class proposed below was never built. A QUST record is now written field by field from a
+> model the tool owns (`gen_questmodel_model.cs`), and `gen_questmodel check` proves it by writing the real record
+> and the built one into two scratch plugins and comparing the bytes. The VMA version values and alias ID
+> families below are still true as measurements; the design is not the live one. Removal is his call.
+
 Creating a new Quest record (with VirtualMachineAdapter scripts and Aliases) entirely in C#,
 without a pre-built CK template. Supplements the existing `QuestNoun` clone-based pattern.
 
