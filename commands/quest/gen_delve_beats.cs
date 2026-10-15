@@ -842,8 +842,7 @@ namespace FrankyCLI
             // than that they are in combat) and drops what belongs to the bounty quest: its two GetStageDone
             // conditions, its fragment scripts and its dialogue on begin/end/change.
             FormKey travelPkg = default;
-            foreach (var k in myMod.Packages.Where(p => p.EditorID != null && p.EditorID.StartsWith(r.id + "_wavepkg")).Select(p => p.FormKey).ToList())
-                myMod.Packages.Remove(k);
+            RemovePrevious(myMod.Packages, e => e.StartsWith(r.id + "_wavepkg"));
             if (r.beats.Any(b => b.type == "hold"))
             {
                 var pk = myMod.Packages.DuplicateInAsNewRecord(travelSrc!);
@@ -939,7 +938,7 @@ namespace FrankyCLI
                     sourceTaken = true;
                     return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)srcMarkerId);
                 }
-                uint id = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                uint id = NextAliasId(clone);
                 var m = srcMarker.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
                 clone.Aliases.Add(m);
                 return m;
@@ -961,19 +960,10 @@ namespace FrankyCLI
                     int nw = steps.First(s => s.Beats.Contains(i)).Waves;
                     for (int w = 0; w < nw; w++)
                     {
-                        uint cid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-                        var col = waveSrc!.DeepCopy();
-                        var entry = col.Collection[0];
-                        var ra = entry.ReferenceAlias!;
-                        if (ra.Location != null || !ra.ForcedReference.IsNull || !ra.UniqueActor.IsNull || ra.CreateReferenceToObject != null)
-                        { Console.WriteLine("REFUSED: the source collection carries a fill; a wave must start empty."); return 1; }
-                        // The entry carries its own ID beside the inner alias's; where vanilla keeps them equal,
-                        // so does the copy.
-                        if (entry.ID == ra.ID) entry.ID = cid;
-                        ra.ID = cid;
-                        ra.Name = $"DelveBeat{i + 1}Wave{w + 1}";
-                        ra.PackageData.Clear();
-                        ra.PackageData.Add(travelPkg.ToLink<IPackageGetter>());
+                        uint cid = NextAliasId(clone);
+                        var col = EmptyCollection(waveSrc!, cid, $"DelveBeat{i + 1}Wave{w + 1}");
+                        if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a wave must start empty."); return 1; }
+                        col.Collection[0].ReferenceAlias!.PackageData.Add(travelPkg.ToLink<IPackageGetter>());
                         clone.Aliases.Add(col);
                         waveAliases[i].Add((int)cid);
                         bm.Waves.Add((int)cid);
@@ -986,7 +976,7 @@ namespace FrankyCLI
                     // recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into
                     // when the step begins, which the objective targets and the death hook sits on.
                     var dm = NewMarker(i, "Marker");
-                    uint did = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    uint did = NextAliasId(clone);
                     var dt = srcMarker.DeepCopy(); dt.ID = did; dt.Name = "DelveBeat" + (i + 1) + "Target";
                     dt.Location = null;
                     dt.Flags = QuestReferenceAlias.Flag.Optional;
@@ -1001,16 +991,9 @@ namespace FrankyCLI
                     // ONE hold wave at the site: a marker, and an EMPTY collection (a copy of vanilla's ActiveHostiles)
                     // the enemies are placed into, with NO travel package, so they hold the site rather than come for him.
                     var cm = NewMarker(i, "Spawn");
-                    uint cid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
-                    var col = waveSrc!.DeepCopy();
-                    var centry = col.Collection[0];
-                    var cra = centry.ReferenceAlias!;
-                    if (cra.Location != null || !cra.ForcedReference.IsNull || !cra.UniqueActor.IsNull || cra.CreateReferenceToObject != null)
-                    { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
-                    if (centry.ID == cra.ID) centry.ID = cid;
-                    cra.ID = cid;
-                    cra.Name = $"DelveBeat{i + 1}Enemies";
-                    cra.PackageData.Clear();
+                    uint cid = NextAliasId(clone);
+                    var col = EmptyCollection(waveSrc!, cid, $"DelveBeat{i + 1}Enemies");
+                    if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
                     clone.Aliases.Add(col);
                     slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = beatStage[i] };
                     bm.ClearGroups.Add((int)cid);
@@ -1022,7 +1005,7 @@ namespace FrankyCLI
                     // A marker, and an alias that CREATES the person there at quest start: a copy of the base's own
                     // activator alias with the cloned NPC as its object (set once he is cloned, below). So he stands at
                     // his marker before the player arrives and the objective can point at him from anywhere.
-                    uint tid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    uint tid = NextAliasId(clone);
                     var tm = srcMarker.DeepCopy(); tm.ID = tid; tm.Name = "DelveBeat" + (i + 1) + "Marker";
                     var tp = srcAct!.DeepCopy(); tp.ID = tid + 1; tp.Name = "DelveBeat" + (i + 1) + "Person";
                     tp.CreateReferenceToObject!.AliasID = (short)tm.ID;
@@ -1038,7 +1021,7 @@ namespace FrankyCLI
                     // A marker where the holder appears, and an EMPTY Optional alias he is placed into, which the
                     // objective targets so it follows him (delve4's shape: a non-optional alias with no fill
                     // makes the whole quest silently not start).
-                    uint rid = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                    uint rid = NextAliasId(clone);
                     var rm = srcMarker.DeepCopy(); rm.ID = rid; rm.Name = "DelveBeat" + (i + 1) + "Marker";
                     var rh = srcMarker.DeepCopy(); rh.ID = rid + 1; rh.Name = "DelveBeat" + (i + 1) + "Holder";
                     rh.Location = null;
@@ -1057,7 +1040,7 @@ namespace FrankyCLI
                     baseNext++;
                     continue;
                 }
-                uint next = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+                uint next = NextAliasId(clone);
                 var m = srcMarker.DeepCopy(); m.ID = next; m.Name = "DelveBeat" + (i + 1) + "Marker";
                 var a = srcAct!.DeepCopy(); a.ID = next + 1; a.Name = "DelveBeat" + (i + 1) + "Target";
                 a.CreateReferenceToObject!.AliasID = (short)m.ID;
@@ -1249,8 +1232,7 @@ namespace FrankyCLI
             }
 
             // --- 5. items, one clone per pickup -----------------------------------------------------------
-            foreach (var k in myMod.MiscItems.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_item")).Select(m => m.FormKey).ToList())
-                myMod.MiscItems.Remove(k);
+            RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
             var itemOf = new Dictionary<int, FormKey>();
             for (int i = 0; i < r.beats.Count; i++)
             {
@@ -1264,8 +1246,7 @@ namespace FrankyCLI
             }
 
             // --- 6. counters: one global per group, cloned, listed for <Global=> in the objective text -------
-            foreach (var k in myMod.Globals.Where(g => g.EditorID != null && g.EditorID.StartsWith(r.id + "_count")).Select(g => g.FormKey).ToList())
-                myMod.Globals.Remove(k);
+            RemovePrevious(myMod.Globals, e => e.StartsWith(r.id + "_count"));
             var globalSrc = myMod.Globals.FirstOrDefault(g => g.EditorID == "duo_reward_xp_easy");
             var counterOf = new Dictionary<int, (FormKey key, string edid)>();   // step index -> counter
             for (int k = 0; k < steps.Count; k++)
@@ -1429,8 +1410,7 @@ namespace FrankyCLI
 
 
             // --- 8. message boxes ---------------------------------------------------------------------
-            foreach (var k in myMod.Messages.Where(m => m.EditorID != null && m.EditorID.StartsWith(r.id + "_msg")).Select(m => m.FormKey).ToList())
-                myMod.Messages.Remove(k);
+            RemovePrevious(myMod.Messages, e => e.StartsWith(r.id + "_msg"));
             var msgOf = new Dictionary<int, FormKey>();
             var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
             for (int i = 0; i < r.beats.Count; i++)
@@ -1464,8 +1444,7 @@ namespace FrankyCLI
             // NPCTools.CloneNPC copies the body field by field and NOT the name or the voice, so both are
             // written here; unaggressive, average confidence, dressed from the recipe (his 2026-10-08 asks).
             var npcOf = new Dictionary<int, FormKey>();
-            foreach (var k in myMod.Npcs.Where(n => n.EditorID != null && n.EditorID.StartsWith(r.id + "_person")).Select(n => n.FormKey).ToList())
-                myMod.Npcs.Remove(k);
+            RemovePrevious(myMod.Npcs, e => e.StartsWith(r.id + "_person"));
             foreach (var (b, pr) in persons)
             {
                 var pp = r.beats[b].person!;
@@ -1485,8 +1464,7 @@ namespace FrankyCLI
 
             // --- the speaker: an NPC that is never placed, carrying the subtitle's NAME and the VOICE TYPE whose
             // folder the audio is looked up in (gen_dlgtest's shape: clone, then set Voice) ----------------------
-            foreach (var k in myMod.Npcs.Where(n => n.EditorID == r.id + "_speaker").Select(n => n.FormKey).ToList())
-                myMod.Npcs.Remove(k);
+            RemovePrevious(myMod.Npcs, e => e == r.id + "_speaker");
             if (speakerSrc is (INpcGetter stmpl, FormKey svoice))
             {
                 var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
@@ -1521,17 +1499,10 @@ namespace FrankyCLI
                         {
                             int col = waveAliases[b][w];
                             int pre = w == 0 ? prereq : ws[w - 1];
-                            var hs = new ScriptEntry { Name = "DefaultCollectionAliasOnDeath" };
-                            hs.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = ws[w], Flags = ScriptProperty.Flag.Edited });
-                            hs.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = pre, Flags = ScriptProperty.Flag.Edited });
-                            hs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = ws[w], Flags = ScriptProperty.Flag.Edited });
-                            hs.Properties.Add(RemoveDeadFromCollection());
-                            var he = new QuestFragmentAlias();
-                            he.Property.Object.SetTo(clone.FormKey);
-                            he.Property.Alias = (short)col;
-                            he.Scripts.Add(hs);
-                            vma.Aliases.Add(he);
-                            bm.Hooks.Add((col, hs.Name, ws[w], pre));
+                            var hs = StageHook("DefaultCollectionAliasOnDeath", ws[w], pre,
+                                               new ScriptIntProperty { Name = "TurnOffStageDone", Data = ws[w], Flags = ScriptProperty.Flag.Edited },
+                                               RemoveDeadFromCollection());
+                            AttachHook(vma, clone.FormKey, col, hs, HookEntry.New, false, bm, ws[w], pre);
                             Console.WriteLine($"  +hook    : beat {b + 1} (hold) wave {w + 1} collection {col} {hs.Name} sets {ws[w]} after {pre}");
                         }
                         continue;
@@ -1542,20 +1513,11 @@ namespace FrankyCLI
                         // TurnOffStageDone on the collection's, as each hold wave's, so a late kill cannot set it twice.
                         bool isClear = beat.type == "clear";
                         int on = slotOf[b].targetAlias;
-                        var fs = new ScriptEntry { Name = isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath" };
-                        fs.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
-                        fs.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
-                        if (isClear)
-                        {
-                            fs.Properties.Add(new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
-                            fs.Properties.Add(RemoveDeadFromCollection());
-                        }
-                        var fe = new QuestFragmentAlias();
-                        fe.Property.Object.SetTo(clone.FormKey);
-                        fe.Property.Alias = (short)on;
-                        fe.Scripts.Add(fs);
-                        vma.Aliases.Add(fe);
-                        bm.Hooks.Add((on, fs.Name, beatStage[b], prereq));
+                        var fs = StageHook(isClear ? "DefaultCollectionAliasOnDeath" : "DefaultAliasOnDeath", beatStage[b], prereq,
+                                           isClear ? new ScriptProperty[] { new ScriptIntProperty { Name = "TurnOffStageDone", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited },
+                                                                            RemoveDeadFromCollection() }
+                                                   : Array.Empty<ScriptProperty>());
+                        AttachHook(vma, clone.FormKey, on, fs, HookEntry.New, false, bm, beatStage[b], prereq);
                         Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {on} {fs.Name} sets {beatStage[b]} after {prereq}");
                         continue;
                     }
@@ -1579,9 +1541,7 @@ namespace FrankyCLI
                         hookAlias = slotOf[b].activatorAlias;
                         script = beat.type == "pickup" ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
                     }
-                    var sc = new ScriptEntry { Name = script };
-                    sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = beatStage[b], Flags = ScriptProperty.Flag.Edited });
-                    sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
+                    var sc = StageHook(script, beatStage[b], prereq);
                     if (beat.type == "pickup")
                     {
                         var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
@@ -1601,18 +1561,8 @@ namespace FrankyCLI
                         bool comesBack = r.beats.Any(x => x.returnTo == b + 1);
                         sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
                     }
-                    var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == hookAlias);
-                    if (entry == null)
-                    {
-                        entry = new QuestFragmentAlias();
-                        entry.Property.Object.SetTo(clone.FormKey);
-                        entry.Property.Alias = (short)hookAlias;
-                        vma.Aliases.Add(entry);
-                    }
-                    if (entry.Scripts.Any(x => x.Name == script))
+                    if (AttachHook(vma, clone.FormKey, hookAlias, sc, HookEntry.FindOrCreate, true, bm, beatStage[b], prereq) == Hooked.AlreadyCarries)
                     { Console.WriteLine($"REFUSED: alias {hookAlias} already carries {script}; a beat cannot hook it twice."); return 1; }
-                    entry.Scripts.Add(sc);
-                    bm.Hooks.Add((hookAlias, script, beatStage[b], prereq));
                     Console.WriteLine($"  +hook    : beat {b + 1} ({beat.type}) alias {hookAlias} {script} sets {beatStage[b]} after {prereq}");
                 }
             }
@@ -1624,18 +1574,8 @@ namespace FrankyCLI
             {
                 int own = slotOf[b].activatorAlias;
                 int enter = steps[steps.FindIndex(s => s.Beats.Contains(b)) - 1].DoneStage;
-                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
-                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
-                ta.Object.SetTo(clone.FormKey);
-                ta.Alias = (short)t.playerAlias;
-                sc.Properties.Add(ta);
-                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = pst, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = enter, Flags = ScriptProperty.Flag.Edited });
-                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == own);
-                if (entry == null) { Console.WriteLine($"REFUSED: ending alias {own} carries no hook entry to add the approach to."); return 1; }
-                entry.Scripts.Add(sc);
-                bm.Hooks.Add((own, sc.Name, pst, enter));
+                if (AttachHook(vma, clone.FormKey, own, DistanceHook(clone.FormKey, t.playerAlias, pst, enter), HookEntry.MustExist, false, bm, pst, enter) == Hooked.NoEntry)
+                { Console.WriteLine($"REFUSED: ending alias {own} carries no hook entry to add the approach to."); return 1; }
                 bm.PersonApproach.Add((own, t.playerAlias));
                 Console.WriteLine($"  +hook    : beat {b + 1}'s person, within {ApproachDistance} of its object (alias {own}) after {enter}, sets {pst}");
             }
@@ -1645,26 +1585,9 @@ namespace FrankyCLI
             foreach (var (p, w, a) in whos)
             {
                 int own = slotOf[a].activatorAlias;
-                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
-                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
-                ta.Object.SetTo(clone.FormKey);
-                ta.Alias = (short)t.playerAlias;
-                sc.Properties.Add(ta);
-                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = whoStage[p], Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = -1, Flags = ScriptProperty.Flag.Edited });
-                var entry = vma.Aliases.FirstOrDefault(x => x.Property.Alias == own);
-                if (entry == null)
-                {
-                    entry = new QuestFragmentAlias();
-                    entry.Property.Object.SetTo(clone.FormKey);
-                    entry.Property.Alias = (short)own;
-                    vma.Aliases.Add(entry);
-                }
-                if (entry.Scripts.Any(x => x.Name == sc.Name))
+                var sc = DistanceHook(clone.FormKey, t.playerAlias, whoStage[p], -1);
+                if (AttachHook(vma, clone.FormKey, own, sc, HookEntry.FindOrCreate, true, bm, whoStage[p], -1) == Hooked.AlreadyCarries)
                 { Console.WriteLine($"REFUSED: alias {own} already carries {sc.Name}; the {w.kind} at {PlaceKey[p]} cannot hook it twice."); return 1; }
-                entry.Scripts.Add(sc);
-                bm.Hooks.Add((own, sc.Name, whoStage[p], -1));
                 Console.WriteLine($"  +hook    : {PlaceKey[p]} is {w.kind}: within {ApproachDistance} of beat {a + 1}'s object (alias {own}) sets {whoStage[p]}");
             }
 
@@ -1674,25 +1597,9 @@ namespace FrankyCLI
             if (arrival)
             {
                 int at = slotOf[steps[0].Beats[0]].markerAlias;
-                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
-                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
-                ta.Object.SetTo(clone.FormKey);
-                ta.Alias = (short)t.playerAlias;
-                sc.Properties.Add(ta);
-                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = t.arrivalStage, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = t.entryStage, Flags = ScriptProperty.Flag.Edited });
-                var entry = vma.Aliases.FirstOrDefault(x => x.Property.Alias == at);
-                if (entry == null)
-                {
-                    entry = new QuestFragmentAlias();
-                    entry.Property.Object.SetTo(clone.FormKey);
-                    entry.Property.Alias = (short)at;
-                    vma.Aliases.Add(entry);
-                }
-                if (entry.Scripts.Any(x => x.Name == sc.Name)) { Console.WriteLine($"REFUSED: alias {at} already carries {sc.Name}; the arrival cannot hook it twice."); return 1; }
-                entry.Scripts.Add(sc);
-                bm.Hooks.Add((at, sc.Name, t.arrivalStage, t.entryStage));
+                var sc = DistanceHook(clone.FormKey, t.playerAlias, t.arrivalStage, t.entryStage);
+                if (AttachHook(vma, clone.FormKey, at, sc, HookEntry.FindOrCreate, true, bm, t.arrivalStage, t.entryStage) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {at} already carries {sc.Name}; the arrival cannot hook it twice."); return 1; }
                 bm.Arrival = (at, t.playerAlias);
                 Console.WriteLine($"  +hook    : arrival within {ApproachDistance} of step one's marker (alias {at}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
             }
@@ -1701,24 +1608,8 @@ namespace FrankyCLI
             if (r.approach is Approach apr)
             {
                 int toAlias = slotOf[apr.to - 1].activatorAlias;
-                var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
-                var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
-                ta.Object.SetTo(clone.FormKey);
-                ta.Alias = (short)toAlias;
-                sc.Properties.Add(ta);
-                sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = t.approachStage, Flags = ScriptProperty.Flag.Edited });
-                sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = -1, Flags = ScriptProperty.Flag.Edited });
-                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == t.playerAlias);
-                if (entry == null)
-                {
-                    entry = new QuestFragmentAlias();
-                    entry.Property.Object.SetTo(clone.FormKey);
-                    entry.Property.Alias = (short)t.playerAlias;
-                    vma.Aliases.Add(entry);
-                }
-                entry.Scripts.Add(sc);
-                bm.Hooks.Add((t.playerAlias, sc.Name, t.approachStage, -1));
+                var sc = DistanceHook(clone.FormKey, toAlias, t.approachStage, -1);
+                AttachHook(vma, clone.FormKey, t.playerAlias, sc, HookEntry.FindOrCreate, false, bm, t.approachStage, -1);
                 bm.ApproachTarget = (t.playerAlias, toAlias);
                 Console.WriteLine($"  +hook    : approach within {ApproachDistance} of beat {apr.to}'s object (alias {toAlias}) sets {t.approachStage}");
             }

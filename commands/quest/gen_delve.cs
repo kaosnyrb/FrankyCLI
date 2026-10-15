@@ -2186,7 +2186,7 @@ namespace FrankyCLI
             var src = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)(t.thirdPlace?.cloneOf ?? -1));
             if (src == null || string.IsNullOrWhiteSpace(t.thirdPlace?.name))
             { Console.WriteLine($"REFUSED: template '{t.id}' names no location alias {t.thirdPlace?.cloneOf} to clone a third place from, or no name for it."); return -1; }
-            uint id = 1 + clone.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+            uint id = NextAliasId(clone);
             var loc = src.DeepCopy();
             loc.ID = id;
             loc.Name = t.thirdPlace!.name;
@@ -2413,7 +2413,7 @@ namespace FrankyCLI
             if (srcMarker?.Location == null || srcAct?.CreateReferenceToObject == null)
             { Console.WriteLine("REFUSED: template slot 0 is not a marker+activator pair on this base."); return null; }
 
-            uint next = 1 + (q.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max());
+            uint next = NextAliasId(q);
             uint mid = next, aid = next + 1;
 
             var marker = srcMarker.DeepCopy();
@@ -2506,6 +2506,92 @@ namespace FrankyCLI
             if (a is IQuestCollectionAliasGetter c)
                 foreach (var m in c.Collection)
                     if (m.ReferenceAlias?.Name != null) yield return (m.ReferenceAlias.ID, m.ReferenceAlias.Name!);
+        }
+
+        /// <summary>
+        /// The id a new alias takes: one past the highest the quest carries. ONE copy (split step 3e, 2026-10-15; it
+        /// was spelled nine times). ⚠ FOUND, NOT FIXED: it reads ids through Flatten, which skips an alias with no
+        /// name, so an unnamed alias above the rest would be handed out twice. Kept exactly as it was, because this
+        /// commit changes no output; fixing it is a behaviour change to make on its own.
+        /// </summary>
+        private static uint NextAliasId(Quest q) => 1 + q.Aliases!.SelectMany(Flatten).Select(x => x.id).DefaultIfEmpty(0u).Max();
+
+        /// <summary>Remove the previous build's records of one group, by their EditorID, before minting this build's: a
+        /// rebuild replaces, it never accumulates. ONE copy of what six sites spelled (split step 3e).</summary>
+        private static void RemovePrevious<T>(IGroup<T> group, Func<string, bool> ours) where T : class, IStarfieldMajorRecordInternal
+        {
+            foreach (var k in group.Where(m => m.EditorID != null && ours(m.EditorID)).Select(m => m.FormKey).ToList())
+                group.Remove(k);
+        }
+
+        /// <summary>A copy of a source collection alias, EMPTY, renumbered and renamed, its packages cleared; null when
+        /// the source carries a fill (the caller refuses in its own words). Where vanilla keeps the entry's id equal to
+        /// its inner alias's, so does the copy. Hold waves and clear groups both start this way.</summary>
+        private static QuestCollectionAlias? EmptyCollection(IQuestCollectionAliasGetter src, uint id, string name)
+        {
+            var col = src.DeepCopy();
+            var entry = col.Collection[0];
+            var ra = entry.ReferenceAlias!;
+            if (ra.Location != null || !ra.ForcedReference.IsNull || !ra.UniqueActor.IsNull || ra.CreateReferenceToObject != null) return null;
+            if (entry.ID == ra.ID) entry.ID = id;
+            ra.ID = id;
+            ra.Name = name;
+            ra.PackageData.Clear();
+            return col;
+        }
+
+        /// <summary>A stock Default* alias hook's script: StageToSet and PrereqStage, then its own properties, in that order.</summary>
+        private static ScriptEntry StageHook(string script, int stage, int prereq, params ScriptProperty[] more)
+        {
+            var sc = new ScriptEntry { Name = script };
+            sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = stage, Flags = ScriptProperty.Flag.Edited });
+            sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
+            sc.Properties.AddRange(more);
+            return sc;
+        }
+
+        /// <summary>DefaultAliasOnDistanceLessThan: within ApproachDistance of the quest's alias targetAlias, set the stage.
+        /// Its properties in the order every distance hook here has always written them.</summary>
+        private static ScriptEntry DistanceHook(FormKey quest, int targetAlias, int stage, int prereq)
+        {
+            var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
+            var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
+            ta.Object.SetTo(quest);
+            ta.Alias = (short)targetAlias;
+            sc.Properties.Add(ta);
+            sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
+            sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = stage, Flags = ScriptProperty.Flag.Edited });
+            sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
+            return sc;
+        }
+
+        /// <summary>How a hook finds the alias's script entry: a fresh one, the existing one or a fresh one, or only an
+        /// existing one.</summary>
+        private enum HookEntry { New, FindOrCreate, MustExist }
+        private enum Hooked { Added, AlreadyCarries, NoEntry }
+
+        /// <summary>
+        /// Put a hook on an alias and record it for the verify. ONE copy of what seven sites each spelled (split step 3e).
+        /// ⚠ THE SEVEN DIFFERED, AND STILL DO, ON PURPOSE (his "sounds right", 2026-10-15, to keeping them exact): which
+        /// entry they take (<see cref="HookEntry"/>) and whether a second copy of the same script on one alias is refused.
+        /// So both are arguments, and the caller refuses in its own words.
+        /// </summary>
+        private static Hooked AttachHook(QuestAdapter vma, FormKey quest, int alias, ScriptEntry sc, HookEntry how, bool refuseTwice,
+                                         BeatsMade bm, int stage, int prereq)
+        {
+            var entry = how == HookEntry.New ? null : vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias);
+            if (entry == null)
+            {
+                if (how == HookEntry.MustExist) return Hooked.NoEntry;
+                entry = new QuestFragmentAlias();
+                entry.Property.Object.SetTo(quest);
+                entry.Property.Alias = (short)alias;
+                vma.Aliases.Add(entry);
+            }
+            if (refuseTwice && entry.Scripts.Any(x => x.Name == sc.Name)) return Hooked.AlreadyCarries;
+            entry.Scripts.Add(sc);
+            bm.Hooks.Add((alias, sc.Name, stage, prereq));
+            return Hooked.Added;
         }
 
         /// <summary>
