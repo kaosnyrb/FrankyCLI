@@ -55,15 +55,6 @@ namespace FrankyCLI
             Check("an id a null-named alias holds is taken", AliasTaken(nullRef, 9), "id 9");
             Check("control: a free id is not taken", !AliasTaken(nullRef, 6), "id 6");
 
-            // The beat kinds, mid-migration (delve_beats/beat_kind.cs): every kind answers to a type the lint knows. (Two
-            // kinds with one name need no check here: BeatKinds is built by ToDictionary, which throws on load.)
-            var unknown = BeatKinds.Keys.Where(k => !BeatTypes.Contains(k)).ToList();
-            Check("every beat kind is a type BeatTypes knows", unknown.Count == 0, unknown.Count == 0 ? $"{BeatKinds.Count} kinds: {string.Join(", ", BeatKinds.Keys)}" : string.Join(", ", unknown));
-            // And the other way, since (d5): the build's Slots and Hooks passes refuse a type with no kind, so the lint's
-            // vocabulary must have none.
-            var kindless = BeatTypes.Where(t => !BeatKinds.ContainsKey(t)).ToList();
-            Check("every type BeatTypes knows has a kind", kindless.Count == 0, kindless.Count == 0 ? $"{BeatTypes.Length} types" : string.Join(", ", kindless));
-
             // recover's OnItemAdded hook per recover on the player alias: the base, then A-D. No recipe has two recovers,
             // so no build has taken a suffix (split step (d2) named it; pinned at (d3)).
             string[] itemAdded = { "DefaultAliasOnItemAddedScript", "DefaultAliasOnItemAddedScriptA", "DefaultAliasOnItemAddedScriptB",

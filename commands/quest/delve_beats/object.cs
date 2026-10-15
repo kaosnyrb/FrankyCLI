@@ -26,14 +26,20 @@ namespace FrankyCLI
         /// these three as a set or between beats (returns, groups, endings, carried items, defend and approach targets, a
         /// who's anchor, the lint's no-model and no-name warnings).
         /// </summary>
+        /// <summary>A use, pickup or deliver beat: one with an object of its own to activate.</summary>
+        private static bool IsObject(Beat b) => KindOf(b) is ObjectBeat;
+
         private sealed class ObjectBeat : BeatKind
         {
             private readonly string name;
-            private readonly bool givesItem;
+            private readonly bool carriesItem;
 
-            internal ObjectBeat(string name, bool givesItem) { this.name = name; this.givesItem = givesItem; }
+            internal ObjectBeat(string name, bool carriesItem) { this.name = name; this.carriesItem = carriesItem; }
 
             internal override string Name => name;
+
+            /// <summary>A pickup's hook hands the item over, so the player carries it from here.</summary>
+            internal override bool CarriesItem => carriesItem;
 
             /// <summary>
             /// Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the same argument
@@ -74,10 +80,10 @@ namespace FrankyCLI
                 else
                 {
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = givesItem ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
+                    script = CarriesItem ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
                 }
                 var sc = StageHook(script, build.beatStage[b], prereq);
-                if (givesItem)
+                if (CarriesItem)
                 {
                     var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
                     ip.Object.SetTo(build.itemOf[b]);

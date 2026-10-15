@@ -40,8 +40,6 @@ namespace FrankyCLI
     /// </summary>
     public static partial class gen_delve
     {
-        /// <summary>The lint's vocabulary of beat types, until every one has a kind (delve_beats/beat_kind.cs); then it goes.</summary>
-        private static readonly string[] BeatTypes = { "use", "pickup", "deliver", "recover", "hold", "talk", "defeat", "clear" };
         private static readonly string[] SpeciesModes = { "one", "mix" };
 
         /// <summary>
@@ -82,7 +80,7 @@ namespace FrankyCLI
             {
                 if (places[p]?.who is not Who w) continue;
                 bool Holds(int i) => r.beats[i].PlaceIndex == p && r.beats[i].returnTo == null
-                            && (r.beats[i].type == "pickup" || r.beats[i].type == "use" || r.beats[i].type == "deliver");
+                            && IsObject(r.beats[i]);
                 // who.beat names the object; one that is not a pickup / use / deliver at this place resolves to -1,
                 // which the lint refuses by name rather than quietly falling back to the first object.
                 int a = w.beat is int nb
@@ -191,11 +189,11 @@ namespace FrankyCLI
             for (int i = 0; i < r.beats.Count; i++)
             {
                 var b = r.beats[i];
-                if (b.type == null || !BeatTypes.Contains(b.type))
-                    Fatal($"beat {i + 1} has type '{b.type ?? "(none)"}'; a beats Delve knows {string.Join(", ", BeatTypes)}.");
-                if ((b.type == "pickup" || b.type == "recover") && string.IsNullOrWhiteSpace(b.item))
+                if (KindOf(b) == null)
+                    Fatal($"beat {i + 1} has type '{b.type ?? "(none)"}'; a beats Delve knows {string.Join(", ", AllKinds.Select(k => k.Name))}.");
+                if (Carries(b) && string.IsNullOrWhiteSpace(b.item))
                     Fatal($"beat {i + 1} is a {b.type} with no item: the player gets a thing with no name.");
-                if (b.type != "pickup" && b.type != "recover" && b.item != null)
+                if (!Carries(b) && b.item != null)
                     Fatal($"beat {i + 1} names an item and is not a pickup or a recover, so it would be silently ignored.");
                 if (b.type != "talk" && (b.greeting != null || b.exchanges != null))
                     Fatal($"beat {i + 1} has a greeting or exchanges and is a {b.type}; only a talk beat has a conversation, so they would be silently ignored.");
@@ -244,7 +242,7 @@ namespace FrankyCLI
                     Warn($"beat {i + 1} has a name and no model; a name only goes onto a clone, so it is not written.");
                 // His, 2026-10-11, after 09's pickup played as the base's boss crate with a generic prompt:
                 // "we dont really want defaults". An object beat with no model or name falls back to the base's.
-                if ((b.type == "use" || b.type == "pickup" || b.type == "deliver") && b.returnTo == null)
+                if (IsObject(b) && b.returnTo == null)
                 {
                     if (string.IsNullOrWhiteSpace(b.model))
                         Warn($"beat {i + 1} is a {b.type} with no model; the player sees the base's default object. Pick one from docs/quests/objects.md.");
@@ -429,7 +427,7 @@ namespace FrankyCLI
             for (int i = 0; i < r.beats.Count; i++)
             {
                 if (i == handBack) carried = 0;   // the talk that ends the Delve takes what is carried
-                else if (r.beats[i].type == "pickup" || r.beats[i].type == "recover") carried++;
+                else if (Carries(r.beats[i])) carried++;
                 else if (r.beats[i].type == "deliver")
                 {
                     if (carried == 0) Fatal($"beat {i + 1} is a deliver with nothing picked up or recovered before it, so there is nothing to hand over.");
@@ -1082,7 +1080,7 @@ namespace FrankyCLI
                 itemOf = new Dictionary<int, FormKey>();
                 for (int i = 0; i < r.beats.Count; i++)
                 {
-                    if (r.beats[i].type != "pickup" && r.beats[i].type != "recover") continue;
+                    if (!Carries(r.beats[i])) continue;
                     if (itemSrc == null) { Console.WriteLine($"REFUSED: the removed driver's CargoObject is not a MiscItem in {t.mod} to clone."); return 1; }
                     var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
                     mi.EditorID = $"{r.id}_item{i + 1}";
@@ -1591,7 +1589,7 @@ namespace FrankyCLI
                     {
                         int st = beatStage[b];
                         if (msgOf.ContainsKey(b)) { props.Add(("Message", $"Beat{b + 1}Message", msgOf[b], -1)); Add(st, $"Beat{b + 1}Message.Show()"); }
-                        if (r.beats[b].type == "pickup" || r.beats[b].type == "recover") held.Add(b);
+                        if (Carries(r.beats[b])) held.Add(b);
                         if (r.beats[b].type == "deliver" || b == handBack)
                         {
                             foreach (var h in held)

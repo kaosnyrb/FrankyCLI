@@ -23,6 +23,13 @@ namespace FrankyCLI
             /// <summary>The beat's `type` in a recipe.</summary>
             internal abstract string Name { get; }
 
+            /// <summary>
+            /// Whether the beat leaves the player holding an item (a pickup's, a recover's): it must name one, the item is
+            /// cloned in the Items pass, and a deliver or a talk that ends the Delve takes it. A rule over the TYPES that
+            /// was spelled by name in five places until the last split step.
+            /// </summary>
+            internal virtual bool CarriesItem => false;
+
             /// <summary>This type's own rules on one beat, in the lint. Fatal and Warn are Grade's.</summary>
             internal virtual void GradeBeat(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                             Action<string> Fatal, Action<string> Warn) { }
@@ -73,14 +80,18 @@ namespace FrankyCLI
         }
 
         /// <summary>
-        /// The beat types, as kinds: every type in BeatTypes has one since split step (d5). ⚠ STILL MID-MIGRATION: BeatTypes
-        /// stays the lint's vocabulary, and the rules over SETS of types still name them, until the last step turns those
-        /// into kind properties and deletes BeatTypes. `gen_delve selftest` holds the two lists equal, both ways.
+        /// Every beat type, as its kind: this list IS the lint's vocabulary (the BeatTypes array it replaced went in the last
+        /// split step), in the order a refusal lists them. A new beat type is one file in this folder and one entry here.
+        /// The rules that name a type and stay a word are each ONE rule between beats (an ending is a deliver, a group is
+        /// uses, a return goes back to a use); a rule that repeats over a set of types is a kind property (CarriesItem) or
+        /// a kind class (IsFight, IsObject).
         /// </summary>
-        private static readonly Dictionary<string, BeatKind> BeatKinds = new BeatKind[] { new DefeatBeat(), new ClearBeat(), new RecoverBeat(), new HoldBeat(), new TalkBeat(),
-                                                                                       new ObjectBeat("use", givesItem: false), new ObjectBeat("pickup", givesItem: true),
-                                                                                       new ObjectBeat("deliver", givesItem: false) }
-            .ToDictionary(k => k.Name);
+        private static readonly BeatKind[] AllKinds =
+        {
+            new ObjectBeat("use", carriesItem: false), new ObjectBeat("pickup", carriesItem: true), new ObjectBeat("deliver", carriesItem: false),
+            new RecoverBeat(), new HoldBeat(), new TalkBeat(), new DefeatBeat(), new ClearBeat()
+        };
+        private static readonly Dictionary<string, BeatKind> BeatKinds = AllKinds.ToDictionary(k => k.Name);
 
         /// <summary>The beat's kind, or null for a type that has none (the lint refuses that).</summary>
         private static BeatKind? KindOf(Beat b) => b.type != null && BeatKinds.TryGetValue(b.type, out var k) ? k : null;
@@ -92,6 +103,9 @@ namespace FrankyCLI
         /// </summary>
         private static BeatKind KindOrThrow(Beat b, int i) =>
             KindOf(b) ?? throw new InvalidOperationException($"beat {i + 1}'s type '{b.type}' passed the lint and has no kind");
+
+        /// <summary>Whether a beat leaves the player holding an item (its kind's CarriesItem); false for a type with no kind.</summary>
+        private static bool Carries(Beat b) => KindOf(b)?.CarriesItem == true;
 
         /// <summary>The kinds a recipe uses, each once, in the order its beats first use them.</summary>
         private static IEnumerable<BeatKind> KindsIn(Recipe r) => r.beats.Select(KindOf).OfType<BeatKind>().Distinct();

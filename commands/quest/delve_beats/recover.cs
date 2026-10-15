@@ -17,6 +17,9 @@ namespace FrankyCLI
         {
             internal override string Name => "recover";
 
+            /// <summary>The item reaches the player's pack, however it gets there, and is carried from then.</summary>
+            internal override bool CarriesItem => true;
+
             internal override void GradeBeat(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                              Action<string> Fatal, Action<string> Warn)
             {
