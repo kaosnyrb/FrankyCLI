@@ -76,6 +76,13 @@ namespace FrankyCLI
             /// where the shell came from (and what the lint still reads, named as open). Without it, the old clone.
             /// </summary>
             public string? shell { get; set; }
+            /// <summary>
+            /// The shell's companion: every alias this template's build takes off ANOTHER quest (remotePlaceFrom's request,
+            /// borrowFrom's aliases, vanilla's wave collection), as models under data/delves, written by `gen_delve shell`
+            /// with the shell and owned from then on. With both, a build reads no quest at all (his 2026-10-15 "close the 2
+            /// places"). Null = the build reads those quests, as it did before.
+            /// </summary>
+            public string? parts { get; set; }
             public string mod { get; set; } = "";
             public string driver { get; set; } = "";
             /// <summary>The base's script entry that is removed, and whose values are taken off it.</summary>
@@ -185,6 +192,34 @@ namespace FrankyCLI
         /// like any other place.
         /// </summary>
         private sealed class ThirdPlace { public int cloneOf { get; set; } = -1; public string name { get; set; } = ""; }
+        /// <summary>
+        /// A template's PARTS file: the aliases its build copies off other quests, as gen_questmodel models, each beside the
+        /// quest it was read from (provenance, never read at build). Written by `gen_delve shell` and owned after, exactly as
+        /// the shell is. A part the template does not take stays null.
+        /// </summary>
+        private sealed class Parts
+        {
+            public int schema { get; set; } = 1;
+            /// <summary>remotePlaceFrom's main place alias (a PCM request), which a remote place is copied from.</summary>
+            public string? remotePlaceFrom { get; set; }
+            public QAlias? remotePlace { get; set; }
+            /// <summary>borrowFrom's aliases, one per borrowAliases row, by their SOURCE ids (the build renumbers them).</summary>
+            public string? borrowFrom { get; set; }
+            public List<QAlias> borrowed { get; set; } = new();
+            /// <summary>Vanilla's empty wave collection (UC08_AB_AnomalyBattle's ActiveHostiles), which hold and clear copy.</summary>
+            public string? wavesFrom { get; set; }
+            public QAlias? waves { get; set; }
+        }
+        /// <summary>The vanilla quest a hold's and a clear's wave collections are copied from, and how its alias is found.</summary>
+        private const uint WaveQuestId = 0x03E832;
+        private const string WaveMemberName = "ActiveHostiles";
+        private static IQuestCollectionAliasGetter? WaveCollectionOf(IQuestGetter? q) =>
+            q?.Aliases.OfType<IQuestCollectionAliasGetter>()
+             .FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == WaveMemberName);
+        /// <summary>A template whose recipes may hold or clear copies the wave collection (allows empty = every type).</summary>
+        private static bool TakesWaves(Template t) => t.allows.Count == 0 || t.allows.Contains("hold") || t.allows.Contains("clear");
+        /// <summary>Does this template's build take anything off another quest?</summary>
+        private static bool TakesParts(Template t) => t.remotePlaceFrom != null || t.borrowFrom != null || TakesWaves(t);
         private sealed class TemplateFile { public int schema { get; set; } public List<Template> templates { get; set; } = new(); }
 
         private sealed class Recipe
@@ -992,6 +1027,14 @@ namespace FrankyCLI
                 return;
             }
             if (e.ValueKind != JsonValueKind.Object || t == typeof(string)) return;
+            // A dictionary's keys are DATA (a template's tokens), never fields: only its values are walked. The first run over
+            // templates.json refused every token name until this line existed; recipes carry no dictionary.
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                var vt = t.GetGenericArguments()[1];
+                foreach (var kv in e.EnumerateObject()) UnknownKeys(kv.Value, vt, path == "" ? kv.Name : path + "." + kv.Name, outp);
+                return;
+            }
             var props = t.GetProperties().ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
             foreach (var kv in e.EnumerateObject())
             {
@@ -2488,11 +2531,71 @@ namespace FrankyCLI
                 foreach (var x in inside) Console.WriteLine("REFUSED: " + x);
                 return 1;
             }
+
+            // THE PARTS: every alias the build takes off ANOTHER quest, read here once, so the build reads none. All of them
+            // are read before either file is written: a refusal in one writes neither.
+            var parts = new Parts();
+            var partRefusals = new List<string>();
+            QAlias Part(IAQuestAliasGetter a, string path)
+            {
+                var m = gen_questmodel.ReadAlias(a, path, out var rf);
+                partRefusals.AddRange(rf);
+                return m;
+            }
+            if (t.remotePlaceFrom != null)
+            {
+                var rq = mod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom);
+                var ra = rq?.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+                if (ra?.ALPS == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' has no location alias {t.placeAlias} carrying a PCM request (ALPS) in {modFile}."); return 1; }
+                parts.remotePlaceFrom = $"{rq!.EditorID} [{rq.FormKey}]";
+                parts.remotePlace = Part(ra, $"{rq.EditorID}.Aliases[{t.placeAlias}]");
+            }
+            if (t.borrowFrom != null)
+            {
+                var bq = mod.Quests.FirstOrDefault(q => q.EditorID == t.borrowFrom);
+                if (bq == null) { Console.WriteLine($"REFUSED: borrowFrom '{t.borrowFrom}' is not a quest in {modFile}."); return 1; }
+                parts.borrowFrom = $"{bq.EditorID} [{bq.FormKey}]";
+                foreach (var ba in t.borrowAliases)
+                {
+                    // The build looks for a ref alias first, then a location alias, by the source id: the same here.
+                    IAQuestAliasGetter? a = bq.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(x => x.ID == (uint)ba.from);
+                    a ??= bq.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(x => x.ID == (uint)ba.from);
+                    if (a == null) { Console.WriteLine($"REFUSED: {bq.EditorID} has no ref or location alias {ba.from} to borrow."); return 1; }
+                    parts.borrowed.Add(Part(a, $"{bq.EditorID}.Aliases[{ba.from}]"));
+                }
+            }
+            if (TakesWaves(t))
+            {
+                var sfm = env.LoadOrder[0].Mod;
+                var wq = sfm?.ModKey.FileName == "Starfield.esm" ? sfm.Quests.FirstOrDefault(q => q.FormKey.ID == WaveQuestId) : null;
+                var w = WaveCollectionOf(wq);
+                if (w == null) { Console.WriteLine($"REFUSED: the wave collection ({WaveMemberName} on [{WaveQuestId:X6}:Starfield.esm]) is not in Starfield.esm."); return 1; }
+                parts.wavesFrom = $"{wq!.EditorID} [{wq.FormKey}]";
+                parts.waves = Part(w, $"{wq.EditorID}.{WaveMemberName}");
+            }
+            if (partRefusals.Count > 0)
+            {
+                foreach (var x in partRefusals) Console.WriteLine("REFUSED (a part): " + x);
+                return 1;
+            }
+
             string dir = Path.Combine(dataDir, "shells");
             Directory.CreateDirectory(dir);
             string file = Path.Combine(dir, t.id + ".json");
             File.WriteAllText(file, gen_questmodel.ToJson(gen_questmodel.ShellOf(full)));
             Console.WriteLine($"  shell    : {file} from {t.@base} [{b.FormKey}]; set the template row's \"shell\": \"shells/{t.id}.json\"");
+            if (parts.remotePlace == null && parts.borrowed.Count == 0 && parts.waves == null)
+            {
+                Console.WriteLine("  parts    : none; this template takes nothing off another quest");
+                return 0;
+            }
+            string pfile = Path.Combine(dir, t.id + ".parts.json");
+            File.WriteAllText(pfile, JsonSerializer.Serialize(parts, gen_questmodel.JsonOptions));
+            Console.WriteLine($"  parts    : {pfile}: " + string.Join(", ", new[] {
+                                  parts.remotePlace == null ? null : $"the remote request from {parts.remotePlaceFrom}",
+                                  parts.borrowed.Count == 0 ? null : $"{parts.borrowed.Count} borrowed alias(es) from {parts.borrowFrom}",
+                                  parts.waves == null ? null : $"the wave collection from {parts.wavesFrom}" }.Where(s => s != null))
+                              + $"; set the template row's \"parts\": \"shells/{t.id}.parts.json\"");
             return 0;
         }
 
@@ -2555,6 +2658,24 @@ namespace FrankyCLI
                 string shellPath = Path.Combine(opts.DataDir, t.shell);
                 if (!File.Exists(shellPath)) { Console.WriteLine($"REFUSED: the template's shell {shellPath} does not exist; `gen_delve shell {t.id}` writes it."); return 1; }
                 shell = gen_questmodel.FromJson(File.ReadAllText(shellPath));
+            }
+            // ⭐ AND ITS PARTS (his "close the 2 places", 2026-10-15): with a shell, NO quest is read in this build, so the
+            // aliases it copies off other quests come from the parts file. A shell without the parts its template takes is
+            // refused by name, never quietly filled from the quest.
+            Parts? parts = null;
+            if (shell != null && TakesParts(t))
+            {
+                if (t.parts == null) { Console.WriteLine($"REFUSED: template '{t.id}' has a shell and no parts, so this build would read another quest; `gen_delve shell {t.id}` writes both."); return 1; }
+                string partsPath = Path.Combine(opts.DataDir, t.parts);
+                if (!File.Exists(partsPath)) { Console.WriteLine($"REFUSED: the template's parts {partsPath} do not exist; `gen_delve shell {t.id}` writes them."); return 1; }
+                parts = JsonSerializer.Deserialize<Parts>(File.ReadAllText(partsPath), gen_questmodel.JsonOptions);
+                // A parts file read off a quest the row no longer names is the wrong file, whatever it holds.
+                string? Stale(string? named, string? readFrom) => named == null ? null
+                    : readFrom == null || !readFrom.StartsWith(named + " [", StringComparison.Ordinal) ? $"{named} (the file was read from {readFrom ?? "nothing"})" : null;
+                var mismatch = parts == null ? new List<string> { "the file is empty" }
+                    : new[] { Stale(t.remotePlaceFrom, parts.remotePlaceFrom), Stale(t.borrowFrom, parts.borrowFrom) }.Where(s => s != null).Select(s => s!).ToList();
+                if (mismatch.Count > 0) { Console.WriteLine($"REFUSED: {t.parts} does not match template '{t.id}': {string.Join("; ", mismatch)}. `gen_delve shell {t.id}` rewrites it."); return 1; }
+                Console.WriteLine($"  parts    : {t.parts}, read in place of the quests they came from");
             }
             var source = shell == null ? myMod.Quests.FirstOrDefault(q => q.EditorID == t.@base) : null;
             if (shell == null && source == null) { Console.WriteLine("REFUSED: no base quest '" + t.@base + "' in " + t.mod); return 1; }
@@ -2634,11 +2755,11 @@ namespace FrankyCLI
             int fail = 0;
             var made4 = new BuildMade();
             var madeBeats = new BeatsMade();
-            if (t.borrowFrom != null) fail += BorrowAliases(myMod, clone, t);
-            if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias);
+            if (t.borrowFrom != null) fail += BorrowAliases(myMod, clone, t, parts);
+            if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts);
             if (fail == 0 && r.place.second?.remote == true)
             {
-                fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias);
+                fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts);
                 // ⛔ Only behind a REQUESTED first site (a board, or place.remote). Behind a LOCAL first site the guard
                 // (IsInSameCurrentLocationAsAlias on its map marker) CRASHED the game on startquest, twice, his play of
                 // duo_delve10a 2026-10-14 22:2x; the same build with the guard out started and played end to end.
@@ -2697,19 +2818,27 @@ namespace FrankyCLI
                 persons[i] = (n, of, co, vo);
             }
             // A hold's waves are empty RefCollection aliases filled at runtime. None of our bases carries
-            // one, so each is a copy of vanilla's own: UC08_QueenBattle's ActiveHostiles, an empty
+            // one, so each is a copy of vanilla's own: UC08_AB_AnomalyBattle's ActiveHostiles, an empty
             // collection its wave scripts fill as hostiles go live (Optional, AllowDisabled, no fill).
-            // Read off Starfield.esm itself, never a winning override.
+            // From the parts file when the build owns its quest; on the old clone path, off Starfield.esm itself, never a
+            // winning override.
             IQuestCollectionAliasGetter? waveSrc = null;
             IPackageGetter? travelSrc = null;
             if (fail == 0 && r.beats.Any(b => b.type == "hold" || b.type == "clear"))
             {
                 var sfm = env.LoadOrder[0].Mod;
-                var uc08 = sfm == null || sfm.ModKey.FileName != "Starfield.esm" ? null
-                    : sfm.Quests.FirstOrDefault(q => q.FormKey.ID == 0x03E832);
-                waveSrc = uc08?.Aliases.OfType<IQuestCollectionAliasGetter>()
-                    .FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.Name == "ActiveHostiles");
-                if (waveSrc == null) { Console.WriteLine("REFUSED: a hold copies its wave collections from UC08_QueenBattle's ActiveHostiles [03E832:Starfield.esm], and it is not there."); fail++; }
+                if (parts != null)
+                {
+                    if (parts.waves?.Kind == "coll") waveSrc = (IQuestCollectionAliasGetter)gen_questmodel.WriteAliasModel(parts.waves);
+                    else { Console.WriteLine($"REFUSED: {t.parts} carries no wave collection, and a hold or a clear copies one; `gen_delve shell {t.id}` rewrites it."); fail++; }
+                }
+                else
+                {
+                    var uc08 = sfm == null || sfm.ModKey.FileName != "Starfield.esm" ? null
+                        : sfm.Quests.FirstOrDefault(q => q.FormKey.ID == WaveQuestId);
+                    waveSrc = WaveCollectionOf(uc08);
+                    if (waveSrc == null) { Console.WriteLine($"REFUSED: a hold copies its wave collections from UC08_AB_AnomalyBattle's {WaveMemberName} [{WaveQuestId:X6}:Starfield.esm], and it is not there."); fail++; }
+                }
                 // And the waves come FOR the player (his ask, after the first play: "there's AI packages in
                 // the game which control enemies, would be good to have them attack the player"): a copy of
                 // the Wanted trait's bounty hunters' Travel package, jog, weapon drawn, to PlayerRef.
@@ -2939,10 +3068,23 @@ namespace FrankyCLI
         /// the list, or the source's main place to this template's. A link to anything else is refused rather than left
         /// pointing at whatever this base happens to number the same (the board's 2 is a planet; the slate's 2 an activator).
         /// </summary>
-        private static int BorrowAliases(StarfieldMod myMod, Quest clone, Template t)
+        private static int BorrowAliases(StarfieldMod myMod, Quest clone, Template t, Parts? parts)
         {
-            var src = myMod.Quests.FirstOrDefault(q => q.EditorID == t.borrowFrom);
-            if (src?.Aliases == null) { Console.WriteLine($"REFUSED: borrowFrom '{t.borrowFrom}' is not a quest in {t.mod}."); return 1; }
+            // From the parts file when the build owns its quest (true construction); off borrowFrom on the old clone path.
+            List<AQuestAlias> pool;
+            string srcName;
+            if (parts != null)
+            {
+                pool = parts.borrowed.Select(gen_questmodel.WriteAliasModel).ToList();
+                srcName = parts.borrowFrom ?? t.borrowFrom ?? "";
+            }
+            else
+            {
+                var src = myMod.Quests.FirstOrDefault(q => q.EditorID == t.borrowFrom);
+                if (src?.Aliases == null) { Console.WriteLine($"REFUSED: borrowFrom '{t.borrowFrom}' is not a quest in {t.mod}."); return 1; }
+                pool = src.Aliases.ToList();
+                srcName = src.EditorID ?? "";
+            }
             var map = t.borrowAliases.ToDictionary(b => b.from, b => b.to);
             if (t.borrowPlaceAlias >= 0) map[t.borrowPlaceAlias] = t.placeAlias;
             int? Map(int from) => map.TryGetValue(from, out var to) ? to : null;
@@ -2953,7 +3095,7 @@ namespace FrankyCLI
                 AQuestAlias copy;
                 string links = "";
                 string name;
-                if (src.Aliases.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)b.from) is QuestReferenceAlias ra)
+                if (pool.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)b.from) is QuestReferenceAlias ra)
                 {
                     var c = ra.DeepCopy(); c.ID = (uint)b.to; name = c.Name ?? "";
                     if (c.Location != null)
@@ -2968,7 +3110,7 @@ namespace FrankyCLI
                     }
                     copy = c;
                 }
-                else if (src.Aliases.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)b.from) is QuestLocationAlias la)
+                else if (pool.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)b.from) is QuestLocationAlias la)
                 {
                     var c = la.DeepCopy(); c.ID = (uint)b.to; name = c.Name ?? "";
                     foreach (var cd in c.Conditions)
@@ -2979,9 +3121,9 @@ namespace FrankyCLI
                         }
                     copy = c;
                 }
-                else { Console.WriteLine($"REFUSED: {src.EditorID} has no ref or location alias {b.from} to borrow."); return 1; }
+                else { Console.WriteLine($"REFUSED: {srcName} has no ref or location alias {b.from} to borrow."); return 1; }
                 clone.Aliases!.Add(copy);
-                Console.WriteLine($"  +borrow  : alias {b.from} -> {b.to} {name} from {src.EditorID}{links}");
+                Console.WriteLine($"  +borrow  : alias {b.from} -> {b.to} {name} from {srcName}{links}");
             }
             return 0;
         }
@@ -3034,25 +3176,39 @@ namespace FrankyCLI
         /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
         /// link into it adds the esp to the esm's masters: 2026-10-08).
         /// </summary>
-        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target)
+        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target, Parts? parts)
         {
             // The request is always the source's MAIN place alias; a second request is that same alias copied over the
             // second place, keeping the second place's ID and name so <SecondPlace> and everything filled from it still bind.
             // A board's own main place IS a request (MB28a's), so its second request copies that, off the clone itself.
-            Quest? src = t.remotePlaceFrom != null ? myMod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom)
-                       : IsBoard(t) ? clone : null;
-            if (src == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in {t.mod}, and this is not a board (whose own place is a request)."); return 1; }
-            var from = src.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
-            if (from?.ALPS == null) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is not a PCM request (no ALPS)."); return 1; }
+            // remotePlaceFrom's comes from the parts file when the build owns its quest, off the quest on the old clone path.
+            QuestLocationAlias? from;
+            string srcName;
+            if (t.remotePlaceFrom != null && parts != null)
+            {
+                if (parts.remotePlace == null || parts.remotePlace.ID != (uint)t.placeAlias)
+                { Console.WriteLine($"REFUSED: {t.parts} carries no remote request at alias {t.placeAlias}; `gen_delve shell {t.id}` rewrites it."); return 1; }
+                from = gen_questmodel.WriteAliasModel(parts.remotePlace) as QuestLocationAlias;
+                srcName = t.remotePlaceFrom;
+            }
+            else
+            {
+                Quest? src = t.remotePlaceFrom != null ? myMod.Quests.FirstOrDefault(q => q.EditorID == t.remotePlaceFrom)
+                           : IsBoard(t) ? clone : null;
+                if (src == null) { Console.WriteLine($"REFUSED: remotePlaceFrom '{t.remotePlaceFrom}' is not a quest in {t.mod}, and this is not a board (whose own place is a request)."); return 1; }
+                from = src.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
+                srcName = src.EditorID ?? "";
+            }
+            if (from?.ALPS == null) { Console.WriteLine($"REFUSED: {srcName} alias {t.placeAlias} is not a PCM request (no ALPS)."); return 1; }
             int at = clone.Aliases!.FindIndex(a => a is QuestLocationAlias l && l.ID == (uint)target);
             if (at < 0) { Console.WriteLine($"REFUSED: the clone has no place alias {target}."); return 1; }
             var old = (QuestLocationAlias)clone.Aliases[at];
             var copy = from.DeepCopy();
-            if (target == t.placeAlias && copy.Name != old.Name) { Console.WriteLine($"REFUSED: {src.EditorID} alias {t.placeAlias} is '{copy.Name}' and the base's is '{old.Name}'; the <Place> token would bind to a different name."); return 1; }
+            if (target == t.placeAlias && copy.Name != old.Name) { Console.WriteLine($"REFUSED: {srcName} alias {t.placeAlias} is '{copy.Name}' and the base's is '{old.Name}'; the <Place> token would bind to a different name."); return 1; }
             copy.ID = (uint)target;
             copy.Name = old.Name;
             clone.Aliases[at] = copy;
-            Console.WriteLine($"  remote   : place alias {target} {copy.Name} is now {src.EditorID}'s PCM request "
+            Console.WriteLine($"  remote   : place alias {target} {copy.Name} is now {srcName}'s PCM request "
                               + $"({(copy.ALPS!.PcmTypeKeyword.IsNull ? "no type" : copy.ALPS.PcmTypeKeyword.FormKey.ToString())}), flags {copy.Flags}");
             return 0;
         }
@@ -3311,8 +3467,16 @@ namespace FrankyCLI
             if (!File.Exists(f)) { err = "no templates.json at " + f; return null; }
             try
             {
-                var tf = JsonSerializer.Deserialize<TemplateFile>(File.ReadAllText(f), JsonOpts);
+                string text = File.ReadAllText(f);
+                var tf = JsonSerializer.Deserialize<TemplateFile>(text, JsonOpts);
                 if (tf == null || tf.templates.Count == 0) { err = f + " holds no templates"; return null; }
+                // ⛔ A KEY THE ROW CANNOT HOLD IS REFUSED, as a recipe's is. Retiring a field (collapsedPlaceAliases with the
+                // dualactivator kind, 2026-10-15) left it sitting in both rows, read by nothing and refused by nothing, until
+                // an edit happened to land beside it. A "_" key is a note.
+                var unknown = new List<string>();
+                using (var doc = JsonDocument.Parse(text, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true }))
+                    UnknownKeys(doc.RootElement, typeof(TemplateFile), "", unknown);
+                if (unknown.Count > 0) { err = "templates.json has key(s) this tool does not know, so they would be IGNORED: " + string.Join("; ", unknown); return null; }
                 if (tf.schema != 1) { err = $"templates.json schema is {tf.schema}, this tool speaks 1"; return null; }
                 // A row of a retired kind (dualactivator, choice, delve4) is refused by name, never built down a default path.
                 var bad = tf.templates.Where(x => !Kinds.Contains(x.kind)).Select(x => $"{x.id} ('{x.kind}')").ToList();

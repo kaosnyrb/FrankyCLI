@@ -24,6 +24,8 @@
       "base": "duo_artifact_localcargo_qst09a",
       "shell": "shells/beats.json",
       "_shell": "TRUE CONSTRUCTION (his ruling 2026-10-15): the build makes the quest with new from this file and never reads the base. Written once by `gen_delve shell beats` from the base above; ours from then on. The lint still reads the base (open).",
+      "parts": "shells/beats.parts.json",
+      "_parts": "Every alias the build takes off ANOTHER quest (remotePlaceFrom's request, vanilla's wave collection), written by `gen_delve shell beats` with the shell; with both, a build reads no quest (his 2026-10-15 'close the 2 places').",
       "mod": "du_overtime",
       "driver": "",
       "replacesDriver": "dou_artifact_ground_dualact_local_qst",
@@ -53,7 +55,6 @@
       ],
       "_beatSlots": "Beats 1 and 2 take the base's two marker+activator pairs; beat 3 on clones slot 1. Stages and objectives are numbered by the build from the recipe, not from this table.",
       "tokens": { "Place": "DungeonLocation", "SecondPlace": "FinalLocation", "ThirdPlace": "ThirdLocation", "Planet": "targetPlanet", "SecondPlanet": "SecondPlanetLocation" },
-      "collapsedPlaceAliases": [],
       "secondPlaceAlias": 10,
       "secondPlanet": { "cloneOf": 3, "id": 60, "name": "SecondPlanetLocation" },
       "_secondPlanet": "Made ONLY when the second place is a request (place.second.remote), as the board's: a copy of targetPlanet (3) whose parent is FinalLocation (10), so <SecondPlanet> names where he flies. A found second place is on the main place's planet, so it has no planet of its own and the lint refuses the token there. Added 2026-10-14 for 10a, the first local-here, requested-there Delve.",
@@ -61,8 +62,6 @@
       "remotePlaceFrom": "duo_artifact_remote_planet_qst01a",
       "_remotePlaceFrom": "place.remote: true copies THIS quest's DungeonLocation (alias 0, a PCM_QuestGeneral request) over the base's, so the site is placed on another planet. Its alias layout matches the base's 0-5 (read 2026-10-14). One place only.",
       "cannot": [
-        "dialogue -- the people stand there, his ruling",
-        "a choose beat -- not yet; 06 keeps its driver until it exists and plays the same",
         "a fourth place",
         "any order for pickups or delivers -- a group is use beats only"
       ],
@@ -72,6 +71,9 @@
       "id": "board",
       "kind": "board",
       "base": "duo_MB28a_qst",
+      "shell": "shells/board.json",
+      "parts": "shells/board.parts.json",
+      "_shell": "TRUE CONSTRUCTION, the board's (2026-10-15, his 'close the 2 places'): the build makes the quest with new from the shell and copies its borrowed aliases and wave collection from the parts, so it reads no quest. Both written by `gen_delve shell board`; ours from then on.",
       "mod": "du_overtime",
       "driver": "",
       "replacesDriver": "duo_bountyscript",
@@ -143,7 +145,6 @@
         "SecondPlace": "FinalLocation",
         "SecondPlanet": "SecondPlanetLocation"
       },
-      "collapsedPlaceAliases": [],
       "secondPlaceAlias": 22,
       "secondPlanet": { "cloneOf": 2, "id": 25, "name": "SecondPlanetLocation" },
       "_second": "The borrowed second place (22) is always a REQUEST on a board (the lint refuses a found one: nothing holds it near the first), guarded off the first site's planet. Its planet (25) is a copy of TargetPlanetLocation whose parent is 22, as vanilla MB_Cargo resolves its planets. A second request is proven (2026-10-14, duo_delve_twosite01a, two POIs on two planets); the guard is not yet played.",

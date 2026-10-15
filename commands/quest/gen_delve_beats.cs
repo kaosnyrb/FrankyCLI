@@ -35,7 +35,7 @@ namespace FrankyCLI
     ///
     /// A HOLD is waves of enemies at a marker, one after another, each when the last is down (Jessica's Type 6).
     /// Each wave is spawned by a fragment INTO its own empty RefCollection alias (a copy of vanilla's
-    /// UC08_QueenBattle ActiveHostiles), and a stock DefaultCollectionAliasOnDeath on that collection sets
+    /// UC08_AB_AnomalyBattle ActiveHostiles), and a stock DefaultCollectionAliasOnDeath on that collection sets
     /// the next stage when every member is dead, so the waves are N stages and N stock hooks, no driver.
     /// The objective carries a "(n/N)" counter. A wave that cannot be finished (an enemy stuck out of reach)
     /// must not soft-lock the quest: the fragment that spawns a wave WAITS (Utility.Wait) and sets the wave's

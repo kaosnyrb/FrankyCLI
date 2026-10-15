@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "borrowFrom": "duo_artifact_localcargo_qst09a [000ADD:du_overtime.esm]",
+  "borrowed": [
+    {
+      "Kind": "ref",
+      "ID": 32,
+      "Name": "MBRIR02Player",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "UniqueActor": "000007:Starfield.esm",
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 1,
+      "Name": "BountyTargetMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 0,
+        "RefType": "207487:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 2,
+      "Name": "PrimaryActivatorTarget",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "000ADF:du_overtime.esm",
+        "AliasID": 1,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 10,
+      "Name": "FinalLocation",
+      "Flags": 1073742081,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "207487:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "27B45C:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "0C6928:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "global",
+          "Function": "GetDistance",
+          "CompareOperator": 4,
+          "Flags": 0,
+          "Global": "00098B:du_overtime.esm",
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": true,
+          "UsePackageData": false,
+          "FirstIndex": 1,
+          "SecondParameter": 0
+        }
+      ],
+      "ParentSystemLocationAliasID": -2
+    },
+    {
+      "Kind": "ref",
+      "ID": 11,
+      "Name": "BountyTargetMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 10,
+        "RefType": "207487:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 12,
+      "Name": "SecondaryActivatorTarget",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "000AE1:du_overtime.esm",
+        "AliasID": 11,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    }
+  ],
+  "wavesFrom": "UC08_AB_AnomalyBattle [03E832:Starfield.esm]",
+  "waves": {
+    "Kind": "coll",
+    "ID": 0,
+    "Collection": [
+      {
+        "ID": 22,
+        "MaxInitialFillCount": 0,
+        "ALAM": 0,
+        "ReferenceAlias": {
+          "Kind": "ref",
+          "ID": 22,
+          "Name": "ActiveHostiles",
+          "Flags": 130,
+          "ALFG": 0,
+          "Conditions": [],
+          "VoiceTypes": "Null"
+        }
+      }
+    ]
+  }
+}

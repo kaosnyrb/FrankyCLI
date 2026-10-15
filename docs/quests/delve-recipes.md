@@ -33,8 +33,16 @@ reads the base quest. Every build then **emits the quest's model** to `data/delv
 recipe, and the quest written into the plugin is built from that file's text. The model is the build's output:
 read it to see exactly what a Delve's quest holds. `gen_delve shell <template>` writes a shell once from the base;
 the file is ours after that. `--from-base` starts from the old clone instead, for the A/B proof (`--dry --emit` both
-ways, compare the two plugins by bytes). **Open:** the lint still reads the base quest, a remote place still
-copies `remotePlaceFrom`'s alias, and the board template has no shell yet.
+ways, compare the two plugins by bytes).
+
+**The parts (2026-10-15, his "close the 2 places").** Beside each shell, `data/delves/shells/<template>.parts.json`
+holds every alias the build takes off ANOTHER quest, as models: `remotePlaceFrom`'s PCM request (a remote place),
+`borrowFrom`'s aliases (the board's player, object slots and second place) and vanilla's empty wave collection
+(`UC08_AB_AnomalyBattle`'s `ActiveHostiles`, which `hold` and `clear` copy). `gen_delve shell <template>` writes the
+shell and its parts together, reading everything before writing either. **Both templates have both, so a build
+reads no quest at all.** A shell without the parts its template takes is refused, never filled from the quest, and
+a parts file read off a quest the row no longer names is refused too. **Open:** the lint still reads the base quest
+(for two warnings, never for the build). `scripts/delves/ab.py` is the byte-for-byte A/B every step is proven by.
 
 **A clean lint means the build will take it.** The lint writes nothing and is safe to run any time.
 
@@ -95,7 +103,9 @@ lettered recipes until they come out. `duo_delve09` was the first, the same day.
 
 ## The templates
 
-`dotnet run -- gen_delve templates` lists them. Each is one row in `data/delves/templates.json`.
+`dotnet run -- gen_delve templates` lists them. Each is one row in `data/delves/templates.json`, and the registry
+refuses a key a row cannot hold exactly as a recipe does (a `_` key is a note), so a retired field cannot sit there
+read by nothing.
 
 | template | kind | beats | the shape |
 |---|---|---|---|

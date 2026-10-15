@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "remotePlaceFrom": "duo_artifact_remote_planet_qst01a [000B27:du_overtime.esm]",
+  "remotePlace": {
+    "Kind": "loc",
+    "ID": 0,
+    "Name": "DungeonLocation",
+    "Flags": 265,
+    "ALFG": 0,
+    "Conditions": [
+      {
+        "Kind": "float",
+        "Function": "LocationHasRefType",
+        "CompareOperator": 0,
+        "Flags": 0,
+        "Value": 1,
+        "Unknown1": "000000",
+        "Unknown2": 0,
+        "RunOnType": 0,
+        "Unknown3": -1,
+        "UseAliases": false,
+        "UsePackageData": false,
+        "FirstLink": "0E518E:Starfield.esm",
+        "SecondParameter": 0
+      },
+      {
+        "Kind": "float",
+        "Function": "LocationHasKeyword",
+        "CompareOperator": 0,
+        "Flags": 0,
+        "Value": 0,
+        "Unknown1": "000000",
+        "Unknown2": 0,
+        "RunOnType": 0,
+        "Unknown3": -1,
+        "UseAliases": false,
+        "UsePackageData": false,
+        "FirstLink": "2235B6:Starfield.esm",
+        "SecondParameter": 0
+      },
+      {
+        "Kind": "float",
+        "Function": "LocationHasKeyword",
+        "CompareOperator": 0,
+        "Flags": 0,
+        "Value": 1,
+        "Unknown1": "000000",
+        "Unknown2": 0,
+        "RunOnType": 0,
+        "Unknown3": -1,
+        "UseAliases": false,
+        "UsePackageData": false,
+        "FirstLink": "226AF3:Starfield.esm",
+        "SecondParameter": 0
+      },
+      {
+        "Kind": "global",
+        "Function": "GetDistanceGalacticParsec",
+        "CompareOperator": 4,
+        "Flags": 0,
+        "Global": "0008CB:du_overtime.esm",
+        "Unknown1": "000000",
+        "Unknown2": 0,
+        "RunOnType": 0,
+        "Unknown3": -1,
+        "UseAliases": false,
+        "UsePackageData": false,
+        "FirstLink": "000014:Starfield.esm",
+        "SecondParameter": 0
+      }
+    ],
+    "Alps": {
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "IsTrueForConditionForm",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "2EDF22:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "PcmTypeKeyword": "2C7982:Starfield.esm"
+    }
+  },
+  "borrowed": [],
+  "wavesFrom": "UC08_AB_AnomalyBattle [03E832:Starfield.esm]",
+  "waves": {
+    "Kind": "coll",
+    "ID": 0,
+    "Collection": [
+      {
+        "ID": 22,
+        "MaxInitialFillCount": 0,
+        "ALAM": 0,
+        "ReferenceAlias": {
+          "Kind": "ref",
+          "ID": 22,
+          "Name": "ActiveHostiles",
+          "Flags": 130,
+          "ALFG": 0,
+          "Conditions": [],
+          "VoiceTypes": "Null"
+        }
+      }
+    ]
+  }
+}
