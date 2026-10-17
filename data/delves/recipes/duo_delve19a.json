@@ -1,0 +1,112 @@
+﻿{
+  "schema": 1,
+  "id": "duo_delve19a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as 11a and 18a.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:0x: \"One of the first I did for overtime was repairing a sattlite. For delves thinking Talk -> get item from dungeon -> repair sat in space\", then \"yup write that and we'll figure out later if we need more info\"",
+  "_note": [
+    "THE FIRST DELVE WITH A BEAT IN SPACE. 0 of 29 had one (gaps-2026-10-14.md, gap 1). His old Overtime satellite repair",
+    "is the MB01 repairs family in the backport map (family I, space), so the verb is his oldest, coming over.",
+    "Shape: 11a's (talk, recover off the dungeon boss), with the hand-back swapped for an install in orbit.",
+    "The dungeon earns its place: you cannot just fly up and fix it, the part is down there with the raiders.",
+    "NEEDS ELIZA, AND THE LINT WILL REFUSE IT UNTIL THEN: place.third.orbit is PROPOSED, not built. No Delve has filled",
+    "an orbit place (hers to price since 2026-10-08, v2-mission-types.md). Prior art in Overtime itself:",
+    "duo_SQ_ArtifactRemoteSpaceEventBranch / duo_MS_ArtifactMap_RemoteSpaceNode (delve-recipes.md, the template table).",
+    "What the third place wants: the satellite placed in orbit over the MAIN place's planet, reachable without landing.",
+    "MODEL: Satellite_Beacon was ruled out ON LAND (his, via Kim, 2026-10-12) because it is a space object. In orbit it",
+    "is the right one; Kim's scale note says SatelliteBeacon01 sinks 10.45 m, which is a space ring. Her eye on the path.",
+    "No closing radio line: recapSay is refused unless a Delve ends on a group, and this ends on one install, so the",
+    "message box carries the end. The settler's say plays when the orbit beat starts (a say plays as its stage is set).",
+    "Pay: med, placeholder (it leaves the ground, README rule 3); the tier is his."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_NonHostile"],
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": ["LocTypeOE_NonHostile", "LocTypeOE_ThemeNaturalKeyword"]
+      }
+    },
+    "third": {
+      "orbit": true,
+      "_orbit": "PROPOSED FIELD, Eliza's to build or reshape: the satellite in orbit over the main place's planet. If a fixed orbital ref or a space cell is the cheaper fill, that is her call; the words below do not depend on which.",
+      "theme": { "require": [], "exclude": [] }
+    },
+    "_themes": "His settlement at a quiet built site (people there, the reason the relay matters), the raiders at a built hostile site, the satellite overhead."
+  },
+  "prose": {
+    "name": "Repair: Relay Satellite over <Planet>",
+    "briefing": "The relay satellite over <Planet> went dark, and the settlers at the <Place> have been cut off since. The replacement part never arrived. Raiders took it to the <SecondPlace>."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the settler at the <Place>",
+      "journal": "The relay over <Planet> is dead and the settlers at the <Place> can't call anyone. Their replacement part was taken by raiders at the <SecondPlace>. I said I'd get it and fit it.",
+      "person": {
+        "name": "Bram Ostrow",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "voice": "GenericMale01",
+        "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
+      },
+      "greeting": "If you've got a ship, you're the most useful person I've seen all week.",
+      "exchanges": [
+        {
+          "prompt": "I'll get the part and fit it.",
+          "reply": "It's a transceiver core, about the size of a toolbox. Fit it in the satellite and we're back on the network. I'd do it myself if I could fly."
+        },
+        {
+          "prompt": "What's wrong with the satellite?",
+          "reply": "Nothing a new core won't fix. The old one burned out, which they do. What they don't usually do is get stolen on the way here."
+        },
+        {
+          "prompt": "Why does it matter so much?",
+          "reply": "No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days."
+        },
+        {
+          "prompt": "Could you rig something in the meantime?",
+          "perk": "BackgroundCyberneticist",
+          "reply": "I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and sets the recover's stage. Exchange 3 is a background line in the 18a shape; Cyberneticist is a guess at the right background, Eliza checks the perk id exists. Voiced lines: no names, no places, no factions, no currency."
+    },
+    {
+      "type": "recover",
+      "place": "second",
+      "at": "LocDungeonBossLocRef",
+      "item": "Transceiver Core",
+      "objective": "Recover the transceiver core from the <SecondPlace>",
+      "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>."
+    },
+    {
+      "type": "deliver",
+      "place": "third",
+      "at": "RECenterLocRef",
+      "objective": "Fit the transceiver core in the relay satellite",
+      "journal": "The relay over <Planet> went dark and raiders at the <SecondPlace> had its replacement core. I got it back and fitted it in orbit. The settlers at the <Place> can call out again.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Relay Satellite",
+      "say": "If that's you heading up, it's the one with no lights on. You can't miss it. Well, you can. Please don't.",
+      "message": {
+        "title": "Relay Restored",
+        "text": "The core seats with a click. A row of lights comes on down the satellite's spine, and the first thing on the channel is somebody below asking if anyone can hear them."
+      },
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Settler",
+    "voice": "GenericMale01",
+    "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
+  },
+  "broadcast": "This is a short-range set, so if you can hear me, you're close. Our relay's dead and we can't call out. We need someone with a ship.",
+  "_speech": "Same voice on the radio and in person. The broadcast says short-range on purpose: with the relay dead, nobody far off could hear it. CwhRBWXzGAHq8TQ4Fs17 is the docs' Relay Control example voice; his ear decides."
+}
