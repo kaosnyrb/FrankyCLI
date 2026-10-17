@@ -1,0 +1,55 @@
+﻿{
+  "schema": 1,
+  "id": "duo_delve22a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as the lettered Delves.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:51: \"do the next 5 as well\". First LOCAL Delve of the old artifact_local Bounty family (Bounty, Danger, Dismantle, Strike, Hunt: 42 quests, no Delve yet).",
+  "_note": [
+    "BOUNTY, LOCAL. missionboard01a's defeat beat on the slate pool, near the player. ⚠ defeat has only been built on a",
+    "remote or board Delve; whether it builds on a local beats Delve is Eliza's to say, and the lint is the first test.",
+    "Ecliptic: their boss and gang lists exist (duo_boss_Ecliptic_Boss_Aggro_NoScript, duo_GangMembersList_Ecliptic).",
+    "Issuer: the homesteaders they are leaning on. Single ending, so the defeat's say is the closing radio.",
+    "Pay: med, placeholder (a named target and gang); the tier is his."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": ["LocTypeOE_NonHostile", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "A built hostile site, where a mercenary crew would set up."
+  },
+  "prose": {
+    "name": "Bounty: Ecliptic Collector on <Planet>",
+    "briefing": "An Ecliptic crew at the <Place> has been charging the homesteads nearby for protection from the Ecliptic. Their collector is the one who comes round. The homesteaders have put up what they can for him to stop."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REWoundedMarkerLocRef",
+      "target": "duo_boss_Ecliptic_Boss_Aggro_NoScript",
+      "gang": {
+        "list": "duo_GangMembersList_Ecliptic",
+        "min": 3,
+        "max": 5,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the Ecliptic collector at the <Place>",
+      "journal": "The Ecliptic collector at the <Place> is dead. Nobody's coming round the homesteads next month for their cut.",
+      "say": "He's really gone? Then we're keeping this month's money. And next month's. Thank you.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Homesteader",
+    "voice": "GenericMale01",
+    "elevenlabs": "CjIKi1zuI666pVsFrtyU"
+  },
+  "broadcast": "There's a crew near us charging every homestead for protection from themselves. Their collector comes round once a month. We'd like him to stop.",
+  "_speech": "Radio rules: no names, places, factions or currency spoken. Voice is missionboard01a's 'David Jarrett'; his ear decides."
+}

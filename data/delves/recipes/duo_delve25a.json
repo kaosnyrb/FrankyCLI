@@ -1,0 +1,63 @@
+﻿{
+  "schema": 1,
+  "id": "duo_delve25a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The mission board's test node, as 12a.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:51: \"do the next 5 as well\". First Delve of the old MB18 pirate stores family. Old MB18a: 'Pirate traffic spiked because they finally have somewhere to put things. Empty it and the spike goes with it.'",
+  "_note": [
+    "STRIKE, THE PIRATE STORE. Two beats in order: clear the Crimson Fleet holding the store (clear, mix), then",
+    "spoil the store itself (use), so the job ends on what the posting asked for, not on the fight.",
+    "⚠ clear on the board template, as 23a: the lint and Eliza confirm.",
+    "Issuer: a hauling company losing cargo to them. Single ending, so the use's say is the closing radio.",
+    "MODEL: Kim's salvagerstash01 (ccs). The lint here FATALs on every ccs mesh, 12a included: this box is behind Defiant (20261016-193039).",`n    "Pay: hard, placeholder (a gang fight then the job); the tier is his."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": ["LocTypeOE_NonHostile", "LocTypeOE_ThemeNaturalKeyword"]
+    },
+    "_theme": "A built hostile site: where pirates keep things."
+  },
+  "prose": {
+    "name": "Strike: Pirate Store on <Planet>",
+    "briefing": "Crimson Fleet raids on <Planet> picked up the moment they had somewhere to keep what they took. That somewhere is the <Place>.",
+    "card": "Local Contract. Crimson Fleet are storing stolen cargo at the <Place> on <Planet>. Clear the site and spoil the store so it cannot be used again. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Crimson",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the Crimson Fleet from the <Place>",
+      "journal": "The pirates holding the <Place> are dead. Their store is still there, and still full."
+    },
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Spoil the pirate store",
+      "journal": "I opened the pirates' store at the <Place> to the weather and cut the seals on every crate. Whatever they come back for won't be worth carrying.",
+      "model": "Meshes\\ccs\\salvagerstash01.nif",
+      "name": "Pirate Store",
+      "say": "Store's spoiled? Then they've nowhere to put it, and they'll go somewhere else to steal. Not our problem. Thank you.",
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Haulage Office",
+    "voice": "GenericMale01",
+    "elevenlabs": "iP95p4xoKVk53GoZ742B"
+  },
+  "broadcast": "Every run we lose ends up in the same place. Clear it out and spoil what's in there. If they've nowhere to keep it, they stop taking it.",
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is 11b's 'Chris', still unheard; his ear decides."
+}

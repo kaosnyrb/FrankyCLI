@@ -1,0 +1,49 @@
+﻿{
+  "schema": 1,
+  "id": "duo_delve24a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:51: \"do the next 5 as well\". First Delve of the old Dismantle: Robots family (artifact_local).",
+  "_note": [
+    "DISMANTLE, THE SECURITY ROBOT. An Ecliptic security robot left running at a site its owners abandoned, still",
+    "guarding it from everyone, including the people who want it back. defeat on the robot boss form",
+    "(duo_boss_LvlRobotModelA_Ecliptic), no gang: it is alone, which is the point.",
+    "⚠ defeat on a LOCAL beats Delve and a target with no gang are both untested; the lint and Eliza say.",
+    "Issuer: the new tenants. Single ending, so the defeat's say is the closing radio. Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "Any built site: somewhere worth guarding once."
+  },
+  "prose": {
+    "name": "Dismantle: Security Robot on <Planet>",
+    "briefing": "The last owners of the <Place> left their security robot running when they went. It's still guarding the place, from everyone, including the people who've just bought it."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REWoundedMarkerLocRef",
+      "target": "duo_boss_LvlRobotModelA_Ecliptic",
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Dismantle the security robot at the <Place>",
+      "journal": "The security robot at the <Place> is scrap. It was still running its last owners' patrol route. Nobody had told it they'd gone.",
+      "say": "It's down? Lovely. We've been living in the ship for a fortnight. Thank you.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "New Tenant",
+    "voice": "GenericFemale01",
+    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+  },
+  "broadcast": "We bought a place and the security robot came with it. It doesn't know we bought it. Could someone please explain that to it, firmly?",
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is 05a/18a/20a's; his ear decides, and it is getting used a lot."
+}

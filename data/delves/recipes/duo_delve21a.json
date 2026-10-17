@@ -1,0 +1,55 @@
+﻿{
+  "schema": 1,
+  "id": "duo_delve21a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The mission board's test node, as 12a and 20a.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:51: \"do the next 5 as well, Json is cheap\". First Delve of the old MB20 Sabotage (books) family. Old MB20a: 'A cache of banned texts has turned up. The order is destruction, not confiscation, and nobody has offered a reason.'",
+  "_note": [
+    "THE BANNED TEXTS. The old line's best part is the missing reason, so the Delve keeps it missing and lets the",
+    "player read one before burning. Two uses, in order: open the cache, then burn it. No choice offered: the job is",
+    "the job, and the journal is where the player gets to have a feeling about it. No fight (quiet site).",
+    "Issuer: an administrator's office, flat and unexplained (style guide 33 s4). Single ending, so the last use's say",
+    "is the closing radio (his 2026-10-17). Pay: easy, placeholder; the tier is his."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_NonHostile"],
+      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "A quiet site, as 20a: nobody shoots, the job is the burning."
+  },
+  "prose": {
+    "name": "Sabotage: Banned Texts on <Planet>",
+    "briefing": "A cache of banned texts has turned up at the <Place>. The posting wants them burned, not collected, and doesn't say why.",
+    "card": "Administrative Contract. A cache of prohibited texts has been located at the <Place> on <Planet>. Destroy the material on site. Do not remove or copy it. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Find the cache of texts at the <Place>",
+      "journal": "The cache at the <Place> is a footlocker of hand-bound books. I read the first page of the top one. It's a cookbook, mostly, with a family's names written in the margins.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Locked Footlocker"
+    },
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Burn the texts",
+      "journal": "I burned the cache at the <Place>, every book in it. I still don't know what was banned about them. Nobody asked me to know.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Cache of Banned Texts",
+      "say": "Destruction confirmed. Your report is filed. There is nothing further on this contract.",
+      "reward": "easy"
+    }
+  ],
+  "speaker": {
+    "name": "Contract Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
+  },
+  "broadcast": "Contract confirmed. The material is to be destroyed on site. Do not read it, remove it or copy it.",
+  "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Voice is remote06a's 'Matilda'; his ear decides."
+}

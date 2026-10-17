@@ -1,0 +1,55 @@
+﻿{
+  "schema": 1,
+  "id": "duo_delve23a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The mission board's test node, as 12a.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:51: \"do the next 5 as well\". First Delve of the old board Infestation families (MB06/07 nests, MB16/17 predators). Old MB16a: 'The assessor will not sign off while there is anything living in it, and the owners cannot draw a credit until she does.'",
+  "_note": [
+    "INFESTATION, THE ASSESSOR. MB16a's premise: the clear is paperwork, not heroics. remote06a's clear beat on the",
+    "board template (one species from a predator list, the Hunt driver's way). ⚠ clear has been built on a remote",
+    "beats Delve; on the board it is the lint's and Eliza's to confirm.",
+    "Issuer: the owners waiting on a signature. Single ending, so the clear's say is the closing radio.",
+    "Pay: med, placeholder; the tier is his."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_NonHostile"],
+      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "A quiet built site that SHOULD be someone's: the creatures are the reason it is empty."
+  },
+  "prose": {
+    "name": "Infestation: Unsigned Survey on <Planet>",
+    "briefing": "The owners of the <Place> can't draw a credit on it until an assessor signs it off, and she won't while anything is living in it. Something is.",
+    "card": "Local Contract. Our site at the <Place> on <Planet> cannot be assessed while it is infested. Clear the creatures from the site so the survey can proceed. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_PreditorMegalist_A",
+        "min": 4,
+        "max": 6,
+        "species": "one"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the creatures from the <Place>",
+      "journal": "Nothing's living at the <Place> any more except the weeds. The assessor can come and sign it off.",
+      "say": "The assessor's on her way. She says she'll need to check the weeds as well. I've told her you don't do weeds.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Site Owner",
+    "voice": "GenericMale01",
+    "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
+  },
+  "broadcast": "You took the contract? Good. The assessor won't set foot on our site while anything's living there. We'd quite like her to set foot on it.",
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is remote03a's 'Killian'; his ear decides."
+}
