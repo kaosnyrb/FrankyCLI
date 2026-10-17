@@ -17,8 +17,8 @@
     "What the third place wants: the satellite placed in orbit over the MAIN place's planet, reachable without landing.",
     "MODEL: Satellite_Beacon was ruled out ON LAND (his, via Kim, 2026-10-12) because it is a space object. In orbit it",
     "is the right one; Kim's scale note says SatelliteBeacon01 sinks 10.45 m, which is a space ring. Her eye on the path.",
-    "No closing radio line: recapSay is refused unless a Delve ends on a group, and this ends on one install, so the",
-    "message box carries the end. The settler's say plays when the orbit beat starts (a say plays as its stage is set).",
+    "THE CLOSING LINE IS A RADIO (his 2026-10-17: 'lets make the closing line a radio, thats something we want'). A say plays",
+    "when its beat is DONE (20261012-154308), so the deliver's say is the last line heard; the heading-up line sits on the recover.",
     "Pay: med, placeholder (it leaves the ground, README rule 3); the tier is his."
   ],
   "place": {
@@ -84,7 +84,8 @@
       "at": "LocDungeonBossLocRef",
       "item": "Transceiver Core",
       "objective": "Recover the transceiver core from the <SecondPlace>",
-      "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>."
+      "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.",
+      "say": "Wait, is that you? You got it? Then it's the satellite with no lights on. You can't miss it. Well, you can. Please don't."
     },
     {
       "type": "deliver",
@@ -94,10 +95,10 @@
       "journal": "The relay over <Planet> went dark and raiders at the <SecondPlace> had its replacement core. I got it back and fitted it in orbit. The settlers at the <Place> can call out again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Relay Satellite",
-      "say": "If that's you heading up, it's the one with no lights on. You can't miss it. Well, you can. Please don't.",
+      "say": "There it is. We can hear the whole sky again. This is the first call I've made in nine days, and it's to say thank you.",
       "message": {
         "title": "Relay Restored",
-        "text": "The core seats with a click. A row of lights comes on down the satellite's spine, and the first thing on the channel is somebody below asking if anyone can hear them."
+        "text": "The core seats with a click. A row of lights comes on down the satellite's spine, one at a time, and the channel opens."
       },
       "reward": "med"
     }
