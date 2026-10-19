@@ -924,7 +924,11 @@ namespace FrankyCLI
                 // from it, so it stays); every later marker is a copy of it. NewMarker does both, for this pass and the kinds.
                 markerPattern = srcMarker;
                 activatorPattern = srcAct;
-                markerSourceId = srcMarkerId;
+                // ⛔ What NewMarker hands out first is the template's marker source when it names one, never slot 0's marker
+                // (2026-10-19, missionboard01a): once the board gained slots (1d1a01d) a defeat was handed slot 0's marker,
+                // so it stood on alias 20 beside PrimaryRef 3, the slot pass then removed it, and the two contended. On
+                // 10-14, slotless, it stood on 3 and played. The pattern above is still slot 0's, as every board build since.
+                markerSourceId = t.markerSource >= 0 ? t.markerSource : srcMarkerId;
                 markerSourceTaken = t.markerSource < 0;
                 baseNext = 0;
                 talkAlias = new Dictionary<int, QuestReferenceAlias>();   // talk beat -> the alias that creates its person
@@ -1261,23 +1265,16 @@ namespace FrankyCLI
                 // The unused object slots go FIRST (2026-10-14, the first Delves with no object beat at all, a lone defeat or
                 // clear): base slot 2's marker fills inside the second place, so while it stands the second place is still
                 // "named" and its own removal below refuses.
-                // ⛔ A marker a beat holds is never removed (2026-10-19, missionboard01a): on the board, NewMarker's first call
-                // hands a defeat, clear or talk slot 0's MARKER without advancing baseNext, so the slot reads as untaken while a
-                // beat stands on its marker. Only the slot's activator goes then. Keyed on what the beats hold, not on the
-                // marker source: a slate's markerSourceId names slot 0's marker too and no beat holds it (the A/B caught that).
                 foreach (var us in unusedSlots)
                 {
-                    bool keepMarker = slotOf.Values.Any(s => s.markerAlias == us.markerAlias);
-                    var pair = keepMarker ? new[] { us.activatorAlias } : new[] { us.markerAlias, us.activatorAlias };
+                    var pair = new[] { us.markerAlias, us.activatorAlias };
                     var gone = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => pair.Contains((int)a.ID)).ToList();
-                    if (gone.Count != pair.Length) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
+                    if (gone.Count != 2) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is not a marker+activator pair on this base."); return 1; }
                     var users = SlotUsers(clone.Aliases!.OfType<IQuestReferenceAliasGetter>(), clone.Objectives!, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
                     if (users.Count > 0) { Console.WriteLine($"REFUSED: unused base slot {us.markerAlias}/{us.activatorAlias} is still named by {string.Join(", ", users)}."); return 1; }
                     foreach (var a in gone) clone.Aliases!.Remove(a);
-                    bm.DroppedSlots.Add((keepMarker ? -1 : us.markerAlias, us.activatorAlias));
-                    Console.WriteLine(keepMarker
-                        ? $"  -slot    : base slot {us.markerAlias}/{us.activatorAlias}: activator {us.activatorAlias} removed, no beat took it; marker {us.markerAlias} kept, a beat stands on it"
-                        : $"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
+                    bm.DroppedSlots.Add((us.markerAlias, us.activatorAlias));
+                    Console.WriteLine($"  -slot    : base slot {us.markerAlias}/{us.activatorAlias} removed: no beat took it, and its marker would be demanded at the place for nothing");
                 }
                 // The removed driver's own aliases (the board's EnemyType), named by nothing once it is gone.
                 foreach (int da in t.driverAliases)
@@ -2232,10 +2229,10 @@ namespace FrankyCLI
             }
             foreach (var (sm, sa) in bm.DroppedSlots)
             {
-                var pair = sm < 0 ? new[] { sa } : new[] { sm, sa };   // sm -1: a beat held the marker, so it stayed
+                var pair = new[] { sm, sa };
                 bool aliasGone = !q.Aliases.OfType<IQuestReferenceAliasGetter>().Any(a => pair.Contains((int)a.ID));
                 var users = SlotUsers(q.Aliases.OfType<IQuestReferenceAliasGetter>(), q.Objectives, vma.Aliases.Select(a => (int)a.Property.Alias), pair);
-                fail += Check(sm < 0 ? $"the unused base slot's activator {sa} is gone and nothing names it" : $"the unused base slot {sm}/{sa} is gone and nothing names it",
+                fail += Check($"the unused base slot {sm}/{sa} is gone and nothing names it",
                               $"aliases {(aliasGone ? "gone" : "PRESENT")}, named by {(users.Count == 0 ? "nothing" : string.Join(", ", users))}",
                               "aliases gone, named by nothing");
             }
