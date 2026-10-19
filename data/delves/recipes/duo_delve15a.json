@@ -61,7 +61,7 @@
       "exchanges": [
         {
           "prompt": "I'll take the package.",
-          "reply": "It's by the crates. Don't shake it. And don't say it's from me. No, say it's from me. She'll know anyway."
+          "reply": "It's by the crates. Don't shake it. And don't tell her it's from me... Actually, no. Tell her. She'll know anyway."
         },
         {
           "prompt": "Why not take it yourself?",
