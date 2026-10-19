@@ -470,6 +470,64 @@ namespace FrankyCLI
                         found += tally.Count;
                         break;
                     }
+                    if (search.Equals("hellotally", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // The lines an NPC says as the player walks up (his ask, 2026-10-19: "default ones with different
+                        // voice actors and its jarring"): every topic of the Hello subtype, who owns it, what gates its
+                        // lines, and which voice types those gates name. Read-only census, per plugin.
+                        var hello = mod.Quests.SelectMany(q => q.DialogTopics.Where(t => t.Subtype.ToString() == "Hello").Select(t => (q, t))).ToList();
+                        if (hello.Count == 0) break;
+                        // A GetIsVoiceType names a VoiceType or a FormList of them; resolve it by EditorID across the load order.
+                        string VoiceOf(IConditionGetter c)
+                        {
+                            // GetIsVoiceType names its parameter VoiceTypeOrList (Mutagen 0.44), not FirstParameter.
+                            var fp = (c.Data.GetType().GetProperty("VoiceTypeOrList") ?? c.Data.GetType().GetProperty("FirstParameter"))?.GetValue(c.Data);
+                            // Either a wrapper with a Link (IsTrueForConditionForm's shape) or the form link itself.
+                            var l = fp?.GetType().GetProperty("Link")?.GetValue(fp) as IFormLinkGetter ?? fp as IFormLinkGetter;
+                            if (l == null || l.IsNull)
+                                return $"? ({fp?.GetType().Name ?? "no FirstParameter; has " + string.Join(",", c.Data.GetType().GetProperties().Select(p => p.Name))})";
+                            string? n = null;
+                            foreach (var m in allMods ?? new List<IStarfieldModGetter> { mod })
+                            {
+                                n ??= m.VoiceTypes.FirstOrDefault(v => v.FormKey == l.FormKey)?.EditorID;
+                                var fl = m.FormLists.FirstOrDefault(f => f.FormKey == l.FormKey);
+                                if (n == null && fl != null) n = $"FormList {fl.EditorID} ({fl.Items.Count})";
+                            }
+                            return n ?? l.FormKey.ToString();
+                        }
+                        int infos = hello.Sum(h => h.t.Responses.Count);
+                        Console.WriteLine($"HELLO\t{mod.ModKey}\t{hello.Count} topic(s)\t{infos} line(s)");
+                        foreach (var g in hello.GroupBy(h => h.q.EditorID ?? h.q.FormKey.ToString()).OrderByDescending(g => g.Sum(h => h.t.Responses.Count)).Take(25))
+                            Console.WriteLine($"OWNER\t{mod.ModKey}\t{g.Sum(h => h.t.Responses.Count)}\t{g.Key}");
+                        var ct = new Dictionary<string, int>();
+                        var vt = new Dictionary<string, int>();
+                        int ungated = 0;
+                        foreach (var (q, t) in hello)
+                            foreach (var resp in t.Responses)
+                            {
+                                var conds = resp.Conditions.Select(c => c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "")).ToList();
+                                if (!conds.Any(n => n.StartsWith("GetIsVoiceType") || n.StartsWith("GetIsID"))) ungated++;
+                                foreach (var n in conds.Distinct()) ct[n] = ct.GetValueOrDefault(n) + 1;
+                                foreach (var c in resp.Conditions.Where(c => c.Data.GetType().Name.StartsWith("GetIsVoiceType")))
+                                {
+                                    string k = $"{VoiceOf(c)} {((IConditionFloatGetter)c).ComparisonValue}";
+                                    vt[k] = vt.GetValueOrDefault(k) + 1;
+                                }
+                            }
+                        Console.WriteLine($"UNGATED\t{mod.ModKey}\t{ungated}\tlines with neither GetIsVoiceType nor GetIsID");
+                        // HELLO_QUEST=<editorId> in the environment prints that quest's Hello lines whole, one per line.
+                        string? one = Environment.GetEnvironmentVariable("HELLO_QUEST");
+                        if (one != null)
+                            foreach (var (q, t) in hello.Where(h => string.Equals(h.q.EditorID, one, StringComparison.OrdinalIgnoreCase)))
+                                foreach (var resp in t.Responses)
+                                    Console.WriteLine($"LINE\t{q.EditorID}\t{resp.FormKey}\t{resp.Responses.FirstOrDefault()?.ResponseText}\t"
+                                        + string.Join(" & ", resp.Conditions.Select(c => c.Data.GetType().Name.StartsWith("GetIsVoiceType")
+                                              ? $"GetIsVoiceType({VoiceOf(c)}) {((IConditionFloatGetter)c).CompareOperator} {((IConditionFloatGetter)c).ComparisonValue}" : DescribeCondition(c))));
+                        foreach (var kv in ct.OrderByDescending(kv => kv.Value)) Console.WriteLine($"COND\t{mod.ModKey}\t{kv.Value}\t{kv.Key}");
+                        foreach (var kv in vt.OrderByDescending(kv => kv.Value).Take(40)) Console.WriteLine($"VOICE\t{mod.ModKey}\t{kv.Value}\t{kv.Key}");
+                        found += hello.Count;
+                        break;
+                    }
                     if (search.Equals("perkchecks", StringComparison.OrdinalIgnoreCase))
                     {
                         // Every response in the plugin gated on HasPerk, one compact line each: how background, trait
@@ -2088,6 +2146,15 @@ namespace FrankyCLI
             }
 
             Console.WriteLine("--- Npc Extras ---");
+
+            // Factions: what vanilla's Hello groups gate on (GetInFaction), so who an NPC is to the dialogue system.
+            if (npc.Factions != null && npc.Factions.Count > 0)
+            {
+                Console.WriteLine($"  Factions [{npc.Factions.Count}]:");
+                foreach (var f in npc.Factions)
+                    Console.WriteLine($"    {Resolve(f.Faction.FormKey)} rank {f.Rank}");
+            }
+            Console.WriteLine($"  Voice: {Resolve(npc.Voice.FormKey)}");
 
             // Keywords
             if (npc.Keywords != null && npc.Keywords.Count > 0)
