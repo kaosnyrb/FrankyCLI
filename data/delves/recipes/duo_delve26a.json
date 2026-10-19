@@ -1,0 +1,67 @@
+{
+  "schema": 2,
+  "id": "duo_delve26a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
+  "_deal": "The remote planet pool, as remote02a to 05a.",
+  "author": "jessica",
+  "source": "his 2026-10-19 21:5x: \"lets do a dungeon mixed with the wave defense, so forces raid after you. Make it so boss has item then another squad turns up ti take it.\"",
+  "_note": [
+    "THE NAV CORE. A dungeon and a hold in one: take the item off the boss, then the rest of his crew lands and comes",
+    "in after you for it. The waves are the boss's own gang coming back, because a hold draws from the base driver's",
+    "list and cannot name another (a rival force would need a hold that takes its own enemies list: Eliza's, if he",
+    "wants it). Remote, so no drive. The hold's pity point is the boss marker: a wave that cannot reach him forms",
+    "where the fight was, so the lint's one-spot-two-beats warning is deliberate. Pay med, under his cap."
+  ],
+  "place": {
+    "remote": true,
+    "theme": {
+      "require": [],
+      "exclude": ["LocTypeTest"]
+    },
+    "_theme": "A dungeon: the boss marker is the only stop, so any place carrying one can draw it. ⚠ Waves inside an interior are new (every hold so far was outdoors): they spawn 30 to 100 m from him snapped to navmesh, which indoors may be another room. His play decides; the stuck guard lets a wave go at 180 s either way."
+  },
+  "prose": {
+    "name": "Recovery: Stolen Nav Core on <Planet>",
+    "briefing": "Raiders boarded a freighter, took what they could carry and her nav core with it. Their boss is holed up at the <Place>. Without the core, her captain isn't going anywhere."
+  },
+  "beats": [
+    {
+      "type": "recover",
+      "at": "LocDungeonBossLocRef",
+      "objective": "Take the nav core from the raiders' boss at the <Place>",
+      "journal": "The raiders' boss at the <Place> had the freighter's nav core. I took it off him. Then a ship set down outside, and the rest of his crew came in after it.",
+      "item": "Freighter Nav Core",
+      "say": [
+        "That's my core? Good.",
+        "Hang on. Something's just set down outside. That'll be the rest of them, and they'll want it back."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonBossLocRef",
+      "objective": "Hold on to the nav core",
+      "revealObjective": "Stop them taking the core",
+      "journal": "Raiders at the <Place> had a freighter's nav core. I took it off their boss, and when the rest of his crew came back for it, I kept it. Her captain can fly again.",
+      "waves": 3,
+      "size": [3, 5],
+      "style": ["squad", "squad", "horde"],
+      "say": [
+        "That's the last of them? Good.",
+        "Payment's on its way. I'll send someone for the core. Don't sell it."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Freighter Captain",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "They boarded us, took what they could carry, and the nav core with it.",
+    "Without that core my ship's a very expensive tent.",
+    "Their boss has it. Get it back and I'll make it worth your while."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is remote05b's 'Daniel, Steady Broadcaster', used once so far; his ear decides."
+}
