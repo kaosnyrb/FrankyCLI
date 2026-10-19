@@ -18,9 +18,7 @@
   ],
   "place": {
     "theme": {
-      "require": [
-        "LocTypeOE_ThemeNaturalKeyword"
-      ],
+      "require": ["LocTypeOE_ThemeNaturalKeyword"],
       "exclude": [
         "LocTypeOE_NonHostile",
         "LocTypeOE_ThemeCaveKeyword"
@@ -37,9 +35,7 @@
     },
     "third": {
       "theme": {
-        "require": [
-          "LocTypeOE_NonHostile"
-        ],
+        "require": ["LocTypeOE_NonHostile"],
         "exclude": [
           "LocTypeOE_ThemeNaturalKeyword",
           "LocTypeOE_ThemeCaveKeyword"
@@ -63,17 +59,27 @@
         "template": "UC_NA_MASTWorkerFemale02",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericFemale01",
-        "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+        "elevenlabs": "wCizWKvnaS3LOIUwHo98",
+        "hellos": [
+          ["Easy. I've had enough visitors this week."]
+        ]
       },
       "greeting": ["You're not one of them, are you? Good. Then you can help, if you want to."],
       "exchanges": [
         {
           "prompt": "I'll get your cargo back.",
-          "reply": ["Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going."]
+          "reply": [
+            "Water filters, one crate.",
+            "Somebody's been waiting a week to drink without boiling it first.",
+            "Don't bring it back to me. Take it where it was going."
+          ]
         },
         {
           "prompt": "What happened?",
-          "reply": ["Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."]
+          "reply": [
+            "Four of them. Very polite until they weren't.",
+            "They took the crate and left me the ship, which I suppose was kind of them."
+          ]
         },
         {
           "prompt": "Did you report it?",
@@ -81,8 +87,11 @@
         },
         {
           "prompt": "Describe the one in charge.",
-          "perk": "BackgroundBountyHunter",
-          "reply": ["Tall, a scar through one eyebrow, laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him."]
+          "reply": [
+            "Tall. A scar through one eyebrow. Laughed at his own jokes.",
+            "If he's worth something to you, take that as well. I won't miss him."
+          ],
+          "perk": "BackgroundBountyHunter"
         }
       ],
       "_talk": "Exchange 0 closes the talk and sets the recover's stage. Exchange 3 is a [Bounty Hunter] line (his 2026-10-14 RP feature): only a hunter asks for a description. Voiced lines: no names, no places, no factions, no currency."

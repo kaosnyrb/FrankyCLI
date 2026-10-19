@@ -20,9 +20,7 @@
   ],
   "place": {
     "theme": {
-      "require": [
-        "LocTypeOE_NonHostile"
-      ],
+      "require": ["LocTypeOE_NonHostile"],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
@@ -46,28 +44,33 @@
         "_outfit": "WANTED: a vanilla Navy or UC service outfit; Eliza or Kim picks the EditorID. Never guessed here.",
         "voice": "GenericFemale01",
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
-        "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear."
+        "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear.",
+        "hellos": [
+          ["Contractor. Over here."]
+        ]
       },
-      "greeting": ["You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go."],
+      "greeting": [
+        "You're the contractor.",
+        "Eleven minutes late.",
+        "Cells are at the drop. Two. Go."
+      ],
       "exchanges": [
         {
           "prompt": "I'll get the cells.",
-          "reply": ["Two. Don't drop them. Left bay first, then right. I'll have the panel open."]
-        },
-        {
-          "prompt": "Why can't you fetch them yourself?",
-          "reply": ["Relay can't be left. Standing order. Not mine. I follow it."]
-        },
-        {
-          "prompt": "Are you out here alone?",
-          "reply": ["Relay needs one. Rations for one. Cells for one. Next drop in nine days."]
+          "reply": [
+            "Two. Don't drop them.",
+            "Left bay first, then right. I'll have the panel open."
+          ]
         },
         {
           "prompt": "Buy you a drink when you're off?",
-          "reply": ["Off in nine days. Ask me then. Cells first."]
+          "reply": [
+            "Off in nine days.",
+            "Ask me then. Cells first."
+          ]
         }
       ],
-      "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 3 is the flirt his 10-12 ceiling allows, answered in register: with the action it implies."
+      "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 1 is the flirt his 10-12 ceiling allows, answered in register: with the action it implies."
     },
     {
       "type": "read",

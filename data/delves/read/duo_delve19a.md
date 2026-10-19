@@ -23,13 +23,18 @@
 > If you've got a ship, you're the most useful person I've seen all week.
 
 **▸ I'll get the part and fit it.** *(ends the talk)*
-> It's a transceiver core, about the size of a toolbox. Fit it in the satellite and we're back on the network. I'd do it myself if I could fly.
+> It's a transceiver core, about the size of a toolbox.
+> Fit it in the satellite and we're back on the network.
+> I'd do it myself if I could fly.
 
 **▸ What's wrong with the satellite?**
-> Nothing a new core won't fix. The old one burned out, which they do. What they don't usually do is get stolen on the way here.
+> Nothing a new core won't fix. The old one burned out, which they do.
+> What they don't usually do is get stolen on the way here.
 
 **▸ Why does it matter so much?**
-> No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days.
+> No relay, no calls.
+> No supply runs, no weather warnings, no doctor.
+> We've been shouting at the sky for nine days.
 
 **▸ Could you rig something in the meantime?**
 > I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing.

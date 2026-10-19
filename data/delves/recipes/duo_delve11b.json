@@ -20,12 +20,8 @@
     },
     "second": {
       "theme": {
-        "require": [
-          "LocTypeOE_NonHostile"
-        ],
-        "exclude": [
-          "LocTypeOE_ThemeCaveKeyword"
-        ]
+        "require": ["LocTypeOE_NonHostile"],
+        "exclude": ["LocTypeOE_ThemeCaveKeyword"]
       }
     },
     "_theme": "As 11a: a dungeon there, a quiet non-hostile site here for him to be waiting at."
@@ -53,25 +49,35 @@
         "template": "UC_NA_MASTWorkerMale02",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericMale01",
-        "elevenlabs": "iP95p4xoKVk53GoZ742B"
+        "elevenlabs": "iP95p4xoKVk53GoZ742B",
+        "hellos": [
+          ["Mind the edge. It's further down than it looks."]
+        ]
       },
       "greeting": ["Go on, then. Did they still have them?"],
       "exchanges": [
         {
           "prompt": "I found your claim papers.",
-          "reply": ["That's them. Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole. Thank you."]
+          "reply": [
+            "That's them.",
+            "Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole.",
+            "Thank you."
+          ]
         },
         {
-          "prompt": "What else did they take?",
-          "reply": ["The drill, the food, my good boots. All of that can be bought again. The ground can't, not once somebody else files on it."]
-        },
-        {
-          "prompt": "Why not go in yourself?",
-          "reply": ["I did. I got as far as the door, heard them laughing, and walked back out. I'm not proud of it."]
+          "prompt": "You could have gone in yourself.",
+          "reply": [
+            "I did.",
+            "Got as far as the door, heard them laughing, and walked back out.",
+            "I'm not proud of it."
+          ]
         },
         {
           "prompt": "Why are papers worth more than the drill?",
-          "reply": ["A drill digs anywhere. These say where I'm allowed to."]
+          "reply": [
+            "A drill digs anywhere.",
+            "These say where I'm allowed to."
+          ]
         }
       ],
       "_talk": "Exchange 0 is the hand-back, as 11a. Same voice on the radio and in person.",

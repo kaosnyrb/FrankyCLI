@@ -23,16 +23,20 @@
 > You're not one of them, are you? Good. Then you can help, if you want to.
 
 **▸ I'll get your cargo back.** *(ends the talk)*
-> Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going.
+> Water filters, one crate.
+> Somebody's been waiting a week to drink without boiling it first.
+> Don't bring it back to me. Take it where it was going.
 
 **▸ What happened?**
-> Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them.
+> Four of them. Very polite until they weren't.
+> They took the crate and left me the ship, which I suppose was kind of them.
 
 **▸ Did you report it?**
 > I did. Someone's going to look into it next month. The filters were due last week.
 
 **▸ Describe the one in charge.**
-> Tall, a scar through one eyebrow, laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him.
+> Tall. A scar through one eyebrow. Laughed at his own jokes.
+> If he's worth something to you, take that as well. I won't miss him.
 
 📓 *Journal:* Raiders jumped a hauler and took her cargo, a crate of water filters, to the <SecondPlace>. She asked me to finish her run and take them to the <ThirdPlace>.
 

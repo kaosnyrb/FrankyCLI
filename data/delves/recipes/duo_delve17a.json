@@ -19,9 +19,7 @@
   ],
   "place": {
     "theme": {
-      "require": [
-        "LocTypeOE_NonHostile"
-      ],
+      "require": ["LocTypeOE_NonHostile"],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
@@ -44,28 +42,57 @@
         "template": "UC_NA_MASTWorkerFemale03",
         "voice": "GenericFemale01",
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
-        "_elevenlabs": "Placeholder again. She wants bright and quick. His ear."
+        "_elevenlabs": "Placeholder again. She wants bright and quick. His ear.",
+        "hellos": [
+          ["Oh! A person!"],
+          ["Hiya! Are you here for lolly Friday?"]
+        ]
       },
-      "greeting": ["You came! Brilliant. Okay. The cool box fell off the hauler, which is fine, but the lollies are in it, which is less fine."],
+      "greeting": [
+        "You came! Brilliant.",
+        "Okay. The cool box fell off the hauler, which is fine.",
+        "But the lollies are in it, which is less fine."
+      ],
       "exchanges": [
         {
           "prompt": "I'll find the cool box.",
-          "reply": ["Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!"]
+          "reply": [
+            "Hero!",
+            "It's blue. Probably blue. The cups fell off too, grab those.",
+            "Five minutes before they go soft. Loads of time!"
+          ]
         },
         {
           "prompt": "What's the occasion?",
-          "reply": ["It's Friday! The fourth one, which is lolly Friday, which nobody voted for, I just started doing it and now there's a rota and a song."]
+          "reply": [
+            "It's Friday! The fourth one, which is lolly Friday.",
+            "Nobody voted for it. I just started doing it, and now there's a rota.",
+            "And a song. There's a song."
+          ]
         },
         {
           "prompt": "How many of you are there?",
-          "reply": ["Seven! One won't eat the orange ones, so really six and a half, and I eat the half. It's a system."]
+          "reply": [
+            "Seven! One won't eat the orange ones, so really six and a half.",
+            "And I eat the half. It's a system."
+          ]
+        },
+        {
+          "prompt": "What flavours?",
+          "reply": [
+            "Orange, lime, and one called Mystery that's just orange again.",
+            "Don't tell anyone. The mystery is the point."
+          ]
         },
         {
           "prompt": "Do I get one?",
-          "reply": ["Obviously! Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now."]
+          "reply": [
+            "Obviously!",
+            "Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now."
+          ]
         }
       ],
-      "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 2 is her one run-on territory; exchange 3 is the flirt the ceiling allows, and she does not notice it is one, which is the Momo answer."
+      "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Her lines run on in bursts of short responses; exchange 4 is the flirt the ceiling allows, and she does not notice it is one, which is the Momo answer."
     },
     {
       "type": "pickup",

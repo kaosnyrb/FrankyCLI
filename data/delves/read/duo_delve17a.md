@@ -19,19 +19,31 @@
 
 🗣️ **Tess Ambry**
 
-> You came! Brilliant. Okay. The cool box fell off the hauler, which is fine, but the lollies are in it, which is less fine.
+> You came! Brilliant.
+> Okay. The cool box fell off the hauler, which is fine.
+> But the lollies are in it, which is less fine.
 
 **▸ I'll find the cool box.** *(ends the talk)*
-> Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!
+> Hero!
+> It's blue. Probably blue. The cups fell off too, grab those.
+> Five minutes before they go soft. Loads of time!
 
 **▸ What's the occasion?**
-> It's Friday! The fourth one, which is lolly Friday, which nobody voted for, I just started doing it and now there's a rota and a song.
+> It's Friday! The fourth one, which is lolly Friday.
+> Nobody voted for it. I just started doing it, and now there's a rota.
+> And a song. There's a song.
 
 **▸ How many of you are there?**
-> Seven! One won't eat the orange ones, so really six and a half, and I eat the half. It's a system.
+> Seven! One won't eat the orange ones, so really six and a half.
+> And I eat the half. It's a system.
+
+**▸ What flavours?**
+> Orange, lime, and one called Mystery that's just orange again.
+> Don't tell anyone. The mystery is the point.
 
 **▸ Do I get one?**
-> Obviously! Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now.
+> Obviously!
+> Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now.
 
 📓 *Journal:* The organiser at the <Place> lost the cool box for the team's Friday lollies off a hauler. It's out on the site somewhere, with a bag of cups. She says there's five minutes before they go soft.
 

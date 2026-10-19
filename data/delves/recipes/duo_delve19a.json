@@ -24,18 +24,27 @@
   "place": {
     "theme": {
       "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "second": {
       "theme": {
         "require": [],
-        "exclude": ["LocTypeOE_NonHostile", "LocTypeOE_ThemeNaturalKeyword"]
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeNaturalKeyword"
+        ]
       }
     },
     "third": {
       "orbit": true,
       "_orbit": "PROPOSED FIELD, Eliza's to build or reshape: the satellite in orbit over the main place's planet. If a fixed orbital ref or a space cell is the cheaper fill, that is her call; the words below do not depend on which.",
-      "theme": { "require": [], "exclude": [] }
+      "theme": {
+        "require": [],
+        "exclude": []
+      }
     },
     "_themes": "His settlement at a quiet built site (people there, the reason the relay matters), the raiders at a built hostile site, the satellite overhead."
   },
@@ -54,26 +63,40 @@
         "template": "UC_NA_MASTWorkerMale02",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericMale01",
-        "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
+        "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17",
+        "hellos": [
+          ["Watch your step. The dish cables run everywhere."]
+        ]
       },
       "greeting": ["If you've got a ship, you're the most useful person I've seen all week."],
       "exchanges": [
         {
           "prompt": "I'll get the part and fit it.",
-          "reply": ["It's a transceiver core, about the size of a toolbox. Fit it in the satellite and we're back on the network. I'd do it myself if I could fly."]
+          "reply": [
+            "It's a transceiver core, about the size of a toolbox.",
+            "Fit it in the satellite and we're back on the network.",
+            "I'd do it myself if I could fly."
+          ]
         },
         {
           "prompt": "What's wrong with the satellite?",
-          "reply": ["Nothing a new core won't fix. The old one burned out, which they do. What they don't usually do is get stolen on the way here."]
+          "reply": [
+            "Nothing a new core won't fix. The old one burned out, which they do.",
+            "What they don't usually do is get stolen on the way here."
+          ]
         },
         {
           "prompt": "Why does it matter so much?",
-          "reply": ["No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days."]
+          "reply": [
+            "No relay, no calls.",
+            "No supply runs, no weather warnings, no doctor.",
+            "We've been shouting at the sky for nine days."
+          ]
         },
         {
           "prompt": "Could you rig something in the meantime?",
-          "perk": "BackgroundCyberneticist",
-          "reply": ["I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."]
+          "reply": ["I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."],
+          "perk": "BackgroundCyberneticist"
         }
       ],
       "_talk": "Exchange 0 closes the talk and sets the recover's stage. Exchange 3 is a background line in the 18a shape; Cyberneticist is a guess at the right background, Eliza checks the perk id exists. Voiced lines: no names, no places, no factions, no currency."

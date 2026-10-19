@@ -29,12 +29,8 @@
     },
     "second": {
       "theme": {
-        "require": [
-          "LocTypeOE_NonHostile"
-        ],
-        "exclude": [
-          "LocTypeOE_ThemeCaveKeyword"
-        ]
+        "require": ["LocTypeOE_NonHostile"],
+        "exclude": ["LocTypeOE_ThemeCaveKeyword"]
       }
     },
     "_theme": "A dungeon there; a quiet non-hostile site here for her to be waiting at (she is placed, rule 2). One peopled end only, so the pool cost of rule 4 does not apply."
@@ -62,25 +58,39 @@
         "template": "UC_NA_MASTWorkerFemale03",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericFemale01",
-        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "hellos": [
+          ["Oh. Hello. Sorry, I'm a bit on edge today."],
+          ["Mind the beans."]
+        ]
       },
       "greeting": ["You've got that look. Did you actually go in there?"],
       "exchanges": [
         {
           "prompt": "I found your things.",
-          "reply": ["That's my bag. They took my credits as well, and I don't care. You can't buy back what's in here. Thank you."]
+          "reply": [
+            "That's my bag.",
+            "They took my credits as well, and I don't care. You can't buy back what's in here.",
+            "Thank you. Really."
+          ]
         },
         {
           "prompt": "What else did they take?",
-          "reply": ["Anything that wasn't bolted down. I only asked for the bag. The rest was just stuff, and stuff comes back."]
-        },
-        {
-          "prompt": "Why not go in yourself?",
-          "reply": ["I grow things for a living. I don't go into places like that. Everyone tells me that's sensible, and I'm starting to believe them."]
+          "reply": ["Anything that wasn't bolted down. Stuff comes back."]
         },
         {
           "prompt": "What's in the bag?",
-          "reply": ["Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."]
+          "reply": [
+            "Nothing anyone would steal on purpose.",
+            "Old photos, a hat, and a book I've read nine times. They took it because it was there."
+          ]
+        },
+        {
+          "prompt": "What do you grow?",
+          "reply": [
+            "Anything that'll put up with me.",
+            "Beans, mostly. Beans are very forgiving."
+          ]
         }
       ],
       "_talk": "Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100, which pays 'reward'. Voiced lines: no names, no places (radio rules). The same voice as the radio speaker.",

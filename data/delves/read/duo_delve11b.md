@@ -33,15 +33,17 @@
 > Go on, then. Did they still have them?
 
 **▸ I found your claim papers.** *(ends the talk)*
-> That's them. Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole. Thank you.
+> That's them.
+> Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole.
+> Thank you.
 
-**▸ What else did they take?**
-> The drill, the food, my good boots. All of that can be bought again. The ground can't, not once somebody else files on it.
-
-**▸ Why not go in yourself?**
-> I did. I got as far as the door, heard them laughing, and walked back out. I'm not proud of it.
+**▸ You could have gone in yourself.**
+> I did.
+> Got as far as the door, heard them laughing, and walked back out.
+> I'm not proud of it.
 
 **▸ Why are papers worth more than the drill?**
-> A drill digs anywhere. These say where I'm allowed to.
+> A drill digs anywhere.
+> These say where I'm allowed to.
 
 📓 *Journal:* Raiders took a prospector's claim papers to the <Place>. I went in after them and brought them back. He'd got as far as the door himself.

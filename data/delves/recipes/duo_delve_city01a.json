@@ -51,29 +51,37 @@
         "template": "UC_NA_MASTWorkerMale02",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericMale01",
-        "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
+        "elevenlabs": "dgkKQcJqyy5AP0dqleUU",
+        "hellos": [
+          ["Stall's shut today. Sorry."]
+        ]
       },
       "greeting": ["Tell me that's what I think it is."],
       "exchanges": [
         {
           "prompt": "I've got your strongbox.",
-          "reply": ["That's it, dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."]
+          "reply": [
+            "That's it. Dent in the lid and all.",
+            "Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."
+          ]
         },
         {
-          "prompt": "What's in it?",
-          "reply": ["Papers, mostly. My permit, my stall number, two years of receipts. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."]
-        },
-        {
-          "prompt": "Why not go after it yourself?",
-          "reply": ["I haul crates and sell them. I don't go into places like that, and I'd like to keep it that way. Back here, people know me."]
+          "prompt": "Why so heavy?",
+          "reply": [
+            "Two years of receipts. Paper's heavier than you'd think.",
+            "Permit, stall number, the lot. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
+          ]
         },
         {
           "prompt": "Which lane did they jump you on?",
-          "perk": "BackgroundLongHauler",
-          "reply": ["The slow one. You've run it too, then. You'll know they never jump you on the fast lane. Not enough time to plan it."]
+          "reply": [
+            "The slow one. You've run it too, then.",
+            "They never jump you on the fast lane. Not enough time to plan it."
+          ],
+          "perk": "BackgroundLongHauler"
         }
       ],
-      "_talk": "Exchange 0 is the hand-back: it ends the talk, takes the Trader's Strongbox and sets stage 100, which pays 'reward'. Exchange 3 is a [Long Hauler] line (his 2026-10-14 RP feature): only a hauler would ask which lane. Voiced lines: no names, no places, no factions, no currency.",
+      "_talk": "Exchange 0 is the hand-back: it ends the talk, takes the Trader's Strongbox and sets stage 100, which pays 'reward'. Exchange 2 is a [Long Hauler] line (his 2026-10-14 RP feature): only a hauler would ask which lane. Voiced lines: no names, no places, no factions, no currency.",
       "reward": "hard"
     }
   ],

@@ -45,18 +45,19 @@
 
 🗣️ **Ilse Corran**
 
-> That's his writing on those. I'd know it anywhere. Where did you find them?
+> That's his writing on those.
+> I'd know it anywhere. Where did you find them?
 
 **▸ Here. They're yours.** *(ends the talk)*
-> He wrote every week and none of it ever came. I thought he'd stopped. He hadn't. Thank you.
+> That's every week. He wrote every week.
+> None of it ever came. I thought he'd stopped.
+> He hadn't. Thank you.
 
 **▸ What happened to him?**
-> His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking.
-
-**▸ Why didn't he send them?**
-> Knowing him, he meant to bring them himself. He never paid for anything he could carry.
+> His unit went quiet near the end of the fighting.
+> They told us that much and nothing else. I stopped asking.
 
 **▸ Will you be all right?**
-> Ask me once I've read them. I've had years of not hearing from him. I'm not ready for this.
+> Ask me once I've read them.
 
 📓 *Journal:* I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and gave them to his sister at the <Place>.

@@ -20,16 +20,24 @@
 > You're the hauler? Good. I'm retiring, and my toolbox goes to the lad I trained. It's only one box, but it's the one that matters.
 
 **▸ Where's the box going?** *(ends the talk)*
-> He runs his own site now, off-world. The box is by the door. Don't let him tell you he doesn't need it.
+> He runs his own site now, off-world.
+> The box is by the door. Don't let him tell you he doesn't need it.
 
 **▸ Why retire now?**
-> Because I'm done. Forty years of fixing other people's mistakes. My knees decided before I did.
+> Because I'm done.
+> Forty years of fixing other people's mistakes. My knees decided before I did.
 
 **▸ What's in it?**
-> Every tool I ever trusted. Half of them I made. The big wrench was my mother's, so tell him to mind it.
+> Every tool I ever trusted. Half of them I made.
+> The big wrench was my mother's, so tell him to mind it.
 
 **▸ Was he a good apprentice?**
-> The worst. Asked why about everything. Took me a year to see that was the point.
+> The worst.
+> Asked why about everything. Took me a year to see that was the point.
+
+**▸ Will you miss it?**
+> The work? No.
+> The lad? Don't you dare tell him I said yes.
 
 📓 *Journal:* The engineer is retiring and wants her toolbox to go to the apprentice she trained. She says he'll pretend he doesn't need it.
 
@@ -52,18 +60,20 @@
 
 🗣️ **Kit Navarro**
 
-> That's her box. I'd know it anywhere. She actually sent it.
+> That's her box.
+> She actually sent it. She said she'd sell it first.
 
 **▸ She wanted you to have it.** *(ends the talk)*
-> She told me I'd never be ready for this box. I suppose that means I am. I'll call her tonight. Thank you.
+> She told me I'd never be ready for this box.
+> I suppose that means I am.
+> I'll call her tonight. Thank you.
 
 **▸ She said you'd pretend you didn't need it.**
-> Ha. I've been borrowing a wrench off the cook for a month. Don't tell her that.
-
-**▸ What was she like to work for?**
-> Hard. Fair. She'd make you redo a weld three times and then buy you dinner.
+> Ha.
+> I've been borrowing a wrench off the cook for a month. Don't tell her that.
 
 **▸ What did she teach you?**
-> To ask why. Every time. She called me the worst apprentice she ever had for it. She's the reason I know any of the answers.
+> To ask why. Every time.
+> She called me the worst apprentice she ever had for it. She's the reason I know any of the answers.
 
 📓 *Journal:* I delivered the toolbox. He opened it, found the wrench in its cloth, and didn't say anything for a while.

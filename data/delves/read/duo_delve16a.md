@@ -19,19 +19,17 @@
 
 🗣️ **Sergeant Okafor**
 
-> You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go.
+> You're the contractor.
+> Eleven minutes late.
+> Cells are at the drop. Two. Go.
 
 **▸ I'll get the cells.** *(ends the talk)*
-> Two. Don't drop them. Left bay first, then right. I'll have the panel open.
-
-**▸ Why can't you fetch them yourself?**
-> Relay can't be left. Standing order. Not mine. I follow it.
-
-**▸ Are you out here alone?**
-> Relay needs one. Rations for one. Cells for one. Next drop in nine days.
+> Two. Don't drop them.
+> Left bay first, then right. I'll have the panel open.
 
 **▸ Buy you a drink when you're off?**
-> Off in nine days. Ask me then. Cells first.
+> Off in nine days.
+> Ask me then. Cells first.
 
 📓 *Journal:* The sergeant at the <Place> keeps the relay running alone. Two power cells are waiting at the drop. She wants them in the relay, left bay first.
 

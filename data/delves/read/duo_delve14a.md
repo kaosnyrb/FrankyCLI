@@ -20,16 +20,27 @@
 > You're from the survey lot? Good. I've had their crate here for days and I've been told not to open it.
 
 **▸ I'm here for the survey crate.** *(ends the talk)*
-> Right. Your crew left in a hurry and took the wrong crate. Theirs had my lunch in it. Yours is still here. I've marked it for you.
+> Right. Your crew left in a hurry and took the wrong crate.
+> Theirs had my lunch in it. Yours is still here. I've marked it for you.
 
 **▸ How long have you been out here?**
-> Eleven years, on and off. Most weeks nobody comes out at all. You're the third this week.
+> Eleven years, on and off.
+> Most weeks nobody comes out at all. You're the third this week. It's been a big week.
 
 **▸ Why did the crew leave?**
 > A recall came in from their office and they were packed in an hour. Nothing bad. They were nice enough. Loud, but nice.
 
 **▸ Did you look inside?**
-> No. It says sealed, so it's sealed. I did shake it once. It rattles like rocks, which I suppose it is.
+> No. It says sealed, so it's sealed.
+> I did shake it once. It rattles like rocks. Which I suppose it is.
+
+**▸ What was in your lunch?**
+> Two rolls and a pickled egg.
+> Somebody on that crew is having a very confusing afternoon.
+
+**▸ Do you like it out here?**
+> I like it fine. The quiet doesn't ask me anything.
+> Present company excepted. You can ask.
 
 📓 *Journal:* The site hand says the crew left in a hurry and took his crate by mistake, lunch and all. Ours is still here. He's marked where.
 

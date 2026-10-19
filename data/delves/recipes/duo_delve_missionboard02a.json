@@ -60,25 +60,47 @@
         "name": "Odile Rasmussen",
         "template": "UC_NA_MASTWorkerFemale03",
         "voice": "GenericFemale01",
-        "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
+        "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
+        "hellos": [
+          ["Mind the cables, love. Everyone trips on that one."]
+        ]
       },
       "greeting": ["You're the hauler? Good. I'm retiring, and my toolbox goes to the lad I trained. It's only one box, but it's the one that matters."],
       "exchanges": [
         {
           "prompt": "Where's the box going?",
-          "reply": ["He runs his own site now, off-world. The box is by the door. Don't let him tell you he doesn't need it."]
+          "reply": [
+            "He runs his own site now, off-world.",
+            "The box is by the door. Don't let him tell you he doesn't need it."
+          ]
         },
         {
           "prompt": "Why retire now?",
-          "reply": ["Because I'm done. Forty years of fixing other people's mistakes. My knees decided before I did."]
+          "reply": [
+            "Because I'm done.",
+            "Forty years of fixing other people's mistakes. My knees decided before I did."
+          ]
         },
         {
           "prompt": "What's in it?",
-          "reply": ["Every tool I ever trusted. Half of them I made. The big wrench was my mother's, so tell him to mind it."]
+          "reply": [
+            "Every tool I ever trusted. Half of them I made.",
+            "The big wrench was my mother's, so tell him to mind it."
+          ]
         },
         {
           "prompt": "Was he a good apprentice?",
-          "reply": ["The worst. Asked why about everything. Took me a year to see that was the point."]
+          "reply": [
+            "The worst.",
+            "Asked why about everything. Took me a year to see that was the point."
+          ]
+        },
+        {
+          "prompt": "Will you miss it?",
+          "reply": [
+            "The work? No.",
+            "The lad? Don't you dare tell him I said yes."
+          ]
         }
       ],
       "_talk": "Exchange 0 closes the talk and sets this beat's stage; the rest loop back in any order. Voice is ElevenLabs' 'Lily, Velvety Actress' (British, middle aged). 2026-10-14 16:2x, his catch: the menu is any order, so the greeting now says she is retiring and he was her apprentice, and every prompt is askable cold."
@@ -103,25 +125,37 @@
         "name": "Kit Navarro",
         "template": "UC_NA_MASTWorkerMale02",
         "voice": "GenericMale01",
-        "elevenlabs": "inKOuEy40NdNVHxcqekZ"
+        "elevenlabs": "inKOuEy40NdNVHxcqekZ",
+        "hellos": [
+          ["Can I help? Sorry, it's a mess in here."]
+        ]
       },
-      "greeting": ["That's her box. I'd know it anywhere. She actually sent it."],
+      "greeting": [
+        "That's her box.",
+        "She actually sent it. She said she'd sell it first."
+      ],
       "exchanges": [
         {
           "prompt": "She wanted you to have it.",
-          "reply": ["She told me I'd never be ready for this box. I suppose that means I am. I'll call her tonight. Thank you."]
+          "reply": [
+            "She told me I'd never be ready for this box.",
+            "I suppose that means I am.",
+            "I'll call her tonight. Thank you."
+          ]
         },
         {
           "prompt": "She said you'd pretend you didn't need it.",
-          "reply": ["Ha. I've been borrowing a wrench off the cook for a month. Don't tell her that."]
-        },
-        {
-          "prompt": "What was she like to work for?",
-          "reply": ["Hard. Fair. She'd make you redo a weld three times and then buy you dinner."]
+          "reply": [
+            "Ha.",
+            "I've been borrowing a wrench off the cook for a month. Don't tell her that."
+          ]
         },
         {
           "prompt": "What did she teach you?",
-          "reply": ["To ask why. Every time. She called me the worst apprentice she ever had for it. She's the reason I know any of the answers."]
+          "reply": [
+            "To ask why. Every time.",
+            "She called me the worst apprentice she ever had for it. She's the reason I know any of the answers."
+          ]
         }
       ],
       "_talk": "The HAND-BACK: the whole last step, so its stage is 100 and it takes the toolbox. Each prompt answers something she said at the first site. Voice is ElevenLabs' 'Hunter' (Canadian, chill, young). 2026-10-14 16:2x: the last prompt was 'She said you asked why about everything', which is only true if the player asked her an optional question; now askable cold, and it still echoes her line if they did. 'She said you'd pretend' stays: it comes from her closing reply, which every player hears."

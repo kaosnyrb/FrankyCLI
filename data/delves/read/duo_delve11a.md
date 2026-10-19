@@ -33,15 +33,19 @@
 > You've got that look. Did you actually go in there?
 
 **▸ I found your things.** *(ends the talk)*
-> That's my bag. They took my credits as well, and I don't care. You can't buy back what's in here. Thank you.
+> That's my bag.
+> They took my credits as well, and I don't care. You can't buy back what's in here.
+> Thank you. Really.
 
 **▸ What else did they take?**
-> Anything that wasn't bolted down. I only asked for the bag. The rest was just stuff, and stuff comes back.
-
-**▸ Why not go in yourself?**
-> I grow things for a living. I don't go into places like that. Everyone tells me that's sensible, and I'm starting to believe them.
+> Anything that wasn't bolted down. Stuff comes back.
 
 **▸ What's in the bag?**
-> Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there.
+> Nothing anyone would steal on purpose.
+> Old photos, a hat, and a book I've read nine times. They took it because it was there.
+
+**▸ What do you grow?**
+> Anything that'll put up with me.
+> Beans, mostly. Beans are very forgiving.
 
 📓 *Journal:* Raiders took a homesteader's things to the <Place>. I went in after them, got her bag back and returned it. She said they could keep the credits.

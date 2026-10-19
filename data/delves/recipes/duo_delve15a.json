@@ -20,9 +20,7 @@
   ],
   "place": {
     "theme": {
-      "require": [
-        "LocTypeOE_NonHostile"
-      ],
+      "require": ["LocTypeOE_NonHostile"],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
@@ -30,9 +28,7 @@
     },
     "second": {
       "theme": {
-        "require": [
-          "LocTypeOE_NonHostile"
-        ],
+        "require": ["LocTypeOE_NonHostile"],
         "exclude": [
           "LocTypeOE_ThemeNaturalKeyword",
           "LocTypeOE_ThemeCaveKeyword"
@@ -55,25 +51,41 @@
         "name": "Owen Pike",
         "template": "UC_NA_MASTWorkerMale01",
         "voice": "GenericMale01",
-        "elevenlabs": "bIHbv24MWmeRgasZH58o"
+        "elevenlabs": "bIHbv24MWmeRgasZH58o",
+        "hellos": [
+          ["Is it you? It's you. Good."]
+        ]
       },
-      "greeting": ["You're here for the package? Good. Quickly, before I change my mind."],
+      "greeting": [
+        "You're here for the package?",
+        "Good. Quickly, before I change my mind."
+      ],
       "exchanges": [
         {
           "prompt": "I'll take the package.",
-          "reply": ["It's by the crates. Don't shake it. And don't tell her it's from me... Actually, no. Tell her. She'll know anyway."]
+          "reply": [
+            "It's by the crates. Don't shake it. And don't tell her it's from me.",
+            "Actually, no. Tell her. She'll know anyway."
+          ]
         },
         {
           "prompt": "Why not take it yourself?",
           "reply": ["Because I'd get there, talk about the weather and come home with it still in my hand. I've done that twice."]
         },
         {
-          "prompt": "What's in it?",
-          "reply": ["Real coffee. Not the stuff we get out here. She said once she missed it. I don't think she knows I heard."]
+          "prompt": "Is it fragile?",
+          "reply": [
+            "Only to me.",
+            "It's real coffee. Not the stuff we get out here.",
+            "She said once she missed it. I don't think she knows I heard."
+          ]
         },
         {
           "prompt": "Why are you nervous?",
-          "reply": ["Because it's for her. And if she knows how I feel, she's been very polite about it."]
+          "reply": [
+            "Because it's for her.",
+            "And if she knows how I feel, she's been very polite about it."
+          ]
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the pickup's stage. Voice: the 13a nervous man ('Will, Relaxed Optimist'), reused; his ear decides."
@@ -101,13 +113,20 @@
         "template": "UC_NA_MASTWorkerFemale03",
         "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
         "voice": "GenericFemale01",
-        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "hellos": [
+          ["Can I help you?"]
+        ]
       },
       "greeting": ["That's got a ribbon on it. Nobody out here ties ribbons. Is that for me?"],
       "exchanges": [
         {
           "prompt": "It's for you. A present.",
-          "reply": ["Real coffee. I said that once, on a bad day, months ago. He was listening. Don't tell him anything. I'll go over myself."]
+          "reply": [
+            "Real coffee.",
+            "I said that once, on a bad day, months ago. He was listening.",
+            "Don't tell him anything. I'll go over myself."
+          ]
         },
         {
           "prompt": "Do you know who it's from?",
@@ -115,11 +134,10 @@
         },
         {
           "prompt": "Were you expecting it?",
-          "reply": ["No. Hoping, a bit. You don't say that out loud when there are this few of you."]
-        },
-        {
-          "prompt": "Should I take an answer back?",
-          "reply": ["No. He's had enough messages carried. It isn't that far. I can walk."]
+          "reply": [
+            "No.",
+            "Hoping, a bit. You don't say that out loud when there are this few of you."
+          ]
         }
       ],
       "_talk": "PROPOSED fields, as 11a. Exchange 0 is the hand-over: it ends the conversation, takes the Wrapped Package and sets stage 100. Voice: Petra's ('Isla'), reused; his ear decides."

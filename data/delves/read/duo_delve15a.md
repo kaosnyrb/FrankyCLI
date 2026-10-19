@@ -20,19 +20,24 @@
 
 🗣️ **Owen Pike**
 
-> You're here for the package? Good. Quickly, before I change my mind.
+> You're here for the package?
+> Good. Quickly, before I change my mind.
 
 **▸ I'll take the package.** *(ends the talk)*
-> It's by the crates. Don't shake it. And don't tell her it's from me... Actually, no. Tell her. She'll know anyway.
+> It's by the crates. Don't shake it. And don't tell her it's from me.
+> Actually, no. Tell her. She'll know anyway.
 
 **▸ Why not take it yourself?**
 > Because I'd get there, talk about the weather and come home with it still in my hand. I've done that twice.
 
-**▸ What's in it?**
-> Real coffee. Not the stuff we get out here. She said once she missed it. I don't think she knows I heard.
+**▸ Is it fragile?**
+> Only to me.
+> It's real coffee. Not the stuff we get out here.
+> She said once she missed it. I don't think she knows I heard.
 
 **▸ Why are you nervous?**
-> Because it's for her. And if she knows how I feel, she's been very polite about it.
+> Because it's for her.
+> And if she knows how I feel, she's been very polite about it.
 
 📓 *Journal:* The sender wants a present carried to a woman at the <SecondPlace>. He would take it himself, but he has tried that twice. He's marked where it is.
 
@@ -59,15 +64,15 @@
 > That's got a ribbon on it. Nobody out here ties ribbons. Is that for me?
 
 **▸ It's for you. A present.** *(ends the talk)*
-> Real coffee. I said that once, on a bad day, months ago. He was listening. Don't tell him anything. I'll go over myself.
+> Real coffee.
+> I said that once, on a bad day, months ago. He was listening.
+> Don't tell him anything. I'll go over myself.
 
 **▸ Do you know who it's from?**
 > There's one person who'd ask a stranger to carry this instead of walking it over. So yes.
 
 **▸ Were you expecting it?**
-> No. Hoping, a bit. You don't say that out loud when there are this few of you.
-
-**▸ Should I take an answer back?**
-> No. He's had enough messages carried. It isn't that far. I can walk.
+> No.
+> Hoping, a bit. You don't say that out loud when there are this few of you.
 
 📓 *Journal:* A man at the <Place> asked me to carry a present to a woman at the <SecondPlace>. It was real coffee. She's going to thank him herself.

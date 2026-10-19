@@ -33,15 +33,15 @@
 > Tell me that's what I think it is.
 
 **▸ I've got your strongbox.** *(ends the talk)*
-> That's it, dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again. Thank you.
+> That's it. Dent in the lid and all.
+> Everything I need to trade is in there. I'd have lost a month getting it again. Thank you.
 
-**▸ What's in it?**
-> Papers, mostly. My permit, my stall number, two years of receipts. Nobody would steal it on purpose. They took the whole hold, and it was in the hold.
-
-**▸ Why not go after it yourself?**
-> I haul crates and sell them. I don't go into places like that, and I'd like to keep it that way. Back here, people know me.
+**▸ Why so heavy?**
+> Two years of receipts. Paper's heavier than you'd think.
+> Permit, stall number, the lot. Nobody would steal it on purpose. They took the whole hold, and it was in the hold.
 
 **▸ Which lane did they jump you on?**
-> The slow one. You've run it too, then. You'll know they never jump you on the fast lane. Not enough time to plan it.
+> The slow one. You've run it too, then.
+> They never jump you on the fast lane. Not enough time to plan it.
 
 📓 *Journal:* Spacers took a trader's hold to the <Place>. I went in and brought his strongbox back to <SecondPlace>. Without the papers in it he couldn't trade.
