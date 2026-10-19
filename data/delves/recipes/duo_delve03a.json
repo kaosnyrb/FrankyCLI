@@ -35,64 +35,65 @@
     "leash": "duo_samemapdistance",
     "second": {
       "theme": {
-        "require": [
-          "LocTypeOE_ThemeNaturalKeyword"
-        ],
-        "exclude": [
-          "LocTypeOE_ThemeCaveKeyword"
-        ]
+        "require": ["LocTypeOE_ThemeNaturalKeyword"],
+        "exclude": ["LocTypeOE_ThemeCaveKeyword"]
       },
       "_theme": "Eliza's, 2026-10-13: natural, so it can never be the main place (which excludes natural): the load was lost out in the open, at a different POI as he asked."
     }
   },
   "prose": {
-    "name": "Recovery: Lost Consignment on <Planet>",
-    "briefing": "A load was signed out for the <Place> and never signed in. Nobody has been out to look for it. Find where it stopped."
+    "name": "Recovery: Missing Payroll on <Planet>",
+    "briefing": "The crew at the <Place> haven't been paid this week. The courier carrying their payroll ledger never arrived. Find where it stopped.",
+    "_rewrite": "Jessica 2026-10-19, his 'the 03a writing feels weak': it named nothing (a load, it, the rest, what was taken). Now the load is the crew's pay: site-agnostic, somebody waiting, and the two halves make sense (ledger by courier, pay ahead to the site locker)."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
-      "objective": "Find the load at the <SecondPlace>",
-      "journal": "Signed out, never signed in, and it got this far.",
-      "item": "Signed-Out Consignment (1 of 2)",
-      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",
-      "say": ["That's it. Finish the run for them and take it where it was going."],
+      "objective": "Find the courier's crate at the <SecondPlace>",
+      "journal": "The courier's crate was out at the <SecondPlace> with the payroll ledger still in it. The pay itself went ahead to the site's locker.",
+      "item": "Payroll Ledger",
+      "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
+      "say": [
+        "That's the ledger.",
+        "Take it to the site. The pay went ahead to their locker, so once it's signed for, we're done."
+      ],
       "model": "Meshes\\ccs\\consignmentcrate01.nif",
-      "name": "Consignment Crate",
+      "name": "Courier Crate",
       "place": "second",
       "_place": "His playtest 2026-10-13: 'Don't like the pushing back away from site thing. Let's switch that to just using a med marker at a different POI.' The crate waits at a second POI; approach.lose is gone."
     },
     {
       "type": "use",
       "at": "RECenterLocRef",
-      "objective": "Take it to the <Place>",
-      "journal": "The other half should be here. Something has taken it.",
+      "objective": "Sign for the pay at the <Place>",
+      "journal": "The pay locker at the <Place> had been forced and emptied. Whoever took it can't have gone far.",
       "say": [
-        "That's only half of it.",
-        "The rest was here, and someone's taken it. Go and get it back."
+        "The locker's been forced.",
+        "The ledger's here. The pay isn't. Somebody knew it was coming.",
+        "Go and get it back."
       ],
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Receiving Locker"
+      "name": "Pay Locker"
     },
     {
       "type": "recover",
       "at": "RETravelB1LocRef",
-      "objective": "Recover what was taken",
-      "journal": "It did not go far. Nothing out here does.",
-      "item": "Signed-Out Consignment (2 of 2)",
-      "_item": "Jessica's, 2026-09-24: named for what the thing is to the job, never what it is (no part noun is safe across 266 sites). Picking up 2 of 2 is beat three's payoff.",
+      "objective": "Recover the crew's pay",
+      "journal": "The crew's pay was out at the edge of the site, with the people who forced the locker. I took it back.",
+      "item": "Crew Pay Case",
+      "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
-        "You got it back? Good.",
-        "Bring it in and I'll close the docket."
+        "You've got it? Good.",
+        "Put it in the locker and sign the ledger. I'll close the docket."
       ]
     },
     {
       "type": "deliver",
       "returnTo": 2,
       "at": "RECenterLocRef",
-      "objective": "Finish the job",
-      "journal": null
+      "objective": "Return the pay to the locker",
+      "journal": "A crew at the <Place> hadn't been paid. I found the courier's ledger, took their pay back from whoever forced the locker, and signed for it."
     }
   ],
   "speaker": {
@@ -102,7 +103,7 @@
   },
   "broadcast": [
     "This is dispatch.",
-    "A load went out from here and never got where it was going. Nobody's been out to look.",
+    "A crew on site haven't been paid this week. The courier with their ledger never arrived.",
     "Find where it stopped."
   ],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
