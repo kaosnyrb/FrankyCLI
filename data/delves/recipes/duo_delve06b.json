@@ -94,7 +94,7 @@
           "max": 4
         }
       },
-      "reward": "med"
+      "reward": "easy"
     },
     {
       "type": "deliver",
@@ -119,7 +119,7 @@
           "max": 4
         }
       },
-      "reward": "hard"
+      "reward": "med"
     }
   ],
   "offer": {

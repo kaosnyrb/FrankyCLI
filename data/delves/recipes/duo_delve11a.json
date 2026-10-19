@@ -94,7 +94,7 @@
         }
       ],
       "_talk": "Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100, which pays 'reward'. Voiced lines: no names, no places (radio rules). The same voice as the radio speaker.",
-      "reward": "hard"
+      "reward": "med"
     }
   ],
   "speaker": {

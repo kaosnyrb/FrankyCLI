@@ -82,7 +82,7 @@
         }
       ],
       "_talk": "Exchange 0 is the hand-back: it ends the talk, takes the Trader's Strongbox and sets stage 100, which pays 'reward'. Exchange 2 is a [Long Hauler] line (his 2026-10-14 RP feature): only a hauler would ask which lane. Voiced lines: no names, no places, no factions, no currency.",
-      "reward": "hard"
+      "reward": "med"
     }
   ],
   "speaker": {
