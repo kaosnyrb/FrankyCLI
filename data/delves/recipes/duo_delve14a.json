@@ -55,6 +55,7 @@
       "person": {
         "name": "Tobias Wren",
         "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Miner_UtilitySuit_NoHardhat",
         "voice": "GenericMale01",
         "elevenlabs": "JBFqnCBsd6RMkjVDRZzb",
         "hellos": [

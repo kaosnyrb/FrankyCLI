@@ -41,7 +41,8 @@
       "person": {
         "name": "Sergeant Okafor",
         "template": "UC_NA_MASTWorkerFemale03",
-        "_outfit": "WANTED: a vanilla Navy or UC service outfit; Eliza or Kim picks the EditorID. Never guessed here.",
+        "outfit": "Outfit_Clothes_UCNavy_Fatigues_NoHat",
+        "_outfit": "Picked 2026-10-19 from his StarArmory faction lists (Clothes - UC Navy), Jessica. His eye in game decides.",
         "voice": "GenericFemale01",
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear.",

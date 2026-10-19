@@ -82,7 +82,7 @@
       "person": {
         "name": "Veteran's Daughter",
         "template": "UC_NA_MASTWorkerFemale01",
-        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "outfit": "Outfit_Clothes_Colonist_BeadedCollarShirt_01_NoHat",
         "company": {
           "list": "duo_GangMembersList_Civ_LIST",
           "min": 2,

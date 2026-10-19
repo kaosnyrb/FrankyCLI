@@ -87,7 +87,7 @@
       "person": {
         "name": "Militiaman's Brother",
         "template": "UC_NA_MASTWorkerMale02",
-        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "outfit": "Outfit_Clothes_Civilian_RubberPocketPants_Jacket_02",
         "company": {
           "list": "duo_GangMembersList_Civ_LIST",
           "min": 2,
@@ -112,7 +112,7 @@
       "person": {
         "name": "Post Quartermaster",
         "template": "UC_NA_MASTWorkerFemale02",
-        "outfit": "Outfit_Clothes_Colonist_QuarterPaddedVest_01_NoHat",
+        "outfit": "Outfit_Clothes_ArmisticeArchives_ArmoredFatigues_Light01_Hat",
         "company": {
           "list": "duo_GangMembersList_Civ_StrongArm",
           "min": 2,

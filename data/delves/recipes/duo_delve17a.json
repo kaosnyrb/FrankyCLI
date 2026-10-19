@@ -40,6 +40,7 @@
       "person": {
         "name": "Tess Ambry",
         "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Resortwear_01",
         "voice": "GenericFemale01",
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Placeholder again. She wants bright and quick. His ear.",

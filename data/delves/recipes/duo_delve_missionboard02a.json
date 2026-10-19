@@ -59,6 +59,7 @@
       "person": {
         "name": "Odile Rasmussen",
         "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_UtilityOveralls_Mechanic_Welding_with_WeldingHatUp_Gray",
         "voice": "GenericFemale01",
         "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
         "hellos": [
@@ -124,6 +125,7 @@
       "person": {
         "name": "Kit Navarro",
         "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Clothes_Mechanic_Tanktop_Teal",
         "voice": "GenericMale01",
         "elevenlabs": "inKOuEy40NdNVHxcqekZ",
         "hellos": [
