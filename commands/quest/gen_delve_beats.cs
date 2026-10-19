@@ -509,6 +509,8 @@ namespace FrankyCLI
 
         /// <summary>The driver's LoseDistance: how close to the approached object the player comes before the approach fires.</summary>
         private const float ApproachDistance = 250f;
+        /// <summary>The stage that stops a Delve ending on a talk, set when the person unloads (vanilla's shutdown number).</summary>
+        private const int LingerStage = 1000;
         /// <summary>How far round its object a nest scatters, in metres. His infestation missions use 40 round a
         /// creature; a stash is a smaller thing to guard, so the nest sits closer.</summary>
         private const float NestRadius = 20f;
@@ -554,7 +556,8 @@ namespace FrankyCLI
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public List<(uint wem, string text, string voice, string elevenlabs, bool female)> TalkLines = new();   // a talk person's voiced lines (female picks the face actor)
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
-            public List<(int beat, int stage)> TalkHolds = new();   // a last-step talk the ending fragment waits on
+            public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
+            public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
@@ -962,7 +965,19 @@ namespace FrankyCLI
                         clone.Stages.Add(copy);
                         Console.WriteLine($"  +stage   : {st} (ending {j + 1} of choose '{cs.Choose}', a copy of completing stage {t.completeStage})");
                     }
+                // A Delve that ENDS on a talk outlives its completion (his 2026-10-19, 15a: "Think we need to have the quest
+                // run for a little while after so you can speak to her"). Every topic loops back to the menu, and a stopped
+                // quest takes its scenes, so the completing stage does not Stop(): this stage does, set by vanilla's
+                // DefaultAliasOnUnload on the person once the quest is complete, i.e. when he walks away from her. That is
+                // vanilla's shape (64+ attachments in Starfield.esm; the timer script, DefaultQuestShutdownScript, shows none).
+                if (!steps[^1].IsChoose && steps[^1].Beats.Any(b => r.beats[b].type == "talk"))
+                {
+                    bm.Linger = LingerStage;
+                    bm.LingerFrom = steps[^1].DoneStage;
+                    if (clone.Stages!.Any(x => x.Index == LingerStage)) { Console.WriteLine($"REFUSED: stage {LingerStage} already exists on this base; the talk's shutdown stage collides."); return 1; }
+                }
                 allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
+                    .Concat(bm.Linger >= 0 ? new[] { bm.Linger } : Array.Empty<int>())
                     .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
                     .Concat(personStage.Values).Concat(whoStage.Values)
                     .Concat(arrival ? new[] { t.arrivalStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
@@ -1375,6 +1390,29 @@ namespace FrankyCLI
                     Console.WriteLine($"  +hook    : arrival within {ApproachDistance} of step one's marker (alias {at}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
                 }
 
+                // Ending on a talk: the person's unload sets the shutdown stage, armed once the quest is complete. On a board,
+                // MissionComplete() would shut the quest down itself (MissionQuestScript.ShutdownOnCompletion, default true),
+                // so it is turned off and the shutdown stage calls MissionShutdown() instead.
+                if (bm.Linger >= 0)
+                {
+                    int done = steps[^1].DoneStage;
+                    foreach (var b in steps[^1].Beats.Where(b => r.beats[b].type == "talk"))
+                    {
+                        int pa = (int)talkAlias[b].ID;
+                        var sc = StageHook("DefaultAliasOnUnload", bm.Linger, done);
+                        if (AttachHook(vma, clone.FormKey, pa, sc, HookEntry.FindOrCreate, true, bm, bm.Linger, done) == Hooked.AlreadyCarries)
+                        { Console.WriteLine($"REFUSED: alias {pa} already carries DefaultAliasOnUnload."); return 1; }
+                        Console.WriteLine($"  +hook    : beat {b + 1}'s person (alias {pa}) unloading after {done} sets {bm.Linger}, which stops the quest; until then she can still be talked to");
+                    }
+                    if (t.questScript != null)
+                    {
+                        var qs = vma.Scripts.First(s => s.Name == t.questScript);
+                        qs.Properties.RemoveAll(p => p.Name == "ShutdownOnCompletion");
+                        qs.Properties.Add(new ScriptBoolProperty { Name = "ShutdownOnCompletion", Data = false, Flags = ScriptProperty.Flag.Edited });
+                        Console.WriteLine($"  linger   : {t.questScript}.ShutdownOnCompletion false; stage {bm.Linger} calls MissionShutdown()");
+                    }
+                }
+
                 // The approach: a stock distance hook on the PLAYER, once, at any stage (no PrereqStage).
                 if (r.approach is Approach apr)
                 {
@@ -1563,42 +1601,32 @@ namespace FrankyCLI
                 // Stop() after it ("Link is online", 2026-10-09). There, wait for the line to finish first: a second
                 // for the scene to begin, then while it plays, capped at 30 s so a scene that never reports done
                 // cannot hold the quest open.
+                // Ending on a talk, the quest stops on the shutdown stage (set when the person unloads), never on the
+                // completing one, so the conversation can go on after it (his 2026-10-19). A 10-19 morning version waited
+                // on IsInDialogueWithPlayer instead, and his play of 15a ended the talk the moment a side question was
+                // picked: the reading went false between topics and the quest stopped under him.
+                bool Lingers(int st) => bm.Linger >= 0 && st == steps[^1].DoneStage;
                 void StopQuest(int st)
                 {
+                    if (Lingers(st)) { Add(bm.Linger, "Stop()   ; the person unloaded after the completion (DefaultAliasOnUnload)"); return; }
                     WaitForLines(st);
-                    WaitForTalks(st);
                     Add(st, "Stop()");
-                }
-                // A talk in the LAST step ends the quest from inside the conversation, and every topic loops back to the
-                // menu (his ruling 2026-10-19: the side questions stay askable after the completion). A quest's scenes stop
-                // with it, so the quest is held open while he is still in the conversation: one-second waits on the
-                // person's IsInDialogueWithPlayer, capped at ten minutes so a stuck reading cannot hold it for ever.
-                // ⚠ No vanilla script calls IsInDialogueWithPlayer (native on ObjectReference): unproven until his play.
-                void WaitForTalks(int st)
-                {
-                    foreach (var b in steps[^1].Beats.Where(b => r.beats[b].type == "talk"))
-                    {
-                        string pa = $"Alias_Talk{b + 1}Person";
-                        props.Add(("ReferenceAlias", pa, clone.FormKey, (int)talkAlias[b].ID));
-                        Add(st, $"ObjectReference talker{b + 1} = {pa}.GetRef()   ; hold the quest open while he is still talking");
-                        Add(st, $"Int talked{b + 1} = 0");
-                        Add(st, $"While talker{b + 1} && talker{b + 1}.IsInDialogueWithPlayer() && talked{b + 1} < 600");
-                        Add(st, "    Utility.Wait(1.0)");
-                        Add(st, $"    talked{b + 1} += 1");
-                        Add(st, "EndWhile");
-                        bm.TalkHolds.Add((b, st));
-                    }
                 }
                 // A board mission ends through the script the board talks to: MissionComplete() pays through MissionParent,
                 // completes every objective, sets CompleteStage and shuts the quest down. Vanilla's own stage-100 fragment
                 // (QF_MB_Bounty05_UC_003303A5) is exactly this autocast and call.
                 void CompleteMission(int st)
                 {
-                    WaitForLines(st);
-                    WaitForTalks(st);   // MissionComplete shuts the quest down, so the conversation must be over first
+                    if (!Lingers(st)) WaitForLines(st);   // lingering, MissionComplete no longer shuts it down (ShutdownOnCompletion false)
                     Add(st, "Quest __temp = Self as Quest");
                     Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
                     Add(st, "kmyQuest.MissionComplete()");
+                    if (Lingers(st))
+                    {
+                        Add(bm.Linger, "Quest __temp = Self as Quest");
+                        Add(bm.Linger, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
+                        Add(bm.Linger, "kmyQuest.MissionShutdown()   ; the person unloaded after the completion (DefaultAliasOnUnload)");
+                    }
                 }
                 void WaitForLines(int st)
                 {
@@ -1975,9 +2003,11 @@ namespace FrankyCLI
                 // A board mission: the script the board talks to, alone, with exactly the driver's board properties.
                 fail += Check($"quest-level scripts (no driver, {t.questScript} only)", string.Join(",", vma.Scripts.Select(s => s.Name)), t.questScript);
                 var qs = vma.Scripts.FirstOrDefault(s => s.Name == t.questScript);
-                fail += Check($"{t.questScript} carries the driver's board properties",
+                // Ending on a talk adds exactly one: ShutdownOnCompletion, off (graded below with the linger).
+                var keeps = t.questScriptKeeps.Concat(bm.Linger >= 0 ? new[] { "ShutdownOnCompletion" } : Array.Empty<string>());
+                fail += Check($"{t.questScript} carries the driver's board properties" + (bm.Linger >= 0 ? " and ShutdownOnCompletion" : ""),
                               string.Join(",", (qs?.Properties.Select(p => p.Name) ?? Enumerable.Empty<string>()).OrderBy(n => n)),
-                              string.Join(",", t.questScriptKeeps.OrderBy(n => n)));
+                              string.Join(",", keeps.OrderBy(n => n)));
                 foreach (var pn in new[] { "MissionParent", "PrimaryRef", "TargetLocation" })
                 {
                     var op = qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == pn);
@@ -2184,9 +2214,6 @@ namespace FrankyCLI
                         fail += Check($"{who}: {sc.EditorID} loops back to the menu (his 2026-10-19 ruling)",
                                       $"0x{(uint)(sc.Flags ?? 0):X8}", "0x00002814");
                 }
-                foreach (var (hb, holdStage) in bm.TalkHolds.Where(h => h.beat == tbeat))
-                    fail += Check($"{who}: the ending fragment (stage {holdStage}) waits while he is in the conversation",
-                                  (fsrc.Contains($"talker{hb + 1} = Alias_Talk{hb + 1}Person.GetRef()") && fsrc.Contains($"talker{hb + 1}.IsInDialogueWithPlayer()")).ToString(), "True");
                 var closer = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{tbeat + 1}_reply1")?.Responses.FirstOrDefault();
                 fail += Check($"{who}: the first reply ends the talk by setting {tstage}",
                               closer?.SetParentQuestStage == null ? "none" : $"OnEnd {closer.SetParentQuestStage.OnEnd}, speaker {closer.Speaker.FormKey}",
@@ -2194,6 +2221,29 @@ namespace FrankyCLI
                 int setters = q.DialogTopics.Where(d => d.EditorID != null && d.EditorID.StartsWith($"{r.id}_talk{tbeat + 1}_"))
                                .SelectMany(d => d.Responses).Count(x => x.SetParentQuestStage != null);
                 fail += Check($"{who}: no other line sets a stage", setters.ToString(), "1");
+            }
+            if (bm.Linger >= 0)
+            {
+                // Ending on a talk: the completing stage completes and does not stop; the shutdown stage stops; a board's
+                // MissionComplete no longer shuts it down. Read off the generated source and the written record.
+                string Body(int st)
+                {
+                    string head = $"Function {FragmentFunction(st)}()";
+                    int i = fsrc.IndexOf(head);
+                    if (i < 0) return "";
+                    int j = fsrc.IndexOf("EndFunction", i);
+                    return j < 0 ? "" : fsrc[i..j];
+                }
+                int done = bm.LingerFrom;
+                string end = t.questScript != null ? "kmyQuest.MissionShutdown()" : "    Stop()";
+                fail += Check($"ending on a talk: stage {done} completes the quest and does not stop it",
+                              (!Body(done).Contains("    Stop()") && !Body(done).Contains("MissionShutdown()")).ToString(), "True");
+                fail += Check($"ending on a talk: stage {bm.Linger} exists and its fragment stops the quest",
+                              (q.Stages.Any(s => s.Index == bm.Linger) && Body(bm.Linger).Contains(end)).ToString(), "True");
+                if (t.questScript != null)
+                    fail += Check($"ending on a talk: {t.questScript}.ShutdownOnCompletion is off",
+                                  vma.Scripts.FirstOrDefault(s => s.Name == t.questScript)?.Properties.OfType<IScriptBoolPropertyGetter>()
+                                      .FirstOrDefault(p => p.Name == "ShutdownOnCompletion")?.Data.ToString() ?? "unset (true)", "False");
             }
             foreach (var ds in bm.StuckWaits)
                 fail += Check($"wave stage {ds}: the stuck guard waits in its spawning fragment and sets it",

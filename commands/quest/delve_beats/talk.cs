@@ -121,8 +121,8 @@ namespace FrankyCLI
             /// complete dialog option completes the quest and ends the dialog. This means if you select it first you can't
             /// hear the other lines." The completion was 0x2810 (closes the talk) until then. So the side questions are
             /// gated only on the step having OPENED, never on it still being open: after the completion they stay askable.
-            /// A talk that ends the quest is held open by the completing fragment, which waits while he is in the
-            /// conversation before CompleteQuest / Stop (BeatsBuild's WaitForTalks): a stopped quest takes its scenes.
+            /// A talk that ends the quest: a stopped quest takes its scenes, so the completing stage does not Stop(); stage
+            /// 1000 does, set by DefaultAliasOnUnload on the person when he walks away (BeatsBuild.Stages and Hooks).
             /// His rule: the completion goes FIRST in the menu ("the top dialog choice is the one that progresses the quest, the
             /// lower ones are fleshing out details"). SCPI does it, untied: completion 100, the rest 50/49/48 (his glass,
             /// missionboard02a, 2026-10-14 evening). With every scene at 100 it showed LAST, and neither its flag (0x2810 ->
