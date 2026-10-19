@@ -9,7 +9,9 @@
 **Where:** natural landmarks, never caves.
 
 📻 **Courier Customer, on the radio:**
-> Bit of an odd one. I've got a very important picnic tonight and the drone dropped it in the wrong place. Please don't open the small box.
+> Bit of an odd one.
+> I've got a very important picnic tonight, and the drone dropped it in the wrong place.
+> Please don't open the small box.
 
 ---
 
@@ -44,6 +46,8 @@
 🧱 Object: Picnic Spot · picnicpallet01.nif
 
 🔊 **Courier Customer:**
-> It's all there? Okay. Okay. I can do this. Thank you.
+> It's all there?
+> Okay. Okay. I can do this.
+> Thank you. Sorry. Thank you.
 
 📓 *Journal:* A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the ring and the hamper and laid it all out where it was meant to be. I did not open the small box.

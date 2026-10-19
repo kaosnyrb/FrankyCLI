@@ -10,7 +10,9 @@
 **Then:** a second place, a quiet, non-hostile site, never caves.
 
 📻 **Prospector, on the radio:**
-> They hit my camp and took the lot. Most of it I can replace. There's a case of claim papers in there I can't. Without those, the ground I've been working belongs to whoever files first.
+> They hit my camp and took the lot. Most of it I can replace.
+> There's a case of claim papers in there I can't.
+> Without those, the ground I've been working belongs to whoever files first.
 
 ---
 

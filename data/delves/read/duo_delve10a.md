@@ -18,7 +18,9 @@
 🧱 Object: Abandoned Camp Beacon · commsmast01.nif
 
 🔊 **Dig Lead:**
-> To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it.
+> To anyone near our old camp.
+> Our last supply drop went to the wrong site.
+> Bring it out to us and we'll make the trip worth it.
 
 📓 *Journal:* The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.
 
@@ -43,6 +45,7 @@
 🧱 Object: Dig Site Stores · AK_FootLocker01.nif
 
 🔊 **Dig Lead:**
-> That's ours. We'd given up on it. Thank you.
+> That's ours.
+> We'd given up on it. Somebody put the kettle on.
 
 📓 *Journal:* I got the crate out to the <SecondPlace>. The crew had been rationing for a week and had stopped expecting it.

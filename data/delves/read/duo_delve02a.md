@@ -9,7 +9,9 @@
 **Where:** anywhere, never natural landmarks or caves.
 
 📻 **Dig Boss, on the radio:**
-> We had to leave our samples behind when we got run off. Bring them out and you'll be paid. Watch yourself, they didn't go far.
+> We got run off and left our samples behind.
+> Bring them out and you'll be paid.
+> Watch yourself. They didn't go far.
 
 ---
 
@@ -21,7 +23,8 @@
 🧱 Object: Abandoned Sample Case · SecureBreifcase.nif
 
 🔊 **Dig Boss:**
-> They're coming back for it. Hang on to that case.
+> They're coming back for it.
+> Hang on to that case.
 
 ---
 
@@ -40,6 +43,7 @@
 🧱 Object: Crew Drop Beacon · commsmast01.nif
 
 🔊 **Dig Boss:**
-> Got it. That's a whole season's work. Thank you.
+> Got it.
+> That's a whole season's work in one case. I owe you a drink.
 
 📓 *Journal:* I got the crew's core samples out of the <Place> under fire and left them at their drop beacon for pickup.

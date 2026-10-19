@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; LocTypeOE_ThemeMilitaryKeyword, never test locations.
 
 📻 **Colony Militia, on the radio:**
-> Mercenaries have taken the old military post and they're raiding our supply runs. We don't have the guns to go in after them. Their commander holds the contract. End it.
+> Mercenaries have taken the old military post, and they're raiding our supply runs.
+> We don't have the guns to go in after them.
+> Their commander holds the contract. End it.
 
 ---
 
@@ -22,6 +24,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Colony Militia:**
-> Commander's down. No commander, no contract. Thank you.
+> Commander's down.
+> No commander, no contract.
 
 📓 *Journal:* The Ecliptic commander at the <Place> is dead. With nobody left to pay them, the rest won't stay.

@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; anywhere, never test locations.
 
 📻 **Station Security, on the radio:**
-> Containment failed and our test subjects got out. They've gone to ground nearby. We've sealed ourselves in. Nobody opens a door until they're dead.
+> Containment failed, and our test subjects got out.
+> They've gone to ground nearby. We've sealed ourselves in.
+> Nobody opens a door until they're dead.
 
 ---
 
@@ -21,6 +23,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Station Security:**
-> That's the last of them. We can open the doors. Thank you.
+> That's the last of them.
+> Opening the doors. Somebody check the coffee machine survived.
 
 📓 *Journal:* Every one of the escaped test subjects at the <Place> is dead. The station can open its doors again.

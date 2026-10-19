@@ -9,7 +9,8 @@
 **Where:** anywhere, never natural landmarks or caves.
 
 📻 **Survey Office, on the radio:**
-> Three sensors went in down there and nobody came back to read them. Send us the data and the job's paid.
+> Three sensors went in down there, and nobody came back to read them.
+> Send us the data and the job's paid.
 
 ---
 
@@ -46,6 +47,7 @@
 🧱 Object: Survey Uplink Beacon · commsmast01.nif
 
 🔊 **Survey Office:**
-> That's all three. Data's coming through. Thank you.
+> That's all three. Data's coming through.
+> Huh. The ground's been busier than we thought.
 
 📓 *Journal:* The survey team's sensors at the <Place> had been sitting unread. I collected all three sets of readings and sent them from the team's beacon.

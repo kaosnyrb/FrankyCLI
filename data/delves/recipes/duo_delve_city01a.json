@@ -90,6 +90,10 @@
     "voice": "GenericMale01",
     "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
   },
-  "broadcast": ["They hit my run and took the lot. Keep the cargo. There's a strongbox in there with my papers, and without them I can't sell a thing. I'd like that back."],
+  "broadcast": [
+    "They hit my run and took the lot. Keep the cargo.",
+    "There's a strongbox in there with my papers. Without them I can't sell a thing.",
+    "I'd like that back."
+  ],
   "_speech": "His own voice on the radio, then in person. Voice is 04a's (dgkKQcJqyy5AP0dqleUU), used once so far, chosen so this is not Isla again (four Delves already); his ear decides. No names, no places, no currency."
 }

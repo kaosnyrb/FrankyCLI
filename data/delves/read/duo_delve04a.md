@@ -32,7 +32,9 @@
 🧱 Object: Water Reclaimer · WaterFiltrationCart01.nif
 
 🔊 **Site Foreman:**
-> That's the housing, but the core's gone. Someone opened the crate in the night. We need it back, or we're drinking recycled for another week.
+> That's the housing. The core's gone.
+> Someone opened the crate in the night.
+> We need it back, or we're drinking recycled for another week.
 
 📓 *Journal:* The filter core reached the <Place> two days ago and was taken from its crate overnight. Without it the reclaimer stays offline. I need to find whoever took it.
 
@@ -56,6 +58,7 @@
 🎯 Get the Reclaimer Running
 
 🔊 **Site Foreman:**
-> Water's in the line. First clean water in a week. Thank you.
+> Water's in the line.
+> First clean water in a week. You can taste the difference. You can actually taste it.
 
 📓 *Journal:* A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.

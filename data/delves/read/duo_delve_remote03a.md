@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; a quiet, non-hostile site, never natural landmarks or caves or test locations.
 
 📻 **Outpost Lead, on the radio:**
-> Our landing beacons are sending the wrong signal and the supply ships keep flying past. We can't get a tech down here. Fix them and there's pay in it.
+> Our landing beacons are sending the wrong signal, and the supply ships keep flying past.
+> We can't get a tech down here.
+> Fix them and there's pay in it.
 
 ---
 

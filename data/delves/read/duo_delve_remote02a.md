@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; anywhere, never natural landmarks or caves or test locations.
 
 📻 **Clinic Dispatch, on the radio:**
-> Our courier was jumped and had to leave a canister of cultures behind. Bring it out and you'll be paid. They may still be watching for it.
+> Our courier was jumped and had to leave a canister of cultures behind.
+> Bring it out and you'll be paid.
+> They may still be watching for it.
 
 ---
 
@@ -21,7 +23,8 @@
 🧱 Object: Dropped Culture Canister · BioHazardCanister_01.nif
 
 🔊 **Clinic Dispatch:**
-> Its tracker just came back on. If anyone's watching for it, they know too. Be careful.
+> Its tracker just came back on.
+> If anyone's watching for it, they know too. Be careful.
 
 ---
 
@@ -40,6 +43,7 @@
 🧱 Object: Courier Pickup Beacon · beacon01.nif
 
 🔊 **Clinic Dispatch:**
-> We've got it. There's a colony waiting on those. Thank you.
+> We've got it. There's a colony waiting on those.
+> Thank you. Truly.
 
 📓 *Journal:* I got the clinic's vaccine cultures out of the <Place> past the people who jumped their courier, and left them at the courier beacon for collection.

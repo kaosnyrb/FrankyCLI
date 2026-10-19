@@ -9,7 +9,9 @@
 **Where:** anywhere, never a quiet, non-hostile site or caves.
 
 📻 **Homesteader, on the radio:**
-> There's a crew near us charging every homestead for protection from themselves. Their collector comes round once a month. We'd like him to stop.
+> There's a crew near us charging every homestead for protection from themselves.
+> Their collector comes round once a month.
+> We'd like him to stop.
 
 ---
 
@@ -22,6 +24,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Homesteader:**
-> He's really gone? Then we're keeping this month's money. And next month's. Thank you.
+> He's really gone?
+> Then we're keeping this month's money. And next month's.
 
 📓 *Journal:* The Ecliptic collector at the <Place> is dead. Nobody's coming round the homesteads next month for their cut.

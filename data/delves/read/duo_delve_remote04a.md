@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; anywhere, never natural landmarks or caves or test locations.
 
 📻 **Research Lead, on the radio:**
-> We had to leave our data behind. The terminal still has it, it just needs power. Get it running and keep it running until we've copied everything.
+> We had to leave our data behind.
+> The terminal still has it. It just needs power.
+> Get it running and keep it running until we've copied everything.
 
 ---
 
@@ -29,7 +31,8 @@
 🧱 Object: Research Terminal · MobileTerminal_01.nif
 
 🔊 **Research Lead:**
-> We've got a connection. Copying now. Keep them off it.
+> We've got a connection. Copying now.
+> Keep them off it.
 
 📓 *Journal:* The terminal is powered and the team is copying their files off-world. The uplink lit up every receiver nearby, and somebody is coming to see. I need to hold until the copy finishes.
 
@@ -40,6 +43,7 @@
 🎯 Defend the terminal
 
 🔊 **Research Lead:**
-> That's the last file. All of it. Thank you.
+> That's the last file. All of it.
+> Three years of work, and you held the door. Thank you.
 
 📓 *Journal:* I powered the research terminal at the <Place> and held it while the team copied their data off-world. They have all of it.

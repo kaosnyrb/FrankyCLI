@@ -9,7 +9,9 @@
 **Where:** a quiet, non-hostile site, never caves.
 
 📻 **Contract Office, on the radio:**
-> Contract confirmed. The material is to be destroyed on site. Do not read it, remove it or copy it.
+> Contract confirmed.
+> The material is to be destroyed on site.
+> Do not read it, remove it or copy it.
 
 ---
 
@@ -30,6 +32,7 @@
 🧱 Object: Cache of Banned Texts · AK_FootLocker01.nif
 
 🔊 **Contract Office:**
-> Destruction confirmed. Your report is filed. There is nothing further on this contract.
+> Destruction confirmed.
+> Your report is filed. There is nothing further on this contract.
 
 📓 *Journal:* I burned the cache at the <Place>, every book in it. I still don't know what was banned about them. Nobody asked me to know.

@@ -10,7 +10,9 @@
 **Then:** a second place, a quiet, non-hostile site, never caves.
 
 📻 **Homesteader, on the radio:**
-> They took everything. I don't care about most of it. There's a bag, though. If anyone's going in there, I'd like the bag back.
+> They took everything.
+> I don't care about most of it. There's a bag, though.
+> If anyone's going in there, I'd like the bag back.
 
 ---
 

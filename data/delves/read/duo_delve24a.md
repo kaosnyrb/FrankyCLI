@@ -9,7 +9,9 @@
 **Where:** anywhere, never natural landmarks or caves.
 
 📻 **New Tenant, on the radio:**
-> We bought a place and the security robot came with it. It doesn't know we bought it. Could someone please explain that to it, firmly?
+> We bought a place, and the security robot came with it.
+> It doesn't know we bought it.
+> Could someone please explain that to it? Firmly?
 
 ---
 
@@ -21,6 +23,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **New Tenant:**
-> It's down? Lovely. We've been living in the ship for a fortnight. Thank you.
+> It's down? Lovely.
+> We've been living in the ship for a fortnight. I'm going to sleep in a room that doesn't hum.
 
 📓 *Journal:* The security robot at the <Place> is scrap. It was still running its last owners' patrol route. Nobody had told it they'd gone.

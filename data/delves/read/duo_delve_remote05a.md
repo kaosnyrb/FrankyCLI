@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; LocTypeOE_ThemeInfrastructureKeyword, never test locations.
 
 📻 **Site Crew, on the radio:**
-> Raiders took our site and they're pulling the machinery apart. We got out with what we could carry. Their leader is keeping them there. Take the leader down.
+> Bit of bother. Raiders have dug in on our site, and they're stripping it for parts.
+> Their boss is the only reason they're still there.
+> Deal with the boss and the rest will scatter.
 
 ---
 
@@ -22,6 +24,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Site Crew:**
-> That's the leader down. The rest won't stay long now. Thank you.
+> Boss is down.
+> Watch them scatter. Never gets old, that.
 
 📓 *Journal:* The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.

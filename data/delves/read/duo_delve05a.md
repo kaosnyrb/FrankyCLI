@@ -32,7 +32,8 @@
 🧱 Object: Comms Relay · relaydish01.nif
 
 🔊 **Comms Tech:**
-> The dish is no good without the transmitter, and someone walked off with it. Whoever took it is trying to sell it. Get it back.
+> The dish is no good without the transmitter, and someone's walked off with it.
+> Whoever took it is trying to sell it. Get it back.
 
 📓 *Journal:* The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.
 
@@ -56,6 +57,7 @@
 🎯 Bring the Relay Online
 
 🔊 **Comms Tech:**
-> We're live. Half the crew's already queuing to call home.
+> We're live.
+> Half the crew's already queuing to call home. The other half are pretending they aren't.
 
 📓 *Journal:* A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.

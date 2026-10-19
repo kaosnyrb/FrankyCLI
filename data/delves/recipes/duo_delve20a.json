@@ -31,7 +31,10 @@
     "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and we need them watching the wrong thing. Do not smash it. Feed each scanner a false reading and leave it running. Payment on completion."
   },
   "recap": "The Ecliptic scanners at the <Place> are all still running, and all three are wrong. Whatever the mercenaries think is happening on <Planet>, it isn't.",
-  "recapSay": ["Their camp's just logged three empty valleys and a dust storm. We moved everything this morning. Nobody so much as looked up. Thank you."],
+  "recapSay": [
+    "Their camp's just logged three empty valleys and a dust storm.",
+    "We moved everything this morning. Nobody so much as looked up."
+  ],
   "beats": [
     {
       "type": "use",
@@ -66,6 +69,10 @@
     "voice": "GenericFemale01",
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
-  "broadcast": ["You took our job? Good. Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed."],
+  "broadcast": [
+    "You took our job? Good.",
+    "Remember, don't break anything.",
+    "A broken scanner gets fixed. A scanner that's wrong gets believed."
+  ],
   "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency."
 }

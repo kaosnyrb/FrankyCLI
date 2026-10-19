@@ -9,7 +9,9 @@
 **Where:** a quiet, non-hostile site, never natural landmarks or caves.
 
 📻 **Relay Post, on the radio:**
-> Relay post needs a contractor. Two cells to carry. Paid on completion. Out.
+> Relay post needs a contractor.
+> Two cells to carry. Paid on completion.
+> Out.
 
 ---
 
@@ -83,6 +85,8 @@
 🧱 Object: Relay · relaydish01.nif
 
 🔊 **Relay Post:**
-> Left bay. Good. Right bay. Good. Relay's up. Payment's sent. Next.
+> Left bay. Good.
+> Right bay. Good.
+> Relay's up. Payment's sent. Next.
 
 📓 *Journal:* A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them. She said next, and meant it.

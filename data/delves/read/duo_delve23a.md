@@ -9,7 +9,9 @@
 **Where:** a quiet, non-hostile site, never caves.
 
 📻 **Site Owner, on the radio:**
-> You took the contract? Good. The assessor won't set foot on our site while anything's living there. We'd quite like her to set foot on it.
+> You took the contract? Good.
+> The assessor won't set foot on our site while anything's living there.
+> We'd quite like her to set foot on it.
 
 ---
 
@@ -21,6 +23,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Site Owner:**
-> The assessor's on her way. She says she'll need to check the weeds as well. I've told her you don't do weeds.
+> The assessor's on her way.
+> She says she'll need to check the weeds as well. I've told her you don't do weeds.
 
 📓 *Journal:* Nothing's living at the <Place> any more except the weeds. The assessor can come and sign it off.

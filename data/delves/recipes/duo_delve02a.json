@@ -36,7 +36,10 @@
   "beats": [
     {
       "type": "pickup",
-      "say": ["They're coming back for it. Hang on to that case."],
+      "say": [
+        "They're coming back for it.",
+        "Hang on to that case."
+      ],
       "_say": "Moved here from the hold beat 2026-10-12 (Eliza): a beat's say plays when its stage is SET, and the hold's is set when the third wave dies, so the warning would have come after the danger. Beat 1's stage is where wave 1 spawns, as 09a's \"Keep an eye out\" sits on the beat before its hold. Words unchanged.",
       "at": "REMarkerMediumLocRef",
       "objective": "Recover the core sample case at the <Place>",
@@ -61,7 +64,10 @@
       "journal": "I got the crew's core samples out of the <Place> under fire and left them at their drop beacon for pickup.",
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Crew Drop Beacon",
-      "say": ["Got it. That's a whole season's work. Thank you."]
+      "say": [
+        "Got it.",
+        "That's a whole season's work in one case. I owe you a drink."
+      ]
     }
   ],
   "speaker": {
@@ -69,6 +75,10 @@
     "voice": "GenericMale01",
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
-  "broadcast": ["We had to leave our samples behind when we got run off. Bring them out and you'll be paid. Watch yourself, they didn't go far."],
+  "broadcast": [
+    "We got run off and left our samples behind.",
+    "Bring them out and you'll be paid.",
+    "Watch yourself. They didn't go far."
+  ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Chris, Charming, Down-to-Earth', NOT yet heard in game (voices.md); his ear decides."
 }

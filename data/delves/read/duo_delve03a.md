@@ -10,7 +10,9 @@
 **Then:** a second place, natural landmarks, never caves.
 
 📻 **Dispatch, on the radio:**
-> This is dispatch. A load went out from here and never got where it was going. Nobody's been out to look. Find where it stopped.
+> This is dispatch.
+> A load went out from here and never got where it was going. Nobody's been out to look.
+> Find where it stopped.
 
 ---
 
@@ -35,7 +37,8 @@
 🧱 Object: Receiving Locker · AK_FootLocker01.nif
 
 🔊 **Dispatch:**
-> That's only half of it. The rest was here, and someone's taken it. Go and get it back.
+> That's only half of it.
+> The rest was here, and someone's taken it. Go and get it back.
 
 📓 *Journal:* The other half should be here. Something has taken it.
 
@@ -48,7 +51,8 @@
 📦 Item: **Signed-Out Consignment (2 of 2)**
 
 🔊 **Dispatch:**
-> You got it back? Good. Bring it in and I'll close the docket.
+> You got it back? Good.
+> Bring it in and I'll close the docket.
 
 📓 *Journal:* It did not go far. Nothing out here does.
 

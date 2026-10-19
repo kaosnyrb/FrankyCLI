@@ -18,7 +18,10 @@
     "2026-10-14). It is the beacon players build for their own outposts, which is why it reads as somebody's pad."
   ],
   "recap": "The crew at the <Place> had supply ships flying straight past them. I got all three landing beacons broadcasting properly, so the runs can find the pad again.",
-  "recapSay": ["All three beacons are right. There's a ship turning in for the pad already. Thank you."],
+  "recapSay": [
+    "All three beacons are right.",
+    "There's a ship turning in for the pad already. Look at that."
+  ],
   "place": {
     "theme": {
       "require": [
@@ -72,7 +75,11 @@
     "voice": "GenericMale01",
     "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
   },
-  "broadcast": ["Our landing beacons are sending the wrong signal and the supply ships keep flying past. We can't get a tech down here. Fix them and there's pay in it."],
+  "broadcast": [
+    "Our landing beacons are sending the wrong signal, and the supply ships keep flying past.",
+    "We can't get a tech down here.",
+    "Fix them and there's pay in it."
+  ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Killian' (Irish, calm), NOT yet heard in game (voices.md); his ear decides.",
   "approach": {
     "to": 1,

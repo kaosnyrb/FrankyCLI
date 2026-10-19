@@ -9,7 +9,8 @@
 **Where:** a new site on another planet, requested when the mission starts; anywhere, never natural landmarks or caves or test locations.
 
 📻 **Survey Office, on the radio:**
-> Three sensors went in down there and nobody came back to read them. Send us the data and the job's paid.
+> We put three sensors in and lost the crew's ride home before anyone could read them.
+> Get the readings off them and send them up. You'll be paid.
 
 ---
 
@@ -46,6 +47,7 @@
 🧱 Object: Survey Uplink Beacon · commsmast01.nif
 
 🔊 **Survey Office:**
-> That's all three. Data's coming through. Thank you.
+> Readings received. All three.
+> That'll keep the analysts arguing for a month.
 
 📓 *Journal:* The survey team's sensors at the <Place> had been sitting unread. I collected all three sets of readings and sent them from the team's beacon.

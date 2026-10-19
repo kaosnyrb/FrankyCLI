@@ -65,7 +65,11 @@
       "journal": "A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the ring and the hamper and laid it all out where it was meant to be. I did not open the small box.",
       "model": "Meshes\\ccs\\picnicpallet01.nif",
       "name": "Picnic Spot",
-      "say": ["It's all there? Okay. Okay. I can do this. Thank you."]
+      "say": [
+        "It's all there?",
+        "Okay. Okay. I can do this.",
+        "Thank you. Sorry. Thank you."
+      ]
     }
   ],
   "speaker": {
@@ -73,6 +77,10 @@
     "voice": "GenericMale01",
     "elevenlabs": "bIHbv24MWmeRgasZH58o"
   },
-  "broadcast": ["Bit of an odd one. I've got a very important picnic tonight and the drone dropped it in the wrong place. Please don't open the small box."],
+  "broadcast": [
+    "Bit of an odd one.",
+    "I've got a very important picnic tonight, and the drone dropped it in the wrong place.",
+    "Please don't open the small box."
+  ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Will, Relaxed Optimist', NOT heard in game; a nervous man in a relaxed voice is the joke, his ear decides."
 }

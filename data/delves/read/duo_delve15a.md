@@ -10,7 +10,8 @@
 **Then:** a second place, a quiet, non-hostile site, never natural landmarks or caves.
 
 📻 **Sender, on the radio:**
-> Bit of a personal one. I need something carried to someone, and I'd rather it wasn't me. It isn't far.
+> Hello? Is this thing on?
+> I need something carried to someone, and I'd rather it wasn't me. It isn't far.
 
 ---
 

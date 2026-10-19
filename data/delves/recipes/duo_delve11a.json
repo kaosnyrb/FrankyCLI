@@ -102,6 +102,10 @@
     "voice": "GenericFemale01",
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
-  "broadcast": ["They took everything. I don't care about most of it. There's a bag, though. If anyone's going in there, I'd like the bag back."],
+  "broadcast": [
+    "They took everything.",
+    "I don't care about most of it. There's a bag, though.",
+    "If anyone's going in there, I'd like the bag back."
+  ],
   "_speech": "Her own voice on the radio, and the same voice for Petra in person (ElevenLabs 'Isla', Scottish, chill; NOT heard in game, his ear decides). No names, no places."
 }

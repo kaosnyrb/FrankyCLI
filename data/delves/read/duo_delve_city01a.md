@@ -10,7 +10,9 @@
 **Then:** a second place, anywhere.
 
 📻 **Trader, on the radio:**
-> They hit my run and took the lot. Keep the cargo. There's a strongbox in there with my papers, and without them I can't sell a thing. I'd like that back.
+> They hit my run and took the lot. Keep the cargo.
+> There's a strongbox in there with my papers. Without them I can't sell a thing.
+> I'd like that back.
 
 ---
 

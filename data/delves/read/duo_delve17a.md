@@ -9,7 +9,9 @@
 **Where:** a quiet, non-hostile site, never natural landmarks or caves.
 
 📻 **Organiser, on the radio:**
-> Hi! Hello! Small emergency, but a nice one. Our cool box fell off a hauler and it's full of lollies. Anyone nearby? There's one in it for you!
+> Hi! Hello! Small emergency, but a nice one.
+> Our cool box fell off a hauler and it's full of lollies.
+> Anyone nearby? There's one in it for you!
 
 ---
 
@@ -80,7 +82,9 @@
 🧱 Object: Lolly Friday · BeachBlanket01.nif
 
 🔊 **Organiser:**
-> You found it! Still cold, feel, it's still cold! And we've got loads of time. Here. Have a red one. The red ones are the best ones.
+> You found it! Still cold. Feel, it's still cold!
+> And we've got loads of time.
+> Here. Have a lime one. The lime ones are the best ones.
 
 📓 *Journal:* Somebody's Friday lollies fell off a hauler at the <Place>. I found the cool box and the cups and brought them back. I got first pick. It's a rule now.
 
@@ -91,6 +95,8 @@
 Starts when beat 1 is done. Beat 4 by then, or the mission fails.
 
 🔊 **Organiser, on failure:**
-> Oh! That's five minutes. They're soup now. Lolly soup! Honestly, that's still a good Friday.
+> Oh! That's five minutes.
+> They're soup now. Lolly soup!
+> Honestly, that's still a good Friday.
 
 📓 *Journal, failed:* Somebody's Friday lollies fell off a hauler at the <Place>. I didn't get the cool box back before they melted. She called it lolly soup and didn't seem to mind.

@@ -124,6 +124,9 @@
     "voice": "GenericFemale01",
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
-  "broadcast": ["I've been jumped. I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it."],
+  "broadcast": [
+    "I've been jumped.",
+    "I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it."
+  ],
   "_speech": "Her voice on the radio first, then in person. Voice is 05a's (wCizWKvnaS3LOIUwHo98), used once so far, so this is not Isla; his ear decides. No names, no places, no currency."
 }

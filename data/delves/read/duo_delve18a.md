@@ -10,7 +10,8 @@
 **Then:** a second place, anywhere, never a quiet, non-hostile site or natural landmarks.
 
 📻 **Hauler, on the radio:**
-> I've been jumped. I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it.
+> I've been jumped.
+> I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it.
 
 ---
 

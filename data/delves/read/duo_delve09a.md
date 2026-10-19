@@ -9,7 +9,9 @@
 **Where:** anywhere, never natural landmarks or caves.
 
 📻 **Relay Control, on the radio:**
-> We've lost a relay down there. The replacement transmitter is at the site. Fit it to the dish and stay with it while it aligns. It will be loud, and loud draws company.
+> We've lost a relay down there. The replacement transmitter's at the site.
+> Fit it to the dish and stay with it while it aligns.
+> It'll be loud. Loud draws company.
 
 ---
 
@@ -29,7 +31,8 @@
 🧱 Object: Relay Dish · relaydish01.nif
 
 🔊 **Relay Control:**
-> Great, that's aligning now. Keep an eye out.
+> That's aligning now.
+> Keep an eye out.
 
 📓 *Journal:* The relay dish is fitted, but it has to align before it can lock on, and the noise has drawn attention. I need to hold until it's done.
 
@@ -40,6 +43,7 @@
 🎯 Defend the relay
 
 🔊 **Relay Control:**
-> Link is online. Thanks for your help.
+> Link's up. Clean signal, first time.
+> Go home. You've earned it.
 
 📓 *Journal:* I fitted the relay at the <Place> and held off three waves of attackers while it aligned. The relay is live.

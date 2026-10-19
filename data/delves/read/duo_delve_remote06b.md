@@ -9,7 +9,9 @@
 **Where:** a new site on another planet, requested when the mission starts; caves, never test locations.
 
 📻 **Survey Crew, on the radio:**
-> We broke into a cave and something came up out of it. We got out, but our gear's still down there. Clear it out and you'll be paid.
+> We broke into a cave, and something came up out of it.
+> We got out, but our gear's still down there.
+> Clear it out and you'll be paid.
 
 ---
 
@@ -21,6 +23,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Survey Crew:**
-> That's the last of them. We can go back down. Thank you.
+> All quiet? Brilliant.
+> We're going back down for the gear. Slowly.
 
 📓 *Journal:* Everything that came up out of the cave at the <Place> is dead. The survey crew can go back for their gear.

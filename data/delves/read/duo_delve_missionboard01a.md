@@ -9,7 +9,9 @@
 **Where:** LocTypeOE_ThemeInfrastructureKeyword, never test locations.
 
 📻 **Site Crew, on the radio:**
-> Raiders took our site and they're pulling the machinery apart. We got out with what we could carry. Their leader is keeping them there. Take the leader down.
+> Raiders took our site, and they're pulling the machinery apart.
+> We got out with what we could carry.
+> Their leader's keeping them there. Take the leader down.
 
 ---
 
@@ -22,6 +24,7 @@
 💰 Loot: 25% each from duo_ArtifactList_Local
 
 🔊 **Site Crew:**
-> That's the leader down. The rest won't stay long now. Thank you.
+> That's the leader down.
+> The rest won't hang about now. Good work, mate.
 
 📓 *Journal:* The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.

@@ -9,7 +9,9 @@
 **Where:** anywhere, never a quiet, non-hostile site or natural landmarks.
 
 📻 **Haulage Office, on the radio:**
-> Every run we lose ends up in the same place. Clear it out and spoil what's in there. If they've nowhere to keep it, they stop taking it.
+> Every run we lose ends up in the same place.
+> Clear it out and spoil what's in there.
+> If they've nowhere to keep it, they stop taking it.
 
 ---
 
@@ -31,6 +33,7 @@
 🧱 Object: Pirate Store · salvagerstash01.nif
 
 🔊 **Haulage Office:**
-> Store's spoiled? Then they've nowhere to put it, and they'll go somewhere else to steal. Not our problem. Thank you.
+> Store's spoiled?
+> Then they'll go somewhere else to steal. Not our problem.
 
 📓 *Journal:* I opened the pirates' store at the <Place> to the weather and cut the seals on every crate. Whatever they come back for won't be worth carrying.

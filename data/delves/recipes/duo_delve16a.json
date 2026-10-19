@@ -121,7 +121,11 @@
       "journal": "A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them. She said next, and meant it.",
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Relay",
-      "say": ["Left bay. Good. Right bay. Good. Relay's up. Payment's sent. Next."]
+      "say": [
+        "Left bay. Good.",
+        "Right bay. Good.",
+        "Relay's up. Payment's sent. Next."
+      ]
     }
   ],
   "speaker": {
@@ -129,6 +133,10 @@
     "voice": "GenericFemale01",
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
-  "broadcast": ["Relay post needs a contractor. Two cells to carry. Paid on completion. Out."],
+  "broadcast": [
+    "Relay post needs a contractor.",
+    "Two cells to carry. Paid on completion.",
+    "Out."
+  ],
   "_speech": "Her voice on the radio, in person and at the relay. No names, no places, no flags."
 }

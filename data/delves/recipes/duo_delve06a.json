@@ -121,7 +121,11 @@
   "offer": {
     "journal": "The engraving is worn past reading, but his service record lists family at the <Place>. Word travels fast. A curator wants the medal for his war room and will pay more than the family can. It's my call.",
     "_journal": "His play 2026-10-08: \"the log doesn't read quite right, I think the family delivery one is skipped\". The log shows only the NEWEST stage's line, and the driver sets 50 (the family line) and 60 (this one) in the same instant, so 50 is never seen. So this line carries both of Jessica's sentences, verbatim, family first; her \"I should take it to them\" is dropped as the one clause the choice contradicts. ⏳ Jessica's to reword as one line if she likes.",
-    "say": ["You're the one with the Colony War medal? I keep a war room. People come to see what the war cost. The family can't pay what I can. Come see me. Your call."],
+    "say": [
+      "You're the one with the Colony War medal?",
+      "I keep a war room. People come to see what the war cost.",
+      "The family can't pay what I can. Come see me. Your call."
+    ],
     "_say": "Jessica's radio line for the curator, verbatim from office/projects/delves/radio-lines.md (written 2026-10-09, parked under his either or). Unparked 2026-10-12 on his ask that the buyer's call be radio: the offer's box is gone, so the line no longer shares a stage with two boxes; it plays after the engraving's box closes. The box text it replaces: \"Heard you turned up a Colony War medal. I keep a small war room back home. People come to see it. I'm at the <ThirdPlace> now. I'll pay more than the family can, and it goes on the wall with his record under it. - The Curator\""
   },
   "_company": "His play 2026-10-08: \"the created NPCs are alone at the POIs which looks wierd. Can we get like a few nameless npcs\", and \"can we set there outfit in the json, so we can dress them up\". ⏳ PLACEHOLDERS, his to dress: Maren in a colonist's padded vest among colonists (Civ_LIST = LvlLISTColonist); Oduya in shirt, slacks and vest among Construx workers (an infrastructure site). Outfits are any vanilla Outfit EditorID (596 in Starfield.esm); company lists are Overtime's duo_GangMembersList_Civ_* (friendly).",

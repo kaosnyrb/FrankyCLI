@@ -10,7 +10,9 @@
 **Then:** a second place, anywhere, never a quiet, non-hostile site or natural landmarks.
 
 📻 **Settler, on the radio:**
-> This is a short-range set, so if you can hear me, you're close. Our relay's dead and we can't call out. We need someone with a ship.
+> This is a short-range set, so if you can hear me, you're close.
+> Our relay's dead and we can't call out.
+> We need someone with a ship.
 
 ---
 
@@ -50,7 +52,9 @@
 📦 Item: **Transceiver Core**
 
 🔊 **Settler:**
-> Wait, is that you? You got it? Then it's the satellite with no lights on. You can't miss it. Well, you can. Please don't.
+> Wait, is that you? You got it?
+> Then it's the satellite with no lights on. You can't miss it.
+> Well, you can. Please don't.
 
 📓 *Journal:* The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.
 
@@ -66,6 +70,7 @@
 > The core seats with a click. A row of lights comes on down the satellite's spine, one at a time, and the channel opens.
 
 🔊 **Settler:**
-> There it is. We can hear the whole sky again. This is the first call I've made in nine days, and it's to say thank you.
+> There it is. We can hear the whole sky again.
+> First call I've made in nine days, and it's to say thank you.
 
 📓 *Journal:* The relay over <Planet> went dark and raiders at the <SecondPlace> had its replacement core. I got it back and fitted it in orbit. The settlers at the <Place> can call out again.

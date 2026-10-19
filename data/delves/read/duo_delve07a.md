@@ -9,7 +9,8 @@
 **Where:** a quiet, non-hostile site, never natural landmarks or caves.
 
 📻 **Crew Lead, on the radio:**
-> Three reclaimers down and nobody spare to look at them. If you can get them running, there's pay in it.
+> Three reclaimers down, and nobody spare to look at them.
+> Get them running and there's pay in it.
 
 ---
 

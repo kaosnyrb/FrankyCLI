@@ -9,7 +9,9 @@
 **Where:** a quiet, non-hostile site, never caves.
 
 📻 **Settler, on the radio:**
-> You took our job? Good. Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed.
+> You took our job? Good.
+> Remember, don't break anything.
+> A broken scanner gets fixed. A scanner that's wrong gets believed.
 
 ---
 
