@@ -27,6 +27,8 @@ namespace FrankyCLI
 
             // The talk beat's limits, docs/specs/npc_dialogue.md: a prompt is a menu line, a reply a spoken one.
             private const int TalkPromptMax = 60, TalkReplyMax = 200;
+            /// <summary>person.hellos: one is picked each walk-up; MQ101's Lin carries 3, Heller 2.</summary>
+            private const int TalkHellosMax = 4;
 
             /// <summary>The perk families vanilla tags a dialogue choice with (INFO.Perk census, 2026-10-14).</summary>
             private static readonly string[] CheckPerkFamilies = { "Background", "TRAIT_", "Skill_", "Faction" };
@@ -58,6 +60,11 @@ namespace FrankyCLI
                     if (text.Length > max) Fatal($"{at} {where} is {text.Length} characters; the limit is {max}.");
                 }
                 Spoken("greeting", b.greeting, TalkReplyMax);
+                if (b.person?.hellos is List<string> hl)
+                {
+                    if (hl.Count == 0 || hl.Count > TalkHellosMax) Fatal($"{at} person.hellos has {hl.Count} line(s); give 1 to {TalkHellosMax}, or leave it out.");
+                    for (int h = 0; h < hl.Count; h++) Spoken($"person.hellos[{h}]", hl[h], TalkReplyMax);
+                }
                 if (b.exchanges == null || b.exchanges.Count == 0) Fatal($"{at} has no exchanges: there is nothing to ask, and exchanges[0] is what ends the talk.");
                 else
                     for (int x = 0; x < b.exchanges.Count; x++)
@@ -234,6 +241,64 @@ namespace FrankyCLI
                                       + (ex.perk != null ? $"  [{ex.perk}]" : ""));
                 }
                 bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));   // the greeting's and the completion's; a side question has one fewer
+
+                // What he says as the player WALKS UP (person.hellos, Jessica's; his 2026-10-19). Vanilla's shape, copied off
+                // MQ101 (Lin, Heller): ONE Hello topic per quest (Misc / Hello, topic priority 50), a group INFO per person
+                // (flags 256) carrying the gate, GetIsID(him), and the spoken lines under it (flags 1024, DialogGroup = the
+                // group), one picked per walk-up. Many lines share one topic here, so each line's WEMFile is its OWN id
+                // (NPCDialogueNoun's scheme; manual 39: either works if the file is named the same), never the topic's.
+                // ⚠ Unproven at his glass: built on vanilla's numbers, not on a play.
+                if (tb.person!.hellos is List<string> hellos)
+                {
+                    string htag = $"{r.id}_hellos";
+                    var ht = clone.DialogTopics.FirstOrDefault(d => d.EditorID == htag);
+                    if (ht == null)
+                    {
+                        ht = new DialogTopic(myMod)
+                        {
+                            EditorID = htag,
+                            Category = DialogTopic.CategoryEnum.Misc,
+                            Subtype = DialogTopic.SubtypeEnum.Hello,
+                            SubtypeName = DialogTopic.SubtypeNameEnum.Hello,
+                            Priority = 50,
+                        };
+                        ht.Quest.SetTo(clone.FormKey);
+                        ht.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>();
+                        clone.DialogTopics.Add(ht);
+                    }
+                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 256 } };
+                    grp.Conditions.Add(IsHim());
+                    var lines = new List<DialogResponses>();
+                    for (int h = 0; h < hellos.Count; h++)
+                    {
+                        var hi = new DialogResponses(myMod)
+                        {
+                            EditorID = $"{tag}_hello{h + 1}",
+                            Flags = new DialogResponseFlags { Flags = 1024 },
+                            SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
+                        };
+                        hi.DialogGroup.SetTo(grp.FormKey);
+                        var hr = new DialogResponse
+                        {
+                            ResponseText = hellos[h],
+                            WEMFile = hi.FormKey.ID,
+                            TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(hellos[h]))[..4],
+                            EmotionOut = 7.466667f,
+                        };
+                        hr.Emotion.SetTo(FormKey.None);
+                        hi.Responses.Add(hr);
+                        lines.Add(hi);
+                        bm.TalkLines.Add((hi.FormKey.ID, hellos[h], vt, vid, female));
+                    }
+                    // Vanilla lists the spoken lines before their group (MQ101: 00563E.. then 00713D).
+                    foreach (var hi in lines.Append(grp))
+                    {
+                        ht.Responses.Add(hi);
+                        ht.TopicInfoList!.Add(hi.ToLink<IDialogResponsesGetter>());
+                    }
+                    bm.Hellos.Add((b, npc, hellos.Count));
+                    Console.WriteLine($"  +hello   : {grp.EditorID}, {hellos.Count} walk-up line(s) in his voice, gated GetIsID({npc})");
+                }
             }
         }
     }

@@ -313,6 +313,13 @@ namespace FrankyCLI
             public string? voice { get; set; }
             /// <summary>talk, REQUIRED there: the ElevenLabs voice id his lines are generated in (docs/quests/voices.md).</summary>
             public string? elevenlabs { get; set; }
+            /// <summary>
+            /// talk, OPTIONAL: what he says as the player WALKS UP, before any conversation (his 2026-10-19: "lines the npc say
+            /// before a conversation when the player walks up", and Jessica writes them). One is picked each time, voiced in
+            /// his own voice, built as vanilla's Hello shape (MQ101's Lin: a group gated on GetIsID, the lines under it).
+            /// Absent, he says nothing of his own, and vanilla's ambient greetings no longer match him either (see Factions).
+            /// </summary>
+            public List<string>? hellos { get; set; }
         }
         /// <summary>talk: one question the player can ask and the person's answer. Prompt is silent menu text, reply is voiced.</summary>
         private sealed class Exchange

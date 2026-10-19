@@ -519,10 +519,20 @@ namespace FrankyCLI
                         string? one = Environment.GetEnvironmentVariable("HELLO_QUEST");
                         if (one != null)
                             foreach (var (q, t) in hello.Where(h => string.Equals(h.q.EditorID, one, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                // The topic's own shape, every scalar set on it, so a builder can copy it rather than guess.
+                                var tf = t.GetType().GetProperties().Where(p => p.GetIndexParameters().Length == 0
+                                        && (p.PropertyType.IsPrimitive || p.PropertyType.IsEnum || p.PropertyType == typeof(string)
+                                            || Nullable.GetUnderlyingType(p.PropertyType) != null))
+                                    .Select(p => { object? v; try { v = p.GetValue(t); } catch { v = "?"; } return $"{p.Name}={v}"; });
+                                Console.WriteLine($"TOPIC\t{q.EditorID}\t{t.FormKey}\t{string.Join(" ", tf)}");
+                                foreach (var resp in t.Responses)
+                                    Console.WriteLine($"INFOFLAGS\t{resp.FormKey}\t{resp.Flags?.Flags}\tgroup {resp.DialogGroup.FormKey}\tspeaker {resp.Speaker.FormKey}\tprompt '{resp.Prompt}'");
                                 foreach (var resp in t.Responses)
                                     Console.WriteLine($"LINE\t{q.EditorID}\t{resp.FormKey}\t{resp.Responses.FirstOrDefault()?.ResponseText}\t"
                                         + string.Join(" & ", resp.Conditions.Select(c => c.Data.GetType().Name.StartsWith("GetIsVoiceType")
                                               ? $"GetIsVoiceType({VoiceOf(c)}) {((IConditionFloatGetter)c).CompareOperator} {((IConditionFloatGetter)c).ComparisonValue}" : DescribeCondition(c))));
+                            }
                         foreach (var kv in ct.OrderByDescending(kv => kv.Value)) Console.WriteLine($"COND\t{mod.ModKey}\t{kv.Value}\t{kv.Key}");
                         foreach (var kv in vt.OrderByDescending(kv => kv.Value).Take(40)) Console.WriteLine($"VOICE\t{mod.ModKey}\t{kv.Value}\t{kv.Key}");
                         found += hello.Count;

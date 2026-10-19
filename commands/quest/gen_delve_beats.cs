@@ -344,6 +344,8 @@ namespace FrankyCLI
                         else if (Tokens(pp.name).Any()) Fatal($"beat {b + 1} person name carries a <Token>; an NPC name is not an alias context.");
                         if (pp.company != null && (pp.company.min < 0 || pp.company.max < pp.company.min))
                             Fatal($"beat {b + 1} person.company needs 0 <= min <= max; it has {pp.company.min}-{pp.company.max}.");
+                        if (pp.hellos != null)
+                            Fatal($"beat {b + 1} person.hellos is a talk person's: an ending's person has no voice of his own to say them in, so they would be silently ignored.");
                     }
                     else Warn($"beat {b + 1} is an ending with no person, so nobody stands there; a box that talks about a person talks about nobody.");
                 }
@@ -511,6 +513,8 @@ namespace FrankyCLI
         private const float ApproachDistance = 250f;
         /// <summary>The stage that stops a Delve ending on a talk, set when the person unloads (vanilla's shutdown number).</summary>
         private const int LingerStage = 1000;
+        /// <summary>A talk Delve's quest priority: above RQ_Dialogue (45), below the story quests (70 to 82). Measured 2026-10-19.</summary>
+        private const byte TalkQuestPriority = 50;
         /// <summary>How far round its object a nest scatters, in metres. His infestation missions use 40 round a
         /// creature; a stash is a smaller thing to guard, so the nest sits closer.</summary>
         private const float NestRadius = 20f;
@@ -558,6 +562,7 @@ namespace FrankyCLI
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
             public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
+            public List<(int beat, FormKey npc, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
@@ -941,6 +946,17 @@ namespace FrankyCLI
             // --- 3. stages: one per beat, one per group's done, cloned from a working plain stage ---------
             internal int Stages()
             {
+                // A Delve whose person talks speaks ABOVE the ambient greeting pool (his 2026-10-19, lever B). The engine
+                // takes a line from the highest-priority quest that has one: ours sat at 10 (slate) and 15 (board), under
+                // OE_Dialogue 30 and RQ_Dialogue 45, so a vanilla walk-up line beat his own. Vanilla's story quests, whose
+                // named people greet in their own lines, sit at 70 to 82; this goes between the two. Every line it raises
+                // is gated on our own person (GetIsID) or our own quest's stages, so it outranks nobody else's.
+                if (r.beats.Any(x => x.type == "talk"))
+                {
+                    int was = clone.Data!.Priority;
+                    clone.Data.Priority = TalkQuestPriority;
+                    Console.WriteLine($"  priority : {was} -> {TalkQuestPriority} (a person talks; above the ambient greeting pool, below the story quests)");
+                }
                 // An ending's person is placed on its own stage, numbered after the approach's.
                 personStage = new Dictionary<int, int>();
                 foreach (var b in Enumerable.Range(0, r.beats.Count).Where(b => r.beats[b].person != null && r.beats[b].type != "talk"))
@@ -1309,6 +1325,12 @@ namespace FrankyCLI
                     npc.Voice.SetTo(pr.voice ?? pr.tmpl.Voice.FormKey);
                     npc.Aggression = Npc.AggressionType.Unaggressive;
                     npc.Confidence = Npc.ConfidenceType.Average;
+                    // ⛔ Not a New Atlantis MAST worker (his 2026-10-19, off "default ones with different voice actors and its
+                    // jarring"). The clone copied the template's factions (NewAtlantisFaction, NewAtlantisMASTWorkerFaction,
+                    // CrimeFactionUC), and vanilla's ambient greetings gate on faction, so a vanilla actor greeted him on every
+                    // planet, and harming him was a UC crime anywhere. He belongs to no faction and no crime faction.
+                    npc.Factions.Clear();
+                    npc.CrimeFaction.Clear();
                     if (pr.outfit is FormKey ofk) npc.DefaultOutfit.SetTo(ofk);
                     myMod.Npcs.Add(npc);
                     npcOf[b] = npc.FormKey;
@@ -2191,6 +2213,35 @@ namespace FrankyCLI
             }
             // A talk beat, read back: the alias that creates him, every scene gated on him and on the step, the
             // greeting's shape, and the one reply that ends the talk by setting the beat's stage.
+            if (bm.Talks.Count > 0)
+                fail += Check("a person talks, so the quest sits above the ambient greeting pool", q.Data?.Priority.ToString() ?? "none", TalkQuestPriority.ToString());
+            // Every person the build cloned: no faction and no crime faction (not a New Atlantis MAST worker).
+            foreach (var (pb, (pk, pname)) in bm.People)
+            {
+                var pn = m.Npcs.FirstOrDefault(n => n.FormKey == pk);
+                fail += Check($"beat {pb + 1}'s person {pname} carries no faction and no crime faction",
+                              pn == null ? "missing" : $"{pn.Factions.Count} faction(s), crime {(pn.CrimeFaction.IsNull ? "none" : pn.CrimeFaction.FormKey.ToString())}",
+                              "0 faction(s), crime none");
+            }
+            // Walk-up lines: vanilla's Hello shape, read back.
+            if (bm.Hellos.Count > 0)
+            {
+                var ht = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_hellos");
+                fail += Check("one Hello topic (Misc / Hello, priority 50)",
+                              ht == null ? "missing" : $"{ht.Category} / {ht.Subtype} / {ht.Priority}", "Misc / Hello / 50");
+                foreach (var (hb, hnpc, hn) in bm.Hellos)
+                {
+                    var grp = ht?.Responses.FirstOrDefault(x => x.EditorID == $"{r.id}_talk{hb + 1}_hellos");
+                    var gid = grp?.Conditions.FirstOrDefault()?.Data as IGetIsIDConditionDataGetter;
+                    fail += Check($"beat {hb + 1}'s walk-up group is gated on him alone",
+                                  grp == null ? "missing" : $"flags {grp.Flags?.Flags}, {grp.Conditions.Count} condition(s), GetIsID {gid?.FirstParameter.Link.FormKey}",
+                                  $"flags 256, 1 condition(s), GetIsID {hnpc}");
+                    var kids = ht?.Responses.Where(x => grp != null && x.DialogGroup.FormKey == grp.FormKey).ToList() ?? new();
+                    fail += Check($"beat {hb + 1}'s walk-up lines sit under the group, each named for its own wem",
+                                  $"{kids.Count} line(s), flags {string.Join("/", kids.Select(k => k.Flags?.Flags).Distinct())}, own-id wems {kids.All(k => k.Responses.FirstOrDefault()?.WEMFile == k.FormKey.ID)}",
+                                  $"{hn} line(s), flags 1024, own-id wems True");
+                }
+            }
             foreach (var (tbeat, tstage, talias, tnpc, nex, tconds) in bm.Talks)
             {
                 string who = $"beat {tbeat + 1} (talk)";

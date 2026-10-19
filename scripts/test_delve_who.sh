@@ -15,7 +15,7 @@ import json, sys, copy, os
 T = sys.argv[1]
 d = json.load(open('data/delves/recipes/duo_delve06b.json', encoding='utf-8'))
 def case(name, f, src='duo_delve06b'):
-    x = copy.deepcopy(d if src == 'duo_delve06b' else json.load(open(f'data/delves/recipes/{src}.json', encoding='utf-8'))); f(x)
+    x = copy.deepcopy(d if src == 'duo_delve06b' else json.load(open(f'data/delves/recipes/{src}.json', encoding='utf-8-sig'))); f(x)
     os.makedirs(f"{T}/{name}", exist_ok=True)
     json.dump(x, open(f"{T}/{name}/{src}.json", 'w', encoding='utf-8'), indent=1)
 case('clean',  lambda x: None)
@@ -35,6 +35,14 @@ case('offerboth', lambda x: x['offer'].__setitem__('message', {'title': 'Incomin
 # missionboard02a's beat 2 is the pickup at the main place.
 mb = 'duo_delve_missionboard02a'
 case('boardwho',  lambda x: x['place'].__setitem__('who', {'kind': 'spacers', 'list': 'duo_GangMembersList_Spacer', 'min': 3, 'max': 5, 'beat': 2}), mb)
+# person.hellos (his 2026-10-19, Jessica writes them): a talk person's walk-up lines, 1 to 4, spoken (no token), and
+# refused on an ending's person, who has no voice of his own. 15a's beat 3 is Mae's talk; 06b's choose endings have people.
+def talk_person(x): return next(b for b in reversed(x['beats']) if b.get('type') == 'talk')['person']
+def ending_person(x): return next(b for b in x['beats'] if b.get('choose') and b.get('person'))['person']
+case('hellosok',   lambda x: talk_person(x).__setitem__('hellos', ['You must be the courier.', 'Is that for me?']), 'duo_delve15a')
+case('hellosmany', lambda x: talk_person(x).__setitem__('hellos', ['a.', 'b.', 'c.', 'd.', 'e.']), 'duo_delve15a')
+case('hellostok',  lambda x: talk_person(x).__setitem__('hellos', ['Welcome to <Planet>.']), 'duo_delve15a')
+case('hellosend',  lambda x: ending_person(x).__setitem__('hellos', ['Hello.']))
 # place.*.planet is GONE (his 2026-10-19 ruling, after two planet guards crashed the game): any planet key is unknown.
 case('planetsecond', lambda x: x['place']['second'].__setitem__('planet', 'same'), mb)
 case('planetmain',   lambda x: x['place'].__setitem__('planet', 'same'), mb)
@@ -58,6 +66,10 @@ run REFUSE anchor "already hooks that object's distance"
 run REFUSE count  'needs 1 <= min <= max'
 run REFUSE offerboth 'offer has both a message and a say'
 run PASS   boardwho    "place.who: spacers, 3-5 placed around beat 2's object"
+run PASS   hellosok   'LINT PASSES'
+run REFUSE hellosmany 'person.hellos has 5 line(s)'
+run REFUSE hellostok  'person.hellos[0] carries a <Token>'
+run REFUSE hellosend  "person.hellos is a talk person's"
 run REFUSE planetsecond 'place.second.planet'
 run REFUSE planetmain   'place.planet'
 echo "failing: $fails"
