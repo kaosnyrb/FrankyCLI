@@ -256,7 +256,7 @@ namespace FrankyCLI
             /// thing heard (Jessica, remote03a); a single-beat ending's own say already is. His play of remote03a, 2026-10-14:
             /// "first radio message played but nothing at the end?" A new optional field, so schema stays 1.
             /// </summary>
-            public string? recapSay { get; set; }
+            public List<string>? recapSay { get; set; }
             /// <summary>
             /// beats, OPTIONAL: what happens the FIRST time the player comes within range of one beat's object
             /// (the delivery point). A stock DefaultAliasOnDistanceLessThan on the player sets the template's
@@ -271,7 +271,7 @@ namespace FrankyCLI
             /// </summary>
             public Speaker? speaker { get; set; }
             /// <summary>beats, OPTIONAL: a line the speaker says when the quest starts (stage 0). Plain words, no tokens.</summary>
-            public string? broadcast { get; set; }
+            public List<string>? broadcast { get; set; }
             /// <summary>
             /// OPTIONAL, either kind: the EditorID of a Story Manager quest node in the template's own mod that deals this
             /// Delve, i.e. a slate pool (duo_MS_ArtifactMap_LocalNode and its siblings). The build appends the quest to
@@ -319,13 +319,13 @@ namespace FrankyCLI
             /// his own voice, built as vanilla's Hello shape (MQ101's Lin: a group gated on GetIsID, the lines under it).
             /// Absent, he says nothing of his own, and vanilla's ambient greetings no longer match him either (see Factions).
             /// </summary>
-            public List<string>? hellos { get; set; }
+            public List<List<string>>? hellos { get; set; }
         }
         /// <summary>talk: one question the player can ask and the person's answer. Prompt is silent menu text, reply is voiced.</summary>
         private sealed class Exchange
         {
             public string? prompt { get; set; }
-            public string? reply { get; set; }
+            public List<string>? reply { get; set; }
             /// <summary>talk, optional: a vanilla perk's EditorID (BackgroundDiplomat, Skill_Medicine, TRAIT_Empath,
             /// FactionCrimsonFleetPerk...). Set on the PLAYER's line as vanilla's own INFO.Perk field, which is how the game
             /// tags the choice [Diplomat] and offers it only to a player with the perk (manual hub Inbox, 2026-10-14: 1,027
@@ -340,7 +340,7 @@ namespace FrankyCLI
         /// opens the choice AFTER the find's box is closed (Message.Show waits), so the two never overlap. His ask,
         /// 2026-10-12 on 06b: "the call from the guy to buy is a textbox and not a radio messsage".
         /// </summary>
-        private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } public string? say { get; set; } }
+        private sealed class Offer { public string? journal { get; set; } public BeatMessage? message { get; set; } public List<string>? say { get; set; } }
         private sealed class Place
         {
             public Theme theme { get; set; } = new();
@@ -479,9 +479,9 @@ namespace FrankyCLI
             /// </summary>
             public List<string>? style { get; set; }
             /// <summary>beats, OPTIONAL: a line the recipe's speaker says over the radio when this beat's stage is set. Plain words, no tokens.</summary>
-            public string? say { get; set; }
+            public List<string>? say { get; set; }
             /// <summary>talk, REQUIRED there: what the person says when the player first speaks to him. Voiced, no tokens.</summary>
-            public string? greeting { get; set; }
+            public List<string>? greeting { get; set; }
             /// <summary>
             /// talk, REQUIRED there: the questions, in menu order. exchanges[0] ENDS the conversation and sets the beat's
             /// stage when its reply finishes; the rest can be asked in any order and loop back to the menu
@@ -878,6 +878,20 @@ namespace FrankyCLI
 
             Recipe? recipe;
             string text = File.ReadAllText(file);
+            // The schema first: a schema-1 recipe's spoken STRINGS cannot become schema 2's lists, and the parser would call
+            // that "not valid JSON", which is true and tells the author nothing.
+            try
+            {
+                using var sd = JsonDocument.Parse(text, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+                int sv = sd.RootElement.TryGetProperty("schema", out var se) && se.TryGetInt32(out int si) ? si : 0;
+                if (sv != 2)
+                {
+                    Console.WriteLine($"REFUSED: {Path.GetFileName(file)} is schema {sv}; this tool speaks 2 (since 2026-10-19 every spoken field, "
+                                      + "broadcast, say, offer.say, recapSay, greeting, reply and each of person.hellos, is a LIST of responses).");
+                    return null;
+                }
+            }
+            catch (JsonException ex) { Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " is not valid JSON -- " + ex.Message); return null; }
             try { recipe = JsonSerializer.Deserialize<Recipe>(text, JsonOpts); }
             catch (JsonException ex) { Console.WriteLine("REFUSED: " + Path.GetFileName(file) + " is not valid JSON -- " + ex.Message); return null; }
             if (recipe == null) { Console.WriteLine("REFUSED: " + file + " parsed to nothing."); return null; }
@@ -1098,7 +1112,8 @@ namespace FrankyCLI
             Console.WriteLine("=== LINT ===");
 
             // --- shape ---------------------------------------------------------------
-            if (r.schema != 1) Fatal($"schema is {r.schema}, this tool speaks 1");
+            // Schema 2 (2026-10-19, his "Need to add multiple line support"): refused at read, before the parse (LoadRecipe).
+            if (r.schema != 2) Fatal($"schema is {r.schema}, this tool speaks 2");
             if (string.IsNullOrWhiteSpace(r.id)) Fatal("no id");
             int maxBeats = t.maxBeats > 0 ? t.maxBeats : t.beats;
             if (r.beats.Count < t.beats)
@@ -1551,8 +1566,8 @@ namespace FrankyCLI
             if (r.offer?.journal != null) yield return ("offer journal", r.offer.journal);
             if (r.offer?.message?.title != null) yield return ("offer message title", r.offer.message.title);
             if (r.offer?.message?.text != null) yield return ("offer message text", r.offer.message.text);
-            if (r.offer?.say != null) yield return ("offer say", r.offer.say);
-            if (r.recapSay != null) yield return ("recapSay", r.recapSay);
+            if (r.offer?.say != null) foreach (var s in r.offer.say) yield return ("offer say", s);
+            if (r.recapSay != null) foreach (var s in r.recapSay) yield return ("recapSay", s);
         }
 
         private static IEnumerable<string> Tokens(string s)

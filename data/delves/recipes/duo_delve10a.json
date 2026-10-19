@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve10a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -48,7 +48,7 @@
       "journal": "The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.",
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Abandoned Camp Beacon",
-      "say": "To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it."
+      "say": ["To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it."]
     },
     {
       "type": "pickup",
@@ -72,7 +72,7 @@
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Dig Site Stores",
       "reward": "med",
-      "say":"That's ours. We'd given up on it. Thank you."
+      "say":["That's ours. We'd given up on it. Thank you."]
     }
   ],
   "speaker": {

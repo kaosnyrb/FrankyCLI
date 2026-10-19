@@ -11,7 +11,7 @@
 
 ---
 
-## 1. PICKUP · out at the edge of the site, at the second place
+## 1. PICKUP · REMarkerMediumLocRef, at the second place
 
 🎯 Recover the medal from <SecondPlace>
 

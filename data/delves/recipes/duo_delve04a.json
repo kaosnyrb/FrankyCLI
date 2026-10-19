@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve04a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -65,7 +65,7 @@
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Water Reclaimer",
       "_name": "His ask, 2026-09-24: \"change the delivery point to like a machine? it's the water plant thing\". The base activator is BossContainer_Science01 named 'Delivery Location'. WaterFiltrationCart01 is Eliza's placeholder pick (alternative: the LargeWaterStorage tanks); 'Water Reclaimer' is Jessica's own noun for the job.",
-      "say": "That's the housing, but the core's gone. Someone opened the crate in the night. We need it back, or we're drinking recycled for another week."
+      "say": ["That's the housing, but the core's gone. Someone opened the crate in the night. We need it back, or we're drinking recycled for another week."]
     },
     {
       "type": "recover",
@@ -85,7 +85,7 @@
       "at": "RECenterLocRef",
       "objective": "Get the Reclaimer Running",
       "journal": "A water reclaimer bound for the <Place> was shipped in two crates, and neither reached it whole. I found the lost housing, recovered the stolen filter core and got the reclaimer running.",
-      "say": "Water's in the line. First clean water in a week. Thank you."
+      "say": ["Water's in the line. First clean water in a week. Thank you."]
     }
   ],
   "_messages": "Texts are Jessica's, verbatim, 2026-09-24 pm. TITLES ARE ELIZA'S PLACEHOLDERS, taken from the opening words of each text: hers to rule on. Each box is a MESG cloned from duo_alocal01_msg03 with OwnerQuest set to this quest, so <Place> resolves.",

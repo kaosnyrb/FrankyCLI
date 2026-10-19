@@ -39,10 +39,10 @@ case('boardwho',  lambda x: x['place'].__setitem__('who', {'kind': 'spacers', 'l
 # refused on an ending's person, who has no voice of his own. 15a's beat 3 is Mae's talk; 06b's choose endings have people.
 def talk_person(x): return next(b for b in reversed(x['beats']) if b.get('type') == 'talk')['person']
 def ending_person(x): return next(b for b in x['beats'] if b.get('choose') and b.get('person'))['person']
-case('hellosok',   lambda x: talk_person(x).__setitem__('hellos', ['You must be the courier.', 'Is that for me?']), 'duo_delve15a')
-case('hellosmany', lambda x: talk_person(x).__setitem__('hellos', ['a.', 'b.', 'c.', 'd.', 'e.']), 'duo_delve15a')
-case('hellostok',  lambda x: talk_person(x).__setitem__('hellos', ['Welcome to <Planet>.']), 'duo_delve15a')
-case('hellosend',  lambda x: ending_person(x).__setitem__('hellos', ['Hello.']))
+case('hellosok',   lambda x: talk_person(x).__setitem__('hellos', [['You must be the courier.'], ['Is that for me?', 'Owen said you would come.']]), 'duo_delve15a')
+case('hellosmany', lambda x: talk_person(x).__setitem__('hellos', [['a.'], ['b.'], ['c.'], ['d.'], ['e.']]), 'duo_delve15a')
+case('hellostok',  lambda x: talk_person(x).__setitem__('hellos', [['Welcome to <Planet>.']]), 'duo_delve15a')
+case('hellosend',  lambda x: ending_person(x).__setitem__('hellos', [['Hello.']]))
 # place.*.planet is GONE (his 2026-10-19 ruling, after two planet guards crashed the game): any planet key is unknown.
 case('planetsecond', lambda x: x['place']['second'].__setitem__('planet', 'same'), mb)
 case('planetmain',   lambda x: x['place'].__setitem__('planet', 'same'), mb)

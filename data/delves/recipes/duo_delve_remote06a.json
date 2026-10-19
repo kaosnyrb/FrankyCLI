@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_remote06a",
   "template": "beats",
   "_note": "PROOF RECIPE for the clear beat (spike office/spikes/2026-10-14-defeat-and-clear-beats.md, graduated on his play), Eliza 2026-10-14 on his scope; gameplay of duo_artifact_remote_planet_qst02a. WORDS ARE JESSICA'S since 2026-10-14 11:0x, on his 'yeah rewrite'. The <Place> can be any site (no theme), so it is where the subjects went to ground, never the station itself. Nobody is placed there, so the speaker is station security, sealed in elsewhere. The opening line does not say how the job arrived (a slate off a body, or his mission terminal).",
@@ -23,7 +23,7 @@
     "voice": "GenericFemale01",
     "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
   },
-  "broadcast": "Containment failed and our test subjects got out. They've gone to ground nearby. We've sealed ourselves in. Nobody opens a door until they're dead.",
+  "broadcast": ["Containment failed and our test subjects got out. They've gone to ground nearby. We've sealed ourselves in. Nobody opens a door until they're dead."],
   "beats": [
     {
       "type": "clear",
@@ -40,7 +40,7 @@
       },
       "objective": "Put down the test subjects at the <Place>",
       "journal": "Every one of the escaped test subjects at the <Place> is dead. The station can open its doors again.",
-      "say": "That's the last of them. We can open the doors. Thank you."
+      "say": ["That's the last of them. We can open the doors. Thank you."]
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Matilda, Knowledgable, Professional', NOT yet heard in game (voices.md); his ear decides. Sarah moved off this speaker because she is remote02a's Clinic Dispatch."

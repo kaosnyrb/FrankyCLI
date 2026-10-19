@@ -55,6 +55,11 @@ def render(recipe, notes):
     out = []
     say = out.append
     prose = recipe.get("prose", {})
+
+    def quote(responses):
+        # Schema 2: a spoken field is a list of responses said back to back, one quoted line each.
+        for r in responses:
+            say(f"> {r}")
     say(f"# {prose.get('name', recipe['id'])}")
     say("")
     say(f"*{recipe['id']} · by {recipe.get('author', '?')}*")
@@ -78,7 +83,7 @@ def render(recipe, notes):
     if recipe.get("broadcast"):
         who = speaker.get("name", "the radio")
         say(f"📻 **{who}, on the radio:**")
-        say(f"> {recipe['broadcast']}")
+        quote(recipe['broadcast'])
         say("")
 
     for n, beat in enumerate(recipe.get("beats", []), 1):
@@ -121,12 +126,12 @@ def render(recipe, notes):
             say(f"🗣️ **{person.get('name', 'someone')}**")
             say("")
             if beat.get("greeting"):
-                say(f"> {beat['greeting']}")
+                quote(beat['greeting'])
                 say("")
             for i, ex in enumerate(beat.get("exchanges", [])):
                 tag = " *(ends the talk)*" if i == 0 else ""
                 say(f"**▸ {ex.get('prompt', '')}**{tag}")
-                say(f"> {ex.get('reply', '')}")
+                quote(ex.get('reply', []))
                 say("")
 
         slate = beat.get("slate")
@@ -144,7 +149,7 @@ def render(recipe, notes):
         if beat.get("say"):
             who = speaker.get("name", "voice")
             say(f"🔊 **{who}:**")
-            say(f"> {beat['say']}")
+            quote(beat['say'])
             say("")
         if beat.get("journal"):
             say(f"📓 *Journal:* {beat['journal']}")
@@ -163,7 +168,7 @@ def render(recipe, notes):
         fail = deadline.get("fail", {})
         if fail.get("say"):
             say(f"🔊 **{speaker.get('name', 'voice')}, on failure:**")
-            say(f"> {fail['say']}")
+            quote(fail['say'])
             say("")
         if fail.get("journal"):
             say(f"📓 *Journal, failed:* {fail['journal']}")
@@ -186,7 +191,7 @@ def load(name):
     path = Path(name)
     if not path.exists():
         path = RECIPES / (name if name.endswith(".json") else name + ".json")
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8-sig"))   # some recipes are saved with a BOM (19a-25a)
 
 
 def main():
@@ -199,7 +204,7 @@ def main():
     if not args.all and not args.recipe:
         ap.error("give a recipe id, or --all")
 
-    recipes = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(RECIPES.glob("*.json"))] if args.all else [load(args.recipe)]
+    recipes = [load(p) for p in sorted(RECIPES.glob("*.json"))] if args.all else [load(args.recipe)]
     sys.stdout.reconfigure(encoding="utf-8")
     if args.write:
         OUT.mkdir(parents=True, exist_ok=True)

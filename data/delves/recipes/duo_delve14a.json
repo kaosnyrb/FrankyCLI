@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve14a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -62,23 +62,23 @@
         "voice": "GenericMale01",
         "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
       },
-      "greeting": "You're from the survey lot? Good. I've had their crate here for days and I've been told not to open it.",
+      "greeting": ["You're from the survey lot? Good. I've had their crate here for days and I've been told not to open it."],
       "exchanges": [
         {
           "prompt": "I'm here for the survey crate.",
-          "reply": "Right. Your crew left in a hurry and took the wrong crate. Theirs had my lunch in it. Yours is still here. I've marked it for you."
+          "reply": ["Right. Your crew left in a hurry and took the wrong crate. Theirs had my lunch in it. Yours is still here. I've marked it for you."]
         },
         {
           "prompt": "How long have you been out here?",
-          "reply": "Eleven years, on and off. Most weeks nobody comes out at all. You're the third this week."
+          "reply": ["Eleven years, on and off. Most weeks nobody comes out at all. You're the third this week."]
         },
         {
           "prompt": "Why did the crew leave?",
-          "reply": "A recall came in from their office and they were packed in an hour. Nothing bad. They were nice enough. Loud, but nice."
+          "reply": ["A recall came in from their office and they were packed in an hour. Nothing bad. They were nice enough. Loud, but nice."]
         },
         {
           "prompt": "Did you look inside?",
-          "reply": "No. It says sealed, so it's sealed. I did shake it once. It rattles like rocks, which I suppose it is."
+          "reply": ["No. It says sealed, so it's sealed. I did shake it once. It rattles like rocks, which I suppose it is."]
         }
       ],
       "_talk": "PROPOSED fields. Exchange 0 ends the conversation and sets the pickup's stage. Voiced lines: no names, no places."

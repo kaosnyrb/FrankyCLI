@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve11a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -64,23 +64,23 @@
         "voice": "GenericFemale01",
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
       },
-      "greeting": "You've got that look. Did you actually go in there?",
+      "greeting": ["You've got that look. Did you actually go in there?"],
       "exchanges": [
         {
           "prompt": "I found your things.",
-          "reply": "That's my bag. They took my credits as well, and I don't care. You can't buy back what's in here. Thank you."
+          "reply": ["That's my bag. They took my credits as well, and I don't care. You can't buy back what's in here. Thank you."]
         },
         {
           "prompt": "What else did they take?",
-          "reply": "Anything that wasn't bolted down. I only asked for the bag. The rest was just stuff, and stuff comes back."
+          "reply": ["Anything that wasn't bolted down. I only asked for the bag. The rest was just stuff, and stuff comes back."]
         },
         {
           "prompt": "Why not go in yourself?",
-          "reply": "I grow things for a living. I don't go into places like that. Everyone tells me that's sensible, and I'm starting to believe them."
+          "reply": ["I grow things for a living. I don't go into places like that. Everyone tells me that's sensible, and I'm starting to believe them."]
         },
         {
           "prompt": "What's in the bag?",
-          "reply": "Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."
+          "reply": ["Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."]
         }
       ],
       "_talk": "Exchange 0 is the hand-back: it ends the conversation, takes the Homesteader's Bag and sets stage 100, which pays 'reward'. Voiced lines: no names, no places (radio rules). The same voice as the radio speaker.",
@@ -92,6 +92,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
-  "broadcast": "They took everything. I don't care about most of it. There's a bag, though. If anyone's going in there, I'd like the bag back.",
+  "broadcast": ["They took everything. I don't care about most of it. There's a bag, though. If anyone's going in there, I'd like the bag back."],
   "_speech": "Her own voice on the radio, and the same voice for Petra in person (ElevenLabs 'Isla', Scottish, chill; NOT heard in game, his ear decides). No names, no places."
 }

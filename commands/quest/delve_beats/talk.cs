@@ -59,18 +59,25 @@ namespace FrankyCLI
                     if (Tokens(text).Any()) Fatal($"{at} {where} carries a <Token>; a voice cannot say one and a scene line is not expanded.");
                     if (text.Length > max) Fatal($"{at} {where} is {text.Length} characters; the limit is {max}.");
                 }
-                Spoken("greeting", b.greeting, TalkReplyMax);
-                if (b.person?.hellos is List<string> hl)
+                // Schema 2: a voiced line is a LIST of responses said back to back, 1 to ResponsesMax, each checked.
+                void SpokenAll(string where, List<string>? said, int max)
+                {
+                    if (said == null || said.Count == 0) { Fatal($"{at} {where} is empty."); return; }
+                    if (said.Count > ResponsesMax) Fatal($"{at} {where} has {said.Count} responses; the limit is {ResponsesMax}.");
+                    for (int k = 0; k < said.Count; k++) Spoken(said.Count == 1 ? where : $"{where}[{k}]", said[k], max);
+                }
+                SpokenAll("greeting", b.greeting, TalkReplyMax);
+                if (b.person?.hellos is List<List<string>> hl)
                 {
                     if (hl.Count == 0 || hl.Count > TalkHellosMax) Fatal($"{at} person.hellos has {hl.Count} line(s); give 1 to {TalkHellosMax}, or leave it out.");
-                    for (int h = 0; h < hl.Count; h++) Spoken($"person.hellos[{h}]", hl[h], TalkReplyMax);
+                    for (int h = 0; h < hl.Count; h++) SpokenAll($"person.hellos[{h}]", hl[h], TalkReplyMax);
                 }
                 if (b.exchanges == null || b.exchanges.Count == 0) Fatal($"{at} has no exchanges: there is nothing to ask, and exchanges[0] is what ends the talk.");
                 else
                     for (int x = 0; x < b.exchanges.Count; x++)
                     {
                         Spoken($"exchanges[{x}].prompt", b.exchanges[x].prompt, TalkPromptMax);
-                        Spoken($"exchanges[{x}].reply", b.exchanges[x].reply, TalkReplyMax);
+                        SpokenAll($"exchanges[{x}].reply", b.exchanges[x].reply, TalkReplyMax);
                         if (b.exchanges[x].perk is not string pn) continue;
                         if (x == 0)
                         {
@@ -162,7 +169,8 @@ namespace FrankyCLI
                     d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
                     return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = want };
                 }
-                (DialogTopic topic, DialogResponses info) Line(string name, string text, bool his)
+                // A line of his is a list of responses (schema 2); the player's prompt is one silent string.
+                (DialogTopic topic, DialogResponses info) Line(string name, List<string> texts, bool his)
                 {
                     var topic = new DialogTopic(myMod)
                     {
@@ -174,21 +182,14 @@ namespace FrankyCLI
                     topic.Quest.SetTo(clone.FormKey);
                     var info = new DialogResponses(myMod) { EditorID = name + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
                     if (his) info.Speaker.SetTo(npc);
-                    var resp = new DialogResponse
-                    {
-                        ResponseText = text,
-                        // The game plays the file this field names; ours is the topic's id, as the radio lines are.
-                        WEMFile = his ? topic.FormKey.ID : 0u,
-                        TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(text))[..4],
-                        EmotionOut = 7.466667f,
-                    };
-                    resp.Emotion.SetTo(FormKey.None);   // FFFFFFFF, the "None Reference" (npc_dialogue.md's gotcha)
-                    info.Responses.Add(resp);
+                    // The game plays the file each response's WEMFile names; the first is the topic's id, as the radio lines'
+                    // are. Emotion is FFFFFFFF, the "None Reference" (npc_dialogue.md's gotcha).
+                    var said = AddResponses(myMod, info, texts, topic.FormKey.ID, his, 7.466667f);
                     topic.Responses.Add(info);
                     // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
                     topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
                     clone.DialogTopics.Add(topic);
-                    if (his) bm.TalkLines.Add((topic.FormKey.ID, text, vt, vid, female));
+                    foreach (var (wem, text) in said) bm.TalkLines.Add((wem, text, vt, vid, female));
                     return (topic, info);
                 }
                 Scene NewScene(string name, uint flags, bool untilDone)
@@ -215,12 +216,12 @@ namespace FrankyCLI
                 var ga = new DialogueSceneAction { Index = 1, AliasID = personAlias, StartPhase = 0, EndPhase = 0 };
                 ga.Topic.SetTo(gt.FormKey);
                 gs.Actions = new Noggog.ExtendedList<ASceneAction> { ga };
-                Console.WriteLine($"  +talk    : {gs.EditorID} greets  \"{tb.greeting}\"");
+                Console.WriteLine($"  +talk    : {gs.EditorID} greets  \"{string.Join(" / ", tb.greeting!)}\"");
 
                 for (int x = 0; x < tb.exchanges!.Count; x++)
                 {
                     var ex = tb.exchanges[x];
-                    var (pt, pi) = Line($"{tag}_ask{x + 1}", ex.prompt!, false);
+                    var (pt, pi) = Line($"{tag}_ask{x + 1}", new List<string> { ex.prompt! }, false);
                     // A [Background] / [Skill] / [Trait] choice: vanilla's INFO.Perk on the PLAYER's line, no condition with it.
                     if (talkPerks.TryGetValue((b, x), out var perkKey)) pi.Perk.SetTo(perkKey);
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
@@ -248,7 +249,7 @@ namespace FrankyCLI
                 // group), one picked per walk-up. Many lines share one topic here, so each line's WEMFile is its OWN id
                 // (NPCDialogueNoun's scheme; manual 39: either works if the file is named the same), never the topic's.
                 // ⚠ Unproven at his glass: built on vanilla's numbers, not on a play.
-                if (tb.person!.hellos is List<string> hellos)
+                if (tb.person!.hellos is List<List<string>> hellos)
                 {
                     string htag = $"{r.id}_hellos";
                     var ht = clone.DialogTopics.FirstOrDefault(d => d.EditorID == htag);
@@ -278,17 +279,10 @@ namespace FrankyCLI
                             SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
                         };
                         hi.DialogGroup.SetTo(grp.FormKey);
-                        var hr = new DialogResponse
-                        {
-                            ResponseText = hellos[h],
-                            WEMFile = hi.FormKey.ID,
-                            TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(hellos[h]))[..4],
-                            EmotionOut = 7.466667f,
-                        };
-                        hr.Emotion.SetTo(FormKey.None);
-                        hi.Responses.Add(hr);
+                        // Each walk-up line is itself a list of responses (schema 2); its first takes the INFO's own id.
+                        foreach (var (wem, text) in AddResponses(myMod, hi, hellos[h], hi.FormKey.ID, true, 7.466667f))
+                            bm.TalkLines.Add((wem, text, vt, vid, female));
                         lines.Add(hi);
-                        bm.TalkLines.Add((hi.FormKey.ID, hellos[h], vt, vid, female));
                     }
                     // Vanilla lists the spoken lines before their group (MQ101: 00563E.. then 00713D).
                     foreach (var hi in lines.Append(grp))

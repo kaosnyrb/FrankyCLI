@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve17a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -46,23 +46,23 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Placeholder again. She wants bright and quick. His ear."
       },
-      "greeting": "You came! Brilliant. Okay. The cool box fell off the hauler, which is fine, but the lollies are in it, which is less fine.",
+      "greeting": ["You came! Brilliant. Okay. The cool box fell off the hauler, which is fine, but the lollies are in it, which is less fine."],
       "exchanges": [
         {
           "prompt": "I'll find the cool box.",
-          "reply": "Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!"
+          "reply": ["Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!"]
         },
         {
           "prompt": "What's the occasion?",
-          "reply": "It's Friday! The fourth one, which is lolly Friday, which nobody voted for, I just started doing it and now there's a rota and a song."
+          "reply": ["It's Friday! The fourth one, which is lolly Friday, which nobody voted for, I just started doing it and now there's a rota and a song."]
         },
         {
           "prompt": "How many of you are there?",
-          "reply": "Seven! One won't eat the orange ones, so really six and a half, and I eat the half. It's a system."
+          "reply": ["Seven! One won't eat the orange ones, so really six and a half, and I eat the half. It's a system."]
         },
         {
           "prompt": "Do I get one?",
-          "reply": "Obviously! Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now."
+          "reply": ["Obviously! Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now."]
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 2 is her one run-on territory; exchange 3 is the flirt the ceiling allows, and she does not notice it is one, which is the Momo answer."
@@ -98,7 +98,7 @@
       "journal": "Somebody's Friday lollies fell off a hauler at the <Place>. I found the cool box and the cups and brought them back. I got first pick. It's a rule now.",
       "model": "Meshes\\SetDressing\\BeachProps\\BeachBlanket01.nif",
       "name": "Lolly Friday",
-      "say": "You found it! Still cold, feel, it's still cold! And we've got loads of time. Here. Have a red one. The red ones are the best ones."
+      "say": ["You found it! Still cold, feel, it's still cold! And we've got loads of time. Here. Have a red one. The red ones are the best ones."]
     }
   ],
   "deadline": {
@@ -106,7 +106,7 @@
     "seconds": 300,
     "until": 4,
     "fail": {
-      "say": "Oh! That's five minutes. They're soup now. Lolly soup! Honestly, that's still a good Friday.",
+      "say": ["Oh! That's five minutes. They're soup now. Lolly soup! Honestly, that's still a good Friday."],
       "journal": "Somebody's Friday lollies fell off a hauler at the <Place>. I didn't get the cool box back before they melted. She called it lolly soup and didn't seem to mind."
     },
     "_deadline": [
@@ -127,6 +127,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
-  "broadcast": "Hi! Hello! Small emergency, but a nice one. Our cool box fell off a hauler and it's full of lollies. Anyone nearby? There's one in it for you!",
+  "broadcast": ["Hi! Hello! Small emergency, but a nice one. Our cool box fell off a hauler and it's full of lollies. Anyone nearby? There's one in it for you!"],
   "_speech": "Her voice on the radio, in person and at the end. No names, no places, no flags."
 }

@@ -13,7 +13,7 @@
 
 ---
 
-## 1. PICKUP · out at the edge of the site
+## 1. PICKUP · REMarkerMediumLocRef
 
 🎯 Find the team's spare power cell at the <Place>
 

@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve16a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -48,23 +48,23 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear."
       },
-      "greeting": "You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go.",
+      "greeting": ["You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go."],
       "exchanges": [
         {
           "prompt": "I'll get the cells.",
-          "reply": "Two. Don't drop them. Left bay first, then right. I'll have the panel open."
+          "reply": ["Two. Don't drop them. Left bay first, then right. I'll have the panel open."]
         },
         {
           "prompt": "Why can't you fetch them yourself?",
-          "reply": "Relay can't be left. Standing order. Not mine. I follow it."
+          "reply": ["Relay can't be left. Standing order. Not mine. I follow it."]
         },
         {
           "prompt": "Are you out here alone?",
-          "reply": "Relay needs one. Rations for one. Cells for one. Next drop in nine days."
+          "reply": ["Relay needs one. Rations for one. Cells for one. Next drop in nine days."]
         },
         {
           "prompt": "Buy you a drink when you're off?",
-          "reply": "Off in nine days. Ask me then. Cells first."
+          "reply": ["Off in nine days. Ask me then. Cells first."]
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the first pickup's stage. Exchange 3 is the flirt his 10-12 ceiling allows, answered in register: with the action it implies."
@@ -118,7 +118,7 @@
       "journal": "A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them. She said next, and meant it.",
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Relay",
-      "say": "Left bay. Good. Right bay. Good. Relay's up. Payment's sent. Next."
+      "say": ["Left bay. Good. Right bay. Good. Relay's up. Payment's sent. Next."]
     }
   ],
   "speaker": {
@@ -126,6 +126,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
-  "broadcast": "Relay post needs a contractor. Two cells to carry. Paid on completion. Out.",
+  "broadcast": ["Relay post needs a contractor. Two cells to carry. Paid on completion. Out."],
   "_speech": "Her voice on the radio, in person and at the relay. No names, no places, no flags."
 }

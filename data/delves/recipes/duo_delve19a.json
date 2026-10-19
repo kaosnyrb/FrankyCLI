@@ -1,5 +1,5 @@
 ﻿{
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve19a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -56,24 +56,24 @@
         "voice": "GenericMale01",
         "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
       },
-      "greeting": "If you've got a ship, you're the most useful person I've seen all week.",
+      "greeting": ["If you've got a ship, you're the most useful person I've seen all week."],
       "exchanges": [
         {
           "prompt": "I'll get the part and fit it.",
-          "reply": "It's a transceiver core, about the size of a toolbox. Fit it in the satellite and we're back on the network. I'd do it myself if I could fly."
+          "reply": ["It's a transceiver core, about the size of a toolbox. Fit it in the satellite and we're back on the network. I'd do it myself if I could fly."]
         },
         {
           "prompt": "What's wrong with the satellite?",
-          "reply": "Nothing a new core won't fix. The old one burned out, which they do. What they don't usually do is get stolen on the way here."
+          "reply": ["Nothing a new core won't fix. The old one burned out, which they do. What they don't usually do is get stolen on the way here."]
         },
         {
           "prompt": "Why does it matter so much?",
-          "reply": "No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days."
+          "reply": ["No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days."]
         },
         {
           "prompt": "Could you rig something in the meantime?",
           "perk": "BackgroundCyberneticist",
-          "reply": "I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."
+          "reply": ["I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."]
         }
       ],
       "_talk": "Exchange 0 closes the talk and sets the recover's stage. Exchange 3 is a background line in the 18a shape; Cyberneticist is a guess at the right background, Eliza checks the perk id exists. Voiced lines: no names, no places, no factions, no currency."
@@ -85,7 +85,7 @@
       "item": "Transceiver Core",
       "objective": "Recover the transceiver core from the <SecondPlace>",
       "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.",
-      "say": "Wait, is that you? You got it? Then it's the satellite with no lights on. You can't miss it. Well, you can. Please don't."
+      "say": ["Wait, is that you? You got it? Then it's the satellite with no lights on. You can't miss it. Well, you can. Please don't."]
     },
     {
       "type": "deliver",
@@ -95,7 +95,7 @@
       "journal": "The relay over <Planet> went dark and raiders at the <SecondPlace> had its replacement core. I got it back and fitted it in orbit. The settlers at the <Place> can call out again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Relay Satellite",
-      "say": "There it is. We can hear the whole sky again. This is the first call I've made in nine days, and it's to say thank you.",
+      "say": ["There it is. We can hear the whole sky again. This is the first call I've made in nine days, and it's to say thank you."],
       "message": {
         "title": "Relay Restored",
         "text": "The core seats with a click. A row of lights comes on down the satellite's spine, one at a time, and the channel opens."
@@ -108,6 +108,6 @@
     "voice": "GenericMale01",
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
-  "broadcast": "This is a short-range set, so if you can hear me, you're close. Our relay's dead and we can't call out. We need someone with a ship.",
+  "broadcast": ["This is a short-range set, so if you can hear me, you're close. Our relay's dead and we can't call out. We need someone with a ship."],
   "_speech": "Same voice on the radio and in person. The broadcast says short-range on purpose: with the relay dead, nobody far off could hear it. CwhRBWXzGAHq8TQ4Fs17 is the docs' Relay Control example voice; his ear decides."
 }

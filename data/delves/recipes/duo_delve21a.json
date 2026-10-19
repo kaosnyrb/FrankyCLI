@@ -1,5 +1,5 @@
 ﻿{
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve21a",
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
@@ -41,7 +41,7 @@
       "journal": "I burned the cache at the <Place>, every book in it. I still don't know what was banned about them. Nobody asked me to know.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Cache of Banned Texts",
-      "say": "Destruction confirmed. Your report is filed. There is nothing further on this contract.",
+      "say": ["Destruction confirmed. Your report is filed. There is nothing further on this contract."],
       "reward": "easy"
     }
   ],
@@ -50,6 +50,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
   },
-  "broadcast": "Contract confirmed. The material is to be destroyed on site. Do not read it, remove it or copy it.",
+  "broadcast": ["Contract confirmed. The material is to be destroyed on site. Do not read it, remove it or copy it."],
   "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Voice is remote06a's 'Matilda'; his ear decides."
 }

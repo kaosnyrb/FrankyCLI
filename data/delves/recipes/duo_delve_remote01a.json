@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_remote01a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
@@ -70,7 +70,7 @@
       "journal": "The survey team's sensors at the <Place> had been sitting unread. I collected all three sets of readings and sent them from the team's beacon.",
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Survey Uplink Beacon",
-      "say": "That's all three. Data's coming through. Thank you."
+      "say": ["That's all three. Data's coming through. Thank you."]
     }
   ],
   "speaker": {
@@ -78,6 +78,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
-  "broadcast": "Three sensors went in down there and nobody came back to read them. Send us the data and the job's paid.",
+  "broadcast": ["Three sensors went in down there and nobody came back to read them. Send us the data and the job's paid."],
   "_speech": "Radio rules: no names, no places, one clause where it can be. Voice is ElevenLabs' 'Annie K, Calm, Grounded Narrator', NOT yet heard in game (voices.md); his ear decides."
 }

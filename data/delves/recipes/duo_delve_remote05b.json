@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_remote05b",
   "template": "beats",
   "_note": "LETTER VARIANT of remote05a, written by Jessica 2026-10-14 on his 'do one of each for now'. His ruling the same morning: the letters of 05 and 06 differ by WHERE, so the words can be specific about the site. Military sites only, so the enemy is Ecliptic and the boss is Overtime's own duo_boss_Ecliptic_Boss_Aggro_NoScript (found in du_overtime.esm). Same beat, same marker, same numbers as 05a. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is a colony militia elsewhere on the planet. The boss gender is not known, so 'the commander', never him.",
@@ -25,7 +25,7 @@
     "voice": "GenericMale01",
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
-  "broadcast": "Mercenaries have taken the old military post and they're raiding our supply runs. We don't have the guns to go in after them. Their commander holds the contract. End it.",
+  "broadcast": ["Mercenaries have taken the old military post and they're raiding our supply runs. We don't have the guns to go in after them. Their commander holds the contract. End it."],
   "beats": [
     {
       "type": "defeat",
@@ -43,7 +43,7 @@
       },
       "objective": "Defeat the Ecliptic commander at the <Place>",
       "journal": "The Ecliptic commander at the <Place> is dead. With nobody left to pay them, the rest won't stay.",
-      "say": "Commander's down. No commander, no contract. Thank you."
+      "say": ["Commander's down. No commander, no contract. Thank you."]
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Daniel, Steady Broadcaster' (British), NOT yet heard in game (voices.md); his ear decides."

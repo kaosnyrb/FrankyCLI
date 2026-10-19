@@ -1,5 +1,5 @@
 ﻿{
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve24a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -35,7 +35,7 @@
       },
       "objective": "Dismantle the security robot at the <Place>",
       "journal": "The security robot at the <Place> is scrap. It was still running its last owners' patrol route. Nobody had told it they'd gone.",
-      "say": "It's down? Lovely. We've been living in the ship for a fortnight. Thank you.",
+      "say": ["It's down? Lovely. We've been living in the ship for a fortnight. Thank you."],
       "reward": "med"
     }
   ],
@@ -44,6 +44,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
-  "broadcast": "We bought a place and the security robot came with it. It doesn't know we bought it. Could someone please explain that to it, firmly?",
+  "broadcast": ["We bought a place and the security robot came with it. It doesn't know we bought it. Could someone please explain that to it, firmly?"],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is 05a/18a/20a's; his ear decides, and it is getting used a lot."
 }

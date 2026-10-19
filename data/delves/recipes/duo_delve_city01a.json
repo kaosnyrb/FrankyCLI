@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_city01a",
   "template": "beats",
   "author": "jessica",
@@ -53,24 +53,24 @@
         "voice": "GenericMale01",
         "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
       },
-      "greeting": "Tell me that's what I think it is.",
+      "greeting": ["Tell me that's what I think it is."],
       "exchanges": [
         {
           "prompt": "I've got your strongbox.",
-          "reply": "That's it, dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."
+          "reply": ["That's it, dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."]
         },
         {
           "prompt": "What's in it?",
-          "reply": "Papers, mostly. My permit, my stall number, two years of receipts. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
+          "reply": ["Papers, mostly. My permit, my stall number, two years of receipts. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."]
         },
         {
           "prompt": "Why not go after it yourself?",
-          "reply": "I haul crates and sell them. I don't go into places like that, and I'd like to keep it that way. Back here, people know me."
+          "reply": ["I haul crates and sell them. I don't go into places like that, and I'd like to keep it that way. Back here, people know me."]
         },
         {
           "prompt": "Which lane did they jump you on?",
           "perk": "BackgroundLongHauler",
-          "reply": "The slow one. You've run it too, then. You'll know they never jump you on the fast lane. Not enough time to plan it."
+          "reply": ["The slow one. You've run it too, then. You'll know they never jump you on the fast lane. Not enough time to plan it."]
         }
       ],
       "_talk": "Exchange 0 is the hand-back: it ends the talk, takes the Trader's Strongbox and sets stage 100, which pays 'reward'. Exchange 3 is a [Long Hauler] line (his 2026-10-14 RP feature): only a hauler would ask which lane. Voiced lines: no names, no places, no factions, no currency.",
@@ -82,6 +82,6 @@
     "voice": "GenericMale01",
     "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
   },
-  "broadcast": "They hit my run and took the lot. Keep the cargo. There's a strongbox in there with my papers, and without them I can't sell a thing. I'd like that back.",
+  "broadcast": ["They hit my run and took the lot. Keep the cargo. There's a strongbox in there with my papers, and without them I can't sell a thing. I'd like that back."],
   "_speech": "His own voice on the radio, then in person. Voice is 04a's (dgkKQcJqyy5AP0dqleUU), used once so far, chosen so this is not Isla again (four Delves already); his ear decides. No names, no places, no currency."
 }

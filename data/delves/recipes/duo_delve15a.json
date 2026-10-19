@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve15a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -57,23 +57,23 @@
         "voice": "GenericMale01",
         "elevenlabs": "bIHbv24MWmeRgasZH58o"
       },
-      "greeting": "You're here for the package? Good. Quickly, before I change my mind.",
+      "greeting": ["You're here for the package? Good. Quickly, before I change my mind."],
       "exchanges": [
         {
           "prompt": "I'll take the package.",
-          "reply": "It's by the crates. Don't shake it. And don't tell her it's from me... Actually, no. Tell her. She'll know anyway."
+          "reply": ["It's by the crates. Don't shake it. And don't tell her it's from me... Actually, no. Tell her. She'll know anyway."]
         },
         {
           "prompt": "Why not take it yourself?",
-          "reply": "Because I'd get there, talk about the weather and come home with it still in my hand. I've done that twice."
+          "reply": ["Because I'd get there, talk about the weather and come home with it still in my hand. I've done that twice."]
         },
         {
           "prompt": "What's in it?",
-          "reply": "Real coffee. Not the stuff we get out here. She said once she missed it. I don't think she knows I heard."
+          "reply": ["Real coffee. Not the stuff we get out here. She said once she missed it. I don't think she knows I heard."]
         },
         {
           "prompt": "Why are you nervous?",
-          "reply": "Because it's for her. And if she knows how I feel, she's been very polite about it."
+          "reply": ["Because it's for her. And if she knows how I feel, she's been very polite about it."]
         }
       ],
       "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the pickup's stage. Voice: the 13a nervous man ('Will, Relaxed Optimist'), reused; his ear decides."
@@ -103,23 +103,23 @@
         "voice": "GenericFemale01",
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
       },
-      "greeting": "That's got a ribbon on it. Nobody out here ties ribbons. Is that for me?",
+      "greeting": ["That's got a ribbon on it. Nobody out here ties ribbons. Is that for me?"],
       "exchanges": [
         {
           "prompt": "It's for you. A present.",
-          "reply": "Real coffee. I said that once, on a bad day, months ago. He was listening. Don't tell him anything. I'll go over myself."
+          "reply": ["Real coffee. I said that once, on a bad day, months ago. He was listening. Don't tell him anything. I'll go over myself."]
         },
         {
           "prompt": "Do you know who it's from?",
-          "reply": "There's one person who'd ask a stranger to carry this instead of walking it over. So yes."
+          "reply": ["There's one person who'd ask a stranger to carry this instead of walking it over. So yes."]
         },
         {
           "prompt": "Were you expecting it?",
-          "reply": "No. Hoping, a bit. You don't say that out loud when there are this few of you."
+          "reply": ["No. Hoping, a bit. You don't say that out loud when there are this few of you."]
         },
         {
           "prompt": "Should I take an answer back?",
-          "reply": "No. He's had enough messages carried. It isn't that far. I can walk."
+          "reply": ["No. He's had enough messages carried. It isn't that far. I can walk."]
         }
       ],
       "_talk": "PROPOSED fields, as 11a. Exchange 0 is the hand-over: it ends the conversation, takes the Wrapped Package and sets stage 100. Voice: Petra's ('Isla'), reused; his ear decides."
@@ -130,6 +130,6 @@
     "voice": "GenericMale01",
     "elevenlabs": "bIHbv24MWmeRgasZH58o"
   },
-  "broadcast": "Bit of a personal one. I need something carried to someone, and I'd rather it wasn't me. It isn't far.",
+  "broadcast": ["Bit of a personal one. I need something carried to someone, and I'd rather it wasn't me. It isn't far."],
   "_speech": "His own voice on the radio and in person, as 11a's. No names, no places, no flags."
 }

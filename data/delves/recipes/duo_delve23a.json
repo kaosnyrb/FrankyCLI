@@ -1,5 +1,5 @@
 ﻿{
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve23a",
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
@@ -41,7 +41,7 @@
       },
       "objective": "Clear the creatures from the <Place>",
       "journal": "Nothing's living at the <Place> any more except the weeds. The assessor can come and sign it off.",
-      "say": "The assessor's on her way. She says she'll need to check the weeds as well. I've told her you don't do weeds.",
+      "say": ["The assessor's on her way. She says she'll need to check the weeds as well. I've told her you don't do weeds."],
       "reward": "med"
     }
   ],
@@ -50,6 +50,6 @@
     "voice": "GenericMale01",
     "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
   },
-  "broadcast": "You took the contract? Good. The assessor won't set foot on our site while anything's living there. We'd quite like her to set foot on it.",
+  "broadcast": ["You took the contract? Good. The assessor won't set foot on our site while anything's living there. We'd quite like her to set foot on it."],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is remote03a's 'Killian'; his ear decides."
 }

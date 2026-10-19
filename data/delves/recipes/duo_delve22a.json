@@ -1,5 +1,5 @@
 ﻿{
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve22a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -41,7 +41,7 @@
       },
       "objective": "Defeat the Ecliptic collector at the <Place>",
       "journal": "The Ecliptic collector at the <Place> is dead. Nobody's coming round the homesteads next month for their cut.",
-      "say": "He's really gone? Then we're keeping this month's money. And next month's. Thank you.",
+      "say": ["He's really gone? Then we're keeping this month's money. And next month's. Thank you."],
       "reward": "med"
     }
   ],
@@ -50,6 +50,6 @@
     "voice": "GenericMale01",
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
-  "broadcast": "There's a crew near us charging every homestead for protection from themselves. Their collector comes round once a month. We'd like him to stop.",
+  "broadcast": ["There's a crew near us charging every homestead for protection from themselves. Their collector comes round once a month. We'd like him to stop."],
   "_speech": "Radio rules: no names, places, factions or currency spoken. Voice is missionboard01a's 'David Jarrett'; his ear decides."
 }

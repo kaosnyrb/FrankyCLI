@@ -7,10 +7,7 @@
 **Briefing:** A survey crew moved their dig off <Planet>, and their last supply drop landed at the old camp anyway. Someone should get it to them.
 
 **Where:** anywhere, never natural landmarks or caves.
-**Then:** a second place, anywhere, never natural landmarks or caves.
-
-📻 **Dig Lead, on the radio:**
-> To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it.
+**Then:** a second place, anywhere, never natural landmarks or caves or test locations.
 
 ---
 
@@ -18,7 +15,10 @@
 
 🎯 Check the camp beacon at the <Place>
 
-🧱 Object: Abandoned Camp Beacon · Satellite_Beacon.nif
+🧱 Object: Abandoned Camp Beacon · commsmast01.nif
+
+🔊 **Dig Lead:**
+> To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and we'll make the trip worth it.
 
 📓 *Journal:* The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.
 

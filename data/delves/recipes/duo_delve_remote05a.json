@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_remote05a",
   "template": "beats",
   "_note": "PROOF RECIPE for the defeat beat (spike office/spikes/2026-10-14-defeat-and-clear-beats.md, graduated on his play), Eliza 2026-10-14 on his scope; gameplay of duo_artifact_remote_planet_qst01a. WORDS ARE JESSICA'S since 2026-10-14 11:0x, on his 'yeah rewrite': the site is always infrastructure (the theme requires it, pool 12, his 'you can be specific about where it is'), so the raiders are stripping a working site. Nobody is placed there, so the speaker is the crew who got out, calling from elsewhere. The boss gender is not known, so the leader is 'the leader', never him. The gang may live when the boss dies, so nothing promises they flee.",
@@ -25,7 +25,7 @@
     "voice": "GenericMale01",
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
-  "broadcast": "Raiders took our site and they're pulling the machinery apart. We got out with what we could carry. Their leader is keeping them there. Take the leader down.",
+  "broadcast": ["Raiders took our site and they're pulling the machinery apart. We got out with what we could carry. Their leader is keeping them there. Take the leader down."],
   "beats": [
     {
       "type": "defeat",
@@ -43,7 +43,7 @@
       },
       "objective": "Defeat the raid leader at the <Place>",
       "journal": "The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.",
-      "say": "That's the leader down. The rest won't stay long now. Thank you."
+      "say": ["That's the leader down. The rest won't stay long now. Thank you."]
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock (a remote job can be a jump away). Voice is ElevenLabs' 'David Jarrett' (Australian, casual), NOT yet heard in game (voices.md); his ear decides."

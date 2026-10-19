@@ -54,7 +54,7 @@
 
 ---
 
-## 3. PICKUP · out at the edge of the site
+## 3. PICKUP · REMarkerMediumLocRef
 
 🎯 Collect the first power cell
 
@@ -66,7 +66,7 @@
 
 ---
 
-## 4. PICKUP · out at the far edge of the site
+## 4. PICKUP · REMarkerSmallImportantLocRef
 
 🎯 Collect the second power cell
 

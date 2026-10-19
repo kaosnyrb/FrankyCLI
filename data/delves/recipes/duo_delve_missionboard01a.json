@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_missionboard01a",
   "template": "board",
   "_note": "PROOF RECIPE for the board template (his 2026-10-14: 'full sep missionboard template', clone duo_MB28a_qst, deal into _duo_MB_MissionNode_test, 'yeah that remote05a'). The GAMEPLAY and every word are duo_delve_remote05a's, Jessica's since 2026-10-14 11:0x; the CARD is Jessica's since 2026-10-14 14:2x, in the board's issuer voice (bethesda 33 section 4: a posting, 'we' and 'ours' never 'I', short, the stock closer 'Payment on contract completion.'): the site's operator posting the job. The place is the board base's own request, so place.remote is absent; the theme is 05a's (infrastructure), so the build drops MB28a's NonHostile_Civilian requirement and says so.",
@@ -25,7 +25,7 @@
     "voice": "GenericMale01",
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
-  "broadcast": "Raiders took our site and they're pulling the machinery apart. We got out with what we could carry. Their leader is keeping them there. Take the leader down.",
+  "broadcast": ["Raiders took our site and they're pulling the machinery apart. We got out with what we could carry. Their leader is keeping them there. Take the leader down."],
   "beats": [
     {
       "type": "defeat",
@@ -43,7 +43,7 @@
       },
       "objective": "Defeat the raid leader at the <Place>",
       "journal": "The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.",
-      "say": "That's the leader down. The rest won't stay long now. Thank you."
+      "say": ["That's the leader down. The rest won't stay long now. Thank you."]
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock (a remote job can be a jump away). Voice is ElevenLabs' 'David Jarrett' (Australian, casual), NOT yet heard in game (voices.md); his ear decides.",

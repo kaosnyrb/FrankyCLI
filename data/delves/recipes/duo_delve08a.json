@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve08a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -94,23 +94,23 @@
         "voice": "GenericFemale01",
         "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
       },
-      "greeting": "That's his writing on those. I'd know it anywhere. Where did you find them?",
+      "greeting": ["That's his writing on those. I'd know it anywhere. Where did you find them?"],
       "exchanges": [
         {
           "prompt": "Here. They're yours.",
-          "reply": "He wrote every week and none of it ever came. I thought he'd stopped. He hadn't. Thank you."
+          "reply": ["He wrote every week and none of it ever came. I thought he'd stopped. He hadn't. Thank you."]
         },
         {
           "prompt": "What happened to him?",
-          "reply": "His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking."
+          "reply": ["His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking."]
         },
         {
           "prompt": "Why didn't he send them?",
-          "reply": "Knowing him, he meant to bring them himself. He never paid for anything he could carry."
+          "reply": ["Knowing him, he meant to bring them himself. He never paid for anything he could carry."]
         },
         {
           "prompt": "Will you be all right?",
-          "reply": "Ask me once I've read them. I've had years of not hearing from him. I'm not ready for this."
+          "reply": ["Ask me once I've read them. I've had years of not hearing from him. I'm not ready for this."]
         }
       ],
       "_talk": "The menu lists exchanges 1 to 3 ABOVE the closer (his play, 2026-10-13), so she sees the letters in the greeting and every question works before the hand-over; the hand-over is the last option, where it reads naturally. Exchange 0 ends the talk, takes the letters and the note, sets stage 100. Voiced: no names, no places. ElevenLabs 'Lucy' (american), heard in game 2026-10-13."

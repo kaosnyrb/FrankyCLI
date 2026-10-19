@@ -37,7 +37,7 @@
 
 ---
 
-## 2. PICKUP · out at the edge of the site
+## 2. PICKUP · REMarkerMediumLocRef
 
 🎯 Find the cool box
 
@@ -49,7 +49,7 @@
 
 ---
 
-## 3. PICKUP · out at the far edge of the site
+## 3. PICKUP · REMarkerSmallImportantLocRef
 
 🎯 Find the bag of cups
 

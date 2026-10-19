@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve07a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -16,7 +16,7 @@
     "player reads. The recap is Jessica's, written 2026-10-09 (907232d); this note said placeholder until 2026-10-10."
   ],
   "recap": "The crew at the <Place> had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
-  "recapSay": "All three are running. You've saved us a very long week.",
+  "recapSay": ["All three are running. You've saved us a very long week."],
   "place": {
     "theme": {
       "require": [
@@ -67,7 +67,7 @@
     "voice": "GenericFemale01",
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
-  "broadcast": "Three reclaimers down and nobody spare to look at them. If you can get them running, there's pay in it.",
+  "broadcast": ["Three reclaimers down and nobody spare to look at them. If you can get them running, there's pay in it."],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides.",
   "approach": {
     "to": 1,

@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve_remote02a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_RemotePlanetNode",
@@ -38,7 +38,7 @@
   "beats": [
     {
       "type": "pickup",
-      "say": "Its tracker just came back on. If anyone's watching for it, they know too. Be careful.",
+      "say": ["Its tracker just came back on. If anyone's watching for it, they know too. Be careful."],
       "_say": "On the pickup because a beat's say plays when its stage is SET, and wave 1 spawns on this stage (Eliza's move on 02a, 2026-10-12). The speaker is off-world and can only see the tracker, so the warning is about the tracker.",
       "at": "REMarkerMediumLocRef",
       "objective": "Recover the culture canister at the <Place>",
@@ -70,7 +70,7 @@
       "journal": "I got the clinic's vaccine cultures out of the <Place> past the people who jumped their courier, and left them at the courier beacon for collection.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Courier Pickup Beacon",
-      "say": "We've got it. There's a colony waiting on those. Thank you."
+      "say": ["We've got it. There's a colony waiting on those. Thank you."]
     }
   ],
   "speaker": {
@@ -78,6 +78,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
-  "broadcast": "Our courier was jumped and had to leave a canister of cultures behind. Bring it out and you'll be paid. They may still be watching for it.",
+  "broadcast": ["Our courier was jumped and had to leave a canister of cultures behind. Bring it out and you'll be paid. They may still be watching for it."],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Sarah, Mature, Reassuring, Confident', NOT yet heard in game (voices.md); his ear decides."
 }

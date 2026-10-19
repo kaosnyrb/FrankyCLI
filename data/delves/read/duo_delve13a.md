@@ -13,7 +13,7 @@
 
 ---
 
-## 1. PICKUP · out at the edge of the site
+## 1. PICKUP · REMarkerSmallImportantLocRef
 
 🎯 Find the courier drop at the <Place>
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 2. PICKUP · out at the far edge of the site
+## 2. PICKUP · REMarkerMediumLocRef
 
 🎯 Find the picnic hamper
 

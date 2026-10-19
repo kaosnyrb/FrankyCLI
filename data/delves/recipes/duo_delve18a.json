@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "duo_delve18a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_LocalCargoNode",
@@ -65,24 +65,24 @@
         "voice": "GenericFemale01",
         "elevenlabs": "wCizWKvnaS3LOIUwHo98"
       },
-      "greeting": "You're not one of them, are you? Good. Then you can help, if you want to.",
+      "greeting": ["You're not one of them, are you? Good. Then you can help, if you want to."],
       "exchanges": [
         {
           "prompt": "I'll get your cargo back.",
-          "reply": "Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going."
+          "reply": ["Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going."]
         },
         {
           "prompt": "What happened?",
-          "reply": "Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."
+          "reply": ["Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."]
         },
         {
           "prompt": "Did you report it?",
-          "reply": "I did. Someone's going to look into it next month. The filters were due last week."
+          "reply": ["I did. Someone's going to look into it next month. The filters were due last week."]
         },
         {
           "prompt": "Describe the one in charge.",
           "perk": "BackgroundBountyHunter",
-          "reply": "Tall, a scar through one eyebrow, laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him."
+          "reply": ["Tall, a scar through one eyebrow, laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him."]
         }
       ],
       "_talk": "Exchange 0 closes the talk and sets the recover's stage. Exchange 3 is a [Bounty Hunter] line (his 2026-10-14 RP feature): only a hunter asks for a description. Voiced lines: no names, no places, no factions, no currency."
@@ -115,6 +115,6 @@
     "voice": "GenericFemale01",
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
-  "broadcast": "I've been jumped. I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it.",
+  "broadcast": ["I've been jumped. I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it."],
   "_speech": "Her voice on the radio first, then in person. Voice is 05a's (wCizWKvnaS3LOIUwHo98), used once so far, so this is not Isla; his ear decides. No names, no places, no currency."
 }

@@ -19,11 +19,17 @@ def case(name, f):
     json.dump(x, open(f"{T}/{name}/duo_delve14a.json", 'w', encoding='utf-8'), indent=1)
 case('clean',    lambda x: None)
 case('noperson', lambda x: x['beats'][0].pop('person'))
-case('token',    lambda x: x['beats'][0]['exchanges'][1].__setitem__('reply', 'Out at the <Place> for eleven years.'))
+case('token',    lambda x: x['beats'][0]['exchanges'][1].__setitem__('reply', ['Out at the <Place> for eleven years.']))
 case('long',     lambda x: x['beats'][0]['exchanges'][2].__setitem__('prompt', 'x' * 61))
 case('box',      lambda x: x['beats'][0].__setitem__('message', {'title': 'T', 'text': 'x'}))
 case('noask',    lambda x: x['beats'][0].__setitem__('exchanges', []))
-case('stray',    lambda x: x['beats'][1].__setitem__('greeting', 'hello'))
+case('stray',    lambda x: x['beats'][1].__setitem__('greeting', ['hello']))
+# schema 2 (2026-10-19, his "Need to add multiple line support"): a spoken field is a list of responses, 1 to 4.
+case('multi',    lambda x: x['beats'][0]['exchanges'][1].__setitem__('reply', ['Eleven years out here.', 'Long enough.', 'Too long, some days.']))
+case('toomany',  lambda x: x['beats'][0]['exchanges'][1].__setitem__('reply', ['a.', 'b.', 'c.', 'd.', 'e.']))
+case('nolines',  lambda x: x['beats'][0].__setitem__('greeting', []))
+case('tokentwo', lambda x: x['beats'][0]['exchanges'][1].__setitem__('reply', ['Fine.', 'Out at the <Place> for years.']))
+case('schema1',  lambda x: (x.__setitem__('schema', 1), x['beats'][0].__setitem__('greeting', 'An old string.')))
 # exchange perks, a [Background] / [Skill] / [Trait] choice (his ask 2026-10-14: "make recipes support this")
 case('perkok',   lambda x: x['beats'][0]['exchanges'][1].__setitem__('perk', 'BackgroundDiplomat'))
 case('perkzero', lambda x: x['beats'][0]['exchanges'][0].__setitem__('perk', 'Skill_Medicine'))
@@ -45,6 +51,11 @@ run REFUSE long     'characters; the limit is 60'
 run REFUSE box      'a talk beat has none of them'
 run REFUSE noask    'has no exchanges'
 run REFUSE stray    'only a talk beat has a conversation'
+run PASS   multi    'LINT PASSES'
+run REFUSE toomany  'exchanges[1].reply has 5 responses; the limit is 4'
+run REFUSE nolines  'greeting is empty'
+run REFUSE tokentwo 'exchanges[1].reply[1] carries a <Token>'
+run REFUSE schema1  'is schema 1; this tool speaks 2'
 run PASS   perkok   'LINT PASSES'
 run REFUSE perkzero 'it is the choice that moves the quest'
 run REFUSE perkbad  "is not a Perk in"

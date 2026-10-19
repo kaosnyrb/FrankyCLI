@@ -477,11 +477,18 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(m.title)) Fatal($"beat {i + 1} has a message with no title.");
             }
             // --- speech: a speaker and the lines it says (broadcast at the start, say on a beat's stage) -------
+            // Schema 2: every spoken field is a LIST of responses said back to back, 1 to ResponsesMax; each is checked.
             var spoken = new List<(string where, string text)>();
-            if (r.broadcast != null) spoken.Add(("broadcast", r.broadcast));
-            for (int i = 0; i < r.beats.Count; i++) if (r.beats[i].say != null) spoken.Add(($"beat {i + 1}'s say", r.beats[i].say!));
-            if (r.offer?.say != null) spoken.Add(("offer.say", r.offer.say));
-            if (r.recapSay != null) spoken.Add(("recapSay", r.recapSay));
+            void Said(string where, List<string>? said)
+            {
+                if (said == null) return;
+                if (said.Count == 0 || said.Count > ResponsesMax) { Fatal($"{where} has {said.Count} response(s); give 1 to {ResponsesMax}, or leave it out."); return; }
+                for (int k = 0; k < said.Count; k++) spoken.Add((said.Count == 1 ? where : $"{where}[{k}]", said[k]));
+            }
+            Said("broadcast", r.broadcast);
+            for (int i = 0; i < r.beats.Count; i++) Said($"beat {i + 1}'s say", r.beats[i].say);
+            Said("offer.say", r.offer?.say);
+            Said("recapSay", r.recapSay);
             if (r.offer?.say != null && r.offer.message != null)
                 Fatal("offer has both a message and a say; his \"either or\": a box and a line on one stage clash. Keep one.");
             if (spoken.Count > 0 && r.speaker == null) Fatal("there are spoken lines and no speaker: say who speaks them (name, voice, elevenlabs).");
@@ -513,6 +520,37 @@ namespace FrankyCLI
         private const float ApproachDistance = 250f;
         /// <summary>The stage that stops a Delve ending on a talk, set when the person unloads (vanilla's shutdown number).</summary>
         private const int LingerStage = 1000;
+        /// <summary>The most responses one spoken line may carry. Vanilla, measured 2026-10-19 over MQ101 and OE_Dialogue's
+        /// 1,027 lines: 909 one, 101 two, 17 three.</summary>
+        private const int ResponsesMax = 4;
+
+        /// <summary>
+        /// One spoken line's RESPONSES, said back to back (schema 2, his 2026-10-19: "every line of dialouge is one string.
+        /// Need to add multiple line support"). Vanilla's own shape: one INFO, several responses, each with its own subtitle
+        /// and its own audio (MQ101 005730: three responses, three WEMFiles). The first keeps the id the line always had
+        /// (its topic's, or its INFO's), so a one-response line builds exactly as before; each later one takes a fresh id
+        /// minted from the plugin's own counter, which no other line's file can share. Returns each response's (wem, text)
+        /// for the voice step. A silent line (the player's) passes voiced false: WEMFile 0, nothing returned.
+        /// </summary>
+        private static List<(uint wem, string text)> AddResponses(StarfieldMod myMod, DialogResponses info, List<string> texts,
+                                                                    uint firstWem, bool voiced, float? emotionOut = null)
+        {
+            var made = new List<(uint wem, string text)>();
+            for (int i = 0; i < texts.Count; i++)
+            {
+                uint wem = !voiced ? 0u : i == 0 ? firstWem : myMod.GetNextFormKey().ID;
+                var resp = new DialogResponse
+                {
+                    ResponseText = texts[i],
+                    WEMFile = wem,
+                    TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(texts[i]))[..4],
+                };
+                if (emotionOut is float eo) { resp.EmotionOut = eo; resp.Emotion.SetTo(FormKey.None); }
+                info.Responses.Add(resp);
+                if (voiced) made.Add((wem, texts[i]));
+            }
+            return made;
+        }
         /// <summary>A talk Delve's quest priority: above RQ_Dialogue (45), below the story quests (70 to 82). Measured 2026-10-19.</summary>
         private const byte TalkQuestPriority = 50;
         /// <summary>How far round its object a nest scatters, in metres. His infestation missions use 40 round a
@@ -1545,7 +1583,7 @@ namespace FrankyCLI
                 var spokenAt = new List<(int stage, int n)>();   // fragment-started lines, by stage
                 if (inputs.Speaker != null)
                 {
-                    var lines = new List<(int stage, string text)>();
+                    var lines = new List<(int stage, List<string> text)>();
                     if (r.broadcast != null) lines.Add((arrival ? t.arrivalStage : t.entryStage, r.broadcast));   // on start (0) the engine plays it; on the board's accept, the fragment
                     for (int b = 0; b < r.beats.Count; b++) if (r.beats[b].say != null) lines.Add((beatStage[b], r.beats[b].say!));
                     // A group ending's closing call: on the completing stage, which every member's last fix sets whatever the order.
@@ -1575,12 +1613,7 @@ namespace FrankyCLI
                         topic.Quest.SetTo(clone.FormKey);
                         var info = new DialogResponses(myMod) { EditorID = tag + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
                         info.Speaker.SetTo(bm.Speaker);
-                        info.Responses.Add(new DialogResponse
-                        {
-                            ResponseText = ltext,
-                            WEMFile = topic.FormKey.ID,
-                            TextHash = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(ltext))[..4],
-                        });
+                        var said = AddResponses(myMod, info, ltext, topic.FormKey.ID, true);
                         topic.Responses.Add(info);
                         // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
                         topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
@@ -1615,8 +1648,11 @@ namespace FrankyCLI
                             else Add(lst, $"{sv}.Start()");
                             spokenAt.Add((lst, n + 1));
                         }
-                        bm.Lines.Add((lst, topic.FormKey.ID, ltext, scene.FormKey));
-                        Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {topic.FormKey.ID:X8}.wem  \"{ltext}\"");
+                        foreach (var (wem, text) in said)
+                        {
+                            bm.Lines.Add((lst, wem, text, scene.FormKey));
+                            Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {wem:X8}.wem  \"{text}\"");
+                        }
                     }
                 }
                 // A quest's scenes stop with it, so a line on the stage that ENDS the quest would be cut off by the
@@ -2202,7 +2238,7 @@ namespace FrankyCLI
                 var act = sc?.Actions?.OfType<IRadioSceneActionGetter>().FirstOrDefault();
                 var tp = act == null ? null : q.DialogTopics.FirstOrDefault(d => d.FormKey == act.Topic.FormKey);
                 var rsp = tp?.Responses.FirstOrDefault();
-                var line = rsp?.Responses.FirstOrDefault();
+                var line = rsp?.Responses.FirstOrDefault(x => x.WEMFile == wem);   // one of the line's responses (schema 2)
                 fail += Check($"stage {lst}'s line is a radio scene the speaker says, voiced as {wem:X8}.wem",
                               sc == null ? "scene missing"
                               : $"alias {act?.AliasID}, speaker {rsp?.Speaker.FormKey}, wem {line?.WEMFile:X8}, text \"{line?.ResponseText?.String}\"",
