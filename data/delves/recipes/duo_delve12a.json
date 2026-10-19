@@ -31,8 +31,7 @@
     "_who": "Jessica's proposed pickup guard, as the built field (ELIZA 2026-10-15): spacers round the crate when he first comes within 250 m, after the accept. Overtime's Spacer gang list (9 entries).",
     "second": {
       "remote": true,
-      "planet": "same",
-      "_remote": "On a board the second place is always a request (ELIZA 2026-10-15). His pick: on the WRECK'S planet, so the drop is a short hop; nothing holds it near, and his play shows how far.",
+      "_remote": "On a board the second place is always a request (ELIZA 2026-10-15). It had a same-planet guard (his 10-15 pick) and that guard CRASHED the game at startquest (his play, 2026-10-19); his ruling: no planet guards, 'it's fine if the mission is on the same planet'. So the drop lands wherever the request puts it.",
       "theme": {
         "require": [],
         "exclude": ["LocTypeOE_ThemeShipwreckKeyword", "LocTypeOE_ThemeCaveKeyword"]

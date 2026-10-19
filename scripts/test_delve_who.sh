@@ -35,11 +35,9 @@ case('offerboth', lambda x: x['offer'].__setitem__('message', {'title': 'Incomin
 # missionboard02a's beat 2 is the pickup at the main place.
 mb = 'duo_delve_missionboard02a'
 case('boardwho',  lambda x: x['place'].__setitem__('who', {'kind': 'spacers', 'list': 'duo_GangMembersList_Spacer', 'min': 3, 'max': 5, 'beat': 2}), mb)
-# place.second.planet (same night, his "same planet"): only on the second, only "same"/"other", only behind a requested first site.
-case('planetsame',  lambda x: x['place']['second'].__setitem__('planet', 'same'), mb)
-case('planetbad',   lambda x: x['place']['second'].__setitem__('planet', 'moon'), mb)
-case('planetmain',  lambda x: x['place'].__setitem__('planet', 'same'), mb)
-case('planetlocal', lambda x: x['place']['second'].__setitem__('planet', 'same'), 'duo_delve10a')
+# place.*.planet is GONE (his 2026-10-19 ruling, after two planet guards crashed the game): any planet key is unknown.
+case('planetsecond', lambda x: x['place']['second'].__setitem__('planet', 'same'), mb)
+case('planetmain',   lambda x: x['place'].__setitem__('planet', 'same'), mb)
 EOF
 
 run() { # run WANT case needle
@@ -60,9 +58,7 @@ run REFUSE anchor "already hooks that object's distance"
 run REFUSE count  'needs 1 <= min <= max'
 run REFUSE offerboth 'offer has both a message and a say'
 run PASS   boardwho    "place.who: spacers, 3-5 placed around beat 2's object"
-run PASS   planetsame  "guards it ONTO the first site's planet"
-run REFUSE planetbad   "place.second.planet is 'moon'"
-run REFUSE planetmain  'place.planet is set'
-run REFUSE planetlocal 'behind a LOCAL first site'
+run REFUSE planetsecond 'place.second.planet'
+run REFUSE planetmain   'place.planet'
 echo "failing: $fails"
 [ $fails -eq 0 ]

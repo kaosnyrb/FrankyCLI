@@ -115,15 +115,21 @@ namespace FrankyCLI
             /// A talk beat's conversation, built INSIDE the Delve's own quest on the scene shapes of
             /// docs/specs/npc_dialogue.md (atbb_mq01, tested in game; NPCDialogueNoun builds the same records for a quest
             /// of its own): a Greeting scene (0x1834) the person opens with, then one Top Level scene per exchange.
-            /// exchanges[0] is the Completion topic (0x2810): its reply sets the beat's stage when it ENDS (the INFO's
-            /// own SetParentQuestStage, as NPCDialogueNoun does), and the talk closes. The rest are Regular topics
-            /// (0x2814, TopLevelTopicsOnEnd): asked in any order, each loops back to the menu.
+            /// exchanges[0] is the Completion topic: its reply sets the beat's stage when it ENDS (the INFO's own
+            /// SetParentQuestStage, as NPCDialogueNoun does). EVERY topic scene, the completion too, is 0x2814
+            /// (TopLevelTopicsOnEnd) and loops back to the menu. His ruling 2026-10-19, off 15a: "Currently selecting the
+            /// complete dialog option completes the quest and ends the dialog. This means if you select it first you can't
+            /// hear the other lines." The completion was 0x2810 (closes the talk) until then. So the side questions are
+            /// gated only on the step having OPENED, never on it still being open: after the completion they stay askable.
+            /// A talk that ends the quest is held open by the completing fragment, which waits while he is in the
+            /// conversation before CompleteQuest / Stop (BeatsBuild's WaitForTalks): a stopped quest takes its scenes.
             /// His rule: the completion goes FIRST in the menu ("the top dialog choice is the one that progresses the quest, the
             /// lower ones are fleshing out details"). SCPI does it, untied: completion 100, the rest 50/49/48 (his glass,
             /// missionboard02a, 2026-10-14 evening). With every scene at 100 it showed LAST, and neither its flag (0x2810 ->
             /// 0x2814, reverted) nor Index (0/10/20/30 -> 1/2/3/4, kept: vanilla's numbering) moved it.
-            /// Every scene is gated on this person (GetIsID) and on the step being open: the beat's stage not done,
-            /// and, past the first step, the stage that opens it done. So he speaks only while the talk is live.
+            /// Every scene is gated on this person (GetIsID) and, past the first step, on the stage that opens it being done.
+            /// The greeting and the completion are also gated on the beat's stage NOT done (nothing completes twice, and he
+            /// does not re-open with the ask); the side questions are not, so they outlive the completion.
             /// The person's lines are voiced by HIS voice (TalkLines), the player's are silent (WEMFile 0, as in vanilla).
             /// </summary>
             private static void BuildTalk(StarfieldMod myMod, Quest clone, Recipe r, int b, List<Step> steps,
@@ -178,7 +184,7 @@ namespace FrankyCLI
                     if (his) bm.TalkLines.Add((topic.FormKey.ID, text, vt, vid, female));
                     return (topic, info);
                 }
-                Scene NewScene(string name, uint flags)
+                Scene NewScene(string name, uint flags, bool untilDone)
                 {
                     var sc = new Scene(myMod)
                     {
@@ -188,7 +194,7 @@ namespace FrankyCLI
                     };
                     sc.Quest.SetTo(clone.FormKey);
                     sc.Conditions.Add(IsHim());
-                    sc.Conditions.Add(StageDone(stage, 0f));
+                    if (untilDone) sc.Conditions.Add(StageDone(stage, 0f));
                     if (enter > 0) sc.Conditions.Add(StageDone(enter, 1f));
                     sc.Actors.Add(new SceneActor { ID = (uint)personAlias, BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
                     sc.Actors.Add(new SceneActor { ID = unchecked((uint)-2), BehaviorFlags = (SceneActor.BehaviorFlag)266, Flags = SceneActor.Flag.NoCommandState });
@@ -197,7 +203,7 @@ namespace FrankyCLI
                 }
 
                 var (gt, _) = Line(tag + "_greet", tb.greeting!, true);
-                var gs = NewScene(tag + "_greet_scene", 0x00001834u);
+                var gs = NewScene(tag + "_greet_scene", 0x00001834u, true);
                 gs.Phases.Add(new ScenePhase { Name = "Greeting", EditorWidth = 298 });
                 var ga = new DialogueSceneAction { Index = 1, AliasID = personAlias, StartPhase = 0, EndPhase = 0 };
                 ga.Topic.SetTo(gt.FormKey);
@@ -212,7 +218,7 @@ namespace FrankyCLI
                     if (talkPerks.TryGetValue((b, x), out var perkKey)) pi.Perk.SetTo(perkKey);
                     var (nt, ni) = Line($"{tag}_reply{x + 1}", ex.reply!, true);
                     if (x == 0) ni.SetParentQuestStage = new DialogSetParentQuestStage { OnEnd = (short)stage };
-                    var sc = NewScene($"{tag}_topic{x + 1}_scene", x == 0 ? 0x00002810u : 0x00002814u);
+                    var sc = NewScene($"{tag}_topic{x + 1}_scene", 0x00002814u, x == 0);
                     sc.Index = (uint)(x + 1);   // vanilla's numbering, from 1; NOT shown to be the menu's sort key (see above)
                     // SCPI orders the menu, highest first, and must not tie (vanilla never does: MQ101 90/80/50/30/20). The
                     // completion takes 100, the rest 50, 49, 48... in recipe order. Tied at 100, the completion showed last.
@@ -224,10 +230,10 @@ namespace FrankyCLI
                     var na = new DialogueSceneAction { Index = 4, AliasID = personAlias, StartPhase = 1, EndPhase = 1 };
                     na.Topic.SetTo(nt.FormKey);
                     sc.Actions = new Noggog.ExtendedList<ASceneAction> { pa, na };
-                    Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (closes the talk, sets {stage} when the reply ends)" : "  (loops to the menu)")
+                    Console.WriteLine($"  +talk    : {sc.EditorID} \"{ex.prompt}\"" + (x == 0 ? $"  (sets {stage} when the reply ends, loops to the menu)" : "  (loops to the menu, askable after the completion)")
                                       + (ex.perk != null ? $"  [{ex.perk}]" : ""));
                 }
-                bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));
+                bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));   // the greeting's and the completion's; a side question has one fewer
             }
         }
     }

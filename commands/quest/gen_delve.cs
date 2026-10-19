@@ -357,13 +357,10 @@ namespace FrankyCLI
             /// (his 2026-10-14 pick, "a": no driving). Its pool is gen_delve pcmpool's, not the POI census.
             /// </summary>
             public bool? remote { get; set; }
-            /// <summary>
-            /// OPTIONAL, second place only, beside second.remote behind a REQUESTED first site: which planet the second request
-            /// lands on, relative to the first site's. "other" (the default when absent: a cargo run crosses planets) or
-            /// "same" (his 2026-10-15 pick for duo_delve12a, the crate delivered near the wreck). It is the one guard condition's
-            /// comparison, == 0 or == 1; nothing holds a same-planet site NEAR the first, and his play is what shows how far.
-            /// </summary>
-            public string? planet { get; set; }
+            // ⛔ There is no "planet" key, and an unknown key is refused. A second request lands where the planet content
+            // manager puts it, the first site's planet or another. Two planet guards on a place (10a 2026-10-14, 12a
+            // 2026-10-19) each CRASHED the game on start, and his ruling 2026-10-19 is "Stop doing it", "it's fine if the
+            // mission is on the same planet". So no place carries one.
             /// <summary>
             /// OPTIONAL: who is at THIS place (his dial, 2026-10-11, office/projects/delves/backlog.md "Who's there").
             /// Absent = empty, the default. infested, workers and spacers are built; any other kind is refused by
@@ -1288,18 +1285,9 @@ namespace FrankyCLI
                 Fatal("remote is set on place.third; only the main and the second place can be requested.");
             if (r.place.second?.remote == false)
                 Fatal("place.second.remote is false; leave it out for a found second place.");
-            if (r.place.planet != null) Fatal("place.planet is set; only place.second takes a planet (where the second request lands).");
-            if (r.place.third?.planet != null) Fatal("place.third.planet is set; only place.second takes a planet (where the second request lands).");
-            if (r.place.second?.planet is string spl)
-            {
-                if (spl != "same" && spl != "other") Fatal($"place.second.planet is '{spl}'; it is \"same\" or \"other\" (leave it out for other).");
-                else if (!secondRemote) Fatal("place.second.planet is set and place.second.remote is not; a found second place is always on the main place's planet.");
-                else if (!(IsBoard(t) || r.place.remote == true))
-                    Fatal("place.second.planet is set behind a LOCAL first site, where no planet guard is written (it crashed the game, 10a 2026-10-14).");
-            }
             // A LOCAL main place with a requested second (10a, his 2026-10-14 "build 10a": here, then another planet) is
-            // allowed: the main keeps its leash to the player; the second has no leash and NO planet guard (it crashed the
-            // game on startquest behind a local first site), so nothing forces it onto another planet.
+            // allowed: the main keeps its leash to the player; the second has no leash and no planet guard, so it lands
+            // on whichever planet the planet content manager picks.
             // A third place would be leashed to a second that is on another planet, so it is refused beside a request.
             if (secondRemote && (anyThird || r.place.third != null))
                 Fatal("place.second.remote is set and the recipe has a third place; a third place is held within a drive of the second, which is on another planet.");
@@ -1309,10 +1297,7 @@ namespace FrankyCLI
                         Fatal($"{where}: <SecondPlanet> needs place.second.remote; a found second place is on the main place's planet and gets no planet alias of its own.");
             if (secondRemote)
                 Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); "
-                                  + (r.place.remote == true || IsBoard(t)
-                                     ? (SecondSamePlanet(r) ? "the build guards it ONTO the first site's planet (place.second.planet: same; nothing holds it near)"
-                                                            : "the build guards it off the first site's planet")
-                                     : "NO planet guard behind a local first site (it crashed the game, 10a 2026-10-14), so nothing forces another planet"));
+                                  + "no planet guard (two crashed the game; his 2026-10-19 ruling), so it may land on either planet");
             if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
             if (remote && (anyThird || r.place.third != null || (!secondRemote && (anySecond || r.place.second != null))))
@@ -1918,14 +1903,8 @@ namespace FrankyCLI
             var madeBeats = new BeatsMade();
             if (t.borrowFrom != null) fail += BorrowAliases(myMod, clone, t, parts);
             if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts);
-            if (fail == 0 && r.place.second?.remote == true)
-            {
-                fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts);
-                // ⛔ Only behind a REQUESTED first site (a board, or place.remote). Behind a LOCAL first site the guard
-                // (IsInSameCurrentLocationAsAlias on its map marker) CRASHED the game on startquest, twice, his play of
-                // duo_delve10a 2026-10-14 22:2x; the same build with the guard out started and played end to end.
-                if (fail == 0 && (IsBoard(t) || r.place.remote == true)) fail += GuardSecondPlanet(clone, t, env, SecondSamePlanet(r));
-            }
+            // No planet guard on the second request, ever: two crashed the game on start (10a, 12a). See Place.remote.
+            if (fail == 0 && r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts);
             if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1) && (IsBoard(t) || r.place.second?.remote == true))
             {
                 fail += MakeSecondPlanet(clone, t);
@@ -2189,31 +2168,6 @@ namespace FrankyCLI
             var c = from.DeepCopy(); c.ID = (uint)sp.id; c.Name = sp.name; c.ParentSystemLocationAliasID = t.secondPlaceAlias;
             clone.Aliases.Add(c);
             Console.WriteLine($"  +planet  : alias {sp.id} {sp.name}, the planet of the second place (alias {t.secondPlaceAlias}), a copy of {from.Name}");
-            return 0;
-        }
-
-        /// <summary>
-        /// A requested second site lands OFF the first site's planet (a cargo run crosses planets), or ON it when the recipe
-        /// says place.second.planet "same" (2026-10-15, duo_delve12a: the crate goes near the wreck). Vanilla's own shape for
-        /// "the same place as that alias" on a location alias is IsInSameCurrentLocationAsAlias with a location-type keyword
-        /// (MB_Cargo01Far's TargetSystemLocation, read 2026-10-14); here it is the first site's map marker, at the planet level,
-        /// FALSE for other and TRUE for same. Whether a PCM request honours it is his play's to show: one probe landed apart
-        /// with no guard at all, and the same-planet side is unplayed.
-        /// </summary>
-        private static bool SecondSamePlanet(Recipe r) => r.place.second?.planet == "same";
-        private static int GuardSecondPlanet(Quest clone, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool same)
-        {
-            var second = clone.Aliases!.OfType<QuestLocationAlias>().First(a => a.ID == (uint)t.secondPlaceAlias);
-            int mPos = clone.Aliases.FindIndex(a => a is QuestReferenceAlias x && x.ID == (uint)t.mapMarkerAlias);
-            int sPos = clone.Aliases.IndexOf(second);
-            if (mPos < 0 || mPos > sPos) { Console.WriteLine($"REFUSED: the main place's map marker (alias {t.mapMarkerAlias}) is not listed before the second place, so the guard would read it empty."); return 1; }
-            var orbital = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>().FirstOrDefault(k => k.EditorID == "LocTypeMajorOrbital" && k.FormKey.ModKey.FileName == "Starfield.esm");
-            if (orbital == null) { Console.WriteLine("REFUSED: LocTypeMajorOrbital is not in Starfield.esm."); return 1; }
-            var d = new IsInSameCurrentLocationAsAliasConditionData { RunOnType = Condition.RunOnType.Subject };
-            d.FirstParameter = t.mapMarkerAlias;
-            d.SecondParameter.Link.SetTo(orbital.FormKey);
-            second.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = same ? 1f : 0f });
-            Console.WriteLine($"  guard    : the second place is {(same ? "ON" : "NOT on")} the planet of alias {t.mapMarkerAlias} (the first site's map marker): IsInSameCurrentLocationAsAlias, LocTypeMajorOrbital, == {(same ? 1 : 0)}");
             return 0;
         }
 

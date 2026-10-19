@@ -554,6 +554,7 @@ namespace FrankyCLI
             public List<(int on, int to)> PersonApproach = new();   // each ending person's hook: its object, measuring to the player
             public List<(uint wem, string text, string voice, string elevenlabs, bool female)> TalkLines = new();   // a talk person's voiced lines (female picks the face actor)
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
+            public List<(int beat, int stage)> TalkHolds = new();   // a last-step talk the ending fragment waits on
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
@@ -1565,7 +1566,28 @@ namespace FrankyCLI
                 void StopQuest(int st)
                 {
                     WaitForLines(st);
+                    WaitForTalks(st);
                     Add(st, "Stop()");
+                }
+                // A talk in the LAST step ends the quest from inside the conversation, and every topic loops back to the
+                // menu (his ruling 2026-10-19: the side questions stay askable after the completion). A quest's scenes stop
+                // with it, so the quest is held open while he is still in the conversation: one-second waits on the
+                // person's IsInDialogueWithPlayer, capped at ten minutes so a stuck reading cannot hold it for ever.
+                // ⚠ No vanilla script calls IsInDialogueWithPlayer (native on ObjectReference): unproven until his play.
+                void WaitForTalks(int st)
+                {
+                    foreach (var b in steps[^1].Beats.Where(b => r.beats[b].type == "talk"))
+                    {
+                        string pa = $"Alias_Talk{b + 1}Person";
+                        props.Add(("ReferenceAlias", pa, clone.FormKey, (int)talkAlias[b].ID));
+                        Add(st, $"ObjectReference talker{b + 1} = {pa}.GetRef()   ; hold the quest open while he is still talking");
+                        Add(st, $"Int talked{b + 1} = 0");
+                        Add(st, $"While talker{b + 1} && talker{b + 1}.IsInDialogueWithPlayer() && talked{b + 1} < 600");
+                        Add(st, "    Utility.Wait(1.0)");
+                        Add(st, $"    talked{b + 1} += 1");
+                        Add(st, "EndWhile");
+                        bm.TalkHolds.Add((b, st));
+                    }
                 }
                 // A board mission ends through the script the board talks to: MissionComplete() pays through MissionParent,
                 // completes every objective, sets CompleteStage and shuts the quest down. Vanilla's own stage-100 fragment
@@ -1573,6 +1595,7 @@ namespace FrankyCLI
                 void CompleteMission(int st)
                 {
                     WaitForLines(st);
+                    WaitForTalks(st);   // MissionComplete shuts the quest down, so the conversation must be over first
                     Add(st, "Quest __temp = Self as Quest");
                     Add(st, $"{t.questScript} kmyQuest = __temp as {t.questScript}");
                     Add(st, "kmyQuest.MissionComplete()");
@@ -1928,22 +1951,15 @@ namespace FrankyCLI
                 fail += Check($"alias {t.markerSource} took no fight and fills from the place's map marker",
                               ms?.Location == null ? "missing" : $"{ms.Location.AliasID} {ms.Location.RefType.FormKey}", $"{t.placeAlias} 02271F:Starfield.esm");
             }
-            if (r.place.second?.remote == true && (IsBoard(t) || r.place.remote == true))
-            {
-                var g =q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
-                    .Conditions.FirstOrDefault(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter);
-                var gd = g?.Data as IIsInSameCurrentLocationAsAliasConditionDataGetter;
-                bool same = SecondSamePlanet(r);
-                fail += Check($"the second request is guarded {(same ? "onto" : "off")} the first site's planet",
-                              gd == null ? "no guard" : $"alias {gd.FirstParameter}, {gd.SecondParameter.Link.FormKey}, == {(g as IConditionFloatGetter)?.ComparisonValue}",
-                              $"alias {t.mapMarkerAlias}, 070A54:Starfield.esm, == {(same ? 1 : 0)}");
-            }
             if (r.place.second?.remote == true)
-                fail += Check(SecondSamePlanet(r)
-                                  ? "the second request carries no drive leash to the first (the planet content manager places it, not a drive)"
-                                  : "the second request carries no drive leash to the first (it is meant for another planet)",
-                              q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?
-                                  .Conditions.Any(c => c.Data is IGetDistanceConditionDataGetter g && g.UseAliases).ToString() ?? "missing", "False");
+            {
+                var sc2 = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias)?.Conditions;
+                // ⛔ Two planet guards crashed the game on start (10a, 12a); his 2026-10-19 ruling is none, ever.
+                fail += Check("the second request carries no planet guard",
+                              sc2 == null ? "missing" : sc2.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter).ToString(), "False");
+                fail += Check("the second request carries no drive leash to the first (the planet content manager places it, not a drive)",
+                              sc2 == null ? "missing" : sc2.Any(c => c.Data is IGetDistanceConditionDataGetter g && g.UseAliases).ToString(), "False");
+            }
             if (t.questScript == null)
             {
                 // No driver: the only quest-level script is the reject handler, carrying every objective.
@@ -2158,11 +2174,19 @@ namespace FrankyCLI
                 fail += Check($"{who}: the greeting is a Greeting scene", greet == null ? "missing" : $"0x{(uint)(greet.Flags ?? 0):X8}", "0x00001834");
                 foreach (var sc in mine)
                 {
+                    // The greeting and the completion (topic1) close with the beat's stage; a side question outlives it.
+                    bool untilDone = sc == greet || sc.EditorID!.EndsWith("_topic1_scene");
                     var isId = sc.Conditions.FirstOrDefault()?.Data as IGetIsIDConditionDataGetter;
-                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step",
+                    fail += Check($"{who}: {sc.EditorID} is his and gated on the step" + (untilDone ? "" : " having opened"),
                                   $"{isId?.FirstParameter.Link.FormKey}, {sc.Conditions.Count} conditions, actor {sc.Actors.FirstOrDefault()?.ID}",
-                                  $"{tnpc}, {tconds} conditions, actor {talias}");
+                                  $"{tnpc}, {(untilDone ? tconds : tconds - 1)} conditions, actor {talias}");
+                    if (sc != greet)
+                        fail += Check($"{who}: {sc.EditorID} loops back to the menu (his 2026-10-19 ruling)",
+                                      $"0x{(uint)(sc.Flags ?? 0):X8}", "0x00002814");
                 }
+                foreach (var (hb, holdStage) in bm.TalkHolds.Where(h => h.beat == tbeat))
+                    fail += Check($"{who}: the ending fragment (stage {holdStage}) waits while he is in the conversation",
+                                  (fsrc.Contains($"talker{hb + 1} = Alias_Talk{hb + 1}Person.GetRef()") && fsrc.Contains($"talker{hb + 1}.IsInDialogueWithPlayer()")).ToString(), "True");
                 var closer = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_talk{tbeat + 1}_reply1")?.Responses.FirstOrDefault();
                 fail += Check($"{who}: the first reply ends the talk by setting {tstage}",
                               closer?.SetParentQuestStage == null ? "none" : $"OnEnd {closer.SetParentQuestStage.OnEnd}, speaker {closer.Speaker.FormKey}",
