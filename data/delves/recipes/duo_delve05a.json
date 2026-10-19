@@ -74,6 +74,8 @@
     },
     {
       "type": "recover",
+      "outside": [150, 300],
+      "_outside": "His 2026-10-19 playtest: 'the spacers spawn in the site'. The thief and his gang out on open ground, 150 to 300 from the far-edge marker at a random angle (the probe's tested range).",
       "at": "RETravelB1LocRef",
       "objective": "Recover the Relay Transmitter",
       "journal": "I've got the transmitter back, still in its packing. I should take it to the <Place> and get the relay working.",

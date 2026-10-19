@@ -436,6 +436,12 @@ namespace FrankyCLI
             /// </summary>
             public int? returnTo { get; set; }
             /// <summary>
+            /// beats, a recover, OPTIONAL: [min, max] distance from the beat's marker at which the holder is placed, out on
+            /// open ground at a random angle, his gang round him (his idea and his 05a note, 2026-10-19: "the spacers spawn in
+            /// the site"). Route A of duo_offpoiprobe (spike 2026-10-19-objectives-off-the-poi). Absent = at the marker.
+            /// </summary>
+            public List<int>? outside { get; set; }
+            /// <summary>
             /// beats, OPTIONAL: consecutive deliver beats sharing a choose name are the ENDINGS (the last step):
             /// each is shown, walking to one completes the quest on its own stage and hides the others (hidden,
             /// never failed: neither side is the villain). Jessica's Type 2; his ruling that the choice is made

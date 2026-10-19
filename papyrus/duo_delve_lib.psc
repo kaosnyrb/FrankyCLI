@@ -37,6 +37,42 @@ Function SpawnHolder(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList 
     EndWhile
 EndFunction
 
+; SpawnHolder OUT ON OPEN GROUND (his idea, 2026-10-19: "go 59 metres in the air and fire a raytrace towards the
+; ground at a random angle. place an npc at that spot and bam, objective outside poi"). The holder is placed from
+; the marker at a random angle, afMin to afMax out, 59 up, snapped to navmesh by PlaceAtMe itself: route A of
+; duo_offpoiprobe, which landed at the asked distance and near ground height 4 of 4 (the offset is in the
+; marker's own frame, which a random angle does not care about). His gang scatters round HIM, not the marker.
+Function SpawnHolderOutside(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList akGang, Form akItem, Int aiMin, Int aiMax, Float afMin, Float afMax) Global
+    ObjectReference marker = akMarker.GetRef()
+    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
+    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
+    Float detected = 2.0
+    Float veryAggressive = 2.0
+
+    Float ang = Utility.RandomFloat(0.0, 360.0)
+    Float dist = Utility.RandomFloat(afMin, afMax)
+    Float[] out = new Float[3]
+    out[0] = dist * Math.cos(ang)
+    out[1] = dist * Math.sin(ang)
+    out[2] = 59.0
+    Actor holder = marker.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, out, akHolder, True) as Actor
+    holder.AddItem(akItem, 1, False)
+    holder.SetValue(Suspicious, detected)
+    holder.SetValue(Aggression, veryAggressive)
+
+    Float[] placePosition = new Float[6]
+    Int n = Utility.RandomInt(aiMin, aiMax)
+    While n > 0
+        placePosition[0] = Utility.RandomFloat(-50, 50)
+        placePosition[1] = Utility.RandomFloat(-50, 50)
+        placePosition[2] = 0
+        Actor enemy = holder.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, placePosition, None, True) as Actor
+        enemy.SetValue(Suspicious, detected)
+        enemy.SetValue(Aggression, veryAggressive)
+        n -= 1
+    EndWhile
+EndFunction
+
 ; THE HOLD BEAT. One wave: aiMin to aiMax enemies from the gang list, each placed INTO akWave (PlaceAtMe's
 ; akAliasToFill on a RefCollectionAlias, as vanilla's MissionBoardCargoContainerScript fills its
 ; CargoCollection), all aggressive so they come for the player. A stock DefaultCollectionAliasOnDeath on

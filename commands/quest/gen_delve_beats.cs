@@ -221,6 +221,8 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is in group '{b.group}' and is a {b.type}; only use beats can be done in any order.");
                 if (b.type != "hold" && (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null))
                     Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal or revealObjective and is not a hold, so they would be silently ignored.");
+                if (b.outside != null && b.type != "recover")
+                    Fatal($"beat {i + 1} sets outside and is a {b.type}; only a recover places its holder out on open ground (so far), so it would be silently ignored.");
                 KindOf(b)?.GradeBeat(b, i, t, env, Fatal, Warn);
                 // A hold's `defend` names an earlier beat, so it is a rule BETWEEN beats and stays here, after the kind's
                 // own rules, where it always printed.

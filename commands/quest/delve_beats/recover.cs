@@ -25,6 +25,8 @@ namespace FrankyCLI
             {
                 if (b.model != null || b.name != null || b.replace)
                     Fatal($"beat {i + 1} is a recover: it has no object of its own (the holder carries the item), so model, name and replace would be ignored.");
+                if (b.outside != null && (b.outside.Count != 2 || b.outside[0] < 1 || b.outside[1] < b.outside[0]))
+                    Fatal($"beat {i + 1} outside must be [min, max] with 1 <= min <= max (distance from its marker), not [{string.Join(", ", b.outside)}].");
             }
 
             internal override int Preflight(BeatsBuild build)
@@ -86,7 +88,11 @@ namespace FrankyCLI
                 build.props.Add(("ReferenceAlias", hd, build.clone.FormKey, build.slotOf[b].targetAlias));
                 build.props.Add(("FormList", "Gang", build.gangKey!.Value, -1));
                 build.props.Add(("Form", $"Item{b + 1}", build.itemOf[b], -1));
-                build.Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax})");
+                var bt = build.r.beats[b];
+                if (bt.outside is { } o)
+                    build.Add(stage, $"duo_delve_lib.SpawnHolderOutside({mk}, {hd}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax}, {o[0]}.0, {o[1]}.0)");
+                else
+                    build.Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax})");
             }
         }
     }
