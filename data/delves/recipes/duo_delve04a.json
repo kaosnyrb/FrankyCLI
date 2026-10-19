@@ -27,6 +27,8 @@
     },
     "_theme": "The DELIVERY site, where people work: LocTypeOE_NonHostile, the engine's own keyword for a site with people on it who are not hostile. Pool 62, measured 2026-09-24. It replaced my first cut (excluding Natural, Cave, Abandoned: pool 121), which approximated people without checking a keyword; his question found this one.",
     "leash": "duo_samemapdistance",
+    "reach": "duo_shortdrivedistance",
+    "_reach": "His 2026-10-19 playtest: 'has the same issue' (as 03a, POIs too far apart). 4,000, as 08a (10-13).",
     "second": {
       "theme": {
         "require": [],

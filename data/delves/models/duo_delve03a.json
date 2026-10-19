@@ -1,5 +1,5 @@
 {
-  "FormKey": "002FDE:du_overtime.esm",
+  "FormKey": "00339C:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -7,7 +7,7 @@
     "VersionControl": 0
   },
   "EditorID": "duo_delve03a",
-  "Name": "Recovery: Lost Consignment on \u003CAlias=targetPlanet\u003E",
+  "Name": "Recovery: Missing Payroll on \u003CAlias=targetPlanet\u003E",
   "Data": {
     "Flags": 655360,
     "Priority": 10,
@@ -28,7 +28,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "A load was signed out for the \u003CAlias=DungeonLocation\u003E and never signed in. Nobody has been out to look for it. Find where it stopped.",
+          "Entry": "The crew at the \u003CAlias=DungeonLocation\u003E haven\u0027t been paid this week. The courier carrying their payroll ledger never arrived. Find where it stopped.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -71,7 +71,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "Signed out, never signed in, and it got this far.",
+          "Entry": "The courier\u0027s crate was out at the \u003CAlias=FinalLocation\u003E with the payroll ledger still in it. The pay itself went ahead to the site\u0027s locker.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -93,7 +93,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "The other half should be here. Something has taken it.",
+          "Entry": "The pay locker at the \u003CAlias=DungeonLocation\u003E had been forced and emptied. Whoever took it can\u0027t have gone far.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -115,7 +115,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "It did not go far. Nothing out here does.",
+          "Entry": "The crew\u0027s pay was out at the edge of the site, with the people who forced the locker. I took it back.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -159,6 +159,7 @@
       "LogEntries": [
         {
           "Flags": 1,
+          "Entry": "A crew at the \u003CAlias=DungeonLocation\u003E hadn\u0027t been paid. I found the courier\u0027s ledger, took their pay back from whoever forced the locker, and signed for it.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -185,7 +186,7 @@
     {
       "Index": 10,
       "Flags": 0,
-      "DisplayText": "Find the load at the \u003CAlias=FinalLocation\u003E",
+      "DisplayText": "Find the courier\u0027s crate at the \u003CAlias=FinalLocation\u003E",
       "Targets": [
         {
           "AliasID": 2,
@@ -198,7 +199,7 @@
     {
       "Index": 20,
       "Flags": 0,
-      "DisplayText": "Take it to the \u003CAlias=DungeonLocation\u003E",
+      "DisplayText": "Sign for the pay at the \u003CAlias=DungeonLocation\u003E",
       "Targets": [
         {
           "AliasID": 12,
@@ -211,7 +212,7 @@
     {
       "Index": 30,
       "Flags": 0,
-      "DisplayText": "Recover what was taken",
+      "DisplayText": "Recover the crew\u0027s pay",
       "Targets": [
         {
           "AliasID": 34,
@@ -224,7 +225,7 @@
     {
       "Index": 40,
       "Flags": 0,
-      "DisplayText": "Finish the job",
+      "DisplayText": "Return the pay to the locker",
       "Targets": [
         {
           "AliasID": 12,
@@ -454,7 +455,7 @@
           "Function": "GetDistance",
           "CompareOperator": 4,
           "Flags": 0,
-          "Global": "00098B:du_overtime.esm",
+          "Global": "0009B0:du_overtime.esm",
           "Unknown1": "000000",
           "Unknown2": 0,
           "RunOnType": 0,
@@ -488,7 +489,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "002FDF:du_overtime.esm",
+        "Object": "00339D:du_overtime.esm",
         "AliasID": 1,
         "Create": 0,
         "Level": 0
@@ -516,7 +517,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "002FE0:du_overtime.esm",
+        "Object": "00339E:du_overtime.esm",
         "AliasID": 11,
         "Create": 0,
         "Level": 0
@@ -560,7 +561,7 @@
           "Name": "Alias_Beat2Target",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 12,
             "Unused": 0
           }
@@ -580,7 +581,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "002FEB:du_overtime.esm",
+            "Form": "0033AA:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -590,7 +591,7 @@
           "Name": "Say3",
           "Flags": 1,
           "Object": {
-            "Form": "002FEF:du_overtime.esm",
+            "Form": "0033AF:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -600,7 +601,7 @@
           "Name": "Say4",
           "Flags": 1,
           "Object": {
-            "Form": "002FF3:du_overtime.esm",
+            "Form": "0033B3:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -610,7 +611,7 @@
           "Name": "Alias_Beat3Marker",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -620,7 +621,7 @@
           "Name": "Alias_Beat3Holder",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -640,7 +641,7 @@
           "Name": "Item3",
           "Flags": 1,
           "Object": {
-            "Form": "002FE2:du_overtime.esm",
+            "Form": "0033A0:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -650,7 +651,7 @@
           "Name": "Item1",
           "Flags": 1,
           "Object": {
-            "Form": "002FE1:du_overtime.esm",
+            "Form": "00339F:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -735,7 +736,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -763,7 +764,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 2,
             "Unused": 0
           }
@@ -790,7 +791,7 @@
                 "Name": "ItemToGive",
                 "Flags": 1,
                 "Object": {
-                  "Form": "002FE1:du_overtime.esm",
+                  "Form": "00339F:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -813,7 +814,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 12,
             "Unused": 0
           }
@@ -876,7 +877,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "002FDE:du_overtime.esm",
+                  "Form": "00339C:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -911,7 +912,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FDE:du_overtime.esm",
+            "Form": "00339C:du_overtime.esm",
             "Alias": 32,
             "Unused": 0
           }
@@ -938,7 +939,7 @@
                 "Name": "ItemFilter",
                 "Flags": 1,
                 "Object": {
-                  "Form": "002FE2:du_overtime.esm",
+                  "Form": "0033A0:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -952,7 +953,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "002FE8:du_overtime.esm",
+        "FormKey": "0033A6:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -961,7 +962,7 @@
         },
         "EditorID": "duo_delve03a_say1_scene",
         "Flags": 129,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -992,12 +993,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "002FE4:du_overtime.esm"
+            "Topic": "0033A2:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "002FEB:du_overtime.esm",
+        "FormKey": "0033AA:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1006,7 +1007,7 @@
         },
         "EditorID": "duo_delve03a_say2_scene",
         "Flags": 128,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1037,12 +1038,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "002FE9:du_overtime.esm"
+            "Topic": "0033A7:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "002FEF:du_overtime.esm",
+        "FormKey": "0033AF:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1051,7 +1052,7 @@
         },
         "EditorID": "duo_delve03a_say3_scene",
         "Flags": 128,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1082,12 +1083,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "002FEC:du_overtime.esm"
+            "Topic": "0033AB:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "002FF3:du_overtime.esm",
+        "FormKey": "0033B3:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1096,7 +1097,7 @@
         },
         "EditorID": "duo_delve03a_say4_scene",
         "Flags": 128,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1127,14 +1128,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "002FF0:du_overtime.esm"
+            "Topic": "0033B0:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "002FE4:du_overtime.esm",
+        "FormKey": "0033A2:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1143,7 +1144,7 @@
         },
         "EditorID": "duo_delve03a_say1_topic",
         "Priority": 50,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1151,11 +1152,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "002FE5:du_overtime.esm"
+          "0033A3:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "002FE5:du_overtime.esm",
+            "FormKey": "0033A3:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1163,14 +1164,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve03a_say1_info",
-            "Speaker": "002FE3:du_overtime.esm",
+            "Speaker": "0033A1:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12260,
+                "WEMFile": 13218,
                 "EmotionOut": 0,
                 "ResponseText": "This is dispatch.",
                 "ScriptNotes": "",
@@ -1179,16 +1180,16 @@
                 "TextHash": "FD7DC77C"
               },
               {
-                "WEMFile": 12262,
+                "WEMFile": 13220,
                 "EmotionOut": 0,
-                "ResponseText": "A load went out from here and never got where it was going. Nobody\u0027s been out to look.",
+                "ResponseText": "A crew on site haven\u0027t been paid this week. The courier with their ledger never arrived.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "122FB953"
+                "TextHash": "BE465D71"
               },
               {
-                "WEMFile": 12263,
+                "WEMFile": 13221,
                 "EmotionOut": 0,
                 "ResponseText": "Find where it stopped.",
                 "ScriptNotes": "",
@@ -1201,7 +1202,7 @@
         ]
       },
       {
-        "FormKey": "002FE9:du_overtime.esm",
+        "FormKey": "0033A7:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1210,7 +1211,7 @@
         },
         "EditorID": "duo_delve03a_say2_topic",
         "Priority": 50,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1218,11 +1219,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "002FEA:du_overtime.esm"
+          "0033A8:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "002FEA:du_overtime.esm",
+            "FormKey": "0033A8:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1230,27 +1231,36 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve03a_say2_info",
-            "Speaker": "002FE3:du_overtime.esm",
+            "Speaker": "0033A1:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12265,
+                "WEMFile": 13223,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s it. Finish the run for them and take it where it was going.",
+                "ResponseText": "That\u0027s the ledger.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "1F7424F2"
+                "TextHash": "5B3AC0C5"
+              },
+              {
+                "WEMFile": 13225,
+                "EmotionOut": 0,
+                "ResponseText": "Take it to the site. The pay went ahead to their locker, so once it\u0027s signed for, we\u0027re done.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "584E5D8C"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "002FEC:du_overtime.esm",
+        "FormKey": "0033AB:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1259,7 +1269,7 @@
         },
         "EditorID": "duo_delve03a_say3_topic",
         "Priority": 50,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1267,11 +1277,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "002FED:du_overtime.esm"
+          "0033AC:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "002FED:du_overtime.esm",
+            "FormKey": "0033AC:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1279,36 +1289,45 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve03a_say3_info",
-            "Speaker": "002FE3:du_overtime.esm",
+            "Speaker": "0033A1:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12268,
+                "WEMFile": 13227,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s only half of it.",
+                "ResponseText": "The locker\u0027s been forced.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "18BC1189"
+                "TextHash": "8A018445"
               },
               {
-                "WEMFile": 12270,
+                "WEMFile": 13229,
                 "EmotionOut": 0,
-                "ResponseText": "The rest was here, and someone\u0027s taken it. Go and get it back.",
+                "ResponseText": "The ledger\u0027s here. The pay isn\u0027t. Somebody knew it was coming.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "7ABE9C0C"
+                "TextHash": "1B0F5CF7"
+              },
+              {
+                "WEMFile": 13230,
+                "EmotionOut": 0,
+                "ResponseText": "Go and get it back.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "2F321067"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "002FF0:du_overtime.esm",
+        "FormKey": "0033B0:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1317,7 +1336,7 @@
         },
         "EditorID": "duo_delve03a_say4_topic",
         "Priority": 50,
-        "Quest": "002FDE:du_overtime.esm",
+        "Quest": "00339C:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1325,11 +1344,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "002FF1:du_overtime.esm"
+          "0033B1:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "002FF1:du_overtime.esm",
+            "FormKey": "0033B1:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1337,29 +1356,29 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve03a_say4_info",
-            "Speaker": "002FE3:du_overtime.esm",
+            "Speaker": "0033A1:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12272,
+                "WEMFile": 13232,
                 "EmotionOut": 0,
-                "ResponseText": "You got it back? Good.",
+                "ResponseText": "You\u0027ve got it? Good.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "94F57CAD"
+                "TextHash": "161A3F54"
               },
               {
-                "WEMFile": 12274,
+                "WEMFile": 13234,
                 "EmotionOut": 0,
-                "ResponseText": "Bring it in and I\u0027ll close the docket.",
+                "ResponseText": "Put it in the locker and sign the ledger. I\u0027ll close the docket.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "A5C0B42D"
+                "TextHash": "85B2D847"
               }
             ]
           }

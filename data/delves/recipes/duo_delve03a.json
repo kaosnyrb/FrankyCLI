@@ -33,6 +33,8 @@
     },
     "_theme": "Deliberately empty, her generic ruling. The skeleton is what is under test.",
     "leash": "duo_samemapdistance",
+    "reach": "duo_shortdrivedistance",
+    "_reach": "His 2026-10-19 playtest: 'distance between Pois is a lot'. 4,000, as 08a (10-13).",
     "second": {
       "theme": {
         "require": ["LocTypeOE_ThemeNaturalKeyword"],

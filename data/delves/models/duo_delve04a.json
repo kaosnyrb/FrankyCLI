@@ -1,5 +1,5 @@
 {
-  "FormKey": "002FF4:du_overtime.esm",
+  "FormKey": "0033B4:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -389,7 +389,7 @@
           "Function": "GetDistance",
           "CompareOperator": 4,
           "Flags": 0,
-          "Global": "00098B:du_overtime.esm",
+          "Global": "0009B0:du_overtime.esm",
           "Unknown1": "000000",
           "Unknown2": 0,
           "RunOnType": 0,
@@ -423,7 +423,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "002FF5:du_overtime.esm",
+        "Object": "0033B5:du_overtime.esm",
         "AliasID": 1,
         "Create": 0,
         "Level": 0
@@ -451,7 +451,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "002FF6:du_overtime.esm",
+        "Object": "0033B6:du_overtime.esm",
         "AliasID": 11,
         "Create": 0,
         "Level": 0
@@ -495,7 +495,7 @@
           "Name": "Say1",
           "Flags": 1,
           "Object": {
-            "Form": "003000:du_overtime.esm",
+            "Form": "0033C0:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -505,7 +505,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003004:du_overtime.esm",
+            "Form": "0033C4:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -515,7 +515,7 @@
           "Name": "Beat1Message",
           "Flags": 1,
           "Object": {
-            "Form": "002FF9:du_overtime.esm",
+            "Form": "0033B9:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -525,7 +525,7 @@
           "Name": "Alias_Beat3Marker",
           "Flags": 1,
           "Object": {
-            "Form": "002FF4:du_overtime.esm",
+            "Form": "0033B4:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -535,7 +535,7 @@
           "Name": "Alias_Beat3Holder",
           "Flags": 1,
           "Object": {
-            "Form": "002FF4:du_overtime.esm",
+            "Form": "0033B4:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -555,7 +555,7 @@
           "Name": "Item3",
           "Flags": 1,
           "Object": {
-            "Form": "002FF8:du_overtime.esm",
+            "Form": "0033B8:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -565,7 +565,7 @@
           "Name": "Beat3Message",
           "Flags": 1,
           "Object": {
-            "Form": "002FFA:du_overtime.esm",
+            "Form": "0033BA:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -575,7 +575,7 @@
           "Name": "Item1",
           "Flags": 1,
           "Object": {
-            "Form": "002FF7:du_overtime.esm",
+            "Form": "0033B7:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -652,7 +652,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FF4:du_overtime.esm",
+            "Form": "0033B4:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -680,7 +680,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FF4:du_overtime.esm",
+            "Form": "0033B4:du_overtime.esm",
             "Alias": 2,
             "Unused": 0
           }
@@ -707,7 +707,7 @@
                 "Name": "ItemToGive",
                 "Flags": 1,
                 "Object": {
-                  "Form": "002FF7:du_overtime.esm",
+                  "Form": "0033B7:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -730,7 +730,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FF4:du_overtime.esm",
+            "Form": "0033B4:du_overtime.esm",
             "Alias": 12,
             "Unused": 0
           }
@@ -794,7 +794,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "002FF4:du_overtime.esm",
+            "Form": "0033B4:du_overtime.esm",
             "Alias": 32,
             "Unused": 0
           }
@@ -821,7 +821,7 @@
                 "Name": "ItemFilter",
                 "Flags": 1,
                 "Object": {
-                  "Form": "002FF8:du_overtime.esm",
+                  "Form": "0033B8:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
@@ -835,7 +835,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003000:du_overtime.esm",
+        "FormKey": "0033C0:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -844,7 +844,7 @@
         },
         "EditorID": "duo_delve04a_say1_scene",
         "Flags": 128,
-        "Quest": "002FF4:du_overtime.esm",
+        "Quest": "0033B4:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -875,12 +875,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "002FFC:du_overtime.esm"
+            "Topic": "0033BC:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003004:du_overtime.esm",
+        "FormKey": "0033C4:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -889,7 +889,7 @@
         },
         "EditorID": "duo_delve04a_say2_scene",
         "Flags": 128,
-        "Quest": "002FF4:du_overtime.esm",
+        "Quest": "0033B4:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -920,14 +920,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003001:du_overtime.esm"
+            "Topic": "0033C1:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "002FFC:du_overtime.esm",
+        "FormKey": "0033BC:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -936,7 +936,7 @@
         },
         "EditorID": "duo_delve04a_say1_topic",
         "Priority": 50,
-        "Quest": "002FF4:du_overtime.esm",
+        "Quest": "0033B4:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -944,11 +944,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "002FFD:du_overtime.esm"
+          "0033BD:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "002FFD:du_overtime.esm",
+            "FormKey": "0033BD:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -956,14 +956,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve04a_say1_info",
-            "Speaker": "002FFB:du_overtime.esm",
+            "Speaker": "0033BB:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12284,
+                "WEMFile": 13244,
                 "EmotionOut": 0,
                 "ResponseText": "That\u0027s the housing. The core\u0027s gone.",
                 "ScriptNotes": "",
@@ -972,7 +972,7 @@
                 "TextHash": "2F55324C"
               },
               {
-                "WEMFile": 12286,
+                "WEMFile": 13246,
                 "EmotionOut": 0,
                 "ResponseText": "Someone opened the crate in the night.",
                 "ScriptNotes": "",
@@ -981,7 +981,7 @@
                 "TextHash": "A5A43DEA"
               },
               {
-                "WEMFile": 12287,
+                "WEMFile": 13247,
                 "EmotionOut": 0,
                 "ResponseText": "We need it back, or we\u0027re drinking recycled for another week.",
                 "ScriptNotes": "",
@@ -994,7 +994,7 @@
         ]
       },
       {
-        "FormKey": "003001:du_overtime.esm",
+        "FormKey": "0033C1:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1003,7 +1003,7 @@
         },
         "EditorID": "duo_delve04a_say2_topic",
         "Priority": 50,
-        "Quest": "002FF4:du_overtime.esm",
+        "Quest": "0033B4:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1011,11 +1011,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003002:du_overtime.esm"
+          "0033C2:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003002:du_overtime.esm",
+            "FormKey": "0033C2:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1023,14 +1023,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve04a_say2_info",
-            "Speaker": "002FFB:du_overtime.esm",
+            "Speaker": "0033BB:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12289,
+                "WEMFile": 13249,
                 "EmotionOut": 0,
                 "ResponseText": "Water\u0027s in the line.",
                 "ScriptNotes": "",
@@ -1039,7 +1039,7 @@
                 "TextHash": "F63DF6AC"
               },
               {
-                "WEMFile": 12291,
+                "WEMFile": 13251,
                 "EmotionOut": 0,
                 "ResponseText": "First clean water in a week. You can taste the difference. You can actually taste it.",
                 "ScriptNotes": "",
