@@ -1162,8 +1162,12 @@ namespace FrankyCLI
                     var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
                     mi.EditorID = $"{r.id}_item{i + 1}";
                     mi.Name = r.beats[i].item!;
+                    // A quest item weighs nothing (his, 2026-10-20: "quest items should wieght 0"): the player cannot drop it,
+                    // so any weight is a load they carry for the mission and can do nothing about. The source's weight is
+                    // printed so the change is visible on every build.
+                    mi.Weight = 0f;
                     itemOf[i] = mi.FormKey;
-                    Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID})");
+                    Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0)");
                 }
                 return 0;
             }
@@ -2026,6 +2030,10 @@ namespace FrankyCLI
                                   .Select(a => $"alias {a.ID} {a.Name} wants alias {g.First().ID} {g.First().Name}'s reference"))
                 .ToList();
             fail += Check("no two aliases contend for one reference", contend.Count == 0 ? "none" : string.Join("; ", contend), "none");
+            // Every pickup this build wrote weighs 0 (his, 2026-10-20), read back off disk.
+            var items = m.MiscItems.Where(x => x.EditorID != null && x.EditorID.StartsWith(r.id + "_item", StringComparison.Ordinal)).ToList();
+            var heavy = items.Where(x => x.Weight != 0f).Select(x => $"{x.EditorID} weighs {x.Weight}").ToList();
+            fail += Check($"every pickup item weighs 0 ({items.Count} item(s))", heavy.Count == 0 ? "all 0" : string.Join("; ", heavy), "all 0");
             if (bm.SecondPlanet is int spId)
             {
                 var sp = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)spId);
