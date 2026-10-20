@@ -27,6 +27,8 @@
     },
     "_theme": "Testcase 01's delivery rule, unchanged on purpose: people who are waiting on the relay have to be there. LocTypeOE_NonHostile, pool 62 when measured 2026-09-24.",
     "leash": "duo_samemapdistance",
+    "reach": "duo_shortdrivedistance",
+    "_reach": "His 2026-10-20 play: 'the distance between the first crate and the POI is a lot'. 4,000, as 03a and 04a (10-19).",
     "second": {
       "theme": {
         "require": [],
