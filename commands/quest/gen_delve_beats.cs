@@ -468,7 +468,7 @@ namespace FrankyCLI
             foreach (var (b, i) in r.beats.Select((b, i) => (b, i)))
             {
                 if (string.IsNullOrWhiteSpace(b.model)) continue;
-                if (FindAsset(env.DataFolderPath.Path, t.mod, b.model!) == "" && !(IndexOf(env).ByModel.ContainsKey(b.model!)))
+                if (FindAsset(env.DataFolderPath.Path, t.mod, b.model!) == "" && !IndexOf(env).Models.Contains(b.model!))
                     Fatal($"beat {i + 1} model '{b.model}' is used by no record and is not in Data or the mod's archives; it would render nothing.");
             }
             foreach (var (b, i) in r.beats.Select((b, i) => (b, i)))

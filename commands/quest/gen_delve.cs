@@ -522,6 +522,7 @@ namespace FrankyCLI
         {
             string verb = args.Length > 1 ? args[1].ToLowerInvariant() : "";
             bool dry = args.Any(a => a.Equals("--dry", StringComparison.OrdinalIgnoreCase));
+            bool spread = args.Any(a => a.Equals("--spread", StringComparison.OrdinalIgnoreCase));
             string? path = args.Skip(2).FirstOrDefault(a => !a.StartsWith("--"));
             // Before the data folder and the environment: it needs neither (gen_delve_selftest.cs).
             if (verb == "selftest") return SelfTest();
@@ -552,14 +553,15 @@ namespace FrankyCLI
                 case "pcmpool": return DelveCensus.PcmPool(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
-                    return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null) ? 0 : 1);
+                    return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null, spread) ? 0 : 1);
                 case "build":
                 {
                     int ei = Array.FindIndex(args, a => a.Equals("--emit", StringComparison.OrdinalIgnoreCase));
                     var opts = new BuildOptions(
                         FromBase: args.Any(a => a.Equals("--from-base", StringComparison.OrdinalIgnoreCase)),
                         EmitDir: ei >= 0 && ei + 1 < args.Length ? args[ei + 1] : null,
-                        DataDir: dataDir);
+                        DataDir: dataDir,
+                        Spread: spread);
                     if (opts.EmitDir != null && !dry) { Console.WriteLine("REFUSED: --emit is a dry-run output; add --dry."); return 1; }
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Build(r, t, env, dry, opts));
                 }
@@ -569,7 +571,7 @@ namespace FrankyCLI
                 case "nodeflag": return NodeFlag(args, templates, dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
-                    Console.WriteLine("       gen_delve lint  <recipe.json | recipeId>");
+                    Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve build <recipe> --dry --emit <dir>   write the would-be plugin and the emitted model to <dir>, never the live plugin");
@@ -962,7 +964,9 @@ namespace FrankyCLI
                 try
                 {
                     r = LoadRecipe(f, dataDir, templates, out var t);
-                    ok = r != null && t != null && Grade(r, t, env, null);
+                    // Never --spread here: each recipe's log is swallowed to one verdict line, so the figures would cost the
+                    // placed-ref index and print nowhere.
+                    ok = r != null && t != null && Grade(r, t, env, null, false);
                 }
                 finally { Console.SetOut(real); }
                 string log = sw.ToString();
@@ -1109,7 +1113,7 @@ namespace FrankyCLI
         /// a lint that only speaks when it is unhappy cannot be told from one that did not run.
         /// </summary>
         private static bool Grade(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
-                                  Dictionary<string, FormKey>? markersOut)
+                                  Dictionary<string, FormKey>? markersOut, bool spread)
         {
             var issues = new List<Issue>();
             void Fatal(string s) => issues.Add(new Issue(true, s));
@@ -1451,7 +1455,13 @@ namespace FrankyCLI
             // how far apart any two beats in ONE POI can ever be. No printed verdict and no
             // threshold: three numbers and the author decides, because "far enough" is a question
             // about the fiction and not about the records.
-            if (!issues.Any(i => i.Fatal) && r.beats.Count >= 2)
+            //
+            // ⚠ OPT-IN SINCE 2026-10-20 (--spread), his "try 1 and 2": it never fails a lint, and its first placed-object
+            // lookup makes Mutagen index every placed ref in the load order, 26-42 s of a ~60-80 s lint (FRANKY_TIMING=1).
+            // Skipped out loud, never silently, so an author still sees where it went.
+            if (!spread && !issues.Any(i => i.Fatal) && r.beats.Count >= 2)
+                Console.WriteLine("\n  separation: skipped (it only prints; add --spread, or run gen_delve spread <markerA> <markerB>)");
+            if (spread && !issues.Any(i => i.Fatal) && r.beats.Count >= 2)
             {
                 Console.WriteLine();
                 Console.WriteLine("  separation, METRES (1 unit = 1 m, read off his HUD 2026-09-24)");
@@ -1627,7 +1637,9 @@ namespace FrankyCLI
         {
             public object Env = null!;
             public List<(string name, string? edid, FormKey fk)> Named = new();
-            public Dictionary<string, List<(string? edid, string? stands)>> ByModel = new(StringComparer.OrdinalIgnoreCase);
+            /// <summary>Every model path some record uses. Only ever asked "is this path used" (the beat-model check), so a
+            /// set: the per-path record lists and a Static's bounds verdict it used to carry were read by nothing.</summary>
+            public HashSet<string> Models = new(StringComparer.OrdinalIgnoreCase);
         }
         private static LoadIndex? _index;
 
@@ -1635,18 +1647,15 @@ namespace FrankyCLI
         {
             if (_index != null && ReferenceEquals(_index.Env, env)) return _index;
             var ix = new LoadIndex { Env = env };
+            // ⚠ THE COST, measured 2026-10-20 (FRANKY_TIMING=1 plus a per-plugin probe): ~36 s on Defiant, and it is
+            // NOT one type or one plugin. The 16 base masters are ~24 s of it (Starfield.esm 11 s alone), enabled mods
+            // ~4.6 s, disabled ones ~5.6 s. Walking only the named/modeled types was tried and dropped the same day:
+            // no faster, and it MISSED models (WinningOverrides(Type) on the object-mod siblings returns the whole
+            // shared group). Every record really is read, because a winning override can take a name away.
             foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
             {
                 if (rec is INamedGetter ng && !string.IsNullOrEmpty(ng.Name)) ix.Named.Add((ng.Name!, rec.EditorID, rec.FormKey));
-                if (rec is IModeledGetter mg && mg.Model?.File != null)
-                {
-                    string path = mg.Model.File.DataRelativePath.Path;
-                    string? stands = rec is IStaticGetter sg && sg.ObjectBounds != null
-                        ? gen_inspect.BoundsVerdict(sg.ObjectBounds.First.Z, sg.ObjectBounds.Second.Z) + $" ({sg.EditorID})" : null;
-                    if (!ix.ByModel.TryGetValue(path, out var list)) ix.ByModel[path] = list = new();
-                    // a Static's verdict first, so the first one read is the one a reader can trust
-                    if (stands != null) list.Insert(0, (rec.EditorID, stands)); else list.Add((rec.EditorID, null));
-                }
+                if (rec is IModeledGetter mg && mg.Model?.File != null) ix.Models.Add(mg.Model.File.DataRelativePath.Path);
             }
             return _index = ix;
         }
@@ -1683,7 +1692,7 @@ namespace FrankyCLI
         /// <summary>FromBase: start from the base quest's clone even when the template has a shell (the A/B proof's A side;
         /// its exit is every template having a shell that has passed the A/B). EmitDir: with --dry, write the would-be
         /// plugin and the emitted model there instead of nowhere.</summary>
-        private sealed record BuildOptions(bool FromBase, string? EmitDir, string DataDir);
+        private sealed record BuildOptions(bool FromBase, string? EmitDir, string DataDir, bool Spread);
 
         /// <summary>
         /// THE RECIPE EMITS THE MODEL. Once every rule has run, the built quest is read into gen_questmodel's model (a
@@ -1819,7 +1828,7 @@ namespace FrankyCLI
         private static int Build(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool dry, BuildOptions opts)
         {
             var markers = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
-            if (!Grade(r, t, env, markers))
+            if (!Grade(r, t, env, markers, opts.Spread))
             { Console.WriteLine("\n=== lint failed. NOTHING WRITTEN. ==="); return 1; }
 
             Console.WriteLine();
