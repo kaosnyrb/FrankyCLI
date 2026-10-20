@@ -85,6 +85,21 @@ board's `_duo_MB_MissionNode_test`** (under vanilla's `MissionBranch`) is a diff
 node; `testnode` edits the `.esm` only.
 
 
+**The legacy mission system: `gen_delve legacy <pool node> [--dry]`** (2026-10-20, his ask; his shape 2026-10-17:
+the old quests stay in the plugin, a setting OFF by default, ON mixes them in, never old-only). It moves every member
+of a pool that is NOT a Delve (a Delve's EditorID names a recipe here, and must agree with the `duo_delve` prefix) into
+a new sibling, `<pool>_Legacy`, placed FIRST under the same branch and gated on the pool's own conditions plus
+`GetGlobalValue(duo_ClassicMissions) == 1` and `GetRandomPercent < duo_ClassicMissionsShare` (50). So with the option
+OFF the legacy node is skipped and the pool deals Delves only; ON, about half the events deal an original quest.
+**Why a node:** a Story Manager quest entry is `Quest` + `HoursUntilReset` and a QUST has no event conditions, so a
+pool cannot gate one member. The first run also creates the setting (all five or refused): the option
+`duo_GPO_ClassicMissions` (Float 0..1, Off/On, default Off) in group `duo_GPO_Group`, the two globals, and
+`duo_GameplayOptionsQuest` (start game enabled) running `papyrus/duo_gameplayoptions.psc`, which copies the option into
+`duo_ClassicMissions` (vanilla PEO's shape, and his Suit Power Cores'). Compile that script once: `python
+papyrus/compile.py C:/modding/DU_Overtime/Data duo_gameplayoptions`, then copy the `.pex` into Steam `Data/scripts`.
+Refuses a pool already split. No quest is touched; a Delve built later still deals into the pool its recipe names.
+⚠ **New Delves for a split pool go to the POOL, never to `_Legacy`.** Snapshot first, as for a build.
+
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
 go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the

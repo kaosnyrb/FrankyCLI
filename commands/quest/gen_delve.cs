@@ -570,6 +570,8 @@ namespace FrankyCLI
                 case "unbuild": return Unbuild(path, templates, dry);
                 case "testnode": return TestNode(args, templates, dry);
                 case "nodeflag": return NodeFlag(args, templates, dry);
+                // the legacy mission system: commands/quest/delve_legacy.cs
+                case "legacy": return DelveLegacy.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
@@ -582,6 +584,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve unbuild <builtId> [--dry]   take a built Delve's records back out of the plugin");
                     Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
                     Console.WriteLine("       gen_delve nodeflag <node> runone on|off [--dry]   one quest per event (NumQuestsToRun, max 1)");
+                    Console.WriteLine("       gen_delve legacy <pool node> [--dry]   move the pool's non-Delve quests to <pool>_Legacy, behind the Classic Missions setting");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
                     Console.WriteLine("       gen_delve selftest   the build's pure helpers, no plugin or game data loaded, exit 1 on failure");
                     return 1;

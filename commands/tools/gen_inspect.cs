@@ -776,6 +776,14 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { Console.WriteLine($"--- Global ---"); Console.WriteLine($"  FormKey:  {rec.FormKey}"); Console.WriteLine($"  EditorID: {rec.EditorID}"); Console.WriteLine($"  Data:     {rec.Data}"); Console.WriteLine(); found++; }
                     break;
+                case "gameplayoption":
+                case "gpof":
+                    // The generic dump prints Data and every Reward as a type name, and the step labels the
+                    // settings menu shows live in the Rewards (2026-10-20, the Classic Missions option).
+                    foreach (var rec in mod.GameplayOptions)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpGameplayOption(rec); found++; }
+                    break;
                 case "formlist":
                     foreach (var rec in mod.FormLists)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
@@ -979,6 +987,41 @@ namespace FrankyCLI
                 Console.WriteLine($"  MenuButtons ({msg.MenuButtons.Count}):");
                 for (int i = 0; i < msg.MenuButtons.Count; i++)
                     Console.WriteLine($"    [{i}] {msg.MenuButtons[i].Text}  (conditions: {msg.MenuButtons[i].Conditions?.Count ?? 0})");
+            }
+            Console.WriteLine();
+        }
+
+        /// A settings-menu slider (GPOF): its value type and range, and every Reward, which is one row per
+        /// step carrying the label the menu shows. A string that will not resolve prints as such, never blank.
+        private static void DumpGameplayOption(IGameplayOptionGetter o)
+        {
+            static string S(Mutagen.Bethesda.Strings.ITranslatedStringGetter? t) => t == null ? "(none)" : (t.String ?? "(unresolved)");
+            Console.WriteLine($"--- GameplayOption (GPOF) ---");
+            Console.WriteLine($"  FormKey:     {o.FormKey}");
+            Console.WriteLine($"  EditorID:    {o.EditorID}");
+            Console.WriteLine($"  Name:        {S(o.Name)}");
+            Console.WriteLine($"  Description: {S(o.Description)}");
+            switch (o.Data)
+            {
+                case IFloatGameplayOptionDataGetter f:
+                    Console.WriteLine($"  Data:        Float  Value1={f.Value1?.ToString() ?? "(null)"}  Value2={f.Value2?.ToString() ?? "(null)"}  Min={f.Min}  Max={f.Max}  Step={f.Step}");
+                    break;
+                case IBoolGameplayOptionDataGetter b:
+                    Console.WriteLine($"  Data:        Bool   Value1={b.Value1?.ToString() ?? "(null)"}  Value2={b.Value2?.ToString() ?? "(null)"}");
+                    break;
+                case null:
+                    Console.WriteLine($"  Data:        (none)");
+                    break;
+                default:
+                    Console.WriteLine($"  Data:        {o.Data.GetType().Name} (a shape this dumper does not know)");
+                    break;
+            }
+            Console.WriteLine($"  Keywords:    {o.Keywords?.Count ?? 0}");
+            Console.WriteLine($"  Rewards ({o.Rewards.Count}):");
+            for (int i = 0; i < o.Rewards.Count; i++)
+            {
+                var r = o.Rewards[i];
+                Console.WriteLine($"    [{i}] SettingValue={r.SettingValue?.ToString() ?? "(null)"}  RewardValue={r.RewardValue?.ToString() ?? "(null)"}  Name={S(r.Name)}  Description={S(r.Description)}");
             }
             Console.WriteLine();
         }
