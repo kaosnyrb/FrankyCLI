@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_delve24a",
   "template": "beats",
-  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
-  "_deal": "The live local-cargo pool.",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: a mission you go into knowing there is a fight (his ruling, 2026-10-20).",
   "author": "jessica",
   "source": "his 2026-10-17 09:51: \"do the next 5 as well\". First Delve of the old Dismantle: Robots family (artifact_local).",
   "_note": [
