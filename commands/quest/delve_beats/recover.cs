@@ -68,7 +68,10 @@ namespace FrankyCLI
                 var fp = new ScriptObjectProperty { Name = "ItemFilter", Flags = ScriptProperty.Flag.Edited };
                 fp.Object.SetTo(build.itemOf[b]);
                 sc.Properties.Add(fp);
-                return build.AttachBeatHook(b, hookAlias, script, sc, prereq);
+                int f = build.AttachBeatHook(b, hookAlias, script, sc, prereq);
+                // Placed outside, the holder can land before his ground loads: he is dropped onto navmesh when it does.
+                if (f == 0 && build.r.beats[b].outside != null) build.SnapOnLoad(b, build.slotOf[b].targetAlias);
+                return f;
             }
 
             /// <summary>

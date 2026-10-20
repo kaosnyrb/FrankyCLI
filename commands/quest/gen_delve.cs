@@ -2522,15 +2522,23 @@ namespace FrankyCLI
             if (entry == null)
             {
                 if (how == HookEntry.MustExist) return Hooked.NoEntry;
-                entry = new QuestFragmentAlias();
-                entry.Property.Object.SetTo(quest);
-                entry.Property.Alias = (short)alias;
-                vma.Aliases.Add(entry);
+                entry = NewAliasEntry(vma, quest, alias);
             }
             if (refuseTwice && entry.Scripts.Any(x => x.Name == sc.Name)) return Hooked.AlreadyCarries;
             entry.Scripts.Add(sc);
             bm.Hooks.Add((alias, sc.Name, stage, prereq));
             return Hooked.Added;
+        }
+
+        /// <summary>A fresh script entry for an alias on the quest's VMAD, added and returned. Shared by AttachHook and
+        /// the outside holder's snap (BeatsBuild.SnapOnLoad).</summary>
+        private static QuestFragmentAlias NewAliasEntry(QuestAdapter vma, FormKey quest, int alias)
+        {
+            var entry = new QuestFragmentAlias();
+            entry.Property.Object.SetTo(quest);
+            entry.Property.Alias = (short)alias;
+            vma.Aliases.Add(entry);
+            return entry;
         }
 
         /// <summary>
