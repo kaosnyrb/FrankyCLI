@@ -772,9 +772,11 @@ namespace FrankyCLI
                         { DumpRecord(rec, "Faction", cache); found++; }
                     break;
                 case "global":
+                    // Flags too: a Constant global cannot be SET by a script or the console, and this case printed
+                    // only the value, so two reads on 2026-10-20 could not see the flag that broke Classic Missions.
                     foreach (var rec in mod.Globals)
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
-                        { Console.WriteLine($"--- Global ---"); Console.WriteLine($"  FormKey:  {rec.FormKey}"); Console.WriteLine($"  EditorID: {rec.EditorID}"); Console.WriteLine($"  Data:     {rec.Data}"); Console.WriteLine(); found++; }
+                        { Console.WriteLine($"--- Global ---"); Console.WriteLine($"  FormKey:  {rec.FormKey}"); Console.WriteLine($"  EditorID: {rec.EditorID}"); Console.WriteLine($"  Data:     {rec.Data}"); Console.WriteLine($"  Flags:    {rec.MajorFlags}"); Console.WriteLine(); found++; }
                     break;
                 case "gameplayoption":
                 case "gpof":
