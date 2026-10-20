@@ -551,6 +551,7 @@ namespace FrankyCLI
                 case "footprint": return DelveCensus.Footprint();
                 case "keywords": return DelveCensus.PoolKeywords(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "pcmpool": return DelveCensus.PcmPool(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
+                case "models": return ModelCheck(dataDir, templates, args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":
                     if (args.Any(a => a.Equals("--all", StringComparison.OrdinalIgnoreCase))) return LintAll(dataDir, templates);
                     return WithRecipe(path, dataDir, templates, (r, t, env) => Grade(r, t, env, null, spread) ? 0 : 1);
@@ -573,6 +574,7 @@ namespace FrankyCLI
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
+                    Console.WriteLine("       gen_delve models [recipe ...]   the final test: every beat model resolves (one ~36 s load-order walk)");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve build <recipe> --dry --emit <dir>   write the would-be plugin and the emitted model to <dir>, never the live plugin");
                     Console.WriteLine("       gen_delve build <recipe> --from-base   start from the base quest's clone, not the template's shell (the A/B proof)");
@@ -983,12 +985,10 @@ namespace FrankyCLI
                 if (r != null)
                 {
                     // Named per beat. (Read only at the top level once, which compared nothing on every beats recipe: Jessica, 2026-10-11.)
+                    // People only since 2026-10-20: item names left with his ruling that quest items never clash for the player.
                     var named = new List<(string field, string? name)>();
                     for (int i = 0; i < r.beats.Count; i++)
-                    {
-                        named.Add(($"beats[{i + 1}].item", r.beats[i].item));
                         named.Add(($"beats[{i + 1}].person.name", r.beats[i].person?.name));
-                    }
                     foreach (var (field, nm) in named)
                         if (!string.IsNullOrWhiteSpace(nm)) names.Add((r.id, field, nm!));
                 }
@@ -1040,12 +1040,14 @@ namespace FrankyCLI
                                               + $"'{Shape(sib, part)}' vs '{Shape(first, part)}'. Same number, same content: fix both, or give it its own number.");
             }
 
-            // The item-name check inside each lint sees only what is already BUILT into the plugin, so two new
-            // recipes naming the same thing both pass until one is built. Across the batch it is a failure.
+            // Two Delves' PEOPLE sharing a name: two different people with one name in a player's world. Across the batch it is
+            // a failure. (Item names were in this until 2026-10-20: his "Items marked as quest items can't be removed from the
+            // players inventory and they don't need to select it from the inventory", extended here from the per-lint check
+            // he retired, by me, said so to him.)
             foreach (var g in names.GroupBy(n => n.name, StringComparer.OrdinalIgnoreCase).Where(g => g.Select(x => x.recipe).Distinct().Count() > 1))
             {
                 clashes++;
-                Console.WriteLine($"  [FATAL] \"{g.Key}\" is used by {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: two things with one name in a player's inventory or world.");
+                Console.WriteLine($"  [FATAL] \"{g.Key}\" is used by {string.Join(", ", g.Select(x => x.recipe + " (" + x.field + ")"))}: two people with one name in a player's world.");
             }
             Console.WriteLine(failed == 0 && clashes == 0 ? $"  ALL {files.Count} RECIPES LINT CLEAN."
                               : $"  {failed} of {files.Count} RECIPE(S) FAIL" + (clashes > 0 ? $", and {clashes} name clash(es) ACROSS recipes." : "."));
@@ -1551,32 +1553,10 @@ namespace FrankyCLI
             return outp;
         }
 
-        /// <summary>
-        /// AN ITEM NAME MUST NOT BE ONE THE LOAD ORDER ALREADY USES. An exact match on any named record
-        /// is fatal (two different things with one name in an inventory); a record whose name merely
-        /// CONTAINS the item's first word is listed, not judged, because whether it collides in the
-        /// fiction is the author's call. Prints how many names it read, so a blind read shows as one.
-        /// </summary>
-        private static void ItemNameCollisions(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Recipe r,
-                                               List<string> names, Action<string> fatal)
-        {
-            var heads = names.Select(n => n.Split(' ')[0]).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            int read = 0;
-            var near = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var (nm, edid, fk) in IndexOf(env).Named)
-            {
-                read++;
-                if (edid != null && edid.StartsWith(r.id + "_", StringComparison.OrdinalIgnoreCase)) continue; // our own last build
-                foreach (var n in names)
-                    if (string.Equals(nm, n, StringComparison.OrdinalIgnoreCase))
-                        fatal($"item name \"{n}\" is already the name of {edid} [{fk}]");
-                foreach (var h in heads)
-                    if (nm.Contains(h, StringComparison.OrdinalIgnoreCase)) near.Add($"{nm}  ({edid})");
-            }
-            Console.WriteLine($"  item names: {read:N0} named record(s) read; containing {string.Join(" / ", heads)}: {near.Count}");
-            foreach (var n in near.Take(25)) Console.WriteLine("    " + n);
-            if (read == 0) fatal("the item-name check read ZERO named records, so it checked nothing");
-        }
+        // (An item-name check stood here from 2026-09-24: a pickup's name matching ANY named record in the load order was
+        // fatal. Retired 2026-10-20 on his ruling: "we don't care about this. Items marked as quest items can't be removed
+        // from the players inventory and they don't need to select it from the inventory." It read every record in the
+        // load order, ~36 s of every lint and build of a recipe with an item.)
 
         private static IEnumerable<(string, string)> ProseStrings(Recipe r)
         {
@@ -1628,36 +1608,71 @@ namespace FrankyCLI
 
 
         /// <summary>
-        /// ONE PASS OVER THE LOAD ORDER, KEPT FOR THE LIFE OF THE ENVIRONMENT. lint --all took six minutes for
-        /// four recipes because every recipe re-walked ~1.08M records for the item names and once per model
-        /// field. Same answers, read once. Keyed on the environment object, so a different load order is a
-        /// different index. (The location census it also cached is PoiCensus now, held by CensusOf.)
+        /// EVERY MODEL PATH SOME RECORD USES, for `gen_delve models` only. A vanilla mesh lives in the game's archives,
+        /// not in Data or the mod's own, so FindAsset cannot see it; "some record uses this path" is the test that can.
+        ///
+        /// ⚠ THE COST, measured 2026-10-20 (FRANKY_TIMING=1 plus a per-plugin probe): ~36 s on Defiant, spread over
+        /// every plugin. The 16 base masters are ~24 s of it (Starfield.esm 11 s alone), enabled mods ~4.6 s, disabled
+        /// ones ~5.6 s. Walking only the modeled types was tried and dropped the same day: no faster, and it MISSED
+        /// models (WinningOverrides(Type) on the object-mod siblings returns the whole shared group). So it runs once,
+        /// as a final test over every recipe, and never inside a lint (his ruling, 2026-10-20: "this can be a single
+        /// final test at the end").
         /// </summary>
-        private sealed class LoadIndex
+        private static HashSet<string> UsedModels(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
         {
-            public object Env = null!;
-            public List<(string name, string? edid, FormKey fk)> Named = new();
-            /// <summary>Every model path some record uses. Only ever asked "is this path used" (the beat-model check), so a
-            /// set: the per-path record lists and a Static's bounds verdict it used to carry were read by nothing.</summary>
-            public HashSet<string> Models = new(StringComparer.OrdinalIgnoreCase);
-        }
-        private static LoadIndex? _index;
-
-        private static LoadIndex IndexOf(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env)
-        {
-            if (_index != null && ReferenceEquals(_index.Env, env)) return _index;
-            var ix = new LoadIndex { Env = env };
-            // ⚠ THE COST, measured 2026-10-20 (FRANKY_TIMING=1 plus a per-plugin probe): ~36 s on Defiant, and it is
-            // NOT one type or one plugin. The 16 base masters are ~24 s of it (Starfield.esm 11 s alone), enabled mods
-            // ~4.6 s, disabled ones ~5.6 s. Walking only the named/modeled types was tried and dropped the same day:
-            // no faster, and it MISSED models (WinningOverrides(Type) on the object-mod siblings returns the whole
-            // shared group). Every record really is read, because a winning override can take a name away.
+            var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var rec in env.LoadOrder.PriorityOrder.WinningOverrides<IMajorRecordGetter>())
+                if (rec is IModeledGetter mg && mg.Model?.File != null) used.Add(mg.Model.File.DataRelativePath.Path);
+            return used;
+        }
+
+        /// <summary>
+        /// `gen_delve models [recipe ...]`: THE FINAL TEST that every beat model resolves, over every recipe (or the ones
+        /// named) in one process, so the whole-load-order walk is paid once. Until 2026-10-20 this ran inside every lint
+        /// and build, and a vanilla mesh made each one pay ~36 s (his: "this can be a single final test at the end").
+        /// A model resolves when it is in Data, in the template mod's archives, or used by some record. A recipe the
+        /// reader refuses is SKIPPED OUT LOUD and fails the run: its models were not checked, and a final test that
+        /// passes over an unchecked recipe has said something it does not know.
+        /// </summary>
+        private static int ModelCheck(string dataDir, List<Template> templates, List<string> named)
+        {
+            var files = named.Count > 0 ? named
+                : Directory.GetFiles(Path.Combine(dataDir, "recipes"), "*.json").OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
+            var want = new List<(string recipe, int beat, string model, string mod)>();
+            int skipped = 0;
+            var real = Console.Out;
+            foreach (var f in files)
             {
-                if (rec is INamedGetter ng && !string.IsNullOrEmpty(ng.Name)) ix.Named.Add((ng.Name!, rec.EditorID, rec.FormKey));
-                if (rec is IModeledGetter mg && mg.Model?.File != null) ix.Models.Add(mg.Model.File.DataRelativePath.Path);
+                Recipe? r; Template? t;
+                var sw = new StringWriter();
+                Console.SetOut(sw);
+                try { r = LoadRecipe(f, dataDir, templates, out t); }
+                finally { Console.SetOut(real); }
+                if (r == null || t == null)
+                {
+                    skipped++;
+                    Console.WriteLine($"  SKIP  {Path.GetFileNameWithoutExtension(f)}: the recipe is refused, so its models are NOT checked (gen_delve lint says why)");
+                    continue;
+                }
+                for (int i = 0; i < r.beats.Count; i++)
+                    if (!string.IsNullOrWhiteSpace(r.beats[i].model)) want.Add((r.id, i + 1, r.beats[i].model!, t.mod));
             }
-            return _index = ix;
+            using var env = Timing.Timed("env.build", () => GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build());
+            HashSet<string>? used = null;
+            int missing = 0;
+            foreach (var (id, beat, model, mod) in want)
+            {
+                if (FindAsset(env.DataFolderPath.Path, mod, model) != "") continue;
+                used ??= Timing.Timed("models.used", () => UsedModels(env));
+                if (used.Contains(model)) continue;
+                missing++;
+                Console.WriteLine($"  [FATAL] {id} beat {beat}: model '{model}' is used by no record and is not in Data or {mod}'s archives; it would render nothing.");
+            }
+            int checkedRecipes = files.Count - skipped;
+            Console.WriteLine(missing == 0
+                ? $"  ALL {want.Count} BEAT MODEL(S) RESOLVE, over {checkedRecipes} recipe(s)" + (skipped > 0 ? $"; {skipped} recipe(s) SKIPPED, unchecked." : ".")
+                : $"  {missing} of {want.Count} BEAT MODEL(S) WOULD RENDER NOTHING" + (skipped > 0 ? $"; {skipped} recipe(s) SKIPPED, unchecked." : "."));
+            return missing == 0 && skipped == 0 ? 0 : 1;
         }
 
         // ------------------------------------------------------------------ the build

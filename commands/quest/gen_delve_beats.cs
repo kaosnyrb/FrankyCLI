@@ -463,14 +463,9 @@ namespace FrankyCLI
             else if (items.Count > 0)
             {
                 if (items.Distinct(StringComparer.OrdinalIgnoreCase).Count() != items.Count) Fatal("two pickups name the same item.");
-                ItemNameCollisions(env, r, items, Fatal);
             }
-            foreach (var (b, i) in r.beats.Select((b, i) => (b, i)))
-            {
-                if (string.IsNullOrWhiteSpace(b.model)) continue;
-                if (FindAsset(env.DataFolderPath.Path, t.mod, b.model!) == "" && !IndexOf(env).Models.Contains(b.model!))
-                    Fatal($"beat {i + 1} model '{b.model}' is used by no record and is not in Data or the mod's archives; it would render nothing.");
-            }
+            // (Whether each beat model resolves is `gen_delve models`, the final test, since 2026-10-20: it costs a walk of
+            // the whole load order, ~36 s, and ran here in every lint and build.)
             foreach (var (b, i) in r.beats.Select((b, i) => (b, i)))
             {
                 var m = b.message;
