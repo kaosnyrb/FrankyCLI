@@ -1,5 +1,6 @@
 ﻿using FrankyCLI;
 
+Timing.Begin(args);   // silent unless FRANKY_TIMING=1 (Timing.cs)
 Console.WriteLine("FrankyCLI");
 
 if (args.Length == 0)

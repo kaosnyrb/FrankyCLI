@@ -865,8 +865,8 @@ namespace FrankyCLI
             if (path == null) { Console.WriteLine("REFUSED: name a recipe."); return 1; }
             var recipe = LoadRecipe(path, dataDir, templates, out var t);
             if (recipe == null || t == null) return 1;
-            using var env = GameEnvironment.Typical
-                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            using var env = Timing.Timed("env.build", () => GameEnvironment.Typical
+                .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build());
             return body(recipe, t, env);
         }
 
@@ -947,7 +947,7 @@ namespace FrankyCLI
         {
             var files = Directory.GetFiles(Path.Combine(dataDir, "recipes"), "*.json").OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
             Console.WriteLine($"  lint --all: {files.Count} recipe(s) in {Path.Combine(dataDir, "recipes")}");
-            using var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
+            using var env = Timing.Timed("env.build", () => GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build());
             var real = Console.Out;
             int failed = 0;
             var names = new List<(string recipe, string field, string name)>();
@@ -1116,7 +1116,9 @@ namespace FrankyCLI
             void Warn(string s) => issues.Add(new Issue(false, s));
 
             Console.WriteLine("=== LINT ===");
+            using var lap = Timing.Laps("lint");   // FRANKY_TIMING=1; one mark per section below
 
+            lap.Mark("shape+beats");
             // --- shape ---------------------------------------------------------------
             // Schema 2 (2026-10-19, his "Need to add multiple line support"): refused at read, before the parse (LoadRecipe).
             if (r.schema != 2) Fatal($"schema is {r.schema}, this tool speaks 2");
@@ -1149,6 +1151,7 @@ namespace FrankyCLI
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
 
+            lap.Mark("deal");
             // --- deal: which slate pool hands this Delve out (2026-10-11) ------------------------------------
             // Only a node in the template's OWN mod: the build appends to it, and appending to a master's node
             // would write an override of somebody else's record.
@@ -1175,6 +1178,7 @@ namespace FrankyCLI
                 }
             }
 
+            lap.Mark("prose+ring+tokens");
             // --- prose, against the style guide (part 33) and the house rule -------------------------------
             foreach (var (where, text) in ProseStrings(r))
             {
@@ -1268,6 +1272,7 @@ namespace FrankyCLI
                           + $"(<{placeTok[b.PlaceIndex]}>): the player would be sent to a site its marker is not at.");
             }
 
+            lap.Mark("markers");
             // --- markers --------------------------------------------------------------
             var lcrts = env.LoadOrder.PriorityOrder.WinningOverrides<ILocationReferenceTypeGetter>()
                 .Where(x => x.EditorID != null)
@@ -1288,6 +1293,7 @@ namespace FrankyCLI
             markersOut?.Clear();
             foreach (var kv in keys) markersOut?.Add(kv.Key, kv.Value);
 
+            lap.Mark("which-place");
             // --- which place each beat is at --------------------------------------------------
             bool anySecond = r.beats.Any(b => b.Second);
             bool anyThird = r.beats.Any(b => b.PlaceIndex == 2);
@@ -1334,6 +1340,7 @@ namespace FrankyCLI
             if (remote && r.place.reach != null)
                 Fatal("place.reach is set on a remote Delve; it holds other places near the main one and there are none.");
 
+            lap.Mark("pool");
             // --- the pool, PER PLACE, which is the number the design sits on ---------------------
             // ⭐ Each place alias is drawn on its OWN conditions, so each gets its own pool figure: the
             // markers of the beats that happen there, the map marker, and that place's theme.
@@ -1399,6 +1406,7 @@ namespace FrankyCLI
                         else if (both > 0) Warn($"the {PlaceLabel(a).ToLowerInvariant()} and {PlaceLabel(b).ToLowerInvariant()} places can draw the same POI ({both} in common); give one a theme the other excludes if they must differ.");
                     }
 
+                lap.Mark("drop");
                 // --- what the build will DROP from the base --------------------------------------------
                 // ⛔ WHY THIS EXISTS: the build rebuilds every keyword condition from the recipe, which is
                 // the design, and for a day it silently threw away the base's own "not Natural, not Cave"
@@ -1432,6 +1440,7 @@ namespace FrankyCLI
                     }
             }
 
+            lap.Mark("separations");
             // --- how far apart the beats actually land -------------------------------------
             // ⛔ THIS EXISTS BECAUSE COVERAGE IS SILENT ABOUT GEOMETRY. The first playable Delve put
             // its two beats close enough together that the mission read as nothing, and both markers
@@ -1472,6 +1481,7 @@ namespace FrankyCLI
                 Console.WriteLine("      a single POI offers, and it is about double what the centre gives.");
             }
 
+            lap.Mark("leash+reach");
             // --- leash, the stated v1 limit ---------------------------------------------
             if (!string.IsNullOrWhiteSpace(r.place.leash))
             {
@@ -1492,6 +1502,7 @@ namespace FrankyCLI
                 else Console.WriteLine($"  place.reach: every other place within {g.EditorID} of the main place and of each other");
             }
 
+            lap.Mark("report");
             // --- report ------------------------------------------------------------------
             Console.WriteLine();
             foreach (var i in issues) Console.WriteLine((i.Fatal ? "  [FATAL] " : "  [warn ] ") + i.Text);
@@ -1813,7 +1824,9 @@ namespace FrankyCLI
 
             Console.WriteLine();
             Console.WriteLine("=== BUILD ===");
+            using var lap = Timing.Laps("build");   // FRANKY_TIMING=1; the lint above keeps its own laps
 
+            lap.Mark("read-plugin");
             string modFile = Path.Combine(env.DataFolderPath, t.mod + ".esm");
             if (!File.Exists(modFile)) { Console.WriteLine("REFUSED: " + modFile + " does not exist."); return 1; }
             var readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
@@ -1823,6 +1836,7 @@ namespace FrankyCLI
             gen_quest_main.FixNextFormId(myMod);
             var mastersBefore = string.Join(", ", myMod.ModHeader.MasterReferences.Select(m => m.Master.FileName.String));
 
+            lap.Mark("quest+places");
             // ⭐ TRUE CONSTRUCTION (his ruling, 2026-10-15): with a shell, the quest is made with `new` from the template's
             // shell model and the base quest is never read here. Without one (or with --from-base, the A/B proof), the old
             // clone. Either way `sourceKey` is the base's FormKey, which the starting quest's self-links still point at.
@@ -1952,6 +1966,7 @@ namespace FrankyCLI
                                              ResolveKeywords(env, theme.exclude, _ => { }));
             }
 
+            lap.Mark("inputs+beats+prose");
             // Everything BuildBeats reads off the load order, own-or-master, in one record (gen_delve_inputs.cs).
             fail = ResolveInputs(myMod, env, t, r, parts, fail, out var inputs);
             if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, inputs);
@@ -1969,6 +1984,7 @@ namespace FrankyCLI
             if (fail == 0) fail += EmitModel(myMod, ref clone, r, opts, dry);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
+            lap.Mark("write");
             if (dry && opts.EmitDir != null)
             {
                 // The A/B proof's output: the plugin exactly as this build would write it, to a folder that is never the
@@ -1986,8 +2002,10 @@ namespace FrankyCLI
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
 
+            lap.Mark("verify");
             int v = VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
             v += VerifyDeal(modFile, readParams, r);
+            lap.Mark("voice");
             // The audio last, and only over a verified plugin: its file names are the written topics' ids.
             return v == 0 ? DeployVoice(r, t, madeBeats) : v;
         }
