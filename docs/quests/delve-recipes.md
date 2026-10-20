@@ -100,6 +100,17 @@ papyrus/compile.py C:/modding/DU_Overtime/Data duo_gameplayoptions`, then copy t
 Refuses a pool already split. No quest is touched; a Delve built later still deals into the pool its recipe names.
 ⚠ **New Delves for a split pool go to the POOL, never to `_Legacy`.** Snapshot first, as for a build.
 
+**The rare tier: `gen_delve rare <pool node> <delveId>[,<delveId>...] [--dry]`** (2026-10-20, his: *"the picnic
+quest should happen quite rarely cus its unique"*, *"we'll make other rare delves too"*). Moves built Delves from a
+pool into `<pool>_Rare`, created on first use directly BEFORE the pool (after its `_Legacy`), gated on the pool's own
+conditions plus `GetRandomPercent < duo_RareDelveChance` (3, shared by every rare node, not Constant). Then set each
+moved recipe's `"deal"` to `<pool>_Rare`, JSON only. A new rare Delve is simply built with that `deal`.
+⚠ **The chance is per EVENT, not per quest:** it is how often the pool's slates try the rare node, so with one member it
+is that member's rate. Raise it as rare Delves are added. Not gated on Classic Missions. **Why before the pool:** a node
+after it is reached only when the pool starts nothing, which is where the original `_Local_LowChance_Node` sits (his
+ship-landing missions, meant to be rare, likely never dealt; its order is his call). The lint's base-quest warning
+reads the whole BRANCH, so a Delve in a tier node does not warn for its base living in `_Legacy`.
+
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
 go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the

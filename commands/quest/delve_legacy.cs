@@ -43,13 +43,13 @@ namespace FrankyCLI
         internal const string QuestId = "duo_GameplayOptionsQuest";
         internal const string Script = "duo_gameplayoptions";
         internal const float DefaultShare = 50f;
-        const string LegacySuffix = "_Legacy";
+        internal const string LegacySuffix = "_Legacy";
         // The Overtime global the two new ones are cloned from, so their record shape is one the plugin already ships.
         // ⛔ IT IS FLAGGED CONSTANT, and the first build carried the flag into both clones (2026-10-20, his play:
         // "the setting switch doesn't change the global"): SetValue cannot change a constant global, so the option
         // never reached the node. His working Suit Power Cores global carries no flags. A clone takes every field of
         // its source, including the ones nobody chose; this one is cleared on the clone and asserted off disk.
-        const string GlobalShape = "duo_Missionchance_Local_Lowchance";
+        internal const string GlobalShape = "duo_Missionchance_Local_Lowchance";
         // His Suit Power Cores' quest flags, read off atpc_gameplayquest: StartGameEnabled, StartsEnabled, RunOnce.
         const int QuestFlagsRaw = 0x111;
 

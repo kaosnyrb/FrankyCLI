@@ -572,6 +572,8 @@ namespace FrankyCLI
                 case "nodeflag": return NodeFlag(args, templates, dry);
                 // the legacy mission system: commands/quest/delve_legacy.cs
                 case "legacy": return DelveLegacy.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
+                // the rare tier: commands/quest/delve_rare.cs
+                case "rare": return DelveRare.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
@@ -585,6 +587,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve testnode on|off <testNode> <realNode> [--keep q,q | --promote] [--dry]   swap a slate pool's parking condition");
                     Console.WriteLine("       gen_delve nodeflag <node> runone on|off [--dry]   one quest per event (NumQuestsToRun, max 1)");
                     Console.WriteLine("       gen_delve legacy <pool node> [--dry]   move the pool's non-Delve quests to <pool>_Legacy, behind the Classic Missions setting");
+                    Console.WriteLine("       gen_delve rare <pool node> <delveId>[,...] [--dry]   move built Delves into <pool>_Rare, tried on duo_RareDelveChance% of the pool's events");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
                     Console.WriteLine("       gen_delve selftest   the build's pure helpers, no plugin or game data loaded, exit 1 on failure");
                     return 1;
@@ -1180,10 +1183,16 @@ namespace FrankyCLI
                     // Structural, not by name: a pool that never dealt this template's base quest is a pool the
                     // base was not built to be started from (another event, other event data). A remote Delve's
                     // place is remotePlaceFrom's, so that is the quest its pool should already deal.
+                    // ⛔ The EVENT is routed by the BRANCH, so any node under the same branch counts: since
+                    // 2026-10-20 a pool's original quests live in its <pool>_Legacy sibling (gen_delve legacy) and a
+                    // rare Delve deals from <pool>_Rare, and a node-only test warned on every Delve of a split pool.
                     string refQ = r.place.remote == true && t.remotePlaceFrom != null ? t.remotePlaceFrom : t.@base;
                     var baseQ = OwnOrMaster<IQuestGetter>(new HashSet<ModKey> { own }, env, refQ);
-                    if (baseQ != null && !node.Quests.Any(e => e.Quest.FormKey == baseQ.FormKey))
-                        Warn($"deal '{node.EditorID}' does not deal {refQ}, the quest this Delve's place is built on; check the pool's event and conditions suit it.");
+                    var branchNodes = env.LoadOrder.PriorityOrder.WinningOverrides<IStoryManagerQuestNodeGetter>()
+                        .Where(n => n.FormKey.ModKey == own && !node.Parent.IsNull && n.Parent.FormKey == node.Parent.FormKey).ToList();
+                    if (!branchNodes.Any(n => n.FormKey == node.FormKey)) branchNodes.Add(node);
+                    if (baseQ != null && !branchNodes.Any(n => n.Quests.Any(e => e.Quest.FormKey == baseQ.FormKey)))
+                        Warn($"no node under deal '{node.EditorID}''s branch deals {refQ}, the quest this Delve's place is built on; check the pool's event and conditions suit it.");
                 }
             }
 
