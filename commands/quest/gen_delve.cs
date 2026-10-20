@@ -2531,7 +2531,7 @@ namespace FrankyCLI
         }
 
         /// <summary>A fresh script entry for an alias on the quest's VMAD, added and returned. Shared by AttachHook and
-        /// the outside holder's snap (BeatsBuild.SnapOnLoad).</summary>
+        /// the outside holder's spawn-near script (BeatsBuild.SpawnNear).</summary>
         private static QuestFragmentAlias NewAliasEntry(QuestAdapter vma, FormKey quest, int alias)
         {
             var entry = new QuestFragmentAlias();

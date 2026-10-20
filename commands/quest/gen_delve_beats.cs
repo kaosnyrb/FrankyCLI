@@ -562,8 +562,9 @@ namespace FrankyCLI
         /// <summary>The quest-level script every beats Delve carries: OnQuestRejected only (papyrus/duo_delve_quest.psc).</summary>
         private const string RejectScript = "duo_delve_quest";
 
-        /// <summary>The alias script that drops an outside holder onto navmesh when his 3D loads (papyrus/duo_delve_snaponload.psc).</summary>
-        private const string SnapScript = "duo_delve_snaponload";
+        /// <summary>The alias script that holds an outside holder's spot and spawns him there when the player comes near
+        /// (papyrus/duo_delve_spawnnear.psc).</summary>
+        private const string SpawnNearScript = "duo_delve_spawnnear";
 
         /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
         private sealed class BeatsMade
@@ -579,7 +580,7 @@ namespace FrankyCLI
             public List<(int objective, int alias, int stage)> TargetGates = new();
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
-            public List<int> SnapOnLoad = new();   // the holders among them placed outside, carrying SnapScript
+            public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
             public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
@@ -830,16 +831,18 @@ namespace FrankyCLI
             }
 
             /// <summary>
-            /// An outside holder's alias carries SnapScript, so he is dropped onto navmesh when his 3D loads (his 2026-10-20 play
-            /// of 05a at 750 to 2000: placed before his ground loaded, he fell when it did). Not a stage hook: no properties,
-            /// so it is recorded in its own list for the verify, never in Hooks (whose check reads StageToSet).
+            /// An outside holder's alias carries SpawnNearScript: the step's fragment hands it a spot at range, and it spawns him
+            /// there when the player comes near (his 2026-10-20 play of 05a at 750 to 2000: placed when the step began, he
+            /// waited in the air over unloaded ground and fell when it loaded; a snap on his OnLoad, tried first, did not
+            /// save him). Not a stage hook: no properties, so it is recorded in its own list for the verify, never in Hooks
+            /// (whose check reads StageToSet).
             /// </summary>
-            internal void SnapOnLoad(int b, int alias)
+            internal void SpawnNear(int b, int alias)
             {
                 var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
-                entry.Scripts.Add(new ScriptEntry { Name = SnapScript });
-                bm.SnapOnLoad.Add(alias);
-                Console.WriteLine($"  +snap    : beat {b + 1} (recover, outside) holder alias {alias} {SnapScript}: onto navmesh when his 3D loads");
+                entry.Scripts.Add(new ScriptEntry { Name = SpawnNearScript });
+                bm.SpawnNear.Add(alias);
+                Console.WriteLine($"  +near    : beat {b + 1} (recover, outside) holder alias {alias} {SpawnNearScript}: a spot at range, him spawned there when the player is near");
             }
 
             /// <summary>A beat's objective index: a choose step's beats take one each, ten apart; any other step shares one.
@@ -2141,9 +2144,9 @@ namespace FrankyCLI
                     fail += Check($"alias {h.alias} drops its dead (the marker shows only the living)",
                                   (sc?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "RemoveFromRefCollection")?.Data ?? false).ToString(), "True");
             }
-            foreach (var a in bm.SnapOnLoad)
-                fail += Check($"outside holder alias {a} carries {SnapScript} (onto navmesh when he loads)",
-                              (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SnapScript) ?? false).ToString(), "True");
+            foreach (var a in bm.SpawnNear)
+                fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the player is near)",
+                              (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
             foreach (var g in bm.Globals)
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var (place, anchor, global) in bm.Leashes)

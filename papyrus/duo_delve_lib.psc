@@ -37,25 +37,40 @@ Function SpawnHolder(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList 
     EndWhile
 EndFunction
 
-; SpawnHolder OUT ON OPEN GROUND (his idea, 2026-10-19: "go 59 metres in the air and fire a raytrace towards the
-; ground at a random angle. place an npc at that spot and bam, objective outside poi"). The holder is placed from
-; the marker at a random angle, afMin to afMax out, 59 up, snapped to navmesh by PlaceAtMe itself: route A of
-; duo_offpoiprobe, which landed at the asked distance and near ground height 4 of 4 (the offset is in the
-; marker's own frame, which a random angle does not care about). His gang scatters round HIM, not the marker.
-Function SpawnHolderOutside(ReferenceAlias akMarker, ReferenceAlias akHolder, FormList akGang, Form akItem, Int aiMin, Int aiMax, Float afMin, Float afMax) Global
-    ObjectReference marker = akMarker.GetRef()
-    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
-    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
-    Float detected = 2.0
-    Float veryAggressive = 2.0
+; THE RECOVER BEAT OUT ON OPEN GROUND, in two halves (his idea, 2026-10-19: "go 59 metres in the air and fire a
+; raytrace towards the ground at a random angle. place an npc at that spot and bam, objective outside poi").
+; ⛔ WHY TWO HALVES: placing the holder when the step began worked at 150 to 300, where the ground was loaded, and
+; at 750 to 2000 he waited in the air and fell when it loaded (his play, 2026-10-20: "when I got close he fell out of
+; the sky and died"); a snap on his OnLoad did not save him either. So the step places only an invisible SPOT (a
+; marker has no physics, so unloaded ground cannot hurt it) and the holder is spawned there when the player comes
+; near, on ground that is loaded by then. duo_delve_spawnnear, on the holder's alias, holds the spot and the wait.
 
+; Half one: an XMarker [STAT:0000003B] afMin to afMax from the marker at a random angle, at the marker's height,
+; placed straight INTO akHolder so the objective points out there at once. Persistent while the alias holds it; no
+; navmesh snap (there may be no loaded navmesh under it, and a marker needs none). The offset is in the marker's own
+; frame, which a random angle does not care about.
+ObjectReference Function PlaceSpotOutside(ReferenceAlias akMarker, ReferenceAlias akHolder, Float afMin, Float afMax) Global
     Float ang = Utility.RandomFloat(0.0, 360.0)
     Float dist = Utility.RandomFloat(afMin, afMax)
     Float[] out = new Float[3]
     out[0] = dist * Math.cos(ang)
     out[1] = dist * Math.sin(ang)
-    out[2] = 59.0
-    Actor holder = marker.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, out, akHolder, True) as Actor
+    out[2] = 0.0
+    Return akMarker.GetRef().PlaceAtMe(Game.GetFormFromFile(0x00003B, "Starfield.esm"), 1, True, False, True, out, akHolder, False) ; XMarker
+EndFunction
+
+; Half two: the holder at the spot, 59 up, snapped to navmesh by PlaceAtMe itself (route A of duo_offpoiprobe, which
+; landed at the asked distance and near ground height 4 of 4 on loaded ground), INTO akHolder, which takes him in
+; place of the spot. His gang scatters round HIM.
+Function SpawnHolderAt(ObjectReference akSpot, ReferenceAlias akHolder, FormList akGang, Form akItem, Int aiMin, Int aiMax) Global
+    ActorValue Suspicious = Game.GetFormFromFile(748, "Starfield.esm") as ActorValue ; Suspicious [AVIF:000002EC]
+    ActorValue Aggression = Game.GetFormFromFile(700, "Starfield.esm") as ActorValue ; Aggression [AVIF:000002BC]
+    Float detected = 2.0
+    Float veryAggressive = 2.0
+
+    Float[] up = new Float[3]
+    up[2] = 59.0
+    Actor holder = akSpot.PlaceAtMe(akGang.GetAt(Utility.RandomInt(0, akGang.GetSize() - 1)), 1, True, False, True, up, akHolder, True) as Actor
     holder.AddItem(akItem, 1, False)
     holder.SetValue(Suspicious, detected)
     holder.SetValue(Aggression, veryAggressive)

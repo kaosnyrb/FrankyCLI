@@ -69,8 +69,8 @@ namespace FrankyCLI
                 fp.Object.SetTo(build.itemOf[b]);
                 sc.Properties.Add(fp);
                 int f = build.AttachBeatHook(b, hookAlias, script, sc, prereq);
-                // Placed outside, the holder can land before his ground loads: he is dropped onto navmesh when it does.
-                if (f == 0 && build.r.beats[b].outside != null) build.SnapOnLoad(b, build.slotOf[b].targetAlias);
+                // Placed outside, the holder is spawned when the player comes near, on ground loaded by then (SpawnNear).
+                if (f == 0 && build.r.beats[b].outside != null) build.SpawnNear(b, build.slotOf[b].targetAlias);
                 return f;
             }
 
@@ -92,8 +92,10 @@ namespace FrankyCLI
                 build.props.Add(("FormList", "Gang", build.gangKey!.Value, -1));
                 build.props.Add(("Form", $"Item{b + 1}", build.itemOf[b], -1));
                 var bt = build.r.beats[b];
+                // Outside: a spot at range now (the objective points there), the holder when the player comes near it
+                // (papyrus/duo_delve_spawnnear.psc, on the holder alias; SpawnNear in the Hooks pass attaches it).
                 if (bt.outside is { } o)
-                    build.Add(stage, $"duo_delve_lib.SpawnHolderOutside({mk}, {hd}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax}, {o[0]}.0, {o[1]}.0)");
+                    build.Add(stage, $"({hd} as duo_delve_spawnnear).PlaceOutside({mk}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax}, {o[0]}.0, {o[1]}.0)");
                 else
                     build.Add(stage, $"duo_delve_lib.SpawnHolder({mk}, {hd}, Gang, Item{b + 1}, {build.t.gangMin}, {build.gangMax})");
             }
