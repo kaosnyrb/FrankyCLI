@@ -99,6 +99,12 @@ pool cannot gate one member. The first run also creates the setting (all five or
 papyrus/compile.py C:/modding/DU_Overtime/Data duo_gameplayoptions`, then copy the `.pex` into Steam `Data/scripts`.
 Refuses a pool already split. No quest is touched; a Delve built later still deals into the pool its recipe names.
 ⚠ **New Delves for a split pool go to the POOL, never to `_Legacy`.** Snapshot first, as for a build.
+⚠ **A board pool is different (2026-10-20, Bounty):** a `duo_MB_MissionNode_*` node carries `SharesEvent`, so a refresh
+walks on after it deals and the legacy node and the pool BOTH deal; there the legacy node gets NO share gate (On =
+today's originals plus the Delves, Off = the Delves only) and keeps the pool's caps (Bounty: 4 / 4 each, so a
+Bounty-heavy board can show more cards once the pool holds several Delves). **A pool needs at least one Delve before it
+is split,** or Off deals nothing from it: board Delves are moved off `_duo_MB_MissionNode_test` first with
+**`gen_delve move <delveId> <fromNode> <toNode> [--dry]`** (a list edit, never a rebuild; then the recipe's `deal`).
 
 **The rare tier: `gen_delve rare <pool node> <delveId>[,<delveId>...] [--dry]`** (2026-10-20, his: *"the picnic
 quest should happen quite rarely cus its unique"*, *"we'll make other rare delves too"*). Moves built Delves from a

@@ -129,16 +129,27 @@ namespace FrankyCLI
             var onData = new GetGlobalValueConditionData();
             onData.FirstParameter = new FormLinkOrIndex<IGlobalGetter>(onData, onG.FormKey);
             legacy.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = onData });
-            var share = new ConditionGlobal { CompareOperator = CompareOperator.LessThan, Data = new GetRandomPercentConditionData() };
-            share.ComparisonValue.SetTo(shareG.FormKey);
-            legacy.Conditions.Add(share);
+            // ⚠ A BOARD node shares the event (SharesEvent): the refresh walks on after it deals, so the legacy node and
+            // the pool BOTH deal on one refresh and the mix happens by itself. A share gate there would only take the
+            // originals off the board on that share of refreshes, so a shared-event pool's legacy node gets none
+            // (2026-10-20, the Bounty category; his to change). A slate pool stops at the first node that deals, so
+            // there the share gate IS the mix.
+            bool shares = real.QuestFlags.HasFlag(StoryManagerQuestNode.QuestFlag.SharesEvent);
+            if (!shares)
+            {
+                var share = new ConditionGlobal { CompareOperator = CompareOperator.LessThan, Data = new GetRandomPercentConditionData() };
+                share.ComparisonValue.SetTo(shareG.FormKey);
+                legacy.Conditions.Add(share);
+            }
 
             // First under the branch: it takes the pool's place in the sibling chain and the pool follows it.
             var placeBefore = real.PreviousSibling.FormKeyNullable;
             legacy.PreviousSibling.SetTo(placeBefore);
             real.PreviousSibling.SetTo(legacy.FormKey);
             myMod.StoryManagerQuestNodes.Add(legacy);
-            Console.WriteLine($"  {legacyName}: first under its branch, gated on {OnGlobal} == 1 and GetRandomPercent < {ShareGlobal}");
+            Console.WriteLine(shares
+                ? $"  {legacyName}: before the pool, gated on {OnGlobal} == 1; the pool shares the event (a board), so both deal and no share gate"
+                : $"  {legacyName}: first under its branch, gated on {OnGlobal} == 1 and GetRandomPercent < {ShareGlobal}");
             foreach (var e in old) Console.WriteLine("    moves: " + NameOf(e.Quest.FormKey));
 
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
@@ -244,8 +255,13 @@ namespace FrankyCLI
             bool gateShare = legacy.Conditions.Any(c => c.Data is IGetRandomPercentConditionDataGetter && c is IConditionGlobalGetter g
                                                         && g.ComparisonValue.FormKey == shareG?.FormKey && c.CompareOperator == CompareOperator.LessThan);
             Check(gateOn, $"the legacy node is gated GetGlobalValue({OnGlobal}) == 1");
-            Check(gateShare, $"the legacy node is gated GetRandomPercent < {ShareGlobal}");
-            Check(legacy.Conditions.Count == real.Conditions.Count + 2, $"the legacy node carries the pool's {real.Conditions.Count} condition(s) plus the two gates");
+            bool shares = real.QuestFlags.HasFlag(StoryManagerQuestNode.QuestFlag.SharesEvent);
+            if (shares) Check(!gateShare, $"the pool shares the event, so the legacy node carries NO share gate (both deal on one refresh)");
+            else Check(gateShare, $"the legacy node is gated GetRandomPercent < {ShareGlobal}");
+            int gates = shares ? 1 : 2;
+            Check(legacy.Conditions.Count == real.Conditions.Count + gates, $"the legacy node carries the pool's {real.Conditions.Count} condition(s) plus {gates} gate(s)");
+            Check(legacy.QuestFlags == real.QuestFlags && legacy.MaxConcurrentQuests == real.MaxConcurrentQuests && legacy.MaxNumQuestsToRun == real.MaxNumQuestsToRun,
+                  $"the legacy node keeps the pool's flags and caps ({legacy.QuestFlags}; max {legacy.MaxConcurrentQuests?.ToString() ?? "-"} / run {legacy.MaxNumQuestsToRun?.ToString() ?? "-"})");
 
             var opt = r.GameplayOptions.FirstOrDefault(o => o.EditorID == OptionId);
             Check(opt?.Data is IFloatGameplayOptionDataGetter d && d.Min == 0 && d.Max == 1 && d.Step == 1 && d.Value1 == 0 && opt.Rewards.Count == 2,
