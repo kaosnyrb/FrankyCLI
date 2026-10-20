@@ -45,6 +45,10 @@ namespace FrankyCLI
         internal const float DefaultShare = 50f;
         const string LegacySuffix = "_Legacy";
         // The Overtime global the two new ones are cloned from, so their record shape is one the plugin already ships.
+        // ⛔ IT IS FLAGGED CONSTANT, and the first build carried the flag into both clones (2026-10-20, his play:
+        // "the setting switch doesn't change the global"): SetValue cannot change a constant global, so the option
+        // never reached the node. His working Suit Power Cores global carries no flags. A clone takes every field of
+        // its source, including the ones nobody chose; this one is cleared on the clone and asserted off disk.
         const string GlobalShape = "duo_Missionchance_Local_Lowchance";
         // His Suit Power Cores' quest flags, read off atpc_gameplayquest: StartGameEnabled, StartsEnabled, RunOnce.
         const int QuestFlagsRaw = 0x111;
@@ -105,7 +109,12 @@ namespace FrankyCLI
             if (have.Any(h => h) && !have.All(h => h))
             { Console.WriteLine($"REFUSED: the Classic Missions setting is half-built ({have.Count(h => h)} of 5 records present). Nothing written."); return 1; }
             if (!have[0]) { if (!CreateSetting(myMod)) return 1; }
-            else Console.WriteLine("  the Classic Missions setting exists; reused");
+            else
+            {
+                var fixedG = myMod.Globals.Where(g => (g.EditorID == OnGlobal || g.EditorID == ShareGlobal) && g.MajorFlags.HasFlag(Global.MajorFlag.Constant)).ToList();
+                if (fixedG.Count > 0) { Console.WriteLine("REFUSED: the setting exists but " + string.Join(", ", fixedG.Select(g => g.EditorID)) + " is flagged Constant, so the option cannot set it. Nothing written."); return 1; }
+                Console.WriteLine("  the Classic Missions setting exists; reused");
+            }
 
             var onG = myMod.Globals.First(g => g.EditorID == OnGlobal);
             var shareG = myMod.Globals.First(g => g.EditorID == ShareGlobal);
@@ -154,6 +163,7 @@ namespace FrankyCLI
                 var g = (Global)shape.Duplicate(myMod.GetNextFormKey());
                 g.EditorID = id;
                 g.Data = value;
+                g.MajorFlags &= ~Global.MajorFlag.Constant;   // the script SETS it, and the console must be able to
                 myMod.Globals.Add(g);
                 return g;
             }
@@ -227,6 +237,8 @@ namespace FrankyCLI
             var onG = r.Globals.FirstOrDefault(g => g.EditorID == OnGlobal);
             var shareG = r.Globals.FirstOrDefault(g => g.EditorID == ShareGlobal);
             Check(onG != null && shareG != null, $"{OnGlobal} and {ShareGlobal} exist (now {onG?.Data}, {shareG?.Data})");
+            Check(onG != null && shareG != null && !onG.MajorFlags.HasFlag(Global.MajorFlag.Constant) && !shareG.MajorFlags.HasFlag(Global.MajorFlag.Constant),
+                  "neither global is flagged Constant (a script and the console can set them)");
             bool gateOn = legacy.Conditions.Any(c => c.Data is IGetGlobalValueConditionDataGetter g && g.FirstParameter.Link.FormKey == onG?.FormKey
                                                      && c is IConditionFloatGetter f && f.ComparisonValue == 1f && c.CompareOperator == CompareOperator.EqualTo);
             bool gateShare = legacy.Conditions.Any(c => c.Data is IGetRandomPercentConditionDataGetter && c is IConditionGlobalGetter g
