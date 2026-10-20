@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_delve11b",
   "template": "beats",
-  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
-  "_deal": "Same pool as 11a, its sibling.",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: it sends you to a dungeon, so you go in knowing there is a fight (his ruling, 2026-10-20; moved by gen_delve move, no rebuild).",
   "author": "jessica",
   "source": "his 2026-10-13 08:52: \"yeah make 11b\", off \"if we just shipped like 20 variations of 11a people would love it as a mod\"",
   "_note": [
