@@ -35,6 +35,14 @@ namespace FrankyCLI
     //     the property is NEW         -> --type is REQUIRED. There is nothing on the record to
     //                                    read, and the Papyrus source is not this tool's to parse.
     //
+    // ALIAS PROPERTIES ARE A SIXTH TYPE HERE, though Mutagen stores them as an object property. A
+    // `ReferenceAlias Property X` is bound as Object = THE QUEST ITSELF plus Alias = the alias id (the
+    // shape gen_delve's distance hooks write), so `--type alias` takes the alias NAME and resolves it on
+    // EACH matched quest: one command binds a family whose ids differ, and a name missing or doubled on
+    // any quest refuses the whole write. An existing property reads as `alias` when its Alias field is
+    // set, so it can no longer be "edited" as an obj, which used to repoint Object and leave a stale
+    // alias id behind it (2026-10-21, for the strike team's landing anchor).
+    //
     // ⛔ THE MASTER GUARD, and it is the one that would actually cost money. Setting an object
     // property to a form from a plugin the mod does not already master ADDS THAT PLUGIN AS A
     // MASTER -- and the mod then fails to load for every player without it. du_overtime carries
@@ -52,7 +60,7 @@ namespace FrankyCLI
     // property is worse than no tool at all. It names them and stops.
     class gen_questprop
     {
-        static readonly string[] Types = { "obj", "int", "float", "bool", "string" };
+        static readonly string[] Types = { "obj", "alias", "int", "float", "bool", "string" };
 
         public static int Generate(string[] args)
         {
@@ -146,7 +154,7 @@ namespace FrankyCLI
                         if (only != null && !string.Equals(sc.Name, only, StringComparison.OrdinalIgnoreCase)) continue;
                         Console.WriteLine($"      {sc.Name}  ({sc.Properties?.Count ?? 0} properties)");
                         foreach (var p in sc.Properties ?? Enumerable.Empty<ScriptProperty>())
-                            Console.WriteLine($"        {Describe(p, nameById)}");
+                            Console.WriteLine($"        {Describe(p, nameById, q)}");
                     }
                 }
                 return 0;
@@ -163,7 +171,8 @@ namespace FrankyCLI
             FormKey objKey = default;
             if (verb == "set")
             {
-                bool needObj = typeArg == "obj" || (typeArg == null && LooksLikeForm(rawValue!));
+                // An alias name is resolved per quest in Apply, never against the load order.
+                bool needObj = typeArg == "obj" || (typeArg == null && LooksLikeForm(rawValue!) && !ExistingIsAlias(quests, scriptName, propName));
                 if (needObj)
                 {
                     if (!TryResolveForm(rawValue!, nameById, idsByName, out objKey, out string why))
@@ -217,13 +226,13 @@ namespace FrankyCLI
                         refusals.Add($"{quest.EditorID}: '{propName}' is already [{have}] and --type says [{typeArg}] -- refusing to coerce");
                         continue;
                     }
-                    if (!Apply(existing, have, rawValue!, objKey, out string err))
+                    if (!Apply(existing, have, rawValue!, objKey, quest, out string err))
                     {
                         refusals.Add($"{quest.EditorID}: {err}");
                         continue;
                     }
                     edited++; touched++;
-                    Console.WriteLine($"    ~ {quest.EditorID}: {Describe(existing, nameById)}");
+                    Console.WriteLine($"    ~ {quest.EditorID}: {Describe(existing, nameById, quest)}");
                 }
                 else
                 {
@@ -237,14 +246,14 @@ namespace FrankyCLI
                     var sibling = props.FirstOrDefault();
                     if (sibling != null) fresh.Flags = sibling.Flags;
                     else Console.WriteLine($"    ! {quest.EditorID}: no sibling property to copy flags from; using the default");
-                    if (!Apply(fresh, typeArg, rawValue!, objKey, out string err2))
+                    if (!Apply(fresh, typeArg, rawValue!, objKey, quest, out string err2))
                     {
                         refusals.Add($"{quest.EditorID}: {err2}");
                         continue;
                     }
                     props.Add(fresh);
                     added++; touched++;
-                    Console.WriteLine($"    + {quest.EditorID}: {Describe(fresh, nameById)}");
+                    Console.WriteLine($"    + {quest.EditorID}: {Describe(fresh, nameById, quest)}");
                 }
             }
 
@@ -299,8 +308,36 @@ namespace FrankyCLI
             return false;
         }
 
+        // True when every matched quest that carries the property carries it as an alias, so a bare
+        // `set ... <aliasName>` on an existing alias property does not get resolved as a form first.
+        static bool ExistingIsAlias(List<Quest> quests, string scriptName, string propName)
+        {
+            var found = quests
+                .Select(q => q.VirtualMachineAdapter?.Scripts?.FirstOrDefault(s => string.Equals(s.Name, scriptName, StringComparison.OrdinalIgnoreCase)))
+                .Where(s => s != null)
+                .Select(s => s!.Properties.FirstOrDefault(p => string.Equals(p.Name, propName, StringComparison.OrdinalIgnoreCase)))
+                .Where(p => p != null).ToList();
+            return found.Count > 0 && found.All(p => TypeOf(p!) == "alias");
+        }
+
+        // Every alias on the quest with its ID and Name. A collection carries neither itself: they sit
+        // on its member ref alias, so without this a RefCollectionAlias property was reported as
+        // "NO SUCH ALIAS" (qst12a's CrewSpawnMarkers, alias 24, the first run, 2026-10-21).
+        static IEnumerable<(uint id, string? name)> NamedAliases(Quest quest)
+        {
+            foreach (var a in quest.Aliases ?? Enumerable.Empty<AQuestAlias>())
+            {
+                if (a is IQuestReferenceAliasGetter r) yield return (r.ID, r.Name);
+                else if (a is IQuestLocationAliasGetter l) yield return (l.ID, l.Name);
+                else if (a is IQuestCollectionAliasGetter c)
+                    foreach (var m in c.Collection ?? Enumerable.Empty<ICollectionAliasGetter>())
+                        if (m.ReferenceAlias != null) yield return (m.ReferenceAlias.ID, m.ReferenceAlias.Name);
+            }
+        }
+
         static string TypeOf(ScriptProperty p) => p switch
         {
+            ScriptObjectProperty o when o.Alias >= 0 => "alias",
             ScriptObjectProperty => "obj",
             ScriptIntProperty => "int",
             ScriptFloatProperty => "float",
@@ -312,13 +349,14 @@ namespace FrankyCLI
         static ScriptProperty Make(string t, string name) => t switch
         {
             "obj" => new ScriptObjectProperty { Name = name },
+            "alias" => new ScriptObjectProperty { Name = name },
             "int" => new ScriptIntProperty { Name = name },
             "float" => new ScriptFloatProperty { Name = name },
             "bool" => new ScriptBoolProperty { Name = name },
             _ => new ScriptStringProperty { Name = name },
         };
 
-        static bool Apply(ScriptProperty p, string t, string raw, FormKey objKey, out string err)
+        static bool Apply(ScriptProperty p, string t, string raw, FormKey objKey, Quest quest, out string err)
         {
             err = "";
             switch (t)
@@ -326,6 +364,19 @@ namespace FrankyCLI
                 case "obj":
                     if (objKey.IsNull) { err = $"'{raw}' did not resolve to a form"; return false; }
                     ((ScriptObjectProperty)p).Object.SetTo(objKey);
+                    return true;
+                case "alias":
+                    var named = NamedAliases(quest)
+                        .Where(a => string.Equals(a.name, raw, StringComparison.OrdinalIgnoreCase)).ToList();
+                    if (named.Count != 1)
+                    {
+                        err = named.Count == 0 ? $"no alias named '{raw}' on this quest"
+                                               : $"alias name '{raw}' is on {named.Count} aliases (ids {string.Join(", ", named.Select(a => a.id))}) -- ambiguous";
+                        return false;
+                    }
+                    var op = (ScriptObjectProperty)p;
+                    op.Object.SetTo(quest.FormKey);
+                    op.Alias = (short)named[0].id;
                     return true;
                 case "int":
                     if (!int.TryParse(raw, out int i)) { err = $"'{raw}' is not an int"; return false; }
@@ -341,8 +392,11 @@ namespace FrankyCLI
             }
         }
 
-        static string Describe(ScriptProperty p, Dictionary<FormKey, string> nameById) => p switch
+        static string Describe(ScriptProperty p, Dictionary<FormKey, string> nameById, Quest quest) => p switch
         {
+            ScriptObjectProperty o when o.Alias >= 0 =>
+                $"[alias]  {p.Name} = {Name(o.Object.FormKey, nameById)} alias {o.Alias}" +
+                $" ({NamedAliases(quest).Where(a => a.id == (uint)o.Alias).Select(a => a.name).FirstOrDefault() ?? "NO SUCH ALIAS on this quest"})",
             ScriptObjectProperty o => $"[obj]    {p.Name} = {Name(o.Object.FormKey, nameById)}",
             ScriptIntProperty i => $"[int]    {p.Name} = {i.Data}",
             ScriptFloatProperty f => $"[float]  {p.Name} = {f.Data}",
@@ -358,7 +412,8 @@ namespace FrankyCLI
         static void Usage()
         {
             Console.WriteLine("Usage: questprop <mod> list   <questPattern> [<script>]");
-            Console.WriteLine("       questprop <mod> set    <questPattern> <script> <prop> <value> [--type obj|int|float|bool|string] [--dry]");
+            Console.WriteLine("       questprop <mod> set    <questPattern> <script> <prop> <value> [--type obj|alias|int|float|bool|string] [--dry]");
+            Console.WriteLine("         --type alias: <value> is an alias NAME, resolved on each matched quest");
             Console.WriteLine("       questprop <mod> remove <questPattern> <script> <prop> [--dry]");
             Console.WriteLine();
             Console.WriteLine("  --type is OPTIONAL when the property exists (the record's type wins) and REQUIRED when adding.");
