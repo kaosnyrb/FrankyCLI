@@ -24,18 +24,25 @@ helper's is the truth; everything after the landing reads off the mover. POD 4, 
 in 2.9 s, but "The box takes longer and has phyics": its havok body falls on its own, tumbling, so a moveable
 static does not follow the move either. The helper route is the one: upright, on time, on target.
 
+⭐ THIRD PLAY, 2026-10-21 14:0x: "works, pod spawns, falls, people spawn", and his three notes: "there isn't
+sound, impact explosion, and I feel like it should start higher and go faster". FXLandingEngineDamagePush is a
+push with nothing to see or hear, so boom 1 is now a rocket launcher's explosion, a descent sound is played on the
+mover, and the defaults went from 150 up at 50 to 400 up at 200.
+
 NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes. Pass ALL
-SEVEN numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an omitted int is unread):
-    cgf "duo_podprobe.Run" 0 0 0 0 0 0 1     Gemini on the invisible helper, nothing else
-    cgf "duo_podprobe.Run" 0 0 0 4 0 0 0     the cargo container, moved directly
-    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1     the helper route with the landing push and 2 people
+EIGHT numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an
+omitted int is unread):
+    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1 1   the whole arrival: helper, rocket boom, 2 people, fly-by sound
+    cgf "duo_podprobe.Run" 0 800 300 0 3 2 1 1   higher, faster, the car-nuke boom
     cgf "duo_podprobe.Clear" 0               deletes every probe object and worker within 1000
-Run(distance, height, speed, pod, boom, people, carrier): 0 means the default for the three floats (25, 150,
-50). pod 0 Gemini, 1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule, 4 Neon_AuroraCargoContainer01 (a vanilla
-MoveableStatic); boom 0 none, 1 FXLandingEngineDamagePush (a landing ship's push), 2 fragGrenadeExplosion;
-people 0 to 4 (UC_NA_MASTWorkerMale01, as duo_offpoiprobe); carrier 0 move the pod itself, 1 attach it to an
-invisible StarbornRingSpin00 and move that. The four capsules are vanilla set dressing and every one STANDS on
-its origin (gen_inspect bounds, 2026-10-21).
+Run(distance, height, speed, pod, boom, people, carrier, sound): 0 means the default for the three floats (25,
+400, 200). pod 0 Gemini, 1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule, 4 Neon_AuroraCargoContainer01 (a vanilla
+MoveableStatic); boom 0 none, 1 RocketlauncherExplosion, 2 fragGrenadeExplosion, 3 CarNukeLargeVehicles, 4
+FXLandingEngineDamagePush (invisible and silent, kept as the control); people 0 to 4 (UC_NA_MASTWorkerMale01, as
+duo_offpoiprobe), placed 0.3 s after the boom so it cannot hit them; carrier 0 move the pod itself, 1 attach it
+to an invisible StarbornRingSpin00 and move that; sound 0 none, 1 WwiseEvent_VEHNPCFlyByClose, 2
+WwiseEvent_VEHNPCFlyByFar, 3 WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy, played on the MOVER as it starts down.
+The four capsules are vanilla set dressing and every one STANDS on its origin (gen_inspect bounds, 2026-10-21).
 Clear deletes by BASE, so never run it at the NASA museum, where those capsules stand for real, nor in New
 Atlantis, where the worker does, nor in a Starborn temple, where the helper does.
 NUMBERS ONLY in the output (duo_worldprobe's lesson: a form cast to a string carries a "<" that the message
@@ -56,7 +63,31 @@ Form Function PodBase(int aiPod) global
     Return Game.GetForm(0x23E2CF)       ; Nasa_GeminiCapsule01, 2.7 x 2.7 x 3.0, upright
 EndFunction
 
-Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2, int aiCarrier = 0) global
+Form Function BoomBase(int aiBoom) global
+    If aiBoom == 1
+        Return Game.GetForm(0x49B53)    ; RocketlauncherExplosion
+    ElseIf aiBoom == 2
+        Return Game.GetForm(0xE574F)    ; fragGrenadeExplosion
+    ElseIf aiBoom == 3
+        Return Game.GetForm(0x23D3B)    ; CarNukeLargeVehicles
+    ElseIf aiBoom == 4
+        Return Game.GetForm(0x1FF72B)   ; FXLandingEngineDamagePush: no visual, no sound (his third play)
+    EndIf
+    Return None
+EndFunction
+
+WwiseEvent Function DescentSound(int aiSound) global
+    If aiSound == 1
+        Return Game.GetForm(0x2B16D7) as WwiseEvent   ; WwiseEvent_VEHNPCFlyByClose
+    ElseIf aiSound == 2
+        Return Game.GetForm(0x2B16DA) as WwiseEvent   ; WwiseEvent_VEHNPCFlyByFar
+    ElseIf aiSound == 3
+        Return Game.GetForm(0xBD626) as WwiseEvent    ; WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy
+    EndIf
+    Return None
+EndFunction
+
+Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2, int aiCarrier = 0, int aiSound = 0) global
     Actor player = Game.GetPlayer()
     Float dist = afDistance
     If dist <= 0.0
@@ -64,16 +95,24 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     EndIf
     Float height = afHeight
     If height <= 0.0
-        height = 150.0
+        height = 400.0
     EndIf
     Float speed = afSpeed
     If speed <= 0.0
-        speed = 50.0
+        speed = 200.0
     EndIf
     Form pod = PodBase(aiPod)
     Form marker = Game.GetForm(0x3B)    ; XMarker
     Form helperBase = PodBase(5)
-    String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople + "  carrier=" + aiCarrier
+    Form boom = BoomBase(aiBoom)
+    WwiseEvent sound = DescentSound(aiSound)
+    String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople + "  carrier=" + aiCarrier + "  sound=" + aiSound
+    If aiBoom > 0 && boom == None
+        out += "\nBOOM " + aiBoom + " DID NOT RESOLVE"
+    EndIf
+    If aiSound > 0 && sound == None
+        out += "\nSOUND " + aiSound + " DID NOT RESOLVE"
+    EndIf
     If pod == None || marker == None || helperBase == None
         out += "\nA BASE DID NOT RESOLVE (pod, XMarker or helper)"
         Debug.Trace(out)
@@ -113,6 +152,9 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
         out += "   helper " + ((mover.GetPositionZ() - gz) as Int) + " up, 3D " + mover.Is3DLoaded()
     EndIf
 
+    If sound != None
+        out += "   sound instance " + sound.Play(mover)
+    EndIf
     Float t0 = Utility.GetCurrentRealTime()
     mover.TranslateTo(gx, gy, gz, mover.GetAngleX(), mover.GetAngleY(), mover.GetAngleZ(), speed)
     Float limit = height / speed * 2.0 + 5.0
@@ -121,17 +163,18 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     Bool landed = false
     Int n = 0
     String trail = ""
+    ; Checked every 0.1 s so the boom follows the touchdown closely at speed; the trail keeps every third reading.
     While t < limit && !landed
-        Utility.Wait(0.25)
+        Utility.Wait(0.1)
         t = Utility.GetCurrentRealTime() - t0
         z = mover.GetPositionZ()
         n += 1
-        If n <= 12 || n % 4 == 0
+        If n % 3 == 0 && n <= 60
             trail += " " + ((z - gz) as Int)
         EndIf
         landed = Math.abs(z - gz) < 0.5
     EndWhile
-    out += "\nmover height every 0.25 s:" + trail
+    out += "\nmover height every 0.3 s:" + trail
     If landed
         out += "\nLANDED in " + ((t * 10.0) as Int) + " tenths of a s (straight line says " + ((height / speed * 10.0) as Int) + ")"
     Else
@@ -143,10 +186,9 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     EndIf
     out += "   off target " + (ground.GetDistance(mover) as Int)
 
-    If aiBoom == 1
-        ground.PlaceAtMe(Game.GetForm(0x1FF72B))   ; FXLandingEngineDamagePush
-    ElseIf aiBoom == 2
-        ground.PlaceAtMe(Game.GetForm(0xE574F))    ; fragGrenadeExplosion
+    If boom != None
+        ground.PlaceAtMe(boom)
+        Utility.Wait(0.3)   ; the people come after the blast, so it cannot hit them
     EndIf
 
     ; People step out beside it, on the navmesh, the way duo_offpoiprobe's route B put a person down. Placed off the
