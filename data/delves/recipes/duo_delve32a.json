@@ -1,0 +1,133 @@
+﻿{
+  "schema": 2,
+  "id": "duo_delve32a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: it sends you to a dungeon, so you go in knowing there is a fight (his ruling, 2026-10-20).",
+  "author": "jessica, as Meg Fenwick",
+  "source": "his 2026-10-21 07:26: \"lets have a talk to person at POI and kill a boss at dungeon local mission\"",
+  "_note": [
+    "PEN NAME: home-office office/pennames/meg-fenwick.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
+    "TALK, THEN THE BOSS. 18a's first two beats with a defeat where its recover was: a talk at a quiet site (main), then",
+    "a defeat at the boss marker of a built hostile site (second). ⚠ defeat at a SECOND place is new (every defeat so far",
+    "is at the main place); the lint and Eliza say. Spacer boss and a small Spacer gang, as 28a.",
+    "Meg's tell: she corrects an animal mid-sentence without breaking off (the greeting, 'easy now'). Her moves: the exact",
+    "age and weight of a creature given unasked (exchange 1), her feeling never named. Her ban: the animal as a stand-in",
+    "for a person, and loneliness. A common, not a rare: losing stock to raiders is a job that happens on any planet.",
+    "Exchange 0 closes the talk and starts the defeat. Exchange 2 is a [Bounty Hunter] line, never the first.",
+    "Same voice on the radio and in person. Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeNaturalKeyword"
+        ]
+      }
+    },
+    "_themes": "Her at a quiet built site where stock could be kept (quiet AND natural is an empty pool, measured 2026-10-15 for 18a), the thieves at a built hostile site with a boss marker."
+  },
+  "prose": {
+    "name": "Bounty: Stock Thief on <Planet>",
+    "briefing": "A stockwoman at the <Place> is losing animals at night, two a week, to raiders who carry them up to their boss. She has asked for someone to come and see her."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the stockwoman at the <Place>",
+      "journal": "A stockwoman at the <Place> is losing two animals a week to raiders, who carry them to their boss at the <SecondPlace>. She asked me to deal with him.",
+      "person": {
+        "name": "Maura Ketley",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Farmer_01_with_Hat",
+        "_outfit": "11a's farmer outfit, already worn in game. His eye decides.",
+        "voice": "GenericFemale01",
+        "elevenlabs": "XrExE9yKIg1WjnnlVkGX",
+        "hellos": [
+          [
+            "Stand there a minute. She kicks."
+          ]
+        ]
+      },
+      "greeting": [
+        "You heard the call. Good.",
+        "They come at night, easy now, stand still, and take the two nearest the gate.",
+        "They carry them up to their boss. He's the one eating them."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll deal with their boss.",
+          "reply": [
+            "His crew carry. He decides.",
+            "Take him, and the carrying stops.",
+            "Shut the gate behind you on your way out."
+          ]
+        },
+        {
+          "prompt": "How many have you lost?",
+          "reply": [
+            "Eleven since the thaw.",
+            "The last was a four-year-old cow, five hundred kilos, in calf.",
+            "She had another eight years in her."
+          ]
+        },
+        {
+          "prompt": "Is there a price on him?",
+          "reply": [
+            "Not that I know of.",
+            "If there is, you're welcome to it. I only want the gate shut."
+          ],
+          "perk": "BackgroundBountyHunter"
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and starts the defeat. Every prompt asks about something the greeting has already said (the boss, the losses). Voiced lines: no names, no places, no factions, no currency."
+    },
+    {
+      "type": "defeat",
+      "place": "second",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the raiders' boss at the <SecondPlace>",
+      "journal": "The raiders' boss at the <SecondPlace> is dead. Nobody is coming down for the stockwoman's animals tonight.",
+      "say": [
+        "Is that done?",
+        "Right. I'll count them in at dusk.",
+        "Same number as this morning, for once."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Stockwoman",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
+  },
+  "broadcast": [
+    "Somebody's taking my stock. Two a week, at night.",
+    "I know where they go, and who's eating them.",
+    "Come and see me, and I'll tell you."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is 21a's and remote06a's, used twice so far; his ear decides. Same voice in person."
+}
