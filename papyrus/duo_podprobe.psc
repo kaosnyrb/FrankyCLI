@@ -103,7 +103,17 @@ WwiseEvent Function DescentSound(int aiSound) global
     ElseIf aiSound == 2
         Return Game.GetForm(0x2B16DA) as WwiseEvent   ; WwiseEvent_VEHNPCFlyByFar
     ElseIf aiSound == 3
-        Return Game.GetForm(0xBD626) as WwiseEvent    ; WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy
+        Return Game.GetForm(0xBD626) as WwiseEvent    ; WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy ("3 is closer, but the sound is took long")
+    ; 14:4x his "What else is there? Sonic Booms I'm thinking": vanilla has no event named sonic or boom-from-the-sky,
+    ; so these are stand-ins, one-shots played as the pod appears and never cut (1 to 3 are cut at touchdown).
+    ElseIf aiSound == 4
+        Return Game.GetForm(0x2D4441) as WwiseEvent   ; WEF_QST_UC04_Distant_Explosion: a far boom, the sonic boom stand-in
+    ElseIf aiSound == 5
+        Return Game.GetForm(0x342944) as WwiseEvent   ; QST_UC08_Radar_Boom_Play_WEF: unheard
+    ElseIf aiSound == 6
+        Return Game.GetForm(0x2C9946) as WwiseEvent   ; PlayVEHNPCAfterburnerOneshot: a short burst, a retro burn?
+    ElseIf aiSound == 7
+        Return Game.GetForm(0x1E2ADB) as WwiseEvent   ; WwiseEvent_AMBShipGravDriveJump: a grav jump
     EndIf
     Return None
 EndFunction
@@ -179,9 +189,11 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     out += "\nstart " + ((z0 - gz) as Int) + " up   3D loaded " + p.Is3DLoaded()
     out += "   helper " + ((mover.GetPositionZ() - gz) as Int) + " up, 3D " + mover.Is3DLoaded()
 
+    Int playing = 0
     If sound != None
         Step("5 sound")
-        out += "   sound instance " + sound.Play(mover)
+        playing = sound.Play(mover)
+        out += "   sound instance " + playing
     EndIf
     Step("6 translate")
     Float t0 = Utility.GetCurrentRealTime()
@@ -213,6 +225,10 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     out += "\nthe pod itself READS " + ((p.GetPositionZ() - gz) as Int) + " up (stale once attached: he saw it land, 2026-10-21)"
     out += "   off target " + (ground.GetDistance(mover) as Int)
 
+    ; A fly-by (1 to 3) is cut the moment it lands, so it lasts exactly as long as the fall; the booms run out.
+    If sound != None && aiSound <= 3
+        WwiseEvent.StopInstance(playing)
+    EndIf
     Step("7 landed " + landed + ", boom")
     If boom != None
         ground.PlaceAtMe(boom)
