@@ -17,7 +17,15 @@ Scriptname duo_delve_landing extends ReferenceAlias
   through aliases off the ship's exterior location, QF_OE_KT_Trait_Wanted_Bounty). LocationRefType extends Keyword, so
   GetExteriorRefs(it) is tried first; vanilla never calls GetExteriorRefs, so whether it finds them is UNMEASURED, and
   the trace says which. The exterior load door is the fallback.
-  ⚠ Flat distance, as duo_delve_spawnnear: the marker's height over unloaded ground means nothing. }
+  ⚠ Flat distance, as duo_delve_spawnnear: the marker's height over unloaded ground means nothing.
+
+  WHERE IT COMES DOWN, A PROBE (2026-10-21, his "find a best fit landing location via script", after his first play
+  came down "in the middle of a fence and tree"): before the ship is called, the pad asks the engine for a clear spot
+  round the landing marker, GetSafePosition(SearchRadius, r) at r = 40, 25 and 15, and moves to the first answer; with
+  none it stays on the marker. Vanilla never searches for a landing spot (every NPC landing is on a hand-placed marker,
+  OE_ShipsAddonScript) and GetSafePosition has no caller anywhere, so what it counts as clear and its units are what his
+  plays measure: every answer is traced, the defaults' answer too. His ordering, when it graduates: a hand-placed
+  landing marker if the place has one, then this, then the marker. }
 
 Float CheckEvery = 1.0 Const
 Int LandChecks = 60 Const
@@ -25,6 +33,7 @@ Int RampChecks = 20 Const
 Int DeckMinChecks = 5 Const
 Int DeckChecks = 60 Const
 Float CleanUpAfter = 30.0 Const
+Float SearchRadius = 100.0 Const
 
 int TimerApproach = 1 Const
 int TimerLanding = 2 Const
@@ -58,6 +67,7 @@ EndFunction
 Function CallShip()
     Furniture ShipLandingMarker_80m_Large = Game.GetFormFromFile(28997, "Starfield.esm") as Furniture;ShipLandingMarker_80m_Large [FURN:00007145]
     pad = GetRef().PlaceAtMe(ShipLandingMarker_80m_Large, 1, True, False, True, None, None, True)
+    MovePadToClearSpot()
     craft = pad.PlaceShipAtMe(ship, 4, true, false, false, true, none, None, None, true)
     if !craft
       ;PROBE ONLY, comes out when this graduates: a ship form that places nothing.
@@ -69,6 +79,44 @@ Function CallShip()
     Debug.Trace(Self + " [landing] ship " + craft + " called to " + pad)
     checks = 0
     StartTimer(CheckEvery, TimerLanding)
+EndFunction
+
+;The probe (see the header): the first clear spot the engine finds, largest radius first, in world offsets from the
+;marker (MoveTo's offset does not turn with anything when abRotateOffset is False, manual Inbox 2026-10-12).
+Function MovePadToClearSpot()
+    ObjectReference here = GetRef()
+    Debug.Trace(Self + " [landing] GetSafePosition() at its defaults -> " + Spot(here, here.GetSafePosition()))
+    Float[] radii = new Float[3]
+    radii[0] = 40.0
+    radii[1] = 25.0
+    radii[2] = 15.0
+    Int i = 0
+    While i < radii.Length
+      Float[] at = here.GetSafePosition(SearchRadius, radii[i])
+      Debug.Trace(Self + " [landing] GetSafePosition(" + SearchRadius + ", " + radii[i] + ") -> " + Spot(here, at))
+      if at && at.Length >= 3
+        pad.MoveTo(here, at[0] - here.GetPositionX(), at[1] - here.GetPositionY(), at[2] - here.GetPositionZ(), True)
+        ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
+        Debug.Notification("Landing: clear spot at r" + (radii[i] as Int) + ", " + (Flat(here, at) as Int) + " off the marker")
+        return
+      endif
+      i += 1
+    EndWhile
+    ;PROBE ONLY, comes out when this graduates.
+    Debug.Notification("Landing: no clear spot found, on the marker")
+EndFunction
+
+String Function Spot(ObjectReference akFrom, Float[] akAt)
+    if !akAt || akAt.Length < 3
+      return "nothing"
+    endif
+    return akAt[0] + ", " + akAt[1] + ", " + akAt[2] + " (flat " + Flat(akFrom, akAt) + " from the marker, dz " + (akAt[2] - akFrom.GetPositionZ()) + ")"
+EndFunction
+
+Float Function Flat(ObjectReference akFrom, Float[] akAt)
+    Float dx = akAt[0] - akFrom.GetPositionX()
+    Float dy = akAt[1] - akFrom.GetPositionY()
+    return Math.sqrt(dx * dx + dy * dy)
 EndFunction
 
 Function SpawnCrew(ObjectReference akAt, Float afSpread)
