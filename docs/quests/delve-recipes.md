@@ -352,7 +352,8 @@ shared by every Delve; the build's read-back checks it is the only quest script 
 
 **A clear's enemies by DROP POD, `enemies.pods`** (2026-10-21, his *"clear sounds good, let's do 3 per pod and 3 pods in
 different points to start with"*; first on `duo_delve33a`, not yet played). `{ "count", "per" }` on a clear's `enemies`:
-`count` pods (1 to 4) land round the spawn marker at even bearings, 15 to 25 out, and `per` (1 to 6) step out of each, so
+`count` pods (1 to 4) land round the spawn marker at even bearings, 15 to 25 out, one after another 2 to 4 s apart at
+random (his *"randomly staggered by 2-4 seconds so they don't all land at once"*), and `per` (1 to 6) step out of each, so
 the pods set the number and `min` / `max` are refused beside them; refused on a defeat's gang. The step's fragment calls
 `SetPods` on `duo_delve_groupnear` BEFORE `Arm` (a function of its own, so clears built earlier still match `Arm`); when
 he comes near, `duo_delve_lib.DropPods` runs the arrival `duo_podprobe` proved at his glass, all vanilla: a
