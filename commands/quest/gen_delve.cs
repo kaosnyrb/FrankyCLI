@@ -513,9 +513,10 @@ namespace FrankyCLI
             public Loot? loot { get; set; }
             /// <summary>
             /// defeat and clear, OPTIONAL: a FRIENDLY team that arrives BY SHIP when the player comes near (his 2026-10-21, "build a
-            /// new delve mission with the landings", after the strike team test on qst11a). The ship is placed on a landing marker
-            /// at the place's `land` marker and comes down from orbit by itself (his fact, the landed bounties qst12a to qst16d);
-            /// on landing its ramps open and the team steps out of its hatch, then it takes off. papyrus/duo_delve_landing.psc.
+            /// new delve mission with the landings", after the strike team test on qst11a). If the place has its own landing pad
+            /// near its `land` marker, the ship is placed on it and comes down from orbit by itself (his fact, the landed bounties
+            /// qst12a to qst16d); on landing its ramps open and the team comes out of its load door, then it takes off. With no
+            /// pad there is no ship and the team arrives on foot (his "Pad or Squad", 2026-10-21). papyrus/duo_delve_landing.psc.
             /// </summary>
             public Support? support { get; set; }
         }

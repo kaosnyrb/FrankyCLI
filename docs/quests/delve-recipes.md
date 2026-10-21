@@ -381,11 +381,13 @@ warns when it is the fight's own marker), `near` the flat call distance (100 to 
 arms `papyrus/duo_delve_landing.psc` on a new landing-marker alias; when the player comes within `near`, a pad is
 chosen (below) and `PlaceShipAtMe` puts the ship on it, which comes down from orbit by itself (his fact: his landed
 bounties, qst12a to qst16d). On `IsLanded` its ramps open; on `IsRampDown` (or 20 s) the team is placed INTO an empty
-collection (a copy of `ActiveHostiles`) **on the ground in a ring round the ship**, 3 to 8 outside its hull (vanilla's
-ship radius, half width and half length as a circle, `SQ_StationTrafficManagerQuestScript`), snapped to the navmesh.
-His plays, 2026-10-21: at the hatch they stayed in the bay, and at the exterior load door they leave only when the ramp
-meets the ground, so *"spawn the marines around the ship rather than in the landing bay"*. (The ship's deck markers were
-tried first and `GetExteriorRefs(Ship_LandDeck_Marker_RefType)` found 0 on the UC A-class transport, one play.)
+collection (a copy of `ActiveHostiles`) **at the ship's exterior load door, so they come down the ramp**. A team at that
+door leaves only when the ramp meets the ground (his play: *"unless the ramp is perfectly aligned with the floor the
+people can[not] pathfind off the ship"*), which on open ground it did not, so from 11:21 to 16:4x they stood in a ring
+round the hull instead; a hand-placed pad is flat, so with open ground gone the door is back (his *"we can bring back
+the landing ramp"*, 2026-10-21, unplayed on a pad). A ship that never lands, or has no exterior load door, puts its team
+on the pad. (The ship's deck markers were tried first and `GetExteriorRefs(Ship_LandDeck_Marker_RefType)` found 0 on
+the UC A-class transport, one play.)
 ⭐ **The collection wears the
 team's OWN package, `<id>_supportpkg_b<n>`**: a copy of the travel package aimed near the beat's marker alias (where the
 enemies or the target spawn) by vanilla's own shape for a landed crew (`OE_KT_LandedShip_TravelPKG`: `LocationFallback`
@@ -399,14 +401,15 @@ in its place left them *"very chill, don't seem to want to engage in comabt"* (o
 his *"Maybe even just stopping the travel package"*. ⚠ A package's location `Radius` holds a FLOAT's bits in Mutagen's
 field (1101004800 is 20.0; vanilla's 3.0, 10.0, 60.0 read the same). The ship takes off once its
 landing deck is clear (`IsLandingDeckClear`, 5 to 60 s) and both refs are deleted 30 s later. Nothing sets aggression.
-Refused on a board (not built for it yet). ⭐ **Where it comes down, his ruling 2026-10-21** (after his first play came down on a
-fence and a tree): *"spawn a ship if there is a land pad, or if there is a suitable spot. Otherwise we just spawn the npcs
-on the ground"*. (1) The place's OWN pad: the closest hand-placed landing marker within 250 of `land` (five furniture
-bases carry every one in his load order, `gen_delve bases`), skipping one his ship sits on; it is never deleted. (2) Else
-a clear spot from `GetSafePosition(100, r)` round `land` at r = 40, 25 and 15, where a pad of ours is placed (its radii are in
-position units; with logging on, 1 of his first 3 plays on Jemison found a spot, at r 15, 88 from `land`). (3) Else no ship: the team is placed on `land` and runs in on its package. Vanilla never
-searches for a landing spot (every NPC landing is on a hand-placed marker). Probe-only notifications name each path and
-come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
+Refused on a board (not built for it yet). ⭐ **Where it comes down, PAD OR SQUAD, his ruling 2026-10-21 16:4x:** *"let's just do Pad
+or Squad. Safe Position isn't really helping us."* (1) **Pad:** the place's OWN pad, the closest hand-placed landing marker
+within 250 of `land` (five furniture bases carry every one in his load order, `gen_delve bases`), skipping one his ship
+sits on; it is never deleted. (2) **Squad:** else no ship, and the team is placed on `land` and runs in on its package.
+Drop pods (`enemies.pods`, above) are the middle ground now. Vanilla never searches for a landing spot (every NPC
+landing is on a hand-placed marker). ⛔ **The open-ground rung is retired, measured first:** a clear spot from
+`GetSafePosition(100, r)` at r 40, 25 and 15 cost 3.1 to 3.6, 1.7 to 1.9 and 0.7 to 0.9 s on a world with none (about
+6 s of stutter, his *"a lot of slow down"*), and r 40 and 25 found nothing in 4 of 4 (home-office manual 09). Probe-only
+notifications name each path and come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),

@@ -580,8 +580,9 @@ namespace FrankyCLI
         /// <summary>The most drop pods one clear may call: duo_delve_lib.DropPods holds them in a fixed array of this size.</summary>
         private const int PodsMax = 4;
 
-        /// <summary>The alias script on a support team's landing marker: armed by the step, it calls a ship down onto the marker
-        /// when the player comes near, opens its ramps and puts the team out of its hatch (papyrus/duo_delve_landing.psc).</summary>
+        /// <summary>The alias script on a support team's landing marker: armed by the step, when the player comes near it calls a
+        /// ship down onto the place's own pad and puts the team out of its load door, or with no pad places the team on foot
+        /// (his "Pad or Squad", 2026-10-21; papyrus/duo_delve_landing.psc).</summary>
         private const string LandingScript = "duo_delve_landing";
         /// <summary>A support team's call distance when the recipe names none: the strike team test's 300 (2026-10-21).</summary>
         private const int DefaultLandingNear = 300;

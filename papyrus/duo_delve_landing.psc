@@ -1,36 +1,37 @@
 Scriptname duo_delve_landing extends ReferenceAlias
 { FrankyCLI, on a fight beat's LANDING marker alias when the recipe gives the beat a `support` team. The step's fragment
-  calls Arm; when the player comes within NearDistance of the marker ACROSS THE MAP, a ship is placed on a landing marker
-  there and comes down from orbit by itself (his fact, 2026-10-21: "Doing this on a planet causes the ship to appear from
-  orbit and land", his landed bounties qst12a to qst16d). Once it reports landed its ramps open; once a ramp is down (or
-  RampChecks seconds pass) the team is placed INTO akTeam, a collection wearing their own Travel to the fight, ON THE
-  GROUND IN A RING ROUND THE SHIP, outside its hull, and each one LEAVES akTeam as he comes within ArriveWithin of akFight
-  (the fight's marker), so the Travel stops and his own AI takes over (his play, 2026-10-21: "Once the marines reach the
-  marker they huddle there doing nothing ... Maybe even just stopping the travel package"; a sandbox round the fight,
-  tried first, left them "very chill, don't seem to want to engage in comabt"); the ship takes off once its landing deck is clear
-  (IsLandingDeckClear, after at least DeckMinChecks seconds, at most DeckChecks), and both refs are deleted CleanUpAfter
-  seconds after that.
+  calls Arm; when the player comes within NearDistance of the marker ACROSS THE MAP, the team arrives one of two ways,
+  his ruling 2026-10-21: "let's just do Pad or Squad. Safe Position isn't really helping us."
+  (1) PAD: the place's own hand-placed landing marker, the closest within PadRadius of the landing marker, skipping one
+  his own ship sits on. A ship is placed on it and comes down from orbit by itself (his fact: "Doing this on a planet
+  causes the ship to appear from orbit and land", his landed bounties qst12a to qst16d). Once it reports landed its
+  ramps open; once a ramp is down (or RampChecks seconds pass) the team is placed INTO akTeam at the ship's exterior load
+  door, so they come down the ramp, a collection wearing their own Travel to the fight; each one LEAVES akTeam as he
+  comes within ArriveWithin of akFight (the fight's marker), so the Travel stops and his own AI takes over. The ship
+  takes off once its landing deck is clear (IsLandingDeckClear, after at least DeckMinChecks seconds, at most
+  DeckChecks) and is deleted CleanUpAfter seconds after that. The place's pad is never deleted.
+  (2) SQUAD: no pad, so no ship: the team is placed on the landing marker and runs in on the same Travel. A ship that
+  never lands, or has no exterior load door, puts its team down the same way, on the pad.
+  Drop pods are the middle ground now (his, the same ruling), so nothing here looks for open ground.
 
-  WHY: his "build a new delve mission with the landings" (2026-10-21), after the strike team test on Overtime's qst11
-  quests was rolled back under his rule that a shipped quest is never edited. The team is FRIENDLY: nothing here sets
-  aggression, so they fight whoever the place's enemies are, as the strike team's spawn always did (manual 09).
+  WHY THE RAMP AGAIN: at the load door a team leaves only if the ramp meets the ground ("unless the ramp is perfectly
+  aligned with the floor the people can[not] pathfind off the ship"), which on open ground it did not; a hand-placed pad
+  is flat by its author, so with the open-ground spots gone the door is back (his "we can bring back the landing ramp").
+  Unplayed on a pad as of this change.
 
-  WHY ROUND THE SHIP AND NOT ON IT, his plays 2026-10-21: at the hatch they "hung out in the landing bay", and at the
-  exterior load door they leave only if the ramp meets the ground: "unless the ramp is perfectly aligned with the floor
-  the people can[not] pathfind off the ship", then his "spawn the marines around the ship rather than in the landing
-  bay". The hull radius is vanilla's own for a ship (SQ_StationTrafficManagerQuestScript: half width and half length
-  as a circle), so the ring fits whichever ship lands.
-  ⚠ Flat distance, as duo_delve_spawnnear: the marker's height over unloaded ground means nothing.
+  The team is FRIENDLY: nothing here sets aggression, so they fight whoever the place's enemies are, as the strike
+  team's spawn always did (manual 09). Flat distance, as duo_delve_spawnnear: height over unloaded ground means nothing. }
 
-  WHERE IT COMES DOWN, his ruling (2026-10-21, after his first play came down "in the middle of a fence and tree"):
-  "spawn a ship if there is a land pad, or if there is a suitable spot. Otherwise we just spawn the npcs on the ground".
-  (1) The place's OWN pad: the closest hand-placed landing marker within PadRadius of the landing marker, skipping one
-  his own ship sits on. (2) Else a clear spot the engine finds, GetSafePosition(SearchRadius, r) at r = 40, 25 and 15,
-  where a pad of ours is placed. (3) Else no ship: the team is placed on the landing marker and runs in on its package.
-  Vanilla never searches for a landing spot (every NPC landing is on a hand-placed marker, OE_ShipsAddonScript) and
-  GetSafePosition has no caller anywhere. Its radii are in position units (an answer at r 15 came back 88 from the
-  marker, inside the 100 search); with logging on, 1 of his first 3 plays on Jemison found a spot and 2 walked in, so
-  rung 3 is common, not rare. A pad of the place's is never deleted; only ours is. }
+;HISTORY, kept out of the docstring (a long .pex string crashes the game, papyrus/compile.py):
+;- 2026-10-21 10:4x to 16:4x a second rung found open ground with GetSafePosition(100, r) at r 40, 25 and 15 and put a
+;  pad of ours there. Its cost, off his logged plays (manual 09): r 40 3.1 to 3.6 s, r 25 1.7 to 1.9 s, r 15 0.7 to 0.9 s
+;  on a world with no spot, about 6 s of stutter on a failed search; r 40 and 25 found nothing in 4 of 4, r 15 2 of 4.
+;  Retired on his "Safe Position isn't really helping us".
+;- 11:21 to 16:4x the team stood in a ring round the hull (vanilla's ship radius, SQ_StationTrafficManagerQuestScript),
+;  because on open ground the ramp did not meet it. Retired with the open-ground rung.
+;- Deck markers were tried first: GetExteriorRefs(Ship_LandDeck_Marker_RefType) found 0 on the UC A-class transport.
+;- A sandbox at the fight left them "very chill, don't seem to want to engage in comabt"; the Travel plus the release
+;  at ArriveWithin is what fought.
 
 Float CheckEvery = 1.0 Const
 Int LandChecks = 60 Const
@@ -38,30 +39,19 @@ Int RampChecks = 20 Const
 Int DeckMinChecks = 5 Const
 Int DeckChecks = 60 Const
 Float CleanUpAfter = 30.0 Const
-Float SearchRadius = 100.0 Const
 Float PadRadius = 250.0 Const
 Float OccupiedWithin = 40.0 Const
-Float MinHull = 10.0 Const
-Float RingGapMin = 3.0 Const
-Float RingGapMax = 8.0 Const
 
 int TimerApproach = 1 Const
 int TimerLanding = 2 Const
 int TimerRamp = 3 Const
 int TimerDeck = 4 Const
 int TimerCleanUp = 5 Const
-int TimerSearch = 6 Const
-int TimerArrive = 7 Const
+int TimerArrive = 6 Const
 
 ;A Marine within this of the fight's marker leaves the team; past ArriveChecks seconds every one left does too.
 Float ArriveWithin = 20.0 Const
 Int ArriveChecks = 180 Const
-
-;ONE clear-spot search per tick, SearchGap apart (his 2026-10-21 play: "there is a large stutter on the search if it
-;can't find a place"). Four searches ran back to back in one call, the first at the engine's defaults for the log only;
-;that one is gone and the other three each get their own tick, timed into the log.
-Float SearchGap = 1.0 Const
-Int SafeRadiusCount = 3 Const
 
 Form ship
 FormList crew
@@ -74,9 +64,7 @@ Int arriveTicks   ; not "arriveChecks": Papyrus is case-insensitive and ArriveCh
 WorldSpace world
 ObjectReference pad
 SpaceshipReference craft
-Bool padIsOurs
 Int checks
-Int searchStep
 
 Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, RefCollectionAlias akTeam, ReferenceAlias akFight)
     team = akTeam
@@ -91,62 +79,24 @@ Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, R
     StartTimer(CheckEvery, TimerApproach)
 EndFunction
 
-;Rung 1 (the header's three): the place's own pad, in this tick; else rung 2 starts on the timer, one search a tick.
-Function FindOwnPad()
+;The header's two: the place's own pad and a ship onto it, else the squad on foot from the landing marker.
+Function PadOrSquad()
     ObjectReference here = GetRef()
     Float t0 = Utility.GetCurrentRealTime()
-    ObjectReference own = OwnPad(here)
-    Debug.Trace(Self + " [landing] pad search took " + (Utility.GetCurrentRealTime() - t0) + " s, found " + own)
-    if own
-      pad = own
-      padIsOurs = False
-      ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
-      Debug.Notification("Landing: on the place's own pad, " + (here.GetDistance(own) as Int) + " off the marker")
+    pad = OwnPad(here)
+    Debug.Trace(Self + " [landing] pad search took " + (Utility.GetCurrentRealTime() - t0) + " s, found " + pad)
+    if pad
+      ;PROBE ONLY, comes out when this graduates: say on screen which way they came.
+      Debug.Notification("Landing: on the place's own pad, " + (here.GetDistance(pad) as Int) + " off the marker")
       CallShip()
       return
     endif
-    searchStep = 0
-    StartTimer(SearchGap, TimerSearch)
-EndFunction
-
-;Rung 2, one radius per tick, largest first; past the last, rung 3: no ship, the team arrives on foot.
-Function SearchStep()
-    ObjectReference here = GetRef()
-    Float r = SafeRadius(searchStep)
-    Float t0 = Utility.GetCurrentRealTime()
-    Float[] at = here.GetSafePosition(SearchRadius, r)
-    Debug.Trace(Self + " [landing] GetSafePosition(" + SearchRadius + ", " + r + ") took " + (Utility.GetCurrentRealTime() - t0) + " s -> " + Spot(here, at))
-    if at && at.Length >= 3
-      ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
-      Debug.Notification("Landing: clear spot at r" + (r as Int) + ", " + (Flat(here, at) as Int) + " off the marker")
-      Furniture ShipLandingMarker_80m_Large = Game.GetFormFromFile(0x007145, "Starfield.esm") as Furniture;[FURN:00007145]
-      pad = here.PlaceAtMe(ShipLandingMarker_80m_Large, 1, True, False, True, None, None, True)
-      ;World offsets: MoveTo's offset does not turn with anything when abRotateOffset is False (manual Inbox 2026-10-12).
-      pad.MoveTo(here, at[0] - here.GetPositionX(), at[1] - here.GetPositionY(), at[2] - here.GetPositionZ(), True)
-      padIsOurs = True
-      CallShip()
-      return
-    endif
-    searchStep += 1
-    if searchStep < SafeRadiusCount
-      StartTimer(SearchGap, TimerSearch)
-      return
-    endif
-    ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
-    Debug.Notification("Landing: no pad and no clear spot, the team arrives on foot")
+    ;PROBE ONLY, comes out when this graduates: say on screen which way they came.
+    Debug.Notification("Landing: no pad here, the team arrives on foot")
     SpawnCrew(here, 8.0)
 EndFunction
 
-Float Function SafeRadius(Int aiStep)
-    if aiStep == 0
-      return 40.0
-    elseif aiStep == 1
-      return 25.0
-    endif
-    return 15.0
-EndFunction
-
-;The ship onto the pad FindOwnPad or SearchStep chose.
+;The ship onto the place's pad.
 Function CallShip()
     craft = pad.PlaceShipAtMe(ship, 4, true, false, false, true, none, None, None, true)
     if !craft
@@ -154,7 +104,6 @@ Function CallShip()
       Debug.Notification("Support ship could not be placed")
       Debug.Trace(Self + " [landing] PlaceShipAtMe(" + ship + ") returned None, team placed at the pad")
       SpawnCrew(pad, 8.0)
-      DropPad()
       return
     endif
     Debug.Trace(Self + " [landing] ship " + craft + " called to " + pad)
@@ -165,7 +114,7 @@ EndFunction
 ;The closest hand-placed landing marker within PadRadius. Five furniture bases carry every one in his load order
 ;(gen_delve bases, 2026-10-21: 40m_Small 124 refs, 60m_Medium 108, 80m_Large 54, the two Vertical 6 and 3). One his
 ;own ship sits on is his, and skipped. ⚠ The search returns the closest of EACH base, so a second free pad of the same
-;base further out is not seen; the clear spot catches that case.
+;base further out is not seen, and that place gets the squad.
 ObjectReference Function OwnPad(ObjectReference akHere)
     Int[] ids = new Int[5]
     ids[0] = 0x1D6E5E ;ShipLandingMarker_40m_Small
@@ -193,27 +142,6 @@ ObjectReference Function OwnPad(ObjectReference akHere)
     return best
 EndFunction
 
-;Only a pad of ours is ever deleted; the place's own stays where its author put it.
-Function DropPad()
-    if pad && padIsOurs
-      pad.Delete()
-    endif
-    pad = None
-EndFunction
-
-String Function Spot(ObjectReference akFrom, Float[] akAt)
-    if !akAt || akAt.Length < 3
-      return "nothing"
-    endif
-    return akAt[0] + ", " + akAt[1] + ", " + akAt[2] + " (flat " + Flat(akFrom, akAt) + " from the marker, dz " + (akAt[2] - akFrom.GetPositionZ()) + ")"
-EndFunction
-
-Float Function Flat(ObjectReference akFrom, Float[] akAt)
-    Float dx = akAt[0] - akFrom.GetPositionX()
-    Float dy = akAt[1] - akFrom.GetPositionY()
-    return Math.sqrt(dx * dx + dy * dy)
-EndFunction
-
 Function SpawnCrew(ObjectReference akAt, Float afSpread)
     Int n = Utility.RandomInt(crewMin, crewMax)
     Float[] offset = new Float[6]
@@ -226,24 +154,8 @@ Function SpawnCrew(ObjectReference akAt, Float afSpread)
     StartArrive()
 EndFunction
 
-;A ring round akAt between afMin and afMax, random bearing each; PlaceAtMe snaps each offset to the navmesh, so they
-;stand on walkable ground (offsets turn with akAt's facing, which a random bearing makes immaterial).
-Function SpawnCrewAround(ObjectReference akAt, Float afMin, Float afMax)
-    Int n = Utility.RandomInt(crewMin, crewMax)
-    Float[] offset = new Float[6]
-    While n > 0
-      Float bearing = Utility.RandomFloat(0.0, 360.0)
-      Float r = Utility.RandomFloat(afMin, afMax)
-      offset[0] = r * Math.sin(bearing)
-      offset[1] = r * Math.cos(bearing)
-      akAt.PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
-      n -= 1
-    EndWhile
-    StartArrive()
-EndFunction
-
-;Watch the team on its way in: every placed member leaves it at the fight (ArriveStep). Started by both spawns, so no
-;path that puts a team down can miss it.
+;Watch the team on its way in: every placed member leaves it at the fight (ArriveStep). Started by SpawnCrew, the one
+;spawn, so no path that puts a team down can miss it.
 Function StartArrive()
     arriveTicks = 0
     StartTimer(CheckEvery, TimerArrive)
@@ -269,16 +181,18 @@ Function ArriveStep()
     endif
 EndFunction
 
-;The team on the ground round the ship (see the header for why not on it), centred on the pad it came down on.
+;The team out of the ship's exterior load door, so they come down the ramp onto the pad (see the header for why a pad
+;and not open ground).
 Function Unload()
-    Float halfW = craft.GetWidth() * 0.5
-    Float halfL = craft.GetLength() * 0.5
-    Float hull = Math.sqrt(halfW * halfW + halfL * halfL)
-    Debug.Trace(Self + " [landing] ship " + craft.GetWidth() + " wide, " + craft.GetLength() + " long, hull radius " + hull)
-    if hull < MinHull
-      hull = MinHull
+    ObjectReference[] doors = craft.GetExteriorLoadDoors()
+    Debug.Trace(Self + " [landing] " + doors.Length + " exterior load door(s)")
+    if doors.Length > 0
+      SpawnCrew(doors[0], 2.0)
+    else
+      ;PROBE ONLY, comes out when this graduates: a ship with no door to come out of.
+      Debug.Notification("Support ship has no exterior load door, team placed at the pad")
+      SpawnCrew(pad, 8.0)
     endif
-    SpawnCrewAround(pad, hull + RingGapMin, hull + RingGapMax)
     checks = 0
     StartTimer(CheckEvery, TimerDeck)
 EndFunction
@@ -302,11 +216,8 @@ Event OnTimer(int aiTimerID)
       if !world || player.GetWorldSpace() != world || dx * dx + dy * dy > near * near
         StartTimer(CheckEvery, TimerApproach)
       else
-        FindOwnPad()
+        PadOrSquad()
       endif
-
-    elseif aiTimerID == TimerSearch
-      SearchStep()
 
     elseif aiTimerID == TimerArrive
       ArriveStep()
@@ -324,10 +235,13 @@ Event OnTimer(int aiTimerID)
         checks = 0
         StartTimer(CheckEvery, TimerRamp)
       elseif checks >= LandChecks
-        ;PROBE ONLY, comes out when this graduates: say on screen which path ran.
-        Debug.Notification("Support ship never landed")
+        ;PROBE ONLY, comes out when this graduates: say on screen which path ran. Not out of the door: a ship that never
+        ;landed may still be in the air.
+        Debug.Notification("Support ship never landed, team placed at the pad")
         Debug.Trace(Self + " [landing] never reported landed after " + checks + " checks")
-        Unload()
+        SpawnCrew(pad, 8.0)
+        checks = 0
+        StartTimer(CheckEvery, TimerDeck)
       else
         StartTimer(CheckEvery, TimerLanding)
       endif
@@ -354,6 +268,6 @@ Event OnTimer(int aiTimerID)
     elseif aiTimerID == TimerCleanUp
       craft.Delete()
       craft = None
-      DropPad()
+      pad = None
     endif
 EndEvent
