@@ -359,10 +359,17 @@ warns when it is the fight's own marker), `near` the flat call distance (100 to 
 arms `papyrus/duo_delve_landing.psc` on a new landing-marker alias; when the player comes within `near`, a
 `ShipLandingMarker_80m_Large` is placed on `land` and `PlaceShipAtMe` puts the ship on it, which comes down from orbit by
 itself (his fact: his landed bounties, qst12a to qst16d). On `IsLanded` its ramps open; on `IsRampDown` (or 20 s) the team
-is placed at its exterior load door; 20 s later it takes off and both refs are deleted 30 s after that. The team is
-FRIENDLY: nothing sets aggression. Refused on a board (not built for it yet). ⚠ Unmeasured: the hatch as a spawn point
-(vanilla's bounty hunters use the ship's deck markers, which need aliases), a cluttered landing spot. Two probe-only
-notifications name the failure paths and come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
+is placed INTO an empty collection (a copy of `ActiveHostiles`) on the ship's deck markers if `GetExteriorRefs` finds
+them (`Ship_LandDeck_Marker_RefType`; unmeasured, traced), else at its exterior load door. ⭐ **The collection wears the
+team's OWN package, `<id>_supportpkg_b<n>`**: a copy of the travel package aimed near the beat's marker alias (where the
+enemies or the target spawn) by vanilla's own shape for a landed crew (`OE_KT_LandedShip_TravelPKG`: `LocationFallback`
+`AliasForReference`), at Run, with no condition. His plays, 2026-10-21: placed with no package they *"hung out in the
+landing bay"*; on the waves' run-to-player package they came off but *"didn't really attack the Spacers"*, and his ruling:
+*"For enemy landings this is prob right but friendlys should attack the objectives"*. The ship takes off once its
+landing deck is clear (`IsLandingDeckClear`, 5 to 60 s) and both refs are deleted 30 s later. Nothing sets aggression.
+Refused on a board (not built for it yet). ⚠ Unmeasured: a cluttered landing spot (his first play came down on a fence and
+a tree; `REShipLanding01`, 53 sites, or a laid pad are the two routes, parked). Two probe-only notifications name the
+failure paths and come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),

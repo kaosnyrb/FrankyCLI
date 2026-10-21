@@ -571,6 +571,8 @@ namespace FrankyCLI
         private const string LandingScript = "duo_delve_landing";
         /// <summary>A support team's call distance when the recipe names none: the strike team test's 300 (2026-10-21).</summary>
         private const int DefaultLandingNear = 300;
+        /// <summary>A support team's own travel package, one per beat: &lt;id&gt;_supportpkg_b&lt;n&gt;, removed by every rebuild.</summary>
+        private const string SupportPackagePrefix = "_supportpkg_b";
 
         /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
         private sealed class BeatsMade
@@ -587,7 +589,7 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
-            public List<int> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, wearing the travel package
+            public List<(int team, FormKey package, int fight)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own package to the fight's marker
             public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
@@ -845,46 +847,6 @@ namespace FrankyCLI
             /// save him). Not a stage hook: no properties, so it is recorded in its own list for the verify, never in Hooks
             /// (whose check reads StageToSet).
             /// </summary>
-            /// <summary>
-            /// The Travel-to-player package, ONE per Delve (moved here from the hold kind's Prepare on 2026-10-21, unchanged, so a
-            /// support team can wear it too). A copy of the bounty hunters' Travel (jog, weapon drawn, to PlayerRef); the copy keeps
-            /// the two GetDistance conditions (travel while the player is 9 to 1000 m away; closer than that they are in combat)
-            /// and drops what belongs to the bounty quest: its two GetStageDone conditions, its fragment scripts and its dialogue.
-            /// </summary>
-            internal int EnsureTravelPackage()
-            {
-                if (!travelPkg.IsNull) return 0;   // one per Delve: a hold made it, or an earlier support team
-                var pk = myMod.Packages.DuplicateInAsNewRecord(inputs.TravelSrc!);
-                pk.EditorID = r.id + "_wavepkg";
-                pk.VirtualMachineAdapter = null;
-                pk.OwnerQuest.SetTo(clone.FormKey);
-                // ⛔ THE BEGIN/END/CHANGE EVENTS ARE COPIED UNTOUCHED. Each carries ONE TopicReference that is
-                // an EMPTY placeholder (no topic set), so there is no dialogue to strip; the first build
-                // cleared the list "to drop the bounty hunters' lines", changed the record's shape for
-                // nothing, and his next play crashed to desktop (2026-10-09; the leading suspect, not proven).
-                // Read a field before removing it.
-                // NOT a suspect, measured: the copy's inputs are written sorted (1,3,5,7,8 where the source
-                // stores 1,3,5,8,7), because Mutagen's writer sorts them whatever order they are given, and
-                // Starfield.esm ships BOTH orders on Travel packages (248 sorted, 214 not).
-                bm.WavePackageShape = $"topics {string.Join("/", new[] { inputs.TravelSrc!.OnBegin, inputs.TravelSrc.OnEnd, inputs.TravelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
-                pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
-                foreach (var c in pk.Conditions)
-                {
-                    var gd = (GetDistanceConditionData)c.Data;
-                    if (gd.FirstParameter.Link.FormKey.ID != 0x14)
-                    { Console.WriteLine($"REFUSED: the copied package's distance condition measures to {gd.FirstParameter.Link.FormKey}, not PlayerRef."); return 1; }
-                }
-                // RUN, not the bounty hunters' jog (his play of 09, 2026-10-10: "They are slowish, so you spend a lot
-                // of time looking around for them"). A StartCombat at spawn was tried first and dropped: they could not
-                // detect him from 40 m+ out of sight, combat lapsed, and they stopped short (his next play).
-                var wasSpeed = pk.PreferredSpeed;
-                pk.PreferredSpeed = Package.Speed.Run;
-                travelPkg = pk.FormKey;
-                bm.WavePackage = pk.FormKey;
-                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {inputs.TravelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
-                return 0;
-            }
-
             /// <summary>Each support beat's landing marker alias, by beat index (Slot makes it, Fills writes it, Enter arms it).</summary>
             internal readonly Dictionary<int, int> landingOf = new();
             /// <summary>Each support beat's team collection, by beat index: empty, wearing the travel package, filled as they land.</summary>
@@ -944,6 +906,7 @@ namespace FrankyCLI
                 // none behind; the hold kind's Prepare clones the new one.
                 travelPkg = default;
                 RemovePrevious(myMod.Packages, e => e.StartsWith(r.id + "_wavepkg"));
+                RemovePrevious(myMod.Packages, e => e.StartsWith(r.id + SupportPackagePrefix));
                 foreach (var kind in KindsIn(r)) if (kind.Prepare(this) != 0) return 1;
                 vma.Scripts.Remove(old);
                 if (vma.Scripts.Count != 0)
@@ -2303,15 +2266,20 @@ namespace FrankyCLI
                               : $"fill {(ca.Location == null && ca.ForcedReference.IsNull && ca.UniqueActor.IsNull && ca.CreateReferenceToObject == null ? "none" : "SET")}, optional {ca.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}, packages {ca.PackageData.Count}",
                               "fill none, optional True, packages 0");
             }
-            foreach (var st in bm.SupportTeams)
+            foreach (var (st, spk, fight) in bm.SupportTeams)
             {
                 var sa = q.Aliases.OfType<IQuestCollectionAliasGetter>()
                     .Select(c => c.Collection.FirstOrDefault()?.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)st);
-                fail += Check($"support team collection {st} is empty, Optional and wears the travel package", sa == null ? "missing"
+                fail += Check($"support team collection {st} is empty, Optional and wears its own package", sa == null ? "missing"
                               : $"fill {(sa.Location == null && sa.ForcedReference.IsNull && sa.UniqueActor.IsNull && sa.CreateReferenceToObject == null ? "none" : "SET")}, optional {sa.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}, packages {string.Join(",", sa.PackageData.Select(p => p.FormKey))}",
-                              $"fill none, optional True, packages {bm.WavePackage}");
+                              $"fill none, optional True, packages {spk}");
+                var sp = m.Packages.FirstOrDefault(p => p.FormKey == spk);
+                var sl = (sp?.Data.Values.OfType<IPackageDataLocationGetter>().FirstOrDefault()?.Location as ILocationTargetRadiusGetter)?.Target as ILocationFallbackGetter;
+                fail += Check($"support package {spk} travels near the fight's marker alias, with no condition and no script",
+                              sp == null ? "missing" : $"{sl?.Type} {sl?.Data} conditions {sp.Conditions.Count} vma {(sp.VirtualMachineAdapter == null ? "none" : "SET")}",
+                              $"AliasForReference {fight} conditions 0 vma none");
             }
-            if (bm.Waves.Count > 0 || bm.SupportTeams.Count > 0)
+            if (bm.Waves.Count > 0)
             {
                 var pk = m.Packages.FirstOrDefault(p => p.FormKey == bm.WavePackage);
                 var loc = pk?.Data.Values.OfType<IPackageDataLocationGetter>().FirstOrDefault()?.Location as ILocationTargetRadiusGetter;

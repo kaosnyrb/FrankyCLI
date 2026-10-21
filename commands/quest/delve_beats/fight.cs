@@ -1,3 +1,4 @@
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
@@ -82,18 +83,30 @@ namespace FrankyCLI
                 { Console.WriteLine("REFUSED: a support team's collection and package are copied like a hold's waves, and a source was not handed in."); return 1; }
                 var lm = build.NewMarker(i, "Landing");
                 build.Landing(i, (int)lm.ID);
-                // His play of 33a, 2026-10-21: placed at the hatch with nothing to do, "The UC marines didn't get off the ship and
-                // just hung out in the landing bay". So the team is placed INTO a collection wearing the waves' run-to-player
-                // package (the piece that already brings Point Defence's waves to him), and they come down the ramp to him.
-                if (build.EnsureTravelPackage() != 0) return 1;
+                // His plays of 33a, 2026-10-21. First: placed at the hatch with nothing to do, "The UC marines didn't get off the
+                // ship and just hung out in the landing bay". Then, on the run-to-player package: "they didn't really attack the
+                // Spacers tho. For enemy landings this is prob right but friendlys should attack the objectives". So a FRIENDLY
+                // team runs to the FIGHT: its own copy of the travel package, aimed near the beat's marker alias (where the
+                // clear's enemies and the defeat's target spawn), vanilla's own shape for a landed crew (OE_KT_LandedShip_TravelPKG:
+                // LocationFallback AliasForReference), with no condition, so they go whatever the player does.
+                int marker = build.slotOf[i].markerAlias;
+                var pk = build.myMod.Packages.DuplicateInAsNewRecord(build.inputs.TravelSrc!);
+                pk.EditorID = $"{build.r.id}{SupportPackagePrefix}{i + 1}";
+                pk.VirtualMachineAdapter = null;
+                pk.OwnerQuest.SetTo(build.clone.FormKey);
+                pk.Conditions.Clear();
+                pk.PreferredSpeed = Package.Speed.Run;
+                var loc = pk.Data.Values.OfType<PackageDataLocation>().FirstOrDefault();
+                if (loc == null) { Console.WriteLine($"REFUSED: {build.inputs.TravelSrc!.EditorID} has no location input to aim at the fight."); return 1; }
+                loc.Location = new LocationTargetRadius { Target = new LocationFallback { Type = LocationTargetRadius.LocationType.AliasForReference, Data = marker } };
                 uint cid = NextAliasId(build.clone);
                 var col = EmptyCollection(build.inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Support");
                 if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a support team must start empty."); return 1; }
-                col.Collection[0].ReferenceAlias!.PackageData.Add(build.travelPkg.ToLink<IPackageGetter>());
+                col.Collection[0].ReferenceAlias!.PackageData.Add(pk.ToLink<IPackageGetter>());
                 build.clone.Aliases.Add(col);
                 build.supportOf[i] = (int)cid;
-                build.bm.SupportTeams.Add((int)cid);
-                Console.WriteLine($"  +support : beat {i + 1} team collection {cid} (EMPTY, a copy of ActiveHostiles, wearing {build.r.id}_wavepkg: they run to the player)");
+                build.bm.SupportTeams.Add(((int)cid, pk.FormKey, marker));
+                Console.WriteLine($"  +support : beat {i + 1} team collection {cid} (EMPTY, a copy of ActiveHostiles) wearing {pk.EditorID} {pk.FormKey}: Travel near alias {marker}, the fight, at Run, no condition");
                 return 0;
             }
 
