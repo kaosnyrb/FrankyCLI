@@ -10,7 +10,7 @@
     "PEN NAME: home-office office/pennames/ines-corvo.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
     "STRIKE, THE SPACER LANDING. First Delve of the old Strike family (local qst12 to qst16: his 'the ship and crew",
     "that are landing on the planet to fight', an ARRIVAL, not a target holed up). No ship lands here: the engine",
-    "spawns the crew at the marker, so the briefing says they are already coming off the ramp. defeat on",
+    "spawns the crew at the marker, and no ship is spoken of as present (his 10-21 ruling on 32a: nothing the build does not place). defeat on",
     "duo_boss_Spacer_Boss_Aggro_Female (qst14's boss) with a Spacer gang. Ines's tell: she names the person who will",
     "pay for the decision before she gives the order (the night shift). Her ban: ceremony, speeches, a rallying line.",
     "⚠ The Spacer boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder."
@@ -27,7 +27,7 @@
   },
   "prose": {
     "name": "Strike: Spacer Landing on <Planet>",
-    "briefing": "A Spacer ship has put down beside the <Place> and its crew are coming off the ramp armed. The supervisor there has locked her night shift in the stores and wants someone to meet the crew before they reach the door."
+    "briefing": "A Spacer crew has come down near the <Place>, and they are on their way in armed. The supervisor there has locked her night shift in the stores and wants someone to meet the crew before they reach the door."
   },
   "beats": [
     {
@@ -45,11 +45,11 @@
         "chance": 25
       },
       "objective": "Defeat the Spacer captain at the <Place>",
-      "journal": "The Spacer captain at the <Place> is dead and her crew have scattered. Their ship is still sitting where they put it down.",
+      "journal": "The Spacer captain at the <Place> is dead and her crew have scattered. The night shift can come out of the stores.",
       "say": [
         "Their captain's down?",
         "I'm unlocking the stores.",
-        "Nobody goes near that ship until I've seen it."
+        "Nobody goes back to work until I've counted heads."
       ],
       "reward": "med"
     }
@@ -60,7 +60,7 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "A ship's put down beside us. The crew are coming off armed.",
+    "A crew's come down near us, and they're on their way in armed.",
     "I've locked the night shift in the stores.",
     "If they reach that door, the night shift pay for it. Get here first."
   ],
