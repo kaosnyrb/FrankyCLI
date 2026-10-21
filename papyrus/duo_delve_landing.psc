@@ -3,28 +3,33 @@ Scriptname duo_delve_landing extends ReferenceAlias
   calls Arm; when the player comes within NearDistance of the marker ACROSS THE MAP, a ship is placed on a landing marker
   there and comes down from orbit by itself (his fact, 2026-10-21: "Doing this on a planet causes the ship to appear from
   orbit and land", his landed bounties qst12a to qst16d). Once it reports landed its ramps open; once a ramp is down (or
-  RampChecks seconds pass) the team is placed at its exterior load door, the hatch; TakeOffAfter seconds later it takes
-  off, and both refs are deleted CleanUpAfter seconds after that.
+  RampChecks seconds pass) the team is placed INTO akTeam, a collection wearing the Delve's run-to-player package, so
+  they come down the ramp to him; the ship takes off once its landing deck is clear (IsLandingDeckClear, after at least
+  DeckMinChecks seconds, at most DeckChecks), and both refs are deleted CleanUpAfter seconds after that.
+  His first play of duo_delve33a, 2026-10-21: placed at the hatch with no package, "The UC marines didn't get off the
+  ship and just hung out in the landing bay, then the ship took off".
 
   WHY: his "build a new delve mission with the landings" (2026-10-21), after the strike team test on Overtime's qst11
   quests was rolled back under his rule that a shipped quest is never edited. The team is FRIENDLY: nothing here sets
   aggression, so they fight whoever the place's enemies are, as the strike team's spawn always did (manual 09).
 
-  ⚠ Vanilla's bounty hunters put their crew on the ship's deck markers (Ship_LandDeck_Marker_RefType, filled through
-  aliases off the ship's exterior location, QF_OE_KT_Trait_Wanted_Bounty). The load door is the no-alias stand-in; if
-  the hatch reads wrong at his glass, the deck markers are the next rung.
+  ⚠ Where they appear: vanilla's bounty hunters stand on the ship's deck markers (Ship_LandDeck_Marker_RefType, filled
+  through aliases off the ship's exterior location, QF_OE_KT_Trait_Wanted_Bounty). LocationRefType extends Keyword, so
+  GetExteriorRefs(it) is tried first; vanilla never calls GetExteriorRefs, so whether it finds them is UNMEASURED, and
+  the trace says which. The exterior load door is the fallback.
   ⚠ Flat distance, as duo_delve_spawnnear: the marker's height over unloaded ground means nothing. }
 
 Float CheckEvery = 1.0 Const
 Int LandChecks = 60 Const
 Int RampChecks = 20 Const
-Float TakeOffAfter = 20.0 Const
+Int DeckMinChecks = 5 Const
+Int DeckChecks = 60 Const
 Float CleanUpAfter = 30.0 Const
 
 int TimerApproach = 1 Const
 int TimerLanding = 2 Const
 int TimerRamp = 3 Const
-int TimerTakeOff = 4 Const
+int TimerDeck = 4 Const
 int TimerCleanUp = 5 Const
 
 Form ship
@@ -32,12 +37,14 @@ FormList crew
 Int crewMin
 Int crewMax
 Float near
+RefCollectionAlias team
 WorldSpace world
 ObjectReference pad
 SpaceshipReference craft
 Int checks
 
-Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear)
+Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, RefCollectionAlias akTeam)
+    team = akTeam
     ship = akShip
     crew = akCrew
     crewMin = aiMin
@@ -70,20 +77,37 @@ Function SpawnCrew(ObjectReference akAt, Float afSpread)
     While n > 0
       offset[0] = Utility.RandomFloat(-afSpread, afSpread)
       offset[1] = Utility.RandomFloat(-afSpread, afSpread)
-      akAt.PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, None, True)
+      akAt.PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
       n -= 1
     EndWhile
 EndFunction
 
+;One crew member per deck marker, round robin, so they stand where vanilla's landing crews stand.
+Function SpawnCrewOnDecks(ObjectReference[] akDecks)
+    Int n = Utility.RandomInt(crewMin, crewMax)
+    Int i = 0
+    Float[] offset = new Float[6]
+    While i < n
+      akDecks[i % akDecks.Length].PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
+      i += 1
+    EndWhile
+EndFunction
+
 Function Unload()
+    Keyword deck = Game.GetFormFromFile(0x07BB02, "Starfield.esm") as Keyword;Ship_LandDeck_Marker_RefType [LCRT:0007BB02]
+    ObjectReference[] decks = craft.GetExteriorRefs(deck)
     ObjectReference[] doors = craft.GetExteriorLoadDoors()
-    if doors.Length > 0
+    Debug.Trace(Self + " [landing] " + decks.Length + " deck marker(s), " + doors.Length + " exterior load door(s)")
+    if decks.Length > 0
+      SpawnCrewOnDecks(decks)
+    elseif doors.Length > 0
       SpawnCrew(doors[0], 2.0)
     else
-      Debug.Trace(Self + " [landing] ship has no exterior load door, team placed at the landing marker")
+      Debug.Trace(Self + " [landing] ship has no deck marker and no exterior load door, team placed at the landing marker")
       SpawnCrew(pad, 8.0)
     endif
-    StartTimer(TakeOffAfter, TimerTakeOff)
+    checks = 0
+    StartTimer(CheckEvery, TimerDeck)
 EndFunction
 
 Event OnTimer(int aiTimerID)
@@ -138,9 +162,15 @@ Event OnTimer(int aiTimerID)
         StartTimer(CheckEvery, TimerRamp)
       endif
 
-    elseif aiTimerID == TimerTakeOff
-      craft.DisableWithTakeOffOrLandingNoWait()
-      StartTimer(CleanUpAfter, TimerCleanUp)
+    elseif aiTimerID == TimerDeck
+      checks += 1
+      if (checks >= DeckMinChecks && craft.IsLandingDeckClear()) || checks >= DeckChecks
+        Debug.Trace(Self + " [landing] taking off after " + checks + " checks, deck clear " + craft.IsLandingDeckClear())
+        craft.DisableWithTakeOffOrLandingNoWait()
+        StartTimer(CleanUpAfter, TimerCleanUp)
+      else
+        StartTimer(CheckEvery, TimerDeck)
+      endif
 
     elseif aiTimerID == TimerCleanUp
       craft.Delete()

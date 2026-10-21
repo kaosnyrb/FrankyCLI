@@ -91,44 +91,10 @@ namespace FrankyCLI
             }
 
             /// <summary>
-            /// The waves come FOR the player: one package per Delve, a copy of the bounty hunters' Travel (jog, weapon drawn,
-            /// to PlayerRef), worn by every wave collection, so every member runs it. The copy keeps the two GetDistance
-            /// conditions (travel while the player is 9 to 1000 m away; closer than that they are in combat) and drops what
-            /// belongs to the bounty quest: its two GetStageDone conditions, its fragment scripts and its dialogue on
-            /// begin/end/change.
+            /// The waves come FOR the player: every wave collection wears the Delve's one Travel-to-player package,
+            /// BeatsBuild.EnsureTravelPackage (moved there 2026-10-21 so a support team wears it too).
             /// </summary>
-            internal override int Prepare(BeatsBuild build)
-            {
-                var pk = build.myMod.Packages.DuplicateInAsNewRecord(build.inputs.TravelSrc!);
-                pk.EditorID = build.r.id + "_wavepkg";
-                pk.VirtualMachineAdapter = null;
-                pk.OwnerQuest.SetTo(build.clone.FormKey);
-                // ⛔ THE BEGIN/END/CHANGE EVENTS ARE COPIED UNTOUCHED. Each carries ONE TopicReference that is
-                // an EMPTY placeholder (no topic set), so there is no dialogue to strip; the first build
-                // cleared the list "to drop the bounty hunters' lines", changed the record's shape for
-                // nothing, and his next play crashed to desktop (2026-10-09; the leading suspect, not proven).
-                // Read a field before removing it.
-                // NOT a suspect, measured: the copy's inputs are written sorted (1,3,5,7,8 where the source
-                // stores 1,3,5,8,7), because Mutagen's writer sorts them whatever order they are given, and
-                // Starfield.esm ships BOTH orders on Travel packages (248 sorted, 214 not).
-                build.bm.WavePackageShape = $"topics {string.Join("/", new[] { build.inputs.TravelSrc!.OnBegin, build.inputs.TravelSrc.OnEnd, build.inputs.TravelSrc.OnChange }.Select(e => e?.Topics.Count ?? -1))}";
-                pk.Conditions.RemoveAll(c => c.Data is not GetDistanceConditionData);
-                foreach (var c in pk.Conditions)
-                {
-                    var gd = (GetDistanceConditionData)c.Data;
-                    if (gd.FirstParameter.Link.FormKey.ID != 0x14)
-                    { Console.WriteLine($"REFUSED: the copied package's distance condition measures to {gd.FirstParameter.Link.FormKey}, not PlayerRef."); return 1; }
-                }
-                // RUN, not the bounty hunters' jog (his play of 09, 2026-10-10: "They are slowish, so you spend a lot
-                // of time looking around for them"). A StartCombat at spawn was tried first and dropped: they could not
-                // detect him from 40 m+ out of sight, combat lapsed, and they stopped short (his next play).
-                var wasSpeed = pk.PreferredSpeed;
-                pk.PreferredSpeed = Package.Speed.Run;
-                build.travelPkg = pk.FormKey;
-                build.bm.WavePackage = pk.FormKey;
-                Console.WriteLine($"  +package : {pk.EditorID} {pk.FormKey} (clone of {build.inputs.TravelSrc!.EditorID}; Travel to PlayerRef, {pk.Conditions.Count} distance condition(s) kept, speed {wasSpeed} -> {pk.PreferredSpeed})");
-                return 0;
-            }
+            internal override int Prepare(BeatsBuild build) => build.EnsureTravelPackage();
 
             /// <summary>
             /// A marker the waves spawn at, and one EMPTY collection per wave, each a copy of vanilla's ActiveHostiles

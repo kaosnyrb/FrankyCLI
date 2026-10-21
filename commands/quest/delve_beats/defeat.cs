@@ -44,8 +44,7 @@ namespace FrankyCLI
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = build.beatStage[i] };
                 build.bm.Holders.Add((int)dt.ID);
                 Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn)");
-                SupportSlot(build, i);
-                return 0;
+                return SupportSlot(build, i);
             }
 
             protected override string DeathScript => "DefaultAliasOnDeath";

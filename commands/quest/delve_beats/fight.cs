@@ -75,11 +75,26 @@ namespace FrankyCLI
             /// A support team's landing marker: a new marker alias at the beat's place (its fill is written in Fills, beside the
             /// beat's own), carrying LandingScript, which the step's fragment arms.
             /// </summary>
-            protected static void SupportSlot(BeatsBuild build, int i)
+            protected static int SupportSlot(BeatsBuild build, int i)
             {
-                if (build.r.beats[i].support == null) return;
+                if (build.r.beats[i].support == null) return 0;
+                if (build.inputs.WaveSrc == null || build.inputs.TravelSrc == null)
+                { Console.WriteLine("REFUSED: a support team's collection and package are copied like a hold's waves, and a source was not handed in."); return 1; }
                 var lm = build.NewMarker(i, "Landing");
                 build.Landing(i, (int)lm.ID);
+                // His play of 33a, 2026-10-21: placed at the hatch with nothing to do, "The UC marines didn't get off the ship and
+                // just hung out in the landing bay". So the team is placed INTO a collection wearing the waves' run-to-player
+                // package (the piece that already brings Point Defence's waves to him), and they come down the ramp to him.
+                if (build.EnsureTravelPackage() != 0) return 1;
+                uint cid = NextAliasId(build.clone);
+                var col = EmptyCollection(build.inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Support");
+                if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a support team must start empty."); return 1; }
+                col.Collection[0].ReferenceAlias!.PackageData.Add(build.travelPkg.ToLink<IPackageGetter>());
+                build.clone.Aliases.Add(col);
+                build.supportOf[i] = (int)cid;
+                build.bm.SupportTeams.Add((int)cid);
+                Console.WriteLine($"  +support : beat {i + 1} team collection {cid} (EMPTY, a copy of ActiveHostiles, wearing {build.r.id}_wavepkg: they run to the player)");
+                return 0;
             }
 
             /// <summary>Who this fight is against: a defeat's target and gang, a clear's enemies.</summary>
@@ -119,7 +134,8 @@ namespace FrankyCLI
                     build.props.Add(("ReferenceAlias", la, build.clone.FormKey, build.landingOf[b]));
                     build.props.Add(("Form", $"Ship{b + 1}", ff.Ship!.Value, -1));
                     build.props.Add(("FormList", $"Support{b + 1}", ff.Support!.Value, -1));
-                    build.Add(stage, $"({la} as {LandingScript}).Arm(Ship{b + 1}, Support{b + 1}, {s.min}, {s.max}, {s.near ?? DefaultLandingNear}.0)");
+                    build.props.Add(("RefCollectionAlias", $"Alias_Beat{b + 1}Support", build.clone.FormKey, build.supportOf[b]));
+                    build.Add(stage, $"({la} as {LandingScript}).Arm(Ship{b + 1}, Support{b + 1}, {s.min}, {s.max}, {s.near ?? DefaultLandingNear}.0, Alias_Beat{b + 1}Support)");
                 }
             }
 

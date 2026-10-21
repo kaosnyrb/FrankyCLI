@@ -87,7 +87,7 @@ namespace FrankyCLI
             // collection its wave scripts fill as hostiles go live (Optional, AllowDisabled, no fill).
             // From the parts file when the build owns its quest; on the old clone path, off Starfield.esm itself, never a
             // winning override.
-            if (fail == 0 && r.beats.Any(b => b.type == "hold" || b.type == "clear"))
+            if (fail == 0 && r.beats.Any(b => b.type == "hold" || b.type == "clear" || b.support != null))
             {
                 var sfm = env.LoadOrder[0].Mod;
                 if (parts != null)

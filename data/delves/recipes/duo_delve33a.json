@@ -44,9 +44,10 @@
         "list": "duo_GangMembersList_UC",
         "min": 3,
         "max": 5,
-        "ship": "LvlShip_UCSecurity_Transport",
+        "ship": "LvlShip_UCNavy_A_Transport",
         "land": "RETravelB1LocRef",
-        "near": 300
+        "near": 300,
+        "_ship": "His 2026-10-21 play: 'Might be better to use a A class ship as they tend to be smaller'. UC Navy, since the team is UC Marines."
       },
       "objective": "Clear the Spacers from the <Place>",
       "journal": "The Spacers at the <Place> are dead. The UC team is holding the site until the owners come back.",
