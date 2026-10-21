@@ -258,8 +258,9 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     out += "\npeople placed " + placed
 
     Step("9 done")
+    ; No message box: it pauses the game and cut the boom still playing (his, 14:4x: "actually the message box stops
+    ; the sound, can you turn it off for now"). The numbers go to Papyrus.0.log, and Eliza reads them there.
     Debug.Trace(out)
-    Debug.MessageBox(out)
 EndFunction
 
 Function Clear(float afRadius = 0.0) global
