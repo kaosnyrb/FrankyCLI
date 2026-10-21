@@ -1,0 +1,64 @@
+﻿{
+  "schema": 2,
+  "id": "duo_delve29a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: a mission you go into knowing there is a fight (his ruling, 2026-10-20).",
+  "author": "jessica, as Bell Harrowgate",
+  "source": "his 2026-10-21 06:57: \"write the local 5, use your pen names\". The five old artifact_local fight families (Bounty, Danger, Dismantle, Strike, Hunt: 42 quests), one new Delve each, each person written by a different pen name.",
+  "_note": [
+    "PEN NAME: home-office office/pennames/bell-harrowgate.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
+    "HUNT, THE ESCAPED SPECIMENS. Second Delve of the old Hunt family (local qst17; remote06a was the first, the",
+    "test subjects from the lab's side). This one is from the KEEPER's: a transport came down hard and the pens split.",
+    "clear on one species from duo_GangMembersList_PreditorMegalist_C (C, not the A that 23a and remote06a use, so",
+    "the player meets a different animal; the letter is a placeholder, his pick of A to G). Bell's tell: every detail",
+    "is given a history (raised from the egg). Her bans: a sentence under six words, and ending lower than it opened,",
+    "so the keeper closes on gratitude and their names, not grief. Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "_theme": "Anywhere: the transport came down where it came down, and the animals went to ground in the nearest site."
+  },
+  "prose": {
+    "name": "Hunt: Escaped Specimens on <Planet>",
+    "briefing": "A specimen transport came down hard near the <Place> and its cargo walked out of the broken pens. The keeper who raised them knows what they will do to the ground there, and wants them put down before they learn it."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_PreditorMegalist_C",
+        "min": 4,
+        "max": 6,
+        "species": "one"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Put down the escaped specimens at the <Place>",
+      "journal": "Every specimen that walked out of the broken pens is dead at the <Place>. Their keeper asked how they went, and I told them: fighting.",
+      "say": [
+        "So every one of them went down fighting, the way their mothers did.",
+        "Thank you for doing it properly, and doing it quickly.",
+        "I will write each of their names in the pen book tonight."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Keeper",
+    "voice": "GenericMale01",
+    "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
+  },
+  "broadcast": [
+    "Our transport came down hard, and the pens split open on landing.",
+    "I raised every one of those animals from the egg myself.",
+    "Please put them down before they learn the ground out there."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is 06a's Curator (a keeper of things, the same care), used once so far; his ear decides. Bell's floor holds: no sentence under six words."
+}

@@ -1,0 +1,61 @@
+﻿{
+  "schema": 2,
+  "id": "duo_delve31a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: a mission you go into knowing there is a fight (his ruling, 2026-10-20).",
+  "author": "jessica, as June Castellan",
+  "source": "his 2026-10-21 06:57: \"write the local 5, use your pen names\". The five old artifact_local fight families (Bounty, Danger, Dismantle, Strike, Hunt: 42 quests), one new Delve each, each person written by a different pen name.",
+  "_note": [
+    "PEN NAME: home-office office/pennames/june-castellan.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
+    "DISMANTLE, THE CHECKPOINT ROBOT. Second Delve of the old Dismantle family (24a was the first: a security robot",
+    "that came with a house). A military robot still running a checkpoint for an outfit long gone, asking everyone",
+    "for papers. defeat on duo_boss_LvlRobotModelA_Marine_Boss, alone. June's tell: she measures the distance in real",
+    "units and it gets smaller (forty metres to her door). The caller is stuck on her own road, not frightened, and",
+    "the funny is hers. ⚠ The Marine boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site on somebody's way home: a checkpoint needs a road."
+  },
+  "prose": {
+    "name": "Dismantle: Checkpoint Robot on <Planet>",
+    "briefing": "A military security robot at the <Place> is still running a checkpoint for an outfit that pulled out years ago. It stops everyone who comes near and asks for papers nobody has issued since."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REWoundedMarkerLocRef",
+      "target": "duo_boss_LvlRobotModelA_Marine_Boss",
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Dismantle the checkpoint robot at the <Place>",
+      "journal": "The checkpoint robot at the <Place> is scrap. It asked me for my papers as well.",
+      "say": [
+        "Is it down? I'm walking through.",
+        "Forty metres to my own door.",
+        "And nobody asking me for anything."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Local",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": [
+    "There's a robot on my road home, asking me for papers.",
+    "I'm forty metres from my own front door.",
+    "It won't let me any closer, and it has a gun."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency ('military', never whose). Voice is 07a's and 10a's crew lead, used twice so far; his ear decides."
+}
