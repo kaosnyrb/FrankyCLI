@@ -87,6 +87,13 @@ WwiseEvent Function DescentSound(int aiSound) global
     Return None
 EndFunction
 
+; ⛔ His run of v4/v5 (0 0 0 0 1 2 1 1), 2026-10-21 14:1x: "crashes to desktop", with no Papyrus error in the log and
+; no probe line at all, because the only trace was at the end. So every step now traces BEFORE it runs; the last
+; "POD PROBE step" line in Papyrus.0.log names the step reached (a CTD may drop the final lines: a hint, not proof).
+Function Step(String asWhat) global
+    Debug.Trace("POD PROBE step " + asWhat)
+EndFunction
+
 Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2, int aiCarrier = 0, int aiSound = 0) global
     Actor player = Game.GetPlayer()
     Float dist = afDistance
@@ -127,6 +134,7 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     Float dx = dist * Math.sin(ang)
     Float dy = dist * Math.cos(ang)
     Float pz = player.GetPositionZ()
+    Step("1 ground marker  h=" + (height as Int) + " v=" + (speed as Int) + " boom=" + aiBoom + " sound=" + aiSound)
     ObjectReference ground = player.PlaceAtMe(marker)
     ground.MoveTo(player, dx, dy, 0.0, false)
     ground.MoveToNearestNavmeshLocation()
@@ -135,14 +143,17 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     Float gz = ground.GetPositionZ()
     out += "\nground vs player " + ((gz - pz) as Int) + "   from player " + (player.GetDistance(ground) as Int)
 
+    Step("2 pod")
     ObjectReference p = player.PlaceAtMe(pod)
     p.MoveTo(ground, 0.0, 0.0, height, false)
     ; mover is what TranslateTo is called on: the pod itself, or the invisible helper the pod hangs from.
     ObjectReference mover = p
     If aiCarrier == 1
+        Step("3 helper")
         mover = player.PlaceAtMe(helperBase)
         mover.MoveTo(ground, 0.0, 0.0, height, false)
         Utility.Wait(0.2)
+        Step("4 attach")
         p.AttachTo(mover)
     EndIf
     Utility.Wait(0.2)
@@ -153,8 +164,10 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     EndIf
 
     If sound != None
+        Step("5 sound")
         out += "   sound instance " + sound.Play(mover)
     EndIf
+    Step("6 translate")
     Float t0 = Utility.GetCurrentRealTime()
     mover.TranslateTo(gx, gy, gz, mover.GetAngleX(), mover.GetAngleY(), mover.GetAngleZ(), speed)
     Float limit = height / speed * 2.0 + 5.0
@@ -186,6 +199,7 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     EndIf
     out += "   off target " + (ground.GetDistance(mover) as Int)
 
+    Step("7 landed " + landed + ", boom")
     If boom != None
         ground.PlaceAtMe(boom)
         Utility.Wait(0.3)   ; the people come after the blast, so it cannot hit them
@@ -197,6 +211,7 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     ActorBase who = Game.GetForm(0x19AD3E) as ActorBase
     Int i = 0
     Int placed = 0
+    Step("8 people")
     While i < aiPeople && i < 4 && who != None
         Float side = 3.0
         If i % 2 == 1
@@ -212,6 +227,7 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     EndWhile
     out += "\npeople placed " + placed
 
+    Step("9 done")
     Debug.Trace(out)
     Debug.MessageBox(out)
 EndFunction
