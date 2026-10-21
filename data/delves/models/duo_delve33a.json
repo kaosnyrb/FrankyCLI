@@ -1,5 +1,5 @@
 {
-  "FormKey": "003443:du_overtime.esm",
+  "FormKey": "003446:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -7,7 +7,7 @@
     "VersionControl": 0
   },
   "EditorID": "duo_delve33a",
-  "Name": "Assault: Spacer Outpost on \u003CAlias=targetPlanet\u003E",
+  "Name": "Assault: Spacer Drop on \u003CAlias=targetPlanet\u003E",
   "Data": {
     "Flags": 655360,
     "Priority": 10,
@@ -28,7 +28,7 @@
       "LogEntries": [
         {
           "Flags": 0,
-          "Entry": "Spacers have taken the \u003CAlias=DungeonLocation\u003E. UC Security is sending a team down to retake it, and they want someone already on the ground when the ship lands.",
+          "Entry": "Spacers are dropping onto the \u003CAlias=DungeonLocation\u003E by pod. UC Security is sending a team down to retake the site, and they want someone already on the ground when the team arrives.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -71,7 +71,7 @@
       "LogEntries": [
         {
           "Flags": 1,
-          "Entry": "The Spacers at the \u003CAlias=DungeonLocation\u003E are dead. The UC team is holding the site until the owners come back.",
+          "Entry": "The Spacers who dropped onto the \u003CAlias=DungeonLocation\u003E are dead. The UC team is holding the site until its owners come back.",
           "Conditions": [],
           "StageCompleteDatas": [
             {
@@ -144,7 +144,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003443:du_overtime.esm",
+              "FirstLink": "003446:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -362,7 +362,7 @@
             "Conditions": [],
             "VoiceTypes": "Null",
             "PackageData": [
-              "003444:du_overtime.esm"
+              "003447:du_overtime.esm"
             ]
           }
         }
@@ -393,7 +393,7 @@
           "Name": "Alias_Beat1Spawn",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -403,7 +403,7 @@
           "Name": "Alias_Beat1Enemies",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -423,7 +423,7 @@
           "Name": "Alias_Beat1Landing",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 35,
             "Unused": 0
           }
@@ -453,7 +453,7 @@
           "Name": "Alias_Beat1Support",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 36,
             "Unused": 0
           }
@@ -463,8 +463,18 @@
           "Name": "Alias_Beat1Fight",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 33,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Say2",
+          "Flags": 1,
+          "Object": {
+            "Form": "003452:du_overtime.esm",
+            "Alias": -1,
             "Unused": 0
           }
         }
@@ -513,7 +523,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -541,7 +551,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -562,7 +572,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 35,
             "Unused": 0
           }
@@ -583,7 +593,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003443:du_overtime.esm",
+            "Form": "003446:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -624,7 +634,233 @@
     ]
   },
   "Children": {
-    "Scenes": [],
-    "Topics": []
+    "Scenes": [
+      {
+        "FormKey": "00344D:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_delve33a_say1_scene",
+        "Flags": 129,
+        "Quest": "003446:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "003449:du_overtime.esm"
+          }
+        ]
+      },
+      {
+        "FormKey": "003452:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_delve33a_say2_scene",
+        "Flags": 128,
+        "Quest": "003446:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "00344E:du_overtime.esm"
+          }
+        ]
+      }
+    ],
+    "Topics": [
+      {
+        "FormKey": "003449:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_delve33a_say1_topic",
+        "Priority": 50,
+        "Quest": "003446:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "00344A:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "00344A:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_delve33a_say1_info",
+            "Speaker": "003448:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 13385,
+                "EmotionOut": 0,
+                "ResponseText": "Team inbound to your position.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "99AB8FE8"
+              },
+              {
+                "WEMFile": 13387,
+                "EmotionOut": 0,
+                "ResponseText": "Expect hostiles by drop pod.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "08E1D576"
+              },
+              {
+                "WEMFile": 13388,
+                "EmotionOut": 0,
+                "ResponseText": "Engage on arrival. We\u0027ll join you.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "1CAA3D92"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "00344E:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_delve33a_say2_topic",
+        "Priority": 50,
+        "Quest": "003446:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "00344F:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "00344F:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_delve33a_say2_info",
+            "Speaker": "003448:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 13390,
+                "EmotionOut": 0,
+                "ResponseText": "Site\u0027s clear.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "BB094CE1"
+              },
+              {
+                "WEMFile": 13392,
+                "EmotionOut": 0,
+                "ResponseText": "We hold it from here.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "253CA9A2"
+              },
+              {
+                "WEMFile": 13393,
+                "EmotionOut": 0,
+                "ResponseText": "You\u0027re released.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "0F3C00B6"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
