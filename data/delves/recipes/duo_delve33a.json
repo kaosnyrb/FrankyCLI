@@ -2,15 +2,16 @@
   "schema": 2,
   "id": "duo_delve33a",
   "template": "beats",
-  "_deal": "No deal: started by hand with startquest for his test. Under his 2026-10-21 rule (never edit a shipped quest) the landing lives in a new Delve; a pool is his call once it has played.",
-  "author": "eliza",
+  "_deal": "No deal yet: started by hand for his test. RARE when dealt, his 2026-10-21 15:18: \"think rarer, the ships take a while to land\". The Local pool has no _Rare node yet (only LocalCargoNode has one), so it needs gen_delve rare on duo_MS_ArtifactMap_LocalNode first; Eliza's.",
+  "author": "eliza (build); words jessica, as Vance Okonkwo-Reyes",
   "source": "his 2026-10-21 09:28: \"Roll back to the old ESM then build a new delve mission with the landings\", after the strike team by ship (A1) on qst11a/b/d was rolled back. His A1: a friendly team lands and holds the entrance.",
   "_note": [
     "THE LANDING, FRIENDLY (A1). A clear at a Spacer-held site; when he comes within 300 of the site's B1 travel ring a",
     "UC Security transport comes down there from orbit, opens its ramps, and a UC Marine team steps out of the hatch",
     "and joins the fight (support, papyrus/duo_delve_landing.psc). The hostile twin is Jessica's 28a, Strike: Spacer",
     "Landing, whose crew could arrive the same way. WORDS ARE ELIZA'S PLACEHOLDERS, Jessica's to write; the type word",
-    "too (a new type gets its word the day it is written). Pay: med, placeholder."
+    "too (a new type gets its word the day it is written). Pay: med, placeholder.",
+    "WORDS, Jessica 2026-10-21 as Vance Okonkwo-Reyes (home-office office/pennames/vance-okonkwo-reyes.json): flat imperative, states and never explains. The caller is the team lead. She never says 'transport' or 'ship': the landing falls back to a team on foot when no pad or clear spot is found, and no line may promise what the build might not place (his 32a ruling). Pods are spoken of as expected, since they drop when he arrives. Type word Assault kept: a joint op on a held site."
   ],
   "place": {
     "theme": {
@@ -23,8 +24,8 @@
     "_theme": "A built site the Spacers have taken: somewhere worth sending a ship for."
   },
   "prose": {
-    "name": "Assault: Spacer Outpost on <Planet>",
-    "briefing": "Spacers have taken the <Place>. UC Security is sending a team down to retake it, and they want someone already on the ground when the ship lands."
+    "name": "Assault: Spacer Drop on <Planet>",
+    "briefing": "Spacers are dropping onto the <Place> by pod. UC Security is sending a team down to retake the site, and they want someone already on the ground when the team arrives."
   },
   "beats": [
     {
@@ -53,8 +54,24 @@
         "_ship": "His 2026-10-21 play: 'Might be better to use a A class ship as they tend to be smaller'. UC Navy, since the team is UC Marines."
       },
       "objective": "Clear the Spacers from the <Place>",
-      "journal": "The Spacers at the <Place> are dead. The UC team is holding the site until the owners come back.",
-      "reward": "med"
+      "journal": "The Spacers who dropped onto the <Place> are dead. The UC team is holding the site until its owners come back.",
+      "reward": "med",
+      "say": [
+        "Site's clear.",
+        "We hold it from here.",
+        "You're released."
+      ]
     }
-  ]
+  ],
+  "speaker": {
+    "name": "Team Lead",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "Team inbound to your position.",
+    "Expect hostiles by drop pod.",
+    "Engage on arrival. We'll join you."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency; a security team is a role. Voice is 26a's and remote05b's (a militia and a captain, the same register), used twice so far; his ear decides."
 }
