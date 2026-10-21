@@ -13,9 +13,19 @@ one line rather than a (0,0) error. See DU_Overtime's README for the five script
 
 A compile is proven by the .pex it produces, not by the compiler's exit code: the output file is
 checked for existence and a fresh modification time, and anything else is a failure.
+
+⛔ THE LONG-STRING WALL, found 2026-10-21 on Defiant: a .pex whose longest string (in practice the {}
+docstring) is too long CRASHES THE GAME the moment the script is first called. duo_podprobe crashed six
+times running with its longest string at 4,468 to 5,237 bytes, and ran at 2,225, 3,269, 3,857 and 481 (the
+same code with the docstring cut, his "works, landed faster and exploded"). Every crash dump was one fault:
+Starfield.exe+0x28281B5, reading 0xFFFFFFFFFFFFFFFF. Papyrus debug info was loaded (bLoadDebugInformation=1);
+whether it crashes with that off is unmeasured. So the compiler writes into a temp folder, the string table
+is read, and a .pex goes into the mod only if its longest string is within PROVEN_STRING: the largest
+measured to RUN, not a guess at the wall (4,096 is the guess). Put history in ; comments: they are not
+compiled.
 """
 from __future__ import annotations
-import subprocess, sys, time
+import shutil, struct, subprocess, sys, tempfile, time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -24,6 +34,26 @@ COMPILER = STARFIELD / "Tools" / "Papyrus Compiler" / "PapyrusCompiler.exe"
 BASE_SRC = STARFIELD / "Data" / "Scripts" / "Source"
 FLAGS = BASE_SRC / "Starfield_Papyrus_Flags.flg"
 NAME_LIMIT = 38
+PROVEN_STRING = 3857   # bytes: the longest .pex string measured to run (duo_podprobe v3); 4,468 crashed
+
+
+def longest_string(pex: Path) -> tuple[int, str]:
+    """The longest entry in a .pex string table, and its first words. Header: magic, version, game id,
+    compile time (16 bytes), then three length-prefixed strings (source, user, machine), then the table."""
+    b = pex.read_bytes()
+    i = 16
+    for _ in range(3):
+        n = struct.unpack_from("<H", b, i)[0]
+        i += 2 + n
+    count = struct.unpack_from("<H", b, i)[0]
+    i += 2
+    best, text = 0, ""
+    for _ in range(count):
+        n = struct.unpack_from("<H", b, i)[0]
+        if n > best:
+            best, text = n, b[i + 2:i + 2 + 60].decode("utf-8", "replace").split("\n")[0]
+        i += 2 + n
+    return best, text
 
 
 def main(argv: list[str]) -> int:
@@ -53,20 +83,32 @@ def main(argv: list[str]) -> int:
             failed += 1
             continue
         pex = out / f"{stem}.pex"
+        tmp = Path(tempfile.mkdtemp(prefix="papyrus_"))
+        built = tmp / f"{stem}.pex"
         started = time.time()
-        r = subprocess.run([str(COMPILER), psc.name, f"-i={psc.parent};{HERE};{BASE_SRC}", f"-o={out}", f"-f={FLAGS}"],
+        r = subprocess.run([str(COMPILER), psc.name, f"-i={psc.parent};{HERE};{BASE_SRC}", f"-o={tmp}", f"-f={FLAGS}"],
                            capture_output=True, text=True, errors="replace")
-        fresh = pex.exists() and pex.stat().st_mtime >= started - 1
+        fresh = built.exists() and built.stat().st_mtime >= started - 1
         if "Compilation succeeded" in (r.stdout or "") and fresh:
-            print(f"[ok]   {stem} -> {pex} ({pex.stat().st_size} B)")
+            longest, text = longest_string(built)
+            if longest > PROVEN_STRING:
+                failed += 1
+                print(f"[FAIL] {stem}: its longest string is {longest} B, over the {PROVEN_STRING} B proven to run; "
+                      f"4,468 B crashed the game on first call (see this file's header). Starts: {text!r}")
+                print(f"       nothing written to {out}; move the history into ; comments")
+            else:
+                shutil.copy2(built, pex)
+                print(f"[ok]   {stem} -> {pex} ({pex.stat().st_size} B, longest string {longest} B)")
+            shutil.rmtree(tmp, ignore_errors=True)
         else:
+            shutil.rmtree(tmp, ignore_errors=True)
             failed += 1
             print(f"[FAIL] {stem}")
             for line in (r.stdout or "").splitlines() + (r.stderr or "").splitlines():
                 if line.strip() and not line.startswith(("Papyrus Compiler", "Copyright", "Starting", "Batch")):
                     print("       " + line.strip())
             if not fresh:
-                print(f"       and no fresh .pex at {pex}")
+                print(f"       and no fresh .pex at {built}")
     return 1 if failed else 0
 
 
