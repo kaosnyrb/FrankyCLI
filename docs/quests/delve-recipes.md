@@ -356,11 +356,15 @@ shared by every Delve; the build's read-back checks it is the only quest script 
 `GenericBaseForm`, e.g. `LvlShip_UCSecurity_Transport`, the record type his landed bounties bind), `land` the marker at
 the beat's place it comes down on (demanded of the place like a beat's own; a travel ring is open ground, and the lint
 warns when it is the fight's own marker), `near` the flat call distance (100 to 1000, absent 300). The step's fragment
-arms `papyrus/duo_delve_landing.psc` on a new landing-marker alias; when the player comes within `near`, a
-`ShipLandingMarker_80m_Large` is placed on `land` and `PlaceShipAtMe` puts the ship on it, which comes down from orbit by
-itself (his fact: his landed bounties, qst12a to qst16d). On `IsLanded` its ramps open; on `IsRampDown` (or 20 s) the team
-is placed INTO an empty collection (a copy of `ActiveHostiles`) on the ship's deck markers if `GetExteriorRefs` finds
-them (`Ship_LandDeck_Marker_RefType`; unmeasured, traced), else at its exterior load door. ⭐ **The collection wears the
+arms `papyrus/duo_delve_landing.psc` on a new landing-marker alias; when the player comes within `near`, a pad is
+chosen (below) and `PlaceShipAtMe` puts the ship on it, which comes down from orbit by itself (his fact: his landed
+bounties, qst12a to qst16d). On `IsLanded` its ramps open; on `IsRampDown` (or 20 s) the team is placed INTO an empty
+collection (a copy of `ActiveHostiles`) **on the ground in a ring round the ship**, 3 to 8 outside its hull (vanilla's
+ship radius, half width and half length as a circle, `SQ_StationTrafficManagerQuestScript`), snapped to the navmesh.
+His plays, 2026-10-21: at the hatch they stayed in the bay, and at the exterior load door they leave only when the ramp
+meets the ground, so *"spawn the marines around the ship rather than in the landing bay"*. (The ship's deck markers were
+tried first and `GetExteriorRefs(Ship_LandDeck_Marker_RefType)` found 0 on the UC A-class transport, one play.)
+⭐ **The collection wears the
 team's OWN package, `<id>_supportpkg_b<n>`**: a copy of the travel package aimed near the beat's marker alias (where the
 enemies or the target spawn) by vanilla's own shape for a landed crew (`OE_KT_LandedShip_TravelPKG`: `LocationFallback`
 `AliasForReference`), at Run, with no condition. His plays, 2026-10-21: placed with no package they *"hung out in the
@@ -371,8 +375,8 @@ Refused on a board (not built for it yet). ⭐ **Where it comes down, his ruling
 fence and a tree): *"spawn a ship if there is a land pad, or if there is a suitable spot. Otherwise we just spawn the npcs
 on the ground"*. (1) The place's OWN pad: the closest hand-placed landing marker within 250 of `land` (five furniture
 bases carry every one in his load order, `gen_delve bases`), skipping one his ship sits on; it is never deleted. (2) Else
-a clear spot from `GetSafePosition(100, r)` round `land` at r = 40, 25 and 15, where a pad of ours is placed (his probe
-plays found one each time). (3) Else no ship: the team is placed on `land` and runs in on its package. Vanilla never
+a clear spot from `GetSafePosition(100, r)` round `land` at r = 40, 25 and 15, where a pad of ours is placed (its radii are in
+position units; with logging on, 1 of his first 3 plays on Jemison found a spot, at r 15, 88 from `land`). (3) Else no ship: the team is placed on `land` and runs in on its package. Vanilla never
 searches for a landing spot (every NPC landing is on a hand-placed marker). Probe-only notifications name each path and
 come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
 

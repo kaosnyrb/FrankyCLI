@@ -3,20 +3,20 @@ Scriptname duo_delve_landing extends ReferenceAlias
   calls Arm; when the player comes within NearDistance of the marker ACROSS THE MAP, a ship is placed on a landing marker
   there and comes down from orbit by itself (his fact, 2026-10-21: "Doing this on a planet causes the ship to appear from
   orbit and land", his landed bounties qst12a to qst16d). Once it reports landed its ramps open; once a ramp is down (or
-  RampChecks seconds pass) the team is placed INTO akTeam, a collection wearing the Delve's run-to-player package, so
-  they come down the ramp to him; the ship takes off once its landing deck is clear (IsLandingDeckClear, after at least
-  DeckMinChecks seconds, at most DeckChecks), and both refs are deleted CleanUpAfter seconds after that.
-  His first play of duo_delve33a, 2026-10-21: placed at the hatch with no package, "The UC marines didn't get off the
-  ship and just hung out in the landing bay, then the ship took off".
+  RampChecks seconds pass) the team is placed INTO akTeam, a collection wearing their own package to the fight, ON THE
+  GROUND IN A RING ROUND THE SHIP, outside its hull; the ship takes off once its landing deck is clear
+  (IsLandingDeckClear, after at least DeckMinChecks seconds, at most DeckChecks), and both refs are deleted CleanUpAfter
+  seconds after that.
 
   WHY: his "build a new delve mission with the landings" (2026-10-21), after the strike team test on Overtime's qst11
   quests was rolled back under his rule that a shipped quest is never edited. The team is FRIENDLY: nothing here sets
   aggression, so they fight whoever the place's enemies are, as the strike team's spawn always did (manual 09).
 
-  ⚠ Where they appear: vanilla's bounty hunters stand on the ship's deck markers (Ship_LandDeck_Marker_RefType, filled
-  through aliases off the ship's exterior location, QF_OE_KT_Trait_Wanted_Bounty). LocationRefType extends Keyword, so
-  GetExteriorRefs(it) is tried first; vanilla never calls GetExteriorRefs, so whether it finds them is UNMEASURED, and
-  the trace says which. The exterior load door is the fallback.
+  WHY ROUND THE SHIP AND NOT ON IT, his plays 2026-10-21: at the hatch they "hung out in the landing bay", and at the
+  exterior load door they leave only if the ramp meets the ground: "unless the ramp is perfectly aligned with the floor
+  the people can[not] pathfind off the ship", then his "spawn the marines around the ship rather than in the landing
+  bay". The hull radius is vanilla's own for a ship (SQ_StationTrafficManagerQuestScript: half width and half length
+  as a circle), so the ring fits whichever ship lands.
   ⚠ Flat distance, as duo_delve_spawnnear: the marker's height over unloaded ground means nothing.
 
   WHERE IT COMES DOWN, his ruling (2026-10-21, after his first play came down "in the middle of a fence and tree"):
@@ -25,8 +25,9 @@ Scriptname duo_delve_landing extends ReferenceAlias
   his own ship sits on. (2) Else a clear spot the engine finds, GetSafePosition(SearchRadius, r) at r = 40, 25 and 15,
   where a pad of ours is placed. (3) Else no ship: the team is placed on the landing marker and runs in on its package.
   Vanilla never searches for a landing spot (every NPC landing is on a hand-placed marker, OE_ShipsAddonScript) and
-  GetSafePosition has no caller anywhere; his probe plays found a spot each time, and what it counts as clear is still
-  his eye. A pad of the place's is never deleted; only ours is. }
+  GetSafePosition has no caller anywhere. Its radii are in position units (an answer at r 15 came back 88 from the
+  marker, inside the 100 search); with logging on, 1 of his first 3 plays on Jemison found a spot and 2 walked in, so
+  rung 3 is common, not rare. A pad of the place's is never deleted; only ours is. }
 
 Float CheckEvery = 1.0 Const
 Int LandChecks = 60 Const
@@ -37,6 +38,9 @@ Float CleanUpAfter = 30.0 Const
 Float SearchRadius = 100.0 Const
 Float PadRadius = 250.0 Const
 Float OccupiedWithin = 40.0 Const
+Float MinHull = 10.0 Const
+Float RingGapMin = 3.0 Const
+Float RingGapMax = 8.0 Const
 
 int TimerApproach = 1 Const
 int TimerLanding = 2 Const
@@ -197,30 +201,31 @@ Function SpawnCrew(ObjectReference akAt, Float afSpread)
     EndWhile
 EndFunction
 
-;One crew member per deck marker, round robin, so they stand where vanilla's landing crews stand.
-Function SpawnCrewOnDecks(ObjectReference[] akDecks)
+;A ring round akAt between afMin and afMax, random bearing each; PlaceAtMe snaps each offset to the navmesh, so they
+;stand on walkable ground (offsets turn with akAt's facing, which a random bearing makes immaterial).
+Function SpawnCrewAround(ObjectReference akAt, Float afMin, Float afMax)
     Int n = Utility.RandomInt(crewMin, crewMax)
-    Int i = 0
     Float[] offset = new Float[6]
-    While i < n
-      akDecks[i % akDecks.Length].PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
-      i += 1
+    While n > 0
+      Float bearing = Utility.RandomFloat(0.0, 360.0)
+      Float r = Utility.RandomFloat(afMin, afMax)
+      offset[0] = r * Math.sin(bearing)
+      offset[1] = r * Math.cos(bearing)
+      akAt.PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
+      n -= 1
     EndWhile
 EndFunction
 
+;The team on the ground round the ship (see the header for why not on it), centred on the pad it came down on.
 Function Unload()
-    Keyword deck = Game.GetFormFromFile(0x07BB02, "Starfield.esm") as Keyword;Ship_LandDeck_Marker_RefType [LCRT:0007BB02]
-    ObjectReference[] decks = craft.GetExteriorRefs(deck)
-    ObjectReference[] doors = craft.GetExteriorLoadDoors()
-    Debug.Trace(Self + " [landing] " + decks.Length + " deck marker(s), " + doors.Length + " exterior load door(s)")
-    if decks.Length > 0
-      SpawnCrewOnDecks(decks)
-    elseif doors.Length > 0
-      SpawnCrew(doors[0], 2.0)
-    else
-      Debug.Trace(Self + " [landing] ship has no deck marker and no exterior load door, team placed at the landing marker")
-      SpawnCrew(pad, 8.0)
+    Float halfW = craft.GetWidth() * 0.5
+    Float halfL = craft.GetLength() * 0.5
+    Float hull = Math.sqrt(halfW * halfW + halfL * halfL)
+    Debug.Trace(Self + " [landing] ship " + craft.GetWidth() + " wide, " + craft.GetLength() + " long, hull radius " + hull)
+    if hull < MinHull
+      hull = MinHull
     endif
+    SpawnCrewAround(pad, hull + RingGapMin, hull + RingGapMax)
     checks = 0
     StartTimer(CheckEvery, TimerDeck)
 EndFunction
