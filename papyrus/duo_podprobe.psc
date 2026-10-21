@@ -29,20 +29,25 @@ sound, impact explosion, and I feel like it should start higher and go faster". 
 push with nothing to see or hear, so boom 1 is now a frag grenade (his pick, after a car nuke was read and refused), a descent sound is played on the
 mover, and the defaults went from 150 up at 50 to 400 up at 200.
 
+⛔ FOURTH ROUND, 2026-10-21 14:1x: every build with EIGHT declared parameters froze the game "the moment I press
+enter", with eight numbers passed and with seven, and no step line ever reached the log, while v3 (seven
+parameters) ran all afternoon. Reading, not established: cgf cannot call a function with more than seven
+parameters. So carrier is RETIRED (the helper is the settled route and is always used) and sound takes its slot.
+
 NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes. Pass ALL
-EIGHT numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an
+SEVEN numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an
 omitted int is unread):
-    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1 1   the whole arrival: helper, frag boom, 2 people, fly-by sound
-    cgf "duo_podprobe.Run" 0 800 300 0 1 2 1 1   higher and faster
+    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1     the whole arrival: frag boom, 2 people, fly-by sound
+    cgf "duo_podprobe.Run" 0 800 300 0 1 2 1     higher and faster
     cgf "duo_podprobe.Clear" 0               deletes every probe object and worker within 1000
-Run(distance, height, speed, pod, boom, people, carrier, sound): 0 means the default for the three floats (25,
+Run(distance, height, speed, pod, boom, people, sound): 0 means the default for the three floats (25,
 400, 200). pod 0 Gemini, 1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule, 4 Neon_AuroraCargoContainer01 (a vanilla
 MoveableStatic); boom 0 none, 1 fragGrenadeExplosion (his pick: "ah carnuke isn't good, use frag grenade for
 now"), 2 RocketlauncherExplosion (outer radius 5, damage 115), 3 unused, 4 FXLandingEngineDamagePush (invisible and silent, kept as the control). ⛔ 3 WAS CarNukeLargeVehicles
 and came out before it was ever run: outer radius 900, damage 200, force 6000, a nuke mesh, so it kills the
 player at the 25 it lands from him (gen_inspect explosion, 2026-10-21); people 0 to 4 (UC_NA_MASTWorkerMale01, as
-duo_offpoiprobe), placed 0.3 s after the boom so it cannot hit them; carrier 0 move the pod itself, 1 attach it
-to an invisible StarbornRingSpin00 and move that; sound 0 none, 1 WwiseEvent_VEHNPCFlyByClose, 2
+duo_offpoiprobe), placed 0.3 s after the boom so it cannot hit them; the pod always hangs from an invisible
+StarbornRingSpin00 and that is what moves (pod 4, the MoveableStatic, now rides the helper too); sound 0 none, 1 WwiseEvent_VEHNPCFlyByClose, 2
 WwiseEvent_VEHNPCFlyByFar, 3 WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy, played on the MOVER as it starts down.
 The four capsules are vanilla set dressing and every one STANDS on its origin (gen_inspect bounds, 2026-10-21).
 Clear deletes by BASE, so never run it at the NASA museum, where those capsules stand for real, nor in New
@@ -94,7 +99,7 @@ Function Step(String asWhat) global
     Debug.Trace("POD PROBE step " + asWhat)
 EndFunction
 
-Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2, int aiCarrier = 0, int aiSound = 0) global
+Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2, int aiSound = 0) global
     Actor player = Game.GetPlayer()
     Float dist = afDistance
     If dist <= 0.0
@@ -113,7 +118,7 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     Form helperBase = PodBase(5)
     Form boom = BoomBase(aiBoom)
     WwiseEvent sound = DescentSound(aiSound)
-    String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople + "  carrier=" + aiCarrier + "  sound=" + aiSound
+    String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople + "  sound=" + aiSound
     If aiBoom > 0 && boom == None
         out += "\nBOOM " + aiBoom + " DID NOT RESOLVE"
     EndIf
@@ -146,22 +151,17 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     Step("2 pod")
     ObjectReference p = player.PlaceAtMe(pod)
     p.MoveTo(ground, 0.0, 0.0, height, false)
-    ; mover is what TranslateTo is called on: the pod itself, or the invisible helper the pod hangs from.
-    ObjectReference mover = p
-    If aiCarrier == 1
-        Step("3 helper")
-        mover = player.PlaceAtMe(helperBase)
-        mover.MoveTo(ground, 0.0, 0.0, height, false)
-        Utility.Wait(0.2)
-        Step("4 attach")
-        p.AttachTo(mover)
-    EndIf
+    ; mover is what TranslateTo is called on: the invisible helper the pod hangs from, always (carrier retired).
+    Step("3 helper")
+    ObjectReference mover = player.PlaceAtMe(helperBase)
+    mover.MoveTo(ground, 0.0, 0.0, height, false)
+    Utility.Wait(0.2)
+    Step("4 attach")
+    p.AttachTo(mover)
     Utility.Wait(0.2)
     Float z0 = p.GetPositionZ()
     out += "\nstart " + ((z0 - gz) as Int) + " up   3D loaded " + p.Is3DLoaded()
-    If aiCarrier == 1
-        out += "   helper " + ((mover.GetPositionZ() - gz) as Int) + " up, 3D " + mover.Is3DLoaded()
-    EndIf
+    out += "   helper " + ((mover.GetPositionZ() - gz) as Int) + " up, 3D " + mover.Is3DLoaded()
 
     If sound != None
         Step("5 sound")
@@ -194,9 +194,7 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
         mover.StopTranslation()
         out += "\nNOT LANDED after " + (t as Int) + " s, still " + ((z - gz) as Int) + " up"
     EndIf
-    If aiCarrier == 1
-        out += "\nthe pod itself READS " + ((p.GetPositionZ() - gz) as Int) + " up (stale once attached: he saw it land, 2026-10-21)"
-    EndIf
+    out += "\nthe pod itself READS " + ((p.GetPositionZ() - gz) as Int) + " up (stale once attached: he saw it land, 2026-10-21)"
     out += "   off target " + (ground.GetDistance(mover) as Int)
 
     Step("7 landed " + landed + ", boom")
