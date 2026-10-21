@@ -434,8 +434,8 @@ EndFunction
 ; later. THE POD IS KIM'S HERO MODEL since 2026-10-21 15:3x (his "Kim has made a droppod, v10", then "go"), was
 ; vanilla Nasa_GeminiCapsule01: duo_DropPod01 [STAT 003445], Meshes\ccs\droppod01.nif, built from Overtime
 ; kitbash/droppod01.json, 7.6 x 6.4 x 11.8 m. Its origin is the riser's, its lowest vertices (the two BLADE TIPS, not
-; the heat shield, which I first wrote) 5.196 m below it, so it rests LIFT above the ground: 5.1, the tips bedded ~10 cm
-; (the box bounds said 5.41, a 0.21 m hover). Its door is its -Y face, so pod and helper are turned to the pod's bearing
+; the heat shield, which I first wrote) 5.196 m below it and the shield's bottom 2.95; it rests LIFT above the ground,
+; 3.2 since his 16:1x (the shield just off the ground, the blades 2.0 m in), see LIFT. (The box bounds said 5.41.) Its door is its -Y face, so pod and helper are turned to the pod's bearing
 ; and the door faces akCentre; the crew come out within 1.5 of a marker 4.5 in front of the door (the body face is
 ; 1.82 out), off the navmesh, never round the middle, which is inside her. aiPods pods land at even bearings round
 ; akCentre, 15 to 25 out, a random turn and jitter each, ONE AFTER ANOTHER 2 TO 4 S APART AT RANDOM (his 15:0x: "the
@@ -464,7 +464,11 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
     Float height = 400.0
     Float speed = 200.0
     Float fall = height / speed
-    Float lift = 5.1      ; the pod's origin above its lowest vertex, less ~10 cm (see above)
+    ; His 16:1x, on her standing on her blade tips: "it should be another like metre down so the heat shield is just
+    ; near the ground". Measured per part: the shield's bottom is 2.95 below her origin (the tips 5.196), so 3.2 puts
+    ; the shield 0.25 off the ground and drives the blades 2.0 into it. His metre would have left the shield 1.15 up;
+    ; the shield is the spec, said to him. (Was 5.1, the tips just bedded.)
+    Float lift = 3.2
     Float doorOut = 4.5   ; the crew marker, in front of the door
     Form one = OneOf(akList, abOneSpecies)
     Int count = aiPods

@@ -366,7 +366,9 @@ marker, and the crew placed within 1.5 of a navmesh point 4.5 in front of the do
 (inside her). **His first play of her hovered at shoulder height and leaned forward** while the helper read 0 off and
 the crew stood on the ground, so pod and helper are now placed DISABLED, posed, enabled, and attached after
 `WaitFor3DLoad`, and **at touchdown the falling pod is swapped for a fresh one placed at the rest pose** (the ground
-marker, 5.1 up, turned to its bearing); the falling pod and helper are deleted under the frag. The Gemini was solid
+marker, 3.2 up, turned to its bearing); the falling pod and helper are deleted under the frag. **His second play, it
+stood on its blade tips: *"another like metre down so the heat shield is just near the ground"*, so 3.2 puts the
+shield (2.95 below the origin) 0.25 off the ground and the blades 2.0 into it** (was 5.1). The Gemini was solid
 where it landed and kept on the ground by a save and reload, his checks; ⚠ **solidity unmeasured on Kim's pod**, whose
 solid parts are ship modules. Home-office manual part 32, *how a DROP POD comes down*.
 
