@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_delve08a",
   "template": "beats",
-  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
-  "_deal": "LIVE POOL since 2026-10-12: tested off the local-cargo test node (his slate tests), then moved here by `gen_delve testnode off --promote`, a node edit with no rebuild (his: \"think it's a bit wasteful to rebuilt all the quests just to put them in a different list\").",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode_Rare",
+  "_deal": "RARE since 2026-10-21, his \"those two sound reasonable\": a grief beat (the letters, then his sister) should not repeat. Was the live local-cargo pool since 2026-10-12.",
   "author": "jessica",
   "source": "home-office office/projects/delves/v2-mission-types.md, type 3 (the trail); office/projects/delves/stages-not-a-driver.md",
   "_note": [
