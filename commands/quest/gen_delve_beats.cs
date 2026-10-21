@@ -517,6 +517,14 @@ namespace FrankyCLI
         private const float ApproachDistance = 250f;
         /// <summary>The stage that stops a Delve ending on a talk, set when the person unloads (vanilla's shutdown number).</summary>
         private const int LingerStage = 1000;
+        /// <summary>
+        /// A clear's SPAWNED stage is this plus its beat index, set by duo_delve_groupnear the moment its enemies exist; the
+        /// objective's site target is lit only while it is NOT done (his play, 2026-10-21: "marker spawning works, but marker
+        /// stays as a visable objective"). A block of its own, as LingerStage: under every beat's first stage there is no room
+        /// (the slate template has 6 to 9, the people's and occupants'). Safe above the beats because no hook of ours carries
+        /// an integer TurnOffStage, the one stock check that reads GetStage() (DefaultScriptFunctions.CheckForStages).
+        /// </summary>
+        private const int SpawnedStageBase = 900;
         /// <summary>The most responses one spoken line may carry. Vanilla, measured 2026-10-19 over MQ101 and OE_Dialogue's
         /// 1,027 lines: 909 one, 101 two, 17 three.</summary>
         private const int ResponsesMax = 4;
@@ -594,8 +602,8 @@ namespace FrankyCLI
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
             public List<int> GroupNear = new();   // clear beats' spawn markers, carrying GroupNearScript (the enemies spawned when he is near)
-            public List<(int objective, int alias)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late
-            public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own sandbox round the fight's marker (its source's radius and template)
+            public List<(int objective, int alias, int spawned)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late, lit until its spawned stage
+            public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own travel to the fight's marker (its source's radius and template)
             public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
@@ -857,6 +865,8 @@ namespace FrankyCLI
             internal readonly Dictionary<int, int> landingOf = new();
             /// <summary>Each support beat's team collection, by beat index: empty, wearing the travel package, filled as they land.</summary>
             internal readonly Dictionary<int, int> supportOf = new();
+            /// <summary>Each clear's spawned stage, by beat index (SpawnedStageBase): set when its enemies exist.</summary>
+            internal readonly Dictionary<int, int> spawnedStage = new();
 
             /// <summary>
             /// A support team's landing marker carries LandingScript. Like SpawnNear, not a stage hook: no properties, its own
@@ -1100,8 +1110,11 @@ namespace FrankyCLI
                     bm.LingerFrom = steps[^1].DoneStage;
                     if (clone.Stages!.Any(x => x.Index == LingerStage)) { Console.WriteLine($"REFUSED: stage {LingerStage} already exists on this base; the talk's shutdown stage collides."); return 1; }
                 }
+                foreach (var ss in spawnedStage.Values)
+                    if (clone.Stages!.Any(x => x.Index == ss)) { Console.WriteLine($"REFUSED: stage {ss} already exists on this base; a clear's spawned stage collides."); return 1; }
                 allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                     .Concat(bm.Linger >= 0 ? new[] { bm.Linger } : Array.Empty<int>())
+                    .Concat(spawnedStage.Values)
                     .Concat(r.approach != null ? new[] { t.approachStage } : Array.Empty<int>())
                     .Concat(personStage.Values).Concat(whoStage.Values)
                     .Concat(arrival ? new[] { t.arrivalStage } : Array.Empty<int>()).Distinct().OrderBy(x => x).ToList();
@@ -1326,12 +1339,18 @@ namespace FrankyCLI
                         ob.Targets.Add(tt);
                         if (slotOf[b].siteAlias >= 0)
                         {
-                            // The place, while the beat's own target does not exist yet (a clear's enemies spawn when he
-                            // is near). The same conditions as the beat's target, so in a group it goes out with it.
+                            // The place, ONLY while the beat's own target does not exist yet: lit while its spawned stage is
+                            // NOT done (a clear's enemies spawn when he is near, and the script sets the stage as they do).
+                            // A plain second target stayed up all fight (his play, 2026-10-21). The same conditions as the
+                            // beat's target too, so in a group it also goes out with it.
                             var st2 = tt.DeepCopy();
                             st2.AliasID = slotOf[b].siteAlias;
+                            int spawned = spawnedStage[b];
+                            var sd = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = spawned };
+                            sd.FirstParameter = new FormLinkOrIndex<IQuestGetter>(sd, clone.FormKey);
+                            st2.Conditions.Add(new ConditionFloat { Data = sd, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f });
                             ob.Targets.Add(st2);
-                            bm.SiteTargets.Add((s.Objective, slotOf[b].siteAlias));
+                            bm.SiteTargets.Add((s.Objective, slotOf[b].siteAlias, spawned));
                             if (s.IsGroup) bm.TargetGates.Add((s.Objective, slotOf[b].siteAlias, beatStage[b]));
                         }
                     }
@@ -2225,9 +2244,15 @@ namespace FrankyCLI
             foreach (var a in bm.GroupNear)
                 fail += Check($"clear spawn marker alias {a} carries {GroupNearScript} (the enemies spawned when the player is near)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == GroupNearScript) ?? false).ToString(), "True");
-            foreach (var (oi, a) in bm.SiteTargets)
-                fail += Check($"objective {oi} also points at the place, alias {a} (on the map before its enemies exist)",
-                              (q.Objectives.FirstOrDefault(o => o.Index == oi)?.Targets.Any(x => x.AliasID == a) ?? false).ToString(), "True");
+            foreach (var (oi, a, spawned) in bm.SiteTargets)
+            {
+                var site = q.Objectives.FirstOrDefault(o => o.Index == oi)?.Targets.FirstOrDefault(x => x.AliasID == a);
+                fail += Check($"objective {oi} also points at the place, alias {a}, lit only until stage {spawned} (on the map before its enemies exist, gone once they do)",
+                              site == null ? "no such target"
+                                  : site.Conditions.Any(c => c.Data is IGetStageDoneConditionDataGetter d && d.SecondParameter == spawned && c is IConditionFloatGetter f && f.ComparisonValue == 0f && c.CompareOperator == CompareOperator.EqualTo) ? "gated" : "ungated",
+                              "gated");
+                fail += Check($"stage {spawned} exists (set when the clear's enemies spawn)", q.Stages.Any(st => st.Index == spawned).ToString(), "True");
+            }
             foreach (var g in bm.Globals)
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var (place, anchor, global) in bm.Leashes)
@@ -2312,7 +2337,7 @@ namespace FrankyCLI
                 var sp = m.Packages.FirstOrDefault(p => p.FormKey == spk);
                 var slr = sp?.Data.Values.OfType<IPackageDataLocationGetter>().FirstOrDefault()?.Location as ILocationTargetRadiusGetter;
                 var sl = slr?.Target as ILocationFallbackGetter;
-                fail += Check($"support package {spk} sandboxes round the fight's marker alias at its source's radius, with no condition and no script",
+                fail += Check($"support package {spk} travels near the fight's marker alias at its source's radius and template, with no condition and no script",
                               sp == null ? "missing" : $"{sl?.Type} {sl?.Data} radius {slr?.Radius} template {sp.PackageTemplate.FormKey} conditions {sp.Conditions.Count} vma {(sp.VirtualMachineAdapter == null ? "none" : "SET")}",
                               $"AliasForReference {fight} radius {radius} template {template} conditions 0 vma none");
             }

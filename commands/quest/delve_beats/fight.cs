@@ -79,21 +79,23 @@ namespace FrankyCLI
             protected static int SupportSlot(BeatsBuild build, int i)
             {
                 if (build.r.beats[i].support == null) return 0;
-                if (build.inputs.WaveSrc == null || build.inputs.SandboxSrc == null)
-                { Console.WriteLine("REFUSED: a support team's collection and package are copied from vanilla, and a source was not handed in."); return 1; }
+                if (build.inputs.WaveSrc == null || build.inputs.TravelSrc == null)
+                { Console.WriteLine("REFUSED: a support team's collection and package are copied like a hold's waves, and a source was not handed in."); return 1; }
                 var lm = build.NewMarker(i, "Landing");
                 build.Landing(i, (int)lm.ID);
                 // His plays of 33a, 2026-10-21. First: placed at the hatch with nothing to do, "The UC marines didn't get off the
                 // ship and just hung out in the landing bay". Then, on the run-to-player package: "they didn't really attack the
                 // Spacers tho. For enemy landings this is prob right but friendlys should attack the objectives". So a FRIENDLY
                 // team goes to the FIGHT, aimed near the beat's marker alias (where the clear's enemies and the defeat's target
-                // spawn), with no condition, so they go whatever the player does. Then, on a Travel there: "Once the marines reach
-                // the marker they huddle there doing nothing. Can we get them to patrol or something?". So it is a SANDBOX round
-                // the fight, a copy of vanilla's OE_Sandbox_20m_Run_Alert_Package (the package its encounter NPCs sandbox round a
-                // scene marker on): they run there, then keep moving within its 20 m, alert, and combat takes over when there is
-                // one. Its own target (a linked ref) is replaced, and its source's radius kept.
+                // spawn), with no condition, so they go whatever the player does: its own copy of the travel package (vanilla's
+                // landed-crew shape, OE_KT_LandedShip_TravelPKG: LocationFallback AliasForReference). Then, on arriving: "Once the
+                // marines reach the marker they huddle there doing nothing ... Maybe even just stopping the travel package". A
+                // copy of vanilla's OE_Sandbox_20m_Run_Alert_Package was tried and they went "very chill, don't seem to want to
+                // engage in combat" (his play, 2026-10-21), where on this Travel they had fought ("yup they got out and fought").
+                // So the Travel stays, and duo_delve_landing takes each Marine OUT of the team as he reaches the fight: the package
+                // stops and his own AI (DefaultMasterPackageList_Human; Aggressive, Brave) takes over.
                 int marker = build.slotOf[i].markerAlias;
-                var pk = build.myMod.Packages.DuplicateInAsNewRecord(build.inputs.SandboxSrc!);
+                var pk = build.myMod.Packages.DuplicateInAsNewRecord(build.inputs.TravelSrc!);
                 pk.EditorID = $"{build.r.id}{SupportPackagePrefix}{i + 1}";
                 pk.VirtualMachineAdapter = null;
                 pk.OwnerQuest.SetTo(build.clone.FormKey);
@@ -101,7 +103,7 @@ namespace FrankyCLI
                 pk.PreferredSpeed = Package.Speed.Run;
                 var loc = pk.Data.Values.OfType<PackageDataLocation>().FirstOrDefault();
                 if (loc?.Location is not LocationTargetRadius src)
-                { Console.WriteLine($"REFUSED: {build.inputs.SandboxSrc!.EditorID} has no location input to aim at the fight."); return 1; }
+                { Console.WriteLine($"REFUSED: {build.inputs.TravelSrc!.EditorID} has no location input to aim at the fight."); return 1; }
                 var radius = src.Radius;
                 loc.Location = new LocationTargetRadius { Target = new LocationFallback { Type = LocationTargetRadius.LocationType.AliasForReference, Data = marker }, Radius = radius };
                 uint cid = NextAliasId(build.clone);
@@ -110,8 +112,8 @@ namespace FrankyCLI
                 col.Collection[0].ReferenceAlias!.PackageData.Add(pk.ToLink<IPackageGetter>());
                 build.clone.Aliases.Add(col);
                 build.supportOf[i] = (int)cid;
-                build.bm.SupportTeams.Add(((int)cid, pk.FormKey, marker, $"{radius}", build.inputs.SandboxSrc!.PackageTemplate.FormKey));
-                Console.WriteLine($"  +support : beat {i + 1} team collection {cid} (EMPTY, a copy of ActiveHostiles) wearing {pk.EditorID} {pk.FormKey}: Sandbox round alias {marker}, the fight, radius {radius} (its source's), at Run, no condition");
+                build.bm.SupportTeams.Add(((int)cid, pk.FormKey, marker, $"{radius}", build.inputs.TravelSrc!.PackageTemplate.FormKey));
+                Console.WriteLine($"  +support : beat {i + 1} team collection {cid} (EMPTY, a copy of ActiveHostiles) wearing {pk.EditorID} {pk.FormKey}: Travel near alias {marker}, the fight, at Run, no condition; each leaves the team on arriving");
                 return 0;
             }
 
@@ -153,7 +155,9 @@ namespace FrankyCLI
                     build.props.Add(("Form", $"Ship{b + 1}", ff.Ship!.Value, -1));
                     build.props.Add(("FormList", $"Support{b + 1}", ff.Support!.Value, -1));
                     build.props.Add(("RefCollectionAlias", $"Alias_Beat{b + 1}Support", build.clone.FormKey, build.supportOf[b]));
-                    build.Add(stage, $"({la} as {LandingScript}).Arm(Ship{b + 1}, Support{b + 1}, {s.min}, {s.max}, {s.near ?? DefaultLandingNear}.0, Alias_Beat{b + 1}Support)");
+                    // The fight's marker, where the team's Travel ends: the script takes each one out of the team there.
+                    build.props.Add(("ReferenceAlias", $"Alias_Beat{b + 1}Fight", build.clone.FormKey, build.slotOf[b].markerAlias));
+                    build.Add(stage, $"({la} as {LandingScript}).Arm(Ship{b + 1}, Support{b + 1}, {s.min}, {s.max}, {s.near ?? DefaultLandingNear}.0, Alias_Beat{b + 1}Support, Alias_Beat{b + 1}Fight)");
                 }
             }
 

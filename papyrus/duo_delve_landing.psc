@@ -3,8 +3,11 @@ Scriptname duo_delve_landing extends ReferenceAlias
   calls Arm; when the player comes within NearDistance of the marker ACROSS THE MAP, a ship is placed on a landing marker
   there and comes down from orbit by itself (his fact, 2026-10-21: "Doing this on a planet causes the ship to appear from
   orbit and land", his landed bounties qst12a to qst16d). Once it reports landed its ramps open; once a ramp is down (or
-  RampChecks seconds pass) the team is placed INTO akTeam, a collection wearing their own package to the fight, ON THE
-  GROUND IN A RING ROUND THE SHIP, outside its hull; the ship takes off once its landing deck is clear
+  RampChecks seconds pass) the team is placed INTO akTeam, a collection wearing their own Travel to the fight, ON THE
+  GROUND IN A RING ROUND THE SHIP, outside its hull, and each one LEAVES akTeam as he comes within ArriveWithin of akFight
+  (the fight's marker), so the Travel stops and his own AI takes over (his play, 2026-10-21: "Once the marines reach the
+  marker they huddle there doing nothing ... Maybe even just stopping the travel package"; a sandbox round the fight,
+  tried first, left them "very chill, don't seem to want to engage in comabt"); the ship takes off once its landing deck is clear
   (IsLandingDeckClear, after at least DeckMinChecks seconds, at most DeckChecks), and both refs are deleted CleanUpAfter
   seconds after that.
 
@@ -48,6 +51,11 @@ int TimerRamp = 3 Const
 int TimerDeck = 4 Const
 int TimerCleanUp = 5 Const
 int TimerSearch = 6 Const
+int TimerArrive = 7 Const
+
+;A Marine within this of the fight's marker leaves the team; past ArriveChecks seconds every one left does too.
+Float ArriveWithin = 20.0 Const
+Int ArriveChecks = 180 Const
 
 ;ONE clear-spot search per tick, SearchGap apart (his 2026-10-21 play: "there is a large stutter on the search if it
 ;can't find a place"). Four searches ran back to back in one call, the first at the engine's defaults for the log only;
@@ -61,6 +69,8 @@ Int crewMin
 Int crewMax
 Float near
 RefCollectionAlias team
+ReferenceAlias fight
+Int arriveTicks   ; not "arriveChecks": Papyrus is case-insensitive and ArriveChecks is the constant
 WorldSpace world
 ObjectReference pad
 SpaceshipReference craft
@@ -68,8 +78,9 @@ Bool padIsOurs
 Int checks
 Int searchStep
 
-Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, RefCollectionAlias akTeam)
+Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, RefCollectionAlias akTeam, ReferenceAlias akFight)
     team = akTeam
+    fight = akFight
     ship = akShip
     crew = akCrew
     crewMin = aiMin
@@ -212,6 +223,7 @@ Function SpawnCrew(ObjectReference akAt, Float afSpread)
       akAt.PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
       n -= 1
     EndWhile
+    StartArrive()
 EndFunction
 
 ;A ring round akAt between afMin and afMax, random bearing each; PlaceAtMe snaps each offset to the navmesh, so they
@@ -227,6 +239,34 @@ Function SpawnCrewAround(ObjectReference akAt, Float afMin, Float afMax)
       akAt.PlaceAtMe(crew.GetAt(Utility.RandomInt(0, crew.GetSize() - 1)), 1, True, False, True, offset, team, True)
       n -= 1
     EndWhile
+    StartArrive()
+EndFunction
+
+;Watch the team on its way in: every placed member leaves it at the fight (ArriveStep). Started by both spawns, so no
+;path that puts a team down can miss it.
+Function StartArrive()
+    arriveTicks = 0
+    StartTimer(CheckEvery, TimerArrive)
+EndFunction
+
+;Each member leaves the team as he reaches the fight's marker, dead or not found ones too, and past ArriveChecks
+;seconds everyone left, so nobody stays on a Travel for good. Leaving the collection drops its package.
+Function ArriveStep()
+    arriveTicks += 1
+    ObjectReference at = fight.GetRef()
+    Int i = team.GetCount() - 1
+    While i >= 0
+      Actor m = team.GetAt(i) as Actor
+      if m && (arriveTicks >= ArriveChecks || !at || m.IsDead() || m.GetDistance(at) < ArriveWithin)
+        team.RemoveRef(m)
+        m.EvaluatePackage()
+        Debug.Trace(Self + " [landing] " + m + " left the team after " + arriveTicks + " checks, dead " + m.IsDead())
+      endif
+      i -= 1
+    EndWhile
+    if team.GetCount() > 0
+      StartTimer(CheckEvery, TimerArrive)
+    endif
 EndFunction
 
 ;The team on the ground round the ship (see the header for why not on it), centred on the pad it came down on.
@@ -267,6 +307,9 @@ Event OnTimer(int aiTimerID)
 
     elseif aiTimerID == TimerSearch
       SearchStep()
+
+    elseif aiTimerID == TimerArrive
+      ArriveStep()
 
     elseif aiTimerID == TimerLanding
       checks += 1

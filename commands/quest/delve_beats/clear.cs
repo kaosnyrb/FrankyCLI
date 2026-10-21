@@ -52,6 +52,7 @@ namespace FrankyCLI
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, siteAlias = (int)cm.ID, journalStage = build.beatStage[i] };
                 build.bm.ClearGroups.Add((int)cid);
                 build.GroupNear(i, (int)cm.ID);
+                build.spawnedStage[i] = SpawnedStageBase + i;
                 Console.WriteLine($"  +slot    : beat {i + 1} (clear) -- spawn marker alias {cm.ID}, enemies collection {cid} (EMPTY, a copy of ActiveHostiles, no package)");
                 return SupportSlot(build, i);
             }
@@ -71,7 +72,7 @@ namespace FrankyCLI
                 build.props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
                 var e = fb.enemies!;
                 // Armed now, spawned when he is near (the class doc above): the same duo_delve_lib.SpawnGroup, called by the script.
-                build.Add(stage, $"({mk} as {GroupNearScript}).Arm({en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
+                build.Add(stage, $"({mk} as {GroupNearScript}).Arm({en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs}, {build.spawnedStage[b]})");
             }
         }
     }

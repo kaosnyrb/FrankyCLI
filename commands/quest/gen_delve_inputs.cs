@@ -26,8 +26,6 @@ namespace FrankyCLI
             public IQuestCollectionAliasGetter? WaveSrc;
             /// <summary>The package a hold's waves run, to come for the player; null when no beat holds or clears.</summary>
             public IPackageGetter? TravelSrc;
-            /// <summary>The package a support team wears once landed, to sandbox round the fight; null when no beat has support.</summary>
-            public IPackageGetter? SandboxSrc;
             /// <summary>The spoken lines' speaker: the NPC cloned to carry a name, and the voice type; null with no speaker.</summary>
             public (INpcGetter tmpl, FormKey voice)? Speaker;
             /// <summary>By place index: the creature list of who is there.</summary>
@@ -108,16 +106,7 @@ namespace FrankyCLI
                 // the game which control enemies, would be good to have them attack the player"): a copy of
                 // the Wanted trait's bounty hunters' Travel package, jog, weapon drawn, to PlayerRef.
                 inputs.TravelSrc = sfm?.Packages.FirstOrDefault(p => p.EditorID == "Trait_Wanted_TravelToPlayer");
-                if (inputs.TravelSrc == null) { Console.WriteLine("REFUSED: a hold copies its waves' package from Trait_Wanted_TravelToPlayer [0E830B:Starfield.esm], and it is not there."); fail++; }
-                // A support team, landed, sandboxes round the fight rather than stands where a travel ended (his play,
-                // 2026-10-21: "Once the marines reach the marker they huddle there doing nothing"): a copy of vanilla's own
-                // OE encounter sandbox, 20 m, at Run, alert.
-                if (r.beats.Any(b => b.support != null))
-                {
-                    inputs.SandboxSrc = sfm?.Packages.FirstOrDefault(p => p.EditorID == "OE_Sandbox_20m_Run_Alert_Package");
-                    if (inputs.SandboxSrc == null) { Console.WriteLine("REFUSED: a support team copies its package from OE_Sandbox_20m_Run_Alert_Package [Starfield.esm], and it is not there."); fail++; }
-                }
-            }
+                if (inputs.TravelSrc == null) { Console.WriteLine("REFUSED: a hold copies its waves' package from Trait_Wanted_TravelToPlayer [0E830B:Starfield.esm], and it is not there."); fail++; }            }
             // The speaker of a Delve's spoken lines: a friendly MAST worker cloned only to carry a NAME and a
             // VOICE TYPE (the voice folder the audio is looked up in). Never placed: the lines are radio.
             if (fail == 0 && r.speaker != null)

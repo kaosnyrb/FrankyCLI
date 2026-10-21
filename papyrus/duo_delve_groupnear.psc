@@ -1,8 +1,9 @@
 Scriptname duo_delve_groupnear extends ReferenceAlias
 { FrankyCLI, on a clear beat's SPAWN marker alias. The step's fragment calls Arm; when the player comes within
   NearDistance of the marker ACROSS THE MAP, the enemies are placed there into akGroup by duo_delve_lib.SpawnGroup (the
-  call the fragment itself made until 2026-10-21), and the objective, which has pointed at this marker all along,
-  starts pointing at them too.
+  call the fragment itself made until 2026-10-21), and aiSpawnedStage is set: the objective, which has pointed at this
+  marker until now (its target lit while that stage is NOT done), points at them alone. His play the same day: "marker
+  spawning works, but marker stays as a visable objective", when the marker was a plain second target.
 
   WHY: placed when the step began, a far site's enemies stood over ground that was not loaded yet. His play of
   duo_delve33a, 2026-10-21: "The spacers are spawned from a distance, which reads bad on the map and puts them in mid
@@ -24,9 +25,10 @@ Int countMax
 Bool oneSpecies
 FormList loot
 Int lootChance
+Int spawnedStage
 WorldSpace world
 
-Function Arm(RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance)
+Function Arm(RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance, Int aiSpawnedStage)
     enemies = akGroup
     list = akList
     countMin = aiMin
@@ -34,6 +36,7 @@ Function Arm(RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, 
     oneSpecies = abOneSpecies
     loot = akLoot
     lootChance = aiChance
+    spawnedStage = aiSpawnedStage
     world = GetRef().GetWorldSpace()
     Debug.Trace(Self + " [groupnear] armed on " + GetRef() + " in " + world + ", near " + NearDistance)
     StartTimer(CheckEvery)
@@ -55,5 +58,6 @@ Event OnTimer(int aiTimerID)
       return
     endif
     duo_delve_lib.SpawnGroup(Self, enemies, list, countMin, countMax, oneSpecies, loot, lootChance)
-    Debug.Trace(Self + " [groupnear] spawned " + enemies.GetCount() + " at " + here + ", the player " + Math.sqrt(dx * dx + dy * dy) + " away")
+    GetOwningQuest().SetStage(spawnedStage)
+    Debug.Trace(Self + " [groupnear] spawned " + enemies.GetCount() + " at " + here + ", the player " + Math.sqrt(dx * dx + dy * dy) + " away; stage " + spawnedStage + " set")
 EndEvent
