@@ -33,12 +33,14 @@ NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing
 EIGHT numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an
 omitted int is unread):
     cgf "duo_podprobe.Run" 0 0 0 0 1 2 1 1   the whole arrival: helper, rocket boom, 2 people, fly-by sound
-    cgf "duo_podprobe.Run" 0 800 300 0 3 2 1 1   higher, faster, the car-nuke boom
+    cgf "duo_podprobe.Run" 0 800 300 0 1 2 1 1   higher and faster
     cgf "duo_podprobe.Clear" 0               deletes every probe object and worker within 1000
 Run(distance, height, speed, pod, boom, people, carrier, sound): 0 means the default for the three floats (25,
 400, 200). pod 0 Gemini, 1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule, 4 Neon_AuroraCargoContainer01 (a vanilla
-MoveableStatic); boom 0 none, 1 RocketlauncherExplosion, 2 fragGrenadeExplosion, 3 CarNukeLargeVehicles, 4
-FXLandingEngineDamagePush (invisible and silent, kept as the control); people 0 to 4 (UC_NA_MASTWorkerMale01, as
+MoveableStatic); boom 0 none, 1 RocketlauncherExplosion (outer radius 5, damage 115), 2 fragGrenadeExplosion,
+3 unused, 4 FXLandingEngineDamagePush (invisible and silent, kept as the control). ⛔ 3 WAS CarNukeLargeVehicles
+and came out before it was ever run: outer radius 900, damage 200, force 6000, a nuke mesh, so it kills the
+player at the 25 it lands from him (gen_inspect explosion, 2026-10-21); people 0 to 4 (UC_NA_MASTWorkerMale01, as
 duo_offpoiprobe), placed 0.3 s after the boom so it cannot hit them; carrier 0 move the pod itself, 1 attach it
 to an invisible StarbornRingSpin00 and move that; sound 0 none, 1 WwiseEvent_VEHNPCFlyByClose, 2
 WwiseEvent_VEHNPCFlyByFar, 3 WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy, played on the MOVER as it starts down.
@@ -68,8 +70,6 @@ Form Function BoomBase(int aiBoom) global
         Return Game.GetForm(0x49B53)    ; RocketlauncherExplosion
     ElseIf aiBoom == 2
         Return Game.GetForm(0xE574F)    ; fragGrenadeExplosion
-    ElseIf aiBoom == 3
-        Return Game.GetForm(0x23D3B)    ; CarNukeLargeVehicles
     ElseIf aiBoom == 4
         Return Game.GetForm(0x1FF72B)   ; FXLandingEngineDamagePush: no visual, no sound (his third play)
     EndIf
