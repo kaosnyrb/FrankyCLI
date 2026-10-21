@@ -20,7 +20,7 @@ specified parent (only works on created refs)". Hence two more routes: pod 4, a 
 directly, and carrier 1, the pod attached to that invisible helper and the helper moved.
 
 NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes. Pass ALL
-SEVEN numbers (on his first run the omitted ints read 0, not their declared defaults):
+SEVEN numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an omitted int is unread):
     cgf "duo_podprobe.Run" 0 0 0 0 0 0 1     Gemini on the invisible helper, nothing else
     cgf "duo_podprobe.Run" 0 0 0 4 0 0 0     the cargo container, moved directly
     cgf "duo_podprobe.Run" 0 0 0 0 1 2 1     the helper route with the landing push and 2 people
