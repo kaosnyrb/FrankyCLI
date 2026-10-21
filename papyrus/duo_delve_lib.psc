@@ -433,9 +433,9 @@ EndFunction
 ; appears ("a clear winner, big BOOM in the atmosphere"); 400 up at 200, 2 s; a frag at touchdown; aiPer enemies 0.3 s
 ; later. THE POD IS KIM'S HERO MODEL since 2026-10-21 15:3x (his "Kim has made a droppod, v10", then "go"), was
 ; vanilla Nasa_GeminiCapsule01: duo_DropPod01 [STAT 003445], Meshes\ccs\droppod01.nif, built from Overtime
-; kitbash/droppod01.json, 7.6 x 6.4 x 11.8 m. Its origin is the riser's, its lowest vertex (the heat shield's centre)
-; 5.196 m below it, so the helper stops LIFT above the ground: 5.1, the shield beds in ~10 cm rather than hover (the
-; box bounds said 5.41, a 0.21 m hover). Its door is its -Y face, so pod and helper are turned to the pod's bearing
+; kitbash/droppod01.json, 7.6 x 6.4 x 11.8 m. Its origin is the riser's, its lowest vertices (the two BLADE TIPS, not
+; the heat shield, which I first wrote) 5.196 m below it, so it rests LIFT above the ground: 5.1, the tips bedded ~10 cm
+; (the box bounds said 5.41, a 0.21 m hover). Its door is its -Y face, so pod and helper are turned to the pod's bearing
 ; and the door faces akCentre; the crew come out within 1.5 of a marker 4.5 in front of the door (the body face is
 ; 1.82 out), off the navmesh, never round the middle, which is inside her. aiPods pods land at even bearings round
 ; akCentre, 15 to 25 out, a random turn and jitter each, ONE AFTER ANOTHER 2 TO 4 S APART AT RANDOM (his 15:0x: "the
@@ -445,6 +445,16 @@ EndFunction
 ; everything after the landing is read off the HELPER or the GROUND marker (his checks on the Gemini: solid where it
 ; lands, and a save and reload keeps it on the ground; both UNMEASURED on Kim's pod, whose solid parts are ship
 ; modules). Latent: returns when the last pod's crew is out.
+; ⛔ HIS FIRST PLAY OF HER, 15:4x: "Pod was hovering", "about shoulder height", "it's also leaning forward", while
+; "Spacers spawned ok" off the same navmesh and the trace read every helper 0 off its rest height. So the ground and
+; the helper were right and the POD's drawn pose was not. Unproven why: the model may have loaded in the pose PlaceAtMe
+; gave it (akCentre's, and a POI marker tilts with its slope) before SetAngle, or been attached a frame into the fall
+; (200 m/s at 144 fps is 1.39 m a frame). Two changes, so the resting pose depends on neither: (1) pod and helper are
+; placed DISABLED, posed, then enabled, and the pod attached only once WaitFor3DLoad says its model exists; (2) AT
+; TOUCHDOWN THE FALLING POD IS SWAPPED for a fresh one placed disabled at the rest pose (the ground marker, LIFT up,
+; turned to the bearing) and then enabled, and the falling pod and its helper are disabled and deleted under the frag.
+; The pod he fights round is an ordinary placed static, so a save keeps it as any other. If he sees a drop or a
+; straighten at touchdown, (1) did not cure the fall and (2) is doing the work.
 Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
     Form marker = Game.GetFormFromFile(0x3B, "Starfield.esm")            ; XMarker
     Form podBase = Game.GetFormFromFile(0x3445, "du_overtime.esm")       ; duo_DropPod01, Kim's droppod_v10
@@ -464,6 +474,8 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
     ObjectReference[] grounds = new ObjectReference[4]
     ObjectReference[] helpers = new ObjectReference[4]
     ObjectReference[] doors = new ObjectReference[4]
+    ObjectReference[] pods = new ObjectReference[4]
+    Float[] bearings = new Float[4]
     Float[] launchAt = new Float[4]   ; seconds after the first; the first is 0
     Int[] stage = new Int[4]          ; 0 waiting, 1 falling, 2 down and crewed
     Int i = 1
@@ -488,13 +500,17 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
                 ObjectReference d = g.PlaceAtMe(marker)
                 d.MoveTo(g, -doorOut * Math.sin(bearing), -doorOut * Math.cos(bearing), 0.0, False)
                 d.MoveToNearestNavmeshLocation()
-                ObjectReference h = akCentre.PlaceAtMe(helperBase)
+                ; Placed disabled and posed BEFORE their models exist, then enabled (see above).
+                ObjectReference h = akCentre.PlaceAtMe(helperBase, 1, False, True)
                 h.MoveTo(g, 0.0, 0.0, height + lift, False)
                 h.SetAngle(0.0, 0.0, bearing)
-                ObjectReference p = akCentre.PlaceAtMe(podBase)
+                h.Enable()
+                ObjectReference p = akCentre.PlaceAtMe(podBase, 1, False, True)
                 p.MoveTo(g, 0.0, 0.0, height + lift, False)
                 p.SetAngle(0.0, 0.0, bearing)
-                Utility.Wait(0.2)
+                p.Enable()
+                Bool loaded = p.WaitFor3DLoad()
+                h.WaitFor3DLoad()
                 p.AttachTo(h)
                 If boom != None
                     boom.Play(h)
@@ -503,13 +519,27 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
                 grounds[i] = g
                 helpers[i] = h
                 doors[i] = d
+                pods[i] = p
+                bearings[i] = bearing
                 stage[i] = 1
+                Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " launched, model loaded " + loaded)
             ; Down when the helper reaches LIFT above its ground, or called down where it is at twice its fall plus 5 s.
             ElseIf stage[i] == 1 && (Math.abs(helpers[i].GetPositionZ() - grounds[i].GetPositionZ() - lift) <= 0.5 || now > launchAt[i] + fall * 2.0 + 5.0)
+                ; The swap: the pod he fights round is a fresh one, posed before its model exists.
+                ObjectReference rest = grounds[i].PlaceAtMe(podBase, 1, False, True)
+                rest.MoveTo(grounds[i], 0.0, 0.0, lift, False)
+                rest.SetAngle(0.0, 0.0, bearings[i])
+                rest.Enable()
+                Bool restLoaded = rest.WaitFor3DLoad()
+                Int off = (helpers[i].GetPositionZ() - grounds[i].GetPositionZ() - lift) as Int
+                pods[i].Disable()
+                pods[i].Delete()
+                helpers[i].Disable()
+                helpers[i].Delete()
                 grounds[i].PlaceAtMe(frag)
                 Utility.Wait(0.3)
                 PlaceAround(doors[i], akGroup, akList, one, aiPer, 1.5, akLoot, aiChance)
-                Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " of " + count + " down at " + (now as Int) + " s (launched at " + (launchAt[i] as Int) + "), " + aiPer + " out at its door, " + ((helpers[i].GetPositionZ() - grounds[i].GetPositionZ() - lift) as Int) + " off its rest height, facing " + (helpers[i].GetAngleZ() as Int))
+                Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " of " + count + " down at " + (now as Int) + " s (launched at " + (launchAt[i] as Int) + "), helper " + off + " off its rest height, swapped (loaded " + restLoaded + ", angles " + (rest.GetAngleX() as Int) + " " + (rest.GetAngleY() as Int) + " " + (rest.GetAngleZ() as Int) + "), " + aiPer + " out at its door")
                 stage[i] = 2
                 down += 1
             EndIf

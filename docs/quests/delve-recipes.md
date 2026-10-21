@@ -361,11 +361,14 @@ he comes near, `duo_delve_lib.DropPods` runs the arrival `duo_podprobe` proved a
 distant explosion as it appears (his *"a clear winner"*), 400 up at 200 (2 s), a frag at touchdown, the crew 0.3 s
 later. **The pod is Kim's hero model since 2026-10-21** (was vanilla `Nasa_GeminiCapsule01`): `duo_DropPod01`
 [STAT `003445`], `Meshes\ccs\droppod01.nif`, built from Overtime `kitbash/droppod01.json`, 7.6 x 6.4 x 11.8 m with its
-origin 5.196 m above its lowest vertex, so the helper stops 5.1 above the ground; pod and helper turned so its door (-Y)
-faces the spawn marker, and the crew placed within 1.5 of a navmesh point 4.5 in front of the door, never round the
-pod's middle (inside her). The Gemini was solid where it landed and kept on the ground by a save and reload, his
-checks; ⚠ **both unmeasured on Kim's pod**, whose solid parts are ship modules. Home-office manual part 32, *how a
-DROP POD comes down*.
+origin 5.196 m above its lowest vertices (the two blade tips); pod and helper turned so its door (-Y) faces the spawn
+marker, and the crew placed within 1.5 of a navmesh point 4.5 in front of the door, never round the pod's middle
+(inside her). **His first play of her hovered at shoulder height and leaned forward** while the helper read 0 off and
+the crew stood on the ground, so pod and helper are now placed DISABLED, posed, enabled, and attached after
+`WaitFor3DLoad`, and **at touchdown the falling pod is swapped for a fresh one placed at the rest pose** (the ground
+marker, 5.1 up, turned to its bearing); the falling pod and helper are deleted under the frag. The Gemini was solid
+where it landed and kept on the ground by a save and reload, his checks; ⚠ **solidity unmeasured on Kim's pod**, whose
+solid parts are ship modules. Home-office manual part 32, *how a DROP POD comes down*.
 
 **A team who lands by ship, `support`** (2026-10-21, his *"build a new delve mission with the landings"*; first on
 `duo_delve33a`, not yet played). Optional on a `defeat` or a `clear`: `{ "list", "min", "max", "ship", "land", "near" }`.
