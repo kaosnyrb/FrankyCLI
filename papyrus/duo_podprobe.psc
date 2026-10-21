@@ -81,16 +81,12 @@ Form Function BoomBase(int aiBoom) global
     Return None
 EndFunction
 
-WwiseEvent Function DescentSound(int aiSound) global
-    If aiSound == 1
-        Return Game.GetForm(0x2B16D7) as WwiseEvent   ; WwiseEvent_VEHNPCFlyByClose
-    ElseIf aiSound == 2
-        Return Game.GetForm(0x2B16DA) as WwiseEvent   ; WwiseEvent_VEHNPCFlyByFar
-    ElseIf aiSound == 3
-        Return Game.GetForm(0xBD626) as WwiseEvent    ; WwiseEvent_VEH_Takeoff_Sequence_F_FlyBy
-    EndIf
-    Return None
-EndFunction
+; ⛔ v7, 2026-10-21 14:2x: THE SOUND IS OUT, AND IT IS THE ONLY CHANGE. Seven parameters froze the game at Enter
+; exactly as eight had (v6), while v3 still ran; the freeze comes before step 1's trace, so the game dies resolving
+; the script rather than running it, and the one type every crashing build referenced and v3 never did was
+; WwiseEvent (a function returning it, a local of it, its Play). The sound argument is kept so his command keeps its
+; shape, and is IGNORED. Was: DescentSound returning Game.GetForm(0x2B16D7 / 0x2B16DA / 0xBD626) as WwiseEvent, and
+; sound.Play(mover) as the helper started down (FrankyCLI b6164a7).
 
 ; ⛔ His run of v4/v5 (0 0 0 0 1 2 1 1), 2026-10-21 14:1x: "crashes to desktop", with no Papyrus error in the log and
 ; no probe line at all, because the only trace was at the end. So every step now traces BEFORE it runs; the last
@@ -117,13 +113,12 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     Form marker = Game.GetForm(0x3B)    ; XMarker
     Form helperBase = PodBase(5)
     Form boom = BoomBase(aiBoom)
-    WwiseEvent sound = DescentSound(aiSound)
     String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople + "  sound=" + aiSound
     If aiBoom > 0 && boom == None
         out += "\nBOOM " + aiBoom + " DID NOT RESOLVE"
     EndIf
-    If aiSound > 0 && sound == None
-        out += "\nSOUND " + aiSound + " DID NOT RESOLVE"
+    If aiSound > 0
+        out += "\nSOUND " + aiSound + " IGNORED (v7: out while the crash is bisected)"
     EndIf
     If pod == None || marker == None || helperBase == None
         out += "\nA BASE DID NOT RESOLVE (pod, XMarker or helper)"
@@ -163,10 +158,6 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     out += "\nstart " + ((z0 - gz) as Int) + " up   3D loaded " + p.Is3DLoaded()
     out += "   helper " + ((mover.GetPositionZ() - gz) as Int) + " up, 3D " + mover.Is3DLoaded()
 
-    If sound != None
-        Step("5 sound")
-        out += "   sound instance " + sound.Play(mover)
-    EndIf
     Step("6 translate")
     Float t0 = Utility.GetCurrentRealTime()
     mover.TranslateTo(gx, gy, gz, mover.GetAngleX(), mover.GetAngleY(), mover.GetAngleZ(), speed)
