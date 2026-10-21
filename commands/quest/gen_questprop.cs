@@ -272,6 +272,10 @@ namespace FrankyCLI
             if (touched == 0) { Console.WriteLine("\n  Nothing to do -- nothing written."); return 0; }
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
 
+            // Release the memory-mapped load order before overwriting one of its files, as gen_delve
+            // does. Without it the write threw "being used by another process" on its own handle, so
+            // until 2026-10-21 this tool had never written anything: every earlier run was list or --dry.
+            env.Dispose();
             foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
             myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
             Console.WriteLine($"\n  Written to {modname}.esm.");
