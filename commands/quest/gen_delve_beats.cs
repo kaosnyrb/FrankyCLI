@@ -566,6 +566,10 @@ namespace FrankyCLI
         /// (papyrus/duo_delve_spawnnear.psc).</summary>
         private const string SpawnNearScript = "duo_delve_spawnnear";
 
+        /// <summary>The alias script on a clear's spawn marker: armed by the step, it spawns the enemies there when the player
+        /// comes near (papyrus/duo_delve_groupnear.psc).</summary>
+        private const string GroupNearScript = "duo_delve_groupnear";
+
         /// <summary>The alias script on a support team's landing marker: armed by the step, it calls a ship down onto the marker
         /// when the player comes near, opens its ramps and puts the team out of its hatch (papyrus/duo_delve_landing.psc).</summary>
         private const string LandingScript = "duo_delve_landing";
@@ -589,7 +593,9 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
-            public List<(int team, FormKey package, int fight)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own package to the fight's marker
+            public List<int> GroupNear = new();   // clear beats' spawn markers, carrying GroupNearScript (the enemies spawned when he is near)
+            public List<(int objective, int alias)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late
+            public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own sandbox round the fight's marker (its source's radius and template)
             public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
@@ -871,6 +877,20 @@ namespace FrankyCLI
                 entry.Scripts.Add(new ScriptEntry { Name = SpawnNearScript });
                 bm.SpawnNear.Add(alias);
                 Console.WriteLine($"  +near    : beat {b + 1} (recover, outside) holder alias {alias} {SpawnNearScript}: a spot at range, him spawned there when the player is near");
+            }
+
+            /// <summary>
+            /// A clear's spawn marker carries GroupNearScript: the step's fragment arms it, and it spawns the enemies there when
+            /// the player comes near (his 2026-10-21 play of 33a: spawned when the step began, "The spacers are spawned from a
+            /// distance, which reads bad on the map and puts them in mid air. Spawn them when the player gets close"). Like
+            /// SpawnNear, not a stage hook: its own list for the verify.
+            /// </summary>
+            internal void GroupNear(int b, int alias)
+            {
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
+                entry.Scripts.Add(new ScriptEntry { Name = GroupNearScript });
+                bm.GroupNear.Add(alias);
+                Console.WriteLine($"  +near    : beat {b + 1} (clear) spawn marker alias {alias} {GroupNearScript}: the enemies spawned there when the player is near");
             }
 
             /// <summary>A beat's objective index: a choose step's beats take one each, ten apart; any other step shares one.
@@ -1304,13 +1324,23 @@ namespace FrankyCLI
                             bm.TargetGates.Add((s.Objective, slotOf[b].ObjectiveTarget, beatStage[b]));
                         }
                         ob.Targets.Add(tt);
+                        if (slotOf[b].siteAlias >= 0)
+                        {
+                            // The place, while the beat's own target does not exist yet (a clear's enemies spawn when he
+                            // is near). The same conditions as the beat's target, so in a group it goes out with it.
+                            var st2 = tt.DeepCopy();
+                            st2.AliasID = slotOf[b].siteAlias;
+                            ob.Targets.Add(st2);
+                            bm.SiteTargets.Add((s.Objective, slotOf[b].siteAlias));
+                            if (s.IsGroup) bm.TargetGates.Add((s.Objective, slotOf[b].siteAlias, beatStage[b]));
+                        }
                     }
                     string text = Expand(r.beats[s.Beats[0]].objective!, t);
                     if (s.IsGroup) text += $" (<Global={counterOf[k].edid}>/{s.Beats.Count})";
                     if (s.IsHold) text += $" (<Global={counterOf[k].edid}>/{s.Waves})";
                     ob.DisplayText = text;
                     bm.ObjectiveText[s.Objective] = text;
-                    Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].ObjectiveTarget))}");
+                    Console.WriteLine($"  objective: {s.Objective} \"{text}\" -> alias(es) {string.Join(", ", s.Beats.Select(b => slotOf[b].siteAlias >= 0 ? $"{slotOf[b].ObjectiveTarget} + site {slotOf[b].siteAlias}" : $"{slotOf[b].ObjectiveTarget}"))}");
                 }
                 // The kinds' own objectives beyond their step's (a hold's revealed waves), once every step's is written.
                 for (int k = 0; k < steps.Count; k++)
@@ -2192,6 +2222,12 @@ namespace FrankyCLI
             foreach (var a in bm.SpawnNear)
                 fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the player is near)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
+            foreach (var a in bm.GroupNear)
+                fail += Check($"clear spawn marker alias {a} carries {GroupNearScript} (the enemies spawned when the player is near)",
+                              (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == GroupNearScript) ?? false).ToString(), "True");
+            foreach (var (oi, a) in bm.SiteTargets)
+                fail += Check($"objective {oi} also points at the place, alias {a} (on the map before its enemies exist)",
+                              (q.Objectives.FirstOrDefault(o => o.Index == oi)?.Targets.Any(x => x.AliasID == a) ?? false).ToString(), "True");
             foreach (var g in bm.Globals)
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
             foreach (var (place, anchor, global) in bm.Leashes)
@@ -2266,7 +2302,7 @@ namespace FrankyCLI
                               : $"fill {(ca.Location == null && ca.ForcedReference.IsNull && ca.UniqueActor.IsNull && ca.CreateReferenceToObject == null ? "none" : "SET")}, optional {ca.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}, packages {ca.PackageData.Count}",
                               "fill none, optional True, packages 0");
             }
-            foreach (var (st, spk, fight) in bm.SupportTeams)
+            foreach (var (st, spk, fight, radius, template) in bm.SupportTeams)
             {
                 var sa = q.Aliases.OfType<IQuestCollectionAliasGetter>()
                     .Select(c => c.Collection.FirstOrDefault()?.ReferenceAlias).FirstOrDefault(a => a?.ID == (uint)st);
@@ -2274,10 +2310,11 @@ namespace FrankyCLI
                               : $"fill {(sa.Location == null && sa.ForcedReference.IsNull && sa.UniqueActor.IsNull && sa.CreateReferenceToObject == null ? "none" : "SET")}, optional {sa.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional) ?? false}, packages {string.Join(",", sa.PackageData.Select(p => p.FormKey))}",
                               $"fill none, optional True, packages {spk}");
                 var sp = m.Packages.FirstOrDefault(p => p.FormKey == spk);
-                var sl = (sp?.Data.Values.OfType<IPackageDataLocationGetter>().FirstOrDefault()?.Location as ILocationTargetRadiusGetter)?.Target as ILocationFallbackGetter;
-                fail += Check($"support package {spk} travels near the fight's marker alias, with no condition and no script",
-                              sp == null ? "missing" : $"{sl?.Type} {sl?.Data} conditions {sp.Conditions.Count} vma {(sp.VirtualMachineAdapter == null ? "none" : "SET")}",
-                              $"AliasForReference {fight} conditions 0 vma none");
+                var slr = sp?.Data.Values.OfType<IPackageDataLocationGetter>().FirstOrDefault()?.Location as ILocationTargetRadiusGetter;
+                var sl = slr?.Target as ILocationFallbackGetter;
+                fail += Check($"support package {spk} sandboxes round the fight's marker alias at its source's radius, with no condition and no script",
+                              sp == null ? "missing" : $"{sl?.Type} {sl?.Data} radius {slr?.Radius} template {sp.PackageTemplate.FormKey} conditions {sp.Conditions.Count} vma {(sp.VirtualMachineAdapter == null ? "none" : "SET")}",
+                              $"AliasForReference {fight} radius {radius} template {template} conditions 0 vma none");
             }
             if (bm.Waves.Count > 0)
             {

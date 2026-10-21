@@ -192,6 +192,12 @@ namespace FrankyCLI
             /// </summary>
             [System.Text.Json.Serialization.JsonIgnore] public int targetAlias { get; set; } = -1;
             public int ObjectiveTarget => targetAlias >= 0 ? targetAlias : activatorAlias >= 0 ? activatorAlias : markerAlias;
+            /// <summary>
+            /// Set by the build: a SECOND objective target, the place itself, for a beat whose own target does not exist
+            /// until the player is near (a clear's enemies, spawned then). Without it the objective has nothing to point
+            /// at and the site is not on his map until he is already there.
+            /// </summary>
+            [System.Text.Json.Serialization.JsonIgnore] public int siteAlias { get; set; } = -1;
         }
         /// <summary>
         /// A created place. cloneOf names the base location alias it is copied from, so it inherits

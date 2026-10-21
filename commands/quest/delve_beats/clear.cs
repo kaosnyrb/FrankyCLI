@@ -7,8 +7,13 @@ namespace FrankyCLI
     public static partial class gen_delve
     {
         /// <summary>
-        /// clear: enemies appear at the beat's place when its step begins; the step is done when every one of them is dead
-        /// (the Hunt driver). They hold the site rather than come for him: no travel package, unlike a hold's waves.
+        /// clear: enemies appear at the beat's place when the player comes NEAR it (the step arms
+        /// papyrus/duo_delve_groupnear.psc on the spawn marker); the step is done when every one of them is dead (the Hunt
+        /// driver). They hold the site rather than come for him: no travel package, unlike a hold's waves. Until they exist
+        /// the objective points at the place as well, so the site is on his map from the start.
+        /// WHY NEAR, his play of 33a, 2026-10-21: spawned when the step began, "The spacers are spawned from a distance, which
+        /// reads bad on the map and puts them in mid air. Spawn them when the player gets close" (the recover holder's
+        /// lesson of 10-20, the same fault).
         /// </summary>
         private sealed class ClearBeat : FightBeat
         {
@@ -44,8 +49,9 @@ namespace FrankyCLI
                 var col = EmptyCollection(build.inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Enemies");
                 if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }
                 build.clone.Aliases.Add(col);
-                build.slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, journalStage = build.beatStage[i] };
+                build.slotOf[i] = new BeatSlot { markerAlias = (int)cm.ID, activatorAlias = -1, targetAlias = (int)cid, siteAlias = (int)cm.ID, journalStage = build.beatStage[i] };
                 build.bm.ClearGroups.Add((int)cid);
+                build.GroupNear(i, (int)cm.ID);
                 Console.WriteLine($"  +slot    : beat {i + 1} (clear) -- spawn marker alias {cm.ID}, enemies collection {cid} (EMPTY, a copy of ActiveHostiles, no package)");
                 return SupportSlot(build, i);
             }
@@ -64,7 +70,8 @@ namespace FrankyCLI
                 build.props.Add(("RefCollectionAlias", en, build.clone.FormKey, build.slotOf[b].targetAlias));
                 build.props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
                 var e = fb.enemies!;
-                build.Add(stage, $"duo_delve_lib.SpawnGroup({mk}, {en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
+                // Armed now, spawned when he is near (the class doc above): the same duo_delve_lib.SpawnGroup, called by the script.
+                build.Add(stage, $"({mk} as {GroupNearScript}).Arm({en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs})");
             }
         }
     }

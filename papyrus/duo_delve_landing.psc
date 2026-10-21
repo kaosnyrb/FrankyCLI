@@ -47,6 +47,13 @@ int TimerLanding = 2 Const
 int TimerRamp = 3 Const
 int TimerDeck = 4 Const
 int TimerCleanUp = 5 Const
+int TimerSearch = 6 Const
+
+;ONE clear-spot search per tick, SearchGap apart (his 2026-10-21 play: "there is a large stutter on the search if it
+;can't find a place"). Four searches ran back to back in one call, the first at the engine's defaults for the log only;
+;that one is gone and the other three each get their own tick, timed into the log.
+Float SearchGap = 1.0 Const
+Int SafeRadiusCount = 3 Const
 
 Form ship
 FormList crew
@@ -59,6 +66,7 @@ ObjectReference pad
 SpaceshipReference craft
 Bool padIsOurs
 Int checks
+Int searchStep
 
 Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, RefCollectionAlias akTeam)
     team = akTeam
@@ -72,14 +80,63 @@ Function Arm(Form akShip, FormList akCrew, Int aiMin, Int aiMax, Float afNear, R
     StartTimer(CheckEvery, TimerApproach)
 EndFunction
 
-Function CallShip()
-    pad = FindPad()
-    if !pad
+;Rung 1 (the header's three): the place's own pad, in this tick; else rung 2 starts on the timer, one search a tick.
+Function FindOwnPad()
+    ObjectReference here = GetRef()
+    Float t0 = Utility.GetCurrentRealTime()
+    ObjectReference own = OwnPad(here)
+    Debug.Trace(Self + " [landing] pad search took " + (Utility.GetCurrentRealTime() - t0) + " s, found " + own)
+    if own
+      pad = own
+      padIsOurs = False
       ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
-      Debug.Notification("Landing: no pad and no clear spot, the team arrives on foot")
-      SpawnCrew(GetRef(), 8.0)
+      Debug.Notification("Landing: on the place's own pad, " + (here.GetDistance(own) as Int) + " off the marker")
+      CallShip()
       return
     endif
+    searchStep = 0
+    StartTimer(SearchGap, TimerSearch)
+EndFunction
+
+;Rung 2, one radius per tick, largest first; past the last, rung 3: no ship, the team arrives on foot.
+Function SearchStep()
+    ObjectReference here = GetRef()
+    Float r = SafeRadius(searchStep)
+    Float t0 = Utility.GetCurrentRealTime()
+    Float[] at = here.GetSafePosition(SearchRadius, r)
+    Debug.Trace(Self + " [landing] GetSafePosition(" + SearchRadius + ", " + r + ") took " + (Utility.GetCurrentRealTime() - t0) + " s -> " + Spot(here, at))
+    if at && at.Length >= 3
+      ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
+      Debug.Notification("Landing: clear spot at r" + (r as Int) + ", " + (Flat(here, at) as Int) + " off the marker")
+      Furniture ShipLandingMarker_80m_Large = Game.GetFormFromFile(0x007145, "Starfield.esm") as Furniture;[FURN:00007145]
+      pad = here.PlaceAtMe(ShipLandingMarker_80m_Large, 1, True, False, True, None, None, True)
+      ;World offsets: MoveTo's offset does not turn with anything when abRotateOffset is False (manual Inbox 2026-10-12).
+      pad.MoveTo(here, at[0] - here.GetPositionX(), at[1] - here.GetPositionY(), at[2] - here.GetPositionZ(), True)
+      padIsOurs = True
+      CallShip()
+      return
+    endif
+    searchStep += 1
+    if searchStep < SafeRadiusCount
+      StartTimer(SearchGap, TimerSearch)
+      return
+    endif
+    ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
+    Debug.Notification("Landing: no pad and no clear spot, the team arrives on foot")
+    SpawnCrew(here, 8.0)
+EndFunction
+
+Float Function SafeRadius(Int aiStep)
+    if aiStep == 0
+      return 40.0
+    elseif aiStep == 1
+      return 25.0
+    endif
+    return 15.0
+EndFunction
+
+;The ship onto the pad FindOwnPad or SearchStep chose.
+Function CallShip()
     craft = pad.PlaceShipAtMe(ship, 4, true, false, false, true, none, None, None, true)
     if !craft
       ;PROBE ONLY, comes out when this graduates: a ship form that places nothing.
@@ -92,29 +149,6 @@ Function CallShip()
     Debug.Trace(Self + " [landing] ship " + craft + " called to " + pad)
     checks = 0
     StartTimer(CheckEvery, TimerLanding)
-EndFunction
-
-;Where the ship comes down (the header's three rungs): the place's own pad, else a pad of ours on a clear spot the
-;engine finds, else None and the team arrives on foot.
-ObjectReference Function FindPad()
-    ObjectReference here = GetRef()
-    ObjectReference own = OwnPad(here)
-    if own
-      padIsOurs = False
-      ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
-      Debug.Notification("Landing: on the place's own pad, " + (here.GetDistance(own) as Int) + " off the marker")
-      return own
-    endif
-    Float[] at = ClearSpot(here)
-    if !at
-      return None
-    endif
-    Furniture ShipLandingMarker_80m_Large = Game.GetFormFromFile(0x007145, "Starfield.esm") as Furniture;[FURN:00007145]
-    ObjectReference made = here.PlaceAtMe(ShipLandingMarker_80m_Large, 1, True, False, True, None, None, True)
-    ;World offsets: MoveTo's offset does not turn with anything when abRotateOffset is False (manual Inbox 2026-10-12).
-    made.MoveTo(here, at[0] - here.GetPositionX(), at[1] - here.GetPositionY(), at[2] - here.GetPositionZ(), True)
-    padIsOurs = True
-    return made
 EndFunction
 
 ;The closest hand-placed landing marker within PadRadius. Five furniture bases carry every one in his load order
@@ -146,27 +180,6 @@ ObjectReference Function OwnPad(ObjectReference akHere)
       i += 1
     EndWhile
     return best
-EndFunction
-
-;The first clear spot the engine finds round the marker, largest radius first, or None.
-Float[] Function ClearSpot(ObjectReference akHere)
-    Debug.Trace(Self + " [landing] GetSafePosition() at its defaults -> " + Spot(akHere, akHere.GetSafePosition()))
-    Float[] radii = new Float[3]
-    radii[0] = 40.0
-    radii[1] = 25.0
-    radii[2] = 15.0
-    Int i = 0
-    While i < radii.Length
-      Float[] at = akHere.GetSafePosition(SearchRadius, radii[i])
-      Debug.Trace(Self + " [landing] GetSafePosition(" + SearchRadius + ", " + radii[i] + ") -> " + Spot(akHere, at))
-      if at && at.Length >= 3
-        ;PROBE ONLY, comes out when this graduates: say on screen which rung ran.
-        Debug.Notification("Landing: clear spot at r" + (radii[i] as Int) + ", " + (Flat(akHere, at) as Int) + " off the marker")
-        return at
-      endif
-      i += 1
-    EndWhile
-    return None
 EndFunction
 
 ;Only a pad of ours is ever deleted; the place's own stays where its author put it.
@@ -249,8 +262,11 @@ Event OnTimer(int aiTimerID)
       if !world || player.GetWorldSpace() != world || dx * dx + dy * dy > near * near
         StartTimer(CheckEvery, TimerApproach)
       else
-        CallShip()
+        FindOwnPad()
       endif
+
+    elseif aiTimerID == TimerSearch
+      SearchStep()
 
     elseif aiTimerID == TimerLanding
       checks += 1
