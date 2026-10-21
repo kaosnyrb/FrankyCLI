@@ -13,7 +13,8 @@
     "spawns the crew at the marker, and no ship is spoken of as present (his 10-21 ruling on 32a: nothing the build does not place). defeat on",
     "duo_boss_Spacer_Boss_Aggro_Female (qst14's boss) with a Spacer gang. Ines's tell: she names the person who will",
     "pay for the decision before she gives the order (the night shift). Her ban: ceremony, speeches, a rallying line.",
-    "⚠ The Spacer boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder."
+    "⚠ The Spacer boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder.",
+    "RE-CUT 2026-10-21 16:36 for the ear, his \"when you split the lines that small Elevenlabs has no context so the delivery is worse\" and \"yeah recut, they aren't made yet\": each speech is one or two whole responses, split only where a real pause belongs."
   ],
   "place": {
     "theme": {
@@ -47,9 +48,7 @@
       "objective": "Defeat the Spacer captain at the <Place>",
       "journal": "The Spacer captain at the <Place> is dead and her crew have scattered. The night shift can come out of the stores.",
       "say": [
-        "Their captain's down?",
-        "I'm unlocking the stores.",
-        "Nobody goes back to work until I've counted heads."
+        "Their captain's down? Then I'm unlocking the stores, and nobody goes back to work until I've counted heads."
       ],
       "reward": "med"
     }
@@ -60,9 +59,8 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "A crew's come down near us, and they're on their way in armed.",
-    "I've locked the night shift in the stores.",
-    "If they reach that door, the night shift pay for it. Get here first."
+    "A crew's come down near us, armed, and they're on their way in.",
+    "I've locked the night shift in the stores. If that crew reaches the door, it's the night shift who pay for it, so get here first."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('a ship', never whose). Voice is remote02a's 'Sarah' (mature, confident), used once so far; his ear decides."
 }

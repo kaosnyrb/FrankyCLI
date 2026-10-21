@@ -12,7 +12,8 @@
     "that came with a house). A military robot still running a checkpoint for an outfit long gone, asking everyone",
     "for papers. defeat on duo_boss_LvlRobotModelA_Marine_Boss, alone. June's tell: she measures the distance in real",
     "units and it gets smaller (forty metres to her door). The caller is stuck on her own road, not frightened, and",
-    "the funny is hers. ⚠ The Marine boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder."
+    "the funny is hers. ⚠ The Marine boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder.",
+    "RE-CUT 2026-10-21 16:36 for the ear, his \"when you split the lines that small Elevenlabs has no context so the delivery is worse\" and \"yeah recut, they aren't made yet\": each speech is one or two whole responses, split only where a real pause belongs."
   ],
   "place": {
     "theme": {
@@ -40,9 +41,7 @@
       "objective": "Dismantle the checkpoint robot at the <Place>",
       "journal": "The checkpoint robot at the <Place> is scrap. It asked me for my papers as well.",
       "say": [
-        "Is it down? I'm walking through.",
-        "Forty metres to my own door.",
-        "And nobody asking me for anything."
+        "Is it down? Then I'm walking through. Forty metres to my own door, and nobody asking me for anything."
       ],
       "reward": "med"
     }
@@ -53,9 +52,8 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "There's a robot on my road home, asking me for papers.",
-    "I'm forty metres from my own front door.",
-    "It won't let me any closer, and it has a gun."
+    "There's a robot on my road home, asking me for papers I've never had.",
+    "I'm forty metres from my own front door, and it won't let me any closer. It also has a gun."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('military', never whose). Voice is 07a's and 10a's crew lead, used twice so far; his ear decides."
 }

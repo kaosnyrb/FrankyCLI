@@ -13,7 +13,8 @@
     "here till it blows over', seen from the people below. defeat on remote05a's boss and the Crimson gang, smaller.",
     "Nan's tell: a number that is never the point of its sentence (four times since the rains, off since Thursday).",
     "Her bans: the witty refusal, menace, an antagonist anyone enjoys. The homesteader is not angry; she is counting.",
-    "Pay: med, placeholder."
+    "Pay: med, placeholder.",
+    "RE-CUT 2026-10-21 16:36 for the ear, his \"when you split the lines that small Elevenlabs has no context so the delivery is worse\" and \"yeah recut, they aren't made yet\": each speech is one or two whole responses, split only where a real pause belongs."
   ],
   "place": {
     "theme": {
@@ -48,9 +49,7 @@
       "objective": "Defeat the Crimson Fleet raider at the <Place>",
       "journal": "The raider at the <Place> is dead. The homesteads round about can stop counting their water.",
       "say": [
-        "He's done, then.",
-        "I'll turn the tank back on.",
-        "We've had it off since Thursday."
+        "He's done, then? I'll turn the tank back on. We've had it off since Thursday."
       ],
       "reward": "med"
     }
@@ -61,9 +60,8 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "There's a man up the way who comes down for our water.",
-    "He's been four times since the rains stopped.",
-    "We've put a bit together for whoever stops him."
+    "There's a man up the way who comes down for our water. He's been four times since the rains stopped.",
+    "We've put a bit together between us for whoever stops him."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('a bit put together', never how much). Voice is 'Lucy' (British, casual), used twice so far, on survey crews; his ear decides."
 }
