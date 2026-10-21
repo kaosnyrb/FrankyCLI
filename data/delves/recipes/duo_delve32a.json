@@ -11,9 +11,7 @@
     "TALK, THEN THE BOSS. 18a's first two beats with a defeat where its recover was: a talk at a quiet site (main), then",
     "a defeat at the boss marker of a built hostile site (second). ⚠ defeat at a SECOND place is new (every defeat so far",
     "is at the main place); the lint and Eliza say. Spacer boss and a small Spacer gang, as 28a.",
-    "Meg's tell: she corrects an animal mid-sentence without breaking off (the greeting, 'easy now'). Her moves: the exact",
-    "age and weight of a creature given unasked (exchange 1), her feeling never named. Her ban: the animal as a stand-in",
-    "for a person, and loneliness. A common, not a rare: losing stock to raiders is a job that happens on any planet.",
+    "Meg's move kept: the exact age and weight of a creature given unasked (exchange 1), her feeling never named. Her tell (correcting an animal mid-sentence) is CUT, his 10-21: no line may imply an animal, a gate or anything else on screen that the build does not place.",
     "Exchange 0 closes the talk and starts the defeat. Exchange 2 is a [Bounty Hunter] line, never the first.",
     "Same voice on the radio and in person. Pay: med, placeholder."
   ],
@@ -57,13 +55,12 @@
         "elevenlabs": "XrExE9yKIg1WjnnlVkGX",
         "hellos": [
           [
-            "Stand there a minute. She kicks."
+            "You'll be the one who answered the call."
           ]
         ]
       },
       "greeting": [
-        "You heard the call. Good.",
-        "They come at night, easy now, stand still, and take the two nearest the gate.",
+        "They come at night and take two at a time.",
         "They carry them up to their boss. He's the one eating them."
       ],
       "exchanges": [
@@ -71,8 +68,7 @@
           "prompt": "I'll deal with their boss.",
           "reply": [
             "His crew carry. He decides.",
-            "Take him, and the carrying stops.",
-            "Shut the gate behind you on your way out."
+            "Take him, and the carrying stops."
           ]
         },
         {
@@ -87,7 +83,7 @@
           "prompt": "Is there a price on him?",
           "reply": [
             "Not that I know of.",
-            "If there is, you're welcome to it. I only want the gate shut."
+            "If there is, you're welcome to it. I only want my stock left alone."
           ],
           "perk": "BackgroundBountyHunter"
         }
