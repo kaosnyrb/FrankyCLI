@@ -367,13 +367,14 @@ enemies or the target spawn) by vanilla's own shape for a landed crew (`OE_KT_La
 landing bay"*; on the waves' run-to-player package they came off but *"didn't really attack the Spacers"*, and his ruling:
 *"For enemy landings this is prob right but friendlys should attack the objectives"*. The ship takes off once its
 landing deck is clear (`IsLandingDeckClear`, 5 to 60 s) and both refs are deleted 30 s later. Nothing sets aggression.
-Refused on a board (not built for it yet). ⭐ **Where it comes down, a PROBE (2026-10-21, his *"find a best fit landing
-location via script"*, after his first play came down on a fence and a tree):** before the ship is called, the pad asks
-`GetSafePosition(100, r)` round `land` at r = 40, 25 and 15 and moves to the first answer, else it stays on `land`.
-Vanilla never searches for a landing spot (every NPC landing is on a hand-placed marker) and nothing anywhere calls that
-native, so whether it sees statics and flora, and its units, are what his plays measure; every answer is traced. His
-ordering when it graduates: a hand-placed landing marker on the place, then this, then `land`. Probe-only notifications
-name each path and come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
+Refused on a board (not built for it yet). ⭐ **Where it comes down, his ruling 2026-10-21** (after his first play came down on a
+fence and a tree): *"spawn a ship if there is a land pad, or if there is a suitable spot. Otherwise we just spawn the npcs
+on the ground"*. (1) The place's OWN pad: the closest hand-placed landing marker within 250 of `land` (five furniture
+bases carry every one in his load order, `gen_delve bases`), skipping one his ship sits on; it is never deleted. (2) Else
+a clear spot from `GetSafePosition(100, r)` round `land` at r = 40, 25 and 15, where a pad of ours is placed (his probe
+plays found one each time). (3) Else no ship: the team is placed on `land` and runs in on its package. Vanilla never
+searches for a landing spot (every NPC landing is on a hand-placed marker). Probe-only notifications name each path and
+come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
 
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
