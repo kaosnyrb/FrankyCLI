@@ -18,6 +18,11 @@ claim about the reference, never about what he sees. Vanilla's own TranslateTo t
 ACTIVATOR whose model is an invisible RotationHelperFree01, and AttachTo is "Attach this reference to the
 specified parent (only works on created refs)". Hence two more routes: pod 4, a vanilla MOVEABLE static moved
 directly, and carrier 1, the pod attached to that invisible helper and the helper moved.
+⭐ SECOND PLAYS, 2026-10-21 13:5x, his glass: CARRIER 1 WORKS, "causes the capsule to fall and land", while the
+pod's own position still read 150 up and the helper's read 0. So an attached ref's position is STALE and the
+helper's is the truth; everything after the landing reads off the mover. POD 4, the MoveableStatic, read landed
+in 2.9 s, but "The box takes longer and has phyics": its havok body falls on its own, tumbling, so a moveable
+static does not follow the move either. The helper route is the one: upright, on time, on target.
 
 NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes. Pass ALL
 SEVEN numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an omitted int is unread):
@@ -119,14 +124,14 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     While t < limit && !landed
         Utility.Wait(0.25)
         t = Utility.GetCurrentRealTime() - t0
-        z = p.GetPositionZ()
+        z = mover.GetPositionZ()
         n += 1
         If n <= 12 || n % 4 == 0
             trail += " " + ((z - gz) as Int)
         EndIf
         landed = Math.abs(z - gz) < 0.5
     EndWhile
-    out += "\npod height every 0.25 s:" + trail
+    out += "\nmover height every 0.25 s:" + trail
     If landed
         out += "\nLANDED in " + ((t * 10.0) as Int) + " tenths of a s (straight line says " + ((height / speed * 10.0) as Int) + ")"
     Else
@@ -134,9 +139,9 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
         out += "\nNOT LANDED after " + (t as Int) + " s, still " + ((z - gz) as Int) + " up"
     EndIf
     If aiCarrier == 1
-        out += "\nhelper ended " + ((mover.GetPositionZ() - gz) as Int) + " up"
+        out += "\nthe pod itself READS " + ((p.GetPositionZ() - gz) as Int) + " up (stale once attached: he saw it land, 2026-10-21)"
     EndIf
-    out += "   off target " + (ground.GetDistance(p) as Int)
+    out += "   off target " + (ground.GetDistance(mover) as Int)
 
     If aiBoom == 1
         ground.PlaceAtMe(Game.GetForm(0x1FF72B))   ; FXLandingEngineDamagePush
@@ -144,7 +149,9 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
         ground.PlaceAtMe(Game.GetForm(0xE574F))    ; fragGrenadeExplosion
     EndIf
 
-    ; People step out beside it, on the navmesh, the way duo_offpoiprobe's route B put a person down.
+    ; People step out beside it, on the navmesh, the way duo_offpoiprobe's route B put a person down. Placed off the
+    ; MOVER: an attached pod's own position is stale (still 150 up on his second play while he watched it land), so
+    ; people placed at the pod would appear in the sky.
     ActorBase who = Game.GetForm(0x19AD3E) as ActorBase
     Int i = 0
     Int placed = 0
@@ -153,9 +160,9 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
         If i % 2 == 1
             side = -3.0
         EndIf
-        Actor a = p.PlaceActorAtMe(who)
+        Actor a = mover.PlaceActorAtMe(who)
         If a != None
-            a.MoveTo(p, side * Math.cos(ang), -side * Math.sin(ang), 0.0, false)
+            a.MoveTo(mover, side * Math.cos(ang), -side * Math.sin(ang), 0.0, false)
             a.MoveToNearestNavmeshLocation()
             placed += 1
         EndIf
