@@ -356,12 +356,16 @@ different points to start with"*; first on `duo_delve33a`, not yet played). `{ "
 random (his *"randomly staggered by 2-4 seconds so they don't all land at once"*), and `per` (1 to 6) step out of each, so
 the pods set the number and `min` / `max` are refused beside them; refused on a defeat's gang. The step's fragment calls
 `SetPods` on `duo_delve_groupnear` BEFORE `Arm` (a function of its own, so clears built earlier still match `Arm`); when
-he comes near, `duo_delve_lib.DropPods` runs the arrival `duo_podprobe` proved at his glass, all vanilla: a
-`Nasa_GeminiCapsule01` hung by `AttachTo` from an invisible `StarbornRingSpin00` (a placed static moves its position and
-not its mesh), the UC04 distant explosion as it appears (his *"a clear winner"*), 400 up at 200 (2 s), a frag at
-touchdown, the crew 0.3 s later within 3 of the pod, read off the helper (the attached pod's own position stays 400 up).
-Solid where it lands and kept on the ground by a save and reload, his checks. Home-office manual part 32, *how a DROP POD
-comes down*.
+he comes near, `duo_delve_lib.DropPods` runs the arrival `duo_podprobe` proved at his glass: the pod hung by
+`AttachTo` from an invisible `StarbornRingSpin00` (a placed static moves its position and not its mesh), the UC04
+distant explosion as it appears (his *"a clear winner"*), 400 up at 200 (2 s), a frag at touchdown, the crew 0.3 s
+later. **The pod is Kim's hero model since 2026-10-21** (was vanilla `Nasa_GeminiCapsule01`): `duo_DropPod01`
+[STAT `003445`], `Meshes\ccs\droppod01.nif`, built from Overtime `kitbash/droppod01.json`, 7.6 x 6.4 x 11.8 m with its
+origin 5.196 m above its lowest vertex, so the helper stops 5.1 above the ground; pod and helper turned so its door (-Y)
+faces the spawn marker, and the crew placed within 1.5 of a navmesh point 4.5 in front of the door, never round the
+pod's middle (inside her). The Gemini was solid where it landed and kept on the ground by a save and reload, his
+checks; ⚠ **both unmeasured on Kim's pod**, whose solid parts are ship modules. Home-office manual part 32, *how a
+DROP POD comes down*.
 
 **A team who lands by ship, `support`** (2026-10-21, his *"build a new delve mission with the landings"*; first on
 `duo_delve33a`, not yet played). Optional on a `defeat` or a `clear`: `{ "list", "min", "max", "ship", "land", "near" }`.

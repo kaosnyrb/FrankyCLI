@@ -428,25 +428,34 @@ Function PlaceAround(ObjectReference akCentre, RefCollectionAlias akGroup, FormL
 EndFunction
 
 ; DROP PODS (2026-10-21, his "3 per pod and 3 pods in different points"), the arrival duo_podprobe proved at his glass
-; (manual 32, "how a DROP POD comes down"), all vanilla: each pod is Nasa_GeminiCapsule01 hung by AttachTo from an
-; invisible StarbornRingSpin00 (a placed STATIC moves its position and not its mesh; the helper's mesh-less move carries
-; it); the UC04 distant explosion as it appears ("a clear winner, big BOOM in the atmosphere"); 400 up at 200, 2 s; a
-; frag at touchdown; aiPer enemies step out within 3 of it 0.3 s later. aiPods pods land at even bearings round
+; (manual 32, "how a DROP POD comes down"): each pod is hung by AttachTo from an invisible StarbornRingSpin00 (a placed
+; STATIC moves its position and not its mesh; the helper's mesh-less move carries it); the UC04 distant explosion as it
+; appears ("a clear winner, big BOOM in the atmosphere"); 400 up at 200, 2 s; a frag at touchdown; aiPer enemies 0.3 s
+; later. THE POD IS KIM'S HERO MODEL since 2026-10-21 15:3x (his "Kim has made a droppod, v10", then "go"), was
+; vanilla Nasa_GeminiCapsule01: duo_DropPod01 [STAT 003445], Meshes\ccs\droppod01.nif, built from Overtime
+; kitbash/droppod01.json, 7.6 x 6.4 x 11.8 m. Its origin is the riser's, its lowest vertex (the heat shield's centre)
+; 5.196 m below it, so the helper stops LIFT above the ground: 5.1, the shield beds in ~10 cm rather than hover (the
+; box bounds said 5.41, a 0.21 m hover). Its door is its -Y face, so pod and helper are turned to the pod's bearing
+; and the door faces akCentre; the crew come out within 1.5 of a marker 4.5 in front of the door (the body face is
+; 1.82 out), off the navmesh, never round the middle, which is inside her. aiPods pods land at even bearings round
 ; akCentre, 15 to 25 out, a random turn and jitter each, ONE AFTER ANOTHER 2 TO 4 S APART AT RANDOM (his 15:0x: "the
 ; spacer pods should be randomly staggered by 2-4 seconds so they don't all land at once"; it was 0.4 s). A 0.1 s loop
 ; launches whichever pod is due and lands whichever is down, so each pod's frag and crew come the moment IT lands and a
 ; later launch never holds an earlier landing back. The attached pod's own position reads 400 up all the way down, so
-; everything after the landing is read off the HELPER (his checks: solid where it lands, and a save and reload keeps it
-; on the ground). Latent: returns when the last pod's crew is out.
+; everything after the landing is read off the HELPER or the GROUND marker (his checks on the Gemini: solid where it
+; lands, and a save and reload keeps it on the ground; both UNMEASURED on Kim's pod, whose solid parts are ship
+; modules). Latent: returns when the last pod's crew is out.
 Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
     Form marker = Game.GetFormFromFile(0x3B, "Starfield.esm")            ; XMarker
-    Form capsule = Game.GetFormFromFile(0x23E2CF, "Starfield.esm")       ; Nasa_GeminiCapsule01
+    Form podBase = Game.GetFormFromFile(0x3445, "du_overtime.esm")       ; duo_DropPod01, Kim's droppod_v10
     Form helperBase = Game.GetFormFromFile(0x1BA30, "Starfield.esm")     ; StarbornRingSpin00
     Form frag = Game.GetFormFromFile(0xE574F, "Starfield.esm")           ; fragGrenadeExplosion
     WwiseEvent boom = Game.GetFormFromFile(0x2D4441, "Starfield.esm") as WwiseEvent   ; WEF_QST_UC04_Distant_Explosion
     Float height = 400.0
     Float speed = 200.0
     Float fall = height / speed
+    Float lift = 5.1      ; the pod's origin above its lowest vertex, less ~10 cm (see above)
+    Float doorOut = 4.5   ; the crew marker, in front of the door
     Form one = OneOf(akList, abOneSpecies)
     Int count = aiPods
     If count > 4
@@ -454,6 +463,7 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
     EndIf
     ObjectReference[] grounds = new ObjectReference[4]
     ObjectReference[] helpers = new ObjectReference[4]
+    ObjectReference[] doors = new ObjectReference[4]
     Float[] launchAt = new Float[4]   ; seconds after the first; the first is 0
     Int[] stage = new Int[4]          ; 0 waiting, 1 falling, 2 down and crewed
     Int i = 1
@@ -474,25 +484,32 @@ Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollection
                 ObjectReference g = akCentre.PlaceAtMe(marker)
                 g.MoveTo(akCentre, r * Math.sin(bearing), r * Math.cos(bearing), 0.0, False)
                 g.MoveToNearestNavmeshLocation()
+                ; The door (-Y) toward akCentre: the pod sits at heading bearing from it, so +Y points away.
+                ObjectReference d = g.PlaceAtMe(marker)
+                d.MoveTo(g, -doorOut * Math.sin(bearing), -doorOut * Math.cos(bearing), 0.0, False)
+                d.MoveToNearestNavmeshLocation()
                 ObjectReference h = akCentre.PlaceAtMe(helperBase)
-                h.MoveTo(g, 0.0, 0.0, height, False)
-                ObjectReference p = akCentre.PlaceAtMe(capsule)
-                p.MoveTo(g, 0.0, 0.0, height, False)
+                h.MoveTo(g, 0.0, 0.0, height + lift, False)
+                h.SetAngle(0.0, 0.0, bearing)
+                ObjectReference p = akCentre.PlaceAtMe(podBase)
+                p.MoveTo(g, 0.0, 0.0, height + lift, False)
+                p.SetAngle(0.0, 0.0, bearing)
                 Utility.Wait(0.2)
                 p.AttachTo(h)
                 If boom != None
                     boom.Play(h)
                 EndIf
-                h.TranslateTo(g.GetPositionX(), g.GetPositionY(), g.GetPositionZ(), h.GetAngleX(), h.GetAngleY(), h.GetAngleZ(), speed)
+                h.TranslateTo(g.GetPositionX(), g.GetPositionY(), g.GetPositionZ() + lift, h.GetAngleX(), h.GetAngleY(), h.GetAngleZ(), speed)
                 grounds[i] = g
                 helpers[i] = h
+                doors[i] = d
                 stage[i] = 1
-            ; Down when the helper reaches its ground, or called down where it is at twice its fall plus 5 s.
-            ElseIf stage[i] == 1 && (Math.abs(helpers[i].GetPositionZ() - grounds[i].GetPositionZ()) <= 0.5 || now > launchAt[i] + fall * 2.0 + 5.0)
+            ; Down when the helper reaches LIFT above its ground, or called down where it is at twice its fall plus 5 s.
+            ElseIf stage[i] == 1 && (Math.abs(helpers[i].GetPositionZ() - grounds[i].GetPositionZ() - lift) <= 0.5 || now > launchAt[i] + fall * 2.0 + 5.0)
                 grounds[i].PlaceAtMe(frag)
                 Utility.Wait(0.3)
-                PlaceAround(helpers[i], akGroup, akList, one, aiPer, 3.0, akLoot, aiChance)
-                Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " of " + count + " down at " + (now as Int) + " s (launched at " + (launchAt[i] as Int) + "), " + aiPer + " out, " + ((helpers[i].GetPositionZ() - grounds[i].GetPositionZ()) as Int) + " above its ground")
+                PlaceAround(doors[i], akGroup, akList, one, aiPer, 1.5, akLoot, aiChance)
+                Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " of " + count + " down at " + (now as Int) + " s (launched at " + (launchAt[i] as Int) + "), " + aiPer + " out at its door, " + ((helpers[i].GetPositionZ() - grounds[i].GetPositionZ() - lift) as Int) + " off its rest height, facing " + (helpers[i].GetAngleZ() as Int))
                 stage[i] = 2
                 down += 1
             EndIf
