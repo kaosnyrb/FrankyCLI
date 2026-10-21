@@ -11,7 +11,8 @@
     "and joins the fight (support, papyrus/duo_delve_landing.psc). The hostile twin is Jessica's 28a, Strike: Spacer",
     "Landing, whose crew could arrive the same way. WORDS ARE ELIZA'S PLACEHOLDERS, Jessica's to write; the type word",
     "too (a new type gets its word the day it is written). Pay: med, placeholder.",
-    "WORDS, Jessica 2026-10-21 as Vance Okonkwo-Reyes (home-office office/pennames/vance-okonkwo-reyes.json): flat imperative, states and never explains. The caller is the team lead. She never says 'transport' or 'ship': the landing falls back to a team on foot when no pad or clear spot is found, and no line may promise what the build might not place (his 32a ruling). Pods are spoken of as expected, since they drop when he arrives. Type word Assault kept: a joint op on a held site."
+    "WORDS, Jessica 2026-10-21 as Vance Okonkwo-Reyes (home-office office/pennames/vance-okonkwo-reyes.json): flat imperative, states and never explains. The caller is the team lead. She never says 'transport' or 'ship': the landing falls back to a team on foot when no pad or clear spot is found, and no line may promise what the build might not place (his 32a ruling). Pods are spoken of as expected, since they drop when he arrives. Type word Assault kept: a joint op on a held site.",
+    "RE-CUT 2026-10-21 16:34, his \"33a's audio is a bit dull sounding\" and \"when you split the lines that small Elevenlabs has no context so the delivery is worse\": six clipped fragments became two full responses each, with some life in the lead, so the voice has a sentence to perform. Vance's flatness was the wrong fit for audio."
   ],
   "place": {
     "theme": {
@@ -57,9 +58,8 @@
       "journal": "The Spacers who dropped onto the <Place> are dead. The UC team is holding the site until its owners come back.",
       "reward": "med",
       "say": [
-        "Site's clear.",
-        "We hold it from here.",
-        "You're released."
+        "That's the last of them. Good shooting out there, honestly, I owe you one.",
+        "We'll hold it from here until the owners are back. Go on, you've earned the quiet."
       ]
     }
   ],
@@ -69,9 +69,8 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Team inbound to your position.",
-    "Expect hostiles by drop pod.",
-    "Engage on arrival. We'll join you."
+    "Ground team, this is the drop lead. We're on our way down to you now, so keep your head up and your weapon out.",
+    "They're coming in by pod, and they'll be shooting before the doors are open. Hold them at the site and we'll be right behind you."
   ],
   "_speech": "Radio rules: no names, places, factions or currency; a security team is a role. Voice is 26a's and remote05b's (a militia and a captain, the same register), used twice so far; his ear decides."
 }
