@@ -397,20 +397,96 @@ EndFunction
 
 ; Shared by the two above: scatter within 50 m of the marker (the drivers' spread), into akGroup when one is given.
 Function PlaceGroup(ObjectReference akCentre, RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
-    Form one = akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
+    PlaceAround(akCentre, akGroup, akList, OneOf(akList, abOneSpecies), Utility.RandomInt(aiMin, aiMax), 50.0, akLoot, aiChance)
+EndFunction
+
+; The species for a whole group: one entry of the list when abOneSpecies, else None (each enemy draws its own).
+Form Function OneOf(FormList akList, Bool abOneSpecies) Global
+    If abOneSpecies
+        Return akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
+    EndIf
+    Return None
+EndFunction
+
+; aiCount enemies within afSpread of akCentre (snapped to the navmesh), into akGroup when one is given: akOne for all,
+; or one drawn from akList each when akOne is None.
+Function PlaceAround(ObjectReference akCentre, RefCollectionAlias akGroup, FormList akList, Form akOne, Int aiCount, Float afSpread, FormList akLoot, Int aiChance) Global
     Float[] pos = new Float[6]
-    Int n = Utility.RandomInt(aiMin, aiMax)
+    Int n = aiCount
     While n > 0
-        pos[0] = Utility.RandomFloat(-50, 50)
-        pos[1] = Utility.RandomFloat(-50, 50)
+        pos[0] = Utility.RandomFloat(-afSpread, afSpread)
+        pos[1] = Utility.RandomFloat(-afSpread, afSpread)
         pos[2] = 0
-        Form who = one
-        If !abOneSpecies
+        Form who = akOne
+        If who == None
             who = akList.GetAt(Utility.RandomInt(0, akList.GetSize() - 1))
         EndIf
         Actor enemy = akCentre.PlaceAtMe(who, 1, True, False, True, pos, akGroup, True) as Actor
         Alert(enemy, akLoot, aiChance)
         n -= 1
+    EndWhile
+EndFunction
+
+; DROP PODS (2026-10-21, his "3 per pod and 3 pods in different points"), the arrival duo_podprobe proved at his glass
+; (manual 32, "how a DROP POD comes down"), all vanilla: each pod is Nasa_GeminiCapsule01 hung by AttachTo from an
+; invisible StarbornRingSpin00 (a placed STATIC moves its position and not its mesh; the helper's mesh-less move carries
+; it); the UC04 distant explosion as it appears ("a clear winner, big BOOM in the atmosphere"); 400 up at 200, 2 s; a
+; frag at touchdown; aiPer enemies step out within 3 of it 0.3 s later. aiPods pods land at even bearings round
+; akCentre, 15 to 25 out, a random turn and jitter each, one after another 0.4 s apart. The attached pod's own position
+; reads 400 up all the way down, so everything after the landing is read off the HELPER (his checks: solid where it
+; lands, and a save and reload keeps it on the ground). Latent: returns when the last pod's crew is out.
+Function DropPods(ObjectReference akCentre, Int aiPods, Int aiPer, RefCollectionAlias akGroup, FormList akList, Bool abOneSpecies, FormList akLoot, Int aiChance) Global
+    Form marker = Game.GetFormFromFile(0x3B, "Starfield.esm")            ; XMarker
+    Form capsule = Game.GetFormFromFile(0x23E2CF, "Starfield.esm")       ; Nasa_GeminiCapsule01
+    Form helperBase = Game.GetFormFromFile(0x1BA30, "Starfield.esm")     ; StarbornRingSpin00
+    Form frag = Game.GetFormFromFile(0xE574F, "Starfield.esm")           ; fragGrenadeExplosion
+    WwiseEvent boom = Game.GetFormFromFile(0x2D4441, "Starfield.esm") as WwiseEvent   ; WEF_QST_UC04_Distant_Explosion
+    Float height = 400.0
+    Float speed = 200.0
+    Form one = OneOf(akList, abOneSpecies)
+    Int count = aiPods
+    If count > 4
+        count = 4
+    EndIf
+    ObjectReference[] grounds = new ObjectReference[4]
+    ObjectReference[] helpers = new ObjectReference[4]
+    Float turn = Utility.RandomFloat(0.0, 360.0)
+    Int i = 0
+    While i < count
+        Float bearing = turn + i * 360.0 / count + Utility.RandomFloat(-20.0, 20.0)
+        Float r = Utility.RandomFloat(15.0, 25.0)
+        ObjectReference g = akCentre.PlaceAtMe(marker)
+        g.MoveTo(akCentre, r * Math.sin(bearing), r * Math.cos(bearing), 0.0, False)
+        g.MoveToNearestNavmeshLocation()
+        ObjectReference h = akCentre.PlaceAtMe(helperBase)
+        h.MoveTo(g, 0.0, 0.0, height, False)
+        ObjectReference p = akCentre.PlaceAtMe(capsule)
+        p.MoveTo(g, 0.0, 0.0, height, False)
+        Utility.Wait(0.2)
+        p.AttachTo(h)
+        If boom != None
+            boom.Play(h)
+        EndIf
+        h.TranslateTo(g.GetPositionX(), g.GetPositionY(), g.GetPositionZ(), h.GetAngleX(), h.GetAngleY(), h.GetAngleZ(), speed)
+        grounds[i] = g
+        helpers[i] = h
+        Utility.Wait(0.4)
+        i += 1
+    EndWhile
+    ; They land in the order they fell. A pod that has not touched down by twice its fall plus 5 s is called down where it is.
+    Float limit = height / speed * 2.0 + 5.0
+    i = 0
+    While i < count
+        Float waited = 0.0
+        While waited < limit && Math.abs(helpers[i].GetPositionZ() - grounds[i].GetPositionZ()) > 0.5
+            Utility.Wait(0.1)
+            waited += 0.1
+        EndWhile
+        grounds[i].PlaceAtMe(frag)
+        Utility.Wait(0.3)
+        PlaceAround(helpers[i], akGroup, akList, one, aiPer, 3.0, akLoot, aiChance)
+        Debug.Trace("[duo_delve_lib] drop pod " + (i + 1) + " of " + count + " down, " + aiPer + " out, " + ((helpers[i].GetPositionZ() - grounds[i].GetPositionZ()) as Int) + " above its ground")
+        i += 1
     EndWhile
 EndFunction
 

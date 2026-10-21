@@ -24,6 +24,17 @@ namespace FrankyCLI
             {
                 if (b.target != null || b.gang != null) Fatal($"{at} sets target or gang; a clear has enemies, every one of whom must die (target and gang are a defeat's).");
                 if (b.enemies == null) Fatal($"{at} has no enemies: nobody to clear, so the step could never end.");
+                else if (b.enemies.pods is Pods p)
+                {
+                    List("enemies", b.enemies.list, true);
+                    if (b.enemies.min != 0 || b.enemies.max != 0)
+                        Fatal($"{at} enemies sets pods AND min/max ({b.enemies.min}-{b.enemies.max}); the pods set the number (count x per), so min and max would be silently ignored. Take them out.");
+                    if (p.count < 1 || p.count > PodsMax) Fatal($"{at} enemies.pods.count is {p.count}; 1 to {PodsMax} pods.");
+                    if (p.per < 1 || p.per > 6) Fatal($"{at} enemies.pods.per is {p.per}; 1 to 6 out of each pod.");
+                    if (b.enemies.species != null && !SpeciesModes.Contains(b.enemies.species))
+                        Fatal($"{at} enemies.species is '{b.enemies.species}'; it is \"one\" (a single entry from the list for all) or \"mix\".");
+                    Console.WriteLine($"  {at} enemies arrive by drop pod: {p.count} x {p.per} = {p.count * p.per}");
+                }
                 else
                 {
                     List("enemies", b.enemies.list, true);
@@ -71,6 +82,10 @@ namespace FrankyCLI
                 build.props.Add(("RefCollectionAlias", en, build.clone.FormKey, build.slotOf[b].targetAlias));
                 build.props.Add(("FormList", $"Enemies{b + 1}", ff.Enemies!.Value, -1));
                 var e = fb.enemies!;
+                // Pods: set BEFORE Arm, never a new Arm parameter, so every clear already built (whose fragment calls Arm
+                // with its eight arguments) still calls a script that has its Arm unchanged.
+                if (e.pods is Pods p)
+                    build.Add(stage, $"({mk} as {GroupNearScript}).SetPods({p.count}, {p.per})");
                 // Armed now, spawned when he is near (the class doc above): the same duo_delve_lib.SpawnGroup, called by the script.
                 build.Add(stage, $"({mk} as {GroupNearScript}).Arm({en}, Enemies{b + 1}, {e.min}, {e.max}, {(e.species == "mix" ? "False" : "True")}, {lootArgs}, {build.spawnedStage[b]})");
             }

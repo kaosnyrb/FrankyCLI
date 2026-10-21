@@ -577,6 +577,8 @@ namespace FrankyCLI
         /// <summary>The alias script on a clear's spawn marker: armed by the step, it spawns the enemies there when the player
         /// comes near (papyrus/duo_delve_groupnear.psc).</summary>
         private const string GroupNearScript = "duo_delve_groupnear";
+        /// <summary>The most drop pods one clear may call: duo_delve_lib.DropPods holds them in a fixed array of this size.</summary>
+        private const int PodsMax = 4;
 
         /// <summary>The alias script on a support team's landing marker: armed by the step, it calls a ship down onto the marker
         /// when the player comes near, opens its ramps and puts the team out of its hatch (papyrus/duo_delve_landing.psc).</summary>

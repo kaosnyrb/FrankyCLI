@@ -24,6 +24,7 @@ namespace FrankyCLI
                     Fatal($"{at} target '{b.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters.");
                 if (b.gang != null)
                 {
+                    if (b.gang.pods != null) Fatal($"{at} gang sets pods; drop pods are built for a clear's enemies only (a defeat's gang spawns at the step's start, not when he is near).");
                     List("gang", b.gang.list, true);
                     Range("gang", b.gang, 0);
                 }

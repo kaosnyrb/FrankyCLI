@@ -27,6 +27,15 @@ FormList loot
 Int lootChance
 Int spawnedStage
 WorldSpace world
+Int pods     ; 0 = the enemies appear (SpawnGroup); above 0 they arrive by drop pod, perPod out of each
+Int perPod
+
+; Drop pods (2026-10-21, his "3 per pod and 3 pods in different points"): set by the step's fragment BEFORE Arm, a
+; function of its own rather than new Arm parameters, so every clear built before it still calls an Arm it matches.
+Function SetPods(Int aiPods, Int aiPer)
+    pods = aiPods
+    perPod = aiPer
+EndFunction
 
 Function Arm(RefCollectionAlias akGroup, FormList akList, Int aiMin, Int aiMax, Bool abOneSpecies, FormList akLoot, Int aiChance, Int aiSpawnedStage)
     enemies = akGroup
@@ -57,7 +66,12 @@ Event OnTimer(int aiTimerID)
       StartTimer(CheckEvery)
       return
     endif
-    duo_delve_lib.SpawnGroup(Self, enemies, list, countMin, countMax, oneSpecies, loot, lootChance)
+    If pods > 0
+        Debug.Trace(Self + " [groupnear] " + pods + " drop pods of " + perPod + " round " + here)
+        duo_delve_lib.DropPods(here, pods, perPod, enemies, list, oneSpecies, loot, lootChance)
+    Else
+        duo_delve_lib.SpawnGroup(Self, enemies, list, countMin, countMax, oneSpecies, loot, lootChance)
+    EndIf
     GetOwningQuest().SetStage(spawnedStage)
     Debug.Trace(Self + " [groupnear] spawned " + enemies.GetCount() + " at " + here + ", the player " + Math.sqrt(dx * dx + dy * dy) + " away; stage " + spawnedStage + " set")
 EndEvent

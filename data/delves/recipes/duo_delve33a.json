@@ -32,9 +32,12 @@
       "at": "RECenterLocRef",
       "enemies": {
         "list": "duo_GangMembersList_Spacer",
-        "min": 4,
-        "max": 6,
-        "species": "mix"
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        },
+        "_pods": "His 2026-10-21 14:52: 'clear sounds good, let's do 3 per pod and 3 pods in different points to start with'. Was min 4, max 6, appearing at the marker."
       },
       "loot": {
         "list": "duo_ArtifactList_Local",

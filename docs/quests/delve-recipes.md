@@ -350,6 +350,18 @@ shared by every Delve; the build's read-back checks it is the only quest script 
 
 **The fight beats, `defeat` and `clear`** (2026-10-14, his scope: *"I want our delve system to be able to make the GAMEPLAY of these quests"*, Overtime's remote Bounty and Hunt; spike `office/spikes/2026-10-14-defeat-and-clear-beats.md` in the home office). Every list is NAMED IN THE RECIPE (his ruling), resolved own-or-master and refused if missing or empty. Both take an optional `loot` (`list`, `chance` 1-100): each enemy spawned, the target too, carries one entry with that chance (the drivers: `duo_ArtifactList_Local`, 25). Suspicious 2 and Aggression 2, the shipped drivers' values. A fight has no object of its own, so `model`, `name`, `replace`, `item`, `returnTo`, `group` and `choose` are refused on it, and an `approach` or a `defend` cannot point at one. ⚠ **No stuck guard** (a `hold` has one): a fight can begin at quest start, before he has even flown there, so a timer would be meaningless; an enemy spawned out of reach would hold the step.
 
+**A clear's enemies by DROP POD, `enemies.pods`** (2026-10-21, his *"clear sounds good, let's do 3 per pod and 3 pods in
+different points to start with"*; first on `duo_delve33a`, not yet played). `{ "count", "per" }` on a clear's `enemies`:
+`count` pods (1 to 4) land round the spawn marker at even bearings, 15 to 25 out, and `per` (1 to 6) step out of each, so
+the pods set the number and `min` / `max` are refused beside them; refused on a defeat's gang. The step's fragment calls
+`SetPods` on `duo_delve_groupnear` BEFORE `Arm` (a function of its own, so clears built earlier still match `Arm`); when
+he comes near, `duo_delve_lib.DropPods` runs the arrival `duo_podprobe` proved at his glass, all vanilla: a
+`Nasa_GeminiCapsule01` hung by `AttachTo` from an invisible `StarbornRingSpin00` (a placed static moves its position and
+not its mesh), the UC04 distant explosion as it appears (his *"a clear winner"*), 400 up at 200 (2 s), a frag at
+touchdown, the crew 0.3 s later within 3 of the pod, read off the helper (the attached pod's own position stays 400 up).
+Solid where it lands and kept on the ground by a save and reload, his checks. Home-office manual part 32, *how a DROP POD
+comes down*.
+
 **A team who lands by ship, `support`** (2026-10-21, his *"build a new delve mission with the landings"*; first on
 `duo_delve33a`, not yet played). Optional on a `defeat` or a `clear`: `{ "list", "min", "max", "ship", "land", "near" }`.
 `list` is the team (a FormList, own-or-master, e.g. `duo_GangMembersList_UC`), `ship` a leveled ship (a
