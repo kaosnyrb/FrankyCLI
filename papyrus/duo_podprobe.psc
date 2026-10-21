@@ -12,16 +12,27 @@ Starborn puzzle rings in place, so a long move is unproven here. What could go w
   - GetPositionZ may not follow the 3D        -> the numbers and HIS EYE disagree; his eye wins
   - the ground point may be wrong             -> "ground vs player" is printed so a slope shows
 
-NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes:
-    cgf "duo_podprobe.Run" 0 0 0 0           25 ahead, 150 up, speed 50, Gemini, landing push, 2 people
-    cgf "duo_podprobe.Run" 40 300 100 2      40 ahead, 300 up, speed 100, Apollo
-    cgf "duo_podprobe.Clear" 0               deletes every probe capsule and worker within 1000
-Run(distance, height, speed, pod, boom, people): 0 means the default for the three floats. pod 0 Gemini,
-1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule; boom 0 none, 1 FXLandingEngineDamagePush (a landing ship's
-push), 2 fragGrenadeExplosion; people 0 to 4 (UC_NA_MASTWorkerMale01, as duo_offpoiprobe). The four
-capsules are vanilla set dressing and every one STANDS on its origin (gen_inspect bounds, 2026-10-21).
+⛔ FIRST PLAY, 2026-10-21 13:4x, his glass: "pod didn't move". The numbers said LANDED in 3.2 s, 0 off target,
+while the Gemini hung at 150 up: TranslateTo moved a STATIC's position and NOT ITS MESH. So the trail below is a
+claim about the reference, never about what he sees. Vanilla's own TranslateTo target is StarbornRingSpin00, an
+ACTIVATOR whose model is an invisible RotationHelperFree01, and AttachTo is "Attach this reference to the
+specified parent (only works on created refs)". Hence two more routes: pod 4, a vanilla MOVEABLE static moved
+directly, and carrier 1, the pod attached to that invisible helper and the helper moved.
+
+NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes. Pass ALL
+SEVEN numbers (on his first run the omitted ints read 0, not their declared defaults):
+    cgf "duo_podprobe.Run" 0 0 0 0 0 0 1     Gemini on the invisible helper, nothing else
+    cgf "duo_podprobe.Run" 0 0 0 4 0 0 0     the cargo container, moved directly
+    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1     the helper route with the landing push and 2 people
+    cgf "duo_podprobe.Clear" 0               deletes every probe object and worker within 1000
+Run(distance, height, speed, pod, boom, people, carrier): 0 means the default for the three floats (25, 150,
+50). pod 0 Gemini, 1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule, 4 Neon_AuroraCargoContainer01 (a vanilla
+MoveableStatic); boom 0 none, 1 FXLandingEngineDamagePush (a landing ship's push), 2 fragGrenadeExplosion;
+people 0 to 4 (UC_NA_MASTWorkerMale01, as duo_offpoiprobe); carrier 0 move the pod itself, 1 attach it to an
+invisible StarbornRingSpin00 and move that. The four capsules are vanilla set dressing and every one STANDS on
+its origin (gen_inspect bounds, 2026-10-21).
 Clear deletes by BASE, so never run it at the NASA museum, where those capsules stand for real, nor in New
-Atlantis, where the worker does.
+Atlantis, where the worker does, nor in a Starborn temple, where the helper does.
 NUMBERS ONLY in the output (duo_worldprobe's lesson: a form cast to a string carries a "<" that the message
 box reads as a tag). Units are whatever GetPositionZ returns; read them, do not assume them.}
 
@@ -32,11 +43,15 @@ Form Function PodBase(int aiPod) global
         Return Game.GetForm(0x23E2B6)   ; Nasa_ApolloCapsule01, 4.5 x 4.5 x 3.5
     ElseIf aiPod == 3
         Return Game.GetForm(0x1F9D47)   ; Apollo_Capsule, 5.1 x 4.4 x 4.5
+    ElseIf aiPod == 4
+        Return Game.GetForm(0x55F4)     ; Neon_AuroraCargoContainer01, a MoveableStatic
+    ElseIf aiPod == 5
+        Return Game.GetForm(0x1BA30)    ; StarbornRingSpin00, the invisible helper (Clear only)
     EndIf
     Return Game.GetForm(0x23E2CF)       ; Nasa_GeminiCapsule01, 2.7 x 2.7 x 3.0, upright
 EndFunction
 
-Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2) global
+Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, int aiPod = 0, int aiBoom = 1, int aiPeople = 2, int aiCarrier = 0) global
     Actor player = Game.GetPlayer()
     Float dist = afDistance
     If dist <= 0.0
@@ -52,9 +67,10 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
     EndIf
     Form pod = PodBase(aiPod)
     Form marker = Game.GetForm(0x3B)    ; XMarker
-    String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople
-    If pod == None || marker == None
-        out += "\nA BASE DID NOT RESOLVE (pod or XMarker)"
+    Form helperBase = PodBase(5)
+    String out = "POD PROBE  d=" + (dist as Int) + "  h=" + (height as Int) + "  v=" + (speed as Int) + "  pod=" + aiPod + "  boom=" + aiBoom + "  people=" + aiPeople + "  carrier=" + aiCarrier
+    If pod == None || marker == None || helperBase == None
+        out += "\nA BASE DID NOT RESOLVE (pod, XMarker or helper)"
         Debug.Trace(out)
         Debug.MessageBox(out)
         Return
@@ -77,12 +93,23 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
 
     ObjectReference p = player.PlaceAtMe(pod)
     p.MoveTo(ground, 0.0, 0.0, height, false)
+    ; mover is what TranslateTo is called on: the pod itself, or the invisible helper the pod hangs from.
+    ObjectReference mover = p
+    If aiCarrier == 1
+        mover = player.PlaceAtMe(helperBase)
+        mover.MoveTo(ground, 0.0, 0.0, height, false)
+        Utility.Wait(0.2)
+        p.AttachTo(mover)
+    EndIf
     Utility.Wait(0.2)
     Float z0 = p.GetPositionZ()
     out += "\nstart " + ((z0 - gz) as Int) + " up   3D loaded " + p.Is3DLoaded()
+    If aiCarrier == 1
+        out += "   helper " + ((mover.GetPositionZ() - gz) as Int) + " up, 3D " + mover.Is3DLoaded()
+    EndIf
 
     Float t0 = Utility.GetCurrentRealTime()
-    p.TranslateTo(gx, gy, gz, p.GetAngleX(), p.GetAngleY(), p.GetAngleZ(), speed)
+    mover.TranslateTo(gx, gy, gz, mover.GetAngleX(), mover.GetAngleY(), mover.GetAngleZ(), speed)
     Float limit = height / speed * 2.0 + 5.0
     Float t = 0.0
     Float z = z0
@@ -99,12 +126,15 @@ Function Run(float afDistance = 0.0, float afHeight = 0.0, float afSpeed = 0.0, 
         EndIf
         landed = Math.abs(z - gz) < 0.5
     EndWhile
-    out += "\nheight every 0.25 s:" + trail
+    out += "\npod height every 0.25 s:" + trail
     If landed
         out += "\nLANDED in " + ((t * 10.0) as Int) + " tenths of a s (straight line says " + ((height / speed * 10.0) as Int) + ")"
     Else
-        p.StopTranslation()
+        mover.StopTranslation()
         out += "\nNOT LANDED after " + (t as Int) + " s, still " + ((z - gz) as Int) + " up"
+    EndIf
+    If aiCarrier == 1
+        out += "\nhelper ended " + ((mover.GetPositionZ() - gz) as Int) + " up"
     EndIf
     out += "   off target " + (ground.GetDistance(p) as Int)
 
@@ -145,9 +175,9 @@ Function Clear(float afRadius = 0.0) global
     EndIf
     Int gone = 0
     Int k = 0
-    While k < 5
+    While k < 7
         Form base = PodBase(k)
-        If k == 4
+        If k == 6
             base = Game.GetForm(0x19AD3E)
         EndIf
         ObjectReference[] found = player.FindAllReferencesOfType(base, radius)
