@@ -26,19 +26,19 @@ static does not follow the move either. The helper route is the one: upright, on
 
 ⭐ THIRD PLAY, 2026-10-21 14:0x: "works, pod spawns, falls, people spawn", and his three notes: "there isn't
 sound, impact explosion, and I feel like it should start higher and go faster". FXLandingEngineDamagePush is a
-push with nothing to see or hear, so boom 1 is now a rocket launcher's explosion, a descent sound is played on the
+push with nothing to see or hear, so boom 1 is now a frag grenade (his pick, after a car nuke was read and refused), a descent sound is played on the
 mover, and the defaults went from 150 up at 50 to 400 up at 200.
 
 NO PLUGIN RECORD. Global functions only, so it runs from the console and nothing in any .esm changes. Pass ALL
 EIGHT numbers (his first run printed boom 0 and people 0; whether he typed them or the console zero-fills an
 omitted int is unread):
-    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1 1   the whole arrival: helper, rocket boom, 2 people, fly-by sound
+    cgf "duo_podprobe.Run" 0 0 0 0 1 2 1 1   the whole arrival: helper, frag boom, 2 people, fly-by sound
     cgf "duo_podprobe.Run" 0 800 300 0 1 2 1 1   higher and faster
     cgf "duo_podprobe.Clear" 0               deletes every probe object and worker within 1000
 Run(distance, height, speed, pod, boom, people, carrier, sound): 0 means the default for the three floats (25,
 400, 200). pod 0 Gemini, 1 Mercury, 2 Apollo (NASA), 3 Apollo_Capsule, 4 Neon_AuroraCargoContainer01 (a vanilla
-MoveableStatic); boom 0 none, 1 RocketlauncherExplosion (outer radius 5, damage 115), 2 fragGrenadeExplosion,
-3 unused, 4 FXLandingEngineDamagePush (invisible and silent, kept as the control). ⛔ 3 WAS CarNukeLargeVehicles
+MoveableStatic); boom 0 none, 1 fragGrenadeExplosion (his pick: "ah carnuke isn't good, use frag grenade for
+now"), 2 RocketlauncherExplosion (outer radius 5, damage 115), 3 unused, 4 FXLandingEngineDamagePush (invisible and silent, kept as the control). ⛔ 3 WAS CarNukeLargeVehicles
 and came out before it was ever run: outer radius 900, damage 200, force 6000, a nuke mesh, so it kills the
 player at the 25 it lands from him (gen_inspect explosion, 2026-10-21); people 0 to 4 (UC_NA_MASTWorkerMale01, as
 duo_offpoiprobe), placed 0.3 s after the boom so it cannot hit them; carrier 0 move the pod itself, 1 attach it
@@ -67,9 +67,9 @@ EndFunction
 
 Form Function BoomBase(int aiBoom) global
     If aiBoom == 1
-        Return Game.GetForm(0x49B53)    ; RocketlauncherExplosion
+        Return Game.GetForm(0xE574F)    ; fragGrenadeExplosion, his pick 2026-10-21: "use frag grenade for now"
     ElseIf aiBoom == 2
-        Return Game.GetForm(0xE574F)    ; fragGrenadeExplosion
+        Return Game.GetForm(0x49B53)    ; RocketlauncherExplosion
     ElseIf aiBoom == 4
         Return Game.GetForm(0x1FF72B)   ; FXLandingEngineDamagePush: no visual, no sound (his third play)
     EndIf
