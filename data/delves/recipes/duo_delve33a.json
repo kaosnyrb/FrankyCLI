@@ -1,0 +1,56 @@
+﻿{
+  "schema": 2,
+  "id": "duo_delve33a",
+  "template": "beats",
+  "_deal": "No deal: started by hand with startquest for his test. Under his 2026-10-21 rule (never edit a shipped quest) the landing lives in a new Delve; a pool is his call once it has played.",
+  "author": "eliza",
+  "source": "his 2026-10-21 09:28: \"Roll back to the old ESM then build a new delve mission with the landings\", after the strike team by ship (A1) on qst11a/b/d was rolled back. His A1: a friendly team lands and holds the entrance.",
+  "_note": [
+    "THE LANDING, FRIENDLY (A1). A clear at a Spacer-held site; when he comes within 300 of the site's B1 travel ring a",
+    "UC Security transport comes down there from orbit, opens its ramps, and a UC Marine team steps out of the hatch",
+    "and joins the fight (support, papyrus/duo_delve_landing.psc). The hostile twin is Jessica's 28a, Strike: Spacer",
+    "Landing, whose crew could arrive the same way. WORDS ARE ELIZA'S PLACEHOLDERS, Jessica's to write; the type word",
+    "too (a new type gets its word the day it is written). Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site the Spacers have taken: somewhere worth sending a ship for."
+  },
+  "prose": {
+    "name": "Assault: Spacer Outpost on <Planet>",
+    "briefing": "Spacers have taken the <Place>. UC Security is sending a team down to retake it, and they want someone already on the ground when the ship lands."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "RECenterLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "support": {
+        "list": "duo_GangMembersList_UC",
+        "min": 3,
+        "max": 5,
+        "ship": "LvlShip_UCSecurity_Transport",
+        "land": "RETravelB1LocRef",
+        "near": 300
+      },
+      "objective": "Clear the Spacers from the <Place>",
+      "journal": "The Spacers at the <Place> are dead. The UC team is holding the site until the owners come back.",
+      "reward": "med"
+    }
+  ]
+}

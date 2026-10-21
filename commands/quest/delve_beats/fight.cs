@@ -46,6 +46,40 @@ namespace FrankyCLI
                     List("loot", b.loot.list, false);
                     if (b.loot.chance < 1 || b.loot.chance > 100) Fatal($"{at} loot.chance is {b.loot.chance}; a percent from 1 to 100.");
                 }
+                if (b.support is Support s) GradeSupport(s, b, at, t, env, Fatal, Warn, List);
+            }
+
+            /// <summary>
+            /// A team who lands by ship. The list, the ship and the landing marker must all resolve, or the arming line would
+            /// call nothing down; the marker is demanded of the place like a beat's own (Grade's markers).
+            /// </summary>
+            private static void GradeSupport(Support s, Beat b, string at, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
+                                             Action<string> Fatal, Action<string> Warn, Action<string, string?, bool> List)
+            {
+                if (t.kind == "board")
+                { Fatal($"{at} has a support team; a board mission runs from the refresh and the landing is not built for it yet (beats only)."); return; }
+                List("support", s.list, true);
+                if (s.min < 1 || s.max < s.min) Fatal($"{at} support needs 1 <= min <= max; it has {s.min}-{s.max}.");
+                else if (s.max > 12) Warn($"{at} support.max is {s.max}; more than 12 off one ship's hatch is a crowd the navmesh may not seat.");
+                if (string.IsNullOrWhiteSpace(s.ship)) Fatal($"{at} support has no ship, so nothing would land.");
+                else if (OwnOrMaster<IGenericBaseFormGetter>(Allowed(env, t), env, s.ship) is not { } ship)
+                    Fatal($"{at} support.ship '{s.ship}' is not a GenericBaseForm (a ship, such as LvlShip_UCSecurity_Transport) in {t.mod} or one of its masters.");
+                else Console.WriteLine($"  {at} support ship: {ship.EditorID} [{ship.FormKey}]");
+                if (string.IsNullOrWhiteSpace(s.land)) Fatal($"{at} support has no land marker; it names where at the place the ship comes down (a travel ring is open ground).");
+                else if (string.Equals(s.land, b.at, StringComparison.OrdinalIgnoreCase))
+                    Warn($"{at} support.land is the fight's own marker ({b.at}), so the ship comes down on top of the enemies.");
+                if (s.near is int n && (n < 100 || n > 1000)) Fatal($"{at} support.near is {n}; 100 to 1000 (flat distance to the landing marker, absent = 300).");
+            }
+
+            /// <summary>
+            /// A support team's landing marker: a new marker alias at the beat's place (its fill is written in Fills, beside the
+            /// beat's own), carrying LandingScript, which the step's fragment arms.
+            /// </summary>
+            protected static void SupportSlot(BeatsBuild build, int i)
+            {
+                if (build.r.beats[i].support == null) return;
+                var lm = build.NewMarker(i, "Landing");
+                build.Landing(i, (int)lm.ID);
             }
 
             /// <summary>Who this fight is against: a defeat's target and gang, a clear's enemies.</summary>
@@ -78,6 +112,15 @@ namespace FrankyCLI
                 string lootArgs = "None, 0";
                 if (ff.Loot is FormKey lk) { build.props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
                 Spawn(build, b, stage, fb, ff, lootArgs);
+                if (fb.support is Support s)
+                {
+                    // Armed when the step begins; the ship is called when the player comes near (duo_delve_landing).
+                    string la = $"Alias_Beat{b + 1}Landing";
+                    build.props.Add(("ReferenceAlias", la, build.clone.FormKey, build.landingOf[b]));
+                    build.props.Add(("Form", $"Ship{b + 1}", ff.Ship!.Value, -1));
+                    build.props.Add(("FormList", $"Support{b + 1}", ff.Support!.Value, -1));
+                    build.Add(stage, $"({la} as {LandingScript}).Arm(Ship{b + 1}, Support{b + 1}, {s.min}, {s.max}, {s.near ?? DefaultLandingNear}.0)");
+                }
             }
 
             /// <summary>The spawn call itself: SpawnTarget for a defeat, SpawnGroup for a clear.</summary>

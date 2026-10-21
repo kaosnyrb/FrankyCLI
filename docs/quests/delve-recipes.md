@@ -350,6 +350,20 @@ shared by every Delve; the build's read-back checks it is the only quest script 
 
 **The fight beats, `defeat` and `clear`** (2026-10-14, his scope: *"I want our delve system to be able to make the GAMEPLAY of these quests"*, Overtime's remote Bounty and Hunt; spike `office/spikes/2026-10-14-defeat-and-clear-beats.md` in the home office). Every list is NAMED IN THE RECIPE (his ruling), resolved own-or-master and refused if missing or empty. Both take an optional `loot` (`list`, `chance` 1-100): each enemy spawned, the target too, carries one entry with that chance (the drivers: `duo_ArtifactList_Local`, 25). Suspicious 2 and Aggression 2, the shipped drivers' values. A fight has no object of its own, so `model`, `name`, `replace`, `item`, `returnTo`, `group` and `choose` are refused on it, and an `approach` or a `defend` cannot point at one. ⚠ **No stuck guard** (a `hold` has one): a fight can begin at quest start, before he has even flown there, so a timer would be meaningless; an enemy spawned out of reach would hold the step.
 
+**A team who lands by ship, `support`** (2026-10-21, his *"build a new delve mission with the landings"*; first on
+`duo_delve33a`, not yet played). Optional on a `defeat` or a `clear`: `{ "list", "min", "max", "ship", "land", "near" }`.
+`list` is the team (a FormList, own-or-master, e.g. `duo_GangMembersList_UC`), `ship` a leveled ship (a
+`GenericBaseForm`, e.g. `LvlShip_UCSecurity_Transport`, the record type his landed bounties bind), `land` the marker at
+the beat's place it comes down on (demanded of the place like a beat's own; a travel ring is open ground, and the lint
+warns when it is the fight's own marker), `near` the flat call distance (100 to 1000, absent 300). The step's fragment
+arms `papyrus/duo_delve_landing.psc` on a new landing-marker alias; when the player comes within `near`, a
+`ShipLandingMarker_80m_Large` is placed on `land` and `PlaceShipAtMe` puts the ship on it, which comes down from orbit by
+itself (his fact: his landed bounties, qst12a to qst16d). On `IsLanded` its ramps open; on `IsRampDown` (or 20 s) the team
+is placed at its exterior load door; 20 s later it takes off and both refs are deleted 30 s after that. The team is
+FRIENDLY: nothing sets aggression. Refused on a board (not built for it yet). ⚠ Unmeasured: the hatch as a spawn point
+(vanilla's bounty hunters use the ship's deck markers, which need aliases), a cluttered landing spot. Two probe-only
+notifications name the failure paths and come out when it graduates. **`duo_delve_landing.pex` must be packed with the mod.**
+
 **Beat fields on this template:** `type` (required), `at`, `place` (`main` / `second` / `third`),
 `objective`, `journal`, `message`, and optionally `item` (pickup and recover: the inventory name),
 `model` and `name` (what the object looks like and its prompt; not on a recover, which has no object),

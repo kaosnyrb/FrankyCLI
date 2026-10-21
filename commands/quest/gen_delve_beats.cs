@@ -239,8 +239,8 @@ namespace FrankyCLI
                             Fatal($"beat {i + 1} defends beat {d}, a {dt.type}, which leaves no object standing to defend; defend a use or a deliver.");
                     }
                 }
-                if (!IsFight(b) && (b.target != null || b.gang != null || b.enemies != null || b.loot != null))
-                    Fatal($"beat {i + 1} sets target, gang, enemies or loot and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
+                if (!IsFight(b) && (b.target != null || b.gang != null || b.enemies != null || b.loot != null || b.support != null))
+                    Fatal($"beat {i + 1} sets target, gang, enemies, loot or support and is a {b.type}; only a defeat or a clear spawns a fight, so they would be silently ignored.");
                 if (b.name != null && Tokens(b.name).Any())
                     Fatal($"beat {i + 1} name carries a <Token>; an activator name is not an alias context.");
                 if (b.name != null && string.IsNullOrWhiteSpace(b.model))
@@ -566,6 +566,12 @@ namespace FrankyCLI
         /// (papyrus/duo_delve_spawnnear.psc).</summary>
         private const string SpawnNearScript = "duo_delve_spawnnear";
 
+        /// <summary>The alias script on a support team's landing marker: armed by the step, it calls a ship down onto the marker
+        /// when the player comes near, opens its ramps and puts the team out of its hatch (papyrus/duo_delve_landing.psc).</summary>
+        private const string LandingScript = "duo_delve_landing";
+        /// <summary>A support team's call distance when the recipe names none: the strike team test's 300 (2026-10-21).</summary>
+        private const int DefaultLandingNear = 300;
+
         /// <summary>What BuildBeats made, for VerifyBeats to read back off disk.</summary>
         private sealed class BeatsMade
         {
@@ -581,6 +587,7 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
+            public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
             public List<int> Waves = new();     // hold beats' wave collections (the inner ref alias ids), empty and Optional
             public FormKey WavePackage;         // the Travel-to-player package every wave collection wears
             public (int id, string name)? DroppedPlace;   // a one-place Delve's removed second place alias
@@ -837,6 +844,22 @@ namespace FrankyCLI
             /// save him). Not a stage hook: no properties, so it is recorded in its own list for the verify, never in Hooks
             /// (whose check reads StageToSet).
             /// </summary>
+            /// <summary>Each support beat's landing marker alias, by beat index (Slot makes it, Fills writes it, Enter arms it).</summary>
+            internal readonly Dictionary<int, int> landingOf = new();
+
+            /// <summary>
+            /// A support team's landing marker carries LandingScript. Like SpawnNear, not a stage hook: no properties, its own
+            /// list for the verify.
+            /// </summary>
+            internal void Landing(int b, int alias)
+            {
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
+                entry.Scripts.Add(new ScriptEntry { Name = LandingScript });
+                landingOf[b] = alias;
+                bm.Landings.Add((alias, b, markers[r.beats[b].support!.land!]));
+                Console.WriteLine($"  +landing : beat {b + 1} support landing marker alias {alias} {LandingScript} ({r.beats[b].support!.land}): a ship called down when the player is near");
+            }
+
             internal void SpawnNear(int b, int alias)
             {
                 var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
@@ -1112,6 +1135,14 @@ namespace FrankyCLI
                     }
                     int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
                     if (f > 0) return f;
+                    if (landingOf.TryGetValue(i, out int la))
+                    {
+                        // Both halves of the fill, as WriteBeat writes a beat's own: the beat's place, the support's land marker.
+                        var lm = clone.Aliases!.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)la);
+                        if (lm?.Location == null) { Console.WriteLine($"REFUSED: landing marker alias {la} has no location fill."); return 1; }
+                        lm.Location.AliasID = PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias);
+                        lm.Location.RefType.SetTo(markers[r.beats[i].support!.land!]);
+                    }
                     if (slotOf[i].activatorAlias >= 0
                         && ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
                 }
@@ -2143,6 +2174,14 @@ namespace FrankyCLI
                 if (h.script == "DefaultCollectionAliasOnDeath")
                     fail += Check($"alias {h.alias} drops its dead (the marker shows only the living)",
                                   (sc?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "RemoveFromRefCollection")?.Data ?? false).ToString(), "True");
+            }
+            foreach (var (a, b, land) in bm.Landings)
+            {
+                fail += Check($"landing marker alias {a} carries {LandingScript} (a ship called down when the player is near)",
+                              (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == LandingScript) ?? false).ToString(), "True");
+                var lm = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(x => x.ID == (uint)a);
+                fail += Check($"landing marker alias {a} fills on beat {b + 1}'s support land marker",
+                              lm?.Location?.RefType.FormKey.ToString() ?? "no fill", land.ToString());
             }
             foreach (var a in bm.SpawnNear)
                 fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the player is near)",

@@ -61,6 +61,8 @@ namespace FrankyCLI
     class gen_questprop
     {
         static readonly string[] Types = { "obj", "alias", "int", "float", "bool", "string" };
+        // Each indexed record's Mutagen type, printed beside an obj value so a binding says WHAT it points at.
+        static readonly Dictionary<FormKey, string> typeById = new();
 
         public static int Generate(string[] args)
         {
@@ -122,6 +124,7 @@ namespace FrankyCLI
                 foreach (var r in m.EnumerateMajorRecords())
                 {
                     nameById[r.FormKey] = r.EditorID ?? "(no EditorID)";
+                    typeById[r.FormKey] = r.GetType().Name.Replace("BinaryOverlay", "");
                     if (r.EditorID != null)
                     {
                         if (!idsByName.TryGetValue(r.EditorID, out var lst))
@@ -401,7 +404,8 @@ namespace FrankyCLI
             ScriptObjectProperty o when o.Alias >= 0 =>
                 $"[alias]  {p.Name} = {Name(o.Object.FormKey, nameById)} alias {o.Alias}" +
                 $" ({NamedAliases(quest).Where(a => a.id == (uint)o.Alias).Select(a => a.name).FirstOrDefault() ?? "NO SUCH ALIAS on this quest"})",
-            ScriptObjectProperty o => $"[obj]    {p.Name} = {Name(o.Object.FormKey, nameById)}",
+            ScriptObjectProperty o => $"[obj]    {p.Name} = {Name(o.Object.FormKey, nameById)}"
+                                       + (typeById.TryGetValue(o.Object.FormKey, out var ty) ? $" ({ty})" : ""),
             ScriptIntProperty i => $"[int]    {p.Name} = {i.Data}",
             ScriptFloatProperty f => $"[float]  {p.Name} = {f.Data}",
             ScriptBoolProperty b => $"[bool]   {p.Name} = {b.Data}",

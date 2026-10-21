@@ -37,7 +37,7 @@ namespace FrankyCLI
         }
 
         /// <summary>A fight beat's forms, resolved own-or-master in ResolveInputs.</summary>
-        private sealed class FightForms { public FormKey? Target, Gang, Enemies, Loot; }
+        private sealed class FightForms { public FormKey? Target, Gang, Enemies, Loot, Support, Ship; }
 
         /// <summary>
         /// Resolves a recipe's DelveInputs. Moved out of Build unchanged: every lookup, refusal and gate is as it was.
@@ -136,12 +136,20 @@ namespace FrankyCLI
                     if (ff.Target == null) { Console.WriteLine($"REFUSED: beat {i + 1} target '{fb.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters."); fail++; continue; }
                 }
                 foreach (var (what, name, set) in new (string, string?, Action<FormKey>)[] {
-                             ("gang", fb.gang?.list, k => ff.Gang = k), ("enemies", fb.enemies?.list, k => ff.Enemies = k), ("loot", fb.loot?.list, k => ff.Loot = k) })
+                             ("gang", fb.gang?.list, k => ff.Gang = k), ("enemies", fb.enemies?.list, k => ff.Enemies = k), ("loot", fb.loot?.list, k => ff.Loot = k),
+                             ("support", fb.support?.list, k => ff.Support = k) })
                 {
                     if (name == null) continue;
                     var fl = OwnOrMaster<IFormListGetter>(myMod, env, name);
                     if (fl == null) { Console.WriteLine($"REFUSED: beat {i + 1} {what}.list '{name}' is not a FormList in {t.mod} or one of its masters."); fail++; break; }
                     set(fl.FormKey);
+                }
+                // A support team's ship: a leveled ship such as LvlShip_UCSecurity_Transport is a GenericBaseForm (read off the
+                // record 2026-10-21; his landed bounties bind LvlShip_CrimsonFleet_A_Combat the same way).
+                if (fb.support?.ship is string sh)
+                {
+                    ff.Ship = OwnOrMaster<IGenericBaseFormGetter>(myMod, env, sh)?.FormKey;
+                    if (ff.Ship == null) { Console.WriteLine($"REFUSED: beat {i + 1} support.ship '{sh}' is not a GenericBaseForm (a ship) in {t.mod} or one of its masters."); fail++; continue; }
                 }
                 inputs.Fights[i] = ff;
             }

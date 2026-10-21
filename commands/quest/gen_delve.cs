@@ -505,6 +505,26 @@ namespace FrankyCLI
             public Crowd? enemies { get; set; }
             /// <summary>defeat and clear, OPTIONAL: each enemy carries one thing from list, each with chance percent (the drivers: artifacts, 25).</summary>
             public Loot? loot { get; set; }
+            /// <summary>
+            /// defeat and clear, OPTIONAL: a FRIENDLY team that arrives BY SHIP when the player comes near (his 2026-10-21, "build a
+            /// new delve mission with the landings", after the strike team test on qst11a). The ship is placed on a landing marker
+            /// at the place's `land` marker and comes down from orbit by itself (his fact, the landed bounties qst12a to qst16d);
+            /// on landing its ramps open and the team steps out of its hatch, then it takes off. papyrus/duo_delve_landing.psc.
+            /// </summary>
+            public Support? support { get; set; }
+        }
+        /// <summary>
+        /// A team who arrives by ship: min..max drawn from list, landed by ship (a leveled ship list such as
+        /// LvlShip_UCSecurity_Transport) on the place's land marker, when the player comes within near (flat; absent = 300).
+        /// </summary>
+        private sealed class Support
+        {
+            public string? list { get; set; }
+            public int min { get; set; }
+            public int max { get; set; }
+            public string? ship { get; set; }
+            public string? land { get; set; }
+            public int? near { get; set; }
         }
         /// <summary>A crowd drawn from a FormList: min..max of them; species "one" = a single entry for all (the Hunt driver), "mix" = drawn per enemy.</summary>
         private sealed class Crowd { public string? list { get; set; } public int min { get; set; } public int max { get; set; } public string? species { get; set; } }
@@ -1302,6 +1322,9 @@ namespace FrankyCLI
 
             var wanted = new List<string>();
             foreach (var b in r.beats) if (!wanted.Contains(b.at, StringComparer.OrdinalIgnoreCase)) wanted.Add(b.at);
+            // A support team's landing marker is demanded of its place like a beat's own.
+            foreach (var b in r.beats)
+                if (b.support?.land is string ld && !wanted.Contains(ld, StringComparer.OrdinalIgnoreCase)) wanted.Add(ld);
             const string MapMarker = "MapMarkerRefType";
             if (!wanted.Contains(MapMarker, StringComparer.OrdinalIgnoreCase)) wanted.Add(MapMarker);
 
@@ -1563,7 +1586,10 @@ namespace FrankyCLI
             // shipped target place carries (the player has to be able to navigate there).
             var outp = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
             foreach (var b in r.beats.Where(b => b.PlaceIndex == place))
+            {
                 if (all.TryGetValue(b.at, out var k)) outp[b.at] = k;
+                if (b.support?.land is string ld && all.TryGetValue(ld, out var lk)) outp[ld] = lk;
+            }
             if (all.TryGetValue("MapMarkerRefType", out var mm)) outp["MapMarkerRefType"] = mm;
             return outp;
         }
