@@ -159,6 +159,41 @@
       ],
       "_who": "A who BUILDS on a board since 2026-10-15 (duo_delve12a, his 'teach board who'): its stage numbered after arrivalStage (16 to 19, below the first beat's 20) and its distance hook armed only after entryStage, so nothing stands at a posting's site until the job is taken.",
       "verifiedFrom": "gen_inspect qall duo_MB28a_qst and MB_Bounty05_UC, Defiant, 2026-10-14; MissionQuestScript.psc read whole"
+    },
+    {
+      "id": "space",
+      "kind": "space",
+      "_kind": "A Delve whose ONE place is an orbit (delve_space.cs). His 2026-10-22: \"make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"A\" (teach gen_delve an orbit-only Delve). The ladder's harness first: graduate or remove is the exit condition in home-office office/spikes/2026-10-22-alias-set-ladders.md.",
+      "base": "duo_artifact_remote_qst03a",
+      "_base": "One of his 62 remote-space quests, all of which carry ONE alias set (and MB01 the same ten): PlayerStarSystemLocation 0, TargetPlanetLocation 2 (by type LocTypeOrbit), the SpaceCellRefs collection 10 created at 2, SpawnMarker01 12 and PatrolMarker01 17 from 10, PrimaryRef 3 created at 12, SpaceMapMarker 16 from 10, TargetSystemLocation 8, the StartingQuestTargetOrbital collection 14 created at 8, StartingQuestTarget 15 from 14, PlayerShip 9. Read with gen_inspect qall, Defiant, 2026-10-22. Its own startquest did not start it (his, the same morning: 'I think it's expecting an event'); the shell keeps no event (ShellOf takes none), so a build is started by hand like every Delve. The base's GetEventData condition (UnusedConditions) is left out of the shell too.",
+      "shell": "shells/space.json",
+      "mod": "du_overtime",
+      "driver": "",
+      "replacesDriver": "dou_artifact_space_bounty_quest",
+      "_replacesDriver": "The shipped mission's script (a Crimson ship, its gang). A test runs none.",
+      "activatorFrom": "duo_artifact09_primary_act",
+      "_activatorFrom": "The beats template's own activator (its alias 2 creates it), which carries no script. His MB01's duo_MB01a_act is NOT the source: it carries a script (the repair, which takes a kit and can spawn ships).",
+      "beats": 1,
+      "maxBeats": 1,
+      "allows": [ "use" ],
+      "carriesItem": false,
+      "placeAlias": 2,
+      "mapMarkerAlias": 16,
+      "briefingStage": 0,
+      "completeStage": 100,
+      "beatSlots": [
+        { "markerAlias": 12, "activatorAlias": 3, "objective": 10, "journalStage": 100 }
+      ],
+      "_beatSlots": "The beat stands on the shell's own pair: SpawnMarker01 (12, from the cell by se_GeneralMarkerLocRef01) and PrimaryRef (3, created at 12, objective 10's target). Stage 100 completes the quest and carries the journal.",
+      "tokens": {
+        "Place": "TargetPlanetLocation"
+      },
+      "_tokens": "<Place> is the orbit. No <System>: a rung may drop TargetSystemLocation, and a token naming a dropped alias is refused at build.",
+      "cannot": [
+        "more than one beat, or any beat but use",
+        "a second or third place, a request, a theme, a who, speech"
+      ],
+      "verifiedFrom": "gen_inspect qall duo_artifact_remote_qst03a and duo_MB01a_qst, Defiant, 2026-10-22"
     }
   ]
 }

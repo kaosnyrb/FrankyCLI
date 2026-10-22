@@ -172,12 +172,20 @@ namespace FrankyCLI
             /// missionboard mission. It's a posting someone has made." -1 = the broadcast plays on entryStage.
             /// </summary>
             public int arrivalStage { get; set; } = -1;
+            /// <summary>
+            /// space: the activator the beat's object is cloned from (ReskinActivator writes its model and name). The base's
+            /// own target is a ship, so the clone needs a source; this one carries no script, unlike his MB01's (which takes a
+            /// repair kit and can spawn ships). Null on every other kind.
+            /// </summary>
+            public string? activatorFrom { get; set; }
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
-        /// <summary>The two kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery.</summary>
-        private static readonly string[] Kinds = { "beats", "board" };
+        /// <summary>The kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery, and an
+        /// orbit-only one ("space", delve_space.cs), whose one place is an orbit and which shares only the plumbing.</summary>
+        private static readonly string[] Kinds = { "beats", "board", "space" };
         private static bool IsBoard(Template t) => t.kind == "board";
+        private static bool IsSpace(Template t) => t.kind == "space";
         /// <summary>
         /// The stage a place's people and occupants (an ending's person, a who) are numbered AFTER, each on its own stage below
         /// the first beat's (entryStage + 10): the approach's on a slate Delve (5, so 6, 7...), the arrival's on a board (15,
@@ -422,6 +430,13 @@ namespace FrankyCLI
             /// </summary>
             public bool? habitability { get; set; }
             /// <summary>
+            /// OPTIONAL, a REQUESTED place only: "same" = the request may only use a planet in the player's current star
+            /// system, written the way vanilla's one same-system request is (MB_Bounty02Local): IsInSameCurrentLocationAsRef(the
+            /// player, LocTypeStarSystem) == 1 on the REQUEST's own conditions, which test the planet. Not a parsec number on
+            /// the alias, which no shipped request uses. His 2026-10-22 "build r5", the test between that and 1 parsec.
+            /// </summary>
+            public string? system { get; set; }
+            /// <summary>
             /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
             /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
@@ -441,6 +456,13 @@ namespace FrankyCLI
             /// name, never read as empty, because a briefing that names a crew at an empty site is the failure this exists for.
             /// </summary>
             public Who? who { get; set; }
+            /// <summary>
+            /// space only, main place only: base aliases this build REMOVES, by name. The alias-set test ladder's knob (his
+            /// 2026-10-22, "make a series of tests for remote and space alias sets. Idea being we learn in isolation how to
+            /// build these sets"): rung 1 is the shipped set whole, each later rung takes pieces away. Refused if anything
+            /// left still names a removed alias. Retires with the ladder (office/spikes/2026-10-22-alias-set-ladders.md).
+            /// </summary>
+            public List<string>? drop { get; set; }
         }
         /// <summary>
         /// Who is at a place, placed round one object there when the player comes within 250 m of it.
@@ -1255,6 +1277,9 @@ namespace FrankyCLI
             }
             else if (r.prose.card != null)
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
+            if (IsSpace(t)) GradeSpace(r, t, Fatal);
+            else if (r.place.drop != null)
+                Fatal($"place.drop is set and template '{t.id}' is not a space template; it is the space ladder's knob.");
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
 
@@ -1409,6 +1434,9 @@ namespace FrankyCLI
             markersOut?.Clear();
             foreach (var kv in keys) markersOut?.Add(kv.Key, kv.Value);
 
+            // A space Delve's one place is an orbit, drawn by its own conditions: none of the POI grading below applies.
+            if (IsSpace(t)) return Report();
+
             lap.Mark("which-place");
             // --- which place each beat is at --------------------------------------------------
             bool anySecond = r.beats.Any(b => b.Second);
@@ -1479,6 +1507,10 @@ namespace FrankyCLI
                     Fatal($"{label}.parsecs must be above 0 (got {ps}).");
                 if (p.habitability == true)
                     Fatal($"{label}.habitability is true; leave it out to keep the request's planet condition, false to drop it.");
+                if (p.system != null && p.remote != true)
+                    Fatal($"{label}.system shapes a REQUEST, and {label}.remote is not set.");
+                if (p.system != null && p.system != "same")
+                    Fatal($"{label}.system is \"{p.system}\"; the one value built is \"same\" (vanilla's far shape, == 0, is not).");
             }
             if (!secondRemote && !IsBoard(t))
                 foreach (var (where, text) in ProseStrings(r))
@@ -1669,16 +1701,21 @@ namespace FrankyCLI
                 else Console.WriteLine($"  place.reach: every other place within {g.EditorID} of the main place and of each other");
             }
 
-            lap.Mark("report");
+            return Report();
+
             // --- report ------------------------------------------------------------------
-            Console.WriteLine();
-            foreach (var i in issues) Console.WriteLine((i.Fatal ? "  [FATAL] " : "  [warn ] ") + i.Text);
-            int fatal = issues.Count(i => i.Fatal);
-            Console.WriteLine();
-            Console.WriteLine(fatal == 0
-                ? $"  LINT PASSES ({issues.Count - fatal} warning(s))."
-                : $"  LINT FAILS: {fatal} fatal, {issues.Count - fatal} warning(s).");
-            return fatal == 0;
+            bool Report()
+            {
+                lap.Mark("report");
+                Console.WriteLine();
+                foreach (var i in issues) Console.WriteLine((i.Fatal ? "  [FATAL] " : "  [warn ] ") + i.Text);
+                int fatal = issues.Count(i => i.Fatal);
+                Console.WriteLine();
+                Console.WriteLine(fatal == 0
+                    ? $"  LINT PASSES ({issues.Count - fatal} warning(s))."
+                    : $"  LINT FAILS: {fatal} fatal, {issues.Count - fatal} warning(s).");
+                return fatal == 0;
+            }
         }
 
         /// <summary>The places a recipe uses, by index: main always, then any a beat names.</summary>
@@ -2138,9 +2175,53 @@ namespace FrankyCLI
             clone.RemapLinks(new Dictionary<FormKey, FormKey> { [sourceKey] = clone.FormKey });
             Console.WriteLine($"  self     : {stray} further link(s) to the base (conditions) now point at the clone");
 
+            var madeBeats = new BeatsMade();
+            int fail = IsSpace(t) ? BuildSpace(myMod, clone, t, r, markers, madeBeats)
+                                  : BuildPlacesAndBeats(myMod, clone, t, r, parts, env, markers, madeBeats, lap);
+            fail += WriteProse(clone, t, r);
+            SortStages(clone);
+            fail += OrderAliases(clone);
+            if (fail == 0) fail += EmitModel(myMod, ref clone, r, opts, dry);
+            if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
+
+            lap.Mark("write");
+            if (dry && opts.EmitDir != null)
+            {
+                // The A/B proof's output: the plugin exactly as this build would write it, to a folder that is never the
+                // game's. Two builds from the same plugin state allocate the same FormKeys, so their files compare by bytes.
+                foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+                string outEsm = Path.Combine(opts.EmitDir, t.mod + ".esm");
+                myMod.WriteToBinary(outEsm, gen_quest_main.BuildWriteParams());
+                Console.WriteLine($"\n  --dry --emit: wrote {outEsm} ({new FileInfo(outEsm).Length:N0} B) and the model; the live plugin is untouched.");
+                return 0;
+            }
+            if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
+
+            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+            env.Dispose();   // release the memory-mapped load order before overwriting one of its files
+            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
+            Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
+
+            lap.Mark("verify");
+            int v = IsSpace(t) ? VerifySpace(modFile, readParams, r, t, madeBeats, mastersBefore)
+                               : VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
+            v += VerifyDeal(modFile, readParams, r);
+            lap.Mark("voice");
+            // The audio last, and only over a verified plugin: its file names are the written topics' ids.
+            return v == 0 ? DeployVoice(r, t, madeBeats) : v;
+        }
+
+        /// <summary>
+        /// A slate or board Delve's places and beats, between the self-links and the prose: borrowed aliases, the requests,
+        /// the second planet, a third place or orbit, each place's conditions, the beats, the leashes. Moved out of Build
+        /// verbatim (2026-10-22) when the space kind became the other branch; nothing in it changed.
+        /// </summary>
+        private static int BuildPlacesAndBeats(StarfieldMod myMod, Quest clone, Template t, Recipe r, Parts? parts,
+                                               IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
+                                               Dictionary<string, FormKey> markers, BeatsMade madeBeats, Laps lap)
+        {
             int fail = 0;
             var made4 = new BuildMade();
-            var madeBeats = new BeatsMade();
             if (t.borrowFrom != null) fail += BorrowAliases(myMod, clone, t, parts);
             if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts, r.place);
             // No planet guard on the second request, ever: two crashed the game on start (10a, 12a). See Place.remote.
@@ -2178,36 +2259,7 @@ namespace FrankyCLI
                 else reach = rg.FormKey;
             }
             if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true, IsOrbit(r));
-            fail += WriteProse(clone, t, r);
-            SortStages(clone);
-            fail += OrderAliases(clone);
-            if (fail == 0) fail += EmitModel(myMod, ref clone, r, opts, dry);
-            if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
-
-            lap.Mark("write");
-            if (dry && opts.EmitDir != null)
-            {
-                // The A/B proof's output: the plugin exactly as this build would write it, to a folder that is never the
-                // game's. Two builds from the same plugin state allocate the same FormKeys, so their files compare by bytes.
-                foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
-                string outEsm = Path.Combine(opts.EmitDir, t.mod + ".esm");
-                myMod.WriteToBinary(outEsm, gen_quest_main.BuildWriteParams());
-                Console.WriteLine($"\n  --dry --emit: wrote {outEsm} ({new FileInfo(outEsm).Length:N0} B) and the model; the live plugin is untouched.");
-                return 0;
-            }
-            if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
-
-            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
-            env.Dispose();   // release the memory-mapped load order before overwriting one of its files
-            myMod.WriteToBinary(modFile, gen_quest_main.BuildWriteParams());
-            Console.WriteLine("\n  wrote " + modFile + " (" + new FileInfo(modFile).Length.ToString("N0") + " B)");
-
-            lap.Mark("verify");
-            int v = VerifyBeats(modFile, readParams, r, t, madeBeats, mastersBefore);
-            v += VerifyDeal(modFile, readParams, r);
-            lap.Mark("voice");
-            // The audio last, and only over a verified plugin: its file names are the written topics' ids.
-            return v == 0 ? DeployVoice(r, t, madeBeats) : v;
+            return fail;
         }
 
         /// <summary>
@@ -2554,7 +2606,8 @@ namespace FrankyCLI
         /// <summary>
         /// A request's two recipe dials, applied to the copied alias (his 2026-10-22, 19a). parsecs: the
         /// GetDistanceGalacticParsec condition keeps its function and subject and compares to a number instead of the
-        /// copied Global. habitability false: the ALPS conditions (the request's planet condition) are cleared.
+        /// copied Global. habitability false: the ALPS conditions (the request's planet condition) are cleared. system
+        /// "same": vanilla's same-system planet test is ADDED to the ALPS conditions, after any clearing.
         /// Each refuses when the copied request has nothing to change, so a dial can never be silently a no-op.
         /// </summary>
         private static int ShapeRequest(QuestLocationAlias copy, Place shape)
@@ -2574,8 +2627,20 @@ namespace FrankyCLI
                 copy.ALPS.Conditions.Clear();
                 Console.WriteLine($"  request  : {copy.Name} planet condition dropped ({n} ALPS condition(s))");
             }
+            if (shape.system == "same")
+            {
+                // MB_Bounty02Local's own test, constructed: the player (000014) and LocTypeStarSystem, run on the subject.
+                var same = new IsInSameCurrentLocationAsRefConditionData { Unknown3 = -1 };
+                same.FirstParameter.Link.SetTo(PlayerRef);
+                same.SecondParameter.Link.SetTo(OrbitScopes["system"]);
+                copy.ALPS!.Conditions.Add(new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
+                Console.WriteLine($"  request  : {copy.Name} planet in the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1, MB_Bounty02Local's)");
+            }
             return 0;
         }
+
+        /// <summary>The player's persistent reference, PlayerRef [000014:Starfield.esm].</summary>
+        private static readonly FormKey PlayerRef = FormKey.Factory("000014:Starfield.esm");
 
         /// <summary>
         /// The place's conditions are REBUILT from the recipe, never patched.

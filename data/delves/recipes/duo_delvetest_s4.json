@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s4",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"A\" and \"Go on both\"",
+  "_note": [
+    "SPACE ALIAS-SET TEST S4: S3 minus PatrolMarker01.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech, so no voice spend.",
+    "Pass = it starts (the objective shows and points into orbit). Using the satellite from the ship completing it is a second, weaker reading."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "drop": [
+      "StartingQuestTarget",
+      "StartingQuestTargetOrbital",
+      "TargetSystemLocation",
+      "PatrolMarker01"
+    ]
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S4 at <Place>",
+    "briefing": "Space test S4."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S4 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S4"
+    }
+  ]
+}

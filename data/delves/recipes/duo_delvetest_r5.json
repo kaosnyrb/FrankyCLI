@@ -1,0 +1,39 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_r5",
+  "template": "beats",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"Go on both\", and \"build r5\" (12:25)",
+  "_note": [
+    "REMOTE ALIAS-SET TEST R5: R4's partner. Both drop habitability and both mean 'this system'; R4 says it with a 1-parsec number on the ALIAS (no shipped request does), R5 the way vanilla's one same-system request does (MB_Bounty02Local): IsInSameCurrentLocationAsRef(player, LocTypeStarSystem) == 1 on the REQUEST, the alias limit left at the shipped 8.",
+    "Read R4 and R5 from ONE spot: R5 starts and R4 does not = the 1-parsec alias condition; neither = his system has no planet a request can use.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech, so no voice spend."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "remote": true,
+    "habitability": false,
+    "system": "same"
+  },
+  "prose": {
+    "name": "Survey: Test Beacon R5 on <Planet>",
+    "briefing": "Remote test R5. One requested site in this system, one beacon."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Use the test beacon at the <Place>",
+      "journal": "Remote test R5 complete.",
+      "model": "Meshes\\ccs\\commsmast01.nif",
+      "name": "Test Beacon R5"
+    }
+  ]
+}

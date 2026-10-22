@@ -2110,31 +2110,14 @@ namespace FrankyCLI
             return Path.Combine(Directory.GetParent(Directory.GetParent(root)!.FullName)!.FullName, "papyrus");
         }
 
-        /// <summary>Read the written plugin back OFF DISK and grade every claim the beats build made.</summary>
-        private static int VerifyBeats(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
-                                       Recipe r, Template t, BeatsMade bm, string mastersBefore)
+        /// <summary>
+        /// The alias graph, read back off disk: every id unique, nothing filling from a collection or linking upward, every
+        /// link resolving, no two aliases contending for one reference. Moved out of VerifyBeats verbatim (2026-10-22) when
+        /// the space kind's verify needed the same four; same lines, same order, so a beats build's log is unchanged.
+        /// </summary>
+        private static int AliasGraphChecks(IQuestGetter q)
         {
-            Console.WriteLine();
-            Console.WriteLine("  verification, re-read from disk:");
-            var m = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
             int fail = 0;
-            fail += Check("the plugin's masters are unchanged by the build",
-                          string.Join(", ", m.ModHeader.MasterReferences.Select(x => x.Master.FileName.String)), mastersBefore);
-            var q = m.Quests.FirstOrDefault(x => x.EditorID == r.id);
-            if (q?.VirtualMachineAdapter == null) { Console.WriteLine("    FAIL: the quest or its VMAD is not in the written file."); return 1; }
-            var vma = q.VirtualMachineAdapter;
-            // A clone drives ITSELF: nothing in it, script or condition, may still point at the quest it was copied from.
-            var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
-            fail += Check($"nothing in the quest points at its base {t.@base}",
-                          baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
-            // Each REQUESTED place reads back as a PCM request (a remote main place, and a remote second one).
-            foreach (var (on, label) in new[] { (r.place.remote == true, t.placeAlias), (r.place.second?.remote == true, t.secondPlaceAlias) })
-            {
-                if (!on) continue;
-                var pl = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
-                fail += Check($"place alias {label} is a PCM request (a new site, placed by the planet content manager)",
-                              pl == null ? "missing" : (pl.ALPS != null).ToString(), "True");
-            }
             // EVERY alias link resolves: nothing fills from, is created at, or parents to an alias the quest does not have. A
             // renumbering (the board's borrowed slots) or a removal (an unused slot, a dropped place) that left one dangling
             // fails here rather than in his game.
@@ -2185,6 +2168,46 @@ namespace FrankyCLI
                                   .Select(a => $"alias {a.ID} {a.Name} wants alias {g.First().ID} {g.First().Name}'s reference"))
                 .ToList();
             fail += Check("no two aliases contend for one reference", contend.Count == 0 ? "none" : string.Join("; ", contend), "none");
+            return fail;
+        }
+
+        /// <summary>Read the written plugin back OFF DISK and grade every claim the beats build made.</summary>
+        private static int VerifyBeats(string modFile, Mutagen.Bethesda.Plugins.Binary.Parameters.BinaryReadParameters readParams,
+                                       Recipe r, Template t, BeatsMade bm, string mastersBefore)
+        {
+            Console.WriteLine();
+            Console.WriteLine("  verification, re-read from disk:");
+            var m = StarfieldMod.CreateFromBinaryOverlay(modFile, StarfieldRelease.Starfield, readParams);
+            int fail = 0;
+            fail += Check("the plugin's masters are unchanged by the build",
+                          string.Join(", ", m.ModHeader.MasterReferences.Select(x => x.Master.FileName.String)), mastersBefore);
+            var q = m.Quests.FirstOrDefault(x => x.EditorID == r.id);
+            if (q?.VirtualMachineAdapter == null) { Console.WriteLine("    FAIL: the quest or its VMAD is not in the written file."); return 1; }
+            var vma = q.VirtualMachineAdapter;
+            // A clone drives ITSELF: nothing in it, script or condition, may still point at the quest it was copied from.
+            var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
+            fail += Check($"nothing in the quest points at its base {t.@base}",
+                          baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
+            // Each REQUESTED place reads back as a PCM request (a remote main place, and a remote second one).
+            foreach (var (on, label) in new[] { (r.place.remote == true, t.placeAlias), (r.place.second?.remote == true, t.secondPlaceAlias) })
+            {
+                if (!on) continue;
+                var pl = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
+                fail += Check($"place alias {label} is a PCM request (a new site, placed by the planet content manager)",
+                              pl == null ? "missing" : (pl.ALPS != null).ToString(), "True");
+            }
+            // A same-system request carries vanilla's planet test, MB_Bounty02Local's (place.system "same", 2026-10-22).
+            foreach (var (shape, label) in new[] { (r.place, t.placeAlias), (r.place.second, t.secondPlaceAlias) })
+            {
+                if (shape?.system != "same") continue;
+                var pl = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
+                bool held = pl?.ALPS?.Conditions.Any(c => c is IConditionFloatGetter f && f.ComparisonValue == 1f
+                    && c.Data is IIsInSameCurrentLocationAsRefConditionDataGetter d
+                    && d.FirstParameter.Link.FormKey == PlayerRef && d.SecondParameter.Link.FormKey == OrbitScopes["system"]) ?? false;
+                fail += Check($"place alias {label}'s request keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
+                              held.ToString(), "True");
+            }
+            fail += AliasGraphChecks(q);
             // Every pickup this build wrote weighs 0 (his, 2026-10-20), read back off disk.
             var items = m.MiscItems.Where(x => x.EditorID != null && x.EditorID.StartsWith(r.id + "_item", StringComparison.Ordinal)).ToList();
             var heavy = items.Where(x => x.Weight != 0f).Select(x => $"{x.EditorID} weighs {x.Weight}").ToList();
