@@ -276,7 +276,12 @@ namespace FrankyCLI
                         ht.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>();
                         clone.DialogTopics.Add(ht);
                     }
-                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 768 } };
+                    // ⛔ The record HEADER flag InfoGroup is what makes the engine read this INFO as a group: vanilla sets it on
+                    // every group (MQ101's Lin and Heller, the bounty hunters'). Without it the group is an ordinary walk-up line
+                    // with no words, it passes its own gate, it is picked, and the engine falls back to a silent "Captain"
+                    // (his 19a play, 2026-10-22, after the alias gate and flags alone changed nothing).
+                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 768 },
+                                                           MajorFlags = DialogResponses.MajorFlag.InfoGroup };
                     grp.Conditions.Add(IsHisAlias());
                     var lines = new List<DialogResponses>();
                     for (int h = 0; h < hellos.Count; h++)
