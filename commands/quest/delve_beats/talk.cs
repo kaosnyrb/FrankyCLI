@@ -257,7 +257,10 @@ namespace FrankyCLI
                 // speaker nowhere). That shape never played: the engine fell back to a silent "Captain" (his plays,
                 // 2026-10-19 and 10-22). Many lines share one topic, so each line's WEMFile is its OWN id (NPCDialogueNoun's
                 // scheme; manual 39: either works if the file is named the same), never the topic's.
-                // ⚠ Unproven at his glass: three things changed at once (gate, group flags, line flags); 19a is the probe.
+                // ⛔ NOT THE FIX (his 19a play, 2026-10-22 16:19): this shape still says the silent "Captain". Kept because it is
+                // vanilla's for a created speaker and plays no worse. The record header InfoGroup (every vanilla group has it)
+                // is untested: the build that set it (af6e0b0, reverted 495fa84) never started, for a reason not yet found
+                // (its plugin was byte-identical to a starting one but for a constant id shift).
                 if (tb.person!.hellos is List<List<string>> hellos)
                 {
                     string htag = $"{r.id}_hellos";
