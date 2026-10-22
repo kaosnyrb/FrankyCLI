@@ -2143,11 +2143,20 @@ namespace FrankyCLI
             // Scoped to collection fills and links on purpose: a fill FROM A PLACE numbered above is in seven played Delves
             // (03a to 08a, 18a), so it is not the rule.
             var upward = q.Aliases.OfType<IQuestReferenceAliasGetter>()
-                .SelectMany(a => (a.ReferenceCollectionAliasID is int rc && rc >= 0 && rc > a.ID ? new[] { $"alias {a.ID} fills from collection {rc}" } : Array.Empty<string>())
-                    .Concat(a.LinkedAliases == null ? Array.Empty<string>() : a.LinkedAliases.Where(l => l.AliasID is int la && la > a.ID).Select(l => $"alias {a.ID} links to {l.AliasID}")))
+                .Where(a => a.ReferenceCollectionAliasID is int rc && rc >= 0 && rc > a.ID)
+                .Select(a => $"alias {a.ID} fills from collection {a.ReferenceCollectionAliasID}")
                 .ToList();
-            fail += Check("no alias fills from a collection, or links to an alias, numbered above it",
+            fail += Check("no alias fills from a collection numbered above it",
                           upward.Count == 0 ? "none" : string.Join("; ", upward), "none");
+            // ⚠ A LINK to an alias numbered above it is PRINTED, NOT GRADED (2026-10-22 pm). This check graded it from the
+            // morning it was written, by analogy and on no incident, and it failed the shipped space set on its first build:
+            // PrimaryRef (3) links to PatrolMarker01 (17) in all 10 MB01 quests and all 62 remote-space quests. Whether it
+            // matters is the space ladder's to say (rung s1 carries it, s4 drops it), not this check's.
+            var upLinks = q.Aliases.OfType<IQuestReferenceAliasGetter>()
+                .SelectMany(a => a.LinkedAliases == null ? Array.Empty<string>() : a.LinkedAliases.Where(l => l.AliasID is int la && la > a.ID).Select(l => $"alias {a.ID} links to {l.AliasID}"))
+                .ToList();
+            if (upLinks.Count > 0)
+                Console.WriteLine($"    [note] a link to an alias numbered above it, not graded (the shipped space set carries one): {string.Join("; ", upLinks)}");
             var dangling = q.Aliases.OfType<IQuestReferenceAliasGetter>()
                 .SelectMany(a => new[] { (a.ID, "fills from", a.Location?.AliasID), (a.ID, "is created at", (int?)a.CreateReferenceToObject?.AliasID) })
                 .Where(x => x.Item3 is int v && v >= 0 && !ids.Contains((uint)v))
