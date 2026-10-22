@@ -48,7 +48,12 @@ namespace FrankyCLI
             /// </summary>
             internal override int Slot(BeatsBuild build, int i)
             {
-                if (build.baseNext < build.t.beatSlots.Count)
+                // ⛔ An ORBIT beat never takes a base slot: the base's ids (1, 2) sit BELOW the orbit's cell collection, and a
+                // marker filled from a collection numbered above it never started 19a (2026-10-22, his "weird ID order", after
+                // the id clash, "planet", "system" and "near" all failed). A fresh slot is numbered above the cell, as MB01's
+                // marker is above its own; the base slot it leaves is removed by the unused-slot pass.
+                bool inOrbit = build.r.beats[i].PlaceIndex == 2 && build.made.OrbitCell >= 0;
+                if (!inOrbit && build.baseNext < build.t.beatSlots.Count)
                 {
                     build.slotOf[i] = new BeatSlot { markerAlias = build.t.beatSlots[build.baseNext].markerAlias, activatorAlias = build.t.beatSlots[build.baseNext].activatorAlias,
                                                      journalStage = build.beatStage[i] };

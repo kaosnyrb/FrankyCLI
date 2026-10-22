@@ -1180,6 +1180,12 @@ namespace FrankyCLI
                     {
                         // The orbit's map marker names the first orbit beat's object on the star map (MB01's shape).
                         var mm = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)made.OrbitMapMarker);
+                        // Numbered and listed AFTER the object it is named by, as MB01's SpaceMapMarker (16) follows its target
+                        // (2026-10-22, his "weird ID order"): nothing in an orbit chain refers to an alias numbered above it.
+                        clone.Aliases.Remove(mm);
+                        mm.ID = NextAliasId(clone);
+                        clone.Aliases.Add(mm);
+                        made.OrbitMapMarker = (int)mm.ID;
                         mm.LinkedAliases[0].AliasID = slotOf[i].activatorAlias;
                         var entry = NewAliasEntry(vma, clone.FormKey, made.OrbitMapMarker);
                         var sc = new ScriptEntry { Name = MapMarkerScript };
@@ -2149,6 +2155,16 @@ namespace FrankyCLI
                 .ToList();
             fail += Check("every alias id is unique and each collection entry's id is its inner alias's",
                           idClash.Count == 0 ? "all unique" : string.Join("; ", idClash), "all unique");
+            // NOTHING FILLS FROM A COLLECTION, OR LINKS TO AN ALIAS, NUMBERED ABOVE IT (2026-10-22, his "weird ID order": 19a's
+            // orbit marker 1 filled from cell collection 62 and would not start; MB01 runs 2, 10, 12, 16 in dependency order).
+            // Scoped to collection fills and links on purpose: a fill FROM A PLACE numbered above is in seven played Delves
+            // (03a to 08a, 18a), so it is not the rule.
+            var upward = q.Aliases.OfType<IQuestReferenceAliasGetter>()
+                .SelectMany(a => (a.ReferenceCollectionAliasID is int rc && rc >= 0 && rc > a.ID ? new[] { $"alias {a.ID} fills from collection {rc}" } : Array.Empty<string>())
+                    .Concat(a.LinkedAliases == null ? Array.Empty<string>() : a.LinkedAliases.Where(l => l.AliasID is int la && la > a.ID).Select(l => $"alias {a.ID} links to {l.AliasID}")))
+                .ToList();
+            fail += Check("no alias fills from a collection, or links to an alias, numbered above it",
+                          upward.Count == 0 ? "none" : string.Join("; ", upward), "none");
             var dangling = q.Aliases.OfType<IQuestReferenceAliasGetter>()
                 .SelectMany(a => new[] { (a.ID, "fills from", a.Location?.AliasID), (a.ID, "is created at", (int?)a.CreateReferenceToObject?.AliasID) })
                 .Where(x => x.Item3 is int v && v >= 0 && !ids.Contains((uint)v))
