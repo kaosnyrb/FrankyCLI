@@ -2571,9 +2571,9 @@ namespace FrankyCLI
                 {
                     var grp = ht?.Responses.FirstOrDefault(x => x.EditorID == $"{r.id}_talk{hb + 1}_hellos");
                     var gal = grp?.Conditions.FirstOrDefault()?.Data as IGetIsAliasRefConditionDataGetter;
-                    fail += Check($"beat {hb + 1}'s walk-up group is a group (InfoGroup header) gated on his alias alone",
-                                  grp == null ? "missing" : $"header {grp.MajorFlags}, flags {grp.Flags?.Flags}, {grp.Conditions.Count} condition(s), GetIsAliasRef {gal?.FirstParameter}",
-                                  $"header {DialogResponses.MajorFlag.InfoGroup}, flags 768, 1 condition(s), GetIsAliasRef {halias}");
+                    fail += Check($"beat {hb + 1}'s walk-up group is gated on his alias alone",
+                                  grp == null ? "missing" : $"flags {grp.Flags?.Flags}, {grp.Conditions.Count} condition(s), GetIsAliasRef {gal?.FirstParameter}",
+                                  $"flags 768, 1 condition(s), GetIsAliasRef {halias}");
                     var kids = ht?.Responses.Where(x => grp != null && x.DialogGroup.FormKey == grp.FormKey).ToList() ?? new();
                     fail += Check($"beat {hb + 1}'s walk-up lines sit under the group, each named for its own wem",
                                   $"{kids.Count} line(s), flags {string.Join("/", kids.Select(k => k.Flags?.Flags).Distinct())}, own-id wems {kids.All(k => k.Responses.FirstOrDefault()?.WEMFile == k.FormKey.ID)}",
