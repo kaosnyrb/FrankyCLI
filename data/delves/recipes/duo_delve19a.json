@@ -78,6 +78,8 @@
         ]
       },
       "greeting": [
+        "Our relay satellite's dead, and we can't call anyone.",
+        "The new core for it got taken by raiders on the way here.",
         "If you've got a ship, you're the most useful person I've seen all week."
       ],
       "exchanges": [
@@ -92,8 +94,8 @@
         {
           "prompt": "What's wrong with the satellite?",
           "reply": [
-            "Nothing a new core won't fix. The old one burned out, which they do.",
-            "What they don't usually do is get stolen on the way here."
+            "The core burned out. They do, after a few years up there.",
+            "Everything else on it is fine. Swap the core and it wakes up."
           ]
         },
         {
