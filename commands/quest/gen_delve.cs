@@ -444,6 +444,12 @@ namespace FrankyCLI
             /// </summary>
             public double? altitude { get; set; }
             /// <summary>
+            /// space only: the alias, by name, the orbit is PARENTED to (ParentSystemLocationAliasID), its conditions cleared:
+            /// "the orbit over that thing", the way 125 vanilla orbit aliases say it (RQ_Settlement_KillShips_01 over its
+            /// trigger, SE_Player_* over PlayerShip; his 2026-10-22 pointer, "Read RQ_Settlement_KillShips_01"). Rung S10.
+            /// </summary>
+            public string? over { get; set; }
+            /// <summary>
             /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
             /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and

@@ -44,6 +44,8 @@ namespace FrankyCLI
                 Fatal($"place.system is \"{p.system}\"; the one value built is \"same\" (the orbit in the player's star system, vanilla's way).");
             if (p.system != null && p.parsecs != null)
                 Fatal("place.system and place.parsecs are both set; one rung, one way of saying near (S6 was the number, S7 vanilla's test).");
+            if (p.over != null && (p.system != null || p.parsecs != null))
+                Fatal("place.over is set beside place.system or place.parsecs; over CLEARS the orbit's conditions, so the others would test nothing.");
             if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
                 Fatal($"place.altitude is {alt}; his settled band is {OrbitAltitudeBand.min} to {OrbitAltitudeBand.max} (past ~32 the engine discards it).");
             if (p.second != null || p.third != null)
@@ -143,6 +145,18 @@ namespace FrankyCLI
                 orbit.Conditions.AddRange(body);
                 orbit.Conditions.Add(SameSystemCondition());
                 Console.WriteLine($"  orbit    : {orbit.Name} in the player's star system, MB_BountySpace06Local's three conditions (dropped: {string.Join(", ", gone)})");
+            }
+            // OVER A THING, vanilla's way (rung S10): no conditions, a parent link to the alias, and the flag every one of the
+            // 125 vanilla orbits carrying a parent link has (0x40000000, unnamed in Mutagen; named here by its users).
+            if (r.place.over is string overName)
+            {
+                var anchor = AliasNames(clone.Aliases!).Where(x => !x.member && string.Equals(x.name, overName, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (anchor.Count != 1) { Console.WriteLine($"REFUSED: place.over names '{overName}', and {anchor.Count} alias(es) of the shell carry that name."); return 1; }
+                var gone = orbit.Conditions.Select(c => c.Data.GetType().Name.Replace("ConditionData", "")).ToList();
+                orbit.Conditions.Clear();
+                orbit.ParentSystemLocationAliasID = (int)anchor[0].id;
+                orbit.Flags = (orbit.Flags ?? 0) | ParentLinkFlag;
+                Console.WriteLine($"  orbit    : {orbit.Name} over alias {anchor[0].id} {anchor[0].name} (ParentSystemLocationAliasID, flags {orbit.Flags}); conditions cleared: {string.Join(", ", gone)}");
             }
             if (r.place.altitude is double alt)
             {
@@ -292,6 +306,9 @@ namespace FrankyCLI
             return 0;
         }
 
+        /// <summary>The flag bit every vanilla location alias with a parent link carries (125 of 125 orbit aliases, 2026-10-22).</summary>
+        private const QuestLocationAlias.Flag ParentLinkFlag = (QuestLocationAlias.Flag)0x40000000;
+
         /// <summary>Every alias id a quest carries with its name; a collection's member is named, and flagged as a member.</summary>
         private static IEnumerable<(uint id, string name, bool member)> AliasNames(IEnumerable<IAQuestAliasGetter> aliases)
             => aliases.SelectMany(a => AliasGraph.IdsOf(a).Select(id => a switch
@@ -348,6 +365,13 @@ namespace FrankyCLI
                               "BodyHasKeyword,BodyHasKeyword,IsInSameCurrentLocationAsRef");
             if (r.place.altitude is double alt)
                 fail += Check($"the orbit's altitude is {alt}", AltitudeOf(orbit).ToString("0.###"), alt.ToString("0.###"));
+            if (r.place.over is string overName)
+            {
+                var anchorId = AliasNames(q.Aliases).Where(x => !x.member && string.Equals(x.name, overName, StringComparison.OrdinalIgnoreCase)).Select(x => (int?)x.id).FirstOrDefault();
+                fail += Check($"the orbit is parented to {overName} (alias {anchorId}), with the parent flag and no conditions",
+                              $"parent {orbit?.ParentSystemLocationAliasID}, flag {((orbit?.Flags ?? 0) & ParentLinkFlag) == ParentLinkFlag}, {orbit?.Conditions.Count} condition(s)",
+                              $"parent {anchorId}, flag True, 0 condition(s)");
+            }
             var target = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
             fail += Check($"alias {slot.activatorAlias} creates {r.id}_b1 at marker alias {slot.markerAlias}",

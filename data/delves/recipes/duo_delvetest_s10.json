@@ -1,0 +1,33 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s10",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"A\" and \"Go on both\", then \"Read RQ_Settlement_KillShips_01\" and \"yeah S10, let's prove it\" (13:32)",
+  "_note": [
+    "SPACE ALIAS-SET TEST S10: S1 with the orbit OVER the player's ship: its conditions cleared and ParentSystemLocationAliasID to PlayerShip, the way the space encounters do it (SE_Player_Patrol02) and RQ_Settlement_KillShips_01 does it over its trigger. One change from S1, at 03a's altitude.",
+    "Pass = it starts, and the satellite is in orbit over the planet his ship is at (from Gagarin, Gagarin's orbit).",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "over": "PlayerShip"
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S10 at <Place>",
+    "briefing": "Space test S10."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S10 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S10"
+    }
+  ]
+}

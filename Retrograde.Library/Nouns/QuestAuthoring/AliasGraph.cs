@@ -77,10 +77,17 @@ namespace Retrograde.Nouns.QuestAuthoring
                 .Where(IsSubject)
                 .Select(d => (uint)d.FirstParameter).ToList();
 
+        /// The alias a location alias is PARENTED to (ParentSystemLocationAliasID): "the location of my type over that alias's
+        /// location", e.g. a planet over the main place, an orbit over the player's ship (SE_Player_*) or a settlement's trigger
+        /// (RQ_Settlement_KillShips_01). Read when the place fills, so a fill dependency: in his load order 1,283 of 1,289
+        /// such links point ABOVE the alias in the list (2026-10-22, before gen_delve's space kind first parented an orbit).
+        public static List<uint> ParentDepsOf(IQuestLocationAliasGetter l) =>
+            l.ParentSystemLocationAliasID is int p && p >= 0 ? new List<uint> { (uint)p } : new List<uint>();
+
         private static List<uint> EntryDeps(IAQuestAliasGetter a) => a switch
         {
             IQuestReferenceAliasGetter r => DepsOf(r).Select(d => d.dep).ToList(),
-            IQuestLocationAliasGetter l => LeashDepsOf(l).Concat(SameLocationDepsOf(l)).ToList(),
+            IQuestLocationAliasGetter l => LeashDepsOf(l).Concat(SameLocationDepsOf(l)).Concat(ParentDepsOf(l)).ToList(),
             IQuestCollectionAliasGetter c => c.Collection?.Where(m => m.ReferenceAlias != null)
                                                  .SelectMany(m => DepsOf(m.ReferenceAlias!).Select(d => d.dep)).ToList() ?? new List<uint>(),
             _ => new List<uint>(),
