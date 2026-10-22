@@ -605,7 +605,9 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
-            public List<(int on, int to)> SpawnHooks = new();   // fight beats' markers carrying the distance hook that spawns them, and the alias it measures to (the player)
+            public List<(int on, int to)> SpawnHooks = new();
+            public (int place, int cell, int main)? Orbit;   // an orbit third place: its alias, its space cell's member, the main place it is tested against
+            public List<(int alias, FormKey refType)> OrbitMarkers = new();   // orbit beats' markers, filled from the cell by this ref type   // fight beats' markers carrying the distance hook that spawns them, and the alias it measures to (the player)
             public List<(int objective, int alias, int spawned)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late, lit until its spawned stage
             public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own travel to the fight's marker (its source's radius and template)
             public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
@@ -651,8 +653,10 @@ namespace FrankyCLI
         /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
         /// constructed one. Refuses if an anchor is missing; its POSITION is OrderAliases' (a leash is a fill dependency).
         /// </summary>
-        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false)
+        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false, bool orbitThird = false)
         {
+            // An ORBIT third place is over the main place's planet by its own condition (CreateOrbitPlace), never a drive.
+            if (orbitThird) Console.WriteLine("  leash    : none on the third place; it is an orbit over the main place's planet");
             // A REQUESTED second place is a new site on (meant to be) another planet: no drive leash to the first, which is
             // the point of it, and its own request carries the parsec limit from the player (the remote source's).
             if (secondRemote) { Console.WriteLine("  leash    : none on the second place; it is a second request, not a drive away"); return 0; }
@@ -692,7 +696,7 @@ namespace FrankyCLI
 
             int fail = 0;
             if (second != null) fail += Anchor(second, longDrive, mainMap, "the main place's map marker");
-            if (loc.GetValueOrDefault(33u) is QuestLocationAlias third)
+            if (!orbitThird && loc.GetValueOrDefault(33u) is QuestLocationAlias third)
             {
                 var c = Leash(third);
                 if (c == null) { Console.WriteLine("REFUSED: the third place carries no single GetDistance leash."); return fail + 1; }
@@ -1163,7 +1167,10 @@ namespace FrankyCLI
                         }
                         continue;
                     }
-                    int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias));
+                    bool inOrbit = r.beats[i].PlaceIndex == 2 && made.OrbitCell >= 0;
+                    int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias),
+                                      inOrbit ? made.OrbitCell : -1, made.OrbitMarker);
+                    if (inOrbit) bm.OrbitMarkers.Add((slotOf[i].markerAlias, markers[r.beats[i].at]));
                     if (f > 0) return f;
                     if (landingOf.TryGetValue(i, out int la))
                     {
@@ -2236,6 +2243,25 @@ namespace FrankyCLI
             // and only this file's read-back of the first copy showed it). Every alias, every script, not only ours.
             var twice = vma.Aliases.SelectMany(a => a.Scripts.GroupBy(s => s.Name).Where(g => g.Count() > 1).Select(g => $"alias {a.Property.Alias} {g.Key}")).ToList();
             fail += Check("no alias carries the same script twice", twice.Count == 0 ? "none" : string.Join(", ", twice), "none");
+            if (bm.Orbit is (int orbAlias, int orbCell, int orbMain))
+            {
+                var ol = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)orbAlias);
+                fail += Check($"orbit alias {orbAlias} fills by type LocTypeOrbit", ol?.LocationTypeKeyword.FormKey.ToString() ?? "missing", "016504:Starfield.esm");
+                float alt = BitConverter.Int32BitsToSingle(ol?.ALFG ?? 0);
+                fail += Check($"orbit alias {orbAlias}'s altitude is in his 8-32 band", (alt >= 8f && alt <= 32f).ToString(), "True");
+                bool samePlanet = ol?.Conditions.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter d
+                                     && d.FirstParameter == orbMain && d.SecondParameter.Link.FormKey == MajorOrbital && c is IConditionFloatGetter f && f.ComparisonValue == 1f) ?? false;
+                fail += Check($"orbit alias {orbAlias} is over the orbMain place's planet (IsInSameCurrentLocationAsAlias {orbMain}, LocTypeMajorOrbital)", samePlanet.ToString(), "True");
+                var cm = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(x => x?.ID == (uint)orbCell);
+                fail += Check($"space cell {orbCell} is created at the orbit", cm?.CreateReferenceToObject?.AliasID.ToString() ?? "missing", orbAlias.ToString());
+                foreach (var (ma, rt) in bm.OrbitMarkers)
+                {
+                    var mk = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)ma);
+                    bool byType = mk?.Conditions.Any(c => c.Data is IHasRefTypeConditionDataGetter h && h.FirstParameter.Link.FormKey == rt) ?? false;
+                    fail += Check($"orbit marker {ma} fills from the cell by its ref type, and from nowhere else",
+                                  $"collection {mk?.ReferenceCollectionAliasID} location {(mk?.Location == null ? "none" : "SET")} by-type {byType}", $"collection {orbCell} location none by-type True");
+                }
+            }
             foreach (var (on, to) in bm.SpawnHooks)
             {
                 var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == on)?.Scripts.FirstOrDefault(x => x.Name == NearScript);

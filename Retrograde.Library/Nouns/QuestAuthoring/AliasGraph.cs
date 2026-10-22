@@ -68,10 +68,19 @@ namespace Retrograde.Nouns.QuestAuthoring
                 .Where(d => d.UseAliases && IsSubject(d) && d.FirstParameter.Index is uint)
                 .Select(d => (uint)d.FirstParameter.Index!).ToList();
 
+        /// The alias IDs a place is tested AGAINST: IsInSameCurrentLocationAsAlias on the candidate names another alias by
+        /// number, and is read when the place fills, so that alias must fill first, exactly as a leash's anchor
+        /// (2026-10-22, gen_delve's orbit place: the orbit over the MAIN place's planet).
+        public static List<uint> SameLocationDepsOf(IQuestLocationAliasGetter l) =>
+            (l.Conditions ?? new List<IConditionGetter>())
+                .Select(c => c.Data).OfType<IIsInSameCurrentLocationAsAliasConditionDataGetter>()
+                .Where(IsSubject)
+                .Select(d => (uint)d.FirstParameter).ToList();
+
         private static List<uint> EntryDeps(IAQuestAliasGetter a) => a switch
         {
             IQuestReferenceAliasGetter r => DepsOf(r).Select(d => d.dep).ToList(),
-            IQuestLocationAliasGetter l => LeashDepsOf(l),
+            IQuestLocationAliasGetter l => LeashDepsOf(l).Concat(SameLocationDepsOf(l)).ToList(),
             IQuestCollectionAliasGetter c => c.Collection?.Where(m => m.ReferenceAlias != null)
                                                  .SelectMany(m => DepsOf(m.ReferenceAlias!).Select(d => d.dep)).ToList() ?? new List<uint>(),
             _ => new List<uint>(),

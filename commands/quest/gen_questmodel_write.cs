@@ -269,6 +269,14 @@ namespace FrankyCLI
             ["LocationHasRefType"] = new(typeof(ILocationHasRefTypeConditionDataGetter), () => new LocationHasRefTypeConditionData(),
                 (g, m) => { var x = (ILocationHasRefTypeConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (LocationHasRefTypeConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            // HasRefType and BodyHasKeyword (2026-10-22): an orbit place's chain off his MB01 (gen_delve orbitFrom). HasRefType
+            // fills a marker from a created space cell; BodyHasKeyword is MB01's own orbit pick, read so the part reads at all.
+            ["HasRefType"] = new(typeof(IHasRefTypeConditionDataGetter), () => new HasRefTypeConditionData(),
+                (g, m) => { var x = (IHasRefTypeConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (HasRefTypeConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            ["BodyHasKeyword"] = new(typeof(IBodyHasKeywordConditionDataGetter), () => new BodyHasKeywordConditionData(),
+                (g, m) => { var x = (IBodyHasKeywordConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (BodyHasKeywordConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             ["LocationHasKeyword"] = new(typeof(ILocationHasKeywordConditionDataGetter), () => new LocationHasKeywordConditionData(),
                 (g, m) => { var x = (ILocationHasKeywordConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (LocationHasKeywordConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),

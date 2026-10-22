@@ -40,7 +40,7 @@
     },
     "third": {
       "orbit": true,
-      "_orbit": "PROPOSED FIELD, Eliza's to build or reshape: the satellite in orbit over the main place's planet. If a fixed orbital ref or a space cell is the cheaper fill, that is her call; the words below do not depend on which.",
+      "_orbit": "BUILT 2026-10-22 (Eliza, his 'go on 19a, try over'): his MB01 satellite repair's orbit chain, tested IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a space cell at it, and the satellite's marker filled from the cell. So the deliver's at is se_TravelMarkerLocRefB02 (was RECenterLocRef, a surface marker no cell has). No vanilla orbit is tied to a planet this way, so his first play is the proof.",
       "theme": {
         "require": [],
         "exclude": []
@@ -117,7 +117,7 @@
     {
       "type": "deliver",
       "place": "third",
-      "at": "RECenterLocRef",
+      "at": "se_TravelMarkerLocRefB02",
       "objective": "Fit the transceiver core in the relay satellite",
       "journal": "The relay over <Planet> went dark and raiders at the <SecondPlace> had its replacement core. I got it back and fitted it in orbit. The settlers at the <Place> can call out again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",

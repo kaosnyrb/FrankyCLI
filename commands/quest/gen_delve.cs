@@ -116,6 +116,13 @@ namespace FrankyCLI
             /// </summary>
             public ThirdPlace? thirdPlace { get; set; }
             /// <summary>
+            /// beats: the quest whose ORBIT chain a recipe's place.third.orbit copies (his MB01 satellite repair, 2026-10-22,
+            /// his "go on 19a, try over"): an orbit location alias, the levelled space cell created at it, a marker filled from
+            /// inside that cell, and the cell's map marker. Read once into the parts file. Null = this template has no orbit.
+            /// </summary>
+            public string? orbitFrom { get; set; }
+            public OrbitAliases? orbitAliases { get; set; }
+            /// <summary>
             /// beats: a quest in the same mod whose place alias (the same ID as placeAlias) is a REMOTE request, copied
             /// over the main place when a recipe sets place.remote. Null = this template cannot go remote. His
             /// 2026-10-14: "I got sick of travelling", so a Delve whose whole site is requested on another planet.
@@ -206,6 +213,18 @@ namespace FrankyCLI
         /// like any other place.
         /// </summary>
         private sealed class ThirdPlace { public int cloneOf { get; set; } = -1; public string name { get; set; } = ""; }
+        /// <summary>orbitFrom's four aliases, by their SOURCE ids: the orbit location, the space-cell collection created at it,
+        /// a marker filled from that collection, and the map marker filled from it.</summary>
+        private sealed class OrbitAliases
+        {
+            public int place { get; set; } = -1;
+            public int cell { get; set; } = -1;
+            public int marker { get; set; } = -1;
+            public int mapMarker { get; set; } = -1;
+            /// <summary>Every source id the row names; -1 (absent) is skipped. The map marker is left out today: its LinkedAliases
+            /// is a field the quest model does not hold, and the objective on the object guides him.</summary>
+            public int[] All => new[] { place, cell, marker, mapMarker }.Where(x => x >= 0).ToArray();
+        }
         /// <summary>
         /// A template's PARTS file: the aliases its build copies off other quests, as gen_questmodel models, each beside the
         /// quest it was read from (provenance, never read at build). Written by `gen_delve shell` and owned after, exactly as
@@ -223,6 +242,9 @@ namespace FrankyCLI
             /// <summary>Vanilla's empty wave collection (UC08_AB_AnomalyBattle's ActiveHostiles), which hold and clear copy.</summary>
             public string? wavesFrom { get; set; }
             public QAlias? waves { get; set; }
+            /// <summary>orbitFrom's four aliases (OrbitAliases), by their SOURCE ids, which a place.third.orbit copies in.</summary>
+            public string? orbitFrom { get; set; }
+            public List<QAlias> orbit { get; set; } = new();
         }
         /// <summary>The vanilla quest a hold's and a clear's wave collections are copied from, and how its alias is found.</summary>
         private const uint WaveQuestId = 0x03E832;
@@ -233,7 +255,13 @@ namespace FrankyCLI
         /// <summary>A template whose recipes may hold or clear copies the wave collection (allows empty = every type).</summary>
         private static bool TakesWaves(Template t) => t.allows.Count == 0 || t.allows.Contains("hold") || t.allows.Contains("clear");
         /// <summary>Does this template's build take anything off another quest?</summary>
-        private static bool TakesParts(Template t) => t.remotePlaceFrom != null || t.borrowFrom != null || TakesWaves(t);
+        /// <summary>A recipe whose third place is an orbit (Place.orbit).</summary>
+        private static bool IsOrbit(Recipe r) => r.place.third?.orbit == true;
+        /// <summary>The beat types built in orbit: a thing used from the ship.</summary>
+        private static readonly string[] OrbitBeatTypes = { "use", "pickup", "deliver" };
+        /// <summary>The marker an orbit beat stands at, filled from the space cell: his MB01's (orbitFrom's marker alias).</summary>
+        private const string OrbitMarker = "se_TravelMarkerLocRefB02";
+        private static bool TakesParts(Template t) => t.remotePlaceFrom != null || t.borrowFrom != null || TakesWaves(t) || t.orbitFrom != null;
         private sealed class TemplateFile { public int schema { get; set; } public List<Template> templates { get; set; } = new(); }
 
         private sealed class Recipe
@@ -370,6 +398,14 @@ namespace FrankyCLI
             /// (his 2026-10-14 pick, "a": no driving). Its pool is gen_delve pcmpool's, not the POI census.
             /// </summary>
             public bool? remote { get; set; }
+            /// <summary>
+            /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
+            /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
+            /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
+            /// each beat's marker filled from inside that cell by its `at` ref type. Its beats are things used from the ship
+            /// (use, pickup, deliver), as his MB01 satellite is. No theme, no who, no leash: an orbit is not a drawn POI.
+            /// </summary>
+            public bool? orbit { get; set; }
             // ⛔ There is no "planet" key, and an unknown key is refused. A second request lands where the planet content
             // manager puts it, the first site's planet or another. Two planet guards on a place (10a 2026-10-14, 12a
             // 2026-10-19) each CRASHED the game on start, and his ruling 2026-10-19 is "Stop doing it", "it's fine if the
@@ -1372,6 +1408,28 @@ namespace FrankyCLI
             bool secondRemote = r.place.second?.remote == true;
             if (r.place.third?.remote != null)
                 Fatal("remote is set on place.third; only the main and the second place can be requested.");
+            // THE ORBIT (2026-10-22, 19a): a thing over the main place's planet, used from the ship.
+            if (r.place.orbit != null || r.place.second?.orbit != null)
+                Fatal("orbit is set on the main or the second place; only place.third can be an orbit.");
+            if (r.place.third?.orbit == false)
+                Fatal("place.third.orbit is false; leave it out for a drawn third place.");
+            if (IsOrbit(r))
+            {
+                var o = r.place.third!;
+                if (t.orbitFrom == null) Fatal($"place.third.orbit is set and template '{t.id}' names no orbitFrom, so there is no orbit to copy.");
+                if (o.theme.require.Count > 0 || o.theme.exclude.Count > 0) Fatal("place.third.orbit has a theme; an orbit is not a drawn POI, so a theme would test nothing.");
+                if (o.who != null) Fatal("place.third.orbit has a who; nobody stands in orbit.");
+                if (o.leash != null || o.reach != null) Fatal("place.third.orbit sets leash or reach; an orbit is over the main place's planet, not a drive from it.");
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    var b = r.beats[i];
+                    if (b.PlaceIndex != 2) continue;
+                    if (!OrbitBeatTypes.Contains(b.type))
+                        Fatal($"beat {i + 1} ({b.type}) is in orbit; only {string.Join(", ", OrbitBeatTypes)} are built there, a thing used from the ship (his MB01 satellite).");
+                    if (!string.Equals(b.at, OrbitMarker, StringComparison.OrdinalIgnoreCase))
+                        Fatal($"beat {i + 1} is in orbit at '{b.at}'; an orbit's markers are its space cell's own, so `at` is {OrbitMarker} (his MB01's, filled from the cell).");
+                }
+            }
             if (r.place.second?.remote == false)
                 Fatal("place.second.remote is false; leave it out for a found second place.");
             // A LOCAL main place with a requested second (10a, his 2026-10-14 "build 10a": here, then another planet) is
@@ -1413,6 +1471,11 @@ namespace FrankyCLI
                 var drawn = new Dictionary<int, HashSet<string>>();
                 foreach (int pi in PlacesUsed(r))
                 {
+                    if (pi == 2 && IsOrbit(r))
+                    {
+                        Console.WriteLine($"  -- the third place is an ORBIT (created at build from {t.orbitFrom}): over the main place's planet, no POI pool to draw");
+                        continue;
+                    }
                     var pool = (pi == 0 && remote) || (pi == 1 && secondRemote) ? reqPool! : drawPool;
                     var here = MarkersAt(r, keys, pi);
                     var theme = ThemeOf(r, pi);
@@ -1476,7 +1539,8 @@ namespace FrankyCLI
                 if (baseQ?.Aliases != null)
                     foreach (int pi in PlacesUsed(r))
                     {
-                        var fromQ = ((pi == 0 && r.place.remote == true) || (pi == 1 && secondRemote)) && remoteQ != null ? remoteQ : baseQ;
+                        if (pi == 2 && IsOrbit(r)) continue;   // an orbit keeps none of the base's place conditions
+                        var fromQ =((pi == 0 && r.place.remote == true) || (pi == 1 && secondRemote)) && remoteQ != null ? remoteQ : baseQ;
                         // The third place is a clone, so what it would inherit and drop is its source's.
                         int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : pi == 1 && secondRemote ? t.placeAlias : PlaceAliasOf(t, pi, -1);
                         var theme = ThemeOf(r, pi);
@@ -1834,6 +1898,21 @@ namespace FrankyCLI
                 parts.wavesFrom = $"{wq!.EditorID} [{wq.FormKey}]";
                 parts.waves = Part(w, $"{wq.EditorID}.{WaveMemberName}");
             }
+            if (t.orbitFrom != null)
+            {
+                var oq = mod.Quests.FirstOrDefault(q => q.EditorID == t.orbitFrom);
+                if (oq == null || t.orbitAliases == null) { Console.WriteLine($"REFUSED: orbitFrom '{t.orbitFrom}' is not a quest in {modFile}, or the row names no orbitAliases."); return 1; }
+                parts.orbitFrom = $"{oq.EditorID} [{oq.FormKey}]";
+                foreach (int oid in t.orbitAliases.All)
+                {
+                    // A collection alias's id is its member's, so it is found through its one member.
+                    IAQuestAliasGetter? a = oq.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(x => x.ID == (uint)oid);
+                    a ??= oq.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(x => x.ID == (uint)oid);
+                    a ??= oq.Aliases.OfType<IQuestCollectionAliasGetter>().FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.ID == (uint)oid);
+                    if (a == null) { Console.WriteLine($"REFUSED: {oq.EditorID} has no alias {oid} for the orbit."); return 1; }
+                    parts.orbit.Add(Part(a, $"{oq.EditorID}.Aliases[{oid}]"));
+                }
+            }
             if (partRefusals.Count > 0)
             {
                 foreach (var x in partRefusals) Console.WriteLine("REFUSED (a part): " + x);
@@ -1845,7 +1924,7 @@ namespace FrankyCLI
             string file = Path.Combine(dir, t.id + ".json");
             File.WriteAllText(file, gen_questmodel.ToJson(gen_questmodel.ShellOf(full)));
             Console.WriteLine($"  shell    : {file} from {t.@base} [{b.FormKey}]; set the template row's \"shell\": \"shells/{t.id}.json\"");
-            if (parts.remotePlace == null && parts.borrowed.Count == 0 && parts.waves == null)
+            if (parts.remotePlace == null && parts.borrowed.Count == 0 && parts.waves == null && parts.orbit.Count == 0)
             {
                 Console.WriteLine("  parts    : none; this template takes nothing off another quest");
                 return 0;
@@ -1855,7 +1934,8 @@ namespace FrankyCLI
             Console.WriteLine($"  parts    : {pfile}: " + string.Join(", ", new[] {
                                   parts.remotePlace == null ? null : $"the remote request from {parts.remotePlaceFrom}",
                                   parts.borrowed.Count == 0 ? null : $"{parts.borrowed.Count} borrowed alias(es) from {parts.borrowFrom}",
-                                  parts.waves == null ? null : $"the wave collection from {parts.wavesFrom}" }.Where(s => s != null))
+                                  parts.waves == null ? null : $"the wave collection from {parts.wavesFrom}",
+                                  parts.orbit.Count == 0 ? null : $"{parts.orbit.Count} orbit alias(es) from {parts.orbitFrom}" }.Where(s => s != null))
                               + $"; set the template row's \"parts\": \"shells/{t.id}.parts.json\"");
             return 0;
         }
@@ -1937,7 +2017,7 @@ namespace FrankyCLI
                 string? Stale(string? named, string? readFrom) => named == null ? null
                     : readFrom == null || !readFrom.StartsWith(named + " [", StringComparison.Ordinal) ? $"{named} (the file was read from {readFrom ?? "nothing"})" : null;
                 var mismatch = parts == null ? new List<string> { "the file is empty" }
-                    : new[] { Stale(t.remotePlaceFrom, parts.remotePlaceFrom), Stale(t.borrowFrom, parts.borrowFrom) }.Where(s => s != null).Select(s => s!).ToList();
+                    : new[] { Stale(t.remotePlaceFrom, parts.remotePlaceFrom), Stale(t.borrowFrom, parts.borrowFrom), Stale(t.orbitFrom, parts.orbitFrom) }.Where(s => s != null).Select(s => s!).ToList();
                 if (mismatch.Count > 0) { Console.WriteLine($"REFUSED: {t.parts} does not match template '{t.id}': {string.Join("; ", mismatch)}. `gen_delve shell {t.id}` rewrites it."); return 1; }
                 Console.WriteLine($"  parts    : {t.parts}, read in place of the quests they came from");
             }
@@ -2030,12 +2110,14 @@ namespace FrankyCLI
             }
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
-                made4.ThirdPlaceAlias = CreateThirdPlace(clone, t);
+                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4) : CreateThirdPlace(clone, t);
                 if (made4.ThirdPlaceAlias < 0) fail++;
+                else if (IsOrbit(r)) madeBeats.Orbit = (made4.ThirdPlaceAlias, made4.OrbitCell, t.placeAlias);
             }
             foreach (int pi in PlacesUsed(r))
             {
                 if (fail > 0) break;
+                if (pi == 2 && IsOrbit(r)) continue;   // an orbit's conditions are CreateOrbitPlace's, not a theme's
                 var theme = ThemeOf(r, pi);
                 fail += WritePlaceConditions(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), MarkersAt(r, markers, pi),
                                              ResolveKeywords(env, theme.require, _ => { }),
@@ -2053,7 +2135,7 @@ namespace FrankyCLI
                 if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
                 else reach = rg.FormKey;
             }
-            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true);
+            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true, IsOrbit(r));
             fail += WriteProse(clone, t, r);
             SortStages(clone);
             fail += OrderAliases(clone);
@@ -2119,6 +2201,10 @@ namespace FrankyCLI
         {
             /// <summary>The created third place's alias id, -1 when the recipe has none.</summary>
             public int ThirdPlaceAlias = -1;
+            /// <summary>An orbit third place's space-cell member alias id (its markers fill from it), -1 when not an orbit.</summary>
+            public int OrbitCell = -1;
+            /// <summary>orbitFrom's marker alias, the pattern an orbit beat's marker takes its from-cell condition off.</summary>
+            public QuestReferenceAlias? OrbitMarker;
         }
 
         /// <summary>
@@ -2210,6 +2296,58 @@ namespace FrankyCLI
             Console.WriteLine($"  +place   : THIRD place alias {id} \"{loc.Name}\" (clone of location alias {src.ID} \"{src.Name}\", "
                               + $"{loc.Conditions?.Count ?? 0} condition(s) carried before the rebuild)");
             return (int)id;
+        }
+
+        /// <summary>LocTypeMajorOrbital: a planet's or a moon's location, the parent of its orbit and its surface.</summary>
+        private static readonly FormKey MajorOrbital = FormKey.Factory("070A54:Starfield.esm");
+
+        /// <summary>
+        /// THE ORBIT AS THE THIRD PLACE (place.third.orbit, 2026-10-22, his "go on 19a, try over"). orbitFrom's chain off the
+        /// parts file: its LocTypeOrbit location (flags and ALFG altitude kept) with its conditions REPLACED by
+        /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital) and its own LocTypeSENotAllowed == 0, then the
+        /// levelled space cell created at it. Each beat's marker fills from that cell in WriteBeat.
+        /// WHY THAT CONDITION: an orbit location and the surface are both children of the planet's location, which carries
+        /// LocTypeMajorOrbital (SAlphaCentauri_PJemison_Orbit and _Surface, read 2026-10-22), so "inside the same major
+        /// orbital as the main place" is the orbit over its planet, or its moon's. ⚠ NO VANILLA ORBIT ALIAS DOES THIS (0 of
+        /// 1,060 measured; 75 use the condition on other kinds of alias), so it is proven by his play or not at all.
+        /// </summary>
+        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made)
+        {
+            if (parts == null || parts.orbit.Count == 0 || t.orbitAliases == null)
+            { Console.WriteLine($"REFUSED: an orbit is copied off the parts file and template '{t.id}' has no orbit parts; `gen_delve shell {t.id}` writes them."); return -1; }
+            var pool = parts.orbit.Select(gen_questmodel.WriteAliasModel).ToList();
+            var o = t.orbitAliases;
+            var srcLoc = pool.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)o.place);
+            var srcCell = pool.OfType<QuestCollectionAlias>().FirstOrDefault(c => c.Collection.Count == 1 && c.Collection[0].ReferenceAlias?.ID == (uint)o.cell);
+            var srcMarker = pool.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)o.marker);
+            if (srcLoc == null || srcCell == null || srcMarker == null)
+            { Console.WriteLine($"REFUSED: the orbit parts lack the place {o.place}, the cell {o.cell} or the marker {o.marker} the template names."); return -1; }
+            var sen = srcLoc.Conditions.FirstOrDefault(c => c.Data is LocationHasKeywordConditionData);
+            if (sen == null) { Console.WriteLine($"REFUSED: {parts.orbitFrom}'s orbit carries no LocationHasKeyword condition (LocTypeSENotAllowed) to keep."); return -1; }
+
+            uint locId = NextAliasId(clone);
+            var loc = srcLoc.DeepCopy(); loc.ID = locId; loc.Name = "OrbitLocation";
+            var same = new IsInSameCurrentLocationAsAliasConditionData { FirstParameter = t.placeAlias, Unknown3 = -1 };
+            same.SecondParameter.Link.SetTo(MajorOrbital);
+            loc.Conditions.Clear();
+            loc.Conditions.Add(new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
+            loc.Conditions.Add(sen.DeepCopy());
+            clone.Aliases.Add(loc);
+
+            uint cellId = NextAliasId(clone);
+            var cell = srcCell.DeepCopy();
+            var member = cell.Collection[0].ReferenceAlias!;
+            member.ID = cellId;
+            if (member.CreateReferenceToObject == null) { Console.WriteLine($"REFUSED: {parts.orbitFrom}'s cell alias {o.cell} is not CREATED at its orbit."); return -1; }
+            member.CreateReferenceToObject.AliasID = (short)locId;
+            clone.Aliases.Add(cell);
+
+            made.OrbitCell = (int)cellId;
+            made.OrbitMarker = srcMarker;
+            float alt = BitConverter.Int32BitsToSingle(loc.ALFG ?? 0);
+            Console.WriteLine($"  +place   : THIRD place is an ORBIT, alias {locId} \"{loc.Name}\" (off {parts.orbitFrom} alias {o.place}, altitude {alt:0.###}): "
+                              + $"inside the same LocTypeMajorOrbital as the main place (alias {t.placeAlias}); space cell {cellId} created at it");
+            return (int)locId;
         }
 
         /// <summary>
@@ -2600,12 +2738,33 @@ namespace FrankyCLI
         /// how a quest ends up selecting a POI on one marker and hunting for another.
         /// </summary>
         private static int WriteBeat(Quest clone, Template t, BeatSlot slot, Beat beat,
-                                     Dictionary<string, FormKey> markers, bool created, int placeAlias)
+                                     Dictionary<string, FormKey> markers, bool created, int placeAlias,
+                                     int orbitCell = -1, QuestReferenceAlias? orbitMarker = null)
         {
             var al = clone.Aliases?.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)slot.markerAlias);
             if (al?.Location == null) { Console.WriteLine("REFUSED: ref alias " + slot.markerAlias + " has no location fill."); return 1; }
-            al.Location.AliasID = placeAlias;
-            al.Location.RefType.SetTo(markers[beat.at]);
+            if (orbitCell >= 0)
+            {
+                // IN ORBIT: the marker is the space cell's own, so it fills FROM the cell's collection by its ref type, as his
+                // MB01's SpawnMarker01 does. A created cell's markers are not registered on the orbit location, so an
+                // in-location fill would find nothing there.
+                if (orbitMarker == null || !orbitMarker.Conditions.Any(c => c.Data is HasRefTypeConditionData))
+                { Console.WriteLine("REFUSED: the orbit's marker pattern carries no HasRefType condition to fill a marker from the cell by."); return 1; }
+                al.Location = null;
+                al.ReferenceCollectionAliasID = orbitCell;
+                al.Conditions.Clear();
+                foreach (var c in orbitMarker.Conditions)
+                {
+                    var cc = c.DeepCopy();
+                    if (cc.Data is HasRefTypeConditionData h) h.FirstParameter.Link.SetTo(markers[beat.at]);
+                    al.Conditions.Add(cc);
+                }
+            }
+            else
+            {
+                al.Location.AliasID = placeAlias;
+                al.Location.RefType.SetTo(markers[beat.at]);
+            }
 
             // A created slot has no objective by construction: the driver displays only its own two,
             // and the lint has already refused any recipe that tried to give one an objective.
@@ -2628,7 +2787,8 @@ namespace FrankyCLI
                 e.Entry = Expand(beat.journal, t);
             }
 
-            Console.WriteLine($"  beat     : alias {slot.markerAlias} -> {beat.at} inside place alias {placeAlias}"
+            Console.WriteLine($"  beat     : alias {slot.markerAlias} -> {beat.at} "
+                              + (orbitCell >= 0 ? $"from space cell {orbitCell} (in orbit, place alias {placeAlias})" : $"inside place alias {placeAlias}")
                               + $", objective {slot.objective}"
                               + (beat.journal != null ? $", journal at stage {slot.journalStage}" : ", no journal"));
             return 0;
