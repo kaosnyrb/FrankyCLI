@@ -300,6 +300,11 @@ namespace FrankyCLI
             ["GetDistance"] = new(typeof(IGetDistanceConditionDataGetter), () => new GetDistanceConditionData(),
                 (g, m) => { var x = (IGetDistanceConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetDistanceConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
+            // GetIsAliasRef (2026-10-22): a walk-up line gated on the alias that holds its speaker, vanilla's shape for a
+            // speaker the quest creates (OE_KT_Trait_Wanted_BountyHunters). The FIRST parameter is a plain int, the alias number.
+            ["GetIsAliasRef"] = new(typeof(IGetIsAliasRefConditionDataGetter), () => new GetIsAliasRefConditionData(),
+                (g, m) => { var x = (IGetIsAliasRefConditionDataGetter)g; m.FirstInt = x.FirstParameter; m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
+                (d, m) => { var x = (GetIsAliasRefConditionData)d; x.FirstParameter = m.FirstInt ?? 0; x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),
             ["GetStageDone"] = new(typeof(IGetStageDoneConditionDataGetter), () => new GetStageDoneConditionData(),
                 (g, m) => { var x = (IGetStageDoneConditionDataGetter)g; ReadFirst(x.FirstParameter, m); m.FirstUnusedString = x.FirstUnusedStringParameter; m.SecondParameter = x.SecondParameter; m.SecondUnusedString = x.SecondUnusedStringParameter; },
                 (d, m) => { var x = (GetStageDoneConditionData)d; WriteFirst(x.FirstParameter, m); x.FirstUnusedStringParameter = m.FirstUnusedString; x.SecondParameter = m.SecondParameter; x.SecondUnusedStringParameter = m.SecondUnusedString; }),

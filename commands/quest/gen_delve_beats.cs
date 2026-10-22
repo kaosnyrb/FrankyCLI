@@ -639,7 +639,7 @@ namespace FrankyCLI
             public List<(int beat, int stage, int alias, FormKey npc, int exchanges, int conditions)> Talks = new();   // each talk beat, for the verify
             public int Linger = -1;   // the stage that stops a quest ending on a talk, once its person unloads; -1 = none
             public int LingerFrom;    // the completing stage it waits behind (the last step's DoneStage)
-            public List<(int beat, FormKey npc, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
+            public List<(int beat, int alias, int lines)> Hellos = new();   // a talk person's walk-up lines, for the verify
             public List<(int place, int anchor, FormKey global)> Leashes = new();   // each place's GetDistance: the alias it measures from, under which global
             public Dictionary<int, (FormKey creds, FormKey xp)> StageReward = new();
             public Dictionary<int, (FormKey npc, string name)> People = new();
@@ -2567,17 +2567,17 @@ namespace FrankyCLI
                 var ht = q.DialogTopics.FirstOrDefault(d => d.EditorID == $"{r.id}_hellos");
                 fail += Check("one Hello topic (Misc / Hello, priority 50)",
                               ht == null ? "missing" : $"{ht.Category} / {ht.Subtype} / {ht.Priority}", "Misc / Hello / 50");
-                foreach (var (hb, hnpc, hn) in bm.Hellos)
+                foreach (var (hb, halias, hn) in bm.Hellos)
                 {
                     var grp = ht?.Responses.FirstOrDefault(x => x.EditorID == $"{r.id}_talk{hb + 1}_hellos");
-                    var gid = grp?.Conditions.FirstOrDefault()?.Data as IGetIsIDConditionDataGetter;
-                    fail += Check($"beat {hb + 1}'s walk-up group is gated on him alone",
-                                  grp == null ? "missing" : $"flags {grp.Flags?.Flags}, {grp.Conditions.Count} condition(s), GetIsID {gid?.FirstParameter.Link.FormKey}",
-                                  $"flags 256, 1 condition(s), GetIsID {hnpc}");
+                    var gal = grp?.Conditions.FirstOrDefault()?.Data as IGetIsAliasRefConditionDataGetter;
+                    fail += Check($"beat {hb + 1}'s walk-up group is gated on his alias alone",
+                                  grp == null ? "missing" : $"flags {grp.Flags?.Flags}, {grp.Conditions.Count} condition(s), GetIsAliasRef {gal?.FirstParameter}",
+                                  $"flags 768, 1 condition(s), GetIsAliasRef {halias}");
                     var kids = ht?.Responses.Where(x => grp != null && x.DialogGroup.FormKey == grp.FormKey).ToList() ?? new();
                     fail += Check($"beat {hb + 1}'s walk-up lines sit under the group, each named for its own wem",
                                   $"{kids.Count} line(s), flags {string.Join("/", kids.Select(k => k.Flags?.Flags).Distinct())}, own-id wems {kids.All(k => k.Responses.FirstOrDefault()?.WEMFile == k.FormKey.ID)}",
-                                  $"{hn} line(s), flags 1024, own-id wems True");
+                                  $"{hn} line(s), flags 2, own-id wems True");
                 }
             }
             foreach (var (tbeat, tstage, talias, tnpc, nex, tconds) in bm.Talks)

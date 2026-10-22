@@ -163,6 +163,11 @@ namespace FrankyCLI
                     d.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(d, npc);
                     return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
                 }
+                ConditionFloat IsHisAlias()
+                {
+                    var d = new GetIsAliasRefConditionData { RunOnType = Condition.RunOnType.Subject, FirstParameter = personAlias };
+                    return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+                }
                 ConditionFloat StageDone(int st, float want)
                 {
                     var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = st };
@@ -243,12 +248,16 @@ namespace FrankyCLI
                 }
                 bm.Talks.Add((b, stage, personAlias, npc, tb.exchanges.Count, enter > 0 ? 3 : 2));   // the greeting's and the completion's; a side question has one fewer
 
-                // What he says as the player WALKS UP (person.hellos, Jessica's; his 2026-10-19). Vanilla's shape, copied off
-                // MQ101 (Lin, Heller): ONE Hello topic per quest (Misc / Hello, topic priority 50), a group INFO per person
-                // (flags 256) carrying the gate, GetIsID(him), and the spoken lines under it (flags 1024, DialogGroup = the
-                // group), one picked per walk-up. Many lines share one topic here, so each line's WEMFile is its OWN id
-                // (NPCDialogueNoun's scheme; manual 39: either works if the file is named the same), never the topic's.
-                // ⚠ Unproven at his glass: built on vanilla's numbers, not on a play.
+                // What he says as the player WALKS UP (person.hellos, Jessica's; his 2026-10-19). ONE Hello topic per quest
+                // (Misc / Hello, topic priority 50), a group INFO per person carrying the gate, and the spoken lines under it
+                // (DialogGroup = the group), one picked per walk-up. Vanilla's shape for a speaker the quest CREATES, copied off
+                // OE_KT_Trait_Wanted_BountyHunters: the group flags 768 gated GetIsAliasRef(his alias), the lines flags 2
+                // (gen_inspect dialogtopic hellocreated: 278 of 312 created-speaker gates are on the alias, and the
+                // shape this replaced, MQ101's placed Lin, a 256 group on GetIsID with 1024 lines, is used for a created
+                // speaker nowhere). That shape never played: the engine fell back to a silent "Captain" (his plays,
+                // 2026-10-19 and 10-22). Many lines share one topic, so each line's WEMFile is its OWN id (NPCDialogueNoun's
+                // scheme; manual 39: either works if the file is named the same), never the topic's.
+                // ⚠ Unproven at his glass: three things changed at once (gate, group flags, line flags); 19a is the probe.
                 if (tb.person!.hellos is List<List<string>> hellos)
                 {
                     string htag = $"{r.id}_hellos";
@@ -267,15 +276,15 @@ namespace FrankyCLI
                         ht.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>();
                         clone.DialogTopics.Add(ht);
                     }
-                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 256 } };
-                    grp.Conditions.Add(IsHim());
+                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 768 } };
+                    grp.Conditions.Add(IsHisAlias());
                     var lines = new List<DialogResponses>();
                     for (int h = 0; h < hellos.Count; h++)
                     {
                         var hi = new DialogResponses(myMod)
                         {
                             EditorID = $"{tag}_hello{h + 1}",
-                            Flags = new DialogResponseFlags { Flags = 1024 },
+                            Flags = new DialogResponseFlags { Flags = 2 },
                             SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
                         };
                         hi.DialogGroup.SetTo(grp.FormKey);
@@ -290,8 +299,8 @@ namespace FrankyCLI
                         ht.Responses.Add(hi);
                         ht.TopicInfoList!.Add(hi.ToLink<IDialogResponsesGetter>());
                     }
-                    bm.Hellos.Add((b, npc, hellos.Count));
-                    Console.WriteLine($"  +hello   : {grp.EditorID}, {hellos.Count} walk-up line(s) in his voice, gated GetIsID({npc})");
+                    bm.Hellos.Add((b, personAlias, hellos.Count));
+                    Console.WriteLine($"  +hello   : {grp.EditorID}, {hellos.Count} walk-up line(s) in his voice, gated GetIsAliasRef({personAlias})");
                 }
             }
         }
