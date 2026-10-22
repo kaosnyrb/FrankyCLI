@@ -860,9 +860,9 @@ namespace FrankyCLI
 
             /// <summary>
             /// An outside holder's alias carries SpawnNearScript: the step's fragment hands it a spot at range, and it spawns him
-            /// there when the player comes near (his 2026-10-20 play of 05a at 750 to 2000: placed when the step began, he
+            /// there when the spot's CELL LOADS, on the navmesh (his 2026-10-22 "A"; first by a flat distance timer). His 2026-10-20 play of 05a at 750 to 2000: placed when the step began, he
             /// waited in the air over unloaded ground and fell when it loaded; a snap on his OnLoad, tried first, did not
-            /// save him). Not a stage hook: no properties, so it is recorded in its own list for the verify, never in Hooks
+            /// save him. Not a stage hook: no properties, so it is recorded in its own list for the verify, never in Hooks
             /// (whose check reads StageToSet).
             /// </summary>
             /// <summary>Each support beat's landing marker alias, by beat index (Slot makes it, Fills writes it, Enter arms it).</summary>
@@ -890,7 +890,7 @@ namespace FrankyCLI
                 var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
                 entry.Scripts.Add(new ScriptEntry { Name = SpawnNearScript });
                 bm.SpawnNear.Add(alias);
-                Console.WriteLine($"  +near    : beat {b + 1} (recover, outside) holder alias {alias} {SpawnNearScript}: a spot at range, him spawned there when the player is near");
+                Console.WriteLine($"  +near    : beat {b + 1} (recover, outside) holder alias {alias} {SpawnNearScript}: a spot at range, him spawned there when its ground loads");
             }
 
 
@@ -2230,7 +2230,7 @@ namespace FrankyCLI
                               lm?.Location?.RefType.FormKey.ToString() ?? "no fill", land.ToString());
             }
             foreach (var a in bm.SpawnNear)
-                fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the player is near)",
+                fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the spot's ground loads)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
             // An alias carries a script ONCE (2026-10-22: missionboard01a's spawn hook landed beside the arrival's stock copy,
             // and only this file's read-back of the first copy showed it). Every alias, every script, not only ours.
