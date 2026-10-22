@@ -1,4 +1,5 @@
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Retrograde.Nouns.QuestAuthoring;
@@ -46,6 +47,10 @@ namespace FrankyCLI
                 Fatal("place.system and place.parsecs are both set; one rung, one way of saying near (S6 was the number, S7 vanilla's test).");
             if (p.over != null && (p.system != null || p.parsecs != null))
                 Fatal("place.over is set beside place.system or place.parsecs; over CLEARS the orbit's conditions, so the others would test nothing.");
+            if (p.playerShip != null && p.playerShip != "flying")
+                Fatal($"place.playerShip is \"{p.playerShip}\"; the one value built is \"flying\" (SQ_PlayerShip's PlayerShip with him aboard, SE_Player_GenericTemplate's).");
+            if (p.cellAt != null && string.IsNullOrWhiteSpace(p.cellAt))
+                Fatal("place.cellAt is empty; it names the alias the space cell is created at (vanilla's encounters: PlayerShip).");
             if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
                 Fatal($"place.altitude is {alt}; his settled band is {OrbitAltitudeBand.min} to {OrbitAltitudeBand.max} (past ~32 the engine discards it).");
             if (p.second != null || p.third != null)
@@ -86,7 +91,8 @@ namespace FrankyCLI
         /// In order: the start event, the driver, the drops, the orbit's parsecs, the object, its marker, the objective and
         /// journal, the hook, stage 0, the fragment. Every refusal writes nothing.
         /// </summary>
-        private static int BuildSpace(StarfieldMod myMod, Quest clone, Template t, Recipe r, Dictionary<string, FormKey> markers, BeatsMade bm)
+        private static int BuildSpace(StarfieldMod myMod, Quest clone, Template t, Recipe r,
+                                      IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm)
         {
             var beat = r.beats[0];
             var slot = t.beatSlots.FirstOrDefault();
@@ -162,6 +168,41 @@ namespace FrankyCLI
             {
                 Console.WriteLine($"  orbit    : {orbit.Name} altitude {alt} (was {AltitudeOf(orbit):0.###})");
                 SetAltitude(orbit, alt);
+            }
+            // THE SHIP HE IS FLYING, vanilla's way (rung S11). The shell's PlayerShip is SQ_PlayerShip's HomeShip (alias 16),
+            // Optional and unconditioned; vanilla's player space encounters use SQ_PlayerShip's PlayerShip (alias 0) and fill
+            // only while he is aboard (ShipContainsRef(player) == 1). COPIED from SE_Player_GenericTemplate, never composed:
+            // its external fill, its flags and its conditions, onto the shell's alias id and name.
+            if (r.place.playerShip == "flying")
+            {
+                var ship = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => string.Equals(a.Name, "PlayerShip", StringComparison.OrdinalIgnoreCase)).ToList();
+                if (ship.Count != 1 || ship[0].External == null) { Console.WriteLine($"REFUSED: place.playerShip needs one external PlayerShip alias on the shell, and found {ship.Count}."); return 1; }
+                var vq = OwnOrMaster<IQuestGetter>(myMod, env, VanillaEncounter);
+                var vs = vq?.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Name == "PlayerShip").ToList();
+                if (vs == null || vs.Count != 1 || vs[0].External == null)
+                { Console.WriteLine($"REFUSED: {VanillaEncounter} is not in this plugin's masters, or carries no single external PlayerShip to copy."); return 1; }
+                var shipWas = $"{ship[0].External!.Quest.FormKey} alias {ship[0].External!.AliasID}, flags {ship[0].Flags}, {ship[0].Conditions.Count} condition(s)";
+                ship[0].External = vs[0].External!.DeepCopy();
+                ship[0].Flags = vs[0].Flags;
+                ship[0].Conditions.Clear();
+                ship[0].Conditions.AddRange(vs[0].Conditions.Select(c => c.DeepCopy()));
+                Console.WriteLine($"  ship     : alias {ship[0].ID} PlayerShip = {ship[0].External.Quest.FormKey} alias {ship[0].External.AliasID}, flags {ship[0].Flags}, " +
+                                  $"{string.Join("; ", ship[0].Conditions.Select(CondLine))} (copied from {VanillaEncounter}; was {shipWas})");
+            }
+            // THE CELL AT A THING (rung S11): the shell creates its space cell AT the orbit; vanilla's player encounters create
+            // theirs at PlayerShip (80 of 82). The create-at alias of the collection the beat's marker fills from changes; the
+            // order pass then puts the anchor above it, as a fill dependency.
+            if (r.place.cellAt is string cellAtName)
+            {
+                var anchor = AliasNames(clone.Aliases!).Where(x => !x.member && string.Equals(x.name, cellAtName, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (anchor.Count != 1) { Console.WriteLine($"REFUSED: place.cellAt names '{cellAtName}', and {anchor.Count} alias(es) of the shell carry that name."); return 1; }
+                var cell = clone.Aliases!.OfType<QuestCollectionAlias>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias)
+                    .FirstOrDefault(m => m?.ID == (uint)cellId);
+                if (cell?.CreateReferenceToObject == null) { Console.WriteLine($"REFUSED: collection member {cellId} creates nothing to move."); return 1; }
+                int wasAt = cell.CreateReferenceToObject.AliasID;
+                cell.CreateReferenceToObject.AliasID = (short)anchor[0].id;
+                bm.CellAt = ((int)cell.ID, (int)anchor[0].id);
+                Console.WriteLine($"  cell     : {cell.Name} (alias {cell.ID}) creates {cell.CreateReferenceToObject.Object.FormKey} at alias {anchor[0].id} {anchor[0].name} (was at {wasAt})");
             }
 
             // THE OBJECT. The shell's target is a ship; it becomes a clone of activatorFrom, reskinned to the beat's model.
@@ -309,6 +350,24 @@ namespace FrankyCLI
         /// <summary>The flag bit every vanilla location alias with a parent link carries (125 of 125 orbit aliases, 2026-10-22).</summary>
         private const QuestLocationAlias.Flag ParentLinkFlag = (QuestLocationAlias.Flag)0x40000000;
 
+        /// <summary>
+        /// Vanilla's own template for a space encounter round the player's ship, the copy source for place.playerShip. Its
+        /// shape is the family's: 82 SE_Player_* quests, orbit parented to PlayerShip in 81, space cell created at PlayerShip
+        /// in 80, PlayerShip = SQ_PlayerShip alias 0 with ShipContainsRef(player) == 1 (gen_inspect qall, Defiant, 2026-10-22).
+        /// </summary>
+        private const string VanillaEncounter = "SE_Player_GenericTemplate";
+
+        /// <summary>One condition as a line: function, first parameter (a link's FormKey), operator, value.</summary>
+        private static string CondLine(IConditionGetter c)
+        {
+            string fn = c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "");
+            object? fp = c.Data.GetType().GetProperty("FirstParameter")?.GetValue(c.Data);
+            object? link = fp?.GetType().GetProperty("Link")?.GetValue(fp) ?? fp;
+            object? key = link?.GetType().GetProperty("FormKey")?.GetValue(link) ?? link;
+            string val = c is IConditionFloatGetter f ? f.ComparisonValue.ToString() : "a Global";
+            return $"{fn}({key}) {c.CompareOperator} {val}";
+        }
+
         /// <summary>Every alias id a quest carries with its name; a collection's member is named, and flagged as a member.</summary>
         private static IEnumerable<(uint id, string name, bool member)> AliasNames(IEnumerable<IAQuestAliasGetter> aliases)
             => aliases.SelectMany(a => AliasGraph.IdsOf(a).Select(id => a switch
@@ -371,6 +430,26 @@ namespace FrankyCLI
                 fail += Check($"the orbit is parented to {overName} (alias {anchorId}), with the parent flag and no conditions",
                               $"parent {orbit?.ParentSystemLocationAliasID}, flag {((orbit?.Flags ?? 0) & ParentLinkFlag) == ParentLinkFlag}, {orbit?.Conditions.Count} condition(s)",
                               $"parent {anchorId}, flag True, 0 condition(s)");
+            }
+            if (r.place.playerShip == "flying")
+            {
+                // Expected values are the census's (SE_Player_GenericTemplate read 2026-10-22), pinned here, never re-read from
+                // the build's own copy source: a check whose expectation comes from where the actual came from cannot fail.
+                var ship = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.Name == "PlayerShip");
+                fail += Check("PlayerShip is SQ_PlayerShip's PlayerShip (alias 0), the ship he is flying",
+                              ship?.External == null ? "not external" : $"{ship.External.Quest.FormKey} alias {ship.External.AliasID}",
+                              "0174A2:Starfield.esm alias 0");
+                fail += Check("PlayerShip fills only while he is aboard", string.Join("; ", (ship?.Conditions ?? new List<IConditionGetter>()).Select(CondLine)),
+                              "ShipContainsRef(000014:Starfield.esm) EqualTo 1");
+                fail += Check("PlayerShip's flags are the vanilla encounter's", ship?.Flags.ToString() ?? "missing", "CreateRefTemp");
+            }
+            if (r.place.cellAt is string cellAtName)
+            {
+                var anchorId = AliasNames(q.Aliases).Where(x => !x.member && string.Equals(x.name, cellAtName, StringComparison.OrdinalIgnoreCase)).Select(x => (int?)x.id).FirstOrDefault();
+                var cell = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(x => x.ReferenceAlias)
+                    .FirstOrDefault(x => x?.ID == (uint)(bm.CellAt?.cell ?? -1));
+                fail += Check($"the space cell is created at {cellAtName} (alias {anchorId})",
+                              cell?.CreateReferenceToObject == null ? "creates nothing" : $"at {cell.CreateReferenceToObject.AliasID}", $"at {anchorId}");
             }
             var target = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");

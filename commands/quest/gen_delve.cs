@@ -450,6 +450,20 @@ namespace FrankyCLI
             /// </summary>
             public string? over { get; set; }
             /// <summary>
+            /// space only: which of SQ_PlayerShip's ships the shell's PlayerShip alias is. "flying" = SQ_PlayerShip's own
+            /// PlayerShip (alias 0, the ship he is flying) with ShipContainsRef(player) == 1, so the quest only fills while he
+            /// is aboard: fill, flags and condition COPIED from SE_Player_GenericTemplate, the way 80 of the 81 SQ_PlayerShip
+            /// fills in vanilla's player space encounters read. The shell's own is alias 16, HomeShip, Optional and
+            /// unconditioned (every duo_artifact_remote_qst carries it). Rung S11, 2026-10-22.
+            /// </summary>
+            public string? playerShip { get; set; }
+            /// <summary>
+            /// space only: the alias, by name, the space cell (the shell's SpaceCellRefs) is CREATED AT, in place of the orbit.
+            /// Vanilla's player space encounters create theirs at PlayerShip (80 of 82 SE_Player_* quests), not at the orbit
+            /// they are parented over. Rung S11, 2026-10-22.
+            /// </summary>
+            public string? cellAt { get; set; }
+            /// <summary>
             /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
             /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
@@ -1291,8 +1305,17 @@ namespace FrankyCLI
             else if (r.prose.card != null)
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
             if (IsSpace(t)) GradeSpace(r, t, Fatal);
-            else if (r.place.drop != null)
-                Fatal($"place.drop is set and template '{t.id}' is not a space template; it is the space ladder's knob.");
+            else
+            {
+                if (r.place.drop != null)
+                    Fatal($"place.drop is set and template '{t.id}' is not a space template; it is the space ladder's knob.");
+                // place.over shipped 2026-10-22 with no refusal here, so on a beats recipe it was silently ignored; closed with
+                // the two keys that joined it.
+                foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })
+                    foreach (var (key, val) in new[] { ("over", p?.over), ("playerShip", p?.playerShip), ("cellAt", p?.cellAt) })
+                        if (val != null)
+                            Fatal($"{label}.{key} is set and template '{t.id}' is not a space template; it is a space Delve's knob and would be silently ignored.");
+            }
             if (r.place.civilians != null)
                 Fatal("place.civilians retired with the delve4 kind (2026-10-09); on a beats Delve write approach.civilians.");
 
@@ -2193,7 +2216,7 @@ namespace FrankyCLI
             Console.WriteLine($"  self     : {stray} further link(s) to the base (conditions) now point at the clone");
 
             var madeBeats = new BeatsMade();
-            int fail = IsSpace(t) ? BuildSpace(myMod, clone, t, r, markers, madeBeats)
+            int fail = IsSpace(t) ? BuildSpace(myMod, clone, t, r, env, markers, madeBeats)
                                   : BuildPlacesAndBeats(myMod, clone, t, r, parts, env, markers, madeBeats, lap);
             fail += WriteProse(clone, t, r);
             SortStages(clone);

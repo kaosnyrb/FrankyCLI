@@ -598,6 +598,7 @@ namespace FrankyCLI
         private sealed class BeatsMade
         {
             public List<int> ClearGroups = new();   // clear beats' collections: empty, Optional, and wearing NO package (they hold the site)
+            public (int cell, int at)? CellAt;      // space only, place.cellAt: the cell member moved, and the alias it is now created at
             public string Script = "";
             public List<int> FragStages = new();
             public List<(int alias, string script, int set, int prereq)> Hooks = new();

@@ -1,0 +1,35 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s11",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then after S10 failed, 13:5x: \"Let's do another space probe so that we can create an orbit encounter on the planet the player is near\"",
+  "_note": [
+    "SPACE ALIAS-SET TEST S11: vanilla's player space encounter shape (SE_Player_GenericTemplate and its 81 siblings). S10 plus TWO changes, named: PlayerShip is SQ_PlayerShip's PlayerShip (alias 0, the ship he is flying, filled only while he is aboard; S10's was alias 16, HomeShip), and the space cell is created AT PlayerShip (S10 created it at the orbit). Both copied from what 80 of 82 SE_Player_* quests do.",
+    "Pass = it starts, and the satellite is in the space round his ship. Play it SITTING IN THE PILOT SEAT IN ORBIT: the ship condition refuses the fill if he is not aboard.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "over": "PlayerShip",
+    "playerShip": "flying",
+    "cellAt": "PlayerShip"
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S11 at <Place>",
+    "briefing": "Space test S11."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S11 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S11"
+    }
+  ]
+}
