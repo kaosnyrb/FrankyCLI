@@ -70,7 +70,7 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(s.land)) Fatal($"{at} support has no land marker; it names where at the place the ship comes down (a travel ring is open ground).");
                 else if (string.Equals(s.land, b.at, StringComparison.OrdinalIgnoreCase))
                     Warn($"{at} support.land is the fight's own marker ({b.at}), so the ship comes down on top of the enemies.");
-                if (s.near is int n && (n < 100 || n > 1000)) Fatal($"{at} support.near is {n}; 100 to 1000 (flat distance to the landing marker, absent = 300).");
+                if (s.near is int n && (n < 100 || n > 1000)) Fatal($"{at} support.near is {n}; 100 to 1000 (distance to the landing marker, absent = 300).");
             }
 
             /// <summary>
