@@ -518,7 +518,8 @@ namespace FrankyCLI
         /// <summary>The stage that stops a Delve ending on a talk, set when the person unloads (vanilla's shutdown number).</summary>
         private const int LingerStage = 1000;
         /// <summary>
-        /// A clear's SPAWNED stage is this plus its beat index, set by duo_delve_groupnear the moment its enemies exist; the
+        /// A fight's SPAWNED stage is this plus its beat index, set by a stock distance hook on its marker when the player
+        /// comes near, and its fragment places the enemies (FightBeat.Enter); the
         /// objective's site target is lit only while it is NOT done (his play, 2026-10-21: "marker spawning works, but marker
         /// stays as a visable objective"). A block of its own, as LingerStage: under every beat's first stage there is no room
         /// (the slate template has 6 to 9, the people's and occupants'). Safe above the beats because no hook of ours carries
@@ -574,9 +575,6 @@ namespace FrankyCLI
         /// (papyrus/duo_delve_spawnnear.psc).</summary>
         private const string SpawnNearScript = "duo_delve_spawnnear";
 
-        /// <summary>The alias script on a clear's spawn marker: armed by the step, it spawns the enemies there when the player
-        /// comes near (papyrus/duo_delve_groupnear.psc).</summary>
-        private const string GroupNearScript = "duo_delve_groupnear";
         /// <summary>The most drop pods one clear may call: duo_delve_lib.DropPods holds them in a fixed array of this size.</summary>
         private const int PodsMax = 4;
 
@@ -604,7 +602,7 @@ namespace FrankyCLI
             public List<(string name, int alias)> Replaced = new();
             public List<int> Holders = new();   // recover beats' empty Optional aliases
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
-            public List<int> GroupNear = new();   // clear beats' spawn markers, carrying GroupNearScript (the enemies spawned when he is near)
+            public List<(int on, int to)> SpawnHooks = new();   // fight beats' markers carrying the distance hook that spawns them, and the alias it measures to (the player)
             public List<(int objective, int alias, int spawned)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late, lit until its spawned stage
             public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own travel to the fight's marker (its source's radius and template)
             public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
@@ -892,19 +890,6 @@ namespace FrankyCLI
                 Console.WriteLine($"  +near    : beat {b + 1} (recover, outside) holder alias {alias} {SpawnNearScript}: a spot at range, him spawned there when the player is near");
             }
 
-            /// <summary>
-            /// A clear's spawn marker carries GroupNearScript: the step's fragment arms it, and it spawns the enemies there when
-            /// the player comes near (his 2026-10-21 play of 33a: spawned when the step began, "The spacers are spawned from a
-            /// distance, which reads bad on the map and puts them in mid air. Spawn them when the player gets close"). Like
-            /// SpawnNear, not a stage hook: its own list for the verify.
-            /// </summary>
-            internal void GroupNear(int b, int alias)
-            {
-                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == alias) ?? NewAliasEntry(vma, clone.FormKey, alias);
-                entry.Scripts.Add(new ScriptEntry { Name = GroupNearScript });
-                bm.GroupNear.Add(alias);
-                Console.WriteLine($"  +near    : beat {b + 1} (clear) spawn marker alias {alias} {GroupNearScript}: the enemies spawned there when the player is near");
-            }
 
             /// <summary>A beat's objective index: a choose step's beats take one each, ten apart; any other step shares one.
             /// Used by sections 7 and 10 (a local function of section 7 until they became methods).</summary>
@@ -1114,7 +1099,7 @@ namespace FrankyCLI
                     if (clone.Stages!.Any(x => x.Index == LingerStage)) { Console.WriteLine($"REFUSED: stage {LingerStage} already exists on this base; the talk's shutdown stage collides."); return 1; }
                 }
                 foreach (var ss in spawnedStage.Values)
-                    if (clone.Stages!.Any(x => x.Index == ss)) { Console.WriteLine($"REFUSED: stage {ss} already exists on this base; a clear's spawned stage collides."); return 1; }
+                    if (clone.Stages!.Any(x => x.Index == ss)) { Console.WriteLine($"REFUSED: stage {ss} already exists on this base; a fight's spawned stage collides."); return 1; }
                 allStages = beatStage.Values.Concat(steps.Select(s => s.DoneStage)).Concat(steps.SelectMany(s => s.WaveStages))
                     .Concat(bm.Linger >= 0 ? new[] { bm.Linger } : Array.Empty<int>())
                     .Concat(spawnedStage.Values)
@@ -2244,9 +2229,14 @@ namespace FrankyCLI
             foreach (var a in bm.SpawnNear)
                 fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the player is near)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
-            foreach (var a in bm.GroupNear)
-                fail += Check($"clear spawn marker alias {a} carries {GroupNearScript} (the enemies spawned when the player is near)",
-                              (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == GroupNearScript) ?? false).ToString(), "True");
+            foreach (var (on, to) in bm.SpawnHooks)
+            {
+                var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == on)?.Scripts.FirstOrDefault(x => x.Name == "DefaultAliasOnDistanceLessThan");
+                var tp = dsc?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == "TargetAlias");
+                var dp = dsc?.Properties.OfType<IScriptFloatPropertyGetter>().FirstOrDefault(x => x.Name == "TargetDistance");
+                fail += Check($"fight marker alias {on} spawns them when the player is near", tp == null ? "missing" : $"{tp.Object.FormKey} alias {tp.Alias} within {dp?.Data}",
+                              $"{q.FormKey} alias {to} within {ApproachDistance}");
+            }
             foreach (var (oi, a, spawned) in bm.SiteTargets)
             {
                 var site = q.Objectives.FirstOrDefault(o => o.Index == oi)?.Targets.FirstOrDefault(x => x.AliasID == a);

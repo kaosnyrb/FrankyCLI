@@ -41,6 +41,7 @@ namespace FrankyCLI
                     if (c.species != null && !SpeciesModes.Contains(c.species))
                         Fatal($"{at} {where}.species is '{c.species}'; it is \"one\" (a single entry from the list for all) or \"mix\".");
                 }
+                if (t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias, and a fight spawns when the player comes near its marker.");
                 GradeWho(b, at, t, env, Fatal, List, Range);
                 if (b.loot != null)
                 {
@@ -140,13 +141,29 @@ namespace FrankyCLI
 
             internal override int EnterRank => 1;
 
+            /// <summary>
+            /// Nothing is placed when the step begins. A stock DefaultAliasOnDistanceLessThan on the fight's marker, armed by
+            /// the step's stage, sets the beat's SPAWNED stage when the player comes within ApproachDistance, and the spawn
+            /// call runs in THAT stage's fragment. Until then the objective points at the marker; after, at who spawned.
+            /// WHY NEAR, his play of 33a, 2026-10-21: "The spacers are spawned from a distance, which reads bad on the map and
+            /// puts them in mid air. Spawn them when the player gets close". WHY THE ENGINE'S EVENT, his 2026-10-22 on the
+            /// once-a-second timer that did this first (duo_delve_groupnear): "that won't scale very well". The event costs
+            /// nothing until it fires. ⚠ It measures in 3D where the timer measured flat; the marker is a real one of the
+            /// place, so its height is true. ⚠ Unmeasured: whether it fires at once if he is ALREADY inside the distance
+            /// when the step begins (ScriptObject.psc does not say).
+            /// </summary>
             internal override void Enter(BeatsBuild build, int b, int stage)
             {
                 var fb = build.r.beats[b];
                 var ff = build.inputs.Fights[b];
                 string lootArgs = "None, 0";
                 if (ff.Loot is FormKey lk) { build.props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
-                Spawn(build, b, stage, fb, ff, lootArgs);
+                int marker = build.slotOf[b].markerAlias, spawned = build.spawnedStage[b];
+                AttachHook(build.vma, build.clone.FormKey, marker, DistanceHook(build.clone.FormKey, build.t.playerAlias, spawned, stage),
+                           HookEntry.FindOrCreate, false, build.bm, spawned, stage);
+                build.bm.SpawnHooks.Add((marker, build.t.playerAlias));
+                Console.WriteLine($"  +near    : beat {b + 1} ({Name}) marker alias {marker} DefaultAliasOnDistanceLessThan sets {spawned} after {stage}: spawned there when the player is within {ApproachDistance}");
+                Spawn(build, b, spawned, fb, ff, lootArgs);
                 if (fb.support is Support s)
                 {
                     // Armed when the step begins; the ship is called when the player comes near (duo_delve_landing).
@@ -161,7 +178,8 @@ namespace FrankyCLI
                 }
             }
 
-            /// <summary>The spawn call itself: SpawnTarget for a defeat, SpawnGroup for a clear.</summary>
+            /// <summary>The spawn call itself, written into the SPAWNED stage's fragment (<paramref name="stage"/>):
+            /// SpawnTarget for a defeat, SpawnGroup or DropPods for a clear.</summary>
             protected abstract void Spawn(BeatsBuild build, int b, int stage, Beat fb, FightForms ff, string lootArgs);
         }
 

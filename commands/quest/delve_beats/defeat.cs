@@ -8,8 +8,11 @@ namespace FrankyCLI
     public static partial class gen_delve
     {
         /// <summary>
-        /// defeat: a target appears at the beat's place when its step begins, with an optional gang who need not die;
-        /// the step is done when the target dies (the Bounty driver's boss, spike 2026-10-14-defeat-and-clear-beats).
+        /// defeat: a target appears at the beat's place when the player comes NEAR it (FightBeat.Enter), with an optional
+        /// gang who need not die; the step is done when the target dies (the Bounty driver's boss, spike
+        /// 2026-10-14-defeat-and-clear-beats). Until he is there the objective points at the marker, as a clear's does.
+        /// Near since 2026-10-22 (his "Make a note that we want to fix the spawn-when-near stuff", 10-21); placed when the
+        /// step began before that, which on a far site put them over ground that was not loaded.
         /// </summary>
         private sealed class DefeatBeat : FightBeat
         {
@@ -24,7 +27,7 @@ namespace FrankyCLI
                     Fatal($"{at} target '{b.target}' is not an Npc or LeveledNpc in {t.mod} or one of its masters.");
                 if (b.gang != null)
                 {
-                    if (b.gang.pods != null) Fatal($"{at} gang sets pods; drop pods are built for a clear's enemies only (a defeat's gang spawns at the step's start, not when he is near).");
+                    if (b.gang.pods != null) Fatal($"{at} gang sets pods; drop pods are built for a clear's enemies only (a defeat's gang is placed beside its target).");
                     List("gang", b.gang.list, true);
                     Range("gang", b.gang, 0);
                 }
@@ -32,7 +35,7 @@ namespace FrankyCLI
 
             /// <summary>
             /// recover's shape without the item: a marker, and an EMPTY Optional alias the target is placed into when the
-            /// step begins, which the objective targets and the death hook sits on.
+            /// player comes near, which the objective targets and the death hook sits on. The marker is the site target until then.
             /// </summary>
             internal override int Slot(BeatsBuild build, int i)
             {
@@ -42,9 +45,10 @@ namespace FrankyCLI
                 dt.Location = null;
                 dt.Flags = QuestReferenceAlias.Flag.Optional;
                 build.clone.Aliases.Add(dt);
-                build.slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, journalStage = build.beatStage[i] };
+                build.slotOf[i] = new BeatSlot { markerAlias = (int)dm.ID, activatorAlias = -1, targetAlias = (int)dt.ID, siteAlias = (int)dm.ID, journalStage = build.beatStage[i] };
                 build.bm.Holders.Add((int)dt.ID);
-                Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn)");
+                build.spawnedStage[i] = SpawnedStageBase + i;
+                Console.WriteLine($"  +slot    : beat {i + 1} (defeat) -- marker alias {dm.ID}, target {dt.ID} (EMPTY, Optional; filled on spawn), site target {dm.ID} until stage {build.spawnedStage[i]}");
                 return SupportSlot(build, i);
             }
 
