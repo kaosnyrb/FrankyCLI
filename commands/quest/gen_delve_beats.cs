@@ -1192,7 +1192,11 @@ namespace FrankyCLI
                         var entry = NewAliasEntry(vma, clone.FormKey, made.OrbitMapMarker);
                         var sc = new ScriptEntry { Name = MapMarkerScript };
                         sc.Properties.Add(new ScriptBoolProperty { Name = "Discovered", Data = true, Flags = ScriptProperty.Flag.Edited });
-                        sc.Properties.Add(new ScriptBoolProperty { Name = "EnableOnInit", Data = false, Flags = ScriptProperty.Flag.Edited });
+                        // EnableOnInit TRUE, the stock script's default and its own doc: "required for default space cell map
+                        // markers which are all initially disabled". MB01's is false because its driver (MissionBountySpaceScript.
+                        // MissionAccepted) calls SpaceMapMarker.TryToEnableNoWait(); a Delve has no driver, so copied as false the
+                        // marker was never enabled (19a, 2026-10-22, his play: the objective on Gagarin, no marker to click).
+                        sc.Properties.Add(new ScriptBoolProperty { Name = "EnableOnInit", Data = true, Flags = ScriptProperty.Flag.Edited });
                         sc.Properties.Add(new ScriptIntProperty { Name = "MapMarkerCategory", Data = 0, Flags = ScriptProperty.Flag.Edited });
                         sc.Properties.Add(new ScriptIntProperty { Name = "MapMarkerType", Data = 47, Flags = ScriptProperty.Flag.Edited });
                         sc.Properties.Add(new ScriptIntProperty { Name = "UndiscoveredVisibility", Data = 1, Flags = ScriptProperty.Flag.Edited });
@@ -2367,6 +2371,9 @@ namespace FrankyCLI
                                   $"collection {orbCell} by-type True");
                     fail += Check($"orbit map marker {omm} is named by the object (MapMarkerLinkedRefNameOverride to alias {otg})",
                                   mma?.LinkedAliases.Any(l => l.AliasID == otg && l.Keyword.FormKey == MapMarkerNameLink).ToString() ?? "missing", "True");
+                    fail += Check($"orbit map marker {omm} is enabled on init (a space cell's map marker starts disabled and a Delve has no driver to enable it)",
+                                  (vma.Aliases.FirstOrDefault(a => a.Property.Alias == omm)?.Scripts.FirstOrDefault(x => x.Name == MapMarkerScript)?.Properties
+                                      .OfType<IScriptBoolPropertyGetter>().FirstOrDefault(x => x.Name == "EnableOnInit")?.Data)?.ToString() ?? "unset", "True");
                     fail += Check($"orbit map marker {omm} wears {MapMarkerScript} (type 47)",
                                   (vma.Aliases.FirstOrDefault(a => a.Property.Alias == omm)?.Scripts.FirstOrDefault(x => x.Name == MapMarkerScript)?.Properties
                                       .OfType<IScriptIntPropertyGetter>().FirstOrDefault(x => x.Name == "MapMarkerType")?.Data ?? -1).ToString(), "47");
