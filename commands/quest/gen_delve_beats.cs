@@ -2251,7 +2251,7 @@ namespace FrankyCLI
                 fail += Check($"orbit alias {orbAlias}'s altitude is in his 8-32 band", (alt >= 8f && alt <= 32f).ToString(), "True");
                 bool samePlanet = ol?.Conditions.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter d
                                      && d.FirstParameter == orbMain && d.SecondParameter.Link.FormKey == MajorOrbital && c is IConditionFloatGetter f && f.ComparisonValue == 1f) ?? false;
-                fail += Check($"orbit alias {orbAlias} is over the orbMain place's planet (IsInSameCurrentLocationAsAlias {orbMain}, LocTypeMajorOrbital)", samePlanet.ToString(), "True");
+                fail += Check($"orbit alias {orbAlias} is over the main place's planet (IsInSameCurrentLocationAsAlias {orbMain}, LocTypeMajorOrbital)", samePlanet.ToString(), "True");
                 var cm = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(x => x?.ID == (uint)orbCell);
                 fail += Check($"space cell {orbCell} is created at the orbit", cm?.CreateReferenceToObject?.AliasID.ToString() ?? "missing", orbAlias.ToString());
                 foreach (var (ma, rt) in bm.OrbitMarkers)
