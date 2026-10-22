@@ -47,6 +47,15 @@ When he tries a new one, add a row: the id, **his** words for how it sounds, and
 in game. Not the voice's name from the ElevenLabs site, and not a guess from the name: the library's labels
 are below, and a label is what ElevenLabs says, not what it sounds like in Starfield.
 
+## Ruled out by his ear
+
+Never cast these. They are taken out of the library table below, and listed here so a re-read of the
+account does not put them back.
+
+| id | ElevenLabs' name | his words | still in a recipe (recast owed) |
+|---|---|---|---|
+| `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | `duo_delve21a`, `duo_delve32a`, `duo_delve_remote06a` |
+
 ## His library: every voice on the account, with ElevenLabs' own labels
 
 *Read off the API on 2026-10-09 (`GET /v1/voices`; he granted the key `voices_read` that afternoon), 51 voices,
@@ -82,7 +91,6 @@ there. The heard-in-game table above is the one to choose from first; this is wh
 | female | middle aged | Lauren B - Warm, Humanlike, Friendly Conversational, Chatbots | `l4Coq6695JDX9xtLqXDE` | american | conversational | pleasant | professional |
 | female | middle aged | Lily - Velvety Actress | `pFZP5JQG7iQjIQuC4Bku` | british | informative educational | confident | premade |
 | female | middle aged | Lucy - Friendly, Relaxed, Thoughtful | `r5iFzIytiA1rzjhWFCjW` | american | conversational | pleasant | professional |
-| female | middle aged | Matilda - Knowledgable, Professional | `XrExE9yKIg1WjnnlVkGX` | american | informative educational | upbeat | premade |
 | female | old | Jeanette - Audiobook (2025-02-08_1330) | `RILOU7YmBhvwJGDGjNmP` | british | narrative story | professional | professional |
 | male | young | Charlie - Deep, Confident, Energetic | `IKne3meq5aSn9XLyUdCD` | australian | conversational | hyped | premade |
 | male | young | Harry - Fierce Warrior | `SOYHLrjzK2X1ezoPC6cr` | american | characters animation | rough | premade |
