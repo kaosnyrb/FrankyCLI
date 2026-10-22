@@ -22,6 +22,8 @@
     "Pay: med, placeholder (it leaves the ground, README rule 3); the tier is his."
   ],
   "place": {
+    "reach": "duo_samemapdistance",
+    "_reach": "His 2026-10-22 08:15 read in xEdit: FinalLocation is LocTypeOE_NonHostile == 0 AND within duo_longdrivedistance of the settlers' site, \"that's prob the issue\". The bisect: planet scope back, this one field widened to the main place's own 20,000. Starts = the leash. 11a pairs the same two kinds the other way round and starts.",
     "theme": {
       "require": ["LocTypeOE_NonHostile"],
       "exclude": [
@@ -39,7 +41,7 @@
       }
     },
     "third": {
-      "orbit": "system",
+      "orbit": "planet",
       "_orbit": "BUILT 2026-10-22 (Eliza, his 'go on 19a, try over'): his MB01 satellite repair's orbit chain, tested IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a space cell at it, and the satellite's marker filled from the cell. So the deliver's at is se_TravelMarkerLocRefB02 (was RECenterLocRef, a surface marker no cell has). No vanilla orbit is tied to a planet this way, so his first play is the proof. 08:0x: \"planet\" would not start in any map (his), and no log names an alias (startquest bypasses the Story Manager); his \"yeah whole system\" made it \"system\": the satellite is somewhere in the settlers' star system, so \"over <Planet>\" wants rewording (Jessica's) once it starts.",
       "theme": {
         "require": [],
