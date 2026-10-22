@@ -1,0 +1,37 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_r1",
+  "template": "beats",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"Go on both\"",
+  "_note": [
+    "REMOTE ALIAS-SET TEST R1: remote01a's request as built: the known-good set, the ladder's control.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech, so no voice spend.",
+    "Pass = it starts, the beacon is placed on another planet's requested site, and using it completes."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "remote": true
+  },
+  "prose": {
+    "name": "Survey: Test Beacon R1 on <Planet>",
+    "briefing": "Remote test R1. One requested site, one beacon."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Use the test beacon at the <Place>",
+      "journal": "Remote test R1 complete.",
+      "model": "Meshes\\ccs\\commsmast01.nif",
+      "name": "Test Beacon R1"
+    }
+  ]
+}
