@@ -757,6 +757,15 @@ namespace FrankyCLI
                         if (MatchesSearch(rec.EditorID, rec.FormKey, search))
                         { DumpPcmContentNode(rec); found++; }
                     break;
+                case "cndf":
+                case "conditionform":
+                    // A condition form's conditions IN FULL, and every condition form those name, opened in turn. The generic
+                    // dump printed "Conditions = [3] ConditionFloatBinaryOverlay, ..." (2026-10-22, his "read up on how it
+                    // actually works" about a request's habitability form), which names the shape and none of the test.
+                    foreach (var rec in mod.ConditionRecords)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpConditionForm(rec, allMods, "", new HashSet<FormKey>()); found++; }
+                    break;
                 case "keyword":
                     found += SearchWithRecovery(mod.Keywords, search, "Keyword");
                     break;
@@ -3290,6 +3299,30 @@ namespace FrankyCLI
         /// would be permanently incomplete, with FormKeys resolved to EditorIDs. A condition type
         /// nobody has hand-written support for still prints its parameters.
         /// </summary>
+        /// <summary>
+        /// One condition form (CNDF) in full, and every condition form its IsTrueForConditionForm conditions name, opened
+        /// beneath it. A form already open on this path is named, not reopened, and the walk stops at depth 6, saying so.
+        /// </summary>
+        private static void DumpConditionForm(IConditionRecordGetter rec, List<IStarfieldModGetter>? allMods, string indent, HashSet<FormKey> open)
+        {
+            Console.WriteLine($"{indent}--- ConditionForm {rec.EditorID} [{rec.FormKey}] ---");
+            if (!open.Add(rec.FormKey)) { Console.WriteLine($"{indent}  (already open above: not reopened)"); return; }
+            if (open.Count > 6) { Console.WriteLine($"{indent}  (depth 6: not opened further)"); open.Remove(rec.FormKey); return; }
+            foreach (var c in rec.Conditions)
+            {
+                DumpConditionFull(c, indent + "  ", allMods);
+                // The nested form a condition tests, found by its own FormKey across the load order.
+                if (c.Data == null || !c.Data.GetType().Name.StartsWith("IsTrueForConditionForm")) continue;
+                var fp = c.Data.GetType().GetProperty("FirstParameter")?.GetValue(c.Data);
+                if (fp?.GetType().GetProperty("Link")?.GetValue(fp) is not IFormLinkGetter l || l.IsNull) continue;
+                var inner = (allMods ?? new List<IStarfieldModGetter>()).Select(m => m.ConditionRecords.FirstOrDefault(r => r.FormKey == l.FormKey)).LastOrDefault(r => r != null);
+                if (inner == null) Console.WriteLine($"{indent}    (condition form {l.FormKey} is in no loaded plugin)");
+                else DumpConditionForm(inner, allMods, indent + "    ", open);
+            }
+            open.Remove(rec.FormKey);
+            Console.WriteLine();
+        }
+
         private static void DumpConditionFull(IConditionGetter cond, string indent,
                                               List<IStarfieldModGetter>? allMods)
         {
