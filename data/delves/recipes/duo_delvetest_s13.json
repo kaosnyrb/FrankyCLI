@@ -1,0 +1,35 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s13",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 14:2x, after S12 failed on a planet and in orbit at Gagarin and a frontier world: \"List every alias in S12 and explain what they do\", then \"if any of the 'Carried over from the shipped quest' are wrong the whole quest fails\"",
+  "_note": [
+    "SPACE ALIAS-SET TEST S13: S5 with ONE change, the anchor. S5 is the five aliases that started (the orbit, its cell, a marker, the map marker, the object), every carry-over dropped. S13 adds a Player alias (copied from SE_Player_GenericTemplate) and hangs the orbit off it, conditions cleared: S12's anchor with none of the six carry-overs, each of which was non-optional except PlayerShip, and three of which (TargetSystemLocation, StartingQuestTargetOrbital, StartingQuestTarget) are built on the orbit itself.",
+    "Reading against S5 and S12: S13 starts = a carry-over was failing the near orbit; S13 fails = the anchored orbit itself (next: its altitude, 10.5 against vanilla's 0 on all 125 parent-linked orbits).",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "drop": ["StartingQuestTarget", "StartingQuestTargetOrbital", "TargetSystemLocation", "PatrolMarker01", "PlayerStarSystemLocation", "PlayerShip"],
+    "player": true,
+    "over": "Player"
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S13 at <Place>",
+    "briefing": "Space test S13."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S13 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S13"
+    }
+  ]
+}
