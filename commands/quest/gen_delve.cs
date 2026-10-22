@@ -261,6 +261,10 @@ namespace FrankyCLI
         {
             ["planet"] = FormKey.Factory("070A54:Starfield.esm"),   // LocTypeMajorOrbital: a planet or a moon
             ["system"] = FormKey.Factory("00149F:Starfield.esm"),   // LocTypeStarSystem
+            // "near": no shared location at all. MB01's OWN conditions, verbatim (BodyHasKeyword LocTypeMajorOrbital, not
+            // LocTypeSENotAllowed, GetDistanceGalacticParsec from the player), the parsec limit from place.third.parsecs. His
+            // 2026-10-22 parsec idea for the dungeon, pointed at the orbit after "planet" and "system" never started.
+            ["near"] = FormKey.Null,
         };
         /// <summary>The beat types built in orbit: a thing used from the ship.</summary>
         private static readonly string[] OrbitBeatTypes = { "use", "pickup", "deliver" };
@@ -1433,7 +1437,9 @@ namespace FrankyCLI
             if (r.place.orbit != null || r.place.second?.orbit != null)
                 Fatal("orbit is set on the main or the second place; only place.third can be an orbit.");
             if (r.place.third?.orbit is string ov && !OrbitScopes.ContainsKey(ov))
-                Fatal($"place.third.orbit is '{ov}'; it is \"planet\" (over the main place's planet) or \"system\" (anywhere in its star system).");
+                Fatal($"place.third.orbit is '{ov}'; it is \"planet\" (over the main place's planet), \"system\" (anywhere in its star system) or \"near\" (MB01's own pick, within place.third.parsecs of the player).");
+            if (r.place.third?.orbit == "near" && r.place.third.parsecs == null)
+                Fatal("place.third.orbit is \"near\" and place.third.parsecs is not set; it is the limit that keeps the orbit close.");
             if (IsOrbit(r))
             {
                 var o = r.place.third!;
@@ -1464,7 +1470,10 @@ namespace FrankyCLI
             foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })
             {
                 if (p == null) continue;
-                if ((p.parsecs != null || p.habitability != null) && p.remote != true)
+                bool nearOrbit = label == "place.third" && p.orbit == "near";
+                if (p.habitability != null && p.remote != true)
+                    Fatal($"{label}.habitability shapes a REQUEST, and {label}.remote is not set.");
+                if (p.parsecs != null && p.remote != true && !nearOrbit)
                     Fatal($"{label}.parsecs / {label}.habitability shape a REQUEST, and {label}.remote is not set.");
                 if (p.parsecs is double ps && !(ps > 0))
                     Fatal($"{label}.parsecs must be above 0 (got {ps}).");
@@ -2143,7 +2152,7 @@ namespace FrankyCLI
             }
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
-                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!]) : CreateThirdPlace(clone, t);
+                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!], r.place.third.parsecs) : CreateThirdPlace(clone, t);
                 if (made4.ThirdPlaceAlias < 0) fail++;
                 else if (IsOrbit(r)) madeBeats.Orbit = (made4.ThirdPlaceAlias, made4.OrbitCell, t.placeAlias, OrbitScopes[r.place.third!.orbit!]);
             }
@@ -2346,7 +2355,7 @@ namespace FrankyCLI
         /// orbital as the main place" is the orbit over its planet, or its moon's. ⚠ NO VANILLA ORBIT ALIAS DOES THIS (0 of
         /// 1,060 measured; 75 use the condition on other kinds of alias), so it is proven by his play or not at all.
         /// </summary>
-        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope)
+        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope, double? parsecs)
         {
             if (parts == null || parts.orbit.Count == 0 || t.orbitAliases == null)
             { Console.WriteLine($"REFUSED: an orbit is copied off the parts file and template '{t.id}' has no orbit parts; `gen_delve shell {t.id}` writes them."); return -1; }
@@ -2362,11 +2371,23 @@ namespace FrankyCLI
 
             uint locId = NextAliasId(clone);
             var loc = srcLoc.DeepCopy(); loc.ID = locId; loc.Name = "OrbitLocation";
-            var same = new IsInSameCurrentLocationAsAliasConditionData { FirstParameter = t.placeAlias, Unknown3 = -1 };
-            same.SecondParameter.Link.SetTo(scope);
-            loc.Conditions.Clear();
-            loc.Conditions.Add(new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
-            loc.Conditions.Add(sen.DeepCopy());
+            if (scope.IsNull)
+            {
+                // "near": the source's conditions stay as copied; only the parsec limit becomes the recipe's number.
+                int pi = loc.Conditions.FindIndex(c => c.Data is IGetDistanceGalacticParsecConditionDataGetter);
+                if (pi < 0) { Console.WriteLine($"REFUSED: {parts.orbitFrom}'s orbit carries no GetDistanceGalacticParsec condition for \"near\" to set."); return -1; }
+                var old = loc.Conditions[pi];
+                loc.Conditions[pi] = new ConditionFloat { CompareOperator = old.CompareOperator, Flags = old.Flags, Data = old.Data, ComparisonValue = (float)parsecs!.Value };
+                Console.WriteLine($"  orbit    : {parts.orbitFrom}'s own conditions kept, GetDistanceGalacticParsec {old.CompareOperator} {parsecs} (was a Global)");
+            }
+            else
+            {
+                var same = new IsInSameCurrentLocationAsAliasConditionData { FirstParameter = t.placeAlias, Unknown3 = -1 };
+                same.SecondParameter.Link.SetTo(scope);
+                loc.Conditions.Clear();
+                loc.Conditions.Add(new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
+                loc.Conditions.Add(sen.DeepCopy());
+            }
             clone.Aliases.Add(loc);
 
             uint cellId = NextAliasId(clone);

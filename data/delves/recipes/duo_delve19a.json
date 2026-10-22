@@ -46,12 +46,13 @@
       }
     },
     "third": {
-      "orbit": "planet",
-      "_orbit": "BUILT 2026-10-22 (Eliza, his 'go on 19a, try over'): his MB01 satellite repair's orbit chain, tested IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a space cell at it, and the satellite's marker filled from the cell. So the deliver's at is se_TravelMarkerLocRefB02 (was RECenterLocRef, a surface marker no cell has). No vanilla orbit is tied to a planet this way, so his first play is the proof. 08:0x: \"planet\" would not start in any map (his), and no log names an alias (startquest bypasses the Story Manager); his \"yeah whole system\" made it \"system\": the satellite is somewhere in the settlers' star system, so \"over <Planet>\" wants rewording (Jessica's) once it starts.",
+      "orbit": "near",
+      "_orbit": "BUILT 2026-10-22 (Eliza, his 'go on 19a, try over'): his MB01 satellite repair's orbit chain, tested IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a space cell at it, and the satellite's marker filled from the cell. So the deliver's at is se_TravelMarkerLocRefB02 (was RECenterLocRef, a surface marker no cell has). No vanilla orbit is tied to a planet this way, so his first play is the proof. 08:0x: \"planet\" would not start in any map (his), and no log names an alias (startquest bypasses the Story Manager); his \"yeah whole system\" made it \"system\": the satellite is somewhere in the settlers' star system, so \"over <Planet>\" wants rewording (Jessica's) once it starts. 10:4x: \"planet\" and \"system\" never started, even after the collection id fix (his \"tried a few maps, no luck\"), and his own MB01 never ties its orbit to a place: it takes any major orbital body within 8 parsecs of the player. So \"near\": MB01's conditions verbatim, the limit 1 parsec (his parsec idea for the dungeon). The satellite is somewhere in his system, not forced over the settlers' planet.",
       "theme": {
         "require": [],
         "exclude": []
-      }
+      },
+      "parsecs": 1
     },
     "_themes": "His settlement at a quiet built site (people there, the reason the relay matters), the raiders at a built hostile site, the satellite overhead."
   },

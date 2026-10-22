@@ -2284,9 +2284,21 @@ namespace FrankyCLI
                 fail += Check($"orbit alias {orbAlias} fills by type LocTypeOrbit", ol?.LocationTypeKeyword.FormKey.ToString() ?? "missing", "016504:Starfield.esm");
                 float alt = BitConverter.Int32BitsToSingle(ol?.ALFG ?? 0);
                 fail += Check($"orbit alias {orbAlias}'s altitude is in his 8-32 band", (alt >= 8f && alt <= 32f).ToString(), "True");
-                bool samePlanet = ol?.Conditions.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter d
-                                     && d.FirstParameter == orbMain && d.SecondParameter.Link.FormKey == orbScope && c is IConditionFloatGetter f && f.ComparisonValue == 1f) ?? false;
-                fail += Check($"orbit alias {orbAlias} shares the main place's {(orbScope == MajorOrbital ? "planet" : "star system")} (IsInSameCurrentLocationAsAlias {orbMain}, {orbScope})", samePlanet.ToString(), "True");
+                if (orbScope.IsNull)
+                {
+                    // "near": MB01's own pick, a major orbital body within a NUMBER of parsecs of the player, and no shared location.
+                    bool body = ol?.Conditions.Any(c => c.Data is IBodyHasKeywordConditionDataGetter d && d.FirstParameter.Link.FormKey == MajorOrbital) ?? false;
+                    bool near = ol?.Conditions.Any(c => c.Data is IGetDistanceGalacticParsecConditionDataGetter && c is IConditionFloatGetter) ?? false;
+                    bool shared = ol?.Conditions.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter) ?? false;
+                    fail += Check($"orbit alias {orbAlias} is MB01's pick: a major orbital body, a parsec NUMBER from the player, no shared location",
+                                  $"body {body} near {near} shared {shared}", "body True near True shared False");
+                }
+                else
+                {
+                    bool samePlanet = ol?.Conditions.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter d
+                                         && d.FirstParameter == orbMain && d.SecondParameter.Link.FormKey == orbScope && c is IConditionFloatGetter f && f.ComparisonValue == 1f) ?? false;
+                    fail += Check($"orbit alias {orbAlias} shares the main place's {(orbScope == MajorOrbital ? "planet" : "star system")} (IsInSameCurrentLocationAsAlias {orbMain}, {orbScope})", samePlanet.ToString(), "True");
+                }
                 var cm = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(x => x?.ID == (uint)orbCell);
                 fail += Check($"space cell {orbCell} is created at the orbit", cm?.CreateReferenceToObject?.AliasID.ToString() ?? "missing", orbAlias.ToString());
                 if (bm.OrbitMapMarker is (int omm, int otg))
