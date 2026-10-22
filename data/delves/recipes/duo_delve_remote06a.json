@@ -1,4 +1,4 @@
-{
+﻿{
   "schema": 2,
   "id": "duo_delve_remote06a",
   "template": "beats",
@@ -21,7 +21,7 @@
   "speaker": {
     "name": "Station Security",
     "voice": "GenericFemale01",
-    "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
     "Containment failed, and our test subjects got out.",
@@ -50,5 +50,5 @@
       ]
     }
   ],
-  "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Matilda, Knowledgable, Professional', NOT yet heard in game (voices.md); his ear decides. Sarah moved off this speaker because she is remote02a's Clinic Dispatch."
+  "_speech": "Radio rules: no names, no places, no clock. Recast 2026-10-22 off Matilda (his: \"very robotic\") to 'Clara, Direct, Firm and Confident': security that wants its subjects back now. Sarah stays off this speaker because she is remote02a's Clinic Dispatch. His ear decides."
 }

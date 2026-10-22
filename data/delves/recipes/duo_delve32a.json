@@ -53,7 +53,7 @@
         "outfit": "Outfit_Clothes_Farmer_01_with_Hat",
         "_outfit": "11a's farmer outfit, already worn in game. His eye decides.",
         "voice": "GenericFemale01",
-        "elevenlabs": "XrExE9yKIg1WjnnlVkGX",
+        "elevenlabs": "XW70ikSsadUbinwLMZ5w",
         "hellos": [
           [
             "You'll be the one who answered the call."
@@ -113,11 +113,11 @@
   "speaker": {
     "name": "Stockwoman",
     "voice": "GenericFemale01",
-    "elevenlabs": "XrExE9yKIg1WjnnlVkGX"
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
     "Somebody's taking my stock, two a week, always at night.",
     "I know where they're going and who's eating them. Come and see me, and I'll tell you the rest."
   ],
-  "_speech": "Radio rules: no names, places, factions or currency. Voice is 21a's and remote06a's, used twice so far; his ear decides. Same voice in person."
+  "_speech": "Radio rules: no names, places, factions or currency. Same voice in person. Recast 2026-10-22 off Matilda, the voice he heard on this stockwoman and called \"very robotic\", to 'Annie K, Calm, Grounded Narrator', older: a farmer who has seen a few thefts. His ear decides."
 }

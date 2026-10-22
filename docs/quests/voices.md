@@ -54,7 +54,7 @@ account does not put them back.
 
 | id | ElevenLabs' name | his words | still in a recipe (recast owed) |
 |---|---|---|---|
-| `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | `duo_delve21a`, `duo_delve32a`, `duo_delve_remote06a` |
+| `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | none: recast 2026-10-22 (21a Alice, 32a Annie K, remote06a Clara) |
 
 ## His library: every voice on the account, with ElevenLabs' own labels
 
