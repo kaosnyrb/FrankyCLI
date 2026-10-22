@@ -10,6 +10,18 @@ namespace Retrograde.Nouns.QuestAuthoring
     public enum FillFrom { Inside, CreatedAt, FromCollection, Leash }
 
     /// <summary>
+    /// How one alias USES another, or how the quest uses it. The first nine are an alias leaning on another (an EDGE: the
+    /// used alias has a job only if the user has one); the last four are the quest's own jobs (TERMINAL: an objective points
+    /// at it, a script holds it, it wears a script, or the quest's text names it).
+    /// </summary>
+    public enum UseKind { FillsInside, CreatedAt, FromCollection, Leash, SameLocation, Parent, SystemLocation, Linked, ClosestTo,
+                          Objective, ScriptProperty, AliasScript, TextToken }
+
+    /// <summary>One use of alias <see cref="Used"/>: by alias <see cref="ByAlias"/> for an edge, and <see cref="Where"/> the
+    /// objective index, property name, script names or token for a terminal. Data, never a sentence.</summary>
+    public sealed record AliasUse(uint Used, UseKind Kind, uint? ByAlias, string? Where);
+
+    /// <summary>
     /// The answer to "put every alias below everything it fills from". <see cref="Order"/> is null when no
     /// order exists, and then <see cref="Unplaced"/> names the alias IDs left when no further entry could go:
     /// the cycle is among them, alongside anything that only depends on it.
@@ -128,6 +140,148 @@ namespace Retrograde.Nouns.QuestAuthoring
                 remaining.RemoveAt(k);
             }
             return new AliasOrder<T>(outp, Array.Empty<uint>());
+        }
+
+        /// <summary>
+        /// EVERY USE OF EVERY ALIAS the record itself shows. His frame, 2026-10-22: "Every none optional alias is a stick of
+        /// dynamite. You need to account for them all on every quest." A required alias that cannot fill stops the quest
+        /// silently, so one with no job is pure risk: rung S12 carried five such aliases and did not start; S13, the same
+        /// anchor without them, did.
+        /// ⚠ STATED LIMIT: only this QUST record is read. A use that lives in another record (a scene's actor, a dialogue
+        /// condition, another quest's external alias) is not seen, so "no use found" means none HERE, never none at all.
+        /// </summary>
+        public static List<AliasUse> UsesOf(IQuestGetter q)
+        {
+            var u = new List<AliasUse>();
+            var aliases = q.Aliases?.ToList() ?? new List<IAQuestAliasGetter>();
+            void Ref(IQuestReferenceAliasGetter a)
+            {
+                foreach (var (dep, how) in DepsOf(a))
+                    u.Add(new AliasUse(dep, how switch
+                    {
+                        FillFrom.Inside => UseKind.FillsInside,
+                        FillFrom.CreatedAt => UseKind.CreatedAt,
+                        FillFrom.FromCollection => UseKind.FromCollection,
+                        _ => UseKind.Leash,
+                    }, a.ID, null));
+                foreach (var l in a.LinkedAliases ?? Enumerable.Empty<ILinkedAliasGetter>())
+                    if (l.AliasID is int v && v >= 0) u.Add(new AliasUse((uint)v, UseKind.Linked, a.ID, null));
+                if (a.ClosestToAlias is int c && c >= 0) u.Add(new AliasUse((uint)c, UseKind.ClosestTo, a.ID, null));
+            }
+            foreach (var a in aliases)
+                switch (a)
+                {
+                    case IQuestReferenceAliasGetter r: Ref(r); break;
+                    case IQuestCollectionAliasGetter col:
+                        foreach (var m in col.Collection ?? Enumerable.Empty<ICollectionAliasGetter>())
+                            if (m.ReferenceAlias != null) Ref(m.ReferenceAlias);
+                        break;
+                    case IQuestLocationAliasGetter l:
+                        foreach (var d in LeashDepsOf(l)) u.Add(new AliasUse(d, UseKind.Leash, l.ID, null));
+                        foreach (var d in SameLocationDepsOf(l)) u.Add(new AliasUse(d, UseKind.SameLocation, l.ID, null));
+                        foreach (var d in ParentDepsOf(l)) u.Add(new AliasUse(d, UseKind.Parent, l.ID, null));
+                        if (l.SystemLocationAliasID is int s && s >= 0) u.Add(new AliasUse((uint)s, UseKind.SystemLocation, l.ID, null));
+                        break;
+                }
+
+            foreach (var o in q.Objectives ?? Enumerable.Empty<IQuestObjectiveGetter>())
+                foreach (var t in o.Targets ?? Enumerable.Empty<IQuestObjectiveTargetGetter>())
+                    if (t.AliasID is int v && v >= 0) u.Add(new AliasUse((uint)v, UseKind.Objective, null, o.Index.ToString()));
+
+            var vma = q.VirtualMachineAdapter;
+            if (vma != null)
+            {
+                IEnumerable<IScriptObjectPropertyGetter> Objs(IEnumerable<IScriptEntryGetter> scripts) => scripts
+                    .SelectMany(s => s.Properties)
+                    .SelectMany(p => p switch
+                    {
+                        IScriptObjectPropertyGetter o => new[] { o },
+                        IScriptObjectListPropertyGetter ol => ol.Objects.ToArray(),
+                        _ => Array.Empty<IScriptObjectPropertyGetter>(),
+                    });
+                var scripts = vma.Scripts.AsEnumerable();
+                if (vma.Script != null) scripts = scripts.Append(vma.Script);
+                scripts = scripts.Concat(vma.Aliases.SelectMany(e => e.Scripts));
+                foreach (var p in Objs(scripts))
+                    if (p.Object.FormKey == q.FormKey && p.Alias >= 0) u.Add(new AliasUse((uint)p.Alias, UseKind.ScriptProperty, null, p.Name));
+                foreach (var e in vma.Aliases)
+                    if (e.Property.Object.FormKey == q.FormKey && e.Property.Alias >= 0 && e.Scripts.Count > 0)
+                        u.Add(new AliasUse((uint)e.Property.Alias, UseKind.AliasScript, null, string.Join(",", e.Scripts.Select(s => s.Name))));
+            }
+
+            var byName = new Dictionary<string, List<uint>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var a in aliases)
+                foreach (var id in IdsOf(a))
+                {
+                    string? n = a switch
+                    {
+                        IQuestReferenceAliasGetter r => r.Name,
+                        IQuestLocationAliasGetter l => l.Name,
+                        IQuestCollectionAliasGetter c => c.Collection?.FirstOrDefault(m => m.ReferenceAlias?.ID == id)?.ReferenceAlias?.Name,
+                        _ => null,
+                    };
+                    if (n == null) continue;
+                    if (!byName.TryGetValue(n, out var ids)) byName[n] = ids = new List<uint>();
+                    ids.Add(id);
+                }
+            var text = new List<string?> { q.Name?.String };
+            text.AddRange((q.Objectives ?? Enumerable.Empty<IQuestObjectiveGetter>()).Select(o => o.DisplayText?.String));
+            text.AddRange((q.Stages ?? Enumerable.Empty<IQuestStageGetter>()).SelectMany(s => s.LogEntries).Select(e => e.Entry?.String));
+            foreach (var s in text.Where(s => s != null))
+                foreach (System.Text.RegularExpressions.Match m in AliasToken.Matches(s!))
+                    if (byName.TryGetValue(m.Groups[1].Value, out var ids))
+                        foreach (var id in ids) u.Add(new AliasUse(id, UseKind.TextToken, null, m.Value));
+            return u;
+        }
+
+        /// <Alias=X>, <Alias.Name=X>, <Alias.PluralName=X> and the like: the quest's text naming an alias.
+        private static readonly System.Text.RegularExpressions.Regex AliasToken = new(@"<Alias(?:\.[A-Za-z]+)?=([^>]+)>");
+
+        public static bool IsTerminal(UseKind k) => k is UseKind.Objective or UseKind.ScriptProperty or UseKind.AliasScript or UseKind.TextToken;
+
+        /// <summary>
+        /// The aliases with a JOB: a terminal use, or used by an alias that has one, to a fixpoint. A chain whose last link
+        /// nobody uses has no job anywhere along it (S12: TargetSystemLocation, the cell created at it, the marker filled
+        /// from that cell, and nothing pointing at the marker).
+        /// </summary>
+        public static HashSet<uint> Accounted(IReadOnlyList<AliasUse> uses)
+        {
+            var acc = uses.Where(x => IsTerminal(x.Kind)).Select(x => x.Used).ToHashSet();
+            for (bool grew = true; grew;)
+            {
+                grew = false;
+                foreach (var x in uses)
+                    if (!IsTerminal(x.Kind) && x.ByAlias is uint by && acc.Contains(by) && acc.Add(x.Used)) grew = true;
+            }
+            return acc;
+        }
+
+        /// The Optional bit (0x2) on an alias's flags, ref or location alike (gen_aliaslint's control holds it to the enum word).
+        public static bool IsOptional(IAQuestAliasGetter a) => a switch
+        {
+            IQuestReferenceAliasGetter r => (Convert.ToUInt32(r.Flags) & 0x2) != 0,
+            IQuestLocationAliasGetter l => (Convert.ToUInt32(l.Flags) & 0x2) != 0,
+            _ => false,
+        };
+
+        /// <summary>The non-optional aliases with no job this record shows: every stick of dynamite not accounted for.</summary>
+        public static List<(uint id, string name)> Unaccounted(IQuestGetter q)
+        {
+            var acc = Accounted(UsesOf(q));
+            var outp = new List<(uint, string)>();
+            foreach (var a in q.Aliases ?? Enumerable.Empty<IAQuestAliasGetter>())
+            {
+                var members = a is IQuestCollectionAliasGetter c
+                    ? (c.Collection ?? Enumerable.Empty<ICollectionAliasGetter>()).Where(m => m.ReferenceAlias != null).Select(m => (IAQuestAliasGetter)m.ReferenceAlias!)
+                    : new[] { a };
+                foreach (var m in members)
+                {
+                    uint id = IdsOf(m).Single();
+                    if (!IsOptional(m) && !acc.Contains(id))
+                        outp.Add((id, m switch { IQuestReferenceAliasGetter r => r.Name ?? "", IQuestLocationAliasGetter l => l.Name ?? "", _ => "" }));
+                }
+            }
+            return outp;
         }
 
         /// WHOSE location a condition tests. On a location alias the subject is the candidate; any other

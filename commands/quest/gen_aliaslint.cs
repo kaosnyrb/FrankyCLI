@@ -42,6 +42,14 @@ namespace FrankyCLI
     ///   R5 leash anchor -- a place's GetDistance that takes an ALIAS parameter must name an alias that
     ///                     exists, is listed above the place, and is not filled inside that same place.
     ///                     UNKNOWN when it fails (such quests start; their distance is not the promised one).
+    ///   R6 dynamite    -- every NON-OPTIONAL alias must have a job: an objective, a script, a script on it, the
+    ///                     quest's text, or an alias with a job leaning on it. His frame, 2026-10-22: "Every none
+    ///                     optional alias is a stick of dynamite. You need to account for them all on every quest."
+    ///                     Rung S12 carried required aliases nothing used and did not start; S13 without them did.
+    ///                     Printed as [DYNAMITE] and counted beside the verdict; it does not change the verdict,
+    ///                     because "no job" is a risk the records show, not a proof it cannot start. ⚠ Reads this
+    ///                     QUST only: a use in a scene, a dialogue condition or another quest is not seen
+    ///                     (AliasGraph.UsesOf), so a vanilla quest can show dynamite that has a job elsewhere.
     ///
     /// ⚠ STATED LIMIT: whether conditions evaluate up the location hierarchy (ParentLocation) is NOT
     /// established (manual part 32). Pools here count a location's OWN references and keywords, so a
@@ -104,15 +112,18 @@ namespace FrankyCLI
             if (quests.Count == 0) { Console.WriteLine("  REFUSED: nothing matched -- a needle failure, not a finding."); return 1; }
 
             var tally = new Dictionary<Verdict, int>();
+            int dynamiteQuests = 0, dynamite = 0;
             foreach (var q in quests)
             {
-                var v = Grade(q, locs, env, quiet);
+                var (v, d) = Grade(q, locs, env, quiet);
                 tally[v] = tally.GetValueOrDefault(v) + 1;
+                if (d > 0) { dynamiteQuests++; dynamite += d; }
             }
             Console.WriteLine();
             Console.WriteLine($"  SUMMARY over {quests.Count}: CANNOT START {tally.GetValueOrDefault(Verdict.Cannot)} · "
                               + $"UNKNOWN {tally.GetValueOrDefault(Verdict.Unknown)} · CAN START IF {tally.GetValueOrDefault(Verdict.CanIf)} · "
                               + $"no runtime terms {tally.GetValueOrDefault(Verdict.Ok)}");
+            Console.WriteLine($"  R6 DYNAMITE: {dynamite} required alias(es) with no job, in {dynamiteQuests} of {quests.Count} quest(s)");
             return tally.GetValueOrDefault(Verdict.Cannot) > 0 ? 2 : 0;
         }
 
@@ -121,7 +132,7 @@ namespace FrankyCLI
 
         private static uint RawFlags(object flags) => Convert.ToUInt32(flags);
 
-        private static Verdict Grade(IQuestGetter q, List<Loc> locs,
+        private static (Verdict, int dynamite) Grade(IQuestGetter q, List<Loc> locs,
                                      IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool quiet)
         {
             var cannot = new List<string>();
@@ -281,18 +292,50 @@ namespace FrankyCLI
                     (optional ? unknown : cannot).Add($"R4 place {Label(la.ID)}: no location satisfies its own terms AND carries every marker its aliases fill from");
             }
 
+            // --- R6: every stick of dynamite accounted for --------------------------------------------
+            var uses = AliasGraph.UsesOf(q);
+            var acc = AliasGraph.Accounted(uses);
+            var dyn = AliasGraph.Unaccounted(q);
+            foreach (var id in byId.Keys.OrderBy(x => x).Where(acc.Contains))
+            {
+                var first = uses.Where(x => x.Used == id).OrderBy(x => AliasGraph.IsTerminal(x.Kind) ? 0 : 1).First();
+                info.Add($"R6 ok   alias {Label(id)}: {UseWords(first, Label)}");
+            }
+
             var v = cannot.Count > 0 ? Verdict.Cannot : unknown.Count > 0 ? Verdict.Unknown : runtime.Count > 0 ? Verdict.CanIf : Verdict.Ok;
             string word = v switch { Verdict.Cannot => "CANNOT START", Verdict.Unknown => "UNKNOWN", Verdict.CanIf => "CAN START IF", _ => "no runtime terms" };
             Console.WriteLine();
-            Console.WriteLine($"  {word,-16} {q.EditorID}  [{q.FormKey}]  ({aliases.Count} aliases)");
-            if (quiet && v != Verdict.Cannot) return v;
+            Console.WriteLine($"  {word,-16} {q.EditorID}  [{q.FormKey}]  ({aliases.Count} aliases; R6 dynamite {dyn.Count})");
+            foreach (var (id, name) in dyn)
+                Console.WriteLine($"    [DYNAMITE] R6 alias {id} {name} is required and nothing in this quest gives it a job"
+                                  + (uses.Any(x => x.Used == id) ? $" (only {string.Join(", ", uses.Where(x => x.Used == id).Select(x => UseWords(x, Label)))}, none of which has one)" : ""));
+            if (quiet && v != Verdict.Cannot) return (v, dyn.Count);
             foreach (var s in cannot) Console.WriteLine("    [CANNOT ] " + s);
             foreach (var s in unknown) Console.WriteLine("    [UNKNOWN] " + s);
-            if (quiet) return v;
+            if (quiet) return (v, dyn.Count);
             foreach (var s in runtime) Console.WriteLine("    [runtime] " + s);
             foreach (var s in info) Console.WriteLine("    [  read ] " + s);
-            return v;
+            return (v, dyn.Count);
         }
+
+        /// The CLI's words for one use; AliasGraph hands back the kind and the data.
+        private static string UseWords(AliasUse x, Func<uint, string> label) => x.Kind switch
+        {
+            UseKind.FillsInside => $"alias {label(x.ByAlias!.Value)} fills inside it",
+            UseKind.CreatedAt => $"alias {label(x.ByAlias!.Value)} is created at it",
+            UseKind.FromCollection => $"alias {label(x.ByAlias!.Value)} fills from its collection",
+            UseKind.Leash => $"alias {label(x.ByAlias!.Value)} measures its leash from it",
+            UseKind.SameLocation => $"alias {label(x.ByAlias!.Value)} is tested against it",
+            UseKind.Parent => $"alias {label(x.ByAlias!.Value)} is parented to it",
+            UseKind.SystemLocation => $"alias {label(x.ByAlias!.Value)} searches its star system",
+            UseKind.Linked => $"alias {label(x.ByAlias!.Value)} links to it",
+            UseKind.ClosestTo => $"alias {label(x.ByAlias!.Value)} fills closest to it",
+            UseKind.Objective => $"objective {x.Where} targets it",
+            UseKind.ScriptProperty => $"script property {x.Where} holds it",
+            UseKind.AliasScript => $"it wears {x.Where}",
+            UseKind.TextToken => $"the text says {x.Where}",
+            _ => throw new ArgumentOutOfRangeException(nameof(x), x.Kind, "a UseKind with no words"),
+        };
 
         /// The CLI's words for a dependency; AliasGraph hands back the kind, never a sentence.
         private static string Words(FillFrom how) => how switch
@@ -367,6 +410,60 @@ namespace FrankyCLI
             var kinds = AliasGraph.DepsOf(made);
             Check("DepsOf returns every kind", kinds.SequenceEqual(new[] { (2u, FillFrom.Inside), (3u, FillFrom.CreatedAt), (4u, FillFrom.FromCollection) }),
                   string.Join(" ", kinds.Select(k => $"{k.dep}:{k.how}")));
+
+            // 6 to 10. R6, on hand-built quests in the shapes of the space ladder's rungs.
+            Quest NewQuest(params AQuestAlias[] aliases)
+            {
+                var q = new Quest(FormKey.Factory("000800:R6SelfTest.esm"), StarfieldRelease.Starfield);
+                q.Aliases = new Noggog.ExtendedList<AQuestAlias>(aliases);
+                return q;
+            }
+            void Target(Quest q, int alias) { var o = new QuestObjective { Index = 10 }; o.Targets.Add(new QuestObjectiveTarget { AliasID = alias }); q.Objectives.Add(o); }
+            QuestCollectionAlias Coll(QuestReferenceAlias member) { var c = new QuestCollectionAlias(); c.Collection.Add(new CollectionAlias { ID = member.ID, ReferenceAlias = member }); return c; }
+            string Dyn(Quest q) => string.Join(",", AliasGraph.Unaccounted(q).Select(x => x.id).OrderBy(x => x));
+
+            // 6. S13's shape: orbit 2 parented to Player 17, a cell created at 2, a marker from the cell, the object at the
+            // marker, the objective on the object. Every link reaches the objective, so nothing is dynamite.
+            var s13 = NewQuest(new QuestReferenceAlias { ID = 17, Name = "Player" },
+                               new QuestLocationAlias { ID = 2, ParentSystemLocationAliasID = 17 },
+                               Coll(new QuestReferenceAlias { ID = 10, CreateReferenceToObject = new CreateReferenceToObject { AliasID = 2 } }),
+                               new QuestReferenceAlias { ID = 12, ReferenceCollectionAliasID = 10 },
+                               new QuestReferenceAlias { ID = 3, CreateReferenceToObject = new CreateReferenceToObject { AliasID = 12 } });
+            Target(s13, 3);
+            Check("R6: S13's chain is all accounted", Dyn(s13) == "", "dynamite [" + Dyn(s13) + "]");
+
+            // 7. S12's tail: a system over the orbit, a cell created at the system, a marker from that cell, and nothing
+            // pointing at the marker. The WHOLE chain is dynamite, not only its end, and the S13 core stays accounted.
+            var s12 = NewQuest(new QuestReferenceAlias { ID = 17, Name = "Player" },
+                               new QuestLocationAlias { ID = 2, ParentSystemLocationAliasID = 17 },
+                               Coll(new QuestReferenceAlias { ID = 10, CreateReferenceToObject = new CreateReferenceToObject { AliasID = 2 } }),
+                               new QuestReferenceAlias { ID = 12, ReferenceCollectionAliasID = 10 },
+                               new QuestReferenceAlias { ID = 3, CreateReferenceToObject = new CreateReferenceToObject { AliasID = 12 } },
+                               new QuestLocationAlias { ID = 8, SystemLocationAliasID = 2 },
+                               Coll(new QuestReferenceAlias { ID = 14, CreateReferenceToObject = new CreateReferenceToObject { AliasID = 8 } }),
+                               new QuestReferenceAlias { ID = 15, ReferenceCollectionAliasID = 14 },
+                               new QuestLocationAlias { ID = 0 });
+            Target(s12, 3);
+            Check("R6: S12's unused chain and its lone system are dynamite", Dyn(s12) == "0,8,14,15", "dynamite [" + Dyn(s12) + "]");
+
+            // 8. CONTROL: the same unused alias marked Optional is not dynamite (an optional alias cannot stop the start).
+            var opt = NewQuest(new QuestLocationAlias { ID = 0, Flags = (QuestLocationAlias.Flag)0x2 }, new QuestReferenceAlias { ID = 3 });
+            Target(opt, 3);
+            Check("R6: an unused Optional alias is not dynamite", Dyn(opt) == "", "dynamite [" + Dyn(opt) + "]");
+
+            // 9. Terminal uses other than an objective: a token in the quest's text, and a link from an alias with a job.
+            var txt = NewQuest(new QuestLocationAlias { ID = 2, Name = "TargetPlanetLocation" },
+                               new QuestReferenceAlias { ID = 17, Name = "Patrol" },
+                               new QuestReferenceAlias { ID = 3, LinkedAliases = new Noggog.ExtendedList<LinkedAlias> { new LinkedAlias { AliasID = 17 } } });
+            txt.Name = "Repair it at <Alias=TargetPlanetLocation>";
+            Target(txt, 3);
+            Check("R6: a text token and a link from a used alias both count", Dyn(txt) == "", "dynamite [" + Dyn(txt) + "]");
+
+            // 10. CONTROL on the direction of a link: a used alias linked FROM an unused one gains nothing for the unused one.
+            var back = NewQuest(new QuestReferenceAlias { ID = 3 },
+                                new QuestReferenceAlias { ID = 5, LinkedAliases = new Noggog.ExtendedList<LinkedAlias> { new LinkedAlias { AliasID = 3 } } });
+            Target(back, 3);
+            Check("R6: linking TO a used alias is not a job", Dyn(back) == "5", "dynamite [" + Dyn(back) + "]");
 
             Console.WriteLine(fail == 0 ? "  selftest: all passed" : $"  selftest: {fail} FAILED");
             return fail == 0 ? 0 : 1;

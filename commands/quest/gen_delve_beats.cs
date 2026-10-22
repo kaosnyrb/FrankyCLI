@@ -624,6 +624,7 @@ namespace FrankyCLI
             public List<(int marker, int activator)> DroppedSlots = new();   // the base's object slots no beat took, removed
             public List<int> DroppedDriverAliases = new();   // board: the removed driver's own aliases, removed with it
             public bool MarkerSourceAtMap;
+            public int? OrbitPlayer;    // the Player alias an orbit "player" hangs off (place.third.orbit, rung S13's shape)
             public int? SecondPlanet;   // the created second planet's alias, when a beat is at the second place   // board: the marker source took no fight and fills from the map marker
             public (int on, int to)? Arrival;   // board: the arrival hook's alias (step one's marker) and the alias it measures to (the player)
             public (int stage, List<string> lines)? HandBack;   // the talk that ends the Delve: its stage and the RemoveItem lines it must run
@@ -2332,7 +2333,16 @@ namespace FrankyCLI
                 fail += Check($"orbit alias {orbAlias}'s altitude is in his 8-32 band", (alt >= 8f && alt <= 32f).ToString(), "True");
                 if (r.place.third?.altitude is double wantAlt)
                     fail += Check($"orbit alias {orbAlias}'s altitude is the recipe's {wantAlt}", alt.ToString("0.###"), wantAlt.ToString("0.###"));
-                if (orbScope.IsNull)
+                if (orbScope == PlayerNpc)
+                {
+                    // "player": the census values, pinned (S13's shape): no conditions, hung off a Player alias, the parent flag.
+                    var pl = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)(bm.OrbitPlayer ?? -1));
+                    fail += Check($"orbit alias {orbAlias} hangs off the Player alias {bm.OrbitPlayer}, with the parent flag and no conditions",
+                                  $"parent {ol?.ParentSystemLocationAliasID}, flag {((ol?.Flags ?? 0) & ParentLinkFlag) == ParentLinkFlag}, {ol?.Conditions.Count} condition(s)",
+                                  $"parent {bm.OrbitPlayer}, flag True, 0 condition(s)");
+                    fail += Check($"alias {bm.OrbitPlayer} is the unique actor Player", pl?.UniqueActor.FormKey.ToString() ?? "missing", "000007:Starfield.esm");
+                }
+                else if (orbScope.IsNull)
                 {
                     // "near": MB01's own pick, a major orbital body within a NUMBER of parsecs of the player, and no shared location.
                     bool body = ol?.Conditions.Any(c => c.Data is IBodyHasKeywordConditionDataGetter d && d.FirstParameter.Link.FormKey == MajorOrbital) ?? false;

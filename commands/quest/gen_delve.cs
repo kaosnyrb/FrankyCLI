@@ -264,6 +264,11 @@ namespace FrankyCLI
         /// <summary>Does this template's build take anything off another quest?</summary>
         /// <summary>A recipe whose third place is an orbit (Place.orbit).</summary>
         private static bool IsOrbit(Recipe r) => r.place.third?.orbit != null;
+        /// <summary>The Player NPC (000007), the unique actor a Player alias fills with; place.third.orbit "player"'s key.
+        /// ⛔ DECLARED ABOVE OrbitScopes ON PURPOSE: static fields initialise in text order, and below it the dictionary read
+        /// FormKey.Null, so "player" became "near" (2026-10-22, 19a's first dry run, caught only because "near" then crashed on
+        /// the parsec limit "player" refuses).</summary>
+        private static readonly FormKey PlayerNpc = FormKey.Factory("000007:Starfield.esm");
         /// <summary>place.third.orbit's scopes: the location keyword the orbit must share with the main place.</summary>
         private static readonly Dictionary<string, FormKey> OrbitScopes = new()
         {
@@ -273,6 +278,11 @@ namespace FrankyCLI
             // LocTypeSENotAllowed, GetDistanceGalacticParsec from the player), the parsec limit from place.third.parsecs. His
             // 2026-10-22 parsec idea for the dungeon, pointed at the orbit after "planet" and "system" never started.
             ["near"] = FormKey.Null,
+            // "player": the orbit hangs OFF THE PLAYER, no conditions, ParentSystemLocationAliasID to a Player alias copied from
+            // SE_Player_GenericTemplate: rung S13's shape, the first near orbit that started (2026-10-22, his "s13 worked").
+            // The key is the Player NPC the alias fills with. Over the planet he takes the quest on, which for a local Delve is
+            // the main place's.
+            ["player"] = PlayerNpc,
         };
         /// <summary>The beat types built in orbit: a thing used from the ship.</summary>
         private static readonly string[] OrbitBeatTypes = { "use", "pickup", "deliver" };
@@ -1508,9 +1518,11 @@ namespace FrankyCLI
             if (r.place.orbit != null || r.place.second?.orbit != null)
                 Fatal("orbit is set on the main or the second place; only place.third can be an orbit.");
             if (r.place.third?.orbit is string ov && !OrbitScopes.ContainsKey(ov))
-                Fatal($"place.third.orbit is '{ov}'; it is \"planet\" (over the main place's planet), \"system\" (anywhere in its star system) or \"near\" (MB01's own pick, within place.third.parsecs of the player).");
+                Fatal($"place.third.orbit is '{ov}'; it is \"player\" (hung off the player, S13's shape), \"planet\" (over the main place's planet), \"system\" (anywhere in its star system) or \"near\" (MB01's own pick, within place.third.parsecs of the player).");
             if (r.place.third?.orbit == "near" && r.place.third.parsecs == null)
                 Fatal("place.third.orbit is \"near\" and place.third.parsecs is not set; it is the limit that keeps the orbit close.");
+            if (r.place.third?.orbit == "player" && r.place.third.parsecs != null)
+                Fatal("place.third.orbit is \"player\" and place.third.parsecs is set; a player orbit hangs off him with no conditions, so a distance would test nothing.");
             if (IsOrbit(r))
             {
                 var o = r.place.third!;
@@ -1594,7 +1606,7 @@ namespace FrankyCLI
                 {
                     if (pi == 2 && IsOrbit(r))
                     {
-                        Console.WriteLine($"  -- the third place is an ORBIT (created at build from {t.orbitFrom}): {(r.place.third!.orbit == "planet" ? "over the main place's planet" : "in the main place's star system")}, no POI pool to draw");
+                        Console.WriteLine($"  -- the third place is an ORBIT (created at build from {t.orbitFrom}): {r.place.third!.orbit switch { "planet" => "over the main place's planet", "system" => "in the main place's star system", "near" => "MB01's pick within place.third.parsecs of the player", "player" => "hung off the player (S13's shape), over the planet he takes it on", var x => $"scope '{x}'" }}, no POI pool to draw");
                         continue;
                     }
                     var pool = (pi == 0 && remote) || (pi == 1 && secondRemote) ? reqPool! : drawPool;
@@ -2231,6 +2243,13 @@ namespace FrankyCLI
             if (fail == 0) fail += EmitModel(myMod, ref clone, r, opts, dry);
             if (fail > 0) { Console.WriteLine("\n=== " + fail + " problem(s). NOTHING WRITTEN. ==="); return 1; }
 
+            // R6 BEFORE THE WRITE: every required alias accounted for, off the quest about to be written (his frame, 2026-10-22:
+            // "Every none optional alias is a stick of dynamite. You need to account for them all on every quest"). Printed, not
+            // gating: the gate is his call, and five shipped remote Delves carry an unused unique-actor Player today.
+            var dyn = AliasGraph.Unaccounted(clone);
+            Console.WriteLine(dyn.Count == 0 ? "  R6       : every required alias has a job (no dynamite)"
+                                             : $"  R6       : DYNAMITE, {dyn.Count} required alias(es) with no job: {string.Join(", ", dyn.Select(d => $"{d.id} {d.name}"))}");
+
             lap.Mark("write");
             if (dry && opts.EmitDir != null)
             {
@@ -2273,14 +2292,23 @@ namespace FrankyCLI
             if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts, r.place);
             // No planet guard on the second request, ever: two crashed the game on start (10a, 12a). See Place.remote.
             if (fail == 0 && r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts, r.place.second!);
-            if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1) && (IsBoard(t) || r.place.second?.remote == true))
+            // The second planet exists for <SecondPlanet> and nothing else, so it is made only when the text says it. Made for
+            // every remote second place until 2026-10-22, it was a required alias with no job on 19a and missionboard03a: R6's
+            // first sweep, under his "Every none optional alias is a stick of dynamite".
+            if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1) && (IsBoard(t) || r.place.second?.remote == true)
+                && ProseStrings(r).Any(p => Tokens(p.Item2).Contains("SecondPlanet")))
             {
                 fail += MakeSecondPlanet(clone, t);
                 madeBeats.SecondPlanet = t.secondPlanet.id;
             }
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
-                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!], r.place.third.parsecs, r.place.third.altitude) : CreateThirdPlace(clone, t);
+                int overPlayer = -1;
+                if (IsOrbit(r) && OrbitScopes[r.place.third!.orbit!] == PlayerNpc && (overPlayer = AddVanillaPlayer(myMod, env, clone)) < 0) fail++;
+                madeBeats.OrbitPlayer = overPlayer >= 0 ? overPlayer : null;
+                made4.ThirdPlaceAlias = fail > 0 ? -1
+                    : IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!], r.place.third.parsecs, r.place.third.altitude, overPlayer)
+                    : CreateThirdPlace(clone, t);
                 if (made4.ThirdPlaceAlias < 0) fail++;
                 else if (IsOrbit(r)) madeBeats.Orbit = (made4.ThirdPlaceAlias, made4.OrbitCell, t.placeAlias, OrbitScopes[r.place.third!.orbit!]);
             }
@@ -2456,7 +2484,7 @@ namespace FrankyCLI
         /// orbital as the main place" is the orbit over its planet, or its moon's. ⚠ NO VANILLA ORBIT ALIAS DOES THIS (0 of
         /// 1,060 measured; 75 use the condition on other kinds of alias), so it is proven by his play or not at all.
         /// </summary>
-        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope, double? parsecs, double? altitude)
+        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope, double? parsecs, double? altitude, int overPlayer)
         {
             if (parts == null || parts.orbit.Count == 0 || t.orbitAliases == null)
             { Console.WriteLine($"REFUSED: an orbit is copied off the parts file and template '{t.id}' has no orbit parts; `gen_delve shell {t.id}` writes them."); return -1; }
@@ -2472,7 +2500,18 @@ namespace FrankyCLI
 
             uint locId = NextAliasId(clone);
             var loc = srcLoc.DeepCopy(); loc.ID = locId; loc.Name = "OrbitLocation";
-            if (scope.IsNull)
+            if (scope == PlayerNpc)
+            {
+                // "player": rung S13's shape. No conditions, hung off the Player alias by its parent link, with the flag every
+                // one of the 125 vanilla parent-linked orbits carries.
+                if (overPlayer < 0) { Console.WriteLine("REFUSED: orbit \"player\" and no Player alias was added to hang it off."); return -1; }
+                var gone = loc.Conditions.Select(c => c.Data.GetType().Name.Replace("ConditionData", "")).ToList();
+                loc.Conditions.Clear();
+                loc.ParentSystemLocationAliasID = overPlayer;
+                loc.Flags = (loc.Flags ?? 0) | ParentLinkFlag;
+                Console.WriteLine($"  orbit    : hung off alias {overPlayer}, the unique actor Player (ParentSystemLocationAliasID, flags {loc.Flags}); conditions cleared: {string.Join(", ", gone)}");
+            }
+            else if (scope.IsNull)
             {
                 // "near": the source's conditions stay as copied; only the parsec limit becomes the recipe's number.
                 int pi = loc.Conditions.FindIndex(c => c.Data is IGetDistanceGalacticParsecConditionDataGetter);
@@ -2521,7 +2560,10 @@ namespace FrankyCLI
             if (altitude is double want) SetAltitude(loc, want);   // place.third.altitude (his "32 distance", 2026-10-22)
             float alt = AltitudeOf(loc);
             Console.WriteLine($"  +place   : THIRD place is an ORBIT, alias {locId} \"{loc.Name}\" (off {parts.orbitFrom} alias {o.place}, altitude {alt:0.###}): "
-                              + $"inside the same {(scope == MajorOrbital ? "LocTypeMajorOrbital" : "LocTypeStarSystem")} as the main place (alias {t.placeAlias}); space cell {cellId} created at it");
+                              + (scope == PlayerNpc ? $"over the player (alias {overPlayer})"
+                                 : scope.IsNull ? "MB01's pick near the player"
+                                 : $"inside the same {(scope == MajorOrbital ? "LocTypeMajorOrbital" : "LocTypeStarSystem")} as the main place (alias {t.placeAlias})")
+                              + $"; space cell {cellId} created at it");
             return (int)locId;
         }
 

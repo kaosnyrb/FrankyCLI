@@ -159,19 +159,7 @@ namespace FrankyCLI
             // THE PLAYER AS A GROUND REF (rung S12). RQ_Settlement_KillShips_01 parents its orbit to Trigger, a ref standing in
             // the settlement, and only that ref comes from its event; the player standing on a planet is the ref a startquest
             // quest can have. The alias is COPIED from SE_Player_GenericTemplate (unique actor Player, as in all 82), new id.
-            if (r.place.player == true)
-            {
-                if (AliasNames(clone.Aliases!).Any(x => string.Equals(x.name, "Player", StringComparison.OrdinalIgnoreCase)))
-                { Console.WriteLine("REFUSED: place.player is set and the shell already carries an alias named Player."); return 1; }
-                var vq = OwnOrMaster<IQuestGetter>(myMod, env, VanillaEncounter);
-                var vp = vq?.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Name == "Player").ToList();
-                if (vp == null || vp.Count != 1 || vp[0].UniqueActor.IsNull)
-                { Console.WriteLine($"REFUSED: {VanillaEncounter} is not in this plugin's masters, or carries no single unique-actor Player to copy."); return 1; }
-                var pa = vp[0].DeepCopy();
-                pa.ID = NextAliasId(clone);
-                clone.Aliases!.Add(pa);
-                Console.WriteLine($"  +player  : alias {pa.ID} Player, unique actor {pa.UniqueActor.FormKey}, flags {pa.Flags} (copied from {VanillaEncounter} alias {vp[0].ID})");
-            }
+            if (r.place.player == true && AddVanillaPlayer(myMod, env, clone) < 0) return 1;
             // OVER A THING, vanilla's way (rung S10): no conditions, a parent link to the alias, and the flag every one of the
             // 125 vanilla orbits carrying a parent link has (0x40000000, unnamed in Mutagen; named here by its users).
             if (r.place.over is string overName)
@@ -376,6 +364,35 @@ namespace FrankyCLI
         /// in 80, PlayerShip = SQ_PlayerShip alias 0 with ShipContainsRef(player) == 1 (gen_inspect qall, Defiant, 2026-10-22).
         /// </summary>
         private const string VanillaEncounter = "SE_Player_GenericTemplate";
+
+        /// <summary>
+        /// Add a ref alias Player (unique actor Player) COPIED from SE_Player_GenericTemplate under a new id, for an orbit to
+        /// hang off. Shared by the space kind (place.player, rung S13 proved it) and the beats kind (place.third.orbit
+        /// "player"). Returns the new id, or -1 having said why.
+        /// ⛔ A quest that ALREADY has a unique-actor Player alias gets that one back, never a second: whether one quest may hold
+        /// the player in two aliases is unread, and our contention check covers in-place fills only, so a second would be a
+        /// stick of dynamite of our own making (19a's base carries MBRIR02Player, alias 32, found by its first dry run).
+        /// </summary>
+        private static int AddVanillaPlayer(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Quest clone)
+        {
+            var have = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.UniqueActor.FormKey == PlayerNpc).ToList();
+            if (have.Count > 0)
+            {
+                Console.WriteLine($"  =player  : alias {have[0].ID} {have[0].Name}, the unique actor Player the quest already carries (flags {have[0].Flags}); no second added");
+                return (int)have[0].ID;
+            }
+            if (AliasNames(clone.Aliases!).Any(x => string.Equals(x.name, "Player", StringComparison.OrdinalIgnoreCase)))
+            { Console.WriteLine("REFUSED: the quest already carries an alias named Player."); return -1; }
+            var vq = OwnOrMaster<IQuestGetter>(myMod, env, VanillaEncounter);
+            var vp = vq?.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Name == "Player").ToList();
+            if (vp == null || vp.Count != 1 || vp[0].UniqueActor.IsNull)
+            { Console.WriteLine($"REFUSED: {VanillaEncounter} is not in this plugin's masters, or carries no single unique-actor Player to copy."); return -1; }
+            var pa = vp[0].DeepCopy();
+            pa.ID = NextAliasId(clone);
+            clone.Aliases!.Add(pa);
+            Console.WriteLine($"  +player  : alias {pa.ID} Player, unique actor {pa.UniqueActor.FormKey}, flags {pa.Flags} (copied from {VanillaEncounter} alias {vp[0].ID})");
+            return (int)pa.ID;
+        }
 
         /// <summary>One condition as a line: function, first parameter (a link's FormKey), operator, value.</summary>
         private static string CondLine(IConditionGetter c)
