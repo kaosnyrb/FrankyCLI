@@ -385,6 +385,40 @@ namespace FrankyCLI
                     // DialogTopics are sub-records of Quests (or top-level DIAL group). Vanilla mostly leaves them
                     // unnamed, so `quest:<EditorID>` dumps every topic of one quest instead of matching the topic.
                     string? questScope = search.StartsWith("quest:", StringComparison.OrdinalIgnoreCase) ? search[6..] : null;
+                    if (search.StartsWith("text:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // `text:<words>`: every line in the plugin whose words contain them, any subtype, any quest, with
+                        // what decides whether it plays: the quest's priority, the topic's, its own conditions and its
+                        // group's (vanilla gates most walk-up lines on the group). His 2026-10-22: our people say
+                        // "Captain" with no audio, and no walk-up line that is only that word could fit them.
+                        // A line can carry no words of its own and BORROW a SharedInfo's (SharedDialog), so a second pass
+                        // prints every line, in any plugin, that borrows a match. Both passes span the whole load order, so
+                        // they run once, on the first plugin, and the per-plugin loop skips the rest.
+                        if (allMods != null && !ReferenceEquals(mod, allMods[0])) break;
+                        string words = search[5..];
+                        var lines = (allMods ?? new List<IStarfieldModGetter> { mod })
+                            .SelectMany(m => m.Quests.SelectMany(q => q.DialogTopics.SelectMany(t => t.Responses.Select(r => (q, t, r))))).ToList();
+                        string Conds(IDialogResponsesGetter? r) => r == null ? "" : string.Join(" & ", r.Conditions.Select(DescribeCondition));
+                        void Line(string tag, IQuestGetter q, IDialogTopicGetter t, IDialogResponsesGetter r, string text)
+                        {
+                            var grp = r.DialogGroup.IsNull ? null : t.Responses.FirstOrDefault(x => x.FormKey == r.DialogGroup.FormKey);
+                            Console.WriteLine($"{tag}\t{q.EditorID}\tquest {q.Data?.Priority}\t{t.Category}/{t.Subtype}\ttopic {t.Priority}\t{r.FormKey}"
+                                + $"\tflags {r.Flags?.Flags}\twem {r.Responses.FirstOrDefault()?.WEMFile:X8}\t{text}\tline: {Conds(r)}\tgroup {r.DialogGroup.FormKey}: {Conds(grp)}");
+                            found++;
+                        }
+                        var said = new Dictionary<FormKey, string>();
+                        foreach (var (q, t, r) in lines)
+                        {
+                            string text = string.Join(" / ", r.Responses.Select(x => x.ResponseText?.ToString()));
+                            if (!text.Contains(words, StringComparison.OrdinalIgnoreCase)) continue;
+                            said[r.FormKey] = text;
+                            Line("TEXT", q, t, r, text);
+                        }
+                        foreach (var (q, t, r) in lines)
+                            if (!r.SharedDialog.IsNull && said.TryGetValue(r.SharedDialog.FormKey, out var borrowed))
+                                Line($"BORROWS {r.SharedDialog.FormKey}", q, t, r, borrowed);
+                        break;
+                    }
                     if (search.Equals("perkfield", StringComparison.OrdinalIgnoreCase))
                     {
                         // Lines whose INFO carries a Perk LINK (a field, not a condition): the tagged checks
