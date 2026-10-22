@@ -578,6 +578,10 @@ namespace FrankyCLI
         /// <summary>A fight's spawn hook on its marker: our copy of DefaultAliasOnDistanceLessThan (papyrus/duo_delve_near.psc),
         /// so it never collides with a stock distance hook on the same alias (a board's arrival).</summary>
         private const string NearScript = "duo_delve_near";
+        /// <summary>Vanilla's map marker alias script, MB01's values on an orbit's map marker (Discovered, type 47, visibility 1).</summary>
+        private const string MapMarkerScript = "DefaultAliasMapMarkerScript";
+        /// <summary>MapMarkerLinkedRefNameOverride: the keyword a map marker links its target by, so the star map names it.</summary>
+        private static readonly FormKey MapMarkerNameLink = FormKey.Factory("17FEBA:Starfield.esm");
         /// <summary>The most drop pods one clear may call: duo_delve_lib.DropPods holds them in a fixed array of this size.</summary>
         private const int PodsMax = 4;
 
@@ -607,7 +611,8 @@ namespace FrankyCLI
             public List<int> SpawnNear = new();   // the holders among them placed outside, carrying SpawnNearScript
             public List<(int on, int to)> SpawnHooks = new();
             public (int place, int cell, int main)? Orbit;   // an orbit third place: its alias, its space cell's member, the main place it is tested against
-            public List<(int alias, FormKey refType)> OrbitMarkers = new();   // orbit beats' markers, filled from the cell by this ref type   // fight beats' markers carrying the distance hook that spawns them, and the alias it measures to (the player)
+            public List<(int alias, FormKey refType)> OrbitMarkers = new();
+            public (int marker, int target)? OrbitMapMarker;   // an orbit's map marker and the object it is named by   // orbit beats' markers, filled from the cell by this ref type   // fight beats' markers carrying the distance hook that spawns them, and the alias it measures to (the player)
             public List<(int objective, int alias, int spawned)> SiteTargets = new();   // the place as a second objective target, beside a target spawned late, lit until its spawned stage
             public List<(int team, FormKey package, int fight, string radius, FormKey template)> SupportTeams = new();   // support teams' collections (inner ref alias ids): empty, Optional, each wearing its own travel to the fight's marker (its source's radius and template)
             public List<(int alias, int beat, FormKey land)> Landings = new();   // support teams' landing markers, carrying LandingScript, and their land marker
@@ -1171,6 +1176,22 @@ namespace FrankyCLI
                     int f = WriteBeat(clone, t, slotOf[i], r.beats[i], markers, true, PlaceAliasOf(t, r.beats[i].PlaceIndex, made.ThirdPlaceAlias),
                                       inOrbit ? made.OrbitCell : -1, made.OrbitMarker);
                     if (inOrbit) bm.OrbitMarkers.Add((slotOf[i].markerAlias, markers[r.beats[i].at]));
+                    if (inOrbit && made.OrbitMapMarker >= 0 && bm.OrbitMapMarker == null && slotOf[i].activatorAlias >= 0)
+                    {
+                        // The orbit's map marker names the first orbit beat's object on the star map (MB01's shape).
+                        var mm = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)made.OrbitMapMarker);
+                        mm.LinkedAliases[0].AliasID = slotOf[i].activatorAlias;
+                        var entry = NewAliasEntry(vma, clone.FormKey, made.OrbitMapMarker);
+                        var sc = new ScriptEntry { Name = MapMarkerScript };
+                        sc.Properties.Add(new ScriptBoolProperty { Name = "Discovered", Data = true, Flags = ScriptProperty.Flag.Edited });
+                        sc.Properties.Add(new ScriptBoolProperty { Name = "EnableOnInit", Data = false, Flags = ScriptProperty.Flag.Edited });
+                        sc.Properties.Add(new ScriptIntProperty { Name = "MapMarkerCategory", Data = 0, Flags = ScriptProperty.Flag.Edited });
+                        sc.Properties.Add(new ScriptIntProperty { Name = "MapMarkerType", Data = 47, Flags = ScriptProperty.Flag.Edited });
+                        sc.Properties.Add(new ScriptIntProperty { Name = "UndiscoveredVisibility", Data = 1, Flags = ScriptProperty.Flag.Edited });
+                        entry.Scripts.Add(sc);
+                        bm.OrbitMapMarker = (made.OrbitMapMarker, slotOf[i].activatorAlias);
+                        Console.WriteLine($"  +map     : orbit map marker alias {made.OrbitMapMarker} from the cell, named by beat {i + 1}'s object (alias {slotOf[i].activatorAlias}), {MapMarkerScript} as MB01's");
+                    }
                     if (f > 0) return f;
                     if (landingOf.TryGetValue(i, out int la))
                     {
@@ -2254,6 +2275,18 @@ namespace FrankyCLI
                 fail += Check($"orbit alias {orbAlias} is over the main place's planet (IsInSameCurrentLocationAsAlias {orbMain}, LocTypeMajorOrbital)", samePlanet.ToString(), "True");
                 var cm = q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection).Select(m => m.ReferenceAlias).FirstOrDefault(x => x?.ID == (uint)orbCell);
                 fail += Check($"space cell {orbCell} is created at the orbit", cm?.CreateReferenceToObject?.AliasID.ToString() ?? "missing", orbAlias.ToString());
+                if (bm.OrbitMapMarker is (int omm, int otg))
+                {
+                    var mma = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)omm);
+                    fail += Check($"orbit map marker {omm} fills from the cell by MapMarkerRefType",
+                                  $"collection {mma?.ReferenceCollectionAliasID} by-type {mma?.Conditions.Any(c => c.Data is IHasRefTypeConditionDataGetter h && h.FirstParameter.Link.FormKey.ToString() == "02271F:Starfield.esm") ?? false}",
+                                  $"collection {orbCell} by-type True");
+                    fail += Check($"orbit map marker {omm} is named by the object (MapMarkerLinkedRefNameOverride to alias {otg})",
+                                  mma?.LinkedAliases.Any(l => l.AliasID == otg && l.Keyword.FormKey == MapMarkerNameLink).ToString() ?? "missing", "True");
+                    fail += Check($"orbit map marker {omm} wears {MapMarkerScript} (type 47)",
+                                  (vma.Aliases.FirstOrDefault(a => a.Property.Alias == omm)?.Scripts.FirstOrDefault(x => x.Name == MapMarkerScript)?.Properties
+                                      .OfType<IScriptIntPropertyGetter>().FirstOrDefault(x => x.Name == "MapMarkerType")?.Data ?? -1).ToString(), "47");
+                }
                 foreach (var (ma, rt) in bm.OrbitMarkers)
                 {
                     var mk = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)ma);

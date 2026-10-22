@@ -221,8 +221,7 @@ namespace FrankyCLI
             public int cell { get; set; } = -1;
             public int marker { get; set; } = -1;
             public int mapMarker { get; set; } = -1;
-            /// <summary>Every source id the row names; -1 (absent) is skipped. The map marker is left out today: its LinkedAliases
-            /// is a field the quest model does not hold, and the objective on the object guides him.</summary>
+            /// <summary>Every source id the row names; -1 (absent) is skipped.</summary>
             public int[] All => new[] { place, cell, marker, mapMarker }.Where(x => x >= 0).ToArray();
         }
         /// <summary>
@@ -2205,6 +2204,8 @@ namespace FrankyCLI
             public int OrbitCell = -1;
             /// <summary>orbitFrom's marker alias, the pattern an orbit beat's marker takes its from-cell condition off.</summary>
             public QuestReferenceAlias? OrbitMarker;
+            /// <summary>An orbit's map marker alias id (filled from the cell; its link and script are set on the orbit beat), -1 when none.</summary>
+            public int OrbitMapMarker = -1;
         }
 
         /// <summary>
@@ -2342,6 +2343,20 @@ namespace FrankyCLI
             member.CreateReferenceToObject.AliasID = (short)locId;
             clone.Aliases.Add(cell);
 
+            // THE MAP MARKER (2026-10-22, his "I feel like other quests use the map marker in space"): 896 of the 903 quests in
+            // his load order that create a space cell fill one from it, and every destination mission's links to the target
+            // with MapMarkerLinkedRefNameOverride, so the star map names the thing. Its link is set to the orbit beat's object
+            // when that beat is filled (Fills), and its DefaultAliasMapMarkerScript there too.
+            if (o.mapMarker >= 0)
+            {
+                var srcMap = pool.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)o.mapMarker);
+                if (srcMap == null || srcMap.LinkedAliases.Count != 1)
+                { Console.WriteLine($"REFUSED: the orbit parts lack the map marker {o.mapMarker}, or it does not carry exactly one link to its target."); return -1; }
+                uint mmId = NextAliasId(clone);
+                var mm = srcMap.DeepCopy(); mm.ID = mmId; mm.ReferenceCollectionAliasID = (int)cellId;
+                clone.Aliases.Add(mm);
+                made.OrbitMapMarker = (int)mmId;
+            }
             made.OrbitCell = (int)cellId;
             made.OrbitMarker = srcMarker;
             float alt = BitConverter.Int32BitsToSingle(loc.ALFG ?? 0);

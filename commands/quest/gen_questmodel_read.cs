@@ -222,6 +222,7 @@ namespace FrankyCLI
                             DisplayName = Fk(r.DisplayName), LegendaryRank = r.LegendaryRank,
                             ForcedReference = Fk(r.ForcedReference), UniqueActor = Fk(r.UniqueActor), UniqueBaseForm = Fk(r.UniqueBaseForm),
                             ReferenceCollectionAliasID = r.ReferenceCollectionAliasID,
+                            LinkedAliases = r.LinkedAliases is { Count: > 0 } lk ? lk.Select(x => new QLinkedAlias { Keyword = Fk(x.Keyword), AliasID = x.AliasID }).ToList() : null,
                             Keywords = r.Keywords?.Select(k => k.FormKey.ToString()).ToList(),
                             DeathItem = Fk(r.DeathItem), ForcedVoice = Fk(r.ForcedVoice), VoiceTypes = Fk(r.VoiceTypes),
                             PackageData = r.PackageData is { Count: > 0 } pk ? pk.Select(k => k.FormKey.ToString()).ToList() : null,
@@ -237,6 +238,8 @@ namespace FrankyCLI
                             m.Create = new QCreate { Object = c.Object.FormKey.ToString(), AliasID = c.AliasID, Create = (int)c.Create, Level = (int)c.Level };
                             Guard(c, typeof(ICreateReferenceToObjectGetter), path + ".CreateReferenceToObject", "Object", "AliasID", "Create", "Level");
                         }
+                        for (int li = 0; li < (r.LinkedAliases?.Count ?? 0); li++)
+                            Guard(r.LinkedAliases![li], typeof(ILinkedAliasGetter), $"{path}.LinkedAliases[{li}]", "Keyword", "AliasID");
                         if (r.External is { } x)
                         {
                             m.External = new QExternal { Quest = Fk(x.Quest), AliasID = x.AliasID };
@@ -244,7 +247,7 @@ namespace FrankyCLI
                         }
                         Guard(r, typeof(IQuestReferenceAliasGetter), path, "ID", "Name", "Flags", "ALFG", "AliasIDToForceIntoWhenFilled",
                               "ClosestToAlias", "DisplayName", "LegendaryRank", "ForcedReference", "UniqueActor", "UniqueBaseForm",
-                              "ReferenceCollectionAliasID", "Keywords", "DeathItem", "ForcedVoice", "VoiceTypes", "PackageData", "Conditions", "Location",
+                              "ReferenceCollectionAliasID", "LinkedAliases", "Keywords", "DeathItem", "ForcedVoice", "VoiceTypes", "PackageData", "Conditions", "Location",
                               "CreateReferenceToObject", "External");
                         return m;
                     }

@@ -219,6 +219,38 @@
       ],
       "ReferenceCollectionAliasID": 10,
       "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 16,
+      "Name": "SpaceMapMarker",
+      "Flags": 16512,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "HasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "9D5800",
+          "Unknown2": 4617,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "ReferenceCollectionAliasID": 10,
+      "LinkedAliases": [
+        {
+          "Keyword": "17FEBA:Starfield.esm",
+          "AliasID": 3
+        }
+      ],
+      "VoiceTypes": "Null"
     }
   ]
 }

@@ -135,6 +135,9 @@ namespace FrankyCLI
         public QCreate? Create { get; set; }
         public QExternal? External { get; set; }
         public int? ReferenceCollectionAliasID { get; set; }
+        /// <summary>A ref alias's keyword links to other aliases (a cell's map marker carries one, 842 of 1,029 vanilla
+        /// ones; read 2026-10-22 for the orbit place). Null = none.</summary>
+        public List<QLinkedAlias>? LinkedAliases { get; set; }
         public List<string>? Keywords { get; set; }
         public string? DeathItem { get; set; }
         public string? ForcedVoice { get; set; }
@@ -168,6 +171,7 @@ namespace FrankyCLI
     public sealed class QInLocation { public int? AliasID { get; set; } public string? Keyword { get; set; } public string? RefType { get; set; } }
     public sealed class QCreate { public string Object { get; set; } = ""; public short AliasID { get; set; } public int Create { get; set; } public int Level { get; set; } }
     public sealed class QExternal { public string? Quest { get; set; } public int? AliasID { get; set; } }
+    public sealed class QLinkedAlias { public string? Keyword { get; set; } public int AliasID { get; set; } }
 
     /// A condition row. Function is the ConditionData class name less "ConditionData"; only the functions in
     /// gen_questmodel's table can be written, and any other is refused on read.

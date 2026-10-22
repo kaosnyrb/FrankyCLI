@@ -140,6 +140,13 @@ namespace FrankyCLI
                     Conditions = a.Conditions == null ? null : new ExtendedList<Condition>(a.Conditions.Select(WriteCondition)),
                     Keywords = a.Keywords == null ? null : new ExtendedList<IFormLinkGetter<IKeywordGetter>>(a.Keywords.Select(k => (IFormLinkGetter<IKeywordGetter>)new FormLink<IKeywordGetter>(Key(k)))),
                 };
+                if (a.LinkedAliases != null)
+                    foreach (var la in a.LinkedAliases)
+                    {
+                        var nl = new LinkedAlias { AliasID = la.AliasID };
+                        if (la.Keyword != null) nl.Keyword.SetTo(Key(la.Keyword));
+                        (r.LinkedAliases ??= new()).Add(nl);   // null on a new alias
+                    }
                 if (a.PackageData != null) r.PackageData.AddRange(a.PackageData.Select(k => (IFormLinkGetter<IPackageGetter>)new FormLink<IPackageGetter>(Key(k))));
                 Link(r.ForcedReference, a.ForcedReference); Link(r.UniqueActor, a.UniqueActor); Link(r.UniqueBaseForm, a.UniqueBaseForm);
                 Link(r.DisplayName, a.DisplayName); Link(r.DeathItem, a.DeathItem); Link(r.ForcedVoice, a.ForcedVoice); Link(r.VoiceTypes, a.VoiceTypes);
