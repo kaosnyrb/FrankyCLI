@@ -40,6 +40,12 @@ namespace FrankyCLI
             var p = r.place;
             if (p.remote != null || p.habitability != null)
                 Fatal("place.remote or place.habitability is set; a space Delve's one place is the orbit its shell carries, never a request.");
+            if (p.system != null && p.system != "same")
+                Fatal($"place.system is \"{p.system}\"; the one value built is \"same\" (the orbit in the player's star system, vanilla's way).");
+            if (p.system != null && p.parsecs != null)
+                Fatal("place.system and place.parsecs are both set; one rung, one way of saying near (S6 was the number, S7 vanilla's test).");
+            if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
+                Fatal($"place.altitude is {alt}; his settled band is {OrbitAltitudeBand.min} to {OrbitAltitudeBand.max} (past ~32 the engine discards it).");
             if (p.second != null || p.third != null)
                 Fatal("place.second or place.third is set; a space Delve has one place, the orbit.");
             if (p.orbit != null)
@@ -118,6 +124,17 @@ namespace FrankyCLI
                 var old = orbit.Conditions[pi];
                 orbit.Conditions[pi] = new ConditionFloat { CompareOperator = old.CompareOperator, Flags = old.Flags, Data = old.Data, ComparisonValue = (float)ps };
                 Console.WriteLine($"  orbit    : {orbit.Name} GetDistanceGalacticParsec {old.CompareOperator} {ps} (was {(old is ConditionGlobal ? "a Global" : "a number")})");
+            }
+            // IN THE PLAYER'S SYSTEM, vanilla's way (rung 7): the R5 condition on the orbit's own conditions, which test the orbit.
+            if (r.place.system == "same")
+            {
+                orbit.Conditions.Add(SameSystemCondition());
+                Console.WriteLine($"  orbit    : {orbit.Name} in the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1, as 238 vanilla orbit aliases)");
+            }
+            if (r.place.altitude is double alt)
+            {
+                Console.WriteLine($"  orbit    : {orbit.Name} altitude {alt} (was {AltitudeOf(orbit):0.###})");
+                SetAltitude(orbit, alt);
             }
 
             // THE OBJECT. The shell's target is a ship; it becomes a clone of activatorFrom, reskinned to the beat's model.
@@ -308,6 +325,10 @@ namespace FrankyCLI
                 fail += Check($"the orbit's GetDistanceGalacticParsec is the number {ps}",
                               pc is IConditionFloatGetter cf ? cf.ComparisonValue.ToString() : pc == null ? "missing" : "a Global", ((float)ps).ToString());
             }
+            fail += Check("the orbit keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
+                          HoldsToSystem(orbit?.Conditions).ToString(), (r.place.system == "same").ToString());
+            if (r.place.altitude is double alt)
+                fail += Check($"the orbit's altitude is {alt}", AltitudeOf(orbit).ToString("0.###"), alt.ToString("0.###"));
             var target = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);
             var act = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
             fail += Check($"alias {slot.activatorAlias} creates {r.id}_b1 at marker alias {slot.markerAlias}",

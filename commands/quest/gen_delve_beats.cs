@@ -2210,11 +2210,8 @@ namespace FrankyCLI
             {
                 if (shape?.system != "same") continue;
                 var pl = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)label);
-                bool held = pl?.ALPS?.Conditions.Any(c => c is IConditionFloatGetter f && f.ComparisonValue == 1f
-                    && c.Data is IIsInSameCurrentLocationAsRefConditionDataGetter d
-                    && d.FirstParameter.Link.FormKey == PlayerRef && d.SecondParameter.Link.FormKey == OrbitScopes["system"]) ?? false;
                 fail += Check($"place alias {label}'s request keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
-                              held.ToString(), "True");
+                              HoldsToSystem(pl?.ALPS?.Conditions).ToString(), "True");
             }
             fail += AliasGraphChecks(q);
             // Every pickup this build wrote weighs 0 (his, 2026-10-20), read back off disk.
@@ -2330,8 +2327,10 @@ namespace FrankyCLI
             {
                 var ol = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)orbAlias);
                 fail += Check($"orbit alias {orbAlias} fills by type LocTypeOrbit", ol?.LocationTypeKeyword.FormKey.ToString() ?? "missing", "016504:Starfield.esm");
-                float alt = BitConverter.Int32BitsToSingle(ol?.ALFG ?? 0);
+                float alt = AltitudeOf(ol);
                 fail += Check($"orbit alias {orbAlias}'s altitude is in his 8-32 band", (alt >= 8f && alt <= 32f).ToString(), "True");
+                if (r.place.third?.altitude is double wantAlt)
+                    fail += Check($"orbit alias {orbAlias}'s altitude is the recipe's {wantAlt}", alt.ToString("0.###"), wantAlt.ToString("0.###"));
                 if (orbScope.IsNull)
                 {
                     // "near": MB01's own pick, a major orbital body within a NUMBER of parsecs of the player, and no shared location.

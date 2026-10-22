@@ -1,0 +1,34 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s7",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"A\" and \"Go on both\", then \"s7. And 32 distance\" (13:12)",
+  "_note": [
+    "SPACE ALIAS-SET TEST S7: S1 with the orbit held to the player's star system VANILLA'S way, IsInSameCurrentLocationAsRef(player, LocTypeStarSystem) == 1 on the orbit's own conditions (238 vanilla orbit aliases carry it; R5 proved it on a request), in place of S6's 1-parsec number. And his altitude, 32 (S1 sat at 03a's 10.5, 'that too close to the planet bug').",
+    "TWO changes from S1, named: the same-system test and the altitude. If it fails, separate the altitude first (his 32 flew fine on 2026-08-04).",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "system": "same",
+    "altitude": 32
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S7 at <Place>",
+    "briefing": "Space test S7."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S7 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S7"
+    }
+  ]
+}

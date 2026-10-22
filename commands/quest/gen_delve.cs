@@ -437,6 +437,13 @@ namespace FrankyCLI
             /// </summary>
             public string? system { get; set; }
             /// <summary>
+            /// OPTIONAL, an ORBIT only (a space template's main place, or place.third with orbit): the orbit altitude (ALFG),
+            /// written over the copied one. His settled band is 8 to 32 (2026-08-04 trials; past a ceiling between 32 and 256
+            /// the engine discards it and reverts to default), so anything outside it is refused. His 2026-10-22: "32
+            /// distance", after S1 sat at 03a's 10.5, "that too close to the planet bug".
+            /// </summary>
+            public double? altitude { get; set; }
+            /// <summary>
             /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
             /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
@@ -1511,6 +1518,10 @@ namespace FrankyCLI
                     Fatal($"{label}.system shapes a REQUEST, and {label}.remote is not set.");
                 if (p.system != null && p.system != "same")
                     Fatal($"{label}.system is \"{p.system}\"; the one value built is \"same\" (vanilla's far shape, == 0, is not).");
+                if (p.altitude != null && !(label == "place.third" && p.orbit != null))
+                    Fatal($"{label}.altitude is an orbit's; only place.third with orbit (or a space template's place) has one.");
+                if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
+                    Fatal($"{label}.altitude is {alt}; his settled band is {OrbitAltitudeBand.min} to {OrbitAltitudeBand.max} (past ~32 the engine discards it).");
             }
             if (!secondRemote && !IsBoard(t))
                 foreach (var (where, text) in ProseStrings(r))
@@ -2233,7 +2244,7 @@ namespace FrankyCLI
             }
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
-                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!], r.place.third.parsecs) : CreateThirdPlace(clone, t);
+                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!], r.place.third.parsecs, r.place.third.altitude) : CreateThirdPlace(clone, t);
                 if (made4.ThirdPlaceAlias < 0) fail++;
                 else if (IsOrbit(r)) madeBeats.Orbit = (made4.ThirdPlaceAlias, made4.OrbitCell, t.placeAlias, OrbitScopes[r.place.third!.orbit!]);
             }
@@ -2407,7 +2418,7 @@ namespace FrankyCLI
         /// orbital as the main place" is the orbit over its planet, or its moon's. ⚠ NO VANILLA ORBIT ALIAS DOES THIS (0 of
         /// 1,060 measured; 75 use the condition on other kinds of alias), so it is proven by his play or not at all.
         /// </summary>
-        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope, double? parsecs)
+        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope, double? parsecs, double? altitude)
         {
             if (parts == null || parts.orbit.Count == 0 || t.orbitAliases == null)
             { Console.WriteLine($"REFUSED: an orbit is copied off the parts file and template '{t.id}' has no orbit parts; `gen_delve shell {t.id}` writes them."); return -1; }
@@ -2469,7 +2480,8 @@ namespace FrankyCLI
             }
             made.OrbitCell = (int)cellId;
             made.OrbitMarker = srcMarker;
-            float alt = BitConverter.Int32BitsToSingle(loc.ALFG ?? 0);
+            if (altitude is double want) SetAltitude(loc, want);   // place.third.altitude (his "32 distance", 2026-10-22)
+            float alt = AltitudeOf(loc);
             Console.WriteLine($"  +place   : THIRD place is an ORBIT, alias {locId} \"{loc.Name}\" (off {parts.orbitFrom} alias {o.place}, altitude {alt:0.###}): "
                               + $"inside the same {(scope == MajorOrbital ? "LocTypeMajorOrbital" : "LocTypeStarSystem")} as the main place (alias {t.placeAlias}); space cell {cellId} created at it");
             return (int)locId;
@@ -2629,11 +2641,7 @@ namespace FrankyCLI
             }
             if (shape.system == "same")
             {
-                // MB_Bounty02Local's own test, constructed: the player (000014) and LocTypeStarSystem, run on the subject.
-                var same = new IsInSameCurrentLocationAsRefConditionData { Unknown3 = -1 };
-                same.FirstParameter.Link.SetTo(PlayerRef);
-                same.SecondParameter.Link.SetTo(OrbitScopes["system"]);
-                copy.ALPS!.Conditions.Add(new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
+                copy.ALPS!.Conditions.Add(SameSystemCondition());
                 Console.WriteLine($"  request  : {copy.Name} planet in the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1, MB_Bounty02Local's)");
             }
             return 0;
@@ -2641,6 +2649,33 @@ namespace FrankyCLI
 
         /// <summary>The player's persistent reference, PlayerRef [000014:Starfield.esm].</summary>
         private static readonly FormKey PlayerRef = FormKey.Factory("000014:Starfield.esm");
+
+        /// <summary>His settled orbit altitude band (manual 12, 2026-08-04): 4 "much better", 32 "feels cool", 256 discarded.</summary>
+        private static readonly (double min, double max) OrbitAltitudeBand = (8, 32);
+
+        /// <summary>
+        /// "In the player's star system", vanilla's way: IsInSameCurrentLocationAsRef(the player, LocTypeStarSystem) == 1, run on
+        /// the subject. On a REQUEST's own conditions it tests the planet (MB_Bounty02Local; played, R5, 2026-10-22); on an
+        /// orbit's alias conditions it tests the orbit (238 of the 1,060 orbit aliases in his load order carry it). ONE
+        /// spelling, constructed, for both; HoldsToSystem is its reader.
+        /// </summary>
+        private static ConditionFloat SameSystemCondition()
+        {
+            var same = new IsInSameCurrentLocationAsRefConditionData { Unknown3 = -1 };
+            same.FirstParameter.Link.SetTo(PlayerRef);
+            same.SecondParameter.Link.SetTo(OrbitScopes["system"]);
+            return new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+        }
+
+        /// <summary>Whether a condition list carries SameSystemCondition, read back off disk.</summary>
+        private static bool HoldsToSystem(IEnumerable<IConditionGetter>? conditions)
+            => conditions?.Any(c => c is IConditionFloatGetter f && f.ComparisonValue == 1f && f.CompareOperator == CompareOperator.EqualTo
+                   && c.Data is IIsInSameCurrentLocationAsRefConditionDataGetter d
+                   && d.FirstParameter.Link.FormKey == PlayerRef && d.SecondParameter.Link.FormKey == OrbitScopes["system"]) ?? false;
+
+        /// <summary>An orbit's altitude, ALFG, which the record keeps as a float's bits in an int.</summary>
+        private static float AltitudeOf(IQuestLocationAliasGetter? l) => BitConverter.Int32BitsToSingle(l?.ALFG ?? 0);
+        private static void SetAltitude(QuestLocationAlias l, double alt) => l.ALFG = BitConverter.SingleToInt32Bits((float)alt);
 
         /// <summary>
         /// The place's conditions are REBUILT from the recipe, never patched.
