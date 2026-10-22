@@ -39,8 +39,8 @@
       }
     },
     "third": {
-      "orbit": true,
-      "_orbit": "BUILT 2026-10-22 (Eliza, his 'go on 19a, try over'): his MB01 satellite repair's orbit chain, tested IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a space cell at it, and the satellite's marker filled from the cell. So the deliver's at is se_TravelMarkerLocRefB02 (was RECenterLocRef, a surface marker no cell has). No vanilla orbit is tied to a planet this way, so his first play is the proof.",
+      "orbit": "system",
+      "_orbit": "BUILT 2026-10-22 (Eliza, his 'go on 19a, try over'): his MB01 satellite repair's orbit chain, tested IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a space cell at it, and the satellite's marker filled from the cell. So the deliver's at is se_TravelMarkerLocRefB02 (was RECenterLocRef, a surface marker no cell has). No vanilla orbit is tied to a planet this way, so his first play is the proof. 08:0x: \"planet\" would not start in any map (his), and no log names an alias (startquest bypasses the Story Manager); his \"yeah whole system\" made it \"system\": the satellite is somewhere in the settlers' star system, so \"over <Planet>\" wants rewording (Jessica's) once it starts.",
       "theme": {
         "require": [],
         "exclude": []

@@ -255,7 +255,13 @@ namespace FrankyCLI
         private static bool TakesWaves(Template t) => t.allows.Count == 0 || t.allows.Contains("hold") || t.allows.Contains("clear");
         /// <summary>Does this template's build take anything off another quest?</summary>
         /// <summary>A recipe whose third place is an orbit (Place.orbit).</summary>
-        private static bool IsOrbit(Recipe r) => r.place.third?.orbit == true;
+        private static bool IsOrbit(Recipe r) => r.place.third?.orbit != null;
+        /// <summary>place.third.orbit's scopes: the location keyword the orbit must share with the main place.</summary>
+        private static readonly Dictionary<string, FormKey> OrbitScopes = new()
+        {
+            ["planet"] = FormKey.Factory("070A54:Starfield.esm"),   // LocTypeMajorOrbital: a planet or a moon
+            ["system"] = FormKey.Factory("00149F:Starfield.esm"),   // LocTypeStarSystem
+        };
         /// <summary>The beat types built in orbit: a thing used from the ship.</summary>
         private static readonly string[] OrbitBeatTypes = { "use", "pickup", "deliver" };
         /// <summary>The marker an orbit beat stands at, filled from the space cell: his MB01's (orbitFrom's marker alias).</summary>
@@ -403,8 +409,10 @@ namespace FrankyCLI
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
             /// each beat's marker filled from inside that cell by its `at` ref type. Its beats are things used from the ship
             /// (use, pickup, deliver), as his MB01 satellite is. No theme, no who, no leash: an orbit is not a drawn POI.
+            /// "planet" = the orbit over the main place's planet (LocTypeMajorOrbital); "system" = any orbit in the main
+            /// place's star system (LocTypeStarSystem), his "yeah whole system" after "planet" would not start (2026-10-22).
             /// </summary>
-            public bool? orbit { get; set; }
+            public string? orbit { get; set; }
             // ⛔ There is no "planet" key, and an unknown key is refused. A second request lands where the planet content
             // manager puts it, the first site's planet or another. Two planet guards on a place (10a 2026-10-14, 12a
             // 2026-10-19) each CRASHED the game on start, and his ruling 2026-10-19 is "Stop doing it", "it's fine if the
@@ -1410,8 +1418,8 @@ namespace FrankyCLI
             // THE ORBIT (2026-10-22, 19a): a thing over the main place's planet, used from the ship.
             if (r.place.orbit != null || r.place.second?.orbit != null)
                 Fatal("orbit is set on the main or the second place; only place.third can be an orbit.");
-            if (r.place.third?.orbit == false)
-                Fatal("place.third.orbit is false; leave it out for a drawn third place.");
+            if (r.place.third?.orbit is string ov && !OrbitScopes.ContainsKey(ov))
+                Fatal($"place.third.orbit is '{ov}'; it is \"planet\" (over the main place's planet) or \"system\" (anywhere in its star system).");
             if (IsOrbit(r))
             {
                 var o = r.place.third!;
@@ -1472,7 +1480,7 @@ namespace FrankyCLI
                 {
                     if (pi == 2 && IsOrbit(r))
                     {
-                        Console.WriteLine($"  -- the third place is an ORBIT (created at build from {t.orbitFrom}): over the main place's planet, no POI pool to draw");
+                        Console.WriteLine($"  -- the third place is an ORBIT (created at build from {t.orbitFrom}): {(r.place.third!.orbit == "planet" ? "over the main place's planet" : "in the main place's star system")}, no POI pool to draw");
                         continue;
                     }
                     var pool = (pi == 0 && remote) || (pi == 1 && secondRemote) ? reqPool! : drawPool;
@@ -2109,9 +2117,9 @@ namespace FrankyCLI
             }
             if (r.beats.Any(b => b.PlaceIndex == 2))
             {
-                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4) : CreateThirdPlace(clone, t);
+                made4.ThirdPlaceAlias = IsOrbit(r) ? CreateOrbitPlace(clone, t, parts, made4, OrbitScopes[r.place.third!.orbit!]) : CreateThirdPlace(clone, t);
                 if (made4.ThirdPlaceAlias < 0) fail++;
-                else if (IsOrbit(r)) madeBeats.Orbit = (made4.ThirdPlaceAlias, made4.OrbitCell, t.placeAlias);
+                else if (IsOrbit(r)) madeBeats.Orbit = (made4.ThirdPlaceAlias, made4.OrbitCell, t.placeAlias, OrbitScopes[r.place.third!.orbit!]);
             }
             foreach (int pi in PlacesUsed(r))
             {
@@ -2312,7 +2320,7 @@ namespace FrankyCLI
         /// orbital as the main place" is the orbit over its planet, or its moon's. ⚠ NO VANILLA ORBIT ALIAS DOES THIS (0 of
         /// 1,060 measured; 75 use the condition on other kinds of alias), so it is proven by his play or not at all.
         /// </summary>
-        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made)
+        private static int CreateOrbitPlace(Quest clone, Template t, Parts? parts, BuildMade made, FormKey scope)
         {
             if (parts == null || parts.orbit.Count == 0 || t.orbitAliases == null)
             { Console.WriteLine($"REFUSED: an orbit is copied off the parts file and template '{t.id}' has no orbit parts; `gen_delve shell {t.id}` writes them."); return -1; }
@@ -2329,7 +2337,7 @@ namespace FrankyCLI
             uint locId = NextAliasId(clone);
             var loc = srcLoc.DeepCopy(); loc.ID = locId; loc.Name = "OrbitLocation";
             var same = new IsInSameCurrentLocationAsAliasConditionData { FirstParameter = t.placeAlias, Unknown3 = -1 };
-            same.SecondParameter.Link.SetTo(MajorOrbital);
+            same.SecondParameter.Link.SetTo(scope);
             loc.Conditions.Clear();
             loc.Conditions.Add(new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f });
             loc.Conditions.Add(sen.DeepCopy());
@@ -2361,7 +2369,7 @@ namespace FrankyCLI
             made.OrbitMarker = srcMarker;
             float alt = BitConverter.Int32BitsToSingle(loc.ALFG ?? 0);
             Console.WriteLine($"  +place   : THIRD place is an ORBIT, alias {locId} \"{loc.Name}\" (off {parts.orbitFrom} alias {o.place}, altitude {alt:0.###}): "
-                              + $"inside the same LocTypeMajorOrbital as the main place (alias {t.placeAlias}); space cell {cellId} created at it");
+                              + $"inside the same {(scope == MajorOrbital ? "LocTypeMajorOrbital" : "LocTypeStarSystem")} as the main place (alias {t.placeAlias}); space cell {cellId} created at it");
             return (int)locId;
         }
 
