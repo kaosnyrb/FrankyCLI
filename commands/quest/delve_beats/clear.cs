@@ -7,7 +7,7 @@ namespace FrankyCLI
     public static partial class gen_delve
     {
         /// <summary>
-        /// clear: enemies appear at the beat's place when the player comes NEAR it (FightBeat.Enter: a stock distance hook
+        /// clear: enemies appear at the beat's place when the player comes NEAR it (FightBeat.Enter: duo_delve_near, a distance hook
         /// sets the spawned stage, whose fragment places them); the step is done when every one of them is dead (the Hunt
         /// driver). They hold the site rather than come for him: no travel package, unlike a hold's waves. Until they exist
         /// the objective points at the place as well, so the site is on his map from the start.

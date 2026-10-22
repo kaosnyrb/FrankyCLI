@@ -142,7 +142,7 @@ namespace FrankyCLI
             internal override int EnterRank => 1;
 
             /// <summary>
-            /// Nothing is placed when the step begins. A stock DefaultAliasOnDistanceLessThan on the fight's marker, armed by
+            /// Nothing is placed when the step begins. duo_delve_near (our copy of the stock DefaultAliasOnDistanceLessThan) on the fight's marker, armed by
             /// the step's stage, sets the beat's SPAWNED stage when the player comes within ApproachDistance, and the spawn
             /// call runs in THAT stage's fragment. Until then the objective points at the marker; after, at who spawned.
             /// WHY NEAR, his play of 33a, 2026-10-21: "The spacers are spawned from a distance, which reads bad on the map and
@@ -159,10 +159,13 @@ namespace FrankyCLI
                 string lootArgs = "None, 0";
                 if (ff.Loot is FormKey lk) { build.props.Add(("FormList", $"Loot{b + 1}", lk, -1)); lootArgs = $"Loot{b + 1}, {fb.loot!.chance}"; }
                 int marker = build.slotOf[b].markerAlias, spawned = build.spawnedStage[b];
-                AttachHook(build.vma, build.clone.FormKey, marker, DistanceHook(build.clone.FormKey, build.t.playerAlias, spawned, stage),
-                           HookEntry.FindOrCreate, false, build.bm, spawned, stage);
+                // Our own copy of the stock script (papyrus/duo_delve_near.psc), never the stock name: a board's step-one
+                // marker already wears DefaultAliasOnDistanceLessThan for the arrival, and an alias carries a script once.
+                var near = DistanceHook(build.clone.FormKey, build.t.playerAlias, spawned, stage);
+                near.Name = NearScript;
+                AttachHook(build.vma, build.clone.FormKey, marker, near, HookEntry.FindOrCreate, false, build.bm, spawned, stage);
                 build.bm.SpawnHooks.Add((marker, build.t.playerAlias));
-                Console.WriteLine($"  +near    : beat {b + 1} ({Name}) marker alias {marker} DefaultAliasOnDistanceLessThan sets {spawned} after {stage}: spawned there when the player is within {ApproachDistance}");
+                Console.WriteLine($"  +near    : beat {b + 1} ({Name}) marker alias {marker} {NearScript} sets {spawned} after {stage}: spawned there when the player is within {ApproachDistance}");
                 Spawn(build, b, spawned, fb, ff, lootArgs);
                 if (fb.support is Support s)
                 {

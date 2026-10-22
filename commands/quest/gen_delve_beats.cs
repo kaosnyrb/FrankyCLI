@@ -518,7 +518,7 @@ namespace FrankyCLI
         /// <summary>The stage that stops a Delve ending on a talk, set when the person unloads (vanilla's shutdown number).</summary>
         private const int LingerStage = 1000;
         /// <summary>
-        /// A fight's SPAWNED stage is this plus its beat index, set by a stock distance hook on its marker when the player
+        /// A fight's SPAWNED stage is this plus its beat index, set by duo_delve_near on its marker when the player
         /// comes near, and its fragment places the enemies (FightBeat.Enter); the
         /// objective's site target is lit only while it is NOT done (his play, 2026-10-21: "marker spawning works, but marker
         /// stays as a visable objective"). A block of its own, as LingerStage: under every beat's first stage there is no room
@@ -575,6 +575,9 @@ namespace FrankyCLI
         /// (papyrus/duo_delve_spawnnear.psc).</summary>
         private const string SpawnNearScript = "duo_delve_spawnnear";
 
+        /// <summary>A fight's spawn hook on its marker: our copy of DefaultAliasOnDistanceLessThan (papyrus/duo_delve_near.psc),
+        /// so it never collides with a stock distance hook on the same alias (a board's arrival).</summary>
+        private const string NearScript = "duo_delve_near";
         /// <summary>The most drop pods one clear may call: duo_delve_lib.DropPods holds them in a fixed array of this size.</summary>
         private const int PodsMax = 4;
 
@@ -2229,9 +2232,13 @@ namespace FrankyCLI
             foreach (var a in bm.SpawnNear)
                 fail += Check($"outside holder alias {a} carries {SpawnNearScript} (spawned when the player is near)",
                               (vma.Aliases.FirstOrDefault(x => x.Property.Alias == a)?.Scripts.Any(s => s.Name == SpawnNearScript) ?? false).ToString(), "True");
+            // An alias carries a script ONCE (2026-10-22: missionboard01a's spawn hook landed beside the arrival's stock copy,
+            // and only this file's read-back of the first copy showed it). Every alias, every script, not only ours.
+            var twice = vma.Aliases.SelectMany(a => a.Scripts.GroupBy(s => s.Name).Where(g => g.Count() > 1).Select(g => $"alias {a.Property.Alias} {g.Key}")).ToList();
+            fail += Check("no alias carries the same script twice", twice.Count == 0 ? "none" : string.Join(", ", twice), "none");
             foreach (var (on, to) in bm.SpawnHooks)
             {
-                var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == on)?.Scripts.FirstOrDefault(x => x.Name == "DefaultAliasOnDistanceLessThan");
+                var dsc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == on)?.Scripts.FirstOrDefault(x => x.Name == NearScript);
                 var tp = dsc?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(x => x.Name == "TargetAlias");
                 var dp = dsc?.Properties.OfType<IScriptFloatPropertyGetter>().FirstOrDefault(x => x.Name == "TargetDistance");
                 fail += Check($"fight marker alias {on} spawns them when the player is near", tp == null ? "missing" : $"{tp.Object.FormKey} alias {tp.Alias} within {dp?.Data}",
