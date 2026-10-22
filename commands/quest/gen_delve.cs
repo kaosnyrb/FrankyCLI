@@ -2372,6 +2372,9 @@ namespace FrankyCLI
             uint cellId = NextAliasId(clone);
             var cell = srcCell.DeepCopy();
             var member = cell.Collection[0].ReferenceAlias!;
+            // The entry's id moves WITH its inner alias, as EmptyCollection does. Left at MB01's 10 on 2026-10-22 it
+            // collided with FinalLocation (10) while the markers pointed at the new id, and 19a would not start on any map.
+            if (cell.Collection[0].ID == member.ID) cell.Collection[0].ID = cellId;
             member.ID = cellId;
             if (member.CreateReferenceToObject == null) { Console.WriteLine($"REFUSED: {parts.orbitFrom}'s cell alias {o.cell} is not CREATED at its orbit."); return -1; }
             member.CreateReferenceToObject.AliasID = (short)locId;

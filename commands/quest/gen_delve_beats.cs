@@ -2135,6 +2135,20 @@ namespace FrankyCLI
             var ids = new HashSet<uint>(q.Aliases.OfType<IQuestReferenceAliasGetter>().Select(a => a.ID)
                 .Concat(q.Aliases.OfType<IQuestLocationAliasGetter>().Select(a => a.ID))
                 .Concat(q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection.Where(e => e.ReferenceAlias != null).Select(e => e.ReferenceAlias!.ID))));
+            // EVERY alias id is unique, a collection entry's id is its inner alias's, and nothing else holds it (2026-10-22:
+            // the orbit copy left its entry at MB01's 10 beside FinalLocation 10, every link above still resolved, and 19a
+            // would not start on any map). Read off the record, entry ids included, so it cannot agree with the copy code.
+            var allIds = q.Aliases.OfType<IQuestReferenceAliasGetter>().Select(a => (a.ID, $"{a.ID} {a.Name}"))
+                .Concat(q.Aliases.OfType<IQuestLocationAliasGetter>().Select(a => (a.ID, $"{a.ID} {a.Name}")))
+                .Concat(q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection.Where(e => e.ID != null).Select(e => (e.ID!.Value, $"collection entry {e.ID}"))))
+                .ToList();
+            var idClash = allIds.GroupBy(x => x.Item1).Where(g => g.Count() > 1).Select(g => string.Join(" / ", g.Select(x => x.Item2)))
+                .Concat(q.Aliases.OfType<IQuestCollectionAliasGetter>().SelectMany(c => c.Collection)
+                    .Where(e => e.ReferenceAlias != null && e.ID != e.ReferenceAlias.ID)
+                    .Select(e => $"collection entry {e.ID} holds alias {e.ReferenceAlias!.ID}"))
+                .ToList();
+            fail += Check("every alias id is unique and each collection entry's id is its inner alias's",
+                          idClash.Count == 0 ? "all unique" : string.Join("; ", idClash), "all unique");
             var dangling = q.Aliases.OfType<IQuestReferenceAliasGetter>()
                 .SelectMany(a => new[] { (a.ID, "fills from", a.Location?.AliasID), (a.ID, "is created at", (int?)a.CreateReferenceToObject?.AliasID) })
                 .Where(x => x.Item3 is int v && v >= 0 && !ids.Contains((uint)v))
