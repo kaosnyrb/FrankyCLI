@@ -404,6 +404,20 @@ namespace FrankyCLI
             /// </summary>
             public bool? remote { get; set; }
             /// <summary>
+            /// OPTIONAL, a REQUESTED place only (remote: true): the request's GetDistanceGalacticParsec limit from the player
+            /// becomes this number, in place of the copied duo_distanceformission Global. His 2026-10-22, 19a: "make the Parsec
+            /// distance like 1. That should be same system at least". The condition's function and subject are kept; only its
+            /// comparison value changes, from a Global to this float.
+            /// </summary>
+            public double? parsecs { get; set; }
+            /// <summary>
+            /// OPTIONAL, a REQUESTED place only: false = the request's own planet condition (its ALPS conditions; on Overtime's
+            /// remote base, IsTrueForConditionForm PCM_CND_BlockCreation_Habitability02_Medium) is dropped, so the request is
+            /// not limited to medium-habitability planets. His 2026-10-22, 19a: "remove the
+            /// PCM_CND_BlockCreation_Habitability02_Medium check". true is refused: leave it out to keep the condition.
+            /// </summary>
+            public bool? habitability { get; set; }
+            /// <summary>
             /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
             /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
@@ -1443,8 +1457,20 @@ namespace FrankyCLI
             // allowed: the main keeps its leash to the player; the second has no leash and no planet guard, so it lands
             // on whichever planet the planet content manager picks.
             // A third place would be leashed to a second that is on another planet, so it is refused beside a request.
-            if (secondRemote && (anyThird || r.place.third != null))
+            // An ORBIT third is held to the main place's planet or system, never within a drive of the second, so it may sit
+            // beside a second request (his 2026-10-22, 19a: the dungeon a created POI, the orbit kept).
+            if (secondRemote && (anyThird || r.place.third != null) && !IsOrbit(r))
                 Fatal("place.second.remote is set and the recipe has a third place; a third place is held within a drive of the second, which is on another planet.");
+            foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })
+            {
+                if (p == null) continue;
+                if ((p.parsecs != null || p.habitability != null) && p.remote != true)
+                    Fatal($"{label}.parsecs / {label}.habitability shape a REQUEST, and {label}.remote is not set.");
+                if (p.parsecs is double ps && !(ps > 0))
+                    Fatal($"{label}.parsecs must be above 0 (got {ps}).");
+                if (p.habitability == true)
+                    Fatal($"{label}.habitability is true; leave it out to keep the request's planet condition, false to drop it.");
+            }
             if (!secondRemote && !IsBoard(t))
                 foreach (var (where, text) in ProseStrings(r))
                     if (Tokens(text).Contains("SecondPlanet"))
@@ -2107,9 +2133,9 @@ namespace FrankyCLI
             var made4 = new BuildMade();
             var madeBeats = new BeatsMade();
             if (t.borrowFrom != null) fail += BorrowAliases(myMod, clone, t, parts);
-            if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts);
+            if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts, r.place);
             // No planet guard on the second request, ever: two crashed the game on start (10a, 12a). See Place.remote.
-            if (fail == 0 && r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts);
+            if (fail == 0 && r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts, r.place.second!);
             if (fail == 0 && t.secondPlanet != null && r.beats.Any(b => b.PlaceIndex == 1) && (IsBoard(t) || r.place.second?.remote == true))
             {
                 fail += MakeSecondPlanet(clone, t);
@@ -2464,7 +2490,7 @@ namespace FrankyCLI
         /// ⛔ Own mod only, never a winning override (the esp bridge carries a copy of every duo_ record, and a
         /// link into it adds the esp to the esm's masters: 2026-10-08).
         /// </summary>
-        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target, Parts? parts)
+        private static int MakePlaceRemote(StarfieldMod myMod, Quest clone, Template t, int target, Parts? parts, Place shape)
         {
             // The request is always the source's MAIN place alias; a second request is that same alias copied over the
             // second place, keeping the second place's ID and name so <SecondPlace> and everything filled from it still bind.
@@ -2498,6 +2524,32 @@ namespace FrankyCLI
             clone.Aliases[at] = copy;
             Console.WriteLine($"  remote   : place alias {target} {copy.Name} is now {srcName}'s PCM request "
                               + $"({(copy.ALPS!.PcmTypeKeyword.IsNull ? "no type" : copy.ALPS.PcmTypeKeyword.FormKey.ToString())}), flags {copy.Flags}");
+            return ShapeRequest(copy, shape);
+        }
+
+        /// <summary>
+        /// A request's two recipe dials, applied to the copied alias (his 2026-10-22, 19a). parsecs: the
+        /// GetDistanceGalacticParsec condition keeps its function and subject and compares to a number instead of the
+        /// copied Global. habitability false: the ALPS conditions (the request's planet condition) are cleared.
+        /// Each refuses when the copied request has nothing to change, so a dial can never be silently a no-op.
+        /// </summary>
+        private static int ShapeRequest(QuestLocationAlias copy, Place shape)
+        {
+            if (shape.parsecs is double ps)
+            {
+                int i = copy.Conditions.FindIndex(c => c.Data is IGetDistanceGalacticParsecConditionDataGetter);
+                if (i < 0) { Console.WriteLine($"REFUSED: parsecs is set and request {copy.Name} has no GetDistanceGalacticParsec condition."); return 1; }
+                var old = copy.Conditions[i];
+                copy.Conditions[i] = new ConditionFloat { CompareOperator = old.CompareOperator, Flags = old.Flags, Data = old.Data, ComparisonValue = (float)ps };
+                Console.WriteLine($"  request  : {copy.Name} GetDistanceGalacticParsec {old.CompareOperator} {ps} (was a Global)");
+            }
+            if (shape.habitability == false)
+            {
+                int n = copy.ALPS!.Conditions.Count;
+                if (n == 0) { Console.WriteLine($"REFUSED: habitability is false and request {copy.Name} has no planet condition to drop."); return 1; }
+                copy.ALPS.Conditions.Clear();
+                Console.WriteLine($"  request  : {copy.Name} planet condition dropped ({n} ALPS condition(s))");
+            }
             return 0;
         }
 

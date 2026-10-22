@@ -22,21 +22,26 @@
     "Pay: med, placeholder (it leaves the ground, README rule 3); the tier is his."
   ],
   "place": {
-    "reach": "duo_samemapdistance",
-    "_reach": "His 2026-10-22 08:15 read in xEdit: FinalLocation is LocTypeOE_NonHostile == 0 AND within duo_longdrivedistance of the settlers' site, \"that's prob the issue\". The bisect: planet scope back, this one field widened to the main place's own 20,000. Starts = the leash. 11a pairs the same two kinds the other way round and starts.",
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
     "second": {
+      "remote": true,
+      "parsecs": 1,
+      "habitability": false,
+      "_remote": "His 2026-10-22 10:12, after the found dungeon would not start on any map: \"Change the dungeon to be a created POI on the same planet\", then off Overtime's remote request in xEdit: \"remove the PCM_CND_BlockCreation_Habitability02_Medium check and make the Parsec distance like 1. That should be same system at least\". No planet guard: two crashed (10a, 12a), his \"Stop doing it\". Was a found site within duo_longdrivedistance, then 20,000 for the bisect.",
       "theme": {
         "require": [],
         "exclude": [
           "LocTypeOE_NonHostile",
-          "LocTypeOE_ThemeNaturalKeyword"
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeTest"
         ]
       }
     },
@@ -67,10 +72,14 @@
         "voice": "GenericMale01",
         "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17",
         "hellos": [
-          ["Watch your step. The dish cables run everywhere."]
+          [
+            "Watch your step. The dish cables run everywhere."
+          ]
         ]
       },
-      "greeting": ["If you've got a ship, you're the most useful person I've seen all week."],
+      "greeting": [
+        "If you've got a ship, you're the most useful person I've seen all week."
+      ],
       "exchanges": [
         {
           "prompt": "I'll get the part and fit it.",
@@ -97,7 +106,9 @@
         },
         {
           "prompt": "Could you rig something in the meantime?",
-          "reply": ["I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."],
+          "reply": [
+            "I tried. The dish down here can hear the satellite fine. It just won't answer. It's the core or nothing."
+          ],
           "perk": "BackgroundCyberneticist"
         }
       ],
