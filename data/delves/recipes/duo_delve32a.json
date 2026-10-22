@@ -89,7 +89,8 @@
     {
       "type": "defeat",
       "place": "second",
-      "at": "LocDungeonBossLocRef",
+      "at": "REMarkerMediumLocRef",
+      "_at": "Was LocDungeonBossLocRef until 2026-10-22: a boss-marker second place is almost always a military dungeon (101 of 107), so the quest only started on a map with one close by (32p1 failed, 32p2 on the medium marker played; his: local missions are very map dependent, so there is a cap on the complexity of locations).",
       "target": "duo_boss_Spacer_Boss_Aggro_Female",
       "gang": {
         "list": "duo_GangMembersList_Spacer",

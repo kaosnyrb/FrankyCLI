@@ -106,7 +106,8 @@
     {
       "type": "recover",
       "place": "second",
-      "at": "LocDungeonBossLocRef",
+      "at": "REMarkerMediumLocRef",
+      "_at": "Was LocDungeonBossLocRef until 2026-10-22: a boss-marker second place is almost always a military dungeon (101 of 107), so the quest only started on a map with one close by (32p1 failed, 32p2 on the medium marker played; his: local missions are very map dependent, so there is a cap on the complexity of locations).",
       "item": "Transceiver Core",
       "objective": "Recover the transceiver core from the <SecondPlace>",
       "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.",
