@@ -572,6 +572,39 @@ namespace FrankyCLI
                         found += hello.Count;
                         break;
                     }
+                    if (search.Equals("hellocreated", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Walk-up lines whose speaker the quest CREATES (a reference alias with CreateReferenceToObject),
+                        // and how each is gated: on the alias (GetIsAliasRef) or on the created base (GetIsID). Our Delve
+                        // person is created at a marker and gated GetIsID, MQ101's shape, but Lin is placed, not created.
+                        // His 2026-10-22: our walk-up line is never picked and the engine falls back to "Captain".
+                        foreach (var quest in mod.Quests)
+                        {
+                            // A quest with no aliases reads back with no alias list at all (the overlay's null), and creates nobody.
+                            if (quest.Aliases == null) continue;
+                            var created = quest.Aliases.OfType<IQuestReferenceAliasGetter>()
+                                .Where(a => a.CreateReferenceToObject != null)
+                                .ToDictionary(a => (int)a.ID, a => (name: a.Name ?? "", obj: a.CreateReferenceToObject!.Object.FormKey));
+                            if (created.Count == 0) continue;
+                            foreach (var topic in quest.DialogTopics.Where(t => t.Subtype.ToString() == "Hello"))
+                                foreach (var resp in topic.Responses)
+                                    foreach (var c in resp.Conditions)
+                                    {
+                                        string? how = null;
+                                        int alias = -1;
+                                        if (c.Data is IGetIsAliasRefConditionDataGetter gia && created.ContainsKey((int)gia.FirstParameter))
+                                        { how = "GetIsAliasRef"; alias = (int)gia.FirstParameter; }
+                                        else if (c.Data is IGetIsIDConditionDataGetter gid && created.Values.Any(v => v.obj == gid.FirstParameter.Link.FormKey))
+                                        { how = "GetIsID"; alias = created.First(kv => kv.Value.obj == gid.FirstParameter.Link.FormKey).Key; }
+                                        if (how == null) continue;
+                                        var first = resp.Responses.FirstOrDefault();
+                                        Console.WriteLine($"CREATEDHELLO\t{how}\t{quest.EditorID}\tquest {quest.Data?.Priority}\ttopic {topic.Priority}\t{resp.FormKey}\tflags {resp.Flags?.Flags}"
+                                            + $"\talias {alias} {created[alias].name} -> {created[alias].obj}\t{first?.ResponseText}\t{string.Join(" & ", resp.Conditions.Select(DescribeCondition))}");
+                                        found++;
+                                    }
+                        }
+                        break;
+                    }
                     if (search.Equals("perkchecks", StringComparison.OrdinalIgnoreCase))
                     {
                         // Every response in the plugin gated on HasPerk, one compact line each: how background, trait
