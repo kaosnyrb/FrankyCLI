@@ -1,0 +1,32 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s8",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"A\" and \"Go on both\", then \"duo_delvetest_s7 doesn't start\" (13:17)",
+  "_note": [
+    "SPACE ALIAS-SET TEST S8: S1 with his altitude 32 ONLY: separates S7's altitude from its system test.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "altitude": 32
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S8 at <Place>",
+    "briefing": "Space test S8."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S8 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S8"
+    }
+  ]
+}

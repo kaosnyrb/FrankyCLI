@@ -2407,6 +2407,8 @@ namespace FrankyCLI
 
         /// <summary>LocTypeMajorOrbital: a planet's or a moon's location, the parent of its orbit and its surface.</summary>
         private static readonly FormKey MajorOrbital = FormKey.Factory("070A54:Starfield.esm");
+        /// <summary>LocTypeSettledPlanet: a body people live on; vanilla's space bounties keep their orbit OFF one (== 0).</summary>
+        private static readonly FormKey SettledPlanet = FormKey.Factory("062F2F:Starfield.esm");
 
         /// <summary>
         /// THE ORBIT AS THE THIRD PLACE (place.third.orbit, 2026-10-22, his "go on 19a, try over"). orbitFrom's chain off the
@@ -2656,8 +2658,9 @@ namespace FrankyCLI
         /// <summary>
         /// "In the player's star system", vanilla's way: IsInSameCurrentLocationAsRef(the player, LocTypeStarSystem) == 1, run on
         /// the subject. On a REQUEST's own conditions it tests the planet (MB_Bounty02Local; played, R5, 2026-10-22); on an
-        /// orbit's alias conditions it tests the orbit (238 of the 1,060 orbit aliases in his load order carry it). ONE
-        /// spelling, constructed, for both; HoldsToSystem is its reader.
+        /// orbit's alias conditions it tests the orbit (MB_BountySpace06Local, the ONE shipped orbit carrying it == 1; 236
+        /// more carry it == 0, NOT the player's system, the Far missions). ONE spelling, constructed, for both;
+        /// HoldsToSystem is its reader.
         /// </summary>
         private static ConditionFloat SameSystemCondition()
         {

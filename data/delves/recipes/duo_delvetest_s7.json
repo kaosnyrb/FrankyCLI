@@ -7,7 +7,8 @@
   "_note": [
     "SPACE ALIAS-SET TEST S7: S1 with the orbit held to the player's star system VANILLA'S way, IsInSameCurrentLocationAsRef(player, LocTypeStarSystem) == 1 on the orbit's own conditions (238 vanilla orbit aliases carry it; R5 proved it on a request), in place of S6's 1-parsec number. And his altitude, 32 (S1 sat at 03a's 10.5, 'that too close to the planet bug').",
     "TWO changes from S1, named: the same-system test and the altitude. If it fails, separate the altitude first (his 32 flew fine on 2026-08-04).",
-    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech.",
+    "\u26d4 BUILT 13:14 UNDER AN EARLIER MEANING of system \"same\": the test ADDED to the shell's far filters (kept). It did not start (13:17). Since S9, system \"same\" on an orbit writes MB_BountySpace06Local's three conditions, so rebuilding this recipe would NOT reproduce what he played."
   ],
   "place": {
     "theme": {

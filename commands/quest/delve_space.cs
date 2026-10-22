@@ -125,11 +125,24 @@ namespace FrankyCLI
                 orbit.Conditions[pi] = new ConditionFloat { CompareOperator = old.CompareOperator, Flags = old.Flags, Data = old.Data, ComparisonValue = (float)ps };
                 Console.WriteLine($"  orbit    : {orbit.Name} GetDistanceGalacticParsec {old.CompareOperator} {ps} (was {(old is ConditionGlobal ? "a Global" : "a number")})");
             }
-            // IN THE PLAYER'S SYSTEM, vanilla's way (rung 7): the R5 condition on the orbit's own conditions, which test the orbit.
+            // IN THE PLAYER'S SYSTEM, the way the ONE shipped same-system orbit does it (MB_BountySpace06Local): its orbit carries
+            // exactly three conditions, a major orbital body, not a settled planet, and IsInSameCurrentLocationAsRef(player,
+            // LocTypeStarSystem) == 1. The shell's far-mission filters (a parsec limit, MB_IsPlayerLevelAppropriate,
+            // LocTypeSENotAllowed == 0) are its OTHER shape, and go. ⛔ Rung S7 (2026-10-22 13:14) ADDED the test and kept those
+            // filters, under a comment claiming 238 vanilla orbits say "same system"; 236 of the 238 say == 0, NOT the player's
+            // system (the Far missions). S7 did not start. This is the shape the one precedent actually has.
             if (r.place.system == "same")
             {
+                var body = orbit.Conditions.Where(c => c.Data is IBodyHasKeywordConditionDataGetter).ToList();
+                string Body(IConditionGetter c) => $"{((IBodyHasKeywordConditionDataGetter)c.Data).FirstParameter.Link.FormKey} == {(c as IConditionFloatGetter)?.ComparisonValue}";
+                var want = new[] { $"{MajorOrbital} == 1", $"{SettledPlanet} == 0" };
+                if (!body.Select(Body).OrderBy(x => x).SequenceEqual(want.OrderBy(x => x)))
+                { Console.WriteLine($"REFUSED: the orbit's planet tests are [{string.Join("; ", body.Select(Body))}], not MB_BountySpace06Local's [{string.Join("; ", want)}]."); return 1; }
+                var gone = orbit.Conditions.Where(c => !body.Contains(c)).Select(c => c.Data.GetType().Name.Replace("ConditionData", "")).ToList();
+                orbit.Conditions.Clear();
+                orbit.Conditions.AddRange(body);
                 orbit.Conditions.Add(SameSystemCondition());
-                Console.WriteLine($"  orbit    : {orbit.Name} in the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1, as 238 vanilla orbit aliases)");
+                Console.WriteLine($"  orbit    : {orbit.Name} in the player's star system, MB_BountySpace06Local's three conditions (dropped: {string.Join(", ", gone)})");
             }
             if (r.place.altitude is double alt)
             {
@@ -327,6 +340,12 @@ namespace FrankyCLI
             }
             fail += Check("the orbit keeps to the player's star system (IsInSameCurrentLocationAsRef player LocTypeStarSystem == 1)",
                           HoldsToSystem(orbit?.Conditions).ToString(), (r.place.system == "same").ToString());
+            if (r.place.system == "same")
+                fail += Check("the orbit's conditions are MB_BountySpace06Local's three",
+                              // Both spellings: a read-back type is ...ConditionData or ...ConditionDataBinaryOverlay (this check's first run
+                              // stripped only the second and failed S9 with the right three conditions on disk).
+                              string.Join(",", (orbit?.Conditions ?? new List<IConditionGetter>()).Select(c => c.Data.GetType().Name.Replace("ConditionDataBinaryOverlay", "").Replace("ConditionData", "")).OrderBy(x => x)),
+                              "BodyHasKeyword,BodyHasKeyword,IsInSameCurrentLocationAsRef");
             if (r.place.altitude is double alt)
                 fail += Check($"the orbit's altitude is {alt}", AltitudeOf(orbit).ToString("0.###"), alt.ToString("0.###"));
             var target = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)slot.activatorAlias);

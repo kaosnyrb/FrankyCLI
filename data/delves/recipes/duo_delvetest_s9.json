@@ -1,0 +1,32 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s9",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 11:1x: \"lets take a backup then make a series of tests for remote and space alias sets. Idea being we learn in isolation how to build these sets\", then \"A\" and \"Go on both\", then \"duo_delvetest_s7 doesn't start\" (13:17)",
+  "_note": [
+    "SPACE ALIAS-SET TEST S9: S1 with the orbit's conditions exactly MB_BountySpace06Local's (the ONE shipped same-system orbit): a major orbital body, not a settled planet, IsInSameCurrentLocationAsRef(player, LocTypeStarSystem) == 1. The shell's far filters (parsecs, level-appropriate, space-encounters-allowed) go. At 03a's altitude, so one change from S1.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "system": "same"
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S9 at <Place>",
+    "briefing": "Space test S9."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S9 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S9"
+    }
+  ]
+}
