@@ -464,6 +464,13 @@ namespace FrankyCLI
             /// </summary>
             public string? cellAt { get; set; }
             /// <summary>
+            /// space only: true = add a ref alias Player (unique actor Player), COPIED from SE_Player_GenericTemplate (all 82
+            /// SE_Player_* fill theirs that way), so place.over can hang the orbit off the player standing on a planet.
+            /// RQ_Settlement_KillShips_01's shape with the player as its ground ref: its orbit is parented to Trigger, a ref in
+            /// the settlement, and only that ref comes from its event. His 2026-10-22 pointer; rung S12. false is refused.
+            /// </summary>
+            public bool? player { get; set; }
+            /// <summary>
             /// place.third only: the third place is an ORBIT, over the main place's planet, not a POI (his 2026-10-22, "go on
             /// 19a, try over"). The template's orbitFrom chain is copied in: a LocTypeOrbit location tested
             /// IsInSameCurrentLocationAsAlias(the main place, LocTypeMajorOrbital), a levelled space cell created at it, and
@@ -1312,7 +1319,7 @@ namespace FrankyCLI
                 // place.over shipped 2026-10-22 with no refusal here, so on a beats recipe it was silently ignored; closed with
                 // the two keys that joined it.
                 foreach (var (p, label) in new[] { (r.place, "place"), (r.place.second, "place.second"), (r.place.third, "place.third") })
-                    foreach (var (key, val) in new[] { ("over", p?.over), ("playerShip", p?.playerShip), ("cellAt", p?.cellAt) })
+                    foreach (var (key, val) in new[] { ("over", p?.over), ("playerShip", p?.playerShip), ("cellAt", p?.cellAt), ("player", p?.player?.ToString()) })
                         if (val != null)
                             Fatal($"{label}.{key} is set and template '{t.id}' is not a space template; it is a space Delve's knob and would be silently ignored.");
             }

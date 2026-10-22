@@ -49,6 +49,10 @@ namespace FrankyCLI
                 Fatal("place.over is set beside place.system or place.parsecs; over CLEARS the orbit's conditions, so the others would test nothing.");
             if (p.playerShip != null && p.playerShip != "flying")
                 Fatal($"place.playerShip is \"{p.playerShip}\"; the one value built is \"flying\" (SQ_PlayerShip's PlayerShip with him aboard, SE_Player_GenericTemplate's).");
+            if (p.player == false)
+                Fatal("place.player is false; leave it out to add no Player alias, true to add one.");
+            if (string.Equals(p.over, "Player", StringComparison.OrdinalIgnoreCase) && p.player != true)
+                Fatal("place.over is \"Player\" and place.player is not set; the shell carries no Player alias until place.player adds one.");
             if (p.cellAt != null && string.IsNullOrWhiteSpace(p.cellAt))
                 Fatal("place.cellAt is empty; it names the alias the space cell is created at (vanilla's encounters: PlayerShip).");
             if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
@@ -151,6 +155,22 @@ namespace FrankyCLI
                 orbit.Conditions.AddRange(body);
                 orbit.Conditions.Add(SameSystemCondition());
                 Console.WriteLine($"  orbit    : {orbit.Name} in the player's star system, MB_BountySpace06Local's three conditions (dropped: {string.Join(", ", gone)})");
+            }
+            // THE PLAYER AS A GROUND REF (rung S12). RQ_Settlement_KillShips_01 parents its orbit to Trigger, a ref standing in
+            // the settlement, and only that ref comes from its event; the player standing on a planet is the ref a startquest
+            // quest can have. The alias is COPIED from SE_Player_GenericTemplate (unique actor Player, as in all 82), new id.
+            if (r.place.player == true)
+            {
+                if (AliasNames(clone.Aliases!).Any(x => string.Equals(x.name, "Player", StringComparison.OrdinalIgnoreCase)))
+                { Console.WriteLine("REFUSED: place.player is set and the shell already carries an alias named Player."); return 1; }
+                var vq = OwnOrMaster<IQuestGetter>(myMod, env, VanillaEncounter);
+                var vp = vq?.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Name == "Player").ToList();
+                if (vp == null || vp.Count != 1 || vp[0].UniqueActor.IsNull)
+                { Console.WriteLine($"REFUSED: {VanillaEncounter} is not in this plugin's masters, or carries no single unique-actor Player to copy."); return 1; }
+                var pa = vp[0].DeepCopy();
+                pa.ID = NextAliasId(clone);
+                clone.Aliases!.Add(pa);
+                Console.WriteLine($"  +player  : alias {pa.ID} Player, unique actor {pa.UniqueActor.FormKey}, flags {pa.Flags} (copied from {VanillaEncounter} alias {vp[0].ID})");
             }
             // OVER A THING, vanilla's way (rung S10): no conditions, a parent link to the alias, and the flag every one of the
             // 125 vanilla orbits carrying a parent link has (0x40000000, unnamed in Mutagen; named here by its users).
@@ -442,6 +462,12 @@ namespace FrankyCLI
                 fail += Check("PlayerShip fills only while he is aboard", string.Join("; ", (ship?.Conditions ?? new List<IConditionGetter>()).Select(CondLine)),
                               "ShipContainsRef(000014:Starfield.esm) EqualTo 1");
                 fail += Check("PlayerShip's flags are the vanilla encounter's", ship?.Flags.ToString() ?? "missing", "CreateRefTemp");
+            }
+            if (r.place.player == true)
+            {
+                var pl = q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Name == "Player").ToList();
+                fail += Check("one Player alias, the unique actor Player (the census value, pinned)",
+                              pl.Count != 1 ? $"{pl.Count} alias(es) named Player" : pl[0].UniqueActor.FormKey.ToString(), "000007:Starfield.esm");
             }
             if (r.place.cellAt is string cellAtName)
             {

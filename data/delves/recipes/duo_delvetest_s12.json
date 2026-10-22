@@ -1,0 +1,34 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_s12",
+  "template": "space",
+  "author": "eliza",
+  "source": "his 2026-10-22 14:0x, after S10 and S11 failed from orbit: \"the SE quests are managed by the story manager. Thats not what we want. We want to create a spacecell with a marker in the game. bonus if we can make it in orbit. RQ_Settlement_KillShips_01 is a quest that starts in a settlement and creates a space encounter\", then \"build\" (14:13)",
+  "_note": [
+    "SPACE ALIAS-SET TEST S12: S10 with ONE change, the anchor. The orbit hangs off a Player ref alias (unique actor Player, copied from SE_Player_GenericTemplate) instead of PlayerShip: RQ_Settlement_KillShips_01's shape, whose orbit is parented to Trigger, a ref standing in a settlement. The space cell is created at the orbit, as the shell and KillShips both do. Altitude stays S10's (the shell's 10.5).",
+    "Pass = it starts, and the satellite is in orbit over the planet he is standing on. Play it STANDING ON A PLANET; from orbit is a second, free reading.",
+    "A test, never dealt: started with startquest, unbuilt when the ladder is read. No speech."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "player": true,
+    "over": "Player"
+  },
+  "prose": {
+    "name": "Repairs: Test Satellite S12 at <Place>",
+    "briefing": "Space test S12."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Repair the test satellite at <Place>",
+      "journal": "Space test S12 complete.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Test Satellite S12"
+    }
+  ]
+}
