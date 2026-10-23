@@ -53,7 +53,8 @@
     },
     {
       "type": "pickup",
-      "at": "LocDungeonBossContainerLocRef",
+      "at": "LocDungeonItemMarker03LocRef",
+      "_at": "2026-10-23 (Eliza): was LocDungeonBossContainerLocRef, which tags the boss crate itself, so the case was created inside it (his play: 'you couldn't actually reach it'). The item markers are 'used to put quest items in dungeons' (his). 03 is the nearest to the boss crate: same cell in 71 of 71 boss dungeons, median 18 m (gen_delve spread --dungeons).",
       "objective": "Recover the survey data from the site safe",
       "journal": "A survey crew ran from the <Place> and left a season's data behind. I found the lead's code by the door, unlocked their terminal, and took the drive out of the safe at the bottom of the place.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",

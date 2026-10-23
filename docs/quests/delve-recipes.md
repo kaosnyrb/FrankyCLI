@@ -340,6 +340,15 @@ objective over 12 words or ending in punctuation · any em dash or
 non-ASCII character · two beats on one marker or one travel ring · a base exclusion the recipe drops ·
 letter siblings that differ in structure · a `deal` pool that never dealt the template's base quest.
 
+**An object beat on a container (2026-10-23, missionboard04a):** an object is created AT its marker, and some
+location ref types tag a CONTAINER rather than a spot, so the object is created inside it (his play: *"the sealed box
+was placed at the same position as the boss crate so you couldn't actually reach it"*). The lint counts what the
+placed refs carrying the beat's `at` are, over every location record: all containers is **refused**
+(`LocDungeonBossContainerLocRef`, 306 of 306), some is **warned**. In a dungeon use an item marker,
+`LocDungeonItemMarker01LocRef` to `03LocRef`, his: *"used to put quest items in dungeons"*. ⚠ On a request the item
+markers stand on about 39 of 214 places, which he reads as the real dungeons, so the narrow-pool warning there is
+expected.
+
 **The build adds, off disk:** every alias fills below what it fills from (the order the engine needs),
 every place demands exactly its markers, the plugin's masters are unchanged, and every script property,
 objective target, journal, stage reward and NPC field reads back as written, the quest sits in exactly the node its `deal` names (or none), and no node points at a quest the plugin no longer has.

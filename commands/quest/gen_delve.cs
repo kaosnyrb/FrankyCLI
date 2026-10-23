@@ -1501,6 +1501,20 @@ namespace FrankyCLI
             markersOut?.Clear();
             foreach (var kv in keys) markersOut?.Add(kv.Key, kv.Value);
 
+            // AN OBJECT IS CREATED AT ITS MARKER, SO A MARKER THAT IS A CONTAINER PUTS IT INSIDE ONE (2026-10-23, his play of
+            // missionboard04a: "the sealed box was placed at the same position as the boss crate so you couldn't actually reach
+            // it"). LocDungeonBossContainerLocRef tags the boss crate itself. Keyed on what the refs carrying the type ARE,
+            // never on the type's name. His fact: the LocDungeonItemMarker types are "used to put quest items in dungeons".
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                if (!IsObject(r.beats[i]) || !keys.TryGetValue(r.beats[i].at, out var at)) continue;
+                var (containers, resolved) = ContainersCarrying(env, at);
+                if (containers == 0) continue;
+                var said = $"beat {i + 1} ({r.beats[i].type}) is at '{r.beats[i].at}', and {containers} of the {resolved} placed ref(s) carrying it are containers, so its object would be created inside one";
+                if (containers == resolved) Fatal($"{said}. Put it on an item marker (LocDungeonItemMarker01LocRef to 03LocRef in a dungeon).");
+                else Warn(said + " some of the time.");
+            }
+
             // A space Delve's one place is an orbit, drawn by its own conditions: none of the POI grading below applies.
             if (IsSpace(t)) return Report();
 
@@ -2843,6 +2857,28 @@ namespace FrankyCLI
                     set.Add(s.Marker.FormKey);
                 }
             return spots;
+        }
+
+        /// <summary>
+        /// How many of the placed refs carrying a location ref type are CONTAINERS, out of those that resolve to a placed
+        /// object, over every version of every location record (MasterSpecialReferences and AddedSpecialReferences). A ref
+        /// that is not a placed object (an actor, say) is not counted either way.
+        /// </summary>
+        private static (int containers, int resolved) ContainersCarrying(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, FormKey refType)
+        {
+            var refs = new HashSet<FormKey>();
+            foreach (var loc in env.LoadOrder.PriorityOrder.WinningOverrides<ILocationGetter>())
+                foreach (var s in (loc.MasterSpecialReferences ?? new List<ILocationCellStaticReferenceGetter>())
+                                  .Concat(loc.AddedSpecialReferences ?? new List<ILocationCellStaticReferenceGetter>()))
+                    if (s.LocationRefType.FormKey == refType) refs.Add(s.Marker.FormKey);
+            int containers = 0, resolved = 0;
+            foreach (var fk in refs)
+            {
+                if (!env.LinkCache.TryResolve<IPlacedObjectGetter>(fk, out var placed)) continue;
+                resolved++;
+                if (env.LinkCache.TryResolve<IContainerGetter>(placed.Base.FormKey, out _)) containers++;
+            }
+            return (containers, resolved);
         }
 
         /// <summary>
