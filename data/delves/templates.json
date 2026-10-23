@@ -150,11 +150,11 @@
       },
       "secondPlaceAlias": 22,
       "secondPlanet": { "cloneOf": 2, "id": 25, "name": "SecondPlanetLocation" },
-      "_second": "The borrowed second place (22) is always a REQUEST on a board (the lint refuses a found one: nothing holds it near the first), guarded off the first site's planet. Its planet (25) is a copy of TargetPlanetLocation whose parent is 22, as vanilla MB_Cargo resolves its planets. A second request is proven (2026-10-14, duo_delve_twosite01a, two POIs on two planets); the guard is not yet played.",
+      "_second": "The borrowed second place (22) is a REQUEST on a board, or since 2026-10-23 (missionboard05a) a named city pinned over it (place.second.settlement, city01a's shape); the lint refuses a found one: nothing holds it near the first. Written before the planet guards were ruled out: guarded off the first site's planet. Its planet (25) is a copy of TargetPlanetLocation whose parent is 22, as vanilla MB_Cargo resolves its planets. A second request is proven (2026-10-14, duo_delve_twosite01a, two POIs on two planets); the guard is not yet played.",
       "_place": "The place is ALREADY a request (ALPS, PcmTypeKeyword none, with MB_IsPlayerLevelAppropriate and a habitability condition), dealt by the board in Overtime, so a recipe never sets place.remote: the lint measures it against the request pool as it does a remote place.",
       "cannot": [
         "a recover or a choose -- see allows",
-        "a found second place (only a requested one) or a third place",
+        "a found second place (only a requested one or a named city) or a third place",
         "an approach, a person at an ending"
       ],
       "_who": "A who BUILDS on a board since 2026-10-15 (duo_delve12a, his 'teach board who'): its stage numbered after arrivalStage (16 to 19, below the first beat's 20) and its distance hook armed only after entryStage, so nothing stands at a posting's site until the job is taken.",

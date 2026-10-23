@@ -17,7 +17,9 @@
     "she will not collide with vanilla's people. The board's own rule today is that a second place is a request",
     "(remote: true); a fixed city is a third kind. If it lands for city01a it lands for this.",
     "Pay: med on the hand-over (README rule 3, capped at med).",
-    "Voices: not yet heard in game; his ear decides. No names or places in any voiced line."
+    "Voices: not yet heard in game; his ear decides. No names or places in any voiced line.",
+    "2026-10-23 (Eliza): place.second.settlement now builds on a board (city01a played first), so the WHAT DOES NOT BUILD",
+    "lines above are history. The talk is at New Atlantis's AutofillGeneric01; see the beat's _at."
   ],
   "place": {
     "theme": {
@@ -79,8 +81,8 @@
     {
       "type": "talk",
       "place": "second",
-      "at": "RECenterLocRef",
-      "_at": "PLACEHOLDER: inside a city the marker is the build's call, with the settlement field (Eliza's).",
+      "at": "AutofillGeneric01",
+      "_at": "2026-10-23 (Eliza): New Atlantis's one AutofillGeneric01 spot (133415), city01a's shape after his 'lets just go for autofill 01 and see' for Akila. The lint refused RECenterLocRef here: no city carries a POI marker. Whether the spot reads as where a family that just moved in lives is his eye.",
       "objective": "Return the compass to the family in <SecondPlace>",
       "journal": "Raiders took a family's belongings to the <Place>. I went in and brought back the one thing they wanted, a brass compass their great-grandmother carried from Earth.",
       "person": {

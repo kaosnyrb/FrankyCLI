@@ -1328,9 +1328,10 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(r.prose.card))
                     Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
                 // The board's second place is borrowed bare: nothing on it holds it near the first, so a FOUND second place
-                // could be anywhere in the galaxy. A requested one is its own new site (proven 2026-10-14), so that is the shape.
-                if (r.beats.Any(b => b.PlaceIndex == 1) && r.place.second?.remote != true)
-                    Fatal("a beat is at the second place and place.second.remote is not set; a board mission's second place must be a request (nothing would hold a found one near the first).");
+                // could be anywhere in the galaxy. A requested one is its own new site (proven 2026-10-14), so that is the shape,
+                // or a named city, which is pinned rather than found (2026-10-23, missionboard05a).
+                if (r.beats.Any(b => b.PlaceIndex == 1) && r.place.second?.remote != true && r.place.second?.settlement == null)
+                    Fatal("a beat is at the second place and place.second.remote is not set; a board mission's second place must be a request or a named city (nothing would hold a found one near the first).");
             }
             else if (r.prose.card != null)
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
@@ -1564,8 +1565,9 @@ namespace FrankyCLI
                 var s = r.place.second!;
                 if (!Settlements.ContainsKey(s.settlement!))
                     Fatal($"place.second.settlement is '{s.settlement}'; the cities built are {string.Join(", ", Settlements.Keys.Select(k => $"\"{k}\""))}.");
-                if (IsBoard(t))
-                    Fatal("place.second.settlement on a board is not built yet: a board's second place is a borrowed request. city01a proves the city on a slate first (spike 2026-10-23-a-named-city-as-a-delve-place).");
+                // On a board (2026-10-23, missionboard05a, after city01a played): the borrowed second place (the slate base's
+                // FinalLocation, the same alias city01a pinned) is pinned instead of requested. Nothing holds a city near the
+                // first site, and nothing needs to: it is where it is.
                 if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.system != null || s.altitude != null)
                     Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, system and altitude do not apply to it.");
                 if (s.theme.require.Count > 0 || s.theme.exclude.Count > 0)
@@ -1604,16 +1606,19 @@ namespace FrankyCLI
                 if (p.altitude is double alt && !(alt >= OrbitAltitudeBand.min && alt <= OrbitAltitudeBand.max))
                     Fatal($"{label}.altitude is {alt}; his settled band is {OrbitAltitudeBand.min} to {OrbitAltitudeBand.max} (past ~32 the engine discards it).");
             }
-            if (!secondRemote && !IsBoard(t))
+            // A named city gets no planet alias either, on a board too: the board's second planet is a copy of its target planet
+            // parented on a request, and nobody has built or played one parented on a pinned city.
+            if (!secondRemote && (!IsBoard(t) || secondCity))
                 foreach (var (where, text) in ProseStrings(r))
                     if (Tokens(text).Contains("SecondPlanet"))
-                        Fatal($"{where}: <SecondPlanet> needs place.second.remote; a found second place is on the main place's planet and gets no planet alias of its own.");
+                        Fatal($"{where}: <SecondPlanet> needs place.second.remote; a found second place is on the main place's planet, and a named city's planet is not made, so neither gets a planet alias of its own.");
             if (secondRemote)
                 Console.WriteLine("  second   : a SECOND REQUEST (proven 2026-10-14, two sites on two planets in one play); "
                                   + "no planet guard (two crashed the game; his 2026-10-19 ruling), so it may land on either planet");
             if (r.place.remote == true && t.remotePlaceFrom == null)
                 Fatal($"place.remote is set and template '{t.id}' names no remotePlaceFrom, so there is no request to copy.");
-            if (remote && (anyThird || r.place.third != null || (!secondRemote && (anySecond || r.place.second != null))))
+            // A board's place is a request, so `remote` holds there too; its second place may be a request or a named city.
+            if (remote && (anyThird || r.place.third != null || (!secondRemote && !(secondCity && IsBoard(t)) && (anySecond || r.place.second != null))))
                 Fatal("place.remote is set and the recipe has a second or third place. A remote Delve is ONE requested site "
                       + "(his 2026-10-14 pick); every beat happens there.");
             if (remote && r.place.reach != null)
