@@ -20,6 +20,7 @@
   "TextDisplayGlobals": [],
   "MissionBoardInfoPanels": [],
   "DialogConditions": [],
+  "UnusedConditions": [],
   "Stages": [
     {
       "Index": 0,
@@ -1775,7 +1776,7 @@
           {
             "FormKey": "003295:du_overtime.esm",
             "Header": {
-              "MajorFlags": 0,
+              "MajorFlags": 64,
               "FormVersion": 576,
               "Version2": 0,
               "VersionControl": 0

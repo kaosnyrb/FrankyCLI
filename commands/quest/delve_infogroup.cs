@@ -23,7 +23,8 @@ namespace FrankyCLI
     /// read before. It passes only if the sizes match and every differing byte is the low flags byte of one of the named
     /// INFO records' headers (type INFO eight bytes before, its own id four bytes after), differing in bit 0x40 alone, once
     /// per group. Anything else is a FAIL with the offsets printed. Snapshot the live plugin before the real run
-    /// (DU_Overtime `sync_plugin.py --snapshot`); restoring stays a hand copy, by that repo's rule.
+    /// (DU_Overtime `sync_plugin.py --snapshot`); restoring stays a hand copy, by that repo's rule. After a real write each
+    /// named Delve's model (data/delves/models) is re-emitted from the edited quest, so it agrees with the plugin.
     /// </summary>
     internal static class DelveInfoGroup
     {
@@ -115,6 +116,18 @@ namespace FrankyCLI
                       $"read back off disk, every changed group's header is InfoGroup {(clear ? "clear" : "set")} ({back.Count} found)");
             }
             if (dryDir != null) Directory.Delete(dryDir, true);
+
+            // The model on disk is what a build writes the quest FROM, so it must say what the plugin now says: re-emitted
+            // from the edited quest exactly as a build emits it (gen_delve.cs, the model step). Git shows the diff.
+            if (!dry && fails == 0)
+                foreach (var id in ids)
+                {
+                    var q = myMod.Quests.First(x => string.Equals(x.EditorID, id, StringComparison.OrdinalIgnoreCase));
+                    var model = gen_questmodel.ReadModel(q, out var refusals);
+                    if (refusals.Count > 0) { foreach (var x in refusals) Console.WriteLine($"  [FAIL] {id}'s model cannot hold: {x}"); fails++; continue; }
+                    File.WriteAllText(Path.Combine(dataDir, "models", id + ".json"), gen_questmodel.ToJson(model));
+                    Console.WriteLine($"  model    : {id} re-emitted from the edited quest");
+                }
 
             Console.WriteLine();
             Console.WriteLine(fails == 0 ? $"  infogroup: every check OK{(dry ? " (dry; run without --dry to write live)" : "")}." : $"  infogroup: {fails} check(s) FAILED.");

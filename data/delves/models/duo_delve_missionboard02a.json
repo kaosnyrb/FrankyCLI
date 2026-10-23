@@ -48,6 +48,7 @@
     }
   ],
   "DialogConditions": [],
+  "UnusedConditions": [],
   "Stages": [
     {
       "Index": 5,
@@ -2759,7 +2760,7 @@
           {
             "FormKey": "003381:du_overtime.esm",
             "Header": {
-              "MajorFlags": 0,
+              "MajorFlags": 64,
               "FormVersion": 576,
               "Version2": 0,
               "VersionControl": 0
@@ -2820,7 +2821,7 @@
           {
             "FormKey": "00339A:du_overtime.esm",
             "Header": {
-              "MajorFlags": 0,
+              "MajorFlags": 64,
               "FormVersion": 576,
               "Version2": 0,
               "VersionControl": 0
