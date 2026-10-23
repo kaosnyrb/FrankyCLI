@@ -601,7 +601,8 @@ properties the driver set (`questScriptKeeps` in the row). What changes from a s
   exactly as on a slate, and gets no `<SecondPlanet>`. ⚠ **Its person stands there from the board's refresh:** a
   talk's person is created on quest start, and a board quest starts when the board refreshes, before anyone takes the
   job (her conversation still waits for stage 10). Vanilla's twin, `RQ_OE_Deliver_01`, creates its recipient
-  `InitiallyDisabled`; not built here until his play says it matters.
+  `InitiallyDisabled`; not built, parked on his ruling (2026-10-23, after 05a played): *"super edgecase, we'll look
+  into it if it ever happens"*.
 - **A `who` builds here too** (2026-10-15, duo_delve12a): numbered after the arrival (16 to 19) and armed only after the
   accept, so nothing stands at a posting's site until the job is taken. An `approach` and an ending's person are still
   refused (`cannot` in the row).
