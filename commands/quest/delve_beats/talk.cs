@@ -163,11 +163,6 @@ namespace FrankyCLI
                     d.FirstParameter = new FormLinkOrIndex<IPlaceableObjectGetter>(d, npc);
                     return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
                 }
-                ConditionFloat IsHisAlias()
-                {
-                    var d = new GetIsAliasRefConditionData { RunOnType = Condition.RunOnType.Subject, FirstParameter = personAlias };
-                    return new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
-                }
                 ConditionFloat StageDone(int st, float want)
                 {
                     var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = st };
@@ -250,17 +245,14 @@ namespace FrankyCLI
 
                 // What he says as the player WALKS UP (person.hellos, Jessica's; his 2026-10-19). ONE Hello topic per quest
                 // (Misc / Hello, topic priority 50), a group INFO per person carrying the gate, and the spoken lines under it
-                // (DialogGroup = the group), one picked per walk-up. Vanilla's shape for a speaker the quest CREATES, copied off
-                // OE_KT_Trait_Wanted_BountyHunters: the group flags 768 gated GetIsAliasRef(his alias), the lines flags 2
-                // (gen_inspect dialogtopic hellocreated: 278 of 312 created-speaker gates are on the alias, and the
-                // shape this replaced, MQ101's placed Lin, a 256 group on GetIsID with 1024 lines, is used for a created
-                // speaker nowhere). That shape never played: the engine fell back to a silent "Captain" (his plays,
-                // 2026-10-19 and 10-22). Many lines share one topic, so each line's WEMFile is its OWN id (NPCDialogueNoun's
-                // scheme; manual 39: either works if the file is named the same), never the topic's.
-                // ⛔ NOT THE FIX (his 19a play, 2026-10-22 16:19): this shape still says the silent "Captain". Kept because it is
-                // vanilla's for a created speaker and plays no worse. The record header InfoGroup (every vanilla group has it)
-                // is untested: the build that set it (af6e0b0, reverted 495fa84) never started, for a reason not yet found
-                // (its plugin was byte-identical to a starting one but for a constant id shift).
+                // (DialogGroup = the group), one picked per walk-up. MQ101's placed-Lin shape: the group flags 256 gated
+                // GetIsID(him), the lines flags 1024. Many lines share one topic, so each line's WEMFile is its OWN id
+                // (NPCDialogueNoun's scheme; manual 39: either works if the file is named the same), never the topic's.
+                // ⛔ THE GROUP CARRIES THE RECORD HEADER InfoGroup, AND THAT IS THE FIX (his play of 14a, 2026-10-23: "BOOM
+                // worked", his line heard in his voice). Every vanilla walk-up group has it; without it the engine falls back
+                // to a silent "Captain", under this shape and under vanilla's created-speaker one (the alias gate, group 768,
+                // lines 2: ca77155, played on 19a 2026-10-22, no change). This is the shape that PLAYED with the header, set in
+                // place by gen_delve infogroup; the alias shape with the header is unplayed, so it is not what a build writes.
                 if (tb.person!.hellos is List<List<string>> hellos)
                 {
                     string htag = $"{r.id}_hellos";
@@ -279,15 +271,16 @@ namespace FrankyCLI
                         ht.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>>();
                         clone.DialogTopics.Add(ht);
                     }
-                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 768 } };
-                    grp.Conditions.Add(IsHisAlias());
+                    var grp = new DialogResponses(myMod) { EditorID = $"{tag}_hellos", Flags = new DialogResponseFlags { Flags = 256 },
+                                                           MajorFlags = DialogResponses.MajorFlag.InfoGroup };
+                    grp.Conditions.Add(IsHim());
                     var lines = new List<DialogResponses>();
                     for (int h = 0; h < hellos.Count; h++)
                     {
                         var hi = new DialogResponses(myMod)
                         {
                             EditorID = $"{tag}_hello{h + 1}",
-                            Flags = new DialogResponseFlags { Flags = 2 },
+                            Flags = new DialogResponseFlags { Flags = 1024 },
                             SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low,
                         };
                         hi.DialogGroup.SetTo(grp.FormKey);
@@ -302,8 +295,8 @@ namespace FrankyCLI
                         ht.Responses.Add(hi);
                         ht.TopicInfoList!.Add(hi.ToLink<IDialogResponsesGetter>());
                     }
-                    bm.Hellos.Add((b, personAlias, hellos.Count));
-                    Console.WriteLine($"  +hello   : {grp.EditorID}, {hellos.Count} walk-up line(s) in his voice, gated GetIsAliasRef({personAlias})");
+                    bm.Hellos.Add((b, npc, hellos.Count));
+                    Console.WriteLine($"  +hello   : {grp.EditorID}, {hellos.Count} walk-up line(s) in his voice, an InfoGroup gated GetIsID({npc})");
                 }
             }
         }
