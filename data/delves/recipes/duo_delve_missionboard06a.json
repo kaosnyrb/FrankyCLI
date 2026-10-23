@@ -1,0 +1,138 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard06a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 13:10: \"we write like 10 missionboard missions for Military Dungeons. Each of those goes to 10 different dungeons leading to 100 unique missions\", then 13:32 \"yeah go. Also we have droppods, those would be cool\"",
+  "_note": [
+    "THE MILITARY FAMILY, 1 OF ~10: PINNED DOWN. Clear the reinforcements (they come down in pods outside), take the",
+    "occupiers' leader inside, then reach the wounded surveyor they had pinned.",
+    "WRITTEN TO THE DELVE MARKER SET, NOT TO WHAT HIS SITES CARRY TODAY (his, 2026-10-23 13:35: \"don't limit ourselves by",
+    "what's there already in my mod, we can add the markers needed later\"). Measured that day: the military keyword is",
+    "on his 50 Takeover sites, which carry boss, wounded, map marker and travel ring, but no outside entrance, so the lint",
+    "pool for this is EMPTY until the entrance marker is added there. The five vanilla military dungeons carry a different",
+    "theme keyword (Eliza's part 32), so they are not in reach either; whether one recipe can ask for both is hers.",
+    "Pods land at the OUTSIDE ENTRANCE because a pod needs sky, and every delve has an outside.",
+    "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
+    "point at is placed (the pods, the leader, the surveyor).",
+    "Pay: med on the talk (capped at med)."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites. The family's marker set: outside entrance, centre, item markers, boss, wounded."
+  },
+  "prose": {
+    "name": "Relief: Pinned Surveyor on <Planet>",
+    "briefing": "A survey detail walked into the <Place> thinking it was empty. It wasn't. Two of them got out; one is still in there, wounded.",
+    "card": "Relief contract. A survey detail is pinned down at the <Place> on <Planet>, with one wounded. Clear the site and reach them. Expect the occupiers to call for more. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "_at": "Outside the way in: open sky for the pods, in any dungeon.",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Clear the occupiers' reinforcements at the <Place>",
+      "journal": "The occupiers called for help the moment they saw me, and it came down in pods. It's dead now. Their leader is still at the <Place>, and so is the wounded surveyor.",
+      "say": [
+        "Was that them? The pods?",
+        "Their boss is still in there. So am I."
+      ]
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 3,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the occupiers' leader at the <Place>",
+      "journal": "The occupiers' leader at the <Place> is dead. The surveyor they had pinned is still alive.",
+      "say": [
+        "It's gone quiet. Is that you?",
+        "I'm by the wall. I'd wave, but it hurts."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "REWoundedMarkerLocRef",
+      "_at": "The wounded marker, on all 50: where vanilla puts a hurt person, so she is where the site expects one.",
+      "objective": "Reach the wounded surveyor",
+      "journal": "A survey detail walked into the <Place> thinking it was empty. I cleared the reinforcements, took down the leader and got the one they left behind back on her feet.",
+      "person": {
+        "name": "Tamsin Ure",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "rfkTsdZrVWEVhDycUYn9",
+        "hellos": [
+          [
+            "Slowly. I bite when I'm scared."
+          ]
+        ]
+      },
+      "greeting": [
+        "You came. I didn't think anyone would take that posting.",
+        "We were only here to survey the place. They've had me down by this wall since the morning, and my leg's no good."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Can you walk?",
+          "reply": [
+            "If you go slowly, and you don't mind the swearing.",
+            "Get me back to my ship. I'll tell the office you earned every credit."
+          ]
+        },
+        {
+          "prompt": "Why survey it at all?",
+          "reply": [
+            "The listing said it was abandoned.",
+            "Somebody didn't update the listing."
+          ]
+        },
+        {
+          "prompt": "Where are the others?",
+          "reply": [
+            "Two of us ran for the ship when it started.",
+            "They called it in. That's why you're here, so I can't even be angry with them."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 ends the talk and sets stage 100, which pays 'reward'. Every prompt stands on the greeting (talk_check.py). Voiced lines: no names, no places, no factions, no currency. Voice 'Shelby', british, unused so far; his ear decides.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Surveyor",
+    "voice": "GenericFemale01",
+    "elevenlabs": "rfkTsdZrVWEVhDycUYn9"
+  },
+  "broadcast": [
+    "You're close? I can hear your engines.",
+    "They'll call for more as soon as they see you. Deal with that first, then come and find me."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. The same voice on the radio and in person."
+}

@@ -1,0 +1,105 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard07a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", and 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\"",
+  "_note": [
+    "THE MILITARY FAMILY, 2 OF ~10: DEMOLITION. The case of charges is outside where the last team dropped it; three",
+    "weapons crates inside take a charge each, in any order; coming back out, the occupiers' reinforcements land in",
+    "pods at the door. The verb is SET, not take: the first of the family where nothing leaves with you.",
+    "Written to the delve marker set (outside entrance, centre, item markers 01 and 02), so the lint pool is EMPTY on",
+    "military sites until he adds the markers (missionboard06a's note says why).",
+    "No line describes an explosion: none is placed. The charges are set; what happens after is the client's.",
+    "Pay: med on the last fight (capped at med)."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Demolition: Weapons Cache on <Planet>",
+    "briefing": "The occupiers of the <Place> are sitting on a weapons cache. A demolition team went in and didn't come out. Their charges are still by the door.",
+    "card": "Demolition contract. The <Place> on <Planet> holds a weapons cache that must not change hands again. Our last team left their charges at the entrance. Set them on the cache and withdraw. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "item": "Demolition Charges",
+      "objective": "Collect the demolition charges at the <Place>",
+      "journal": "The last team's charges were by the way in, still sealed. They never got past the door. The cache is inside the <Place>.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Demolition Case",
+      "message": {
+        "title": "Demolition Case",
+        "text": "Sealed, full, and a little scorched on one corner. Three charges in foam, and a fourth slot that is empty. Somebody took one in with them."
+      }
+    },
+    {
+      "type": "use",
+      "group": "charges",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Set charges on the weapons cache",
+      "journal": "One charge set on a crate of rifles, packed still in their grease.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Weapons Crate"
+    },
+    {
+      "type": "use",
+      "group": "charges",
+      "at": "LocDungeonItemMarker01LocRef",
+      "journal": "One charge set on a crate of grenades. Somebody had stencilled the count on the lid and then crossed it out twice.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Munitions Crate"
+    },
+    {
+      "type": "use",
+      "group": "charges",
+      "at": "LocDungeonItemMarker02LocRef",
+      "journal": "One charge set on a crate with no markings at all, which is the kind you worry about most.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Unmarked Crate"
+    },
+    {
+      "type": "clear",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "_at": "Back at the way in: open sky for the pods.",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Get clear of the <Place>",
+      "journal": "Three charges set on the cache at the <Place>. Their reinforcements came down in pods at the door as I came out, and I got clear anyway. The rest is the client's.",
+      "say": [
+        "That's you out? And still standing?",
+        "Then the cache is ours to deal with. Get some distance."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Demolition Office",
+    "voice": "GenericMale01",
+    "elevenlabs": "omRordDZNt4Gy45cetUa"
+  },
+  "broadcast": [
+    "You're at the site? Good.",
+    "Our team's charges should be right by the door. Three crates inside, one charge each.",
+    "And they'll hear you working. Expect company on the way out."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Voice 'Royce', australian, unused so far; his ear decides. No names, places, factions or currency."
+}

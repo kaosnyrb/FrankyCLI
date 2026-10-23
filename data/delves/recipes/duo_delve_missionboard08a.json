@@ -1,0 +1,102 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard08a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), and 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\"",
+  "_note": [
+    "THE MILITARY FAMILY, 3 OF ~10: THE LAST REPORT. A unit held the site and stopped reporting. Read what they left",
+    "in two places, in any order, deal with whoever holds it now, and take the unit's tags out of the room where it",
+    "ended. The verb is READ: the story is in the objects, and the radio only asks.",
+    "The two logs never say first or last (an any-order group), and neither depends on the other.",
+    "Written to the delve marker set (item markers 01 to 03, boss), so the lint pool is EMPTY on military sites until",
+    "he adds the markers (missionboard06a's note says why). Pay: med on the tags."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Recovery: Last Report on <Planet>",
+    "briefing": "A unit was holding the <Place> and stopped reporting twelve days ago. Their records office wants to know what happened, and wants their tags back.",
+    "card": "Recovery contract. A unit stationed at the <Place> on <Planet> has not reported in twelve days. Find out what happened to them and recover their tags. The site may be occupied. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "logs",
+      "at": "LocDungeonItemMarker01LocRef",
+      "objective": "Find out what happened to the unit",
+      "journal": "The unit's field terminal. The last entries are a supply request, sent four times, each one shorter than the one before. The last one is just the word please.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Unit Field Terminal"
+    },
+    {
+      "type": "use",
+      "group": "logs",
+      "at": "LocDungeonItemMarker02LocRef",
+      "journal": "A footlocker with a roster taped inside the lid. Six names, five of them crossed out in the same pen, neatly, by somebody who was taking care to be neat.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Unit Footlocker"
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Deal with whoever holds the <Place> now",
+      "journal": "Whoever came after the unit held the <Place> for themselves. They don't now. The unit's tags should be close.",
+      "say": [
+        "You found them?",
+        "Then bring the tags home. That's all anyone here is asking for."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "item": "Unit Tags",
+      "objective": "Recover the unit's tags",
+      "journal": "A unit at the <Place> stopped reporting after their supplies never came. I read what they left, cleared the people who took the site, and recovered all six of their tags.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Sealed Case",
+      "message": {
+        "title": "Unit Tags",
+        "text": "Six sets of tags on one chain, in a case shut with a twist of wire. The sixth set is on the outside of the bundle: the last one added, by whoever closed it."
+      },
+      "say": [
+        "All six?",
+        "Thank you. I'll tell the families before anyone else gets the chance to tell them wrong."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Records Office",
+    "voice": "GenericMale01",
+    "elevenlabs": "nPczCjzI2devNBz1zQrb"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "We lost contact with that unit twelve days ago, and nobody's been out since.",
+    "I don't need a story. I need to know what happened, and I need them home."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Voice 'Brian, Deep, Resonant and Comforting', unused so far; his ear decides. No names, places, factions or currency."
+}
