@@ -717,7 +717,9 @@ namespace FrankyCLI
                 case "markers": return DelveCensus.Markers(args.Any(a => a.Equals("--dungeons", StringComparison.OrdinalIgnoreCase)));
                 case "bases": return DelveCensus.MarkerBases(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "footprint": return DelveCensus.Footprint();
-                case "keywords": return DelveCensus.PoolKeywords(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
+                case "keywords": return DelveCensus.PoolKeywords(args.Skip(2).Where(a => !a.StartsWith("--")).ToList(),
+                                             args.Any(a => a.Equals("--request", StringComparison.OrdinalIgnoreCase)),
+                                             args.Any(a => a.Equals("--list", StringComparison.OrdinalIgnoreCase)));
                 case "pcmpool": return DelveCensus.PcmPool(args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "models": return ModelCheck(dataDir, templates, args.Skip(2).Where(a => !a.StartsWith("--")).ToList());
                 case "lint":

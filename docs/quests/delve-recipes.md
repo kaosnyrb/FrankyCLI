@@ -262,6 +262,12 @@ pool): `LocTypeOE_NonHostile` (nobody hostile, 62 POIs with a centre and map mar
 `LocTypeOE_ThemeInfrastructureKeyword` (36 of those 62) · `LocTypeOE_ThemeNaturalKeyword` ·
 `LocTypeOE_ThemeCaveKeyword`.
 
+**`--request`** reads the places a request can put down (a board's or a remote place's pool) instead of the POI census,
+and **`--list`** names each place left with its keywords and ref types (2026-10-23, Jessica's ask for the dungeon
+split). The control: `gen_delve keywords --request LocDungeonOutsideEntranceMarkerLocRef LocDungeonCenterMarkerLocRef
+LocDungeonItemMarker03LocRef MapMarkerRefType LocTypeDungeon` gives 37, missionboard04a's lint pool. The dungeon split
+itself is in the Bethesda manual, part 32.
+
 ### `beats[]`
 
 | field | what it is |

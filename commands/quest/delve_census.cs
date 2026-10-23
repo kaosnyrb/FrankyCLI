@@ -567,11 +567,18 @@ namespace FrankyCLI
             return 0;
         }
 
-        internal static int PoolKeywords(List<string> narrow)
+        /// <summary>
+        /// `gen_delve keywords [--request] [--list] [narrow...]`. --request reads the places a PCM_QuestGeneral request can
+        /// put down (a board's or a remote place's pool) instead of the POI census; --list names each place left, with its
+        /// keywords and ref types (2026-10-23, Jessica's ask for the dungeon split: "gen_delve keywords reads the POI census,
+        /// not the request pool").
+        /// </summary>
+        internal static int PoolKeywords(List<string> narrow, bool request = false, bool list = false)
         {
             using var env = GameEnvironment.Typical
                 .Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build();
-            var pool = CensusOf(env).Pool;
+            var pool = request ? CensusOf(env).PcmRequestPool() : CensusOf(env).Pool;
+            if (request) Console.WriteLine($"  the REQUEST pool ({PoiCensus.PcmGeneralNode}): {pool.Count} place(s)");
             foreach (var n in narrow)
             {
                 var kw = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
@@ -583,9 +590,21 @@ namespace FrankyCLI
                 pool = pool.Where(p => (kw != null && p.Keywords.Contains(kw.FormKey)) || (rt != null && p.RefTypes.Contains(rt.FormKey))).ToList();
                 Console.WriteLine($"  narrowed by {n} ({(kw != null ? "keyword" : "ref type")}): {before} -> {pool.Count}");
             }
+            if (list)
+            {
+                string Kw(FormKey k) => env.LinkCache.TryResolve<IKeywordGetter>(k, out var r) ? (r.EditorID ?? k.ToString()) : k.ToString();
+                string Rt(FormKey k) => env.LinkCache.TryResolve<ILocationReferenceTypeGetter>(k, out var r) ? (r.EditorID ?? k.ToString()) : k.ToString();
+                Console.WriteLine();
+                foreach (var p in pool.OrderBy(p => p.Edid, StringComparer.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"  {p.Edid}");
+                    Console.WriteLine($"    keywords: {string.Join(" ", p.Keywords.Select(Kw).OrderBy(s => s))}");
+                    Console.WriteLine($"    ref types: {string.Join(" ", p.RefTypes.Select(Rt).OrderBy(s => s))}");
+                }
+            }
             var tally = new Dictionary<FormKey, int>();
             foreach (var p in pool) foreach (var k in p.Keywords) tally[k] = tally.GetValueOrDefault(k) + 1;
-            Console.WriteLine($"\n  POI pool: {pool.Count} location(s); {tally.Count} distinct keyword(s)\n");
+            Console.WriteLine($"\n  {(request ? "request" : "POI")} pool: {pool.Count} location(s); {tally.Count} distinct keyword(s)\n");
             foreach (var kv in tally.OrderByDescending(k => k.Value))
             {
                 string n = env.LinkCache.TryResolve<IKeywordGetter>(kv.Key, out var kw) ? (kw.EditorID ?? "?") : "(unresolved)";
