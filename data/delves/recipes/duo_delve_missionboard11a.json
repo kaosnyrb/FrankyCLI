@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard11a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
+  "_note": [
+    "THE MILITARY FAMILY, 6 OF ~10: THE QUARTERMASTER.",
+    "The occupiers' quartermaster has been selling stolen stock back to the people it was stolen from. Take her, and take",
+    "her ledger, which is the proof the client needs. The verb is TAKE, off the woman herself. Pods come for the ledger.",
+    "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
+    "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
+    "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
+    "point at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Bounty: The Quartermaster on <Planet>",
+    "briefing": "Whoever runs supplies at the <Place> has been selling stolen stock back to the people it was taken from. Her ledger proves it.",
+    "card": "Bounty contract. The quartermaster at the <Place> on <Planet> is wanted. Proof is required: recover her ledger. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the quartermaster at the <Place>",
+      "journal": "The quartermaster at the <Place> is dead. She kept a ledger, and it is still in there somewhere.",
+      "say": [
+        "That's her? Good.",
+        "Now the ledger. Without it she's just someone who was rude to us."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "item": "Quartermaster's Ledger",
+      "objective": "Recover the quartermaster's ledger",
+      "journal": "The quartermaster kept every sale. Same crates, same buyers, sold twice. The ledger is mine now.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Quartermaster's Footlocker",
+      "message": {
+        "title": "Quartermaster's Ledger",
+        "text": "Every sale in a neat hand, and a column on the right for what each buyer said when they paid. Most of them said thank you."
+      }
+    },
+    {
+      "type": "clear",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Get the ledger out of the <Place>",
+      "journal": "I took the quartermaster down and got her ledger out of the <Place>, through the people sent down to stop it.",
+      "say": [
+        "You're out with it? Then it's done.",
+        "Every name in that book is about to have a very long week."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Bounty Office",
+    "voice": "GenericMale01",
+    "elevenlabs": "pqHfZKP75CvOlQylNhV4"
+  },
+  "broadcast": [
+    "You're at the site.",
+    "The quartermaster's inside. So's her ledger, and I want both of them dealt with.",
+    "She'll call for help when it starts. She always does."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

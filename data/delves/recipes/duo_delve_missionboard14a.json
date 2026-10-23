@@ -1,0 +1,123 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard14a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
+  "_note": [
+    "THE MILITARY FAMILY, 9 OF ~10: THE HOLDOUTS.",
+    "A few soldiers are still holding part of the site and are out of almost everything. Bring the medical crate from",
+    "the door to their position, and the sergeant tells you how long they have been there. The verb is BRING, to people",
+    "who are still alive: the warm one of the family, kept short.",
+    "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
+    "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
+    "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
+    "point at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Resupply: Holdouts on <Planet>",
+    "briefing": "A handful of soldiers are still holding part of the <Place>. They are out of almost everything.",
+    "card": "Resupply contract. Friendly forces are holding a position inside the <Place> on <Planet>. A medical crate is waiting at the entrance. Deliver it to them. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "item": "Medical Crate",
+      "objective": "Collect the medical crate at the <Place>",
+      "journal": "The medical crate was waiting by the way in, dropped by somebody who didn't want to come any closer. The holdouts are deeper inside the <Place>.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Medical Crate"
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonItemMarker01LocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Break through to the holdouts",
+      "journal": "The ones keeping the holdouts pinned at the <Place> are dead. The way to them is open.",
+      "say": [
+        "They're clear? Then go. They've been waiting a long time."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "REWoundedMarkerLocRef",
+      "objective": "Bring the crate to the holdouts",
+      "journal": "A few soldiers were still holding part of the <Place>, out of nearly everything. I broke through and brought them a medical crate.",
+      "person": {
+        "name": "Sergeant Okafor",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_UCNavy_ArmoredFatigues_Light01_SY-920",
+        "voice": "GenericMale01",
+        "elevenlabs": "wsHauqjSkdBeAvdbUFmR",
+        "hellos": [
+          [
+            "Slowly. We've been shooting at shapes for days."
+          ]
+        ]
+      },
+      "greeting": [
+        "Is that a medical crate? Tell me that's a medical crate.",
+        "Four of us left holding this corner, and we've been out of dressings for three days."
+      ],
+      "exchanges": [
+        {
+          "prompt": "It's yours. Where do you want it?",
+          "reply": [
+            "Right here. Right by the lad who keeps saying he's fine.",
+            "Thank you. Really. I'll find a way to say it properly once I've slept."
+          ]
+        },
+        {
+          "prompt": "How long have you been holding?",
+          "reply": [
+            "Nine days, if the clock on my sleeve is right.",
+            "Nobody here trusts the clock."
+          ]
+        },
+        {
+          "prompt": "Why not pull out?",
+          "reply": [
+            "Because nobody told us to.",
+            "And because if we leave this corner, they have all of it."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 ends the talk, takes the Medical Crate and sets stage 100. 'Nine days' is fixed on purpose and not the unit's: it is a sleeve clock nobody trusts. A rank in a person's name is allowed (it is not a token). Voice 'Jon Jebus', unused so far.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Logistics",
+    "voice": "GenericMale01",
+    "elevenlabs": "wsHauqjSkdBeAvdbUFmR"
+  },
+  "broadcast": [
+    "You're at the site? Good.",
+    "There's a crate by the door. Our people are further in, and they need it more than they'll say."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

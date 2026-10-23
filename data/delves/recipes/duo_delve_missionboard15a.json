@@ -1,0 +1,132 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard15a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
+  "_note": [
+    "THE MILITARY FAMILY, 10 OF ~10: THE DESERTER.",
+    "A soldier walked out of the site and will not go back in. Her discharge papers are still inside, in the office of",
+    "the officer who kept them. Talk to her at the door, deal with the officer, fetch the papers, and she radios you",
+    "when you have them. The verb is RETURN, to someone who left. The talk is FIRST, outside, so she is never inside.",
+    "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
+    "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
+    "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
+    "point at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Discharge: Deserter's Papers on <Planet>",
+    "briefing": "A soldier walked out of the <Place> and won't go back in. Her discharge papers are still inside.",
+    "card": "Private contract. A former soldier is waiting outside the <Place> on <Planet>. Recover her discharge papers from inside. Discretion appreciated. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "objective": "Talk to the soldier outside the <Place>",
+      "journal": "The soldier outside the <Place> walked out and won't go back. Her discharge papers are inside, with the officer who kept them.",
+      "person": {
+        "name": "Corporal Mabry",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_UCNavy_Fatigues",
+        "voice": "GenericFemale01",
+        "elevenlabs": "oW8bn5YtBB89X2nJ0DT9",
+        "hellos": [
+          [
+            "I'm not going back in. Whatever you've heard."
+          ]
+        ]
+      },
+      "greeting": [
+        "You took the posting? Then you know I walked out.",
+        "My discharge papers are still in there. The officer wouldn't sign them, so I signed myself out."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll get your papers.",
+          "reply": [
+            "They're in her office, in a case.",
+            "She'll be in there with them. She doesn't trust anyone else near paperwork."
+          ]
+        },
+        {
+          "prompt": "Why did you walk out?",
+          "reply": [
+            "Because she would have kept us here until there was nobody left to keep.",
+            "I'd rather be the one who left than one of the ones who didn't."
+          ]
+        },
+        {
+          "prompt": "What happens if you go back?",
+          "reply": [
+            "Nothing good, and nothing fast.",
+            "So I'll wait here, thanks."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 ends the talk and sets the next stage. Every prompt stands on the greeting. Voice 'Verity', british, unused so far; the same voice on the radio."
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Deal with the officer",
+      "journal": "The officer at the <Place> won't be keeping anyone else here. Her office is open now.",
+      "say": [
+        "Is she...? Right.",
+        "Then the papers are in her office. Bring them out to me."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "item": "Discharge Papers",
+      "objective": "Find the soldier's discharge papers",
+      "journal": "A soldier walked out of the <Place> and wouldn't go back. I dealt with the officer who kept her there and found her discharge papers, under eleven more nobody had signed either.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Officer's Case",
+      "message": {
+        "title": "Discharge Papers",
+        "text": "Hers, on top, with the signature box empty. Under them, eleven more just like it."
+      },
+      "say": [
+        "You've got them? All of them?",
+        "Then I'm not a deserter any more. I'm just someone who left. Thank you."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Corporal",
+    "voice": "GenericFemale01",
+    "elevenlabs": "oW8bn5YtBB89X2nJ0DT9"
+  },
+  "broadcast": [
+    "You're close? I'm outside, by the door.",
+    "I'm not going in. Come and talk to me first."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

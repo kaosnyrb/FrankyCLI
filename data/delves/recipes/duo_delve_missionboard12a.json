@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard12a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
+  "_note": [
+    "THE MILITARY FAMILY, 7 OF ~10: THE BEACONS.",
+    "Three beacons are guiding the occupiers' supply runs in. Shut them down in any order; whoever was expecting a",
+    "delivery comes to see why. The verb is SILENCE.",
+    "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
+    "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
+    "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
+    "point at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Sabotage: Beacon Network on <Planet>",
+    "briefing": "Three beacons at the <Place> are guiding the occupiers' supply runs in. Without them, the runs miss.",
+    "card": "Sabotage contract. The <Place> on <Planet> runs a beacon network supplying the occupiers. Shut down all three beacons. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "beacons",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Shut down the beacons at the <Place>",
+      "journal": "One beacon off. It was playing a little three note chime between bursts. I don't know why that made it worse.",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Supply Beacon"
+    },
+    {
+      "type": "use",
+      "group": "beacons",
+      "at": "LocDungeonItemMarker01LocRef",
+      "journal": "One beacon off. Someone had taped a picture of a ship to it, the way you'd tape one to a fridge.",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Guide Beacon"
+    },
+    {
+      "type": "use",
+      "group": "beacons",
+      "at": "LocDungeonItemMarker02LocRef",
+      "journal": "One beacon off, and its backup battery pulled so it stays off.",
+      "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
+      "name": "Relay Beacon"
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "objective": "Deal with the people coming to check",
+      "journal": "With all three beacons dark, the next supply run went somewhere else. The ones waiting for it came to find out why, and found me.",
+      "waves": 2,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "All quiet? Their run just went sailing past.",
+        "Nobody out there knows where to land now."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Operations",
+    "voice": "GenericMale01",
+    "elevenlabs": "cjVigY5qzO86Huf0OWal"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "There are three beacons in there guiding their runs in. Turn them all off.",
+    "Somebody's waiting on that delivery. They'll come and ask."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}
