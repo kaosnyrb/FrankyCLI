@@ -38,15 +38,15 @@
     "_themes": "Her at a quiet built site where stock could be kept (quiet AND natural is an empty pool, measured 2026-10-15 for 18a), the thieves at a built hostile site with a boss marker."
   },
   "prose": {
-    "name": "Bounty: Stock Thief on <Planet>",
-    "briefing": "A stockwoman at the <Place> is losing animals at night, two a week, to raiders who carry them up to their boss. She has asked for someone to come and see her."
+    "name": "Bounty: Cattle Thief on <Planet>",
+    "briefing": "A stockwoman at the <Place> is losing cattle at night, two a week, to raiders who drive them up to their boss. She has asked for someone to come and see her."
   },
   "beats": [
     {
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the stockwoman at the <Place>",
-      "journal": "A stockwoman at the <Place> is losing two animals a week to raiders, who carry them to their boss at the <SecondPlace>. She asked me to deal with him.",
+      "journal": "A stockwoman at the <Place> is losing two head of cattle a week to raiders, who drive them to their boss at the <SecondPlace>. She asked me to deal with him.",
       "person": {
         "name": "Maura Ketley",
         "template": "UC_NA_MASTWorkerFemale01",
@@ -61,30 +61,35 @@
         ]
       },
       "greeting": [
-        "They come at night and take two at a time, then carry them up to their boss. He's the one eating them."
+        "Raiders have been taking my cattle.",
+        "They come at night, take two at a time, and drive them up to their boss. He's eating them."
       ],
       "exchanges": [
         {
           "prompt": "I'll deal with their boss.",
           "reply": [
-            "His crew carry, he decides. Take him, and the carrying stops."
+            "Do that. His crew only take what he tells them to.",
+            "Stop him, and it stops."
           ]
         },
         {
           "prompt": "How many have you lost?",
           "reply": [
-            "Eleven since the thaw. The last was a four-year-old cow, five hundred kilos, in calf, and she had another eight years in her."
+            "Eleven since the thaw.",
+            "The last was a four-year-old cow. Five hundred kilos, and in calf.",
+            "She had eight good years left."
           ]
         },
         {
           "prompt": "Is there a price on him?",
           "reply": [
-            "Not that I know of. If there is, you're welcome to it. I only want my stock left alone."
+            "Not that I know of. If there is, it's yours.",
+            "I just want my cattle left alone."
           ],
           "perk": "BackgroundBountyHunter"
         }
       ],
-      "_talk": "Exchange 0 closes the talk and starts the defeat. Every prompt asks about something the greeting has already said (the boss, the losses). Voiced lines: no names, no places, no factions, no currency."
+      "_talk": "Exchange 0 closes the talk and starts the defeat. Every prompt asks about something the greeting has already said (the boss, the losses). Voiced lines: no names, no places, no factions, no currency. Pass 2026-10-23, his \"unclear shes talking about cows and doesn't read well spoken\": she says cattle in her first sentence, the stock is driven, not carried, and the long one-breath replies are split at their real pauses."
     },
     {
       "type": "defeat",
@@ -103,9 +108,10 @@
         "chance": 25
       },
       "objective": "Defeat the raiders' boss at the <SecondPlace>",
-      "journal": "The raiders' boss at the <SecondPlace> is dead. Nobody is coming down for the stockwoman's animals tonight.",
+      "journal": "The raiders' boss at the <SecondPlace> is dead. Nobody is coming for the stockwoman's cattle tonight.",
       "say": [
-        "Is that done? Right, I'll count them in at dusk. Same number as this morning, for once."
+        "Is it done?",
+        "Then I'll count them in tonight, and for once it'll be the same number as this morning."
       ],
       "reward": "med"
     }
@@ -116,8 +122,8 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Somebody's taking my stock, two a week, always at night.",
-    "I know where they're going and who's eating them. Come and see me, and I'll tell you the rest."
+    "Someone's stealing my cattle. Two a week, always at night.",
+    "I know where they're taking them. Come and see me, and I'll tell you the rest."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Same voice in person. Recast 2026-10-22 off Matilda, the voice he heard on this stockwoman and called \"very robotic\", to 'Annie K, Calm, Grounded Narrator', older: a farmer who has seen a few thefts. His ear decides."
 }
