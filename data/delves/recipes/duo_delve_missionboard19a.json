@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard19a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 4 OF 10: THE COOLANT PUMPS.",
+    "Two coolant pumps failed and the plant is too hot to restart. Bring the engineer's toolbox in, fix both pumps in",
+    "any order, and hold the room while the system bleeds. The verb is FIX.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Repair: Coolant Pumps on <Planet>",
+    "briefing": "The <Place> can't restart until its coolant pumps are fixed, and the engineer who could fix them won't go back in.",
+    "card": "Repair contract. Two coolant pumps at the <Place> on <Planet> have failed. A toolbox is waiting at the entrance. Restore both pumps. The site is occupied. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "item": "Engineer's Toolbox",
+      "objective": "Collect the toolbox at the <Place>",
+      "journal": "The engineer left her toolbox at the door, with a note taped to the lid: pumps, both, inside. Take your time.",
+      "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
+      "name": "Engineer's Toolbox"
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonItemMarker01LocRef",
+      "group": "pumps",
+      "objective": "Fix the coolant pumps",
+      "journal": "One pump fixed. The seal had perished, years ago by the look of it.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Coolant Pump"
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonItemMarker02LocRef",
+      "group": "pumps",
+      "journal": "One pump fixed. Somebody had kicked it, hard, more than once. It works now.",
+      "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
+      "name": "Backup Coolant Pump"
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Hold the room while the system bleeds",
+      "journal": "Both pumps at the <Place> are fixed and the system bled through clean. The plant can restart.",
+      "waves": 2,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "Pressure's coming up on both.",
+        "That's lovely. You'd make a decent engineer, if you ever want a worse job."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Engineer",
+    "voice": "GenericFemale01",
+    "elevenlabs": "GZ4PpFJV8ikEGUtBrjK7"
+  },
+  "broadcast": [
+    "You're at the site? My toolbox is by the door.",
+    "Two pumps inside, both dead. Fix them and then give the system time to bleed.",
+    "And don't rush it. A rushed pump is a broken pump."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

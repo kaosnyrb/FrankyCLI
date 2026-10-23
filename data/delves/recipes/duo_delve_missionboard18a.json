@@ -1,0 +1,90 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard18a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 3 OF 10: THE FIRE.",
+    "There was a fire, the owners claimed for it, and the insurer does not believe them. Read the three places it",
+    "started, in any order, and take the device that started it. The verb is PROVE, and the answer is unkind to the",
+    "client's client: the evidence says the owners set it.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Investigation: Fire at the Works on <Planet>",
+    "briefing": "The owners of the <Place> claimed for a fire. The insurer thinks somebody set it, and wants proof either way.",
+    "card": "Investigation contract. The <Place> on <Planet> burned and its owners have claimed. Examine where the fire started and recover any evidence. The site is occupied. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonItemMarker01LocRef",
+      "group": "fire",
+      "objective": "Find where the fire started",
+      "journal": "One place the fire started: a junction box burned from the inside out, which is not how junction boxes usually burn.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Scorched Junction Box"
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonItemMarker02LocRef",
+      "group": "fire",
+      "journal": "One place the fire started: a locker that burned hot and alone, with nothing near it to catch.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Burned Locker"
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "group": "fire",
+      "journal": "One place the fire started: the terminal's log ends four minutes before the alarm, on a command that switched the alarm off.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Scorched Terminal"
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "item": "Ignition Timer",
+      "objective": "Recover the evidence",
+      "journal": "Three places the fire started, all at once, and a timer with the owners' work order number scratched on it. The insurer was right.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Sealed Evidence Case",
+      "message": {
+        "title": "Ignition Timer",
+        "text": "A cheap timer, the kind you buy by the dozen. Somebody scratched a work order number on the back, out of habit, so the job could be billed."
+      },
+      "say": [
+        "A timer? With their work order on it?",
+        "That is the stupidest thing I've seen this year, and I've seen this year."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Insurance Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "MzqUf1HbJ8UmQ0wUsx2p"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "Fire like that doesn't start in one place. Find all of them.",
+    "And if there's anything that looks like it was put there, bring it to me."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

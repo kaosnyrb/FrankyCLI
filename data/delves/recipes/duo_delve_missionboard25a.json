@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard25a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 10 OF 10: SALVAGE RIGHTS.",
+    "The plant's regulator is worth more than the plant, and the client holds the salvage rights. Pull it, then get it",
+    "out past the rival salvagers who drop in to take it off you. The verb is SALVAGE: the one where the thing you carry",
+    "is what everybody wants.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Salvage: Plant Regulator on <Planet>",
+    "briefing": "The <Place> is a wreck, but its regulator is worth more than everything else in it, and everyone knows it.",
+    "card": "Salvage contract. We hold the salvage rights to the <Place> on <Planet>. Recover the plant regulator. Others may contest it. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the occupiers from the <Place>",
+      "journal": "Whoever was holding the <Place> is dead. The regulator is still in there.",
+      "say": [
+        "That's them? Then the regulator's ours.",
+        "Pull it, and be quick. We're not the only ones who know it's there."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "item": "Plant Regulator",
+      "objective": "Recover the plant regulator",
+      "journal": "I pulled the regulator out of the <Place>. It's heavier than it looks and worth more than my ship.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Regulator Housing",
+      "message": {
+        "title": "Plant Regulator",
+        "text": "The size of a lunchbox and heavier than it has any right to be. A sticker on it reads PROPERTY OF, and nothing after."
+      }
+    },
+    {
+      "type": "clear",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "species": "mix",
+        "pods": {
+          "count": 3,
+          "per": 3
+        }
+      },
+      "objective": "Get the regulator out",
+      "journal": "I salvaged the regulator from the <Place>, and the people who dropped in to take it off me at the door didn't.",
+      "say": [
+        "You've still got it? With them landing on top of you?",
+        "Then the rights are ours, and so's the regulator. Bring it home."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Salvage Office",
+    "voice": "GenericMale01",
+    "elevenlabs": "inKOuEy40NdNVHxcqekZ"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "The regulator's in there somewhere central. We own the rights to it.",
+    "Other people don't care about rights. Be quick."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

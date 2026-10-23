@@ -1,0 +1,99 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard22a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 7 OF 10: THE SHIPMENT.",
+    "The occupiers have a shipment staged to leave. Take their leader, lock the shipment down at the loading terminal,",
+    "and hold the way in when the people waiting for it arrive. The verb is LOCK.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Seizure: Outbound Shipment on <Planet>",
+    "briefing": "The occupiers of the <Place> have a shipment staged to go out. If it leaves, it's gone for good.",
+    "card": "Seizure contract. A shipment staged at the <Place> on <Planet> must not leave. Lock it down at the loading terminal and hold until it is secured. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the occupiers' leader at the <Place>",
+      "journal": "The occupiers' leader at the <Place> is dead. Her shipment is still staged to go.",
+      "say": [
+        "She's down? Then the shipment's next.",
+        "Lock it at the loading terminal before anyone else can send it."
+      ]
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Lock the shipment at the loading terminal",
+      "journal": "The shipment is locked down at the <Place>. Nobody can send it now without a code they don't have.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Loading Terminal",
+      "say": [
+        "It's locked? Good.",
+        "And now whoever was coming to collect it is going to be annoyed. They're nearly there."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "objective": "Hold the way in",
+      "journal": "The shipment at the <Place> is locked down, and the people who came to collect it went home empty.",
+      "waves": 2,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "That's the last of them.",
+        "We'll have it secured within the hour. Well done."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Port Authority",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "There's a shipment in there that's meant to leave tonight. It doesn't.",
+    "Lock it at the loading terminal."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

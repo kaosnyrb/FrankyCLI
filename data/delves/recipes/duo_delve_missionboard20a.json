@@ -1,0 +1,93 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard20a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 5 OF 10: THE BAD BATCH.",
+    "A batch of faulty parts is waiting in the plant for a buyer who knows they are faulty. Mark the three crates as",
+    "condemned in any order, then meet the buyer when she comes to collect. The verb is CONDEMN.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Recall: Condemned Batch on <Planet>",
+    "briefing": "A batch of faulty parts is sitting in the <Place> waiting for a buyer who knows exactly what's wrong with them.",
+    "card": "Recall contract. Three crates of faulty components are held at the <Place> on <Planet>. Mark all three as condemned. A buyer is expected. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "group": "batch",
+      "objective": "Condemn the faulty crates",
+      "journal": "One crate condemned. The parts inside pass every test except the one where they're used.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Parts Crate"
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonItemMarker01LocRef",
+      "group": "batch",
+      "journal": "One crate condemned. Somebody had already written NO on the lid, and then crossed it out.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Parts Crate"
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonItemMarker02LocRef",
+      "group": "batch",
+      "journal": "One crate condemned. This one had a delivery date and a name. I hope the name never finds out.",
+      "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
+      "name": "Parts Crate"
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Deal with the buyer",
+      "journal": "The buyer came to collect the batch at the <Place> and found it condemned, and me. The parts go nowhere now.",
+      "say": [
+        "She came for them? Of course she did.",
+        "Well, she won't be selling them to anyone. Thank you."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Standards Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "Three crates of parts in there that should never leave. Mark every one of them condemned.",
+    "And the person who bought them is on her way."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

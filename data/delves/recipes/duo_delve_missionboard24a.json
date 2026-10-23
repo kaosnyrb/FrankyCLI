@@ -1,0 +1,132 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard24a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 9 OF 10: THE INHERITANCE.",
+    "Somebody has inherited the plant, occupiers and all, and wants the deed before anyone else can claim it. Talk to her",
+    "at the door, deal with whoever runs the place now, and bring the deed out of the safe. The verb is CLAIM, and she",
+    "is the comedy of the family: delighted, appalled, and taking notes. The talk is FIRST, at the entrance.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Recovery: The Deed on <Planet>",
+    "briefing": "The owner of the <Place> died and left it to a niece, who has arrived to find it full of armed strangers.",
+    "card": "Private contract. The new owner of the <Place> on <Planet> requires the deed from the site safe before her claim can be filed. The site is occupied. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "objective": "Talk to the new owner outside the <Place>",
+      "journal": "The new owner of the <Place> is waiting at the door. Her uncle left her the plant, and the deed is in the safe inside.",
+      "person": {
+        "name": "Imogen Vey",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_BusinessSuitGreen",
+        "voice": "GenericFemale01",
+        "elevenlabs": "l4Coq6695JDX9xtLqXDE",
+        "hellos": [
+          [
+            "Hello! Are you the help? Please say you're the help."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're the contractor? Wonderful.",
+        "My uncle left me this place. He did not mention the people with guns."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll get your deed.",
+          "reply": [
+            "It's in the safe, inside.",
+            "Whoever's in charge in there will have the safe. They always have the safe, don't they?"
+          ]
+        },
+        {
+          "prompt": "Did you know your uncle well?",
+          "reply": [
+            "I met him twice. He gave me a calculator both times.",
+            "I think that's why he left me a factory."
+          ]
+        },
+        {
+          "prompt": "What will you do with it?",
+          "reply": [
+            "Run it, apparently.",
+            "I've bought a book."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 ends the talk and sets the next stage. Every prompt stands on the greeting. Voice 'Lauren B', unused so far; the same voice on the radio."
+    },
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Deal with whoever runs the <Place> now",
+      "journal": "Whoever ran the <Place> is dead. The safe is somewhere close.",
+      "say": [
+        "Was that the one in charge? Oh, good.",
+        "I'll add that to the notes. Under 'staff'."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "item": "Property Deed",
+      "objective": "Recover the deed from the safe",
+      "journal": "The niece who inherited the <Place> has her deed. I dealt with the people running it and took it out of the safe.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Site Safe",
+      "message": {
+        "title": "Property Deed",
+        "text": "The deed, folded in three, and a calculator. Taped to the calculator: for the next one."
+      },
+      "say": [
+        "You've got it? Then I own a factory.",
+        "And a calculator. I have three now."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "New Owner",
+    "voice": "GenericFemale01",
+    "elevenlabs": "l4Coq6695JDX9xtLqXDE"
+  },
+  "broadcast": [
+    "Hello? Is this the contractor?",
+    "I'm outside. I'm not going in there, I'm wearing my good shoes.",
+    "Come and find me first."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

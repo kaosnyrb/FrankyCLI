@@ -1,0 +1,80 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard16a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 1 OF 10: THE RUNAWAY PLANT.",
+    "The plant was left running when its crew ran, and it is about to cook itself. Shut it down from the control terminal",
+    "and keep the occupiers off it while it winds down. The verb is STOP.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Shutdown: Runaway Plant on <Planet>",
+    "briefing": "The <Place> has been running unattended since its crew fled, and its owners say it won't last much longer.",
+    "card": "Shutdown contract. The <Place> on <Planet> is running unattended and over its limits. Reach the control terminal and complete a safe shutdown. The site is occupied. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Start the shutdown at the <Place>",
+      "journal": "The shutdown is running. It takes as long as it takes, and the people living in the <Place> have heard it start.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Plant Control Terminal",
+      "say": [
+        "It's winding down? Good.",
+        "Don't let anyone near that terminal till it's finished, or it starts all over again."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Keep the terminal running until the shutdown completes",
+      "journal": "The <Place> is shut down safely, and stays that way. Nobody got to the terminal before it finished.",
+      "waves": 3,
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "say": [
+        "That's it. It's cold.",
+        "First quiet that place has had in a month."
+      ],
+      "reward": "med",
+      "defend": 1
+    }
+  ],
+  "speaker": {
+    "name": "Plant Owners",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "You're at the site?",
+    "The control terminal is inside. Start the shutdown and stay with it.",
+    "It's slow, and it's noisy, and they'll come to see what's changed."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

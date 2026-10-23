@@ -1,0 +1,126 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard21a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
+  "_note": [
+    "THE INDUSTRIAL FAMILY, 6 OF 10: THE NIGHT SHIFT.",
+    "One worker hid when the occupiers came and has been hiding since. Clear the floor, find her, and then do the one",
+    "thing she asks: clock her out at the door, because she has not been paid for any of this. The verb is FIND, and the",
+    "end is a joke she means completely.",
+    "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
+    "delve markers today. Every word holds in any of them: nothing names the site, the faction or what the plant",
+    "made; everything a line points at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon_ThemeIndustrial"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Industrial dungeons; the delve marker set."
+  },
+  "prose": {
+    "name": "Rescue: Night Shift on <Planet>",
+    "briefing": "One worker on the night shift hid when the <Place> was taken. She's still in there, and she's been very patient about it.",
+    "card": "Rescue contract. A night-shift worker is still inside the <Place> on <Planet>. Locate her and see her out. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Clear the occupiers from the <Place>",
+      "journal": "Whoever was running the <Place> is dead. The night-shift worker is somewhere inside.",
+      "say": [
+        "Is it quiet? Then she'll come out for a friendly voice.",
+        "Probably. She's very particular."
+      ]
+    },
+    {
+      "type": "talk",
+      "at": "REWoundedMarkerLocRef",
+      "objective": "Find the night-shift worker",
+      "journal": "The night-shift worker had been hiding in the <Place> since it was taken. Before she'd leave, she wanted clocking out.",
+      "person": {
+        "name": "Dot Ferreira",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Worker_Jumpsuit_Janitor",
+        "voice": "GenericFemale01",
+        "elevenlabs": "54Cze5LrTSyLgbO6Fhlc",
+        "hellos": [
+          [
+            "If you're one of them, I'm not here."
+          ]
+        ]
+      },
+      "greeting": [
+        "Oh, you're not one of them. Thank goodness.",
+        "I've been hiding since my shift started, and nobody has clocked me out."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Let's get you out.",
+          "reply": [
+            "Yes. But clock me out on the way, at the door.",
+            "I've been on shift for days, and I want it on the record."
+          ]
+        },
+        {
+          "prompt": "How did you stay hidden?",
+          "reply": [
+            "I'm the night shift. Nobody ever sees the night shift.",
+            "That's been a problem my whole career, and this week it was very useful."
+          ]
+        },
+        {
+          "prompt": "What did you eat?",
+          "reply": [
+            "Everybody's lunch.",
+            "I'll be leaving some notes of apology."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 ends the talk and sets the next stage. Voice 'Cat, Droll and Dry', unused so far."
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "objective": "Clock her out at the door",
+      "journal": "I clocked the night-shift worker out at the door of the <Place>. It's on the record now, every hour of it.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Shift Clock",
+      "say": [
+        "Did it take? It took. Look at that number.",
+        "I am going to be very difficult about that number. Thank you."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Night Shift",
+    "voice": "GenericFemale01",
+    "elevenlabs": "54Cze5LrTSyLgbO6Fhlc"
+  },
+  "broadcast": [
+    "Is someone there? Don't answer if you're one of them.",
+    "I'm still inside. I'll come out when it's quiet, and not before."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}
