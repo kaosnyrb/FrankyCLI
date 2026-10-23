@@ -7,7 +7,8 @@ them again, and compare every output by bytes.
 
 With no ids, emit builds COVERAGE: the 8 recipes his 2026-10-15 ruling set per step, plus missionboard02a so the
 board template's path is in the net too, plus remote05a because none of the others builds a defeat beat (his
-"yeah", 2026-10-15 14:3x). Each recipe takes about 75 s (one game-data load each).
+"yeah", 2026-10-15 14:3x). Each recipe is one game-data load: about 75 s when this was written, about 5 s on
+Defiant by 2026-10-23 (ten recipes in 45 s, measured off the label folders' times). A timing is the machine's.
 
 What a recipe's outputs are, all of them on disk: the would-be plugin and the emitted model (gen_delve --emit
 writes both), AND the fragment script source, which a dry build still writes into papyrus/gen/ in this repo. The
