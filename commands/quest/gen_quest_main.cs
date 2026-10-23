@@ -188,6 +188,7 @@ namespace FrankyCLI
                     List<IQuestchain> questchains = new List<IQuestchain>
                     {
                         new LoopingLayoutQuestChain(myMod),
+                        new LorewalkerQuestChain(myMod),
                         //new StaticLayoutQuestChain(myMod),
                     };
                     var outlawQuest = questchains[random.Next(questchains.Count)];
