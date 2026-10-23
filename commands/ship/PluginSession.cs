@@ -83,14 +83,16 @@ namespace FrankyCLI
         /// <summary>The file Write() writes, for a caller that must read its own output back.</summary>
         public string PluginPath => _dataPath + "\\" + ModName + ".esm";
 
-        public void Write()
+        /// <param name="path">Somewhere other than the live plugin, for a dry run that must write exactly what the real
+        /// one would (gen_delve infogroup diffs it against live). Omitted: the live plugin.</param>
+        public void Write(string? path = null)
         {
             if (_env != null)
                 throw new InvalidOperationException("PluginSession.Write with the environment still open: Close() first, "
                                                     + "or the write fails after the edits have reported success");
             foreach (var rec in Mod.EnumerateMajorRecords())
                 rec.IsCompressed = false;
-            Mod.WriteToBinary(PluginPath, gen_quest_main.BuildWriteParams());
+            Mod.WriteToBinary(path ?? PluginPath, gen_quest_main.BuildWriteParams());
         }
     }
 }
