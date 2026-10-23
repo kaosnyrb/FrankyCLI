@@ -490,6 +490,16 @@ namespace FrankyCLI
             /// place's star system (LocTypeStarSystem), his "yeah whole system" after "planet" would not start (2026-10-22).
             /// </summary>
             public string? orbit { get; set; }
+            /// <summary>
+            /// place.second only: the second place is a NAMED CITY, pinned, not drawn (his 2026-10-23, city01a and
+            /// missionboard05a, "lets just go for autofill 01 and see"). Vanilla's own shape for carrying a thing to a person
+            /// in a city, RQ_OE_Deliver_01's (manual 12, "A named city as a place"): the location alias pinned to the city
+            /// (SpecificLocation), no conditions, flags AllowCleared | StoresText, never ReservesLocationOrReference (it would
+            /// reserve the city); each beat there fills its marker inside the city by its own `at` ref type, AllowReserved
+            /// because a generic city spot is shared with vanilla (SE_Derelict_IDCardQuest's). No theme, who, leash or reach:
+            /// a pinned city is not drawn. The name is looked up in Settlements, a closed table; any other is refused.
+            /// </summary>
+            public string? settlement { get; set; }
             // ⛔ There is no "planet" key, and an unknown key is refused. A second request lands where the planet content
             // manager puts it, the first site's planet or another. Two planet guards on a place (10a 2026-10-14, 12a
             // 2026-10-19) each CRASHED the game on start, and his ruling 2026-10-19 is "Stop doing it", "it's fine if the
@@ -1545,6 +1555,26 @@ namespace FrankyCLI
             }
             if (r.place.second?.remote == false)
                 Fatal("place.second.remote is false; leave it out for a found second place.");
+            // A NAMED CITY (2026-10-23, city01a): the second place pinned, not drawn. See Place.settlement.
+            bool secondCity = r.place.second?.settlement != null;
+            if (r.place.settlement != null || r.place.third?.settlement != null)
+                Fatal("settlement is set on the main or the third place; only place.second can be a named city.");
+            if (secondCity)
+            {
+                var s = r.place.second!;
+                if (!Settlements.ContainsKey(s.settlement!))
+                    Fatal($"place.second.settlement is '{s.settlement}'; the cities built are {string.Join(", ", Settlements.Keys.Select(k => $"\"{k}\""))}.");
+                if (IsBoard(t))
+                    Fatal("place.second.settlement on a board is not built yet: a board's second place is a borrowed request. city01a proves the city on a slate first (spike 2026-10-23-a-named-city-as-a-delve-place).");
+                if (s.remote != null || s.orbit != null || s.parsecs != null || s.habitability != null || s.system != null || s.altitude != null)
+                    Fatal("place.second.settlement is a PINNED city: remote, orbit, parsecs, habitability, system and altitude do not apply to it.");
+                if (s.theme.require.Count > 0 || s.theme.exclude.Count > 0)
+                    Fatal("place.second.settlement has a theme; a pinned city is not drawn, so a theme would test nothing.");
+                if (s.who != null) Fatal("place.second.settlement has a who; the city has its own people.");
+                if (s.leash != null || s.reach != null) Fatal("place.second.settlement sets leash or reach; a pinned city is not held a drive from anything.");
+                if (anyThird || r.place.third != null)
+                    Fatal("place.second.settlement and a third place: a third place is held within a drive of the second, and a city is not drawn.");
+            }
             // A LOCAL main place with a requested second (10a, his 2026-10-14 "build 10a": here, then another planet) is
             // allowed: the main keeps its leash to the player; the second has no leash and no planet guard, so it lands
             // on whichever planet the planet content manager picks.
@@ -1612,6 +1642,20 @@ namespace FrankyCLI
                         Console.WriteLine($"  -- the third place is an ORBIT (created at build from {t.orbitFrom}): {r.place.third!.orbit switch { "planet" => "over the main place's planet", "system" => "in the main place's star system", "near" => "MB01's pick within place.third.parsecs of the player", "player" => "hung off the player (S13's shape), over the planet he takes it on", var x => $"scope '{x}'" }}, no POI pool to draw");
                         continue;
                     }
+                    if (pi == 1 && secondCity)
+                    {
+                        // A pinned city draws nothing: what can fail is a beat's marker type the city does not list.
+                        var city = r.place.second!.settlement!;
+                        var spots = CitySpots(env, Settlements[city]);
+                        Console.WriteLine($"  -- the SECOND place is PINNED to {city} ({Settlements[city]}): no pool to draw; the city lists {spots.Count} ref type(s)");
+                        foreach (var m in MarkersAt(r, keys, 1))
+                        {
+                            int n = spots.TryGetValue(m.Value, out var refs) ? refs.Count : 0;
+                            Console.WriteLine($"    {m.Key,-34} {n,4} spot(s) in the city");
+                            if (n == 0) Fatal($"{city} lists no ref carrying {m.Key}, so a beat there could never fill its marker.");
+                        }
+                        continue;
+                    }
                     var pool = (pi == 0 && remote) || (pi == 1 && secondRemote) ? reqPool! : drawPool;
                     var here = MarkersAt(r, keys, pi);
                     var theme = ThemeOf(r, pi);
@@ -1676,6 +1720,7 @@ namespace FrankyCLI
                     foreach (int pi in PlacesUsed(r))
                     {
                         if (pi == 2 && IsOrbit(r)) continue;   // an orbit keeps none of the base's place conditions
+                        if (pi == 1 && secondCity) continue;   // nor does a pinned city: it carries no conditions at all
                         var fromQ =((pi == 0 && r.place.remote == true) || (pi == 1 && secondRemote)) && remoteQ != null ? remoteQ : baseQ;
                         // The third place is a clone, so what it would inherit and drop is its source's.
                         int aid = pi == 2 ? (t.thirdPlace?.cloneOf ?? -1) : pi == 1 && secondRemote ? t.placeAlias : PlaceAliasOf(t, pi, -1);
@@ -2295,6 +2340,8 @@ namespace FrankyCLI
             if (fail == 0 && r.place.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.placeAlias, parts, r.place);
             // No planet guard on the second request, ever: two crashed the game on start (10a, 12a). See Place.remote.
             if (fail == 0 && r.place.second?.remote == true) fail += MakePlaceRemote(myMod, clone, t, t.secondPlaceAlias, parts, r.place.second!);
+            bool secondCity = r.place.second?.settlement != null && r.beats.Any(b => b.PlaceIndex == 1);
+            if (fail == 0 && secondCity) fail += MakePlaceSettlement(clone, t.secondPlaceAlias, r.place.second!.settlement!);
             // The second planet exists for <SecondPlanet> and nothing else, so it is made only when the text says it. Made for
             // every remote second place until 2026-10-22, it was a required alias with no job on 19a and missionboard03a: R6's
             // first sweep, under his "Every none optional alias is a stick of dynamite".
@@ -2319,6 +2366,7 @@ namespace FrankyCLI
             {
                 if (fail > 0) break;
                 if (pi == 2 && IsOrbit(r)) continue;   // an orbit's conditions are CreateOrbitPlace's, not a theme's
+                if (pi == 1 && secondCity) continue;   // a pinned city carries no conditions (MakePlaceSettlement)
                 var theme = ThemeOf(r, pi);
                 fail += WritePlaceConditions(clone, PlaceAliasOf(t, pi, made4.ThirdPlaceAlias), MarkersAt(r, markers, pi),
                                              ResolveKeywords(env, theme.require, _ => { }),
@@ -2329,6 +2377,18 @@ namespace FrankyCLI
             // Everything BuildBeats reads off the load order, own-or-master, in one record (gen_delve_inputs.cs).
             fail = ResolveInputs(myMod, env, t, r, parts, fail, out var inputs);
             if (fail == 0) fail += BuildBeats(myMod, clone, t, r, markers, made4, madeBeats, inputs);
+            if (fail == 0 && secondCity)
+            {
+                // A generic city spot is shared with vanilla (AutofillGeneric01 by 67 vanilla aliases), so every marker filled
+                // inside the pinned city may take one another quest has reserved, as SE_Derelict_IDCardQuest's do.
+                var inCity = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => a.Location?.AliasID == t.secondPlaceAlias).ToList();
+                if (inCity.Count == 0) { Console.WriteLine($"REFUSED: a beat is in {r.place.second!.settlement} and no alias fills inside it."); fail++; }
+                foreach (var a in inCity)
+                {
+                    a.Flags = (a.Flags ?? 0) | QuestReferenceAlias.Flag.AllowReserved;
+                    Console.WriteLine($"  city     : alias {a.ID} {a.Name} fills inside {r.place.second!.settlement} by {a.Location!.RefType.FormKey}, AllowReserved");
+                }
+            }
             FormKey? reach = null;
             if (r.place.reach != null)
             {
@@ -2336,7 +2396,7 @@ namespace FrankyCLI
                 if (rg == null) { Console.WriteLine($"REFUSED: place.reach '{r.place.reach}' is not a Global in {t.mod} or one of its masters."); fail++; }
                 else reach = rg.FormKey;
             }
-            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true, IsOrbit(r));
+            if (fail == 0) fail += LeashPlaces(clone, madeBeats, reach, r.place.second?.remote == true, IsOrbit(r), secondCity);
             return fail;
         }
 
@@ -2749,6 +2809,52 @@ namespace FrankyCLI
             same.FirstParameter.Link.SetTo(PlayerRef);
             same.SecondParameter.Link.SetTo(OrbitScopes["system"]);
             return new ConditionFloat { Data = same, CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f };
+        }
+
+        /// <summary>
+        /// place.second.settlement's CLOSED table: the name a recipe writes, to the city's location in Starfield.esm.
+        /// Measured 2026-10-23 (gen_inspect qalias ":"): vanilla pins CityNewAtlantisLocation 72 times and
+        /// CityAkilaCityLocation 28. A city is added here when a recipe needs one, never searched for by name.
+        /// </summary>
+        private static readonly Dictionary<string, FormKey> Settlements = new(StringComparer.Ordinal)
+        {
+            ["Akila City"] = FormKey.Factory("010DFB:Starfield.esm"),     // CityAkilaCityLocation
+            ["New Atlantis"] = FormKey.Factory("01295A:Starfield.esm"),   // CityNewAtlantisLocation
+        };
+
+        /// <summary>
+        /// A city's tagged spots, ref type to the refs carrying it, over EVERY version of the location record (the master's
+        /// MasterSpecialReferences and each plugin's AddedSpecialReferences). The one thing the engine can fill a marker
+        /// inside a pinned city from, so the lint and the verify read it.
+        /// </summary>
+        private static Dictionary<FormKey, HashSet<FormKey>> CitySpots(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, FormKey city)
+        {
+            var spots = new Dictionary<FormKey, HashSet<FormKey>>();
+            foreach (var loc in env.LinkCache.ResolveAll<ILocationGetter>(city))
+                foreach (var s in (loc.MasterSpecialReferences ?? new List<ILocationCellStaticReferenceGetter>())
+                                  .Concat(loc.AddedSpecialReferences ?? new List<ILocationCellStaticReferenceGetter>()))
+                {
+                    if (!spots.TryGetValue(s.LocationRefType.FormKey, out var set)) spots[s.LocationRefType.FormKey] = set = new HashSet<FormKey>();
+                    set.Add(s.Marker.FormKey);
+                }
+            return spots;
+        }
+
+        /// <summary>
+        /// The second place pinned to a named city (Place.settlement): RQ_OE_Deliver_01's Destination, written over the
+        /// template's second place alias, keeping its ID and name so every beat filled inside it still binds.
+        /// </summary>
+        private static int MakePlaceSettlement(Quest clone, int target, string city)
+        {
+            var loc = clone.Aliases?.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)target);
+            if (loc == null) { Console.WriteLine($"REFUSED: the clone has no place alias {target}."); return 1; }
+            var was = $"flags {loc.Flags}, {loc.Conditions.Count} condition(s)";
+            loc.SpecificLocation.SetTo(Settlements[city]);
+            loc.Conditions.Clear();
+            loc.ParentSystemLocationAliasID = null;
+            loc.Flags = QuestLocationAlias.Flag.AllowCleared | QuestLocationAlias.Flag.StoresText;
+            Console.WriteLine($"  city     : place alias {target} {loc.Name} PINNED to {city} ({Settlements[city]}), flags {loc.Flags}, no conditions (was {was})");
+            return 0;
         }
 
         /// <summary>Whether a condition list carries SameSystemCondition, read back off disk.</summary>

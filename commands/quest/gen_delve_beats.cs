@@ -660,8 +660,10 @@ namespace FrankyCLI
         /// Only the condition's parameter and global change: each is a copy of the base's own condition, never a
         /// constructed one. Refuses if an anchor is missing; its POSITION is OrderAliases' (a leash is a fill dependency).
         /// </summary>
-        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false, bool orbitThird = false)
+        private static int LeashPlaces(Quest clone, BeatsMade bm, FormKey? reach, bool secondRemote = false, bool orbitThird = false, bool secondCity = false)
         {
+            // A PINNED city is where it is: no drive leash, and the lint refuses a third place beside it.
+            if (secondCity) { Console.WriteLine("  leash    : none on the second place; it is a named city, pinned"); return 0; }
             // An ORBIT third place is tied to the main place by its own condition (CreateOrbitPlace: its planet or its system), never a drive.
             if (orbitThird) Console.WriteLine("  leash    : none on the third place; it is an orbit over the main place's planet");
             // A REQUESTED second place is a new site on (meant to be) another planet: no drive leash to the first, which is
@@ -2244,6 +2246,18 @@ namespace FrankyCLI
                               sc2 == null ? "missing" : sc2.Any(c => c.Data is IIsInSameCurrentLocationAsAliasConditionDataGetter).ToString(), "False");
                 fail += Check("the second request carries no drive leash to the first (the planet content manager places it, not a drive)",
                               sc2 == null ? "missing" : sc2.Any(c => c.Data is IGetDistanceConditionDataGetter g && g.UseAliases).ToString(), "False");
+            }
+            if (r.place.second?.settlement is string city && Settlements.TryGetValue(city, out var cityKey))
+            {
+                // The named city (2026-10-23), read back off disk: RQ_OE_Deliver_01's Destination, and its spots AllowReserved.
+                var pin = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.secondPlaceAlias);
+                fail += Check($"the second place is pinned to {city}, with no conditions and no reservation",
+                              pin == null ? "missing" : $"{pin.SpecificLocation.FormKey}, {pin.Conditions.Count} condition(s), reserves {(pin.Flags ?? 0).HasFlag(QuestLocationAlias.Flag.ReservesLocationOrReference)}",
+                              $"{cityKey}, 0 condition(s), reserves False");
+                var inCity = q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.Location?.AliasID == t.secondPlaceAlias).ToList();
+                fail += Check($"every marker inside {city} may take a spot vanilla holds (AllowReserved)",
+                              $"{inCity.Count(a => a.Flags?.HasFlag(QuestReferenceAlias.Flag.AllowReserved) == true)} of {inCity.Count}",
+                              $"{Math.Max(1, inCity.Count)} of {Math.Max(1, inCity.Count)}");
             }
             if (t.questScript == null)
             {

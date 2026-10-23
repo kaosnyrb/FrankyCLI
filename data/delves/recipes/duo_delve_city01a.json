@@ -43,7 +43,8 @@
     {
       "type": "talk",
       "place": "second",
-      "at": "RECenterLocRef",
+      "at": "AutofillGeneric01",
+      "_at": "His 2026-10-23 pick, 'lets just go for autofill 01 and see': Akila City's one AutofillGeneric01 spot (2D1D2A, cell 1,-1), the city pinned (place.second.settlement).",
       "objective": "Return the strongbox to the trader in <SecondPlace>",
       "journal": "Spacers took a trader's hold to the <Place>. I went in and brought his strongbox back to <SecondPlace>. Without the papers in it he couldn't trade.",
       "person": {
