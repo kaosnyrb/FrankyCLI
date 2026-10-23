@@ -53,10 +53,15 @@
         "voice": "GenericMale01",
         "elevenlabs": "dgkKQcJqyy5AP0dqleUU",
         "hellos": [
-          ["Stall's shut today. Sorry."]
+          [
+            "Stall's shut today. Sorry."
+          ]
         ]
       },
-      "greeting": ["Tell me that's what I think it is."],
+      "greeting": [
+        "Spacers jumped my run and took the whole hold.",
+        "Tell me that's what I think it is."
+      ],
       "exchanges": [
         {
           "prompt": "I've got your strongbox.",
@@ -66,10 +71,10 @@
           ]
         },
         {
-          "prompt": "Why so heavy?",
+          "prompt": "What's in it?",
           "reply": [
-            "Two years of receipts. Paper's heavier than you'd think.",
-            "Permit, stall number, the lot. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
+            "Two years of receipts. Permit, stall number, the lot.",
+            "Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
           ]
         },
         {
@@ -82,7 +87,9 @@
         }
       ],
       "_talk": "Exchange 0 is the hand-back: it ends the talk, takes the Trader's Strongbox and sets stage 100, which pays 'reward'. Exchange 2 is a [Long Hauler] line (his 2026-10-14 RP feature): only a hauler would ask which lane. Voiced lines: no names, no places, no factions, no currency.",
-      "reward": "med"
+      "reward": "med",
+      "_heavy": "2026-10-23: 'Why so heavy?' had nothing setting it up (no line says the box is heavy). Now 'What's in it?'.",
+      "_greeting": "2026-10-23, found by scripts/delves/talk_check.py: the greeting set nothing up, so 'Which lane did they jump you on?' leaned on the radio and the card. The hit now goes before the menu."
     }
   ],
   "speaker": {

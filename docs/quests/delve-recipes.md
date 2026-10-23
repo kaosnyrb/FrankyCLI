@@ -27,6 +27,12 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 dotnet run -- gen_delve build <id> --dry --emit <dir>   the would-be plugin and the emitted model, to <dir> only
 ```
 
+**Then a MANUAL step for any recipe with a talk beat:** `python scripts/delves/talk_check.py <id>` (or no id for all,
+`--flagged` for only the menus it flags). It prints what the player is sure to have heard before each menu (the
+greeting, an earlier talk's closing reply, what he is carrying) and marks prompts whose words are not in it. **A
+person reads it**; the lint cannot, because this is about meaning. His plays, 2026-10-22/23: 19a *"he never tells
+you the sattlie is bust"*, 11a *"the growing line is unprompted"*, 11b the drill. Read the `*` rows first.
+
 **True construction (his ruling, 2026-10-15).** A template with a `shell` builds its quest with `new` from
 `data/delves/shells/<template>.json` (the quest the template starts from, as a `gen_questmodel` model) and never
 reads the base quest. Every build then **emits the quest's model** to `data/delves/models/<id>.json` beside the

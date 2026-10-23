@@ -20,8 +20,12 @@
     },
     "second": {
       "theme": {
-        "require": ["LocTypeOE_NonHostile"],
-        "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
       }
     },
     "_theme": "As 11a: a dungeon there, a quiet non-hostile site here for him to be waiting at."
@@ -51,10 +55,15 @@
         "voice": "GenericMale01",
         "elevenlabs": "iP95p4xoKVk53GoZ742B",
         "hellos": [
-          ["Mind the edge. It's further down than it looks."]
+          [
+            "Mind the edge. It's further down than it looks."
+          ]
         ]
       },
-      "greeting": ["Go on, then. Did they still have them?"],
+      "greeting": [
+        "They took my drill as well, and I couldn't care less about the drill.",
+        "Go on, then. Did they still have them?"
+      ],
       "exchanges": [
         {
           "prompt": "I found your claim papers.",
@@ -81,7 +90,8 @@
         }
       ],
       "_talk": "Exchange 0 is the hand-back, as 11a. Same voice on the radio and in person.",
-      "reward": "med"
+      "reward": "med",
+      "_greeting": "2026-10-23, his play: the drill question had nothing setting it up. The greeting always plays before the menu, so the drill goes there."
     }
   ],
   "speaker": {
