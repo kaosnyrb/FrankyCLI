@@ -16,9 +16,10 @@
   ],
   "place": {
     "theme": {
-      "require": [],
+      "require": ["LocTypeDungeon"],
       "exclude": ["LocTypeTest"]
     },
+    "_require": "2026-10-23 (Eliza): his play of the item-marker rebuild 'went to a tiny POI', so 'need to limit the quest to LocTypeDungeon' (his). The item markers alone are not a dungeon.",
     "_theme": "A dungeon (entrance, centre, boss container: about 162 dungeons on his load order, Eliza 10-13; the terminal marker cut it to 29, and we bring our own terminal, so it stands on the centre). The stops are the dungeon marker vocabulary (bethesda 32), and only places carrying all three plus a map marker can draw it. Caves allowed: a survey crew works caves. The lint measures the pool."
   },
   "prose": {
