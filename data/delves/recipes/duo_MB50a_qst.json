@@ -56,7 +56,9 @@
             "ResOrgCommonSealant",
             2
           ]
-        ]
+        ],
+        "description": "A replacement pressure regulator for a water reclaimer, built to an old pattern nobody stocks any more.",
+        "_description": "The bench menu's line (Eliza 2026-10-26: the bench showed MB11a's old text). No token: a recipe's description is not a quest's text. It echoes Noor ('Nobody out here makes them any more')."
       },
       "_craft": "BUILT 2026-10-26 (Eliza): type craft, a COBJ cloned off his duo_co_MB11a, live from the accept until the item is made. Ingredients are placeholders, his balance.",
       "item": "Pressure Regulator",
