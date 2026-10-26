@@ -12,7 +12,7 @@ label is not a listen.
 
 | id | described as | by whom | heard in game | voice type folder | used by |
 |---|---|---|---|---|---|
-| `CwhRBWXzGAHq8TQ4Fs17` | **A professional-sounding male voice, fairly neutral.** (ElevenLabs labels it *Roger, laid-back, casual, resonant*; his ear wins) | him, 2026-10-09 | ✅ yes, Relay Control | `GenericMale01` | `duo_delve09a` (Relay Control); `duo_delve_missionboard26a` (Approach Control, 2026-10-26, his "yeah put rodger in") |
+| `CwhRBWXzGAHq8TQ4Fs17` | **A professional-sounding male voice, fairly neutral.** (ElevenLabs labels it *Roger, laid-back, casual, resonant*; his ear wins) | him, 2026-10-09; *"Roger is much more human"* (2026-10-26, against Katie X) | ✅ yes, Relay Control; Approach Control (26a) | `GenericMale01` | `duo_delve09a` (Relay Control); `duo_delve_missionboard26a` (Approach Control, 2026-10-26, his "yeah put rodger in") |
 | `XW70ikSsadUbinwLMZ5w` | Female, older. *Annie K, Calm, Grounded Narrator* (ElevenLabs' labels: american, middle aged) | the library's labels | ⏳ not yet: his first listen is 06b | `GenericFemale01` | `duo_delve06b`, the Post Quartermaster's call (2026-10-12) |
 | `ClKfJnuqp0hQ7Ax41F4w` | Female. *Ada*: ElevenLabs labels her young, Canadian, casual | the library's labels | ⏳ not in a Delve | `GenericFemale01` | `gen_dlgtest` (a structure test) |
 | `21m00Tcm4TlvDq8ikWAM` | The default in `Retrograde.Library/Core/AI/elevenlabsAPI.cs` when no id is given. **Not in his library** (below) | the code | ⏳ no | | nothing on purpose |
