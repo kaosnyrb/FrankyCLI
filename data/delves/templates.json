@@ -240,7 +240,7 @@
       ],
       "arrivalStage": 30,
       "arrivalDistance": 1500,
-      "_arrival": "The broadcast plays on 30, set by a distance hook on the object to a Player alias (copied from vanilla), armed by the accept (10), within 1500 m: his 2026-10-26 \"500m is the use distance, so 1500m os prob better\". The closing line plays on 100 with ShutdownOnCompletion off, then MissionShutdown().",
+      "_arrival": "The broadcast plays on 30, set by a distance hook on the object to FlyingShip (SQ_PlayerShip alias 0, the ship he flies; a Player alias never fired, his 09:3x play), armed by the accept (10), within 1500 m: his 2026-10-26 \"500m is the use distance, so 1500m os prob better\". The closing line plays on 100 and the fragment waits for it; the activator's MissionComplete shuts the quest down after.",
       "verifiedFrom": "gen_inspect qall duo_MB01a_qst, Defiant, 2026-10-26; MissionBountySpaceScript.psc, MissionQuestScript.psc and QF_MB_BountySpace01Far_001EF957.psc read"
     }
   ]

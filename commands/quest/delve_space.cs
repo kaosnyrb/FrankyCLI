@@ -298,8 +298,12 @@ namespace FrankyCLI
             {
                 // THE FRAGMENT IS HIS MB01a's (vanilla QF_MB_BountySpace01Far_001EF957), with the beat's objective as the
                 // second: the system objective on the accept, the beat's on arrival in the system (the location script sets
-                // ArriveInSystemStage), and the board's pay on CompleteStage (set by the activator's MissionComplete(), or by the shipped death hook). MissionComplete() sets CompleteStage itself
-                // only when it is not already done, so calling it from that stage is vanilla's own shape.
+                // ArriveInSystemStage), and CompleteStage set by the activator's own MissionComplete(), which pays.
+                // ⛔ ONE CHANGE FROM VANILLA'S SHAPE: the completing stage does NOT call MissionComplete() again. The activator's
+                // call holds MissionStateChangeGuard while SetStage(CompleteStage) waits for this fragment, so a second call
+                // waits on the guard: a deadlock, in his play of BS1 (Papyrus.0.log, 2026-10-26 09:38: "Deadlock ... wants guard
+                // MissionStateChangeGuard held by stack ..."). His MB01's death hook is the only other path to 100, and an
+                // activator never dies.
                 // Unset on his MB01a, so the script's own declaration holds (MissionBountySpaceScript.psc: `= 20`). That is the
                 // engine's value, not a guess: an unset Const property reads its declared default.
                 const int ArriveInSystemDeclared = 20;
@@ -310,13 +314,7 @@ namespace FrankyCLI
                 if (clone.Objectives?.Any(o => o.Index == systemObjective) != true) { Console.WriteLine($"REFUSED: the shell has no system objective {systemObjective}."); return 1; }
                 code[t.entryStage] = new() { $"SetObjectiveDisplayed({systemObjective})" };
                 code[arrive] = new() { $"SetObjectiveCompleted({systemObjective})", $"SetObjectiveDisplayed({slot.objective})" };
-                code[t.completeStage] = new()
-                {
-                    $"SetObjectiveCompleted({slot.objective})",
-                    "Quest __temp = Self as Quest",
-                    $"{t.questScript} kmyQuest = __temp as {t.questScript}",
-                    "kmyQuest.MissionComplete()",
-                };
+                code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})" };
                 bm.ArriveStage = arrive;
 
                 // THE RADIO (rung 2, his "go", 2026-10-26). The lines are the beats build's own radio scenes (MakeRadioLine),
@@ -328,11 +326,15 @@ namespace FrankyCLI
                     MakeSpeaker(myMod, r, speaker, bm);
                     int n = 0;
                     // THE BROADCAST waits for him at the satellite (a board posting, his 2026-10-14 rule), within the template's
-                    // arrivalDistance: a distance hook on the object, measured to a Player alias (copied from vanilla, as S13's),
-                    // armed by the accept, setting the arrival stage, whose fragment starts the line.
+                    // arrivalDistance: a distance hook on the object, measured to THE SHIP HE IS FLYING, armed by the accept,
+                    // setting the arrival stage, whose fragment starts the line.
+                    // ⛔ NOT TO THE PLAYER: measured to a Player alias, it never fired in his play (2026-10-26 09:3x, the closing
+                    // line played and the broadcast did not, no log line). Every vanilla space distance event is between SHIPS
+                    // (SE_FAB18c_SpawnScript, LC107QuestScript, SYTest01_DestinationDistanceScript: RegisterForDistanceLessThanEvent
+                    // against PlayerShip).
                     if (r.broadcast != null)
                     {
-                        int player = AddVanillaPlayer(myMod, env, clone);
+                        int player = AddFlyingShip(clone);
                         if (player < 0) return 1;
                         if (clone.Stages!.Any(s => s.Index == t.arrivalStage))
                         { Console.WriteLine($"REFUSED: the shell already has a stage {t.arrivalStage}; the arrival stage must be its own."); return 1; }
@@ -344,39 +346,35 @@ namespace FrankyCLI
                         var sc = DistanceHook(clone.FormKey, player, t.arrivalStage, t.entryStage, t.arrivalDistance);
                         if (AttachHook(vma, clone.FormKey, (int)target.ID, sc, HookEntry.FindOrCreate, true, bm, t.arrivalStage, t.entryStage) == Hooked.AlreadyCarries)
                         { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDistanceLessThan."); return 1; }
-                        Console.WriteLine($"  +hook    : arrival within {t.arrivalDistance} of the object (alias {target.ID}) to the player (alias {player}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
+                        Console.WriteLine($"  +hook    : arrival within {t.arrivalDistance} of the object (alias {target.ID}) to the ship he flies (alias {player}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
                         var scene = MakeRadioLine(myMod, clone, r, n, t.arrivalStage, r.broadcast, bm);
                         sayProps.Add(($"Say{n + 1}", scene.FormKey));
                         code[t.arrivalStage] = new() { $"Say{n + 1}.Start()" };
                         bm.ArrivalDistance = t.arrivalDistance;
                         n++;
                     }
-                    // THE CLOSING LINE plays on the completing stage. MissionComplete() would shut the quest down at once and cut
-                    // it off (MissionQuestScript.psc: SetStage(CompleteStage), then MissionShutdown() when ShutdownOnCompletion),
-                    // so on this build ShutdownOnCompletion is off: the stage pays, plays the line, waits for it, then shuts down.
-                    // The ground board's ending on a talk does the same (its Linger).
+                    // THE CLOSING LINE plays on the completing stage, and the fragment WAITS for it. That wait is what keeps it
+                    // heard: the activator's MissionComplete() is inside SetStage(CompleteStage), and SetStage waits for this
+                    // fragment to finish before MissionComplete goes on to MissionShutdown() (his play's deadlock report,
+                    // 2026-10-26 09:38: the SetStage stack "is waiting on stack <the fragment> to finish"). So ShutdownOnCompletion
+                    // stays as shipped and the fragment shuts nothing down itself.
                     if (beat.say != null)
                     {
                         var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, beat.say, bm);
                         string sv = $"Say{n + 1}";
                         sayProps.Add((sv, scene.FormKey));
-                        var qs = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
-                        if (qs.Properties.Any(x => x.Name == "ShutdownOnCompletion"))
-                        { Console.WriteLine($"REFUSED: {t.questScript} already sets ShutdownOnCompletion; this build turns it off and would not know whose value it overwrote."); return 1; }
-                        qs.Properties.Add(new ScriptBoolProperty { Name = "ShutdownOnCompletion", Data = false, Flags = ScriptProperty.Flag.Edited });
                         code[t.completeStage].AddRange(new[]
                         {
                             $"{sv}.Start()",
                             $"Utility.Wait(1.0)   ; let {sv} begin before asking whether it plays",
                             "Int waited = 0",
-                            $"While {sv}.IsPlaying() && waited < 30",
+                            $"While {sv}.IsPlaying() && waited < 30   ; the activator's MissionComplete waits on this, then shuts the quest down",
                             "    Utility.Wait(1.0)",
                             "    waited += 1",
                             "EndWhile",
-                            "kmyQuest.MissionShutdown()   ; ShutdownOnCompletion is off so the closing line is heard",
                         });
                         bm.ClosingLine = sv;
-                        Console.WriteLine($"  linger   : {t.questScript}.ShutdownOnCompletion false; stage {t.completeStage} plays {sv}, then MissionShutdown()");
+                        Console.WriteLine($"  closing  : stage {t.completeStage} plays {sv} and waits for it (MissionComplete's SetStage waits on the fragment)");
                         n++;
                     }
                 }
@@ -520,6 +518,31 @@ namespace FrankyCLI
         /// in 80, PlayerShip = SQ_PlayerShip alias 0 with ShipContainsRef(player) == 1 (gen_inspect qall, Defiant, 2026-10-22).
         /// </summary>
         private const string VanillaEncounter = "SE_Player_GenericTemplate";
+
+        /// <summary>
+        /// Add FlyingShip: the ship he is flying, for a space distance hook to measure to (boardspace's arrival). A copy of the
+        /// shell's own PlayerShip alias (external SQ_PlayerShip, Optional, ExternalAliasLinked, so it can never stop the quest
+        /// filling) pointed at SQ_PlayerShip's alias 0, the ship he is flying, where the shell's points at 16, his HOME ship
+        /// (the manual, part 12: vanilla's player space encounters take alias 0). Returns the new id, or -1 having said why.
+        /// </summary>
+        private static int AddFlyingShip(Quest clone)
+        {
+            const string Name = "FlyingShip";
+            const short SqPlayerShipFlying = 0;
+            var ship = clone.Aliases!.OfType<QuestReferenceAlias>().Where(a => string.Equals(a.Name, "PlayerShip", StringComparison.OrdinalIgnoreCase) && a.External != null).ToList();
+            if (ship.Count != 1) { Console.WriteLine($"REFUSED: the shell has {ship.Count} external PlayerShip alias(es) to copy; FlyingShip is a copy of exactly one."); return -1; }
+            if (!ship[0].Flags.HasValue || !ship[0].Flags.Value.HasFlag(QuestReferenceAlias.Flag.Optional))
+            { Console.WriteLine("REFUSED: the shell's PlayerShip is not Optional, and FlyingShip must never stop the quest filling."); return -1; }
+            if (AliasNames(clone.Aliases!).Any(x => string.Equals(x.name, Name, StringComparison.OrdinalIgnoreCase)))
+            { Console.WriteLine($"REFUSED: the quest already carries an alias named {Name}."); return -1; }
+            var fly = (QuestReferenceAlias)ship[0].DeepCopy();
+            fly.ID = AliasNames(clone.Aliases!).Max(x => x.id) + 1;
+            fly.Name = Name;
+            fly.External!.AliasID = SqPlayerShipFlying;
+            clone.Aliases!.Add(fly);
+            Console.WriteLine($"  +ship    : alias {fly.ID} {Name}, {fly.External.Quest.FormKey} alias {SqPlayerShipFlying} (the ship he is flying), flags {fly.Flags}; a copy of PlayerShip (alias {ship[0].ID}, which is his home ship)");
+            return (int)fly.ID;
+        }
 
         /// <summary>
         /// Add a ref alias Player (unique actor Player) COPIED from SE_Player_GenericTemplate under a new id, for an orbit to
@@ -696,10 +719,16 @@ namespace FrankyCLI
                     fail += Check($"the arrival hook on the object fires within {bm.ArrivalDistance}",
                                   dh?.Properties.OfType<IScriptFloatPropertyGetter>().FirstOrDefault(p => p.Name == "TargetDistance")?.Data.ToString() ?? "no hook",
                                   bm.ArrivalDistance.ToString());
-                    var players = q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.UniqueActor.FormKey == PlayerNpc).Select(a => (int)a.ID).ToList();
+                    // The expected ship is pinned (SQ_PlayerShip [0174A2:Starfield.esm] alias 0, the ship he flies), never re-read
+                    // from what the build wrote.
                     var measured = dh?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "TargetAlias");
-                    fail += Check("it measures to the one Player alias", players.Count == 1 ? $"{measured?.Object.FormKey} alias {measured?.Alias}" : $"{players.Count} Player alias(es)",
-                                  players.Count == 1 ? $"{q.FormKey} alias {players[0]}" : "1");
+                    var to = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => measured != null && a.ID == (uint)measured.Alias);
+                    fail += Check("it measures to an Optional alias on the ship he is flying, on this quest",
+                                  to?.External == null ? "not an external ship alias"
+                                      : $"{measured!.Object.FormKey} {to.External.Quest.FormKey} alias {to.External.AliasID} optional {to.Flags?.HasFlag(QuestReferenceAlias.Flag.Optional)}",
+                                  $"{q.FormKey} 0174A2:Starfield.esm alias 0 optional True");
+                    fail += Check("no unique-actor Player alias (nothing measures to the player in space)",
+                                  q.Aliases.OfType<IQuestReferenceAliasGetter>().Count(a => a.UniqueActor.FormKey == PlayerNpc).ToString(), "0");
                 }
                 var says = (vma.Script?.Properties ?? new List<IScriptPropertyGetter>()).OfType<IScriptObjectPropertyGetter>().Where(p => p.Name.StartsWith("Say")).ToList();
                 fail += Check("each Say property names one of this quest's scenes",
@@ -707,18 +736,19 @@ namespace FrankyCLI
                 fail += Check("one radio scene per spoken line", q.Scenes.Count.ToString(), says.Count.ToString());
                 if (bm.ClosingLine is string cl)
                 {
-                    var qsc = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
-                    fail += Check($"{t.questScript}.ShutdownOnCompletion is off (the closing line is heard)",
-                                  qsc?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "ShutdownOnCompletion")?.Data.ToString() ?? "unset", "False");
                     string fin = File.ReadAllText(bm.PscPath).Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
-                    int pay = fin.IndexOf("MissionComplete()"), say = fin.IndexOf($"{cl}.Start()"), end = fin.IndexOf("MissionShutdown()");
-                    fail += Check($"stage {t.completeStage} pays, then plays {cl}, then shuts down", (pay >= 0 && pay < say && say < end).ToString(), "True");
+                    int say = fin.IndexOf($"{cl}.Start()"), wait = fin.IndexOf($"{cl}.IsPlaying()");
+                    fail += Check($"stage {t.completeStage} plays {cl} and waits for it", (say >= 0 && say < wait).ToString(), "True");
                 }
                 fail += Check($"the object (alias {slot.activatorAlias}) carries no stock activate hook",
                               (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnActivate") == true).ToString(), "False");
                 string src = File.ReadAllText(bm.PscPath);
                 string done = src.Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
-                fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete()", done.Contains("kmyQuest.MissionComplete()").ToString(), "True");
+                // The activator's MissionComplete pays and sets this stage; a second call from here deadlocks (his play, 09:38).
+                fail += Check($"stage {t.completeStage} does not call MissionComplete() or MissionShutdown() (the activator's call is setting it)",
+                              (done.Contains("MissionComplete()") || done.Contains("MissionShutdown()")).ToString(), "False");
+                fail += Check($"{t.questScript}.ShutdownOnCompletion is as shipped (unset, so true)",
+                              vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))?.Properties.Any(p => p.Name == "ShutdownOnCompletion").ToString() ?? "no script", "False");
                 if (bm.PaidGlobal is FormKey paid)
                 {
                     var qs = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
