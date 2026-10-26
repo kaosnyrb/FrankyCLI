@@ -42,6 +42,7 @@ namespace FrankyCLI
                              : name.EndsWith("_Rare", StringComparison.OrdinalIgnoreCase) ? "rare tier"
                              : names.Contains(name + "_Legacy") ? (qs.Count == 0 ? "SPLIT, but EMPTY: deals nothing with Classic Missions off" : qs.Count == delves ? "SPLIT: Delves only" : "split, but originals still in the pool")
                              : delves == 0 ? (qs.Count == 0 ? "empty" : "NOT SPLIT: originals only")
+                             : delves == qs.Count ? "Delves only (no legacy sibling)"
                              : "NOT SPLIT: Delves mixed with originals";
                 Console.WriteLine($"  {name,-48} {qs.Count,6} {delves,6} {qs.Count - delves,5}  {state}");
             }

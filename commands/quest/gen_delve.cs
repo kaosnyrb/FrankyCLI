@@ -190,11 +190,14 @@ namespace FrankyCLI
         /// <summary>The kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery, and two
         /// orbit-only ones (delve_space.cs), whose one place is an orbit and which share only the plumbing: "space", started
         /// by hand, and "boardspace", taken from the board (his 2026-10-26 "I want a missionboard that is only space").</summary>
-        private static readonly string[] Kinds = { "beats", "board", "space", "boardspace" };
+        private static readonly string[] Kinds = { "beats", "board", "space", "boardspace", "slatespace" };
         private static bool IsBoard(Template t) => t.kind == "board";
-        /// <summary>Either orbit kind: both take the space build, grade and verify.</summary>
-        private static bool IsSpace(Template t) => t.kind == "space" || t.kind == "boardspace";
+        /// <summary>Every orbit kind: all take the space build, grade and verify.</summary>
+        private static bool IsSpace(Template t) => t.kind is "space" or "boardspace" or "slatespace";
         private static bool IsBoardSpace(Template t) => t.kind == "boardspace";
+        /// <summary>A remote-space SLATE Delve (his 2026-10-26 "go", duo_delve34a): the space build, dealt by a slate node,
+        /// with the call on quest start, the closing line on completion and the tier on the completing stage's pay.</summary>
+        private static bool IsSlateSpace(Template t) => t.kind == "slatespace";
         /// <summary>
         /// The stage a place's people and occupants (an ending's person, a who) are numbered AFTER, each on its own stage below
         /// the first beat's (entryStage + 10): the approach's on a slate Delve (5, so 6, 7...), the arrival's on a board (15,

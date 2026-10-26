@@ -70,10 +70,11 @@ namespace FrankyCLI
             if (p.drop != null)
                 foreach (var d in p.drop.GroupBy(x => x, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1))
                     Fatal($"place.drop names {d.Key} twice.");
-            if (!IsBoardSpace(t) && (r.speaker != null || r.broadcast != null || r.recapSay != null))
+            bool speaks = IsBoardSpace(t) || IsSlateSpace(t);   // the two orbit kinds that are products, not the ladder's harness
+            if (!speaks && (r.speaker != null || r.broadcast != null || r.recapSay != null))
                 Fatal("speech is set; the space kind builds none yet (its harness is one silent beat).");
-            if (IsBoardSpace(t) && r.recapSay != null)
-                Fatal("recapSay is set; a board space Delve has one beat, so its closing line is that beat's say.");
+            if (speaks && r.recapSay != null)
+                Fatal($"recapSay is set; a {t.id} Delve has one beat, so its closing line is that beat's say.");
             if (IsBoardSpace(t) && r.broadcast != null && (t.arrivalStage < 0 || t.arrivalDistance <= 0))
                 Fatal($"broadcast is set and template '{t.id}' names no arrivalStage or arrivalDistance for the hook that plays it.");
             if (r.approach != null || r.offer != null || r.recap != null)
@@ -89,12 +90,12 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(IsBoardSpace(t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
-                if ((b.say != null && !IsBoardSpace(t)) || b.message != null || b.group != null || b.returnTo != null)
+                if ((b.say != null && !speaks) || b.message != null || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a {(b.message != null ? "message" : b.say != null ? "say" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
                           + (IsBoardSpace(t) && b.message != null ? " (its object's script shows its own start, success and fail messages)." : "."));
                 // A board pays through the board's reward globals (BuildSpace); a startquest test has nobody to pay it, so a
                 // tier there would be written nowhere.
-                if (b.reward != null && !IsBoardSpace(t))
+                if (b.reward != null && !speaks)
                     Fatal($"beat {i + 1} carries a reward; template '{t.id}' is started by hand and pays nothing, so it would be silently ignored.");
             }
         }
@@ -402,7 +403,9 @@ namespace FrankyCLI
                 s0.Flags |= QuestStage.Flag.RunOnStart;
                 // THE FRAGMENT: the objective shows on start, and the hook's stage completes and stops the quest.
                 code[0] = new() { $"SetObjectiveDisplayed({slot.objective})" };
-                code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})", "CompleteQuest()", "Stop()" };
+                code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})", "CompleteQuest()" };
+                if (IsSlateSpace(t) && SlateSpeechAndPay(myMod, clone, t, r, env, beat, code, sayProps, bm) != 0) return 1;
+                code[t.completeStage].Add("Stop()");
             }
             var psc = new StringBuilder();
             psc.AppendLine($"Scriptname {name} Extends Quest Hidden Const");
@@ -437,6 +440,59 @@ namespace FrankyCLI
             Console.WriteLine($"  fragments: {name} on stages [{string.Join(", ", code.Keys)}]; source {bm.PscPath}");
 
             Console.WriteLine("  set      : " + SetOf(clone.Aliases!));
+            return 0;
+        }
+
+        /// <summary>
+        /// A SLATE's voice and pay (slatespace, duo_delve34a). The ground slates' rules, carried to the orbit:
+        /// THE CALL starts with the quest, by the scene's own BeginOnQuestStart (MakeRadioLine at stage 0), never from stage 0's
+        /// fragment, which runs while the quest is still starting and whose Start() does nothing (his play, 2026-10-09).
+        /// THE CLOSING LINE plays on the completing stage and the fragment waits for it before Stop(), as a ground slate's does.
+        /// THE PAY is the tier written onto the completing stage's one reward entry (QRCR, QRXP), as the beats build pays a
+        /// slate ending; absent, the shell's own stage pay stands.
+        /// </summary>
+        private static int SlateSpeechAndPay(StarfieldMod myMod, Quest clone, Template t, Recipe r, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
+                                             Beat beat, SortedDictionary<int, List<string>> code, List<(string pname, FormKey scene)> sayProps, BeatsMade bm)
+        {
+            if (r.speaker != null)
+            {
+                var speaker = ResolveSpeaker(myMod, env, r, t);
+                if (speaker == null) return 1;
+                MakeSpeaker(myMod, r, speaker, bm);
+                int n = 0;
+                if (r.broadcast != null) { MakeRadioLine(myMod, clone, r, n, 0, r.broadcast, bm); n++; }
+                if (beat.say != null)
+                {
+                    var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, beat.say, bm);
+                    string sv = $"Say{n + 1}";
+                    sayProps.Add((sv, scene.FormKey));
+                    code[t.completeStage].AddRange(new[]
+                    {
+                        $"{sv}.Start()",
+                        $"Utility.Wait(1.0)   ; let {sv} begin before asking whether it plays",
+                        "Int waited = 0",
+                        $"While {sv}.IsPlaying() && waited < 30   ; Stop() would cut it off",
+                        "    Utility.Wait(1.0)",
+                        "    waited += 1",
+                        "EndWhile",
+                    });
+                    bm.ClosingLine = sv;
+                    Console.WriteLine($"  closing  : stage {t.completeStage} plays {sv} and waits for it before Stop()");
+                }
+            }
+            if (beat.reward is string tier)
+            {
+                var st = clone.Stages?.FirstOrDefault(x => x.Index == t.completeStage);
+                var rds = st?.LogEntries.FirstOrDefault()?.StageCompleteDatas.SelectMany(c => c.RewardDatas).ToList();
+                if (rds == null || rds.Count != 1) { Console.WriteLine($"REFUSED: stage {t.completeStage} carries {rds?.Count ?? 0} reward entries; this tool writes exactly one."); return 1; }
+                var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
+                var xg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_xp_{tier}");
+                if (cg == null || xg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier} / duo_reward_xp_{tier}."); return 1; }
+                rds[0].BonusCredits.SetTo(cg.FormKey);
+                rds[0].XpAwarded.SetTo(xg.FormKey);
+                bm.StageReward[t.completeStage] = (cg.FormKey, xg.FormKey);
+                Console.WriteLine($"  reward   : stage {t.completeStage} pays {cg.EditorID} + {xg.EditorID}");
+            }
             return 0;
         }
 
@@ -617,7 +673,7 @@ namespace FrankyCLI
             var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
             fail += Check($"nothing in the quest points at its base {t.@base}",
                           baseKey == null ? "base not found" : LinksTo(q, baseKey.Value), "0");   // the model's reader: it sees script structs (LinksTo)
-            fail += Check(IsBoardSpace(t) ? "no story-manager start event (the board's node deals it, as every board Delve)"
+            fail += Check(IsBoardSpace(t) || IsSlateSpace(t) ? "no story-manager start event (its node deals it, as every board and slate Delve)"
                                           : "no story-manager start event (started with startquest, as every Delve)", q.Event?.ToString() ?? "none", "none");
             fail += AliasGraphChecks(q);
             if (IsBoardSpace(t))
@@ -761,6 +817,24 @@ namespace FrankyCLI
             }
             else
                 fail += Check("stage 0 runs on start", q.Stages.Any(s => s.Index == 0 && s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "True");
+            if (IsSlateSpace(t))
+            {
+                if (r.broadcast != null)
+                    fail += Check("the call starts with the quest (its scene's BeginOnQuestStart), never from stage 0's fragment",
+                                  q.Scenes.Any(sc => sc.EditorID == $"{r.id}_say1_scene" && (sc.Flags?.HasFlag(Scene.Flag.BeginOnQuestStart) ?? false)).ToString(), "True");
+                foreach (var (st, (cg, xg)) in bm.StageReward)
+                {
+                    var rd = q.Stages.FirstOrDefault(x => x.Index == st)?.LogEntries.FirstOrDefault()?.StageCompleteDatas.SelectMany(c => c.RewardDatas).FirstOrDefault();
+                    fail += Check($"stage {st} pays the beat's tier", rd == null ? "no reward entry" : $"{rd.BonusCredits.FormKey} + {rd.XpAwarded.FormKey}", $"{cg} + {xg}");
+                }
+                if (bm.ClosingLine is string cl)
+                {
+                    var src = File.ReadAllText(bm.PscPath);
+                    var body = src.Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                    int say = body.IndexOf($"{cl}.Start()"), stop = body.IndexOf("Stop()");
+                    fail += Check($"stage {t.completeStage} plays {cl} and waits for it before Stop()", (say >= 0 && stop > say && body.Contains($"{cl}.IsPlaying()")).ToString(), "True");
+                }
+            }
             foreach (var h in bm.Hooks)
             {
                 var sc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == h.alias)?.Scripts.FirstOrDefault(s => s.Name == h.script);
@@ -775,6 +849,7 @@ namespace FrankyCLI
                 Console.WriteLine();
                 Console.WriteLine(IsBoardSpace(t)
                     ? $"  BUILD VERIFIED. Compile the fragment script, then take it from the board ({r.deal}); a board quest is never started by hand:"
+                    : IsSlateSpace(t) ? $"  BUILD VERIFIED. Compile the fragment script, then take it from a slate ({r.deal}; on a parked test node, gen_delve testnode on):"
                     : $"  BUILD VERIFIED. Compile the fragment script, then startquest {r.id}:");
                 Console.WriteLine($"    python papyrus/compile.py C:/modding/DU_Overtime/Data {bm.Script}");
             }

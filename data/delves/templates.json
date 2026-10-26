@@ -197,6 +197,40 @@
       "verifiedFrom": "gen_inspect qall duo_artifact_remote_qst03a and duo_MB01a_qst, Defiant, 2026-10-22"
     },
     {
+      "id": "slatespace",
+      "kind": "slatespace",
+      "_kind": "A remote-space SLATE Delve: its ONE place is an orbit and a slate node deals it (delve_space.cs, the space build). His 2026-10-26 \"yup go\", for Jessica's duo_delve34a, the last RemoteSpace gap. The space template's shell and alias set exactly (the shipped remote-space quest), plus what a slate needs: the call on quest start (BeginOnQuestStart), the closing line on completion, the tier on the completing stage's pay. No start event: remote01a's model carries none and plays from its slate, so the node deals it.",
+      "base": "duo_artifact_remote_qst03a",
+      "shell": "shells/space.json",
+      "_shell": "The space template's own shell, shared: the same quest, the same set. A slate Delve differs in what the build adds, never in the record it starts from.",
+      "mod": "du_overtime",
+      "driver": "",
+      "replacesDriver": "dou_artifact_space_bounty_quest",
+      "activatorFrom": "duo_artifact09_primary_act",
+      "beats": 1,
+      "maxBeats": 1,
+      "allows": [ "use" ],
+      "carriesItem": false,
+      "placeAlias": 2,
+      "mapMarkerAlias": 16,
+      "briefingStage": 0,
+      "completeStage": 100,
+      "beatSlots": [
+        { "markerAlias": 12, "activatorAlias": 3, "objective": 10, "journalStage": 100 }
+      ],
+      "tokens": {
+        "Place": "TargetPlanetLocation",
+        "Planet": "TargetPlanetLocation"
+      },
+      "_tokens": "Both name the orbit alias, as boardspace's <Planet> does (his read there: it prints the body's name). No <System>, as on space.",
+      "cannot": [
+        "more than one beat, or any beat but use",
+        "a second or third place, a request, a theme, a who",
+        "a beat message, a recapSay (one beat: the closing line is its say)"
+      ],
+      "verifiedFrom": "the space template's census (gen_inspect qall duo_artifact_remote_qst03a, Defiant, 2026-10-22); remote01a's model, no Event, 2026-10-26"
+    },
+    {
       "id": "boardspace",
       "kind": "boardspace",
       "_kind": "A board mission whose ONE place is an orbit (delve_space.cs, the space build). His 2026-10-26: \"I want a missionboard that is only space\". Built on HIS MB01a, which is a board-taken satellite repair in orbit already and plays: the board's own refresh fills its orbit by its own conditions (a major body within 8 parsecs), so nothing hangs off the player or the board. 19a's parent link to the Player would be wrong here: a board quest starts at the refresh, wherever he is then.",
