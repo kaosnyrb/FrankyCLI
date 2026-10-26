@@ -1,0 +1,89 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard30a",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-26 10:27: \"Missonboard. Spacers have stockpiled illegal drugs in cargo containers near a space outpost. Destroy the containers.\" then \"Has a Spacer base (unboardable, just a decoration), spacer ships guarding and a few container activators to blow up\"",
+  "_note": [
+    "THE SPACE BOARD FAMILY, 5: THE STOCKPILE. A crew is sitting on a stockpile of contraband in cargo containers beside",
+    "their base in orbit. Blow up the containers. The verb is DESTROY: his MB14 and MB15 ('Strike' in board-names.md),",
+    "which are the prior art in his own catalogue, and MB15 (destroy a station) may be the nearer base. Eliza's call.",
+    "THREE THINGS BOARDSPACE DOES NOT BUILD TODAY (it is MB01a whole: one use on one activator), and the lint refuses each:",
+    "(1) THREE CONTAINERS: three uses behind one counter (group), 'any order', objective (0/3). His MB01 activator is one.",
+    "(2) THE BASE: a static in the space cell, not boardable, never an objective. No field exists; 'dressing' is a stand-in.",
+    "(3) THE GUARDS: hostile ships in the cell from arrival. No field exists; 'ships' is a stand-in. The ground's waves",
+    "are the shape (list, min, max), the space shell's own target was a ship, and his MB15 has a combat flag.",
+    "WORDS: 'Spacers' and the drug's name are faction and item words, so nothing voiced says either. The card says",
+    "'contraband' and 'an armed crew'. 'Their base' and 'their ships' are only said because both are placed.",
+    "The broadcast plays at 1500 m (the template's). Closing line on the radio, on the last container. Pay: med, capped."
+  ],
+  "place": {
+    "dressing": [
+      {
+        "model": "SPACER BASE, UNPICKED",
+        "_model": "His: 'unboardable, just a decoration'. A space station static, his or Kim's pick; not on the approved list (objects.md is ground objects)."
+      }
+    ],
+    "ships": {
+      "list": "SPACER SHIPS, UNPICKED",
+      "min": 2,
+      "max": 3,
+      "_ships": "His 'spacer ships guarding'. Present from arrival, hostile. The levelled list is Eliza's to find (vanilla's own space encounters carry them)."
+    }
+  },
+  "prose": {
+    "name": "Strike: Contraband Stockpile over <Planet>",
+    "briefing": "An armed crew is sitting on a stockpile of contraband in cargo containers beside their base over <Planet>. Nobody wants it sold.",
+    "card": "Strike contract. An armed crew has stockpiled contraband in cargo containers beside their base in orbit over <Planet>. Destroy the containers. Expect resistance. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "stockpile",
+      "at": "se_GeneralMarkerLocRef06",
+      "_at": "26a's proven marker. The other two want markers of their own in the same cell; 01 and 02 are guesses, hers to find.",
+      "objective": "Destroy the contraband containers",
+      "model": "CARGO CONTAINER, UNPICKED",
+      "_model": "A space cargo container his MB01-style activator can wear. His or Kim's pick.",
+      "name": "Contraband Container",
+      "_group": "Three containers, any order, one objective counting them (his 'a few'), as 01a's three sensors on the ground. boardspace refuses a group today.",
+      "journal": "The first container went up like it was full of something that wanted to burn. Two more."
+    },
+    {
+      "type": "use",
+      "group": "stockpile",
+      "at": "se_GeneralMarkerLocRef01",
+      "journal": "Another container gone. The crew's ships know exactly what I'm doing now.",
+      "model": "CARGO CONTAINER, UNPICKED",
+      "name": "Contraband Container"
+    },
+    {
+      "type": "use",
+      "group": "stockpile",
+      "at": "se_GeneralMarkerLocRef02",
+      "model": "CARGO CONTAINER, UNPICKED",
+      "name": "Contraband Container",
+      "journal": "The last container is gone."
+    }
+  ],
+  "speaker": {
+    "name": "Station Security",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": [
+    "You're close enough to see them now. Those containers are what we're paying you for.",
+    "Their ships will be on you the moment you start.",
+    "Don't stop to argue with them. Just make sure none of it's left."
+  ],
+  "_speech": "Station Security: whoever posted the job, not the crew. Clara (Direct, Firm and Confident), already in five recipes; his ear decides. No names, places, factions or currency.",
+  "recap": "An armed crew had a stockpile of contraband in cargo containers beside their base over <Planet>. I blew up every container. Whatever was in them won't be sold now.",
+  "recapSay": [
+    "That's the last one.",
+    "Whatever was in there, nobody's selling it now."
+  ],
+  "_recap": "The grouped ending, as 23a: stage 100 carries the recap and the closing radio. boardspace refuses a recapSay today (one beat, so the closing line was its say); with a group it wants this. Reward placement follows 23a.",
+  "_reward": "med, capped. 23a's grouped ending carries no reward tier, so where it goes on a grouped board ending is Eliza's."
+}
