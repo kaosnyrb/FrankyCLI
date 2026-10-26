@@ -293,7 +293,7 @@ namespace FrankyCLI
 
         private static void Walk(object node, FormKey oldKey, FormKey newKey, ref int count, int depth)
         {
-            if (node == null || depth > 6) return;
+            if (node == null || depth > 10) return;   // 6 stopped one short of a script struct's members (vmad, scripts, entry, properties, struct list, structs, struct, members), 2026-10-26
 
             if (node is System.Collections.IEnumerable seq && node is not string)
             {

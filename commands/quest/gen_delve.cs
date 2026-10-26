@@ -2323,6 +2323,9 @@ namespace FrankyCLI
             int stray = clone.EnumerateFormLinks().Count(l => l.FormKey == sourceKey);
             clone.RemapLinks(new Dictionary<FormKey, FormKey> { [sourceKey] = clone.FormKey });
             Console.WriteLine($"  self     : {stray} further link(s) to the base (conditions) now point at the clone");
+            // And by a second reader, which sees inside script structs where the two passes above did not (LinksTo).
+            string left = LinksTo(clone, sourceKey);
+            if (left != "0") { Console.WriteLine($"REFUSED: the clone still names its base {sourceKey} ({left}), read through the quest model."); return 1; }
 
             var madeBeats = new BeatsMade();
             int fail = IsSpace(t) ? BuildSpace(myMod, clone, t, r, env, markers, madeBeats)
@@ -3283,6 +3286,23 @@ namespace FrankyCLI
             bool ok = string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase);
             Console.WriteLine("    [" + (ok ? "OK  " : "FAIL") + "] " + label + ": got '" + actual + "' expected '" + expected + "'");
             return ok ? 0 : 1;
+        }
+
+        /// <summary>
+        /// How many times a quest names a form, counted through the QUEST MODEL's reader, never Mutagen's EnumerateFormLinks.
+        /// ⛔ WHY: EnumerateFormLinks does not reach a ScriptStructListProperty's members. duo_delvetest_bs1 (2026-10-26) kept
+        /// its location script's ChangeLocationStages pointing at MB01a, and both the build's count and the verify's read 0
+        /// over the live link; he found it in xEdit. The model reads every field it holds and REFUSES the rest, so a field
+        /// it cannot read comes back as the refusal, never as a zero.
+        /// </summary>
+        private static string LinksTo(IQuestGetter q, FormKey key)
+        {
+            var model = gen_questmodel.ReadModel(q, out var refusals);
+            if (refusals.Count > 0) return $"unreadable, {refusals.Count} field(s) the model cannot hold: {refusals[0]}";
+            string json = gen_questmodel.ToJson(model), needle = "\"" + key + "\"";
+            int n = 0;
+            for (int i = json.IndexOf(needle, StringComparison.OrdinalIgnoreCase); i >= 0; i = json.IndexOf(needle, i + 1, StringComparison.OrdinalIgnoreCase)) n++;
+            return n.ToString();
         }
 
         // ------------------------------------------------------------------ plumbing

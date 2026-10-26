@@ -503,7 +503,7 @@ namespace FrankyCLI
             var vma = q.VirtualMachineAdapter;
             var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
             fail += Check($"nothing in the quest points at its base {t.@base}",
-                          baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
+                          baseKey == null ? "base not found" : LinksTo(q, baseKey.Value), "0");   // the model's reader: it sees script structs (LinksTo)
             fail += Check(IsBoardSpace(t) ? "no story-manager start event (the board's node deals it, as every board Delve)"
                                           : "no story-manager start event (started with startquest, as every Delve)", q.Event?.ToString() ?? "none", "none");
             fail += AliasGraphChecks(q);

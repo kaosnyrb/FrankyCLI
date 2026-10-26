@@ -2207,7 +2207,7 @@ namespace FrankyCLI
             // A clone drives ITSELF: nothing in it, script or condition, may still point at the quest it was copied from.
             var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
             fail += Check($"nothing in the quest points at its base {t.@base}",
-                          baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
+                          baseKey == null ? "base not found" : LinksTo(q, baseKey.Value), "0");   // the model's reader: it sees script structs (LinksTo)
             // Each REQUESTED place reads back as a PCM request (a remote main place, and a remote second one).
             foreach (var (on, label) in new[] { (r.place.remote == true, t.placeAlias), (r.place.second?.remote == true, t.secondPlaceAlias) })
             {
