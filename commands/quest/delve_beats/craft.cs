@@ -80,22 +80,25 @@ namespace FrankyCLI
         }
 
         /// <summary>
-        /// One ingredient, as a MiscItem in the load order: by EditorID first, else by its in-game name if exactly ONE
+        /// One ingredient, as a Resource in the load order: by EditorID first, else by its in-game name if exactly ONE
         /// item carries it. Ambiguous or missing is null with the reason, never a guess (the needle's worst answer is a
         /// plausible wrong record).
         /// </summary>
-        private static IMiscItemGetter? ResolveIngredient(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, HashSet<Mutagen.Bethesda.Plugins.ModKey> allowed,
+        private static IResourceGetter? ResolveIngredient(IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, HashSet<Mutagen.Bethesda.Plugins.ModKey> allowed,
                                                           string key, out string why)
         {
             // Own-or-master only: a record from a plugin that is not a master would make it one (OwnOrMaster's rule).
-            var all = env.LoadOrder.PriorityOrder.MiscItem().WinningOverrides().Where(m => allowed.Contains(m.FormKey.ModKey)).ToList();
+            // A RESOURCE (IRES, the Res* forms), never a MiscItem: every component of his MB11a's COBJ is one, and the
+            // first build resolved "Aluminum" to the MiscItem InorgCommonAluminum, which the bench then GAVE him rather
+            // than charged (his play, 2026-10-26: "The resource costs are negative, It gives copper").
+            var all = env.LoadOrder.PriorityOrder.Resource().WinningOverrides().Where(m => allowed.Contains(m.FormKey.ModKey)).ToList();
             var byId = all.FirstOrDefault(m => string.Equals(m.EditorID, key, StringComparison.OrdinalIgnoreCase));
             if (byId != null) { why = ""; return byId; }
             var byName = all.Where(m => string.Equals(m.Name?.String, key, StringComparison.OrdinalIgnoreCase)).ToList();
             if (byName.Count == 1) { why = ""; return byName[0]; }
             why = byName.Count == 0
-                ? "is neither a MiscItem EditorID nor any MiscItem's name in the plugin or its masters"
-                : $"names {byName.Count} MiscItems ({string.Join(", ", byName.Take(6).Select(m => m.EditorID))}); give the EditorID";
+                ? "is neither a Resource (Res*) EditorID nor any Resource's name in the plugin or its masters"
+                : $"names {byName.Count} Resources ({string.Join(", ", byName.Take(6).Select(m => m.EditorID))}); give the EditorID";
             return null;
         }
     }

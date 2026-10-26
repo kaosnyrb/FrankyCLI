@@ -3953,6 +3953,21 @@ namespace FrankyCLI
             Console.WriteLine($"  LearnMethod:      {co.LearnMethod}");
             Console.WriteLine($"  Value:            {co.Value}");
             Console.WriteLine($"  Tier:             {co.Tier}");
+            // The ingredients were rendered nowhere until 2026-10-26, and that is how a craft beat shipped writing its
+            // counts into the wrong field (his play: "The resource costs are negative, It gives copper"). Every field of
+            // each component is printed by reflection, so a field this dumper does not know by name still shows.
+            if (co.ConstructableComponents != null)
+            {
+                Console.WriteLine($"  Components [{co.ConstructableComponents.Count}]:");
+                foreach (var comp in co.ConstructableComponents)
+                {
+                    var fields = comp.GetType().GetProperties()
+                        .Where(p => p.GetIndexParameters().Length == 0 && p.Name != "Registration" && p.Name != "StaticRegistration")
+                        .Select(p => { object? v; try { v = p.GetValue(comp); } catch { v = "?"; }
+                                       return $"{p.Name}={(v is Mutagen.Bethesda.Plugins.IFormLinkGetter fl ? ResolveName(fl.FormKey, allMods) : v)}"; });
+                    Console.WriteLine("    " + string.Join("  ", fields));
+                }
+            }
             // ⛔ RQPK WAS RENDERED NOWHERE AT ALL, and that is how a whole gating mechanism
             // stayed invisible on 2026-08-17. A COBJ's skill requirement is NOT a condition and
             // is NOT on the perk record -- it is `Required Perks` on the recipe itself, two

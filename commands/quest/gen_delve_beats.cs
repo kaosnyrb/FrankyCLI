@@ -1340,6 +1340,8 @@ namespace FrankyCLI
                     co.CreatedObject.SetTo(itemOf[i]);
                     co.WorkbenchKeyword.SetTo(made.bench);
                     co.AmountProduced = 1;
+                    // Never the source's text: MB11a's Plasma Wave Inducer showed under the Pressure Regulator (his play).
+                    co.Description = c.description;
                     co.Conditions.Clear();
                     foreach (var (st, done) in new[] { (start, 1f), (beatStage[i], 0f) })
                     {
@@ -2540,6 +2542,9 @@ namespace FrankyCLI
                 fail += Check($"craft recipe {rk} is gated on two of this quest's stages (live only while the step shows)",
                               co == null ? "missing" : co.Conditions.Count(c => c.Data is IGetStageDoneConditionDataGetter d && d.FirstParameter.Link.FormKey == q.FormKey).ToString(), "2");
                 fail += Check($"craft recipe {rk} costs something", co == null ? "missing" : ((co.ConstructableComponents?.Count ?? 0) > 0).ToString(), "True");
+                var craftBeat = r.beats.FirstOrDefault(b => b.craft != null);
+                fail += Check($"craft recipe {rk}'s description is the recipe's, never the source COBJ's",
+                              co == null ? "missing" : co.Description?.String ?? "(none)", craftBeat?.craft?.description ?? "(none)");
             }
             foreach (var (place, anchor, global) in bm.Leashes)
             {

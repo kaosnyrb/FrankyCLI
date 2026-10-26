@@ -546,8 +546,15 @@ namespace FrankyCLI
         /// </summary>
         private sealed class Who { public string? kind { get; set; } public string? list { get; set; } public int min { get; set; } public int max { get; set; } public int? beat { get; set; } }
         /// <summary>A craft beat's recipe: the bench (a word, CraftBenches) and [item, count] pairs, each item a MiscItem
-        /// named by EditorID or by its unique in-game name.</summary>
-        private sealed class Craft { public string? bench { get; set; } public List<List<JsonElement>>? ingredients { get; set; } }
+        /// named by EditorID or by its unique in-game name. Ingredients are RESOURCES (Res*), as his own COBJs' are.</summary>
+        private sealed class Craft
+        {
+            public string? bench { get; set; }
+            public List<List<JsonElement>>? ingredients { get; set; }
+            /// <summary>OPTIONAL: the recipe's text in the bench menu. Absent = none (the source COBJ's own text is cleared,
+            /// never inherited: the first build showed MB11a's Plasma Wave Inducer under a Pressure Regulator, his play).</summary>
+            public string? description { get; set; }
+        }
         /// <summary>The craft benches a recipe may name, as the workbench keyword the COBJ carries. His MB11 to MB13 COBJs
         /// all use WorkbenchIndustrialKeyword (read 2026-10-26); add a word when a recipe needs another bench.</summary>
         private static readonly Dictionary<string, string> CraftBenches = new(StringComparer.OrdinalIgnoreCase)
