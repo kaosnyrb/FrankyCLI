@@ -55,6 +55,7 @@ account does not put them back.
 | id | ElevenLabs' name | his words | still in a recipe (recast owed) |
 |---|---|---|---|
 | `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | none: recast 2026-10-22 (21a Alice, 32a Annie K, remote06a Clara) |
+| `MzqUf1HbJ8UmQ0wUsx2p` | Katie X, Clear British Customer Support | *"I meant the Elevenlabs voice, both we're a bit stilted and robotic"* (2026-10-26, Approach Control, broadcast and closing line, on `eleven_v3` at the default settings) | **yes: `duo_delve_missionboard26a`, `duo_delvetest_bs1`** |
 
 ## His library: every voice on the account, with ElevenLabs' own labels
 
@@ -86,7 +87,7 @@ there. The heard-in-game table above is the one to choose from first; this is wh
 | female | middle aged | Emma | `56bWURjYFHyYyVf490Dp` | australian | conversational | neutral | professional |
 | female | middle aged | Isla | `h8eW5xfRUGVJrZhAFxqK` | scottish | conversational | chill | professional |
 | female | middle aged | Jessica Gallagher | `DbwWo4rVEd5NrejHYUnm` | irish | informative educational | confident | professional |
-| female | middle aged | Katie X - Clear British Customer Support | `MzqUf1HbJ8UmQ0wUsx2p` | british | conversational | professional | professional |
+| ~~female~~ | ~~middle aged~~ | ~~Katie X - Clear British Customer Support~~ | `MzqUf1HbJ8UmQ0wUsx2p` | RULED OUT by his ear 2026-10-26, see above | | | |
 | female | middle aged | Laura - a top narration voice | `GZ4PpFJV8ikEGUtBrjK7` | american | narrative story | sassy | professional |
 | female | middle aged | Lauren B - Warm, Humanlike, Friendly Conversational, Chatbots | `l4Coq6695JDX9xtLqXDE` | american | conversational | pleasant | professional |
 | female | middle aged | Lily - Velvety Actress | `pFZP5JQG7iQjIQuC4Bku` | british | informative educational | confident | premade |
