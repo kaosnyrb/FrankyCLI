@@ -1,0 +1,73 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard27a",
+  "template": "boardspace",
+  "_template": "PROPOSED, NOT BUILT, as missionboard26a: a board mission whose one place is an orbit. Eliza's.",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-26 07:12, variations on 26a: \"Cargo ship orbitting wreakage has part, get and take to sat\"",
+  "_note": [
+    "THE SPACE BOARD FAMILY, 2: THE WRECKED FREIGHTER. The freighter bringing the satellite's replacement part broke up in",
+    "orbit; the part is in a sealed crate in the wreckage. Pick it up, fit it. Both stops are in space.",
+    "TWO ORBIT BEATS, A PICKUP THEN A DELIVER, in ONE space cell: the wreck and the satellite are two markers in the same",
+    "orbit. Unproven: S13 carried one use. Whether the cell has two markers to give, and how a pickup works from a ship",
+    "(vanilla's space cargo is looted by flying close and activating), is Eliza's.",
+    "MODEL: the crate is wreckcargocrate01 (03a's, seen on the ground). Whether the wreckage itself is a placed model or",
+    "the cell's own debris is hers and his; a ship wreck in space is not on the approved list.",
+    "The broadcast plays at the wreck, his 1500 m in space (26a). Closing line on the radio. Pay: med, capped."
+  ],
+  "place": {
+    "orbit": "board",
+    "_orbit": "As 26a: the orbit is the board's target, field name Eliza's."
+  },
+  "prose": {
+    "name": "Salvage: Satellite Part over <Planet>",
+    "briefing": "The freighter bringing a replacement part for the navigation satellite over <Planet> broke up in orbit. The part is still somewhere in the wreckage.",
+    "card": "Salvage and repair contract. A freighter carrying a replacement part for the navigation satellite over <Planet> broke up in orbit. Recover the part from the wreckage and fit it to the satellite. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "se_GeneralMarkerLocRef01",
+      "_at": "A space-cell marker; which two the cell offers is Eliza's.",
+      "objective": "Recover the signal amplifier from the freighter wreckage",
+      "journal": "The freighter's wreckage is still in orbit over <Planet>, and the signal amplifier was in a sealed crate inside it. I've got it. Now it needs fitting to the navigation satellite.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Sealed Cargo Crate",
+      "item": "Signal Amplifier",
+      "say": [
+        "You've got it? Good.",
+        "The satellite's close. Take it straight there."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Fit the signal amplifier to the navigation satellite",
+      "journal": "A freighter broke up in orbit over <Planet> with the navigation satellite's replacement part aboard. I found it in the wreckage and fitted it. The satellite is broadcasting again.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Navigation Satellite",
+      "message": {
+        "title": "Satellite Repaired",
+        "text": "The amplifier slots into place. The satellite's beacon comes back on, slow and steady."
+      },
+      "say": [
+        "That's the signal back. Pilots can see the approach again.",
+        "Shame about the freighter. Glad something on it made it."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Freight Dispatch",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "That's what's left of our freighter.",
+    "The part was in a sealed crate. If anything in there survived, it's that.",
+    "Find it, then take it to the satellite."
+  ],
+  "_speech": "The freighter's owners, so the loss is theirs and the joke at the end is a little rueful. Voice: Daniel (Steady Broadcaster), already in four recipes; his ear decides. No names, places, factions or currency."
+}

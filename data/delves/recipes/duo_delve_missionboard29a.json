@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard29a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-26 07:12, variations on 26a: \"Enemy boss in dungon has part, get and take it to sat\"",
+  "_note": [
+    "THE SPACE BOARD FAMILY, 4: THE PART IN THE DUNGEON. Raiders took the courier's case to a dungeon and their leader keeps",
+    "it. Get it, fly up, fit it. 19a's shape on a board, but a WEATHER satellite, so it is not 19a again.",
+    "THE GROUND HALF BUILDS TODAY: a board dungeon request, as 04a (LocTypeDungeon, played), with the part in a case at",
+    "LocDungeonItemMarker03LocRef, nearest the boss (same cell in 71 of 71 boss dungeons, median 18 m; 04a's lesson,",
+    "where the boss container itself put the case out of reach). The dungeon's own boss guards it; no spawned target.",
+    "THE ORBIT HALF DOES NOT: a board takes no second or third place but a request or a city. place.third.orbit on a board is a",
+    "PROPOSED, Eliza's; the beats kind's is the precedent (19a, played).",
+    "The broadcast plays outside the dungeon (step one's marker is inside, so it may need the entrance; 04a put step one",
+    "outside for this reason). Closing line on the radio. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A dungeon, as 04a. The lint measures the pool against what a request can place.",
+    "third": {
+      "orbit": "planet",
+      "_orbit": "PROPOSED on a board (the beats kind builds it, 19a). 'planet', the orbit over the dungeon's planet, is the meaning wanted, and it NEVER STARTED on 19a, which played on 'player'. 'player' is wrong here: a board quest starts when the board refreshes, so the orbit would fill over wherever he stood then. Eliza's: the board's own target planet is the likely anchor."
+    }
+  },
+  "prose": {
+    "name": "Recovery: Weather Satellite Part on <Planet>",
+    "briefing": "Raiders took the replacement core for the weather satellite over <Planet> off its courier. Their leader at the <Place> has it.",
+    "card": "Recovery contract. The replacement core for the weather satellite over <Planet> was taken to the <Place>, and the leader there has it. Recover the core and fit it to the satellite. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "objective": "Recover the sensor core from the <Place>",
+      "journal": "The raiders' leader at the <Place> had the weather satellite's sensor core. I took it back. It needs fitting to the satellite over <Planet>.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "_model": "The C1 sealed courier case he cleared 2026-10-12 (04a's), which is what a courier would carry it in.",
+      "name": "Courier's Case",
+      "item": "Sensor Core",
+      "say": [
+        "Got it? Good.",
+        "Get it up to the satellite while there's still a forecast worth giving."
+      ]
+    },
+    {
+      "type": "deliver",
+      "place": "third",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Fit the sensor core to the weather satellite",
+      "journal": "Raiders at the <Place> took the weather satellite's replacement core off its courier. I took it back and fitted it in orbit over <Planet>. The satellite is reading the weather again.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Weather Satellite",
+      "message": {
+        "title": "Satellite Repaired",
+        "text": "The core locks in. The satellite turns its sensors back to the planet below."
+      },
+      "say": [
+        "There's the data coming in. First clear picture in a week.",
+        "Everyone down here can plan a day again. Thank you."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Weather Station",
+    "voice": "GenericMale01",
+    "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
+  },
+  "broadcast": [
+    "You're at the site? The one in charge in there has our core.",
+    "They took it off the courier because they think it's worth something.",
+    "It isn't, to anyone but us. Bring it back anyway."
+  ],
+  "_speech": "A forecaster, mild and a little dry. Voice: George (Warm, Captivating Storyteller), already in three recipes; his ear decides. No names, places, factions or currency."
+}

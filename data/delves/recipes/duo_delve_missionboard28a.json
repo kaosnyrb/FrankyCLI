@@ -1,0 +1,78 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard28a",
+  "template": "boardspace",
+  "_template": "PROPOSED, NOT BUILT, as missionboard26a: a board mission whose one place is an orbit. Eliza's.",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-26 07:12, variations on 26a: \"enemy ship.has part, get and take to sat\"",
+  "_note": [
+    "THE SPACE BOARD FAMILY, 3: THE STOLEN PART. A ship hit the supply run and kept the satellite's replacement part. It is",
+    "still in orbit. Take it apart, recover the part from what's left, fit it. The one with a fight.",
+    "NEEDS A BEAT NOBODY HAS BUILT: a hostile SHIP as a defeat target in orbit. The defeat beat today spawns an Npc or",
+    "LeveledNpc on the ground. But the space shell was cut from a shipped remote-space quest whose target IS a ship",
+    "(delve-recipes.md, Space), so the ship half may be closer than it looks. Eliza's to price.",
+    "THE PART COMES OFF THE WRECK, A RECOVER: 'takes item off whoever has it (loot, pick up, be handed it: all count)'.",
+    "A destroyed ship drops its cargo to loot, which is the vanilla way. Recover is refused on a board today; hers.",
+    "Boarding the ship instead of destroying it is the other way to 'get' it, and a bigger build; not written.",
+    "The broadcast plays at the ship, his 1500 m. Closing line on the radio. Pay: med, capped."
+  ],
+  "place": {
+    "orbit": "board",
+    "_orbit": "As 26a: the orbit is the board's target, field name Eliza's."
+  },
+  "prose": {
+    "name": "Recovery: Stolen Part over <Planet>",
+    "briefing": "A ship hit the supply run to the communications satellite over <Planet> and kept the replacement part. It hasn't left orbit.",
+    "card": "Recovery contract. A ship stole the replacement part for the communications satellite over <Planet> and is still in orbit. Deal with the ship, recover the part and fit it to the satellite. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "SHIP, UNBUILT",
+      "_target": "A hostile ship, levelled, whatever the space shell's own target ship is or Eliza's pick. Not an Npc.",
+      "objective": "Destroy the ship that took the part",
+      "journal": "The ship that hit the supply run is gone. The part should be somewhere in what's left of it."
+    },
+    {
+      "type": "recover",
+      "item": "Power Regulator",
+      "objective": "Recover the power regulator from the wreck",
+      "journal": "I took the power regulator back off the ship that stole it. It needs fitting to the communications satellite over <Planet>.",
+      "say": [
+        "That's it. That's our part.",
+        "Now get it to the satellite before anyone else gets ideas."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Fit the power regulator to the communications satellite",
+      "journal": "A ship stole the communications satellite's replacement part and sat in orbit over <Planet> with it. I took it back and fitted it. The satellite is back on.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Communications Satellite",
+      "message": {
+        "title": "Satellite Repaired",
+        "text": "The regulator seats and the satellite powers up. Its channels open, one by one."
+      },
+      "say": [
+        "We're back on. Every channel's open.",
+        "And I don't think anyone's going to try that again."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Satellite Operator",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": [
+    "That's them. They hit our supply run and kept the part.",
+    "They won't hand it over.",
+    "Take that ship apart and the part should come out with the rest of their cargo."
+  ],
+  "_speech": "The operator is angry and practical, which is why the voice is Clara (Direct, Firm and Confident), already in four recipes; his ear decides. No names, places, factions or currency."
+}
