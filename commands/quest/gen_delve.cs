@@ -174,6 +174,11 @@ namespace FrankyCLI
             /// </summary>
             public int arrivalStage { get; set; } = -1;
             /// <summary>
+            /// boardspace: how near the object the arrival hook fires, in metres. His 2026-10-26: "500m is the use distance, so
+            /// 1500m os prob better" (a ship crosses the ground's 250 in a second). 0 on every other kind, which keeps 250.
+            /// </summary>
+            public float arrivalDistance { get; set; }
+            /// <summary>
             /// space: the activator the beat's object is cloned from (ReskinActivator writes its model and name). The base's
             /// own target is a ship, so the clone needs a source; this one carries no script, unlike his MB01's (which takes a
             /// repair kit and can spawn ships). Null on every other kind.
@@ -3143,15 +3148,17 @@ namespace FrankyCLI
         }
 
         /// <summary>DefaultAliasOnDistanceLessThan: within ApproachDistance of the quest's alias targetAlias, set the stage.
-        /// Its properties in the order every distance hook here has always written them.</summary>
-        private static ScriptEntry DistanceHook(FormKey quest, int targetAlias, int stage, int prereq)
+        /// Its properties in the order every distance hook here has always written them. The orbit board's arrival passes its
+        /// own distance (the template's arrivalDistance: his 1500 m in space, 2026-10-26); every ground hook keeps 250.</summary>
+        private static ScriptEntry DistanceHook(FormKey quest, int targetAlias, int stage, int prereq) => DistanceHook(quest, targetAlias, stage, prereq, ApproachDistance);
+        private static ScriptEntry DistanceHook(FormKey quest, int targetAlias, int stage, int prereq, float distance)
         {
             var sc = new ScriptEntry { Name = "DefaultAliasOnDistanceLessThan" };
             var ta = new ScriptObjectProperty { Name = "TargetAlias", Flags = ScriptProperty.Flag.Edited };
             ta.Object.SetTo(quest);
             ta.Alias = (short)targetAlias;
             sc.Properties.Add(ta);
-            sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = ApproachDistance, Flags = ScriptProperty.Flag.Edited });
+            sc.Properties.Add(new ScriptFloatProperty { Name = "TargetDistance", Data = distance, Flags = ScriptProperty.Flag.Edited });
             sc.Properties.Add(new ScriptIntProperty { Name = "StageToSet", Data = stage, Flags = ScriptProperty.Flag.Edited });
             sc.Properties.Add(new ScriptIntProperty { Name = "PrereqStage", Data = prereq, Flags = ScriptProperty.Flag.Edited });
             return sc;

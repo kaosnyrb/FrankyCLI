@@ -27,7 +27,7 @@ namespace FrankyCLI
             /// <summary>The package a hold's waves run, to come for the player; null when no beat holds or clears.</summary>
             public IPackageGetter? TravelSrc;
             /// <summary>The spoken lines' speaker: the NPC cloned to carry a name, and the voice type; null with no speaker.</summary>
-            public (INpcGetter tmpl, FormKey voice)? Speaker;
+            public (INpcGetter tmpl, FormKey voice)? Speaker;   // ResolveSpeaker's, shared with the space build
             /// <summary>By place index: the creature list of who is there.</summary>
             public readonly Dictionary<int, FormKey> WhoLists = new();
             /// <summary>By beat index, for defeat and clear: the target and the lists the fight draws from.</summary>
@@ -111,10 +111,8 @@ namespace FrankyCLI
             // VOICE TYPE (the voice folder the audio is looked up in). Never placed: the lines are radio.
             if (fail == 0 && r.speaker != null)
             {
-                var st = OwnOrMaster<INpcGetter>(myMod, env, "UC_NA_MASTWorkerMale01");
-                var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, r.speaker.voice ?? "");
-                if (st == null || vt == null) { Console.WriteLine($"REFUSED: the speaker needs UC_NA_MASTWorkerMale01 and VoiceType '{r.speaker.voice}' in {t.mod} or a master."); fail++; }
-                else inputs.Speaker = (st, vt.FormKey);
+                inputs.Speaker = ResolveSpeaker(myMod, env, r, t);
+                if (inputs.Speaker == null) fail++;
             }
             // Who is at each place: its creature list, own-or-master, as a person's company list is.
             foreach (var (p, w, _) in WhoOf(r))

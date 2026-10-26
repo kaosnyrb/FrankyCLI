@@ -35,7 +35,23 @@
       "journal": "The navigation satellite over <Planet> had stopped broadcasting. I flew out to it and got it working again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Navigation Satellite",
+      "say": [
+        "There it is. It's broadcasting again.",
+        "Every approach just got a lot less exciting. Thank you."
+      ],
+      "_say": "Jessica's 26a closing line, verbatim (rung 2, his \"go\" 2026-10-26 09:24). Her beat message is not carried: the activator's script shows its own.",
       "reward": "med"
     }
-  ]
+  ],
+  "speaker": {
+    "name": "Approach Control",
+    "voice": "GenericFemale01",
+    "elevenlabs": "MzqUf1HbJ8UmQ0wUsx2p"
+  },
+  "broadcast": [
+    "You're out at the satellite? Good.",
+    "It went silent three days ago, and pilots have been landing on guesswork ever since.",
+    "Whatever's wrong is on the satellite itself. Nothing we send from down here gets through."
+  ],
+  "_speech": "Jessica's 26a speaker and broadcast, verbatim. The broadcast plays within 1500 m of the satellite (the template's arrival)."
 }

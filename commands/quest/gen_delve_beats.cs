@@ -602,6 +602,8 @@ namespace FrankyCLI
             public (int cell, int at)? CellAt;      // space only, place.cellAt: the cell member moved, and the alias it is now created at
             public int ArriveStage = -1;            // boardspace only: the arrival-in-system stage the beat's objective shows on
             public FormKey? PaidGlobal;             // boardspace only: the reward global written onto the board's script, when a tier is set
+            public float ArrivalDistance;           // boardspace only: the arrival hook's distance, when there is a broadcast
+            public string? ClosingLine;             // boardspace only: the Say property the completing stage plays before shutting down
             public string Script = "";
             public List<int> FragStages = new();
             public List<(int alias, string script, int set, int prereq)> Hooks = new();
@@ -1525,17 +1527,7 @@ namespace FrankyCLI
 
                 // --- the speaker: an NPC that is never placed, carrying the subtitle's NAME and the VOICE TYPE whose
                 // folder the audio is looked up in (gen_dlgtest's shape: clone, then set Voice) ----------------------
-                RemovePrevious(myMod.Npcs, e => e == r.id + "_speaker");
-                if (inputs.Speaker is (INpcGetter stmpl, FormKey svoice))
-                {
-                    var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
-                    sp.EditorID = r.id + "_speaker";
-                    sp.Name = r.speaker!.name!;
-                    sp.Voice.SetTo(svoice);
-                    myMod.Npcs.Add(sp);
-                    bm.Speaker = sp.FormKey;
-                    Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
-                }
+                MakeSpeaker(myMod, r, inputs.Speaker, bm);
 
                 // The kinds' dialogue, once every person is cloned (a talk's conversation).
                 for (int b = 0; b < r.beats.Count; b++)
@@ -1749,44 +1741,8 @@ namespace FrankyCLI
                     for (int n = 0; n < lines.Count; n++)
                     {
                         var (lst, ltext) = lines[n];
-                        string tag = $"{r.id}_say{n + 1}";
-                        var topic = new DialogTopic(myMod)
-                        {
-                            EditorID = tag + "_topic",
-                            Category = DialogTopic.CategoryEnum.Scene,
-                            Subtype = DialogTopic.SubtypeEnum.CustomScene,
-                            SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
-                        };
-                        topic.Quest.SetTo(clone.FormKey);
-                        var info = new DialogResponses(myMod) { EditorID = tag + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
-                        info.Speaker.SetTo(bm.Speaker);
-                        var said = AddResponses(myMod, info, ltext, topic.FormKey.ID, true);
-                        topic.Responses.Add(info);
-                        // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
-                        topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
-                        clone.DialogTopics.Add(topic);
-
-                        var action = new RadioSceneAction { Name = "Say", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0 };
-                        action.Topic.SetTo(topic.FormKey);
-                        // ⛔ THE BROADCAST CANNOT BE STARTED FROM STAGE 0's FRAGMENT: that runs while the quest is still
-                        // starting, and Start() then does nothing at all. Measured in his play, 2026-10-09, with an
-                        // on-screen probe: stage 0 "playing = FALSE", the same scene started again at stage 10 played,
-                        // voice and subtitle. So a stage-0 line is started by the ENGINE, with the scene's own
-                        // BeginOnQuestStart flag, and every later stage's line by its fragment.
                         bool atStart = lst == 0;
-                        var scene = new Scene(myMod)
-                        {
-                            EditorID = tag + "_scene",
-                            // 0x80 is on every vanilla audio-log scene; undocumented (book_audio.md)
-                            Flags = (Scene.Flag)0x80 | (atStart ? Scene.Flag.BeginOnQuestStart : 0),
-                            VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
-                        };
-                        scene.Quest.SetTo(clone.FormKey);
-                        scene.Actors.Add(new SceneActor { ID = unchecked((uint)-4), Flags = SceneActor.Flag.NoCommandState, BehaviorFlags = 0 });
-                        scene.Phases.Add(new ScenePhase { Name = "SayPhase", EditorWidth = 500 });
-                        scene.Actions = new Noggog.ExtendedList<ASceneAction> { action };
-                        clone.Scenes.Add(scene);
-
+                        var scene = MakeRadioLine(myMod, clone, r, n, lst, ltext, bm);
                         string sv = $"Say{n + 1}";
                         if (!atStart)
                         {
@@ -1794,11 +1750,6 @@ namespace FrankyCLI
                             if (n == offerLine) Tail(lst, $"{sv}.Start()   ; the offer's call, after the find's box is closed");
                             else Add(lst, $"{sv}.Start()");
                             spokenAt.Add((lst, n + 1));
-                        }
-                        foreach (var (wem, text) in said)
-                        {
-                            bm.Lines.Add((lst, wem, text, scene.FormKey));
-                            Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {lst}")} plays {scene.EditorID} -> {wem:X8}.wem  \"{text}\"");
                         }
                     }
                 }
@@ -2030,6 +1981,87 @@ namespace FrankyCLI
             p.StandardOutput.ReadToEnd(); p.StandardError.ReadToEnd();
             p.WaitForExit();
             return p.ExitCode;
+        }
+
+        /// <summary>
+        /// The speaker of a Delve's spoken lines: a friendly MAST worker cloned only to carry a NAME and a VOICE TYPE (the
+        /// voice folder the audio is looked up in). Never placed: the lines are radio. Null = refused, and said why.
+        /// Shared by the beats build (DelveInputs) and the space build (2026-10-26, boardspace's radio).
+        /// </summary>
+        private static (INpcGetter tmpl, FormKey voice)? ResolveSpeaker(StarfieldMod myMod, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Recipe r, Template t)
+        {
+            var st = OwnOrMaster<INpcGetter>(myMod, env, "UC_NA_MASTWorkerMale01");
+            var vt = OwnOrMaster<IVoiceTypeGetter>(myMod, env, r.speaker!.voice ?? "");
+            if (st == null || vt == null) { Console.WriteLine($"REFUSED: the speaker needs UC_NA_MASTWorkerMale01 and VoiceType '{r.speaker.voice}' in {t.mod} or a master."); return null; }
+            return (st, vt.FormKey);
+        }
+
+        /// <summary>The speaker NPC itself, cloned (gen_dlgtest's shape: clone, then set Voice); the previous build's goes first.</summary>
+        private static void MakeSpeaker(StarfieldMod myMod, Recipe r, (INpcGetter tmpl, FormKey voice)? speaker, BeatsMade bm)
+        {
+            RemovePrevious(myMod.Npcs, e => e == r.id + "_speaker");
+            if (speaker is not (INpcGetter stmpl, FormKey svoice)) return;
+            var sp = Retrograde.Utils.NPCTools.CloneNPC(myMod, stmpl.DeepCopy());
+            sp.EditorID = r.id + "_speaker";
+            sp.Name = r.speaker!.name!;
+            sp.Voice.SetTo(svoice);
+            myMod.Npcs.Add(sp);
+            bm.Speaker = sp.FormKey;
+            Console.WriteLine($"  +speaker : {sp.EditorID} {sp.FormKey}  \"{sp.Name}\"  voice {r.speaker.voice} (clone of {stmpl.EditorID}, never placed)");
+        }
+
+        /// <summary>
+        /// ONE spoken line as a RADIO scene (no actor in the world: AliasID -4, the vanilla audio-log shape, FrankyCLI
+        /// docs/formlib/book_audio.md) holding one topic and the responses the speaker says. Line n of the recipe is
+        /// `&lt;id&gt;_say&lt;n+1&gt;`; its responses' WEMFile is the topic's own id, and the game looks the audio up as
+        /// Sound\Voice\&lt;plugin&gt;\&lt;voice type&gt;\&lt;that id, 8 hex&gt;.wem. Each response goes into bm.Lines for DeployVoice.
+        /// Starting it is the caller's: a fragment's SayN.Start(), or, on stage 0, the scene's own BeginOnQuestStart.
+        /// </summary>
+        private static Scene MakeRadioLine(StarfieldMod myMod, Quest clone, Recipe r, int n, int stage, List<string> text, BeatsMade bm)
+        {
+            string tag = $"{r.id}_say{n + 1}";
+            var topic = new DialogTopic(myMod)
+            {
+                EditorID = tag + "_topic",
+                Category = DialogTopic.CategoryEnum.Scene,
+                Subtype = DialogTopic.SubtypeEnum.CustomScene,
+                SubtypeName = DialogTopic.SubtypeNameEnum.CustomScene,
+            };
+            topic.Quest.SetTo(clone.FormKey);
+            var info = new DialogResponses(myMod) { EditorID = tag + "_info", SubtitlePriority = DialogResponses.SubtitlePriorityLevel.Low };
+            info.Speaker.SetTo(bm.Speaker);
+            var said = AddResponses(myMod, info, text, topic.FormKey.ID, true);
+            topic.Responses.Add(info);
+            // TPIC: the topic's own list of its infos. Missing, the CK crashes on a click (book_audio.md).
+            topic.TopicInfoList = new Noggog.ExtendedList<IFormLinkGetter<IDialogResponsesGetter>> { info.ToLink<IDialogResponsesGetter>() };
+            clone.DialogTopics.Add(topic);
+
+            var action = new RadioSceneAction { Name = "Say", AliasID = -4, Index = 0, StartPhase = 0, EndPhase = 0 };
+            action.Topic.SetTo(topic.FormKey);
+            // ⛔ THE BROADCAST CANNOT BE STARTED FROM STAGE 0's FRAGMENT: that runs while the quest is still
+            // starting, and Start() then does nothing at all. Measured in his play, 2026-10-09, with an
+            // on-screen probe: stage 0 "playing = FALSE", the same scene started again at stage 10 played,
+            // voice and subtitle. So a stage-0 line is started by the ENGINE, with the scene's own
+            // BeginOnQuestStart flag, and every later stage's line by its fragment.
+            bool atStart = stage == 0;
+            var scene = new Scene(myMod)
+            {
+                EditorID = tag + "_scene",
+                // 0x80 is on every vanilla audio-log scene; undocumented (book_audio.md)
+                Flags = (Scene.Flag)0x80 | (atStart ? Scene.Flag.BeginOnQuestStart : 0),
+                VNAM = new byte[] { 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 },
+            };
+            scene.Quest.SetTo(clone.FormKey);
+            scene.Actors.Add(new SceneActor { ID = unchecked((uint)-4), Flags = SceneActor.Flag.NoCommandState, BehaviorFlags = 0 });
+            scene.Phases.Add(new ScenePhase { Name = "SayPhase", EditorWidth = 500 });
+            scene.Actions = new Noggog.ExtendedList<ASceneAction> { action };
+            clone.Scenes.Add(scene);
+            foreach (var (wem, said1) in said)
+            {
+                bm.Lines.Add((stage, wem, said1, scene.FormKey));
+                Console.WriteLine($"  +speech  : {(atStart ? "on quest start (BeginOnQuestStart)" : $"stage {stage}")} plays {scene.EditorID} -> {wem:X8}.wem  \"{said1}\"");
+            }
+            return scene;
         }
 
         /// <summary>

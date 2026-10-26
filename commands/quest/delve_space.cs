@@ -70,8 +70,12 @@ namespace FrankyCLI
             if (p.drop != null)
                 foreach (var d in p.drop.GroupBy(x => x, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1))
                     Fatal($"place.drop names {d.Key} twice.");
-            if (r.speaker != null || r.broadcast != null || r.recapSay != null)
+            if (!IsBoardSpace(t) && (r.speaker != null || r.broadcast != null || r.recapSay != null))
                 Fatal("speech is set; the space kind builds none yet (its harness is one silent beat).");
+            if (IsBoardSpace(t) && r.recapSay != null)
+                Fatal("recapSay is set; a board space Delve has one beat, so its closing line is that beat's say.");
+            if (IsBoardSpace(t) && r.broadcast != null && (t.arrivalStage < 0 || t.arrivalDistance <= 0))
+                Fatal($"broadcast is set and template '{t.id}' names no arrivalStage or arrivalDistance for the hook that plays it.");
             if (r.approach != null || r.offer != null || r.recap != null)
                 Fatal("approach, offer or recap is set; the space kind builds one beat and none of those.");
             for (int i = 0; i < r.beats.Count; i++)
@@ -85,8 +89,9 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(IsBoardSpace(t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
-                if (b.say != null || b.message != null || b.group != null || b.returnTo != null)
-                    Fatal($"beat {i + 1} carries a say, message, group or returnTo; the space kind builds none of those.");
+                if ((b.say != null && !IsBoardSpace(t)) || b.message != null || b.group != null || b.returnTo != null)
+                    Fatal($"beat {i + 1} carries a {(b.message != null ? "message" : b.say != null ? "say" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
+                          + (IsBoardSpace(t) && b.message != null ? " (its object's script shows its own start, success and fail messages)." : "."));
                 // A board pays through the board's reward globals (BuildSpace); a startquest test has nobody to pay it, so a
                 // tier there would be written nowhere.
                 if (b.reward != null && !IsBoardSpace(t))
@@ -288,6 +293,7 @@ namespace FrankyCLI
 
             string name = FragmentScriptName(r);
             var code = new SortedDictionary<int, List<string>>();
+            var sayProps = new List<(string pname, FormKey scene)>();   // the fragment's Scene properties, one per spoken line
             if (IsBoardSpace(t))
             {
                 // THE FRAGMENT IS HIS MB01a's (vanilla QF_MB_BountySpace01Far_001EF957), with the beat's objective as the
@@ -312,6 +318,68 @@ namespace FrankyCLI
                     "kmyQuest.MissionComplete()",
                 };
                 bm.ArriveStage = arrive;
+
+                // THE RADIO (rung 2, his "go", 2026-10-26). The lines are the beats build's own radio scenes (MakeRadioLine),
+                // spoken by its never-placed speaker (MakeSpeaker); only where they start differs.
+                if (r.speaker != null)
+                {
+                    var speaker = ResolveSpeaker(myMod, env, r, t);
+                    if (speaker == null) return 1;
+                    MakeSpeaker(myMod, r, speaker, bm);
+                    int n = 0;
+                    // THE BROADCAST waits for him at the satellite (a board posting, his 2026-10-14 rule), within the template's
+                    // arrivalDistance: a distance hook on the object, measured to a Player alias (copied from vanilla, as S13's),
+                    // armed by the accept, setting the arrival stage, whose fragment starts the line.
+                    if (r.broadcast != null)
+                    {
+                        int player = AddVanillaPlayer(myMod, env, clone);
+                        if (player < 0) return 1;
+                        if (clone.Stages!.Any(s => s.Index == t.arrivalStage))
+                        { Console.WriteLine($"REFUSED: the shell already has a stage {t.arrivalStage}; the arrival stage must be its own."); return 1; }
+                        var ns = CloneStage(clone, t.arrivalStage);
+                        if (ns == null) return 1;
+                        clone.Stages.Add(ns);
+                        if (ns.LogEntries.FirstOrDefault() is QuestLogEntry le) le.Entry = null;
+                        Console.WriteLine($"  +stage   : {t.arrivalStage}, the arrival at the object");
+                        var sc = DistanceHook(clone.FormKey, player, t.arrivalStage, t.entryStage, t.arrivalDistance);
+                        if (AttachHook(vma, clone.FormKey, (int)target.ID, sc, HookEntry.FindOrCreate, true, bm, t.arrivalStage, t.entryStage) == Hooked.AlreadyCarries)
+                        { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnDistanceLessThan."); return 1; }
+                        Console.WriteLine($"  +hook    : arrival within {t.arrivalDistance} of the object (alias {target.ID}) to the player (alias {player}) sets {t.arrivalStage} after {t.entryStage}; the broadcast plays there");
+                        var scene = MakeRadioLine(myMod, clone, r, n, t.arrivalStage, r.broadcast, bm);
+                        sayProps.Add(($"Say{n + 1}", scene.FormKey));
+                        code[t.arrivalStage] = new() { $"Say{n + 1}.Start()" };
+                        bm.ArrivalDistance = t.arrivalDistance;
+                        n++;
+                    }
+                    // THE CLOSING LINE plays on the completing stage. MissionComplete() would shut the quest down at once and cut
+                    // it off (MissionQuestScript.psc: SetStage(CompleteStage), then MissionShutdown() when ShutdownOnCompletion),
+                    // so on this build ShutdownOnCompletion is off: the stage pays, plays the line, waits for it, then shuts down.
+                    // The ground board's ending on a talk does the same (its Linger).
+                    if (beat.say != null)
+                    {
+                        var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, beat.say, bm);
+                        string sv = $"Say{n + 1}";
+                        sayProps.Add((sv, scene.FormKey));
+                        var qs = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                        if (qs.Properties.Any(x => x.Name == "ShutdownOnCompletion"))
+                        { Console.WriteLine($"REFUSED: {t.questScript} already sets ShutdownOnCompletion; this build turns it off and would not know whose value it overwrote."); return 1; }
+                        qs.Properties.Add(new ScriptBoolProperty { Name = "ShutdownOnCompletion", Data = false, Flags = ScriptProperty.Flag.Edited });
+                        code[t.completeStage].AddRange(new[]
+                        {
+                            $"{sv}.Start()",
+                            $"Utility.Wait(1.0)   ; let {sv} begin before asking whether it plays",
+                            "Int waited = 0",
+                            $"While {sv}.IsPlaying() && waited < 30",
+                            "    Utility.Wait(1.0)",
+                            "    waited += 1",
+                            "EndWhile",
+                            "kmyQuest.MissionShutdown()   ; ShutdownOnCompletion is off so the closing line is heard",
+                        });
+                        bm.ClosingLine = sv;
+                        Console.WriteLine($"  linger   : {t.questScript}.ShutdownOnCompletion false; stage {t.completeStage} plays {sv}, then MissionShutdown()");
+                        n++;
+                    }
+                }
                 // THE PAY goes onto the board's reward globals, which the card also shows (the ground board's rule: never onto
                 // the stage, or it pays twice). Absent, his MB01a's own stand (duo_reward_creds_easy).
                 if (beat.reward is string tier)
@@ -352,7 +420,14 @@ namespace FrankyCLI
                 psc.AppendLine("EndFunction");
                 psc.AppendLine();
             }
+            foreach (var (pname, _) in sayProps) psc.AppendLine($"Scene Property {pname} Auto Const Mandatory");
             vma.Script = new ScriptEntry { Name = name };
+            foreach (var (pname, key) in sayProps)
+            {
+                var op = new ScriptObjectProperty { Name = pname, Flags = ScriptProperty.Flag.Edited };
+                op.Object.SetTo(key);
+                vma.Script.Properties.Add(op);
+            }
             foreach (var st in code.Keys)
                 vma.Fragments.Add(new QuestScriptFragment { Stage = (ushort)st, StageIndex = 0, ScriptName = name, FragmentName = FragmentFunction(st) });
             bm.Script = name;
@@ -615,6 +690,30 @@ namespace FrankyCLI
                 fail += Check($"{r.id}_b1 carries his repair script, its questobjective on this quest",
                               repair == null ? "no ccs_activaterepair" : repair.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "questobjective")?.Object.FormKey.ToString() ?? "no questobjective",
                               q.FormKey.ToString());
+                if (bm.ArrivalDistance > 0)
+                {
+                    var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnDistanceLessThan");
+                    fail += Check($"the arrival hook on the object fires within {bm.ArrivalDistance}",
+                                  dh?.Properties.OfType<IScriptFloatPropertyGetter>().FirstOrDefault(p => p.Name == "TargetDistance")?.Data.ToString() ?? "no hook",
+                                  bm.ArrivalDistance.ToString());
+                    var players = q.Aliases.OfType<IQuestReferenceAliasGetter>().Where(a => a.UniqueActor.FormKey == PlayerNpc).Select(a => (int)a.ID).ToList();
+                    var measured = dh?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "TargetAlias");
+                    fail += Check("it measures to the one Player alias", players.Count == 1 ? $"{measured?.Object.FormKey} alias {measured?.Alias}" : $"{players.Count} Player alias(es)",
+                                  players.Count == 1 ? $"{q.FormKey} alias {players[0]}" : "1");
+                }
+                var says = (vma.Script?.Properties ?? new List<IScriptPropertyGetter>()).OfType<IScriptObjectPropertyGetter>().Where(p => p.Name.StartsWith("Say")).ToList();
+                fail += Check("each Say property names one of this quest's scenes",
+                              says.Count(p => q.Scenes.Any(s => s.FormKey == p.Object.FormKey)).ToString(), says.Count.ToString());
+                fail += Check("one radio scene per spoken line", q.Scenes.Count.ToString(), says.Count.ToString());
+                if (bm.ClosingLine is string cl)
+                {
+                    var qsc = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                    fail += Check($"{t.questScript}.ShutdownOnCompletion is off (the closing line is heard)",
+                                  qsc?.Properties.OfType<IScriptBoolPropertyGetter>().FirstOrDefault(p => p.Name == "ShutdownOnCompletion")?.Data.ToString() ?? "unset", "False");
+                    string fin = File.ReadAllText(bm.PscPath).Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                    int pay = fin.IndexOf("MissionComplete()"), say = fin.IndexOf($"{cl}.Start()"), end = fin.IndexOf("MissionShutdown()");
+                    fail += Check($"stage {t.completeStage} pays, then plays {cl}, then shuts down", (pay >= 0 && pay < say && say < end).ToString(), "True");
+                }
                 fail += Check($"the object (alias {slot.activatorAlias}) carries no stock activate hook",
                               (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnActivate") == true).ToString(), "False");
                 string src = File.ReadAllText(bm.PscPath);
