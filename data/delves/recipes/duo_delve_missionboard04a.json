@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_delve_missionboard04a",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The mission board's test node, as 20a and 21a, until he plays it.",
+  "deal": "duo_MB_MissionNode_Exploration",
+  "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Exploration_Legacy behind Classic Missions. Was the board test node.",
   "author": "jessica",
   "source": "his 2026-10-19 21:26: \"one thing we dont have yet is a missionboard mission that sends you to a remote POI for multiple objectibes. Like find code, hse terminal, get files\", then \"yup go. Make it a dungeon\".",
   "_note": [

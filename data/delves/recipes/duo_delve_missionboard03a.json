@@ -3,8 +3,8 @@
   "id": "duo_delve_missionboard03a",
   "_id": "Was duo_delve12a until 2026-10-19: his 'duo_delve12a is the name for local delves. We have missionboard naming convention'. Unbuilt and rebuilt under this id.",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The mission board's test node (under vanilla's MissionBranch): no conditions, SharesEvent, NumQuestsToRun 1. ELIZA 2026-10-15: on the board template since it exists (2026-10-14, missionboard01a/02a).",
+  "deal": "duo_MB_MissionNode_Exploration",
+  "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Exploration_Legacy behind Classic Missions. Was the board test node.",
   "author": "jessica",
   "source": "his 2026-10-12 14:16: \"Missonboard quest where a crate was onboard a ship that crashed. Go to the crash site, get the crate which is gaurded by spacers and return it to a POI local to the crashed ship.\"",
   "_note": [

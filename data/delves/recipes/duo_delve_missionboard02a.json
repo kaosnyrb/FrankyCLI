@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_delve_missionboard02a",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, as missionboard01a (his 2026-10-14 pick for the board proofs). A board quest started by hand never gets the board's accept, so stage 10 would never be set.",
+  "deal": "duo_MB_MissionNode_Delivery",
+  "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Delivery_Legacy behind Classic Missions. Was the board test node.",
   "_note": [
     "CARGO RUN, REMOTE TO REMOTE, ON THE BOARD. His 2026-10-14 14:33: 'thinking we should have a cargo run mission,",
     "remote to remote. Talking on both ends', then 14:53 'it'll be both types eventually, but let's start missionboard'",

@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_delve_missionboard05a",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, as missionboard02a, until it plays.",
+  "deal": "duo_MB_MissionNode_Exploration",
+  "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Exploration_Legacy behind Classic Missions. Was the board test node.",
   "author": "jessica",
   "source": "his 2026-10-23 09:30: \"new quest idea. Missionboard. A family item has been stolen and is in a hostile POI. Recover it and bring it back to new atlantis\"",
   "_note": [
