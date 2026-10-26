@@ -87,7 +87,11 @@ test node per slate branch, each beside its real pool:
 ⚠ **The local branch has TWO real nodes**, and `testnode` parks one: testing there leaves the low-chance pool live
 unless it is parked too (a second call cannot do it, since the test node has given its condition away). ⚠ **The
 board's `_duo_MB_MissionNode_test`** (under vanilla's `MissionBranch`) is a different shape: no conditions at all,
-`SharesEvent`, `NumQuestsToRun` 1. `testnode` does not apply to it. ⚠ The `.esp` twin carries its own copy of every
+`SharesEvent`, `NumQuestsToRun` 1. `testnode` does not apply to it. **A build dealt into it EMPTIES it first** (his
+2026-10-26: *"It should be cleared out before each test so only the tested mission is there"*: a board refreshes only on
+a sleep, about 2 minutes, so five in the node is a 1-in-5 roll, and a quest that failed to fill never shows, which a roll
+cannot tell from bad luck). Every board recipe deals here, so the quests it held leave the board until each is rebuilt;
+the build names them, and the verify asserts the node holds the built quest alone. ⚠ The `.esp` twin carries its own copy of every
 node; `testnode` edits the `.esm` only.
 
 

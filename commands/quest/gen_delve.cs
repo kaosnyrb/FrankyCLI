@@ -257,6 +257,8 @@ namespace FrankyCLI
             public string? orbitFrom { get; set; }
             public List<QAlias> orbit { get; set; } = new();
         }
+        /// <summary>His BOARD test node (the slate test nodes are `testnode`'s, a different shape). A build dealt into it empties it first, so it holds only the quest under test.</summary>
+        private const string BoardTestNode = "_duo_MB_MissionNode_test";
         /// <summary>The vanilla quest a hold's and a clear's wave collections are copied from, and how its alias is found.</summary>
         private const uint WaveQuestId = 0x03E832;
         private const string WaveMemberName = "ActiveHostiles";
@@ -2293,6 +2295,16 @@ namespace FrankyCLI
             {
                 var pool = myMod.StoryManagerQuestNodes.FirstOrDefault(n => string.Equals(n.EditorID, r.deal, StringComparison.OrdinalIgnoreCase));
                 if (pool == null) { Console.WriteLine($"REFUSED: no Story Manager quest node '{r.deal}' in {t.mod}."); return 1; }
+                // THE TEST NODE HOLDS ONLY THE QUEST UNDER TEST. His 2026-10-26: "It should be cleared out before each test so
+                // only the tested mission is there": a board refreshes only on a sleep (about 2 minutes), so with five in the node
+                // each refresh is a 1-in-5 roll, and a quest that failed to fill never appears at all, which a 1-in-5 cannot
+                // tell from bad luck. So a build into it empties it first, every quest it held named.
+                if (string.Equals(pool.EditorID, BoardTestNode, StringComparison.OrdinalIgnoreCase) && pool.Quests.Count > 0)
+                {
+                    var was = pool.Quests.Select(e => myMod.Quests.FirstOrDefault(q => q.FormKey == e.Quest.FormKey)?.EditorID ?? e.Quest.FormKey.ToString()).ToList();
+                    pool.Quests.Clear();
+                    Console.WriteLine($"  cleared  : {BoardTestNode} emptied for this test ({was.Count}: {string.Join(", ", was)})");
+                }
                 pool.Quests.Add(new StoryManagerQuest { Quest = clone.ToNullableLink<IQuestGetter>() });
                 Console.WriteLine($"  dealt    : {r.id} into {pool.EditorID}, now {pool.Quests.Count} quests");
             }
@@ -2444,6 +2456,13 @@ namespace FrankyCLI
             int fail = Check("the quest is dealt from exactly the node the recipe names",
                              holding.Count == 0 ? "(none)" : string.Join(", ", holding.Select(h => h.count == 1 ? h.EditorID : $"{h.EditorID} x{h.count}")),
                              r.deal ?? "(none)");
+            if (string.Equals(r.deal, BoardTestNode, StringComparison.OrdinalIgnoreCase))
+            {
+                var node = reread.StoryManagerQuestNodes.FirstOrDefault(n => n.EditorID == BoardTestNode);
+                fail += Check($"{BoardTestNode} holds this quest and nothing else",
+                              node == null ? "no node" : string.Join(", ", node.Quests.Select(e => reread.Quests.FirstOrDefault(x => x.FormKey == e.Quest.FormKey)?.EditorID ?? e.Quest.FormKey.ToString())),
+                              r.id);
+            }
             var own = reread.Quests.Select(x => x.FormKey).ToHashSet();
             var dangling = reread.StoryManagerQuestNodes
                 .SelectMany(n => n.Quests.Where(e => e.Quest.FormKey.ModKey == reread.ModKey && !own.Contains(e.Quest.FormKey))
