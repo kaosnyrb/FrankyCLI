@@ -2,6 +2,8 @@
   "schema": 2,
   "id": "duo_artifact_localcargo_qst25b",
   "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "His pick, 2026-10-26, after the rename: built and dealt by no pool until then; added by gen_delve move from '-' (no pool), no rebuild.",
   "author": "jessica",
   "source": "home-office office/projects/delves/backlog.md (the who's-there dial) and type-02-keep-or-give-back.md (the medal)",
   "_note": [

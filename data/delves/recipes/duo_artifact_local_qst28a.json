@@ -2,6 +2,8 @@
   "schema": 2,
   "id": "duo_artifact_local_qst28a",
   "template": "beats",
+  "deal": "duo_MS_ArtifactMap_Local_LowChance_Node",
+  "_deal": "His pick, 2026-10-26, after the rename: built and dealt by no pool until then; added by gen_delve move from '-' (no pool), no rebuild.",
   "_deal": "No deal yet: started by hand for his test. RARE when dealt, his 2026-10-21 15:18: \"think rarer, the ships take a while to land\". The Local pool has no _Rare node yet (only LocalCargoNode has one), so it needs gen_delve rare on duo_MS_ArtifactMap_LocalNode first; Eliza's.",
   "author": "eliza (build); words jessica, as Vance Okonkwo-Reyes",
   "source": "his 2026-10-21 09:28: \"Roll back to the old ESM then build a new delve mission with the landings\", after the strike team by ship (A1) on qst11a/b/d was rolled back. His A1: a friendly team lands and holds the entrance.",
