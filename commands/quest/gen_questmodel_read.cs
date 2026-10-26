@@ -386,6 +386,17 @@ namespace FrankyCLI
                     case IScriptBoolListPropertyGetter x: m.Type = "BoolList"; m.BoolList = x.Data.ToList(); Guard(p, typeof(IScriptBoolListPropertyGetter), path, "Name", "Flags", "Data"); break;
                     case IScriptStringListPropertyGetter x: m.Type = "StringList"; m.StringList = x.Data.ToList(); Guard(p, typeof(IScriptStringListPropertyGetter), path, "Name", "Flags", "Data"); break;
                     case IScriptObjectListPropertyGetter x: m.Type = "ObjectList"; m.ObjectList = x.Objects.Select(Obj).ToList(); Guard(p, typeof(IScriptObjectListPropertyGetter), path, "Name", "Flags", "Objects"); break;
+                    case IScriptStructListPropertyGetter x:
+                        m.Type = "StructList";
+                        m.StructList = new();
+                        for (int i = 0; i < x.Structs.Count; i++)
+                        {
+                            var st = x.Structs[i];
+                            m.StructList.Add(st.Members.Select((mp, j) => Property(mp, $"{path}.Structs[{i}].Members[{j}]")).ToList());
+                            Guard(st, typeof(IScriptEntryStructsGetter), $"{path}.Structs[{i}]", "Members");
+                        }
+                        Guard(p, typeof(IScriptStructListPropertyGetter), path, "Name", "Flags", "Structs");
+                        break;
                     default: Refusals.Add($"{path}: a {p.GetType().Name} ('{p.Name}'), a property type the model does not hold"); break;
                 }
                 return m;

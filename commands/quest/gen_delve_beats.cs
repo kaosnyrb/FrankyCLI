@@ -257,9 +257,10 @@ namespace FrankyCLI
             }
 
             // His, 2026-10-11: "the first objective name should have a POI name in it. It helps to know
-            // what POI your looking for". So the first objective names its place by token.
+            // what POI your looking for". So the first objective names its place by token. On an orbit kind there is no POI:
+            // the place IS the orbit, which <Planet> names (2026-10-26, boardspace's first lint).
             if (r.beats.Count > 0 && r.beats[0].objective is string first
-                && !Tokens(first).Any(tk => tk is "Place" or "SecondPlace" or "ThirdPlace"))
+                && !Tokens(first).Any(tk => tk is "Place" or "SecondPlace" or "ThirdPlace" || (IsSpace(t) && tk is "Planet")))
                 Warn($"beat 1's objective \"{first}\" names no place; the first objective tells the player which POI to look for, so give it <Place> (or <SecondPlace>, <ThirdPlace>, wherever beat 1 is).");
 
             var steps = StepsOf(r);
@@ -599,6 +600,8 @@ namespace FrankyCLI
         {
             public List<int> ClearGroups = new();   // clear beats' collections: empty, Optional, and wearing NO package (they hold the site)
             public (int cell, int at)? CellAt;      // space only, place.cellAt: the cell member moved, and the alias it is now created at
+            public int ArriveStage = -1;            // boardspace only: the arrival-in-system stage the beat's objective shows on
+            public FormKey? PaidGlobal;             // boardspace only: the reward global written onto the board's script, when a tier is set
             public string Script = "";
             public List<int> FragStages = new();
             public List<(int alias, string script, int set, int prereq)> Hooks = new();

@@ -194,6 +194,51 @@
         "a second or third place, a request, a theme, a who, speech"
       ],
       "verifiedFrom": "gen_inspect qall duo_artifact_remote_qst03a and duo_MB01a_qst, Defiant, 2026-10-22"
+    },
+    {
+      "id": "boardspace",
+      "kind": "boardspace",
+      "_kind": "A board mission whose ONE place is an orbit (delve_space.cs, the space build). His 2026-10-26: \"I want a missionboard that is only space\". Built on HIS MB01a, which is a board-taken satellite repair in orbit already and plays: the board's own refresh fills its orbit by its own conditions (a major body within 8 parsecs), so nothing hangs off the player or the board. 19a's parent link to the Player would be wrong here: a board quest starts at the refresh, wherever he is then.",
+      "base": "duo_MB01a_qst",
+      "shell": "shells/boardspace.json",
+      "mod": "du_overtime",
+      "driver": "",
+      "questScript": "MissionBountySpaceScript",
+      "_questScript": "KEPT, not replaced: vanilla's MissionBountySpaceScript (extends MissionQuestScript). Its MissionAccepted enables the space map marker (his MB01a's DefaultAliasMapMarkerScript carries EnableOnInit false for exactly that); its ArriveInSystemStage (20, the declared default) is set by the kept defaultquestchangelocationscript; MissionComplete() pays. Its MissionAccepted also calls PrimaryRef.GetShipRef().Enable(), a no-op error on an activator, exactly as his shipped MB01a does.",
+      "activatorFrom": "duo_artifact09_primary_act",
+      "_activatorFrom": "As the space kind: the script-free activator, reskinned. His duo_MB01a_act carries the repair script (a kit, ship spawns).",
+      "beats": 1,
+      "maxBeats": 1,
+      "allows": [
+        "use"
+      ],
+      "carriesItem": false,
+      "placeAlias": 2,
+      "mapMarkerAlias": 16,
+      "entryStage": 10,
+      "_entryStage": "The board's AcceptStage. The system objective shows here; the beat's objective on arrival in the system (20); the object's use sets 100 after 10, whose fragment calls MissionComplete(), his MB01a's own fragment shape (QF_MB_BountySpace01Far_001EF957).",
+      "briefingStage": 10,
+      "completeStage": 100,
+      "beatSlots": [
+        {
+          "markerAlias": 12,
+          "activatorAlias": 3,
+          "objective": 20,
+          "journalStage": 100
+        }
+      ],
+      "_beatSlots": "SpawnMarker01 (12, from the space cell by its ref type) and PrimaryRef (3, created at 12): objective 20's target. Objective 10 (\"Go to any planet in the <Alias=TargetSystemLocation> system\") is his MB01a's text, kept.",
+      "tokens": {
+        "Planet": "TargetPlanetLocation",
+        "System": "TargetSystemLocation"
+      },
+      "_tokens": "<Planet> is the orbit alias; his read, 2026-10-26: it prints the body's name (\"Jemison\"), unconfirmed in game.",
+      "cannot": [
+        "more than one beat, or any beat but use",
+        "a second or third place, a request, a theme, a who",
+        "speech (rung 2, after his first play)"
+      ],
+      "verifiedFrom": "gen_inspect qall duo_MB01a_qst, Defiant, 2026-10-26; MissionBountySpaceScript.psc, MissionQuestScript.psc and QF_MB_BountySpace01Far_001EF957.psc read"
     }
   ]
 }

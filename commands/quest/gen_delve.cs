@@ -65,8 +65,9 @@ namespace FrankyCLI
         {
             public string id { get; set; } = "";
             /// <summary>
-            /// "beats" or "board": both remove the base's driver and have none. Anything else is refused when the
-            /// registry loads, never defaulted, since the kinds that once took other build paths are gone.
+            /// "beats" or "board": both remove the base's driver and have none. "space" and "boardspace": the orbit build
+            /// (delve_space.cs); boardspace KEEPS its base's quest scripts, because the board talks to them. Anything else
+            /// is refused when the registry loads, never defaulted.
             /// </summary>
             public string kind { get; set; } = "";
             public string @base { get; set; } = "";
@@ -181,11 +182,14 @@ namespace FrankyCLI
             public List<string> cannot { get; set; } = new();
             public string verifiedFrom { get; set; } = "";
         }
-        /// <summary>The kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery, and an
-        /// orbit-only one ("space", delve_space.cs), whose one place is an orbit and which shares only the plumbing.</summary>
-        private static readonly string[] Kinds = { "beats", "board", "space" };
+        /// <summary>The kinds: a slate Delve ("beats") and a mission-board one ("board") on the same machinery, and two
+        /// orbit-only ones (delve_space.cs), whose one place is an orbit and which share only the plumbing: "space", started
+        /// by hand, and "boardspace", taken from the board (his 2026-10-26 "I want a missionboard that is only space").</summary>
+        private static readonly string[] Kinds = { "beats", "board", "space", "boardspace" };
         private static bool IsBoard(Template t) => t.kind == "board";
-        private static bool IsSpace(Template t) => t.kind == "space";
+        /// <summary>Either orbit kind: both take the space build, grade and verify.</summary>
+        private static bool IsSpace(Template t) => t.kind == "space" || t.kind == "boardspace";
+        private static bool IsBoardSpace(Template t) => t.kind == "boardspace";
         /// <summary>
         /// The stage a place's people and occupants (an ending's person, a who) are numbered AFTER, each on its own stage below
         /// the first beat's (entryStage + 10): the approach's on a slate Delve (5, so 6, 7...), the arrival's on a board (15,
@@ -1334,6 +1338,11 @@ namespace FrankyCLI
                 // or a named city, which is pinned rather than found (2026-10-23, missionboard05a).
                 if (r.beats.Any(b => b.PlaceIndex == 1) && r.place.second?.remote != true && r.place.second?.settlement == null)
                     Fatal("a beat is at the second place and place.second.remote is not set; a board mission's second place must be a request or a named city (nothing would hold a found one near the first).");
+            }
+            else if (IsBoardSpace(t))
+            {
+                if (string.IsNullOrWhiteSpace(r.prose.card))
+                    Fatal("prose.card is required on a board mission: it is the board's description, the card he reads before taking the job.");
             }
             else if (r.prose.card != null)
                 Fatal($"prose.card is set and template '{t.id}' is not a board mission, so it would be silently ignored.");
@@ -3233,7 +3242,7 @@ namespace FrankyCLI
             if (e == null) { Console.WriteLine("REFUSED: no log entry on briefing stage " + t.briefingStage + "."); return 1; }
             e.Entry = Expand(r.prose.briefing!, t);
             Console.WriteLine("  prose    : name + briefing at stage " + t.briefingStage);
-            if (IsBoard(t))
+            if (IsBoard(t) || IsBoardSpace(t))
             {
                 clone.MissionBoardDescription = Expand(r.prose.card!, t);
                 Console.WriteLine("  card     : the board's description");

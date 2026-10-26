@@ -362,6 +362,10 @@ namespace FrankyCLI
                 "BoolList" => new ScriptBoolListProperty { Data = new ExtendedList<bool>(m.BoolList!) },
                 "StringList" => new ScriptStringListProperty { Data = new ExtendedList<string>(m.StringList!) },
                 "ObjectList" => new ScriptObjectListProperty { Objects = new ExtendedList<ScriptObjectProperty>(m.ObjectList!.Select(Obj)) },
+                "StructList" => new ScriptStructListProperty
+                {
+                    Structs = new ExtendedList<ScriptEntryStructs>(m.StructList!.Select(s => new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty>(s.Select(WriteProperty)) })),
+                },
                 _ => throw new InvalidOperationException($"property type '{m.Type}'"),
             };
             p.Name = m.Name;

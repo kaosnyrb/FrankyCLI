@@ -1,0 +1,39 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_bs1",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, as 26a's.",
+  "author": "eliza",
+  "source": "his 2026-10-26 08:11: \"yeah let's get 26a running\", after my plan of two builds (silent first, then the radio), and 08:14 \"yup\"",
+  "_note": [
+    "BOARD SPACE TEST BS1: missionboard26a (Jessica's) WITHOUT ITS SPEECH, on the new boardspace template (his MB01a whole: its orbit pick,",
+    "its scripts, its map marker on the accept). Her prose, object and objective verbatim; the speaker, broadcast, say and message are left out",
+    "because the template builds none yet, and her recipe keeps them for build two.",
+    "Reading it: taken from the board, the system objective shows, arriving in the system swaps to the repair objective, using the satellite pays.",
+    "Any fault is a board or orbit fault, not a speech one. Unbuilt once 26a builds."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    }
+  },
+  "prose": {
+    "name": "Repairs: Navigation Satellite over <Planet>",
+    "briefing": "A navigation satellite over <Planet> has stopped broadcasting, and ships coming in have been flying the approach blind.",
+    "card": "Repair contract. A navigation satellite in orbit over <Planet> has stopped broadcasting. Fly out to it and bring it back online. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_TravelMarkerLocRefB02",
+      "_at": "His MB01a's own marker for the object (SpawnMarker01's ref type); 26a names se_GeneralMarkerLocRef01, S13's, and either is the template's to fill. The shell's own is kept for this rung so only the board changes.",
+      "objective": "Repair the navigation satellite over <Planet>",
+      "journal": "The navigation satellite over <Planet> had stopped broadcasting. I flew out to it and got it working again.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "name": "Navigation Satellite",
+      "reward": "med"
+    }
+  ]
+}

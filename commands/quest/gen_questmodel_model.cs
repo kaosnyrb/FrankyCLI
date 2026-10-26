@@ -240,7 +240,9 @@ namespace FrankyCLI
     }
 
     /// A Papyrus property. Type is the Mutagen class less "Script" and "Property": Int, Float, Bool, String,
-    /// Object, IntList, FloatList, BoolList, StringList, ObjectList. Anything else is refused on read.
+    /// Object, IntList, FloatList, BoolList, StringList, ObjectList, StructList. Anything else (a single Struct) is refused
+    /// on read. A StructList is a list of structs, each its members as properties (vanilla's
+    /// DefaultQuestChangeLocationScript.ChangeLocationStages, first met on his MB01a 2026-10-26).
     public sealed class QProperty
     {
         public string Type { get; set; } = "";
@@ -256,6 +258,7 @@ namespace FrankyCLI
         public List<bool>? BoolList { get; set; }
         public List<string>? StringList { get; set; }
         public List<QObjectRef>? ObjectList { get; set; }
+        public List<List<QProperty>>? StructList { get; set; }
     }
 
     public sealed class QObjectRef { public string? Form { get; set; } public short Alias { get; set; } public ushort Unused { get; set; } }

@@ -87,6 +87,10 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {t.activatorFrom}, reskinned.");
                 if (b.say != null || b.message != null || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a say, message, group or returnTo; the space kind builds none of those.");
+                // A board pays through the board's reward globals (BuildSpace); a startquest test has nobody to pay it, so a
+                // tier there would be written nowhere.
+                if (b.reward != null && !IsBoardSpace(t))
+                    Fatal($"beat {i + 1} carries a reward; template '{t.id}' is started by hand and pays nothing, so it would be silently ignored.");
             }
         }
 
@@ -108,11 +112,23 @@ namespace FrankyCLI
             // every Delve. His startquest on the base itself did not start it (2026-10-22, "I think it's expecting an
             // event"); the verify asserts the absence rather than this build assuming it.
 
-            // THE DRIVER. The shell's quest script runs the shipped mission (its ship, its gang); a test runs none.
-            var driver = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
-            if (driver == null) { Console.WriteLine($"REFUSED: the shell carries no '{t.replacesDriver}' to remove."); return 1; }
-            vma.Scripts.Remove(driver);
-            Console.WriteLine($"  -driver  : {driver.Name} removed ({vma.Scripts.Count} quest script(s) left)");
+            if (IsBoardSpace(t))
+            {
+                // THE BOARD'S SCRIPTS STAY. The board talks to the quest script (vanilla MissionBountySpaceScript: the accept
+                // enables the space map marker, MissionComplete pays), and his MB01a's location script sets the arrival stage
+                // when he reaches the system. Both are his shipped mission's own, played; nothing replaces them.
+                if (!vma.Scripts.Any(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase)))
+                { Console.WriteLine($"REFUSED: the shell carries no '{t.questScript}', the script the board talks to."); return 1; }
+                Console.WriteLine($"  scripts  : kept, the board's: {string.Join(", ", vma.Scripts.Select(s => s.Name))}");
+            }
+            else
+            {
+                // THE DRIVER. The shell's quest script runs the shipped mission (its ship, its gang); a test runs none.
+                var driver = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.replacesDriver, StringComparison.OrdinalIgnoreCase));
+                if (driver == null) { Console.WriteLine($"REFUSED: the shell carries no '{t.replacesDriver}' to remove."); return 1; }
+                vma.Scripts.Remove(driver);
+                Console.WriteLine($"  -driver  : {driver.Name} removed ({vma.Scripts.Count} quest script(s) left)");
+            }
             // The shell's own fragments go too: this build writes its own, below, and their properties must not count as users.
             vma.Script = new ScriptEntry();
             vma.Fragments.Clear();
@@ -241,28 +257,78 @@ namespace FrankyCLI
                 e.Entry = Expand(beat.journal, t);
             }
 
-            // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is the stock one).
-            var hook = StageHook("DefaultAliasOnActivate", t.completeStage, 0,
+            // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is the stock one). On a
+            // board it waits for the accept, since the quest runs from the board's refresh and its object is already placed.
+            int prereq = IsBoardSpace(t) ? t.entryStage : 0;
+            var hook = StageHook("DefaultAliasOnActivate", t.completeStage, prereq,
                                  new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
-            if (AttachHook(vma, clone.FormKey, (int)target.ID, hook, HookEntry.FindOrCreate, true, bm, t.completeStage, 0) == Hooked.AlreadyCarries)
+            if (AttachHook(vma, clone.FormKey, (int)target.ID, hook, HookEntry.FindOrCreate, true, bm, t.completeStage, prereq) == Hooked.AlreadyCarries)
             { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnActivate."); return 1; }
-            Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnActivate sets {t.completeStage} after 0");
+            Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnActivate sets {t.completeStage} after {prereq}");
 
-            var s0 = clone.Stages?.FirstOrDefault(s => s.Index == 0);
-            if (s0 == null) { Console.WriteLine("REFUSED: the shell has no stage 0 to run on start."); return 1; }
-            s0.Flags |= QuestStage.Flag.RunOnStart;
-
-            // THE FRAGMENT: the objective shows on start, and the hook's stage completes and stops the quest.
             string name = FragmentScriptName(r);
-            var code = new SortedDictionary<int, List<string>>
+            var code = new SortedDictionary<int, List<string>>();
+            if (IsBoardSpace(t))
             {
-                [0] = new() { $"SetObjectiveDisplayed({slot.objective})" },
-                [t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})", "CompleteQuest()", "Stop()" },
-            };
+                // His MB01a's object is a ship-shaped target that completes by DYING (DefaultAliasOnDeath sets 100). Ours is
+                // used, so the death hook goes with the ship it was written for; printed, never silent.
+                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID);
+                int deaths = entry?.Scripts.RemoveAll(s => s.Name == "DefaultAliasOnDeath") ?? 0;
+                Console.WriteLine($"  -hook    : alias {target.ID} DefaultAliasOnDeath removed ({deaths}); the object is used, not killed");
+                // THE FRAGMENT IS HIS MB01a's (vanilla QF_MB_BountySpace01Far_001EF957), with the beat's objective as the
+                // second: the system objective on the accept, the beat's on arrival in the system (the location script sets
+                // ArriveInSystemStage), and the board's pay on the hook's stage. MissionComplete() sets CompleteStage itself
+                // only when it is not already done, so calling it from that stage is vanilla's own shape.
+                // Unset on his MB01a, so the script's own declaration holds (MissionBountySpaceScript.psc: `= 20`). That is the
+                // engine's value, not a guess: an unset Const property reads its declared default.
+                const int ArriveInSystemDeclared = 20;
+                var arrive = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))
+                    .Properties.OfType<ScriptIntProperty>().FirstOrDefault(p => p.Name == "ArriveInSystemStage")?.Data ?? ArriveInSystemDeclared;
+                if (clone.Stages?.Any(s => s.Index == arrive) != true) { Console.WriteLine($"REFUSED: the shell has no arrival stage {arrive}."); return 1; }
+                const int systemObjective = 10;
+                if (clone.Objectives?.Any(o => o.Index == systemObjective) != true) { Console.WriteLine($"REFUSED: the shell has no system objective {systemObjective}."); return 1; }
+                code[t.entryStage] = new() { $"SetObjectiveDisplayed({systemObjective})" };
+                code[arrive] = new() { $"SetObjectiveCompleted({systemObjective})", $"SetObjectiveDisplayed({slot.objective})" };
+                code[t.completeStage] = new()
+                {
+                    $"SetObjectiveCompleted({slot.objective})",
+                    "Quest __temp = Self as Quest",
+                    $"{t.questScript} kmyQuest = __temp as {t.questScript}",
+                    "kmyQuest.MissionComplete()",
+                };
+                bm.ArriveStage = arrive;
+                // THE PAY goes onto the board's reward globals, which the card also shows (the ground board's rule: never onto
+                // the stage, or it pays twice). Absent, his MB01a's own stand (duo_reward_creds_easy).
+                if (beat.reward is string tier)
+                {
+                    var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
+                    if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
+                    var qs = vma.Scripts.First(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
+                    {
+                        var rp = qs.Properties.OfType<ScriptObjectProperty>().FirstOrDefault(p => p.Name == pn);
+                        if (rp == null) { Console.WriteLine($"REFUSED: {t.questScript} carries no {pn} to pay through."); return 1; }
+                        rp.Object.SetTo(cg.FormKey);
+                    }
+                    bm.PaidGlobal = cg.FormKey;
+                    Console.WriteLine($"  reward   : the board pays {cg.EditorID} (RewardAmountGlobal and its Actual)");
+                }
+            }
+            else
+            {
+                var s0 = clone.Stages?.FirstOrDefault(s => s.Index == 0);
+                if (s0 == null) { Console.WriteLine("REFUSED: the shell has no stage 0 to run on start."); return 1; }
+                s0.Flags |= QuestStage.Flag.RunOnStart;
+                // THE FRAGMENT: the objective shows on start, and the hook's stage completes and stops the quest.
+                code[0] = new() { $"SetObjectiveDisplayed({slot.objective})" };
+                code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})", "CompleteQuest()", "Stop()" };
+            }
             var psc = new StringBuilder();
             psc.AppendLine($"Scriptname {name} Extends Quest Hidden Const");
             psc.AppendLine($"{{GENERATED by FrankyCLI gen_delve from data/delves/recipes/{r.id}.json (template {t.id}). Do not edit: change");
-            psc.AppendLine("the recipe and rebuild. A space Delve's two stages: the objective on start, and the object's use completes it.}");
+            psc.AppendLine(IsBoardSpace(t)
+                ? "the recipe and rebuild. A board space Delve: the system objective on the accept, the beat's on arrival, and the object's use pays.}"
+                : "the recipe and rebuild. A space Delve's two stages: the objective on start, and the object's use completes it.}");
             psc.AppendLine();
             foreach (var kv in code)
             {
@@ -438,9 +504,15 @@ namespace FrankyCLI
             var baseKey = m.Quests.FirstOrDefault(x => x.EditorID == t.@base)?.FormKey;
             fail += Check($"nothing in the quest points at its base {t.@base}",
                           baseKey == null ? "base not found" : q.EnumerateFormLinks().Count(l => l.FormKey == baseKey.Value).ToString(), "0");
-            fail += Check("no story-manager start event (started with startquest, as every Delve)", q.Event?.ToString() ?? "none", "none");
+            fail += Check(IsBoardSpace(t) ? "no story-manager start event (the board's node deals it, as every board Delve)"
+                                          : "no story-manager start event (started with startquest, as every Delve)", q.Event?.ToString() ?? "none", "none");
             fail += AliasGraphChecks(q);
-            fail += Check("quest-level scripts (the driver removed, none added)", string.Join(",", vma.Scripts.Select(s => s.Name)), "");
+            if (IsBoardSpace(t))
+                // Pinned off his MB01a's census (gen_inspect qall duo_MB01a_qst, Defiant, 2026-10-26), never re-read from the shell.
+                fail += Check("quest-level scripts (the board's, kept)", string.Join(",", vma.Scripts.Select(s => s.Name.ToLowerInvariant()).OrderBy(x => x)),
+                              "defaultquestchangelocationscript,missionbountyspacescript");
+            else
+                fail += Check("quest-level scripts (the driver removed, none added)", string.Join(",", vma.Scripts.Select(s => s.Name)), "");
 
             var slot = t.beatSlots[0];
             var orbit = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)t.placeAlias);
@@ -517,7 +589,27 @@ namespace FrankyCLI
             fail += Check("fragment stages", string.Join(",", vma.Fragments.Select(f => f.Stage).OrderBy(x => x)), string.Join(",", bm.FragStages));
             foreach (var f in vma.Fragments)
                 fail += Check($"stage {f.Stage} fragment", $"{f.ScriptName}.{f.FragmentName}", $"{bm.Script}.{FragmentFunction(f.Stage)}");
-            fail += Check("stage 0 runs on start", q.Stages.Any(s => s.Index == 0 && s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "True");
+            if (IsBoardSpace(t))
+            {
+                fail += Check("nothing runs on start (the board starts it at its refresh, long before the accept)",
+                              string.Join(",", q.Stages.Where(s => s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).Select(s => s.Index)), "");
+                fail += Check($"the object (alias {slot.activatorAlias}) no longer carries DefaultAliasOnDeath",
+                              (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnDeath") == true).ToString(), "False");
+                string src = File.ReadAllText(bm.PscPath);
+                string done = src.Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+                fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete()", done.Contains("kmyQuest.MissionComplete()").ToString(), "True");
+                if (bm.PaidGlobal is FormKey paid)
+                {
+                    var qs = vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase));
+                    foreach (var pn in new[] { "RewardAmountGlobal", "RewardAmountGlobalActual" })
+                        fail += Check($"{t.questScript}.{pn} is the beat's tier",
+                                      qs?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == pn)?.Object.FormKey.ToString() ?? "missing", paid.ToString());
+                }
+                fail += Check($"the beat's objective {slot.objective} shows on arrival stage {bm.ArriveStage}",
+                              (src.Split($"Function {FragmentFunction(bm.ArriveStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0].Contains($"SetObjectiveDisplayed({slot.objective})") == true).ToString(), "True");
+            }
+            else
+                fail += Check("stage 0 runs on start", q.Stages.Any(s => s.Index == 0 && s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).ToString(), "True");
             foreach (var h in bm.Hooks)
             {
                 var sc = vma.Aliases.FirstOrDefault(a => a.Property.Alias == h.alias)?.Scripts.FirstOrDefault(s => s.Name == h.script);
@@ -530,7 +622,9 @@ namespace FrankyCLI
             if (fail == 0)
             {
                 Console.WriteLine();
-                Console.WriteLine($"  BUILD VERIFIED. Compile the fragment script, then startquest {r.id}:");
+                Console.WriteLine(IsBoardSpace(t)
+                    ? $"  BUILD VERIFIED. Compile the fragment script, then take it from the board ({r.deal}); a board quest is never started by hand:"
+                    : $"  BUILD VERIFIED. Compile the fragment script, then startquest {r.id}:");
                 Console.WriteLine($"    python papyrus/compile.py C:/modding/DU_Overtime/Data {bm.Script}");
             }
             return fail;
