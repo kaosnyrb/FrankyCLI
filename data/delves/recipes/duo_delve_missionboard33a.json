@@ -18,7 +18,7 @@
     "(2) ASHTA WAVES. A hold's waves come from the base driver's gang list (spacers). This wants a creature list, Ashta",
     "only: hold.list is the stand-in. Which LeveledNpc is Ashta is hers to find.",
     "Pay: med, capped.",
-    "NARROW, SO THE TEXT NAMES THINGS (his 11:33: narrow quests give the writing more bones): Akila, Akila City's walls, the Rangers, in the card, briefing and journals. THE AUDIO STILL NAMES ROLES ONLY, his 10-12 rule for a different reason (a total conversion patches text, not recorded audio), so the broadcast and says carry Akila's texture (the long grass, the walls) without a proper noun. Unless he rules narrow quests out of that."
+    "NARROW, SO IT NAMES THINGS, ALOUD TOO. His 11:33 (\"narrow quests which give you writing more bones\") and 11:36: \"yeah let's make them exempt. This is like something people will go 'Wait how the hell did they do that'\". So the audio says Ashta, Akila and the Rangers; the total-conversion rule (10-12) does not apply to a narrow Delve, his trade."
   ],
   "place": {
     "theme": {
@@ -49,7 +49,7 @@
       "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",
       "say": [
         "That's the alarm. Everybody's inside.",
-        "They'll have heard it too. They always come when it goes off."
+        "The Ashta will have heard it too. They always come when it goes off."
       ]
     },
     {
@@ -72,8 +72,8 @@
       "revealObjective": "Kill the Ashta",
       "defend": 1,
       "say": [
-        "That's them gone. Back out into the grass.",
-        "They were hunting here long before we came. I don't think they've forgotten it."
+        "That's the pack gone, back out into the grass.",
+        "Ashta were hunting this ground long before anyone built a wall on Akila. They haven't forgotten it."
       ],
       "reward": "med"
     }
@@ -84,9 +84,9 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "You're here? Good. Get the alarm going so everyone gets inside.",
-    "They come in from the long grass, and they come fast.",
-    "Don't let them reach the middle of the camp."
+    "You made it out past the walls? Good. Get the alarm going so everyone gets inside.",
+    "The Ashta come in from the long grass, and they come fast.",
+    "The Rangers can't get out here till tomorrow. Tonight it's us and you."
   ],
-  "_speech": "The outpost's lead, steady, has done this before. Sarah (Mature, Reassuring, Confident), in two recipes; his ear decides. No names, places, factions or currency, and the animal is never named aloud."
+  "_speech": "The outpost's lead, steady, has done this before. Sarah (Mature, Reassuring, Confident), in two recipes; his ear decides. Narrow, so places, factions and the creature may be said aloud (his exemption, 2026-10-26)."
 }
