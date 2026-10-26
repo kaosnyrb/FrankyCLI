@@ -84,7 +84,7 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} is at '{b.at}'; an orbit's markers are its space cell's own (se_*), filled from the cell.");
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
-                    Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {t.activatorFrom}, reskinned.");
+                    Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(IsBoardSpace(t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
                 if (b.say != null || b.message != null || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a say, message, group or returnTo; the space kind builds none of those.");
                 // A board pays through the board's reward globals (BuildSpace); a startquest test has nobody to pay it, so a
@@ -229,13 +229,31 @@ namespace FrankyCLI
                 Console.WriteLine($"  cell     : {cell.Name} (alias {cell.ID}) creates {cell.CreateReferenceToObject.Object.FormKey} at alias {anchor[0].id} {anchor[0].name} (was at {wasAt})");
             }
 
-            // THE OBJECT. The shell's target is a ship; it becomes a clone of activatorFrom, reskinned to the beat's model.
-            var src = myMod.Activators.FirstOrDefault(a => a.EditorID == t.activatorFrom);
-            if (src == null) { Console.WriteLine($"REFUSED: activatorFrom '{t.activatorFrom}' is not an activator in {t.mod}."); return 1; }
-            if (src.VirtualMachineAdapter?.Scripts.Count > 0)
-            { Console.WriteLine($"REFUSED: activatorFrom '{t.activatorFrom}' carries a script, and a clone would run it."); return 1; }
-            target.CreateReferenceToObject!.Object.SetTo(src.FormKey);
-            if (ReskinActivator(myMod, clone, t, r.id + "_b1", (int)target.ID, beat.model, beat.name) != 0) return 1;
+            if (IsBoardSpace(t))
+            {
+                // THE OBJECT IS HIS MB01's OWN ACTIVATOR, script and all, reskinned (his 2026-10-26: "The activator has
+                // important scripts on it and is critial to the mission"). ccs_activaterepair IS the mission: it places an
+                // installation on load, takes a Ship Repair Kit, may spawn attackers, completes objective 20 and calls
+                // MissionComplete() itself. Its questobjective names the base quest, so the clone's is repointed at this one.
+                if (ReskinActivator(myMod, clone, t, r.id + "_b1", (int)target.ID, beat.model, beat.name) != 0) return 1;
+                var act = myMod.Activators.First(a => a.FormKey == target.CreateReferenceToObject!.Object.FormKey);
+                var baseKey = myMod.Quests.FirstOrDefault(q => q.EditorID == t.@base)?.FormKey;
+                if (baseKey == null || act.VirtualMachineAdapter == null)
+                { Console.WriteLine($"REFUSED: the base {t.@base} is not in {t.mod}, or the activator carries no script to repoint."); return 1; }
+                int n = gen_delvegatetest.RepointSelfLinks(act.VirtualMachineAdapter, baseKey.Value, clone.FormKey);
+                if (n != 1) { Console.WriteLine($"REFUSED: the activator's script named its base quest {n} time(s); one (questobjective) was expected."); return 1; }
+                Console.WriteLine($"  object   : {act.EditorID} keeps {string.Join(", ", act.VirtualMachineAdapter.Scripts.Select(s => s.Name))}; questobjective now this quest");
+            }
+            else
+            {
+                // THE OBJECT. The shell's target is a ship; it becomes a clone of activatorFrom, reskinned to the beat's model.
+                var src = myMod.Activators.FirstOrDefault(a => a.EditorID == t.activatorFrom);
+                if (src == null) { Console.WriteLine($"REFUSED: activatorFrom '{t.activatorFrom}' is not an activator in {t.mod}."); return 1; }
+                if (src.VirtualMachineAdapter?.Scripts.Count > 0)
+                { Console.WriteLine($"REFUSED: activatorFrom '{t.activatorFrom}' carries a script, and a clone would run it."); return 1; }
+                target.CreateReferenceToObject!.Object.SetTo(src.FormKey);
+                if (ReskinActivator(myMod, clone, t, r.id + "_b1", (int)target.ID, beat.model, beat.name) != 0) return 1;
+            }
 
             // ITS MARKER: the cell's own, by the beat's ref type (the shell's is kept when the recipe names the same one).
             var rt = marker.Conditions.Select(c => c.Data).OfType<HasRefTypeConditionData>().FirstOrDefault();
@@ -257,27 +275,24 @@ namespace FrankyCLI
                 e.Entry = Expand(beat.journal, t);
             }
 
-            // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is the stock one). On a
-            // board it waits for the accept, since the quest runs from the board's refresh and its object is already placed.
-            int prereq = IsBoardSpace(t) ? t.entryStage : 0;
-            var hook = StageHook("DefaultAliasOnActivate", t.completeStage, prereq,
-                                 new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
-            if (AttachHook(vma, clone.FormKey, (int)target.ID, hook, HookEntry.FindOrCreate, true, bm, t.completeStage, prereq) == Hooked.AlreadyCarries)
-            { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnActivate."); return 1; }
-            Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnActivate sets {t.completeStage} after {prereq}");
+            // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is the stock one). Not on a
+            // board: there the activator's own script completes the mission, and his MB01's alias scripts stay as shipped.
+            if (!IsBoardSpace(t))
+            {
+                var hook = StageHook("DefaultAliasOnActivate", t.completeStage, 0,
+                                     new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                if (AttachHook(vma, clone.FormKey, (int)target.ID, hook, HookEntry.FindOrCreate, true, bm, t.completeStage, 0) == Hooked.AlreadyCarries)
+                { Console.WriteLine($"REFUSED: alias {target.ID} already carries DefaultAliasOnActivate."); return 1; }
+                Console.WriteLine($"  +hook    : alias {target.ID} DefaultAliasOnActivate sets {t.completeStage} after 0");
+            }
 
             string name = FragmentScriptName(r);
             var code = new SortedDictionary<int, List<string>>();
             if (IsBoardSpace(t))
             {
-                // His MB01a's object is a ship-shaped target that completes by DYING (DefaultAliasOnDeath sets 100). Ours is
-                // used, so the death hook goes with the ship it was written for; printed, never silent.
-                var entry = vma.Aliases.FirstOrDefault(a => a.Property.Alias == (int)target.ID);
-                int deaths = entry?.Scripts.RemoveAll(s => s.Name == "DefaultAliasOnDeath") ?? 0;
-                Console.WriteLine($"  -hook    : alias {target.ID} DefaultAliasOnDeath removed ({deaths}); the object is used, not killed");
                 // THE FRAGMENT IS HIS MB01a's (vanilla QF_MB_BountySpace01Far_001EF957), with the beat's objective as the
                 // second: the system objective on the accept, the beat's on arrival in the system (the location script sets
-                // ArriveInSystemStage), and the board's pay on the hook's stage. MissionComplete() sets CompleteStage itself
+                // ArriveInSystemStage), and the board's pay on CompleteStage (set by the activator's MissionComplete(), or by the shipped death hook). MissionComplete() sets CompleteStage itself
                 // only when it is not already done, so calling it from that stage is vanilla's own shape.
                 // Unset on his MB01a, so the script's own declaration holds (MissionBountySpaceScript.psc: `= 20`). That is the
                 // engine's value, not a guess: an unset Const property reads its declared default.
@@ -593,8 +608,15 @@ namespace FrankyCLI
             {
                 fail += Check("nothing runs on start (the board starts it at its refresh, long before the accept)",
                               string.Join(",", q.Stages.Where(s => s.Flags.HasFlag(QuestStage.Flag.RunOnStart)).Select(s => s.Index)), "");
-                fail += Check($"the object (alias {slot.activatorAlias}) no longer carries DefaultAliasOnDeath",
-                              (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnDeath") == true).ToString(), "False");
+                // The object: his MB01 activator's script, its questobjective on THIS quest (never the base), and no stock
+                // activate hook beside it, since the script completes the mission itself.
+                var objAct = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
+                var repair = objAct?.VirtualMachineAdapter?.Scripts.FirstOrDefault(s => s.Name.Equals("ccs_activaterepair", StringComparison.OrdinalIgnoreCase));
+                fail += Check($"{r.id}_b1 carries his repair script, its questobjective on this quest",
+                              repair == null ? "no ccs_activaterepair" : repair.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "questobjective")?.Object.FormKey.ToString() ?? "no questobjective",
+                              q.FormKey.ToString());
+                fail += Check($"the object (alias {slot.activatorAlias}) carries no stock activate hook",
+                              (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnActivate") == true).ToString(), "False");
                 string src = File.ReadAllText(bm.PscPath);
                 string done = src.Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
                 fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete()", done.Contains("kmyQuest.MissionComplete()").ToString(), "True");

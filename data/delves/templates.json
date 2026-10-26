@@ -205,8 +205,7 @@
       "driver": "",
       "questScript": "MissionBountySpaceScript",
       "_questScript": "KEPT, not replaced: vanilla's MissionBountySpaceScript (extends MissionQuestScript). Its MissionAccepted enables the space map marker (his MB01a's DefaultAliasMapMarkerScript carries EnableOnInit false for exactly that); its ArriveInSystemStage (20, the declared default) is set by the kept defaultquestchangelocationscript; MissionComplete() pays. Its MissionAccepted also calls PrimaryRef.GetShipRef().Enable(), a no-op error on an activator, exactly as his shipped MB01a does.",
-      "activatorFrom": "duo_artifact09_primary_act",
-      "_activatorFrom": "As the space kind: the script-free activator, reskinned. His duo_MB01a_act carries the repair script (a kit, ship spawns).",
+      "_object": "NO activatorFrom: the object is HIS MB01a's own duo_MB01a_act, cloned with its script and reskinned (his 2026-10-26: \"The activator has important scripts on it and is critial to the mission\"). ccs_activaterepair places an installation on load, takes a Ship Repair Kit, may spawn attackers, completes objective 20 and calls MissionComplete() itself; its questobjective is repointed at the built quest. So no stock activate hook, and his DefaultAliasOnDeath stays as shipped.",
       "beats": 1,
       "maxBeats": 1,
       "allows": [
@@ -216,7 +215,7 @@
       "placeAlias": 2,
       "mapMarkerAlias": 16,
       "entryStage": 10,
-      "_entryStage": "The board's AcceptStage. The system objective shows here; the beat's objective on arrival in the system (20); the object's use sets 100 after 10, whose fragment calls MissionComplete(), his MB01a's own fragment shape (QF_MB_BountySpace01Far_001EF957).",
+      "_entryStage": "The board's AcceptStage. The system objective shows here; the beat's objective on arrival in the system (20); the activator's script completes it and pays (MissionComplete sets 100, whose fragment calls it again, guarded), his MB01a's own fragment shape (QF_MB_BountySpace01Far_001EF957).",
       "briefingStage": 10,
       "completeStage": 100,
       "beatSlots": [
