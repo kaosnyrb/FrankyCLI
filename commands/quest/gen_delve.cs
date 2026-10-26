@@ -782,6 +782,7 @@ namespace FrankyCLI
                 // the rare tier: commands/quest/delve_rare.cs
                 case "rare": return DelveRare.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // a built Delve changes pool by a list edit, never a rebuild: commands/quest/delve_move.cs
+                case "nodes": return DelveNodes.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
                 case "move": return DelveMove.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // the walk-up groups' InfoGroup header, in place: commands/quest/delve_infogroup.cs
                 case "infogroup": return DelveInfoGroup.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
