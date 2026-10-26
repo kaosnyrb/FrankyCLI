@@ -1,0 +1,56 @@
+{
+  "schema": 2,
+  "id": "duo_delve34a",
+  "template": "slatespace",
+  "_template": "PROPOSED, NOT BUILT: a SLATE Delve whose one place is an orbit, dealt from the remote-space branch. Eliza's. The space kind is the ladder's harness (one silent use, started by hand, pays nothing); this is it graduating as boardspace did for the board, the ladder spike's exit (b). His 62 duo_artifact_remote_qst* are the prior art, and the space shell is one of them (qst03a) already.",
+  "deal": "_duo_MS_ArtifactMapRemoteSpace_TEST",
+  "_deal": "The remote-space branch's test node; the real one is duo_MS_ArtifactMap_RemoteSpaceNode.",
+  "author": "jessica",
+  "source": "his 2026-10-26 10:48: \"Another mission needed to fill the last gap: RemoteSpace: needs a slate space template; nothing for it yet.\"",
+  "_note": [
+    "THE FIRST REMOTE-SPACE SLATE DELVE. A freighter went dark in orbit; its crew got off in the pods, and its flight",
+    "recorder is still pinging. Fly out and pull it. ONE use, the one thing an orbit Delve is proven to carry.",
+    "A SLATE, so the broadcast plays when the quest starts (BeginOnQuestStart, never stage 0's fragment), and the opening",
+    "line does not say how the job arrived (remote06a's rule). The client calls; the closing line is the radio.",
+    "Not a satellite on purpose: 26a to 29a are satellites. MODEL: Satellite_Beacon is the only object proven in orbit, so it",
+    "stands in; a wreck section or a recorder beacon is his or Kim's pick.",
+    "Pay: med, capped.",
+    "LINT as 'space' (2026-10-26): speech, the say, the reward and <Planet> are refused (space supplies only <Place>, the orbit itself). boardspace supplies <Planet> off the orbit; slatespace wants the same, or say which token and I reword."
+  ],
+  "place": {
+    "altitude": 27.673,
+    "_altitude": "26a's, MB01e's: the altitude that filled. Eliza's to say whether a slate orbit wants another."
+  },
+  "prose": {
+    "name": "Recovery: Flight Recorder over <Planet>",
+    "briefing": "A freighter went dark in orbit over <Planet>. Its crew got off in the pods, and its flight recorder is still pinging."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef06",
+      "_at": "26a's proven marker.",
+      "objective": "Recover the flight recorder from the wreck over <Planet>",
+      "journal": "A freighter went dark over <Planet> and its crew got off in the pods. I pulled its flight recorder out of the wreck, so somebody can finally say what happened.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "_model": "STAND-IN: the only object proven in orbit.",
+      "name": "Flight Recorder",
+      "say": [
+        "You've got it? Then we'll finally know.",
+        "The crew will be glad. They've been telling the same story to anyone who'll listen."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Freight Owner",
+    "voice": "GenericFemale01",
+    "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
+  },
+  "broadcast": [
+    "If you're near the wreck, you'll pick up the ping. That's the recorder.",
+    "The crew got off in the pods. The ship didn't.",
+    "They swear they did nothing wrong. The recorder's the only thing that can say so."
+  ],
+  "_speech": "The ship's owner, who believes her crew and wants proof. Bella (Professional, Bright, Warm), in one recipe so far; his ear decides. No names, places, factions or currency."
+}
