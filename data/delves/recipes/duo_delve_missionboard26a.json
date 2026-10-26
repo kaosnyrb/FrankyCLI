@@ -2,7 +2,7 @@
   "schema": 2,
   "id": "duo_delve_missionboard26a",
   "template": "boardspace",
-  "_template": "PROPOSED, NOT BUILT, and the lint refuses it until it is: a board mission whose one place is an ORBIT. Eliza's. The board kind gives the posting, the accept on 10 and the pay through MissionComplete(); the space kind gives the orbit (S13's five aliases plus a parent link, proven in his 10-22 play). His MB01a is a board-taken satellite repair in orbit already, so it is the obvious base, hers to choose. The board picks the system, so the orbit hangs off the board's target, not off the Player as on 19a; hers to price.",
+  "_template": "BUILT AND PLAYED 2026-10-26 (Eliza, his 'yup all worked'): his MB01a whole, its own orbit pick, his repair activator reskinned.",
   "deal": "_duo_MB_MissionNode_test",
   "_deal": "The board's test node, until he plays it.",
   "author": "jessica",
@@ -23,10 +23,7 @@
     "which token will and I reword.",
     "Pay: med, capped (his 10-19 'for now')."
   ],
-  "place": {
-    "orbit": "board",
-    "_orbit": "The orbit is the board's target. The value is a placeholder for whatever field Eliza builds; the intent is S13's shape, with the board choosing where."
-  },
+  "place": {},
   "prose": {
     "name": "Repairs: Navigation Satellite over <Planet>",
     "briefing": "A navigation satellite over <Planet> has stopped broadcasting, and ships coming in have been flying the approach blind.",
@@ -42,15 +39,12 @@
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "_model": "The right object at last: ruled out on land (his, via Kim, 10-12) because it is a space object. Kim's scale note says it sinks 10.45 m, a space ring. S13 used it in orbit.",
       "name": "Navigation Satellite",
-      "message": {
-        "title": "Satellite Repaired",
-        "text": "The fault clears. A light on the satellite starts to pulse again, slow and steady."
-      },
       "say": [
         "There it is. It's broadcasting again.",
         "Every approach just got a lot less exciting. Thank you."
       ],
-      "reward": "med"
+      "reward": "med",
+      "_message": "Dropped 2026-10-26: his MB01 repair activator shows its own start and success messages, so a message box of mine would stack on them (Eliza's catch; my call)."
     }
   ],
   "speaker": {
