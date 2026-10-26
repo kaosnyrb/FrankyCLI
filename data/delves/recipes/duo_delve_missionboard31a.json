@@ -7,10 +7,12 @@
   "author": "jessica",
   "source": "Eliza's letter 2026-10-26 (office/correspondence/2026-10-26-eliza-jessica-infestations-for-the-board.md), on his week goal: \"This week I'd like to have at least one of each of the new missions set and the old in the legacy nodes.\"",
   "_note": [
-    "THE INFESTATION FAMILY, 1 OF 2: PREDATORS AT A HOME. His MB16 (surface predators, 13 originals), the plain one:",
-    "go where animals have taken over, kill them, leave. Voice on the clear, from the client (mission-types.md, type 3).",
-    "A lived-in built site, so the stake is people who cannot go home. One species, as a Hunt: the megalist's one-species pick.",
-    "Builds on a board today: one request, one clear, the arrival broadcast and a closing line. Pay: med, capped."
+    "THE INFESTATION FAMILY, 1 OF 2: A SITE THAT WENT QUIET. His MB16 (surface predators, 13 originals): go where animals have",
+    "taken over, kill them, leave. Voice on the clear, from the client (mission-types.md, type 3).",
+    "REWRITTEN 2026-10-26 after his play: every site in the pool has residents, and on his idea they now die when the first",
+    "call plays (place.residents \"dead\"). So the people are already dead when he arrives, and the predators are among them.",
+    "The client is a neighbour who lost contact, not a resident going home. Restrained on purpose: nobody describes the bodies.",
+    "One species, as a Hunt. Pay: med, capped."
   ],
   "place": {
     "theme": {
@@ -28,8 +30,8 @@
   },
   "prose": {
     "name": "Infestation: Predators at the <Place> on <Planet>",
-    "briefing": "Predators have moved into the <Place>, and the people who live there have been sleeping somewhere else for a week.",
-    "card": "Infestation contract. Predators have moved into the <Place> on <Planet>, and the people who live there can't get back in. Clear them out. Payment on contract completion."
+    "briefing": "The <Place> went quiet three days ago. Predators have been seen around it since.",
+    "card": "Infestation contract. The <Place> on <Planet> stopped answering three days ago, and predators have been seen around it. Go in and clear them out. Payment on contract completion."
   },
   "beats": [
     {
@@ -46,23 +48,23 @@
         "chance": 25
       },
       "objective": "Clear the predators out of the <Place>",
-      "journal": "Predators had taken over the <Place>. They're dead, every one, and the people who live there can go home.",
+      "journal": "The people at the <Place> were already dead when I got there, and the predators were still in among them. They're gone now, so somebody can go in and see to the dead.",
       "say": [
-        "That's all of them? You're sure?",
-        "Then we're going home. I'm sleeping in my own bed tonight."
+        "It's done? Then I'll get some people together and go up.",
+        "Thank you for going in first. None of us wanted to."
       ],
       "reward": "med"
     }
   ],
   "speaker": {
-    "name": "Resident",
+    "name": "Neighbour",
     "voice": "GenericMale01",
     "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
   },
   "broadcast": [
-    "You're there? Good. Don't go in like you're visiting.",
-    "They came in one night and never left.",
-    "There's more of them than you'd think, and they don't scare."
+    "You're at the site? Then you can see more than I can.",
+    "They stopped answering three days ago. We heard the animals at night after that.",
+    "Clear out whatever's still in there. Somebody has to go in and see to them."
   ],
-  "_speech": "Someone who lives there, tired and a little wry. Killian, already in three recipes; his ear decides. No names, places, factions or currency."
+  "_speech": "A neighbour from further along, quiet, has guessed what you'll find and doesn't say it. Killian, his ear decides. No names, places, factions or currency."
 }
