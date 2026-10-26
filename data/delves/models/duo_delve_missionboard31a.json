@@ -1,5 +1,5 @@
 {
-  "FormKey": "003BA5:du_overtime.esm",
+  "FormKey": "003BB2:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -138,7 +138,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003BA5:du_overtime.esm",
+              "FirstLink": "003BB2:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -175,7 +175,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003BA5:du_overtime.esm",
+              "FirstLink": "003BB2:du_overtime.esm",
               "SecondParameter": 10
             }
           ],
@@ -266,7 +266,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003BA5:du_overtime.esm",
+              "FirstLink": "003BB2:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -490,6 +490,16 @@
       "Properties": [
         {
           "Type": "Object",
+          "Name": "Alias_ArrivalMarker",
+          "Flags": 1,
+          "Object": {
+            "Form": "003BB2:du_overtime.esm",
+            "Alias": 3,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
           "Name": "Loot1",
           "Flags": 1,
           "Object": {
@@ -503,7 +513,7 @@
           "Name": "Alias_Beat1Spawn",
           "Flags": 1,
           "Object": {
-            "Form": "003BA5:du_overtime.esm",
+            "Form": "003BB2:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -513,7 +523,7 @@
           "Name": "Alias_Beat1Enemies",
           "Flags": 1,
           "Object": {
-            "Form": "003BA5:du_overtime.esm",
+            "Form": "003BB2:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -533,7 +543,7 @@
           "Name": "Say1",
           "Flags": 1,
           "Object": {
-            "Form": "003BAB:du_overtime.esm",
+            "Form": "003BB8:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -543,7 +553,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003BAF:du_overtime.esm",
+            "Form": "003BBC:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -624,7 +634,7 @@
             "Name": "PlayerStarSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003BA5:du_overtime.esm",
+              "Form": "003BB2:du_overtime.esm",
               "Alias": 0,
               "Unused": 0
             }
@@ -634,7 +644,7 @@
             "Name": "TargetSystemLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003BA5:du_overtime.esm",
+              "Form": "003BB2:du_overtime.esm",
               "Alias": 8,
               "Unused": 0
             }
@@ -644,7 +654,7 @@
             "Name": "TargetPlanetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003BA5:du_overtime.esm",
+              "Form": "003BB2:du_overtime.esm",
               "Alias": 2,
               "Unused": 0
             }
@@ -654,7 +664,7 @@
             "Name": "TargetLocation",
             "Flags": 1,
             "Object": {
-              "Form": "003BA5:du_overtime.esm",
+              "Form": "003BB2:du_overtime.esm",
               "Alias": 5,
               "Unused": 0
             }
@@ -664,7 +674,7 @@
             "Name": "PrimaryRef",
             "Flags": 1,
             "Object": {
-              "Form": "003BA5:du_overtime.esm",
+              "Form": "003BB2:du_overtime.esm",
               "Alias": 3,
               "Unused": 0
             }
@@ -674,7 +684,7 @@
             "Name": "PlayerShip",
             "Flags": 1,
             "Object": {
-              "Form": "003BA5:du_overtime.esm",
+              "Form": "003BB2:du_overtime.esm",
               "Alias": 9,
               "Unused": 0
             }
@@ -697,7 +707,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003BA5:du_overtime.esm",
+            "Form": "003BB2:du_overtime.esm",
             "Alias": 11,
             "Unused": 0
           }
@@ -731,7 +741,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003BA5:du_overtime.esm",
+            "Form": "003BB2:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -777,7 +787,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003BA5:du_overtime.esm",
+            "Form": "003BB2:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -792,7 +802,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003BA5:du_overtime.esm",
+                  "Form": "003BB2:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -826,7 +836,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003BA5:du_overtime.esm",
+                  "Form": "003BB2:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -858,7 +868,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003BAB:du_overtime.esm",
+        "FormKey": "003BB8:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -867,7 +877,7 @@
         },
         "EditorID": "duo_delve_missionboard31a_say1_scene",
         "Flags": 128,
-        "Quest": "003BA5:du_overtime.esm",
+        "Quest": "003BB2:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -898,12 +908,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003BA7:du_overtime.esm"
+            "Topic": "003BB4:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003BAF:du_overtime.esm",
+        "FormKey": "003BBC:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -912,7 +922,7 @@
         },
         "EditorID": "duo_delve_missionboard31a_say2_scene",
         "Flags": 128,
-        "Quest": "003BA5:du_overtime.esm",
+        "Quest": "003BB2:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -943,14 +953,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003BAC:du_overtime.esm"
+            "Topic": "003BB9:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003BA7:du_overtime.esm",
+        "FormKey": "003BB4:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -959,7 +969,7 @@
         },
         "EditorID": "duo_delve_missionboard31a_say1_topic",
         "Priority": 50,
-        "Quest": "003BA5:du_overtime.esm",
+        "Quest": "003BB2:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -967,11 +977,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003BA8:du_overtime.esm"
+          "003BB5:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003BA8:du_overtime.esm",
+            "FormKey": "003BB5:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -979,14 +989,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve_missionboard31a_say1_info",
-            "Speaker": "003BA6:du_overtime.esm",
+            "Speaker": "003BB3:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15271,
+                "WEMFile": 15284,
                 "EmotionOut": 0,
                 "ResponseText": "You\u0027re there? Good. Don\u0027t go in like you\u0027re visiting.",
                 "ScriptNotes": "",
@@ -995,7 +1005,7 @@
                 "TextHash": "A29C9427"
               },
               {
-                "WEMFile": 15273,
+                "WEMFile": 15286,
                 "EmotionOut": 0,
                 "ResponseText": "They came in one night and never left.",
                 "ScriptNotes": "",
@@ -1004,7 +1014,7 @@
                 "TextHash": "9C7FDBA9"
               },
               {
-                "WEMFile": 15274,
+                "WEMFile": 15287,
                 "EmotionOut": 0,
                 "ResponseText": "There\u0027s more of them than you\u0027d think, and they don\u0027t scare.",
                 "ScriptNotes": "",
@@ -1017,7 +1027,7 @@
         ]
       },
       {
-        "FormKey": "003BAC:du_overtime.esm",
+        "FormKey": "003BB9:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1026,7 +1036,7 @@
         },
         "EditorID": "duo_delve_missionboard31a_say2_topic",
         "Priority": 50,
-        "Quest": "003BA5:du_overtime.esm",
+        "Quest": "003BB2:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1034,11 +1044,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003BAD:du_overtime.esm"
+          "003BBA:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003BAD:du_overtime.esm",
+            "FormKey": "003BBA:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1046,14 +1056,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_delve_missionboard31a_say2_info",
-            "Speaker": "003BA6:du_overtime.esm",
+            "Speaker": "003BB3:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15276,
+                "WEMFile": 15289,
                 "EmotionOut": 0,
                 "ResponseText": "That\u0027s all of them? You\u0027re sure?",
                 "ScriptNotes": "",
@@ -1062,7 +1072,7 @@
                 "TextHash": "5B661617"
               },
               {
-                "WEMFile": 15278,
+                "WEMFile": 15291,
                 "EmotionOut": 0,
                 "ResponseText": "Then we\u0027re going home. I\u0027m sleeping in my own bed tonight.",
                 "ScriptNotes": "",

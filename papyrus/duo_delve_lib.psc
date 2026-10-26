@@ -373,6 +373,27 @@ Function PlaceCrew(ReferenceAlias akCentre, FormList akGang, Int aiMin, Int aiMa
     EndWhile
 EndFunction
 
+; THE RESIDENTS ARE DEAD (his 2026-10-26, on missionboard31a's occupied outpost: "what about we kill the
+; inhabitants when the first radio message plays"). Every HUMAN within afRadius of akCentre, in the loaded area,
+; killed silently (no kill event: no bounty, not the player's kill). Never the player, his crew, the dead or an
+; essential actor (a named person another quest needs). Run on the board's arrival stage beside the radio call.
+; Creatures carry no ActorTypeHuman, so a clear beat's predators are untouched. ⚠ UNPROVEN: whether the site's
+; people are loaded yet at 250 m; FindAllReferencesWithKeyword sees only the loaded area.
+Function KillResidents(ReferenceAlias akCentre, Float afRadius) Global
+    ObjectReference centre = akCentre.GetRef()
+    Keyword human = Game.GetFormFromFile(2482580, "Starfield.esm") as Keyword ; ActorTypeHuman [KYWD:25E194]
+    Actor player = Game.GetPlayer()
+    ObjectReference[] found = centre.FindAllReferencesWithKeyword(human, afRadius)
+    Int i = 0
+    While i < found.Length
+        Actor a = found[i] as Actor
+        If a && a != player && !a.IsDead() && !a.IsPlayerTeammate() && !a.IsEssential()
+            a.KillSilent()
+        EndIf
+        i += 1
+    EndWhile
+EndFunction
+
 ; THE DEFEAT BEAT (spike 2026-10-14-defeat-and-clear-beats; the Bounty driver's shape). The target appears at the
 ; marker INTO akTarget, the alias the objective follows and a stock DefaultAliasOnDeath sits on, so his death sets
 ; the step's stage and nothing here watches anything. A gang (optional: akGang None) stands with him and need not

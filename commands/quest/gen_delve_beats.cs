@@ -395,6 +395,18 @@ namespace FrankyCLI
                 else if (occBase + personCount >= firstBeat) Fatal($"{personCount} people need stages {occBase + 1} to {occBase + personCount}, which reach the first beat's {firstBeat}.");
             }
 
+            // --- the site's own people (his 2026-10-26) ------------------------------------------------------
+            if (r.place.residents != null)
+            {
+                if (r.place.residents != "dead")
+                    Fatal($"place.residents is '{r.place.residents}'; built: \"dead\". Leave it out and they stand.");
+                else if (!(IsBoard(t) && t.arrivalStage >= 0 && r.broadcast != null))
+                    Fatal("place.residents \"dead\" runs on a board's arrival stage, with its radio call: it needs the board template and a broadcast.");
+                else Console.WriteLine($"  place.residents: dead, every human within {ResidentsRadius:0} of step one's marker, killed when the broadcast plays");
+            }
+            if (r.place.second?.residents != null || r.place.third?.residents != null)
+                Fatal("residents is main place only: the arrival hook measures from step one's marker.");
+
             // --- who is there (his dial, 2026-10-11) --------------------------------------------------------
             var whos = WhoOf(r);
             foreach (var (p, w, a) in whos)
@@ -566,6 +578,9 @@ namespace FrankyCLI
         /// <summary>How far round its object a who: workers crowd stands, in metres: wider than an ending's 8 m
         /// company (people at work, not a welcoming party), tighter than a nest.</summary>
         private const float WorkersRadius = 12f;
+        /// <summary>How far round step one's marker place.residents "dead" reaches, in metres: a whole POI, not one
+        /// object's surroundings. Chosen, not measured (2026-10-26); the play says whether it reaches the far huts.</summary>
+        private const float ResidentsRadius = 200f;
 
         private static string FragmentFunction(int stage) => $"Fragment_Stage_{stage:D4}_Item_00";
 
@@ -1637,6 +1652,15 @@ namespace FrankyCLI
                     props.Add(("GlobalVariable", p, kv.Value.key, -1));
                     Add(t.entryStage, $"{p}.SetValue(0)");
                     Add(t.entryStage, $"UpdateCurrentInstanceGlobal({p})");
+                }
+                // The site's own people, dead on arrival (place.residents "dead"): on the arrival stage, before its radio call,
+                // round the marker the arrival hook measures from. The lint guarantees a board with a broadcast.
+                if (r.place.residents == "dead")
+                {
+                    if (bm.Arrival is not (int on, _)) { Console.WriteLine("REFUSED: place.residents is \"dead\" and no arrival hook was built to run it on."); return 1; }
+                    props.Add(("ReferenceAlias", "Alias_ArrivalMarker", clone.FormKey, on));
+                    Add(t.arrivalStage, $"duo_delve_lib.KillResidents(Alias_ArrivalMarker, {ResidentsRadius:0.0})");
+                    Console.WriteLine($"  residents: dead, every human within {ResidentsRadius:0} of step one's marker (alias {on}) on stage {t.arrivalStage}");
                 }
                 // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
                 // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.

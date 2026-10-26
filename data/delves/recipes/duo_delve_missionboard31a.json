@@ -22,6 +22,8 @@
       ]
     },
     "_theme": "A non-hostile built site, where somebody lives; the lint measures what a request can place.",
+    "residents": "dead",
+    "_residents": "His 2026-10-26: every site in this pool carries a resident tag, so they die when the first radio call plays (place.residents).",
     "_pool": "24 on 2026-10-26, under Overtime's narrowest (44). Widening to every built non-dungeon site gives 40, but that adds hostile sites whose own occupants fight too, and the words are about people who live there. Kept narrow; his call."
   },
   "prose": {

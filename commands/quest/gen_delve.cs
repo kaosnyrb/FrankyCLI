@@ -522,6 +522,13 @@ namespace FrankyCLI
             /// </summary>
             public Who? who { get; set; }
             /// <summary>
+            /// OPTIONAL, main place only, board only: what happens to the site's OWN people. "dead" kills every human
+            /// near step one's marker on the arrival stage, with the radio call (his 2026-10-26, missionboard31a: every
+            /// site in its pool carries a resident tag, "what about we kill the inhabitants when the first radio message
+            /// plays"). Absent = they stand. Distinct from who's designed "the dead" (corpses PLACED round an object).
+            /// </summary>
+            public string? residents { get; set; }
+            /// <summary>
             /// space only, main place only: base aliases this build REMOVES, by name. The alias-set test ladder's knob (his
             /// 2026-10-22, "make a series of tests for remote and space alias sets. Idea being we learn in isolation how to
             /// build these sets"): rung 1 is the shipped set whole, each later rung takes pieces away. Refused if anything
