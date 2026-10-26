@@ -1,0 +1,67 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard26a",
+  "template": "boardspace",
+  "_template": "PROPOSED, NOT BUILT, and the lint refuses it until it is: a board mission whose one place is an ORBIT. Eliza's. The board kind gives the posting, the accept on 10 and the pay through MissionComplete(); the space kind gives the orbit (S13's five aliases plus a parent link, proven in his 10-22 play). His MB01a is a board-taken satellite repair in orbit already, so it is the obvious base, hers to choose. The board picks the system, so the orbit hangs off the board's target, not off the Player as on 19a; hers to price.",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-26 06:55: \"thinking we doo some sat repair missionboard missions today\", then 07:01 \"Ive played 19a. But I want a missionboard that is only space\", then \"yeah write that\"",
+  "_note": [
+    "THE FIRST SPACE-ONLY BOARD DELVE. Nothing on the ground: take the posting, fly to the satellite, fix it. The verb is REPAIR,",
+    "his oldest, the MB01 repairs family (family I, space, in the backport map).",
+    "ONE BEAT ON PURPOSE: a use, the one beat an orbit-only Delve has been proven to carry (S13). A second orbit beat (a part",
+    "picked up from wreckage on the way, a pickup then a deliver) is the next rung, after this one plays.",
+    "Not 19a's relay: this one is a NAVIGATION satellite, so the stake is the pilots, not a settlement, and nobody needs to be",
+    "on the ground for it to matter.",
+    "THE BROADCAST WAITS FOR HIM AT THE SATELLITE (a board posting, his 10-14 rule): arrivalStage is a distance hook on step one's",
+    "marker, 250 m on the ground. Whether 250 m is right for a ship is hers to check; a ship covers that in a second or two.",
+    "THE CLOSING LINE IS A RADIO (his 10-17). Every voiced line holds anywhere: no names, no places, no factions, no currency,",
+    "and nothing a line points at is unplaced (the satellite is the only object, and it is placed).",
+    "TOKEN: <Planet> in the title, card, briefing and objective assumes the orbit's planet resolves. On a board the target",
+    "planet resolves FROM PrimaryRef; here PrimaryRef is the satellite in the space cell. If <Planet> will not fill, Eliza says",
+    "which token will and I reword.",
+    "Pay: med, capped (his 10-19 'for now')."
+  ],
+  "place": {
+    "orbit": "board",
+    "_orbit": "The orbit is the board's target. The value is a placeholder for whatever field Eliza builds; the intent is S13's shape, with the board choosing where."
+  },
+  "prose": {
+    "name": "Repairs: Navigation Satellite over <Planet>",
+    "briefing": "A navigation satellite over <Planet> has stopped broadcasting, and ships coming in have been flying the approach blind.",
+    "card": "Repair contract. A navigation satellite in orbit over <Planet> has stopped broadcasting. Fly out to it and bring it back online. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "_at": "S13's marker, the space kind's. 19a's orbit beat stands at se_TravelMarkerLocRefB02; whichever the built template fills is right.",
+      "objective": "Repair the navigation satellite over <Planet>",
+      "journal": "The navigation satellite over <Planet> had stopped broadcasting. I flew out to it and got it working again.",
+      "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
+      "_model": "The right object at last: ruled out on land (his, via Kim, 10-12) because it is a space object. Kim's scale note says it sinks 10.45 m, a space ring. S13 used it in orbit.",
+      "name": "Navigation Satellite",
+      "message": {
+        "title": "Satellite Repaired",
+        "text": "The fault clears. A light on the satellite starts to pulse again, slow and steady."
+      },
+      "say": [
+        "There it is. It's broadcasting again.",
+        "Every approach just got a lot less exciting. Thank you."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Approach Control",
+    "voice": "GenericFemale01",
+    "elevenlabs": "MzqUf1HbJ8UmQ0wUsx2p"
+  },
+  "broadcast": [
+    "You're out at the satellite? Good.",
+    "It went silent three days ago, and pilots have been landing on guesswork ever since.",
+    "Whatever's wrong is on the satellite itself. Nothing we send from down here gets through."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site, here the satellite. Voice: Katie X (Clear British Customer Support) from his library, chosen as someone who talks pilots in all day. NOT HEARD IN GAME; his ear decides, and voices.md gets a row once it is. Not a staff voice."
+}
