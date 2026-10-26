@@ -5,7 +5,7 @@
   "deal": "_duo_MB_MissionNode_test",
   "_deal": "The board's test node, until he plays it.",
   "author": "jessica",
-  "source": "his 2026-10-26 11:24: \"right a Jaeger like quest idea. Missonboard. Our outpost is being attack by Ashta. Only spawns on a outpost on Cheyenne\"",
+  "source": "his 2026-10-26 11:24: \"right a Jaeger like quest idea. Missonboard. Our outpost is being attack by Ashta. Only spawns on a outpost on Cheyenne\", then 11:33: \"ah worth saying we can be more specific. We know what planet this is, we know this is on the Freestar Collective homeworld etc. Idea is we make narrow quests which give you writing more bones\"",
   "_note": [
     "THE FIRST JAEGER DELVE. An outpost on Cheyenne is under attack by Ashta, the planet's own predators. Sound the",
     "alarm, then hold through three waves. 16a's shape (a use, then a hold defending it), which played on the industrial ten.",
@@ -17,8 +17,8 @@
     "12a, but the same family, so price it before it goes near the plugin. Stand-in field: place.planet.",
     "(2) ASHTA WAVES. A hold's waves come from the base driver's gang list (spacers). This wants a creature list, Ashta",
     "only: hold.list is the stand-in. Which LeveledNpc is Ashta is hers to find.",
-    "Ashta is not said aloud: voiced lines name roles only. The card and objectives say it.",
-    "Pay: med, capped."
+    "Pay: med, capped.",
+    "NARROW, SO THE TEXT NAMES THINGS (his 11:33: narrow quests give the writing more bones): Akila, Akila City's walls, the Rangers, in the card, briefing and journals. THE AUDIO STILL NAMES ROLES ONLY, his 10-12 rule for a different reason (a total conversion patches text, not recorded audio), so the broadcast and says carry Akila's texture (the long grass, the walls) without a proper noun. Unless he rules narrow quests out of that."
   ],
   "place": {
     "theme": {
@@ -30,20 +30,20 @@
       ]
     },
     "_theme": "A non-hostile built site: somebody's outpost. His word is outpost; whether a request on Cheyenne can place one is the pool question.",
-    "planet": "Cheyenne",
-    "_planet": "STAND-IN for his 'Only spawns on a outpost on Cheyenne'. Not a field yet."
+    "planet": "Akila",
+    "_planet": "STAND-IN for his 'Only spawns on a outpost on Cheyenne'. Cheyenne is the SYSTEM; the Freestar homeworld he means is the planet Akila in it, where the Ashta are native. The condition is on the planet Akila (or the system, if that is what builds). Not a field yet; Eliza's."
   },
   "prose": {
     "name": "Defense: Ashta at the <Place> on <Planet>",
-    "briefing": "An Ashta pack has been hitting the <Place> for days, and the people there can't hold them off alone.",
-    "card": "Defense contract. Ashta have been attacking our outpost on <Planet>, and we can't hold them off on our own. Sound the alarm and help us see the next attack through. Payment on contract completion."
+    "briefing": "The <Place> sits out past Akila City's walls, in Ashta country. A pack has been testing it for a week, and the Rangers have their hands full.",
+    "card": "Defense contract. An Ashta pack has been hitting our outpost out past the walls of Akila City for a week, and the Rangers can't spare anyone. Sound the alarm and help us see the next attack through. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "RECenterLocRef",
       "objective": "Sound the alarm at the <Place>",
-      "journal": "The Ashta have been circling the <Place> for days. I sounded the alarm, and everyone there got behind a wall.",
+      "journal": "The Ashta have been circling the <Place> for a week. I sounded the alarm, and everyone there got behind a wall, which is the Akila answer to most things.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Outpost Alarm",
       "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",
@@ -56,7 +56,7 @@
       "type": "hold",
       "at": "RECenterLocRef",
       "objective": "Hold the <Place> against the Ashta",
-      "journal": "The Ashta came at the <Place> three times and didn't get in. Whatever's left of the pack has gone back out into the grass.",
+      "journal": "The Ashta came at the <Place> three times and didn't get in. Out here past the walls of Akila City, that's about as good as it gets.",
       "waves": 3,
       "size": [
         2,
