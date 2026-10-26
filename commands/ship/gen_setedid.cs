@@ -25,10 +25,16 @@ namespace FrankyCLI
     // see it, which is worse than a part that fails loudly.
     //
     // ⭐ WHY A RENAME IS SAFE INSIDE THE PLUGIN AND DANGEROUS OUTSIDE IT, WHICH IS THE
-    // WHOLE RISK AND IS NOT OBVIOUS: every reference BETWEEN records is a FormID. Nothing
-    // in the plugin resolves anything by EditorID, so renaming cannot break a link, a
-    // recipe, a FormList membership or a placed object -- the CK will show the new name
-    // everywhere the old one appeared and nothing else moves.
+    // WHOLE RISK AND IS NOT OBVIOUS: every reference BETWEEN records is a FormID, so renaming
+    // cannot break a link, a recipe, a FormList membership or a placed object -- the CK will
+    // show the new name everywhere the old one appeared and nothing else moves.
+    // ⛔ WITH ONE EXCEPTION, AND THIS LINE SAID "NOTHING IN THE PLUGIN RESOLVES ANYTHING BY
+    // EDITORID" UNTIL IT BROKE (2026-10-26): DISPLAY TEXT DOES. A quest objective's counter is
+    // "(<Global=duo_x_count1>/3)", and the game finds that global BY ITS EDITORID when it draws
+    // the line. The Delve rename renamed eight counter globals and left their objectives naming
+    // the old ones; his play showed "([...]/3)". So --map now carries every rename into the
+    // <Global=> tokens of quest objectives and journal entries, and both --map and --retoken
+    // read the written file's bytes back for any token naming an EditorID that no longer exists.
     // ⛔ THE TOOLING IS THE OPPOSITE. check_part discovers parts by EditorID string;
     // build_archlist, the manual, the desk notes and every command that takes an
     // <editorid> argument hold the name as TEXT. So a rename is a change to an API whose
@@ -64,6 +70,7 @@ namespace FrankyCLI
             {
                 Console.WriteLine("Usage: setedid <modname> <old_editorid> <new_editorid> [--dry]");
                 Console.WriteLine("       setedid <modname> --map <map.tsv> [--dry]   many at once: one load, one write, all or nothing");
+                Console.WriteLine("       setedid <modname> --retoken <map.tsv> [--dry]   only carry a map's renames into <Global=> tokens in quest text");
                 Console.WriteLine();
                 Console.WriteLine("  Renames a record's EditorID, FormID-stable, any record type.");
                 Console.WriteLine("  NOT setname -- that sets a GBFM's FullName, the string the player sees.");
@@ -76,6 +83,7 @@ namespace FrankyCLI
 
             string modname = args[0];
             if (args[2] == "--map") return RenameFromMap(modname, args[3], args.Skip(4).ToArray());
+            if (args[2] == "--retoken") return RetokenFromMap(modname, args[3], args.Skip(4).ToArray());
             string oldId = args[2].Trim();
             string newId = args[3].Trim();
             bool dry = false;
@@ -288,6 +296,8 @@ namespace FrankyCLI
 
             var before = byId.ToDictionary(kv => kv.Key, kv => kv.Value.EditorID);
             foreach (var r in rows) byId[r.id].EditorID = r.newId;
+            int tokens = Retoken(myMod, rows.ToDictionary(r => r.oldId, r => r.newId, StringComparer.OrdinalIgnoreCase));
+            Console.WriteLine($"  <Global=> tokens carried into quest text: {tokens}");
             foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
             string outPath = datapath + "\\" + modname + ".esm";
             myMod.WriteToBinary(outPath, gen_quest_main.BuildWriteParams());
@@ -306,14 +316,102 @@ namespace FrankyCLI
                 if (!string.Equals(rec.EditorID, want, StringComparison.Ordinal)) wrong.Add($"{rec.FormKey} is '{rec.EditorID}', expected '{want}'");
             }
             if (seen != expect.Count) wrong.Add($"{seen} records read back, {expect.Count} expected");
+            wrong.AddRange(DanglingTokens(outPath, expect.Values));
             if (wrong.Count > 0)
             {
                 Console.WriteLine($"WRITTEN, BUT THE READ-BACK DISAGREES ({wrong.Count}): restore from the snapshot.");
                 foreach (var w in wrong.Take(40)) Console.WriteLine("  " + w);
                 return 1;
             }
-            Console.WriteLine($"\nFinished -- {rows.Count} renamed, read back off disk: every EditorID as the map predicts, {seen} records, no FormID moved.");
-            Console.WriteLine("⚠ Anything holding the old names as TEXT is now stale: recipes, notes, saved command lines.");
+            Console.WriteLine($"\nFinished -- {rows.Count} renamed, read back off disk: every EditorID as the map predicts, {seen} records, no FormID moved, no <Global=> token names a missing EditorID.");
+            Console.WriteLine("⚠ Anything OUTSIDE the plugin holding the old names as text is now stale: recipes, notes, saved command lines.");
+            return 0;
+        }
+
+        static readonly System.Text.RegularExpressions.Regex GlobalToken = new("<Global=([A-Za-z0-9_]+)>");
+
+        /// Rewrite every <Global=old> in a quest objective's display text and a stage's journal entries to the map's new
+        /// name. Those are where the game resolves a name at draw time; returns how many tokens changed.
+        static int Retoken(StarfieldMod mod, Dictionary<string, string> oldToNew)
+        {
+            int n = 0;
+            string? Fix(string? s)
+            {
+                if (s == null || !s.Contains("<Global=")) return s;
+                return GlobalToken.Replace(s, m => oldToNew.TryGetValue(m.Groups[1].Value, out var nw) ? (n++ >= 0 ? $"<Global={nw}>" : "") : m.Value);
+            }
+            foreach (var q in mod.Quests)
+            {
+                foreach (var ob in q.Objectives)
+                {
+                    var s = ob.DisplayText?.String; var f = Fix(s);
+                    if (f != s) ob.DisplayText = f;
+                }
+                foreach (var st in q.Stages)
+                    foreach (var le in st.LogEntries)
+                    {
+                        var s = le.Entry?.String; var f = Fix(s);
+                        if (f != s) le.Entry = f;
+                    }
+            }
+            return n;
+        }
+
+        /// Read the written file's BYTES (every record is written uncompressed) for <Global=X> tokens and name each X that
+        /// is not an EditorID in the plugin. Bytes, not the fields Retoken walks, so a text surface it does not walk still
+        /// shows up here instead of shipping quietly.
+        static List<string> DanglingTokens(string path, IEnumerable<string?> edids)
+        {
+            var have = new HashSet<string>(edids.Where(e => e != null)!, StringComparer.OrdinalIgnoreCase);
+            var text = System.Text.Encoding.Latin1.GetString(System.IO.File.ReadAllBytes(path));
+            return GlobalToken.Matches(text).Select(m => m.Groups[1].Value).Distinct(StringComparer.OrdinalIgnoreCase)
+                              .Where(x => !have.Contains(x)).Select(x => $"text token <Global={x}> names no record in the plugin").ToList();
+        }
+
+        // --retoken: carry a map's renames into the quest text only, for a rename already applied without it (the 2026-10-26
+        // Delve rename). Every row's NEW name must already be a record (that is what makes the repair true); then one write
+        // and the same byte read-back as --map.
+        private static int RetokenFromMap(string modname, string mapPath, string[] flags)
+        {
+            bool dry = flags.Contains("--dry");
+            if (flags.Any(f => f != "--dry")) { Console.WriteLine("Error: unknown option " + flags.First(f => f != "--dry")); return 1; }
+            if (modname == "Starfield") { Console.WriteLine("No way am I allowing you to edit Starfield.esm"); return 1; }
+            var pairs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var raw in System.IO.File.ReadAllLines(mapPath))
+            {
+                var c = raw.TrimEnd('\r').Split('\t');
+                if (c.Length == 4 && c[2].Trim().Length > 0) pairs[c[2].Trim()] = c[3].Trim();
+            }
+            StarfieldMod myMod; string datapath; BinaryReadParameters readParams;
+            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            {
+                datapath = env.DataFolderPath;
+                readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+                myMod = StarfieldMod.CreateFromBinary(System.IO.Path.Combine(datapath, modname + ".esm"), StarfieldRelease.Starfield, readParams);
+                gen_quest_main.FixNextFormId(myMod);
+            }
+            var edids = myMod.EnumerateMajorRecords().Where(r => r.FormKey.ModKey == myMod.ModKey).Select(r => r.EditorID).ToList();
+            var have = new HashSet<string>(edids.Where(e => e != null)!, StringComparer.OrdinalIgnoreCase);
+            var notThere = pairs.Values.Where(v => !have.Contains(v)).ToList();
+            if (notThere.Count > 0) { Console.WriteLine($"REFUSED: {notThere.Count} new name(s) in the map are not records yet (run --map first): {string.Join(", ", notThere.Take(5))}"); return 1; }
+
+            int n = Retoken(myMod, pairs);
+            Console.WriteLine($"  <Global=> tokens to carry into quest text: {n}");
+            if (dry || n == 0) { Console.WriteLine(n == 0 ? "  nothing to do; nothing written." : "\n--dry: nothing written."); return 0; }
+            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+            string outPath = datapath + "\\" + modname + ".esm";
+            myMod.WriteToBinary(outPath, gen_quest_main.BuildWriteParams());
+            var dangling = DanglingTokens(outPath, edids);
+            using var back = StarfieldMod.CreateFromBinaryOverlay(outPath, StarfieldRelease.Starfield, readParams);
+            int changedEdids = back.EnumerateMajorRecords().Where(r => r.FormKey.ModKey == back.ModKey).Select(r => r.EditorID).Zip(edids).Count(p => p.First != p.Second);
+            if (dangling.Count > 0 || changedEdids > 0)
+            {
+                Console.WriteLine($"WRITTEN, BUT THE READ-BACK DISAGREES: restore from the snapshot.");
+                foreach (var d in dangling) Console.WriteLine("  " + d);
+                if (changedEdids > 0) Console.WriteLine($"  {changedEdids} EditorID(s) changed, and --retoken changes none");
+                return 1;
+            }
+            Console.WriteLine($"\nFinished -- {n} token(s) carried, read back off disk: no <Global=> token names a missing EditorID, no EditorID changed.");
             return 0;
         }
     }
