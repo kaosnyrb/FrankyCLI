@@ -12,7 +12,7 @@ label is not a listen.
 
 | id | described as | by whom | heard in game | voice type folder | used by |
 |---|---|---|---|---|---|
-| `CwhRBWXzGAHq8TQ4Fs17` | **A professional-sounding male voice, fairly neutral.** (ElevenLabs labels it *Roger, laid-back, casual, resonant*; his ear wins) | him, 2026-10-09 | ✅ yes, Relay Control | `GenericMale01` | `duo_delve09a` (Relay Control) |
+| `CwhRBWXzGAHq8TQ4Fs17` | **A professional-sounding male voice, fairly neutral.** (ElevenLabs labels it *Roger, laid-back, casual, resonant*; his ear wins) | him, 2026-10-09 | ✅ yes, Relay Control | `GenericMale01` | `duo_delve09a` (Relay Control); `duo_delve_missionboard26a` (Approach Control, 2026-10-26, his "yeah put rodger in") |
 | `XW70ikSsadUbinwLMZ5w` | Female, older. *Annie K, Calm, Grounded Narrator* (ElevenLabs' labels: american, middle aged) | the library's labels | ⏳ not yet: his first listen is 06b | `GenericFemale01` | `duo_delve06b`, the Post Quartermaster's call (2026-10-12) |
 | `ClKfJnuqp0hQ7Ax41F4w` | Female. *Ada*: ElevenLabs labels her young, Canadian, casual | the library's labels | ⏳ not in a Delve | `GenericFemale01` | `gen_dlgtest` (a structure test) |
 | `21m00Tcm4TlvDq8ikWAM` | The default in `Retrograde.Library/Core/AI/elevenlabsAPI.cs` when no id is given. **Not in his library** (below) | the code | ⏳ no | | nothing on purpose |
@@ -55,7 +55,7 @@ account does not put them back.
 | id | ElevenLabs' name | his words | still in a recipe (recast owed) |
 |---|---|---|---|
 | `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | none: recast 2026-10-22 (21a Alice, 32a Annie K, remote06a Clara) |
-| `MzqUf1HbJ8UmQ0wUsx2p` | Katie X, Clear British Customer Support | *"I meant the Elevenlabs voice, both we're a bit stilted and robotic"* (2026-10-26, Approach Control, broadcast and closing line, on `eleven_v3` at the default settings) | **yes: `duo_delve_missionboard26a`, `duo_delvetest_bs1`** |
+| `MzqUf1HbJ8UmQ0wUsx2p` | Katie X, Clear British Customer Support | *"I meant the Elevenlabs voice, both we're a bit stilted and robotic"* (2026-10-26, Approach Control, broadcast and closing line, on `eleven_v3` at the default settings) | none: recast 2026-10-26 to Roger (26a, bs1), his "yeah put rodger in" |
 
 ## His library: every voice on the account, with ElevenLabs' own labels
 

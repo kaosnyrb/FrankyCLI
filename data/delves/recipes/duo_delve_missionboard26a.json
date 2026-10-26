@@ -23,7 +23,10 @@
     "which token will and I reword.",
     "Pay: med, capped (his 10-19 'for now')."
   ],
-  "place": {},
+  "place": {
+    "altitude": 27.673,
+    "_altitude": "Eliza, 2026-10-26, off duo_delvetest_bs1: MB01e's orbit altitude. The template's base (his MB01a, 20.589) never filled in his StoryManager log; MB01b and MB01e do, and BS1 filled once it carried this."
+  },
   "prose": {
     "name": "Repairs: Navigation Satellite over <Planet>",
     "briefing": "A navigation satellite over <Planet> has stopped broadcasting, and ships coming in have been flying the approach blind.",
@@ -32,8 +35,8 @@
   "beats": [
     {
       "type": "use",
-      "at": "se_GeneralMarkerLocRef01",
-      "_at": "S13's marker, the space kind's. 19a's orbit beat stands at se_TravelMarkerLocRefB02; whichever the built template fills is right.",
+      "at": "se_GeneralMarkerLocRef06",
+      "_at": "Eliza, 2026-10-26: MB01e's marker, which filled on his board in BS1 (Jessica's first pick was se_GeneralMarkerLocRef01, S13's, unproven in MB01's space cell).",
       "objective": "Repair the navigation satellite over <Planet>",
       "journal": "The navigation satellite over <Planet> had stopped broadcasting. I flew out to it and got it working again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
@@ -49,8 +52,9 @@
   ],
   "speaker": {
     "name": "Approach Control",
-    "voice": "GenericFemale01",
-    "elevenlabs": "MzqUf1HbJ8UmQ0wUsx2p"
+    "voice": "GenericMale01",
+    "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17",
+    "_recast": "Roger, 2026-10-26, his \"yeah put rodger in\": Katie X (MzqUf1HbJ8UmQ0wUsx2p) was ruled out by his ear (\"a bit stilted and robotic\", voices.md). Roger is the one Delve voice he has confirmed in game (Relay Control, 09a)."
   },
   "broadcast": [
     "You're out at the satellite? Good.",
