@@ -3,8 +3,8 @@
   "id": "duo_delve_missionboard26a",
   "template": "boardspace",
   "_template": "BUILT AND PLAYED 2026-10-26 (Eliza, his 'yup all worked'): his MB01a whole, its own orbit pick, his repair activator reskinned.",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The board's test node, until he plays it.",
+  "deal": "duo_MB_MissionNode_Infrastructure",
+  "_deal": "LIVE, his 2026-10-26: \"Then put 26a live in duo_MB_MissionNode_Infrastructure\", after its originals (MB01a-e, MB02a-d) moved to duo_MB_MissionNode_Infrastructure_Legacy behind Classic Missions. Was the board test node.",
   "author": "jessica",
   "source": "his 2026-10-26 06:55: \"thinking we doo some sat repair missionboard missions today\", then 07:01 \"Ive played 19a. But I want a missionboard that is only space\", then \"yeah write that\"",
   "_note": [
