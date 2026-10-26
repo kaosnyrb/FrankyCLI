@@ -55,7 +55,7 @@ account does not put them back.
 | id | ElevenLabs' name | his words | still in a recipe (recast owed) |
 |---|---|---|---|
 | `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | none: recast 2026-10-22 (21a Alice, 32a Annie K, remote06a Clara) |
-| `MzqUf1HbJ8UmQ0wUsx2p` | Katie X, Clear British Customer Support | *"I meant the Elevenlabs voice, both we're a bit stilted and robotic"* (2026-10-26, Approach Control, broadcast and closing line, on `eleven_v3` at the default settings) | none: recast 2026-10-26 to Roger (26a, bs1), his "yeah put rodger in" |
+| `MzqUf1HbJ8UmQ0wUsx2p` | Katie X, Clear British Customer Support | *"I meant the Elevenlabs voice, both we're a bit stilted and robotic"* (2026-10-26, Approach Control, broadcast and closing line, on `eleven_v3` at the default settings) | none: recast 2026-10-26 to Roger (26a, bs1), his "yeah put rodger in"; 18a's Insurance Office to Annie K (Jessica) |
 
 ## His library: every voice on the account, with ElevenLabs' own labels
 
