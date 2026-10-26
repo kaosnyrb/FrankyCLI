@@ -27,8 +27,8 @@
   "beats": [
     {
       "type": "use",
-      "at": "se_TravelMarkerLocRefB02",
-      "_at": "His MB01a's own marker for the object (SpawnMarker01's ref type); 26a names se_GeneralMarkerLocRef01, S13's, and either is the template's to fill. The shell's own is kept for this rung so only the board changes.",
+      "at": "se_GeneralMarkerLocRef06",
+      "_at": "MB01e's marker (2026-10-26 08:5x). BS1 first kept MB01a's own, se_TravelMarkerLocRefB02, and never filled (StoryManager.0.log: failed to fill aliases, every refresh); his MB01a fails the same way in that log and the one before, while MB01b and MB01e pass, and the three differ only in this ref type and the orbit's altitude. A difference, not a proven cause: this rung tests it.",
       "objective": "Repair the navigation satellite over <Planet>",
       "journal": "The navigation satellite over <Planet> had stopped broadcasting. I flew out to it and got it working again.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
