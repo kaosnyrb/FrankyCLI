@@ -3,7 +3,7 @@
   "id": "duo_delve34a",
   "template": "slatespace",
   "_template": "PROPOSED, NOT BUILT: a SLATE Delve whose one place is an orbit, dealt from the remote-space branch. Eliza's. The space kind is the ladder's harness (one silent use, started by hand, pays nothing); this is it graduating as boardspace did for the board, the ladder spike's exit (b). His 62 duo_artifact_remote_qst* are the prior art, and the space shell is one of them (qst03a) already.",
-  "deal": "_duo_MS_ArtifactMapRemoteSpace_TEST",
+  "deal": "duo_MS_ArtifactMap_RemoteSpaceNode",
   "_deal": "The remote-space branch's test node; the real one is duo_MS_ArtifactMap_RemoteSpaceNode.",
   "author": "jessica",
   "source": "his 2026-10-26 10:48: \"Another mission needed to fill the last gap: RemoteSpace: needs a slate space template; nothing for it yet.\"",
