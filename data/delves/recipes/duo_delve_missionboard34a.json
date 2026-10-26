@@ -2,7 +2,7 @@
   "schema": 2,
   "id": "duo_delve_missionboard34a",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
+  "deal": "duo_MB_MissionNode_Manufacturing",
   "_deal": "The board's test node; the Manufacturing node is Eliza's to point it at.",
   "author": "jessica",
   "source": "his 2026-10-26 11:57: \"hey we need a Manufacturing mission. These are about bringing raw material or crafted parts to people. It's crafting quests. Read an existing one and build one with a NPC delivery as the target\"",
