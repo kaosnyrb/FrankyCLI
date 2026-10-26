@@ -14,6 +14,8 @@
     "Any fault is a board or orbit fault, not a speech one. Unbuilt once 26a builds."
   ],
   "place": {
+    "altitude": 27.673,
+    "_altitude": "MB01e's (2026-10-26 08:5x). The marker alone did not fill (08:53 session: 66 'failed to fill aliases'); the orbit still carried MB01a's 20.589, and MB01a is the one MB01 that fails. With this, BS1's alias set is MB01e's whole; a failure after it is in what the build changed, not the set.",
     "theme": {
       "require": [],
       "exclude": []
