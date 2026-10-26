@@ -122,9 +122,10 @@
         "use",
         "pickup",
         "deliver",
-        "talk"
+        "talk",
+        "craft"
       ],
-      "_allows": "The fights from the first board build; use, pickup, deliver and talk since the borrowed slots (2026-10-14, missionboard02a). Not recover (untested here) and not choose (the board ends through MissionComplete, and a choice's endings complete the quest themselves).",
+      "_allows": "craft since 2026-10-26 (missionboard34a, his Manufacturing ask). The fights from the first board build; use, pickup, deliver and talk since the borrowed slots (2026-10-14, missionboard02a). Not recover (untested here) and not choose (the board ends through MissionComplete, and a choice's endings complete the quest themselves).",
       "carriesItem": false,
       "placeAlias": 5,
       "mapMarkerAlias": 11,

@@ -34,6 +34,8 @@ namespace FrankyCLI
             public readonly Dictionary<int, FightForms> Fights = new();
             /// <summary>By (beat, exchange): a talk exchange's perk.</summary>
             public readonly Dictionary<(int beat, int ex), FormKey> TalkPerks = new();
+            /// <summary>By beat index, for a craft: the bench keyword and each ingredient with its count.</summary>
+            public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
         }
 
         /// <summary>A fight beat's forms, resolved own-or-master in ResolveInputs.</summary>
@@ -120,6 +122,21 @@ namespace FrankyCLI
                 var f = OwnOrMaster<IFormListGetter>(myMod, env, w.list ?? "");
                 if (f == null) { Console.WriteLine($"REFUSED: FormList '{w.list}' ({PlaceKey[p]}.who.list) is not in {t.mod} or one of its masters."); fail++; continue; }
                 inputs.WhoLists[p] = f.FormKey;
+            }
+            // A craft's bench and ingredients, own-or-master (ResolveIngredient's rule: never a plugin that is not a master).
+            for (int i = 0; i < r.beats.Count; i++)
+            {
+                if (r.beats[i].craft is not Craft c || c.bench == null || !CraftBenches.TryGetValue(c.bench, out var kw)) continue;
+                var bench = OwnOrMaster<IKeywordGetter>(myMod, env, kw);
+                if (bench == null) { Console.WriteLine($"REFUSED: the bench keyword {kw} is not in {t.mod} or one of its masters."); fail++; continue; }
+                var bom = new List<(FormKey, int)>();
+                foreach (var (key, count, err) in ReadIngredients(c))
+                {
+                    var part = err == null ? ResolveIngredient(env, Allowed(env, t), key!, out _) : null;
+                    if (part == null) { Console.WriteLine($"REFUSED: beat {i + 1} craft ingredient '{key}' cannot be resolved."); fail++; continue; }
+                    bom.Add((part.FormKey, count));
+                }
+                inputs.Crafts[i] = (bench.FormKey, bom);
             }
             // A fight's forms (defeat / clear), own-or-master as a who list is: the target, and each list it draws from.
             for (int i = 0; i < r.beats.Count && fail == 0; i++)

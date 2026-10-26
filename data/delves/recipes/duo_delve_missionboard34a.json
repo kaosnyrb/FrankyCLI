@@ -40,7 +40,7 @@
   },
   "beats": [
     {
-      "type": "recover",
+      "type": "craft",
       "craft": {
         "bench": "industrial",
         "ingredients": [
@@ -58,7 +58,7 @@
           ]
         ]
       },
-      "_craft": "STAND-IN: a COBJ for the item at an industrial workbench, live while the quest runs. Ingredients are placeholders, his balance.",
+      "_craft": "BUILT 2026-10-26 (Eliza): type craft, a COBJ cloned off his duo_co_MB11a, live from the accept until the item is made. Ingredients are placeholders, his balance.",
       "item": "Pressure Regulator",
       "objective": "Build a pressure regulator for the <Place> at an industrial workbench",
       "journal": "The <Place> needs a pressure regulator for its water reclaimer. I built one. Now it has to go out to them by hand."

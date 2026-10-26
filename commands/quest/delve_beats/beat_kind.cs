@@ -30,6 +30,12 @@ namespace FrankyCLI
             /// </summary>
             internal virtual bool CarriesItem => false;
 
+            /// <summary>
+            /// Whether the beat happens AT a place (it names a marker, `at`, and the place must carry it). False for a craft,
+            /// which is done wherever the player has a bench: every pass over markers skips it (Placed).
+            /// </summary>
+            internal virtual bool HasPlace => true;
+
             /// <summary>This type's own rules on one beat, in the lint. Fatal and Warn are Grade's.</summary>
             internal virtual void GradeBeat(Beat b, int i, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env,
                                             Action<string> Fatal, Action<string> Warn) { }
@@ -89,7 +95,7 @@ namespace FrankyCLI
         private static readonly BeatKind[] AllKinds =
         {
             new ObjectBeat("use", carriesItem: false), new ObjectBeat("pickup", carriesItem: true), new ObjectBeat("deliver", carriesItem: false),
-            new RecoverBeat(), new HoldBeat(), new TalkBeat(), new DefeatBeat(), new ClearBeat()
+            new RecoverBeat(), new HoldBeat(), new TalkBeat(), new DefeatBeat(), new ClearBeat(), new CraftBeat()
         };
         private static readonly Dictionary<string, BeatKind> BeatKinds = AllKinds.ToDictionary(k => k.Name);
 
@@ -106,6 +112,10 @@ namespace FrankyCLI
 
         /// <summary>Whether a beat leaves the player holding an item (its kind's CarriesItem); false for a type with no kind.</summary>
         private static bool Carries(Beat b) => KindOf(b)?.CarriesItem == true;
+
+        /// <summary>Whether a beat happens at a place and names a marker (its kind's HasPlace); true for a type with no kind,
+        /// so the lint's own refusal of that type is what speaks, not a skipped marker.</summary>
+        private static bool Placed(Beat b) => KindOf(b)?.HasPlace != false;
 
         /// <summary>The kinds a recipe uses, each once, in the order its beats first use them.</summary>
         private static IEnumerable<BeatKind> KindsIn(Recipe r) => r.beats.Select(KindOf).OfType<BeatKind>().Distinct();

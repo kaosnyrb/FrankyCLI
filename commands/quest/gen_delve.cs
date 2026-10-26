@@ -545,6 +545,16 @@ namespace FrankyCLI
         /// first one (his 2026-10-13: crowds driven from the json).
         /// </summary>
         private sealed class Who { public string? kind { get; set; } public string? list { get; set; } public int min { get; set; } public int max { get; set; } public int? beat { get; set; } }
+        /// <summary>A craft beat's recipe: the bench (a word, CraftBenches) and [item, count] pairs, each item a MiscItem
+        /// named by EditorID or by its unique in-game name.</summary>
+        private sealed class Craft { public string? bench { get; set; } public List<List<JsonElement>>? ingredients { get; set; } }
+        /// <summary>The craft benches a recipe may name, as the workbench keyword the COBJ carries. His MB11 to MB13 COBJs
+        /// all use WorkbenchIndustrialKeyword (read 2026-10-26); add a word when a recipe needs another bench.</summary>
+        private static readonly Dictionary<string, string> CraftBenches = new(StringComparer.OrdinalIgnoreCase)
+        { ["industrial"] = "WorkbenchIndustrialKeyword" };
+        /// <summary>The COBJ every craft beat's recipe is cloned from: his MB11a's (industrial bench, LearnMethod
+        /// DefaultOrConditions), read 2026-10-26. Its created object, conditions and ingredients are all rewritten.</summary>
+        private const string CraftCobjSource = "duo_co_MB11a";
         private static readonly string[] WhoKinds = { "infested", "workers", "spacers" };
         private sealed class Theme { public List<string> require { get; set; } = new(); public List<string> exclude { get; set; } = new(); }
         /// <summary>card: board only, REQUIRED there, the mission board's description (the card he reads before taking the job).</summary>
@@ -580,6 +590,8 @@ namespace FrankyCLI
             public string? group { get; set; }
             /// <summary>beats, pickup only: the inventory name of what this beat hands the player (a cloned item).</summary>
             public string? item { get; set; }
+            /// <summary>beats, craft only: where the item is made and what it costs (a quest-only COBJ, live while the step shows).</summary>
+            public Craft? craft { get; set; }
             /// <summary>beats, OPTIONAL: the NIF this beat's object wears, and its activate prompt. Absent = the base's.</summary>
             public string? model { get; set; }
             public string? name { get; set; }
@@ -1510,7 +1522,7 @@ namespace FrankyCLI
                 .ToDictionary(g => g.Key, g => g.First().FormKey, StringComparer.OrdinalIgnoreCase);
 
             var wanted = new List<string>();
-            foreach (var b in r.beats) if (!wanted.Contains(b.at, StringComparer.OrdinalIgnoreCase)) wanted.Add(b.at);
+            foreach (var b in r.beats) if (Placed(b) && !wanted.Contains(b.at, StringComparer.OrdinalIgnoreCase)) wanted.Add(b.at);
             // A support team's landing marker is demanded of its place like a beat's own.
             foreach (var b in r.beats)
                 if (b.support?.land is string ld && !wanted.Contains(ld, StringComparer.OrdinalIgnoreCase)) wanted.Add(ld);
@@ -1801,7 +1813,7 @@ namespace FrankyCLI
             // Skipped out loud, never silently, so an author still sees where it went.
             if (!spread && !issues.Any(i => i.Fatal) && r.beats.Count >= 2)
                 Console.WriteLine("\n  separation: skipped (it only prints; add --spread, or run gen_delve spread <markerA> <markerB>)");
-            if (spread && !issues.Any(i => i.Fatal) && r.beats.Count >= 2)
+            if (spread && !issues.Any(i => i.Fatal) && r.beats.Count >= 2 && Placed(r.beats[0]) && Placed(r.beats[1]))
             {
                 Console.WriteLine();
                 Console.WriteLine("  separation, METRES (1 unit = 1 m, read off his HUD 2026-09-24)");

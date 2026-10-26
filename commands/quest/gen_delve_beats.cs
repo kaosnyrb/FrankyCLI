@@ -439,7 +439,8 @@ namespace FrankyCLI
                     Fatal($"{personCount} people and {whos.Count} nest(s) need stages {occBase + 1} to {occBase + personCount + whos.Count}, which reach the first beat's {firstBeat}.");
             }
 
-            int recoverCount = r.beats.Count(b => b.type == "recover");
+            // A craft wears the same hook on the player as a recover, so the five-copy limit counts both.
+            int recoverCount = r.beats.Count(b => b.type is "recover" or "craft");
             if (recoverCount > 5) Fatal($"{recoverCount} recover beats; the player's OnItemAdded hook has the base and four duplicates, so five.");
             if (recoverCount > 0 && t.playerAlias < 0) Fatal($"template '{t.id}' names no playerAlias for a recover beat's hook.");
 
@@ -623,6 +624,7 @@ namespace FrankyCLI
             public List<int> FragStages = new();
             public List<(int alias, string script, int set, int prereq)> Hooks = new();
             public List<FormKey> Globals = new();
+            public List<FormKey> Recipes = new();                          // a craft beat's COBJ, one per craft
             public Dictionary<int, string> ObjectiveText = new();
             public string PscPath = "";
             public string? Recap;                                        // the completing stage's line, when ending on a group
@@ -1185,9 +1187,10 @@ namespace FrankyCLI
             {
                 for (int i = 0; i < r.beats.Count; i++)
                 {
-                    if (r.beats[i].returnTo != null)
+                    if (r.beats[i].returnTo != null || !Placed(r.beats[i]))
                     {
-                        // The fill is the earlier beat's; only this beat's journal is its own.
+                        // A return's fill is the earlier beat's, and a craft has none (made at a bench, no alias); either
+                        // way only this beat's journal is its own.
                         if (r.beats[i].journal != null)
                         {
                             var je = clone.Stages.FirstOrDefault(s => s.Index == beatStage[i])?.LogEntries.FirstOrDefault();
@@ -1312,6 +1315,52 @@ namespace FrankyCLI
                     itemOf[i] = mi.FormKey;
                     Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0)");
                 }
+                return Recipes();
+            }
+
+            /// <summary>
+            /// A craft beat's COBJ, cloned off his MB11a's (CraftCobjSource): it makes the beat's item at the recipe's bench,
+            /// costs the recipe's ingredients, and is live only while the step shows: GetStageDone(the step's start) == 1 AND
+            /// GetStageDone(the beat's own stage) == 0. His COBJs gate on GetStage == 10, which a board's arrival stage (15,
+            /// set by distance while the step still shows) would break, so the gate is on stages done, never the current one.
+            /// </summary>
+            private int Recipes()
+            {
+                RemovePrevious(myMod.ConstructibleObjects, e => e.StartsWith(r.id + "_cobj"));
+                for (int i = 0; i < r.beats.Count; i++)
+                {
+                    if (r.beats[i].craft is not Craft c) continue;
+                    var src = myMod.ConstructibleObjects.FirstOrDefault(o => o.EditorID == CraftCobjSource);
+                    if (src == null) { Console.WriteLine($"REFUSED: no COBJ {CraftCobjSource} in {t.mod} to clone a craft's recipe from."); return 1; }
+                    if (!inputs.Crafts.TryGetValue(i, out var made)) { Console.WriteLine($"REFUSED: beat {i + 1}'s craft was not resolved before the build."); return 1; }
+                    int k = steps.FindIndex(s => s.Beats.Contains(i));
+                    int start = k == 0 ? t.entryStage : steps[k - 1].DoneStage;
+                    var co = myMod.ConstructibleObjects.DuplicateInAsNewRecord(src);
+                    co.EditorID = $"{r.id}_cobj{i + 1}";
+                    co.CreatedObject.SetTo(itemOf[i]);
+                    co.WorkbenchKeyword.SetTo(made.bench);
+                    co.AmountProduced = 1;
+                    co.Conditions.Clear();
+                    foreach (var (st, done) in new[] { (start, 1f), (beatStage[i], 0f) })
+                    {
+                        var d = new GetStageDoneConditionData { RunOnType = Condition.RunOnType.Subject, SecondParameter = st };
+                        d.FirstParameter = new FormLinkOrIndex<IQuestGetter>(d, clone.FormKey);
+                        co.Conditions.Add(new ConditionFloat { Data = d, CompareOperator = CompareOperator.EqualTo, ComparisonValue = done });
+                    }
+                    var pattern = src.ConstructableComponents?.FirstOrDefault();
+                    if (pattern == null) { Console.WriteLine($"REFUSED: {CraftCobjSource} has no ingredient to copy the component shape from."); return 1; }
+                    co.ConstructableComponents!.Clear();
+                    foreach (var (part, count) in made.parts)
+                    {
+                        var comp = pattern.DeepCopy();
+                        comp.Component.SetTo(part);
+                        comp.RequiredCount = (uint)count;
+                        co.ConstructableComponents.Add(comp);
+                    }
+                    bm.Recipes.Add(co.FormKey);
+                    Console.WriteLine($"  +recipe  : {co.EditorID} {co.FormKey} makes item {i + 1} at {CraftBenches[c.bench!]}, live from stage {start} until {beatStage[i]}; "
+                                      + string.Join(", ", ReadIngredients(c).Select(x => $"{x.count} {x.key}")) + $" (clone of {CraftCobjSource})");
+                }
                 return 0;
             }
 
@@ -1374,6 +1423,8 @@ namespace FrankyCLI
                     ob.Targets.Clear();
                     foreach (var b in s.Beats)
                     {
+                        // A craft points nowhere: it is done at whatever bench he chooses, so its objective has no target.
+                        if (slotOf[b].ObjectiveTarget < 0) { Console.WriteLine($"  objective: {s.Objective} has no target for beat {b + 1} (a {r.beats[b].type}, made wherever he is)"); continue; }
                         var tt = tgt.DeepCopy();
                         tt.AliasID = slotOf[b].ObjectiveTarget;
                         if (s.IsGroup)
@@ -1596,7 +1647,10 @@ namespace FrankyCLI
                 // accept (his 2026-10-14: "you should get the radio message when you are near the POI").
                 if (arrival)
                 {
-                    int at = slotOf[steps[0].Beats[0]].markerAlias;
+                    // The first beat that HAPPENS somewhere: a craft (missionboard34a) is made at any bench and has no
+                    // marker, so the call waits for the place he is going to after it (34a: Noor's site).
+                    int first = steps.SelectMany(s => s.Beats).First(b => Placed(r.beats[b]));
+                    int at = slotOf[first].markerAlias;
                     var sc = DistanceHook(clone.FormKey, t.playerAlias, t.arrivalStage, t.entryStage);
                     if (AttachHook(vma, clone.FormKey, at, sc, HookEntry.FindOrCreate, true, bm, t.arrivalStage, t.entryStage) == Hooked.AlreadyCarries)
                     { Console.WriteLine($"REFUSED: alias {at} already carries {sc.Name}; the arrival cannot hook it twice."); return 1; }
@@ -2478,6 +2532,15 @@ namespace FrankyCLI
             }
             foreach (var g in bm.Globals)
                 fail += Check($"counter {g} is a text-display global", (q.TextDisplayGlobals?.Any(x => x.FormKey == g) ?? false).ToString(), "True");
+            foreach (var rk in bm.Recipes)
+            {
+                var co = m.ConstructibleObjects.FirstOrDefault(x => x.FormKey == rk);
+                fail += Check($"craft recipe {rk} is in the file and makes a {r.id} item",
+                              co == null ? "missing" : (m.MiscItems.FirstOrDefault(x => x.FormKey == co.CreatedObject.FormKey)?.EditorID ?? "not one of ours").StartsWith(r.id + "_item").ToString(), "True");
+                fail += Check($"craft recipe {rk} is gated on two of this quest's stages (live only while the step shows)",
+                              co == null ? "missing" : co.Conditions.Count(c => c.Data is IGetStageDoneConditionDataGetter d && d.FirstParameter.Link.FormKey == q.FormKey).ToString(), "2");
+                fail += Check($"craft recipe {rk} costs something", co == null ? "missing" : ((co.ConstructableComponents?.Count ?? 0) > 0).ToString(), "True");
+            }
             foreach (var (place, anchor, global) in bm.Leashes)
             {
                 var la = q.Aliases.OfType<IQuestLocationAliasGetter>().FirstOrDefault(a => a.ID == (uint)place);
