@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard33a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-26 11:24: \"right a Jaeger like quest idea. Missonboard. Our outpost is being attack by Ashta. Only spawns on a outpost on Cheyenne\"",
+  "_note": [
+    "THE FIRST JAEGER DELVE. An outpost on Cheyenne is under attack by Ashta, the planet's own predators. Sound the",
+    "alarm, then hold through three waves. 16a's shape (a use, then a hold defending it), which played on the industrial ten.",
+    "JAEGER'S FRAME, kept light (office/stories/2026-07-31-jaeger-frame-spec.md, frame 01, the territorial native): the",
+    "Ashta were hunting this ground before the outpost went up. Said once, by the client, as a fact about the ground.",
+    "The July owed fix holds: no interiority for the animal, nobody says what it wants.",
+    "TWO THINGS NOT BUILT, the lint refuses or ignores each, Eliza's:",
+    "(1) CHEYENNE ONLY. A planet condition on a board's request. Not the second-request planet guard that crashed 10a and",
+    "12a, but the same family, so price it before it goes near the plugin. Stand-in field: place.planet.",
+    "(2) ASHTA WAVES. A hold's waves come from the base driver's gang list (spacers). This wants a creature list, Ashta",
+    "only: hold.list is the stand-in. Which LeveledNpc is Ashta is hers to find.",
+    "Ashta is not said aloud: voiced lines name roles only. The card and objectives say it.",
+    "Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A non-hostile built site: somebody's outpost. His word is outpost; whether a request on Cheyenne can place one is the pool question.",
+    "planet": "Cheyenne",
+    "_planet": "STAND-IN for his 'Only spawns on a outpost on Cheyenne'. Not a field yet."
+  },
+  "prose": {
+    "name": "Defense: Ashta at the <Place> on <Planet>",
+    "briefing": "An Ashta pack has been hitting the <Place> for days, and the people there can't hold them off alone.",
+    "card": "Defense contract. Ashta have been attacking our outpost on <Planet>, and we can't hold them off on our own. Sound the alarm and help us see the next attack through. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Sound the alarm at the <Place>",
+      "journal": "The Ashta have been circling the <Place> for days. I sounded the alarm, and everyone there got behind a wall.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Outpost Alarm",
+      "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",
+      "say": [
+        "That's the alarm. Everybody's inside.",
+        "They'll have heard it too. They always come when it goes off."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "objective": "Hold the <Place> against the Ashta",
+      "journal": "The Ashta came at the <Place> three times and didn't get in. Whatever's left of the pack has gone back out into the grass.",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "list": "ASHTA, UNPICKED",
+      "_list": "STAND-IN: an Ashta-only creature list, Eliza's. Size per side on the horde (his rule).",
+      "revealObjective": "Kill the Ashta",
+      "defend": 1,
+      "say": [
+        "That's them gone. Back out into the grass.",
+        "They were hunting here long before we came. I don't think they've forgotten it."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Outpost Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
+  },
+  "broadcast": [
+    "You're here? Good. Get the alarm going so everyone gets inside.",
+    "They come in from the long grass, and they come fast.",
+    "Don't let them reach the middle of the camp."
+  ],
+  "_speech": "The outpost's lead, steady, has done this before. Sarah (Mature, Reassuring, Confident), in two recipes; his ear decides. No names, places, factions or currency, and the animal is never named aloud."
+}
