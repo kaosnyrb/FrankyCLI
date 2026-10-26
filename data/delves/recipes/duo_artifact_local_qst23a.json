@@ -1,0 +1,66 @@
+﻿{
+  "schema": 2,
+  "id": "duo_artifact_local_qst23a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: a mission you go into knowing there is a fight (his ruling, 2026-10-20).",
+  "author": "jessica, as Ines Corvo",
+  "source": "his 2026-10-21 06:57: \"write the local 5, use your pen names\". The five old artifact_local fight families (Bounty, Danger, Dismantle, Strike, Hunt: 42 quests), one new Delve each, each person written by a different pen name.",
+  "_note": [
+    "PEN NAME: home-office office/pennames/ines-corvo.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
+    "STRIKE, THE SPACER LANDING. First Delve of the old Strike family (local qst12 to qst16: his 'the ship and crew",
+    "that are landing on the planet to fight', an ARRIVAL, not a target holed up). No ship lands here: the engine",
+    "spawns the crew at the marker, and no ship is spoken of as present (his 10-21 ruling on 32a: nothing the build does not place). defeat on",
+    "duo_boss_Spacer_Boss_Aggro_Female (qst14's boss) with a Spacer gang. Ines's tell: she names the person who will",
+    "pay for the decision before she gives the order (the night shift). Her ban: ceremony, speeches, a rallying line.",
+    "⚠ The Spacer boss form has not been on a Delve before; the lint resolves it. Pay: med, placeholder.",
+    "RE-CUT 2026-10-21 16:36 for the ear, his \"when you split the lines that small Elevenlabs has no context so the delivery is worse\" and \"yeah recut, they aren't made yet\": each speech is one or two whole responses, split only where a real pause belongs."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site somebody works: there are stores to lock people in."
+  },
+  "prose": {
+    "name": "Strike: Spacer Landing on <Planet>",
+    "briefing": "A Spacer crew has come down near the <Place>, and they are on their way in armed. The supervisor there has locked her night shift in the stores and wants someone to meet the crew before they reach the door."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REWoundedMarkerLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 3,
+        "max": 5,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the Spacer captain at the <Place>",
+      "journal": "The Spacer captain at the <Place> is dead and her crew have scattered. The night shift can come out of the stores.",
+      "say": [
+        "Their captain's down? Then I'm unlocking the stores, and nobody goes back to work until I've counted heads."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Site Supervisor",
+    "voice": "GenericFemale01",
+    "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
+  },
+  "broadcast": [
+    "A crew's come down near us, armed, and they're on their way in.",
+    "I've locked the night shift in the stores. If that crew reaches the door, it's the night shift who pay for it, so get here first."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency ('a ship', never whose). Voice is remote02a's 'Sarah' (mature, confident), used once so far; his ear decides."
+}

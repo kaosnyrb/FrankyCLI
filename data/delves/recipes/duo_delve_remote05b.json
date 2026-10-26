@@ -4,7 +4,7 @@
   "template": "beats",
   "_note": "LETTER VARIANT of remote05a, written by Jessica 2026-10-14 on his 'do one of each for now'. His ruling the same morning: the letters of 05 and 06 differ by WHERE, so the words can be specific about the site. Military sites only, so the enemy is Ecliptic and the boss is Overtime's own duo_boss_Ecliptic_Boss_Aggro_NoScript (found in du_overtime.esm). Same beat, same marker, same numbers as 05a. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is a colony militia elsewhere on the planet. The boss gender is not known, so 'the commander', never him.",
   "author": "jessica",
-  "source": "Structure from duo_delve_remote05a (Eliza's defeat proof)",
+  "source": "Structure from duo_artifact_remote_planet_qst24a (Eliza's defeat proof)",
   "place": {
     "remote": true,
     "theme": {

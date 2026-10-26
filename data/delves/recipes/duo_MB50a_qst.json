@@ -1,0 +1,133 @@
+{
+  "schema": 2,
+  "id": "duo_MB50a_qst",
+  "template": "board",
+  "deal": "duo_MB_MissionNode_Manufacturing",
+  "_deal": "The board's test node; the Manufacturing node is Eliza's to point it at.",
+  "author": "jessica",
+  "source": "his 2026-10-26 11:57: \"hey we need a Manufacturing mission. These are about bringing raw material or crafted parts to people. It's crafting quests. Read an existing one and build one with a NPC delivery as the target\"",
+  "_note": [
+    "THE MANUFACTURING FAMILY, 1: THE PRESSURE REGULATOR. His MB11 to MB13 fabrication shape (7 originals, read in",
+    "overtime/text patch-03 and the board-titles patch: 'Build-and-deliver. The stake is always the same and it is always the",
+    "wait'): build a part at a workbench, take it to the people waiting for it. Here the delivery is a PERSON, 11a's",
+    "hand-back: the talk is the last step and exchange 0 takes the item and pays.",
+    "⚠ I read the originals' TEXT, not their records: the plugin is on Defiant, not this machine, so their COBJs, ingredients",
+    "and how their 'have it' step completes are unread. Eliza's to read before she builds the craft half.",
+    "ONE THING NOT BUILT, refused by the lint until it is, Eliza's: THE CRAFT STEP. A recipe (COBJ) for the Pressure",
+    "Regulator, at an industrial workbench, live only while the quest runs, and a step that completes when the item lands",
+    "in his inventory. recover's hook (DefaultAliasOnItemAddedScript on the player) already fires on any add, crafting",
+    "included; recover is refused on a board today. backport-map capability E ('count') is the raw-material twin.",
+    "⚠ The board's arrival hook measures to STEP ONE's marker, and step one here is a craft with no marker. The broadcast",
+    "should play when he nears the person instead. Eliza's.",
+    "Ingredients are PLACEHOLDERS for his balance. Pay: med, capped.",
+    "LINT 2026-10-26 without the craft stand-in: two fatals, both the craft step (recover on a board; no marker). The talk half and the place pass. talk_check: one ? (How have you managed?), set up by the card and radio's rationing, kept."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A lived-in non-hostile site: the people waiting. The residents stay ALIVE here (no place.residents)."
+  },
+  "prose": {
+    "name": "Fabrication: Pressure Regulator for the <Place> on <Planet>",
+    "briefing": "The water reclaimer at the <Place> blew its pressure regulator. Nobody out there can make another, and they've been rationing water since.",
+    "card": "Fabrication contract. The water reclaimer at the <Place> on <Planet> has blown its pressure regulator, and nobody out there can make another. Build one at an industrial workbench and deliver it by hand. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "craft",
+      "craft": {
+        "bench": "industrial",
+        "ingredients": [
+          [
+            "Aluminum",
+            4
+          ],
+          [
+            "Copper",
+            2
+          ],
+          [
+            "ResOrgCommonSealant",
+            2
+          ]
+        ]
+      },
+      "_craft": "BUILT 2026-10-26 (Eliza): type craft, a COBJ cloned off his duo_co_MB11a, live from the accept until the item is made. Ingredients are placeholders, his balance.",
+      "item": "Pressure Regulator",
+      "objective": "Build a pressure regulator for the <Place> at an industrial workbench",
+      "journal": "The <Place> needs a pressure regulator for its water reclaimer. I built one. Now it has to go out to them by hand."
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the pressure regulator to the <Place>",
+      "journal": "The water reclaimer at the <Place> blew its pressure regulator, and nobody out there could make another. I built one and handed it over. They'll have running water by tonight.",
+      "person": {
+        "name": "Noor Halvorsen",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
+        "hellos": [
+          [
+            "Sorry, there's no water to offer you. Long story."
+          ],
+          [
+            "Mind the tanks. They're empty, but they're heavy."
+          ]
+        ]
+      },
+      "greeting": [
+        "You've got the regulator? Please say you've got the regulator.",
+        "The old one was older than me. Nobody out here makes them any more."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here's your regulator.",
+          "reply": [
+            "That's it. That's exactly it.",
+            "Give me an hour and we'll have running water again. Thank you."
+          ]
+        },
+        {
+          "prompt": "What happened to the old one?",
+          "reply": [
+            "Nothing dramatic. It just stopped one morning.",
+            "Most things out here do, eventually."
+          ]
+        },
+        {
+          "prompt": "Why does nobody make them?",
+          "reply": [
+            "Nobody stocks them out here. The last one came in a crate with the reclaimer, years ago."
+          ]
+        },
+        {
+          "prompt": "How have you managed?",
+          "reply": [
+            "Emergency tanks and a lot of not washing.",
+            "Everything tastes of the tank. I've stopped noticing, which is worse."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-back (11a's): it ends the talk, takes the Pressure Regulator and sets stage 100, which pays. Every other prompt is set up by the greeting (the old one, nobody makes them) or by the card (rationing).",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Water Reclaimer Crew",
+    "voice": "GenericFemale01",
+    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+  },
+  "broadcast": [
+    "You're close? Good. Come and find me, I'll be outside.",
+    "We've been rationing water for a week. You're the best news we've had."
+  ],
+  "_speech": "The same voice on the radio and in person (Noor), as 11a and 19a. Lucy (Friendly, Relaxed, Thoughtful), in two recipes; his ear decides. No names, places, factions or currency in a voiced line; her name is subtitle only."
+}

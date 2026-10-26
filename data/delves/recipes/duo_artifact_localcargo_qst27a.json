@@ -1,0 +1,122 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_localcargo_qst27a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode_Rare",
+  "_deal": "RARE since 2026-10-21, his \"those two sound reasonable\": a grief beat (the letters, then his sister) should not repeat. Was the live local-cargo pool since 2026-10-12.",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/v2-mission-types.md, type 3 (the trail); office/projects/delves/stages-not-a-driver.md",
+  "_note": [
+    "TYPE 3, THE TRAIL, the first Delve across THREE places: a note at one POI points to letters at another,",
+    "and both go to a third. Three links, then it ends (his: 'ok for the chain to end, otherwise its a",
+    "thradmill'). Built by Eliza 2026-10-08; every player-facing word is Jessica's, written 2026-10-08 on his",
+    "\"yeah 2\". The fiction: a soldier's unsent letters, taken home. The natural site is where he left a note,",
+    "the military one is where he served, the peopled end is where his sister lives.",
+    "2026-10-13, his: \"the payoff feels off. Lets change the last to a talk with his sister\". The post locker",
+    "is gone: the last step is a hand-back TALK (as 11a), so the letters reach a person, not furniture."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_NonHostile"],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "reach": "duo_shortdrivedistance",
+    "_reach": "His 2026-10-13: 'First objective was ages away from the second' ('most of the worldspace'), then 'let's tighten this one quest down to duo_shortdrivedistance'. Every other place within 4,000 of the main place and of each other.",
+    "_theme": "The END of the trail, peopled: his sister, placed at the centre.",
+    "second": {
+      "theme": {
+        "require": ["LocTypeOE_ThemeNaturalKeyword"],
+        "exclude": ["LocTypeOE_NonHostile"]
+      }
+    },
+    "third": {
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeNaturalKeyword"
+        ]
+      }
+    },
+    "_themes": "THREE DISJOINT POOLS, so no two links can be one site: the end is peopled (keeping the base's no-natural, no-cave exclusions); the first slate is at an unpeopled NATURAL site; the second at an unpeopled MILITARY one (DROPPED 2026-10-13, his: 'I couldn't test, think the requirements are too narrow. Let's drop the Military keyword req': now any unpeopled, non-natural site, still disjoint from both). Split on the two biggest themes in the pool (gen_delve keywords, 2026-10-08: Natural 121, Military 119); 'infrastructure and not peopled' was 16. Which fiction suits which site is Jessica's call."
+  },
+  "prose": {
+    "name": "Search: Soldier's Letters on <Planet>",
+    "briefing": "I came across a soldier's note pointing to a cache at the <SecondPlace>. Whatever he left there, he never came back for it."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "place": "second",
+      "objective": "Search the cache at the <SecondPlace>",
+      "item": "Private's Field Note",
+      "journal": "The cache held a note from a private. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home.",
+      "model": "Meshes\\ccs\\fieldcache01.nif",
+      "message": {
+        "title": "Field Note",
+        "text": "The note is folded small and signed with a service number. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home."
+      },
+      "name": "Field Cache"
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "place": "third",
+      "objective": "Find the private's letters at the <ThirdPlace>",
+      "item": "Private's Unsent Letters",
+      "journal": "I've found the private's letters at the <ThirdPlace>. They're all addressed to his sister at the <Place>, so that's where they're going.",
+      "model": "Meshes\\ccs\\lettercache01.nif",
+      "message": {
+        "title": "Unsent Letters",
+        "text": "A bundle of slates tied with wire. Every one is addressed to the same person, his sister, at the <Place>. None of them were ever sent."
+      },
+      "name": "Letter Cache"
+    },
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Take the letters to his sister at the <Place>",
+      "journal": "I followed a soldier's note from the <SecondPlace> to his letters at the <ThirdPlace>, and gave them to his sister at the <Place>.",
+      "person": {
+        "name": "Ilse Corran",
+        "template": "UC_NA_MASTWorkerFemale02",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_Poncho_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
+        "hellos": [
+          ["Are you lost? There's nothing out here worth the walk."]
+        ]
+      },
+      "greeting": [
+        "That's his writing on those.",
+        "I'd know it anywhere. Where did you find them?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here. They're yours.",
+          "reply": [
+            "That's every week. He wrote every week.",
+            "None of it ever came. I thought he'd stopped.",
+            "He hadn't. Thank you."
+          ]
+        },
+        {
+          "prompt": "What happened to him?",
+          "reply": [
+            "His unit went quiet near the end of the fighting.",
+            "They told us that much and nothing else. I stopped asking."
+          ]
+        },
+        {
+          "prompt": "Will you be all right?",
+          "reply": ["Ask me once I've read them."]
+        }
+      ],
+      "_talk": "The menu lists exchanges 1 to 3 ABOVE the closer (his play, 2026-10-13), so she sees the letters in the greeting and every question works before the hand-over; the hand-over is the last option, where it reads naturally. Exchange 0 ends the talk, takes the letters and the note, sets stage 100. Voiced: no names, no places. ElevenLabs 'Lucy' (american), heard in game 2026-10-13."
+    }
+  ]
+}

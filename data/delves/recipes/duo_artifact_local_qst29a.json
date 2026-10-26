@@ -1,0 +1,107 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_local_qst29a",
+  "template": "beats",
+  "author": "jessica",
+  "source": "his 2026-10-15 06:22: \"Back to city: You find a slafe which tells you of a object to be recovered and returned to a major city/settlement. Placing talking NPC in city\"; 06:23 \"it like closes the loop of an adventure so you end up back at base\"",
+  "_note": [
+    "BACK TO CITY, a new family: a slate sends you out, you take something small back off whoever holds it in a",
+    "dangerous place, and you carry it home to a MAJOR SETTLEMENT and hand it over in a conversation. The adventure",
+    "goes out and the ending comes back to base. His idea; words Jessica's.",
+    "11a's shape (recover off the dungeon boss, talk hand-back at stage 100), which he called the best yet, so the ONE",
+    "new mechanic here is the city (his rule: prove a verb, then vary it cheaply). Everything else is proven.",
+    "UNBUILT, so the lint should refuse exactly this half (ELIZA'S):",
+    "1. place.second.settlement: a FIXED named settlement as a place, not a pooled POI. Akila City first.",
+    "2. The person spawned inside that city at a spot of the build's choosing, and not colliding with vanilla's people.",
+    "   Where in Akila is his eye: the market is the obvious spot for a trader.",
+    "No 'deal' yet: started by hand until the city place exists, then it joins the local-cargo slate pool like 11a.",
+    "Pay: reward on the talk, the single ending. 'hard' is a placeholder, as on 11a; the tier is his.",
+    "His voice on the radio first and the same voice in person, which is the first of 11a's three reasons (his)."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": []
+    },
+    "second": {
+      "settlement": "Akila City"
+    },
+    "_theme": "A dungeon out there; Akila City at home. The city is named, not drawn from a pool, so there is no theme to filter."
+  },
+  "prose": {
+    "name": "Recovery: Trader's Strongbox on <Planet>",
+    "briefing": "Spacers hit a trader's supply run and took the whole hold to the <Place>. He only wants one thing back: a strongbox with his trading papers in it. He's at his stall in <SecondPlace>."
+  },
+  "beats": [
+    {
+      "type": "recover",
+      "at": "LocDungeonBossLocRef",
+      "item": "Trader's Strongbox",
+      "objective": "Recover the trader's strongbox from the <Place>",
+      "journal": "The spacers at the <Place> had the trader's strongbox. I took it back. He's waiting at his stall in <SecondPlace>."
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "AutofillGeneric01",
+      "_at": "His 2026-10-23 pick, 'lets just go for autofill 01 and see': Akila City's one AutofillGeneric01 spot (2D1D2A, cell 1,-1), the city pinned (place.second.settlement).",
+      "objective": "Return the strongbox to the trader in <SecondPlace>",
+      "journal": "Spacers took a trader's hold to the <Place>. I went in and brought his strongbox back to <SecondPlace>. Without the papers in it he couldn't trade.",
+      "person": {
+        "name": "Wade Tolliver",
+        "template": "UC_NA_MASTWorkerMale02",
+        "outfit": "Outfit_Merchant",
+        "voice": "GenericMale01",
+        "elevenlabs": "dgkKQcJqyy5AP0dqleUU",
+        "hellos": [
+          [
+            "Stall's shut today. Sorry."
+          ]
+        ]
+      },
+      "greeting": [
+        "Spacers jumped my run and took the whole hold.",
+        "Tell me that's what I think it is."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I've got your strongbox.",
+          "reply": [
+            "That's it. Dent in the lid and all.",
+            "Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."
+          ]
+        },
+        {
+          "prompt": "What's in it?",
+          "reply": [
+            "Two years of receipts. Permit, stall number, the lot.",
+            "Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
+          ]
+        },
+        {
+          "prompt": "Which lane did they jump you on?",
+          "reply": [
+            "The slow one. You've run it too, then.",
+            "They never jump you on the fast lane. Not enough time to plan it."
+          ],
+          "perk": "BackgroundLongHauler"
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-back: it ends the talk, takes the Trader's Strongbox and sets stage 100, which pays 'reward'. Exchange 2 is a [Long Hauler] line (his 2026-10-14 RP feature): only a hauler would ask which lane. Voiced lines: no names, no places, no factions, no currency.",
+      "reward": "med",
+      "_heavy": "2026-10-23: 'Why so heavy?' had nothing setting it up (no line says the box is heavy). Now 'What's in it?'.",
+      "_greeting": "2026-10-23, found by scripts/delves/talk_check.py: the greeting set nothing up, so 'Which lane did they jump you on?' leaned on the radio and the card. The hit now goes before the menu."
+    }
+  ],
+  "speaker": {
+    "name": "Trader",
+    "voice": "GenericMale01",
+    "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
+  },
+  "broadcast": [
+    "They hit my run and took the lot. Keep the cargo.",
+    "There's a strongbox in there with my papers. Without them I can't sell a thing.",
+    "I'd like that back."
+  ],
+  "_speech": "His own voice on the radio, then in person. Voice is 04a's (dgkKQcJqyy5AP0dqleUU), used once so far, chosen so this is not Isla again (four Delves already); his ear decides. No names, no places, no currency."
+}

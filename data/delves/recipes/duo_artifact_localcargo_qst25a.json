@@ -1,0 +1,145 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_localcargo_qst25a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "LIVE POOL since 2026-10-12: tested off the local-cargo test node (his slate tests), then moved here by `gen_delve testnode off --promote`, a node edit with no rebuild (his: \"think it's a bit wasteful to rebuilt all the quests just to put them in a different list\").",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/type-02-keep-or-give-back.md (variant a, the medal)",
+  "_note": [
+    "TYPE 2 VARIANT A, THE MEDAL. His go 2026-10-08 11:42, and 11:51 on the shape: \"third place, time",
+    "to learn\". Every player-facing word is Jessica's, written 2026-10-08 on his \"yeah write\".",
+    "Her placeholders map onto this template's tokens unchanged in meaning: <DungeonLocation> (the",
+    "stash) is <SecondPlace>, <TargetPlanet> is <Planet>, <Place> and <ThirdPlace> as written.",
+    "",
+    "NOT IN THIS RECIPE: the salvager's slate (\"Salvage Note: Engraved Medal\", signed R.). It is the",
+    "mission's entry item and no Delve has an entry item yet; 03-05 start from the console.",
+    "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"choose now\"). items, people and reward went into the beats they belong to; the place tokens were renamed role for role (FindPlace->SecondPlace, OwnerPlace->Place, BuyerPlace->ThirdPlace), which resolve to the same places. Every other word is unchanged (asserted)."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeInfrastructureKeyword"
+      ]
+    },
+    "_theme": "The OWNER (the Vale family). Peopled, and NOT infrastructure, so the buyer's pool below is disjoint from this one by construction: one requires the keyword the other excludes. Census 2026-10-08 on Defiant: 62 peopled POIs carrying RECenterLocRef + MapMarker, 36 infrastructure and 26 not. ⏳ Which side gets which is a PLACEHOLDER (Eliza's split on the numbers); Jessica's call on the fiction.",
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": []
+      }
+    },
+    "_second": "The FIND (the salvager's stash), any POI, as duo_delve05's find.",
+    "third": {
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeInfrastructureKeyword"
+        ],
+        "exclude": []
+      }
+    },
+    "_third": "The BUYER (Curator Oduya's war room). Peopled AND infrastructure."
+  },
+  "prose": {
+    "name": "Salvage: Service Medal on <Planet>",
+    "briefing": "A salvager stashed a war medal at the <SecondPlace>. If it's engraved, somebody is missing it."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "place": "second",
+      "objective": "Recover the medal from <SecondPlace>",
+      "message": {
+        "title": "Service Medal",
+        "text": "The name on the back is worn past reading. The service number under it is not, and the record lists next of kin at the <Place>."
+      },
+      "item": "Colony War Service Medal",
+      "model": "Meshes\\ccs\\salvagerstash01.nif",
+      "_model": "Kim's salvager's stash kitbash (her salvager_stash.json, 2026-10-13: a strapped bundle, an open toolbox, scrap; 0.60 m, STANDS), replacing testcase 01's freight crate on his go.",
+      "_journal_never_shown": "The medal has a name on it, Sergeant Vale, and his service record lists family at the <Place>. I should take it to them.",
+      "_journal_note": "This line was beat 1's journal on the choice kind and was NEVER SHOWN: the offer is set in the same instant and the log shows only the newest line (part 13, his play 2026-10-08). offer.journal opens with the same sentence and is what the player reads. Kept here as Jessica wrote it.",
+      "name": "Salvager's Stash"
+    },
+    {
+      "type": "deliver",
+      "choose": "ending",
+      "at": "RECenterLocRef",
+      "place": "main",
+      "objective": "Return the medal to the family",
+      "journal": "I found a sergeant's Colony War medal in a salvager's stash and took it home to his family at the <Place>.",
+      "message": {
+        "title": "Returned",
+        "text": "His daughter turns the medal over twice, says nothing for a while, and puts it in her pocket. She pays what she can."
+      },
+      "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Memorial\\AK_Memorial_Podium.nif",
+      "name": "Family Memorial",
+      "_model": "PLACEHOLDER, the owner's delivery point: Akila's memorial podium, z 0.00..1.22, STANDS (gen_inspect bounds 2026-10-08). Name is Eliza's placeholder; Jessica's to word.",
+      "person": {
+        "name": "Veteran's Daughter",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Colonist_BeadedCollarShirt_01_NoHat",
+        "company": {
+          "list": "duo_GangMembersList_Civ_LIST",
+          "min": 2,
+          "max": 4
+        }
+      },
+      "reward": "easy"
+    },
+    {
+      "type": "deliver",
+      "choose": "ending",
+      "at": "RECenterLocRef",
+      "place": "third",
+      "objective": "Sell the medal to the curator",
+      "journal": "I found a sergeant's Colony War medal in a salvager's stash and sold it to a curator for his war room.",
+      "message": {
+        "title": "Sold",
+        "text": "The curator pays in full and packs it away for the war room. The card is already written: the rank, the service number, and the years."
+      },
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Curator's Collection",
+      "_model": "The buyer's delivery point is a footlocker (AK_FootLocker01_Static: z -0.00..0.28, 1.0 x 0.4 m, STANDS). His playtest 2026-10-08: \"The display cabinent looks wierd in the middle of a POI. Prob be a chest.\" The tilted display case it replaced is shop furniture, which reads wrong standing alone on open ground. Name is Eliza's placeholder; Jessica's to word.",
+      "person": {
+        "name": "Curator",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Formal_ShirtSlacks_Vest",
+        "company": {
+          "list": "duo_GangMembersList_Civ_Construx",
+          "min": 2,
+          "max": 4
+        }
+      },
+      "reward": "med",
+      "say": [
+        "That's it. That's the one.",
+        "People will stand in front of this and read his record, which is more than most of them get."
+      ],
+      "_say": "Added 2026-10-23 on his \"do 06a\", after his 18a play (\"no voice and no people just a small box\"): the buyer's ending was a box and a silent man. Plays when the medal goes in, in the speaker's voice (George, the curator's offer). The family ending stays silent on purpose: she says nothing for a while, and the speaker is his voice, not hers."
+    }
+  ],
+  "offer": {
+    "journal": "The engraving is worn past reading, but his service record lists family at the <Place>. Word travels fast. A curator wants the medal for his war room and will pay more than the family can. It's my call.",
+    "_journal": "His play 2026-10-08: \"the log doesn't read quite right, I think the family delivery one is skipped\". The log shows only the NEWEST stage's line, and the driver sets 50 (the family line) and 60 (this one) in the same instant, so 50 is never seen. So this line carries both of Jessica's sentences, verbatim, family first; her \"I should take it to them\" is dropped as the one clause the choice contradicts. ⏳ Jessica's to reword as one line if she likes.",
+    "say": [
+      "You're the one with the Colony War medal?",
+      "I keep a war room. People come to see what the war cost.",
+      "The family can't pay what I can. Come see me. Your call."
+    ],
+    "_say": "Jessica's radio line for the curator, verbatim from office/projects/delves/radio-lines.md (written 2026-10-09, parked under his either or). Unparked 2026-10-12 on his ask that the buyer's call be radio: the offer's box is gone, so the line no longer shares a stage with two boxes; it plays after the engraving's box closes. The box text it replaces: \"Heard you turned up a Colony War medal. I keep a small war room back home. People come to see it. I'm at the <ThirdPlace> now. I'll pay more than the family can, and it goes on the wall with his record under it. - The Curator\""
+  },
+  "_company": "His play 2026-10-08: \"the created NPCs are alone at the POIs which looks wierd. Can we get like a few nameless npcs\", and \"can we set there outfit in the json, so we can dress them up\". ⏳ PLACEHOLDERS, his to dress: Maren in a colonist's padded vest among colonists (Civ_LIST = LvlLISTColonist); Oduya in shirt, slacks and vest among Construx workers (an infrastructure site). Outfits are any vanilla Outfit EditorID (596 in Starfield.esm); company lists are Overtime's duo_GangMembersList_Civ_* (friendly).",
+  "_people": "His playtest 2026-10-08: \"Returning the medal talks about a person who isn't there\", then \"FrankyCLI has npc creation tools\". Templates are from NPCTools.GetTemplateFriendlyNPC's talkable set. ⏳ \"Vale's Daughter\" is a PLACEHOLDER: Jessica's prose never names her, so the name is hers to give (checked against his who's-who, no family name). Oduya is her name.",
+  "_reward": "Overtime's own ladder, on each ending's completing stage (QRCR/QRXP): easy 1,250 cr / 250 xp, med 2,800 / 500, hard 7,500 / 1,500. His first play 2026-10-08 paid 1,250 + 2,500 on the buyer's ending, because the stage reward the base carries was copied to it AND the driver paid on top; the driver pays nothing now. ⏳ PLACEHOLDER TIERS, his to set: the buyer one rung above the owner, which is the design's only rule.",
+  "speaker": {
+    "name": "Curator",
+    "voice": "GenericMale01",
+    "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
+  },
+  "_speech": "One line, the curator's offer, on the radio (his 2026-10-12, unparking Jessica's 10-09 line and her casting: George, warm storyteller, 'the temptation has to sound reasonable'). The offer box is gone, so his either or holds."
+}

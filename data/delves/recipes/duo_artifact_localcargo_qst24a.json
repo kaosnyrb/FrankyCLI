@@ -1,0 +1,111 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_localcargo_qst24a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "LIVE POOL since 2026-10-12: tested off the local-cargo test node (his slate tests), then moved here by `gen_delve testnode off --promote`, a node edit with no rebuild (his: \"think it's a bit wasteful to rebuilt all the quests just to put them in a different list\").",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/status.md (testcase 02)",
+  "_note": [
+    "TESTCASE 02, A DIFFERENT LOST THING ON THE SAME FOUR BEATS. His go, 2026-10-02 21:03: \"yeah lets try",
+    "abother artifact recipe\". The question it answers: is carry-absence-recover-return a FAMILY or one",
+    "mission? So the template, the place rules and the leash are testcase 01's unchanged, and everything",
+    "the player reads is new: the object, the absence, the people waiting and why it matters to them.",
+    "",
+    "Testcase 01 was a utility (water). This one is a comms relay, and the reason it matters is that the",
+    "people at the <Place> have not spoken to home since it went down. The last box pays that off.",
+    "2026-10-09: MOVED ONTO THE BEATS KIND (no driver; his \"work on the other beats and missions so everything is on this system\"). The items block went into the beats it belongs to; every word is unchanged."
+  ],
+  "place": {
+    "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
+    "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_Construx", "min": 2, "max": 4},
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "Testcase 01's delivery rule, unchanged on purpose: people who are waiting on the relay have to be there. LocTypeOE_NonHostile, pool 62 when measured 2026-09-24.",
+    "leash": "duo_samemapdistance",
+    "reach": "duo_shortdrivedistance",
+    "_reach": "His 2026-10-20 play: 'the distance between the first crate and the POI is a lot'. 4,000, as 03a and 04a (10-19).",
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": []
+      }
+    },
+    "_civilians": "Off, as testcase 01: the site brings its own people. (2026-10-09: the delve4 'civilians: false' key is gone; a beats Delve with no approach places nobody.)"
+  },
+  "prose": {
+    "name": "Recovery: Relay Dish on <Planet>",
+    "briefing": "The <Place> has been without a comms relay for over a week. The dish was signed out to them and never arrived, so I should find where it stopped.",
+    "_prose": "Artifact family title shape, Category: thing on <Planet> (style guide 4b), as testcase 01. Journal lines follow section 3: first person, what just happened then what next, about 23 words, and beat 4 is the standalone recap."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Find the Relay Dish at the <SecondPlace>",
+      "journal": "I found the dish crate, set down well short of the <Place>. The tag says the transmitter went ahead on its own. I should take the dish there.",
+      "place": "second",
+      "message": {
+        "title": "Shipping Tag",
+        "text": "The crate's shipping tag is addressed to the <Place>. Relay dish, 1 of 2. The transmitter was shipped separately."
+      },
+      "item": "Relay Dish (1 of 2)",
+      "model": "Meshes\\ccs\\relaydishcrate01.nif",
+      "_item": "Jessica's, 2026-10-02. Named objects, never a described site.",
+      "_model": "Testcase 01's freight crate, his eye 2026-09-24: a consignment, not loot.",
+      "name": "Relay Dish Crate"
+    },
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the Dish to the <Place>",
+      "journal": "The transmitter reached the <Place> and was taken from its crate before anyone could fit it. Without it the dish is just a dish. I need to find who took it.",
+      "model": "Meshes\\ccs\\relaydish01.nif",
+      "name": "Comms Relay",
+      "_model": "2026-10-08, his kitbash: a comms console with an antenna mast, Overtime's own asset (packed in du_overtime - Main.ba2 and Main_ps.ba2). Replaced two vanilla dishes the same morning: TripodFloor01 HANGS below its origin (OBND z -2.14 to +0.06) and sat 2.1 m underground; A_01 stands on its origin but is a dish lying on the ground (his: 'the dish is good but just sitting on the ground'). Before using a mesh as a placed activator, read its lowest z.",
+      "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
+      "_name": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right.",
+      "say": [
+        "The dish is no good without the transmitter, and someone's walked off with it.",
+        "Whoever took it is trying to sell it. Get it back."
+      ]
+    },
+    {
+      "type": "recover",
+      "outside": [750, 2000],
+      "_outside": "His 2026-10-19 playtest: 'the spacers spawn in the site'. The thief and his gang out on open ground from the far-edge marker at a random angle. 150 to 300 (the probe's tested range) played 2026-10-19; widened to 750 to 2000 on 2026-10-20, his 'want to increase the range to 750 - 2000'. Placed that far when the step began he fell from the sky on approach (the ground was not loaded), so since 2026-10-20 the step places a SPOT out there and the thief is spawned at it when the player comes within 250 (duo_delve_spawnnear, his 'yeah C').",
+      "at": "RETravelB1LocRef",
+      "objective": "Recover the Relay Transmitter",
+      "journal": "I've got the transmitter back, still in its packing. I should take it to the <Place> and get the relay working.",
+      "message": {
+        "title": "Relay Transmitter",
+        "text": "The transmitter, still in its packing. Someone has scrawled a low price on the box."
+      },
+      "item": "Relay Transmitter (2 of 2)",
+      "_item": "Jessica's, 2026-10-02. Named objects, never a described site."
+    },
+    {
+      "type": "deliver",
+      "returnTo": 2,
+      "at": "RECenterLocRef",
+      "objective": "Bring the Relay Online",
+      "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
+      "say": [
+        "We're live.",
+        "Half the crew's already queuing to call home. The other half are pretending they aren't."
+      ]
+    }
+  ],
+  "_messages": "Texts and titles are Jessica's, 2026-10-02. Each box is a MESG cloned the same way as testcase 01's, so <Place> resolves.",
+  "_journal": "Contractions on purpose (didn't, I've, isn't): the journal and the boxes are people writing in a hurry, and a log with none reads generated (the Outlaws 01 read, 2026-10-02).",
+  "speaker": {
+    "name": "Comms Tech",
+    "voice": "GenericFemale01",
+    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+  },
+  "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."
+}

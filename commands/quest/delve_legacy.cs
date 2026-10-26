@@ -29,8 +29,9 @@ namespace FrankyCLI
     /// own shape (PEO:SQ_PEO_QuestScript) and his Suit Power Cores' (avpc_poichance into atpc_poispawnchance); the
     /// option, group and quest records here are written field for field in the shape of his shipped ones.
     ///
-    /// A DELVE is a quest whose EditorID names a recipe in data/delves/recipes. The duo_delve prefix is checked against
-    /// that and the two must agree, because a naming convention is a promise nobody signed.
+    /// A DELVE is a quest whose EditorID names a recipe in data/delves/recipes. Nothing else: since 2026-10-26 the Delves
+    /// carry the classic names (duo_MB40a_qst, duo_artifact_local_qst20a; his ruling, families from 40 and 20), so no
+    /// name tells a Delve from an original. The second, by-name test this used to cross-check against went with it.
     ///
     /// Edits the .esm only, as testnode does: the .esp twin carries its own copy of every node.
     /// </summary>
@@ -80,19 +81,11 @@ namespace FrankyCLI
             var questName = myMod.Quests.ToDictionary(q => q.FormKey, q => q.EditorID ?? "");
             string NameOf(FormKey k) => questName.TryGetValue(k, out var n) ? n : k.ToString();
 
-            // Sort the pool, and refuse on any member whose two Delve tests disagree.
+            // Sort the pool: a member is a Delve when a recipe carries its name.
             var delves = new List<StoryManagerQuest>();
             var old = new List<StoryManagerQuest>();
-            var disagree = new List<string>();
             foreach (var e in real.Quests)
-            {
-                string n = NameOf(e.Quest.FormKey);
-                bool byRecipe = recipeIds.Contains(n);
-                bool byName = n.StartsWith("duo_delve", StringComparison.OrdinalIgnoreCase);
-                if (byRecipe != byName) disagree.Add($"{n} (recipe {(byRecipe ? "yes" : "no")}, duo_delve name {(byName ? "yes" : "no")})");
-                (byRecipe ? delves : old).Add(e);
-            }
-            if (disagree.Count > 0) { Console.WriteLine("REFUSED: these members are a Delve by one test and not the other: " + string.Join("; ", disagree)); return 1; }
+                (recipeIds.Contains(NameOf(e.Quest.FormKey)) ? delves : old).Add(e);
             if (old.Count == 0) { Console.WriteLine($"REFUSED: {real.EditorID} holds no quest that is not a Delve; there is nothing to move."); return 1; }
 
             Console.WriteLine();

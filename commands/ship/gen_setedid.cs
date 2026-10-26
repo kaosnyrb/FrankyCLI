@@ -1,6 +1,7 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Environments;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Starfield;
 using System;
@@ -62,6 +63,7 @@ namespace FrankyCLI
             if (args.Length < 4)
             {
                 Console.WriteLine("Usage: setedid <modname> <old_editorid> <new_editorid> [--dry]");
+                Console.WriteLine("       setedid <modname> --map <map.tsv> [--dry]   many at once: one load, one write, all or nothing");
                 Console.WriteLine();
                 Console.WriteLine("  Renames a record's EditorID, FormID-stable, any record type.");
                 Console.WriteLine("  NOT setname -- that sets a GBFM's FullName, the string the player sees.");
@@ -73,6 +75,7 @@ namespace FrankyCLI
             }
 
             string modname = args[0];
+            if (args[2] == "--map") return RenameFromMap(modname, args[3], args.Skip(4).ToArray());
             string oldId = args[2].Trim();
             string newId = args[3].Trim();
             bool dry = false;
@@ -183,6 +186,134 @@ namespace FrankyCLI
             Console.WriteLine("Finished -- 1 " + renamedKind + " renamed, FormID " + renamedKey + " unchanged.");
             Console.WriteLine("⚠ Anything holding '" + renamedFrom + "' as TEXT is now stale:");
             Console.WriteLine("  check_part discovery, desk notes, the manual, and any saved command line.");
+            return 0;
+        }
+
+        // ------------------------------------------------------------------ --map
+        //
+        // Many renames in one load and one write. His ask 2026-10-26: the Delves back onto the classic
+        // naming (duo_delve01a -> duo_artifact_localcargo_qst20a, 882 records) "without having to rebuild
+        // every quest". One call per record would load the game environment and rewrite the plugin 882
+        // times, and a run that died half way would leave a half-renamed mod.
+        //
+        // THE MAP: one row per record, tab separated, "<type>\t<FormID>\t<old>\t<new>", the FormID as the
+        // plugin's own hex (01002FC0: the high byte is the mod index, the low 24 bits the ID). The type
+        // column is for the reader and is not trusted. A row names its record TWICE, by FormID and by its
+        // current EditorID, and both must agree: a map built off an older copy of the plugin is refused
+        // row by row instead of renaming whatever now sits at that FormID.
+        //
+        // ALL OR NOTHING. Every row is checked before any record changes: the record exists, its EditorID
+        // is the row's old name, no two rows share a new name, and no new name is held by a record the
+        // map does not also rename away. Then one write, then the file is re-read off disk and every
+        // EditorID in it compared with what the map predicts, so a rename that did not land, or a
+        // record that changed without being asked, is named rather than assumed.
+        private static int RenameFromMap(string modname, string mapPath, string[] flags)
+        {
+            bool dry = false;
+            foreach (var f in flags)
+            {
+                if (f == "--dry") { dry = true; continue; }
+                Console.WriteLine("Error: unknown option " + f);
+                return 1;
+            }
+            if (modname == "Starfield") { Console.WriteLine("No way am I allowing you to edit Starfield.esm"); return 1; }
+            if (!System.IO.File.Exists(mapPath)) { Console.WriteLine("Error: no map file " + mapPath); return 1; }
+
+            var rows = new List<(uint id, string oldId, string newId, int line)>();
+            var bad = new List<string>();
+            int ln = 0;
+            foreach (var raw in System.IO.File.ReadAllLines(mapPath))
+            {
+                ln++;
+                var line = raw.TrimEnd('\r');
+                if (line.Length == 0 || line.StartsWith("#")) continue;
+                var c = line.Split('\t');
+                if (c.Length != 4) { bad.Add($"line {ln}: {c.Length} columns, want 4 (type, FormID, old, new)"); continue; }
+                if (!uint.TryParse(c[1], System.Globalization.NumberStyles.HexNumber, null, out var fid)) { bad.Add($"line {ln}: FormID '{c[1]}' is not hex"); continue; }
+                if (c[2].Trim().Length == 0 || c[3].Trim().Length == 0) { bad.Add($"line {ln}: an empty EditorID"); continue; }
+                if (string.Equals(c[2], c[3], StringComparison.Ordinal)) { bad.Add($"line {ln}: old and new are identical ({c[2]})"); continue; }
+                rows.Add((fid & 0x00FFFFFF, c[2].Trim(), c[3].Trim(), ln));
+            }
+            if (rows.Count == 0 && bad.Count == 0) { Console.WriteLine("Error: the map has no rows"); return 1; }
+
+            StarfieldMod myMod;
+            string datapath;
+            // Kept for the read-back: a Starfield plugin cannot be parsed without its masters' info, and the
+            // first version read back with none and crashed AFTER the write (2026-10-26, the write was good).
+            BinaryReadParameters readParams;
+            using (var env = GameEnvironment.Typical.Builder<IStarfieldMod, IStarfieldModGetter>(GameRelease.Starfield).Build())
+            {
+                datapath = env.DataFolderPath;
+                ModKey modKey = new ModKey(modname, ModType.Master);
+                if (!env.LoadOrder.ModExists(modKey)) { Console.WriteLine("Error: " + modname + ".esm is not in the load order"); return 1; }
+                readParams = gen_quest_main.BuildReadParams(env.LoadOrder);
+                myMod = StarfieldMod.CreateFromBinary(System.IO.Path.Combine(datapath, modname + ".esm"), StarfieldRelease.Starfield, readParams);
+                gen_quest_main.FixNextFormId(myMod);
+            }
+
+            var byId = new Dictionary<uint, IMajorRecord>();
+            foreach (var rec in myMod.EnumerateMajorRecords())
+                if (rec.FormKey.ModKey == myMod.ModKey) byId[rec.FormKey.ID] = rec;
+
+            var seenId = new HashSet<uint>();
+            foreach (var r in rows)
+            {
+                if (!seenId.Add(r.id)) { bad.Add($"line {r.line}: FormID {r.id:X6} appears twice in the map"); continue; }
+                if (!byId.TryGetValue(r.id, out var rec)) { bad.Add($"line {r.line}: no record {r.id:X6} in {modname}"); continue; }
+                if (!string.Equals(rec.EditorID, r.oldId, StringComparison.OrdinalIgnoreCase))
+                    bad.Add($"line {r.line}: {r.id:X6} is '{rec.EditorID}', the map says '{r.oldId}' (built off another copy?)");
+            }
+            foreach (var g in rows.GroupBy(r => r.newId, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1))
+                bad.Add($"new name '{g.Key}' is given to {g.Count()} records (lines {string.Join(", ", g.Select(x => x.line))})");
+            var leaving = new HashSet<uint>(rows.Select(r => r.id));
+            var staying = new Dictionary<string, IMajorRecord>(StringComparer.OrdinalIgnoreCase);
+            foreach (var rec in byId.Values)
+                if (!leaving.Contains(rec.FormKey.ID) && rec.EditorID != null) staying[rec.EditorID] = rec;
+            foreach (var r in rows)
+                if (staying.TryGetValue(r.newId, out var holder))
+                    bad.Add($"line {r.line}: '{r.newId}' is already {holder.FormKey} ({holder.GetType().Name}), which the map does not rename");
+
+            if (bad.Count > 0)
+            {
+                Console.WriteLine($"REFUSED: {bad.Count} problem(s) in {mapPath}; nothing written.");
+                foreach (var b in bad.Take(40)) Console.WriteLine("  " + b);
+                if (bad.Count > 40) Console.WriteLine($"  ... and {bad.Count - 40} more");
+                return 1;
+            }
+
+            foreach (var g in rows.GroupBy(r => byId[r.id].GetType().Name).OrderBy(g => g.Key))
+                Console.WriteLine($"  {g.Key,-22} {g.Count(),4}");
+            Console.WriteLine($"  {rows.Count} record(s) to rename in {modname}.esm, every FormID unchanged.");
+            if (dry) { Console.WriteLine("\n--dry: nothing written."); return 0; }
+
+            var before = byId.ToDictionary(kv => kv.Key, kv => kv.Value.EditorID);
+            foreach (var r in rows) byId[r.id].EditorID = r.newId;
+            foreach (var rec in myMod.EnumerateMajorRecords()) rec.IsCompressed = false;
+            string outPath = datapath + "\\" + modname + ".esm";
+            myMod.WriteToBinary(outPath, gen_quest_main.BuildWriteParams());
+
+            // Read it back off disk: every EditorID is either the map's new name or what it was before.
+            var expect = new Dictionary<uint, string?>(before);
+            foreach (var r in rows) expect[r.id] = r.newId;
+            using var back = StarfieldMod.CreateFromBinaryOverlay(outPath, StarfieldRelease.Starfield, readParams);
+            var wrong = new List<string>();
+            int seen = 0;
+            foreach (var rec in back.EnumerateMajorRecords())
+            {
+                if (rec.FormKey.ModKey != back.ModKey) continue;
+                seen++;
+                if (!expect.TryGetValue(rec.FormKey.ID, out var want)) { wrong.Add($"{rec.FormKey} appeared ({rec.EditorID})"); continue; }
+                if (!string.Equals(rec.EditorID, want, StringComparison.Ordinal)) wrong.Add($"{rec.FormKey} is '{rec.EditorID}', expected '{want}'");
+            }
+            if (seen != expect.Count) wrong.Add($"{seen} records read back, {expect.Count} expected");
+            if (wrong.Count > 0)
+            {
+                Console.WriteLine($"WRITTEN, BUT THE READ-BACK DISAGREES ({wrong.Count}): restore from the snapshot.");
+                foreach (var w in wrong.Take(40)) Console.WriteLine("  " + w);
+                return 1;
+            }
+            Console.WriteLine($"\nFinished -- {rows.Count} renamed, read back off disk: every EditorID as the map predicts, {seen} records, no FormID moved.");
+            Console.WriteLine("⚠ Anything holding the old names as TEXT is now stale: recipes, notes, saved command lines.");
             return 0;
         }
     }

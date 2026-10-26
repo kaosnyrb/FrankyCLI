@@ -1,0 +1,157 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_localcargo_qst32a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode_Rare",
+  "_deal": "RARE since 2026-10-21, his \"those two sound reasonable\": a present for one person should not repeat. Was the live local-cargo pool since 2026-10-12.",
+  "author": "jessica",
+  "source": "his 2026-10-12 17:53: \"lets make another delve. You get a present from a guy and deliver it to the girl he likes in a different POI\"",
+  "_note": [
+    "THE PRESENT: TWO PEOPLE, TWO TALK BEATS. 14a's opening (talk, then pick up what he marked) and 11a's ending",
+    "(a talk at the second place whose exchange 0 takes the item and ends the quest), so nothing here is a new beat.",
+    "What is new is TWO persons in one quest, one at each place. If that needs template work, this recipe is the ask.",
+    "Calm, no combat, both places quiet: NonHostile mostly has nobody, so both people are placed by their talk beats.",
+    "Shared POI between the two places is fine (his 2026-10-12 17:51, on 14a: not worth guarding against).",
+    "The pickup has a box (a calm moment); the talks speak and have none (either or).",
+    "Her reply to exchange 0 answers HIS question with her own move: she will go to him. The player carries the",
+    "present, never the answer.",
+    "MODEL WANTED: a small gift box. The freight crate stands in, and the box text admits it is a crate. Kim's list.",
+    "Voiced lines: no names, no places, no flags (speech-lines.md rules, 2026-10-12)."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeOE_NonHostile"],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "second": {
+      "theme": {
+        "require": ["LocTypeOE_NonHostile"],
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    },
+    "_theme": "Two worked sites, one person at each, both placed. Not natural and not a cave: these are people who work somewhere."
+  },
+  "prose": {
+    "name": "Errand: Personal Delivery on <Planet>",
+    "briefing": "Someone at the <Place> wants a package carried to the <SecondPlace>. The posting says personal, and discreet, twice."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the sender at the <Place>",
+      "journal": "The sender wants a present carried to a woman at the <SecondPlace>. He would take it himself, but he has tried that twice. He's marked where it is.",
+      "person": {
+        "name": "Owen Pike",
+        "template": "UC_NA_MASTWorkerMale01",
+        "outfit": "Outfit_Clothes_Mechanic_Brown",
+        "voice": "GenericMale01",
+        "elevenlabs": "bIHbv24MWmeRgasZH58o",
+        "hellos": [
+          ["Is it you? It's you. Good."]
+        ]
+      },
+      "greeting": [
+        "You're here for the package?",
+        "Good. Quickly, before I change my mind."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll take the package.",
+          "reply": [
+            "It's by the crates. Don't shake it. And don't tell her it's from me.",
+            "Actually, no. Tell her. She'll know anyway."
+          ]
+        },
+        {
+          "prompt": "Why not take it yourself?",
+          "reply": ["Because I'd get there, talk about the weather and come home with it still in my hand. I've done that twice."]
+        },
+        {
+          "prompt": "Is it fragile?",
+          "reply": [
+            "Only to me.",
+            "It's real coffee. Not the stuff we get out here.",
+            "She said once she missed it. I don't think she knows I heard."
+          ]
+        },
+        {
+          "prompt": "Why are you nervous?",
+          "reply": [
+            "Because it's for her.",
+            "And if she knows how I feel, she's been very polite about it."
+          ]
+        }
+      ],
+      "_talk": "PROPOSED fields, as 14a. Exchange 0 ends the conversation and sets the pickup's stage. Voice: the 13a nervous man ('Will, Relaxed Optimist'), reused; his ear decides."
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "item": "Wrapped Package",
+      "objective": "Collect the package",
+      "model": "Meshes\\ccs\\wrappedpackage01.nif",
+      "name": "Wrapped Package",
+      "message": {
+        "title": "Wrapped Package",
+        "text": "A freight crate with a ribbon tied round it, badly, and then again, better. A card is tucked under the ribbon. It isn't addressed to me."
+      }
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Deliver the package at the <SecondPlace>",
+      "journal": "A man at the <Place> asked me to carry a present to a woman at the <SecondPlace>. It was real coffee. She's going to thank him herself.",
+      "person": {
+        "name": "Mae Hollins",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_CroppedVest_CargoPants",
+        "voice": "GenericFemale01",
+        "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
+        "hellos": [
+          ["Can I help you?"]
+        ]
+      },
+      "greeting": ["That's got a ribbon on it. Nobody out here ties ribbons. Is that for me?"],
+      "exchanges": [
+        {
+          "prompt": "It's for you. A present.",
+          "reply": [
+            "Real coffee.",
+            "I said that once, on a bad day, months ago. He was listening.",
+            "Don't tell him anything. I'll go over myself."
+          ]
+        },
+        {
+          "prompt": "Do you know who it's from?",
+          "reply": ["There's one person who'd ask a stranger to carry this instead of walking it over. So yes."]
+        },
+        {
+          "prompt": "Were you expecting it?",
+          "reply": [
+            "No.",
+            "Hoping, a bit. You don't say that out loud when there are this few of you."
+          ]
+        }
+      ],
+      "_talk": "PROPOSED fields, as 11a. Exchange 0 is the hand-over: it ends the conversation, takes the Wrapped Package and sets stage 100. Voice: Petra's ('Isla'), reused; his ear decides."
+    }
+  ],
+  "speaker": {
+    "name": "Sender",
+    "voice": "GenericMale01",
+    "elevenlabs": "bIHbv24MWmeRgasZH58o"
+  },
+  "broadcast": [
+    "Hello? Is this thing on?",
+    "I need something carried to someone, and I'd rather it wasn't me. It isn't far."
+  ],
+  "_speech": "His own voice on the radio and in person, as 11a's. No names, no places, no flags."
+}

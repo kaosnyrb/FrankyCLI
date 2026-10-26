@@ -1,0 +1,733 @@
+{
+  "FormKey": "003503:du_overtime.esm",
+  "Header": {
+    "MajorFlags": 0,
+    "FormVersion": 576,
+    "Version2": 0,
+    "VersionControl": 0
+  },
+  "EditorID": "duo_artifact_local_qst24a",
+  "Name": "Hunt: Escaped Specimens on \u003CAlias=targetPlanet\u003E",
+  "Data": {
+    "Flags": 655360,
+    "Priority": 10,
+    "Type": 0,
+    "Unused": "000000"
+  },
+  "QuestType": "047600:Starfield.esm",
+  "Timestamp": 0,
+  "Unknown": 0,
+  "TextDisplayGlobals": [],
+  "MissionBoardInfoPanels": [],
+  "DialogConditions": [],
+  "Stages": [
+    {
+      "Index": 0,
+      "Flags": 2,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "A specimen transport came down hard, and its cargo walked out of the broken pens and went to ground at the \u003CAlias=DungeonLocation\u003E. The keeper who raised them knows what they will do there, and wants them put down before they learn the ground.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 50,
+      "Flags": 0,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 100,
+      "Flags": 0,
+      "Unknown": 171,
+      "LogEntries": [
+        {
+          "Flags": 1,
+          "Entry": "Every specimen that walked out of the broken pens is dead at the \u003CAlias=DungeonLocation\u003E. Their keeper asked how they went, and I told them: fighting.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "01000000",
+              "RewardDatas": [
+                {
+                  "XpAwarded": "00081E:du_overtime.esm",
+                  "BonusCredits": "000820:du_overtime.esm",
+                  "Rewards": [],
+                  "Conditions": []
+                }
+              ]
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 900,
+      "Flags": 0,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Objectives": [
+    {
+      "Index": 10,
+      "Flags": 0,
+      "DisplayText": "Put down the escaped specimens at the \u003CAlias=DungeonLocation\u003E",
+      "Targets": [
+        {
+          "AliasID": 34,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        },
+        {
+          "AliasID": 33,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "000000",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "003503:du_overtime.esm",
+              "SecondParameter": 900
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Aliases": [
+    {
+      "Kind": "ref",
+      "ID": 32,
+      "Name": "MBRIR02Player",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "UniqueActor": "000007:Starfield.esm",
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 0,
+      "Name": "DungeonLocation",
+      "Flags": 1073742081,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "207487:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "global",
+          "Function": "GetDistance",
+          "CompareOperator": 4,
+          "Flags": 0,
+          "Global": "000948:du_overtime.esm",
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": true,
+          "UsePackageData": false,
+          "FirstIndex": 32,
+          "SecondParameter": 0
+        }
+      ],
+      "ParentSystemLocationAliasID": -2
+    },
+    {
+      "Kind": "ref",
+      "ID": 5,
+      "Name": "dungeonMapMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 0,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 3,
+      "Name": "targetPlanet",
+      "Flags": 1073807616,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "ParentSystemLocationAliasID": 0
+    },
+    {
+      "Kind": "ref",
+      "ID": 9,
+      "Name": "PlayerShip",
+      "Flags": 1048578,
+      "ALFG": 0,
+      "Conditions": [],
+      "External": {
+        "Quest": "0174A2:Starfield.esm",
+        "AliasID": 16
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 33,
+      "Name": "DelveBeat1Spawn",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 0,
+        "RefType": "207487:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "coll",
+      "ID": 0,
+      "Collection": [
+        {
+          "ID": 34,
+          "MaxInitialFillCount": 0,
+          "ALAM": 0,
+          "ReferenceAlias": {
+            "Kind": "ref",
+            "ID": 34,
+            "Name": "DelveBeat1Enemies",
+            "Flags": 130,
+            "ALFG": 0,
+            "Conditions": [],
+            "VoiceTypes": "Null"
+          }
+        }
+      ]
+    }
+  ],
+  "Vmad": {
+    "Version": 6,
+    "ObjectFormat": 2,
+    "ExtraBindDataVersion": 3,
+    "Versioning": 0,
+    "FragmentScript": {
+      "Name": "duo_qf_duo_delve29a",
+      "Flags": 0,
+      "Properties": [
+        {
+          "Type": "Object",
+          "Name": "Loot1",
+          "Flags": 1,
+          "Object": {
+            "Form": "0009CB:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat1Spawn",
+          "Flags": 1,
+          "Object": {
+            "Form": "003503:du_overtime.esm",
+            "Alias": 33,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat1Enemies",
+          "Flags": 1,
+          "Object": {
+            "Form": "003503:du_overtime.esm",
+            "Alias": 34,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Enemies1",
+          "Flags": 1,
+          "Object": {
+            "Form": "000BEB:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Say2",
+          "Flags": 1,
+          "Object": {
+            "Form": "00350C:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        }
+      ]
+    },
+    "Fragments": [
+      {
+        "Stage": 0,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve29a",
+        "FragmentName": "Fragment_Stage_0000_Item_00"
+      },
+      {
+        "Stage": 100,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve29a",
+        "FragmentName": "Fragment_Stage_0100_Item_00"
+      },
+      {
+        "Stage": 900,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve29a",
+        "FragmentName": "Fragment_Stage_0900_Item_00"
+      }
+    ],
+    "Scripts": [
+      {
+        "Name": "duo_delve_quest",
+        "Flags": 0,
+        "Properties": [
+          {
+            "Type": "IntList",
+            "Name": "Objectives",
+            "Flags": 1,
+            "IntList": [
+              10
+            ]
+          }
+        ]
+      }
+    ],
+    "Aliases": [
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003503:du_overtime.esm",
+            "Alias": 5,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasMapMarkerScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "MapMarkerCategory",
+                "Flags": 1,
+                "Int": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003503:du_overtime.esm",
+            "Alias": 34,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultCollectionAliasOnDeath",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 100
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 0
+              },
+              {
+                "Type": "Int",
+                "Name": "TurnOffStageDone",
+                "Flags": 1,
+                "Int": 100
+              },
+              {
+                "Type": "Bool",
+                "Name": "RemoveFromRefCollection",
+                "Flags": 1,
+                "Bool": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003503:du_overtime.esm",
+            "Alias": 33,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "duo_delve_near",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Object",
+                "Name": "TargetAlias",
+                "Flags": 1,
+                "Object": {
+                  "Form": "003503:du_overtime.esm",
+                  "Alias": 32,
+                  "Unused": 0
+                }
+              },
+              {
+                "Type": "Float",
+                "Name": "TargetDistance",
+                "Flags": 1,
+                "Float": 250
+              },
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 900
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "Children": {
+    "Scenes": [
+      {
+        "FormKey": "003508:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_local_qst24a_say1_scene",
+        "Flags": 129,
+        "Quest": "003503:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "003505:du_overtime.esm"
+          }
+        ]
+      },
+      {
+        "FormKey": "00350C:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_local_qst24a_say2_scene",
+        "Flags": 128,
+        "Quest": "003503:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "003509:du_overtime.esm"
+          }
+        ]
+      }
+    ],
+    "Topics": [
+      {
+        "FormKey": "003505:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_local_qst24a_say1_topic",
+        "Priority": 50,
+        "Quest": "003503:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "003506:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "003506:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_local_qst24a_say1_info",
+            "Speaker": "003504:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 13573,
+                "EmotionOut": 0,
+                "ResponseText": "Our transport came down hard, and the pens split open. The animals ran, and they\u0027ve gone to ground at a site nearby.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "1C733B3B"
+              },
+              {
+                "WEMFile": 13575,
+                "EmotionOut": 0,
+                "ResponseText": "I raised every one of those animals from the egg myself, and I know what they will do out there. Please put them down before they learn the ground.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "F788DF49"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "003509:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_local_qst24a_say2_topic",
+        "Priority": 50,
+        "Quest": "003503:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "00350A:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "00350A:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_local_qst24a_say2_info",
+            "Speaker": "003504:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 13577,
+                "EmotionOut": 0,
+                "ResponseText": "So every one of them went down fighting, the way their mothers did. Thank you for doing it properly, and doing it quickly.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "A94DC52C"
+              },
+              {
+                "WEMFile": 13579,
+                "EmotionOut": 0,
+                "ResponseText": "I will write each of their names in the pen book tonight.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "E8C7D7A6"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

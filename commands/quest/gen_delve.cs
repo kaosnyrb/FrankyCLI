@@ -1044,7 +1044,7 @@ namespace FrankyCLI
             Console.WriteLine($"  {matched.Count} record(s), {gone.Count} leaving with their children; {unpooled} pool entr{(unpooled == 1 ? "y" : "ies")} to drop");
 
             Console.WriteLine("  loose files a build of " + id + " deployed, NOT touched (the owner's call):");
-            Console.WriteLine("    Data/scripts/duo_qf_" + id + ".pex  (the fragment script; its quest is what leaves)");
+            Console.WriteLine("    the fragment script the quest names (Data/scripts/duo_qf_<id at build time>.pex; its quest is what leaves)");
             Console.WriteLine("    the voice files listed in the mod repo's voicecache/deployed_" + id + ".txt, if it has one");
 
             if (dry) { Console.WriteLine("\n  --dry: nothing written."); return 0; }
@@ -1148,8 +1148,11 @@ namespace FrankyCLI
             string stem = Path.GetFileNameWithoutExtension(file);
             if (!string.Equals(recipe.id, stem, StringComparison.Ordinal))
             { Console.WriteLine($"REFUSED: {Path.GetFileName(file)} has id '{recipe.id}'; a recipe's id must be its file name ('{stem}'), so no two can collide."); return null; }
-            if (!System.Text.RegularExpressions.Regex.IsMatch(recipe.id, "^duo_delve[0-9a-z_]+$"))
-            { Console.WriteLine($"REFUSED: id '{recipe.id}' must look like duo_delveNN (lower case, digits, underscores): it becomes an EditorID and every clone's prefix."); return null; }
+            // THE NAMING (his, 2026-10-26): a built Delve carries the classic grammar, a family number and a letter, board
+            // families from 40 and slate families from 20, so the old missions sit below a clear gap. A recipe not yet
+            // built still carries its draft name (duo_delve...), which is the name it is written under, not a family.
+            if (!System.Text.RegularExpressions.Regex.IsMatch(recipe.id, "^(duo_MB[0-9]{2}[a-z]_qst|duo_artifact_(local|localcargo|remote|remote_planet)_qst[0-9]{2}[a-z]|duo_delve[0-9a-z_]+)$"))
+            { Console.WriteLine($"REFUSED: id '{recipe.id}' must be duo_MB<NN><x>_qst, duo_artifact_<local|localcargo|remote|remote_planet>_qst<NN><x>, or a draft duo_delve...: it becomes an EditorID and every clone's prefix."); return null; }
             Console.WriteLine("  recipe: " + file);
 
             t = templates.FirstOrDefault(x => string.Equals(x.id, recipe.template, StringComparison.OrdinalIgnoreCase));
@@ -1225,8 +1228,15 @@ namespace FrankyCLI
             // drift: a fix made in 06a and forgotten in 06b. So siblings sharing a number are compared on
             // STRUCTURE (everything that is not lore) and any difference is named. A warning, not a refusal:
             // a sibling that differs on purpose is a new mission number, and that call is the author's.
-            foreach (var fam in loaded.GroupBy(x => System.Text.RegularExpressions.Regex.Match(x.id, "^(duo_delve[0-9]+)[a-z]$").Groups[1].Value)
-                                      .Where(g => g.Key != "" && g.Count() > 1))
+            // The family is the id without its letter, in either grammar (duo_artifact_local_qst20a, duo_MB45a_qst, a draft
+            // duo_delve_remote05a). Until 2026-10-26 the key was ^duo_delve[0-9]+, so the rename to the classic names
+            // would have stopped every comparison silently, and it had never seen the duo_delve_remote pairs at all.
+            static string FamilyOf(string id)
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(id, "^(.+?[0-9]+)[a-z](_qst)?$");
+                return m.Success ? m.Groups[1].Value + m.Groups[2].Value : "";
+            }
+            foreach (var fam in loaded.GroupBy(x => FamilyOf(x.id)).Where(g => g.Key != "" && g.Count() > 1))
             {
                 string Shape(Recipe x, string part) => part switch
                 {

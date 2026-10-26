@@ -1,0 +1,141 @@
+{
+  "schema": 2,
+  "id": "duo_MB44a_qst",
+  "template": "board",
+  "deal": "duo_MB_MissionNode_Exploration",
+  "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Exploration_Legacy behind Classic Missions. Was the board test node.",
+  "author": "jessica",
+  "source": "his 2026-10-23 09:30: \"new quest idea. Missionboard. A family item has been stolen and is in a hostile POI. Recover it and bring it back to new atlantis\"",
+  "_note": [
+    "BACK TO CITY ON THE BOARD: city01a's shape (take a thing back off raiders, hand it over in a city), started from a",
+    "posting instead of a slate. His idea; words Jessica's.",
+    "WHAT BUILDS TODAY on the board (delve-recipes.md, Board): defeat, pickup and talk. 'recover' is still refused on a",
+    "board, so the recover is split into its two proven halves: beat the boss, then pick the compass out of the",
+    "raiders' takings. Nothing new there.",
+    "WHAT DOES NOT BUILD, AND THE LINT SHOULD REFUSE EXACTLY THIS (ELIZA'S, the same ask as city01a):",
+    "place.second.settlement, a FIXED named city as a place, here New Atlantis, and the person spawned inside it where",
+    "she will not collide with vanilla's people. The board's own rule today is that a second place is a request",
+    "(remote: true); a fixed city is a third kind. If it lands for city01a it lands for this.",
+    "Pay: med on the hand-over (README rule 3, capped at med).",
+    "Voices: not yet heard in game; his ear decides. No names or places in any voiced line.",
+    "2026-10-23 (Eliza): place.second.settlement now builds on a board (city01a played first), so the WHAT DOES NOT BUILD",
+    "lines above are history. The talk is at New Atlantis's AutofillGeneric01; see the beat's _at."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "The raiders at a built hostile site: not quiet, not a natural landmark.",
+    "second": {
+      "settlement": "New Atlantis"
+    },
+    "_second": "PROPOSED, city01a's field (there 'Akila City'). Where in New Atlantis is his eye; somewhere a family that has just moved in would live, not the spaceport."
+  },
+  "prose": {
+    "name": "Recovery: Family Compass on <Planet>",
+    "briefing": "Raiders hit a freighter carrying a family's belongings to <SecondPlace> and took the hold to the <Place>. The family only wants one thing back: a brass compass that came from Earth.",
+    "card": "Raiders took the hold of a freighter carrying our belongings, and are holding it at the <Place> on <Planet>. Keep whatever else you find. We want one thing back, a brass compass. Return it to us in <SecondPlace>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REMarkerMediumLocRef",
+      "_at": "The medium marker, not the boss marker: a boss-marker site is almost always a military dungeon and the quest starts only where one is close (32a, his 'there is a cap on the complexity of locations').",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the raiders' leader at the <Place>",
+      "journal": "The raiders' leader at the <Place> is dead. The family's compass will be with whatever they took off the freighter.",
+      "say": [
+        "Is that them dealt with?",
+        "Then it'll be in with everything they took off us. Please look carefully, it's small."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "item": "Brass Compass",
+      "objective": "Find the compass in the raiders' takings",
+      "journal": "I found the family's brass compass in the raiders' takings at the <Place>. It goes back to them in <SecondPlace>.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Raiders' Takings",
+      "_model": "The footlocker, approved (objects.md) and his own pick for a chest in the open. Here it is what it looks like: where raiders keep what they took.",
+      "message": {
+        "title": "Brass Compass",
+        "text": "Under someone's good shoes and a box of cutlery, wrapped in a sock: a brass compass, worn smooth on one side where a thumb has rested on it for a very long time."
+      }
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "AutofillGeneric01",
+      "_at": "2026-10-23 (Eliza): New Atlantis's one AutofillGeneric01 spot (133415), city01a's shape after his 'lets just go for autofill 01 and see' for Akila. The lint refused RECenterLocRef here: no city carries a POI marker. Whether the spot reads as where a family that just moved in lives is his eye.",
+      "objective": "Return the compass to the family in <SecondPlace>",
+      "journal": "Raiders took a family's belongings to the <Place>. I went in and brought back the one thing they wanted, a brass compass their great-grandmother carried from Earth.",
+      "person": {
+        "name": "Nell Ashby",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Citizen_UC",
+        "voice": "GenericFemale01",
+        "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
+        "hellos": [
+          [
+            "Sorry, we've only just moved in. Everything's still in boxes."
+          ]
+        ]
+      },
+      "greeting": [
+        "You took our posting? The raiders who hit our freighter took everything we own.",
+        "Did they still have the compass?"
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here. Your compass.",
+          "reply": [
+            "That's it. That's the dent from when my mother dropped it on a landing pad.",
+            "Thank you. I'd stopped telling the children it would come back."
+          ]
+        },
+        {
+          "prompt": "Why this and not the rest?",
+          "reply": [
+            "The rest was furniture. You can buy furniture.",
+            "This came from Earth. My grandmother's grandmother carried it on one of the first ships out, and it's been in somebody's pocket ever since."
+          ]
+        },
+        {
+          "prompt": "Does it still work?",
+          "reply": [
+            "It points north.",
+            "Which north, on a planet that isn't Earth, nobody in this family has ever agreed on."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-over: it ends the talk, takes the Brass Compass and sets stage 100, which pays 'reward'. Every prompt stands on the greeting or what he carries (talk_check.py). Voiced lines: no names, no places, no factions, no currency.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Family",
+    "voice": "GenericFemale01",
+    "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
+  },
+  "broadcast": [
+    "Is that you at the site? You took our posting.",
+    "They'll have kept the compass with the rest of what they took. It's old, it's brass, and it's the only thing we want back."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site (arrivalStage 15). Same voice on the radio and in person: Lucy, 'Friendly, Relaxed, Thoughtful', used once (08a); his ear decides."
+}

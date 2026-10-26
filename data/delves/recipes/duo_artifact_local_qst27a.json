@@ -1,0 +1,129 @@
+﻿{
+  "schema": 2,
+  "id": "duo_artifact_local_qst27a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: it sends you to a dungeon, so you go in knowing there is a fight (his ruling, 2026-10-20).",
+  "author": "jessica, as Meg Fenwick",
+  "source": "his 2026-10-21 07:26: \"lets have a talk to person at POI and kill a boss at dungeon local mission\"",
+  "_note": [
+    "PEN NAME: home-office office/pennames/meg-fenwick.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
+    "TALK, THEN THE BOSS. 18a's first two beats with a defeat where its recover was: a talk at a quiet site (main), then",
+    "a defeat at the boss marker of a built hostile site (second). ⚠ defeat at a SECOND place is new (every defeat so far",
+    "is at the main place); the lint and Eliza say. Spacer boss and a small Spacer gang, as 28a.",
+    "Meg's move kept: the exact age and weight of a creature given unasked (exchange 1), her feeling never named. Her tell (correcting an animal mid-sentence) is CUT, his 10-21: no line may imply an animal, a gate or anything else on screen that the build does not place.",
+    "Exchange 0 closes the talk and starts the defeat. Exchange 2 is a [Bounty Hunter] line, never the first.",
+    "Same voice on the radio and in person. Pay: med, placeholder.",
+    "RE-CUT 2026-10-21 16:36 for the ear, his \"when you split the lines that small Elevenlabs has no context so the delivery is worse\" and \"yeah recut, they aren't made yet\": each speech is one or two whole responses, split only where a real pause belongs."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "second": {
+      "theme": {
+        "require": [],
+        "exclude": [
+          "LocTypeOE_NonHostile",
+          "LocTypeOE_ThemeNaturalKeyword"
+        ]
+      }
+    },
+    "_themes": "Her at a quiet built site where stock could be kept (quiet AND natural is an empty pool, measured 2026-10-15 for 18a), the thieves at a built hostile site with a boss marker."
+  },
+  "prose": {
+    "name": "Bounty: Cattle Thief on <Planet>",
+    "briefing": "A stockwoman at the <Place> is losing cattle at night, two a week, to raiders who drive them up to their boss. She has asked for someone to come and see her."
+  },
+  "beats": [
+    {
+      "type": "talk",
+      "at": "RECenterLocRef",
+      "objective": "Talk to the stockwoman at the <Place>",
+      "journal": "A stockwoman at the <Place> is losing two head of cattle a week to raiders, who drive them to their boss at the <SecondPlace>. She asked me to deal with him.",
+      "person": {
+        "name": "Maura Ketley",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_Farmer_01_with_Hat",
+        "_outfit": "11a's farmer outfit, already worn in game. His eye decides.",
+        "voice": "GenericFemale01",
+        "elevenlabs": "XW70ikSsadUbinwLMZ5w",
+        "hellos": [
+          [
+            "You'll be the one who answered the call."
+          ]
+        ]
+      },
+      "greeting": [
+        "Raiders have been taking my cattle.",
+        "They come at night, take two at a time, and drive them up to their boss. He's eating them."
+      ],
+      "exchanges": [
+        {
+          "prompt": "I'll deal with their boss.",
+          "reply": [
+            "Do that. His crew only take what he tells them to.",
+            "Stop him, and it stops."
+          ]
+        },
+        {
+          "prompt": "How many have you lost?",
+          "reply": [
+            "Eleven since the thaw.",
+            "The last was a four-year-old cow. Five hundred kilos, and in calf.",
+            "She had eight good years left."
+          ]
+        },
+        {
+          "prompt": "Is there a price on him?",
+          "reply": [
+            "Not that I know of. If there is, it's yours.",
+            "I just want my cattle left alone."
+          ],
+          "perk": "BackgroundBountyHunter"
+        }
+      ],
+      "_talk": "Exchange 0 closes the talk and starts the defeat. Every prompt asks about something the greeting has already said (the boss, the losses). Voiced lines: no names, no places, no factions, no currency. Pass 2026-10-23, his \"unclear shes talking about cows and doesn't read well spoken\": she says cattle in her first sentence, the stock is driven, not carried, and the long one-breath replies are split at their real pauses."
+    },
+    {
+      "type": "defeat",
+      "place": "second",
+      "at": "REMarkerMediumLocRef",
+      "_at": "Was LocDungeonBossLocRef until 2026-10-22: a boss-marker second place is almost always a military dungeon (101 of 107), so the quest only started on a map with one close by (32p1 failed, 32p2 on the medium marker played; his: local missions are very map dependent, so there is a cap on the complexity of locations).",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the raiders' boss at the <SecondPlace>",
+      "journal": "The raiders' boss at the <SecondPlace> is dead. Nobody is coming for the stockwoman's cattle tonight.",
+      "say": [
+        "Is it done?",
+        "Then I'll count them in tonight, and for once it'll be the same number as this morning."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Stockwoman",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "Someone's stealing my cattle. Two a week, always at night.",
+    "I know where they're taking them. Come and see me, and I'll tell you the rest."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency. Same voice in person. Recast 2026-10-22 off Matilda, the voice he heard on this stockwoman and called \"very robotic\", to 'Annie K, Calm, Grounded Narrator', older: a farmer who has seen a few thefts. His ear decides."
+}

@@ -1,0 +1,83 @@
+{
+  "schema": 2,
+  "id": "duo_MB43a_qst",
+  "template": "board",
+  "deal": "duo_MB_MissionNode_Exploration",
+  "_deal": "LIVE, his 2026-10-26 \"Go on delivery and Explore\": its category's originals move to duo_MB_MissionNode_Exploration_Legacy behind Classic Missions. Was the board test node.",
+  "author": "jessica",
+  "source": "his 2026-10-19 21:26: \"one thing we dont have yet is a missionboard mission that sends you to a remote POI for multiple objectibes. Like find code, hse terminal, get files\", then \"yup go. Make it a dungeon\".",
+  "_note": [
+    "THE LOCKED TERMINAL. A board mission with three stops inside one dungeon, going DEEPER at each: the code at the",
+    "outside entrance, the terminal in the middle, the drive in the safe with the boss. The layout is the pacing.",
+    "Step one is OUTSIDE on purpose: a board's broadcast plays when he comes within 250 m of step one's marker, and",
+    "that distance check through a load door is unproven, so the call should not depend on it.",
+    "No who: a dungeon brings its own occupants, and they are why the crew left. Pay med, under his cap.",
+    "Beat one is a box and no radio, beats two and three are radio and no box: his either-or."
+  ],
+  "place": {
+    "theme": {
+      "require": ["LocTypeDungeon"],
+      "exclude": ["LocTypeTest"]
+    },
+    "_require": "2026-10-23 (Eliza): his play of the item-marker rebuild 'went to a tiny POI', so 'need to limit the quest to LocTypeDungeon' (his). The item markers alone are not a dungeon.",
+    "_theme": "A dungeon (entrance, centre, boss container: about 162 dungeons on his load order, Eliza 10-13; the terminal marker cut it to 29, and we bring our own terminal, so it stands on the centre). The stops are the dungeon marker vocabulary (bethesda 32), and only places carrying all three plus a map marker can draw it. Caves allowed: a survey crew works caves. The lint measures the pool."
+  },
+  "prose": {
+    "name": "Recovery: Survey Data on <Planet>",
+    "briefing": "A survey crew pulled out of the <Place> in a hurry and left a season's data locked on their site terminal. The lead wrote the code down somewhere.",
+    "card": "Data Recovery. A survey crew evacuated the <Place> on <Planet> and left their site terminal locked. Recover the code, unlock the terminal and retrieve the survey data. Expect the reason they left to still be there. Payment on completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonOutsideEntranceMarkerLocRef",
+      "objective": "Find the terminal code at the <Place>",
+      "journal": "The survey lead kept her terminal code in her toolbox by the way in, behind a photo of two kids and a dog. The terminal is somewhere inside the <Place>.",
+      "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
+      "name": "Survey Lead's Toolbox",
+      "message": {
+        "title": "Survey Lead's Toolbox",
+        "text": "Tucked inside the lid, behind a photo of two kids and a dog: six digits in marker pen. Under them, smaller: don't laugh, I always forget it."
+      }
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Unlock the survey terminal",
+      "journal": "The code worked. The terminal says the lead pulled everything to a drive before they ran and locked it in the site safe, further in.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Survey Terminal",
+      "say": [
+        "You're in? Good.",
+        "It says she pulled everything to a drive before they ran. It'll be in the site safe, further in."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "LocDungeonItemMarker03LocRef",
+      "_at": "2026-10-23 (Eliza): was LocDungeonBossContainerLocRef, which tags the boss crate itself, so the case was created inside it (his play: 'you couldn't actually reach it'). The item markers are 'used to put quest items in dungeons' (his). 03 is the nearest to the boss crate: same cell in 71 of 71 boss dungeons, median 18 m (gen_delve spread --dungeons).",
+      "objective": "Recover the survey data from the site safe",
+      "journal": "A survey crew ran from the <Place> and left a season's data behind. I found the lead's code by the door, unlocked their terminal, and took the drive out of the safe at the bottom of the place.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Sealed Data Case",
+      "item": "Survey Data Drive",
+      "_model": "Kim's C5 data drive is unbuilt (quest-objects.md), so the drive travels in the C1 sealed courier case he cleared 2026-10-12.",
+      "say": [
+        "That's the drive? That's the whole season.",
+        "Now get out of there. Nobody's paid enough to stay."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Survey Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "You're on site? Good.",
+    "The terminal's locked, and our lead wrote the code down somewhere near the door. She always does.",
+    "Mind yourself in there. Whatever ran us out hasn't left."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is remote06b's 'Lucy' (a survey crew there too, the same register), used once so far; his ear decides."
+}

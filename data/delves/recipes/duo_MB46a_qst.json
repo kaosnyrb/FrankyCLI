@@ -1,0 +1,124 @@
+{
+  "schema": 2,
+  "id": "duo_MB46a_qst",
+  "template": "board",
+  "deal": "duo_MB_MissionNode_Assault",
+  "_deal": "LIVE, his 2026-10-26 \"yeah Assult live\": Assault's originals move to duo_MB_MissionNode_Assault_Legacy behind Classic Missions. Was the board test node.",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
+  "_note": [
+    "THE MILITARY FAMILY, 5 OF ~10: THE CAPTURED PILOT.",
+    "A pilot came down near the site and was taken in. Take the guard captain, open the holding cell from its terminal,",
+    "and talk her out. The verb is FREE. She is funnier about it than anyone else would be.",
+    "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
+    "lint pool is EMPTY on military sites until the markers are on them (missionboard06a's note says why).",
+    "Every word holds at any military site: nothing names the site, the faction or the weather; everything the lines",
+    "point at is placed. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeMilitaryKeyword"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Military sites; the family's marker set."
+  },
+  "prose": {
+    "name": "Rescue: Captured Pilot on <Planet>",
+    "briefing": "A pilot set down near the <Place> to wait out a fault, and the occupiers took her inside. She is still alive.",
+    "card": "Rescue contract. One of our pilots is held at the <Place> on <Planet>. Recover her alive. Her ship can be replaced. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "LocDungeonBossLocRef",
+      "target": "duo_boss_Spacer_Boss_Aggro_Female",
+      "gang": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 2,
+        "max": 4,
+        "species": "mix"
+      },
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Defeat the guard captain at the <Place>",
+      "journal": "The guard captain at the <Place> is dead. The pilot's cell runs off a terminal somewhere inside.",
+      "say": [
+        "Is that the one with the keys?",
+        "Then she's in a cell off their terminal. Open it."
+      ]
+    },
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Open the holding cell",
+      "journal": "The cell terminal's lock was a four digit code. It was 1-2-3-4. The pilot is free inside the <Place>.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Holding Cell Terminal"
+    },
+    {
+      "type": "talk",
+      "at": "REWoundedMarkerLocRef",
+      "objective": "Get the pilot out",
+      "journal": "A pilot was taken at the <Place>. I took the guard captain, opened her cell and walked her out.",
+      "person": {
+        "name": "Ines Varga",
+        "template": "UC_NA_MASTWorkerFemale01",
+        "outfit": "Outfit_Clothes_UCNavy_Fatigues_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "E393dkE75hqtz1LO2aEJ",
+        "hellos": [
+          [
+            "If you're here to feed me again, I'll pass."
+          ]
+        ]
+      },
+      "greeting": [
+        "You're not one of them. They'd never have opened that door that fast.",
+        "I set down to fix a coolant fault and got captured by people who couldn't fix it either."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Let's get you out of here.",
+          "reply": [
+            "Yes. Please.",
+            "And if my ship's still out there, I'm taking it. Coolant fault and all."
+          ]
+        },
+        {
+          "prompt": "Did they hurt you?",
+          "reply": [
+            "Not really. They mostly argued about what I was worth.",
+            "The number kept going down. That was the worst part."
+          ]
+        },
+        {
+          "prompt": "Why set down here at all?",
+          "reply": [
+            "It was the only flat ground for a long way.",
+            "In fairness to the ground, it was very flat."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 ends the talk and sets stage 100, which pays 'reward'. Every prompt stands on the greeting. Voice 'Megan', irish, unused so far.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Flight Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "E393dkE75hqtz1LO2aEJ"
+  },
+  "broadcast": [
+    "That's you at the site? Good.",
+    "Our pilot's in there somewhere. They'll keep her near whoever's in charge.",
+    "Bring her home. The ship I can replace."
+  ],
+  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+}

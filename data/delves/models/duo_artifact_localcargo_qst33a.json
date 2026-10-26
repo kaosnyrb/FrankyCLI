@@ -1,0 +1,2293 @@
+{
+  "FormKey": "0038C4:du_overtime.esm",
+  "Header": {
+    "MajorFlags": 0,
+    "FormVersion": 576,
+    "Version2": 0,
+    "VersionControl": 0
+  },
+  "EditorID": "duo_artifact_localcargo_qst33a",
+  "Name": "Repair: Relay Satellite over \u003CAlias=targetPlanet\u003E",
+  "Data": {
+    "Flags": 655360,
+    "Priority": 50,
+    "Type": 0,
+    "Unused": "000000"
+  },
+  "QuestType": "047600:Starfield.esm",
+  "Timestamp": 0,
+  "Unknown": 0,
+  "TextDisplayGlobals": [],
+  "MissionBoardInfoPanels": [],
+  "DialogConditions": [],
+  "Stages": [
+    {
+      "Index": 0,
+      "Flags": 2,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "The relay satellite over \u003CAlias=targetPlanet\u003E went dark, and the settlers at the \u003CAlias=DungeonLocation\u003E have been cut off since. The replacement part never arrived. Raiders took it to the \u003CAlias=FinalLocation\u003E.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 10,
+      "Flags": 0,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "The relay over \u003CAlias=targetPlanet\u003E is dead and the settlers at the \u003CAlias=DungeonLocation\u003E can\u0027t call anyone. Their replacement part was taken by raiders at the \u003CAlias=FinalLocation\u003E. I said I\u0027d get it and fit it.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 20,
+      "Flags": 0,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "The raiders\u0027 leader at the \u003CAlias=FinalLocation\u003E had the transceiver core. I took it back. It needs fitting in the relay satellite over \u003CAlias=targetPlanet\u003E.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 50,
+      "Flags": 0,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "I\u0027ve got the Goods Package. It goes to \u003CAlias=FinalLocation\u003E on \u003CAlias=targetPlanet\u003E, whenever I\u0027m heading that way.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 100,
+      "Flags": 0,
+      "Unknown": 171,
+      "LogEntries": [
+        {
+          "Flags": 1,
+          "Entry": "The relay over \u003CAlias=targetPlanet\u003E went dark and raiders at the \u003CAlias=FinalLocation\u003E had its replacement core. I got it back and fitted it in orbit. The settlers at the \u003CAlias=DungeonLocation\u003E can call out again.",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "01000000",
+              "RewardDatas": [
+                {
+                  "XpAwarded": "00081E:du_overtime.esm",
+                  "BonusCredits": "000820:du_overtime.esm",
+                  "Rewards": [],
+                  "Conditions": []
+                }
+              ]
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Objectives": [
+    {
+      "Index": 10,
+      "Flags": 0,
+      "DisplayText": "Talk to the settler at the \u003CAlias=DungeonLocation\u003E",
+      "Targets": [
+        {
+          "AliasID": 37,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        }
+      ]
+    },
+    {
+      "Index": 20,
+      "Flags": 0,
+      "DisplayText": "Recover the transceiver core from the \u003CAlias=FinalLocation\u003E",
+      "Targets": [
+        {
+          "AliasID": 39,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        }
+      ]
+    },
+    {
+      "Index": 30,
+      "Flags": 0,
+      "DisplayText": "Fit the transceiver core in the relay satellite",
+      "Targets": [
+        {
+          "AliasID": 41,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": []
+        }
+      ]
+    }
+  ],
+  "Aliases": [
+    {
+      "Kind": "ref",
+      "ID": 32,
+      "Name": "MBRIR02Player",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "UniqueActor": "000007:Starfield.esm",
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 0,
+      "Name": "DungeonLocation",
+      "Flags": 1073742081,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "05F198:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "027050:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "0C6928:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "27B45C:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "global",
+          "Function": "GetDistance",
+          "CompareOperator": 4,
+          "Flags": 0,
+          "Global": "000948:du_overtime.esm",
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": true,
+          "UsePackageData": false,
+          "FirstIndex": 32,
+          "SecondParameter": 0
+        }
+      ],
+      "ParentSystemLocationAliasID": -2
+    },
+    {
+      "Kind": "ref",
+      "ID": 5,
+      "Name": "dungeonMapMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 0,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 3,
+      "Name": "targetPlanet",
+      "Flags": 1073807616,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "ParentSystemLocationAliasID": 0
+    },
+    {
+      "Kind": "ref",
+      "ID": 9,
+      "Name": "PlayerShip",
+      "Flags": 1048578,
+      "ALFG": 0,
+      "Conditions": [],
+      "External": {
+        "Quest": "0174A2:Starfield.esm",
+        "AliasID": 16
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 10,
+      "Name": "FinalLocation",
+      "Flags": 265,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "207487:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "027050:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "0C6928:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "2235B6:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "GetDistanceGalacticParsec",
+          "CompareOperator": 4,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "000014:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "Alps": {
+        "Conditions": [],
+        "PcmTypeKeyword": "2C7982:Starfield.esm"
+      }
+    },
+    {
+      "Kind": "loc",
+      "ID": 33,
+      "Name": "OrbitLocation",
+      "Flags": 1073742089,
+      "ALFG": 1101313513,
+      "Conditions": [],
+      "LocationTypeKeyword": "016504:Starfield.esm",
+      "ParentSystemLocationAliasID": 32
+    },
+    {
+      "Kind": "coll",
+      "ID": 0,
+      "Collection": [
+        {
+          "ID": 34,
+          "MaxInitialFillCount": 0,
+          "ReferenceAlias": {
+            "Kind": "ref",
+            "ID": 34,
+            "Name": "SpaceCellRefs",
+            "Flags": 524288,
+            "ALFG": 0,
+            "Conditions": [],
+            "Create": {
+              "Object": "2239D9:Starfield.esm",
+              "AliasID": 33,
+              "Create": 0,
+              "Level": 0
+            },
+            "VoiceTypes": "Null"
+          }
+        }
+      ]
+    },
+    {
+      "Kind": "ref",
+      "ID": 36,
+      "Name": "DelveBeat1Marker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 0,
+        "RefType": "05F198:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 37,
+      "Name": "DelveBeat1Person",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "0038C8:du_overtime.esm",
+        "AliasID": 36,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 38,
+      "Name": "DelveBeat2Marker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 10,
+        "RefType": "207487:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 39,
+      "Name": "DelveBeat2Holder",
+      "Flags": 2,
+      "ALFG": 0,
+      "Conditions": [],
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 40,
+      "Name": "DelveBeat3Marker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "HasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "1DEE19:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "ReferenceCollectionAliasID": 34,
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 41,
+      "Name": "DelveBeat3Target",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "0038C5:du_overtime.esm",
+        "AliasID": 40,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 42,
+      "Name": "SpaceMapMarker",
+      "Flags": 16512,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "HasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "9D5800",
+          "Unknown2": 4617,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "ReferenceCollectionAliasID": 34,
+      "LinkedAliases": [
+        {
+          "Keyword": "17FEBA:Starfield.esm",
+          "AliasID": 41
+        }
+      ],
+      "VoiceTypes": "Null"
+    }
+  ],
+  "Vmad": {
+    "Version": 6,
+    "ObjectFormat": 2,
+    "ExtraBindDataVersion": 3,
+    "Versioning": 0,
+    "FragmentScript": {
+      "Name": "duo_qf_duo_delve19a",
+      "Flags": 0,
+      "Properties": [
+        {
+          "Type": "Object",
+          "Name": "Say2",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038F4:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Say3",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038F8:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat2Marker",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C4:du_overtime.esm",
+            "Alias": 38,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat2Holder",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C4:du_overtime.esm",
+            "Alias": 39,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Gang",
+          "Flags": 1,
+          "Object": {
+            "Form": "0009ED:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Item2",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C6:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Beat3Message",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C7:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        }
+      ]
+    },
+    "Fragments": [
+      {
+        "Stage": 0,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve19a",
+        "FragmentName": "Fragment_Stage_0000_Item_00"
+      },
+      {
+        "Stage": 10,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve19a",
+        "FragmentName": "Fragment_Stage_0010_Item_00"
+      },
+      {
+        "Stage": 20,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve19a",
+        "FragmentName": "Fragment_Stage_0020_Item_00"
+      },
+      {
+        "Stage": 100,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_duo_delve19a",
+        "FragmentName": "Fragment_Stage_0100_Item_00"
+      }
+    ],
+    "Scripts": [
+      {
+        "Name": "duo_delve_quest",
+        "Flags": 0,
+        "Properties": [
+          {
+            "Type": "IntList",
+            "Name": "Objectives",
+            "Flags": 1,
+            "IntList": [
+              10,
+              20,
+              30
+            ]
+          }
+        ]
+      }
+    ],
+    "Aliases": [
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C4:du_overtime.esm",
+            "Alias": 5,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasMapMarkerScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "MapMarkerCategory",
+                "Flags": 1,
+                "Int": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C4:du_overtime.esm",
+            "Alias": 42,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasMapMarkerScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Bool",
+                "Name": "Discovered",
+                "Flags": 1,
+                "Bool": true
+              },
+              {
+                "Type": "Bool",
+                "Name": "EnableOnInit",
+                "Flags": 1,
+                "Bool": true
+              },
+              {
+                "Type": "Int",
+                "Name": "MapMarkerCategory",
+                "Flags": 1,
+                "Int": 0
+              },
+              {
+                "Type": "Int",
+                "Name": "MapMarkerType",
+                "Flags": 1,
+                "Int": 47
+              },
+              {
+                "Type": "Int",
+                "Name": "UndiscoveredVisibility",
+                "Flags": 1,
+                "Int": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C4:du_overtime.esm",
+            "Alias": 32,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnItemAddedScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 20
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              },
+              {
+                "Type": "Object",
+                "Name": "ItemFilter",
+                "Flags": 1,
+                "Object": {
+                  "Form": "0038C6:du_overtime.esm",
+                  "Alias": -1,
+                  "Unused": 0
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "0038C4:du_overtime.esm",
+            "Alias": 41,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnActivate",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 100
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 20
+              },
+              {
+                "Type": "Bool",
+                "Name": "ShouldHideActivationAfterSuccessfulActivation",
+                "Flags": 1,
+                "Bool": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "Children": {
+    "Scenes": [
+      {
+        "FormKey": "0038CE:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_greet_scene",
+        "Flags": 6196,
+        "Quest": "0038C4:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "GetIsID",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C8:du_overtime.esm",
+            "SecondParameter": 0
+          },
+          {
+            "Kind": "float",
+            "Function": "GetStageDone",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 0,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C4:du_overtime.esm",
+            "SecondParameter": 10
+          }
+        ],
+        "Phases": [
+          {
+            "Name": "Greeting",
+            "EditorWidth": 298,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 37,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          },
+          {
+            "ID": 4294967294,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": 37,
+            "Index": 1,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038CA:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          }
+        ]
+      },
+      {
+        "FormKey": "0038D5:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic1_scene",
+        "Flags": 10260,
+        "Quest": "0038C4:du_overtime.esm",
+        "Index": 1,
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCPI": "6400",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "GetIsID",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C8:du_overtime.esm",
+            "SecondParameter": 0
+          },
+          {
+            "Kind": "float",
+            "Function": "GetStageDone",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 0,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C4:du_overtime.esm",
+            "SecondParameter": 10
+          }
+        ],
+        "Phases": [
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          },
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 37,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          },
+          {
+            "ID": 4294967294,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": -2,
+            "Index": 3,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038CF:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          },
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": 37,
+            "Index": 4,
+            "StartPhase": 1,
+            "EndPhase": 1,
+            "Topic": "0038D1:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          }
+        ]
+      },
+      {
+        "FormKey": "0038DB:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic2_scene",
+        "Flags": 10260,
+        "Quest": "0038C4:du_overtime.esm",
+        "Index": 2,
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCPI": "3200",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "GetIsID",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C8:du_overtime.esm",
+            "SecondParameter": 0
+          }
+        ],
+        "Phases": [
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          },
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 37,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          },
+          {
+            "ID": 4294967294,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": -2,
+            "Index": 3,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038D6:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          },
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": 37,
+            "Index": 4,
+            "StartPhase": 1,
+            "EndPhase": 1,
+            "Topic": "0038D8:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          }
+        ]
+      },
+      {
+        "FormKey": "0038E2:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic3_scene",
+        "Flags": 10260,
+        "Quest": "0038C4:du_overtime.esm",
+        "Index": 3,
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCPI": "3100",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "GetIsID",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C8:du_overtime.esm",
+            "SecondParameter": 0
+          }
+        ],
+        "Phases": [
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          },
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 37,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          },
+          {
+            "ID": 4294967294,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": -2,
+            "Index": 3,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038DC:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          },
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": 37,
+            "Index": 4,
+            "StartPhase": 1,
+            "EndPhase": 1,
+            "Topic": "0038DE:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          }
+        ]
+      },
+      {
+        "FormKey": "0038E7:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_topic4_scene",
+        "Flags": 10260,
+        "Quest": "0038C4:du_overtime.esm",
+        "Index": 4,
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCPI": "3000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "GetIsID",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "0038C8:du_overtime.esm",
+            "SecondParameter": 0
+          }
+        ],
+        "Phases": [
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          },
+          {
+            "Name": "",
+            "EditorWidth": 350,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 37,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          },
+          {
+            "ID": 4294967294,
+            "Flags": 8,
+            "BehaviorFlags": 266
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": -2,
+            "Index": 3,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038E3:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          },
+          {
+            "Kind": "Dialogue",
+            "Name": "",
+            "AliasID": 37,
+            "Index": 4,
+            "StartPhase": 1,
+            "EndPhase": 1,
+            "Topic": "0038E5:du_overtime.esm",
+            "HeadTracking": {
+              "ForceRotate": false,
+              "ForceRotateMustComplete": false
+            }
+          }
+        ]
+      },
+      {
+        "FormKey": "0038EF:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_say1_scene",
+        "Flags": 129,
+        "Quest": "0038C4:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038EB:du_overtime.esm"
+          }
+        ]
+      },
+      {
+        "FormKey": "0038F4:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_say2_scene",
+        "Flags": 128,
+        "Quest": "0038C4:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038F0:du_overtime.esm"
+          }
+        ]
+      },
+      {
+        "FormKey": "0038F8:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_say3_scene",
+        "Flags": 128,
+        "Quest": "0038C4:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "0038F5:du_overtime.esm"
+          }
+        ]
+      }
+    ],
+    "Topics": [
+      {
+        "FormKey": "0038CA:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_greet",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038CB:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038CB:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_greet_info",
+            "Speaker": "0038C8:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 14538,
+                "EmotionOut": 7.466667,
+                "ResponseText": "Our relay satellite\u0027s dead, and we can\u0027t call anyone.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "C7272D92"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14540,
+                "EmotionOut": 7.466667,
+                "ResponseText": "The new core for it got taken by raiders on the way here.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "D1C13F45"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14541,
+                "EmotionOut": 7.466667,
+                "ResponseText": "If you\u0027ve got a ship, you\u0027re the most useful person I\u0027ve seen all week.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "7DEFB1FA"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038CF:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask1",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038D0:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038D0:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask1_info",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 0,
+                "EmotionOut": 7.466667,
+                "ResponseText": "I\u0027ll get the part and fit it.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "09FF5F15"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038D1:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply1",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038D2:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038D2:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply1_info",
+            "Speaker": "0038C8:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "SetStageOnBegin": 0,
+            "SetStageOnEnd": 10,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 14545,
+                "EmotionOut": 7.466667,
+                "ResponseText": "It\u0027s a transceiver core, about the size of a toolbox.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "B3C3B5C7"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14547,
+                "EmotionOut": 7.466667,
+                "ResponseText": "Fit it in the satellite and we\u0027re back on the network.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "A71CA928"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14548,
+                "EmotionOut": 7.466667,
+                "ResponseText": "I\u0027d do it myself if I could fly.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "4A2D59D8"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038D6:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask2",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038D7:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038D7:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask2_info",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 0,
+                "EmotionOut": 7.466667,
+                "ResponseText": "What\u0027s wrong with the satellite?",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "8A38A467"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038D8:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply2",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038D9:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038D9:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply2_info",
+            "Speaker": "0038C8:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 14552,
+                "EmotionOut": 7.466667,
+                "ResponseText": "The core burned out. They do, after a few years up there.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "AB5E89FC"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14554,
+                "EmotionOut": 7.466667,
+                "ResponseText": "Everything else on it is fine. Swap the core and it wakes up.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "F2A1CCE6"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038DC:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask3",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038DD:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038DD:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask3_info",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 0,
+                "EmotionOut": 7.466667,
+                "ResponseText": "Why does it matter so much?",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "4763B55F"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038DE:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply3",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038DF:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038DF:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply3_info",
+            "Speaker": "0038C8:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 14558,
+                "EmotionOut": 7.466667,
+                "ResponseText": "No relay, no calls.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "A857061D"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14560,
+                "EmotionOut": 7.466667,
+                "ResponseText": "No supply runs, no weather warnings, no doctor.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "9B9A2DC6"
+              },
+              {
+                "Emotion": "None",
+                "WEMFile": 14561,
+                "EmotionOut": 7.466667,
+                "ResponseText": "We\u0027ve been shouting at the sky for nine days.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "6CA3C277"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038E3:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask4",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038E4:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038E4:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_ask4_info",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Perk": "22EC7C:Starfield.esm",
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 0,
+                "EmotionOut": 7.466667,
+                "ResponseText": "Could you rig something in the meantime?",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "3FCDB976"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038E5:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply4",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038E6:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038E6:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_reply4_info",
+            "Speaker": "0038C8:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 14565,
+                "EmotionOut": 7.466667,
+                "ResponseText": "I tried. The dish down here can hear the satellite fine. It just won\u0027t answer. It\u0027s the core or nothing.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "EA689280"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038E8:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_hellos",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 7,
+        "Subtype": 125,
+        "SubtypeName": 1330398536,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038EA:du_overtime.esm",
+          "0038E9:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038EA:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_hello1",
+            "FlagsFlags": 2,
+            "FlagsResetHours": 0,
+            "DialogGroup": "0038E9:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "Emotion": "None",
+                "WEMFile": 14570,
+                "EmotionOut": 7.466667,
+                "ResponseText": "Watch your step. The dish cables run everywhere.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "0A4ECD5C"
+              }
+            ]
+          },
+          {
+            "FormKey": "0038E9:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 64,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_talk1_hellos",
+            "FlagsFlags": 768,
+            "FlagsResetHours": 0,
+            "StartScenePhase": "",
+            "COCT": false,
+            "Conditions": [
+              {
+                "Kind": "float",
+                "Function": "GetIsAliasRef",
+                "CompareOperator": 0,
+                "Flags": 0,
+                "Value": 1,
+                "Unknown1": "000000",
+                "Unknown2": 0,
+                "RunOnType": 0,
+                "Unknown3": -1,
+                "UseAliases": false,
+                "UsePackageData": false,
+                "SecondParameter": 0,
+                "FirstInt": 37
+              }
+            ],
+            "Lines": []
+          }
+        ]
+      },
+      {
+        "FormKey": "0038EB:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_say1_topic",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038EC:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038EC:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_say1_info",
+            "Speaker": "0038C9:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 14571,
+                "EmotionOut": 0,
+                "ResponseText": "This is a short-range set, so if you can hear me, you\u0027re close.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "2BCE679D"
+              },
+              {
+                "WEMFile": 14573,
+                "EmotionOut": 0,
+                "ResponseText": "Our relay\u0027s dead and we can\u0027t call out.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "4C121F97"
+              },
+              {
+                "WEMFile": 14574,
+                "EmotionOut": 0,
+                "ResponseText": "We need someone with a ship.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "69AB717C"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038F0:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_say2_topic",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038F1:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038F1:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_say2_info",
+            "Speaker": "0038C9:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 14576,
+                "EmotionOut": 0,
+                "ResponseText": "Wait, is that you? You got it?",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "851DD7B2"
+              },
+              {
+                "WEMFile": 14578,
+                "EmotionOut": 0,
+                "ResponseText": "Then it\u0027s the satellite with no lights on. You can\u0027t miss it.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "FD744149"
+              },
+              {
+                "WEMFile": 14579,
+                "EmotionOut": 0,
+                "ResponseText": "Well, you can. Please don\u0027t.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "D63C5EF1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "0038F5:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_artifact_localcargo_qst33a_say3_topic",
+        "Priority": 50,
+        "Quest": "0038C4:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "0038F6:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "0038F6:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_artifact_localcargo_qst33a_say3_info",
+            "Speaker": "0038C9:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 14581,
+                "EmotionOut": 0,
+                "ResponseText": "There it is. We can hear the whole sky again.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "43AA9A0B"
+              },
+              {
+                "WEMFile": 14583,
+                "EmotionOut": 0,
+                "ResponseText": "First call I\u0027ve made in nine days, and it\u0027s to say thank you.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "EE6017F6"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

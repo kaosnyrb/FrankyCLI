@@ -1,0 +1,83 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_localcargo_qst20a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12.",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/backlog.md, new candidates: survey (scan N things at a site)",
+  "_note": [
+    "SURVEY, a new type, written 2026-10-12 on his \"First we need 01a and 02a. It's bugging me we start from 03\",",
+    "and his pick of the survey verb the same hour. 01a was held for type 8 (two planets); his call was to fill 01a",
+    "and 02a with types that build today, so type 8 moves to 10a when its remote second place exists.",
+    "Shape: three sensors read in ANY ORDER behind one counted objective (07a's group), then one send at the",
+    "team's beacon. The house shape: an unfinished job somebody else started. No combat.",
+    "Each sensor sets its own stage in whatever order, so no journal line says first, next or last.",
+    "Ends on a single beat, so the beacon's journal is stage 100's line and no recap is written.",
+    "MODELS NOT ON THE APPROVED LIST (docs/quests/objects.md), his eye first: SeismicSensor01.nif is vanilla's",
+    "own quest sensor (Quest_SeismicSensor01, SFBGS001_Quest_MultifunctionSensor01); Satellite_Beacon.nif is",
+    "vanilla's Satellite_Beacon static. Neither seen in a Delve yet."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "_theme": "Keeps the base's own exclusions (no natural sites, no caves). A ground survey before somebody builds reads right at a worked site."
+  },
+  "prose": {
+    "name": "Survey: Seismic Sensors on <Planet>",
+    "briefing": "A survey team set three seismic sensors at the <Place> and left before anyone came back to read them. The survey office will pay for the data."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "read",
+      "at": "RETravelA1LocRef",
+      "ring": "infrastructure",
+      "objective": "Read the seismic sensors at the <Place>",
+      "journal": "This sensor had been knocked off true. I set it level again and pulled its readings.",
+      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "name": "Tilted Seismic Sensor"
+    },
+    {
+      "type": "use",
+      "group": "read",
+      "at": "RETravelB1LocRef",
+      "ring": "infrastructure",
+      "journal": "Dust had drifted over this sensor up to the lid. I dug it out and the readings were still there.",
+      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "name": "Half-Buried Seismic Sensor"
+    },
+    {
+      "type": "use",
+      "group": "read",
+      "at": "REMarkerMediumLocRef",
+      "journal": "This sensor was still logging on its own, weeks after the team left. I copied everything it had.",
+      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "name": "Logging Seismic Sensor"
+    },
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Send the readings from the survey beacon",
+      "journal": "The survey team's sensors at the <Place> had been sitting unread. I collected all three sets of readings and sent them from the team's beacon.",
+      "model": "Meshes\\ccs\\commsmast01.nif",
+      "name": "Survey Uplink Beacon",
+      "say": [
+        "That's all three. Data's coming through.",
+        "Huh. The ground's been busier than we thought."
+      ]
+    }
+  ],
+  "speaker": {
+    "name": "Survey Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "Three sensors went in down there, and nobody came back to read them.",
+    "Send us the data and the job's paid."
+  ],
+  "_speech": "Radio rules: no names, no places, one clause where it can be. Voice is ElevenLabs' 'Annie K, Calm, Grounded Narrator', NOT yet heard in game (voices.md); his ear decides."
+}

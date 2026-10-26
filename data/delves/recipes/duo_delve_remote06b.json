@@ -4,7 +4,7 @@
   "template": "beats",
   "_note": "LETTER VARIANT of remote06a, written by Jessica 2026-10-14 on his 'do one of each for now' and his example, 'cave creatures'. Caves only. Same beat, marker and numbers as 06a; the creature list is PreditorMegalist_B where 06a has _A, picked so the two do not draw the same pool, and I have NOT read what _B holds, so the words never name a species. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is the survey crew who got out.",
   "author": "jessica",
-  "source": "Structure from duo_delve_remote06a (Eliza's clear proof)",
+  "source": "Structure from duo_artifact_remote_planet_qst25a (Eliza's clear proof)",
   "place": {
     "remote": true,
     "theme": {

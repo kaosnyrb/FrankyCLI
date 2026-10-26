@@ -199,7 +199,7 @@ refused rather than silently ignored.
 | field | type | required | read by | what it is |
 |---|---|---|---|---|
 | `schema` | int | yes | all | always `2` (since 2026-10-19; a schema-1 recipe is refused at read, by name). ⭐ **Schema 2: every SPOKEN field is a LIST of responses**, said back to back, each its own subtitle and audio file, 1 to 4 per line (vanilla, 1,027 lines measured: 909 one, 101 two, 17 three): `broadcast`, a beat's `say`, `offer.say`, `recapSay`, `greeting`, each exchange's `reply`, and each of `person.hellos`. One response is `["…"]`. Menu text (`prompt`), journals, objectives and box text stay plain strings. His ask: *"every line of dialouge is one string. Need to add multiple line support"*. Every recipe was migrated to one-response lists the same day, words unchanged, for Jessica to split |
-| `id` | string | yes | all | the quest's EditorID and every clone's prefix. **Must equal the file name** (`duo_delve07a.json` has id `duo_delve07a`) and look like `duo_delve…` |
+| `id` | string | yes | all | the quest's EditorID and every clone's prefix. **Must equal the file name** (`duo_MB50a_qst.json` has id `duo_MB50a_qst`). A built Delve carries the classic grammar (`duo_MB<NN><x>_qst`, `duo_artifact_<local\|localcargo\|remote\|remote_planet>_qst<NN><x>`); a draft not yet built may still be `duo_delve…`. See *Naming* below |
 | `template` | string | yes | all | a template id from the table above |
 | `author`, `source` | string | no | none | provenance; not written into the game |
 | `place` | object | yes | all | where the mission happens (below) |
@@ -321,7 +321,31 @@ Map dependant"*).
 sit in the player's log twice. Each letter is its own quest record, which is what lets `07a` and `07b`
 run in parallel. A variant is not only new lore; it is another copy that can be live at once.
 
-**Every recipe has a letter**, even when it has no sibling yet (`duo_delve03a`), and **new numbers fill 01 and 02 first** (his, 2026-10-11: *"its bugging me that our delves dont start at 1"*; the old 01 and 02 test quests are out of the plugin).
+**Every recipe has a letter**, even when it has no sibling yet.
+
+**Naming (his rulings, 2026-10-26; supersedes "new numbers fill 01 and 02 first", 10-11).** A Delve is a new
+FAMILY in the original mod's own grammar, so it sorts beside the classics in xEdit with no marker word:
+
+| dealt from | name | Delve families start at | classic families |
+|---|---|---|---|
+| a mission board | `duo_MB<NN><x>_qst` | **40** | MB01 to MB31 |
+| a slate, local | `duo_artifact_local_qst<NN><x>` | **20** | 01 to 17 |
+| a slate, local cargo | `duo_artifact_localcargo_qst<NN><x>` | **20** | 01 to 09 |
+| a slate, remote (SPACE) | `duo_artifact_remote_qst<NN><x>` | **20** | 03 to 14 |
+| a slate, remote planet | `duo_artifact_remote_planet_qst<NN><x>` | **20** | 01 to 02 |
+
+- **The gap is the point:** *"a clear numbering gap I can read and leans into the V2"*. Everything at or above
+  40 (board) or 20 (slate) is new.
+- **A family lives in ONE place** (his *"hard no"* to a family's letters being dealt from different nodes), so
+  the scope in the name can never split a family.
+- **The number is assigned when the forms are made, not when the recipe is written** (his: *"When I built
+  before the numbers got assigned when I built so there was no gaps"*). A draft keeps its `duo_delve…` name
+  until it is built. ⏳ The build step that hands out the next free number is not built yet; until it is,
+  the number is chosen by hand at first build and the recipe file renamed to match.
+- **Letters are the phase-two axis:** his plan is about ten lettered versions per family.
+- Fragment scripts are `duo_qf_` plus the id **without** its own `duo_`, so the longest id fits the
+  compiler's 38. Quests built before 2026-10-26 keep the fragment they were built with.
+- The 2026-10-26 rename table (old `duo_delve…` to new) is in the office's Bethesda manual, part 04.
 
 **Full recipes** (his ruling, 2026-10-08). `duo_delve07a`, `duo_delve07b`: same structure, new names
 and words. `lint --all` compares siblings that share a number and names any drift in template, beats

@@ -525,7 +525,11 @@ namespace FrankyCLI
             if (fname.Length > 38) Fatal($"the fragment script name {fname} is {fname.Length} chars; the Papyrus compiler refuses over 38. Shorten the id.");
         }
 
-        private static string FragmentScriptName(Recipe r) => "duo_qf_" + r.id;
+        /// The id's own "duo_" is dropped (2026-10-26, his naming: the Delves back on the classic grammar). The longest
+        /// id, duo_artifact_remote_planet_qst20a, is 33, so "duo_qf_" + it was 40 against the compiler's 38. Quests built
+        /// before keep the fragment they were built with (duo_qf_duo_delve...); a rebuild writes the new name.
+        private static string FragmentScriptName(Recipe r) =>
+            "duo_qf_" + (r.id.StartsWith("duo_", StringComparison.OrdinalIgnoreCase) ? r.id.Substring(4) : r.id);
 
         /// <summary>The driver's LoseDistance: how close to the approached object the player comes before the approach fires.</summary>
         private const float ApproachDistance = 250f;

@@ -1,0 +1,59 @@
+﻿{
+  "schema": 2,
+  "id": "duo_artifact_local_qst22a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalNode",
+  "_deal": "The Local pool: a mission you go into knowing there is a fight (his ruling, 2026-10-20).",
+  "author": "jessica, as Ruth Pargeter",
+  "source": "his 2026-10-21 06:57: \"write the local 5, use your pen names\". The five old artifact_local fight families (Bounty, Danger, Dismantle, Strike, Hunt: 42 quests), one new Delve each, each person written by a different pen name.",
+  "_note": [
+    "PEN NAME: home-office office/pennames/ruth-pargeter.json. Her heat checks do not apply (Overtime is adult, not explicit, his 10-12); her voice does.",
+    "DANGER, THE TERRORMORPH. First Delve of the old Danger family (local qst05: Cataxi, predator, Terrormorph; the",
+    "slate was always 'something big has moved in'). defeat on duo_boss_encTerrormorph, alone. Ruth's tell: the number",
+    "before the feeling, and the number IS the feeling (nineteen entries, the last six kills). Her ban: the reveal,",
+    "and warmth or worry named. The surveyor never says she was afraid; the count says it.",
+    "⚠ defeat on a CREATURE target is untested (every defeat so far is a person or a robot); the lint and Eliza say.",
+    "Single ending, so the defeat's say is the closing radio. Pay: med, placeholder.",
+    "RE-CUT 2026-10-21 16:36 for the ear, his \"when you split the lines that small Elevenlabs has no context so the delivery is worse\" and \"yeah recut, they aren't made yet\": each speech is one or two whole responses, split only where a real pause belongs."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "Anywhere with room for it: a Terrormorph does not fit in a cave."
+  },
+  "prose": {
+    "name": "Danger: Terrormorph on <Planet>",
+    "briefing": "A survey crew at the <Place> logged a Terrormorph working the ground around their site, then pulled out. The log runs to nineteen entries. The first thirteen are sightings. The last six are kills."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "REMarkerMediumLocRef",
+      "target": "duo_boss_encTerrormorph",
+      "loot": {
+        "list": "duo_ArtifactList_Local",
+        "chance": 25
+      },
+      "objective": "Kill the Terrormorph at the <Place>",
+      "journal": "The Terrormorph at the <Place> is dead. The survey log closes at nineteen entries, and the twentieth is mine.",
+      "say": [
+        "That's it down? Then the log closes at nineteen entries, and we go back in at first light."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Site Surveyor",
+    "voice": "GenericFemale01",
+    "elevenlabs": "Xb7hH8MSUJpSbSDYk0k2"
+  },
+  "broadcast": [
+    "We've logged the thing nineteen times now. The first thirteen entries are sightings, and the last six aren't.",
+    "Everyone's pulled back off the site until it's dead, and we'd like to go back."
+  ],
+  "_speech": "Radio rules: no names, places, factions or currency. Voice is remote04a's 'Alice' (British, clear), used once so far; his ear decides."
+}

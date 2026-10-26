@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "id": "duo_artifact_localcargo_qst29a",
+  "template": "beats",
+  "deal": "duo_MS_ArtifactMap_LocalCargoNode",
+  "_deal": "The live local-cargo pool, as every lettered recipe since 2026-10-12.",
+  "author": "jessica",
+  "source": "home-office office/projects/delves/type-08-two-planets.md (variant a, the forwarding address)",
+  "_note": [
+    "TYPE 8, HERE THEN ANOTHER PLANET. His ask 2026-10-10 18:48 (\"lets try a do something here then travel to a",
+    "different plant\"), written that night as 01a; renumbered 10a on 2026-10-12 when 01a and 02a went to types",
+    "that build today; put into recipes on his \"write the two-planet one now\" the same afternoon.",
+    "NEEDS ELIZA'S TEMPLATE: the beats base's second place is LOCAL and leashed (FinalLocation). This recipe needs",
+    "it to be a remote-planet request (cloned from duo_artifact_remote_planet_qst, TargetPlanet + DungeonLocation,",
+    "manual 12) while main stays local, plus a <SecondPlanet> token. The lint refuses <SecondPlanet> until then.",
+    "The first beat was a claim board on paper; every vanilla board is wall-mounted or New Atlantis signage, so it",
+    "is now the abandoned camp's beacon, the same model 01a and 02a propose.",
+    "Pay should be med (it crosses a planet, README rule 3); whether a single-ending beats Delve can set its own tier",
+    "is Eliza's open question.",
+    "BUILT 2026-10-14 22:1x (Eliza, his \"build 10a\"): the template need above is met by place.second.remote behind a",
+    "LOCAL main (alias 60 SecondPlanetLocation for <SecondPlanet>); the beacon is Kim's commsmast01 (Satellite_Beacon ruled",
+    "out on land, his 10-12); the deliver pays med (a single ending can set its tier since 10-13). Not yet played."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+    },
+    "second": {
+      "remote": true,
+      "_remote": "A REQUEST on another planet (Eliza, 2026-10-14 22:1x, on his \"build 10a\"): the second-place request proven by duo_delve_twosite01a and missionboard02a, here behind a LOCAL main place, the first Delve of that shape.",
+      "theme": {
+        "require": [],
+        "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword", "LocTypeTest"]
+      }
+    },
+    "_theme": "An abandoned camp here, a working dig there. The base's own exclusions at both ends: no caves, no natural sites; a dig crew camps by kit, not in the wild."
+  },
+  "prose": {
+    "name": "Supply Run: Dig Site on <SecondPlanet>",
+    "briefing": "A survey crew moved their dig off <Planet>, and their last supply drop landed at the old camp anyway. Someone should get it to them."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "objective": "Check the camp beacon at the <Place>",
+      "journal": "The beacon at the <Place> is still broadcasting the crew's new site: the <SecondPlace> on <SecondPlanet>. Their supplies arrived after they left.",
+      "model": "Meshes\\ccs\\commsmast01.nif",
+      "name": "Abandoned Camp Beacon",
+      "say": [
+        "To anyone near our old camp.",
+        "Our last supply drop went to the wrong site.",
+        "Bring it out to us and we'll make the trip worth it."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "RETravelA1LocRef",
+      "ring": "large-cargo",
+      "item": "Misdelivered Supply Crate",
+      "objective": "Collect the crew's supply crate",
+      "message": {
+        "title": "Supply Crate",
+        "text": "Still sealed. The label has the old camp crossed out, and the new site written underneath in marker, twice, in case the first one was missed."
+      },
+      "model": "Meshes\\ccs\\supplycrate01.nif",
+      "name": "Supply Crate"
+    },
+    {
+      "type": "deliver",
+      "at": "RECenterLocRef",
+      "place": "second",
+      "objective": "Deliver the supplies to the <SecondPlace> on <SecondPlanet>",
+      "journal": "I got the crate out to the <SecondPlace>. The crew had been rationing for a week and had stopped expecting it.",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Dig Site Stores",
+      "reward": "med",
+      "say":[
+        "That's ours.",
+        "We'd given up on it. Somebody put the kettle on."
+      ]
+    }
+  ],
+  "speaker": {
+    "name": "Dig Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "_broadcast": "Moved onto the beacon 2026-10-14 22:4x, his play: the start broadcast then the beacon told the same thing twice (\"Either the first recording should be after the beacon or we need another thing between beacon and package\"). The beacon IS the recording now; Jessica's words unchanged.",
+  "_speech": "Radio rules: no names, no places, one clause where it can be. The broadcast gives the reason before the place; the beacon gives the place. Voice: Clara, as 07a's Crew Lead; not yet heard in game."
+}

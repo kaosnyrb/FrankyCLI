@@ -1,0 +1,68 @@
+{
+  "schema": 2,
+  "id": "duo_MB49a_qst",
+  "template": "board",
+  "deal": "duo_MB_MissionNode_Infestation",
+  "_deal": "The board's test node. Which Infestation node deals it is Eliza's.",
+  "author": "jessica",
+  "source": "Eliza's letter 2026-10-26 (office/correspondence/2026-10-26-eliza-jessica-infestations-for-the-board.md), on his week goal: \"This week I'd like to have at least one of each of the new missions set and the old in the legacy nodes.\"",
+  "_note": [
+    "THE INFESTATION FAMILY, 2 OF 2: SOMETHING NESTED INSIDE. His MB17 (interior predators, 5 originals), with a job:",
+    "the creatures have settled round the control terminal in the middle of a dungeon, the crew pulled out, and the air",
+    "scrubbers are off. Get to the terminal through them and restart the scrubbers so the crew can come back.",
+    "who: infested round beat 1's object, one species, set to attack, placed when he first comes within 250 m.",
+    "⚠ Step one's marker is INSIDE, so both the broadcast's arrival hook and the infested placement measure through a load",
+    "door. 04a put its step one outside for exactly this reason. Unproven; Eliza's to say whether it fires.",
+    "Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeDungeon"
+      ],
+      "exclude": [
+        "LocTypeTest",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built dungeon (as 04a), not a cave: scrubbers and a terminal want a built interior.",
+    "who": {
+      "kind": "infested",
+      "list": "duo_GangMembersList_PreditorMegalist_A",
+      "min": 4,
+      "max": 7,
+      "beat": 1
+    }
+  },
+  "prose": {
+    "name": "Infestation: Creatures in the <Place> on <Planet>",
+    "briefing": "Something nested in the middle of the <Place> and the crew pulled out. The air scrubbers have been off since.",
+    "card": "Infestation contract. Something has nested in the <Place> on <Planet>, and the crew pulled out. Get to the control terminal and restart the air scrubbers. Expect company. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "LocDungeonCenterMarkerLocRef",
+      "objective": "Restart the air scrubbers at the <Place>",
+      "journal": "Creatures had nested round the control terminal in the middle of the <Place>. I got through them and restarted the air scrubbers, so the crew can come back.",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Scrubber Control",
+      "say": [
+        "That's the scrubbers back on. The crew can come back now.",
+        "Tell me you didn't leave any of them in there."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Site Foreman",
+    "voice": "GenericMale01",
+    "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
+  },
+  "broadcast": [
+    "You're at the site? The control terminal's in the middle of the place.",
+    "That's where they've settled. Right on top of it.",
+    "Get it running again and we can send the crew back in."
+  ],
+  "_speech": "A foreman who left in a hurry and is not proud of it. Hector, already in two recipes; his ear decides. No names, places, factions or currency."
+}
