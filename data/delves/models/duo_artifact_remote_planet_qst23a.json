@@ -1,5 +1,5 @@
 {
-  "FormKey": "0031FF:du_overtime.esm",
+  "FormKey": "003F02:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -18,7 +18,7 @@
   "Timestamp": 0,
   "Unknown": 0,
   "TextDisplayGlobals": [
-    "003204:du_overtime.esm"
+    "003F07:du_overtime.esm"
   ],
   "MissionBoardInfoPanels": [],
   "DialogConditions": [],
@@ -455,7 +455,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003201:du_overtime.esm",
+        "Object": "003F04:du_overtime.esm",
         "AliasID": 1,
         "Create": 0,
         "Level": 0
@@ -506,7 +506,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003202:du_overtime.esm",
+        "Object": "003F05:du_overtime.esm",
         "AliasID": 11,
         "Create": 0,
         "Level": 0
@@ -543,7 +543,7 @@
             "Conditions": [],
             "VoiceTypes": "Null",
             "PackageData": [
-              "003200:du_overtime.esm"
+              "003F03:du_overtime.esm"
             ]
           }
         }
@@ -566,7 +566,7 @@
             "Conditions": [],
             "VoiceTypes": "Null",
             "PackageData": [
-              "003200:du_overtime.esm"
+              "003F03:du_overtime.esm"
             ]
           }
         }
@@ -589,7 +589,7 @@
             "Conditions": [],
             "VoiceTypes": "Null",
             "PackageData": [
-              "003200:du_overtime.esm"
+              "003F03:du_overtime.esm"
             ]
           }
         }
@@ -602,7 +602,7 @@
     "ExtraBindDataVersion": 3,
     "Versioning": 0,
     "FragmentScript": {
-      "Name": "duo_qf_duo_delve_remote04a",
+      "Name": "duo_qf_artifact_remote_planet_qst23a",
       "Flags": 0,
       "Properties": [
         {
@@ -610,7 +610,7 @@
           "Name": "Counter3",
           "Flags": 1,
           "Object": {
-            "Form": "003204:du_overtime.esm",
+            "Form": "003F07:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -620,7 +620,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "00320E:du_overtime.esm",
+            "Form": "003F0E:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -630,8 +630,18 @@
           "Name": "Say3",
           "Flags": 1,
           "Object": {
-            "Form": "003212:du_overtime.esm",
+            "Form": "003F11:du_overtime.esm",
             "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Alias_Beat1Target",
+          "Flags": 1,
+          "Object": {
+            "Form": "003F02:du_overtime.esm",
+            "Alias": 2,
             "Unused": 0
           }
         },
@@ -640,7 +650,7 @@
           "Name": "Item1",
           "Flags": 1,
           "Object": {
-            "Form": "003203:du_overtime.esm",
+            "Form": "003F06:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -650,7 +660,7 @@
           "Name": "Alias_Beat3Spawn",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -660,7 +670,7 @@
           "Name": "Alias_Beat3Wave1",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -680,7 +690,7 @@
           "Name": "Alias_Beat3Wave2",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 35,
             "Unused": 0
           }
@@ -690,7 +700,7 @@
           "Name": "Alias_Beat3Wave3",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 36,
             "Unused": 0
           }
@@ -703,7 +713,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_remote04a",
+        "ScriptName": "duo_qf_artifact_remote_planet_qst23a",
         "FragmentName": "Fragment_Stage_0000_Item_00"
       },
       {
@@ -711,7 +721,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_remote04a",
+        "ScriptName": "duo_qf_artifact_remote_planet_qst23a",
         "FragmentName": "Fragment_Stage_0010_Item_00"
       },
       {
@@ -719,7 +729,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_remote04a",
+        "ScriptName": "duo_qf_artifact_remote_planet_qst23a",
         "FragmentName": "Fragment_Stage_0020_Item_00"
       },
       {
@@ -727,7 +737,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_remote04a",
+        "ScriptName": "duo_qf_artifact_remote_planet_qst23a",
         "FragmentName": "Fragment_Stage_0030_Item_00"
       },
       {
@@ -735,7 +745,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_remote04a",
+        "ScriptName": "duo_qf_artifact_remote_planet_qst23a",
         "FragmentName": "Fragment_Stage_0040_Item_00"
       },
       {
@@ -743,7 +753,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve_remote04a",
+        "ScriptName": "duo_qf_artifact_remote_planet_qst23a",
         "FragmentName": "Fragment_Stage_0100_Item_00"
       }
     ],
@@ -777,7 +787,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -805,7 +815,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 2,
             "Unused": 0
           }
@@ -832,16 +842,10 @@
                 "Name": "ItemToGive",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003203:du_overtime.esm",
+                  "Form": "003F06:du_overtime.esm",
                   "Alias": -1,
                   "Unused": 0
                 }
-              },
-              {
-                "Type": "Bool",
-                "Name": "ShouldDisableAfterSuccessfulActivation",
-                "Flags": 1,
-                "Bool": true
               }
             ]
           }
@@ -855,7 +859,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 12,
             "Unused": 0
           }
@@ -895,7 +899,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -941,7 +945,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 35,
             "Unused": 0
           }
@@ -987,7 +991,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "0031FF:du_overtime.esm",
+            "Form": "003F02:du_overtime.esm",
             "Alias": 36,
             "Unused": 0
           }
@@ -1030,7 +1034,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "00320A:du_overtime.esm",
+        "FormKey": "003F0B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1039,7 +1043,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst23a_say1_scene",
         "Flags": 129,
-        "Quest": "0031FF:du_overtime.esm",
+        "Quest": "003F02:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1070,12 +1074,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003206:du_overtime.esm"
+            "Topic": "003F09:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "00320E:du_overtime.esm",
+        "FormKey": "003F0E:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1084,7 +1088,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst23a_say2_scene",
         "Flags": 128,
-        "Quest": "0031FF:du_overtime.esm",
+        "Quest": "003F02:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1115,12 +1119,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "00320B:du_overtime.esm"
+            "Topic": "003F0C:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003212:du_overtime.esm",
+        "FormKey": "003F11:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1129,7 +1133,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst23a_say3_scene",
         "Flags": 128,
-        "Quest": "0031FF:du_overtime.esm",
+        "Quest": "003F02:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -1160,14 +1164,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "00320F:du_overtime.esm"
+            "Topic": "003F0F:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003206:du_overtime.esm",
+        "FormKey": "003F09:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1176,7 +1180,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst23a_say1_topic",
         "Priority": 50,
-        "Quest": "0031FF:du_overtime.esm",
+        "Quest": "003F02:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1184,11 +1188,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003207:du_overtime.esm"
+          "003F0A:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003207:du_overtime.esm",
+            "FormKey": "003F0A:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1196,45 +1200,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_planet_qst23a_say1_info",
-            "Speaker": "003205:du_overtime.esm",
+            "Speaker": "003F08:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12806,
+                "WEMFile": 16137,
                 "EmotionOut": 0,
-                "ResponseText": "We had to leave our data behind.",
+                "ResponseText": "We had to leave our data behind. The terminal still has it. It just needs power. Get it running and keep it running until we\u0027ve copied everything.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "8DA1CC95"
-              },
-              {
-                "WEMFile": 12808,
-                "EmotionOut": 0,
-                "ResponseText": "The terminal still has it. It just needs power.",
-                "ScriptNotes": "",
-                "Edits": "",
-                "AlternateLipText": "",
-                "TextHash": "4445293D"
-              },
-              {
-                "WEMFile": 12809,
-                "EmotionOut": 0,
-                "ResponseText": "Get it running and keep it running until we\u0027ve copied everything.",
-                "ScriptNotes": "",
-                "Edits": "",
-                "AlternateLipText": "",
-                "TextHash": "8E3D99E8"
+                "TextHash": "C23C975C"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "00320B:du_overtime.esm",
+        "FormKey": "003F0C:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1243,7 +1229,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst23a_say2_topic",
         "Priority": 50,
-        "Quest": "0031FF:du_overtime.esm",
+        "Quest": "003F02:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1251,11 +1237,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00320C:du_overtime.esm"
+          "003F0D:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00320C:du_overtime.esm",
+            "FormKey": "003F0D:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1263,36 +1249,27 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_planet_qst23a_say2_info",
-            "Speaker": "003205:du_overtime.esm",
+            "Speaker": "003F08:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12811,
+                "WEMFile": 16140,
                 "EmotionOut": 0,
-                "ResponseText": "We\u0027ve got a connection. Copying now.",
+                "ResponseText": "We\u0027ve got a connection. Copying now. Keep them off it.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "E443CBF5"
-              },
-              {
-                "WEMFile": 12813,
-                "EmotionOut": 0,
-                "ResponseText": "Keep them off it.",
-                "ScriptNotes": "",
-                "Edits": "",
-                "AlternateLipText": "",
-                "TextHash": "CE171CDA"
+                "TextHash": "4D4C6A3A"
               }
             ]
           }
         ]
       },
       {
-        "FormKey": "00320F:du_overtime.esm",
+        "FormKey": "003F0F:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -1301,7 +1278,7 @@
         },
         "EditorID": "duo_artifact_remote_planet_qst23a_say3_topic",
         "Priority": 50,
-        "Quest": "0031FF:du_overtime.esm",
+        "Quest": "003F02:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -1309,11 +1286,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003210:du_overtime.esm"
+          "003F10:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003210:du_overtime.esm",
+            "FormKey": "003F10:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -1321,29 +1298,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_planet_qst23a_say3_info",
-            "Speaker": "003205:du_overtime.esm",
+            "Speaker": "003F08:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 12815,
+                "WEMFile": 16143,
                 "EmotionOut": 0,
-                "ResponseText": "That\u0027s the last file. All of it.",
+                "ResponseText": "That\u0027s the last file. All of it. Three years of work. We\u0027d already started telling each other it didn\u0027t matter.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "463AD5E1"
-              },
-              {
-                "WEMFile": 12817,
-                "EmotionOut": 0,
-                "ResponseText": "Three years of work, and you held the door. Thank you.",
-                "ScriptNotes": "",
-                "Edits": "",
-                "AlternateLipText": "",
-                "TextHash": "F1EAFAE4"
+                "TextHash": "1383B4E9"
               }
             ]
           }

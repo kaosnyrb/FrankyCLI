@@ -1,5 +1,5 @@
 {
-  "FormKey": "003503:du_overtime.esm",
+  "FormKey": "003D75:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -144,7 +144,7 @@
               "Unknown3": -1,
               "UseAliases": false,
               "UsePackageData": false,
-              "FirstLink": "003503:du_overtime.esm",
+              "FirstLink": "003D75:du_overtime.esm",
               "SecondParameter": 900
             }
           ]
@@ -294,7 +294,7 @@
     "ExtraBindDataVersion": 3,
     "Versioning": 0,
     "FragmentScript": {
-      "Name": "duo_qf_duo_delve29a",
+      "Name": "duo_qf_artifact_local_qst24a",
       "Flags": 0,
       "Properties": [
         {
@@ -312,7 +312,7 @@
           "Name": "Alias_Beat1Spawn",
           "Flags": 1,
           "Object": {
-            "Form": "003503:du_overtime.esm",
+            "Form": "003D75:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -322,7 +322,7 @@
           "Name": "Alias_Beat1Enemies",
           "Flags": 1,
           "Object": {
-            "Form": "003503:du_overtime.esm",
+            "Form": "003D75:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -342,7 +342,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "00350C:du_overtime.esm",
+            "Form": "003D7D:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -355,7 +355,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve29a",
+        "ScriptName": "duo_qf_artifact_local_qst24a",
         "FragmentName": "Fragment_Stage_0000_Item_00"
       },
       {
@@ -363,7 +363,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve29a",
+        "ScriptName": "duo_qf_artifact_local_qst24a",
         "FragmentName": "Fragment_Stage_0100_Item_00"
       },
       {
@@ -371,7 +371,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve29a",
+        "ScriptName": "duo_qf_artifact_local_qst24a",
         "FragmentName": "Fragment_Stage_0900_Item_00"
       }
     ],
@@ -400,7 +400,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003503:du_overtime.esm",
+            "Form": "003D75:du_overtime.esm",
             "Alias": 5,
             "Unused": 0
           }
@@ -428,7 +428,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003503:du_overtime.esm",
+            "Form": "003D75:du_overtime.esm",
             "Alias": 34,
             "Unused": 0
           }
@@ -474,7 +474,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003503:du_overtime.esm",
+            "Form": "003D75:du_overtime.esm",
             "Alias": 33,
             "Unused": 0
           }
@@ -489,7 +489,7 @@
                 "Name": "TargetAlias",
                 "Flags": 1,
                 "Object": {
-                  "Form": "003503:du_overtime.esm",
+                  "Form": "003D75:du_overtime.esm",
                   "Alias": 32,
                   "Unused": 0
                 }
@@ -521,7 +521,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003508:du_overtime.esm",
+        "FormKey": "003D7A:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -530,7 +530,7 @@
         },
         "EditorID": "duo_artifact_local_qst24a_say1_scene",
         "Flags": 129,
-        "Quest": "003503:du_overtime.esm",
+        "Quest": "003D75:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -561,12 +561,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003505:du_overtime.esm"
+            "Topic": "003D77:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "00350C:du_overtime.esm",
+        "FormKey": "003D7D:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -575,7 +575,7 @@
         },
         "EditorID": "duo_artifact_local_qst24a_say2_scene",
         "Flags": 128,
-        "Quest": "003503:du_overtime.esm",
+        "Quest": "003D75:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -606,14 +606,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003509:du_overtime.esm"
+            "Topic": "003D7B:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003505:du_overtime.esm",
+        "FormKey": "003D77:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -622,7 +622,7 @@
         },
         "EditorID": "duo_artifact_local_qst24a_say1_topic",
         "Priority": 50,
-        "Quest": "003503:du_overtime.esm",
+        "Quest": "003D75:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -630,11 +630,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003506:du_overtime.esm"
+          "003D78:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003506:du_overtime.esm",
+            "FormKey": "003D78:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -642,14 +642,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst24a_say1_info",
-            "Speaker": "003504:du_overtime.esm",
+            "Speaker": "003D76:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 13573,
+                "WEMFile": 15735,
                 "EmotionOut": 0,
                 "ResponseText": "Our transport came down hard, and the pens split open. The animals ran, and they\u0027ve gone to ground at a site nearby.",
                 "ScriptNotes": "",
@@ -658,7 +658,7 @@
                 "TextHash": "1C733B3B"
               },
               {
-                "WEMFile": 13575,
+                "WEMFile": 15737,
                 "EmotionOut": 0,
                 "ResponseText": "I raised every one of those animals from the egg myself, and I know what they will do out there. Please put them down before they learn the ground.",
                 "ScriptNotes": "",
@@ -671,7 +671,7 @@
         ]
       },
       {
-        "FormKey": "003509:du_overtime.esm",
+        "FormKey": "003D7B:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -680,7 +680,7 @@
         },
         "EditorID": "duo_artifact_local_qst24a_say2_topic",
         "Priority": 50,
-        "Quest": "003503:du_overtime.esm",
+        "Quest": "003D75:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -688,11 +688,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "00350A:du_overtime.esm"
+          "003D7C:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "00350A:du_overtime.esm",
+            "FormKey": "003D7C:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -700,29 +700,20 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_local_qst24a_say2_info",
-            "Speaker": "003504:du_overtime.esm",
+            "Speaker": "003D76:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 13577,
+                "WEMFile": 15739,
                 "EmotionOut": 0,
-                "ResponseText": "So every one of them went down fighting, the way their mothers did. Thank you for doing it properly, and doing it quickly.",
+                "ResponseText": "So every one of them went down fighting, the way their mothers did. Thank you for doing it properly, and doing it quickly. I will write each of their names in the pen book tonight.",
                 "ScriptNotes": "",
                 "Edits": "",
                 "AlternateLipText": "",
-                "TextHash": "A94DC52C"
-              },
-              {
-                "WEMFile": 13579,
-                "EmotionOut": 0,
-                "ResponseText": "I will write each of their names in the pen book tonight.",
-                "ScriptNotes": "",
-                "Edits": "",
-                "AlternateLipText": "",
-                "TextHash": "E8C7D7A6"
+                "TextHash": "D2B051AA"
               }
             ]
           }
