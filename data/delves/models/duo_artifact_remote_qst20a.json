@@ -1,5 +1,5 @@
 {
-  "FormKey": "003C0E:du_overtime.esm",
+  "FormKey": "003C1B:du_overtime.esm",
   "Header": {
     "MajorFlags": 0,
     "FormVersion": 576,
@@ -104,7 +104,7 @@
       "ID": 2,
       "Name": "TargetPlanetLocation",
       "Flags": 265,
-      "ALFG": 1105027662,
+      "ALFG": 1107296256,
       "Conditions": [
         {
           "Kind": "float",
@@ -270,7 +270,7 @@
       "ALFG": 0,
       "Conditions": [],
       "Create": {
-        "Object": "003C0F:du_overtime.esm",
+        "Object": "003C1C:du_overtime.esm",
         "AliasID": 12,
         "Create": 0,
         "Level": 3
@@ -416,7 +416,7 @@
     "ExtraBindDataVersion": 3,
     "Versioning": 0,
     "FragmentScript": {
-      "Name": "duo_qf_duo_delve34a",
+      "Name": "duo_qf_artifact_remote_qst20a",
       "Flags": 0,
       "Properties": [
         {
@@ -424,7 +424,7 @@
           "Name": "Say2",
           "Flags": 1,
           "Object": {
-            "Form": "003C19:du_overtime.esm",
+            "Form": "003C26:du_overtime.esm",
             "Alias": -1,
             "Unused": 0
           }
@@ -437,7 +437,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve34a",
+        "ScriptName": "duo_qf_artifact_remote_qst20a",
         "FragmentName": "Fragment_Stage_0000_Item_00"
       },
       {
@@ -445,7 +445,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_duo_delve34a",
+        "ScriptName": "duo_qf_artifact_remote_qst20a",
         "FragmentName": "Fragment_Stage_0100_Item_00"
       }
     ],
@@ -459,7 +459,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C0E:du_overtime.esm",
+            "Form": "003C1B:du_overtime.esm",
             "Alias": 16,
             "Unused": 0
           }
@@ -487,7 +487,7 @@
           "Name": "",
           "Flags": 1,
           "Object": {
-            "Form": "003C0E:du_overtime.esm",
+            "Form": "003C1B:du_overtime.esm",
             "Alias": 3,
             "Unused": 0
           }
@@ -524,7 +524,7 @@
   "Children": {
     "Scenes": [
       {
-        "FormKey": "003C15:du_overtime.esm",
+        "FormKey": "003C22:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -533,7 +533,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say1_scene",
         "Flags": 129,
-        "Quest": "003C0E:du_overtime.esm",
+        "Quest": "003C1B:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -564,12 +564,12 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003C11:du_overtime.esm"
+            "Topic": "003C1E:du_overtime.esm"
           }
         ]
       },
       {
-        "FormKey": "003C19:du_overtime.esm",
+        "FormKey": "003C26:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -578,7 +578,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say2_scene",
         "Flags": 128,
-        "Quest": "003C0E:du_overtime.esm",
+        "Quest": "003C1B:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
         "SCSP": false,
         "SPRP": false,
@@ -609,14 +609,14 @@
             "Index": 0,
             "StartPhase": 0,
             "EndPhase": 0,
-            "Topic": "003C16:du_overtime.esm"
+            "Topic": "003C23:du_overtime.esm"
           }
         ]
       }
     ],
     "Topics": [
       {
-        "FormKey": "003C11:du_overtime.esm",
+        "FormKey": "003C1E:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -625,7 +625,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say1_topic",
         "Priority": 50,
-        "Quest": "003C0E:du_overtime.esm",
+        "Quest": "003C1B:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -633,11 +633,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003C12:du_overtime.esm"
+          "003C1F:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003C12:du_overtime.esm",
+            "FormKey": "003C1F:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -645,14 +645,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_qst20a_say1_info",
-            "Speaker": "003C10:du_overtime.esm",
+            "Speaker": "003C1D:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15377,
+                "WEMFile": 15390,
                 "EmotionOut": 0,
                 "ResponseText": "If you\u0027re near the wreck, you\u0027ll pick up the ping. That\u0027s the recorder.",
                 "ScriptNotes": "",
@@ -661,7 +661,7 @@
                 "TextHash": "CB7076E4"
               },
               {
-                "WEMFile": 15379,
+                "WEMFile": 15392,
                 "EmotionOut": 0,
                 "ResponseText": "The crew got off in the pods. The ship didn\u0027t.",
                 "ScriptNotes": "",
@@ -670,7 +670,7 @@
                 "TextHash": "72E399BC"
               },
               {
-                "WEMFile": 15380,
+                "WEMFile": 15393,
                 "EmotionOut": 0,
                 "ResponseText": "They swear they did nothing wrong. The recorder\u0027s the only thing that can say so.",
                 "ScriptNotes": "",
@@ -683,7 +683,7 @@
         ]
       },
       {
-        "FormKey": "003C16:du_overtime.esm",
+        "FormKey": "003C23:du_overtime.esm",
         "Header": {
           "MajorFlags": 0,
           "FormVersion": 576,
@@ -692,7 +692,7 @@
         },
         "EditorID": "duo_artifact_remote_qst20a_say2_topic",
         "Priority": 50,
-        "Quest": "003C0E:du_overtime.esm",
+        "Quest": "003C1B:du_overtime.esm",
         "TopicFlags": 0,
         "Category": 2,
         "Subtype": 17,
@@ -700,11 +700,11 @@
         "Timestamp": 0,
         "Unknown": 0,
         "TopicInfoList": [
-          "003C17:du_overtime.esm"
+          "003C24:du_overtime.esm"
         ],
         "Infos": [
           {
-            "FormKey": "003C17:du_overtime.esm",
+            "FormKey": "003C24:du_overtime.esm",
             "Header": {
               "MajorFlags": 0,
               "FormVersion": 576,
@@ -712,14 +712,14 @@
               "VersionControl": 0
             },
             "EditorID": "duo_artifact_remote_qst20a_say2_info",
-            "Speaker": "003C10:du_overtime.esm",
+            "Speaker": "003C1D:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
             "COCT": false,
             "Conditions": [],
             "Lines": [
               {
-                "WEMFile": 15382,
+                "WEMFile": 15395,
                 "EmotionOut": 0,
                 "ResponseText": "You\u0027ve got it? Then we\u0027ll finally know.",
                 "ScriptNotes": "",
@@ -728,7 +728,7 @@
                 "TextHash": "E3018DB3"
               },
               {
-                "WEMFile": 15384,
+                "WEMFile": 15397,
                 "EmotionOut": 0,
                 "ResponseText": "The crew will be glad. They\u0027ve been telling the same story to anyone who\u0027ll listen.",
                 "ScriptNotes": "",
