@@ -11,7 +11,7 @@ namespace FrankyCLI
         /// instances in BeatKinds, because the three differ only in their name and whether the hook hands over an item:
         ///
         ///   use      DefaultAliasOnActivate          hides its prompt after use
-        ///   pickup   DefaultAliasOnActivateGiveItem  gives the beat's item, disables the object
+        ///   pickup   DefaultAliasOnActivateGiveItem  gives the beat's item; the fragment disables the object
         ///   deliver  DefaultAliasOnActivate          the fragment takes every item picked up so far
         ///
         /// ⛔ DELIVER IS NOT DefaultAliasOnActivateRemoveItems, and it looks like it should be. That script's parent SETS THE
@@ -93,7 +93,10 @@ namespace FrankyCLI
                     var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
                     ip.Object.SetTo(build.itemOf[b]);
                     sc.Properties.Add(ip);
-                    sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldDisableAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                    // No ShouldDisableAfterSuccessfulActivation: the stock hook disables only after SafeSetStage returns,
+                    // which waits out the stage's fragment, and a hold's wave fragment waits up to 180 s. The canister on
+                    // remote_planet_qst21a stood through the fight and the late Disable() hit an alias Stop() had cleared
+                    // (Papyrus.1.log 2026-10-26 16:50:52, "Cannot call Disable() on a None object"). StageLines disables it.
                 }
                 else
                 {
@@ -102,6 +105,21 @@ namespace FrankyCLI
                     sc.Properties.Add(new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = !comesBack, Flags = ScriptProperty.Flag.Edited });
                 }
                 return build.AttachBeatHook(b, hookAlias, script, sc, prereq);
+            }
+
+            /// <summary>
+            /// A pickup's object goes as the FIRST line of its stage, ahead of anything that waits (his play of
+            /// remote_planet_qst21a, 2026-10-26: "the canister doesn't disappear on use"). See Hook for why the stock flag
+            /// cannot do it.
+            /// </summary>
+            internal override void StageLines(BeatsBuild build, int k, int b)
+            {
+                if (!CarriesItem || build.r.beats[b].returnTo != null) return;
+                string ta = $"Alias_Beat{b + 1}Target";
+                build.props.Add(("ReferenceAlias", ta, build.clone.FormKey, build.slotOf[b].activatorAlias));
+                int st = build.beatStage[b];
+                if (!build.code.ContainsKey(st)) build.code[st] = new();
+                build.code[st].Insert(0, $"{ta}.GetRef().Disable()");
             }
         }
     }

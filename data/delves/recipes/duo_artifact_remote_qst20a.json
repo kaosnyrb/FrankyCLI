@@ -18,8 +18,8 @@
     "LINT as 'space' (2026-10-26): speech, the say, the reward and <Planet> are refused (space supplies only <Place>, the orbit itself). boardspace supplies <Planet> off the orbit; slatespace wants the same, or say which token and I reword."
   ],
   "place": {
-    "altitude": 27.673,
-    "_altitude": "26a's, MB01e's: the altitude that filled. Eliza's to say whether a slate orbit wants another."
+    "altitude": 32.0,
+    "_altitude": "His 2026-10-27 ruling, off his play of 27.673 (26a's, MB01e's): \"the orbit distance is too low\". 32 is the top of the band he tested (2026-08-04: \"feels cool, we're a good distance from the planet\"); somewhere between 32 and 256 the engine discards the value and reverts to default. duo_MB47a_qst (26a) keeps 27.673."
   },
   "prose": {
     "name": "Recovery: Flight Recorder over <Planet>",
