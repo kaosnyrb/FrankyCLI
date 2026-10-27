@@ -35,6 +35,7 @@ namespace FrankyCLI
         /// </summary>
         public const string SupportedTypes =
             "  SurfaceBlock, Worldspace, WorldspaceStructure, PackIn, Cell, Static, MoveableStatic\n" +
+            "  CellRT (cellrt)    - every location ref type the cell's placed refs carry, counted\n" +
             "  Activator, Light, Npc, Location, Location_Full, Keyword, Book, Scene\n" +
             "  PcmBranchNode, PcmContentNode, Planet, Star, Race, Biome (biom)\n" +
             "  Quest, Quest_VMAD, DialogBranch, DialogTopic, AudioLog (full dialog chain dump)\n" +
@@ -209,6 +210,16 @@ namespace FrankyCLI
                                     if (MatchesSearch(cell.EditorID, cell.FormKey, search))
                                     { Console.Write($"  [Worldspace: {ws.EditorID} grid ({wsSubBlock.BlockNumberX},{wsSubBlock.BlockNumberY})] "); DumpCell(cell, cache); found++; }
                     }
+                    break;
+                case "cellrt":
+                    // Every location ref type (XLRT) carried by a placed ref in the cell: what a quest
+                    // alias's HasRefType can fill from it. `cell` does not print this field. Added
+                    // 2026-10-27 for the space-board census (27a's two markers in one space cell).
+                    foreach (var block in mod.Cells)
+                        foreach (var subBlock in block.SubBlocks)
+                            foreach (var cell in subBlock.Cells)
+                                if (MatchesSearch(cell.EditorID, cell.FormKey, search))
+                                { DumpCellRefTypes(cell, mod, cache); found++; }
                     break;
                 case "refr_xflg":
                 {
@@ -1250,6 +1261,33 @@ namespace FrankyCLI
                 Console.WriteLine($"    PlacedNpc {npc.FormKey} EditorID={npc.EditorID} Base={npc.Base.FormKey} Pos={npc.Position} Rot={npc.Rotation}");
             else
                 Console.WriteLine($"    {entry.GetType().Name} {entry.FormKey}");
+        }
+
+        /// <summary>
+        /// One line per location ref type in the cell: how many placed refs carry it, and which. A ref
+        /// type absent from the list is absent from the cell, so a required alias filling by it cannot
+        /// fill there. The mod is printed because a later plugin's copy of a cell is a different answer.
+        /// </summary>
+        private static void DumpCellRefTypes(ICellGetter cell, IStarfieldModGetter mod, ILinkCache? cache)
+        {
+            var byType = new SortedDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            int refs = 0;
+            foreach (var entry in cell.Persistent.Concat(cell.Temporary))
+            {
+                if (entry is not IPlacedObjectGetter po) continue;
+                refs++;
+                foreach (var rt in po.LocationRefTypes ?? Enumerable.Empty<IFormLinkGetter<ILocationReferenceTypeGetter>>())
+                {
+                    string name = NameOf(rt.FormKey, cache);
+                    string key = name.Length > 0 ? name : rt.FormKey.ToString();
+                    if (!byType.TryGetValue(key, out var list)) byType[key] = list = new List<string>();
+                    list.Add(po.EditorID ?? po.FormKey.ID.ToString("X6"));
+                }
+            }
+            Console.WriteLine($"--- Cell ref types: {cell.EditorID} {cell.FormKey} (in {mod.ModKey}) ---");
+            Console.WriteLine($"  {refs} placed object(s), {byType.Count} ref type(s)");
+            foreach (var (type, list) in byType)
+                Console.WriteLine($"    {type,-34} x{list.Count}  {string.Join(", ", list.Take(4))}{(list.Count > 4 ? ", ..." : "")}");
         }
 
         private static void DumpCell(ICellGetter cell, ILinkCache? cache = null)
