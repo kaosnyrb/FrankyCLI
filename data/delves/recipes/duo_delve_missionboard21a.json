@@ -102,7 +102,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Shift Clock",
       "say": [
-        "Did it take? It took. Look at that number. I am going to be very difficult about that number. Thank you."
+        "Did it take? It took. Look at that number. I am going to be very difficult about that number."
       ],
       "reward": "med"
     }

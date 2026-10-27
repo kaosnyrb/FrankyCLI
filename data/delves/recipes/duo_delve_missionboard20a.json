@@ -73,7 +73,7 @@
       "objective": "Deal with the buyer",
       "journal": "The buyer came to collect the batch at the <Place> and found it condemned, and me. The parts go nowhere now.",
       "say": [
-        "She came for them? Of course she did. Well, she won't be selling them to anyone. Thank you."
+        "She came for them? Of course she did. Well, she won't be selling them to anyone."
       ],
       "reward": "med"
     }
@@ -84,7 +84,7 @@
     "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
   },
   "broadcast": [
-    "You're at the site? Three crates of parts in there that should never leave. Mark every one of them condemned. And the person who bought them is on her way."
+    "Three crates of parts in there that should never leave. Mark every one of them condemned. And the person who bought them is on her way."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

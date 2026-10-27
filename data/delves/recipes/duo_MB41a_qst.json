@@ -69,7 +69,7 @@
         ]
       },
       "greeting": [
-        "You're the hauler? Good. I'm retiring, and my toolbox goes to the lad I trained. It's only one box, but it's the one that matters."
+        "You're the hauler? I'm retiring, and my toolbox goes to the lad I trained. It's only one box, but it's the one that matters."
       ],
       "exchanges": [
         {
@@ -140,7 +140,7 @@
         {
           "prompt": "She wanted you to have it.",
           "reply": [
-            "She told me I'd never be ready for this box. I suppose that means I am. I'll call her tonight. Thank you."
+            "She told me I'd never be ready for this box. I suppose that means I am. I'll call her tonight."
           ]
         },
         {

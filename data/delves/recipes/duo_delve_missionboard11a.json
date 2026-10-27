@@ -49,7 +49,7 @@
       "objective": "Defeat the quartermaster at the <Place>",
       "journal": "The quartermaster at the <Place> is dead. She kept a ledger, and it is still in there somewhere.",
       "say": [
-        "That's her? Good. Now the ledger. Without it she's just someone who was rude to us."
+        "That's her? Now the ledger. Without it she's just someone who was rude to us."
       ]
     },
     {

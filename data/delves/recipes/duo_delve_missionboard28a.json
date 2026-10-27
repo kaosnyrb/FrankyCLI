@@ -42,7 +42,7 @@
       "objective": "Recover the power regulator from the wreck",
       "journal": "I took the power regulator back off the ship that stole it. It needs fitting to the communications satellite over <Planet>.",
       "say": [
-        "That's it. That's our part. Now get it to the satellite before anyone else gets ideas."
+        "That's our part. Now get it to the satellite before anyone else gets ideas."
       ]
     },
     {

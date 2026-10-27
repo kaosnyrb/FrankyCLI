@@ -40,7 +40,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Uplink Terminal",
       "say": [
-        "It's sending? Good. It's loud on every channel, so they'll know. Keep them off it till it finishes."
+        "It's sending? It's loud on every channel, so they'll know. Keep them off it till it finishes."
       ]
     },
     {
@@ -71,7 +71,7 @@
     "elevenlabs": "zcIk2xc7SGwlywr4TzZu"
   },
   "broadcast": [
-    "You're at the site? The terminal inside can send everything we need. It's slow, and it's loud. Once you start it, you'll have to stay with it."
+    "The terminal inside can send everything we need. It's slow, and it's loud. Once you start it, you'll have to stay with it."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

@@ -24,6 +24,13 @@ THE CHECKS. Each one is a fault he caught, with the catch that earned it.
          patches our text but cannot re-record our audio, so the voice names roles. A narrow Delve (one planet
          or faction) is exempt, his 2026-10-26; it says so with "NARROW" in a _note.
 
+THE TICS, counted ACROSS the corpus, not per line (his, 2026-10-27: "make a note of the tics so we can watch out
+for them later"). These are MINE: every Delve not written in a pen name is in my voice, and each habit is fine in
+one Delve and a drone across sixty. Each has a cap on how many recipes may carry it; over the cap WARNS (the exit
+code is unchanged, because the fix is a judgement about which ones earn it). Measured 2026-10-27 before the first
+pass, in the 70 Delves without a pen name: "Good." as a beat 24, a closing "Thank you" 20, the board's "You're at
+the site?" opener 16, "Is that you/them?" 6, "That's it. That's X" 4, "Tell me that's a X" 3.
+
 WHAT IT CANNOT SEE, stated rather than papered. A LONE line ("They may still be watching for it.", his catch
 on the Culture Canister): each list item is its own take, so a fragment that only works after the line before
 is delivered flat. Whether a line stands alone is meaning, not pattern; a short-line count fires on "Thank you.
@@ -50,7 +57,15 @@ PAY = re.compile(
 NOUN = re.compile(
     r"\b(UC|United Colonies|Freestar|Collective|Crimson Fleet|Ecliptic|Va'?ruun|House Va'?ruun|Constellation"
     r"|Rangers?|Vanguard|SysDef|Ryujin|Neon|Akila|New Atlantis|Jemison|Cydonia|Paradiso|Volii|Cheyenne|Alpha Centauri"
-    r"|credits?|creds)\b")
+    r"|credits?|creds|Spacers?)\b")
+TICS = [  # (name, pattern, cap on recipes, flags)
+    ('"X? Good." / "Good." as a beat', r"\bGood\.", 6, 0),
+    ('"Thank you" to close', r"\bthank you\b", 8, re.I),
+    ('"You\'re at the site?" opener', r"^You're at the site\?", 2, 0),
+    ('"Is that you/them?" opener', r"^(Is|Was) (that|it) (you|them|her|the)", 6, 0),
+    ('"That\'s it. That\'s X."', r"^That's (it|them)\. That's", 1, 0),
+    ('"Tell me that\'s a X"', r"Tell me that'?s", 1, 0),
+]
 DASH = "—"
 
 
@@ -136,6 +151,16 @@ def main():
             if len(takes) > 1 and len(" ".join(takes)) <= 250:
                 hits += 1
                 print(f"{rid:40} {'SHARD':14} {where:16} " + " | ".join(takes))
+    tic_hits = {name: set() for name, *_ in TICS}
+    for rid, d in load(a.rev, a.id):
+        for _, line in spoken(d):
+            for name, pat, cap, fl in TICS:
+                if re.search(pat, line, fl):
+                    tic_hits[name].add(rid)
+    print("\nTICS (recipes carrying each; over the cap warns, the exit code is unchanged):")
+    for name, pat, cap, fl in TICS:
+        n = len(tic_hits[name])
+        print(f"  {'WARN' if n > cap else 'ok  '} {n:3}/{cap:<3} {name}")
     print(f"\n{hits} flagged line(s). PAY, DASH, NOUN and SHARD are his catches; a LONE line is not checked (see the header).")
     return 1 if hits else 0
 

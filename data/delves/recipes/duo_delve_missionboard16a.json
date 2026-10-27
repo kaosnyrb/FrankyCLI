@@ -39,7 +39,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Plant Control Terminal",
       "say": [
-        "It's winding down? Good. Don't let anyone near that terminal till it's finished, or it starts all over again."
+        "It's winding down? Don't let anyone near that terminal till it's finished, or it starts all over again."
       ]
     },
     {
@@ -70,7 +70,7 @@
     "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
   },
   "broadcast": [
-    "You're at the site? The control terminal is inside. Start the shutdown and stay with it. It's slow, and it's noisy, and they'll come to see what's changed."
+    "The control terminal is inside. Start the shutdown and stay with it. It's slow, and it's noisy, and they'll come to see what's changed."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

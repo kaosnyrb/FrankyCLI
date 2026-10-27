@@ -81,7 +81,7 @@
         "text": "Six sets of tags on one chain, in a case shut with a twist of wire. The sixth set is on the outside of the bundle: the last one added, by whoever closed it."
       },
       "say": [
-        "All six? Thank you. I'll tell the families before anyone else gets the chance to tell them wrong."
+        "All six? I'll tell the families before anyone else gets the chance to tell them wrong."
       ],
       "reward": "med"
     }
@@ -92,7 +92,7 @@
     "elevenlabs": "nPczCjzI2devNBz1zQrb"
   },
   "broadcast": [
-    "You're at the site? We lost contact with that unit twelve days ago, and nobody's been out since. I don't need a story. I need to know what happened, and I need them home."
+    "We lost contact with that unit twelve days ago, and nobody's been out since. I don't need a story. I need to know what happened, and I need them home."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Voice 'Brian, Deep, Resonant and Comforting', unused so far; his ear decides. No names, places, factions or currency."
 }

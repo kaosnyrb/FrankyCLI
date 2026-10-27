@@ -62,13 +62,13 @@
         ]
       },
       "greeting": [
-        "Spacers jumped my run and took the whole hold. Tell me that's what I think it is."
+        "They jumped my run and took the whole hold. Is that what I think it is?"
       ],
       "exchanges": [
         {
           "prompt": "I've got your strongbox.",
           "reply": [
-            "That's it. Dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."
+            "Dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again."
           ]
         },
         {

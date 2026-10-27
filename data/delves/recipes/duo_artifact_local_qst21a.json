@@ -71,7 +71,7 @@
         ]
       },
       "greeting": [
-        "You're not one of them, are you? Good. Then you can help, if you want to."
+        "You're not one of them, are you? Then you can help, if you want to."
       ],
       "exchanges": [
         {
@@ -135,7 +135,7 @@
         {
           "prompt": "It's your filters. The hauler sent them on.",
           "reply": [
-            "She's all right? Good. I'll have these in by tonight. First glass I don't have to wait for, I'm raising it to her."
+            "She's all right? I'll have these in by tonight. First glass I don't have to wait for, I'm raising it to her."
           ]
         },
         {

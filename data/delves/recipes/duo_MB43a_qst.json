@@ -52,7 +52,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Survey Terminal",
       "say": [
-        "You're in? Good. It says she pulled everything to a drive before they ran. It'll be in the site safe, further in."
+        "You're in? It says she pulled everything to a drive before they ran. It'll be in the site safe, further in."
       ]
     },
     {
@@ -77,7 +77,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "You're on site? Good. The terminal's locked, and our lead wrote the code down somewhere near the door. She always does. Mind yourself in there. Whatever ran us out hasn't left."
+    "You're on site? The terminal's locked, and our lead wrote the code down somewhere near the door. She always does. Mind yourself in there. Whatever ran us out hasn't left."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is remote06b's 'Lucy' (a survey crew there too, the same register), used once so far; his ear decides."
 }

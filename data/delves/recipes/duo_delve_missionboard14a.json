@@ -80,13 +80,13 @@
         ]
       },
       "greeting": [
-        "Is that a medical crate? Tell me that's a medical crate. Four of us left holding this corner, and we've been out of dressings for three days."
+        "A medical crate? Four of us left holding this corner, and we've been out of dressings for three days."
       ],
       "exchanges": [
         {
           "prompt": "It's yours. Where do you want it?",
           "reply": [
-            "Right here. Right by the lad who keeps saying he's fine. Thank you. Really. I'll find a way to say it properly once I've slept."
+            "Right here. Right by the lad who keeps saying he's fine. I'll find a way to thank you properly once I've slept."
           ]
         },
         {
@@ -112,7 +112,7 @@
     "elevenlabs": "wsHauqjSkdBeAvdbUFmR"
   },
   "broadcast": [
-    "You're at the site? Good. There's a crate by the door. Our people are further in, and they need it more than they'll say."
+    "There's a crate by the door. Our people are further in, and they need it more than they'll say."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

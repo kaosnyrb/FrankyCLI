@@ -48,7 +48,7 @@
       "name": "Courier's Case",
       "item": "Sensor Core",
       "say": [
-        "Got it? Good. Get it up to the satellite while there's still a forecast worth giving."
+        "Got it? Get it up to the satellite while there's still a forecast worth giving."
       ]
     },
     {
@@ -64,7 +64,7 @@
         "text": "The core locks in. The satellite turns its sensors back to the planet below."
       },
       "say": [
-        "There's the data coming in. First clear picture in a week. Everyone down here can plan a day again. Thank you."
+        "There's the data coming in. First clear picture in a week. Everyone down here can plan a day again."
       ],
       "reward": "med"
     }
@@ -75,7 +75,7 @@
     "elevenlabs": "JBFqnCBsd6RMkjVDRZzb"
   },
   "broadcast": [
-    "You're at the site? The one in charge in there has our core. They took it off the courier because they think it's worth something. It isn't, to anyone but us. Bring it back anyway."
+    "The one in charge in there has our core. They took it off the courier because they think it's worth something. It isn't, to anyone but us. Bring it back anyway."
   ],
   "_speech": "A forecaster, mild and a little dry. Voice: George (Warm, Captivating Storyteller), already in three recipes; his ear decides. No names, places, factions or currency."
 }
