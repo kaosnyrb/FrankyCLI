@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_localcargo_qst33a",
   "template": "beats",
@@ -79,32 +79,25 @@
         ]
       },
       "greeting": [
-        "Our relay satellite's dead, and we can't call anyone.",
-        "The new core for it got taken by raiders on the way here.",
-        "If you've got a ship, you're the most useful person I've seen all week."
+        "Our relay satellite's dead, and we can't call anyone. The new core for it got taken by raiders on the way here. If you've got a ship, you're the most useful person I've seen all week."
       ],
       "exchanges": [
         {
           "prompt": "I'll get the part and fit it.",
           "reply": [
-            "It's a transceiver core, about the size of a toolbox.",
-            "Fit it in the satellite and we're back on the network.",
-            "I'd do it myself if I could fly."
+            "It's a transceiver core, about the size of a toolbox. Fit it in the satellite and we're back on the network. I'd do it myself if I could fly."
           ]
         },
         {
           "prompt": "What's wrong with the satellite?",
           "reply": [
-            "The core burned out. They do, after a few years up there.",
-            "Everything else on it is fine. Swap the core and it wakes up."
+            "The core burned out. They do, after a few years up there. Everything else on it is fine. Swap the core and it wakes up."
           ]
         },
         {
           "prompt": "Why does it matter so much?",
           "reply": [
-            "No relay, no calls.",
-            "No supply runs, no weather warnings, no doctor.",
-            "We've been shouting at the sky for nine days."
+            "No relay, no calls. No supply runs, no weather warnings, no doctor. We've been shouting at the sky for nine days."
           ]
         },
         {
@@ -126,9 +119,7 @@
       "objective": "Recover the transceiver core from the <SecondPlace>",
       "journal": "The raiders' leader at the <SecondPlace> had the transceiver core. I took it back. It needs fitting in the relay satellite over <Planet>.",
       "say": [
-        "Wait, is that you? You got it?",
-        "Then it's the satellite with no lights on. You can't miss it.",
-        "Well, you can. Please don't."
+        "Wait, is that you? You got it? Then it's the satellite with no lights on. You can't miss it. Well, you can. Please don't."
       ]
     },
     {
@@ -140,8 +131,7 @@
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Relay Satellite",
       "say": [
-        "There it is. We can hear the whole sky again.",
-        "First call I've made in nine days, and it's to say thank you."
+        "There it is. We can hear the whole sky again. First call I've made in nine days, and it's to say thank you."
       ],
       "message": {
         "title": "Relay Restored",
@@ -156,9 +146,7 @@
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
   "broadcast": [
-    "This is a short-range set, so if you can hear me, you're close.",
-    "Our relay's dead and we can't call out.",
-    "We need someone with a ship."
+    "This is a short-range set, so if you can hear me, you're close. Our relay's dead and we can't call out. We need someone with a ship."
   ],
   "_speech": "Same voice on the radio and in person. The broadcast says short-range on purpose: with the relay dead, nobody far off could hear it. CwhRBWXzGAHq8TQ4Fs17 is the docs' Relay Control example voice; his ear decides."
 }

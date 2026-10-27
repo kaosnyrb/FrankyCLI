@@ -16,8 +16,12 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeDungeon"],
-      "exclude": ["LocTypeTest"]
+      "require": [
+        "LocTypeDungeon"
+      ],
+      "exclude": [
+        "LocTypeTest"
+      ]
     },
     "_require": "2026-10-23 (Eliza): his play of the item-marker rebuild 'went to a tiny POI', so 'need to limit the quest to LocTypeDungeon' (his). The item markers alone are not a dungeon.",
     "_theme": "A dungeon (entrance, centre, boss container: about 162 dungeons on his load order, Eliza 10-13; the terminal marker cut it to 29, and we bring our own terminal, so it stands on the centre). The stops are the dungeon marker vocabulary (bethesda 32), and only places carrying all three plus a map marker can draw it. Caves allowed: a survey crew works caves. The lint measures the pool."
@@ -48,8 +52,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Survey Terminal",
       "say": [
-        "You're in? Good.",
-        "It says she pulled everything to a drive before they ran. It'll be in the site safe, further in."
+        "You're in? Good. It says she pulled everything to a drive before they ran. It'll be in the site safe, further in."
       ]
     },
     {
@@ -63,8 +66,7 @@
       "item": "Survey Data Drive",
       "_model": "Kim's C5 data drive is unbuilt (quest-objects.md), so the drive travels in the C1 sealed courier case he cleared 2026-10-12.",
       "say": [
-        "That's the drive? That's the whole season.",
-        "Now get out of there. Nobody's paid enough to stay."
+        "That's the drive? That's the whole season. Now get out of there. Nobody's paid enough to stay."
       ],
       "reward": "med"
     }
@@ -75,9 +77,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "You're on site? Good.",
-    "The terminal's locked, and our lead wrote the code down somewhere near the door. She always does.",
-    "Mind yourself in there. Whatever ran us out hasn't left."
+    "You're on site? Good. The terminal's locked, and our lead wrote the code down somewhere near the door. She always does. Mind yourself in there. Whatever ran us out hasn't left."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is remote06b's 'Lucy' (a survey crew there too, the same register), used once so far; his ear decides."
 }

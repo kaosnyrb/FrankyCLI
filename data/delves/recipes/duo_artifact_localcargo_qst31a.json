@@ -78,15 +78,13 @@
         {
           "prompt": "I'm here for the survey crate.",
           "reply": [
-            "Right. Your crew left in a hurry and took the wrong crate.",
-            "Theirs had my lunch in it. Yours is still here. I've marked it for you."
+            "Right. Your crew left in a hurry and took the wrong crate. Theirs had my lunch in it. Yours is still here. I've marked it for you."
           ]
         },
         {
           "prompt": "How long have you been out here?",
           "reply": [
-            "Eleven years, on and off.",
-            "Most weeks nobody comes out at all. You're the third this week. It's been a big week."
+            "Eleven years, on and off. Most weeks nobody comes out at all. You're the third this week. It's been a big week."
           ]
         },
         {
@@ -98,22 +96,19 @@
         {
           "prompt": "Did you look inside?",
           "reply": [
-            "No. It says sealed, so it's sealed.",
-            "I did shake it once. It rattles like rocks. Which I suppose it is."
+            "No. It says sealed, so it's sealed. I did shake it once. It rattles like rocks. Which I suppose it is."
           ]
         },
         {
           "prompt": "Did they take anything of yours?",
           "reply": [
-            "My lunch. Two rolls and a pickled egg.",
-            "Somebody on that crew is having a very confusing afternoon."
+            "My lunch. Two rolls and a pickled egg. Somebody on that crew is having a very confusing afternoon."
           ]
         },
         {
           "prompt": "Do you like it out here?",
           "reply": [
-            "I like it fine. The quiet doesn't ask me anything.",
-            "Present company excepted. You can ask."
+            "I like it fine. The quiet doesn't ask me anything. Present company excepted. You can ask."
           ]
         }
       ],

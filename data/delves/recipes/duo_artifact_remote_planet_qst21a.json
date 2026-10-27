@@ -39,8 +39,7 @@
     {
       "type": "pickup",
       "say": [
-        "That's its tracker back on. I can see it from here.",
-        "Which means they can too. Get ready."
+        "That's its tracker back on. I can see it from here. Which means they can too. Get ready."
       ],
       "_say": "On the pickup because a beat's say plays when its stage is SET, and wave 1 spawns on this stage (Eliza's move on 02a, 2026-10-12). The speaker is off-world and can only see the tracker, so the warning is about the tracker.",
       "at": "REMarkerMediumLocRef",
@@ -75,8 +74,7 @@
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Courier Pickup Beacon",
       "say": [
-        "That's it, we've got it. There's a colony waiting on those cultures.",
-        "Thank you. Truly."
+        "That's it, we've got it. There's a colony waiting on those cultures. Thank you. Truly."
       ]
     }
   ],
@@ -86,8 +84,7 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "Our courier was jumped on her way back and had to drop a canister of vaccine cultures.",
-    "It's still out there. Get it to the courier beacon before anyone else does.",
+    "Our courier was jumped on her way back and had to drop a canister of vaccine cultures. It's still out there. Get it to the courier beacon before anyone else does.",
     "Whoever jumped her didn't take it, and that worries me. I think they're waiting to see who comes for it."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Sarah, Mature, Reassuring, Confident', NOT yet heard in game (voices.md); his ear decides.",

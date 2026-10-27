@@ -17,7 +17,9 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
@@ -28,8 +30,12 @@
     "_theme": "The END of the trail, peopled: his sister, placed at the centre.",
     "second": {
       "theme": {
-        "require": ["LocTypeOE_ThemeNaturalKeyword"],
-        "exclude": ["LocTypeOE_NonHostile"]
+        "require": [
+          "LocTypeOE_ThemeNaturalKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_NonHostile"
+        ]
       }
     },
     "third": {
@@ -88,32 +94,32 @@
         "voice": "GenericFemale01",
         "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
         "hellos": [
-          ["Are you lost? There's nothing out here worth the walk."]
+          [
+            "Are you lost? There's nothing out here worth the walk."
+          ]
         ]
       },
       "greeting": [
-        "That's his writing on those.",
-        "I'd know it anywhere. Where did you find them?"
+        "That's his writing on those. I'd know it anywhere. Where did you find them?"
       ],
       "exchanges": [
         {
           "prompt": "Here. They're yours.",
           "reply": [
-            "That's every week. He wrote every week.",
-            "None of it ever came. I thought he'd stopped.",
-            "He hadn't. Thank you."
+            "That's every week. He wrote every week. None of it ever came. I thought he'd stopped. He hadn't. Thank you."
           ]
         },
         {
           "prompt": "What happened to him?",
           "reply": [
-            "His unit went quiet near the end of the fighting.",
-            "They told us that much and nothing else. I stopped asking."
+            "His unit went quiet near the end of the fighting. They told us that much and nothing else. I stopped asking."
           ]
         },
         {
           "prompt": "Will you be all right?",
-          "reply": ["Ask me once I've read them."]
+          "reply": [
+            "Ask me once I've read them."
+          ]
         }
       ],
       "_talk": "The menu lists exchanges 1 to 3 ABOVE the closer (his play, 2026-10-13), so she sees the letters in the greeting and every question works before the hand-over; the hand-over is the last option, where it reads naturally. Exchange 0 ends the talk, takes the letters and the note, sets stage 100. Voiced: no names, no places. ElevenLabs 'Lucy' (american), heard in game 2026-10-13."

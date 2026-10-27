@@ -77,16 +77,13 @@
         {
           "prompt": "I'll get your cargo back.",
           "reply": [
-            "Water filters, one crate.",
-            "Somebody's been waiting a week to drink without boiling it first.",
-            "Don't bring it back to me. Take it where it was going."
+            "Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going."
           ]
         },
         {
           "prompt": "What happened?",
           "reply": [
-            "Four of them. Very polite until they weren't.",
-            "They took the crate and left me the ship, which I suppose was kind of them."
+            "Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."
           ]
         },
         {
@@ -98,8 +95,7 @@
         {
           "prompt": "Describe the one in charge.",
           "reply": [
-            "Tall. A scar through one eyebrow. Laughed at his own jokes.",
-            "If he's worth something to you, take that as well. I won't miss him."
+            "Tall. A scar through one eyebrow. Laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him."
           ],
           "perk": "BackgroundBountyHunter"
         }
@@ -133,30 +129,25 @@
         ]
       },
       "greeting": [
-        "Is that a filter crate? Tell me that's a filter crate.",
-        "We've been boiling every drop for a week."
+        "Is that a filter crate? Tell me that's a filter crate. We've been boiling every drop for a week."
       ],
       "exchanges": [
         {
           "prompt": "It's your filters. The hauler sent them on.",
           "reply": [
-            "She's all right? Good.",
-            "I'll have these in by tonight.",
-            "First glass I don't have to wait for, I'm raising it to her."
+            "She's all right? Good. I'll have these in by tonight. First glass I don't have to wait for, I'm raising it to her."
           ]
         },
         {
           "prompt": "How bad has it been?",
           "reply": [
-            "The old ones clogged.",
-            "You can drink what comes out, if you boil it first and don't look at it."
+            "The old ones clogged. You can drink what comes out, if you boil it first and don't look at it."
           ]
         },
         {
           "prompt": "Is it just you here?",
           "reply": [
-            "Me and six others.",
-            "Six others who've each told me how to fix the pump."
+            "Me and six others. Six others who've each told me how to fix the pump."
           ]
         }
       ],
@@ -170,8 +161,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "I've been jumped.",
-    "I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it."
+    "I've been jumped. I'm fine, the ship's fine. The cargo isn't, and somebody's waiting on it."
   ],
   "_speech": "Her voice on the radio first, then in person. Voice is 05a's (wCizWKvnaS3LOIUwHo98), used once so far, so this is not Isla; his ear decides. No names, no places, no currency."
 }

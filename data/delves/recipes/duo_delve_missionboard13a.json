@@ -49,8 +49,7 @@
       "objective": "Stop the courier at the <Place>",
       "journal": "The courier at the <Place> is dead. Her orders are coded for the site's own terminal.",
       "say": [
-        "Got her? Good.",
-        "Her orders will be coded. Their terminal can read them, if you can get to it."
+        "Got her? Good. Her orders will be coded. Their terminal can read them, if you can get to it."
       ]
     },
     {
@@ -61,8 +60,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Terminal",
       "say": [
-        "Reinforcements? At the door, on the hour?",
-        "Then you'd better be at the door on the hour."
+        "Reinforcements? At the door, on the hour? Then you'd better be at the door on the hour."
       ]
     },
     {
@@ -79,8 +77,7 @@
       "objective": "Meet the reinforcements at the entrance",
       "journal": "I caught the courier at the <Place>, read her orders, and was waiting at the door when the reinforcements they promised came down.",
       "say": [
-        "Was that them? All of them?",
-        "Then the orders were right, and nobody's left to follow them."
+        "Was that them? All of them? Then the orders were right, and nobody's left to follow them."
       ],
       "reward": "med"
     }
@@ -91,9 +88,7 @@
     "elevenlabs": "SAz9YHcvj6GT2YYXdXww"
   },
   "broadcast": [
-    "You're at the site?",
-    "Their courier's going through there with orders. Stop her, and find out what they say.",
-    "Whatever's coming, I'd rather you were ready for it."
+    "You're at the site? Their courier's going through there with orders. Stop her, and find out what they say. Whatever's coming, I'd rather you were ready for it."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

@@ -48,8 +48,7 @@
       "name": "Outpost Alarm",
       "_model": "The field terminal, approved, as 16a. A siren or a floodlight mast would say it better; Kim's shelf.",
       "say": [
-        "That's the alarm. Everybody's inside.",
-        "The Ashta will have heard it too. They always come when it goes off."
+        "That's the alarm. Everybody's inside. The Ashta will have heard it too. They always come when it goes off."
       ]
     },
     {
@@ -72,8 +71,7 @@
       "revealObjective": "Kill the Ashta",
       "defend": 1,
       "say": [
-        "That's the pack gone, back out into the grass.",
-        "Ashta were hunting this ground long before anyone built a wall on Akila. They haven't forgotten it."
+        "That's the pack gone, back out into the grass. Ashta were hunting this ground long before anyone built a wall on Akila. They haven't forgotten it."
       ],
       "reward": "med"
     }
@@ -84,9 +82,7 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "You made it out past the walls? Good. Get the alarm going so everyone gets inside.",
-    "The Ashta come in from the long grass, and they come fast.",
-    "The Rangers can't get out here till tomorrow. Tonight it's us and you."
+    "You made it out past the walls? Good. Get the alarm going so everyone gets inside. The Ashta come in from the long grass, and they come fast. The Rangers can't get out here till tomorrow. Tonight it's us and you."
   ],
   "_speech": "The outpost's lead, steady, has done this before. Sarah (Mature, Reassuring, Confident), in two recipes; his ear decides. Narrow, so places, factions and the creature may be said aloud (his exemption, 2026-10-26)."
 }

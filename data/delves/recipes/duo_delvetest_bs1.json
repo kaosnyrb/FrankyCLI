@@ -36,8 +36,7 @@
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "name": "Navigation Satellite",
       "say": [
-        "There it is. It's broadcasting again.",
-        "Every approach just got a lot less exciting. Thank you."
+        "There it is. It's broadcasting again. Every approach just got a lot less exciting. Thank you."
       ],
       "_say": "Jessica's 26a closing line, verbatim (rung 2, his \"go\" 2026-10-26 09:24). Her beat message is not carried: the activator's script shows its own.",
       "reward": "med"
@@ -50,9 +49,7 @@
     "_recast": "Roger, 2026-10-26, his \"yeah put rodger in\": Katie X (MzqUf1HbJ8UmQ0wUsx2p) was ruled out by his ear (\"a bit stilted and robotic\", voices.md). Roger is the one Delve voice he has confirmed in game (Relay Control, 09a)."
   },
   "broadcast": [
-    "You're out at the satellite? Good.",
-    "It went silent three days ago, and pilots have been landing on guesswork ever since.",
-    "Whatever's wrong is on the satellite itself. Nothing we send from down here gets through."
+    "You're out at the satellite? Good. It went silent three days ago, and pilots have been landing on guesswork ever since. Whatever's wrong is on the satellite itself. Nothing we send from down here gets through."
   ],
   "_speech": "Jessica's 26a speaker and broadcast, verbatim. The broadcast plays within 1500 m of the satellite (the template's arrival)."
 }

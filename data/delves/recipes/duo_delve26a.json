@@ -17,7 +17,9 @@
     "remote": true,
     "theme": {
       "require": [],
-      "exclude": ["LocTypeTest"]
+      "exclude": [
+        "LocTypeTest"
+      ]
     },
     "_theme": "A dungeon: the boss marker is the only stop, so any place carrying one can draw it. ⚠ Waves inside an interior are new (every hold so far was outdoors): they spawn 30 to 100 m from him snapped to navmesh, which indoors may be another room. His play decides; the stuck guard lets a wave go at 180 s either way."
   },
@@ -33,8 +35,7 @@
       "journal": "The raiders' boss at the <Place> had the freighter's nav core. I took it off him. Then a ship set down outside, and the rest of his crew came in after it.",
       "item": "Freighter Nav Core",
       "say": [
-        "That's my core? Good.",
-        "Hang on. Something's just set down outside. That'll be the rest of them, and they'll want it back."
+        "That's my core? Good. Hang on. Something's just set down outside. That'll be the rest of them, and they'll want it back."
       ]
     },
     {
@@ -44,11 +45,17 @@
       "revealObjective": "Stop them taking the core",
       "journal": "Raiders at the <Place> had a freighter's nav core. I took it off their boss, and when the rest of his crew came back for it, I kept it. Her captain can fly again.",
       "waves": 3,
-      "size": [3, 5],
-      "style": ["squad", "squad", "horde"],
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
       "say": [
-        "That's the last of them? Good.",
-        "Payment's on its way. I'll send someone for the core. Don't sell it."
+        "That's the last of them? Good. I'll send someone for the core. Don't sell it, I'll know."
       ],
       "reward": "med"
     }
@@ -59,9 +66,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "They boarded us, took what they could carry, and the nav core with it.",
-    "Without that core my ship's a very expensive tent.",
-    "Their boss has it. Get it back and I'll make it worth your while."
+    "They boarded us, took what they could carry, and the nav core with it. Without that core my ship's a very expensive tent. Their boss has it. Get it back before they work out what it's worth."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is remote05b's 'Daniel, Steady Broadcaster', used once so far; his ear decides."
 }

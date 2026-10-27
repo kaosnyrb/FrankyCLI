@@ -48,8 +48,7 @@
       "objective": "Defeat the occupiers' leader at the <Place>",
       "journal": "The occupiers' leader at the <Place> is dead. Her shipment is still staged to go.",
       "say": [
-        "She's down? Then the shipment's next.",
-        "Lock it at the loading terminal before anyone else can send it."
+        "She's down? Then the shipment's next. Lock it at the loading terminal before anyone else can send it."
       ]
     },
     {
@@ -60,8 +59,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Loading Terminal",
       "say": [
-        "It's locked? Good.",
-        "And now whoever was coming to collect it is going to be annoyed. They're nearly there."
+        "It's locked? Good. And now whoever was coming to collect it is going to be annoyed. They're nearly there."
       ]
     },
     {
@@ -79,8 +77,7 @@
         "horde"
       ],
       "say": [
-        "That's the last of them.",
-        "We'll have it secured within the hour. Well done."
+        "That's the last of them. We'll have it secured within the hour. Well done."
       ],
       "reward": "med"
     }
@@ -91,9 +88,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "You're at the site?",
-    "There's a shipment in there that's meant to leave tonight. It doesn't.",
-    "Lock it at the loading terminal."
+    "You're at the site? There's a shipment in there that's meant to leave tonight. It doesn't. Lock it at the loading terminal."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

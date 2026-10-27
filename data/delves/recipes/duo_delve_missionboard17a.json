@@ -49,8 +49,7 @@
       "objective": "Defeat the occupiers' leader at the <Place>",
       "journal": "The occupiers' leader at the <Place> is dead. She kept the payroll close.",
       "say": [
-        "Is that her? Good.",
-        "The payroll will be somewhere she could keep an eye on it."
+        "Is that her? Good. The payroll will be somewhere she could keep an eye on it."
       ]
     },
     {
@@ -84,29 +83,25 @@
         ]
       },
       "greeting": [
-        "You came out the right door. Is that our payroll?",
-        "Forty people have been working on a promise for a month."
+        "You came out the right door. Is that our payroll? Forty people have been working on a promise for a month."
       ],
       "exchanges": [
         {
           "prompt": "Every credit. Here.",
           "reply": [
-            "All of it? You didn't take a cut?",
-            "Then I'm buying you a drink, out of my own share. Thank you."
+            "All of it? You didn't take a cut? Then I'm buying you a drink, out of my own share. Thank you."
           ]
         },
         {
           "prompt": "Why not just pay them again?",
           "reply": [
-            "With what? That case was the money.",
-            "The owners pay once. They were very clear about that."
+            "With what? That case was the money. The owners pay once. They were very clear about that."
           ]
         },
         {
           "prompt": "What will they do with it?",
           "reply": [
-            "Rent, mostly. Food. Somebody's got a wedding.",
-            "And then we go back to work, which I'm told is the point."
+            "Rent, mostly. Food. Somebody's got a wedding. And then we go back to work, which I'm told is the point."
           ]
         }
       ],
@@ -120,8 +115,7 @@
     "elevenlabs": "IKne3meq5aSn9XLyUdCD"
   },
   "broadcast": [
-    "You're at the plant? I'm outside, by the way in.",
-    "They took our pay when they took the place. Get it back off whoever's in charge in there."
+    "You're at the plant? I'm outside, by the way in. They took our pay when they took the place. Get it back off whoever's in charge in there."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

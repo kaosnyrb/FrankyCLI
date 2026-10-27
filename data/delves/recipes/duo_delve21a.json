@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_delve21a",
   "template": "board",
@@ -15,8 +15,12 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "A quiet site, as 20a: nobody shoots, the job is the burning."
   },
@@ -42,8 +46,7 @@
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Cache of Banned Texts",
       "say": [
-        "Destruction confirmed.",
-        "Your report is filed. There is nothing further on this contract."
+        "Destruction confirmed. Your report is filed. There is nothing further on this contract."
       ],
       "reward": "easy"
     }
@@ -54,9 +57,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Contract confirmed.",
-    "The material is to be destroyed on site.",
-    "Do not read it, remove it or copy it."
+    "Contract confirmed. The material is to be destroyed on site. Do not read it, remove it or copy it."
   ],
   "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Recast 2026-10-22 off Matilda (his: \"very robotic\") to ElevenLabs' 'Alice, Clear, Engaging Educator', british: clear and official without the robot. Alice then ruled out of the whole cast by his ear 2026-10-27 (\"sounds like a phone system instead of a person\"); recast to Annie K, heard in game on 32a. His ear decides."
 }

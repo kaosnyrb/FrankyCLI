@@ -18,12 +18,20 @@
   ],
   "place": {
     "_who": "Eliza's placeholder list, 2026-10-13, his playtest 'there were no workers'; the list is Jessica's or his to swap.",
-    "who": {"kind": "workers", "list": "duo_GangMembersList_Civ_Construx", "min": 2, "max": 4},
+    "who": {
+      "kind": "workers",
+      "list": "duo_GangMembersList_Civ_Construx",
+      "min": 2,
+      "max": 4
+    },
     "theme": {
       "require": [
         "LocTypeOE_NonHostile"
       ],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "Testcase 01's delivery rule, unchanged on purpose: people who are waiting on the relay have to be there. LocTypeOE_NonHostile, pool 62 when measured 2026-09-24.",
     "leash": "duo_samemapdistance",
@@ -70,13 +78,15 @@
       "_relaydish": "2026-10-08 09:3x, his go: the FIRST kitbash the office built without NifSkope (spike office/spikes/2026-10-08-kitbash-without-nifskope.md): his machinebase console with a quarter-scale vanilla SatelliteDish_A_01 pasted at 2.2 m, turned 90. Tree bounds z 0.00..3.19, STANDS. Loose in Steam Data for the test; NOT yet in either archive, so it must be packed before a release.",
       "_name": "PLACEHOLDER, Jessica's pick 2026-10-02 off `gen_inspect static Satellite`: a free-standing tripod dish (RadarDish01 and the CommRadarDish stack were the alternatives). Never seen in game as an activator; his eye decides whether it reads and sits right.",
       "say": [
-        "The dish is no good without the transmitter, and someone's walked off with it.",
-        "Whoever took it is trying to sell it. Get it back."
+        "The dish is no good without the transmitter, and someone's walked off with it. Whoever took it is trying to sell it. Get it back."
       ]
     },
     {
       "type": "recover",
-      "outside": [750, 2000],
+      "outside": [
+        750,
+        2000
+      ],
       "_outside": "His 2026-10-19 playtest: 'the spacers spawn in the site'. The thief and his gang out on open ground from the far-edge marker at a random angle. 150 to 300 (the probe's tested range) played 2026-10-19; widened to 750 to 2000 on 2026-10-20, his 'want to increase the range to 750 - 2000'. Placed that far when the step began he fell from the sky on approach (the ground was not loaded), so since 2026-10-20 the step places a SPOT out there and the thief is spawned at it when the player comes within 250 (duo_delve_spawnnear, his 'yeah C').",
       "at": "RETravelB1LocRef",
       "objective": "Recover the Relay Transmitter",
@@ -95,8 +105,7 @@
       "objective": "Bring the Relay Online",
       "journal": "A comms relay bound for the <Place> was shipped in two crates, and neither arrived whole. I found the dish, took the transmitter back from the thieves and brought the relay online.",
       "say": [
-        "We're live.",
-        "Half the crew's already queuing to call home. The other half are pretending they aren't."
+        "We're live. Half the crew's already queuing to call home. The other half are pretending they aren't."
       ]
     }
   ],

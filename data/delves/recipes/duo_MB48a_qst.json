@@ -50,8 +50,7 @@
       "objective": "Clear the predators out of the <Place>",
       "journal": "The people at the <Place> were already dead when I got there, and the predators were still in among them. They're gone now, so somebody can go in and see to the dead.",
       "say": [
-        "It's done? Then I'll get some people together and go up.",
-        "Thank you for going in first. None of us wanted to."
+        "It's done? Then I'll get some people together and go up. Thank you for going in first. None of us wanted to."
       ],
       "reward": "med"
     }
@@ -62,9 +61,7 @@
     "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
   },
   "broadcast": [
-    "You're at the site? Then you can see more than I can.",
-    "They stopped answering three days ago. We heard the animals at night after that.",
-    "Clear out whatever's still in there. Somebody has to go in and see to them."
+    "You're at the site? Then you can see more than I can. They stopped answering three days ago. We heard the animals at night after that. Clear out whatever's still in there. Somebody has to go in and see to them."
   ],
   "_speech": "A neighbour from further along, quiet, has guessed what you'll find and doesn't say it. Killian, his ear decides. No names, places, factions or currency."
 }

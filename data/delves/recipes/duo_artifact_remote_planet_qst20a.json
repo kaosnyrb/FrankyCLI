@@ -71,8 +71,7 @@
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Survey Uplink Beacon",
       "say": [
-        "Readings received. All three.",
-        "That'll keep the analysts arguing for a month."
+        "Readings received. All three. That'll keep the analysts arguing for a month."
       ]
     }
   ],
@@ -82,8 +81,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "We put three sensors in and lost the crew's ride home before anyone could read them.",
-    "Get the readings off them and send them up. That's months of work sitting in the ground."
+    "We put three sensors in and lost the crew's ride home before anyone could read them. Get the readings off them and send them up. That's months of work sitting in the ground."
   ],
   "_speech": "Radio rules: no names, no places, one clause where it can be. Voice is ElevenLabs' 'Annie K, Calm, Grounded Narrator', NOT yet heard in game (voices.md); his ear decides.",
   "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."

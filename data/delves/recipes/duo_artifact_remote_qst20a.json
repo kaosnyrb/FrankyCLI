@@ -36,8 +36,7 @@
       "_model": "STAND-IN: the only object proven in orbit.",
       "name": "Flight Recorder",
       "say": [
-        "You've got it? Then we'll finally know.",
-        "The crew will be glad. They've been telling the same story to anyone who'll listen."
+        "You've got it? Then we'll finally know. The crew will be glad. They've been telling the same story to anyone who'll listen."
       ],
       "reward": "med"
     }
@@ -48,9 +47,7 @@
     "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
   },
   "broadcast": [
-    "If you're near it, you'll pick up the ping. That's the recorder.",
-    "The crew got out in the escape pods. The recorder ejected when the ship broke up.",
-    "They swear they did nothing wrong. The recorder's the only thing that can say so."
+    "If you're near it, you'll pick up the ping. That's the recorder. The crew got out in the escape pods. The recorder ejected when the ship broke up. They swear they did nothing wrong. The recorder's the only thing that can say so."
   ],
   "_speech": "The ship's owner, who believes her crew and wants proof. Bella (Professional, Bright, Warm), in one recipe so far; his ear decides. No names, places, factions or currency.",
   "_wording": "2026-10-26/27, his catch: 'The crew got off in the pods. The ship didn't.' did not make sense. Rewritten so the recorder EJECTED and floats alone, which also matches the placed object (Kim's S3, a beacon on a hull plate) and stops every line implying a wreck nobody placed."

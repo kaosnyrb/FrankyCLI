@@ -28,9 +28,7 @@
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
   "broadcast": [
-    "Bit of bother. Raiders have dug in on our site, and they're stripping it for parts.",
-    "Their boss is the only reason they're still there.",
-    "Deal with the boss and the rest will scatter."
+    "Bit of bother. Raiders have dug in on our site, and they're stripping it for parts. Their boss is the only reason they're still there. Deal with the boss and the rest will scatter."
   ],
   "beats": [
     {
@@ -50,8 +48,7 @@
       "objective": "Defeat the raid leader at the <Place>",
       "journal": "The raid leader at the <Place> is dead. Whoever's left won't hold the site for long without them.",
       "say": [
-        "Boss is down.",
-        "Watch them scatter. Never gets old, that."
+        "Boss is down. Watch them scatter. Never gets old, that."
       ]
     }
   ],

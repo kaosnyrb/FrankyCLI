@@ -72,8 +72,7 @@
         "horde"
       ],
       "say": [
-        "Pressure's coming up on both.",
-        "That's lovely. You'd make a decent engineer, if you ever want a worse job."
+        "Pressure's coming up on both. That's lovely. You'd make a decent engineer, if you ever want a worse job."
       ],
       "reward": "med"
     }
@@ -84,9 +83,7 @@
     "elevenlabs": "GZ4PpFJV8ikEGUtBrjK7"
   },
   "broadcast": [
-    "You're at the site? My toolbox is by the door.",
-    "Two pumps inside, both dead. Fix them and then give the system time to bleed.",
-    "And don't rush it. A rushed pump is a broken pump."
+    "You're at the site? My toolbox is by the door. Two pumps inside, both dead. Fix them and then give the system time to bleed. And don't rush it. A rushed pump is a broken pump."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

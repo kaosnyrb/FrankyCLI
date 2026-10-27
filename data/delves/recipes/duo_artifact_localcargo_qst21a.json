@@ -40,8 +40,7 @@
     {
       "type": "pickup",
       "say": [
-        "They're coming back for it.",
-        "Hang on to that case."
+        "They're coming back for it. Hang on to that case."
       ],
       "_say": "Moved here from the hold beat 2026-10-12 (Eliza): a beat's say plays when its stage is SET, and the hold's is set when the third wave dies, so the warning would have come after the danger. Beat 1's stage is where wave 1 spawns, as 09a's \"Keep an eye out\" sits on the beat before its hold. Words unchanged.",
       "at": "REMarkerMediumLocRef",
@@ -75,8 +74,7 @@
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Crew Drop Beacon",
       "say": [
-        "Got it.",
-        "That's a whole season's work in one case. I owe you a drink."
+        "Got it. That's a whole season's work in one case. I owe you a drink."
       ]
     }
   ],
@@ -86,9 +84,7 @@
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
   "broadcast": [
-    "We got run off and left our samples behind.",
-    "We can't go back in for it. Not with them out there.",
-    "Watch yourself. They didn't go far."
+    "We got run off and left our samples behind. We can't go back in for them. Not with them out there. Watch yourself. They didn't go far."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Chris, Charming, Down-to-Earth', NOT yet heard in game (voices.md); his ear decides.",
   "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."

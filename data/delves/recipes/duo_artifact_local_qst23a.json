@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_local_qst23a",
   "template": "beats",
@@ -59,8 +59,7 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "A crew's come down near us, armed, and they're on their way in.",
-    "I've locked the night shift in the stores. If that crew reaches the door, it's the night shift who pay for it, so get here first."
+    "A crew's come down near us, armed, and they're on their way in. I've locked the night shift in the stores. If that crew reaches the door, it's the night shift who pay for it, so get here first."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('a ship', never whose). Voice is remote02a's 'Sarah' (mature, confident), used once so far; his ear decides."
 }

@@ -61,31 +61,25 @@
         ]
       },
       "greeting": [
-        "They took my drill as well, and I couldn't care less about the drill.",
-        "Go on, then. Did they still have them?"
+        "They took my drill as well, and I couldn't care less about the drill. Go on, then. Did they still have them?"
       ],
       "exchanges": [
         {
           "prompt": "I found your claim papers.",
           "reply": [
-            "That's them.",
-            "Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole.",
-            "Thank you."
+            "That's them. Eleven years of survey work, and it fits in a case. Without this I'm just a man standing in a hole. Thank you."
           ]
         },
         {
           "prompt": "You could have gone in yourself.",
           "reply": [
-            "I did.",
-            "Got as far as the door, heard them laughing, and walked back out.",
-            "I'm not proud of it."
+            "I did. Got as far as the door, heard them laughing, and walked back out. I'm not proud of it."
           ]
         },
         {
           "prompt": "Why are papers worth more than the drill?",
           "reply": [
-            "A drill digs anywhere.",
-            "These say where I'm allowed to."
+            "A drill digs anywhere. These say where I'm allowed to."
           ]
         }
       ],
@@ -100,9 +94,7 @@
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
   "broadcast": [
-    "They hit my camp and took the lot. Most of it I can replace.",
-    "There's a case of claim papers in there I can't.",
-    "Without those, the ground I've been working belongs to whoever files first."
+    "They hit my camp and took the lot. Most of it I can replace. There's a case of claim papers in there I can't. Without those, the ground I've been working belongs to whoever files first."
   ],
   "_speech": "ElevenLabs 'Chris, charming, down-to-earth' (american, middle aged): NOT heard in game yet, his ear decides. Chosen to sound nothing like 11a's Isla."
 }

@@ -50,29 +50,25 @@
         ]
       },
       "greeting": [
-        "You're the contractor? Wonderful.",
-        "My uncle left me this place. He did not mention the people with guns."
+        "You're the contractor? Wonderful. My uncle left me this place. He did not mention the people with guns."
       ],
       "exchanges": [
         {
           "prompt": "I'll get your deed.",
           "reply": [
-            "It's in the safe, inside.",
-            "Whoever's in charge in there will have the safe. They always have the safe, don't they?"
+            "It's in the safe, inside. Whoever's in charge in there will have the safe. They always have the safe, don't they?"
           ]
         },
         {
           "prompt": "Did you know your uncle well?",
           "reply": [
-            "I met him twice. He gave me a calculator both times.",
-            "I think that's why he left me a factory."
+            "I met him twice. He gave me a calculator both times. I think that's why he left me a factory."
           ]
         },
         {
           "prompt": "What will you do with it?",
           "reply": [
-            "Run it, apparently.",
-            "I've bought a book."
+            "Run it, apparently. I've bought a book."
           ]
         }
       ],
@@ -95,8 +91,7 @@
       "objective": "Deal with whoever runs the <Place> now",
       "journal": "Whoever ran the <Place> is dead. The safe is somewhere close.",
       "say": [
-        "Was that the one in charge? Oh, good.",
-        "I'll add that to the notes. Under 'staff'."
+        "Was that the one in charge? Oh, good. I'll add that to the notes. Under 'staff'."
       ]
     },
     {
@@ -112,8 +107,7 @@
         "text": "The deed, folded in three, and a calculator. Taped to the calculator: for the next one."
       },
       "say": [
-        "You've got it? Then I own a factory.",
-        "And a calculator. I have three now."
+        "You've got it? Then I own a factory. And a calculator. I have three now."
       ],
       "reward": "med"
     }
@@ -124,9 +118,7 @@
     "elevenlabs": "l4Coq6695JDX9xtLqXDE"
   },
   "broadcast": [
-    "Hello? Is this the contractor?",
-    "I'm outside. I'm not going in there, I'm wearing my good shoes.",
-    "Come and find me first."
+    "Hello? Is this the contractor? I'm outside. I'm not going in there, I'm wearing my good shoes. Come and find me first."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

@@ -26,9 +26,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Mercenaries have taken the old military post, and they're raiding our supply runs.",
-    "We don't have the guns to go in after them.",
-    "Their commander holds the contract. End it."
+    "Mercenaries have taken the old military post, and they're raiding our supply runs. We don't have the guns to go in after them. Their commander holds the contract. End it."
   ],
   "beats": [
     {
@@ -48,8 +46,7 @@
       "objective": "Defeat the Ecliptic commander at the <Place>",
       "journal": "The Ecliptic commander at the <Place> is dead. With nobody left to pay them, the rest won't stay.",
       "say": [
-        "Commander's down.",
-        "No commander, no contract."
+        "Commander's down. No commander, no contract."
       ]
     }
   ],

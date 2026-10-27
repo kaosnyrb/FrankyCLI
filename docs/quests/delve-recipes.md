@@ -27,7 +27,9 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 dotnet run -- gen_delve build <id> --dry --emit <dir>   the would-be plugin and the emitted model, to <dir> only
 ```
 
-**And for every recipe with speech: `python scripts/delves/voice_check.py`** (or an id, or `--rev` for the control). It grades every SPOKEN line against his by-ear catches: PAY (a line that promises pay; his "I know i'll be paid", 2026-10-27), DASH (an em dash) and NOUN (a faction, place or currency outside a NARROW Delve, his total-conversion rule). Exit 1 on any flag. It cannot see a LONE line (a fragment that only works after the line before); read the lines aloud. Jessica's, 2026-10-27, on his "Feels like we need a linter here".
+**⭐ ONE TAKE BY DEFAULT (his, 2026-10-21 and 2026-10-27: *"we've sharded our lines too hard"*).** ElevenLabs renders each response ALONE, with no context, so a short take is delivered flat. A spoken field is ONE response unless it will not fit in 250 characters; a turn in the scene that fits is still one take. The sweep of 2026-10-27 merged 260 fields in 77 recipes (every line's audio regenerates). `voice_check` SHARD enforces it.
+
+**And for every recipe with speech: `python scripts/delves/voice_check.py`** (or an id, or `--rev` for the control). It grades every SPOKEN line against his by-ear catches: SHARD (a field split into takes that would fit in one), PAY (a line that promises pay; his "I know i'll be paid", 2026-10-27), DASH (an em dash) and NOUN (a faction, place or currency outside a NARROW Delve, his total-conversion rule). Exit 1 on any flag. It cannot see a LONE line (a fragment that only works after the line before); read the lines aloud. Jessica's, 2026-10-27, on his "Feels like we need a linter here".
 
 **Then a MANUAL step for any recipe with a talk beat:** `python scripts/delves/talk_check.py <id>` (or no id for all,
 `--flagged` for only the menus it flags). It prints what the player is sure to have heard before each menu (the

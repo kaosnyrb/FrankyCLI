@@ -1,9 +1,8 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_local_qst28a",
   "template": "beats",
   "deal": "duo_MS_ArtifactMap_Local_LowChance_Node",
-  "_deal": "His pick, 2026-10-26, after the rename: built and dealt by no pool until then; added by gen_delve move from '-' (no pool), no rebuild.",
   "_deal": "No deal yet: started by hand for his test. RARE when dealt, his 2026-10-21 15:18: \"think rarer, the ships take a while to land\". The Local pool has no _Rare node yet (only LocalCargoNode has one), so it needs gen_delve rare on duo_MS_ArtifactMap_LocalNode first; Eliza's.",
   "author": "eliza (build); words jessica, as Vance Okonkwo-Reyes",
   "source": "his 2026-10-21 09:28: \"Roll back to the old ESM then build a new delve mission with the landings\", after the strike team by ship (A1) on qst11a/b/d was rolled back. His A1: a friendly team lands and holds the entrance.",
@@ -61,8 +60,7 @@
       "journal": "The Spacers who dropped onto the <Place> are dead. The UC team is holding the site until its owners come back.",
       "reward": "med",
       "say": [
-        "That's the last of them. Good shooting out there, honestly, I owe you one.",
-        "We'll hold it from here until the owners are back. Go on, you've earned the quiet."
+        "That's the last of them. Good shooting out there, honestly, I owe you one. We'll hold it from here until the owners are back. Go on, you've earned the quiet."
       ]
     }
   ],
@@ -72,8 +70,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Ground team, this is the drop lead. We're on our way to you now, so keep your head up and your weapon out.",
-    "They're coming in by pod, and they'll be shooting before the doors are open. Hold them at the site and we'll be right behind you."
+    "Ground team, this is the drop lead. We're on our way to you now, so keep your head up and your weapon out. They're coming in by pod, and they'll be shooting before the doors are open. Hold them at the site and we'll be right behind you."
   ],
   "_speech": "Radio rules: no names, places, factions or currency; a security team is a role. Voice is 26a's and remote05b's (a militia and a captain, the same register), used twice so far; his ear decides."
 }

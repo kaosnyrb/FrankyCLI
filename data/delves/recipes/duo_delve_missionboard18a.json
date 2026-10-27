@@ -70,8 +70,7 @@
         "text": "A cheap timer, the kind you buy by the dozen. Somebody scratched a work order number on the back, out of habit, so the job could be billed."
       },
       "say": [
-        "A timer? With their work order on it?",
-        "That is the stupidest thing I've seen this year, and I've seen this year."
+        "A timer? With their work order on it? That is the stupidest thing I've seen this year, and I've seen this year."
       ],
       "reward": "med"
     }
@@ -82,9 +81,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "You're at the site?",
-    "Fire like that doesn't start in one place. Find all of them.",
-    "And if there's anything that looks like it was put there, bring it to me."
+    "You're at the site? Fire like that doesn't start in one place. Find all of them. And if there's anything that looks like it was put there, bring it to me."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Recast 2026-10-26 from Katie X (ruled out by his ear) to Annie K, one of the two voices heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

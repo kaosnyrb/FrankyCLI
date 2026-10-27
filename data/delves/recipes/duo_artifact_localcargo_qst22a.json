@@ -37,8 +37,12 @@
     "_reach": "His 2026-10-19 playtest: 'distance between Pois is a lot'. 4,000, as 08a (10-13).",
     "second": {
       "theme": {
-        "require": ["LocTypeOE_ThemeNaturalKeyword"],
-        "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+        "require": [
+          "LocTypeOE_ThemeNaturalKeyword"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
       },
       "_theme": "Eliza's, 2026-10-13: natural, so it can never be the main place (which excludes natural): the load was lost out in the open, at a different POI as he asked."
     }
@@ -57,8 +61,7 @@
       "item": "Payroll Ledger",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
-        "That's the ledger.",
-        "Take it to the site. The pay went ahead to their locker, so once it's signed for, we're done."
+        "That's the ledger. Take it to the site. The pay went ahead to their locker, so once it's signed for, we're done."
       ],
       "model": "Meshes\\ccs\\consignmentcrate01.nif",
       "name": "Courier Crate",
@@ -71,9 +74,7 @@
       "objective": "Sign for the pay at the <Place>",
       "journal": "The pay locker at the <Place> had been forced and emptied. Whoever took it can't have gone far.",
       "say": [
-        "The locker's been forced.",
-        "The ledger's here. The pay isn't. Somebody knew it was coming.",
-        "Go and get it back."
+        "The locker's been forced. The ledger's here. The pay isn't. Somebody knew it was coming. Go and get it back."
       ],
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Pay Locker"
@@ -86,8 +87,7 @@
       "item": "Crew Pay Case",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
-        "You've got it? Good.",
-        "Put it in the locker and sign the ledger. I'll close the docket."
+        "You've got it? Good. Put it in the locker and sign the ledger. I'll close the docket."
       ]
     },
     {
@@ -104,9 +104,7 @@
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
   "broadcast": [
-    "This is dispatch.",
-    "A crew on site haven't been paid this week. The courier with their ledger never arrived.",
-    "Find where it stopped."
+    "This is dispatch. A crew on site haven't been paid this week. The courier with their ledger never arrived. Find where it stopped."
   ],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
 }

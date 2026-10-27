@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_delve20a",
   "template": "board",
@@ -20,8 +20,12 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
-      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "A quiet (non-hostile) site, so nobody shoots and the job stays quiet; the array is unmanned. Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12)."
   },
@@ -32,8 +36,7 @@
   },
   "recap": "The Ecliptic scanners at the <Place> are all still running, and all three are wrong. Whatever the mercenaries think is happening on <Planet>, it isn't.",
   "recapSay": [
-    "Their camp's just logged three empty valleys and a dust storm.",
-    "We moved everything this morning. Nobody so much as looked up."
+    "Their camp's just logged three empty valleys and a dust storm. We moved everything this morning. Nobody so much as looked up."
   ],
   "beats": [
     {
@@ -70,9 +73,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "You took our job? Good.",
-    "Remember, don't break anything.",
-    "A broken scanner gets fixed. A scanner that's wrong gets believed."
+    "You took our job? Good. Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed."
   ],
   "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency."
 }

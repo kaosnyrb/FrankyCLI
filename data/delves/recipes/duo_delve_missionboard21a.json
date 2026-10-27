@@ -49,8 +49,7 @@
       "objective": "Clear the occupiers from the <Place>",
       "journal": "Whoever was running the <Place> is dead. The night-shift worker is somewhere inside.",
       "say": [
-        "Is it quiet? Then she'll come out for a friendly voice.",
-        "Probably. She's very particular."
+        "Is it quiet? Then she'll come out for a friendly voice. Probably. She's very particular."
       ]
     },
     {
@@ -71,29 +70,25 @@
         ]
       },
       "greeting": [
-        "Oh, you're not one of them. Thank goodness.",
-        "I've been hiding since my shift started, and nobody has clocked me out."
+        "Oh, you're not one of them. Thank goodness. I've been hiding since my shift started, and nobody has clocked me out."
       ],
       "exchanges": [
         {
           "prompt": "Let's get you out.",
           "reply": [
-            "Yes. But clock me out on the way, at the door.",
-            "I've been on shift for days, and I want it on the record."
+            "Yes. But clock me out on the way, at the door. I've been on shift for days, and I want it on the record."
           ]
         },
         {
           "prompt": "How did you stay hidden?",
           "reply": [
-            "I'm the night shift. Nobody ever sees the night shift.",
-            "That's been a problem my whole career, and this week it was very useful."
+            "I'm the night shift. Nobody ever sees the night shift. That's been a problem my whole career, and this week it was very useful."
           ]
         },
         {
           "prompt": "What did you eat?",
           "reply": [
-            "Everybody's lunch.",
-            "I'll be leaving some notes of apology."
+            "Everybody's lunch. I'll be leaving some notes of apology."
           ]
         }
       ],
@@ -107,8 +102,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Shift Clock",
       "say": [
-        "Did it take? It took. Look at that number.",
-        "I am going to be very difficult about that number. Thank you."
+        "Did it take? It took. Look at that number. I am going to be very difficult about that number. Thank you."
       ],
       "reward": "med"
     }
@@ -119,8 +113,7 @@
     "elevenlabs": "54Cze5LrTSyLgbO6Fhlc"
   },
   "broadcast": [
-    "Is someone there? Don't answer if you're one of them.",
-    "I'm still inside. I'll come out when it's quiet, and not before."
+    "Is someone there? Don't answer if you're one of them. I'm still inside. I'll come out when it's quiet, and not before."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

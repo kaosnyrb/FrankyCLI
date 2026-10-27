@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_delve25a",
   "template": "board",
@@ -17,7 +17,10 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": ["LocTypeOE_NonHostile", "LocTypeOE_ThemeNaturalKeyword"]
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeNaturalKeyword"
+      ]
     },
     "_theme": "A built hostile site: where pirates keep things."
   },
@@ -51,8 +54,7 @@
       "model": "Meshes\\ccs\\salvagerstash01.nif",
       "name": "Pirate Store",
       "say": [
-        "Store's spoiled?",
-        "Then they'll go somewhere else to steal. Not our problem."
+        "Store's spoiled? Then they'll go somewhere else to steal. Not our problem."
       ],
       "reward": "med"
     }
@@ -63,9 +65,7 @@
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
   "broadcast": [
-    "Every run we lose ends up in the same place.",
-    "Clear it out and spoil what's in there.",
-    "If they've nowhere to keep it, they stop taking it."
+    "Every run we lose ends up in the same place. Clear it out and spoil what's in there. If they've nowhere to keep it, they stop taking it."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is 11b's 'Chris', still unheard; his ear decides."
 }

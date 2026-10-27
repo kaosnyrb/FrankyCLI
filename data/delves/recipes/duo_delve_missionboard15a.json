@@ -51,29 +51,25 @@
         ]
       },
       "greeting": [
-        "You took the posting? Then you know I walked out.",
-        "My discharge papers are still in there. The officer wouldn't sign them, so I signed myself out."
+        "You took the posting? Then you know I walked out. My discharge papers are still in there. The officer wouldn't sign them, so I signed myself out."
       ],
       "exchanges": [
         {
           "prompt": "I'll get your papers.",
           "reply": [
-            "They're in her office, in a case.",
-            "She'll be in there with them. She doesn't trust anyone else near paperwork."
+            "They're in her office, in a case. She'll be in there with them. She doesn't trust anyone else near paperwork."
           ]
         },
         {
           "prompt": "Why did you walk out?",
           "reply": [
-            "Because she would have kept us here until there was nobody left to keep.",
-            "I'd rather be the one who left than one of the ones who didn't."
+            "Because she would have kept us here until there was nobody left to keep. I'd rather be the one who left than one of the ones who didn't."
           ]
         },
         {
           "prompt": "What happens if you go back?",
           "reply": [
-            "Nothing good, and nothing fast.",
-            "So I'll wait here, thanks."
+            "Nothing good, and nothing fast. So I'll wait here, thanks."
           ]
         }
       ],
@@ -96,8 +92,7 @@
       "objective": "Deal with the officer",
       "journal": "The officer at the <Place> won't be keeping anyone else here. Her office is open now.",
       "say": [
-        "Is she...? Right.",
-        "Then the papers are in her office. Bring them out to me."
+        "Is she...? Right. Then the papers are in her office. Bring them out to me."
       ]
     },
     {
@@ -113,8 +108,7 @@
         "text": "Hers, on top, with the signature box empty. Under them, eleven more just like it."
       },
       "say": [
-        "You've got them? All of them?",
-        "Then I'm not a deserter any more. I'm just someone who left. Thank you."
+        "You've got them? All of them? Then I'm not a deserter any more. I'm just someone who left. Thank you."
       ],
       "reward": "med"
     }
@@ -125,8 +119,7 @@
     "elevenlabs": "oW8bn5YtBB89X2nJ0DT9"
   },
   "broadcast": [
-    "You're close? I'm outside, by the door.",
-    "I'm not going in. Come and talk to me first."
+    "You're close? I'm outside, by the door. I'm not going in. Come and talk to me first."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

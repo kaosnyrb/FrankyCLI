@@ -62,29 +62,25 @@
         ]
       },
       "greeting": [
-        "Spacers jumped my run and took the whole hold.",
-        "Tell me that's what I think it is."
+        "Spacers jumped my run and took the whole hold. Tell me that's what I think it is."
       ],
       "exchanges": [
         {
           "prompt": "I've got your strongbox.",
           "reply": [
-            "That's it. Dent in the lid and all.",
-            "Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."
+            "That's it. Dent in the lid and all. Everything I need to trade is in there. I'd have lost a month getting it again. Thank you."
           ]
         },
         {
           "prompt": "What's in it?",
           "reply": [
-            "Two years of receipts. Permit, stall number, the lot.",
-            "Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
+            "Two years of receipts. Permit, stall number, the lot. Nobody would steal it on purpose. They took the whole hold, and it was in the hold."
           ]
         },
         {
           "prompt": "Which lane did they jump you on?",
           "reply": [
-            "The slow one. You've run it too, then.",
-            "They never jump you on the fast lane. Not enough time to plan it."
+            "The slow one. You've run it too, then. They never jump you on the fast lane. Not enough time to plan it."
           ],
           "perk": "BackgroundLongHauler"
         }
@@ -101,9 +97,7 @@
     "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
   },
   "broadcast": [
-    "They hit my run and took the lot. Keep the cargo.",
-    "There's a strongbox in there with my papers. Without them I can't sell a thing.",
-    "I'd like that back."
+    "They hit my run and took the lot. Keep the cargo. There's a strongbox in there with my papers. Without them I can't sell a thing. I'd like that back."
   ],
   "_speech": "His own voice on the radio, then in person. Voice is 04a's (dgkKQcJqyy5AP0dqleUU), used once so far, chosen so this is not Isla again (four Delves already); his ear decides. No names, no places, no currency."
 }

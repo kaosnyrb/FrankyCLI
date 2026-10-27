@@ -72,8 +72,7 @@
         "horde"
       ],
       "say": [
-        "All quiet? Their run just went sailing past.",
-        "Nobody out there knows where to land now."
+        "All quiet? Their run just went sailing past. Nobody out there knows where to land now."
       ],
       "reward": "med"
     }
@@ -84,9 +83,7 @@
     "elevenlabs": "cjVigY5qzO86Huf0OWal"
   },
   "broadcast": [
-    "You're at the site?",
-    "There are three beacons in there guiding their runs in. Turn them all off.",
-    "Somebody's waiting on that delivery. They'll come and ask."
+    "You're at the site? There are three beacons in there guiding their runs in. Turn them all off. Somebody's waiting on that delivery. They'll come and ask."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

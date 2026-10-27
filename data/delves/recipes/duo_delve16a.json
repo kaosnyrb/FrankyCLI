@@ -55,23 +55,19 @@
         ]
       },
       "greeting": [
-        "You're the contractor.",
-        "Eleven minutes late.",
-        "Cells are at the drop. Two. Go."
+        "You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go."
       ],
       "exchanges": [
         {
           "prompt": "I'll get the cells.",
           "reply": [
-            "Two. Don't drop them.",
-            "Left bay first, then right. I'll have the panel open."
+            "Two. Don't drop them. Left bay first, then right. I'll have the panel open."
           ]
         },
         {
           "prompt": "Buy you a drink when you're off?",
           "reply": [
-            "Off in nine days.",
-            "Ask me then. Cells first."
+            "Off in nine days. Ask me then. Cells first."
           ]
         }
       ],
@@ -127,9 +123,7 @@
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Relay",
       "say": [
-        "Left bay. Good.",
-        "Right bay. Good.",
-        "Relay's up. Log closed. Next."
+        "Left bay. Good. Right bay. Good. Relay's up. Log closed. Next."
       ]
     }
   ],
@@ -139,9 +133,7 @@
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
   "broadcast": [
-    "Relay post needs a contractor.",
-    "Two cells to carry. Left bay, right bay.",
-    "Out."
+    "Relay post needs a contractor. Two cells to carry. Left bay, right bay. Out."
   ],
   "_speech": "Her voice on the radio, in person and at the relay. No names, no places, no flags.",
   "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."

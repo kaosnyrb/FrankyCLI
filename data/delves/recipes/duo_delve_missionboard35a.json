@@ -67,8 +67,7 @@
       },
       "_slate": "STAND-IN for an AUDIO data-slate: each entry one phase of its scene, her voice, read in order. The entries are the story; the journal and card never repeat them.",
       "say": [
-        "Got it? Don't listen to it.",
-        "Actually, listen to it if you like. It's mostly rocks."
+        "Got it? Don't listen to it. Actually, listen to it if you like. It's mostly rocks."
       ]
     },
     {
@@ -93,22 +92,19 @@
         ]
       },
       "greeting": [
-        "You found it. I honestly thought it was gone.",
-        "Did you listen to it? Everyone listens to it."
+        "You found it. I honestly thought it was gone. Did you listen to it? Everyone listens to it."
       ],
       "exchanges": [
         {
           "prompt": "Here's your diary.",
           "reply": [
-            "Thank you. Fifteen days of my life, and most of them about coffee.",
-            "I'd give you more, but you know how much coffee I had left."
+            "Thank you. Fifteen days of my life, and most of them about coffee. I'd give you more, but you know how much coffee I had left."
           ]
         },
         {
           "prompt": "I listened to it.",
           "reply": [
-            "Then you know I'm not rich.",
-            "I'll go back for the drill one day. Not soon."
+            "Then you know I'm not rich. I'll go back for the drill one day. Not soon."
           ]
         },
         {
@@ -120,8 +116,7 @@
         {
           "prompt": "How are you holding up?",
           "reply": [
-            "Ask me in a year.",
-            "Right now, a bed with walls round it is worth more than anything I dug up."
+            "Ask me in a year. Right now, a bed with walls round it is worth more than anything I dug up."
           ]
         }
       ],
@@ -135,9 +130,7 @@
     "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
   },
   "broadcast": [
-    "You're at my old claim? Good. My diary's in there somewhere.",
-    "It's small, it's scuffed, and it's full of rubbish about rocks.",
-    "Whoever's in there now won't want it. I do."
+    "You're at my old claim? Good. My diary's in there somewhere. It's small, it's scuffed, and it's full of rubbish about rocks. Whoever's in there now won't want it. I do."
   ],
   "_speech": "One woman, three ways: the diary, the radio, the conversation. Lily (Velvety Actress), in one recipe so far; his ear decides. Not narrow, so roles only aloud."
 }

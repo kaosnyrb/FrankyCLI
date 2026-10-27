@@ -37,8 +37,7 @@
       "name": "Sealed Cargo Crate",
       "item": "Signal Amplifier",
       "say": [
-        "You've got it? Good.",
-        "The satellite's close. Take it straight there."
+        "You've got it? Good. The satellite's close. Take it straight there."
       ]
     },
     {
@@ -53,8 +52,7 @@
         "text": "The amplifier slots into place. The satellite's beacon comes back on, slow and steady."
       },
       "say": [
-        "That's the signal back. Pilots can see the approach again.",
-        "Shame about the freighter. Glad something on it made it."
+        "That's the signal back. Pilots can see the approach again. Shame about the freighter. Glad something on it made it."
       ],
       "reward": "med"
     }
@@ -65,9 +63,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "That's what's left of our freighter.",
-    "The part was in a sealed crate. If anything in there survived, it's that.",
-    "Find it, then take it to the satellite."
+    "That's what's left of our freighter. The part was in a sealed crate. If anything in there survived, it's that. Find it, then take it to the satellite."
   ],
   "_speech": "The freighter's owners, so the loss is theirs and the joke at the end is a little rueful. Voice: Daniel (Steady Broadcaster), already in four recipes; his ear decides. No names, places, factions or currency."
 }

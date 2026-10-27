@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_local_qst27a",
   "template": "beats",
@@ -61,30 +61,25 @@
         ]
       },
       "greeting": [
-        "Raiders have been taking my cattle.",
-        "They come at night, take two at a time, and drive them up to their boss. He's eating them."
+        "Raiders have been taking my cattle. They come at night, take two at a time, and drive them up to their boss. He's eating them."
       ],
       "exchanges": [
         {
           "prompt": "I'll deal with their boss.",
           "reply": [
-            "Do that. His crew only take what he tells them to.",
-            "Stop him, and it stops."
+            "Do that. His crew only take what he tells them to. Stop him, and it stops."
           ]
         },
         {
           "prompt": "How many have you lost?",
           "reply": [
-            "Eleven since the thaw.",
-            "The last was a four-year-old cow. Five hundred kilos, and in calf.",
-            "She had eight good years left."
+            "Eleven since the thaw. The last was a four-year-old cow. Five hundred kilos, and in calf. She had eight good years left."
           ]
         },
         {
           "prompt": "Is there a price on him?",
           "reply": [
-            "Not that I know of. If there is, it's yours.",
-            "I just want my cattle left alone."
+            "Not that I know of. If there is, it's yours. I just want my cattle left alone."
           ],
           "perk": "BackgroundBountyHunter"
         }
@@ -110,8 +105,7 @@
       "objective": "Defeat the raiders' boss at the <SecondPlace>",
       "journal": "The raiders' boss at the <SecondPlace> is dead. Nobody is coming for the stockwoman's cattle tonight.",
       "say": [
-        "Is it done?",
-        "Then I'll count them in tonight, and for once it'll be the same number as this morning."
+        "Is it done? Then I'll count them in tonight, and for once it'll be the same number as this morning."
       ],
       "reward": "med"
     }
@@ -122,8 +116,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Someone's stealing my cattle. Two a week, always at night.",
-    "I know where they're taking them. Come and see me, and I'll tell you the rest."
+    "Someone's stealing my cattle. Two a week, always at night. I know where they're taking them. Come and see me, and I'll tell you the rest."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Same voice in person. Recast 2026-10-22 off Matilda, the voice he heard on this stockwoman and called \"very robotic\", to 'Annie K, Calm, Grounded Narrator', older: a farmer who has seen a few thefts. His ear decides."
 }

@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_local_qst26a",
   "template": "beats",
@@ -52,8 +52,7 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "There's a robot on my road home, asking me for papers I've never had.",
-    "I'm forty metres from my own front door, and it won't let me any closer. It also has a gun."
+    "There's a robot on my road home, asking me for papers I've never had. I'm forty metres from my own front door, and it won't let me any closer. It also has a gun."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('military', never whose). Voice is 07a's and 10a's crew lead, used twice so far; his ear decides."
 }

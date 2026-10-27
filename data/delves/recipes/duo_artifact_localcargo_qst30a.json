@@ -24,8 +24,12 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_ThemeNaturalKeyword"],
-      "exclude": ["LocTypeOE_ThemeCaveKeyword"]
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "Natural sites only, and never a cave: a proposal wants open sky."
   },
@@ -66,9 +70,7 @@
       "model": "Meshes\\ccs\\picnicpallet01.nif",
       "name": "Picnic Spot",
       "say": [
-        "It's all there?",
-        "Okay. Okay. I can do this.",
-        "Thank you. Sorry. Thank you."
+        "It's all there? Okay. Okay. I can do this. Thank you. Sorry. Thank you."
       ]
     }
   ],
@@ -78,9 +80,7 @@
     "elevenlabs": "bIHbv24MWmeRgasZH58o"
   },
   "broadcast": [
-    "Bit of an odd one.",
-    "I've got a very important picnic tonight, and the drone dropped it in the wrong place.",
-    "Please don't open the small box."
+    "Bit of an odd one. I've got a very important picnic tonight, and the drone dropped it in the wrong place. Please don't open the small box."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Will, Relaxed Optimist', NOT heard in game; a nervous man in a relaxed voice is the joke, his ear decides."
 }

@@ -64,14 +64,11 @@
     "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
   },
   "broadcast": [
-    "You're at the site?",
-    "Three vents in there, all open. Close them from their own controls.",
-    "Don't hang about in there longer than you have to."
+    "You're at the site? Three vents in there, all open. Close them from their own controls. Don't hang about in there longer than you have to."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line.",
   "recap": "The <Place> was venting from three places at once. I closed all three, and the site can be worked again.",
   "recapSay": [
-    "All three closed?",
-    "Readings are coming down everywhere. Nicely done."
+    "All three closed? Readings are coming down everywhere. Nicely done."
   ]
 }

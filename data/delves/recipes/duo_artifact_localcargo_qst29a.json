@@ -24,14 +24,21 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "second": {
       "remote": true,
       "_remote": "A REQUEST on another planet (Eliza, 2026-10-14 22:1x, on his \"build 10a\"): the second-place request proven by duo_delve_twosite01a and missionboard02a, here behind a LOCAL main place, the first Delve of that shape.",
       "theme": {
         "require": [],
-        "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword", "LocTypeTest"]
+        "exclude": [
+          "LocTypeOE_ThemeNaturalKeyword",
+          "LocTypeOE_ThemeCaveKeyword",
+          "LocTypeTest"
+        ]
       }
     },
     "_theme": "An abandoned camp here, a working dig there. The base's own exclusions at both ends: no caves, no natural sites; a dig crew camps by kit, not in the wild."
@@ -49,9 +56,7 @@
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Abandoned Camp Beacon",
       "say": [
-        "To anyone near our old camp.",
-        "Our last supply drop went to the wrong site.",
-        "Bring it out to us and we'll make the trip worth it."
+        "To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us. We've been living on emergency rations since."
       ]
     },
     {
@@ -76,9 +81,8 @@
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Dig Site Stores",
       "reward": "med",
-      "say":[
-        "That's ours.",
-        "We'd given up on it. Somebody put the kettle on."
+      "say": [
+        "That's ours. We'd given up on it. Somebody put the kettle on."
       ]
     }
   ],

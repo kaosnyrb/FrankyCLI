@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_local_qst25a",
   "template": "beats",
@@ -60,8 +60,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "There's a man up the way who comes down for our water. He's been four times since the rains stopped.",
-    "We've put a bit together between us for whoever stops him."
+    "There's a man up the way who comes down for our water. He's been four times since the rains stopped. We've put a bit together between us for whoever stops him."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('a bit put together', never how much). Voice is 'Lucy' (British, casual), used twice so far, on survey crews; his ear decides."
 }

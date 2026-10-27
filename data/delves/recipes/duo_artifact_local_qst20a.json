@@ -73,16 +73,13 @@
         ]
       },
       "greeting": [
-        "Sorry. I've been weeding all morning, it's the only thing that keeps me calm.",
-        "You've got that look. Did you actually go in there?"
+        "Sorry. I've been weeding all morning, it's the only thing that keeps me calm. You've got that look. Did you actually go in there?"
       ],
       "exchanges": [
         {
           "prompt": "I found your things.",
           "reply": [
-            "That's my bag.",
-            "They took my money as well, and I don't care. You can't buy back what's in here.",
-            "Thank you. Really."
+            "That's my bag. They took my money as well, and I don't care. You can't buy back what's in here. Thank you. Really."
           ]
         },
         {
@@ -94,15 +91,13 @@
         {
           "prompt": "What's in the bag?",
           "reply": [
-            "Nothing anyone would steal on purpose.",
-            "Old photos, a hat, and a book I've read nine times. They took it because it was there."
+            "Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."
           ]
         },
         {
           "prompt": "What do you grow?",
           "reply": [
-            "Anything that'll put up with me.",
-            "Beans, mostly. Beans are very forgiving."
+            "Anything that'll put up with me. Beans, mostly. Beans are very forgiving."
           ]
         }
       ],
@@ -117,9 +112,7 @@
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
   "broadcast": [
-    "They took everything.",
-    "I don't care about most of it. There's a bag, though.",
-    "If anyone's going in there, I'd like the bag back."
+    "They took everything. I don't care about most of it. There's a bag, though. If anyone's going in there, I'd like the bag back."
   ],
   "_speech": "Her own voice on the radio, and the same voice for Petra in person (ElevenLabs 'Isla', Scottish, chill; NOT heard in game, his ear decides). No names, no places."
 }

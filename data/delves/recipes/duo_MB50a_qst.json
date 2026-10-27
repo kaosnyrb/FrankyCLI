@@ -86,22 +86,19 @@
         ]
       },
       "greeting": [
-        "You've got the regulator? Please say you've got the regulator.",
-        "The old one was older than me. Nobody out here makes them any more."
+        "You've got the regulator? Please say you've got the regulator. The old one was older than me. Nobody out here makes them any more."
       ],
       "exchanges": [
         {
           "prompt": "Here's your regulator.",
           "reply": [
-            "That's it. That's exactly it.",
-            "Give me an hour and we'll have running water again. Thank you."
+            "That's it. That's exactly it. Give me an hour and we'll have running water again. Thank you."
           ]
         },
         {
           "prompt": "What happened to the old one?",
           "reply": [
-            "Nothing dramatic. It just stopped one morning.",
-            "Most things out here do, eventually."
+            "Nothing dramatic. It just stopped one morning. Most things out here do, eventually."
           ]
         },
         {
@@ -113,8 +110,7 @@
         {
           "prompt": "How have you managed?",
           "reply": [
-            "Emergency tanks and a lot of not washing.",
-            "Everything tastes of the tank. I've stopped noticing, which is worse."
+            "Emergency tanks and a lot of not washing. Everything tastes of the tank. I've stopped noticing, which is worse."
           ]
         }
       ],
@@ -128,8 +124,7 @@
     "elevenlabs": "r5iFzIytiA1rzjhWFCjW"
   },
   "broadcast": [
-    "You're close? Good. Come and find me, I'll be outside.",
-    "We've been rationing water for a week. You're the best news we've had."
+    "You're close? Good. Come and find me, I'll be outside. We've been rationing water for a week. You're the best news we've had."
   ],
   "_speech": "The same voice on the radio and in person (Noor), as 11a and 19a. Lucy (Friendly, Relaxed, Thoughtful), in two recipes; his ear decides. No names, places, factions or currency in a voiced line; her name is subtitle only."
 }

@@ -19,7 +19,9 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
@@ -45,51 +47,46 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Placeholder again. She wants bright and quick. His ear.",
         "hellos": [
-          ["Oh! A person!"],
-          ["Hiya! Are you here for lolly Friday?"]
+          [
+            "Oh! A person!"
+          ],
+          [
+            "Hiya! Are you here for lolly Friday?"
+          ]
         ]
       },
       "greeting": [
-        "You came! Brilliant.",
-        "Okay. The cool box fell off the hauler, which is fine.",
-        "But the lollies are in it, which is less fine."
+        "You came! Brilliant. Okay. The cool box fell off the hauler, which is fine. But the lollies are in it, which is less fine."
       ],
       "exchanges": [
         {
           "prompt": "I'll find the cool box.",
           "reply": [
-            "Hero!",
-            "It's blue. Probably blue. The cups fell off too, grab those.",
-            "Five minutes before they go soft. Loads of time!"
+            "Hero! It's blue. Probably blue. The cups fell off too, grab those. Five minutes before they go soft. Loads of time!"
           ]
         },
         {
           "prompt": "What's the occasion?",
           "reply": [
-            "It's Friday! The fourth one, which is lolly Friday.",
-            "Nobody voted for it. I just started doing it, and now there's a rota.",
-            "And a song. There's a song."
+            "It's Friday! The fourth one, which is lolly Friday. Nobody voted for it. I just started doing it, and now there's a rota. And a song. There's a song."
           ]
         },
         {
           "prompt": "How many of you are there?",
           "reply": [
-            "Seven! One won't eat the orange ones, so really six and a half.",
-            "And I eat the half. It's a system."
+            "Seven! One won't eat the orange ones, so really six and a half. And I eat the half. It's a system."
           ]
         },
         {
           "prompt": "What flavours?",
           "reply": [
-            "Orange, lime, and one called Mystery that's just orange again.",
-            "Don't tell anyone. The mystery is the point."
+            "Orange, lime, and one called Mystery that's just orange again. Don't tell anyone. The mystery is the point."
           ]
         },
         {
           "prompt": "Do I get one?",
           "reply": [
-            "Obviously!",
-            "Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now."
+            "Obviously! Whoever saves lolly Friday gets first pick. I just made that up. It's a rule now."
           ]
         }
       ],
@@ -127,9 +124,7 @@
       "model": "Meshes\\SetDressing\\BeachProps\\BeachBlanket01.nif",
       "name": "Lolly Friday",
       "say": [
-        "You found it! Still cold. Feel, it's still cold!",
-        "And we've got loads of time.",
-        "Here. Have a lime one. The lime ones are the best ones."
+        "You found it! Still cold. Feel, it's still cold! And we've got loads of time. Here. Have a lime one. The lime ones are the best ones."
       ]
     }
   ],
@@ -164,9 +159,7 @@
     "elevenlabs": "h8eW5xfRUGVJrZhAFxqK"
   },
   "broadcast": [
-    "Hi! Hello! Small emergency, but a nice one.",
-    "Our cool box fell off a hauler and it's full of lollies.",
-    "Anyone nearby? There's one in it for you!"
+    "Hi! Hello! Small emergency, but a nice one. Our cool box fell off a hauler and it's full of lollies. Anyone nearby? There's one in it for you!"
   ],
   "_speech": "Her voice on the radio, in person and at the end. No names, no places, no flags."
 }

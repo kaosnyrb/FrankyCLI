@@ -16,6 +16,10 @@ THE CHECKS. Each one is a fault he caught, with the catch that earned it.
   PAY    a line that promises pay. His: "I know i'll be paid" (Seismic Sensors). Pay as the STORY is fine
          (a crew's missing wages, "The owners pay once"), so this matches PROMISES only, never the word.
   DASH   an em dash. His house rule, 2026-09-11.
+  SHARD  a field split into takes that would fit in ONE (250 characters). ElevenLabs renders each take alone,
+         with no context, so short takes come out flat. His, 2026-10-21 ("when you split the lines that small
+         Elevenlabs has no context so the delivery is worse") and again 2026-10-27 ("we've sharded our lines too
+         hard"). Split only past 250, or where the scene truly turns; a turn that fits is still ONE take.
   NOUN   a faction, a place or currency, in a Delve that is not NARROW. His 2026-10-12: a total conversion
          patches our text but cannot re-record our audio, so the voice names roles. A narrow Delve (one planet
          or faction) is exempt, his 2026-10-26; it says so with "NARROW" in a _note.
@@ -40,13 +44,33 @@ RECIPES = ROOT / "data" / "delves" / "recipes"
 PAY = re.compile(
     r"\byou'?ll be paid\b|\byou will be paid\b|\bwe'?ll pay\b|\bwe will pay\b|\bthere'?s pay in it\b"
     r"|\bpaid on completion\b|\bpayment'?s sent\b|\bpayment on\b|\bthe job'?s paid\b|\bpay for your time\b"
-    r"|\bpays well\b|\bget paid\b|\bgets? you paid\b",
+    r"|\bpays well\b|\bget paid\b|\bgets? you paid\b|\bpayment'?s on its way\b|\bworth your while\b"
+    r"|\bmake the trip worth\b|\bpaying you\b|\bwe'?ll make it worth\b",
     re.I)
 NOUN = re.compile(
     r"\b(UC|United Colonies|Freestar|Collective|Crimson Fleet|Ecliptic|Va'?ruun|House Va'?ruun|Constellation"
     r"|Rangers?|Vanguard|SysDef|Ryujin|Neon|Akila|New Atlantis|Jemison|Cydonia|Paradiso|Volii|Cheyenne|Alpha Centauri"
     r"|credits?|creds)\b")
 DASH = "—"
+
+
+def fields(d):
+    """Every voiced FIELD (a list of takes), with where it sits; hellos are alternatives, so each is its own field."""
+    out = []
+    for k in ("broadcast", "recapSay"):
+        if d.get(k):
+            out.append((k, d[k]))
+    for i, b in enumerate(d.get("beats") or [], 1):
+        if b.get("say"):
+            out.append((f"beat {i} say", b["say"]))
+        if b.get("greeting"):
+            out.append((f"beat {i} greeting", b["greeting"]))
+        for j, e in enumerate(b.get("exchanges") or []):
+            if e.get("reply"):
+                out.append((f"beat {i} reply {j}", e["reply"]))
+        for h in (b.get("person") or {}).get("hellos") or []:
+            out.append((f"beat {i} hello", h))
+    return out
 
 
 def spoken(d):
@@ -108,7 +132,11 @@ def main():
             for f in faults:
                 hits += 1
                 print(f"{rid:40} {f:14} {where:16} {line}")
-    print(f"\n{hits} flagged line(s). PAY, DASH and NOUN are his catches; a LONE line is not checked (see the header).")
+        for where, takes in fields(d):
+            if len(takes) > 1 and len(" ".join(takes)) <= 250:
+                hits += 1
+                print(f"{rid:40} {'SHARD':14} {where:16} " + " | ".join(takes))
+    print(f"\n{hits} flagged line(s). PAY, DASH, NOUN and SHARD are his catches; a LONE line is not checked (see the header).")
     return 1 if hits else 0
 
 

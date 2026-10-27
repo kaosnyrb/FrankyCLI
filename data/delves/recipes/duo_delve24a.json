@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_delve24a",
   "template": "beats",
@@ -16,7 +16,10 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "Any built site: somewhere worth guarding once."
   },
@@ -36,8 +39,7 @@
       "objective": "Dismantle the security robot at the <Place>",
       "journal": "The security robot at the <Place> is scrap. It was still running its last owners' patrol route. Nobody had told it they'd gone.",
       "say": [
-        "It's down? Lovely.",
-        "We've been living in the ship for a fortnight. I'm going to sleep in a room that doesn't hum."
+        "It's down? Lovely. We've been living in the ship for a fortnight. I'm going to sleep in a room that doesn't hum."
       ],
       "reward": "med"
     }
@@ -48,9 +50,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "We bought a place, and the security robot came with it.",
-    "It doesn't know we bought it.",
-    "Could someone please explain that to it? Firmly?"
+    "We bought a place, and the security robot came with it. It doesn't know we bought it. Could someone please explain that to it? Firmly?"
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice is 05a/18a/20a's; his ear decides, and it is getting used a lot."
 }

@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": 2,
   "id": "duo_artifact_remote_planet_qst25a",
   "template": "beats",
@@ -26,9 +26,7 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "Containment failed, and our test subjects got out.",
-    "They've gone to ground nearby. We've sealed ourselves in.",
-    "Nobody opens a door until they're dead."
+    "Containment failed, and our test subjects got out. They've gone to ground nearby. We've sealed ourselves in. Nobody opens a door until they're dead."
   ],
   "beats": [
     {
@@ -47,8 +45,7 @@
       "objective": "Put down the test subjects at the <Place>",
       "journal": "Every one of the escaped test subjects at the <Place> is dead. The station can open its doors again.",
       "say": [
-        "That's the last of them.",
-        "Opening the doors. Somebody check the coffee machine survived."
+        "That's the last of them. Opening the doors. Somebody check the coffee machine survived."
       ]
     }
   ],

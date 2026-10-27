@@ -49,8 +49,7 @@
       "objective": "Clear the occupiers from the <Place>",
       "journal": "Whoever was holding the <Place> is dead. The regulator is still in there.",
       "say": [
-        "That's them? Then the regulator's ours.",
-        "Pull it, and be quick. We're not the only ones who know it's there."
+        "That's them? Then the regulator's ours. Pull it, and be quick. We're not the only ones who know it's there."
       ]
     },
     {
@@ -80,8 +79,7 @@
       "objective": "Get the regulator out",
       "journal": "I salvaged the regulator from the <Place>, and the people who dropped in to take it off me at the door didn't.",
       "say": [
-        "You've still got it? With them landing on top of you?",
-        "Then the rights are ours, and so's the regulator. Bring it home."
+        "You've still got it? With them landing on top of you? Then the rights are ours, and so's the regulator. Bring it home."
       ],
       "reward": "med"
     }
@@ -92,9 +90,7 @@
     "elevenlabs": "inKOuEy40NdNVHxcqekZ"
   },
   "broadcast": [
-    "You're at the site?",
-    "The regulator's in there somewhere central. We own the rights to it.",
-    "Other people don't care about rights. Be quick."
+    "You're at the site? The regulator's in there somewhere central. We own the rights to it. Other people don't care about rights. Be quick."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }
