@@ -70,14 +70,16 @@
     },
     {
       "type": "use",
-      "at": "RECenterLocRef",
+      "at": "REContainerLocRef",
       "objective": "Sign for the pay at the <Place>",
       "journal": "The pay locker at the <Place> had been forced and emptied. Whoever took it can't have gone far.",
       "say": [
         "The locker's been forced. The ledger's here. The pay isn't. Somebody knew it was coming. Go and get it back."
       ],
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Pay Locker"
+      "name": "Pay Locker",
+      "replace": true,
+      "_at": "2026-10-27, his: 'The delivery box is just sitting in a random place, make it a better marker'. Was RECenterLocRef (the middle of the site, often open ground). Now REContainerLocRef with replace: the site's OWN loot spot, placed by its designer against a wall or a building, and the site's box is disabled so the forced locker stands where the site already keeps things. Pool unchanged (150). Unproven until his play: the lint counts 146 of 380 refs carrying it as containers (replace covers those)."
     },
     {
       "type": "recover",
@@ -93,9 +95,10 @@
     {
       "type": "deliver",
       "returnTo": 2,
-      "at": "RECenterLocRef",
+      "at": "REContainerLocRef",
       "objective": "Return the pay to the locker",
-      "journal": "A crew at the <Place> hadn't been paid. I found the courier's ledger, took their pay back from whoever forced the locker, and signed for it."
+      "journal": "A crew at the <Place> hadn't been paid. I found the courier's ledger, took their pay back from whoever forced the locker, and signed for it.",
+      "_at": "Returns to beat 2's locker (returnTo), so it moves with it."
     }
   ],
   "speaker": {
