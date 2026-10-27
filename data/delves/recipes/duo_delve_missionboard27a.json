@@ -18,8 +18,8 @@
     "The broadcast plays at the wreck, his 1500 m in space (26a). Closing line on the radio. Pay: med, capped."
   ],
   "place": {
-    "orbit": "board",
-    "_orbit": "As 26a: the orbit is the board's target, field name Eliza's."
+    "altitude": 27.673,
+    "_altitude": "Eliza, 2026-10-27, filling Jessica's place.orbit stand-in: on boardspace the place IS the orbit, so there is no field to name it, and the value it needs is 47a's (MB01e's altitude; his MB01a's 20.589 never filled in his StoryManager log, BS1 filled on this)."
   },
   "prose": {
     "name": "Salvage: Satellite Part over <Planet>",

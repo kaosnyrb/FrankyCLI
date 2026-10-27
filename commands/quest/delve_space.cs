@@ -79,6 +79,20 @@ namespace FrankyCLI
                 Fatal($"broadcast is set and template '{t.id}' names no arrivalStage or arrivalDistance for the hook that plays it.");
             if (r.approach != null || r.offer != null || r.recap != null)
                 Fatal("approach, offer or recap is set; the space kind builds one beat and none of those.");
+            // A BOARD has two shapes and only two (27a, his 2026-10-27 "let's do 27a"): ONE use, which is his MB01a's own
+            // activator (it takes the kit and pays itself), or a PICKUP THEN A DELIVER on two scriptless objects in the one
+            // cell. The pair is the shape built; every other mix is refused here rather than half-wired.
+            bool two = TwoBeatBoard(r, t);
+            if (IsBoardSpace(t) && r.beats.Count == 1 && r.beats[0].type != "use")
+                Fatal($"beat 1 is a '{r.beats[0].type}'; a one-beat board is a use, his MB01a's activator.");
+            if (IsBoardSpace(t) && r.beats.Count == 2 && !two)
+                Fatal($"the beats are {string.Join(" then ", r.beats.Select(x => x.type))}; a two-beat board builds a pickup then a deliver, and nothing else yet.");
+            if (two && string.Equals(r.beats[0].at, r.beats[1].at, StringComparison.OrdinalIgnoreCase))
+                Fatal($"both beats are at '{r.beats[0].at}'; the two objects need two of the cell's markers.");
+            if (two && string.IsNullOrWhiteSpace(r.beats[0].item))
+                Fatal("beat 1 is a pickup with no item; it names what he picks up and the deliver takes back.");
+            if (two && r.beats[0].reward != null)
+                Fatal("beat 1 carries a reward; a two-beat board pays once, from the deliver, through the board's globals.");
             for (int i = 0; i < r.beats.Count; i++)
             {
                 var b = r.beats[i];
@@ -90,7 +104,8 @@ namespace FrankyCLI
                 if (string.IsNullOrWhiteSpace(b.objective)) Fatal($"beat {i + 1} has no objective; it is the one line that points him at the object.");
                 if (string.IsNullOrWhiteSpace(b.model) || string.IsNullOrWhiteSpace(b.name))
                     Fatal($"beat {i + 1} needs a model and a name: its object is a clone of {(IsBoardSpace(t) ? "the base's own activator" : t.activatorFrom)}, reskinned.");
-                if ((b.say != null && !speaks) || b.message != null || b.group != null || b.returnTo != null)
+                // A two-beat board shows its own boxes: no repair script is there to show one.
+                if ((b.say != null && !speaks) || (b.message != null && !two) || b.group != null || b.returnTo != null)
                     Fatal($"beat {i + 1} carries a {(b.message != null ? "message" : b.say != null ? "say" : b.group != null ? "group" : "returnTo")}; the {t.id} kind builds none"
                           + (IsBoardSpace(t) && b.message != null ? " (its object's script shows its own start, success and fail messages)." : "."));
                 // A board pays through the board's reward globals (BuildSpace); a startquest test has nobody to pay it, so a
@@ -99,6 +114,17 @@ namespace FrankyCLI
                     Fatal($"beat {i + 1} carries a reward; template '{t.id}' is started by hand and pays nothing, so it would be silently ignored.");
             }
         }
+
+        /// <summary>A board in orbit with a pickup then a deliver (27a): two scriptless objects on the stock hooks, not his
+        /// MB01a activator, whose script takes a repair kit and pays on the first use.</summary>
+        private static bool TwoBeatBoard(Recipe r, Template t)
+            => IsBoardSpace(t) && r.beats.Count == 2 && r.beats[0].type == "pickup" && r.beats[1].type == "deliver";
+
+        /// <summary>A two-beat board's stages and objective: the pickup's own stage, and the deliver's objective beside the
+        /// shell's 20. Neither exists on his MB01a (the build refuses if one does). 40, not 30: the broadcast's arrival is
+        /// the template's arrivalStage 30.</summary>
+        private const int PickupStage = 40;
+        private const int DeliverObjective = 30;
 
         /// <summary>
         /// The space build, between the self-links and the prose (Build calls it in place of the beats' places and beats).
@@ -109,6 +135,7 @@ namespace FrankyCLI
                                       IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, Dictionary<string, FormKey> markers, BeatsMade bm)
         {
             var beat = r.beats[0];
+            bool two = TwoBeatBoard(r, t);
             var slot = t.beatSlots.FirstOrDefault();
             if (slot == null) { Console.WriteLine($"REFUSED: template '{t.id}' names no beat slot (the marker and the object it creates there)."); return 1; }
             var vma = clone.VirtualMachineAdapter;
@@ -235,7 +262,7 @@ namespace FrankyCLI
                 Console.WriteLine($"  cell     : {cell.Name} (alias {cell.ID}) creates {cell.CreateReferenceToObject.Object.FormKey} at alias {anchor[0].id} {anchor[0].name} (was at {wasAt})");
             }
 
-            if (IsBoardSpace(t))
+            if (IsBoardSpace(t) && !two)
             {
                 // THE OBJECT IS HIS MB01's OWN ACTIVATOR, script and all, reskinned (his 2026-10-26: "The activator has
                 // important scripts on it and is critial to the mission"). ccs_activaterepair IS the mission: it places an
@@ -274,11 +301,70 @@ namespace FrankyCLI
             if (!ob.Targets.Any(x => x.AliasID == (int)target.ID))
             { Console.WriteLine($"REFUSED: objective {slot.objective} does not target alias {target.ID}, the object."); return 1; }
             ob.DisplayText = Expand(beat.objective!, t);
-            if (beat.journal != null)
+            // A two-beat board's pickup journals on its own stage; the deliver's goes where a one-beat board's does.
+            if (two && (clone.Stages!.Any(s => s.Index == PickupStage) || clone.Objectives!.Any(o => o.Index == DeliverObjective)))
+            { Console.WriteLine($"REFUSED: the shell already has a stage {PickupStage} or objective {DeliverObjective}; a two-beat board's must be its own."); return 1; }
+            if (two)
             {
-                var e = clone.Stages?.FirstOrDefault(s => s.Index == slot.journalStage)?.LogEntries?.FirstOrDefault();
-                if (e == null) { Console.WriteLine($"REFUSED: stage {slot.journalStage} has no log entry to carry the journal."); return 1; }
-                e.Entry = Expand(beat.journal, t);
+                var pickSt = CloneStage(clone, PickupStage);
+                if (pickSt == null) return 1;
+                clone.Stages!.Add(pickSt);
+                SortStages(clone);
+                Console.WriteLine($"  +stage   : {PickupStage}, the pickup");
+            }
+            foreach (var (b, st) in two ? new[] { (beat, PickupStage), (r.beats[1], slot.journalStage) } : new[] { (beat, slot.journalStage) })
+            {
+                if (b.journal == null) continue;
+                var e = clone.Stages?.FirstOrDefault(s => s.Index == st)?.LogEntries?.FirstOrDefault();
+                if (e == null) { Console.WriteLine($"REFUSED: stage {st} has no log entry to carry the journal."); return 1; }
+                e.Entry = Expand(b.journal, t);
+            }
+
+            // THE SECOND OBJECT (a two-beat board): a second marker from the SAME cell by its own ref type and a second
+            // activator created at it, both COPIES of the first pair (a slot that works brings every field this tool does
+            // not know), numbered above the cell collection as every orbit slot must be (19a). Its objective is the shell's
+            // 20 copied to 30 and pointed at it. The census that licenses this: every cell of LVLSC_AllSpacePOIs tags
+            // se_GeneralMarkerLocRef01 and se_TravelMarkerLocRefB02 on distinct refs (gen_inspect cellrt, 2026-10-27).
+            QuestReferenceAlias? target2 = null;
+            if (two)
+            {
+                var b2 = r.beats[1];
+                var m2 = marker.DeepCopy();
+                m2.ID = NextAliasId(clone);
+                m2.Name = "DelveBeat2Marker";
+                var rt2 = m2.Conditions.Select(c => c.Data).OfType<HasRefTypeConditionData>().First();
+                rt2.FirstParameter.Link.SetTo(markers[b2.at]);
+                clone.Aliases!.Add(m2);
+                target2 = target.DeepCopy();
+                target2.ID = m2.ID + 1;
+                target2.Name = "DelveBeat2Target";
+                target2.CreateReferenceToObject!.AliasID = (short)m2.ID;
+                clone.Aliases.Add(target2);
+                bm.OrbitMarkers.Add(((int)m2.ID, markers[b2.at]));
+                Console.WriteLine($"  +slot    : beat 2 -- marker alias {m2.ID} -> {b2.at} from cell {cellId}, object alias {target2.ID}");
+                var src2 = myMod.Activators.First(a => a.EditorID == t.activatorFrom);
+                target2.CreateReferenceToObject.Object.SetTo(src2.FormKey);
+                if (ReskinActivator(myMod, clone, t, r.id + "_b2", (int)target2.ID, b2.model, b2.name) != 0) return 1;
+                var ob2 = ob.DeepCopy();
+                ob2.Index = DeliverObjective;
+                foreach (var x in ob2.Targets.Where(x => x.AliasID == (int)target.ID)) x.AliasID = (int)target2.ID;
+                ob2.DisplayText = Expand(b2.objective!, t);
+                clone.Objectives!.Insert(clone.Objectives.IndexOf(ob) + 1, ob2);
+            }
+            else if (ReskinActivator(myMod, clone, t, r.id + "_b2", -1, null, null) != 0) return 1;   // a rebuild as one beat drops an old _b2: removes, then no model, so no clone
+
+            if (two)
+            {
+                // THE HOOKS: the stock activate hook on each object, the deliver gated on the pickup's stage, so it cannot
+                // complete empty-handed (the gate is stage order, as on the ground: object.cs).
+                foreach (var (alias, set, after) in new[] { ((int)target.ID, PickupStage, t.entryStage), ((int)target2!.ID, t.completeStage, PickupStage) })
+                {
+                    var h = StageHook("DefaultAliasOnActivate", set, after,
+                                      new ScriptBoolProperty { Name = "ShouldHideActivationAfterSuccessfulActivation", Data = true, Flags = ScriptProperty.Flag.Edited });
+                    if (AttachHook(vma, clone.FormKey, alias, h, HookEntry.FindOrCreate, true, bm, set, after) == Hooked.AlreadyCarries)
+                    { Console.WriteLine($"REFUSED: alias {alias} already carries DefaultAliasOnActivate."); return 1; }
+                    Console.WriteLine($"  +hook    : alias {alias} DefaultAliasOnActivate sets {set} after {after}");
+                }
             }
 
             // THE HOOK: activating the object completes it (his MB01's is used from the ship; this is the stock one). Not on a
@@ -295,6 +381,7 @@ namespace FrankyCLI
             string name = FragmentScriptName(r);
             var code = new SortedDictionary<int, List<string>>();
             var sayProps = new List<(string pname, FormKey scene)>();   // the fragment's Scene properties, one per spoken line
+            var extraProps = new List<(string type, string pname, FormKey key, int alias)>();   // a two-beat board's item, boxes and object
             if (IsBoardSpace(t))
             {
                 // THE FRAGMENT IS HIS MB01a's (vanilla QF_MB_BountySpace01Far_001EF957), with the beat's objective as the
@@ -317,6 +404,58 @@ namespace FrankyCLI
                 code[arrive] = new() { $"SetObjectiveCompleted({systemObjective})", $"SetObjectiveDisplayed({slot.objective})" };
                 code[t.completeStage] = new() { $"SetObjectiveCompleted({slot.objective})" };
                 bm.ArriveStage = arrive;
+
+                if (two)
+                {
+                    // THE ITEM goes to THE SHIP HE IS FLYING, as vanilla space loot does (his: "think it goes to the hold").
+                    // Given from the fragment, not the stock GiveItem hook, whose source adds nothing unless a ...ToAddTo alias
+                    // is set (DefaultAliasOnActivateGiveItem.psc), a question this build does not need to answer.
+                    RemovePrevious(myMod.MiscItems, e => e.StartsWith(r.id + "_item"));
+                    var itemSrc = myMod.MiscItems.FirstOrDefault(m => m.EditorID == t.itemSource);
+                    if (itemSrc == null) { Console.WriteLine($"REFUSED: itemSource '{t.itemSource}' is not a MiscItem in {t.mod}."); return 1; }
+                    var mi = myMod.MiscItems.DuplicateInAsNewRecord(itemSrc);
+                    mi.EditorID = $"{r.id}_item1";
+                    mi.Name = beat.item!;
+                    mi.Weight = 0f;   // a quest item weighs nothing (his, 2026-10-20), as the beats build's
+                    Console.WriteLine($"  +item    : {mi.EditorID} {mi.FormKey}  \"{mi.Name}\"  (clone of {itemSrc.EditorID}, weight {itemSrc.Weight} -> 0)");
+                    extraProps.Add(("Form", "Item1", mi.FormKey, -1));
+                    extraProps.Add(("ReferenceAlias", "Alias_Beat1Target", clone.FormKey, (int)target.ID));
+                    // The object goes first (the pickup rule, object.cs), then the item, then the objectives.
+                    code[PickupStage] = new()
+                    {
+                        "Alias_Beat1Target.GetRef().Disable()",
+                        "Game.GetPlayer().GetCurrentShipRef().AddItem(Item1, 1)",
+                        $"SetObjectiveCompleted({slot.objective})",
+                        $"SetObjectiveDisplayed({DeliverObjective})",
+                    };
+                    // TAKEN BACK from him or his ship, his ccs_activaterepair's own two places for a kit.
+                    code[t.completeStage] = new()
+                    {
+                        "Actor player = Game.GetPlayer()",
+                        "If player.GetItemCount(Item1) >= 1",
+                        "    player.RemoveItem(Item1, 1)",
+                        "Else",
+                        "    player.GetCurrentShipRef().RemoveItem(Item1, 1)",
+                        "EndIf",
+                        $"SetObjectiveCompleted({DeliverObjective})",
+                    };
+                    RemovePrevious(myMod.Messages, e => e.StartsWith(r.id + "_msg"));
+                    var msgSrc = myMod.Messages.FirstOrDefault(m => m.EditorID == MessageTemplate);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var bmsg = r.beats[i].message;
+                        if (bmsg == null) continue;
+                        if (msgSrc == null) { Console.WriteLine($"REFUSED: no message template '{MessageTemplate}' in {t.mod}."); return 1; }
+                        var msg = myMod.Messages.DuplicateInAsNewRecord(msgSrc);
+                        msg.EditorID = $"{r.id}_msg{i + 1}";
+                        msg.Name = Expand(bmsg.title!, t);
+                        msg.Description = Expand(bmsg.text!, t);
+                        msg.OwnerQuest.SetTo(clone.FormKey);
+                        extraProps.Add(("Message", $"Beat{i + 1}Message", msg.FormKey, -1));
+                        code[i == 0 ? PickupStage : t.completeStage].Add($"Beat{i + 1}Message.Show()");
+                        Console.WriteLine($"  +message : {msg.EditorID} {msg.FormKey}  \"{msg.Name}\"");
+                    }
+                }
 
                 // THE RADIO (rung 2, his "go", 2026-10-26). The lines are the beats build's own radio scenes (MakeRadioLine),
                 // spoken by its never-placed speaker (MakeSpeaker); only where they start differs.
@@ -359,9 +498,18 @@ namespace FrankyCLI
                     // fragment to finish before MissionComplete goes on to MissionShutdown() (his play's deadlock report,
                     // 2026-10-26 09:38: the SetStage stack "is waiting on stack <the fragment> to finish"). So ShutdownOnCompletion
                     // stays as shipped and the fragment shuts nothing down itself.
-                    if (beat.say != null)
+                    // A two-beat board's pickup line plays as the item comes aboard; nothing waits on it.
+                    if (two && beat.say != null)
                     {
-                        var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, beat.say, bm);
+                        var scene = MakeRadioLine(myMod, clone, r, n, PickupStage, beat.say, bm);
+                        sayProps.Add(($"Say{n + 1}", scene.FormKey));
+                        code[PickupStage].Add($"Say{n + 1}.Start()");
+                        n++;
+                    }
+                    var closer = two ? r.beats[1] : beat;
+                    if (closer.say != null)
+                    {
+                        var scene = MakeRadioLine(myMod, clone, r, n, t.completeStage, closer.say, bm);
                         string sv = $"Say{n + 1}";
                         sayProps.Add((sv, scene.FormKey));
                         code[t.completeStage].AddRange(new[]
@@ -369,7 +517,8 @@ namespace FrankyCLI
                             $"{sv}.Start()",
                             $"Utility.Wait(1.0)   ; let {sv} begin before asking whether it plays",
                             "Int waited = 0",
-                            $"While {sv}.IsPlaying() && waited < 30   ; the activator's MissionComplete waits on this, then shuts the quest down",
+                            two ? $"While {sv}.IsPlaying() && waited < 30   ; MissionComplete, below, shuts the quest down"
+                                : $"While {sv}.IsPlaying() && waited < 30   ; the activator's MissionComplete waits on this, then shuts the quest down",
                             "    Utility.Wait(1.0)",
                             "    waited += 1",
                             "EndWhile",
@@ -379,9 +528,19 @@ namespace FrankyCLI
                         n++;
                     }
                 }
+                // A TWO-BEAT BOARD PAYS FROM ITS OWN LAST STAGE, the ground board's shape (CompleteMission, gen_delve_beats;
+                // vanilla QF_MB_Bounty05_UC_003303A5): no activator holds MissionStateChangeGuard here, so the call BS1's
+                // deadlock forbids a one-beat board is the only thing that pays this one.
+                if (two)
+                    code[t.completeStage].AddRange(new[]
+                    {
+                        "Quest __temp = Self as Quest",
+                        $"{t.questScript} kmyQuest = __temp as {t.questScript}",
+                        "kmyQuest.MissionComplete()",
+                    });
                 // THE PAY goes onto the board's reward globals, which the card also shows (the ground board's rule: never onto
                 // the stage, or it pays twice). Absent, his MB01a's own stand (duo_reward_creds_easy).
-                if (beat.reward is string tier)
+                if ((two ? r.beats[1] : beat).reward is string tier)
                 {
                     var cg = myMod.Globals.FirstOrDefault(g => g.EditorID == $"duo_reward_creds_{tier}");
                     if (cg == null) { Console.WriteLine($"REFUSED: {t.mod} has no duo_reward_creds_{tier}."); return 1; }
@@ -410,7 +569,9 @@ namespace FrankyCLI
             var psc = new StringBuilder();
             psc.AppendLine($"Scriptname {name} Extends Quest Hidden Const");
             psc.AppendLine($"{{GENERATED by FrankyCLI gen_delve from data/delves/recipes/{r.id}.json (template {t.id}). Do not edit: change");
-            psc.AppendLine(IsBoardSpace(t)
+            psc.AppendLine(two
+                ? "the recipe and rebuild. A two-beat board space Delve: the system objective on the accept, the pickup's on arrival, the deliver's once the item is aboard, and the deliver pays.}"
+                : IsBoardSpace(t)
                 ? "the recipe and rebuild. A board space Delve: the system objective on the accept, the beat's on arrival, and the object's use pays.}"
                 : "the recipe and rebuild. A space Delve's two stages: the objective on start, and the object's use completes it.}");
             psc.AppendLine();
@@ -422,11 +583,19 @@ namespace FrankyCLI
                 psc.AppendLine();
             }
             foreach (var (pname, _) in sayProps) psc.AppendLine($"Scene Property {pname} Auto Const Mandatory");
+            foreach (var (type, pname, _, _) in extraProps) psc.AppendLine($"{type} Property {pname} Auto Const Mandatory");
             vma.Script = new ScriptEntry { Name = name };
             foreach (var (pname, key) in sayProps)
             {
                 var op = new ScriptObjectProperty { Name = pname, Flags = ScriptProperty.Flag.Edited };
                 op.Object.SetTo(key);
+                vma.Script.Properties.Add(op);
+            }
+            foreach (var (_, pname, key, alias) in extraProps)
+            {
+                var op = new ScriptObjectProperty { Name = pname, Flags = ScriptProperty.Flag.Edited };
+                op.Object.SetTo(key);
+                if (alias >= 0) op.Alias = (short)alias;
                 vma.Script.Properties.Add(op);
             }
             foreach (var st in code.Keys)
@@ -655,6 +824,42 @@ namespace FrankyCLI
             => string.Join(", ", AliasNames(aliases).OrderBy(x => x.id).Select(x => x.member ? $"{x.id} [{x.name}]" : $"{x.id} {x.name}"));
 
         /// <summary>
+        /// A two-beat board's own claims, off disk: two scriptless objects, the second at its own marker, the deliver's
+        /// objective on the second, the item, and the fragment lines that move it. The hooks are graded by VerifySpace's
+        /// own pass over bm.Hooks; the markers by its OrbitMarkers pass.
+        /// </summary>
+        private static int VerifyTwoBeatBoard(IStarfieldModGetter m, IQuestGetter q, Recipe r, Template t, BeatsMade bm)
+        {
+            int fail = 0;
+            var acts = new[] { "_b1", "_b2" }.Select(s => m.Activators.FirstOrDefault(a => a.EditorID == r.id + s)).ToList();
+            fail += Check("both objects exist and carry no script (the stock hooks are on their aliases)",
+                          string.Join(", ", acts.Select(a => a == null ? "missing" : (a.VirtualMachineAdapter?.Scripts.Count ?? 0).ToString())), "0, 0");
+            var refs = q.Aliases.OfType<IQuestReferenceAliasGetter>().ToList();
+            var m2 = refs.FirstOrDefault(a => a.Name == "DelveBeat2Marker");
+            var t2 = refs.FirstOrDefault(a => a.Name == "DelveBeat2Target");
+            fail += Check("DelveBeat2Target creates the second object at DelveBeat2Marker",
+                          t2?.CreateReferenceToObject == null ? "creates nothing" : $"{t2.CreateReferenceToObject.Object.FormKey} at {t2.CreateReferenceToObject.AliasID}",
+                          $"{acts[1]?.FormKey.ToString() ?? "no activator"} at {m2?.ID.ToString() ?? "no marker"}");
+            var ob2 = q.Objectives.FirstOrDefault(o => o.Index == DeliverObjective);
+            fail += Check($"objective {DeliverObjective} is the deliver's, on the second object",
+                          ob2 == null ? "missing" : $"{ob2.DisplayText?.String} -> {string.Join(",", ob2.Targets.Select(x => x.AliasID))}",
+                          $"{Expand(r.beats[1].objective!, t)} -> {t2?.ID}");
+            var item = m.MiscItems.FirstOrDefault(i => i.EditorID == r.id + "_item1");
+            fail += Check("the item is the pickup's, weightless", item == null ? "missing" : $"{item.Name?.String} {item.Weight}", $"{r.beats[0].item} 0");
+            fail += Check("Item1 names it", q.VirtualMachineAdapter?.Script?.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "Item1")?.Object.FormKey.ToString() ?? "missing",
+                          item?.FormKey.ToString() ?? "no item");
+            string src = File.ReadAllText(bm.PscPath);
+            string Body(int st) => src.Split($"Function {FragmentFunction(st)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
+            var pick = Body(PickupStage).Split('\n').Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
+            fail += Check($"stage {PickupStage} disables the wreck's object FIRST, then puts the item in his ship",
+                          string.Join(" | ", pick.Take(2)), "Alias_Beat1Target.GetRef().Disable() | Game.GetPlayer().GetCurrentShipRef().AddItem(Item1, 1)");
+            string done = Body(t.completeStage);
+            fail += Check($"stage {t.completeStage} takes the item back from him, or else from his ship",
+                          (done.Contains("player.RemoveItem(Item1, 1)") && done.Contains("player.GetCurrentShipRef().RemoveItem(Item1, 1)")).ToString(), "True");
+            return fail;
+        }
+
+        /// <summary>
         /// Read the written plugin back OFF DISK and grade every claim the space build made. The alias graph is the beats
         /// verify's own (AliasGraphChecks); the fragment and hook lines repeat VerifyBeats' four, a second copy, named.
         /// </summary>
@@ -741,11 +946,13 @@ namespace FrankyCLI
                           target?.CreateReferenceToObject == null ? "creates nothing"
                               : $"{target.CreateReferenceToObject.Object.FormKey} at {target.CreateReferenceToObject.AliasID}",
                           $"{act?.FormKey.ToString() ?? "no activator"} at {slot.markerAlias}");
+            bool two = TwoBeatBoard(r, t);
+            int mk = 0;   // OrbitMarkers is written in beat order
             foreach (var (ma, wrote) in bm.OrbitMarkers)
             {
                 var marker = q.Aliases.OfType<IQuestReferenceAliasGetter>().FirstOrDefault(a => a.ID == (uint)ma);
                 var mrt = marker?.Conditions.Select(c => c.Data).OfType<IHasRefTypeConditionDataGetter>().FirstOrDefault();
-                fail += Check($"marker alias {ma} fills from a cell collection by {r.beats[0].at}",
+                fail += Check($"marker alias {ma} fills from a cell collection by {r.beats[Math.Min(mk++, r.beats.Count - 1)].at}",
                               marker?.ReferenceCollectionAliasID == null ? "not from a collection" : mrt?.FirstParameter.Link.FormKey.ToString() ?? "no HasRefType",
                               wrote.ToString());
             }
@@ -766,9 +973,12 @@ namespace FrankyCLI
                 // activate hook beside it, since the script completes the mission itself.
                 var objAct = m.Activators.FirstOrDefault(a => a.EditorID == r.id + "_b1");
                 var repair = objAct?.VirtualMachineAdapter?.Scripts.FirstOrDefault(s => s.Name.Equals("ccs_activaterepair", StringComparison.OrdinalIgnoreCase));
-                fail += Check($"{r.id}_b1 carries his repair script, its questobjective on this quest",
-                              repair == null ? "no ccs_activaterepair" : repair.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "questobjective")?.Object.FormKey.ToString() ?? "no questobjective",
-                              q.FormKey.ToString());
+                if (!two)
+                    fail += Check($"{r.id}_b1 carries his repair script, its questobjective on this quest",
+                                  repair == null ? "no ccs_activaterepair" : repair.Properties.OfType<IScriptObjectPropertyGetter>().FirstOrDefault(p => p.Name == "questobjective")?.Object.FormKey.ToString() ?? "no questobjective",
+                                  q.FormKey.ToString());
+                else
+                    fail += VerifyTwoBeatBoard(m, q, r, t, bm);
                 if (bm.ArrivalDistance > 0)
                 {
                     var dh = vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.FirstOrDefault(s => s.Name == "DefaultAliasOnDistanceLessThan");
@@ -796,13 +1006,21 @@ namespace FrankyCLI
                     int say = fin.IndexOf($"{cl}.Start()"), wait = fin.IndexOf($"{cl}.IsPlaying()");
                     fail += Check($"stage {t.completeStage} plays {cl} and waits for it", (say >= 0 && say < wait).ToString(), "True");
                 }
-                fail += Check($"the object (alias {slot.activatorAlias}) carries no stock activate hook",
-                              (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnActivate") == true).ToString(), "False");
                 string src = File.ReadAllText(bm.PscPath);
                 string done = src.Split($"Function {FragmentFunction(t.completeStage)}()").ElementAtOrDefault(1)?.Split("EndFunction")[0] ?? "";
-                // The activator's MissionComplete pays and sets this stage; a second call from here deadlocks (his play, 09:38).
-                fail += Check($"stage {t.completeStage} does not call MissionComplete() or MissionShutdown() (the activator's call is setting it)",
-                              (done.Contains("MissionComplete()") || done.Contains("MissionShutdown()")).ToString(), "False");
+                if (!two)
+                {
+                    fail += Check($"the object (alias {slot.activatorAlias}) carries no stock activate hook",
+                                  (vma.Aliases.FirstOrDefault(a => a.Property.Alias == slot.activatorAlias)?.Scripts.Any(s => s.Name == "DefaultAliasOnActivate") == true).ToString(), "False");
+                    // The activator's MissionComplete pays and sets this stage; a second call from here deadlocks (his play, 09:38).
+                    fail += Check($"stage {t.completeStage} does not call MissionComplete() or MissionShutdown() (the activator's call is setting it)",
+                                  (done.Contains("MissionComplete()") || done.Contains("MissionShutdown()")).ToString(), "False");
+                }
+                else
+                    // No activator pays here, so the stage does, once, after the closing line's wait (the ground board's shape).
+                    fail += Check($"stage {t.completeStage} pays through {t.questScript}.MissionComplete(), after the closing line",
+                                  (done.Contains("kmyQuest.MissionComplete()")
+                                   && (bm.ClosingLine == null || done.IndexOf($"{bm.ClosingLine}.IsPlaying()") < done.IndexOf("kmyQuest.MissionComplete()"))).ToString(), "True");
                 fail += Check($"{t.questScript}.ShutdownOnCompletion is as shipped (unset, so true)",
                               vma.Scripts.FirstOrDefault(s => string.Equals(s.Name, t.questScript, StringComparison.OrdinalIgnoreCase))?.Properties.Any(p => p.Name == "ShutdownOnCompletion").ToString() ?? "no script", "False");
                 if (bm.PaidGlobal is FormKey paid)

@@ -240,11 +240,16 @@
       "driver": "",
       "questScript": "MissionBountySpaceScript",
       "_questScript": "KEPT, not replaced: vanilla's MissionBountySpaceScript (extends MissionQuestScript). Its MissionAccepted enables the space map marker (his MB01a's DefaultAliasMapMarkerScript carries EnableOnInit false for exactly that); its ArriveInSystemStage (20, the declared default) is set by the kept defaultquestchangelocationscript; MissionComplete() pays. Its MissionAccepted also calls PrimaryRef.GetShipRef().Enable(), a no-op error on an activator, exactly as his shipped MB01a does.",
-      "_object": "NO activatorFrom: the object is HIS MB01a's own duo_MB01a_act, cloned with its script and reskinned (his 2026-10-26: \"The activator has important scripts on it and is critial to the mission\"). ccs_activaterepair places an installation on load, takes a Ship Repair Kit, may spawn attackers, completes objective 20 and calls MissionComplete() itself; its questobjective is repointed at the built quest. So no stock activate hook, and his DefaultAliasOnDeath stays as shipped.",
+      "_object": "ONE BEAT: the object is HIS MB01a's own duo_MB01a_act, cloned with its script and reskinned (his 2026-10-26: \"The activator has important scripts on it and is critial to the mission\"). ccs_activaterepair places an installation on load, takes a Ship Repair Kit, may spawn attackers, completes objective 20 and calls MissionComplete() itself; its questobjective is repointed at the built quest. So no stock activate hook, and his DefaultAliasOnDeath stays as shipped.",
+      "activatorFrom": "duo_artifact09_primary_act",
+      "itemSource": "duo_Artifact09_item01",
+      "_twoBeats": "TWO BEATS, a pickup then a deliver (27a, his 2026-10-27 \"let's do 27a\"): his activator would take a kit and pay on the first use, so both objects are clones of activatorFrom (scriptless, as slatespace's) on the stock DefaultAliasOnActivate, the deliver gated on the pickup's stage 40. The second object is a copy of the first pair at its own marker from the same cell (every LVLSC_AllSpacePOIs cell tags se_GeneralMarkerLocRef01 and se_TravelMarkerLocRefB02 on distinct refs, gen_inspect cellrt 2026-10-27); its objective is 20 copied to 30. The item (a clone of itemSource) goes to the ship he flies and is taken back from him or his ship, his ccs_activaterepair's two places. Stage 100 pays through MissionComplete(), the ground board's shape.",
       "beats": 1,
-      "maxBeats": 1,
+      "maxBeats": 2,
       "allows": [
-        "use"
+        "use",
+        "pickup",
+        "deliver"
       ],
       "carriesItem": false,
       "placeAlias": 2,
@@ -268,10 +273,10 @@
       },
       "_tokens": "<Planet> is the orbit alias; his read, 2026-10-26: it prints the body's name (\"Jemison\"), unconfirmed in game.",
       "cannot": [
-        "more than one beat, or any beat but use",
+        "more than two beats, or any shape but one use or a pickup then a deliver",
         "a second or third place, a request, a theme, a who",
-        "a beat message (the activator's script shows its own start, success and fail messages)",
-        "a recapSay (one beat: the closing line is its say)"
+        "a beat message on one beat (the activator's script shows its own start, success and fail messages)",
+        "a recapSay (the closing line is the last beat's say)"
       ],
       "arrivalStage": 30,
       "arrivalDistance": 1500,
