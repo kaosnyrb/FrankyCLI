@@ -6,7 +6,7 @@
     "Version2": 0,
     "VersionControl": 0
   },
-  "EditorID": "duo_delve_missionboard27a",
+  "EditorID": "duo_MB51a_qst",
   "Name": "Salvage: Satellite Part over \u003CAlias=TargetPlanetLocation\u003E",
   "Data": {
     "Flags": 655360,
@@ -612,7 +612,7 @@
     "ExtraBindDataVersion": 3,
     "Versioning": 0,
     "FragmentScript": {
-      "Name": "duo_qf_delve_missionboard27a",
+      "Name": "duo_qf_MB51a_qst",
       "Flags": 0,
       "Properties": [
         {
@@ -683,7 +683,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_delve_missionboard27a",
+        "ScriptName": "duo_qf_MB51a_qst",
         "FragmentName": "Fragment_Stage_0010_Item_00"
       },
       {
@@ -691,7 +691,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_delve_missionboard27a",
+        "ScriptName": "duo_qf_MB51a_qst",
         "FragmentName": "Fragment_Stage_0020_Item_00"
       },
       {
@@ -699,7 +699,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_delve_missionboard27a",
+        "ScriptName": "duo_qf_MB51a_qst",
         "FragmentName": "Fragment_Stage_0030_Item_00"
       },
       {
@@ -707,7 +707,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_delve_missionboard27a",
+        "ScriptName": "duo_qf_MB51a_qst",
         "FragmentName": "Fragment_Stage_0040_Item_00"
       },
       {
@@ -715,7 +715,7 @@
         "Unknown": 0,
         "StageIndex": 0,
         "Unknown2": 0,
-        "ScriptName": "duo_qf_delve_missionboard27a",
+        "ScriptName": "duo_qf_MB51a_qst",
         "FragmentName": "Fragment_Stage_0100_Item_00"
       }
     ],
@@ -1073,7 +1073,7 @@
           "Version2": 0,
           "VersionControl": 0
         },
-        "EditorID": "duo_delve_missionboard27a_say1_scene",
+        "EditorID": "duo_MB51a_qst_say1_scene",
         "Flags": 128,
         "Quest": "003F2B:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
@@ -1118,7 +1118,7 @@
           "Version2": 0,
           "VersionControl": 0
         },
-        "EditorID": "duo_delve_missionboard27a_say2_scene",
+        "EditorID": "duo_MB51a_qst_say2_scene",
         "Flags": 128,
         "Quest": "003F2B:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
@@ -1163,7 +1163,7 @@
           "Version2": 0,
           "VersionControl": 0
         },
-        "EditorID": "duo_delve_missionboard27a_say3_scene",
+        "EditorID": "duo_MB51a_qst_say3_scene",
         "Flags": 128,
         "Quest": "003F2B:du_overtime.esm",
         "VNAM": "0300000003000000030000000300000003000000",
@@ -1210,7 +1210,7 @@
           "Version2": 0,
           "VersionControl": 0
         },
-        "EditorID": "duo_delve_missionboard27a_say1_topic",
+        "EditorID": "duo_MB51a_qst_say1_topic",
         "Priority": 50,
         "Quest": "003F2B:du_overtime.esm",
         "TopicFlags": 0,
@@ -1231,7 +1231,7 @@
               "Version2": 0,
               "VersionControl": 0
             },
-            "EditorID": "duo_delve_missionboard27a_say1_info",
+            "EditorID": "duo_MB51a_qst_say1_info",
             "Speaker": "003F30:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
@@ -1259,7 +1259,7 @@
           "Version2": 0,
           "VersionControl": 0
         },
-        "EditorID": "duo_delve_missionboard27a_say2_topic",
+        "EditorID": "duo_MB51a_qst_say2_topic",
         "Priority": 50,
         "Quest": "003F2B:du_overtime.esm",
         "TopicFlags": 0,
@@ -1280,7 +1280,7 @@
               "Version2": 0,
               "VersionControl": 0
             },
-            "EditorID": "duo_delve_missionboard27a_say2_info",
+            "EditorID": "duo_MB51a_qst_say2_info",
             "Speaker": "003F30:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
@@ -1308,7 +1308,7 @@
           "Version2": 0,
           "VersionControl": 0
         },
-        "EditorID": "duo_delve_missionboard27a_say3_topic",
+        "EditorID": "duo_MB51a_qst_say3_topic",
         "Priority": 50,
         "Quest": "003F2B:du_overtime.esm",
         "TopicFlags": 0,
@@ -1329,7 +1329,7 @@
               "Version2": 0,
               "VersionControl": 0
             },
-            "EditorID": "duo_delve_missionboard27a_say3_info",
+            "EditorID": "duo_MB51a_qst_say3_info",
             "Speaker": "003F30:du_overtime.esm",
             "StartScenePhase": "",
             "SubtitlePriority": 1,
