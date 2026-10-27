@@ -96,7 +96,7 @@
       "objective": "Find the missing walker near the <SecondPlace>",
       "journal": "A colonist at the <Place> sent me after his mother, who'd gone out walking and not come back. I found her near the <SecondPlace>, sat on a warm rock and quite all right, just turned round. I pointed her home.",
       "person": {
-        "name": "Orla Orrel",
+        "name": "Maud Orrel",
         "template": "UC_NA_MASTWorkerFemale03",
         "outfit": "Outfit_Clothes_Farmer_01_with_Hat",
         "voice": "GenericFemale01",
