@@ -117,12 +117,20 @@ namespace FrankyCLI
             {
                 var beat = build.r.beats[b];
                 bool pickupGoes = CarriesItem && beat.returnTo == null;
-                if (!pickupGoes && !beat.vanish) return;
+                bool goes = pickupGoes || beat.vanish;
+                bool blows = build.inputs.Explosions.TryGetValue(b, out var xk);
+                if (!goes && !blows) return;
                 string ta = $"Alias_Beat{b + 1}Target";
                 build.props.Add(("ReferenceAlias", ta, build.clone.FormKey, build.slotOf[b].activatorAlias));
                 int st = build.beatStage[b];
                 if (!build.code.ContainsKey(st)) build.code[st] = new();
-                build.code[st].Insert(0, $"{ta}.GetRef().Disable()");
+                if (goes) build.code[st].Insert(0, $"{ta}.GetRef().Disable()");
+                if (blows)
+                {
+                    // Placed BEFORE the disable, so it goes off where the object stood.
+                    build.props.Add(("Form", $"Explosion{b + 1}", xk, -1));
+                    build.code[st].Insert(0, $"{ta}.GetRef().PlaceAtMe(Explosion{b + 1})");
+                }
             }
         }
     }

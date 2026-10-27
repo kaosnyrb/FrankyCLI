@@ -217,6 +217,10 @@ namespace FrankyCLI
                     if (b.model != null || b.name != null || b.replace)
                         Fatal($"beat {i + 1} is a return; the object is beat {back}'s, so model, name and replace would be ignored.");
                 }
+                if (b.explosion != null && b.type != "use")
+                    Fatal($"beat {i + 1} sets explosion and is a {b.type}; only a use beat takes it, so it would be silently ignored.");
+                else if (b.explosion != null && OwnOrMaster<IExplosionGetter>(Allowed(env, t), env, b.explosion) == null)
+                    Fatal($"beat {i + 1} explosion '{b.explosion}' is not an Explosion in {t.mod} or one of its masters.");
                 if (b.vanish && b.type != "use")
                     Fatal($"beat {i + 1} sets vanish and is a {b.type}; only a use beat takes it (a pickup's object vanishes already), so it would be silently ignored.");
                 if (b.vanish && r.beats.Skip(i + 1).Any(x => x.returnTo == i + 1))

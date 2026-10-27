@@ -625,6 +625,12 @@ namespace FrankyCLI
             /// </summary>
             public bool vanish { get; set; }
             /// <summary>
+            /// beats, a use, OPTIONAL: an Explosion EditorID (own-or-master) placed at the object as the FIRST line of this
+            /// beat's stage, ahead of a vanish (his 2026-10-27 on duo_MB52a_qst's burned cache: "just place it, we can always
+            /// make our own fire later"; IncendiaryGrenadeExplosion drops a 4.5 m, 12 s fire hazard that burns whoever is in it).
+            /// </summary>
+            public string? explosion { get; set; }
+            /// <summary>
             /// beats, a recover, OPTIONAL: [min, max] distance from the beat's marker at which the holder is placed, out on
             /// open ground at a random angle, his gang round him (his idea and his 05a note, 2026-10-19: "the spacers spawn in
             /// the site"). Route A of duo_offpoiprobe (spike 2026-10-19-objectives-off-the-poi). Absent = at the marker.

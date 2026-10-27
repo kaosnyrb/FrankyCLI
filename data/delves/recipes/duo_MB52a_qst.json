@@ -34,6 +34,7 @@
       "type": "use",
       "at": "RECenterLocRef",
       "vanish": true,
+      "explosion": "IncendiaryGrenadeExplosion",
       "objective": "Burn the cache of texts at the <Place>",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Cache of Banned Texts",

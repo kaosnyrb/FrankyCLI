@@ -36,6 +36,8 @@ namespace FrankyCLI
             public readonly Dictionary<(int beat, int ex), FormKey> TalkPerks = new();
             /// <summary>By beat index, for a craft: the bench keyword and each ingredient with its count.</summary>
             public readonly Dictionary<int, (FormKey bench, List<(FormKey part, int count)> parts)> Crafts = new();
+            /// <summary>By beat index, for a use with explosion: the Explosion placed at its object.</summary>
+            public readonly Dictionary<int, FormKey> Explosions = new();
         }
 
         /// <summary>A fight beat's forms, resolved own-or-master in ResolveInputs.</summary>
@@ -166,6 +168,14 @@ namespace FrankyCLI
                     if (ff.Ship == null) { Console.WriteLine($"REFUSED: beat {i + 1} support.ship '{sh}' is not a GenericBaseForm (a ship) in {t.mod} or one of its masters."); fail++; continue; }
                 }
                 inputs.Fights[i] = ff;
+            }
+            // A use beat's explosion, own-or-master as every other form here.
+            for (int i = 0; i < r.beats.Count && fail == 0; i++)
+            {
+                if (r.beats[i].explosion is not string xn) continue;
+                var xp = OwnOrMaster<IExplosionGetter>(myMod, env, xn);
+                if (xp == null) { Console.WriteLine($"REFUSED: beat {i + 1} explosion '{xn}' is not an Explosion in {t.mod} or one of its masters."); fail++; continue; }
+                inputs.Explosions[i] = xp.FormKey;
             }
             // A talk exchange's perk (a [Background] / [Skill] / [Trait] choice), own-or-master as every other form here.
             for (int i = 0; i < r.beats.Count && fail == 0; i++)
