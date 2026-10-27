@@ -33,17 +33,10 @@
     {
       "type": "use",
       "at": "RECenterLocRef",
-      "objective": "Find the cache of texts at the <Place>",
-      "journal": "The cache at the <Place> is a footlocker of hand-bound books. I read the first page of the top one. It's a cookbook, mostly, with a family's names written in the margins.",
-      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Cache of Banned Texts"
-    },
-    {
-      "type": "use",
-      "at": "RECenterLocRef",
-      "returnTo": 1,
       "vanish": true,
-      "objective": "Burn the texts",
+      "objective": "Burn the cache of texts at the <Place>",
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Cache of Banned Texts",
       "journal": "I burned the cache at the <Place>, every book in it. I still don't know what was banned about them. Nobody asked me to know.",
       "say": [
         "Destruction confirmed. Your report is filed. There is nothing further on this contract."
