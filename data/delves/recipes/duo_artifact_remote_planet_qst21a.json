@@ -33,14 +33,14 @@
   },
   "prose": {
     "name": "Extraction: Culture Canister on <Planet>",
-    "briefing": "A clinic's courier was jumped at the <Place> and a canister of vaccine cultures was left behind. The canister should still be there. Whoever jumped the courier may still be watching for it."
+    "briefing": "A clinic's courier was jumped at the <Place> and had to drop a canister of vaccine cultures. Whoever jumped her left it where it fell, which looks a lot like bait."
   },
   "beats": [
     {
       "type": "pickup",
       "say": [
-        "Its tracker just came back on.",
-        "If anyone's watching for it, they know too. Be careful."
+        "That's its tracker back on. I can see it from here.",
+        "Which means they can too. Get ready."
       ],
       "_say": "On the pickup because a beat's say plays when its stage is SET, and wave 1 spawns on this stage (Eliza's move on 02a, 2026-10-12). The speaker is off-world and can only see the tracker, so the warning is about the tracker.",
       "at": "REMarkerMediumLocRef",
@@ -75,7 +75,7 @@
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Courier Pickup Beacon",
       "say": [
-        "We've got it. There's a colony waiting on those.",
+        "That's it, we've got it. There's a colony waiting on those cultures.",
         "Thank you. Truly."
       ]
     }
@@ -86,9 +86,10 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "Our courier was jumped and had to leave a canister of cultures behind.",
-    "Bring it out and you'll be paid.",
-    "They may still be watching for it."
+    "Our courier was jumped on her way back and had to drop a canister of vaccine cultures.",
+    "It's still out there. Get it to the courier beacon and we'll pay for your time.",
+    "Whoever jumped her didn't take it, and that worries me. I think they're waiting to see who comes for it."
   ],
-  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Sarah, Mature, Reassuring, Confident', NOT yet heard in game (voices.md); his ear decides."
+  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Sarah, Mature, Reassuring, Confident', NOT yet heard in game (voices.md); his ear decides.",
+  "_wording": "2026-10-27, his catch: 'They may still be watching for it.' delivered badly on its own (each list item is its own audio line). Reworded whole: every radio line is a complete thought, the bait is said once with its reason, and the pickup line answers it."
 }
