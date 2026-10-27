@@ -79,12 +79,12 @@
   "speaker": {
     "name": "Research Lead",
     "voice": "GenericFemale01",
-    "elevenlabs": "Xb7hH8MSUJpSbSDYk0k2"
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
     "We had to leave our data behind.",
     "The terminal still has it. It just needs power.",
     "Get it running and keep it running until we've copied everything."
   ],
-  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Alice, Clear, Engaging Educator' (British), NOT yet heard in game (voices.md); his ear decides."
+  "_speech": "Radio rules: no names, no places. Voice was ElevenLabs' 'Alice, Clear, Engaging Educator'; his ear 2026-10-27: \"Elevenlabs voice sounds like a phone system instead of a person\". Recast to Annie K, heard in game on 32a without complaint (voices.md)."
 }

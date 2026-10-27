@@ -56,6 +56,7 @@ account does not put them back.
 |---|---|---|---|
 | `XrExE9yKIg1WjnnlVkGX` | Matilda, Knowledgable, Professional | *"the voice on the farmer is very robotic, remove that elevenlabs voice from our list"* (2026-10-22, the stockwoman in `duo_delve32p2`) | none: recast 2026-10-22 (21a Alice, 32a Annie K, remote06a Clara) |
 | `MzqUf1HbJ8UmQ0wUsx2p` | Katie X, Clear British Customer Support | *"I meant the Elevenlabs voice, both we're a bit stilted and robotic"* (2026-10-26, Approach Control, broadcast and closing line, on `eleven_v3` at the default settings) | none: recast 2026-10-26 to Roger (26a, bs1), his "yeah put rodger in"; 18a's Insurance Office to Annie K (Jessica) |
+| `Xb7hH8MSUJpSbSDYk0k2` | Alice, Clear, Engaging Educator | *"Elevenlabs voice sounds like a phone system instead of a person"* (2026-10-27, Research Lead on `remote_planet_qst23a`), then *"drop Alice from our entire cast"* | recipes recast 2026-10-27 (23a and `duo_delve21a` to Annie K, `local_qst22a` to Lucy); ⏳ 23a and 22a not yet REBUILT, so the plugin still speaks Alice until they are |
 
 ## His library: every voice on the account, with ElevenLabs' own labels
 
@@ -81,7 +82,7 @@ there. The heard-in-game table above is the one to choose from first; this is wh
 | female | young | Serafina - Flirty Sensual Temptress | `4tRn1lSkEn13EVTuqb0g` | american | characters animation | mature | professional |
 | female | young | Shelby | `rfkTsdZrVWEVhDycUYn9` | british | conversational | pleasant | professional |
 | female | young | Verity - Chatty, Fast-Paced, Fun Storyteller | `oW8bn5YtBB89X2nJ0DT9` | british | conversational | upbeat | professional |
-| female | middle aged | Alice - Clear, Engaging Educator | `Xb7hH8MSUJpSbSDYk0k2` | british | informative educational | professional | premade |
+| ~~female~~ | ~~middle aged~~ | ~~Alice - Clear, Engaging Educator~~ | `Xb7hH8MSUJpSbSDYk0k2` | RULED OUT by his ear 2026-10-27, see above | | | |
 | female | middle aged | Annie K - Calm, Grounded Narrator | `XW70ikSsadUbinwLMZ5w` | american | narrative story | professional | professional |
 | female | middle aged | Bella - Professional, Bright, Warm | `hpp4J3VqNfWAUOO0d1Us` | american | informative educational | professional | premade |
 | female | middle aged | Emma | `56bWURjYFHyYyVf490Dp` | australian | conversational | neutral | professional |

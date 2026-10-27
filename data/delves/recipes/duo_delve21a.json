@@ -51,12 +51,12 @@
   "speaker": {
     "name": "Contract Office",
     "voice": "GenericFemale01",
-    "elevenlabs": "Xb7hH8MSUJpSbSDYk0k2"
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
     "Contract confirmed.",
     "The material is to be destroyed on site.",
     "Do not read it, remove it or copy it."
   ],
-  "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Recast 2026-10-22 off Matilda (his: \"very robotic\") to ElevenLabs' 'Alice, Clear, Engaging Educator', british: clear and official without the robot. His ear decides."
+  "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Recast 2026-10-22 off Matilda (his: \"very robotic\") to ElevenLabs' 'Alice, Clear, Engaging Educator', british: clear and official without the robot. Alice then ruled out of the whole cast by his ear 2026-10-27 (\"sounds like a phone system instead of a person\"); recast to Annie K, heard in game on 32a. His ear decides."
 }
