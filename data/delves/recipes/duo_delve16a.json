@@ -20,7 +20,9 @@
   ],
   "place": {
     "theme": {
-      "require": ["LocTypeOE_NonHostile"],
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
       "exclude": [
         "LocTypeOE_ThemeNaturalKeyword",
         "LocTypeOE_ThemeCaveKeyword"
@@ -47,7 +49,9 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "_elevenlabs": "Petra's voice reused as a placeholder. She wants flat and clipped, not chill. His ear.",
         "hellos": [
-          ["Contractor. Over here."]
+          [
+            "Contractor. Over here."
+          ]
         ]
       },
       "greeting": [
@@ -125,7 +129,7 @@
       "say": [
         "Left bay. Good.",
         "Right bay. Good.",
-        "Relay's up. Payment's sent. Next."
+        "Relay's up. Log closed. Next."
       ]
     }
   ],
@@ -136,8 +140,9 @@
   },
   "broadcast": [
     "Relay post needs a contractor.",
-    "Two cells to carry. Paid on completion.",
+    "Two cells to carry. Left bay, right bay.",
     "Out."
   ],
-  "_speech": "Her voice on the radio, in person and at the relay. No names, no places, no flags."
+  "_speech": "Her voice on the radio, in person and at the relay. No names, no places, no flags.",
+  "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."
 }

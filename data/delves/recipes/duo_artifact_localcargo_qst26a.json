@@ -72,12 +72,13 @@
   },
   "broadcast": [
     "Three reclaimers down, and nobody spare to look at them.",
-    "Get them running and there's pay in it."
+    "We're down to what's in the tanks, and the tanks don't last."
   ],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides.",
   "approach": {
     "to": 1,
     "civilians": true,
     "_approach": "His fact 2026-10-11: LocTypeOE_NonHostile POIs mostly have nobody unless a quest is there, so the crew the briefing names must be placed. Civilians appear round the first reclaimer on first approach."
-  }
+  },
+  "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."
 }

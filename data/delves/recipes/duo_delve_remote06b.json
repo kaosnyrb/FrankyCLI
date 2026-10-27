@@ -28,7 +28,7 @@
   "broadcast": [
     "We broke into a cave, and something came up out of it.",
     "We got out, but our gear's still down there.",
-    "Clear it out and you'll be paid."
+    "Clear it out so we can go back for it."
   ],
   "beats": [
     {
@@ -52,5 +52,6 @@
       ]
     }
   ],
-  "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Lucy, Fresh and Casual' (British), NOT yet heard in game (voices.md); his ear decides."
+  "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Lucy, Fresh and Casual' (British), NOT yet heard in game (voices.md); his ear decides.",
+  "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."
 }

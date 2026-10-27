@@ -78,12 +78,13 @@
   "broadcast": [
     "Our landing beacons are sending the wrong signal, and the supply ships keep flying past.",
     "We can't get a tech down here.",
-    "Fix them and there's pay in it."
+    "Fix them and the next ship might actually land."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Killian' (Irish, calm), NOT yet heard in game (voices.md); his ear decides.",
   "approach": {
     "to": 1,
     "civilians": true,
     "_approach": "His fact 2026-10-11: LocTypeOE_NonHostile POIs mostly have nobody unless a quest is there, so the crew the briefing names must be placed. Civilians appear round the first beacon on first approach."
-  }
+  },
+  "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."
 }

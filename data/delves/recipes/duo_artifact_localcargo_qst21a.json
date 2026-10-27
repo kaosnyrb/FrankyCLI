@@ -25,7 +25,10 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "No natural or cave sites: his 09a ruling 2026-10-12 once waves spawn close behind the player, and the base's own exclusions."
   },
@@ -53,8 +56,15 @@
       "objective": "Hold off the attackers",
       "journal": "As soon as I lifted the sample case, the people who ran the crew off came back for it. I have to deal with them before I can get it out.",
       "waves": 3,
-      "size": [3, 5],
-      "style": ["squad", "squad", "horde"],
+      "size": [
+        3,
+        5
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
       "revealObjective": "Stop the attackers"
     },
     {
@@ -77,8 +87,9 @@
   },
   "broadcast": [
     "We got run off and left our samples behind.",
-    "Bring them out and you'll be paid.",
+    "We can't go back in for it. Not with them out there.",
     "Watch yourself. They didn't go far."
   ],
-  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Chris, Charming, Down-to-Earth', NOT yet heard in game (voices.md); his ear decides."
+  "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Chris, Charming, Down-to-Earth', NOT yet heard in game (voices.md); his ear decides.",
+  "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."
 }

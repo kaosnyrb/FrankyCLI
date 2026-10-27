@@ -27,6 +27,8 @@ dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, t
 dotnet run -- gen_delve build <id> --dry --emit <dir>   the would-be plugin and the emitted model, to <dir> only
 ```
 
+**And for every recipe with speech: `python scripts/delves/voice_check.py`** (or an id, or `--rev` for the control). It grades every SPOKEN line against his by-ear catches: PAY (a line that promises pay; his "I know i'll be paid", 2026-10-27), DASH (an em dash) and NOUN (a faction, place or currency outside a NARROW Delve, his total-conversion rule). Exit 1 on any flag. It cannot see a LONE line (a fragment that only works after the line before); read the lines aloud. Jessica's, 2026-10-27, on his "Feels like we need a linter here".
+
 **Then a MANUAL step for any recipe with a talk beat:** `python scripts/delves/talk_check.py <id>` (or no id for all,
 `--flagged` for only the menus it flags). It prints what the player is sure to have heard before each menu (the
 greeting, an earlier talk's closing reply, what he is carrying) and marks prompts whose words are not in it. **A
