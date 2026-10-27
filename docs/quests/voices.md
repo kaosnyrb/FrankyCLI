@@ -118,6 +118,21 @@ there. The heard-in-game table above is the one to choose from first; this is wh
 | neutral | young | Xiaoxi - Chinese American podcast host | `rk9BD4xwuG39syvDIBQy` | american | conversational | confident | professional |
 | neutral | middle aged | River - Relaxed, Neutral, Informative | `SAz9YHcvj6GT2YYXdXww` | american | conversational | calm | premade |
 
+## The model: `eleven_v3`, his ruling
+
+**His 2026-10-27: *"we'll stick with v3, I'm getting Jessica to write longer sentences so we don't have this
+context sharding stuff."*** Measured that morning on 23a's lines (Annie K, the build's settings), off his wish for
+each line to know the ones beside it:
+
+- `eleven_v3` refuses `previous_text` / `next_text` (HTTP 400 `unsupported_model`). Every line is generated alone.
+- `eleven_multilingual_v2` takes them; **his ear: "V2 is a downgrade".**
+- `eleven_v4` takes them (whether it uses them was not shown); `eleven_v4_alpha` refuses them.
+- ⚠ v2 and v4 both come out about **14 dB quieter** than v3 (about −30 against −16 LUFS integrated), so a
+  side-by-side by ear needs loudness matching first, and a model switch needs a loudness step in the build.
+
+**So context is the writer's job:** a thought that belongs together goes in ONE line, because the voice cannot
+hear the line before it.
+
 ## What changing a voice costs
 
 Changing `speaker.elevenlabs` (or the words) regenerates those lines at the next build. One call each,
