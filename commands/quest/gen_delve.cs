@@ -619,6 +619,12 @@ namespace FrankyCLI
             /// </summary>
             public int? returnTo { get; set; }
             /// <summary>
+            /// beats, a use, OPTIONAL: the object is disabled as the FIRST line of this beat's stage, as a pickup's is (his
+            /// play of duo_MB52a_qst, 2026-10-27: "the box kinda just sits there tho", the cache burned and still standing).
+            /// On a return it takes the shared object. Refused on a use a later beat comes back to. Absent = false.
+            /// </summary>
+            public bool vanish { get; set; }
+            /// <summary>
             /// beats, a recover, OPTIONAL: [min, max] distance from the beat's marker at which the holder is placed, out on
             /// open ground at a random angle, his gang round him (his idea and his 05a note, 2026-10-19: "the spacers spawn in
             /// the site"). Route A of duo_offpoiprobe (spike 2026-10-19-objectives-off-the-poi). Absent = at the marker.

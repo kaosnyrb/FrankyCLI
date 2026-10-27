@@ -110,11 +110,14 @@ namespace FrankyCLI
             /// <summary>
             /// A pickup's object goes as the FIRST line of its stage, ahead of anything that waits (his play of
             /// remote_planet_qst21a, 2026-10-26: "the canister doesn't disappear on use"). See Hook for why the stock flag
-            /// cannot do it.
+            /// cannot do it. A use with vanish goes the same way (his play of duo_MB52a_qst, 2026-10-27: "the box kinda just
+            /// sits there tho"); on a return its slot is the shared object, so the name is this beat's and the alias the same.
             /// </summary>
             internal override void StageLines(BeatsBuild build, int k, int b)
             {
-                if (!CarriesItem || build.r.beats[b].returnTo != null) return;
+                var beat = build.r.beats[b];
+                bool pickupGoes = CarriesItem && beat.returnTo == null;
+                if (!pickupGoes && !beat.vanish) return;
                 string ta = $"Alias_Beat{b + 1}Target";
                 build.props.Add(("ReferenceAlias", ta, build.clone.FormKey, build.slotOf[b].activatorAlias));
                 int st = build.beatStage[b];

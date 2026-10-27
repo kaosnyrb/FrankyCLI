@@ -42,6 +42,7 @@
       "type": "use",
       "at": "RECenterLocRef",
       "returnTo": 1,
+      "vanish": true,
       "objective": "Burn the texts",
       "journal": "I burned the cache at the <Place>, every book in it. I still don't know what was banned about them. Nobody asked me to know.",
       "say": [
