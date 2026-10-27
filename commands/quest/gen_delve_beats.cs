@@ -863,6 +863,16 @@ namespace FrankyCLI
                     markerSourceTaken = true;
                     return clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)markerSourceId);
                 }
+                // A beat AT the main place's map marker takes the template's own map-marker alias rather than a second alias
+                // on the same reference, which the contention check refuses (his ruling 2026-10-27, "yeah reuse the map
+                // marker alias", after remote_planet_qst21a's hold on MapMarkerRefType failed it).
+                if (r.beats[i].PlaceIndex == 0 && string.Equals(r.beats[i].at, "MapMarkerRefType", StringComparison.OrdinalIgnoreCase)
+                    && clone.Aliases!.OfType<QuestReferenceAlias>().FirstOrDefault(a => a.ID == (uint)t.mapMarkerAlias) is { } mm
+                    && mm.Location?.AliasID == t.placeAlias)
+                {
+                    Console.WriteLine($"  marker   : beat {i + 1} is at the map marker, so it reuses alias {mm.ID} {mm.Name}");
+                    return mm;
+                }
                 uint id = NextAliasId(clone);
                 var m = markerPattern.DeepCopy(); m.ID = id; m.Name = "DelveBeat" + (i + 1) + suffix;
                 clone.Aliases.Add(m);

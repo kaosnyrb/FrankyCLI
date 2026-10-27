@@ -51,7 +51,8 @@
     },
     {
       "type": "hold",
-      "at": "RETravelB1LocRef",
+      "at": "MapMarkerRefType",
+      "_at": "The map marker, his 2026-10-27 ruling off his play: \"The defend marker is at a random point\" on RETravelB1LocRef, a travel-ring marker that can sit anywhere round the POI. The hold reuses the quest's own map-marker alias (his \"reuse the map marker alias\"), since a second alias on the same reference fails the contention check.",
       "objective": "Fight off the ambush",
       "journal": "Lifting the canister woke its tracker, and the people who jumped the courier came straight for it. I have to deal with them before I can get it out.",
       "waves": 3,
