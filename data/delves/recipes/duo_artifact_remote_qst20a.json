@@ -23,15 +23,15 @@
   },
   "prose": {
     "name": "Recovery: Flight Recorder over <Planet>",
-    "briefing": "A freighter went dark in orbit over <Planet>. Its crew got off in the pods, and its flight recorder is still pinging."
+    "briefing": "A freighter broke up in orbit over <Planet>. Its crew got out in the escape pods, and its flight recorder ejected and is still pinging."
   },
   "beats": [
     {
       "type": "use",
       "at": "se_GeneralMarkerLocRef06",
       "_at": "26a's proven marker.",
-      "objective": "Recover the flight recorder from the wreck over <Planet>",
-      "journal": "A freighter went dark over <Planet> and its crew got off in the pods. I pulled its flight recorder out of the wreck, so somebody can finally say what happened.",
+      "objective": "Recover the flight recorder over <Planet>",
+      "journal": "A freighter broke up over <Planet> and its crew got out in the escape pods. I picked up its flight recorder, so somebody can finally say what happened.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "_model": "STAND-IN: the only object proven in orbit.",
       "name": "Flight Recorder",
@@ -48,9 +48,10 @@
     "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
   },
   "broadcast": [
-    "If you're near the wreck, you'll pick up the ping. That's the recorder.",
-    "The crew got off in the pods. The ship didn't.",
+    "If you're near it, you'll pick up the ping. That's the recorder.",
+    "The crew got out in the escape pods. The recorder ejected when the ship broke up.",
     "They swear they did nothing wrong. The recorder's the only thing that can say so."
   ],
-  "_speech": "The ship's owner, who believes her crew and wants proof. Bella (Professional, Bright, Warm), in one recipe so far; his ear decides. No names, places, factions or currency."
+  "_speech": "The ship's owner, who believes her crew and wants proof. Bella (Professional, Bright, Warm), in one recipe so far; his ear decides. No names, places, factions or currency.",
+  "_wording": "2026-10-26/27, his catch: 'The crew got off in the pods. The ship didn't.' did not make sense. Rewritten so the recorder EJECTED and floats alone, which also matches the placed object (Kim's S3, a beacon on a hull plate) and stops every line implying a wreck nobody placed."
 }
