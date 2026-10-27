@@ -14,7 +14,7 @@
     "The entries say she got away ('If someone finds this, I'm fine'), so the job is a return, never a body.",
     "ONE THING NOT BUILT, Eliza's: a pickup whose item is an AUDIO BOOK (today a pickup clones a MiscItem). Stand-in:",
     "beats[0].slate.audio, four entries. The Delves' speech already builds the same radio-scene shape (AliasID -4).",
-    "Whether he hears it on pickup or only when he opens it is his: vanilla plays it when opened.",
+    "IT PLAYS WHEN OPENED, vanilla's way (his 2026-10-27 05:50: \"it should play when you open it\"). Never on pickup.",
     "Not narrow, so roles only aloud: no names, places, factions or currency. Pay: med, capped."
   ],
   "place": {
