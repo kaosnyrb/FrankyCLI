@@ -23,6 +23,7 @@ data/delves/recipes/<id>.json          write or copy a recipe
 dotnet run -- gen_delve lint --all     grade every recipe (about a minute, one line each)
 dotnet run -- gen_delve lint <id>      one recipe's full report
 dotnet run -- gen_delve build <id> --dry   lint, then build in memory, write nothing
+dotnet run -- gen_delve name <draftId> [--family <NN>]   a draft takes its classic name before its first real build
 dotnet run -- gen_delve build <id>     write it into the live du_overtime.esm, then verify off disk
 dotnet run -- gen_delve build <id> --dry --emit <dir>   the would-be plugin and the emitted model, to <dir> only
 ```
@@ -54,7 +55,7 @@ reads no quest at all.** A shell without the parts its template takes is refused
 a parts file read off a quest the row no longer names is refused too. **Open:** the lint still reads the base quest
 (for two warnings, never for the build). `scripts/delves/ab.py` is the byte-for-byte A/B every step is proven by.
 
-**A clean lint means the build will take it.** The lint writes nothing and is safe to run any time.
+**A clean lint means the build will take it, once it has its name.** The lint writes nothing and is safe to run any time, and it passes a draft (`duo_delve…`) because drafts are written and linted before they are named; only a REAL build refuses a draft, naming `gen_delve name` and the name it would give (2026-10-27, see *Naming*).
 
 **Before a real build, on the machine with the plugin (Defiant):**
 1. Starfield and the Creation Kit are closed (the build cannot write a plugin the game holds, and
@@ -344,8 +345,15 @@ FAMILY in the original mod's own grammar, so it sorts beside the classics in xEd
   the scope in the name can never split a family.
 - **The number is assigned when the forms are made, not when the recipe is written** (his: *"When I built
   before the numbers got assigned when I built so there was no gaps"*). A draft keeps its `duo_delve…` name
-  until it is built. ⏳ The build step that hands out the next free number is not built yet; until it is,
-  the number is chosen by hand at first build and the recipe file renamed to match.
+  until it is built. **`gen_delve name <draftId>` hands out the number** (2026-10-27, his *"lets build the naming
+  tool now so we don't have to move things again"*, after 27a was built under its draft name and rebuilt as
+  `duo_MB51a_qst`): it reads the scope off the recipe (a board or boardspace template is a board; slatespace is
+  remote space; a ground slate's deal node says LocalCargo, RemotePlanet or Local), takes one past the highest
+  family at or above the floor in the recipes folder, and renames the file and its id, nothing else, read back off
+  disk. `--family <NN>` gives that family's next letter instead (refused for a classic or an empty family). A real
+  build of a draft is refused with the command and the name it would give; `duo_delvetest_` rungs are not drafts.
+  The numbers are read off the RECIPES, not the plugin: every Delve ever built has one, and the classics sit below
+  the floors. `gen_delve selftest` carries the rule's cases.
 - **Letters are the phase-two axis:** his plan is about ten lettered versions per family.
 - Fragment scripts are `duo_qf_` plus the id **without** its own `duo_`, so the longest id fits the
   compiler's 38. Quests built before 2026-10-26 keep the fragment they were built with.

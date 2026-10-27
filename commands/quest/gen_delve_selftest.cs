@@ -2,6 +2,8 @@ using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Starfield;
 using Noggog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FrankyCLI
 {
@@ -61,6 +63,32 @@ namespace FrankyCLI
                                    "DefaultAliasOnItemAddedScriptC", "DefaultAliasOnItemAddedScriptD" };
             for (int n = 0; n < itemAdded.Length; n++)
                 Check($"recover {n + 1}'s hook is {itemAdded[n]}", RecoverBeat.ItemAddedScript(n) == itemAdded[n], RecoverBeat.ItemAddedScript(n));
+
+            // The naming rule (delve_name.cs, 2026-10-27): the scope read off kind and deal, the next family and letter.
+            string S(string? kind, string? deal) => ScopeOf(kind, deal, out _)?.Label ?? "none";
+            Check("a board template is a board", S("board", "_duo_MB_MissionNode_test") == "board", S("board", "_duo_MB_MissionNode_test"));
+            Check("boardspace is a board", S("boardspace", null) == "board", S("boardspace", null));
+            Check("slatespace is remote", S("slatespace", null) == "remote", S("slatespace", null));
+            Check("LocalCargo is not read as Local", S("beats", "duo_MS_ArtifactMap_LocalCargoNode_Rare") == "localcargo", S("beats", "duo_MS_ArtifactMap_LocalCargoNode_Rare"));
+            Check("a Local test node is local", S("beats", "_duo_MS_ArtifactMapLocal_TEST") == "local", S("beats", "_duo_MS_ArtifactMapLocal_TEST"));
+            Check("RemotePlanet is remote_planet", S("beats", "duo_MS_ArtifactMap_RemotePlanetNode") == "remote_planet", S("beats", "duo_MS_ArtifactMap_RemotePlanetNode"));
+            Check("a beats recipe with no deal has no scope", S("beats", null) == "none", S("beats", null));
+            Check("the test ladder has no scope", S("space", null) == "none", S("space", null));
+            var mb = ScopeOf("board", "x", out _)!;
+            string? N(IEnumerable<string> ids, int? fam = null) => NextName(mb, ids, fam, out _);
+            var have = new[] { "duo_MB01a_qst", "duo_MB31a_qst", "duo_MB40a_qst", "duo_MB47a_qst", "duo_MB50a_qst", "duo_delve_missionboard28a" };
+            Check("the next family is one past the highest Delve", N(have) == "duo_MB51a_qst", N(have) ?? "null");
+            Check("an empty scope starts at the floor", N(new[] { "duo_MB31a_qst" }) == "duo_MB40a_qst", N(new[] { "duo_MB31a_qst" }) ?? "null");
+            Check("a family's next letter", N(have.Append("duo_MB47b_qst"), 47) == "duo_MB47c_qst", N(have.Append("duo_MB47b_qst"), 47) ?? "null");
+            Check("a classic family is refused", N(have, 31) == null, N(have, 31) ?? "null");
+            Check("a family with no member is refused", N(have, 48) == null, N(have, 48) ?? "null");
+            var lc = ScopeOf("beats", "duo_MS_ArtifactMap_LocalCargoNode", out _)!;
+            string? L(params string[] ids) => NextName(lc, ids, null, out _);
+            Check("a slate scope numbers from 20 and ignores other scopes", L("duo_artifact_localcargo_qst09a", "duo_artifact_local_qst29a") == "duo_artifact_localcargo_qst20a",
+                  L("duo_artifact_localcargo_qst09a", "duo_artifact_local_qst29a") ?? "null");
+            Check("a draft is a draft", IsDraftId("duo_delve_missionboard28a") && IsDraftId("duo_delve36a"), "duo_delve...");
+            Check("a test rung is not a draft", !IsDraftId("duo_delvetest_bs1"), "duo_delvetest_bs1");
+            Check("a named Delve is not a draft", !IsDraftId("duo_MB51a_qst"), "duo_MB51a_qst");
 
             Console.WriteLine(fail == 0 ? "selftest: all passed" : $"selftest: {fail} FAILED");
             return fail == 0 ? 0 : 1;

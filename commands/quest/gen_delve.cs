@@ -778,6 +778,8 @@ namespace FrankyCLI
                 }
                 case "shell": return MakeShell(path, dataDir, templates);
                 case "unbuild": return Unbuild(path, templates, dry);
+                // a draft takes its classic name before it is built: commands/quest/delve_name.cs
+                case "name": return Name(args, dataDir, templates, dry);
                 case "testnode": return TestNode(args, templates, dry);
                 case "nodeflag": return NodeFlag(args, templates, dry);
                 // the legacy mission system: commands/quest/delve_legacy.cs
@@ -794,6 +796,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
                     Console.WriteLine("       gen_delve lint  --all          every recipe, one game-data load, one line each");
                     Console.WriteLine("       gen_delve models [recipe ...]   the final test: every beat model resolves (one ~36 s load-order walk)");
+                    Console.WriteLine("       gen_delve name  <draftId> [--family <NN>] [--dry]   a draft takes its classic name (the next family, or --family's next letter) before its first build");
                     Console.WriteLine("       gen_delve build <recipe.json | recipeId> [--dry]");
                     Console.WriteLine("       gen_delve build <recipe> --dry --emit <dir>   write the would-be plugin and the emitted model to <dir>, never the live plugin");
                     Console.WriteLine("       gen_delve build <recipe> --from-base   start from the base quest's clone, not the template's shell (the A/B proof)");
@@ -2237,6 +2240,16 @@ namespace FrankyCLI
 
         private static int Build(Recipe r, Template t, IGameEnvironment<IStarfieldMod, IStarfieldModGetter> env, bool dry, BuildOptions opts)
         {
+            // A DRAFT TAKES ITS NAME BEFORE ITS FORMS ARE MADE (his 10-26 rule; delve_name.cs). Only a real build refuses:
+            // a dry one and the lint still take a draft, because drafts are written and linted before they are named.
+            if (!dry && IsDraftId(r.id))
+            {
+                var suggest = SuggestName(r, t, opts.DataDir, out string why);
+                Console.WriteLine($"REFUSED: {r.id} is a draft name, and a Delve takes its classic name before its forms are made. "
+                                  + (suggest != null ? $"Run: gen_delve name {r.id}   (it would become {suggest}; --family <NN> for a letter of an existing family)"
+                                                     : $"It has no Delve scope to name it in: {why}."));
+                return 1;
+            }
             var markers = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
             if (!Grade(r, t, env, markers, opts.Spread))
             { Console.WriteLine("\n=== lint failed. NOTHING WRITTEN. ==="); return 1; }
