@@ -1,0 +1,143 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard35a",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node. Its category is his (Exploration or Delivery).",
+  "author": "jessica",
+  "source": "his 2026-10-27 05:44: \"Mission idea. Missonboard. Recover dairy from POI and return it to owner at poi. Dairy is a voiced dataslate\"",
+  "_note": [
+    "THE DIARY. A prospector ran from her claim when strangers turned up, and left her diary behind. Fetch it from",
+    "the site, take it to her at another, hand it over in a conversation (11a's hand-back, MB50a played it).",
+    "THE DIARY IS VOICED: an AUDIO data-slate (BOOK DataSlateType Audio, its Scene a radio scene, docs/formlib/book_audio.md).",
+    "It is HER voice, and so is the radio and the woman you meet: the player hears the diary, then meets the person in it.",
+    "The entries say she got away ('If someone finds this, I'm fine'), so the job is a return, never a body.",
+    "ONE THING NOT BUILT, Eliza's: a pickup whose item is an AUDIO BOOK (today a pickup clones a MiscItem). Stand-in:",
+    "beats[0].slate.audio, four entries. The Delves' speech already builds the same radio-scene shape (AliasID -4).",
+    "Whether he hears it on pickup or only when he opens it is his: vanilla plays it when opened.",
+    "Not narrow, so roles only aloud: no names, places, factions or currency. Pay: med, capped."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "Her claim, now occupied: a built site that is NOT non-hostile, so whoever ran her off is there.",
+    "second": {
+      "remote": true,
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeTest"
+        ]
+      },
+      "_theme": "Where she is now: a lived-in non-hostile site. Residents stay alive here."
+    }
+  },
+  "prose": {
+    "name": "Recovery: Prospector's Diary on <Planet>",
+    "briefing": "A prospector ran from her claim at the <Place> when strangers turned up, and left her diary behind. She's at the <SecondPlace> now, and she'd like it back.",
+    "card": "Recovery contract. A prospector had to leave her claim at the <Place> on <Planet> in a hurry and left her diary behind. It's worth nothing to anyone else. Bring it back to her at the <SecondPlace>. The site is occupied. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Find the prospector's diary at the <Place>",
+      "journal": "I found the prospector's diary at the <Place>. Fifteen days of her claim, recorded. She's waiting at the <SecondPlace>.",
+      "item": "Prospector's Diary",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "_model": "STAND-IN: the slate itself is tiny on the ground. A dataslate on a crate (Kim's U4, not built) is the right look.",
+      "name": "Prospector's Things",
+      "slate": {
+        "title": "Prospector's Diary",
+        "audio": [
+          "Day one. The readings are better than the survey said. I might actually be rich. Don't get excited.",
+          "Day nine. Still not rich. Found a lot of rock that looks like money and isn't. Drank the last of the good coffee.",
+          "Day fourteen. Lights on the ridge again last night. Probably nothing. I've started sleeping with my boots on.",
+          "Day fifteen. They're not nothing. I'm going now. If someone finds this, I'm fine. I'm just not coming back for the drill."
+        ]
+      },
+      "_slate": "STAND-IN for an AUDIO data-slate: each entry one phase of its scene, her voice, read in order. The entries are the story; the journal and card never repeat them.",
+      "say": [
+        "Got it? Don't listen to it.",
+        "Actually, listen to it if you like. It's mostly rocks."
+      ]
+    },
+    {
+      "type": "talk",
+      "place": "second",
+      "at": "RECenterLocRef",
+      "objective": "Return the diary to the prospector at the <SecondPlace>",
+      "journal": "A prospector ran from her claim at the <Place> and left her diary behind. I brought it back to her at the <SecondPlace>. She's fine, and she's not rich.",
+      "person": {
+        "name": "Ines Calder",
+        "template": "UC_NA_MASTWorkerFemale03",
+        "outfit": "Outfit_Clothes_Colonist_Adventurous_01_NoHat",
+        "voice": "GenericFemale01",
+        "elevenlabs": "pFZP5JQG7iQjIQuC4Bku",
+        "hellos": [
+          [
+            "Oh. Hello. Sorry, I'm still jumpy."
+          ],
+          [
+            "If you're selling coffee, I'll buy all of it."
+          ]
+        ]
+      },
+      "greeting": [
+        "You found it. I honestly thought it was gone.",
+        "Did you listen to it? Everyone listens to it."
+      ],
+      "exchanges": [
+        {
+          "prompt": "Here's your diary.",
+          "reply": [
+            "Thank you. Fifteen days of my life, and most of them about coffee.",
+            "I'd give you more, but you know how much coffee I had left."
+          ]
+        },
+        {
+          "prompt": "I listened to it.",
+          "reply": [
+            "Then you know I'm not rich.",
+            "I'll go back for the drill one day. Not soon."
+          ]
+        },
+        {
+          "prompt": "Who was on the ridge?",
+          "reply": [
+            "I never saw them properly. Lights, then voices, then I stopped waiting to find out."
+          ]
+        },
+        {
+          "prompt": "How are you holding up?",
+          "reply": [
+            "Ask me in a year.",
+            "Right now, a bed with walls round it is worth more than anything I dug up."
+          ]
+        }
+      ],
+      "_talk": "Exchange 0 is the hand-back: it takes the diary and pays. 'I listened to it' is set up by her greeting; 'the ridge' only by the diary itself, so a player who never opened it gets a prompt he can't place. talk_check will flag it; kept because the diary is the point, his eye decides.",
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Prospector",
+    "voice": "GenericFemale01",
+    "elevenlabs": "pFZP5JQG7iQjIQuC4Bku"
+  },
+  "broadcast": [
+    "You're at my old claim? Good. My diary's in there somewhere.",
+    "It's small, it's scuffed, and it's full of rubbish about rocks.",
+    "Whoever's in there now won't want it. I do."
+  ],
+  "_speech": "One woman, three ways: the diary, the radio, the conversation. Lily (Velvety Actress), in one recipe so far; his ear decides. Not narrow, so roles only aloud."
+}
