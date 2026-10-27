@@ -101,5 +101,9 @@
     "voice": "GenericMale01",
     "elevenlabs": "dgkKQcJqyy5AP0dqleUU"
   },
+  "broadcast": [
+    "We're still waiting on a reclaimer housing that was signed out to us and never turned up. Until it does, the whole site's on rationed water."
+  ],
+  "_broadcast": "Added 2026-10-27 with 24a's, his 'There's like no radio at the start' (same family, same gap).",
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."
 }

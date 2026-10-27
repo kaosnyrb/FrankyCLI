@@ -116,5 +116,9 @@
     "voice": "GenericFemale01",
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
+  "broadcast": [
+    "We've been without a relay for over a week. The dish was signed out to us and it never turned up, so somewhere between there and here, it's sitting in a crate."
+  ],
+  "_broadcast": "Added 2026-10-27, his: 'There's like no radio at the start of this one'. One take; it sets up the crate (the pickup's box) without naming a place.",
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides. His \"either or\" 2026-10-09: a beat carries a spoken line OR a message box, never both; the spoken beats lost their boxes."
 }
