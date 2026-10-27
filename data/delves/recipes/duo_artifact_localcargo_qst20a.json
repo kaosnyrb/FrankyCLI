@@ -21,13 +21,16 @@
   "place": {
     "theme": {
       "require": [],
-      "exclude": ["LocTypeOE_ThemeNaturalKeyword", "LocTypeOE_ThemeCaveKeyword"]
+      "exclude": [
+        "LocTypeOE_ThemeNaturalKeyword",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
     },
     "_theme": "Keeps the base's own exclusions (no natural sites, no caves). A ground survey before somebody builds reads right at a worked site."
   },
   "prose": {
     "name": "Survey: Seismic Sensors on <Planet>",
-    "briefing": "A survey team set three seismic sensors at the <Place> and left before anyone came back to read them. The survey office will pay for the data."
+    "briefing": "A survey team set three seismic sensors at the <Place> and left before anyone came back to read them. Nobody builds on that ground until someone does."
   },
   "beats": [
     {
@@ -76,8 +79,9 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Three sensors went in down there, and nobody came back to read them.",
-    "Send us the data and the job's paid."
+    "A survey team set three seismic sensors down there, then left before anyone came back to read them.",
+    "Nobody's building on that ground until we've seen those readings."
   ],
-  "_speech": "Radio rules: no names, no places, one clause where it can be. Voice is ElevenLabs' 'Annie K, Calm, Grounded Narrator', NOT yet heard in game (voices.md); his ear decides."
+  "_speech": "Radio rules: no names, no places, one clause where it can be. Voice is ElevenLabs' 'Annie K, Calm, Grounded Narrator', NOT yet heard in game (voices.md); his ear decides.",
+  "_wording": "2026-10-27, his: 'could use a rewording too. I know i'll be paid'. The pay line is gone; the call says why the readings matter instead."
 }

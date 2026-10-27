@@ -87,9 +87,9 @@
   },
   "broadcast": [
     "Our courier was jumped on her way back and had to drop a canister of vaccine cultures.",
-    "It's still out there. Get it to the courier beacon and we'll pay for your time.",
+    "It's still out there. Get it to the courier beacon before anyone else does.",
     "Whoever jumped her didn't take it, and that worries me. I think they're waiting to see who comes for it."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Sarah, Mature, Reassuring, Confident', NOT yet heard in game (voices.md); his ear decides.",
-  "_wording": "2026-10-27, his catch: 'They may still be watching for it.' delivered badly on its own (each list item is its own audio line). Reworded whole: every radio line is a complete thought, the bait is said once with its reason, and the pickup line answers it."
+  "_wording": "2026-10-27, his catch: 'They may still be watching for it.' delivered badly on its own (each list item is its own audio line). Reworded whole: every radio line is a complete thought, the bait is said once with its reason, and the pickup line answers it. Then his 'I know i'll be paid' (on Seismic Sensors, same morning): the pay promise in line two is gone."
 }
