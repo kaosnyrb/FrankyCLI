@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "id": "duo_delve21a",
+  "id": "duo_MB52a_qst",
   "template": "board",
   "deal": "_duo_MB_MissionNode_test",
   "_deal": "The mission board's test node, as 12a and 20a.",
@@ -36,15 +36,14 @@
       "objective": "Find the cache of texts at the <Place>",
       "journal": "The cache at the <Place> is a footlocker of hand-bound books. I read the first page of the top one. It's a cookbook, mostly, with a family's names written in the margins.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Locked Footlocker"
+      "name": "Cache of Banned Texts"
     },
     {
       "type": "use",
       "at": "RECenterLocRef",
+      "returnTo": 1,
       "objective": "Burn the texts",
       "journal": "I burned the cache at the <Place>, every book in it. I still don't know what was banned about them. Nobody asked me to know.",
-      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
-      "name": "Cache of Banned Texts",
       "say": [
         "Destruction confirmed. Your report is filed. There is nothing further on this contract."
       ],
