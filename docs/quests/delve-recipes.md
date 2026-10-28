@@ -155,7 +155,7 @@ afternoon: *"yup no mission"*, and the site's people were gone too: at a quiet s
 places its own). Then all twelve board Delves the same way. **The board shell carries the bit since that day**
 (`shells/board.json`, alias 5 `8388865`; a dry build of 53a and 40a before and after differs by that one byte), so a
 new or rebuilt board Delve reserves by construction and this pass is for none. The space boards (`boardspace`, his
-MB01a) already reserve their orbit's planet (0x109).
+MB01a) already reserve their orbit's planet (0x109). **And the build refuses a place that does not reserve** (his *"can we add it to the linter"*, the same day): after the place conditions are written, every place the recipe uses is checked on the clone and printed (`reserve  : place (alias 5, TargetLocation) reserves its location`); one that does not is `REFUSED`, naming the shell to fix. It runs on `--dry`, so `build --dry` is the gate; it is in the BUILD and not the recipe lint because only the build knows which alias each place became (a shell's, a borrowed one, a remote request, a created third, an orbit), and a lint re-deriving that would be a second mapping. A named city is exempt (shared with every quest). Bitten: the board shell with the bit removed refuses 53a by name. The space templates build elsewhere (`delve_space.cs`) and are not checked; their shells reserve (0x109).
 
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes

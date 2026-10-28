@@ -2490,6 +2490,26 @@ namespace FrankyCLI
                                              ResolveKeywords(env, theme.require, _ => { }),
                                              ResolveKeywords(env, theme.exclude, _ => { }));
             }
+            // ⛔ EVERY PLACE HE IS SENT TO RESERVES ITS LOCATION (his 2026-10-28, "can we add it to the linter", after the board
+            // base's TargetLocation did not and vanilla's POI encounters took 53a's site). An OE_Location fills without
+            // AllowReserved, so a reserved site is one they cannot take. Checked HERE, on the clone, because only the build knows
+            // which alias each place became (a shell's, a borrowed one, a remote request, a created third, an orbit); a lint
+            // that re-derived it would be a second mapping. Runs on --dry too. A named city is exempt: it is shared with every
+            // quest that uses it, and reserving it would lock them out.
+            foreach (int pi in fail > 0 ? Enumerable.Empty<int>() : PlacesUsed(r))
+            {
+                if (pi == 1 && secondCity) continue;
+                int aid = PlaceAliasOf(t, pi, made4.ThirdPlaceAlias);
+                var la = clone.Aliases.OfType<QuestLocationAlias>().FirstOrDefault(a => a.ID == (uint)aid);
+                bool reserves = la?.Flags?.HasFlag(QuestLocationAlias.Flag.ReservesLocationOrReference) == true;
+                Console.WriteLine($"  reserve  : {PlaceKey[pi]} (alias {aid}, {la?.Name ?? "missing"}) {(reserves ? "reserves its location" : "DOES NOT RESERVE")}");
+                if (!reserves)
+                {
+                    Console.WriteLine($"REFUSED: the {PlaceKey[pi]} (alias {aid}) does not reserve its location, so a POI encounter can take the site. "
+                                      + $"Set ReservesLocationOrReference on it in {t.shell ?? "the template's shell"} (or its parts).");
+                    fail++;
+                }
+            }
 
             lap.Mark("inputs+beats+prose");
             // Everything BuildBeats reads off the load order, own-or-master, in one record (gen_delve_inputs.cs).
