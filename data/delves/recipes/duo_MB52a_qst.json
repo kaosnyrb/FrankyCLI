@@ -10,8 +10,8 @@
     "THE BANNED TEXTS. The old line's best part is the missing reason, so the Delve keeps it missing. No choice offered:",
     "the job is the job, and the journal is where the player gets to have a feeling about it.",
     "SABOTAGE IS DESTROY (his 2026-10-28 13:07): the classic MB20 cache was shot, not opened. One beat, the cache destroyed",
-    "and burning; words rewritten 2026-10-28. BEAT TYPE STAYS 'use' (with vanish and the incendiary) UNTIL A destroy BEAT",
-    "EXISTS in gen_delve (Eliza's lane, not commissioned); the words already read as destroy.",
+    "and burning; words rewritten 2026-10-28. The beat is destroy (Eliza's, FrankyCLI 7195765) with the incendiary kept;",
+    "vanish dropped, since a destroy stage disables the object itself. Unplayed as destroy.",
     "Issuer: an administrator's office, flat and unexplained (style guide 33 s4). Single ending, so the last beat's say",
     "is the closing radio (his 2026-10-17). Pay: easy, placeholder; the tier is his."
   ],
@@ -33,9 +33,8 @@
   },
   "beats": [
     {
-      "type": "use",
+      "type": "destroy",
       "at": "RECenterLocRef",
-      "vanish": true,
       "explosion": "IncendiaryGrenadeExplosion",
       "objective": "Destroy the cache of texts at the <Place>",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",

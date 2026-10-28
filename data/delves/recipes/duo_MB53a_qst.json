@@ -10,8 +10,8 @@
     "SABOTAGE IS DESTROY. His 2026-10-28 13:07: \"the original sabotage missions had you destroy the activator. They have a",
     "health system\". The classic MB19/MB20 are his nest machinery (shoot-only activators), so the scanners get shot, not",
     "spoofed. The first draft was a quiet trick (feed false readings); that premise is gone, words rewritten 2026-10-28.",
-    "BEAT TYPE STAYS 'use' UNTIL A destroy BEAT EXISTS in gen_delve (Eliza's lane, not commissioned). The words already read",
-    "as destroy; the type changes when the beat does.",
+    "The beats are destroy (Eliza's beat, FrankyCLI 7195765: the clone takes health 50, activation blocked, the",
+    "stage disables it). Unplayed.",
     "Issuer: settlers the Ecliptic are watching, who want to move without being seen. The board card is theirs",
     "(style guide 33 s4: we, payer on line one, flat, stock closer).",
     "Three scanners in ANY ORDER behind one counted objective (remote03a's shape), so no journal line says first or last.",
@@ -41,7 +41,7 @@
   ],
   "beats": [
     {
-      "type": "use",
+      "type": "destroy",
       "group": "spoof",
       "at": "RECenterLocRef",
       "objective": "Destroy the Ecliptic scanners at the <Place>",
@@ -50,7 +50,7 @@
       "name": "Ecliptic Motion Scanner"
     },
     {
-      "type": "use",
+      "type": "destroy",
       "group": "spoof",
       "at": "RETravelA1LocRef",
       "ring": "infrastructure",
@@ -59,7 +59,7 @@
       "name": "Ecliptic Landing Scanner"
     },
     {
-      "type": "use",
+      "type": "destroy",
       "group": "spoof",
       "at": "RETravelB1LocRef",
       "ring": "infrastructure",
