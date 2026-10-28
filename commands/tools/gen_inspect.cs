@@ -970,6 +970,12 @@ namespace FrankyCLI
                 case "biom":
                     found += SearchWithRecovery(mod.Biomes, search, "Biome");
                     break;
+                case "surfacetreegrid":
+                case "sftrgrid":
+                    foreach (var rec in mod.SurfaceTrees)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpSurfaceTreeGrid(rec, cache); found++; }
+                    break;
                 case "surfacepattern":
                 case "sfpt":
                     foreach (var rec in mod.SurfacePatterns)
@@ -1104,6 +1110,35 @@ namespace FrankyCLI
             Grid("MasterBlocks", pat.MasterBlocks, pat.MasterBlockRotations);
             Grid("OverrideBlocks", pat.OverrideBlocks, pat.OverrideBlockRotations);
             Console.WriteLine();
+        }
+
+        /// <summary>
+        /// A SurfaceTree as data: one tab-separated row per grid point of each of its two pattern
+        /// grids (the CK's "Hemisphere Face"), `face index pattern gnam`, index in record order.
+        /// Read by reflection because the two grids and their byte companions are only known here
+        /// by the names the generic dump printed (2026-10-28, Venus, for Homestead); a property
+        /// that is missing is reported, never skipped.
+        /// </summary>
+        private static void DumpSurfaceTreeGrid(ISurfaceTreeGetter tree, ILinkCache? cache)
+        {
+            Console.WriteLine($"# SurfaceTree {tree.EditorID} {tree.FormKey}");
+            var names = new Dictionary<FormKey, string>();
+            string Name(FormKey fk)
+            {
+                if (names.TryGetValue(fk, out var n)) return n;
+                n = cache != null && cache.TryResolve<ISurfacePatternGetter>(fk, out var p) ? (p.EditorID ?? fk.ToString()) : fk.ToString();
+                return names[fk] = n;
+            }
+            object? Prop(string name) => tree.GetType().GetProperty(name)?.GetValue(tree);
+            foreach (var (face, patName, byteName) in new[] { (0, "SurfacePatterns", "GNAM"), (1, "SurfacePatterns2", "GNAM2") })
+            {
+                var pats = (Prop(patName) as System.Collections.IEnumerable)?.Cast<IFormLinkGetter>().ToList();
+                var bytes = (Prop(byteName) as System.Collections.IEnumerable)?.Cast<byte>().ToList();
+                if (pats == null) { Console.WriteLine($"# face {face}: property {patName} not found"); continue; }
+                Console.WriteLine($"# face {face}: {pats.Count} patterns, {bytes?.Count ?? 0} {byteName} bytes");
+                for (int i = 0; i < pats.Count; i++)
+                    Console.WriteLine($"{face}\t{i}\t{Name(pats[i].FormKey)}\t{(bytes != null && i < bytes.Count ? bytes[i] : -1)}");
+            }
         }
 
         private static void DumpMessage(IMessageGetter msg)
