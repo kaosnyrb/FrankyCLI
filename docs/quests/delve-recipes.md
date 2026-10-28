@@ -142,6 +142,17 @@ Delve's model from the edited quest, so the model agrees with the plugin. First 
 11a, 11b, 15a, 18a, missionboard02a and 32a the same morning. A build writes the header itself since the same day, so
 this is for a Delve built before.
 
+**A board Delve's site reserved, in place: `gen_delve reserve <delveId>[,...] [--dry]`** (2026-10-28, his: *"Doing
+missions which send you to non-combat sites seem very likely to get the other kinda of mission event, the POI ones"*, *"I
+don't remember it happening in the original quests"*). Sets `ReservesLocationOrReference` on alias 5 (`TargetLocation`)
+with no rebuild. Vanilla's POI encounters (`OE_MainBranch`) fill `OE_Location` with Reserves set and AllowReserved (0x200)
+not, so a site our quest reserves should be one they cannot take; his classics reserve it (MB19a 0x109) and the board base
+`duo_MB28a_qst` does not (0x800100). Proof as `infogroup`'s: same size, one byte per Delve, the low byte of the alias's
+`FNAM` (a location alias's flags subrecord), bit `0x01` alone; then each quest read back with every other alias's flags
+unchanged, and the model re-emitted. Snapshot first. First use: `duo_MB53a_qst`, 2026-10-28, unplayed. ⚠ **The board
+shell does not carry the bit yet**, so a rebuild of a reserved Delve drops it: until his play confirms the fix, re-run
+this after any rebuild.
+
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
 go with the quest), and the id's Story Manager pool entries, behind `removerecord`'s inbound guard; re-reads the

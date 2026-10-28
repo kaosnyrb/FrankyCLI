@@ -803,6 +803,8 @@ namespace FrankyCLI
                 case "move": return DelveMove.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 // the walk-up groups' InfoGroup header, in place: commands/quest/delve_infogroup.cs
                 case "infogroup": return DelveInfoGroup.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
+                // a board Delve's TargetLocation reserved, in place: commands/quest/delve_reserve.cs
+                case "reserve": return DelveReserve.Run(args, dataDir, templates.Select(t => t.mod).Distinct(StringComparer.OrdinalIgnoreCase).ToList(), dry);
                 default:
                     Console.WriteLine("Usage: gen_delve templates");
                     Console.WriteLine("       gen_delve lint  <recipe.json | recipeId> [--spread]   --spread adds the beat-separation figures (~30 s more)");
@@ -820,6 +822,7 @@ namespace FrankyCLI
                     Console.WriteLine("       gen_delve rare <pool node> <delveId>[,...] [--dry]   move built Delves into <pool>_Rare, tried on duo_RareDelveChance% of the pool's events");
                     Console.WriteLine("       gen_delve move <delveId> <fromNode> <toNode> [--dry]   a built Delve changes pool (a list edit, never a rebuild)");
                     Console.WriteLine("       gen_delve infogroup <delveId>[,...] [--clear] [--dry]   set the InfoGroup header on its walk-up groups in place, proven at the bytes");
+                    Console.WriteLine("       gen_delve reserve <delveId>[,...] [--dry]   reserve a board Delve's TargetLocation in place (no POI encounter takes it), proven at the bytes");
                     Console.WriteLine("       gen_delve pcmpool <pcmBranchNode> [refType ...]   what a PCM request under that node can place, and which carry the ref types");
                     Console.WriteLine("       gen_delve selftest   the build's pure helpers, no plugin or game data loaded, exit 1 on failure");
                     return 1;
