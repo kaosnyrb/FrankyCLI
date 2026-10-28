@@ -120,6 +120,7 @@
         "clear",
         "hold",
         "use",
+        "destroy",
         "pickup",
         "deliver",
         "talk",

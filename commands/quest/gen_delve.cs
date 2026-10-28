@@ -2594,6 +2594,31 @@ namespace FrankyCLI
         }
 
         /// <summary>
+        /// The activator a destroy beat's health is copied from: his classic Sabotage scanner (MB19a), shot to pieces in
+        /// his shipped Overtime, so its Destructible demonstrably fires OnDestroyed in game. Only the Destructible is
+        /// taken; its script (ccs_heatleechpoddeath, bound to duo_MB19a_qst) is not.
+        /// </summary>
+        private const string DestroyTemplate = "duo_MB19a_Scanner";
+
+        /// <summary>
+        /// A DESTROY BEAT'S HEALTH, on its own clone: DestroyTemplate's Destructible, deep-copied onto the activator
+        /// ReskinActivator just made as {edid}. Refused if either is missing, never a clone without health, which would
+        /// stand unkillable with its prompt blocked.
+        /// </summary>
+        private static int GiveHealth(StarfieldMod myMod, string edid)
+        {
+            var act = myMod.Activators.FirstOrDefault(a => a.EditorID == edid);
+            var src = myMod.Activators.FirstOrDefault(a => a.EditorID == DestroyTemplate);
+            if (act == null) { Console.WriteLine($"REFUSED: destroy beat's clone {edid} was not made."); return 1; }
+            if (src?.Destructible == null) { Console.WriteLine($"REFUSED: {DestroyTemplate} has no Destructible to copy."); return 1; }
+            act.Destructible = src.Destructible.DeepCopy();
+            var d = act.Destructible;
+            Console.WriteLine($"  +health  : {edid} takes {DestroyTemplate}'s Destructible (health {d.Data?.Health}, {d.Stages.Count} stage(s): "
+                              + string.Join("; ", d.Stages.Select(s => s.ToString()?.Replace(System.Environment.NewLine, " ").Replace("  ", " "))) + ")");
+            return 0;
+        }
+
+        /// <summary>
         /// The pausing box every Delve message is cloned from: a MessageBox Overtime already ships
         /// (patch 04, 2026-07-31), so its flags are ones the game demonstrably shows.
         /// </summary>

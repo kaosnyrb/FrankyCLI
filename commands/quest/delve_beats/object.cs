@@ -13,6 +13,13 @@ namespace FrankyCLI
         ///   use      DefaultAliasOnActivate          hides its prompt after use
         ///   pickup   DefaultAliasOnActivateGiveItem  gives the beat's item; the fragment disables the object
         ///   deliver  DefaultAliasOnActivate          the fragment takes every item picked up so far
+        ///   destroy  DefaultAliasOnDestroyed         shot to pieces, never pressed; the fragment disables the object
+        ///
+        /// DESTROY (2026-10-28, his "yeah build the beat now", off his note that the classic Sabotage "had you destroy the
+        /// activator. They have a health system"). His classics do it with ccs_heatleechpoddeath on a per-quest activator
+        /// (BlockActivation on load, OnDestroyed: Disable, then the quest's HandleNestDistruction); a Delve has no driver,
+        /// so the same three moves are stock and data: the clone carries DestroyTemplate's Destructible, the entry stage
+        /// blocks activation (BuildBeats, beside "replace"), and the stock DefaultAliasOnDestroyed sets the stage.
         ///
         /// ⛔ DELIVER IS NOT DefaultAliasOnActivateRemoveItems, and it looks like it should be. That script's parent SETS THE
         /// STAGE FIRST and only then runs the item check (DefaultAlias.CheckAndSetStageAndCallDoSpecificThing: SafeSetStage,
@@ -40,6 +47,9 @@ namespace FrankyCLI
 
             /// <summary>A pickup's hook hands the item over, so the player carries it from here.</summary>
             internal override bool CarriesItem => carriesItem;
+
+            /// <summary>A destroy: the object is shot, not activated (see the summary).</summary>
+            internal bool Destroys => name == "destroy";
 
             /// <summary>
             /// Beats 1 and 2 use the base's own two slots; every further beat is the first slot CLONED (the same argument
@@ -85,10 +95,11 @@ namespace FrankyCLI
                 else
                 {
                     hookAlias = build.slotOf[b].activatorAlias;
-                    script = CarriesItem ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
+                    script = Destroys ? "DefaultAliasOnDestroyed" : CarriesItem ? "DefaultAliasOnActivateGiveItem" : "DefaultAliasOnActivate";
                 }
                 var sc = StageHook(script, build.beatStage[b], prereq);
-                if (CarriesItem)
+                if (Destroys) { }   // no prompt to hide: the entry stage blocked activation
+                else if (CarriesItem)
                 {
                     var ip = new ScriptObjectProperty { Name = "ItemToGive", Flags = ScriptProperty.Flag.Edited };
                     ip.Object.SetTo(build.itemOf[b]);
@@ -117,7 +128,9 @@ namespace FrankyCLI
             {
                 var beat = build.r.beats[b];
                 bool pickupGoes = CarriesItem && beat.returnTo == null;
-                bool goes = pickupGoes || beat.vanish;
+                // A destroyed object goes too, as his classics' OnDestroyed disables it: a Destructible with no destroyed
+                // model would otherwise stand there whole.
+                bool goes = pickupGoes || Destroys || beat.vanish;
                 bool blows = build.inputs.Explosions.TryGetValue(b, out var xk);
                 if (!goes && !blows) return;
                 string ta = $"Alias_Beat{b + 1}Target";

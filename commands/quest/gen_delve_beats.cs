@@ -217,16 +217,20 @@ namespace FrankyCLI
                     if (b.model != null || b.name != null || b.replace)
                         Fatal($"beat {i + 1} is a return; the object is beat {back}'s, so model, name and replace would be ignored.");
                 }
-                if (b.explosion != null && b.type != "use")
-                    Fatal($"beat {i + 1} sets explosion and is a {b.type}; only a use beat takes it, so it would be silently ignored.");
+                if (b.explosion != null && b.type != "use" && b.type != "destroy")
+                    Fatal($"beat {i + 1} sets explosion and is a {b.type}; only a use or a destroy beat takes it, so it would be silently ignored.");
                 else if (b.explosion != null && OwnOrMaster<IExplosionGetter>(Allowed(env, t), env, b.explosion) == null)
                     Fatal($"beat {i + 1} explosion '{b.explosion}' is not an Explosion in {t.mod} or one of its masters.");
                 if (b.vanish && b.type != "use")
                     Fatal($"beat {i + 1} sets vanish and is a {b.type}; only a use beat takes it (a pickup's object vanishes already), so it would be silently ignored.");
                 if (b.vanish && r.beats.Skip(i + 1).Any(x => x.returnTo == i + 1))
                     Fatal($"beat {i + 1} sets vanish and a later beat returns to its object, which would be gone; put vanish on the return.");
-                if (b.group != null && b.type != "use")
-                    Fatal($"beat {i + 1} is in group '{b.group}' and is a {b.type}; only use beats can be done in any order.");
+                if (b.group != null && b.type != "use" && b.type != "destroy")
+                    Fatal($"beat {i + 1} is in group '{b.group}' and is a {b.type}; only use and destroy beats can be done in any order.");
+                // The Destructible goes onto the beat's OWN clone (ReskinActivator), never the base's activator, which his
+                // shipped quests share; with no model there is no clone to carry it.
+                if (b.type == "destroy" && string.IsNullOrWhiteSpace(b.model))
+                    Fatal($"beat {i + 1} is a destroy with no model; its health goes on the beat's own clone and only a model makes one.");
                 if (b.type != "hold" && (b.waves != null || b.size != null || b.defend != null || b.stuck != null || b.style != null || b.reveal != null || b.revealObjective != null))
                     Fatal($"beat {i + 1} sets waves, size, defend, stuck, style, reveal or revealObjective and is not a hold, so they would be silently ignored.");
                 if (b.outside != null && b.type != "recover")
@@ -1262,6 +1266,7 @@ namespace FrankyCLI
                     }
                     if (slotOf[i].activatorAlias >= 0
                         && ReskinActivator(myMod, clone, t, $"{r.id}_b{i + 1}", slotOf[i].activatorAlias, r.beats[i].model, r.beats[i].name) != 0) return 1;
+                    if (r.beats[i].type == "destroy" && GiveHealth(myMod, $"{r.id}_b{i + 1}") != 0) return 1;
                 }
 
                 // The endings' pay, ON THE STAGE: QuestStage -> LogEntries -> StageCompleteDatas -> RewardDatas,
@@ -1749,6 +1754,15 @@ namespace FrankyCLI
                     props.Add(("ReferenceAlias", an, clone.FormKey, slotOf[b].markerAlias));
                     bm.Replaced.Add((an, slotOf[b].markerAlias));
                     Add(t.entryStage, $"{an}.GetRef().Disable(False)");
+                }
+                // "destroy": the object is shot, never pressed, so its prompt is blocked when the quest starts, as his
+                // classics' ccs_heatleechpoddeath does on load: BlockActivation(True, True), which also hides the prompt.
+                for (int b = 0; b < r.beats.Count; b++)
+                {
+                    if (r.beats[b].type != "destroy") continue;
+                    string ta = $"Alias_Beat{b + 1}Target";
+                    props.Add(("ReferenceAlias", ta, clone.FormKey, slotOf[b].activatorAlias));
+                    Add(t.entryStage, $"{ta}.GetRef().BlockActivation(True, True)");
                 }
                 tails = new Dictionary<int, List<string>>();
                 // Entering a step: what the beats spawn appears (and fills the alias the objective targets) BEFORE the

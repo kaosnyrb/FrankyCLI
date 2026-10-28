@@ -1,0 +1,68 @@
+{
+  "schema": 2,
+  "id": "duo_delvetest_d1",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The mission board's test node, as 12a.",
+  "author": "jessica",
+  "source": "his 2026-10-17 09:42: \"yup write sabotage\". The first Delve of the old MB19/MB20 Sabotage families (backport-map.md: no Delve yet, fits today).",
+  "_note": "Eliza 2026-10-28: the destroy beat's test rung, 53a's three scanners shot instead of spoofed (his 'yeah build the beat now, Jessica will rewrite 53a'). Words are 53a's stand-ins until hers.",
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet (non-hostile) site, so nobody shoots and the job stays quiet; the array is unmanned. Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12)."
+  },
+  "prose": {
+    "name": "Sabotage: Ecliptic Scanners on <Planet>",
+    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>. The settlers who posted the job don't want it broken. They want it lying.",
+    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and we need them watching the wrong thing. Do not smash it. Feed each scanner a false reading and leave it running. Payment on completion."
+  },
+  "recap": "The Ecliptic scanners at the <Place> are all still running, and all three are wrong. Whatever the mercenaries think is happening on <Planet>, it isn't.",
+  "recapSay": [
+    "Their camp's just logged three empty valleys and a dust storm. We moved everything this morning. Nobody so much as looked up."
+  ],
+  "beats": [
+    {
+      "type": "destroy",
+      "group": "spoof",
+      "at": "RECenterLocRef",
+      "objective": "Feed false readings to the Ecliptic scanners at the <Place>",
+      "journal": "This scanner was tracking movement on the ground. I looped an hour of empty footage into it. It's still recording, just not anything real.",
+      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "name": "Ecliptic Motion Scanner"
+    },
+    {
+      "type": "destroy",
+      "group": "spoof",
+      "at": "RETravelA1LocRef",
+      "ring": "infrastructure",
+      "journal": "This one counted ships landing and taking off. I set it to read a dust storm. Nobody flies in a dust storm, so nobody will wonder why it's quiet.",
+      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "name": "Ecliptic Landing Scanner"
+    },
+    {
+      "type": "destroy",
+      "group": "spoof",
+      "at": "RETravelB1LocRef",
+      "ring": "infrastructure",
+      "journal": "This scanner logged heat signatures. I shifted its calibration so a whole settlement reads as warm rock. It will be right about the rock.",
+      "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
+      "name": "Ecliptic Thermal Scanner"
+    }
+  ],
+  "speaker": {
+    "name": "Settler",
+    "voice": "GenericFemale01",
+    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+  },
+  "broadcast": [
+    "You took our job? Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed."
+  ],
+  "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency."
+}

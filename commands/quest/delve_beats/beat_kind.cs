@@ -95,7 +95,7 @@ namespace FrankyCLI
         private static readonly BeatKind[] AllKinds =
         {
             new ObjectBeat("use", carriesItem: false), new ObjectBeat("pickup", carriesItem: true), new ObjectBeat("deliver", carriesItem: false),
-            new RecoverBeat(), new HoldBeat(), new TalkBeat(), new DefeatBeat(), new ClearBeat(), new CraftBeat()
+            new ObjectBeat("destroy", carriesItem: false), new RecoverBeat(), new HoldBeat(), new TalkBeat(), new DefeatBeat(), new ClearBeat(), new CraftBeat()
         };
         private static readonly Dictionary<string, BeatKind> BeatKinds = AllKinds.ToDictionary(k => k.Name);
 
