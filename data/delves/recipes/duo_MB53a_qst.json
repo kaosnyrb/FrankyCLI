@@ -7,16 +7,17 @@
   "author": "jessica",
   "source": "his 2026-10-17 09:42: \"yup write sabotage\". The first Delve of the old MB19/MB20 Sabotage families (backport-map.md: no Delve yet, fits today).",
   "_note": [
-    "SABOTAGE, QUIETLY. The old MB19c line is the spine: 'Do not smash the Ecliptic scanners. Sabotage them quietly, so",
-    "the mercenaries keep trusting a picture of <Planet> that stopped being true.' The one old verb that is a trick, not",
-    "a fight, so this one has no fight: the array is unmanned at an abandoned site and feeds an Ecliptic camp elsewhere.",
-    "It answers the player's pacifist ask (2026-10-10). No failure state, no timer (his rule).",
+    "SABOTAGE IS DESTROY. His 2026-10-28 13:07: \"the original sabotage missions had you destroy the activator. They have a",
+    "health system\". The classic MB19/MB20 are his nest machinery (shoot-only activators), so the scanners get shot, not",
+    "spoofed. The first draft was a quiet trick (feed false readings); that premise is gone, words rewritten 2026-10-28.",
+    "BEAT TYPE STAYS 'use' UNTIL A destroy BEAT EXISTS in gen_delve (Eliza's lane, not commissioned). The words already read",
+    "as destroy; the type changes when the beat does.",
     "Issuer: settlers the Ecliptic are watching, who want to move without being seen. The board card is theirs",
     "(style guide 33 s4: we, payer on line one, flat, stock closer).",
     "Three scanners in ANY ORDER behind one counted objective (remote03a's shape), so no journal line says first or last.",
     "Ends on a group, so the closing radio is recapSay (his 2026-10-17: the close is a radio).",
     "MODEL IS A STAND-IN: SeismicSensor01 (vanilla, used by 01a). Kim's F9 'Scanner array' is unbuilt; her eye owed.",
-    "Pay: med, placeholder (a three-part job, no fight); the tier is his."
+    "Pay: med, placeholder (a three-part job); the tier is his."
   ],
   "place": {
     "theme": {
@@ -27,24 +28,24 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet (non-hostile) site, so nobody shoots and the job stays quiet; the array is unmanned. Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12)."
+    "_theme": "A quiet (non-hostile) site and an unmanned array. Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12). Open, not mine: shooting at a site with residents (52a's fire burned a worker, 10-27)."
   },
   "prose": {
     "name": "Sabotage: Ecliptic Scanners on <Planet>",
-    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>. The settlers who posted the job don't want it broken. They want it lying.",
-    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and we need them watching the wrong thing. Do not smash it. Feed each scanner a false reading and leave it running. Payment on completion."
+    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>. The settlers who posted the job want every scanner in it destroyed.",
+    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>. We need it destroyed, all of it, so they have to send someone out to look for themselves. Payment on completion."
   },
-  "recap": "The Ecliptic scanners at the <Place> are all still running, and all three are wrong. Whatever the mercenaries think is happening on <Planet>, it isn't.",
+  "recap": "The Ecliptic scanners at the <Place> are wrecked, all three. Whatever the mercenaries want to know about <Planet> now, they'll have to come and see it with their own eyes.",
   "recapSay": [
-    "Their camp's just logged three empty valleys and a dust storm. We moved everything this morning. Nobody so much as looked up."
+    "Their screens all went dark at once, and we had everything moved before they'd worked out it wasn't a fault."
   ],
   "beats": [
     {
       "type": "use",
       "group": "spoof",
       "at": "RECenterLocRef",
-      "objective": "Feed false readings to the Ecliptic scanners at the <Place>",
-      "journal": "This scanner was tracking movement on the ground. I looped an hour of empty footage into it. It's still recording, just not anything real.",
+      "objective": "Destroy the Ecliptic scanners at the <Place>",
+      "journal": "This scanner was tracking movement on the ground. It isn't tracking anything now.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Ecliptic Motion Scanner"
     },
@@ -53,7 +54,7 @@
       "group": "spoof",
       "at": "RETravelA1LocRef",
       "ring": "infrastructure",
-      "journal": "This one counted ships landing and taking off. I set it to read a dust storm. Nobody flies in a dust storm, so nobody will wonder why it's quiet.",
+      "journal": "This one counted ships landing and taking off. Whoever's watching will have to count them by eye.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Ecliptic Landing Scanner"
     },
@@ -62,7 +63,7 @@
       "group": "spoof",
       "at": "RETravelB1LocRef",
       "ring": "infrastructure",
-      "journal": "This scanner logged heat signatures. I shifted its calibration so a whole settlement reads as warm rock. It will be right about the rock.",
+      "journal": "This scanner logged heat signatures, and it's in pieces now, still warm.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Ecliptic Thermal Scanner"
     }
@@ -73,7 +74,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "You took our job? Remember, don't break anything. A broken scanner gets fixed. A scanner that's wrong gets believed."
+    "You took our job? Then break every one of them, because a single scanner left standing is enough to see us coming."
   ],
   "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency."
 }
