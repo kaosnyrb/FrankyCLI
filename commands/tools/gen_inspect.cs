@@ -970,6 +970,12 @@ namespace FrankyCLI
                 case "biom":
                     found += SearchWithRecovery(mod.Biomes, search, "Biome");
                     break;
+                case "surfacepattern":
+                case "sfpt":
+                    foreach (var rec in mod.SurfacePatterns)
+                        if (MatchesSearch(rec.EditorID, rec.FormKey, search))
+                        { DumpSurfacePattern(rec, cache); found++; }
+                    break;
                 default:
                     // Not a bespoke renderer -- try the mod's own record groups. This is what
                     // makes every one of Mutagen's 177 groups inspectable instead of the ~40
@@ -1058,6 +1064,46 @@ namespace FrankyCLI
 
             // Dump all public properties via reflection
             DumpPropertiesReflection(block, "  ", maxDepth: 2);
+        }
+
+        /// <summary>
+        /// A SurfacePattern is a grid of SurfaceBlocks, each a .btd, each with a rotation. The
+        /// generic dump printed the grid as `KeyValue`2[...]` type names, cut off (2026-10-28,
+        /// reading Venus's terrain chain for Homestead), so this renders it: one row per grid key,
+        /// the block it names, the block's .btd and cell grid, and the rotation at the same key.
+        /// </summary>
+        private static void DumpSurfacePattern(ISurfacePatternGetter pat, ILinkCache? cache)
+        {
+            Console.WriteLine($"--- SurfacePattern ({pat.FormKey}) ---");
+            Console.WriteLine($"  EditorID: {pat.EditorID}");
+            Console.WriteLine($"  Style:    {pat.SurfacePatternStyle.FormKey}");
+            void Grid(string label, Noggog.IReadOnlyArray2d<IFormLinkGetter<ISurfaceBlockGetter>>? grid,
+                      Noggog.IReadOnlyArray2d<sbyte>? rotations)
+            {
+                var blocks = grid?.ToList();
+                if (blocks == null || blocks.Count == 0) { Console.WriteLine($"  {label}: (none)"); return; }
+                var rot = new Dictionary<Noggog.P2Int, sbyte>();
+                if (rotations != null) foreach (var r in rotations) rot[r.Key] = r.Value;
+                int minX = blocks.Min(b => b.Key.X), maxX = blocks.Max(b => b.Key.X);
+                int minY = blocks.Min(b => b.Key.Y), maxY = blocks.Max(b => b.Key.Y);
+                Console.WriteLine($"  {label}: {blocks.Count} blocks, keys X {minX}..{maxX}, Y {minY}..{maxY}, " +
+                                  $"{rot.Count} rotations");
+                foreach (var kv in blocks.OrderBy(b => b.Key.Y).ThenBy(b => b.Key.X))
+                {
+                    string ed = "?", anam = "?", dnam = "?";
+                    if (cache != null && cache.TryResolve<ISurfaceBlockGetter>(kv.Value.FormKey, out var sb))
+                    {
+                        ed = sb.EditorID ?? "";
+                        anam = sb.ANAM ?? "";
+                        dnam = sb.DNAM == null ? "-" : $"{sb.DNAM.First}x{sb.DNAM.Second}";
+                    }
+                    string r = rot.TryGetValue(kv.Key, out var rv) ? rv.ToString() : "-";
+                    Console.WriteLine($"    ({kv.Key.X,3},{kv.Key.Y,3})  rot {r,3}  {kv.Value.FormKey}  {ed}  {anam}  cells {dnam}");
+                }
+            }
+            Grid("MasterBlocks", pat.MasterBlocks, pat.MasterBlockRotations);
+            Grid("OverrideBlocks", pat.OverrideBlocks, pat.OverrideBlockRotations);
+            Console.WriteLine();
         }
 
         private static void DumpMessage(IMessageGetter msg)
