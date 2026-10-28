@@ -149,9 +149,13 @@ with no rebuild. Vanilla's POI encounters (`OE_MainBranch`) fill `OE_Location` w
 not, so a site our quest reserves should be one they cannot take; his classics reserve it (MB19a 0x109) and the board base
 `duo_MB28a_qst` does not (0x800100). Proof as `infogroup`'s: same size, one byte per Delve, the low byte of the alias's
 `FNAM` (a location alias's flags subrecord), bit `0x01` alone; then each quest read back with every other alias's flags
-unchanged, and the model re-emitted. Snapshot first. First use: `duo_MB53a_qst`, 2026-10-28, unplayed. ⚠ **The board
-shell does not carry the bit yet**, so a rebuild of a reserved Delve drops it: until his play confirms the fix, re-run
-this after any rebuild.
+unchanged, and the model re-emitted. Snapshot first. First use: `duo_MB53a_qst`, 2026-10-28; **his play the same
+afternoon: *"yup no mission"*, and the site's people were gone too: at a quiet site the residents ARE vanilla's
+`OE_Civilians` encounter, so reserving keeps them away as well** (`place.residents "dead"` now matters only where a site
+places its own). Then all twelve board Delves the same way. **The board shell carries the bit since that day**
+(`shells/board.json`, alias 5 `8388865`; a dry build of 53a and 40a before and after differs by that one byte), so a
+new or rebuilt board Delve reserves by construction and this pass is for none. The space boards (`boardspace`, his
+MB01a) already reserve their orbit's planet (0x109).
 
 **Taking a build back out: `dotnet run -- gen_delve unbuild <builtId> [--dry]`** (2026-10-12). Removes every
 record whose EditorID is the id or starts with the id plus `_` (the build's own naming; nested topics and scenes
