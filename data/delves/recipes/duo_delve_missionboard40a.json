@@ -1,0 +1,48 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard40a",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
+  "_note": [
+    "SPACE CARGO 5: THE WRONG MANIFEST. A container adrift in orbit, listed as machine parts. Pick it up.",
+    "THE HOOK: someone is in it, and she is the radio. The broadcast is her, calling from inside the box when the player",
+    "comes within range, so the speaker is the stowaway and the card is the owners' (unvoiced). One beat; the closing",
+    "line is the use's say. FITTED TO boardspace: a one-beat board is a use, so the player clamps on and tows it.",
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
+  },
+  "prose": {
+    "name": "Recovery: Lost Container over <Planet>",
+    "briefing": "A cargo container slipped its mooring during a transfer over <Planet> and has been drifting ever since. The owners want it picked up. The manifest says machine parts.",
+    "card": "Recovery contract. A cargo container is adrift in orbit over <Planet>. Recover it. Contents listed as machine parts. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Secure the drifting container over <Planet>",
+      "journal": "The drifting container over <Planet> wasn't machine parts. There's a woman inside it, and she's been in there four days. I've got it in tow.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Drifting Cargo Container",
+      "say": [
+        "I can hear your clamps on the hull. That's the best sound I've ever heard. Tow me somewhere with air and people, and then you can let me out and forget you ever saw me."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Voice in the Container",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "Is that a ship? Please be a ship. I've been in this box four days and the air scrubber's started making a noise I don't like, so if you're here for the container, I'm in it."
+  ],
+  "_speech": "Young, frightened, trying to be funny about it. Lucy (Fresh and Casual), from remote06b; his ear decides."
+}

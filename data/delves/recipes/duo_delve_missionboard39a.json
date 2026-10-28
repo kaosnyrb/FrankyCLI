@@ -1,0 +1,66 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard39a",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
+  "_note": [
+    "SPACE CARGO 4: THE GHOST FREIGHTER. A freighter has drifted dark for months with her hold intact.",
+    "THE HOOK: her company reported her lost with everything aboard and claimed for it. The cargo was the colony's",
+    "medicine, and it's still there. Pull her manifest (a use on her data beacon, the satellite model as remote_qst20a's",
+    "medicine, and it's still there. FITTED TO boardspace: take the crate, hand it to the colony's shuttle; the manifest",
+    "reveal rides on the pickup's journal and say.",
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
+  },
+  "prose": {
+    "name": "Recovery: Ghost Freighter over <Planet>",
+    "briefing": "A freighter has been drifting dark in orbit over <Planet> for months with her hold intact. Nobody ever came back for her, and the colony below would like to know why.",
+    "card": "Recovery contract. A derelict freighter in orbit over <Planet> is carrying cargo owed to the colony below. Recover the cargo and deliver it to the colony's shuttle. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Recover the medical supplies from the freighter over <Planet>",
+      "journal": "The freighter's manifest says she was carrying the colony's medical supplies, and her company's last entry reports the whole cargo lost. I've just taken it out of her hold.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Medical Supply Crate",
+      "item": "Medical Supplies",
+      "say": [
+        "Lost with everything aboard, they told us, and they claimed for every crate. Our shuttle's coming up to meet you, so hand them across, and I'll deal with the company myself."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Deliver the medical supplies to the colony's shuttle",
+      "journal": "The freighter over <Planet> was never lost. Her company claimed her cargo and left her drifting. I delivered the colony's medical supplies to their shuttle.",
+      "model": "SHUTTLE, UNPICKED",
+      "_model": "A small shuttle static in orbit, not boardable. His or Kim's pick.",
+      "name": "Colony Shuttle",
+      "message": {
+        "title": "Supplies Delivered",
+        "text": "The shuttle takes the crate aboard and turns for the planet below."
+      },
+      "say": [
+        "They're aboard. There are people down here who've been waiting since spring, and some of them had stopped asking."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Colony Medic",
+    "voice": "GenericFemale01",
+    "elevenlabs": "wCizWKvnaS3LOIUwHo98"
+  },
+  "broadcast": [
+    "That freighter was bringing our medical supplies when she went quiet, and the company told us she was lost with everything aboard. She doesn't look lost to me, so get into her hold and see what's still there."
+  ],
+  "_speech": "Angry and precise. The settler voice from 05a and 18a; his ear decides."
+}

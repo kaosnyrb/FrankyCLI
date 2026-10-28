@@ -1,0 +1,66 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard36a",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
+  "_note": [
+    "SPACE CARGO 1: THE JETTISONED HOLD. A freighter dumped her hold to outrun raiders. Bring the containers back.",
+    "THE HOOK: the last container isn't freight. The crew packed everything they owned into it when they thought they'd",
+    "abandon ship, and it went out with the cargo. FITTED TO boardspace (pickup then deliver, its two-beat limit):",
+    "the captain sends you for the crew's container only; the company's salvagers can fetch the freight.",
+    "NEEDS ONE NEW OBJECT: a ship or station static to DELIVER to in orbit (every orbit deliver so far is a satellite). One ask covers 36a, 37a and 39a; the model string is a stand-in (the lint does not catch it), picked by him or Kim.",
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
+  },
+  "prose": {
+    "name": "Salvage: Jettisoned Hold over <Planet>",
+    "briefing": "A freighter dumped her hold in orbit over <Planet> to outrun raiders. The containers are still drifting, and her captain would like them back before the company counts what's missing.",
+    "card": "Salvage contract. A crew container jettisoned in orbit over <Planet> is to be recovered and returned to the freighter that lost it. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "se_GeneralMarkerLocRef02",
+      "objective": "Recover the crew's container over <Planet>",
+      "journal": "The last container wasn't freight. When the crew thought they'd have to abandon ship, they packed everything they owned into it, and it went out with the cargo.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Crew Container",
+      "item": "Crew Container",
+      "say": [
+        "You've got it? That's everything we own. We packed it when we thought we'd be leaving her, and then we didn't, and by then it was already gone."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Return the crew's container to the freighter",
+      "journal": "A freighter over <Planet> dumped her hold to outrun raiders, and the crew's own belongings went with it. I brought their container home.",
+      "model": "FREIGHTER, UNPICKED",
+      "_model": "A freighter static in orbit, not boardable. His or Kim's pick.",
+      "name": "Damaged Freighter",
+      "message": {
+        "title": "Container Returned",
+        "text": "The freighter's hold opens and takes the container in."
+      },
+      "say": [
+        "It's aboard. The company can send someone for their crates whenever they like, and I'm going down to open ours."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Freighter Captain",
+    "voice": "GenericFemale01",
+    "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
+  },
+  "broadcast": [
+    "That's our cargo out there, what's left of it after we dumped the lot to get away. The company's salvagers can fetch the freight. I want the crew's container, because that one isn't freight, and it's the one with everything we own in it."
+  ],
+  "_speech": "The captain, tired and a little embarrassed. Clara, in five recipes; his ear decides."
+}

@@ -1,0 +1,58 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard38a",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
+  "_note": [
+    "DESIGN DRAFT, NOT BUILDABLE TODAY: boardspace builds a use, or a pickup then a deliver. A ship target and recover are 28a's open ask.",
+    "SPACE CARGO 3: THE TOLL. A crew is stopping haulers and taking one container from each. Destroy the ship, recover",
+    "what it took. THE HOOK: the radio is a hauler who has paid them twice, and his own container is in their hold.",
+    "NEEDS 28a's UNBUILT PIECES: a hostile SHIP as a defeat target, and recover on a board. Eliza's to price, once for both.",
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
+  },
+  "prose": {
+    "name": "Strike: Toll Ship over <Planet>",
+    "briefing": "A crew in orbit over <Planet> has been stopping haulers and taking one container from each as a toll. They keep everything they've taken in their own hold.",
+    "card": "Strike contract. A hostile vessel over <Planet> is extorting cargo from passing haulers. Destroy it and recover the seized cargo. Expect resistance. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "defeat",
+      "at": "se_GeneralMarkerLocRef01",
+      "target": "SHIP, UNBUILT",
+      "_target": "A hostile ship, as 28a's. Not an Npc.",
+      "objective": "Destroy the toll ship",
+      "journal": "The toll ship over <Planet> is gone. Everything it took off the haulers is somewhere in what's left of it.",
+      "say": [
+        "That's them finished? Their hold will have come apart with the rest of them, so have a look through what's floating."
+      ]
+    },
+    {
+      "type": "recover",
+      "item": "Seized Cargo",
+      "objective": "Recover the seized cargo from the wreck",
+      "journal": "I recovered the cargo the toll crew took off the haulers over <Planet>. Most of it still has its owners' marks on it.",
+      "say": [
+        "I can see my own container on your manifest from here. I'll put the word out, and everyone who paid them can come and claim theirs."
+      ],
+      "reward": "med",
+      "at": "se_GeneralMarkerLocRef01"
+    }
+  ],
+  "speaker": {
+    "name": "Hauler",
+    "voice": "GenericMale01",
+    "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
+  },
+  "broadcast": [
+    "That's the ship that's been stopping us. They took one container off me last week and another this morning, and they're sitting on all of it, so take them apart and get our cargo back out of what's left."
+  ],
+  "_speech": "A hauler who's had enough. The male voice from 23a; his ear decides."
+}

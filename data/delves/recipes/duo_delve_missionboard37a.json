@@ -1,0 +1,68 @@
+{
+  "schema": 2,
+  "id": "duo_delve_missionboard37a",
+  "template": "boardspace",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-28 20:54 \"thinking we need more space cargo missions\", then \"all these sound good\" to five seeds",
+  "_note": [
+    "SPACE CARGO 2: THE SEALED DELIVERY. Collect a sealed container in one orbit and deliver it to a station.",
+    "THE HOOK: nobody tells you what's in it, and the woman receiving it is all business until it's opened. It's soil",
+    "from Earth, sealed by her grandmother the year they left. Earth is named in the JOURNAL only; the voice says 'the",
+    "first home' (the noun rule).",
+    "NEEDS A SECOND ORBIT: the station is over another planet. boardspace has one orbit today, so the deliver sits in the",
+    "same cell until Eliza prices a second (her 'an ORBIT third place may sit beside a second request').",
+    "NEEDS ONE NEW OBJECT: a ship or station static to DELIVER to in orbit (every orbit deliver so far is a satellite). One ask covers 36a, 37a and 39a; the model string is a stand-in (the lint does not catch it), picked by him or Kim.",
+    "Every space Delve before these was a satellite (5 of 7); these are about CARGO, his ask. Markers: General01/06/02 and TravelB02 are 51a's and 30a's; which a cell offers is Eliza's. No names, places, factions or currency in a voiced line. Pay: med, capped, placeholder."
+  ],
+  "place": {
+    "altitude": 32.0,
+    "_altitude": "His 2026-10-27 32 (MB01's band top, 'feels cool'), as remote_qst20a."
+  },
+  "prose": {
+    "name": "Courier: Sealed Container over <Planet>",
+    "briefing": "A sealed container is waiting in orbit over <Planet> for a courier who won't ask what's in it. The receiving end is a station.",
+    "card": "Courier contract. Collect a sealed container in orbit over <Planet> and deliver it unopened to the receiving station. Do not open the container. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "se_GeneralMarkerLocRef01",
+      "objective": "Collect the sealed container over <Planet>",
+      "journal": "The container's seal is older than anything else on it, and it's light for its size. I'm not to open it.",
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Sealed Container",
+      "item": "Sealed Container",
+      "say": [
+        "You've got it aboard? Then bring it in slowly. I'll be waiting at the dock."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "objective": "Deliver the sealed container to the receiving station",
+      "journal": "I delivered the sealed container. It held a jar of soil from Earth, sealed before anyone left, and the woman who received it went very quiet.",
+      "model": "STATION, UNPICKED",
+      "_model": "A small station static in orbit, not boardable. His or Kim's pick.",
+      "name": "Receiving Station",
+      "message": {
+        "title": "Container Delivered",
+        "text": "The seal breaks with a long hiss. Inside is a single jar of dark soil, labelled by hand."
+      },
+      "say": [
+        "It's soil. From the first home, from before. My grandmother sealed it the year they left, and I have never once seen it opened."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Receiving Officer",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "The container's sealed and it stays that way. Collect it and bring it to the station, and please don't fly like you're in a hurry, because it can't be replaced."
+  ],
+  "_speech": "Businesslike until the last line. Annie K, heard on 32a; his ear decides."
+}
