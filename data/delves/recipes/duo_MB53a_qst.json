@@ -28,12 +28,20 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet (non-hostile) site and an unmanned array. Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12). Open, not mine: shooting at a site with residents (52a's fire burned a worker, 10-27)."
+    "_theme": "A non-hostile site, so the only guns are the Ecliptic crew on the array (who). Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12).",
+    "who": {
+      "kind": "spacers",
+      "list": "duo_GangMembersList_Ecliptic",
+      "min": 4,
+      "max": 6,
+      "beat": 1
+    },
+    "_who": "His 2026-10-28 play: \"dull. You walk up to a place, shoot a box and the mission completes. Originally these were defended by there faction\". The classic MB19 put Ecliptic guards on the nest (LCharEcliptic). So an Ecliptic crew round the first scanner, MB42a's built field."
   },
   "prose": {
     "name": "Sabotage: Ecliptic Scanners on <Planet>",
-    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>. The settlers who posted the job want every scanner in it destroyed.",
-    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>. We need it destroyed, all of it, so they have to send someone out to look for themselves. Payment on completion."
+    "briefing": "The Ecliptic have a scanner array at the <Place> watching everything that moves on <Planet>, and a crew sitting on it. The settlers who posted the job want every scanner destroyed.",
+    "card": "Local Contract. The Ecliptic are watching <Planet> through a scanner array at the <Place>, and they keep a crew on it. We need it destroyed, all of it, so they have to send someone out to look for themselves. Payment on completion."
   },
   "recap": "The Ecliptic scanners at the <Place> are wrecked, all three. Whatever the mercenaries want to know about <Planet> now, they'll have to come and see it with their own eyes.",
   "recapSay": [
@@ -74,7 +82,7 @@
     "elevenlabs": "wCizWKvnaS3LOIUwHo98"
   },
   "broadcast": [
-    "You took our job? Then break every one of them, because a single scanner left standing is enough to see us coming."
+    "You took our job? They keep a crew on that array, so expect a fight, and don't leave a single scanner standing, because one is enough to see us coming."
   ],
   "_speech": "The issuer on the radio once the job is taken. Voice is 05a and 18a's (wCizWKvnaS3LOIUwHo98); his ear decides. Radio rules: no names, no places, no factions spoken, no currency."
 }

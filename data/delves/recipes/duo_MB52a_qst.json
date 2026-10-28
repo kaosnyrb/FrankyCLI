@@ -24,12 +24,20 @@
         "LocTypeOE_ThemeCaveKeyword"
       ]
     },
-    "_theme": "A quiet site, as 53a: nobody shoots back, the job is the destroying."
+    "_theme": "A non-hostile site; the only guns are the crew on the cache (who).",
+    "who": {
+      "kind": "spacers",
+      "list": "duo_GangMembersList_Spacer",
+      "min": 3,
+      "max": 5,
+      "beat": 1
+    },
+    "_who": "His 2026-10-28 play: \"dull... Originally these were defended by there faction\". A spacer crew sits on the cache (the old MB20e: boxed and waiting on a hauler), MB42a's built field and list."
   },
   "prose": {
     "name": "Sabotage: Banned Texts on <Planet>",
-    "briefing": "A cache of banned texts has turned up at the <Place>. The posting wants them destroyed, not collected, and doesn't say why.",
-    "card": "Administrative Contract. A cache of prohibited texts has been located at the <Place> on <Planet>. Destroy the material on site. Do not remove or copy it. Payment on contract completion."
+    "briefing": "A cache of banned texts has turned up at the <Place>, with an armed crew sitting on it. The posting wants them destroyed, not collected, and doesn't say why.",
+    "card": "Administrative Contract. A cache of prohibited texts has been located at the <Place> on <Planet>. Armed resistance is expected. Destroy the material on site. Do not remove or copy it. Payment on contract completion."
   },
   "beats": [
     {
@@ -39,7 +47,7 @@
       "objective": "Destroy the cache of texts at the <Place>",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Cache of Banned Texts",
-      "journal": "The cache at the <Place> went up with every book in it. I still don't know what was banned about them. Nobody asked me to know.",
+      "journal": "The cache at the <Place> went up with every book in it. Somebody thought those books were worth a gunfight. I still don't know what was in them, and nobody asked me to know.",
       "say": [
         "Destruction confirmed. Your report is filed. There is nothing further on this contract."
       ],
@@ -52,7 +60,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Contract confirmed. The material is to be destroyed on site. Do not read it, remove it or copy it."
+    "Contract confirmed. The material is under guard and is to be destroyed on site. Do not read it, remove it or copy it."
   ],
   "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Recast 2026-10-22 off Matilda (his: \"very robotic\") to ElevenLabs' 'Alice, Clear, Engaging Educator', british: clear and official without the robot. Alice then ruled out of the whole cast by his ear 2026-10-27 (\"sounds like a phone system instead of a person\"); recast to Annie K, heard in game on 32a. His ear decides."
 }
