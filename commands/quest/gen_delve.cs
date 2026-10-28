@@ -1501,7 +1501,9 @@ namespace FrankyCLI
 
             // --- two beats on top of each other ------------------------------------------------------------
             // Two beats on one marker in one place happen in one spot; two on the same travel RING (A1/A2/A3 or
-            // B1/B2/B3) sit 7 to 14 units apart (part 32). A declared return is the one legitimate repeat.
+            // B1/B2/B3) sit 7 to 14 units apart (part 32). A declared return is one legitimate repeat; a FIGHT at an earlier
+            // beat's spot is the other (a hold defending the terminal beside it), and the build gives it that beat's marker
+            // alias (FightMarker, 2026-10-28), so it is said as a note of what the build does rather than warned.
             for (int i = 0; i < r.beats.Count; i++)
                 for (int j = i + 1; j < r.beats.Count; j++)
                 {
@@ -1509,7 +1511,11 @@ namespace FrankyCLI
                     if (a.PlaceIndex != b.PlaceIndex) continue;
                     bool ret = b.returnTo == i + 1;
                     if (string.Equals(a.at, b.at, StringComparison.OrdinalIgnoreCase))
-                    { if (!ret) Warn($"beats {i + 1} and {j + 1} are both on {a.at} at the same place: one spot, two beats."); }
+                    {
+                        if (ret) { }
+                        else if (SpawnsAtMarker(b)) Console.WriteLine($"  [note ] beat {j + 1} ({b.type}) is at beat {i + 1}'s spot ({a.at}): the build gives it beat {i + 1}'s marker alias.");
+                        else Warn($"beats {i + 1} and {j + 1} are both on {a.at} at the same place: one spot, two beats.");
+                    }
                     else if (a.at.Length > 9 && b.at.Length > 9 && a.at.StartsWith("RETravel") && b.at.StartsWith("RETravel")
                              && a.at[8] == b.at[8])
                         Warn($"beats {i + 1} and {j + 1} are on the same travel ring ({a.at}, {b.at}): they land 7 to 14 m apart.");

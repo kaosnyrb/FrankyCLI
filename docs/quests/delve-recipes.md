@@ -404,6 +404,12 @@ objective over 12 words or ending in punctuation · any em dash or
 non-ASCII character · two beats on one marker or one travel ring · a base exclusion the recipe drops ·
 letter siblings that differ in structure · a `deal` pool that never dealt the template's base quest.
 
+**A fight at an earlier beat's spot is not warned (2026-10-28, his "tool fix", `duo_MB55a_qst`).** A `hold`, `clear`
+or `defeat` on the same marker and place as an earlier beat (a hold defending the terminal beside it) takes THAT beat's
+marker alias, and the lint prints a `[note ]` saying so. A second alias on the same place and ref type grabs the same
+reference and cannot fill, which the build's contention check refused AFTER the lint had passed it. Two objects on one
+spot are still warned.
+
 **An object beat on a container (2026-10-23, missionboard04a):** an object is created AT its marker, and some
 location ref types tag a CONTAINER rather than a spot, so the object is created inside it (his play: *"the sealed box
 was placed at the same position as the boss crate so you couldn't actually reach it"*). The lint counts what the

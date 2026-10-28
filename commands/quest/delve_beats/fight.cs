@@ -188,5 +188,11 @@ namespace FrankyCLI
 
         /// <summary>A fight beat (defeat or clear).</summary>
         private static bool IsFight(Beat b) => KindOf(b) is FightBeat;
+
+        /// <summary>
+        /// A beat whose marker is only where people spawn (defeat, clear, hold), placing no object there, so it may share an
+        /// earlier beat's spot: the three kinds that take their marker through FightMarker, and the lint's note says so.
+        /// </summary>
+        private static bool SpawnsAtMarker(Beat b) => KindOf(b) is FightBeat or HoldBeat;
     }
 }

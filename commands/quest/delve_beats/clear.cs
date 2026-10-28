@@ -52,7 +52,7 @@ namespace FrankyCLI
             /// </summary>
             internal override int Slot(BeatsBuild build, int i)
             {
-                var cm = build.NewMarker(i, "Spawn");
+                var cm = build.FightMarker(i, "Spawn");
                 uint cid = NextAliasId(build.clone);
                 var col = EmptyCollection(build.inputs.WaveSrc!, cid, $"DelveBeat{i + 1}Enemies");
                 if (col == null) { Console.WriteLine("REFUSED: the source collection carries a fill; a clear's group must start empty."); return 1; }

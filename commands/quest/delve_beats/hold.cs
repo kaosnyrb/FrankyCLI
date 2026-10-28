@@ -138,7 +138,7 @@ namespace FrankyCLI
             /// </summary>
             internal override int Slot(BeatsBuild build, int i)
             {
-                var hm = build.NewMarker(i, "Spawn");
+                var hm = build.FightMarker(i, "Spawn");
                 build.slotOf[i] = new BeatSlot { markerAlias = (int)hm.ID, activatorAlias = -1, journalStage = build.beatStage[i] };
                 build.waveAliases[i] = new List<int>();
                 int nw = build.steps.First(s => s.Beats.Contains(i)).Waves;

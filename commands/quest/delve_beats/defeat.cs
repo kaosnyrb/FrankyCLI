@@ -39,7 +39,7 @@ namespace FrankyCLI
             /// </summary>
             internal override int Slot(BeatsBuild build, int i)
             {
-                var dm = build.NewMarker(i, "Marker");
+                var dm = build.FightMarker(i, "Marker");
                 uint did = NextAliasId(build.clone);
                 var dt = build.markerPattern.DeepCopy(); dt.ID = did; dt.Name = "DelveBeat" + (i + 1) + "Target";
                 dt.Location = null;

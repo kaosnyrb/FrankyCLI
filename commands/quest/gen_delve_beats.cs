@@ -892,6 +892,29 @@ namespace FrankyCLI
                 return m;
             }
 
+            /// <summary>
+            /// A fight's marker (hold, clear, defeat). A fight at an EARLIER beat's own spot, same place and same marker type
+            /// (a hold defending the terminal it stands beside), REUSES that beat's marker alias: a second alias on the same
+            /// place and ref type grabs the same reference and cannot fill, so the quest never starts (duo_MB55a_qst's verify,
+            /// his "tool fix", 2026-10-28). The same shape as the map-marker reuse in NewMarker, and a return already shares a
+            /// marker alias the same way. Fights only: a fight places no object at its marker, while two objects on one spot
+            /// still meet the contention check.
+            /// </summary>
+            internal QuestReferenceAlias FightMarker(int i, string suffix)
+            {
+                var b = r.beats[i];
+                for (int j = 0; j < i; j++)
+                {
+                    var e = r.beats[j];
+                    if (e.PlaceIndex != b.PlaceIndex || !string.Equals(e.at, b.at, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!slotOf.TryGetValue(j, out var s) || s.markerAlias < 0) continue;
+                    var m = clone.Aliases!.OfType<QuestReferenceAlias>().First(a => a.ID == (uint)s.markerAlias);
+                    Console.WriteLine($"  marker   : beat {i + 1} is at beat {j + 1}'s spot ({b.at}), so it reuses alias {m.ID} {m.Name}");
+                    return m;
+                }
+                return NewMarker(i, suffix);
+            }
+
             /// <summary>One line of the fragment script, on a stage. A local function of section 10 until the kinds needed it.</summary>
             internal void Add(int st, string line) { if (!code.ContainsKey(st)) code[st] = new(); code[st].Add(line); }
 
