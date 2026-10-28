@@ -2,7 +2,7 @@
   "schema": 2,
   "id": "duo_delve_remote05b",
   "template": "beats",
-  "_note": "LETTER VARIANT of remote05a, written by Jessica 2026-10-14 on his 'do one of each for now'. His ruling the same morning: the letters of 05 and 06 differ by WHERE, so the words can be specific about the site. Military sites only, so the enemy is Ecliptic and the boss is Overtime's own duo_boss_Ecliptic_Boss_Aggro_NoScript (found in du_overtime.esm). Same beat, same marker, same numbers as 05a. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is a colony militia elsewhere on the planet. The boss gender is not known, so 'the commander', never him.",
+  "_note": "LETTER VARIANT of remote05a, written by Jessica 2026-10-14 on his 'do one of each for now'. His ruling the same morning: the letters of 05 and 06 differ by WHERE, so the words can be specific about the site. Military sites only, so the enemy is Ecliptic and the boss is Overtime's own duo_boss_Ecliptic_Boss_Aggro_NoScript (found in du_overtime.esm). Same beat, same marker, same numbers as 05a. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is a colony militia elsewhere on the planet. The boss gender is not known, so 'the commander', never him. THE HOOK (10-28): the commander carries the contract, and the name at the bottom is somebody the militia knows. A pickup after the kill, in the C1 courier case he cleared. Rewritten 2026-10-28 on his bar, \"just about making each mission feel interesting in some way\" (and \"go ahead on the 7\"): the draft had nothing in it worth mentioning afterwards. The case shares the commander marker and the contract stays with the player (lint warns both): a keepsake.",
   "author": "jessica",
   "source": "Structure from duo_artifact_remote_planet_qst24a (Eliza's defeat proof)",
   "place": {
@@ -18,7 +18,7 @@
   },
   "prose": {
     "name": "Bounty: Ecliptic Commander on <Planet>",
-    "briefing": "Ecliptic mercenaries have dug into the old military post at the <Place> and are raiding everything in range. Their commander holds the contract. Without the commander, nobody is paying the rest to stay."
+    "briefing": "Ecliptic mercenaries have dug into the old military post at the <Place> and are raiding everything in range. Their commander carries the contract, and the colony would very much like to know who signed it."
   },
   "speaker": {
     "name": "Colony Militia",
@@ -26,7 +26,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Mercenaries have taken the old military post, and they're raiding our supply runs. We don't have the guns to go in after them. Their commander holds the contract. End it."
+    "Mercenaries have taken the old military post, and somebody's paying them to raid our supply runs. Their commander carries the contract. End the commander and bring me that contract, because I want to see whose name is on it."
   ],
   "beats": [
     {
@@ -44,10 +44,23 @@
         "chance": 25
       },
       "objective": "Defeat the Ecliptic commander at the <Place>",
-      "journal": "The Ecliptic commander at the <Place> is dead. With nobody left to pay them, the rest won't stay.",
+      "journal": "The Ecliptic commander at the <Place> is dead. The contract will be close by.",
       "say": [
-        "Commander's down. No commander, no contract."
+        "Commander's down? Then find that contract. It'll be close by, they never let it out of reach."
       ]
+    },
+    {
+      "type": "pickup",
+      "at": "REWoundedMarkerLocRef",
+      "objective": "Take the commander's contract",
+      "journal": "I took the commander's contract from the <Place>. Somebody nearby has been paying for the raids on the colony, and their name is at the bottom.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Commander's Contract Case",
+      "item": "Mercenary Contract",
+      "say": [
+        "Read me the name at the bottom. No, it's all right, I heard you. I've had dinner at that table. Leave that one with me."
+      ],
+      "reward": "med"
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Daniel, Steady Broadcaster' (British), NOT yet heard in game (voices.md); his ear decides."

@@ -8,6 +8,7 @@
   "source": "his 2026-10-23: the military family (\"like 10 missionboard missions for Military Dungeons\"), \"we have droppods, those would be cool\", 13:35 \"don't limit ourselves by what's there already in my mod, we can add the markers needed later\", 13:44 \"go for it\"",
   "_note": [
     "THE MILITARY FAMILY, 4 OF ~10: THE UPLINK.",
+    "THE HOOK (10-28): the records are the garrison's unsent mail, and the radio is someone who wrote one. Rewritten 2026-10-28 on his bar, \"just about making each mission feel interesting in some way\" (and \"go ahead on the 7\"): the draft had nothing in it worth mentioning afterwards.",
     "Start the site's uplink from its own terminal, then hold the room while it sends. The verb is HOLD: the first of the",
     "family where you stay put. Waves defend the terminal (a hold's defend). Rung 1 squads, rung 3 a horde.",
     "Written to the delve marker set (outside entrance, centre, item markers, boss, wounded) on his ruling, so the",
@@ -27,20 +28,20 @@
     "_theme": "Military sites; the family's marker set."
   },
   "prose": {
-    "name": "Uplink: Site Records on <Planet>",
-    "briefing": "The <Place> holds records somebody wants sent home before the occupiers wipe them. The terminal can send them. It just takes a while.",
-    "card": "Data contract. The site terminal at the <Place> on <Planet> holds records we need transmitted. Start the uplink and keep it running until it completes. Expect resistance. Payment on contract completion."
+    "name": "Uplink: Unsent Letters on <Planet>",
+    "briefing": "When the <Place> fell, its outbound mail was still queued on the site terminal: a month of letters home that never went. The occupiers will wipe it. The terminal can still send them, slowly.",
+    "card": "Data contract. The site terminal at the <Place> on <Planet> holds a queue of unsent personal correspondence. Start the uplink and keep it running until the queue clears. Expect resistance. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Start the uplink at the <Place>",
-      "journal": "The uplink is running. The progress bar is the slowest thing I have ever watched, and something in the <Place> has noticed.",
+      "journal": "The uplink is running. The queue is four hundred and twelve letters long and it sends them one at a time. Something in the <Place> has noticed.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Uplink Terminal",
       "say": [
-        "It's sending? It's loud on every channel, so they'll know. Keep them off it till it finishes."
+        "It's sending. I can see them landing at this end, one at a time, and every one of them is loud on every channel, so keep them off that terminal."
       ]
     },
     {
@@ -48,7 +49,7 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "defend": 1,
       "objective": "Keep the uplink running",
-      "journal": "I held the room until the uplink finished. Every record the <Place> had is on its way home.",
+      "journal": "I held the room until the last letter went. Four hundred and twelve people are about to hear from someone they'd stopped expecting to.",
       "waves": 3,
       "size": [
         3,
@@ -60,18 +61,18 @@
         "horde"
       ],
       "say": [
-        "That's the last packet. Everything's through. Whatever they do to the place now, it's too late."
+        "That's the queue empty. Mine was in there, near the bottom. I wrote it the night before they came in, and I can't remember a word of what I said."
       ],
       "reward": "med"
     }
   ],
   "speaker": {
-    "name": "Records Office",
+    "name": "Comms Officer",
     "voice": "GenericMale01",
     "elevenlabs": "zcIk2xc7SGwlywr4TzZu"
   },
   "broadcast": [
-    "The terminal inside can send everything we need. It's slow, and it's loud. Once you start it, you'll have to stay with it."
+    "When we lost the place, the outbound mail was still sitting in that terminal, every letter anyone wrote that month. Start the uplink and stay with it, because it's slow and it's loud and they'll come to see what's talking."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

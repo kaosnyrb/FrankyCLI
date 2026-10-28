@@ -8,6 +8,7 @@
   "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
   "_note": [
     "THE INDUSTRIAL FAMILY, 1 OF 10: THE RUNAWAY PLANT.",
+    "THE HOOK (10-28): the plant itself is the voice, a polite control system announcing the shutdown to everyone, guns included. Rewritten 2026-10-28 on his bar, \"just about making each mission feel interesting in some way\" (and \"go ahead on the 7\"): the draft had nothing in it worth mentioning afterwards.",
     "The plant was left running when its crew ran, and it is about to cook itself. Shut it down from the control terminal",
     "and keep the occupiers off it while it winds down. The verb is STOP.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
@@ -35,18 +36,18 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Start the shutdown at the <Place>",
-      "journal": "The shutdown is running. It takes as long as it takes, and the people living in the <Place> have heard it start.",
+      "journal": "The shutdown is running. The plant announces every step of it over the speakers, very politely, to everyone, including the people with guns.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Plant Control Terminal",
       "say": [
-        "It's winding down? Don't let anyone near that terminal till it's finished, or it starts all over again."
+        "Shutdown authorised. Estimated time to completion is several minutes. All occupants have been informed of the change, which was not my decision."
       ]
     },
     {
       "type": "hold",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Keep the terminal running until the shutdown completes",
-      "journal": "The <Place> is shut down safely, and stays that way. Nobody got to the terminal before it finished.",
+      "journal": "The <Place> is cold. Its system announced the last step and then had nothing left to say.",
       "waves": 3,
       "size": [
         3,
@@ -58,19 +59,19 @@
         "horde"
       ],
       "say": [
-        "That's it. It's cold. First quiet that place has had in a month."
+        "Shutdown complete. All systems are cold. This is the first time in thirty-one days that I have had nothing to report."
       ],
       "reward": "med",
       "defend": 1
     }
   ],
   "speaker": {
-    "name": "Plant Owners",
+    "name": "Plant Control",
     "voice": "GenericMale01",
     "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
   },
   "broadcast": [
-    "The control terminal is inside. Start the shutdown and stay with it. It's slow, and it's noisy, and they'll come to see what's changed."
+    "Visitor detected. This facility has been operating outside safe limits for thirty-one days, and a shutdown can be authorised from the control terminal. Please be aware that the facility is also occupied."
   ],
-  "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
+  "_speech": "The plant's own control system on the site speakers (10-28). Wants a calm synthetic voice; the voice id is the old owners' until his ear picks one. No names, places, factions or currency."
 }

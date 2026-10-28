@@ -8,6 +8,7 @@
   "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
   "_note": [
     "THE INDUSTRIAL FAMILY, 7 OF 10: THE SHIPMENT.",
+    "THE HOOK (10-28): the shipment is the water purifiers the plant built for the settlements nearby, and the radio is the settlement that put half down on them. Rewritten 2026-10-28 on his bar, \"just about making each mission feel interesting in some way\" (and \"go ahead on the 7\"): the draft had nothing in it worth mentioning afterwards.",
     "The occupiers have a shipment staged to leave. Take their leader, lock the shipment down at the loading terminal,",
     "and hold the way in when the people waiting for it arrive. The verb is LOCK.",
     "Industrial dungeons (LocTypeDungeon_ThemeIndustrial, 20 per Eliza's count), vanilla interiors that carry the",
@@ -26,9 +27,9 @@
     "_theme": "Industrial dungeons; the delve marker set."
   },
   "prose": {
-    "name": "Seizure: Outbound Shipment on <Planet>",
-    "briefing": "The occupiers of the <Place> have a shipment staged to go out. If it leaves, it's gone for good.",
-    "card": "Seizure contract. A shipment staged at the <Place> on <Planet> must not leave. Lock it down at the loading terminal and hold until it is secured. Payment on contract completion."
+    "name": "Seizure: Purifier Shipment on <Planet>",
+    "briefing": "The <Place> built a run of water purifiers for the settlements nearby before the occupiers took it. Now the whole run is staged to go to whoever pays most.",
+    "card": "Seizure contract. A shipment of water purifiers staged at the <Place> on <Planet> must not leave. Lock it down at the loading terminal and hold until it is secured. Payment on contract completion."
   },
   "beats": [
     {
@@ -55,11 +56,11 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Lock the shipment at the loading terminal",
-      "journal": "The shipment is locked down at the <Place>. Nobody can send it now without a code they don't have.",
+      "journal": "The shipment is locked at the terminal. Nobody can send it now without a code they don't have, and the settlements get their water.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Loading Terminal",
       "say": [
-        "It's locked? And now whoever was coming to collect it is going to be annoyed. They're nearly there."
+        "It's locked. Their buyer's ship has just set down outside and nobody's told them yet, so they're going to come in angry."
       ]
     },
     {
@@ -77,18 +78,18 @@
         "horde"
       ],
       "say": [
-        "That's the last of them. We'll have it secured within the hour. Well done."
+        "That's the last of them. We'll have the purifiers out of there by morning, and there'll be clean water on every homestead by the end of the week."
       ],
       "reward": "med"
     }
   ],
   "speaker": {
-    "name": "Port Authority",
+    "name": "Settlement Quartermaster",
     "voice": "GenericMale01",
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "There's a shipment in there that's meant to leave tonight. It doesn't. Lock it at the loading terminal."
+    "Every one of those purifiers was built for us, and we'd put half down before they took the place. Now they're staged for a buyer who's landing tonight, so lock the shipment at the loading terminal before anyone gets it on board."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

@@ -2,7 +2,7 @@
   "schema": 2,
   "id": "duo_delve_remote06b",
   "template": "beats",
-  "_note": "LETTER VARIANT of remote06a, written by Jessica 2026-10-14 on his 'do one of each for now' and his example, 'cave creatures'. Caves only. Same beat, marker and numbers as 06a; the creature list is PreditorMegalist_B where 06a has _A, picked so the two do not draw the same pool, and I have NOT read what _B holds, so the words never name a species. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is the survey crew who got out.",
+  "_note": "LETTER VARIANT of remote06a, written by Jessica 2026-10-14 on his 'do one of each for now' and his example, 'cave creatures'. Caves only. Same beat, marker and numbers as 06a; the creature list is PreditorMegalist_B where 06a has _A, picked so the two do not draw the same pool, and I have NOT read what _B holds, so the words never name a species. lint --all did not flag the theme difference between siblings (checked 2026-10-14). Nobody is placed, so the speaker is the survey crew who got out. THE HOOK (10-28): the gear is the surveyor's camera, and it filmed what came up. A pickup after the clear, in the C1 courier case. Rewritten 2026-10-28 on his bar, \"just about making each mission feel interesting in some way\" (and \"go ahead on the 7\"): the draft had nothing in it worth mentioning afterwards. The case shares the clear marker and the camera stays with the player (lint warns both): a keepsake, the radio has the footage sent.",
   "author": "jessica",
   "source": "Structure from duo_artifact_remote_planet_qst25a (Eliza's clear proof)",
   "place": {
@@ -18,7 +18,7 @@
   },
   "prose": {
     "name": "Hunt: Cave Breach on <Planet>",
-    "briefing": "A survey crew broke through into the cave at the <Place> and something came up out of it. They got out and left their gear behind. Whatever lives down there has to be cleared before anyone goes back."
+    "briefing": "A survey crew broke through into the cave at the <Place> and something came up out of it. They got out, but their camera is still down there, and it was recording."
   },
   "speaker": {
     "name": "Survey Crew",
@@ -26,7 +26,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "We broke into a cave, and something came up out of it. We got out, but our gear's still down there. Clear it out so we can go back for it."
+    "We broke into a cave and something came up out of it. We got out, but my camera's still down there, and it was running the whole time. Clear the cave, then bring me the camera, because I want to see what we nearly met."
   ],
   "beats": [
     {
@@ -43,10 +43,23 @@
         "chance": 25
       },
       "objective": "Clear the creatures out of the <Place>",
-      "journal": "Everything that came up out of the cave at the <Place> is dead. The survey crew can go back for their gear.",
+      "journal": "Everything that came up out of the cave at the <Place> is dead. The survey camera is still somewhere down here.",
       "say": [
-        "All quiet? Brilliant. We're going back down for the gear. Slowly."
+        "All quiet? Then the camera should be where we dropped it, right by where we broke through."
       ]
+    },
+    {
+      "type": "pickup",
+      "at": "REMarkerMediumLocRef",
+      "objective": "Recover the survey camera",
+      "journal": "I recovered the survey crew's camera from the cave at the <Place>. The last thing on it is a long stretch of dark, and then something filling the frame.",
+      "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
+      "name": "Survey Camera Case",
+      "item": "Survey Camera",
+      "say": [
+        "You've it? Send me the footage. It's mostly dark. And then it isn't. I'm going to need a minute."
+      ],
+      "reward": "med"
     }
   ],
   "_speech": "Radio rules: no names, no places, no clock. Voice is ElevenLabs' 'Lucy, Fresh and Casual' (British), NOT yet heard in game (voices.md); his ear decides.",

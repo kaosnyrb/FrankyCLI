@@ -8,6 +8,7 @@
   "source": "his 2026-10-23 15:00: \"let's do the next type now\", after the military ten (his plan, 13:10: \"like 10 missionboard missions\" per dungeon type)",
   "_note": [
     "THE INDUSTRIAL FAMILY, 8 OF 10: THE GAS LEAK.",
+    "THE HOOK (10-28): the radio is the technician who has to go back in after you. Rewritten 2026-10-28 on his bar, \"just about making each mission feel interesting in some way\" (and \"go ahead on the 7\"): the draft had nothing in it worth mentioning afterwards.",
     "Something is leaking, and three vents need closing from their own controls before anyone can work there again. Close",
     "them in any order. The verb is SEAL, and it ends on the third vent rather than a fight, so the site's own occupants",
     "are the danger, not a set piece.",
@@ -59,16 +60,16 @@
     }
   ],
   "speaker": {
-    "name": "Safety Office",
+    "name": "Site Technician",
     "voice": "GenericMale01",
     "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
   },
   "broadcast": [
-    "You're at the site? Three vents in there, all open. Close them from their own controls. Don't hang about in there longer than you have to."
+    "I'm the one who has to go back in there and find out what started this, so I'd like it to stop leaking first. Three vents, all open, each one closes from its own control, and breathe as little as you can while you're in there."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line.",
   "recap": "The <Place> was venting from three places at once. I closed all three, and the site can be worked again.",
   "recapSay": [
-    "All three closed? Readings are coming down everywhere. Nicely done."
+    "Readings are coming down everywhere. I'll be in tomorrow with a mask and a very long list, and for once the first thing on it isn't the gas."
   ]
 }
