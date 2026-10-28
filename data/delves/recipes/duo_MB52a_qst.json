@@ -49,18 +49,18 @@
       "name": "Cache of Banned Texts",
       "journal": "The cache at the <Place> went up with every book in it. Somebody thought those books were worth a gunfight. I still don't know what was in them, and nobody asked me to know.",
       "say": [
-        "Destruction confirmed. Your report is filed. There is nothing further on this contract."
+        "I can see the smoke from here on the feed. I'll file it as done and not ask what was in them, which is the only part of this job I've ever been good at."
       ],
       "reward": "easy"
     }
   ],
   "speaker": {
-    "name": "Contract Office",
+    "name": "Records Clerk",
     "voice": "GenericFemale01",
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Contract confirmed. The material is under guard and is to be destroyed on site. Do not read it, remove it or copy it."
+    "The order came down with my name on it and no reason attached, which in my experience means the reason is worse than the books. There's a crew sitting on that cache, so somebody thinks they're worth fighting for."
   ],
-  "_speech": "The office on the radio, flat as a form. 'Do not read it' is said once and the journal reads it anyway. Recast 2026-10-22 off Matilda (his: \"very robotic\") to ElevenLabs' 'Alice, Clear, Engaging Educator', british: clear and official without the robot. Alice then ruled out of the whole cast by his ear 2026-10-27 (\"sounds like a phone system instead of a person\"); recast to Annie K, heard in game on 32a. His ear decides."
+  "_speech": "A records clerk on the radio, his 2026-10-28 \"the whole this is the contract thing doesn't land. We need more interesting dialouge\": a person whose name is on an order with no reason, uneasy and dry, keeping the missing reason missing. Was 'Contract Office', flat as a form. Voice: Annie K (Alice ruled out 10-27, Matilda 10-22). His ear decides."
 }
