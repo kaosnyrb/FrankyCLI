@@ -57,7 +57,7 @@
       "name": "Survey Camera Case",
       "item": "Survey Camera",
       "say": [
-        "You've it? Send me the footage. It's mostly dark. And then it isn't. I'm going to need a minute."
+        "You've got it? Send me the footage. It's mostly dark. And then it isn't. I'm going to need a minute."
       ],
       "reward": "med"
     }
