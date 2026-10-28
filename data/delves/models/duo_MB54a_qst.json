@@ -1,0 +1,1259 @@
+{
+  "FormKey": "003FCA:du_overtime.esm",
+  "Header": {
+    "MajorFlags": 0,
+    "FormVersion": 576,
+    "Version2": 0,
+    "VersionControl": 0
+  },
+  "EditorID": "duo_MB54a_qst",
+  "Name": "Hazard: Gas Leak on \u003CAlias=TargetPlanetLocation\u003E",
+  "Data": {
+    "Flags": 524288,
+    "Priority": 15,
+    "Type": 0,
+    "Unused": "000000"
+  },
+  "QuestType": "1E2D30:Starfield.esm",
+  "MissionTypeKeyword": "1E2671:Starfield.esm",
+  "MissionBoardDescription": "Hazard contract. Three vents at the \u003CAlias=TargetLocation\u003E on \u003CAlias=TargetPlanetLocation\u003E are venting. Close all three from their controls. The site is occupied. Payment on contract completion.",
+  "Timestamp": 0,
+  "Unknown": 0,
+  "Keywords": [
+    "1A6C4A:Starfield.esm",
+    "1E2671:Starfield.esm"
+  ],
+  "TextDisplayGlobals": [
+    "003FCE:du_overtime.esm"
+  ],
+  "MissionBoardInfoPanels": [
+    {
+      "Header": "Target Location",
+      "Line1": "\u003CAlias=TargetLocation\u003E"
+    },
+    {
+      "Header": "Target System",
+      "Line1": "\u003CAlias=TargetSystemLocation\u003E"
+    },
+    {
+      "Header": "Target Planet",
+      "Line1": "\u003CAlias=TargetPlanetLocation\u003E"
+    },
+    {
+      "Header": ""
+    },
+    {
+      "Header": ""
+    },
+    {
+      "Header": ""
+    }
+  ],
+  "DialogConditions": [],
+  "Stages": [
+    {
+      "Index": 5,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 10,
+      "Flags": 8,
+      "Unknown": 0,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "The \u003CAlias=TargetLocation\u003E is leaking from three vents, and nobody will go in to close them while it\u0027s occupied.",
+          "Note": "Mission Accepted",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 15,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 20,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "One vent closed. The readout dropped straight away, which is the nicest thing a readout has done for me all week.",
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 30,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "One vent closed. Its control had been set to open and then the dial pulled off, so it couldn\u0027t be shut.",
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 40,
+      "Flags": 64,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 0,
+          "Entry": "One vent closed. Somebody had written VENT? in marker on the casing, and somebody else had answered YES.",
+          "Note": "Ready stage",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 100,
+      "Flags": 0,
+      "Unknown": 116,
+      "LogEntries": [
+        {
+          "Flags": 1,
+          "Entry": "The \u003CAlias=TargetLocation\u003E was venting from three places at once. I closed all three, and the site can be worked again.",
+          "Note": "Mission Complete",
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 1,
+              "Unknown1": "5BD913",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "003FCA:du_overtime.esm",
+              "SecondParameter": 10
+            }
+          ],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "01000000",
+              "RewardDatas": [
+                {
+                  "XpAwarded": "00081D:du_overtime.esm",
+                  "BonusCredits": "000831:du_overtime.esm",
+                  "Rewards": [],
+                  "Conditions": []
+                }
+              ]
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        },
+        {
+          "Flags": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "5BD913",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "003FCA:du_overtime.esm",
+              "SecondParameter": 10
+            }
+          ],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Index": 200,
+      "Flags": 0,
+      "Unknown": 171,
+      "LogEntries": [
+        {
+          "Flags": 2,
+          "Note": "Mission Rejected",
+          "Conditions": [],
+          "StageCompleteDatas": [
+            {
+              "QSRD": "00000000",
+              "RewardDatas": []
+            },
+            {
+              "QSRD": "",
+              "RewardDatas": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Objectives": [
+    {
+      "Index": 10,
+      "Flags": 0,
+      "DisplayText": "Close the vents (\u003CGlobal=duo_MB54a_qst_count1\u003E/3)",
+      "Targets": [
+        {
+          "AliasID": 21,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "000000",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "003FCA:du_overtime.esm",
+              "SecondParameter": 20
+            }
+          ]
+        },
+        {
+          "AliasID": 24,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "000000",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "003FCA:du_overtime.esm",
+              "SecondParameter": 30
+            }
+          ]
+        },
+        {
+          "AliasID": 34,
+          "Flags": 0,
+          "DataTypeState": 0,
+          "Conditions": [
+            {
+              "Kind": "float",
+              "Function": "GetStageDone",
+              "CompareOperator": 0,
+              "Flags": 0,
+              "Value": 0,
+              "Unknown1": "000000",
+              "Unknown2": 0,
+              "RunOnType": 0,
+              "Unknown3": -1,
+              "UseAliases": false,
+              "UsePackageData": false,
+              "FirstLink": "003FCA:du_overtime.esm",
+              "SecondParameter": 40
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Aliases": [
+    {
+      "Kind": "loc",
+      "ID": 0,
+      "Name": "PlayerStarSystemLocation",
+      "Flags": 536870920,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "00149F:Starfield.esm",
+      "SystemLocationAliasID": -2
+    },
+    {
+      "Kind": "loc",
+      "ID": 5,
+      "Name": "TargetLocation",
+      "Flags": 8388865,
+      "ALFG": 0,
+      "Conditions": [
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "283591:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "283598:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "283599:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasRefType",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "02271F:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 1,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "28358A:Starfield.esm",
+          "SecondParameter": 0
+        },
+        {
+          "Kind": "float",
+          "Function": "LocationHasKeyword",
+          "CompareOperator": 0,
+          "Flags": 0,
+          "Value": 0,
+          "Unknown1": "000000",
+          "Unknown2": 0,
+          "RunOnType": 0,
+          "Unknown3": -1,
+          "UseAliases": false,
+          "UsePackageData": false,
+          "FirstLink": "2235B6:Starfield.esm",
+          "SecondParameter": 0
+        }
+      ],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "Alps": {
+        "Conditions": [
+          {
+            "Kind": "float",
+            "Function": "IsTrueForConditionForm",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "028FBB:Starfield.esm",
+            "SecondParameter": 0
+          },
+          {
+            "Kind": "float",
+            "Function": "IsTrueForConditionForm",
+            "CompareOperator": 0,
+            "Flags": 0,
+            "Value": 1,
+            "Unknown1": "000000",
+            "Unknown2": 0,
+            "RunOnType": 0,
+            "Unknown3": -1,
+            "UseAliases": false,
+            "UsePackageData": false,
+            "FirstLink": "2EDF22:Starfield.esm",
+            "SecondParameter": 0
+          }
+        ]
+      }
+    },
+    {
+      "Kind": "ref",
+      "ID": 3,
+      "Name": "PrimaryRef",
+      "Flags": 264,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 11,
+      "Name": "MapMarker",
+      "Flags": 136,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "02271F:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "loc",
+      "ID": 8,
+      "Name": "TargetSystemLocation",
+      "Flags": 536871168,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "00149F:Starfield.esm",
+      "SystemLocationAliasID": 3
+    },
+    {
+      "Kind": "loc",
+      "ID": 2,
+      "Name": "TargetPlanetLocation",
+      "Flags": 1073742080,
+      "ALFG": 0,
+      "Conditions": [],
+      "LocationTypeKeyword": "070A54:Starfield.esm",
+      "ParentSystemLocationAliasID": 3
+    },
+    {
+      "Kind": "ref",
+      "ID": 9,
+      "Name": "PlayerShip",
+      "Flags": 1048578,
+      "ALFG": 0,
+      "Conditions": [],
+      "External": {
+        "Quest": "0174A2:Starfield.esm",
+        "AliasID": 16
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 32,
+      "Name": "MBRIR02Player",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "UniqueActor": "000007:Starfield.esm",
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 20,
+      "Name": "BountyTargetMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "283591:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 21,
+      "Name": "PrimaryActivatorTarget",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "003FCB:du_overtime.esm",
+        "AliasID": 20,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 23,
+      "Name": "BountyTargetMarker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "283598:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 24,
+      "Name": "SecondaryActivatorTarget",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "003FCC:du_overtime.esm",
+        "AliasID": 23,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 33,
+      "Name": "DelveBeat3Marker",
+      "Flags": 0,
+      "ALFG": 0,
+      "Conditions": [],
+      "InLocation": {
+        "AliasID": 5,
+        "RefType": "283599:Starfield.esm"
+      },
+      "VoiceTypes": "Null"
+    },
+    {
+      "Kind": "ref",
+      "ID": 34,
+      "Name": "DelveBeat3Target",
+      "Flags": 524548,
+      "ALFG": 0,
+      "Conditions": [],
+      "Create": {
+        "Object": "003FCD:du_overtime.esm",
+        "AliasID": 33,
+        "Create": 0,
+        "Level": 0
+      },
+      "VoiceTypes": "Null"
+    }
+  ],
+  "Vmad": {
+    "Version": 6,
+    "ObjectFormat": 2,
+    "ExtraBindDataVersion": 3,
+    "Versioning": 0,
+    "FragmentScript": {
+      "Name": "duo_qf_MB54a_qst",
+      "Flags": 0,
+      "Properties": [
+        {
+          "Type": "Object",
+          "Name": "Counter1",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FCE:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Say1",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FD2:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        },
+        {
+          "Type": "Object",
+          "Name": "Say2",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FD5:du_overtime.esm",
+            "Alias": -1,
+            "Unused": 0
+          }
+        }
+      ]
+    },
+    "Fragments": [
+      {
+        "Stage": 10,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_MB54a_qst",
+        "FragmentName": "Fragment_Stage_0010_Item_00"
+      },
+      {
+        "Stage": 15,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_MB54a_qst",
+        "FragmentName": "Fragment_Stage_0015_Item_00"
+      },
+      {
+        "Stage": 20,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_MB54a_qst",
+        "FragmentName": "Fragment_Stage_0020_Item_00"
+      },
+      {
+        "Stage": 30,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_MB54a_qst",
+        "FragmentName": "Fragment_Stage_0030_Item_00"
+      },
+      {
+        "Stage": 40,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_MB54a_qst",
+        "FragmentName": "Fragment_Stage_0040_Item_00"
+      },
+      {
+        "Stage": 100,
+        "Unknown": 0,
+        "StageIndex": 0,
+        "Unknown2": 0,
+        "ScriptName": "duo_qf_MB54a_qst",
+        "FragmentName": "Fragment_Stage_0100_Item_00"
+      }
+    ],
+    "Scripts": [
+      {
+        "Name": "MissionQuestScript",
+        "Flags": 0,
+        "Properties": [
+          {
+            "Type": "Object",
+            "Name": "MissionParent",
+            "Flags": 1,
+            "Object": {
+              "Form": "015300:Starfield.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "RewardAmountGlobal",
+            "Flags": 1,
+            "Object": {
+              "Form": "000831:du_overtime.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "RewardAmountGlobalActual",
+            "Flags": 1,
+            "Object": {
+              "Form": "000831:du_overtime.esm",
+              "Alias": -1,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PlayerStarSystemLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "003FCA:du_overtime.esm",
+              "Alias": 0,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetSystemLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "003FCA:du_overtime.esm",
+              "Alias": 8,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetPlanetLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "003FCA:du_overtime.esm",
+              "Alias": 2,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "TargetLocation",
+            "Flags": 1,
+            "Object": {
+              "Form": "003FCA:du_overtime.esm",
+              "Alias": 5,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PrimaryRef",
+            "Flags": 1,
+            "Object": {
+              "Form": "003FCA:du_overtime.esm",
+              "Alias": 3,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Object",
+            "Name": "PlayerShip",
+            "Flags": 1,
+            "Object": {
+              "Form": "003FCA:du_overtime.esm",
+              "Alias": 9,
+              "Unused": 0
+            }
+          },
+          {
+            "Type": "Bool",
+            "Name": "ShutdownOnFailure",
+            "Flags": 1,
+            "Bool": true
+          }
+        ]
+      }
+    ],
+    "Aliases": [
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FCA:du_overtime.esm",
+            "Alias": 11,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasMapMarkerScript",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "MapMarkerCategory",
+                "Flags": 1,
+                "Int": 0
+              },
+              {
+                "Type": "Int",
+                "Name": "UndiscoveredVisibility",
+                "Flags": 1,
+                "Int": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FCA:du_overtime.esm",
+            "Alias": 21,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnActivate",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 20
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              },
+              {
+                "Type": "Bool",
+                "Name": "ShouldHideActivationAfterSuccessfulActivation",
+                "Flags": 1,
+                "Bool": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FCA:du_overtime.esm",
+            "Alias": 24,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnActivate",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 30
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              },
+              {
+                "Type": "Bool",
+                "Name": "ShouldHideActivationAfterSuccessfulActivation",
+                "Flags": 1,
+                "Bool": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FCA:du_overtime.esm",
+            "Alias": 34,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnActivate",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 40
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              },
+              {
+                "Type": "Bool",
+                "Name": "ShouldHideActivationAfterSuccessfulActivation",
+                "Flags": 1,
+                "Bool": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Version": 6,
+        "ObjectFormat": 2,
+        "Property": {
+          "Type": "Object",
+          "Name": "",
+          "Flags": 1,
+          "Object": {
+            "Form": "003FCA:du_overtime.esm",
+            "Alias": 20,
+            "Unused": 0
+          }
+        },
+        "Scripts": [
+          {
+            "Name": "DefaultAliasOnDistanceLessThan",
+            "Flags": 0,
+            "Properties": [
+              {
+                "Type": "Object",
+                "Name": "TargetAlias",
+                "Flags": 1,
+                "Object": {
+                  "Form": "003FCA:du_overtime.esm",
+                  "Alias": 32,
+                  "Unused": 0
+                }
+              },
+              {
+                "Type": "Float",
+                "Name": "TargetDistance",
+                "Flags": 1,
+                "Float": 250
+              },
+              {
+                "Type": "Int",
+                "Name": "StageToSet",
+                "Flags": 1,
+                "Int": 15
+              },
+              {
+                "Type": "Int",
+                "Name": "PrereqStage",
+                "Flags": 1,
+                "Int": 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "Children": {
+    "Scenes": [
+      {
+        "FormKey": "003FD2:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_MB54a_qst_say1_scene",
+        "Flags": 128,
+        "Quest": "003FCA:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "003FD0:du_overtime.esm"
+          }
+        ]
+      },
+      {
+        "FormKey": "003FD5:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_MB54a_qst_say2_scene",
+        "Flags": 128,
+        "Quest": "003FCA:du_overtime.esm",
+        "VNAM": "0300000003000000030000000300000003000000",
+        "SCSP": false,
+        "SPRP": false,
+        "SPDF": false,
+        "SPPQ": false,
+        "DEVT": false,
+        "Conditions": [],
+        "Phases": [
+          {
+            "Name": "SayPhase",
+            "EditorWidth": 500,
+            "StartConditions": [],
+            "CompletionConditions": []
+          }
+        ],
+        "Actors": [
+          {
+            "ID": 4294967292,
+            "Flags": 8,
+            "BehaviorFlags": 0
+          }
+        ],
+        "Actions": [
+          {
+            "Kind": "Radio",
+            "Name": "Say",
+            "AliasID": -4,
+            "Index": 0,
+            "StartPhase": 0,
+            "EndPhase": 0,
+            "Topic": "003FD3:du_overtime.esm"
+          }
+        ]
+      }
+    ],
+    "Topics": [
+      {
+        "FormKey": "003FD0:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_MB54a_qst_say1_topic",
+        "Priority": 50,
+        "Quest": "003FCA:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "003FD1:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "003FD1:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_MB54a_qst_say1_info",
+            "Speaker": "003FCF:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 16336,
+                "EmotionOut": 0,
+                "ResponseText": "I\u0027m the one who has to go back in there and find out what started this, so I\u0027d like it to stop leaking first. Three vents, all open, each one closes from its own control, and breathe as little as you can while you\u0027re in there.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "345E30F0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "FormKey": "003FD3:du_overtime.esm",
+        "Header": {
+          "MajorFlags": 0,
+          "FormVersion": 576,
+          "Version2": 0,
+          "VersionControl": 0
+        },
+        "EditorID": "duo_MB54a_qst_say2_topic",
+        "Priority": 50,
+        "Quest": "003FCA:du_overtime.esm",
+        "TopicFlags": 0,
+        "Category": 2,
+        "Subtype": 17,
+        "SubtypeName": 1313162067,
+        "Timestamp": 0,
+        "Unknown": 0,
+        "TopicInfoList": [
+          "003FD4:du_overtime.esm"
+        ],
+        "Infos": [
+          {
+            "FormKey": "003FD4:du_overtime.esm",
+            "Header": {
+              "MajorFlags": 0,
+              "FormVersion": 576,
+              "Version2": 0,
+              "VersionControl": 0
+            },
+            "EditorID": "duo_MB54a_qst_say2_info",
+            "Speaker": "003FCF:du_overtime.esm",
+            "StartScenePhase": "",
+            "SubtitlePriority": 1,
+            "COCT": false,
+            "Conditions": [],
+            "Lines": [
+              {
+                "WEMFile": 16339,
+                "EmotionOut": 0,
+                "ResponseText": "Readings are coming down everywhere. I\u0027ll be in tomorrow with a mask and a very long list, and for once the first thing on it isn\u0027t the gas.",
+                "ScriptNotes": "",
+                "Edits": "",
+                "AlternateLipText": "",
+                "TextHash": "E5BF22AF"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
