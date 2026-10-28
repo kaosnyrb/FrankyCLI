@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB53a_qst",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The mission board's test node, as 12a.",
+  "deal": "duo_MB_MissionNode_Assault",
+  "_deal": "Assault, beside 45a, 46a and 52a: the classic Sabotage families (MB19, MB20) deal from Assault. His 2026-10-28 \"promote 53a to Assult\"; moved by gen_delve move, never a rebuild.",
   "author": "jessica",
   "source": "his 2026-10-17 09:42: \"yup write sabotage\". The first Delve of the old MB19/MB20 Sabotage families (backport-map.md: no Delve yet, fits today).",
   "_note": [
