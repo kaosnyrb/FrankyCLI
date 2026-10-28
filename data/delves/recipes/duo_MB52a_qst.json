@@ -2,8 +2,8 @@
   "schema": 2,
   "id": "duo_MB52a_qst",
   "template": "board",
-  "deal": "_duo_MB_MissionNode_test",
-  "_deal": "The mission board's test node, as 12a and 20a.",
+  "deal": "duo_MB_MissionNode_Assault",
+  "_deal": "Assault, beside 45a and 46a: the classic Sabotage families (MB19, MB20) deal from Assault. His 2026-10-28 \"promote 52a to assualt\"; moved by gen_delve move, never a rebuild.",
   "author": "jessica",
   "source": "his 2026-10-17 09:51: \"do the next 5 as well, Json is cheap\". First Delve of the old MB20 Sabotage (books) family. Old MB20a: 'A cache of banned texts has turned up. The order is destruction, not confiscation, and nobody has offered a reason.'",
   "_note": [
