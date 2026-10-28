@@ -414,7 +414,8 @@ namespace FrankyCLI
                     Fatal($"place.residents is '{r.place.residents}'; built: \"dead\". Leave it out and they stand.");
                 else if (!(IsBoard(t) && t.arrivalStage >= 0 && r.broadcast != null))
                     Fatal("place.residents \"dead\" runs on a board's arrival stage, with its radio call: it needs the board template and a broadcast.");
-                else Console.WriteLine($"  place.residents: dead, every human within {ResidentsRadius:0} of step one's marker, killed when the broadcast plays");
+                else Console.WriteLine($"  place.residents: dead, every human within {ResidentsRadius:0} of step one's marker, killed "
+                                       + (r.place.who != null ? "on the crew's stage, before the crew is placed" : "when the broadcast plays"));
             }
             if (r.place.second?.residents != null || r.place.third?.residents != null)
                 Fatal("residents is main place only: the arrival hook measures from step one's marker.");
@@ -1738,12 +1739,19 @@ namespace FrankyCLI
                 }
                 // The site's own people, dead on arrival (place.residents "dead"): on the arrival stage, before its radio call,
                 // round the marker the arrival hook measures from. The lint guarantees a board with a broadcast.
+                // ⛔ WITH A CREW AT THE MAIN PLACE THE KILL MOVES TO THE CREW'S STAGE, as the line before its placer (his
+                // 2026-10-28 on 52a and 53a: "kill all the site inhabitants before spawning the enemies"). The arrival hook
+                // and the crew's hook both fire at 250 m and nothing orders them, and KillResidents takes every human in
+                // reach, so a crew placed first died with the settlers. One fragment, kill then place, cannot race.
                 if (r.place.residents == "dead")
                 {
                     if (bm.Arrival is not (int on, _)) { Console.WriteLine("REFUSED: place.residents is \"dead\" and no arrival hook was built to run it on."); return 1; }
                     props.Add(("ReferenceAlias", "Alias_ArrivalMarker", clone.FormKey, on));
-                    Add(t.arrivalStage, $"duo_delve_lib.KillResidents(Alias_ArrivalMarker, {ResidentsRadius:0.0})");
-                    Console.WriteLine($"  residents: dead, every human within {ResidentsRadius:0} of step one's marker (alias {on}) on stage {t.arrivalStage}");
+                    bool crew = whos.Any(x => x.place == 0);
+                    int killStage = crew ? whoStage[0] : t.arrivalStage;
+                    Add(killStage, $"duo_delve_lib.KillResidents(Alias_ArrivalMarker, {ResidentsRadius:0.0})");
+                    Console.WriteLine($"  residents: dead, every human within {ResidentsRadius:0} of step one's marker (alias {on}) on stage {killStage}"
+                                      + (crew ? ", the main place's crew stage, BEFORE the crew is placed" : ""));
                 }
                 // "replace": the beat's marker is a placed object (a box), so it goes when the quest starts and
                 // the beat's own object stands there instead. His shape: GetRef().Disable(False), never re-enabled.

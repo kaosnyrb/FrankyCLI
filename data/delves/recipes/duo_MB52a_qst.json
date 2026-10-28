@@ -25,6 +25,8 @@
       ]
     },
     "_theme": "A non-hostile site; the only guns are the crew on the cache (who).",
+    "residents": "dead",
+    "_residents": "His 2026-10-28: \"kill all the site inhabitants before spawning the enemies\". Killed on the crew's stage, the line before the crew is placed (Eliza).",
     "who": {
       "kind": "spacers",
       "list": "duo_GangMembersList_Spacer",

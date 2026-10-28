@@ -29,6 +29,8 @@
       ]
     },
     "_theme": "A non-hostile site, so the only guns are the Ecliptic crew on the array (who). Abandoned-only was a pool of 4 (lint, 2026-10-17), too narrow. The board places the POI, so it always starts (his, 2026-10-12).",
+    "residents": "dead",
+    "_residents": "His 2026-10-28: \"kill all the site inhabitants before spawning the enemies\". Killed on the crew's stage, the line before the crew is placed (Eliza).",
     "who": {
       "kind": "spacers",
       "list": "duo_GangMembersList_Ecliptic",
