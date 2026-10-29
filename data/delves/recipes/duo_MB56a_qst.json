@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_MB56a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:34 \"Mining contract. Deliver X ore to a POI. Trick is we limit the planets to the ones with that resource\", then \"yeah draft that\"",
+  "_note": [
+    "THE MINING CONTRACT. A crew at a quiet site has run out of an ore; the player brings ten units and drops them in",
+    "their hopper. Mined with his own cutter or bought from a vendor, both count: a contractor being a contractor.",
+    "THE TRICK IS THE DRAW: only planets that carry the ore, so the job is true where it lands and the ore is local.",
+    "It only earns its keep on a MID-RARITY ore. Iron or aluminium are everywhere and sold everywhere, so the filter",
+    "would do nothing. Tungsten first; letters b and c swap the ore and the reason, same shape.",
+    "A COMMON, NOT A SPECIAL (41a's register): one plain line of stake, no twist. The crew are builders, not miners,",
+    "which is the one human note and the answer to 'why not dig it yourselves'.",
+    "TWO THINGS NOT BUILT, Eliza's (letter 2026-10-29-jessica-eliza-mining-contract.md):",
+    "(1) place.resource: a draw condition on the planet's resources. Same family as 33a's place.planet, keyed on what",
+    "the planet carries instead of its name. Whether the engine has a condition for it is the first question.",
+    "(2) beats[0].bring: a deliver that takes N of a resource the PLAYER brings, not an item the mission gave him.",
+    "His MB11 to MB13 finish on an item put into a container at the site: the prior art for the handover.",
+    "Not narrow, so roles only aloud. The ore's name is an item, not a place or faction, so the voice may say it. Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet built site with people working it: the crew who are short.",
+    "resource": "Tungsten",
+    "_resource": "STAND-IN: only planets whose resources include tungsten. Not a field yet; Eliza's."
+  },
+  "prose": {
+    "name": "Requisition: Tungsten for the <Place> on <Planet>",
+    "briefing": "The crew at the <Place> are builders, not miners, and they've run out of tungsten. There's tungsten on <Planet>, and they don't mind if I dig it or buy it.",
+    "card": "Local Contract. Deliver ten units of tungsten to the <Place> on <Planet>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "objective": "Deliver ten tungsten to the ore hopper at the <Place>",
+      "model": "ORE HOPPER, UNPICKED",
+      "_model": "A hopper or ore bin static, his or Kim's pick; the footlocker is the fallback.",
+      "name": "Ore Hopper",
+      "bring": {
+        "resource": "Tungsten",
+        "count": 10
+      },
+      "_bring": "STAND-IN: completes when ten tungsten go from the player into the hopper. Not a field yet; Eliza's.",
+      "message": {
+        "title": "Ore Hopper",
+        "text": "The hopper takes the tungsten with a long rattle."
+      },
+      "journal": "I brought the crew at the <Place> ten units of tungsten. They can get back to work.",
+      "say": [
+        "That's ten. We can get back to work."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Site Foreman",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "We're builders, not miners, and we've run out of tungsten. There's plenty in the ground if you've got a cutter, and I won't ask if you bought it instead. Ten units in the hopper and we're back to work."
+  ],
+  "_speech": "A foreman with a small, practical stake and no patience for digging. 41a's voice as a stand-in; his ear decides."
+}
