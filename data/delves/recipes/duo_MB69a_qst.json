@@ -1,0 +1,82 @@
+{
+  "schema": 2,
+  "id": "duo_MB69a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 5: THE WHOLE PIPELINE. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's Producer career track in one job: the ore, the bench, the delivery. A craft whose ingredients include a",
+    "mid-rarity ore, then a deliver, at a site on a planet that carries it (MB56a's place.resource).",
+    "STAND-INS: place.resource; the Tungsten ingredient EditorID. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site with a worn-out dig.",
+    "resource": "Tungsten",
+    "_resource": "STAND-IN: only planets whose resources include tungsten. MB56a's field."
+  },
+  "prose": {
+    "name": "Fabrication: Drill Bits for the <Place> on <Planet>",
+    "briefing": "The dig at the <Place> has worn through its last drill bits. They need a new set made with tungsten, and there's tungsten on <Planet>.",
+    "card": "Local Contract. Make a set of tungsten drill bits and deliver them to the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "craft",
+      "craft": {
+        "bench": "industrial",
+        "ingredients": [
+          [
+            "TUNGSTEN, UNRESOLVED",
+            6
+          ],
+          [
+            "Aluminum",
+            2
+          ]
+        ],
+        "_ingredients": "STAND-IN: Tungsten's resource EditorID, Eliza's to resolve.",
+        "description": "Drill bits tipped with tungsten, for a dig that wore through its last set."
+      },
+      "item": "Tungsten Drill Bits",
+      "objective": "Make tungsten drill bits at an industrial workbench",
+      "journal": "I've made the drill bits. Now I need to take them to the <Place>."
+    },
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Parts Crate",
+      "objective": "Deliver the drill bits to the <Place>",
+      "message": {
+        "title": "Parts Crate",
+        "text": "The crate takes the bits with a clatter."
+      },
+      "journal": "I made a set of tungsten drill bits and delivered them to the <Place>.",
+      "say": [
+        "Lovely. They'll be cutting by the next shift."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Dig Foreman",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "Those the bits? Drop them in the crate and we'll fit them."
+  ],
+  "_speech": "Cheerful, mostly about his drill. A stand-in voice; his ear decides."
+}

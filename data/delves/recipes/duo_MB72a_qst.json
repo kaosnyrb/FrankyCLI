@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "id": "duo_MB72a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 8: BUILT FOR THE JOB. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's career line ends with you building your own frigate. A bulk load that needs a bigger hold than most:",
+    "fit one at a shipyard and come back. The most ambitious of the family.",
+    "STAND-IN: beats[0].ship.cargoMin (the pickup waits until his ship's hold is at least that big). Eliza's.",
+    "Pay: hard, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site with a big load waiting.",
+    "second": {
+      "remote": true,
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    }
+  },
+  "prose": {
+    "name": "Hauling: Bulk Load on <Planet>",
+    "briefing": "A bulk load at the <Place> is too big for most holds. The dispatcher wants it at the <SecondPlace> and doesn't mind waiting while I refit.",
+    "card": "Local Contract. Haul a bulk load from the <Place> to the <SecondPlace>. Large cargo hold required. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\ccs\\wreckcargocrate01.nif",
+      "name": "Bulk Load",
+      "item": "Bulk Load",
+      "ship": {
+        "cargoMin": 2000
+      },
+      "_ship": "STAND-IN: refuses the pickup until his ship's hold is at least this big. Eliza's.",
+      "objective": "Collect the bulk load at the <Place>",
+      "journal": "I've loaded the bulk load at the <Place>. I need to take it to the <SecondPlace>.",
+      "say": [
+        "It fits. I knew it would, eventually."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "place": "second",
+      "replace": true,
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Bulk Drop",
+      "objective": "Deliver the bulk load to the <SecondPlace>",
+      "journal": "I hauled a bulk load from the <Place> to the <SecondPlace>, in a hold I fitted for it.",
+      "say": [
+        "That's delivered. Keep that hold, I'll have more like it."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Bulk Dispatcher",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "It's a big load, bigger than most holds. If yours isn't up to it, fit a bigger one and come back. It'll wait."
+  ],
+  "_speech": "Patient, has seen a lot of small ships. A stand-in voice; his ear decides."
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 2,
+  "id": "duo_MB71a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 7: THE RESEARCH JOB. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's research and invention. Complete a research project at a lab (his outpost's or anyone's), then upload it.",
+    "STAND-IN: beat type 'research' (done when a named project completes). Whether a condition exists for it is",
+    "Eliza's first question. The upload is a use at the site, so the call plays on arrival. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet site with a lab that's behind."
+  },
+  "prose": {
+    "name": "Requisition: Research for the <Place> on <Planet>",
+    "briefing": "The lab at the <Place> is behind on a research project and will pay someone with a research lab to finish it.",
+    "card": "Private Contract. Complete a research project and upload the results at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "research",
+      "project": "RESEARCH PROJECT, UNPICKED",
+      "_type": "STAND-IN: not a beat yet. Done when the named project is complete. Eliza's.",
+      "objective": "Complete the research project at a research lab",
+      "journal": "I've finished the research. Now I need to upload the results at the <Place>."
+    },
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
+      "name": "Lab Terminal",
+      "objective": "Upload the results at the lab terminal",
+      "message": {
+        "title": "Lab Terminal",
+        "text": "The terminal takes the upload and starts a long compile."
+      },
+      "journal": "I finished a research project for the lab at the <Place> and uploaded the results.",
+      "say": [
+        "That's in. You've saved us a month of work."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Research Lead",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "You finished it? Upload it to the terminal and I'll stop pacing."
+  ],
+  "_speech": "Relieved, a bit embarrassed. A stand-in voice; his ear decides."
+}

@@ -1,0 +1,78 @@
+{
+  "schema": 2,
+  "id": "duo_MB70a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 6: LAUNCH TO ORBIT. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's planetary industry, which ships goods off the surface through customs offices. An abandoned extractor",
+    "full of product: take it, deliver it to a shuttle in orbit.",
+    "STAND-IN: place.third.orbit on a board (29a's proposed field, Eliza's). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A wild site where an extractor was left running.",
+    "third": {
+      "orbit": "planet",
+      "_orbit": "PROPOSED, as 29a: the orbit over the site's planet. Eliza's."
+    }
+  },
+  "prose": {
+    "name": "Hauling: Extractor Output on <Planet>",
+    "briefing": "An extractor at the <Place> kept running after its crew left, and nobody has emptied it since. A shipping agent wants the output brought up to orbit.",
+    "card": "Local Contract. Recover the output from the abandoned extractor at the <Place> on <Planet> and deliver it to orbit. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "model": "EXTRACTOR, UNPICKED",
+      "_model": "An extractor or hopper static, his or Kim's pick.",
+      "name": "Extractor Hopper",
+      "item": "Extractor Output",
+      "objective": "Take the output from the extractor at the <Place>",
+      "journal": "I've emptied the abandoned extractor at the <Place>. I need to bring its output up to the shuttle in orbit over <Planet>.",
+      "say": [
+        "That's a full load. Bring it up."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "se_TravelMarkerLocRefB02",
+      "place": "third",
+      "model": "SHUTTLE, UNPICKED",
+      "_model": "39a's shuttle ask.",
+      "name": "Cargo Shuttle",
+      "objective": "Deliver the output to the shuttle in orbit",
+      "message": {
+        "title": "Cargo Shuttle",
+        "text": "The shuttle takes the load aboard."
+      },
+      "journal": "I emptied an abandoned extractor at the <Place> and brought its output up to a shuttle in orbit over <Planet>.",
+      "say": [
+        "That's aboard. Somebody left a good extractor running down there."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Shipping Agent",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "That extractor kept running after its crew left, and nobody's emptied it since. Take what's in it and bring it up to the shuttle in orbit."
+  ],
+  "_speech": "Opportunistic, cheerful about it. A stand-in voice; his ear decides."
+}

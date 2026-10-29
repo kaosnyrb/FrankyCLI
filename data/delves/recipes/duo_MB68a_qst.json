@@ -1,0 +1,65 @@
+{
+  "schema": 2,
+  "id": "duo_MB68a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 4: BY ANY MEANS. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's Entrepreneur mission: name the product, not the route. His MB22 to 25 (TerraBrew) are the bones: they ask",
+    "for the goods with no word on how to get them. Buy, craft, loot: all count.",
+    "NEEDS capability E (backport-map.md): beats[0].bring taking ANY item, not only a resource. MB56a's field widened.",
+    "STAND-IN: the item. Isocentered magnets are a manufactured component; the EditorID is Eliza's to resolve. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site with a stopped line."
+  },
+  "prose": {
+    "name": "Requisition: Magnets for the <Place> on <Planet>",
+    "briefing": "The <Place> has been stopped for a week for want of five isocentered magnets, and doesn't care where they come from.",
+    "card": "Local Contract. Deliver five isocentered magnets to the <Place> on <Planet>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Parts Bin",
+      "objective": "Deliver five isocentered magnets to the parts bin at the <Place>",
+      "bring": {
+        "item": "ISOCENTERED MAGNET, UNRESOLVED",
+        "count": 5
+      },
+      "_bring": "STAND-IN: capability E, any item. Completes when five go from the player into the bin.",
+      "message": {
+        "title": "Parts Bin",
+        "text": "The bin takes all five."
+      },
+      "journal": "I brought the <Place> five isocentered magnets. Where I got them is my business.",
+      "say": [
+        "That's five. We're back in business, and I didn't ask."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Fabrication Lead",
+    "voice": "GenericMale01",
+    "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
+  },
+  "broadcast": [
+    "Five isocentered magnets. Buy them, build them, pry them out of something, I don't need to know. We've been stopped a week without them."
+  ],
+  "_speech": "Past caring about the paperwork. A stand-in voice; his ear decides."
+}

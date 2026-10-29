@@ -1,0 +1,79 @@
+{
+  "schema": 2,
+  "id": "duo_MB65a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 1: THE SCHEMATIC. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's build-from-a-blueprint mission. MB50a's craft (played), then a deliver at the site. Buildable today.",
+    "The board's arrival waits on the first beat with a place, so the call plays once the part is built. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet site with a relay to fix."
+  },
+  "prose": {
+    "name": "Fabrication: Relay Coupling for the <Place> on <Planet>",
+    "briefing": "The comms relay at the <Place> needs a coupling nobody sells. Its technician has sent the schematic, and wants one built and fitted.",
+    "card": "Private Contract. Build a relay coupling to the attached schematic and fit it at the <Place> on <Planet>. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "craft",
+      "craft": {
+        "bench": "industrial",
+        "ingredients": [
+          [
+            "Aluminum",
+            3
+          ],
+          [
+            "Copper",
+            3
+          ]
+        ],
+        "description": "A relay coupling built to a technician's schematic, for a comms relay nobody makes parts for."
+      },
+      "item": "Relay Coupling",
+      "objective": "Build a relay coupling at an industrial workbench",
+      "journal": "I've built the relay coupling. Now I need to fit it at the <Place>."
+    },
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "_model": "A relay housing or junction box if one fits; the footlocker is the fallback.",
+      "name": "Relay Housing",
+      "objective": "Fit the relay coupling at the <Place>",
+      "message": {
+        "title": "Relay Housing",
+        "text": "The coupling seats with a click, and the housing's status light turns green."
+      },
+      "journal": "I built a relay coupling to the technician's schematic and fitted it at the <Place>.",
+      "say": [
+        "There's the signal. You built that yourself? It shows. That's a compliment."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Relay Technician",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "You've got the coupling? The housing's open. Seat it and step back."
+  ],
+  "_speech": "Brisk, a little proud of her schematic. A stand-in voice; his ear decides."
+}

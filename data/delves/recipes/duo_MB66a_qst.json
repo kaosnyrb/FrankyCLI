@@ -1,0 +1,78 @@
+{
+  "schema": 2,
+  "id": "duo_MB66a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:56 \"now look at the indurstrial missions in eve online\", then 22:04 \"yup go ahead. We have the bones of 4 with the terrabrew missions. They ask you to deliver the items with no mention how to get\"",
+  "_note": [
+    "THE INDUSTRY FAMILY, 2: THE DATA CORE. Plan: home-office office/projects/delves/industry-family.md.",
+    "EVE's relic hacking that feeds invention: a research core out of a hostile site, to a lab. Buildable today",
+    "(pickup, deliver at a second place). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site somebody else holds.",
+    "second": {
+      "remote": true,
+      "theme": {
+        "require": [
+          "LocTypeOE_NonHostile"
+        ],
+        "exclude": [
+          "LocTypeOE_ThemeCaveKeyword"
+        ]
+      }
+    }
+  },
+  "prose": {
+    "name": "Recovery: Data Core on <Planet>",
+    "briefing": "A lab at the <SecondPlace> wants a data core recovered from the <Place>, unread.",
+    "card": "Private Contract. Recover a data core from the <Place> and deliver it to the lab at the <SecondPlace>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "REContainerLocRef",
+      "model": "DATA CORE, UNPICKED",
+      "_model": "A data core or server module, his or Kim's pick.",
+      "name": "Data Core",
+      "item": "Data Core",
+      "objective": "Recover the data core from the <Place>",
+      "journal": "I've got the data core from the <Place>. I need to take it to the lab at the <SecondPlace>.",
+      "say": [
+        "That's the core. Bring it to the lab."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "place": "second",
+      "replace": true,
+      "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
+      "name": "Lab Intake",
+      "objective": "Deliver the data core to the lab at the <SecondPlace>",
+      "journal": "I brought a data core from the <Place> to the lab at the <SecondPlace>. Whatever's on it is theirs to read.",
+      "say": [
+        "Thank you. We'll have it talking soon."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Lab Director",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "The core should still be running at that site. Bring it to the lab, and don't try to read it on the way."
+  ],
+  "_speech": "Polite and very interested. A stand-in voice; his ear decides."
+}
