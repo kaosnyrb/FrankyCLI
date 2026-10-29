@@ -36,6 +36,10 @@
       "group": "logs",
       "at": "LocDungeonItemMarker01LocRef",
       "objective": "Find out what happened to the unit",
+      "message": {
+        "title": "Unit Field Terminal",
+        "text": "The last entries are a supply request, sent four times, each one shorter than the one before."
+      },
       "journal": "The unit's field terminal. The last entries are a supply request, sent four times, each one shorter than the one before.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Unit Field Terminal"
@@ -44,6 +48,10 @@
       "type": "use",
       "group": "logs",
       "at": "LocDungeonItemMarker02LocRef",
+      "message": {
+        "title": "Unit Footlocker",
+        "text": "A roster taped inside the lid. Six names, five of them crossed out in the same pen, neatly."
+      },
       "journal": "A footlocker with a roster taped inside the lid. Six names, five of them crossed out in the same pen, neatly.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Unit Footlocker"

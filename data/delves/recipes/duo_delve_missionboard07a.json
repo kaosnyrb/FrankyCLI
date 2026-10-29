@@ -50,6 +50,10 @@
       "group": "charges",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Set charges on the weapons cache",
+      "message": {
+        "title": "Weapons Crate",
+        "text": "Rifles, still packed in their grease."
+      },
       "journal": "One charge set on a crate of rifles, packed still in their grease.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Weapons Crate"
@@ -58,6 +62,10 @@
       "type": "use",
       "group": "charges",
       "at": "LocDungeonItemMarker01LocRef",
+      "message": {
+        "title": "Munitions Crate",
+        "text": "Grenades. Somebody stencilled the count on the lid, then crossed it out twice."
+      },
       "journal": "One charge set on a crate of grenades. Somebody had stencilled the count on the lid and then crossed it out twice.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Munitions Crate"
@@ -66,6 +74,10 @@
       "type": "use",
       "group": "charges",
       "at": "LocDungeonItemMarker02LocRef",
+      "message": {
+        "title": "Unmarked Crate",
+        "text": "No markings at all. The lid is nailed down twice as hard as the others."
+      },
       "journal": "One charge set on a crate with no markings at all, and the lid nailed down twice as hard as the others.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Unmarked Crate"

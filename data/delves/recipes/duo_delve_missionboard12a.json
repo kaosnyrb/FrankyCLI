@@ -37,6 +37,10 @@
       "group": "beacons",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Shut down the beacons at the <Place>",
+      "message": {
+        "title": "Supply Beacon",
+        "text": "Its log shows a run due every few days, regular as clockwork."
+      },
       "journal": "One beacon off. Its log had a run due every few days, regular as clockwork.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Supply Beacon"
@@ -45,6 +49,10 @@
       "type": "use",
       "group": "beacons",
       "at": "LocDungeonItemMarker01LocRef",
+      "message": {
+        "title": "Guide Beacon",
+        "text": "Someone has renamed it in its settings, after a ship."
+      },
       "journal": "One beacon off. Someone had renamed it in its settings, after a ship.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Guide Beacon"
@@ -53,6 +61,10 @@
       "type": "use",
       "group": "beacons",
       "at": "LocDungeonItemMarker02LocRef",
+      "message": {
+        "title": "Relay Beacon",
+        "text": "Four repairs in its log, all signed by the same hand."
+      },
       "journal": "One beacon off. Somebody had kept it running: four repairs in its log, all signed by the same hand.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Relay Beacon"
