@@ -32,14 +32,14 @@
   },
   "prose": {
     "name": "Repairs: Relay Power on <Planet>",
-    "briefing": "A relay post at the <Place> wants a contractor to carry two power cells. The posting is short and signed with a rank."
+    "briefing": "A relay post at the <Place> wants a contractor to carry two power cells. The call was four sentences long."
   },
   "beats": [
     {
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Report to the sergeant at the <Place>",
-      "journal": "The sergeant at the <Place> keeps the relay running alone. I need to fetch the two power cells from the drop and fit them, left bay first.",
+      "journal": "I need to fetch the two power cells and fit them, left bay first.",
       "person": {
         "name": "Sergeant Okafor",
         "template": "UC_NA_MASTWorkerFemale03",
@@ -55,7 +55,7 @@
         ]
       },
       "greeting": [
-        "You're the contractor. Eleven minutes late. Cells are at the drop. Two. Go."
+        "You're the contractor. Sign the log. Cells. Two. Go."
       ],
       "exchanges": [
         {
@@ -67,7 +67,13 @@
         {
           "prompt": "Buy you a drink when you're off?",
           "reply": [
-            "Off in nine days. Ask me then. Cells first."
+            "Off at the next drop. Ask me then. Cells first."
+          ]
+        },
+        {
+          "prompt": "Where's everyone else?",
+          "reply": [
+            "Cells. Two. Left bay first."
           ]
         }
       ],
@@ -80,7 +86,7 @@
       "objective": "Read the relay log",
       "slate": {
         "title": "Relay Post Log",
-        "text": "D212. Relay nominal. Cells low. Requested two.\nD213. Relay nominal. Requested two.\nD214. Relay nominal. Cells critical. Contractor requested.\nD215. Relay nominal. Contractor eleven minutes late.\n\nBunks: six. Lockers: six. Mugs: six.\nIn use: one.\n\nNext drop: nine days."
+        "text": "Relay nominal. Cells low. Requested two.\nRelay nominal. Requested two.\nRelay nominal. Cells critical. Contractor requested.\nRelay nominal. Contractor on site.\n\nNext drop: scheduled."
       },
       "_read": [
         "PROPOSED, his 2026-10-12 21:41: lore slates must be 'actual objectives tho so players find them. If they are",
@@ -112,18 +118,18 @@
       "name": "Relay Power Cell",
       "message": {
         "title": "Relay Power Cell",
-        "text": "The second cell. RIGHT, in the same hand. The letters are exactly the same height."
+        "text": "The second cell. RIGHT, in the same hand."
       }
     },
     {
       "type": "deliver",
       "at": "RECenterLocRef",
       "objective": "Fit the power cells to the relay",
-      "journal": "A sergeant keeping a relay post alone at the <Place> needed two power cells carried. I carried them, and the relay is up.",
+      "journal": "A sergeant keeping a relay post at the <Place> needed two power cells carried. I carried them, and the cells are in.",
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Relay",
       "say": [
-        "Left bay. Good. Right bay. Good. Relay's up. Log closed. Next."
+        "Left bay. Good. Right bay. Good. Cells nominal. Log closed. Next."
       ]
     }
   ],
