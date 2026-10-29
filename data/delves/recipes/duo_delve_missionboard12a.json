@@ -53,7 +53,7 @@
       "type": "use",
       "group": "beacons",
       "at": "LocDungeonItemMarker02LocRef",
-      "journal": "One beacon off, Somebody had kept it running: four repairs in its log, all signed by the same hand.",
+      "journal": "One beacon off. Somebody had kept it running: four repairs in its log, all signed by the same hand.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Relay Beacon"
     },

@@ -41,7 +41,7 @@
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Uplink Terminal",
       "say": [
-        "It's sending. I can see them landing at this end,, one at a time. Keep whatever comes for that terminal off it."
+        "It's sending. I can see them landing at this end, one at a time. Keep whatever comes for that terminal off it."
       ]
     },
     {

@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Sabotage: Weapons Cache on <Planet>",
-    "briefing": "The occupiers of the <Place> are sitting on a weapons cache. A demolition team went in and didn't come out. Their charges are still by the door.",
+    "briefing": "The occupiers of the <Place> are sitting on a weapons cache. A demolition team went in and didn't come out. Their charges are still at the entrance.",
     "card": "Local Contract. Set charges on the weapons cache at the <Place> on <Planet>. Charges are at the entrance. Payment on contract completion."
   },
   "beats": [
@@ -83,7 +83,7 @@
         }
       },
       "objective": "Get clear of the <Place>",
-      "journal": "Three charges set on the cache at the <Place>. Their reinforcements came down in pods at the door as I came out, and I got clear anyway. The rest is the client's.",
+      "journal": "Three charges set on the cache at the <Place>. Their reinforcements came down in pods at the entrance as I came out, and I got clear anyway. The rest is the client's.",
       "say": [
         "You're out. Get some distance, the cache is ours to deal with now."
       ],
@@ -96,7 +96,7 @@
     "elevenlabs": "omRordDZNt4Gy45cetUa"
   },
   "broadcast": [
-    "Our team's charges should be right by the door. Three crates inside, one charge each. And they'll hear you working. Expect company on the way out."
+    "Our team's charges should be right at the entrance. Three crates inside, one charge each. And they'll hear you working. Expect company on the way out."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Voice 'Royce', australian, unused so far; his ear decides. No names, places, factions or currency."
 }

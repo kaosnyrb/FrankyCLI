@@ -27,6 +27,8 @@ PER-LINE FAULTS (each fails the run):
            shooters at a site where the build places nobody. Every field the player reads OR hears, because the
            claim is about the world, not the wording. ⚠ `who` has no armed friendly kind (workers are civilians),
            so a count of shooters is never true today: the fix is the words.
+  NAME     two recipes place a person with the same name. The subtitle shows it, so a replaying player meets one
+           person in two jobs that disagree about her (14a and 16a were both "Sergeant Okafor", 2026-10-29).
   SPEAKER  two letter variants of one family share a speaker name. The subtitles show it (his, 2026-10-29), so
            the same name tells a replaying player it is the same person, whatever the lines do. Frances Hale's
            forced pick on the raiders, 43a and 43e, both "Settler".
@@ -58,7 +60,7 @@ NUM = r"(?:two|three|four|five|six|seven|eight|\d+)"
 PEOPLE = re.compile(
     rf"\b{NUM} of us (?:can|could|will|are|left|holding|here)\b|\byou make {NUM}\b|\b{NUM} (?:people|settlers|soldiers|of them) who can (?:shoot|fight)\b"
     rf"|\bwith {NUM} (?:settlers|soldiers|people|others)\b"
-    r"|\b(?:held|hold|holding|fought|stand|standing|stood)\b[^.]{0,40}?\bwith (?:us|them|the settlers|the soldiers)\b",
+    r"|\b(?:held|hold|holding|fought|stand|standing|stood)\b[^.]{0,40}?\bwith (?:us|them|the (?:settlers|soldiers|people|others))\b",
     re.I)
 
 
@@ -162,10 +164,21 @@ def main():
         for name, ids in names.items():
             if len(ids) > 1:
                 flag(", ".join(sorted(ids)), "SPEAKER", "speaker", f"letters share \"{name}\"")
+    people = {}
+    for rid, d in load(a.rev):
+        if "delvetest" in rid:
+            continue
+        for b in d.get("beats") or []:
+            n = (b.get("person") or {}).get("name")
+            if n:
+                people.setdefault(n, set()).add(rid)
+    for n, ids in people.items():
+        if len(ids) > 1 and (not a.id or a.id in ids):
+            flag(", ".join(sorted(ids)), "NAME", "person", f"two recipes place \"{n}\"")
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
-    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH, PEOPLE and SPEAKER (see the header).")
+    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH, PEOPLE, NAME and SPEAKER (see the header).")
     return 1 if hits else 0
 
 

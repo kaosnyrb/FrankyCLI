@@ -41,7 +41,7 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
-      "journal": "Raiders came at the <Place> three times and didn't get in. The volunteer who called me in was still delighted about it an hour later.",
+      "journal": "Raiders came at the <Place> three times and didn't get in. The volunteer who called me in was delighted.",
       "say": [
         "That's them gone! And it's only half past, so there's still time for tea!"
       ],

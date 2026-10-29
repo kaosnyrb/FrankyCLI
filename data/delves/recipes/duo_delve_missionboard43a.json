@@ -48,7 +48,7 @@
         "horde"
       ],
       "objective": "Hold the <Place> against the raiders",
-      "journal": "Raiders came at the <Place> three times. I held it with the people who live there until they gave up.",
+      "journal": "Raiders came at the <Place> three times. I held it until they gave up.",
       "say": [
         "That's them off. We'll get a proper night's sleep tonight."
       ],
