@@ -21,6 +21,9 @@ PER-LINE FAULTS (each fails the run):
            so it may not say first or last), any ending (the last beat, or a choose ending), and a beat whose
            next step is said by the objective of a talk that follows in the same place.
   DASH     an em dash in any of it (his 2026-09-11 ruling; vanilla has none either).
+  SPEAKER  two letter variants of one family share a speaker name. The subtitles show it (his, 2026-10-29), so
+           the same name tells a replaying player it is the same person, whatever the lines do. Frances Hale's
+           forced pick on the raiders, 43a and 43e, both "Settler".
 
 CORPUS RATES (WARN only, the exit code is unchanged, because the fix is a judgement):
   journal entries in first person, floor 75% (vanilla 87%; ours 57% before the pass, 79% after).
@@ -104,10 +107,24 @@ def main():
                 if DASH in field:
                     flag(rid, "DASH", f"beat {i+1}", field)
                     break
+    families = {}
+    for rid, d in load(a.rev):
+        m = re.match(r"^(.*?)([a-z])(_qst)?$", rid)
+        if not m or "delvetest" in rid:
+            continue
+        name = (d.get("speaker") or {}).get("name")
+        if name:
+            families.setdefault(m.group(1) + (m.group(3) or ""), {}).setdefault(name, []).append(rid)
+    for fam, names in families.items():
+        if a.id and not a.id.startswith(fam.replace("_qst", "")):
+            continue
+        for name, ids in names.items():
+            if len(ids) > 1:
+                flag(", ".join(sorted(ids)), "SPEAKER", "speaker", f"letters share \"{name}\"")
     if journals:
         pct = 100 * first / journals
         print(f"\nRATES: journal first person {pct:.0f}% {'WARN, floor 75%' if pct < 75 else 'ok (floor 75%, vanilla 87%)'}")
-    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT and DASH (see the header).")
+    print(f"\n{hits} flagged. TYPE, PAYER, CLOSER, CARD, OBJ, NEXT, DASH and SPEAKER (see the header).")
     return 1 if hits else 0
 
 
