@@ -22,7 +22,7 @@ PER-LINE FAULTS (each fails the run):
            next step is said by the objective of a talk that follows in the same place.
   DASH     an em dash in any of it (his 2026-09-11 ruling; vanilla has none either).
   PEOPLE   the words put allies beside the player (a count of them, "four of us", "you make five", "held the
-           middle with four settlers", "stand with us") and no place in the recipe has a `who`. His, 2026-10-29:
+           middle with four settlers", "stand with us") and nobody friendly is placed: no `who` on a place, no talk person's `company`, no `support` team. His, 2026-10-29:
            "do we have a check on when we mention people who should be present?", on 43b's sergeant counting four
            shooters at a site where the build places nobody. Every field the player reads OR hears, because the
            claim is about the world, not the wording. ⚠ `who` has no armed friendly kind (workers are civilians),
@@ -121,6 +121,7 @@ def main():
         place = d.get("place") or {}
         placed = bool(place.get("who")) or any(isinstance(place.get(k), dict) and place[k].get("who")
                                                 for k in ("second", "third"))
+        placed = placed or any((b.get("person") or {}).get("company") or b.get("support") for b in d.get("beats") or [])
         if not placed:
             for field, t in spoken_and_read(d):
                 m = PEOPLE.search(t)

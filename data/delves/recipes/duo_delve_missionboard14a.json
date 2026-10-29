@@ -71,6 +71,11 @@
         "name": "Sergeant Brandt",
         "template": "UC_NA_MASTWorkerMale01",
         "outfit": "Outfit_Clothes_UCNavy_ArmoredFatigues_Light01_SY-920",
+        "company": {
+          "list": "duo_GangMembersList_UC",
+          "min": 2,
+          "max": 3
+        },
         "voice": "GenericMale01",
         "elevenlabs": "wsHauqjSkdBeAvdbUFmR",
         "hellos": [
@@ -103,7 +108,8 @@
         }
       ],
       "_talk": "Exchange 0 ends the talk, takes the Medical Crate and sets stage 100. 'Nine days' is fixed on purpose and not the unit's: it is a sleeve clock nobody trusts. A rank in a person's name is allowed (it is not a token). Voice 'Jon Jebus', unused so far.",
-      "reward": "med"
+      "reward": "med",
+      "_company": "His 2026-10-29 'can we add a field so that the mission will spawn friendlies there too': the holdouts are real now, the UC Marines list support uses (armed, friendly). Untested whether a person's company fights."
     }
   ],
   "speaker": {
