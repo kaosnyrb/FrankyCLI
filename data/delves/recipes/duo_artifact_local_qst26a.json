@@ -39,9 +39,9 @@
         "chance": 25
       },
       "objective": "Dismantle the checkpoint robot at the <Place>",
-      "journal": "The checkpoint robot at the <Place> is scrap. It asked me for my papers as well.",
+      "journal": "The checkpoint robot at the <Place> is scrap, and the road past it is open.",
       "say": [
-        "It's down. I'm walking through, forty metres to my own door, and nobody asking me for anything."
+        "It's down? Then I'm going home, and nobody's asking me for anything."
       ],
       "reward": "med"
     }
@@ -52,7 +52,7 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "There's a robot on my road home, asking me for papers I've never had. I'm forty metres from my own front door, and it won't let me any closer. It also has a gun."
+    "There's a robot on my road home, asking me for papers I've never had. It turned me back forty metres from my own front door. It also has a gun."
   ],
   "_speech": "Radio rules: no names, places, factions or currency ('military', never whose). Voice is 07a's and 10a's crew lead, used twice so far; his ear decides."
 }

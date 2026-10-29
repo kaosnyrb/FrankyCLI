@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Strike: Spacer Drop on <Planet>",
-    "briefing": "Spacers are dropping onto the <Place> by pod. UC Security is sending a team down to retake the site, and they want someone already on the ground when the team arrives."
+    "briefing": "Spacers are dropping onto the <Place> by pod. The UC is sending a team down to retake the site, and they want someone already on the ground when the team arrives."
   },
   "beats": [
     {
@@ -57,10 +57,10 @@
         "_ship": "His 2026-10-21 play: 'Might be better to use a A class ship as they tend to be smaller'. UC Navy, since the team is UC Marines."
       },
       "objective": "Clear the Spacers from the <Place>",
-      "journal": "The Spacers who dropped onto the <Place> are dead. The UC team is holding the site until its owners come back.",
+      "journal": "The Spacers at the <Place> are dead. The UC team is holding the site.",
       "reward": "med",
       "say": [
-        "That's the last of them. Good shooting out there, honestly, I owe you one. We'll hold it from here until the owners are back. Go on, you've earned the quiet."
+        "That's the last of them. Good shooting. We'll hold it from here. Go on, you've earned the quiet."
       ]
     }
   ],
@@ -70,7 +70,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Ground team, this is the drop lead. We're on our way to you now, so keep your head up and your weapon out. They're coming in by pod, and they'll be shooting before the doors are open. Hold them at the site and we'll be right behind you."
+    "Ground team, this is the drop lead. We're on our way to you now, so keep your head up and your weapon out. Hostiles are coming in by pod, and they'll be shooting before the doors are open. Push into the site and we'll be right behind you."
   ],
   "_speech": "Radio rules: no names, places, factions or currency; a security team is a role. Voice is 26a's and remote05b's (a militia and a captain, the same register), used twice so far; his ear decides."
 }

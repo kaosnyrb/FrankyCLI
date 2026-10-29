@@ -25,25 +25,25 @@
   },
   "prose": {
     "name": "Recovery: Stolen Nav Core on <Planet>",
-    "briefing": "Raiders boarded a freighter, took what they could carry and her nav core with it. Their boss is holed up at the <Place>. Without the core, her captain isn't going anywhere."
+    "briefing": "Raiders boarded a freighter, took what they could carry and her nav core with it. Their boss is at the <Place>. Without the core, her captain isn't going anywhere."
   },
   "beats": [
     {
       "type": "recover",
       "at": "LocDungeonBossLocRef",
       "objective": "Take the nav core from the boss at the <Place>",
-      "journal": "I took the freighter's nav core off the raiders' boss at the <Place>. Then a ship set down outside, and now I need to hold on to the core while the rest of his crew come in.",
+      "journal": "I took the freighter's nav core off the raiders' boss at the <Place>. Now the rest of the crew will want it back, and I need to hold on to it.",
       "item": "Freighter Nav Core",
       "say": [
-        "That's my core. Hang on, something's just set down outside. That'll be the rest of them, and they'll want it back."
+        "That's my core. Don't get comfortable. The rest of them will be back for it."
       ]
     },
     {
       "type": "hold",
       "at": "LocDungeonBossLocRef",
       "objective": "Hold on to the nav core",
-      "revealObjective": "Stop them taking the core",
-      "journal": "Raiders at the <Place> had a freighter's nav core. I took it off their boss, and when the rest of his crew came back for it, I kept it. Her captain can fly again.",
+      "revealObjective": "Stop the rest of the crew taking the core",
+      "journal": "Raiders at the <Place> had a freighter's nav core. I took it off their boss, and when the rest of the crew came back for it, I kept it. Her captain is sending someone for it.",
       "waves": 3,
       "size": [
         3,

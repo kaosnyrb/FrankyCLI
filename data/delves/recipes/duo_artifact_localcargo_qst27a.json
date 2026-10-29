@@ -51,7 +51,7 @@
   },
   "prose": {
     "name": "Recovery: Soldier's Letters on <Planet>",
-    "briefing": "I came across a soldier's note pointing to a cache at the <SecondPlace>. Whatever he left there, he never came back for it."
+    "briefing": "I came across a slate pointing to a cache at the <SecondPlace>."
   },
   "beats": [
     {
@@ -60,11 +60,11 @@
       "place": "second",
       "objective": "Search the cache at the <SecondPlace>",
       "item": "Private's Field Note",
-      "journal": "The cache held a note from a private. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home. I need to find them.",
+      "journal": "The cache held a note from a private, left where he never came back for it. His letters are stashed at the <ThirdPlace>, and he asks whoever finds this to see they get home. I need to find them.",
       "model": "Meshes\\ccs\\fieldcache01.nif",
       "message": {
         "title": "Field Note",
-        "text": "The note is folded small and signed with a service number. His letters are stashed at the <ThirdPlace>. Whoever finds this, please get them home."
+        "text": "The note is folded small and signed with a service number. It reads: 'My letters are at the <ThirdPlace>. Whoever finds this, please get them home.'"
       },
       "name": "Field Cache"
     },
@@ -95,18 +95,18 @@
         "elevenlabs": "r5iFzIytiA1rzjhWFCjW",
         "hellos": [
           [
-            "Are you lost? There's nothing out here worth the walk."
+            "Are you lost? Nobody comes to see me."
           ]
         ]
       },
       "greeting": [
-        "That's his writing on those. I'd know it anywhere. Where did you find them?"
+        "That's his writing on those."
       ],
       "exchanges": [
         {
           "prompt": "Here. They're yours.",
           "reply": [
-            "That's every week. He wrote every week. None of it ever came. I thought he'd stopped. He hadn't."
+            "That's every week. I thought he'd stopped."
           ]
         },
         {

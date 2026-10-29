@@ -39,14 +39,14 @@
   },
   "prose": {
     "name": "Bounty: Cattle Thief on <Planet>",
-    "briefing": "A stockwoman at the <Place> is losing cattle at night, two a week, to raiders who drive them up to their boss. She has asked for someone to come and see her."
+    "briefing": "A stockwoman at the <Place> is losing cattle at night, two a week. She knows where they are going, and has asked for someone to come and see her."
   },
   "beats": [
     {
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the stockwoman at the <Place>",
-      "journal": "A stockwoman at the <Place> is losing two head of cattle a week to raiders, who drive them to their boss at the <SecondPlace>. I need to deal with him.",
+      "journal": "A stockwoman at the <Place> is losing two head of cattle a week to raiders, who drive them to their boss at the <SecondPlace>. I need to deal with the boss.",
       "person": {
         "name": "Maura Ketley",
         "template": "UC_NA_MASTWorkerFemale01",
@@ -61,27 +61,20 @@
         ]
       },
       "greeting": [
-        "Raiders have been taking my cattle. They come at night, take two at a time, and drive them up to their boss. He's eating them."
+        "It's raiders. They drive them up to their boss, and they're eating them. The last one they took was a four-year-old cow. Five hundred kilos, and in calf. She had eight good years left."
       ],
       "exchanges": [
         {
           "prompt": "I'll deal with their boss.",
           "reply": [
-            "Do that. His crew only take what he tells them to. Stop him, and it stops."
+            "Do that. Her crew only take what she tells them to. Stop her, and it stops."
           ]
         },
         {
           "prompt": "How many have you lost?",
           "reply": [
-            "Eleven since the thaw. The last was a four-year-old cow. Five hundred kilos, and in calf. She had eight good years left."
+            "Twelve since the thaw."
           ]
-        },
-        {
-          "prompt": "Is there a price on him?",
-          "reply": [
-            "Not that I know of. If there is, it's yours. I just want my cattle left alone."
-          ],
-          "perk": "BackgroundBountyHunter"
         }
       ],
       "_talk": "Exchange 0 closes the talk and starts the defeat. Every prompt asks about something the greeting has already said (the boss, the losses). Voiced lines: no names, no places, no factions, no currency. Pass 2026-10-23, his \"unclear shes talking about cows and doesn't read well spoken\": she says cattle in her first sentence, the stock is driven, not carried, and the long one-breath replies are split at their real pauses."

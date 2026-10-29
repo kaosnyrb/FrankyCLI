@@ -15,9 +15,9 @@
     "2026-10-09: each repair now clears its own marker, and 'recap' is stage 100's line, the last thing the",
     "player reads. The recap is Jessica's, written 2026-10-09 (907232d); this note said placeholder until 2026-10-10."
   ],
-  "recap": "The crew at the <Place> had three water reclaimers down and nobody spare. I found what was wrong with each one and got all three running again.",
+  "recap": "The crew at the <Place> had three water reclaimers down and nobody who could fix them. I found what was wrong with each one and got all three running again.",
   "recapSay": [
-    "All three are running, so the crew have water again."
+    "All three running. The tanks will hold now."
   ],
   "place": {
     "theme": {
@@ -33,7 +33,7 @@
   },
   "prose": {
     "name": "Repairs: Water Reclaimers on <Planet>",
-    "briefing": "The crew at the <Place> have three water reclaimers down and nobody spare to look at them. I said I'd go and get them running."
+    "briefing": "The crew at the <Place> have three water reclaimers down and nobody who can fix them. I'm going to get them running."
   },
   "beats": [
     {
@@ -41,16 +41,24 @@
       "group": "fix",
       "at": "RECenterLocRef",
       "objective": "Repair the water reclaimers at the <Place>",
-      "journal": "The faulty reclaimer had a clogged intake filter. I've swapped in a clean one and it's drawing water again.",
+      "message": {
+        "title": "Clogged Water Reclaimer",
+        "text": "The intake filter is clogged. Somebody has rinsed the old one and put it back more than once."
+      },
+      "journal": "A few of the crew were standing round this one when I got there. Its intake filter was clogged, and somebody had rinsed the old one and put it back more than once. I've swapped in a clean one and it's drawing water again.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
-      "name": "Faulty Water Reclaimer"
+      "name": "Clogged Water Reclaimer"
     },
     {
       "type": "use",
       "group": "fix",
       "at": "RETravelA1LocRef",
       "ring": "infrastructure",
-      "journal": "The leaking reclaimer only needed its hose clamps tightened. It's holding pressure now.",
+      "message": {
+        "title": "Leaking Water Reclaimer",
+        "text": "The hose clamps are loose. Someone has wrapped the hose in tape to get another week out of it."
+      },
+      "journal": "The leaking reclaimer only needed its hose clamps tightened. Someone had wrapped the hose in tape to get another week out of it. It's holding pressure now.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Leaking Water Reclaimer"
     },
@@ -59,7 +67,11 @@
       "group": "fix",
       "at": "RETravelB1LocRef",
       "ring": "infrastructure",
-      "journal": "The stalled reclaimer had a seized pump. I've freed it, reset the breaker, and it's running.",
+      "message": {
+        "title": "Stalled Water Reclaimer",
+        "text": "The pump has seized. The breaker label has worn off from being flipped so often."
+      },
+      "journal": "The stalled reclaimer had a seized pump, and the breaker label had worn off from being flipped so often. I've freed it, reset the breaker, and it's running.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Stalled Water Reclaimer"
     }
@@ -70,7 +82,7 @@
     "elevenlabs": "OFIZL27ncTeMt1qVKEzH"
   },
   "broadcast": [
-    "Three reclaimers down, and nobody spare to look at them. We're down to what's in the tanks, and the tanks don't last."
+    "Three reclaimers down, and nobody here who can fix them. We're down to what's in the tanks, and the tanks don't last."
   ],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides.",
   "approach": {
