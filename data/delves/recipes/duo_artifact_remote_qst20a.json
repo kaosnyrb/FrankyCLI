@@ -31,12 +31,12 @@
       "at": "se_GeneralMarkerLocRef06",
       "_at": "26a's proven marker.",
       "objective": "Recover the flight recorder over <Planet>",
-      "journal": "A freighter broke up over <Planet> and its crew got out in the escape pods. I picked up its flight recorder, so somebody can finally say what happened.",
+      "journal": "I picked up the flight recorder from the freighter that broke up over <Planet>. Its crew swear they did nothing wrong. Now somebody can check.",
       "model": "Meshes\\SetDressing\\Satellite_Beacon\\Satellite_Beacon.nif",
       "_model": "STAND-IN: the only object proven in orbit.",
       "name": "Flight Recorder",
       "say": [
-        "That's the recorder. Now we'll finally know what happened, and so will the crew."
+        "That's the recorder. Now we'll know what happened, and so will the crew."
       ],
       "reward": "med"
     }
@@ -47,7 +47,7 @@
     "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
   },
   "broadcast": [
-    "If you're near it, you'll pick up the ping. That's the recorder. The crew got out in the escape pods. The recorder ejected when the ship broke up. They swear they did nothing wrong. The recorder's the only thing that can say so."
+    "Get close and you'll pick up a ping. That's the flight recorder. I lost a full hold out there. The crew got out in the pods, and they swear they did nothing wrong. The recorder's the only thing that can say so."
   ],
   "_speech": "The ship's owner, who believes her crew and wants proof. Bella (Professional, Bright, Warm), in one recipe so far; his ear decides. No names, places, factions or currency.",
   "_wording": "2026-10-26/27, his catch: 'The crew got off in the pods. The ship didn't.' did not make sense. Rewritten so the recorder EJECTED and floats alone, which also matches the placed object (Kim's S3, a beacon on a hull plate) and stops every line implying a wreck nobody placed."

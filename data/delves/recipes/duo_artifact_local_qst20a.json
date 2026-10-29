@@ -48,8 +48,8 @@
       "type": "recover",
       "at": "LocDungeonBossLocRef",
       "item": "Homesteader's Bag",
-      "objective": "Recover the stolen belongings from the <Place>",
-      "journal": "I took the homesteader's bag back from the raider leading them at the <Place>. I need to return it to her at the <SecondPlace>."
+      "objective": "Recover the homesteader's bag from the <Place>",
+      "journal": "I took the homesteader's bag back from the raiders' leader at the <Place>. I need to return it to her at the <SecondPlace>."
     },
     {
       "type": "talk",
@@ -65,21 +65,18 @@
         "elevenlabs": "h8eW5xfRUGVJrZhAFxqK",
         "hellos": [
           [
-            "Oh. Hello. I'm a bit on edge today."
-          ],
-          [
-            "Mind the beans."
+            "Oh. Hello."
           ]
         ]
       },
       "greeting": [
-        "Sorry. I've been weeding all morning, it's the only thing that keeps me calm. You've got that look. Did you actually go in there?"
+        "Sorry. I've been sorting what they left, it's the only thing that keeps me calm. You've got that look. Did you actually go in there?"
       ],
       "exchanges": [
         {
-          "prompt": "I found your things.",
+          "prompt": "I've got your bag.",
           "reply": [
-            "That's my bag. They took my money as well, and I don't care. You can't buy back what's in here. Thank you. Really."
+            "That's my bag. They took my money as well, and I don't care. Thank you. Really."
           ]
         },
         {
@@ -91,13 +88,7 @@
         {
           "prompt": "What's in the bag?",
           "reply": [
-            "Nothing anyone would steal on purpose. Old photos, a hat, and a book I've read nine times. They took it because it was there."
-          ]
-        },
-        {
-          "prompt": "What do you grow?",
-          "reply": [
-            "Anything that'll put up with me. Beans, mostly. Beans are very forgiving."
+            "Old photos, a hat, and a book I've read nine times. They took it because it was there."
           ]
         }
       ],

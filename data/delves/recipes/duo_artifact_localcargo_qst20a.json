@@ -30,7 +30,7 @@
   },
   "prose": {
     "name": "Survey: Seismic Sensors on <Planet>",
-    "briefing": "A survey team set three seismic sensors at the <Place> and left before anyone came back to read them. Nobody builds on that ground until someone does."
+    "briefing": "A survey team set three seismic sensors at the <Place> and left without reading them. Nobody builds on that ground until someone reads them."
   },
   "beats": [
     {
@@ -39,7 +39,11 @@
       "at": "RETravelA1LocRef",
       "ring": "infrastructure",
       "objective": "Read the seismic sensors at the <Place>",
-      "journal": "This sensor had been knocked off true. I set it level again and pulled its readings.",
+      "message": {
+        "title": "Tilted Seismic Sensor",
+        "text": "Knocked off true. Someone has chalked a level mark on the casing."
+      },
+      "journal": "This sensor had been knocked off true. Someone had chalked a level mark on the casing, so I set it back to the mark and pulled its readings.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Tilted Seismic Sensor"
     },
@@ -48,7 +52,11 @@
       "group": "read",
       "at": "RETravelB1LocRef",
       "ring": "infrastructure",
-      "journal": "Dust had drifted over this sensor up to the lid. I dug it out and the readings were still there.",
+      "message": {
+        "title": "Half-Buried Seismic Sensor",
+        "text": "Buried up to the lid, dug in deep. Someone has written the date on the lid."
+      },
+      "journal": "This sensor had been buried up to the lid. Whoever dug it in had dug it deep and written the date on the lid. The readings were still there.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
       "name": "Half-Buried Seismic Sensor"
     },
@@ -56,9 +64,13 @@
       "type": "use",
       "group": "read",
       "at": "REMarkerMediumLocRef",
-      "journal": "This sensor was still logging on its own, weeks after the team left. I copied everything it had.",
+      "message": {
+        "title": "Still-Recording Seismic Sensor",
+        "text": "Still recording. Nobody switched it off when they left."
+      },
+      "journal": "This sensor was still recording, weeks after the team left. Nobody had switched it off. I copied everything it had.",
       "model": "Meshes\\SetDressing\\SeismicSensor\\SeismicSensor01.nif",
-      "name": "Logging Seismic Sensor"
+      "name": "Still-Recording Seismic Sensor"
     },
     {
       "type": "use",
@@ -78,7 +90,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "A survey team set three seismic sensors down there, then left before anyone came back to read them. Nobody's building on that ground until we've seen those readings."
+    "A survey team set three seismic sensors down there and left without reading them. Nobody's building on that ground until we've seen those readings."
   ],
   "_speech": "Radio rules: no names, no places, one clause where it can be. Voice is ElevenLabs' 'Annie K, Calm, Grounded Narrator', NOT yet heard in game (voices.md); his ear decides.",
   "_wording": "2026-10-27, his: 'could use a rewording too. I know i'll be paid'. The pay line is gone; the call says why the readings matter instead."
