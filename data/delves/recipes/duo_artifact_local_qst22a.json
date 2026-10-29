@@ -27,7 +27,7 @@
   },
   "prose": {
     "name": "Danger: Terrormorph on <Planet>",
-    "briefing": "A survey crew at the <Place> logged a Terrormorph working the ground around their site, then pulled out. The log runs to nineteen entries. The first thirteen are sightings. The last six are kills."
+    "briefing": "A survey crew at the <Place> logged a Terrormorph working the ground around their site, then pulled out. The log runs to nineteen entries, and only the first thirteen are sightings."
   },
   "beats": [
     {
@@ -39,7 +39,7 @@
         "chance": 25
       },
       "objective": "Kill the Terrormorph at the <Place>",
-      "journal": "The Terrormorph at the <Place> is dead. The survey log closes at nineteen entries, and the twentieth is mine.",
+      "journal": "The Terrormorph at the <Place> is dead. The survey log closes at nineteen entries.",
       "say": [
         "That's it down. The log closes at nineteen entries, and we go back in at first light."
       ],
@@ -52,7 +52,7 @@
     "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
   },
   "broadcast": [
-    "We've logged the thing nineteen times now. The first thirteen entries are sightings, and the last six aren't. Everyone's pulled back off the site until it's dead, and we'd like to go back."
+    "We've logged the thing nineteen times now. The first thirteen entries are sightings, and the last six aren't. We've pulled our people off the site until it's dead, and we'd like to go back."
   ],
   "_speech": "Radio rules: no names, places, factions or currency. Voice was 'Alice', ruled out of the whole cast by his ear 2026-10-27 (\"sounds like a phone system instead of a person\", \"drop Alice from our entire cast\"). Recast to 'Lucy, Fresh & Casual' (British), heard in game on missionboard04a (his \"I like all your voices\"); his ear decides."
 }

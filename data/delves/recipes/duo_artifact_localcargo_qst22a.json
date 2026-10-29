@@ -49,7 +49,7 @@
   },
   "prose": {
     "name": "Recovery: Missing Payroll on <Planet>",
-    "briefing": "The crew at the <Place> haven't been paid this week. The courier carrying their payroll ledger never arrived. Find where it stopped.",
+    "briefing": "The crew at the <Place> haven't been paid this week. The courier carrying their payroll ledger never arrived. Find where the courier stopped.",
     "_rewrite": "Jessica 2026-10-19, his 'the 03a writing feels weak': it named nothing (a load, it, the rest, what was taken). Now the load is the crew's pay: site-agnostic, somebody waiting, and the two halves make sense (ledger by courier, pay ahead to the site locker)."
   },
   "beats": [
@@ -57,7 +57,7 @@
       "type": "pickup",
       "at": "REMarkerMediumLocRef",
       "objective": "Find the courier's crate at the <SecondPlace>",
-      "journal": "I found the courier's crate at the <SecondPlace> with the payroll ledger still in it. The pay went ahead to the site's locker, so I need to take the ledger there.",
+      "journal": "I found the courier's crate at the <SecondPlace>, set down square with the lid latched and the payroll ledger still in it. Whoever carried it meant to come back for it. The pay went ahead to the site's locker, so I need to take the ledger there.",
       "item": "Payroll Ledger",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
@@ -72,9 +72,13 @@
       "type": "use",
       "at": "REContainerLocRef",
       "objective": "Sign for the pay at the <Place>",
-      "journal": "The pay locker at the <Place> has been forced and emptied. I need to find whoever took the pay, and they can't have gone far.",
+      "message": {
+        "title": "Pay Locker",
+        "text": "Empty. The crew have chalked their names on the door, ready to sign."
+      },
+      "journal": "The pay locker at the <Place> is empty, and the crew had already chalked their names on the door to sign. I need to find whoever took the pay, and they can't have gone far.",
       "say": [
-        "The locker's been forced. The ledger's here. The pay isn't. Somebody knew it was coming. Go and get it back."
+        "The locker's empty. The ledger's here. The pay isn't. Somebody knew it was coming. Go and get it back."
       ],
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Pay Locker",
@@ -85,7 +89,7 @@
       "type": "recover",
       "at": "RETravelB1LocRef",
       "objective": "Recover the crew's pay",
-      "journal": "I took the crew's pay back from the people who forced the locker. Now I need to put it in the locker and sign the ledger.",
+      "journal": "I took the crew's pay back from the thieves. Now I need to put it in the locker and sign the ledger.",
       "item": "Crew Pay Case",
       "_item": "Jessica 2026-10-19: a noun that is safe at any site, which the old 'Signed-Out Consignment (1 of 2)' was guarding against.",
       "say": [
@@ -97,7 +101,7 @@
       "returnTo": 2,
       "at": "REContainerLocRef",
       "objective": "Return the pay to the locker",
-      "journal": "A crew at the <Place> hadn't been paid. I found the courier's ledger, took their pay back from whoever forced the locker, and signed for it.",
+      "journal": "A crew at the <Place> hadn't been paid. I found the courier's ledger, took their pay back from whoever emptied the locker, and signed for it.",
       "_at": "Returns to beat 2's locker (returnTo), so it moves with it."
     }
   ],
@@ -107,7 +111,7 @@
     "elevenlabs": "CwhRBWXzGAHq8TQ4Fs17"
   },
   "broadcast": [
-    "This is dispatch. A crew on site haven't been paid this week, because the courier with their ledger never arrived, so find out where it stopped."
+    "This is dispatch. A crew on site haven't been paid this week. The courier with their ledger never arrived. Find out where the courier stopped."
   ],
   "_speech": "Jessica 2026-10-09, his \"setup all the json so Eliza can build it\". Lines and casting: home-office office/projects/delves/radio-lines.md. No names, no places (his rulings). Only Roger is heard in game; the other voices are cast off ElevenLabs' labels, his ear decides."
 }

@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Strike: Purifier Shipment on <Planet>",
-    "briefing": "The <Place> built a run of water purifiers for the settlements nearby before the occupiers took it. Now the whole run is staged to go to whoever pays most.",
+    "briefing": "The <Place> built a run of water purifiers for the settlements nearby before the occupiers took it. Now the whole run is staged for a buyer.",
     "card": "Local Contract. Stop the purifier shipment leaving the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -47,27 +47,27 @@
         "chance": 25
       },
       "objective": "Defeat the occupiers' leader at the <Place>",
-      "journal": "The occupiers' leader at the <Place> is dead. Now I need to lock her shipment at the loading terminal before it goes.",
+      "journal": "The occupiers' leader at the <Place> is dead. Now I need to lock the shipment at the loading terminal before it goes.",
       "say": [
-        "That's her down. The shipment's next, so lock it at the loading terminal before anyone else can send it."
+        "That's her down. Now the terminal."
       ]
     },
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Lock the shipment at the loading terminal",
-      "journal": "The shipment is locked at the terminal and nobody can send it without a code. Now I need to hold the way in against whoever comes to collect it.",
+      "journal": "The shipment is locked at the terminal and nobody can load it without a code. Now I need to hold the way in against whoever comes to collect it.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Loading Terminal",
       "say": [
-        "It's locked. Their buyer's ship has just set down outside and nobody's told them yet, so they're going to come in angry."
+        "It's locked. Their buyer's ship has just set down outside. Nobody's told them, and they're coming in for it."
       ]
     },
     {
       "type": "hold",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Hold the way in",
-      "journal": "The shipment at the <Place> is locked down, and the people who came to collect it went home empty.",
+      "journal": "The shipment at the <Place> is locked down.",
       "waves": 2,
       "size": [
         3,
@@ -78,7 +78,7 @@
         "horde"
       ],
       "say": [
-        "That's the last of them. We'll have the purifiers out of there by morning, and there'll be clean water on every homestead by the end of the week."
+        "That's the last of them. We'll have the purifiers out of there by morning, and we'll see about the other half."
       ],
       "reward": "med"
     }
@@ -89,7 +89,7 @@
     "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
   },
   "broadcast": [
-    "Every one of those purifiers was built for us, and we'd put half down before they took the place. Now they're staged for a buyer who's landing tonight, so lock the shipment at the loading terminal before anyone gets it on board."
+    "Every one of those purifiers was built for us, and we'd put half down before they took the place. Now they're staged for a buyer who's on the way down, so lock the shipment at the loading terminal before anyone gets it on board."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

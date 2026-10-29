@@ -25,7 +25,7 @@
   },
   "prose": {
     "name": "Bounty: Ecliptic Collector on <Planet>",
-    "briefing": "An Ecliptic crew at the <Place> has been charging the homesteads nearby for protection from the Ecliptic. Their collector is the one who comes round. The homesteaders have put up what they can for him to stop."
+    "briefing": "An Ecliptic crew at the <Place> has been charging the homesteads nearby for protection from the Ecliptic. Their collector is the one who comes round. The homesteaders have put up what they can to have the collector stopped."
   },
   "beats": [
     {
@@ -43,9 +43,9 @@
         "chance": 25
       },
       "objective": "Defeat the Ecliptic collector at the <Place>",
-      "journal": "The Ecliptic collector at the <Place> is dead. Nobody's coming round the homesteads next month for their cut.",
+      "journal": "The Ecliptic collector at the <Place> is dead. This month the homesteads keep what they'd have paid.",
       "say": [
-        "He's gone, so this month's money stays with us."
+        "That's the collector gone, so this month's money stays with us."
       ],
       "reward": "med"
     }
@@ -56,7 +56,7 @@
     "elevenlabs": "CjIKi1zuI666pVsFrtyU"
   },
   "broadcast": [
-    "There's a crew near us charging every homestead for protection from themselves. Their collector comes round once a month. We'd like him to stop."
+    "There's a crew near us charging every homestead for protection from themselves. Their collector comes round once a month. Most months it's the money we'd put by for seed. We'd like that stopped."
   ],
   "_speech": "Radio rules: no names, places, factions or currency spoken. Voice is missionboard01a's 'David Jarrett'; his ear decides."
 }
