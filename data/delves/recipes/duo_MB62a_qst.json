@@ -1,0 +1,79 @@
+{
+  "schema": 2,
+  "id": "duo_MB62a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 7: CLAIM JUMPERS. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's guarded asteroid: the fight is the toll for the ore. A clear, then MB56a's counted bring. Cobalt, mid-rarity.",
+    "Same two stand-ins as MB56a. Pay: hard, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site somebody has taken: the jumpers.",
+    "resource": "Cobalt",
+    "_resource": "STAND-IN: only planets whose resources include cobalt. MB56a's field."
+  },
+  "prose": {
+    "name": "Strike: Claim Jumpers on <Planet>",
+    "briefing": "Claim jumpers are sitting on a cobalt claim at the <Place>. Its holder wants them gone and ten units of cobalt delivered.",
+    "card": "Private Contract. Clear the claim jumpers from the <Place> on <Planet>, then deliver ten units of cobalt. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "clear",
+      "at": "REMarkerMediumLocRef",
+      "enemies": {
+        "list": "duo_GangMembersList_Spacer",
+        "min": 4,
+        "max": 6,
+        "species": "mix"
+      },
+      "objective": "Clear the claim jumpers from the <Place>",
+      "journal": "The claim jumpers at the <Place> are gone. I need to bring ten units of cobalt to the claim's hopper.",
+      "say": [
+        "That's them off. Now the cobalt."
+      ]
+    },
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "ORE HOPPER, UNPICKED",
+      "name": "Ore Hopper",
+      "objective": "Deliver ten cobalt to the ore hopper at the <Place>",
+      "bring": {
+        "resource": "Cobalt",
+        "count": 10
+      },
+      "_bring": "STAND-IN: MB56a's field.",
+      "message": {
+        "title": "Ore Hopper",
+        "text": "The hopper takes the cobalt with a long rattle."
+      },
+      "journal": "I cleared the claim jumpers off the <Place> and brought the claim holder ten units of cobalt.",
+      "say": [
+        "That's ten. It's my claim again."
+      ],
+      "reward": "hard"
+    }
+  ],
+  "speaker": {
+    "name": "Claim Holder",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "That's my claim they're sitting on. Move them off it, then bring me ten units of cobalt, and I'll call it square."
+  ],
+  "_speech": "Aggrieved and businesslike. A stand-in voice; his ear decides."
+}

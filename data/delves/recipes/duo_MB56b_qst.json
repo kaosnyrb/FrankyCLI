@@ -1,0 +1,66 @@
+{
+  "schema": 2,
+  "id": "duo_MB56b_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 6: THE FUEL RUN (MB56a's b letter). Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's ice: fuel every structure burns forever, so the demand never stops. MB56a's shape with helium-3, Starfield's",
+    "own ship fuel. Same two stand-ins as MB56a (place.resource, beats[0].bring). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet site with a reactor to keep running.",
+    "resource": "Helium-3",
+    "_resource": "STAND-IN: only planets whose resources include helium-3. MB56a's field."
+  },
+  "prose": {
+    "name": "Requisition: Helium-3 for the <Place> on <Planet>",
+    "briefing": "The <Place> is running its reactor on its last cells. There's helium-3 on <Planet>, and they don't mind if I extract it or buy it.",
+    "card": "Local Contract. Deliver ten units of helium-3 to the <Place> on <Planet>. Payment on delivery."
+  },
+  "beats": [
+    {
+      "type": "deliver",
+      "at": "REContainerLocRef",
+      "replace": true,
+      "model": "FUEL INTAKE, UNPICKED",
+      "_model": "A fuel tank or intake static, his or Kim's pick.",
+      "name": "Fuel Intake",
+      "objective": "Deliver ten helium-3 to the fuel intake at the <Place>",
+      "bring": {
+        "resource": "Helium-3",
+        "count": 10
+      },
+      "_bring": "STAND-IN: MB56a's field.",
+      "message": {
+        "title": "Fuel Intake",
+        "text": "The intake gauge climbs out of the red."
+      },
+      "journal": "I brought the <Place> ten units of helium-3. Their reactor is off its last cells.",
+      "say": [
+        "That's ten. The reactor will hold."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Outpost Engineer",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "Our reactor's on its last cells. Bring us ten units of helium-3, dug or bought, and we'll keep the lights on."
+  ],
+  "_speech": "Calm, counting. A stand-in voice; his ear decides."
+}

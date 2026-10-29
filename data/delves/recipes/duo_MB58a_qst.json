@@ -1,0 +1,76 @@
+{
+  "schema": 2,
+  "id": "duo_MB58a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 2: BLAST THE SEAM. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's moon extraction in miniature: break it open, then collect. A use with an explosion and vanish (52a's own",
+    "fields) on a rock face, then a pickup of the core where it stood.",
+    "STAND-INS: the explosion (a blast, not 52a's incendiary; it must resolve or the lint refuses it) and both models.",
+    "Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A wild site with rock to blow."
+  },
+  "prose": {
+    "name": "Recovery: Ore Core at the <Place> on <Planet>",
+    "briefing": "A mine surveyor thinks the good ore at the <Place> is behind the rock face, not on it, and wants a core brought out.",
+    "card": "Local Contract. Blast open the rock face at the <Place> on <Planet> and recover the ore core. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "explosion": "BLAST EXPLOSION, UNPICKED",
+      "_explosion": "A frag or mining-charge explosion EditorID that resolves; Eliza's to find.",
+      "vanish": true,
+      "model": "ROCK FACE, UNPICKED",
+      "_model": "A rock or ore-vein static that reads as a face to blast, his or Kim's pick.",
+      "name": "Rock Face",
+      "objective": "Set the charge on the rock face at the <Place>",
+      "journal": "The charge took the rock face apart. I need to pick the ore core out of the blast.",
+      "say": [
+        "That's a good noise."
+      ]
+    },
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "model": "ORE CORE, UNPICKED",
+      "name": "Ore Core",
+      "item": "Ore Core",
+      "objective": "Recover the ore core from the blast",
+      "message": {
+        "title": "Ore Core",
+        "text": "A fist-sized lump, heavier than rock should be, with a seam of metal through it."
+      },
+      "journal": "I blew open a rock face at the <Place> and brought out the ore core behind it.",
+      "say": [
+        "That's the one. If there's more of that in there, it was worth the charge."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Mine Surveyor",
+    "voice": "GenericMale01",
+    "elevenlabs": "N2lVS1w4EtoT3dr4eOWO"
+  },
+  "broadcast": [
+    "The good ore's behind the face, not on it. Set the charge, stand well back, and bring me whatever's shiny once the dust settles."
+  ],
+  "_speech": "Cheerful about explosives. MB55a's voice as a stand-in; his ear decides."
+}

@@ -1,0 +1,77 @@
+{
+  "schema": 2,
+  "id": "duo_MB60a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 4: BELT RATS. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's most recognisable mining moment: you're busy, then something shows up. MB55a's shape, start it then hold it,",
+    "with creature waves. STAND-IN: hold.list (a creature list for the waves, 33a's same ask). Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A wild site: the drill is the only thing there that wasn't."
+  },
+  "prose": {
+    "name": "Defense: Drill Run at the <Place> on <Planet>",
+    "briefing": "A survey drill is set up at the <Place> and needs someone to start it and keep things off it while it runs.",
+    "card": "Local Contract. Run the survey drill at the <Place> on <Planet> and protect it until it finishes. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "MINING DRILL, UNPICKED",
+      "_model": "A drill or extractor static, his or Kim's pick.",
+      "name": "Survey Drill",
+      "objective": "Start the survey drill at the <Place>",
+      "journal": "The drill is running, and the noise will draw things in. I need to keep them off it until it finishes.",
+      "say": [
+        "That's it turning. Stay close to it, they'll hear it soon."
+      ]
+    },
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "list": "duo_GangMembersList_PreditorMegalist_A",
+      "_list": "STAND-IN: creature waves instead of the base driver's gang (33a's hold.list ask). Eliza's.",
+      "defend": 1,
+      "objective": "Protect the drill until it finishes",
+      "journal": "I ran a drill at the <Place> and kept the creatures off it until it finished.",
+      "say": [
+        "Drill's done and so are they. Leave it, I'll fetch it."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Drill Operator",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "The drill's set up and ready, it just needs someone to start it and stay with it. The noise brings things up out of the ground, so don't wander off."
+  ],
+  "_speech": "Practical, a little amused. 52a's voice as a stand-in; his ear decides."
+}

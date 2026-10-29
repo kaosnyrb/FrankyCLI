@@ -1,0 +1,68 @@
+{
+  "schema": 2,
+  "id": "duo_MB61a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 5: THE CREW UNDER ATTACK. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's mining fleet with its support, turned round: here the miners are the support. A hold with allies (43a's field).",
+    "STAND-IN: allies.list. Civ_StrongArm are the Strong Arm company's workers (his 10-29); whether a worker list",
+    "fights as allies, or an armed list stands in, is Eliza's. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_NonHostile"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A quiet worked site: the crew's own."
+  },
+  "prose": {
+    "name": "Defense: Mining Crew at the <Place> on <Planet>",
+    "briefing": "The mining crew at the <Place> are about to be attacked and want someone who fights for a living to stand with them.",
+    "card": "Local Contract. Help the mining crew at the <Place> on <Planet> hold off an attack. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "hold",
+      "at": "RECenterLocRef",
+      "waves": 3,
+      "size": [
+        2,
+        4
+      ],
+      "style": [
+        "squad",
+        "squad",
+        "horde"
+      ],
+      "allies": {
+        "list": "CIV STRONGARM, UNPICKED",
+        "min": 3,
+        "max": 5
+      },
+      "_allies": "STAND-IN: the Strong Arm workers (Civ_StrongArm) armed, or an armed list in their clothes. Eliza's.",
+      "objective": "Hold the <Place> with the mining crew",
+      "journal": "I held the <Place> with its mining crew until the attackers gave up.",
+      "say": [
+        "That's the last of them. Everyone's still standing, which is more than I'd have bet."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Crew Boss",
+    "voice": "GenericMale01",
+    "elevenlabs": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "broadcast": [
+    "We dig for a living, we don't fight for one, but they're not giving us a choice. Get here and stand with us."
+  ],
+  "_speech": "Tired, not scared. 41a's voice as a stand-in; his ear decides."
+}

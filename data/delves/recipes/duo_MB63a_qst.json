@@ -1,0 +1,66 @@
+{
+  "schema": 2,
+  "id": "duo_MB63a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 8: THE BAD ORE. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's mercoxit, which poisons the space round it when mined. The best seam sits in a hazard zone.",
+    "His 21:51: \"we can place hazard zones\". STAND-IN: place.hazard (kind, radius at the seam). Eliza's to name.",
+    "Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A wild site.",
+    "hazard": {
+      "kind": "TOXIC, UNPICKED",
+      "at": "RECenterLocRef",
+      "radius": 8
+    },
+    "_hazard": "STAND-IN: a toxic hazard zone round the seam, there from arrival. His: we can place them. Eliza's field."
+  },
+  "prose": {
+    "name": "Danger: Toxic Seam at the <Place> on <Planet>",
+    "briefing": "The richest seam at the <Place> sits in a pocket of something toxic. An assayer wants a sample from it anyway.",
+    "card": "Local Contract. Recover a sample from the toxic seam at the <Place> on <Planet>. Suit up. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "pickup",
+      "at": "RECenterLocRef",
+      "model": "ORE CORE, UNPICKED",
+      "name": "Seam Sample",
+      "item": "Seam Sample",
+      "objective": "Recover a sample from the toxic seam",
+      "message": {
+        "title": "Seam Sample",
+        "text": "The sample is warm, even through the glove."
+      },
+      "journal": "I took a sample from the toxic seam at the <Place>. My suit is still complaining about it.",
+      "say": [
+        "Out in one piece? Good. That sample's worth more than you'd think."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Assayer",
+    "voice": "GenericFemale01",
+    "elevenlabs": "XW70ikSsadUbinwLMZ5w"
+  },
+  "broadcast": [
+    "The richest seam on that site is sitting in a pocket of something that'll burn your lungs out. Get in, take a sample, get out. Don't stand there admiring it."
+  ],
+  "_speech": "Dry, has lost interns. A stand-in voice; his ear decides."
+}

@@ -1,0 +1,86 @@
+{
+  "schema": 2,
+  "id": "duo_MB57a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 1: THE SURVEY. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's survey scanner as a job: three sample points in any order (30a's group), a claims office files on the result.",
+    "Buildable today. Pay: med, placeholder."
+  ],
+  "place": {
+    "theme": {
+      "require": [
+        "LocTypeOE_ThemeNaturalKeyword"
+      ],
+      "exclude": [
+        "LocTypeOE_ThemeCaveKeyword",
+        "LocTypeTest"
+      ]
+    },
+    "_theme": "A wild site: nobody's claim yet, which is the point."
+  },
+  "prose": {
+    "name": "Survey: Core Samples at the <Place> on <Planet>",
+    "briefing": "A claims office wants three core samples from the <Place> before anyone files on it.",
+    "card": "Private Contract. Take three core samples at the <Place> on <Planet> before the claim is filed. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "group": "samples",
+      "at": "RECenterLocRef",
+      "model": "SAMPLE PROBE, UNPICKED",
+      "_model": "A survey stake or probe static, his or Kim's pick.",
+      "name": "Sample Point",
+      "objective": "Take core samples at the <Place>",
+      "message": {
+        "title": "Sample Point",
+        "text": "The probe comes up with a core of grey rock, banded with something darker."
+      },
+      "journal": "This sample came up banded with something darker."
+    },
+    {
+      "type": "use",
+      "group": "samples",
+      "at": "REMarkerMediumLocRef",
+      "model": "SAMPLE PROBE, UNPICKED",
+      "_model": "A survey stake or probe static, his or Kim's pick.",
+      "name": "Sample Point",
+      "message": {
+        "title": "Sample Point",
+        "text": "The probe comes up with a core that glitters when it catches the light."
+      },
+      "journal": "This sample glittered when it caught the light."
+    },
+    {
+      "type": "use",
+      "group": "samples",
+      "at": "REContainerLocRef",
+      "model": "SAMPLE PROBE, UNPICKED",
+      "_model": "A survey stake or probe static, his or Kim's pick.",
+      "name": "Sample Point",
+      "message": {
+        "title": "Sample Point",
+        "text": "The probe comes up with a core of plain rock, and the readout barely moves."
+      },
+      "journal": "This sample was plain rock."
+    }
+  ],
+  "speaker": {
+    "name": "Claims Office",
+    "voice": "GenericFemale01",
+    "elevenlabs": "lcMyyd2HUfFzxdCaC4Ta"
+  },
+  "broadcast": [
+    "Three sample points, marked. Push the probe in, let it read, move on. We file on what you send us, so don't skip one."
+  ],
+  "_speech": "A clerk who has seen a lot of bad claims. 42a's voice as a stand-in; his ear decides.",
+  "recap": "I took three core samples at the <Place> for a claims office. They'll file on what I sent them.",
+  "recapSay": [
+    "That's all three. We'll file on these."
+  ]
+}

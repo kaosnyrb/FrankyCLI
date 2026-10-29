@@ -1,0 +1,59 @@
+{
+  "schema": 2,
+  "id": "duo_MB64a_qst",
+  "template": "board",
+  "deal": "_duo_MB_MissionNode_test",
+  "_deal": "The board's test node, until he plays it.",
+  "author": "jessica",
+  "source": "his 2026-10-29 21:43 \"look at the mining gameplay system of Eve online... What other missions could we do\", then 21:51 \"Write all these ideas down. My thinking is we build and if its not fun we tweak\"",
+  "_note": [
+    "THE MINING FAMILY, 9: THE RIGGED CLAIM. Plan: home-office office/projects/delves/mining-family.md.",
+    "EVE's booby-trapped asteroids, as mines on the approach. One use at the beacon with mines placed round it.",
+    "STAND-IN: place.mines (count, radius round the beacon). Vanilla's own frag mines; Eliza's field. Pay: med."
+  ],
+  "place": {
+    "theme": {
+      "require": [],
+      "exclude": [
+        "LocTypeOE_NonHostile",
+        "LocTypeOE_ThemeCaveKeyword"
+      ]
+    },
+    "_theme": "A built site somebody left in a hurry.",
+    "mines": {
+      "count": 6,
+      "at": "RECenterLocRef",
+      "radius": 20
+    },
+    "_mines": "STAND-IN: armed mines on the approach to the beacon, there from arrival. Eliza's field."
+  },
+  "prose": {
+    "name": "Danger: Rigged Claim at the <Place> on <Planet>",
+    "briefing": "Whoever held the claim at the <Place> mined the approach on the way out. The registrar wants its claim beacon reset.",
+    "card": "Administrative Contract. Reset the claim beacon at the <Place> on <Planet>. The approach is mined. Payment on contract completion."
+  },
+  "beats": [
+    {
+      "type": "use",
+      "at": "RECenterLocRef",
+      "model": "CLAIM BEACON, UNPICKED",
+      "_model": "A beacon static, his or Kim's pick.",
+      "name": "Claim Beacon",
+      "objective": "Reset the claim beacon at the <Place>",
+      "journal": "Someone mined the approach to the claim at the <Place> before they left. I got through and reset the claim beacon.",
+      "say": [
+        "Beacon's back on our register. Mind your step coming out."
+      ],
+      "reward": "med"
+    }
+  ],
+  "speaker": {
+    "name": "Claim Registrar",
+    "voice": "GenericMale01",
+    "elevenlabs": "7QTeMqXOsYj1AQaKLcrf"
+  },
+  "broadcast": [
+    "Whoever had that claim before you mined the approach on the way out, and I don't mean for ore. Watch your feet and reset the claim beacon."
+  ],
+  "_speech": "Deadpan. A stand-in voice; his ear decides."
+}
