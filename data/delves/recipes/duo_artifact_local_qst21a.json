@@ -77,13 +77,13 @@
         {
           "prompt": "I'll get your cargo back.",
           "reply": [
-            "Water filters, one crate. Somebody's been waiting a week to drink without boiling it first. Don't bring it back to me. Take it where it was going."
+            "Water filters, one crate. Somebody's waiting on them. Don't bring it back to me. Take it where it was going."
           ]
         },
         {
           "prompt": "What happened?",
           "reply": [
-            "Four of them. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."
+            "More than I could argue with. Very polite until they weren't. They took the crate and left me the ship, which I suppose was kind of them."
           ]
         },
         {
@@ -95,7 +95,7 @@
         {
           "prompt": "Describe the one in charge.",
           "reply": [
-            "Tall. A scar through one eyebrow. Laughed at his own jokes. If he's worth something to you, take that as well. I won't miss him."
+            "Did all the talking. Laughed at their own jokes. I won't miss them."
           ],
           "perk": "BackgroundBountyHunter"
         }
@@ -129,25 +129,25 @@
         ]
       },
       "greeting": [
-        "Is that a filter crate? Tell me that's a filter crate. We've been boiling every drop for a week."
+        "Tell me you've got our filters. We've been boiling every drop for a week."
       ],
       "exchanges": [
         {
-          "prompt": "It's your filters. The hauler sent them on.",
+          "prompt": "Your filters. The hauler sent them on.",
           "reply": [
-            "She's all right? I'll have these in by tonight. First glass I don't have to wait for, I'm raising it to her."
+            "She's all right? I'll have these in before I sleep. First glass I don't have to wait for, I'm raising it to her."
           ]
         },
         {
           "prompt": "How bad has it been?",
           "reply": [
-            "The old ones clogged. You can drink what comes out, if you boil it first and don't look at it."
+            "The old ones clogged. You can drink what comes out, if you don't look at it."
           ]
         },
         {
           "prompt": "Is it just you here?",
           "reply": [
-            "Me and six others. Six others who've each told me how to fix the pump."
+            "Enough of us. Every one of them has told me how to fix the pump."
           ]
         }
       ],

@@ -40,7 +40,7 @@
     {
       "type": "pickup",
       "say": [
-        "They're coming back for it. Hang on to that case."
+        "You've stirred them up. Hang on to that case."
       ],
       "_say": "Moved here from the hold beat 2026-10-12 (Eliza): a beat's say plays when its stage is SET, and the hold's is set when the third wave dies, so the warning would have come after the danger. Beat 1's stage is where wave 1 spawns, as 09a's \"Keep an eye out\" sits on the beat before its hold. Words unchanged.",
       "at": "REMarkerMediumLocRef",
@@ -53,7 +53,7 @@
       "type": "hold",
       "at": "RETravelB1LocRef",
       "objective": "Hold off the attackers",
-      "journal": "As soon as I lifted the sample case, the people who ran the crew off came back for it. I have to deal with them before I can get it out.",
+      "journal": "As soon as I lifted the sample case, whatever ran the crew off came back. I have to deal with them before I can get it out.",
       "waves": 3,
       "size": [
         3,
@@ -70,7 +70,7 @@
       "type": "deliver",
       "at": "RECenterLocRef",
       "objective": "Take the samples to the drop beacon",
-      "journal": "I got the crew's core samples out of the <Place> under fire and left them at their drop beacon for pickup.",
+      "journal": "I got the crew's core samples out of the <Place> through the attack and left them at their drop beacon for pickup.",
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Crew Drop Beacon",
       "say": [
@@ -84,7 +84,7 @@
     "elevenlabs": "iP95p4xoKVk53GoZ742B"
   },
   "broadcast": [
-    "We got run off and left our samples behind, and we can't go back in for them with those things still out there. Watch yourself, because they didn't go far."
+    "We got run off the dig, and yes, we left the samples behind. Whatever ran us off didn't go far. Watch yourself."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Chris, Charming, Down-to-Earth', NOT yet heard in game (voices.md); his ear decides.",
   "_wording": "2026-10-27, his 'I know i'll be paid': the pay promise is gone; the line says why the job matters."

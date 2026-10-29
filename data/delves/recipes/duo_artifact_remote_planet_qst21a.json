@@ -52,7 +52,7 @@
       "type": "hold",
       "at": "MapMarkerRefType",
       "_at": "The map marker, his 2026-10-27 ruling off his play: \"The defend marker is at a random point\" on RETravelB1LocRef, a travel-ring marker that can sit anywhere round the POI. The hold reuses the quest's own map-marker alias (his \"reuse the map marker alias\"), since a second alias on the same reference fails the contention check.",
-      "objective": "Fight off the ambush",
+      "objective": "Fight off the attackers",
       "journal": "Lifting the canister woke its tracker, and the people who jumped the courier came straight for it. I have to deal with them before I can get it out.",
       "waves": 3,
       "size": [
@@ -64,7 +64,7 @@
         "squad",
         "horde"
       ],
-      "revealObjective": "Find the attackers"
+      "revealObjective": "Find the rest of them"
     },
     {
       "type": "deliver",
@@ -74,7 +74,7 @@
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Courier Pickup Beacon",
       "say": [
-        "We've got it. There's a colony waiting on those cultures, and they'll be on their way tonight."
+        "It's at the beacon. There's a colony waiting on those cultures. They go out tonight."
       ]
     }
   ],
@@ -84,8 +84,8 @@
     "elevenlabs": "EXAVITQu4vr4xnSDxMaL"
   },
   "broadcast": [
-    "Our courier was jumped on her way back and had to drop a canister of vaccine cultures. It's still out there. Get it to the courier beacon before anyone else does.",
-    "Whoever jumped her didn't take it, and that worries me. I think they're waiting to see who comes for it."
+    "Our courier was jumped on her way back and had to drop a canister of vaccine cultures. It's still out there. Get to it before anyone else does, and bring it to the courier beacon.",
+    "She says whoever jumped her didn't take it, and that worries me. I think they left it there for its tracker."
   ],
   "_speech": "Radio rules: no names, no places. Voice is ElevenLabs' 'Sarah, Mature, Reassuring, Confident', NOT yet heard in game (voices.md); his ear decides.",
   "_wording": "2026-10-27, his catch: 'They may still be watching for it.' delivered badly on its own (each list item is its own audio line). Reworded whole: every radio line is a complete thought, the bait is said once with its reason, and the pickup line answers it. Then his 'I know i'll be paid' (on Seismic Sensors, same morning): the pay promise in line two is gone."

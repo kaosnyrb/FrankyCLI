@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Rescue: Night Shift on <Planet>",
-    "briefing": "One worker on the night shift hid when the <Place> was taken. She's still in there, and she's been very patient about it.",
+    "briefing": "One worker on the night shift hid when the <Place> was taken. She's still in there.",
     "card": "Local Contract. See the night-shift worker out of the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -47,16 +47,16 @@
         "chance": 25
       },
       "objective": "Clear the occupiers from the <Place>",
-      "journal": "Whoever was running the <Place> is dead. Now I need to find the night-shift worker somewhere inside.",
+      "journal": "Whoever led the occupiers is dead. Now I need to find the night-shift worker somewhere inside.",
       "say": [
-        "It's quiet now. She'll come out for a friendly voice, so go and find her."
+        "It's quiet. Come and find me, and say something friendly first."
       ]
     },
     {
       "type": "talk",
       "at": "REWoundedMarkerLocRef",
       "objective": "Find the night-shift worker",
-      "journal": "The night-shift worker had been hiding in the <Place> since it was taken. She won't leave until she's clocked out, so I need to clock her out at the door.",
+      "journal": "The night-shift worker had been hiding in the <Place> since it was taken. She won't leave until she's clocked out, so I need to clock her out on the way out.",
       "person": {
         "name": "Dot Ferreira",
         "template": "UC_NA_MASTWorkerFemale02",
@@ -76,7 +76,7 @@
         {
           "prompt": "Let's get you out.",
           "reply": [
-            "Yes. But clock me out on the way, at the door. I've been on shift for days, and I want it on the record."
+            "Yes. But clock me out on the way out. I've been on shift for days, and I want it on the record."
           ]
         },
         {
@@ -97,12 +97,16 @@
     {
       "type": "use",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
-      "objective": "Clock her out at the door",
-      "journal": "I clocked the night-shift worker out at the door of the <Place>. It's on the record now, every hour of it.",
+      "objective": "Clock her out at the shift clock",
+      "message": {
+        "title": "Shift Clock",
+        "text": "Clocked in: the night the place was taken. Clocked out: now."
+      },
+      "journal": "I clocked the night-shift worker out of the <Place>. It's on the record now, every hour of it.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Shift Clock",
       "say": [
-        "It took. Look at that number, she's owed every hour of it."
+        "It took. I'd like that framed."
       ],
       "reward": "med"
     }
