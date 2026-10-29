@@ -29,19 +29,19 @@
   },
   "prose": {
     "name": "Defense: Unsent Letters on <Planet>",
-    "briefing": "When the <Place> fell, its outbound mail was still queued on the site terminal: a month of letters home that never went. The occupiers will wipe it. The terminal can still send them, slowly.",
-    "card": "Local Contract. Send the unsent mail from the terminal at the <Place> on <Planet>. Payment on contract completion."
+    "briefing": "The <Place> fell with its outbound mail still queued on the site terminal. The terminal can still send it, slowly, if someone holds the site.",
+    "card": "Local Contract. Hold the <Place> on <Planet> while its terminal sends the unsent mail. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Start the uplink at the <Place>",
-      "journal": "The uplink is running. The queue is four hundred and twelve letters long and it sends them one at a time. Something in the <Place> has noticed, and I need to keep the terminal running.",
+      "journal": "The uplink is running. The queue is four hundred and twelve letters long and it sends them one at a time. Something in the <Place> has noticed, and I need to hold the room.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Uplink Terminal",
       "say": [
-        "It's sending. I can see them landing at this end, one at a time, and every one of them is loud on every channel, so keep them off that terminal."
+        "It's sending. I can see them landing at this end,, one at a time. Keep whatever comes for that terminal off it."
       ]
     },
     {
@@ -49,7 +49,7 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "defend": 1,
       "objective": "Keep the uplink running",
-      "journal": "I held the room until the last letter went. Four hundred and twelve people are about to hear from someone they'd stopped expecting to.",
+      "journal": "I held the room until the last letter went.",
       "waves": 3,
       "size": [
         3,

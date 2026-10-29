@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Bounty: The Quartermaster on <Planet>",
-    "briefing": "Whoever runs supplies at the <Place> has been selling stolen stock back to the people it was taken from. Her ledger proves it.",
+    "briefing": "The quartermaster at the <Place> has been selling stolen stock back to the people it was taken from. Her ledger proves it.",
     "card": "Local Contract. The quartermaster at the <Place> on <Planet> is wanted. Bring her ledger. Payment on contract completion."
   },
   "beats": [
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Defeat the quartermaster at the <Place>",
-      "journal": "The quartermaster at the <Place> is dead. Now I need to find her ledger, which is still in there somewhere.",
+      "journal": "The quartermaster at the <Place> is dead. I need to find her ledger.",
       "say": [
         "That's her down. Now the ledger, because without it nothing sticks."
       ]
@@ -57,12 +57,12 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Quartermaster's Ledger",
       "objective": "Recover the quartermaster's ledger",
-      "journal": "The quartermaster kept every sale: same crates, same buyers, sold twice. I've got the ledger, and now I need to get it out of the <Place>.",
+      "journal": "The quartermaster wrote down where every crate came from, and who she sold it to. Mostly the same people. I've got the ledger, and now I need to get it out of the <Place>.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Quartermaster's Footlocker",
       "message": {
         "title": "Quartermaster's Ledger",
-        "text": "Every sale in a neat hand, and a column on the right for what each buyer said when they paid. Most of them said thank you."
+        "text": "Every sale in a neat hand. Beside each crate, a second column: where it came from. In most rows it is the buyer's own name."
       }
     },
     {
@@ -77,9 +77,9 @@
         }
       },
       "objective": "Get the ledger out of the <Place>",
-      "journal": "I took the quartermaster down and got her ledger out of the <Place>, through the people sent down to stop it.",
+      "journal": "I took the quartermaster down and got her ledger out of the <Place>, through the help she'd called.",
       "say": [
-        "You're out with the ledger, so it's done. Everyone named in it will be hearing from us."
+        "You're out with the ledger, so it's done. A lot of people paid for their own stock, and now they can prove it."
       ],
       "reward": "med"
     }
@@ -90,7 +90,7 @@
     "elevenlabs": "pqHfZKP75CvOlQylNhV4"
   },
   "broadcast": [
-    "You're at the site. The quartermaster's inside. So's her ledger, and I want both of them dealt with. She'll call for help when it starts, she always does."
+    "You're at the site. The quartermaster's there, and so's her ledger. I want her stopped and the ledger brought out. She'll call for help when it starts, she always does."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

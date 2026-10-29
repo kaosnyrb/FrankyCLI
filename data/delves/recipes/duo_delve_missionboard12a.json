@@ -37,7 +37,7 @@
       "group": "beacons",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Shut down the beacons at the <Place>",
-      "journal": "One beacon off. It was playing a little three note chime between bursts. I don't know why that made it worse.",
+      "journal": "One beacon off. Its log had a run due every few days, regular as clockwork.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Supply Beacon"
     },
@@ -45,7 +45,7 @@
       "type": "use",
       "group": "beacons",
       "at": "LocDungeonItemMarker01LocRef",
-      "journal": "One beacon off. Someone had taped a picture of a ship to it, the way you'd tape one to a fridge.",
+      "journal": "One beacon off. Someone had renamed it in its settings, after a ship.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Guide Beacon"
     },
@@ -53,7 +53,7 @@
       "type": "use",
       "group": "beacons",
       "at": "LocDungeonItemMarker02LocRef",
-      "journal": "One beacon off, and its backup battery pulled so it stays off.",
+      "journal": "One beacon off, Somebody had kept it running: four repairs in its log, all signed by the same hand.",
       "model": "Meshes\\SetDressing\\Outpost\\Beacon\\beacon01.nif",
       "name": "Relay Beacon"
     },
@@ -61,7 +61,7 @@
       "type": "hold",
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "objective": "Deal with the people coming to check",
-      "journal": "With all three beacons dark, the next supply run went somewhere else. The ones waiting for it came to find out why, and found me.",
+      "journal": "With all three beacons dark, the ones waiting on the next supply run came to find out why, and found me. The run went straight past.",
       "waves": 2,
       "size": [
         3,
@@ -72,7 +72,7 @@
         "horde"
       ],
       "say": [
-        "Their run just went straight past. Without the beacons, nobody out there knows where to land."
+        "Their run just went straight past."
       ],
       "reward": "med"
     }
@@ -83,7 +83,7 @@
     "elevenlabs": "cjVigY5qzO86Huf0OWal"
   },
   "broadcast": [
-    "There are three beacons in there guiding their runs in. Turn them all off. Somebody's waiting on that delivery, and they'll come and ask."
+    "There are three beacons at that site guiding their runs in. Turn them all off. Somebody's waiting on that delivery, and they'll come and ask."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

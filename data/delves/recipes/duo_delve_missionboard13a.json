@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Bounty: Courier's Orders on <Planet>",
-    "briefing": "A courier is carrying the occupiers' orders through the <Place>. Whatever they say is coming hasn't arrived yet.",
+    "briefing": "A courier is carrying orders through the <Place>. Stop the courier and read them.",
     "card": "Local Contract. Intercept the courier at the <Place> on <Planet> and read her orders. Payment on contract completion."
   },
   "beats": [
@@ -47,7 +47,7 @@
         "chance": 25
       },
       "objective": "Stop the courier at the <Place>",
-      "journal": "The courier at the <Place> is dead. Her orders are coded, so I need to read them on the site's own terminal.",
+      "journal": "The courier at the <Place> is dead. I need to read her orders on the site's terminal.",
       "say": [
         "That's her. Her orders will be coded, but their terminal can read them if you can get to it."
       ]
@@ -56,11 +56,11 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Decode the orders",
-      "journal": "The orders were for reinforcements, landing at the entrance, on the hour. It's nearly the hour, so I need to be at the entrance when they land.",
+      "journal": "The orders were for reinforcements, landing at the entrance. I need to be at the entrance when they land.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Site Terminal",
       "say": [
-        "The orders say reinforcements, at the door, on the hour. Be at the door when they arrive."
+        "The orders say reinforcements, coming down at the entrance. Be there when they land."
       ]
     },
     {
@@ -75,9 +75,9 @@
         }
       },
       "objective": "Meet the reinforcements at the entrance",
-      "journal": "I caught the courier at the <Place>, read her orders, and was waiting at the door when the reinforcements they promised came down.",
+      "journal": "I caught the courier at the <Place>, read her orders, and was waiting at the entrance when the reinforcements they promised came down.",
       "say": [
-        "That was all of them. The orders were right."
+        "That was all of them."
       ],
       "reward": "med"
     }
