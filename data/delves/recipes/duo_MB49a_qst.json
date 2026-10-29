@@ -36,19 +36,19 @@
   },
   "prose": {
     "name": "Infestation: Creatures in the <Place> on <Planet>",
-    "briefing": "Something nested in the middle of the <Place> and the crew pulled out. The air scrubbers have been off since.",
-    "card": "Local Contract. Clear the creatures from the <Place> on <Planet> and restart its air scrubbers. Payment on contract completion."
+    "briefing": "Something settled in the middle of the <Place> and the crew pulled back. The air scrubbers have been off since.",
+    "card": "Local Contract. Restart the air scrubbers at the <Place> on <Planet>. Creatures have settled round the controls. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Restart the air scrubbers at the <Place>",
-      "journal": "Creatures had nested round the control terminal in the middle of the <Place>. I got through them and restarted the air scrubbers, so the crew can come back.",
+      "journal": "Creatures had settled round the control terminal in the middle of the <Place>. I got through them and restarted the air scrubbers.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Scrubber Control",
       "say": [
-        "That's the scrubbers back on, so the crew can come back now."
+        "That's the scrubbers on. We'll deal with the rest when the crew's back in."
       ],
       "reward": "med"
     }

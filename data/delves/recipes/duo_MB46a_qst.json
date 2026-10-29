@@ -28,7 +28,7 @@
   },
   "prose": {
     "name": "Rescue: Captured Pilot on <Planet>",
-    "briefing": "A pilot set down near the <Place> to wait out a fault, and the occupiers took her inside. She is still alive.",
+    "briefing": "A pilot set down near the <Place> to wait out a fault, and whoever holds it took her inside. She is still alive.",
     "card": "Local Contract. One of our pilots is held at the <Place> on <Planet>. Recover her alive. Payment on contract completion."
   },
   "beats": [
@@ -49,22 +49,22 @@
       "objective": "Defeat the guard captain at the <Place>",
       "journal": "I've dealt with the guard captain at the <Place>. Now I need to find the terminal that opens the pilot's cell.",
       "say": [
-        "That one had the keys. She's in a cell off their terminal, so open it."
+        "That one was in charge. Her cell runs off their terminal, so open it."
       ]
     },
     {
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "objective": "Open the holding cell",
-      "journal": "The cell's lock was a four digit code, and it was 1-2-3-4. The pilot is free, and I need to talk to her.",
+      "journal": "I opened the cell from the terminal. The pilot is free, and I need to talk to her.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Holding Cell Terminal"
     },
     {
       "type": "talk",
       "at": "REWoundedMarkerLocRef",
-      "objective": "Get the pilot out",
-      "journal": "A pilot was taken at the <Place>. I took the guard captain, opened her cell and walked her out.",
+      "objective": "Talk to the pilot",
+      "journal": "A pilot was taken at the <Place>. I killed the guard captain, opened her cell, and she went to see about her ship.",
       "person": {
         "name": "Ines Varga",
         "template": "UC_NA_MASTWorkerFemale01",
@@ -78,7 +78,7 @@
         ]
       },
       "greeting": [
-        "You're not one of them. They'd never have opened that door that fast. I set down to fix a coolant fault and got captured by people who couldn't fix it either."
+        "You're not one of them. They never opened that door without shouting first. I set down to fix a coolant fault."
       ],
       "exchanges": [
         {
@@ -96,7 +96,7 @@
         {
           "prompt": "Why set down here at all?",
           "reply": [
-            "It was the only flat ground for a long way. In fairness to the ground, it was very flat."
+            "The fault picked the spot, not me. I'd have liked somewhere quieter."
           ]
         }
       ],

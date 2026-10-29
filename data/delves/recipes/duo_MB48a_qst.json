@@ -30,7 +30,7 @@
   },
   "prose": {
     "name": "Infestation: Predators at the <Place> on <Planet>",
-    "briefing": "The <Place> went quiet three days ago. Predators have been seen around it since.",
+    "briefing": "The <Place> went quiet three days ago. Its neighbours have heard animals there at night since.",
     "card": "Local Contract. Clear the predators from the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -48,9 +48,9 @@
         "chance": 25
       },
       "objective": "Clear the predators out of the <Place>",
-      "journal": "The people at the <Place> were already dead when I got there, and the predators were still in among them. They're gone now, so somebody can go in and see to the dead.",
+      "journal": "I cleared the predators out of the <Place>. Nobody answered there, and now somebody can go and find out why.",
       "say": [
-        "It's done. I'll get some people together and go up. Thank you for going in first, none of us wanted to."
+        "It's done. I'll get some people together and go over. Thank you for going in first, none of us wanted to."
       ],
       "reward": "med"
     }
@@ -61,7 +61,7 @@
     "elevenlabs": "CsbTapRVtZdcBs3vBbQe"
   },
   "broadcast": [
-    "From where you are, you can see more than I can. They stopped answering three days ago, and we heard the animals at night after that. Clear out whatever's still in there, because somebody has to go in and see to them."
+    "They stopped answering three days ago, and we heard the animals at night after that. Clear out whatever's still in there, because somebody has to go and find out why."
   ],
   "_speech": "A neighbour from further along, quiet, has guessed what you'll find and doesn't say it. Killian, his ear decides. No names, places, factions or currency."
 }
