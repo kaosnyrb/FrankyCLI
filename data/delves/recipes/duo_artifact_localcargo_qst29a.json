@@ -56,7 +56,7 @@
       "model": "Meshes\\ccs\\commsmast01.nif",
       "name": "Abandoned Camp Beacon",
       "say": [
-        "To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us. We've been living on emergency rations since."
+        "To anyone near our old camp. Our last supply drop went to the wrong site. Bring it out to us and leave it in the stores; we're out on the dig most days. We're on emergency rations."
       ]
     },
     {
@@ -64,7 +64,7 @@
       "at": "RETravelA1LocRef",
       "ring": "large-cargo",
       "item": "Misdelivered Supply Crate",
-      "objective": "Collect the crew's supply crate",
+      "objective": "Collect the crew's supply crate at the <Place>",
       "message": {
         "title": "Supply Crate",
         "text": "Still sealed. The label has the old camp crossed out, and the new site written underneath in marker, twice, in case the first one was missed."
@@ -77,12 +77,12 @@
       "at": "RECenterLocRef",
       "place": "second",
       "objective": "Deliver the supplies to the <SecondPlace> on <SecondPlanet>",
-      "journal": "I got the crate out to the <SecondPlace>. The crew had been rationing for a week and had stopped expecting it.",
+      "journal": "I left the crate in the stores at the <SecondPlace>. The crew had been rationing for a week.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Dig Site Stores",
       "reward": "med",
       "say": [
-        "That's ours. We'd given up on it."
+        "Stores just logged it. That's ours. We'd given up on it."
       ]
     }
   ],

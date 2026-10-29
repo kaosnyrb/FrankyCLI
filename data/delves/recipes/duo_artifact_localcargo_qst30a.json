@@ -35,19 +35,19 @@
   },
   "prose": {
     "name": "Hauling: Proposal Picnic on <Planet>",
-    "briefing": "A courier drone was meant to set out a proposal picnic at the <Place> and came down in the wrong spot. Somebody is about to have a very awkward evening unless it gets sorted."
+    "briefing": "A courier drone was meant to set out a proposal picnic at the <Place> and came down in the wrong part of it. Somebody is about to have a very awkward evening unless it gets sorted."
   },
   "beats": [
     {
       "type": "pickup",
       "at": "REMarkerSmallImportantLocRef",
-      "item": "Ring Box (1 of 2)",
+      "item": "Small Box (1 of 2)",
       "objective": "Find the courier drop at the <Place>",
       "model": "Meshes\\ccs\\ringbox01.nif",
       "name": "Split Courier Crate",
       "message": {
         "title": "Split Courier Crate",
-        "text": "The crate split open on landing. A small ring box has a note taped to it: DO NOT OPEN. Underneath, smaller: sorry."
+        "text": "The crate split open on landing. A small box has a note taped to it: DO NOT OPEN. Underneath, smaller: sorry. The hamper is nowhere in it."
       }
     },
     {
@@ -59,14 +59,14 @@
       "name": "Courier Hamper",
       "message": {
         "title": "Courier Hamper",
-        "text": "The hamper bounced further than the ring did. The bottle inside survived. Both glasses did not."
+        "text": "The hamper bounced further than the box did. The bottle inside survived. Both glasses did not."
       }
     },
     {
       "type": "deliver",
       "at": "RECenterLocRef",
       "objective": "Set out the picnic",
-      "journal": "A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the ring and the hamper and laid it all out where it was meant to be. I did not open the small box.",
+      "journal": "A courier drone dropped somebody's proposal picnic in the wrong spot at the <Place>. I found the small box and the hamper, set out the picnic where it was meant to be, and tucked the small box under the hamper lid. I did not open the small box.",
       "model": "Meshes\\ccs\\picnicpallet01.nif",
       "name": "Picnic Spot",
       "say": [

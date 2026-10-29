@@ -29,7 +29,7 @@
   },
   "prose": {
     "name": "Defense: Relay Alignment on <Planet>",
-    "briefing": "The relay at the <Place> has lost its transmitter, and a replacement was dropped at the site. Fitting it will make noise, and noise out here brings company."
+    "briefing": "The relay at the <Place> has lost its transmitter, and a replacement was dropped at the site. Fitting it will make noise, and noise brings company."
   },
   "beats": [
     {
@@ -44,8 +44,8 @@
     {
       "type": "deliver",
       "at": "RECenterLocRef",
-      "objective": "Start the relay alignment",
-      "journal": "The relay dish is fitted, but it has to align before it can lock on, and the noise has drawn attention. I need to hold until it's done.",
+      "objective": "Fit the transmitter to the relay dish",
+      "journal": "The transmitter is fitted, but the dish has to align before it can lock on, and it is loud. I need to hold until it's done.",
       "model": "Meshes\\ccs\\relaydish01.nif",
       "name": "Relay Dish",
       "say": [
@@ -56,7 +56,7 @@
       "type": "hold",
       "at": "RETravelB1LocRef",
       "objective": "Defend the relay",
-      "journal": "I fitted the relay at the <Place> and held off three waves of attackers while it aligned. The relay is live.",
+      "journal": "I fitted the transmitter at the <Place> and held off three waves of attackers while it aligned. The relay is live.",
       "waves": 3,
       "size": [
         3,

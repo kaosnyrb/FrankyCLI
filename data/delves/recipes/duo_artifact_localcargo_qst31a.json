@@ -48,14 +48,14 @@
   },
   "prose": {
     "name": "Hauling: Survey Crate on <Planet>",
-    "briefing": "A survey crew left their samples behind at the <Place>. A site hand there is holding them. I should go and ask him for the crate."
+    "briefing": "A survey crew left their samples behind at the <Place>. A site hand there knows where it is. I should go and ask him."
   },
   "beats": [
     {
       "type": "talk",
       "at": "RECenterLocRef",
       "objective": "Talk to the site hand at the <Place>",
-      "journal": "The site hand says the crew left in a hurry and took his crate by mistake, lunch and all. Ours is still here, and I need to find it where he's marked.",
+      "journal": "The site hand says the crew left in a hurry and took his crate by mistake, lunch and all. Theirs is still round the back, and I need to find it where he's marked.",
       "person": {
         "name": "Tobias Wren",
         "template": "UC_NA_MASTWorkerMale01",
@@ -72,19 +72,19 @@
         ]
       },
       "greeting": [
-        "You're from the survey lot? I've had their crate here for days and I've been told not to open it."
+        "You're here for the survey crate? I've had it here for days and I've been told not to open it. They took my lunch, mind."
       ],
       "exchanges": [
         {
           "prompt": "I'm here for the survey crate.",
           "reply": [
-            "Right. Your crew left in a hurry and took the wrong crate. Theirs had my lunch in it. Yours is still here. I've marked it for you."
+            "Right. The crew left in a hurry and took the wrong crate. The one they took had my lunch in it. Theirs is round the back. I've marked it for you."
           ]
         },
         {
           "prompt": "How long have you been out here?",
           "reply": [
-            "Eleven years, on and off. Most weeks nobody comes out at all. You're the third this week. It's been a big week."
+            "Eleven years, on and off. Most weeks nobody comes for anything. You're the third this week."
           ]
         },
         {
@@ -108,7 +108,7 @@
         {
           "prompt": "Do you like it out here?",
           "reply": [
-            "I like it fine. The quiet doesn't ask me anything. Present company excepted. You can ask."
+            "I like it fine. The quiet doesn't ask me anything. You can ask, though."
           ]
         }
       ],
@@ -124,7 +124,7 @@
       "name": "Marked Survey Crate",
       "message": {
         "title": "Survey Crate",
-        "text": "The crate is sealed and stencilled with a survey mark. Someone has written LUNCH on the lid in marker and crossed it out."
+        "text": "The crate is sealed and stencilled with a survey mark. Someone has written LUNCH on the lid in marker and crossed it out. A tag on the handle reads: DROP LOCKER, <SecondPlace>."
       }
     },
     {
