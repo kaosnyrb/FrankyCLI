@@ -36,7 +36,11 @@
       "at": "LocDungeonCenterMarkerLocRef",
       "group": "batch",
       "objective": "Condemn the faulty crates",
-      "journal": "One crate condemned. The parts inside pass every test except the one where they're used.",
+      "message": {
+        "title": "Parts Crate",
+        "text": "Every part inside has a pass sticker. Same hand on every one, same date."
+      },
+      "journal": "One crate condemned. Every part inside had a pass sticker, all in the same hand, all dated the same day.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Parts Crate"
     },
@@ -44,7 +48,11 @@
       "type": "use",
       "at": "LocDungeonItemMarker01LocRef",
       "group": "batch",
-      "journal": "One crate condemned. Somebody had already written NO on the lid, and then crossed it out.",
+      "message": {
+        "title": "Parts Crate",
+        "text": "Somebody has written NO on the lid in marker, and then crossed it out."
+      },
+      "journal": "One crate condemned. Somebody had written NO on the lid, and then crossed it out.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Parts Crate"
     },
@@ -52,7 +60,11 @@
       "type": "use",
       "at": "LocDungeonItemMarker02LocRef",
       "group": "batch",
-      "journal": "One crate condemned. This one had a delivery date and a name. I hope the name never finds out.",
+      "message": {
+        "title": "Parts Crate",
+        "text": "A delivery label: a date, and a name."
+      },
+      "journal": "One crate condemned. This one had a delivery date and a name.",
       "model": "Meshes\\SetDressing\\Container\\CrateStackableA_01.nif",
       "name": "Parts Crate"
     },
@@ -73,7 +85,7 @@
       "objective": "Deal with the buyer",
       "journal": "The buyer came to collect the batch at the <Place> and found it condemned, and me. The parts go nowhere now.",
       "say": [
-        "So she came for them. Those parts won't be sold to anyone now."
+        "So she came for them. Those parts aren't going anywhere now."
       ],
       "reward": "med"
     }
@@ -84,7 +96,7 @@
     "elevenlabs": "hpp4J3VqNfWAUOO0d1Us"
   },
   "broadcast": [
-    "Three crates of parts in there that should never leave. Mark every one of them condemned. And the person who bought them is on her way."
+    "Three crates of parts at that site that should never leave. Mark every one of them condemned. And the buyer knows what's wrong with them. She's on her way."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

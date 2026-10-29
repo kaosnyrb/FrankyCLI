@@ -57,7 +57,7 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Payroll Case",
       "objective": "Recover the payroll",
-      "journal": "The payroll case was where the leader could watch it, still sealed, not a credit missing. I need to take it to the foreman outside the <Place>.",
+      "journal": "The payroll case was where the leader could watch it, still sealed. I need to take it to the foreman outside the <Place>.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Payroll Case",
       "message": {
@@ -78,18 +78,18 @@
         "elevenlabs": "IKne3meq5aSn9XLyUdCD",
         "hellos": [
           [
-            "Easy. Everyone out here's owed money, and they're all a bit tense about it."
+            "Easy."
           ]
         ]
       },
       "greeting": [
-        "You came out the right door. Is that our payroll? Forty people have been working for a month on a promise of pay."
+        "Is that our payroll? Forty people have been working for a month on a promise of pay."
       ],
       "exchanges": [
         {
-          "prompt": "Every credit. Here.",
+          "prompt": "Still sealed. Here.",
           "reply": [
-            "All of it? You didn't take a cut? Then I'm buying you a drink, out of my own share."
+            "Still sealed. Then I'm buying you a drink, out of my own share."
           ]
         },
         {
@@ -101,7 +101,7 @@
         {
           "prompt": "What will they do with it?",
           "reply": [
-            "Rent, mostly. Food. Somebody's got a wedding. And then we go back to work, which I'm told is the point."
+            "Rent, mostly. Food. Somebody's got a wedding. And then we go back to work."
           ]
         }
       ],
@@ -115,7 +115,7 @@
     "elevenlabs": "IKne3meq5aSn9XLyUdCD"
   },
   "broadcast": [
-    "You're at the plant? I'm outside, by the way in. They took our pay when they took the place. Get it back off whoever's in charge in there."
+    "You're close? I'm outside, by the way in. They took our pay when they took the place. Get it back off her, she's the one in charge."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

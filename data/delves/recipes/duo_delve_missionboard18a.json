@@ -29,15 +29,19 @@
   "prose": {
     "name": "Survey: Fire at the Works on <Planet>",
     "briefing": "The owners of the <Place> claimed for a fire. The insurer thinks somebody set it, and wants proof either way.",
-    "card": "Insurance Contract. Find where the fire at the <Place> on <Planet> started. Payment on contract completion."
+    "card": "Insurance Contract. The owners of the <Place> on <Planet> claimed for a fire. Find the three places it started. Payment on contract completion."
   },
   "beats": [
     {
       "type": "use",
       "at": "LocDungeonItemMarker01LocRef",
       "group": "fire",
-      "objective": "Find where the fire started",
-      "journal": "One place the fire started: a junction box burned from the inside out, which is not how junction boxes usually burn.",
+      "objective": "Find the three places the fire started",
+      "message": {
+        "title": "Scorched Junction Box",
+        "text": "Burned from the inside. Its breaker is taped down so it couldn't trip."
+      },
+      "journal": "One place the fire started: a junction box burned from the inside, with its breaker taped down so it couldn't trip.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Scorched Junction Box"
     },
@@ -45,6 +49,10 @@
       "type": "use",
       "at": "LocDungeonItemMarker02LocRef",
       "group": "fire",
+      "message": {
+        "title": "Burned Locker",
+        "text": "Burned hot and alone. Nothing near it caught."
+      },
       "journal": "One place the fire started: a locker that burned hot and alone, with nothing near it to catch.",
       "model": "Meshes\\SetDressing\\Furniture\\Foot_Locker\\AK_FootLocker01.nif",
       "name": "Burned Locker"
@@ -53,7 +61,11 @@
       "type": "use",
       "at": "LocDungeonCenterMarkerLocRef",
       "group": "fire",
-      "journal": "One place the fire started: the terminal's log ends four minutes before the alarm, on a command that switched the alarm off.",
+      "message": {
+        "title": "Scorched Terminal",
+        "text": "Burned where it stands. The last entry in its log is a command that switched the fire alarm off."
+      },
+      "journal": "One place the fire started: a terminal whose last logged command switched the fire alarm off.",
       "model": "Meshes\\SetDressing\\Terminals\\MobileTerminal_01.nif",
       "name": "Scorched Terminal"
     },
@@ -62,15 +74,15 @@
       "at": "LocDungeonItemMarker03LocRef",
       "item": "Ignition Timer",
       "objective": "Recover the evidence",
-      "journal": "Three places the fire started, all at once, and a timer with the owners' work order number scratched on it. The insurer was right.",
+      "journal": "Three places the fire started, and a timer with the owners' work order number scratched on it.",
       "model": "Meshes\\SetDressing\\SecureBriefcase\\SecureBreifcase.nif",
       "name": "Sealed Evidence Case",
       "message": {
         "title": "Ignition Timer",
-        "text": "A cheap timer, the kind you buy by the dozen. Somebody scratched a work order number on the back, out of habit, so the job could be billed."
+        "text": "A cheap timer, the kind you buy by the dozen. Somebody scratched a work order number on the back, so the job could be billed."
       },
       "say": [
-        "A timer with their own work order on it. That's all the proof the claim needs."
+        "Work order on the back. That settles the claim."
       ],
       "reward": "med"
     }
@@ -81,7 +93,7 @@
     "elevenlabs": "XW70ikSsadUbinwLMZ5w"
   },
   "broadcast": [
-    "Fire like that doesn't start in one place. Find all of them. And if there's anything that looks like it was put there, bring it to me."
+    "Fire like that doesn't start in one place. Find all of them. And if there's anything that looks like it was put there, take it."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Recast 2026-10-26 from Katie X (ruled out by his ear) to Annie K, one of the two voices heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }

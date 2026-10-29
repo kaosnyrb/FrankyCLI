@@ -27,7 +27,7 @@
   },
   "prose": {
     "name": "Repairs: Coolant Pumps on <Planet>",
-    "briefing": "The <Place> can't restart until its coolant pumps are fixed, and the engineer who could fix them won't go back in.",
+    "briefing": "The <Place> can't restart until its coolant pumps are fixed. The engineer has sent me her toolbox.",
     "card": "Local Contract. Repair the two coolant pumps at the <Place> on <Planet>. Payment on contract completion."
   },
   "beats": [
@@ -36,7 +36,7 @@
       "at": "LocDungeonOutsideEntranceMarkerLocRef",
       "item": "Engineer's Toolbox",
       "objective": "Collect the toolbox at the <Place>",
-      "journal": "The engineer left her toolbox at the door, with a note taped to the lid: pumps, both, inside. Take your time. I need to fix both pumps.",
+      "journal": "I've got the engineer's toolbox. I need to fix both pumps.",
       "model": "Meshes\\Architecture\\City\\Akila\\Unique\\Toolbox\\AK_Toolbox_01_Closed.nif",
       "name": "Engineer's Toolbox"
     },
@@ -45,7 +45,7 @@
       "at": "LocDungeonItemMarker01LocRef",
       "group": "pumps",
       "objective": "Fix the coolant pumps",
-      "journal": "One pump fixed. The seal had perished, years ago by the look of it.",
+      "journal": "That pump's fixed. Somebody had kicked it, hard, more than once. It works now.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Coolant Pump"
     },
@@ -53,14 +53,14 @@
       "type": "use",
       "at": "LocDungeonItemMarker02LocRef",
       "group": "pumps",
-      "journal": "One pump fixed. Somebody had kicked it, hard, more than once. It works now.",
+      "journal": "That pump's fixed. The seal had perished, years ago by the look of it.",
       "model": "Meshes\\SetDressing\\WaterFiltrationCart\\WaterFiltrationCart01.nif",
       "name": "Backup Coolant Pump"
     },
     {
       "type": "hold",
       "at": "LocDungeonCenterMarkerLocRef",
-      "objective": "Hold the room while the system bleeds",
+      "objective": "Hold the site while the system bleeds",
       "journal": "Both pumps at the <Place> are fixed and the system bled through clean. The plant can restart.",
       "waves": 2,
       "size": [
@@ -83,7 +83,7 @@
     "elevenlabs": "GZ4PpFJV8ikEGUtBrjK7"
   },
   "broadcast": [
-    "My toolbox is by the door. Two pumps inside, both dead. Fix them and then give the system time to bleed. And don't rush it. A rushed pump is a broken pump."
+    "My toolbox is at the entrance. Two pumps, both dead. Fix them and then give the system time to bleed. It's loud while it bleeds, and loud brings company. Don't rush it. A rushed pump is a broken pump."
   ],
   "_speech": "On a board the broadcast waits for him at the site. Not yet heard in game; his ear decides. No names, places, factions or currency in a voiced line."
 }
